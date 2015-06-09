@@ -1,0 +1,1 @@
+AJS.toInit(function(a){a("#helpcontent a").click(function(){var b=a(this).attr("href");var c=a(this).attr("onClick");if(!c&&b&&b.indexOf("#")!=0&&b.indexOf(window.location)==-1){window.open(b,"_blank").focus();return false}})});
