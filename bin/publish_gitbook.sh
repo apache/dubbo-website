@@ -6,7 +6,7 @@ DEPLOY_DIR=`pwd`
 STATIC_TMP_DIR=$HOME/dubbo-docs-static-tmp
 
 if [ ! -d "$STATIC_TMP_DIR" ] ; then
-    git clone -b master https://github.com/dubbo/dubbo-docs.git $STATIC_TMP_DIR
+    git clone -b master https://github.com/dubbo/dubbo.github.io.git $STATIC_TMP_DIR
 fi
 
 cd $DEPLOY_DIR/user-guide

@@ -1,3 +1,48 @@
+<style>
+table {
+  width: 100%;
+  max-width: 65em;
+  border: 1px solid #dedede;
+  margin: 15px auto;
+  border-collapse: collapse;
+  empty-cells: show;
+}
+table th,
+table td {
+  height: 35px;
+  border: 1px solid #dedede;
+  padding: 0 10px;
+}
+table th {
+  font-weight: bold;
+  text-align: center !important;
+  background: rgba(158,188,226,0.2);
+  white-space: nowrap;
+}
+table tbody tr:nth-child(2n) {
+  background: rgba(158,188,226,0.12);
+}
+table td:nth-child(1) {
+  white-space: nowrap;
+}
+table tr:hover {
+  background: #efefef;
+}
+.table-area {
+  overflow: auto;
+}
+</style>
+
+<script type="text/javascript">
+[].slice.call(document.querySelectorAll('table')).forEach(function(el){
+    var wrapper = document.createElement('div');
+    wrapper.className = 'table-area';
+    el.parentNode.insertBefore(wrapper, el);
+    el.parentNode.removeChild(el);
+    wrapper.appendChild(el);
+})
+</script>
+
 选项参数配置：  
 配置类：java.util.Map  
 说明：该标签为|&lt;dubbo:protocol&gt;或|&lt;dubbo:service&gt;或|&lt;dubbo:provider&gt;或|&lt;dubbo:reference&gt;或|&lt;dubbo:consumer&gt;的子标签，用于配置自定义参数，该配置项将作为扩展点设置自定义参数使用。

@@ -1,3 +1,48 @@
+<style>
+table {
+  width: 100%;
+  max-width: 65em;
+  border: 1px solid #dedede;
+  margin: 15px auto;
+  border-collapse: collapse;
+  empty-cells: show;
+}
+table th,
+table td {
+  height: 35px;
+  border: 1px solid #dedede;
+  padding: 0 10px;
+}
+table th {
+  font-weight: bold;
+  text-align: center !important;
+  background: rgba(158,188,226,0.2);
+  white-space: nowrap;
+}
+table tbody tr:nth-child(2n) {
+  background: rgba(158,188,226,0.12);
+}
+table td:nth-child(1) {
+  white-space: nowrap;
+}
+table tr:hover {
+  background: #efefef;
+}
+.table-area {
+  overflow: auto;
+}
+</style>
+
+<script type="text/javascript">
+[].slice.call(document.querySelectorAll('table')).forEach(function(el){
+    var wrapper = document.createElement('div');
+    wrapper.className = 'table-area';
+    el.parentNode.insertBefore(wrapper, el);
+    el.parentNode.removeChild(el);
+    wrapper.appendChild(el);
+})
+</script>
+
 服务提供者协议配置：  
 配置类：com.alibaba.dubbo.config.ProtocolConfig  
 说明：如果需要支持多协议，可以声明多个|&lt;dubbo:protocol&gt;标签，并在|&lt;dubbo:service&gt;中通过protocol属性指定使用的协议。
