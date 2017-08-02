@@ -1,11 +1,11 @@
 > ![check](../sources/images/check.gif)**配置项说明**  
-> 详细配置项，请参见：配置参考手册 (+)
+> 详细配置项，请参见：[配置参考手册](../reference-xmlconf/introduction.md)
 
 > ![check](../sources/images/check.gif)**API使用说明**  
-如果不想使用Spring配置，而希望通过API的方式进行调用，请参见：API配置 (+)
+如果不想使用Spring配置，而希望通过API的方式进行调用，请参见：[API配置](./api.md)
 
 > ![check](../sources/images/check.gif)**配置使用说明**  
-想知道如何使用配置，请参见：快速启动 (+)
+想知道如何使用配置，请参见：[tutorials](../preface/usage.md)
 
 示例：
 <center style="align=center;">provider.xml</center>
@@ -29,7 +29,7 @@
 如：
 ``` xml
 <dubbo:protocol name="jms">
-    <dubbo:parameter key="queue" value="http://10.20.160.198/wiki/display/dubbo/10.20.31.22" />
+    <dubbo:parameter key="queue" value="your_queue" />
 </dubbo:protocol>
 ```
 或：(2.1.0开始支持)
@@ -40,7 +40,7 @@
     xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">  
-    <dubbo:protocol name="jms" p:queue="http://10.20.160.198/wiki/display/dubbo/10.20.31.22" />  
+    <dubbo:protocol name="jms" p:queue="your_queue" />  
 </beans>
 ```
 **Configuration Relation:**  

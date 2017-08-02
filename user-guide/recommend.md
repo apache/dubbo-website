@@ -30,7 +30,7 @@ Provider上尽量多配置Consumer端的属性，让Provider实现者一开始�
 3. `actives` 消费者端，最大并发调用限制，即当Consumer对一个服务的并发调用到上限后，新调用会Wait直到超时。
 在方法上配置（dubbo:method ）则并发限制针对方法，在接口上配置（dubbo:service），则并发限制针对服务。
 
-详细配置说明参见：[Dubbo配置参考手册](reference-xmlconf/dubbo-provider.md)
+详细配置说明参见：[Dubbo配置参考手册](./reference-xmlconf/introduction.md)
 
 #### Provider上配置合理的Provider端属性
 

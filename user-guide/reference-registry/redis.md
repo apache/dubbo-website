@@ -1,4 +1,4 @@
-> ![warning](../sources/images/check.gif)[Redis](http://redis.io) 是一个高效的KV存储服务器。安装方式参见: [Redis安装手册](admin-guide-install-manual#redis注册中心安装)，只需搭一个原生的Redis服务器，并将 [Quick Start](user-guide-quick-start#快速启动) 中Provider和Consumer里的conf/dubbo.properties中的dubbo.registry.addrss的值改为redis://127.0.0.1:6379即可使用。
+> ![warning](../sources/images/check.gif)[Redis](http://redis.io) 是一个高效的KV存储服务器。安装方式参见: [Redis安装手册](http://dubbo.io/admin-guide/install-mannual/Redis%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%AE%89%E8%A3%85.html)，只需搭一个原生的Redis服务器，并将 [Quick Start](../preface/usage.md) 中Provider和Consumer里的conf/dubbo.properties中的dubbo.registry.addrss的值改为redis://127.0.0.1:6379即可使用。
 
 ##### Redis过期数据
 

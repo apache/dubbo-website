@@ -1,5 +1,7 @@
 > ![check](../sources/images/check.gif)如果公共配置很简单，没有多注册中心，多协议等情况，或者想多个Spring容器想共享配置，可以使用dubbo.properties作为缺省配置。
+
 > ![check](../sources/images/check.gif)Dubbo将自动加载classpath根目录下的dubbo.properties，可以通过JVM启动参数：-Ddubbo.properties.file=xxx.properties 改变缺省配置位置。
+
 > ![warning](../sources/images/warning-3.gif)如果classpath根目录下存在多个dubbo.properties，比如多个jar包中有dubbo.properties，Dubbo会任意加载，并打印Error日志，后续可能改为抛异常。
 
 **映射规则：**

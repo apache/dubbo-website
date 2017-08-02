@@ -4,7 +4,7 @@
 [Zookeeper](http://zookeeper.apache.org) 是Apacahe Hadoop的子项目，是一个树型的目录服务，支持变更推送，适合作为Dubbo服务的注册中心，工业强度较高，可用于生产环境，并推荐使用。
 
 > ![warning](../sources/images/check.gif)**Zookeeper安装**  
-安装方式参见: [Zookeeper安装手册](admin-guide-install-manual#zookeeper注册中心安装)，只需搭一个原生的Zookeeper 服务器，并将 [Quick Start](user-guide-quick-start#快速启动) 中Provider和Consumer里的conf/dubbo.properties中的dubbo.registry.addrss的值改为zookeeper://127.0.0.1:2181即可使用。
+安装方式参见: [Zookeeper安装手册](http://dubbo.io/admin-guide/install-mannual/Zookeeper%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%AE%89%E8%A3%85.html)，只需搭一个原生的Zookeeper 服务器，并将 [Quick Start](../preface/usage.md) 中Provider和Consumer里的conf/dubbo.properties中的dubbo.registry.addrss的值改为zookeeper://127.0.0.1:2181即可使用。
 
 > ![warning](../sources/images/warning-3.gif)**可靠性声明**  
 > 阿里内部并没有采用Zookeeper做为注册中心，而是使用自己实现的基于数据库的注册中心，即：Zookeeper注册中心并没有在阿里内部长时间运行的可靠性保障，此Zookeeper桥接实现只为开源版本提供，其可靠性依赖于Zookeeper本身的可靠性。

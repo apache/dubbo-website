@@ -1,6 +1,6 @@
 > ![warning](../sources/images/check.gif)这里以Xml Config为准，列举所有配置项，其它配置方式，请参见相应转换关系：Properties Config，Annotation Config，API Config
 
-> ![warning](../sources/images/warningf-3.gif)注意：只有group，interface，version是服务的匹配条件，三者决定是不是同一个服务，其它配置项均为调优和治理参数。
+> ![warning](../sources/images/warning-3.gif)注意：只有group，interface，version是服务的匹配条件，三者决定是不是同一个服务，其它配置项均为调优和治理参数。
 
 所有配置项分为三大类，参见下表中的"作用"一列。
 

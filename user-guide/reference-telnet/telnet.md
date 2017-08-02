@@ -12,8 +12,8 @@ telnet localhost 20880
 echo status | nc -i 1 localhost 20880
 ```
 
-telnet命令可以扩展，参见：[扩展参考手册](dev-guide-spi-reference-manual#telnet命令扩展)。
-status命令所检查的资源也可以扩展，参见：[扩展参考手册](dev-guide-spi-reference-manual#状态检查扩展)。
+telnet命令可以扩展，参见：[扩展参考手册](http://dubbo.io/developer-guide/SPI%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C/Telnet%E5%91%BD%E4%BB%A4%E6%89%A9%E5%B1%95.html)。
+status命令所检查的资源也可以扩展，参见：[扩展参考手册](http://dubbo.io/developer-guide/SPI%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C/%E7%8A%B6%E6%80%81%E6%A3%80%E6%9F%A5%E6%89%A9%E5%B1%95.html)。
 
 #### ls
 
