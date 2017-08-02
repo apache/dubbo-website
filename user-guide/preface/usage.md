@@ -1,11 +1,11 @@
 
 Dubbo采用全Spring配置方式，透明化接入应用，对应用没有任何API侵入，只需用Spring加载Dubbo的配置即可，Dubbo基于Spring的Schema扩展进行加载。
 
-如果不想使用Spring配置，而希望通过API的方式进行调用（不推荐），请参见：[API配置](user-guide-configuration#api配置)
+如果不想使用Spring配置，而希望通过API的方式进行调用（不推荐），请参见：[API配置](../configuration/api.md)
 
 #### 服务提供者
 
-> 完整安装步骤，请参见：[示例提供者安装](admin-guide-install-manual#示例提供者安装)
+> 完整安装步骤，请参见：[示例提供者安装](../../admin-guide/install-mannual/示例提供者安装.md)
 
 ##### 定义服务接口
 
@@ -90,7 +90,7 @@ public class Provider {
 
 #### 服务消费者
 
-> 完整安装步骤，请参见：[示例消费者安装](admin-guide-install-manual#示例消费者安装)
+> 完整安装步骤，请参见：[示例消费者安装](../../admin-guide/install-mannual/示例消费者安装.md)
 
 ##### 通过Spring配置引用远程服务
 
