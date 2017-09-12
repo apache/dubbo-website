@@ -25,7 +25,7 @@ This guide gets you started with dubbo in Java with a simple working example. Yo
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>dubbo</artifactId>
-    <version>2.5.4</version>
+    <version>2.5.5</version>
 </dependency>
 ```
 
