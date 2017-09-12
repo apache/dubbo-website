@@ -19,13 +19,15 @@ This guide gets you started with dubbo in Java with a simple working example. Yo
 * JDK: version 6 or higher
 * Maven: version 3 or higher
 
-#### Maven dependency
+#### Maven dependency 
+
+You may need to use the latest release <img class="inline-image" src="https://img.shields.io/maven-central/v/com.alibaba/dubbo.svg"/> to build your dubbo application.
 
 ```xml
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>dubbo</artifactId>
-    <version>2.5.4</version>
+    <version>2.5.5</version>
 </dependency>
 ```
 
