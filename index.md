@@ -27,7 +27,7 @@ You may need to use the latest release <img class="inline-image" src="https://im
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>dubbo</artifactId>
-    <version>2.5.6</version>
+    <version>2.5.7</version>
 </dependency>
 ```
 
@@ -125,6 +125,6 @@ public class Consumer {
 
 ## What's next
 
-* Dive deep into [dubbo user guide](https://dubbo.gitbooks.io/dubbo-user-book/) to find more details, or <a href="https://gitter.im/alibaba/dubbo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img class="inline-image" src="https://badges.gitter.im/alibaba/dubbo.svg"/></a>
-* Read [dubbo admin guide](https://dubbo.gitbooks.io/dubbo-admin-book/) for dubbo application administration topics.
-* Interested in how dubbo is designed, or want to contribute? Read [dubbo developer guide](https://dubbo.gitbooks.io/dubbo-dev-book/), and start to [hack the code](https://github.com/alibaba/dubbo).
+* Dive deep into [dubbo user guide](https://dubbo.gitbooks.io/dubbo-user-book/) or [download pdf](docs/dubbo-user-book.pdf) to find more details, or <a href="https://gitter.im/alibaba/dubbo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img class="inline-image" src="https://badges.gitter.im/alibaba/dubbo.svg"/></a>
+* Read [dubbo admin guide](https://dubbo.gitbooks.io/dubbo-admin-book/) or [download pdf](docs/dubbo-admin-book.pdf) for dubbo application administration topics.
+* Interested in how dubbo is designed, or want to contribute? Read [dubbo developer guide](https://dubbo.gitbooks.io/dubbo-dev-book/) or [download pdf](docs/dubbo-dev-book.pdf), and start to [hack the code](https://github.com/alibaba/dubbo).
