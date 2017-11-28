@@ -25,7 +25,7 @@ git_book_dir="${parent_dir}/dubbo.gitbooks.io"
 
 saved_dir=${git_book_dir}
 
-if [ -f "${base_dir}/git_book_list" ]
+if [ -f "${base_dir}/gitbook_list" ]
 then
     if [ -d ${git_book_dir} ]
     then
@@ -51,7 +51,7 @@ then
         cd ${git_book_dir}
 
         # clone github code for books
-        for git_book_url in `cat ${base_dir}/git_book_list`
+        for git_book_url in `cat ${base_dir}/gitbook_list`
         do
             echo "git clone $git_book_url"
             git clone ${git_book_url}
@@ -75,14 +75,14 @@ then
 
     fi
 else
-    echo "file '"${base_dir}/git_book_list"' not exist, shell will exit."
+    echo "file '"${base_dir}/gitbook_list"' not exist, shell will exit."
     exit $?
 fi
 
 # I'm ready to compile and start service
 cd ${base_dir}
-echo "run 'jekyll build' for '${saved_dir}'"
-jekyll build
+echo "run 'jekyll build --config _config.yml,_config_build.yml' for '${saved_dir}'"
+jekyll build --config _config.yml,_config_build.yml
 
 for book_dir in ${git_book_dir}/*
 do

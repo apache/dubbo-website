@@ -1,6 +1,8 @@
 ---
 layout: default
-git_book_url: https://dubbo.gitbooks.io
+{% if site.environment == "product" %}
+    git_book_url: https://dubbo.gitbooks.io
+{% endif %}
 ---
 
 ## [](#introduction)Overview
