@@ -81,8 +81,8 @@ fi
 
 # I'm ready to compile and start service
 cd ${base_dir}
-echo "run 'jekyll build --config _config.yml,_config_build.yml' for '${saved_dir}'"
-jekyll build --config _config.yml,_config_build.yml
+echo "run 'jekyll build --config _config_build.yml' for '${saved_dir}'"
+jekyll build --config _config_build.yml
 
 for book_dir in ${git_book_dir}/*
 do
