@@ -106,5 +106,5 @@ do
 done
 
 # Now, start jekyll server
-#cd "${base_dir}/_site"
-#jekyll server --port ${port} --host ${host} --detach
+cd "${base_dir}/_site"
+jekyll server --port ${port} --host ${host} --detach
