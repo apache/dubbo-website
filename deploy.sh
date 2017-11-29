@@ -93,12 +93,12 @@ do
         echo "build done."
 
         to_dir_name=$(echo ${book_dir} | awk -F \/ '{print $NF}');
-        to_dir_path="${base_dir}/_site/${to_dir_name}";
+        to_dir_path="${base_dir}/books/${to_dir_name}";
 
         echo "copying '${book_dir}/_book/ to ${to_dir_path}."
         if [ ! -e "${to_dir_path}" ]
         then
-            mkdir ${to_dir_path}
+            mkdir -p ${to_dir_path}
             cp -rf "${book_dir}/_book/." ${to_dir_path}
         fi
         echo "copy done."
@@ -106,5 +106,5 @@ do
 done
 
 # Now, start jekyll server
-cd "${base_dir}/_site"
-jekyll server --port ${port} --host ${host} --detach
+#cd "${base_dir}/_site"
+#jekyll server --port ${port} --host ${host} --detach
