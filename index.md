@@ -27,7 +27,7 @@ You may need to use the latest release <img class="inline-image" src="https://im
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>dubbo</artifactId>
-    <version>2.5.7</version>
+    <version>2.5.8</version>
 </dependency>
 ```
 
