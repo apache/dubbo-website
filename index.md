@@ -130,6 +130,7 @@ public class Consumer {
 * Read dubbo admin guide ([English]({{ site.github.gitbook_url }}/dubbo-admin-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-admin-book/)) for dubbo application administration topics.
 * Interested in how dubbo is designed, or want to contribute? Read dubbo developer guide ([English]({{ site.github.gitbook_url }}/dubbo-dev-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-dev-book/)), and start to [hack the code](https://github.com/alibaba/dubbo).
 * <a href="https://gitter.im/alibaba/dubbo"><img class="inline-image" src="https://badges.gitter.im/alibaba/dubbo.svg"/></a> to discuss with dubbo core team.
+* Expore more side projects you may interested from [github dubbo group](https://github.com/dubbo).
 
 
 ## We need your help
