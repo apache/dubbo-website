@@ -116,9 +116,12 @@ public class Consumer {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
                 new String[]{"META-INF/spring/dubbo-demo-consumer.xml"});
         context.start();
-        DemoService demoService = (DemoService) context.getBean("demoService"); // obtain proxy object for remote invocation
-        String hello = demoService.sayHello("world"); // execute remote invocation
-        System.out.println(hello); // show the result
+        // obtain proxy object for remote invocation
+        DemoService demoService = (DemoService) context.getBean("demoService");
+        // execute remote invocation
+        String hello = demoService.sayHello("world");
+        // show the result
+        System.out.println(hello);
     }
 }
 ```
