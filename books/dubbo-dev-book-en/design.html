@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>9 Versions · GitBook</title>
+        <title>2 Architecture · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.2">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="contribution.html" />
+    <link rel="next" href="SPI.html" />
     
     
-    <link rel="prev" href="coding.html" />
+    <link rel="prev" href="build.html" />
     
 
     </head>
@@ -115,7 +115,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3" data-path="design.html">
+        <li class="chapter active" data-level="1.3" data-path="design.html">
             
                 <a href="design.html">
             
@@ -537,7 +537,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.9" data-path="release.html">
+        <li class="chapter " data-level="1.9" data-path="release.html">
             
                 <a href="release.html">
             
@@ -632,7 +632,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >9 Versions</a>
+        <a href="." >2 Architecture</a>
     </h1>
 </div>
 
@@ -647,38 +647,88 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="versions">Versions</h1>
-<p><strong>New feature development</strong> and <strong>stability improvement</strong> are equally important to product. But adding new features will affect stability, dubbo uses the following version development pattern to achieve a good balance.</p>
-<h2 id="two-versions-evolving-at-the-same-time">Two versions evolving at the same time</h2>
+                                <h1 id="framework-design">Framework Design</h1>
+<h2 id="overall-design">Overall design</h2>
+<p><img src="sources/images/dubbo-framework.jpg" alt="/dev-guide/images/dubbo-framework.jpg"></p>
+<p>Image description:</p>
 <ul>
-<li>BugFix Version&#xFF1A;low version&#xFF0C;e.g. <code>2.4.x</code>. This is called the GA version, which can be applied in production. We are supposed only to fix bugs in this version, and increase the third version number when release.</li>
-<li>Feature Version&#xFF1A;high version, e.g. <code>2.5.x</code>. We add new features to this version, so applications have opportunities try new features.</li>
+<li>Left area with light blue background shows service consumer interfaces, Right area with light green background shows service provider interfaces, center area shows both side interfaces.</li>
+<li>The image is divided into 10 layers from the bottom to the top, and the layers are one-way dependence. The black arrow on the right represents the dependency between layers, and each layer can be stripped from the upper layer to be reused, the Service and Config layers are API, and the other layers are SPI.</li>
+<li>Green boxes are extension interfaces, blue boxes are implementation classes, image only shows implementation class of associated layers.</li>
+<li>The blue dashed line is the initialization process, which is wassembly chain when starting, red line for the method call process, which is calling chain when running, purple triangle arrow is inherited, can treat subclass as the same node of parent class, text of lines are the method invocation.</li>
 </ul>
-<p>When features in <code>2.5.x</code> are proved stable enough, we will announce <code>2.5.x</code> as a beta release. </p>
-<p>When <code>2.5.x</code> proved stable after enough test on enough applications&#xFF1A;</p>
+<h2 id="layer-description">Layer description</h2>
 <ul>
-<li><code>2.5.x</code>, the GA Version, only do BugFix, the main version to be used. We can try to promote applications to upgrade to GA at the desired time.</li>
-<li><code>2.4.x</code>, no longer maintained. When bugs appear, applications have no choice but upgrade to the latest stable version- Sunset Clause</li>
-<li>We create a new branch <code>2.6.0</code> based on <code>2.5.x</code> for new features.</li>
+<li><strong>config layer</strong>: external config interface, <code>ServiceConfig</code> and <code>ReferenceConfig</code> is the center of the layer, you can directly initialize config class, also can generate config class by spring.</li>
+<li><strong>proxy layer</strong>: transparent proxy of service interface, generate client Stub of service and server Skeletion of service, <code>ServiceProxy</code> is the center, extension interface is <code>ProxyFactory</code>.</li>
+<li><strong>registry layer</strong>: encapsulation of service registry and discovery, service URL is the center, extension interfaces are <code>RegistryFactory</code>, <code>Registry</code> and <code>RegistryService</code>.</li>
+<li><strong>cluster layer</strong>: encapsulation of cluster of muliple providers and load balance, and bridging registration center, <code>Invoker</code> is the center, extension interfaces are <code>Cluster</code>, <code>Directory</code>, <code>Router</code>, <code>LoadBalance</code>.</li>
+<li><strong>monitor layer</strong>: monitor of RPC call times and call execute time, <code>Statistics</code> is the center, extension interface are <code>MonitorFactory</code>, <code>Monitor</code>, <code>MonitorService</code></li>
+<li><strong>protocol layer</strong>: encapsulation of RPC, <code>Invocation</code> and <code>Result</code> are the center, extension interfaces are <code>Protocol</code>, <code>Invoker</code>, <code>Exporter</code></li>
+<li><strong>exchange layer</strong>: encapsulation of request and response, synchronous transfer asynchronous, <code>Request</code> and <code>Response</code> are the center, extension interfaces are <code>Exchanger</code>, <code>ExchangeChannel</code>, <code>ExchangeClient</code>, <code>ExchangeServer</code></li>
+<li><strong>transport layer</strong>: abstraction of mina and netty, <code>Message</code> is the center, extension interfaces are <code>Channel</code>, <code>Transporter</code>, <code>Client</code>, <code>Server</code>, <code>Codec</code></li>
+<li><strong>serialize layer</strong>: reusable tools, extension interfaces are <code>Serialization</code>, <code>ObjectInput</code>, <code>ObjectOutput</code>, <code>ThreadPool</code></li>
 </ul>
-<h2 id="pros">Pros</h2>
+<h2 id="relationship-description">Relationship description</h2>
 <ul>
-<li>GA Version are promised stable:<ul>
-<li>only BugFix</li>
-<li>GA Version got enough tests before promotion</li>
+<li>In RPC, Protocol is the core layer, it means that you can complete RPC calling by Protocol + Invoker + Exporter, then filter at the main process of Invoker.</li>
+<li>Consumer and Provider are abstraction concepts, just want you have a more intuitive understanding of which classes belong to the client and server side, the reason not use Client and Server is that Dubbo uses Provider, Consumer, Registry, Monitor divide logical topology node in many scenes, keep the concept of unity.</li>
+<li>Cluster is external concept, the purpose of Cluster is that make various Invoker disguise to one Invoker, so that we just pay attention to the Invoker in Protocol layer, adding Cluster or removing Cluster will not affect other layers, because we don&apos;t need Cluster when only have one provider.</li>
+<li>The Proxy layer encapsulates the transparent proxy for all interfaces, and in other layers with Invoker as the center, turn Invoker into interface, or turn interface implementation into Invoker by Proxy only when exposuring to user. RPC still work even removing Proxy layer, but not so transparent, making remote service calling don&apos;t look like local service calling.</li>
+<li>Remoting is the implemetation of Dubbo protocols, you can remove Remoting if choosing RMI. The Remoting is divided into Transport layer and Exchange layer, Transport layer is responsible for one-way message transmission, it&apos;s abstraction of Mina, Netty, Grizzly, it also can extend UDP transmission. The Exchange layer encapsulates the Request-Response semantics over the transport layer.</li>
+<li>Actually Registry and Monitor are not at the same layer, they are independent nodes, draw them together by layer just for global view.</li>
 </ul>
-</li>
-<li>New features can respond quickly in Feature Version and allow applications to try that</li>
-<li>Significantly reduces development and maintenance costs </li>
-</ul>
-<h2 id="the-responsibilities-of-users">The responsibilities of users</h2>
-<p>Users should always keep in track with the GA Version, make sure all bugs were fixed.</p>
-<p>There is a fake proposition: regular upgrades bring more risks. Here&apos;s the reasons:</p>
+<h2 id="modules-packaging">Modules packaging</h2>
+<p><img src="sources/images/dubbo-modules.jpg" alt="/dev-guide/images/dubbo-modules.jpg"></p>
+<p>Modules description:</p>
 <ul>
-<li>GA remains stable after a trial period.</li>
-<li>Bugs find on GA will be fixed immediately.</li>
-<li>Comparing with the on-need-upgrade (only upgrade when find a serious problem, and may span multiple versions), upgrade periodically can flat risk. Experienced a long cycle of large projects, students will have such an experience, the tripartite library version does not upgrade for a long time, the result of the problem had to upgrade to the new version (across multiple versions) a huge risk.</li>
+<li><strong>dubbo-common module</strong>: includes Util classes and common modules.</li>
+<li><strong>dubbo-remoting module</strong>: is Dubbo protocol implementation, no need to use this module if using RMI for RPC.</li>
+<li><strong>dubbo-rpc module</strong>: abstraction of various protocols, and dynamic proxy, only one to one call, not concerned with the management of cluster.</li>
+<li><strong>dubbo-cluster module</strong>: disguise many service providers as one provider, including load balancing, fault tolerance, routing, etc. the address list of clusters can be either static or send by registry.</li>
+<li><strong>dubbo-registry module</strong>: Based on the cluster of registry send address and the abstraction of various registry centers.</li>
+<li><strong>dubbo-monitor module</strong>: statistics of service call times, call time, call chain tracked services.</li>
+<li><strong>dubbo-config module</strong>: is Dubbo external API, users use Dubbo by Config, hide Dubbo details.</li>
+<li><strong>dubbo-container module</strong>: is a Standlone container, just use Main method to load Spring, because usually service no need Tomcat/JBoss features.</li>
 </ul>
+<p>Package dividing according to the layer structure, and the difference with layer dividing:</p>
+<ul>
+<li>container is service container, for service running deployment, not showed in the image.</li>
+<li>protocol layer and proxy layer are placed in RPC module, they are the core of RPC module, you can use these 2 layers complete RPC call when only have 1 provider.</li>
+<li>transport layer and exchange layer are placed in remoting module, for RPC call base comminucation.</li>
+<li>serialize layer is placed in common module, for reuse.</li>
+</ul>
+<h2 id="dependence-relationship">Dependence relationship</h2>
+<p><img src="sources/images/dubbo-relation.jpg" alt="/dev-guide/images/dubbo-relation.jpg"></p>
+<p>Image description:</p>
+<ul>
+<li>The boxes in image, Protocol, Cluster, Proxy, Service, Container, Registry, Monitor represent layer or module, the blues mean interactive with business, the greens mean only internal interactive with Dubbo.</li>
+<li>The backgroud boxes in image, Consumer, Provider, Registry, Monitor represent deployment logical topology node.</li>
+<li>The blue dashed line in the image is called for initialization, the red dashed line is called asynchronously for runtime, and the red line is called synchronously for runtime.</li>
+<li>The image only includes RPC layer, don&apos;t includes Remoting layer, the whole Remoting hides in Protocol layer.</li>
+</ul>
+<h2 id="call-chain">Call chain</h2>
+<p>Expand the red call chain of the overall design map:</p>
+<p><img src="sources/images/dubbo-extension.jpg" alt="/dev-guide/images/dubbo-extension.jpg"></p>
+<h2 id="expose-service-sequence">Expose service sequence</h2>
+<p>Expand the initialization chain of service provider exposes service which at the left of the overall design map, the sequence diagram shows below:</p>
+<p><img src="sources/images/dubbo-export.jpg" alt="/dev-guide/images/dubbo-export.jpg"></p>
+<h2 id="reference-service-sequence">Reference service sequence</h2>
+<p>Expand the initialization chain of service consumer references service which at the right of the overall design map, the sequence diagram shows below:</p>
+<p><img src="sources/images/dubbo-refer.jpg" alt="/dev-guide/images/dubbo-refer.jpg"></p>
+<h2 id="domain-model">Domain model</h2>
+<p>The core domain models of Dubbo:</p>
+<ul>
+<li>Protocol is service domain, it is the main function entrance of Invoker exposure and reference, it is responsible for the life cycle management of Invoker.</li>
+<li>Invoker is entity domain, it is the core model of Dubbo, all the other models are disturbed, or converted to it, it represents an executable, you can call it by calling invoke, it can be a local implementation, a remote implementation, or a cluster implementation.</li>
+<li>Invocation is session domain, it holds variables in the calling process, such as the method name, the parameters, and so on.</li>
+</ul>
+<h2 id="base-design-principle">Base design principle</h2>
+<ul>
+<li>Use Microkernel + Plugin design pattern&#xFF0C;Microkernel only responsible for assembly Plugin, the functions of Dubbo are implemented by extension points, it means that all functions of Dubbo can be replaced by self defined extension by user.</li>
+<li>Use URL to be the startdard format of config information, all extension points transfer config information by URL.</li>
+</ul>
+<p>More design principles refer to: <a href="principals/introduction.md">Framework design principle</a></p>
 
                                 
                                 </section>
@@ -706,12 +756,12 @@
 
             
                 
-                <a href="coding.html" class="navigation navigation-prev " aria-label="Previous page: 7 Code Style">
+                <a href="build.html" class="navigation navigation-prev " aria-label="Previous page: 1 How To Build">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="contribution.html" class="navigation navigation-next " aria-label="Next page: 10 Contribution">
+                <a href="SPI.html" class="navigation navigation-next " aria-label="Next page: 3 How SPI Works">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -722,7 +772,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"9 Versions","level":"1.9","depth":1,"next":{"title":"10 Contribution","level":"1.10","depth":1,"path":"contribution.md","ref":"./contribution.md","articles":[]},"previous":{"title":"7 Code Style","level":"1.8","depth":1,"path":"coding.md","ref":"./coding.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"release.md","mtime":"2017-12-20T03:29:31.010Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2018-01-02T02:10:29.751Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"2 Architecture","level":"1.3","depth":1,"next":{"title":"3 How SPI Works","level":"1.4","depth":1,"path":"SPI.md","ref":"./SPI.md","articles":[]},"previous":{"title":"1 How To Build","level":"1.2","depth":1,"path":"build.md","ref":"./build.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"design.md","mtime":"2018-01-02T02:10:11.891Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2018-01-02T02:10:29.751Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>9 Versions · GitBook</title>
+        <title>7 Code Style · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.2">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="contribution.html" />
+    <link rel="next" href="release.html" />
     
     
-    <link rel="prev" href="coding.html" />
+    <link rel="prev" href="contract.html" />
     
 
     </head>
@@ -524,7 +524,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.8" data-path="coding.html">
+        <li class="chapter active" data-level="1.8" data-path="coding.html">
             
                 <a href="coding.html">
             
@@ -537,7 +537,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.9" data-path="release.html">
+        <li class="chapter " data-level="1.9" data-path="release.html">
             
                 <a href="release.html">
             
@@ -632,7 +632,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >9 Versions</a>
+        <a href="." >7 Code Style</a>
     </h1>
 </div>
 
@@ -647,38 +647,63 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="versions">Versions</h1>
-<p><strong>New feature development</strong> and <strong>stability improvement</strong> are equally important to product. But adding new features will affect stability, dubbo uses the following version development pattern to achieve a good balance.</p>
-<h2 id="two-versions-evolving-at-the-same-time">Two versions evolving at the same time</h2>
+                                <h1 id="coding-convention">Coding convention</h1>
+<h2 id="code-style">Code style</h2>
+<p>The source and JavaDoc of Dubbo follow below specifications:</p>
 <ul>
-<li>BugFix Version&#xFF1A;low version&#xFF0C;e.g. <code>2.4.x</code>. This is called the GA version, which can be applied in production. We are supposed only to fix bugs in this version, and increase the third version number when release.</li>
-<li>Feature Version&#xFF1A;high version, e.g. <code>2.5.x</code>. We add new features to this version, so applications have opportunities try new features.</li>
+<li><a href="http://www.oracle.com/technetwork/java/codeconvtoc-136057.html" target="_blank">Code Conventions for the Java Programming Language</a></li>
+<li><a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html" target="_blank">How to Write Doc Comments for the Javadoc Tool</a></li>
 </ul>
-<p>When features in <code>2.5.x</code> are proved stable enough, we will announce <code>2.5.x</code> as a beta release. </p>
-<p>When <code>2.5.x</code> proved stable after enough test on enough applications&#xFF1A;</p>
+<h2 id="exception-and-logging">Exception and Logging</h2>
 <ul>
-<li><code>2.5.x</code>, the GA Version, only do BugFix, the main version to be used. We can try to promote applications to upgrade to GA at the desired time.</li>
-<li><code>2.4.x</code>, no longer maintained. When bugs appear, applications have no choice but upgrade to the latest stable version- Sunset Clause</li>
-<li>We create a new branch <code>2.6.0</code> based on <code>2.5.x</code> for new features.</li>
+<li>Log more context information as possible, such as error reason, error server address, client address, registry center address, dubbo version and so on.</li>
+<li>Try to put the main cause at the front, and display all other context information with key-value paris after it.</li>
+<li>Log is not printed where the exception is thrown, log level is determined by the final exception handler, and must print log when dicarding exception.</li>
+<li><code>ERROR</code> log means NEED TO ALARM, <code>WARN</code> log means COULD AUTO RECOVERY, <code>INFO</code> long mean NORMAL.</li>
+<li>Suggestion: config <code>ERROR</code> log in Monitor center for real-time alarm, summary and send <code>WARN</code> log weekly.</li>
+<li><code>RpcException</code> is the ONLY external exception of Dubbo&#xFF0C;all internal exceptions mush be transfered to <code>RpcException</code> if need to throw out to user.</li>
+<li><code>RpcException</code> CAN NOT have sub-class, all types of information are identified with ErrorCode in order to keep compatible.</li>
 </ul>
-<h2 id="pros">Pros</h2>
+<h2 id="configuration-and-url">Configuration and URL</h2>
 <ul>
-<li>GA Version are promised stable:<ul>
-<li>only BugFix</li>
-<li>GA Version got enough tests before promotion</li>
+<li>Use initials and camelCase for multiple words for object properties <sup><a href="#fn_1" id="reffn_1">1</a></sup>.</li>
+<li>Use lowercase and split by &apos;-&apos; for multiple words for config properties <sup><a href="#fn_2" id="reffn_2">2</a></sup>.</li>
+<li>Use lowercase and split by &apos;.&apos; for multiple words for URL properties <sup><a href="#fn_3" id="reffn_3">3</a></sup>.</li>
+<li>Use URL transfer parameters as possible, Don&apos;t define Map or other types, config information also transfer to URL style.</li>
+<li>Minimize URL nesting to keep URL simplicity.</li>
 </ul>
-</li>
-<li>New features can respond quickly in Feature Version and allow applications to try that</li>
-<li>Significantly reduces development and maintenance costs </li>
-</ul>
-<h2 id="the-responsibilities-of-users">The responsibilities of users</h2>
-<p>Users should always keep in track with the GA Version, make sure all bugs were fixed.</p>
-<p>There is a fake proposition: regular upgrades bring more risks. Here&apos;s the reasons:</p>
+<h2 id="unit-testing-and-integration-testing">Unit testing and integration testing</h2>
 <ul>
-<li>GA remains stable after a trial period.</li>
-<li>Bugs find on GA will be fixed immediately.</li>
-<li>Comparing with the on-need-upgrade (only upgrade when find a serious problem, and may span multiple versions), upgrade periodically can flat risk. Experienced a long cycle of large projects, students will have such an experience, the tripartite library version does not upgrade for a long time, the result of the problem had to upgrade to the new version (across multiple versions) a huge risk.</li>
+<li>Use JUnit and EasyMock for unit testing, use TestNG for integration testing, use DBUnit for database testing.</li>
+<li>Don&apos;t put large integration test case in unit testing for running speed of unit test case.</li>
+<li>Use <code>try...finally</code> or <code>tearDown</code> to release resource for all test cases of unit testing.</li>
+<li>Minimize test case that with <code>while</code> loop which need waiting repsonse, use to make the logic in timer as function for timer and net testing.</li>
+<li>For fail-safe testing, unified use <code>LogUtil</code> assertion log output.</li>
 </ul>
+<h2 id="extension-point-base-class-and-aop">Extension point base class and AOP</h2>
+<ul>
+<li>AOP class should be named as <code>XxxWrapper</code>&#xFF0C;Base class should be named as <code>AbstractXxx</code>.</li>
+<li>Use AOP for combine relationship between extension points, <code>ExtensionLoader</code> only loads extension points, including AOP extension.</li>
+<li>Try to use Ioc inject dependency of extension points, Don&apos;t direct dependent on factory method of <code>ExtensionLoader</code>.</li>
+<li>Try to use AOP implement the common action of extension points, instead of using base class, such as the <code>isAvailable</code> checking before load balancing, which is independent of load balance. Close the URL paramters which no need to check.</li>
+<li>Use base class for abstaction for a variety of similar types, such as RMI, Hessian 3rd protocols which have generated interface proxy, only transfer interface proxy to <code>Invoker</code> to complete bridging, and public base class can do the logic.</li>
+<li>The base class is also part of the SPI, and each extension should have a convenient base class support.</li>
+</ul>
+<h2 id="module-and-packaging">Module and packaging</h2>
+<ul>
+<li>Base on reusability for packaging, dividing the interface, base class and large implementation into separate modules.</li>
+<li>Put all interfaces under the base package of module, and put base classes in support subpackage, different implementations are placed under the subpackage named by extension point.</li>
+<li>Try to keep subpackage dependent on parent package, NOT reverse.</li>
+</ul>
+<blockquote id="fn_1">
+<sup>1</sup>. Java convention<a href="#reffn_1" title="Jump back to footnote [1] in the text."> &#x21A9;</a>
+</blockquote>
+<blockquote id="fn_2">
+<sup>2</sup>. Spring convention<a href="#reffn_2" title="Jump back to footnote [2] in the text."> &#x21A9;</a>
+</blockquote>
+<blockquote id="fn_3">
+<sup>3</sup>. Dubbo convention<a href="#reffn_3" title="Jump back to footnote [3] in the text."> &#x21A9;</a>
+</blockquote>
 
                                 
                                 </section>
@@ -706,12 +731,12 @@
 
             
                 
-                <a href="coding.html" class="navigation navigation-prev " aria-label="Previous page: 7 Code Style">
+                <a href="contract.html" class="navigation navigation-prev " aria-label="Previous page: 6 Contract">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="contribution.html" class="navigation navigation-next " aria-label="Next page: 10 Contribution">
+                <a href="release.html" class="navigation navigation-next " aria-label="Next page: 9 Versions">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -722,7 +747,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"9 Versions","level":"1.9","depth":1,"next":{"title":"10 Contribution","level":"1.10","depth":1,"path":"contribution.md","ref":"./contribution.md","articles":[]},"previous":{"title":"7 Code Style","level":"1.8","depth":1,"path":"coding.md","ref":"./coding.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"release.md","mtime":"2017-12-20T03:29:31.010Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2018-01-02T02:10:29.751Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"7 Code Style","level":"1.8","depth":1,"next":{"title":"9 Versions","level":"1.9","depth":1,"path":"release.md","ref":"./release.md","articles":[]},"previous":{"title":"6 Contract","level":"1.7","depth":1,"path":"contract.md","ref":"./contract.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"coding.md","mtime":"2018-01-02T02:10:11.890Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2018-01-02T02:10:29.751Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
