@@ -22,62 +22,32 @@ host=0.0.0.0
 script_dir=$(cd `dirname $0`; pwd)
 base_dir=`dirname ${script_dir}`
 parent_dir=`dirname ${base_dir}`
-git_book_dir="${parent_dir}/dubbo.gitbooks.io"
+git_book_dir="${parent_dir}/dubbo-docs"
 
 saved_dir=${git_book_dir}
 
-if [ -f "${base_dir}/gitbook_list" ]
+if [ -d ${git_book_dir} ]
 then
-    if [ -d ${git_book_dir} ]
-    then
+   echo "updating '${base_dir}'"
+   # update self code
+   git pull
 
-        echo "updating '${base_dir}'"
-        # update self code
-        git pull
-
-        # ready to update git books
-        for book_dir in ${git_book_dir}/*
-        do
-            if [ -d ${book_dir} ]
-            then
-                echo "updating '${book_dir}'"
-                cd ${book_dir}
-                git pull
-            fi
-        done
-
-    else
-        echo "Attempting to create the directory '${git_book_dir}'"
-        mkdir ${git_book_dir}
-        cd ${git_book_dir}
-
-        # clone github code for books
-        for git_book_url in `cat ${base_dir}/gitbook_list`
-        do
-            echo "git clone $git_book_url"
-            git clone ${git_book_url}
-        done
-
-        cd ${base_dir}
-        # first time , we should install jekyll dependency plugin
-        echo "run 'bundle install' for '${base_dir}'."
-        bundle install
-
-        # install git books dependency plugins
-        for book_dir in ${git_book_dir}/*
-        do
-            if [ -d ${book_dir} ]
-            then
-                echo "run 'gitbook install' for '${book_dir}'."
-                cd ${book_dir}
-                gitbook install
-            fi
-        done
-
-    fi
+   # ready to update git books
+   echo "updating '${git_book_dir}'"
+   cd ${git_book_dir}
+   git pull
 else
-    echo "file '"${base_dir}/gitbook_list"' not exist, shell will exit."
-    exit $?
+   echo "Attempting to create the directory '${git_book_dir}'"
+   cd ${parent_dir}
+
+   # clone github code for books
+   echo "git clone $git_book_url"
+   git clone https://github.com/dubbo/dubbo-docs.git
+
+   cd ${base_dir}
+   # first time , we should install jekyll dependency plugin
+   echo "run 'bundle install' for '${base_dir}'."
+   bundle install
 fi
 
 for book_dir in ${git_book_dir}/*
