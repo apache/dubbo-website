@@ -17,15 +17,7 @@
     
             
                 
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-disqus/plugin.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
                 
             
                 
@@ -1405,31 +1397,31 @@
 <p>To solve this problem, you can configure the stub in the API, so that when the client generates the proxy instance, it passes the proxy to the <code>Stub</code> via the constructor <sup><a href="#fn_1" id="reffn_1">1</a></sup>, and then you can implement your logic in the stub implementation code.</p>
 <p><img src="../sources/images/stub.jpg" alt="/user-guide/images/stub.jpg"></p>
 <p>Configured in the spring configuration file as follows:</p>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>service</span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">stub</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>true<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.foo.BarService&quot;</span> <span class="hljs-attr">stub</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span>
 </code></pre>
 <p>or</p>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>service</span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">stub</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarServiceStub<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.foo.BarService&quot;</span> <span class="hljs-attr">stub</span>=<span class="hljs-string">&quot;com.foo.BarServiceStub&quot;</span> /&gt;</span>
 </code></pre>
 <p>Provide Stub implementation <sup><a href="#fn_2" id="reffn_2">2</a></sup>&#xFF1A;</p>
-<pre class="language-"><code class="lang-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>foo<span class="token punctuation">;</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BarServiceStub</span> <span class="token keyword">implements</span> <span class="token class-name">BarService</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> BarService barService<span class="token punctuation">;</span>
+<pre><code class="lang-java"><span class="hljs-keyword">package</span> com.foo;
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BarServiceStub</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">BarService</span> </span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> BarService barService;
 
-    <span class="token comment" spellcheck="true">// The real remote proxy object is passed in through the constructor</span>
-    <span class="token keyword">public</span> <span class="token punctuation">(</span>BarService barService<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>barService <span class="token operator">=</span> barService<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    <span class="hljs-comment">// The real remote proxy object is passed in through the constructor</span>
+    <span class="hljs-keyword">public</span> (BarService barService) {
+        <span class="hljs-keyword">this</span>.barService = barService;
+    }
 
-    <span class="token keyword">public</span> String <span class="token function">sayHello</span><span class="token punctuation">(</span>String name<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// The following code is executed on the client. You can do local ThreadLocal caching on the client side, or verify parameters, etc.</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> barService<span class="token punctuation">.</span><span class="token function">sayHello</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// You can return the mock data.</span>
-            <span class="token keyword">return</span> <span class="token string">&quot;MockData&quot;</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-comment">// The following code is executed on the client. You can do local ThreadLocal caching on the client side, or verify parameters, etc.</span>
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-keyword">return</span> barService.sayHello(name);
+        } <span class="hljs-keyword">catch</span> (Exception e) {
+            <span class="hljs-comment">// You can return the mock data.</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;MockData&quot;</span>;
+        }
+    }
+}
 </code></pre>
 <blockquote id="fn_1">
 <sup>1</sup>. The Stub must have a constructor that can pass in the proxy.<a href="#reffn_1" title="Jump back to footnote [1] in the text."> &#x21A9;</a>
@@ -1480,7 +1472,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.25 Local stub","level":"1.7.25","depth":2,"next":{"title":"6.26 Local mock","level":"1.7.26","depth":2,"path":"demos/local-mock.md","ref":"./demos/local-mock.md","articles":[]},"previous":{"title":"6.24 Events notify","level":"1.7.24","depth":2,"path":"demos/events-notify.md","ref":"./demos/events-notify.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["disqus","github","editlink","prism","-highlight","baidu","splitter","sitemap"],"pluginsConfig":{"prism":{},"disqus":{"useIdentifier":false,"shortName":"webpack-handbook"},"github":{"url":"https://github.com/zhaoda/webpack-handbook"},"editlink":{"label":"edit this page","multilingual":false,"base":"https://github.com/zhaoda/webpack-handbook/blob/master/content"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sitemap":{"hostname":"http://zhaoda.net/"},"baidu":{"token":"a9787f0ab45d5e237bab522431d0a7ec"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/local-stub.md","mtime":"2017-12-26T02:28:31.619Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-26T02:30:10.822Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.25 Local stub","level":"1.7.25","depth":2,"next":{"title":"6.26 Local mock","level":"1.7.26","depth":2,"path":"demos/local-mock.md","ref":"./demos/local-mock.md","articles":[]},"previous":{"title":"6.24 Events notify","level":"1.7.24","depth":2,"path":"demos/events-notify.md","ref":"./demos/events-notify.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/local-stub.md","mtime":"2018-01-25T00:56:11.157Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-25T00:57:09.621Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -1488,30 +1480,6 @@
         
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
-    
-        
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.16.1/URI.min.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-disqus/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-baidu/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
-        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>

@@ -17,15 +17,7 @@
     
             
                 
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-disqus/plugin.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
                 
             
                 
@@ -1403,30 +1395,30 @@
                                 <h1 id="local-mock">Local mock</h1>
 <p>Local mock <sup><a href="#fn_1" id="reffn_1">1</a></sup> is usually used for service downgrade, such as a verification service, the client does not throw an exception when the service provider hangs up all the time, but returns the authorization failed through the Mock data.</p>
 <p>Configured in the spring configuration file as follows:</p>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>service</span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">mock</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>true<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.foo.BarService&quot;</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span>
 </code></pre>
 <p>or</p>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>service</span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">mock</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarServiceMock<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.foo.BarService&quot;</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">&quot;com.foo.BarServiceMock&quot;</span> /&gt;</span>
 </code></pre>
 <p>Mock implementation in the project <sup><a href="#fn_2" id="reffn_2">2</a></sup>&#xFF1A;</p>
-<pre class="language-"><code class="lang-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>foo<span class="token punctuation">;</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BarServiceMock</span> <span class="token keyword">implements</span> <span class="token class-name">BarService</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> String <span class="token function">sayHello</span><span class="token punctuation">(</span>String name<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// You can return mock data, this method is only executed when an RpcException is thrown.</span>
-        <span class="token keyword">return</span> <span class="token string">&quot;mock data&quot;</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<pre><code class="lang-java"><span class="hljs-keyword">package</span> com.foo;
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BarServiceMock</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">BarService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-comment">// You can return mock data, this method is only executed when an RpcException is thrown.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;mock data&quot;</span>;
+    }
+}
 </code></pre>
 <p>If the service consumer often needs <code>try-catch</code> to catch exceptions, such as:</p>
-<pre class="language-"><code class="lang-java">Offer offer <span class="token operator">=</span> null<span class="token punctuation">;</span>
-<span class="token keyword">try</span> <span class="token punctuation">{</span>
-    offer <span class="token operator">=</span> offerService<span class="token punctuation">.</span><span class="token function">findOffer</span><span class="token punctuation">(</span>offerId<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">RpcException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-   logger<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="lang-java">Offer offer = <span class="hljs-keyword">null</span>;
+<span class="hljs-keyword">try</span> {
+    offer = offerService.findOffer(offerId);
+} <span class="hljs-keyword">catch</span> (RpcException e) {
+   logger.error(e);
+}
 </code></pre>
 <p>Consider changing to Mock implementation and return null in Mock implementation. If you just want to simply ignore the exception, <code>2.0.11</code> version or later version is available:</p>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>service</span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">mock</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>return null<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.foo.BarService&quot;</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">&quot;return null&quot;</span> /&gt;</span>
 </code></pre>
 <blockquote id="fn_1">
 <sup>1</sup>. Mock is a subset of the Stub. If you use Stub, you may need to rely on the RpcException class. If you use Mock, you do not need to rely on RpcException, when throwing RpcException, it will callback Mock implementation class.<a href="#reffn_1" title="Jump back to footnote [1] in the text."> &#x21A9;</a>
@@ -1477,7 +1469,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.26 Local mock","level":"1.7.26","depth":2,"next":{"title":"6.27 Delay publish","level":"1.7.27","depth":2,"path":"demos/delay-publish.md","ref":"./demos/delay-publish.md","articles":[]},"previous":{"title":"6.25 Local stub","level":"1.7.25","depth":2,"path":"demos/local-stub.md","ref":"./demos/local-stub.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["disqus","github","editlink","prism","-highlight","baidu","splitter","sitemap"],"pluginsConfig":{"prism":{},"disqus":{"useIdentifier":false,"shortName":"webpack-handbook"},"github":{"url":"https://github.com/zhaoda/webpack-handbook"},"editlink":{"label":"edit this page","multilingual":false,"base":"https://github.com/zhaoda/webpack-handbook/blob/master/content"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sitemap":{"hostname":"http://zhaoda.net/"},"baidu":{"token":"a9787f0ab45d5e237bab522431d0a7ec"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/local-mock.md","mtime":"2017-12-26T02:28:31.619Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-26T02:30:10.822Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.26 Local mock","level":"1.7.26","depth":2,"next":{"title":"6.27 Delay publish","level":"1.7.27","depth":2,"path":"demos/delay-publish.md","ref":"./demos/delay-publish.md","articles":[]},"previous":{"title":"6.25 Local stub","level":"1.7.25","depth":2,"path":"demos/local-stub.md","ref":"./demos/local-stub.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/local-mock.md","mtime":"2018-01-25T00:56:11.157Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-25T00:57:09.621Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -1485,30 +1477,6 @@
         
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
-    
-        
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.16.1/URI.min.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-disqus/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-baidu/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
-        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>

@@ -17,15 +17,7 @@
     
             
                 
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-disqus/plugin.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
                 
             
                 
@@ -1404,91 +1396,91 @@
 <p>The parameter callback is the same as calling a local callback or listener, just declare which parameter is a callback type in Spring&apos;s configuration file, and Dubbo will generate a reverse proxy based on the long connection so that client logic can be called from the server.Can ref to <a href="https://github.com/alibaba/dubbo/tree/master/dubbo-test/dubbo-test-examples/src/main/java/com/alibaba/dubbo/examples/callback" target="_blank">Sample code in the dubbo project</a>.</p>
 <h2 id="example-of-service-interface">Example of service interface</h2>
 <h3 id="callbackservicejava">CallbackService.java</h3>
-<pre class="language-"><code class="lang-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>callback<span class="token punctuation">;</span>
+<pre><code class="lang-java"><span class="hljs-keyword">package</span> com.callback;
 
-<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">CallbackService</span> <span class="token punctuation">{</span>
-    <span class="token keyword">void</span> <span class="token function">addListener</span><span class="token punctuation">(</span>String key<span class="token punctuation">,</span> CallbackListener listener<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">CallbackService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">addListener</span><span class="hljs-params">(String key, CallbackListener listener)</span></span>;
+}
 </code></pre>
 <h3 id="callbacklistenerjava">CallbackListener.java</h3>
-<pre class="language-"><code class="lang-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>callback<span class="token punctuation">;</span>
+<pre><code class="lang-java"><span class="hljs-keyword">package</span> com.callback;
 
-<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">CallbackListener</span> <span class="token punctuation">{</span>
-    <span class="token keyword">void</span> <span class="token function">changed</span><span class="token punctuation">(</span>String msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">CallbackListener</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">changed</span><span class="hljs-params">(String msg)</span></span>;
+}
 </code></pre>
 <h2 id="example-of-service-provider-interface-implementation">Example of service provider interface implementation</h2>
-<pre class="language-"><code class="lang-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>callback<span class="token punctuation">.</span>impl<span class="token punctuation">;</span>
+<pre><code class="lang-java"><span class="hljs-keyword">package</span> com.callback.impl;
 
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>text<span class="token punctuation">.</span>SimpleDateFormat<span class="token punctuation">;</span>
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Date<span class="token punctuation">;</span>
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Map<span class="token punctuation">;</span>
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>concurrent<span class="token punctuation">.</span>ConcurrentHashMap<span class="token punctuation">;</span>
+<span class="hljs-keyword">import</span> java.text.SimpleDateFormat;
+<span class="hljs-keyword">import</span> java.util.Date;
+<span class="hljs-keyword">import</span> java.util.Map;
+<span class="hljs-keyword">import</span> java.util.concurrent.ConcurrentHashMap;
 
-<span class="token keyword">import</span> com<span class="token punctuation">.</span>callback<span class="token punctuation">.</span>CallbackListener<span class="token punctuation">;</span>
-<span class="token keyword">import</span> com<span class="token punctuation">.</span>callback<span class="token punctuation">.</span>CallbackService<span class="token punctuation">;</span>
+<span class="hljs-keyword">import</span> com.callback.CallbackListener;
+<span class="hljs-keyword">import</span> com.callback.CallbackService;
 
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">CallbackServiceImpl</span> <span class="token keyword">implements</span> <span class="token class-name">CallbackService</span> <span class="token punctuation">{</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CallbackServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CallbackService</span> </span>{
 
-    <span class="token keyword">private</span> <span class="token keyword">final</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> CallbackListener<span class="token operator">&gt;</span> listeners <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ConcurrentHashMap</span><span class="token operator">&lt;</span>String<span class="token punctuation">,</span> CallbackListener<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, CallbackListener&gt; listeners = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;String, CallbackListener&gt;();
 
-    <span class="token keyword">public</span> <span class="token function">CallbackServiceImpl</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Thread t <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Runnable</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                        <span class="token keyword">for</span><span class="token punctuation">(</span>Map<span class="token punctuation">.</span>Entry<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> CallbackListener<span class="token operator">&gt;</span> entry <span class="token operator">:</span> listeners<span class="token punctuation">.</span><span class="token function">entrySet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                           <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                               entry<span class="token punctuation">.</span><span class="token function">getValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">changed</span><span class="token punctuation">(</span><span class="token function">getChanged</span><span class="token punctuation">(</span>entry<span class="token punctuation">.</span><span class="token function">getKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                           <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> t<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                               listeners<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>entry<span class="token punctuation">.</span><span class="token function">getKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                           <span class="token punctuation">}</span>
-                        <span class="token punctuation">}</span>
-                        Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Timed trigger change notification</span>
-                    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> t<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// Defense fault tolerance</span>
-                        t<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        t<span class="token punctuation">.</span><span class="token function">setDaemon</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        t<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CallbackServiceImpl</span><span class="hljs-params">()</span> </span>{
+        Thread t = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() {
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">while</span>(<span class="hljs-keyword">true</span>) {
+                    <span class="hljs-keyword">try</span> {
+                        <span class="hljs-keyword">for</span>(Map.Entry&lt;String, CallbackListener&gt; entry : listeners.entrySet()){
+                           <span class="hljs-keyword">try</span> {
+                               entry.getValue().changed(getChanged(entry.getKey()));
+                           } <span class="hljs-keyword">catch</span> (Throwable t) {
+                               listeners.remove(entry.getKey());
+                           }
+                        }
+                        Thread.sleep(<span class="hljs-number">5000</span>); <span class="hljs-comment">// Timed trigger change notification</span>
+                    } <span class="hljs-keyword">catch</span> (Throwable t) { <span class="hljs-comment">// Defense fault tolerance</span>
+                        t.printStackTrace();
+                    }
+                }
+            }
+        });
+        t.setDaemon(<span class="hljs-keyword">true</span>);
+        t.start();
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">addListener</span><span class="token punctuation">(</span>String key<span class="token punctuation">,</span> CallbackListener listener<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        listeners<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> listener<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        listener<span class="token punctuation">.</span><span class="token function">changed</span><span class="token punctuation">(</span><span class="token function">getChanged</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// send change notification</span>
-    <span class="token punctuation">}</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addListener</span><span class="hljs-params">(String key, CallbackListener listener)</span> </span>{
+        listeners.put(key, listener);
+        listener.changed(getChanged(key)); <span class="hljs-comment">// send change notification</span>
+    }
 
-    <span class="token keyword">private</span> String <span class="token function">getChanged</span><span class="token punctuation">(</span>String key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token string">&quot;Changed: &quot;</span> <span class="token operator">+</span> <span class="token keyword">new</span> <span class="token class-name">SimpleDateFormat</span><span class="token punctuation">(</span><span class="token string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+    <span class="hljs-function"><span class="hljs-keyword">private</span> String <span class="hljs-title">getChanged</span><span class="hljs-params">(String key)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Changed: &quot;</span> + <span class="hljs-keyword">new</span> SimpleDateFormat(<span class="hljs-string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>).format(<span class="hljs-keyword">new</span> Date());
+    }
+}
 </code></pre>
 <h2 id="example-of-service-provider-configuration">Example of service provider configuration</h2>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>bean</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>callbackService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.callback.impl.CallbackServiceImpl<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>service</span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.callback.CallbackService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">ref</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>callbackService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">connections</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>1<span class="token punctuation">&quot;</span></span> <span class="token attr-name">callbacks</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>1000<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>method</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>addListener<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>argument</span> <span class="token attr-name">index</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>1<span class="token punctuation">&quot;</span></span> <span class="token attr-name">callback</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>true<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
-        <span class="token comment" spellcheck="true">&lt;!--also can via specified argument type--&gt;</span>
-        <span class="token comment" spellcheck="true">&lt;!--&lt;dubbo:argument type=&quot;com.demo.CallbackListener&quot; callback=&quot;true&quot; /&gt;--&gt;</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">dubbo:</span>method</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">dubbo:</span>service</span><span class="token punctuation">&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;callbackService&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.callback.impl.CallbackServiceImpl&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.callback.CallbackService&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;callbackService&quot;</span> <span class="hljs-attr">connections</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">callbacks</span>=<span class="hljs-string">&quot;1000&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:method</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;addListener&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:argument</span> <span class="hljs-attr">index</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">callback</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span>
+        <span class="hljs-comment">&lt;!--also can via specified argument type--&gt;</span>
+        <span class="hljs-comment">&lt;!--&lt;dubbo:argument type=&quot;com.demo.CallbackListener&quot; callback=&quot;true&quot; /&gt;--&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">dubbo:method</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dubbo:service</span>&gt;</span>
 </code></pre>
 <h2 id="example-of-service-consumer-configuration">Example of service consumer configuration</h2>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>reference</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>callbackService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.callback.CallbackService<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;callbackService&quot;</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.callback.CallbackService&quot;</span> /&gt;</span>
 </code></pre>
 <h2 id="example-of-service-consumer-call">Example of service consumer call</h2>
-<pre class="language-"><code class="lang-java">ClassPathXmlApplicationContext context <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ClassPathXmlApplicationContext</span><span class="token punctuation">(</span><span class="token string">&quot;classpath:consumer.xml&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-context<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="lang-java">ClassPathXmlApplicationContext context = <span class="hljs-keyword">new</span> ClassPathXmlApplicationContext(<span class="hljs-string">&quot;classpath:consumer.xml&quot;</span>);
+context.start();
 
-CallbackService callbackService <span class="token operator">=</span> <span class="token punctuation">(</span>CallbackService<span class="token punctuation">)</span> context<span class="token punctuation">.</span><span class="token function">getBean</span><span class="token punctuation">(</span><span class="token string">&quot;callbackService&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+CallbackService callbackService = (CallbackService) context.getBean(<span class="hljs-string">&quot;callbackService&quot;</span>);
 
-callbackService<span class="token punctuation">.</span><span class="token function">addListener</span><span class="token punctuation">(</span><span class="token string">&quot;http://10.20.160.198/wiki/display/dubbo/foo.bar&quot;</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">CallbackListener</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">changed</span><span class="token punctuation">(</span>String msg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">&quot;callback1:&quot;</span> <span class="token operator">+</span> msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+callbackService.addListener(<span class="hljs-string">&quot;http://10.20.160.198/wiki/display/dubbo/foo.bar&quot;</span>, <span class="hljs-keyword">new</span> CallbackListener(){
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">changed</span><span class="hljs-params">(String msg)</span> </span>{
+        System.out.println(<span class="hljs-string">&quot;callback1:&quot;</span> + msg);
+    }
+});
 </code></pre>
 <p><strong>NOTE</strong> <code>2.0.6+</code> version supported.</p>
 
@@ -1534,7 +1526,7 @@ callbackService<span class="token punctuation">.</span><span class="token functi
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.23 Callback parameter","level":"1.7.23","depth":2,"next":{"title":"6.24 Events notify","level":"1.7.24","depth":2,"path":"demos/events-notify.md","ref":"./demos/events-notify.md","articles":[]},"previous":{"title":"6.22 Local call","level":"1.7.22","depth":2,"path":"demos/local-call.md","ref":"./demos/local-call.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["disqus","github","editlink","prism","-highlight","baidu","splitter","sitemap"],"pluginsConfig":{"prism":{},"disqus":{"useIdentifier":false,"shortName":"webpack-handbook"},"github":{"url":"https://github.com/zhaoda/webpack-handbook"},"editlink":{"label":"edit this page","multilingual":false,"base":"https://github.com/zhaoda/webpack-handbook/blob/master/content"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sitemap":{"hostname":"http://zhaoda.net/"},"baidu":{"token":"a9787f0ab45d5e237bab522431d0a7ec"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/callback-parameter.md","mtime":"2017-12-26T02:28:31.609Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-26T02:30:10.822Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.23 Callback parameter","level":"1.7.23","depth":2,"next":{"title":"6.24 Events notify","level":"1.7.24","depth":2,"path":"demos/events-notify.md","ref":"./demos/events-notify.md","articles":[]},"previous":{"title":"6.22 Local call","level":"1.7.22","depth":2,"path":"demos/local-call.md","ref":"./demos/local-call.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/callback-parameter.md","mtime":"2018-01-25T00:56:11.157Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-25T00:57:09.621Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -1542,30 +1534,6 @@ callbackService<span class="token punctuation">.</span><span class="token functi
         
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
-    
-        
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.16.1/URI.min.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-disqus/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-baidu/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
-        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>

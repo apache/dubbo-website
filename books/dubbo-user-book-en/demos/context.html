@@ -17,15 +17,7 @@
     
             
                 
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-disqus/plugin.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
                 
             
                 
@@ -1404,31 +1396,31 @@
 <p>All environment information of during the current call will put into the context,and all configuration information will convert the parameters of <code>URL</code> instance,Ref to the column of <strong>URL parameters</strong> at the <a href="../references/xml/introduction.html">schema configuration reference book</a></p>
 <p><code>RpcContext</code> is a temporary status recorder of <code>ThreadLocal</code>,when accept <code>RPC</code> request or send <code>RPC</code> request,The <code>RpcContext</code> will be  changed.Such as: <code>A</code> call <code>B</code> and <code>B</code> call <code>C</code>. On <code>B</code> machine,before <code>B</code> call <code>C</code>,the <code>RpcContext</code> will record the information of <code>A</code> call <code>B</code>.After <code>B</code> call <code>C</code>,the <code>RpcContext</code> record the information of <code>B</code> call <code>C</code>.</p>
 <h2 id="at-service-consumer">At service consumer</h2>
-<pre class="language-"><code class="lang-java"><span class="token comment" spellcheck="true">// remote invoke</span>
-xxxService<span class="token punctuation">.</span><span class="token function">xxx</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// if return true,then the current side is consumer.</span>
-<span class="token keyword">boolean</span> isConsumerSide <span class="token operator">=</span> RpcContext<span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">isConsumerSide</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// get the provider ip address of the last invoke.</span>
-String serverIP <span class="token operator">=</span> RpcContext<span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getRemoteHost</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// because all configuration information has convert the URL&apos;s  parameters,so at this place can get the application parameter value.</span>
-String application <span class="token operator">=</span> RpcContext<span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getUrl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getParameter</span><span class="token punctuation">(</span><span class="token string">&quot;application&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// Note:every rpc invoke,then context will be changed.</span>
-yyyService<span class="token punctuation">.</span><span class="token function">yyy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="lang-java"><span class="hljs-comment">// remote invoke</span>
+xxxService.xxx();
+<span class="hljs-comment">// if return true,then the current side is consumer.</span>
+<span class="hljs-keyword">boolean</span> isConsumerSide = RpcContext.getContext().isConsumerSide();
+<span class="hljs-comment">// get the provider ip address of the last invoke.</span>
+String serverIP = RpcContext.getContext().getRemoteHost();
+<span class="hljs-comment">// because all configuration information has convert the URL&apos;s  parameters,so at this place can get the application parameter value.</span>
+String application = RpcContext.getContext().getUrl().getParameter(<span class="hljs-string">&quot;application&quot;</span>);
+<span class="hljs-comment">// Note:every rpc invoke,then context will be changed.</span>
+yyyService.yyy();
 </code></pre>
 <h2 id="at-service-provider">At service provider</h2>
-<pre class="language-"><code class="lang-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">XxxServiceImpl</span> <span class="token keyword">implements</span> <span class="token class-name">XxxService</span> <span class="token punctuation">{</span>
+<pre><code class="lang-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XxxServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">XxxService</span> </span>{
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">xxx</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// if return true,then the current side is provider.</span>
-        <span class="token keyword">boolean</span> isProviderSide <span class="token operator">=</span> RpcContext<span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">isProviderSide</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// get the invoker ip</span>
-        String clientIP <span class="token operator">=</span> RpcContext<span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getRemoteHost</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// because all configuration information has convert the URL&apos;s  parameters,so at this place can get the application parameter value.</span>
-        String application <span class="token operator">=</span> RpcContext<span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getUrl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getParameter</span><span class="token punctuation">(</span><span class="token string">&quot;application&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// Note:every rpc invoke,then context will be changed.</span>
-        yyyService<span class="token punctuation">.</span><span class="token function">yyy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">xxx</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// if return true,then the current side is provider.</span>
+        <span class="hljs-keyword">boolean</span> isProviderSide = RpcContext.getContext().isProviderSide();
+        <span class="hljs-comment">// get the invoker ip</span>
+        String clientIP = RpcContext.getContext().getRemoteHost();
+        <span class="hljs-comment">// because all configuration information has convert the URL&apos;s  parameters,so at this place can get the application parameter value.</span>
+        String application = RpcContext.getContext().getUrl().getParameter(<span class="hljs-string">&quot;application&quot;</span>);
+        <span class="hljs-comment">// Note:every rpc invoke,then context will be changed.</span>
+        yyyService.yyy();;
+    }
+}
 </code></pre>
 
                                 
@@ -1473,7 +1465,7 @@ yyyService<span class="token punctuation">.</span><span class="token function">y
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.19 Context","level":"1.7.19","depth":2,"next":{"title":"6.20 Attachment","level":"1.7.20","depth":2,"path":"demos/attachment.md","ref":"./demos/attachment.md","articles":[]},"previous":{"title":"6.18 Echo service","level":"1.7.18","depth":2,"path":"demos/echo-service.md","ref":"./demos/echo-service.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["disqus","github","editlink","prism","-highlight","baidu","splitter","sitemap"],"pluginsConfig":{"prism":{},"disqus":{"useIdentifier":false,"shortName":"webpack-handbook"},"github":{"url":"https://github.com/zhaoda/webpack-handbook"},"editlink":{"label":"edit this page","multilingual":false,"base":"https://github.com/zhaoda/webpack-handbook/blob/master/content"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sitemap":{"hostname":"http://zhaoda.net/"},"baidu":{"token":"a9787f0ab45d5e237bab522431d0a7ec"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/context.md","mtime":"2017-12-26T02:28:31.610Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-26T02:30:10.822Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.19 Context","level":"1.7.19","depth":2,"next":{"title":"6.20 Attachment","level":"1.7.20","depth":2,"path":"demos/attachment.md","ref":"./demos/attachment.md","articles":[]},"previous":{"title":"6.18 Echo service","level":"1.7.18","depth":2,"path":"demos/echo-service.md","ref":"./demos/echo-service.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/context.md","mtime":"2018-01-25T00:56:11.157Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-25T00:57:09.621Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -1481,30 +1473,6 @@ yyyService<span class="token punctuation">.</span><span class="token function">y
         
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
-    
-        
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.16.1/URI.min.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-disqus/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-baidu/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
-        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>

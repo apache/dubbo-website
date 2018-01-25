@@ -17,15 +17,7 @@
     
             
                 
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-disqus/plugin.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
                 
             
                 
@@ -1404,25 +1396,25 @@
 <p>The instance of <code>ReferenceConfig</code> is heavy. It encapsulates the connection to the registry and the connection to the provider, so it need to be cached. Otherwise, repeatedly generating <code>ReferenceConfig</code> may cause performance problems , memory and connection leaks. This problem is easy to ignored when programming in API mode.</p>
 <p>Therefore, since <code>2.4.0</code>, dubbo provides a simple utility ReferenceConfigCache for caching instances of <code>ReferenceConfig</code>.</p>
 <p>Use as follows&#xFF1A;</p>
-<pre class="language-"><code class="lang-java">ReferenceConfig<span class="token operator">&lt;</span>XxxService<span class="token operator">&gt;</span> reference <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReferenceConfig</span><span class="token operator">&lt;</span>XxxService<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-reference<span class="token punctuation">.</span><span class="token function">setInterface</span><span class="token punctuation">(</span>XxxService<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-reference<span class="token punctuation">.</span><span class="token function">setVersion</span><span class="token punctuation">(</span><span class="token string">&quot;1.0.0&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-ReferenceConfigCache cache <span class="token operator">=</span> ReferenceConfigCache<span class="token punctuation">.</span><span class="token function">getCache</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// cache.get will cache the instance of Reference &#xFF0C;and call ReferenceConfig.get method to start ReferenceConfig</span>
-XxxService xxxService <span class="token operator">=</span> cache<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>reference<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// Note: Cache will hold ReferenceConfig, do not call destroy method of ReferenceConfig outside. If you do this, it will invalidate ReferenceConfig in Cache!</span>
-<span class="token comment" spellcheck="true">// Use xxxService instance</span>
-xxxService<span class="token punctuation">.</span><span class="token function">sayHello</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="lang-java">ReferenceConfig&lt;XxxService&gt; reference = <span class="hljs-keyword">new</span> ReferenceConfig&lt;XxxService&gt;();
+reference.setInterface(XxxService.class);
+reference.setVersion(<span class="hljs-string">&quot;1.0.0&quot;</span>);
+......
+ReferenceConfigCache cache = ReferenceConfigCache.getCache();
+<span class="hljs-comment">// cache.get will cache the instance of Reference &#xFF0C;and call ReferenceConfig.get method to start ReferenceConfig</span>
+XxxService xxxService = cache.get(reference);
+<span class="hljs-comment">// Note: Cache will hold ReferenceConfig, do not call destroy method of ReferenceConfig outside. If you do this, it will invalidate ReferenceConfig in Cache!</span>
+<span class="hljs-comment">// Use xxxService instance</span>
+xxxService.sayHello();
 </code></pre>
 <p>Destroy <code>ReferenceConfig</code> in the Cache, it also remove <code>ReferenceConfig</code> and release the corresponding resources&#x3002;</p>
-<pre class="language-"><code class="lang-java">ReferenceConfigCache cache <span class="token operator">=</span> ReferenceConfigCache<span class="token punctuation">.</span><span class="token function">getCache</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-cache<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span>reference<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="lang-java">ReferenceConfigCache cache = ReferenceConfigCache.getCache();
+cache.destroy(reference);
 </code></pre>
 <p>By default ,<code>ReferenceConfigCache</code> caches one <code>ReferenceConfig</code> for the same service Group, interface, version. The key of <code>ReferenceConfigCache</code> is from the group of service Group, interface, and the version. </p>
 <p>You can modify the strategy. Define an instance of KeyGenerator, pass it as parameter of getCache method. Refer to <code>ReferenceConfigCache</code> for information&#x3002;</p>
-<pre class="language-"><code class="lang-java">KeyGenerator keyGenerator <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span></span>
-ReferenceConfigCache cache <span class="token operator">=</span> ReferenceConfigCache<span class="token punctuation">.</span><span class="token function">getCache</span><span class="token punctuation">(</span>keyGenerator <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="lang-java">KeyGenerator keyGenerator = <span class="hljs-keyword">new</span> ...
+ReferenceConfigCache cache = ReferenceConfigCache.getCache(keyGenerator );
 </code></pre>
 
                                 
@@ -1467,7 +1459,7 @@ ReferenceConfigCache cache <span class="token operator">=</span> ReferenceConfig
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.41 Reference config cache","level":"1.7.41","depth":2,"next":{"title":"6.42 Distributed transaction","level":"1.7.42","depth":2,"path":"demos/distributed-transaction.md","ref":"./demos/distributed-transaction.md","articles":[]},"previous":{"title":"6.40 Service container","level":"1.7.40","depth":2,"path":"demos/service-container.md","ref":"./demos/service-container.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["disqus","github","editlink","prism","-highlight","baidu","splitter","sitemap"],"pluginsConfig":{"prism":{},"disqus":{"useIdentifier":false,"shortName":"webpack-handbook"},"github":{"url":"https://github.com/zhaoda/webpack-handbook"},"editlink":{"label":"edit this page","multilingual":false,"base":"https://github.com/zhaoda/webpack-handbook/blob/master/content"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sitemap":{"hostname":"http://zhaoda.net/"},"baidu":{"token":"a9787f0ab45d5e237bab522431d0a7ec"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/reference-config-cache.md","mtime":"2017-12-26T02:28:31.625Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-26T02:30:10.822Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.41 Reference config cache","level":"1.7.41","depth":2,"next":{"title":"6.42 Distributed transaction","level":"1.7.42","depth":2,"path":"demos/distributed-transaction.md","ref":"./demos/distributed-transaction.md","articles":[]},"previous":{"title":"6.40 Service container","level":"1.7.40","depth":2,"path":"demos/service-container.md","ref":"./demos/service-container.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/reference-config-cache.md","mtime":"2018-01-25T00:56:11.157Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-25T00:57:09.621Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -1475,30 +1467,6 @@ ReferenceConfigCache cache <span class="token operator">=</span> ReferenceConfig
         
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
-    
-        
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.16.1/URI.min.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-disqus/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-baidu/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
-        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>

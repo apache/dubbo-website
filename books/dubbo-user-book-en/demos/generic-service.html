@@ -17,15 +17,7 @@
     
             
                 
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-disqus/plugin.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
-                
-            
-                
-                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
                 
             
                 
@@ -1403,36 +1395,36 @@
                                 <h1 id="generic-service">Generic Service</h1>
 <p>The implementation of the generic interface is mainly used when there is no API interface and model class on the server side. All POJOs in the parameters and return values are represented by the Map and are usually used for framework integration. For example, to implement a universal remote service Mock framework, handle all service requests by implementing the GenericService interface.</p>
 <p>In Java code, implement <code>GenericService</code> interface&#xFF1A;</p>
-<pre class="language-"><code class="lang-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>foo<span class="token punctuation">;</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MyGenericService</span> <span class="token keyword">implements</span> <span class="token class-name">GenericService</span> <span class="token punctuation">{</span>
+<pre><code class="lang-java"><span class="hljs-keyword">package</span> com.foo;
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyGenericService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GenericService</span> </span>{
 
-    <span class="token keyword">public</span> Object $<span class="token function">invoke</span><span class="token punctuation">(</span>String methodName<span class="token punctuation">,</span> String<span class="token punctuation">[</span><span class="token punctuation">]</span> parameterTypes<span class="token punctuation">,</span> Object<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> GenericException <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">&quot;sayHello&quot;</span><span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>methodName<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token string">&quot;Welcome &quot;</span> <span class="token operator">+</span> args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+    <span class="hljs-keyword">public</span> Object $invoke(String methodName, String[] parameterTypes, Object[] args) <span class="hljs-keyword">throws</span> GenericException {
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">&quot;sayHello&quot;</span>.equals(methodName)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Welcome &quot;</span> + args[<span class="hljs-number">0</span>];
+        }
+    }
+}
 </code></pre>
 <h2 id="export-generic-implements-via-spring">Export generic implements via Spring</h2>
 <p>Declared in the Spring configuration file&#xFF1A;</p>
-<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>bean</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>genericService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.MyGenericService<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">dubbo:</span>service</span> <span class="token attr-name">interface</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>com.foo.BarService<span class="token punctuation">&quot;</span></span> <span class="token attr-name">ref</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>genericService<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;genericService&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.foo.MyGenericService&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">&quot;com.foo.BarService&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;genericService&quot;</span> /&gt;</span>
 </code></pre>
 <h2 id="export-generic-implements-via-api">Export generic implements via API</h2>
-<pre class="language-"><code class="lang-java"><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-<span class="token comment" spellcheck="true">// use com.alibaba.dubbo.rpc.service.GenericService can replace all implements</span>
-GenericService xxxService <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">XxxGenericService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="lang-java">...
+<span class="hljs-comment">// use com.alibaba.dubbo.rpc.service.GenericService can replace all implements</span>
+GenericService xxxService = <span class="hljs-keyword">new</span> XxxGenericService();
 
-<span class="token comment" spellcheck="true">// The instance is very heavy, which encapsulates all the registration center and service provider connection, please cache</span>
-ServiceConfig<span class="token operator">&lt;</span>GenericService<span class="token operator">&gt;</span> service <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServiceConfig</span><span class="token operator">&lt;</span>GenericService<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// weak type service interface name</span>
-service<span class="token punctuation">.</span><span class="token function">setInterface</span><span class="token punctuation">(</span><span class="token string">&quot;com.xxx.XxxService&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
-service<span class="token punctuation">.</span><span class="token function">setVersion</span><span class="token punctuation">(</span><span class="token string">&quot;1.0.0&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// point to a generic serivce instance</span>
-service<span class="token punctuation">.</span><span class="token function">setRef</span><span class="token punctuation">(</span>xxxService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="hljs-comment">// The instance is very heavy, which encapsulates all the registration center and service provider connection, please cache</span>
+ServiceConfig&lt;GenericService&gt; service = <span class="hljs-keyword">new</span> ServiceConfig&lt;GenericService&gt;();
+<span class="hljs-comment">// weak type service interface name</span>
+service.setInterface(<span class="hljs-string">&quot;com.xxx.XxxService&quot;</span>);  
+service.setVersion(<span class="hljs-string">&quot;1.0.0&quot;</span>);
+<span class="hljs-comment">// point to a generic serivce instance</span>
+service.setRef(xxxService);
 
-<span class="token comment" spellcheck="true">// export service to registration center</span>
-service<span class="token punctuation">.</span><span class="token function">export</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="hljs-comment">// export service to registration center</span>
+service.export();
 </code></pre>
 
                                 
@@ -1477,7 +1469,7 @@ service<span class="token punctuation">.</span><span class="token function">expo
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.17 Generic service","level":"1.7.17","depth":2,"next":{"title":"6.18 Echo service","level":"1.7.18","depth":2,"path":"demos/echo-service.md","ref":"./demos/echo-service.md","articles":[]},"previous":{"title":"6.16 Generic reference","level":"1.7.16","depth":2,"path":"demos/generic-reference.md","ref":"./demos/generic-reference.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["disqus","github","editlink","prism","-highlight","baidu","splitter","sitemap"],"pluginsConfig":{"prism":{},"disqus":{"useIdentifier":false,"shortName":"webpack-handbook"},"github":{"url":"https://github.com/zhaoda/webpack-handbook"},"editlink":{"label":"edit this page","multilingual":false,"base":"https://github.com/zhaoda/webpack-handbook/blob/master/content"},"splitter":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sitemap":{"hostname":"http://zhaoda.net/"},"baidu":{"token":"a9787f0ab45d5e237bab522431d0a7ec"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/generic-service.md","mtime":"2017-12-26T02:28:31.613Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-26T02:30:10.822Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.17 Generic service","level":"1.7.17","depth":2,"next":{"title":"6.18 Echo service","level":"1.7.18","depth":2,"path":"demos/echo-service.md","ref":"./demos/echo-service.md","articles":[]},"previous":{"title":"6.16 Generic reference","level":"1.7.16","depth":2,"path":"demos/generic-reference.md","ref":"./demos/generic-reference.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"demos/generic-service.md","mtime":"2018-01-25T00:56:11.157Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-25T00:57:09.621Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -1485,30 +1477,6 @@ service<span class="token punctuation">.</span><span class="token function">expo
         
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
-    
-        
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.16.1/URI.min.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-disqus/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-baidu/plugin.js"></script>
-        
-    
-        
-        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
-        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
