@@ -133,9 +133,13 @@ public class Consumer {
 * Dive deep into dubbo user guide ([English]({{ site.github.gitbook_url }}/dubbo-user-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-user-book/)) to find more details.
 * Read dubbo admin guide ([English]({{ site.github.gitbook_url }}/dubbo-admin-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-admin-book/)) for dubbo application administration topics.
 * Interested in how dubbo is designed, or want to contribute? Read dubbo developer guide ([English]({{ site.github.gitbook_url }}/dubbo-dev-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-dev-book/)), and start to [hack the code](https://github.com/alibaba/dubbo).
-* <a href="https://gitter.im/alibaba/dubbo"><img class="inline-image" src="https://badges.gitter.im/alibaba/dubbo.svg"/></a> to discuss with dubbo core team.
 * Explore more side projects you may interested from [github dubbo group](https://github.com/dubbo).
 
+## Post questions
+
+* Developer mailing list. Any questions or suggestions? Subscribe to [developer mailing list](https://github.com/alibaba/dubbo/issues/1393) to discuss with developers.
+* Gitter channel. Join <a href="https://gitter.im/alibaba/dubbo"><img class="inline-image" src="https://badges.gitter.im/alibaba/dubbo.svg"/></a> to discuss with users and developers in real time.
+* Contribute on Github. As dubbo is hosted at [Github](https://github.com/alibaba/dubbo). Feel free to fork it, issue a pull request or report a bug, and join the discussion. 
 
 ## We need your help
 
