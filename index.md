@@ -140,6 +140,7 @@ public class Consumer {
 * Developer mailing list. Any questions or suggestions? Subscribe to [developer mailing list](https://github.com/alibaba/dubbo/issues/1393) to discuss with developers.
 * Gitter channel. Join <a href="https://gitter.im/alibaba/dubbo"><img class="inline-image" src="https://badges.gitter.im/alibaba/dubbo.svg"/></a> to discuss with users and developers in real time.
 * Contribute on Github. As dubbo is hosted at [Github](https://github.com/alibaba/dubbo). Feel free to fork it, issue a pull request or report a bug, and join the discussion. 
+* Reporting security vulnerability. If you find a security vulnerability, please send an email to security@dubbo.apache.org, which is a private mailing list and nothing will go public unless we announce it.
 
 ## We need your help
 
