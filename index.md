@@ -58,7 +58,7 @@ public class DemoServiceImpl implements DemoService {
 
 #### Configure service provider
 
-The code snippet below shows how a dubbo service provider is configured with spring framework, which is recommended, however you could also use [API configuration](https://dubbo.gitbooks.io/dubbo-user-book/content/configuration/api.html) if it's preferred.
+The code snippet below shows how a dubbo service provider is configured with spring framework, which is recommended, however you could also use [API configuration](http://dubbo.io/books/dubbo-user-book-en/configuration/api.html) if it's preferred.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
