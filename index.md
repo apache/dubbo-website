@@ -4,11 +4,11 @@ layout: default
 
 ## [](#introduction)Overview
 
-Dubbo _\|ˈdʌbəʊ\|_ is a high-performance, java based [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) framework open-sourced by Alibaba. As in many RPC systems, dubbo is based around the idea of defining a service, specifying the methods that can be called remotely with their parameters and return types. On the server side, the server implements this interface and runs a dubbo server to handle client calls. On the client side, the client has a stub that provides the same methods as the server.
+Apache Dubbo (incubating) _\|ˈdʌbəʊ\|_ is a high-performance, java based [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) framework open-sourced by Alibaba. As in many RPC systems, dubbo is based around the idea of defining a service, specifying the methods that can be called remotely with their parameters and return types. On the server side, the server implements this interface and runs a dubbo server to handle client calls. On the client side, the client has a stub that provides the same methods as the server.
 
 ![](images//dubbo-architecture.png)
 
-Dubbo offers three key functionalities, which include interface based remote call, fault tolerance & load balancing, and automatic service registration & discovery. Dubbo framework is widely adopted inside Alibaba and outside by other companies including [jingdong](http://www.jd.com), [dangdang](http://www.dangdang.com), [qunar](https://www.qunar.com), [kaola](https://www.kaola.com), and many others.
+Apache Dubbo (incubating) offers three key functionalities, which include interface based remote call, fault tolerance & load balancing, and automatic service registration & discovery. Apache Dubbo (incubating) framework is widely adopted inside Alibaba and outside by other companies including [jingdong](http://www.jd.com), [dangdang](http://www.dangdang.com), [qunar](https://www.qunar.com), [kaola](https://www.kaola.com), and many others.
 
 ## [](#quick-start)Quick start
 
@@ -58,7 +58,7 @@ public class DemoServiceImpl implements DemoService {
 
 #### Configure service provider
 
-The code snippet below shows how a dubbo service provider is configured with spring framework, which is recommended, however you could also use [API configuration](http://dubbo.io/books/dubbo-user-book-en/configuration/api.html) if it's preferred.
+The code snippet below shows how a dubbo service provider is configured with spring framework, which is recommended, however you could also use [API configuration]({{ site.github.gitbook_url }}/dubbo-user-book-en/configuration/api.html) if it's preferred.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
