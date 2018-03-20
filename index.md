@@ -12,7 +12,7 @@ Apache Dubbo (incubating) offers three key functionalities, which include interf
 
 ## [](#quick-start)Quick start
 
-This guide gets you started with dubbo in Java with a simple working example. You could find the complete working samples from directory 'dubbo-demo' in [dubbo project](https://github.com/alibaba/dubbo) on github.
+This guide gets you started with dubbo in Java with a simple working example. You could find the complete working samples from directory 'dubbo-demo' in [dubbo project]({{ site.github.repository_url }}) on github.
 
 #### Prerequisites
 
@@ -132,19 +132,19 @@ public class Consumer {
 * Read this excellent article [Introduction to Dubbo](http://www.baeldung.com/dubbo) to learn more on dubbo's basic features.
 * Dive deep into dubbo user guide ([English]({{ site.github.gitbook_url }}/dubbo-user-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-user-book/)) to find more details.
 * Read dubbo admin guide ([English]({{ site.github.gitbook_url }}/dubbo-admin-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-admin-book/)) for dubbo application administration topics.
-* Interested in how dubbo is designed, or want to contribute? Read dubbo developer guide ([English]({{ site.github.gitbook_url }}/dubbo-dev-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-dev-book/)), and start to [hack the code](https://github.com/alibaba/dubbo).
+* Interested in how dubbo is designed, or want to contribute? Read dubbo developer guide ([English]({{ site.github.gitbook_url }}/dubbo-dev-book-en/), [Chinese]({{ site.github.gitbook_url }}/dubbo-dev-book/)), and start to [hack the code]({{ site.github.repository_url }}).
 * Explore more side projects you may interested from [github dubbo group](https://github.com/dubbo).
 
 ## Post questions
 
-* Developer mailing list. Any questions or suggestions? Subscribe to [developer mailing list](https://github.com/alibaba/dubbo/issues/1393) to discuss with developers.
+* Developer mailing list. Any questions or suggestions? Subscribe to [developer mailing list]({{ site.github.repository_url }}/issues/1393) to discuss with developers.
 * Gitter channel. Join <a href="https://gitter.im/alibaba/dubbo"><img class="inline-image" src="https://badges.gitter.im/alibaba/dubbo.svg"/></a> to discuss with users and developers in real time.
-* Contribute on Github. As dubbo is hosted at [Github](https://github.com/alibaba/dubbo). Feel free to fork it, issue a pull request or report a bug, and join the discussion. 
+* Contribute on Github. As dubbo is hosted at [Github]({{ site.github.repository_url }}). Feel free to fork it, issue a pull request or report a bug, and join the discussion. 
 * Reporting security vulnerability. If you find a security vulnerability, please send an email to security@dubbo.apache.org, which is a private mailing list and nothing will go public unless we announce it.
 
 ## We need your help
 
-We are now collecting dubbo user info in order to help us to improve dubbo better, pls. kindly help us by providing yours on [issue#1012: Wanted: who's using dubbo](https://github.com/alibaba/dubbo/issues/1012), thanks :)
+We are now collecting dubbo user info in order to help us to improve dubbo better, pls. kindly help us by providing yours on [issue#1012: Wanted: who's using dubbo]({{ site.github.repository_url }}/issues/1012), thanks :)
 
 ## DISCLAIMER 
 
