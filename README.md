@@ -12,7 +12,7 @@ cd script
 ./bootstrap
 ```
 
-To build the website locally
+Make sure you have installed jekyll and gitbook. To build the website locally
 
 ```sh
 bundle exec jekyll build --config _config_build.yml
@@ -30,6 +30,12 @@ And you can visit the website via http://localhost:8000
 
 
 ### Publish the website
+
+Copy all the files from `_site` directory to the parent direcotry:
+
+```sh
+cp -r _site/* .
+```
 
 Make sure you have all the changed committed.
 
