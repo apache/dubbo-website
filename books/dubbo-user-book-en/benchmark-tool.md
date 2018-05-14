@@ -1,6 +1,8 @@
 # Beanchmark testing tool installer
 
-Download the [benchmark installer](http://code.alibabatech.com/wiki/download/attachments/7669075/dubbo.benchmark-2.0.14.tar.gz)，and unzip it 
+* download： git clone https://github.com/apache/incubator-dubbo.git  
+* compile benchmark: cd incubator-dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install  
+* uncompress benchmark： incubator-dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz 
 
 Read ReadMe.txt (the contents are as follows, in the compressed package.)
 
