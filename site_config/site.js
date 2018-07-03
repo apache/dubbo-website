@@ -8,7 +8,7 @@ export default {
       },
       {
         text: 'DOCS',
-        link: '/docs/quick-start.md',
+        link: '/docs/user/quick-start.md',
       },
       {
         text: 'BLOG',
@@ -28,11 +28,11 @@ export default {
       list: [
         {
           text: 'Overview',
-          link: '/docs/preface/architecture.md',
+          link: '/docs/user/preface/architecture.md',
         },
         {
           text: 'Quick start',
-          link: '/docs/quick-start.md',
+          link: '/docs/user/quick-start.md',
         },
         {
           text: 'Developer guide',
@@ -63,7 +63,7 @@ export default {
       },
       {
         text: '文档',
-        link: '/docs/quick-start.md',
+        link: '/docs/user/quick-start.md',
       },
       {
         text: '博客',
@@ -83,11 +83,11 @@ export default {
       list: [
         {
           text: '概览',
-          link: '/docs/preface/architecture.md',
+          link: '/docs/user/preface/architecture.md',
         },
         {
           text: '快速开始',
-          link: '/docs/quick-start.md',
+          link: '/docs/user/quick-start.md',
         },
         {
           text: '开发者指南',

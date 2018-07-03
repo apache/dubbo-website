@@ -14,8 +14,8 @@ class App extends React.Component {
     return (
       <HashRouter>
         <Switch>
-          <Redirect exact from="/docs" to="/docs/quick-start.md" />
-          <Redirect exact from="/docs/" to="/docs/quick-start.md" />
+          <Redirect exact from="/docs" to="/docs/user/quick-start.md" />
+          <Redirect exact from="/docs/" to="/docs/user/quick-start.md" />
           <Route exact path="/" component={Home} />
           <Route exact path="/community" component={Community} />
           <Route exact path="/blog" component={Blog} />
