@@ -52,10 +52,10 @@ export default {
           link: 'https://segmentfault.com/t/dubbo'
         },
         {
-          img: './img/weibo.png',
-          imgHover: './img/weibo_hover.png',
-          title: '@dubbo',
-          link: '',
+          img: './img/twitter.png',
+          imgHover: './img/twitter_hover.png',
+          title: '@ApacheDubbo',
+          link: 'https://twitter.com/ApacheDubbo',
         },
       ],
     },
@@ -410,10 +410,10 @@ export default {
           link: 'https://segmentfault.com/t/dubbo'
         },
         {
-          img: './img/weibo.png',
-          imgHover: './img/weibo_hover.png',
-          title: '微博',
-          link: '',
+          img: './img/twitter.png',
+          imgHover: './img/twitter_hover.png',
+          title: '@ApacheDubbo',
+          link: 'https://twitter.com/ApacheDubbo',
         },
       ],
     },
