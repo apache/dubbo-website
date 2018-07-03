@@ -7,7 +7,7 @@ export default {
       briefIntroduction: 'Apache Dubbo™ (incubating)是一款高性能Java RPC框架。',
       button: {
         text: '立即开始',
-        link: '/docs/quick-start.md',
+        link: '/docs/user/quick-start.md',
       }
     },
     introduction: {
@@ -56,7 +56,7 @@ export default {
       img: './img/quick_start.png',
       button: {
         text: '阅读更多',
-        link: '/docs/quick-start.md',
+        link: '/docs/user/quick-start.md',
       },
     },
     users: {
@@ -88,7 +88,7 @@ export default {
       briefIntroduction: 'Apache Dubbo™ (incubating) is a high-performance, java based open source RPC framework.',
       button: {
         text: 'GET STARTED',
-        link: '/docs/quick-start.md',
+        link: '/docs/user/quick-start.md',
       }
     },
     introduction: {
@@ -137,7 +137,7 @@ export default {
       img: './img/quick_start.png',
       button: {
         text: 'READ MORE',
-        link: '/docs/quick-start.md',
+        link: '/docs/user/quick-start.md',
       },
     },
     users: {
