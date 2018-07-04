@@ -9,8 +9,9 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'build'),
-    publicPath: '/build/',
+    publicPath: '//localhost:8080/build/',
     filename: '[name].js',
+    chunkFilename: '[chunkhash].js',
   },
   externals: {
     react: 'React',
