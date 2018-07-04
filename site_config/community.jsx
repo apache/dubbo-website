@@ -115,17 +115,17 @@ export default {
           tags: [
             {
               text: 'Spring XML',
-              link: '#/docs/configuration/xml.md',
+              link: '#/docs/user/configuration/xml.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Spring Annotation',
-              link: '#/docs/configuration/annotation.md',
+              link: '#/docs/user/configuration/annotation.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Plain Java',
-              link: '#/docs/configuration/properties.md',
+              link: '#/docs/user/configuration/properties.md',
               bgColor: '#00D0D9',
             },
             {
@@ -141,22 +141,22 @@ export default {
           tags: [
             {
               text: 'Zookeeper',
-              link: '#/docs/references/registry/zookeeper.md',
+              link: '#/docs/user/references/registry/zookeeper.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Redis',
-              link: '#/docs/references/registry/redis.md',
+              link: '#/docs/user/references/registry/redis.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Simple',
-              link: '#/docs/references/registry/simple.md',
+              link: '#/docs/user/references/registry/simple.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Multicast',
-              link: '#/docs/references/registry/multicast.md',
+              link: '#/docs/user/references/registry/multicast.md',
               bgColor: '#00D0D9',
             },
           ],
@@ -167,32 +167,32 @@ export default {
           tags: [
             {
               text: 'Fail over',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Fail safe',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail fast',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail back',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Forking',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Broadcast',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
           ],
@@ -203,22 +203,22 @@ export default {
           tags: [
             {
               text: 'Random',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Least Active',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Round Robin',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Consistent hash',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#00D0D9',
             },
           ],
@@ -229,47 +229,47 @@ export default {
           tags: [
             {
               text: 'Dubbo',
-              link: '#/docs/references/protocol/dubbo.md',
+              link: '#/docs/user/references/protocol/dubbo.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'RMI',
-              link: '#/docs/references/protocol/rmi.md',
+              link: '#/docs/user/references/protocol/rmi.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Hessian',
-              link: '#/docs/references/protocol/hessian.md',
+              link: '#/docs/user/references/protocol/hessian.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'HTTP',
-              link: '#/docs/references/protocol/http.md',
+              link: '#/docs/user/references/protocol/http.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'WebService',
-              link: '#/docs/references/protocol/webservice.md',
+              link: '#/docs/user/references/protocol/webservice.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Thrift',
-              link: '#/docs/references/protocol/thrift.md',
+              link: '#/docs/user/references/protocol/thrift.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Memcached',
-              link: '#/docs/references/protocol/memcached.md',
+              link: '#/docs/user/references/protocol/memcached.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Redis',
-              link: '#/docs/references/protocol/redis.md',
+              link: '#/docs/user/references/protocol/redis.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Rest',
-              link: '#/docs/references/protocol/rest.md',
+              link: '#/docs/user/references/protocol/rest.md',
               bgColor: '#00D0D9',
             },
             {
@@ -295,7 +295,7 @@ export default {
             },
             {
               text: 'Netty4',
-              link: '#/docs/demos/netty4.md',
+              link: '#/docs/user/demos/netty4.md',
               bgColor: '#00D0D9',
             },
             {
@@ -473,17 +473,17 @@ export default {
           tags: [
             {
               text: 'Spring XML',
-              link: '#/docs/configuration/xml.md',
+              link: '#/docs/user/configuration/xml.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Spring Annotation',
-              link: '#/docs/configuration/annotation.md',
+              link: '#/docs/user/configuration/annotation.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Plain Java',
-              link: '#/docs/configuration/properties.md',
+              link: '#/docs/user/configuration/properties.md',
               bgColor: '#00D0D9',
             },
             {
@@ -499,22 +499,22 @@ export default {
           tags: [
             {
               text: 'Zookeeper',
-              link: '#/docs/references/registry/zookeeper.md',
+              link: '#/docs/user/references/registry/zookeeper.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Redis',
-              link: '#/docs/references/registry/redis.md',
+              link: '#/docs/user/references/registry/redis.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Simple',
-              link: '#/docs/references/registry/simple.md',
+              link: '#/docs/user/references/registry/simple.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Multicast',
-              link: '#/docs/references/registry/multicast.md',
+              link: '#/docs/user/references/registry/multicast.md',
               bgColor: '#00D0D9',
             },
           ],
@@ -525,32 +525,32 @@ export default {
           tags: [
             {
               text: 'Fail over',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Fail safe',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail fast',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail back',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Forking',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Broadcast',
-              link: '#/docs/demos/fault-tolerent-strategy.md',
+              link: '#/docs/user/demos/fault-tolerent-strategy.md',
               bgColor: '#00D0D9',
             },
           ],
@@ -561,22 +561,22 @@ export default {
           tags: [
             {
               text: 'Random',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'Least Active',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Round Robin',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Consistent hash',
-              link: '#/docs/demos/loadbalance.md',
+              link: '#/docs/user/demos/loadbalance.md',
               bgColor: '#00D0D9',
             },
           ],
@@ -587,47 +587,47 @@ export default {
           tags: [
             {
               text: 'Dubbo',
-              link: '#/docs/references/protocol/dubbo.md',
+              link: '#/docs/user/references/protocol/dubbo.md',
               bgColor: '#7A63FC',
             },
             {
               text: 'RMI',
-              link: '#/docs/references/protocol/rmi.md',
+              link: '#/docs/user/references/protocol/rmi.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Hessian',
-              link: '#/docs/references/protocol/hessian.md',
+              link: '#/docs/user/references/protocol/hessian.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'HTTP',
-              link: '#/docs/references/protocol/http.md',
+              link: '#/docs/user/references/protocol/http.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'WebService',
-              link: '#/docs/references/protocol/webservice.md',
+              link: '#/docs/user/references/protocol/webservice.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Thrift',
-              link: '#/docs/references/protocol/thrift.md',
+              link: '#/docs/user/references/protocol/thrift.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Memcached',
-              link: '#/docs/references/protocol/memcached.md',
+              link: '#/docs/user/references/protocol/memcached.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Redis',
-              link: '#/docs/references/protocol/redis.md',
+              link: '#/docs/user/references/protocol/redis.md',
               bgColor: '#00D0D9',
             },
             {
               text: 'Rest',
-              link: '#/docs/references/protocol/rest.md',
+              link: '#/docs/user/references/protocol/rest.md',
               bgColor: '#00D0D9',
             },
             {
@@ -653,7 +653,7 @@ export default {
             },
             {
               text: 'Netty4',
-              link: '#/docs/demos/netty4.md',
+              link: '#/docs/user/demos/netty4.md',
               bgColor: '#00D0D9',
             },
             {
