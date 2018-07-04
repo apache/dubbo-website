@@ -71,6 +71,11 @@ while (it != null && it.hasNext()){
 }
 ```
 在上面的例子中，我们定义了一个扩展点和它的两个实现。在ClassPath中添加了扩展的配置文件，最后使用ServiceLoader来加载所有的扩展点。
+最终的输出结果为：
+class:testDubbo.MongoRepository
+Save tom to Mongo
+class:testDubbo.MysqlRepository
+Save tom to Mysql
 
 # 4. Dubbo的SPI机制
 
@@ -78,7 +83,7 @@ Java SPI的使用很简单。也做到了基本的加载扩展点的功能。但
 * 需要遍历所有的实现，并实例化，然后我们在循环中才能找到我们需要的实现。
 * 配置文件中只是简单的列出了所有的扩展实现，而没有给他们命名。导致在程序中很难去准确的引用它们。
 * 扩展如果依赖其他的扩展，做不到自动注入和装配
-* 不提供类似于Spring的AOP功能
+* 不提供类似于Spring的IOC和AOP功能
 * 扩展很难和其他的框架集成，比如扩展里面依赖了一个Spring bean，原生的Java SPI不支持
 
 所以Java SPI应付一些简单的场景是可以的，但对于Dubbo，它的功能还是比较弱的。Dubbo对原生SPI机制进行了一些扩展。接下来，我们就更深入地了解下Dubbo的SPI机制。
@@ -106,6 +111,8 @@ Java SPI的使用很简单。也做到了基本的加载扩展点的功能。但
 
 ### 5.6 @Adaptive
 @Adaptive注解用在扩展接口的方法上。表示该方法是一个自适应方法。Dubbo在为扩展点生成自适应实例时，如果方法有@Adaptive注解，会为该方法生成对应的代码。方法内部会根据方法的参数，来决定使用哪个扩展。
+@Adaptive注解用在类上代表实现一个装饰类，类似于设计模式中的装饰模式，它主要作用是返回指定类，目前在整个系统中AdaptiveCompiler、AdaptiveExtensionFactory这两个类拥有该注解。
+
 
 ### 5.7 ExtentionLoader
 类似于Java SPI的ServiceLoader，负责扩展的加载和生命周期维护。
@@ -210,6 +217,7 @@ demo=com.dubbo.spi.demo.consumer.DemoLoadBalance
 * 对Dubbo进行扩展，不需要改动Dubbo的源码
 * 自定义的Dubbo的扩展点实现，是一个普通的Java类，Dubbo没有引入任何Dubbo特有的元素，对代码侵入性几乎为零。
 * 将扩展注册到Dubbo中，只需要在ClassPath中添加配置文件。使用简单。而且不会对现有代码造成影响。符合开闭原则。
+* dubbo的扩展机制设计默认值：@SPI("dubbo") 代表默认的spi对象
 * Dubbo的扩展机制支持IoC,AoP等高级功能
 * Dubbo的扩展机制能很好的支持第三方IoC容器，默认支持Spring Bean，可自己扩展来支持其他容器，比如Google的Guice。
 * 切换扩展点的实现，只需要在配置文件中修改具体的实现，不需要改代码。使用方便。
