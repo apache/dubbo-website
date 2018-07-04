@@ -82,16 +82,12 @@ export default {
       title: '文档',
       list: [
         {
-          text: '概览',
-          link: '/docs/user/preface/architecture.md',
-        },
-        {
           text: '快速开始',
           link: '/docs/user/quick-start.md',
         },
         {
           text: '开发者指南',
-          link: '/docs/demo.md',
+          link: '/docs/dev/build.md',
         }
       ]
     },
