@@ -27,16 +27,16 @@ export default {
       title: 'Documentation',
       list: [
         {
-          text: 'Overview',
-          link: '/docs/user/preface/architecture.md',
-        },
-        {
           text: 'Quick start',
           link: '/docs/user/quick-start.md',
         },
         {
           text: 'Developer guide',
-          link: '/docs/demo.md',
+          link: '/docs/dev/build.md',
+        },
+        {
+          text: 'Admin manual',
+          link: '/docs/admin/ops/dubbo-ops.md',
         },
       ],
     },
@@ -88,7 +88,11 @@ export default {
         {
           text: '开发者指南',
           link: '/docs/dev/build.md',
-        }
+        },
+        {
+          text: '运维管理',
+          link: '/docs/admin/ops/dubbo-ops.md',
+        },
       ]
     },
     resources: {
