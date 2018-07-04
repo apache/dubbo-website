@@ -7,7 +7,7 @@ If you don't want to use the Spring configuration, you can call it by [the way o
 
 ## Service provider
 
-Complete installation steps, see：[Provider demo installation](http://dubbo.apache.org/books/dubbo-admin-book-en/install/provider-demo.html)
+Complete installation steps, see：[Provider demo installation](../admin/install/provider-demo.md)
 
 ### Defining service interfaces
 
