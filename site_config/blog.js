@@ -11,7 +11,7 @@ export default {
         link: '/blog/dubbo-meetup-beijing-may-12th-2018.md',
       },
       {
-        title: 'The ApacheCon NA schedule has been announced2',
+        title: 'The ApacheCon NA schedule has been announced',
         author: 'Huxing Zhang',
         dateStr: 'May 2nd，2018',
         desc: 'Ian Luo and Jun Liu will talk about "Introducing Apache Dubbo(Incubating): What is Dubbo and How it Works" at ApacheCon NA this year in Montréal!',
