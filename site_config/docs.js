@@ -558,6 +558,54 @@ export default {
                     }
                 ],
             },
+            {
+                title: 'Admin guide',
+                children: [
+                    {
+                        title: 'Installation',
+                        children: [
+                            {
+                                title: 'Install provider demo',
+                                link: '/docs/admin/install/provider-demo.md'
+                            },
+                            {
+                                title: 'Install consumer demo',
+                                link: '/docs/admin/install/consumer-demo.md'
+                            },
+                            {
+                                title: 'Install Zookeeper configuration center',
+                                link: '/docs/admin/install/zookeeper.md'
+                            },
+                            {
+                                title: 'Install Redis configuration center',
+                                link: '/docs/admin/install/redis.md'
+                            },
+                            {
+                                title: 'Install Simple configuration center',
+                                link: '/docs/admin/install/simple-registry-center.md'
+                            },
+                            {
+                                title: 'Install Simple monitor center',
+                                link: '/docs/admin/install/simple-monitor-center.md'
+                            },
+                            {
+                                title: 'Install admin console',
+                                link: '/docs/admin/install/admin-console.md'
+                            }
+                        ],
+                    },
+                    {
+                        title: 'Operation manual',
+                        children: [
+                            {
+                                title: 'Admin console operation guide',
+                                link: '/docs/admin/ops/dubbo-ops.md'
+                            }
+                        ]
+                    }
+
+                ]
+            }
         ],
         barText: 'Documentation',
     },
@@ -1160,6 +1208,54 @@ export default {
                         link: '/docs/dev/TCK.md'
                     }
                 ],
+            },
+            {
+                title: '运维管理',
+                children: [
+                    {
+                        title: '安装手册',
+                        children: [
+                            {
+                                title: '示例提供者安装',
+                                link: '/docs/admin/install/provider-demo.md'
+                            },
+                            {
+                                title: '示例消费者安装',
+                                link: '/docs/admin/install/consumer-demo.md'
+                            },
+                            {
+                                title: 'Zookeeper 注册中心安装',
+                                link: '/docs/admin/install/zookeeper.md'
+                            },
+                            {
+                                title: 'Redis 注册中心安装',
+                                link: '/docs/admin/install/redis.md'
+                            },
+                            {
+                                title: 'Simple 注册中心安装',
+                                link: '/docs/admin/install/simple-registry-center.md'
+                            },
+                            {
+                                title: 'Simple 监控中心安装',
+                                link: '/docs/admin/install/simple-monitor-center.md'
+                            },
+                            {
+                                title: '管理控制台安装',
+                                link: '/docs/admin/install/admin-console.md'
+                            }
+                        ],
+                    },
+                    {
+                        title: '运维手册',
+                        children: [
+                            {
+                                title: '管理控制台运维',
+                                link: '/docs/admin/ops/dubbo-ops.md'
+                            }
+                        ]
+                    }
+
+                ]
             }
         ],
         barText: '文档',
