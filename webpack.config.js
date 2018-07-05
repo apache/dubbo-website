@@ -9,7 +9,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'build'),
-    publicPath: '//localhost:8080/build/',
+    publicPath: './build/',
     filename: '[name].js',
     chunkFilename: '[chunkhash].js',
   },
