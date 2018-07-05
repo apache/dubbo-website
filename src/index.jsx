@@ -1,12 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
-import Home from './pages/home';
-import Community from './pages/community';
-import Blog from './pages/blog';
-import BlogDetail from './pages/blogDetail';
-import Documentation from './pages/documentation';
+import asyncComponent from './components/asyncComponent';
+
 import './index.scss';
+
+const Home = asyncComponent(() => import('./pages/home'));
+const Community = asyncComponent(() => import('./pages/community'));
+const Blog = asyncComponent(() => import('./pages/blog'));
+const BlogDetail = asyncComponent(() => import('./pages/blogDetail'));
+const Documentation = asyncComponent(() => import('./pages/documentation'));
 
 class App extends React.Component {
   render() {

@@ -68,7 +68,7 @@ gulp.task('webpack-dev-server', () => {
   myConfig.plugins.push(new webpack.HotModuleReplacementPlugin({}));
   // Start a webpack-dev-server
   new WebpackDevServer(webpack(myConfig), {
-    publicPath: myConfig.output.publicPath,
+    publicPath: '//localhost:8080/build/',
     hot: true,
     inline: true,
     stats: {
