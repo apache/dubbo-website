@@ -107,6 +107,11 @@ export default {
               link: 'https://github.com/dubbo/dubbo-client-py',
               bgColor: '#00D0D9',
             },
+			{
+              text: 'php',
+              link: 'https://github.com/dubbo/dubbo-php-framework',
+              bgColor: '#00D0D9',
+            },
           ],
         },
         {
@@ -463,6 +468,11 @@ export default {
             {
               text: 'Python',
               link: 'https://github.com/dubbo/dubbo-client-py',
+              bgColor: '#00D0D9',
+            },
+			{
+              text: 'php',
+              link: 'https://github.com/dubbo/dubbo-php-framework',
               bgColor: '#00D0D9',
             },
           ],
