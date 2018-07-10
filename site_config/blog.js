@@ -38,6 +38,13 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
+        title: 'Dubbo 的同步与异步调用方式',
+        author: '@Jerrick Zhu',
+        dateStr: 'July 10th, 2018',
+        desc: '主要讲述了 Dubbo 在底层异步通信机制的基础上实现的同步调用、异步调用、参数回调以及事件通知几种方式及示例。',
+        link: '/blog/dubbo-invoke.md',
+      },
+      {
         title: '第一个 Dubbo 应用',
         author: '@beiwei30',
         dateStr: 'June 2nd, 2018',
@@ -52,7 +59,7 @@ export default {
         link: '/blog/dubbo-basic-usage-dubbo-provider-configuration.md',
       },
       {
-        title: 'Spring-boot+Dubbo应用启停源码分析',
+        title: 'Spring Boot+Dubbo应用启停源码分析',
         author: 'Huxing Zhang',
         dateStr: 'May 28th, 2018',
         desc: 'dubbo-spring-boot-project致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发，同时也整合了Spring Boot特性。',
