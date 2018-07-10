@@ -7,6 +7,13 @@ export default {
       title: 'Events & News',
       list: [
         {
+          img: './img/blog/dubbo-shanghai-meetup.jpeg',
+          title: 'Dubbo Shanghai meetup has been held successfully',
+          content: 'The Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.',
+          dateStr: 'June 23rd，2018',
+          link: '/blog/dubbo-meetup-shanghai-jun-23rd-2018.md',
+        },
+        {
           img: './img/blog/dubbo-beijing-meetup.png',
           title: 'The first Dubbo meetup has successfully been held in Beijing',
           content: 'The first Dubbo meetup has successfully been held in Beijing, over 400+ people were present. What a great event!',
@@ -369,6 +376,13 @@ export default {
     events: {
       title: '事件 & 新闻',
       list: [
+        {
+          img: './img/blog/dubbo-shanghai-meetup.jpeg',
+          title: '第二届Dubbo开发者沙龙在上海成功举办',
+          content: '第二届Dubbo开发者沙龙在上海成功举办，超过700位开发者报名，现场参与人数300+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数10000+',
+          dateStr: 'Jun 23rd，2018',
+          link: '/blog/dubbo-meetup-shanghai-jun-23rd-2018.md',
+        },
         {
           img: './img/blog/dubbo-beijing-meetup.png',
           title: '首届Dubbo开发者沙龙在北京成功举办',
