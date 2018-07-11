@@ -600,6 +600,10 @@ export default {
                             {
                                 title: 'Admin console operation guide',
                                 link: '/docs/admin/ops/dubbo-ops.md'
+                            },
+                            {
+                                title: 'Tracking with Pinpoint',
+                                link: '/docs/admin/ops/pinpoint.md'
                             }
                         ]
                     }
@@ -1251,6 +1255,10 @@ export default {
                             {
                                 title: '管理控制台运维',
                                 link: '/docs/admin/ops/dubbo-ops.md'
+                            },
+                            {
+                                title: '使用Pinpoint做分布式跟踪',
+                                link: '/docs/admin/ops/pinpoint.md'
                             }
                         ]
                     }
