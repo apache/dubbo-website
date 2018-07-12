@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
       {
+        title: 'Tracking with Pinpoint',
+        author: '@majinkai',
+        dateStr: 'July 12th, 2018',
+        desc: 'Call chain tracking and performance monitoring for Dubbo distributed applications using Pinpoint',
+        link: '/blog/pinpoint.md',
+      },
+      {
         title: 'The first Dubbo meetup has been held in Beijing',
         author: 'Huxing Zhang',
         dateStr: 'May 12nd，2018',
@@ -37,6 +44,13 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+      {
+        title: '使用Pinpoint做分布式跟踪',
+        author: '@majinkai',
+        dateStr: 'July 12th, 2018',
+        desc: '利用Pinpoint对Dubbo分布式应用进行调用链跟踪与性能监控',
+        link: '/blog/pinpoint.md',
+      },
       {
         title: 'Dubbo 的同步与异步调用方式',
         author: '@Jerrick Zhu',
