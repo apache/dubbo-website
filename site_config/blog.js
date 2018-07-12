@@ -38,6 +38,13 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
+        title: '使用Pinpoint做分布式跟踪',
+        author: '@majinkai',
+        dateStr: 'July 12th, 2018',
+        desc: '利用Pinpoint对Dubbo分布式应用进行调用链跟踪与性能监控',
+        link: '/blog/pinpoint.md',
+      },
+      {
         title: 'Dubbo 的同步与异步调用方式',
         author: '@Jerrick Zhu',
         dateStr: 'July 10th, 2018',
