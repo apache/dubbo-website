@@ -7,6 +7,13 @@ export default {
       title: 'Events & News',
       list: [
         {
+          img: './img/blog/dubbo-shanghai-meetup.jpeg',
+          title: 'Dubbo Shanghai meetup has been held successfully',
+          content: 'The Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.',
+          dateStr: 'June 23rd，2018',
+          link: '/blog/dubbo-meetup-shanghai-jun-23rd-2018.md',
+        },
+        {
           img: './img/blog/dubbo-beijing-meetup.png',
           title: 'The first Dubbo meetup has successfully been held in Beijing',
           content: 'The first Dubbo meetup has successfully been held in Beijing, over 400+ people were present. What a great event!',
@@ -89,6 +96,17 @@ export default {
       title: 'Eco System',
       list: [
         {
+            title: 'Bootstrap',
+            content: <span>Generate Dubbo project with Spring Boot:</span>,
+            tags: [
+                {
+                    text: 'Dubbo Initializr',
+                    link: 'http://start.dubbo.io',
+                    bgColor: '#7A63FC',
+                },
+            ],
+        },
+        {
           title: 'Language',
           content: <span>Dubbo supports the following languages:</span>,
           tags: [
@@ -107,8 +125,8 @@ export default {
               link: 'https://github.com/dubbo/dubbo-client-py',
               bgColor: '#00D0D9',
             },
-			{
-              text: 'php',
+            {
+              text: 'PHP',
               link: 'https://github.com/dubbo/dubbo-php-framework',
               bgColor: '#00D0D9',
             },
@@ -134,7 +152,7 @@ export default {
               bgColor: '#00D0D9',
             },
             {
-              text: 'Spring-boot',
+              text: 'Spring Boot',
               link: 'https://github.com/apache/incubator-dubbo-spring-boot-project',
               bgColor: '#00D0D9',
             },
@@ -162,6 +180,11 @@ export default {
             {
               text: 'Multicast',
               link: '#/docs/user/references/registry/multicast.md',
+              bgColor: '#00D0D9',
+            },
+            {
+              text: 'Etcd3',
+              link: 'https://github.com/dubbo/dubbo-registry-etcd',
               bgColor: '#00D0D9',
             },
           ],
@@ -263,6 +286,11 @@ export default {
               bgColor: '#00D0D9',
             },
             {
+              text: 'Native Thrift',
+              link: 'https://github.com/dubbo/dubbo-rpc-native-thrift',
+              bgColor: '#00D0D9',
+            },
+            {
               text: 'Memcached',
               link: '#/docs/user/references/protocol/memcached.md',
               bgColor: '#00D0D9',
@@ -287,7 +315,12 @@ export default {
               link: 'https://github.com/dubbo/incubator-dubbo-rpc-xmlrpc',
               bgColor: '#00D0D9',
             },
-          ]
+            {
+              text: 'JmsRpc',
+              link: 'https://github.com/dubbo/incubator-dubbo-rpc-jms',
+              bgColor: '#00D0D9',
+            },
+          ],
         },
         {
           title: 'Transport',
@@ -319,7 +352,7 @@ export default {
               bgColor: '#00D0D9',
             },
             {
-              text: 'p2p',
+              text: 'P2P',
               link: '',
               bgColor: '#00D0D9',
             },
@@ -358,8 +391,18 @@ export default {
               text: 'Kryo',
               link: '',
               bgColor: '#00D0D9',
-            }
-          ]
+            },
+            {
+              text: 'Native Hessian',
+              link: 'https://github.com/dubbo/dubbo-serialization-native-hessian',
+              bgColor: '#00D0D9',
+            },
+            {
+              text: 'Avro',
+              link: 'https://github.com/dubbo/dubbo-serialization-avro',
+              bgColor: '#00D0D9',
+            },
+          ],
         },
       ],
     },
@@ -369,6 +412,13 @@ export default {
     events: {
       title: '事件 & 新闻',
       list: [
+        {
+          img: './img/blog/dubbo-shanghai-meetup.jpeg',
+          title: '第二届Dubbo开发者沙龙在上海成功举办',
+          content: '第二届Dubbo开发者沙龙在上海成功举办，超过700位开发者报名，现场参与人数300+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数10000+',
+          dateStr: 'Jun 23rd，2018',
+          link: '/blog/dubbo-meetup-shanghai-jun-23rd-2018.md',
+        },
         {
           img: './img/blog/dubbo-beijing-meetup.png',
           title: '首届Dubbo开发者沙龙在北京成功举办',
@@ -452,6 +502,17 @@ export default {
       title: '生态系统',
       list: [
         {
+          title: '脚手架',
+          content: <span>快速生成基于 Spring Boot 的 Dubbo 项目:</span>,
+          tags: [
+            {
+                text: 'Dubbo Initializr',
+                link: 'http://start.dubbo.io',
+                bgColor: '#7A63FC',
+            },
+          ],
+        },
+        {
           title: '多语言',
           content: <span>Dubbo支持以下语言:</span>,
           tags: [
@@ -470,8 +531,8 @@ export default {
               link: 'https://github.com/dubbo/dubbo-client-py',
               bgColor: '#00D0D9',
             },
-			{
-              text: 'php',
+            {
+              text: 'PHP',
               link: 'https://github.com/dubbo/dubbo-php-framework',
               bgColor: '#00D0D9',
             },
@@ -497,7 +558,7 @@ export default {
               bgColor: '#00D0D9',
             },
             {
-              text: 'Spring-boot',
+              text: 'Spring Boot',
               link: 'https://github.com/apache/incubator-dubbo-spring-boot-project',
               bgColor: '#00D0D9',
             },
@@ -525,6 +586,11 @@ export default {
             {
               text: 'Multicast',
               link: '#/docs/user/references/registry/multicast.md',
+              bgColor: '#00D0D9',
+            },
+            {
+              text: 'Etcd3',
+              link: 'https://github.com/dubbo/dubbo-registry-etcd',
               bgColor: '#00D0D9',
             },
           ],
@@ -626,6 +692,11 @@ export default {
               bgColor: '#00D0D9',
             },
             {
+                text: 'Native Thrift',
+                link: 'https://github.com/dubbo/dubbo-rpc-native-thrift',
+                bgColor: '#00D0D9',
+            },
+            {
               text: 'Memcached',
               link: '#/docs/user/references/protocol/memcached.md',
               bgColor: '#00D0D9',
@@ -649,6 +720,11 @@ export default {
               text: 'XmlRPC',
               link: 'https://github.com/dubbo/incubator-dubbo-rpc-xmlrpc',
               bgColor: '#00D0D9',
+            },
+            {
+                text: 'JmsRpc',
+                link: 'https://github.com/dubbo/incubator-dubbo-rpc-jms',
+                bgColor: '#00D0D9',
             },
           ]
         },
@@ -682,7 +758,7 @@ export default {
               bgColor: '#00D0D9',
             },
             {
-              text: 'p2p',
+              text: 'P2P',
               link: '',
               bgColor: '#00D0D9',
             },
@@ -721,8 +797,18 @@ export default {
               text: 'Kryo',
               link: '',
               bgColor: '#00D0D9',
-            }
-          ]
+            },
+            {
+              text: 'Native Hessian',
+              link: 'https://github.com/dubbo/dubbo-serialization-native-hessian',
+              bgColor: '#00D0D9',
+            },
+            {
+              text: 'Avro',
+              link: 'https://github.com/dubbo/dubbo-serialization-avro',
+              bgColor: '#00D0D9',
+            },
+          ],
         },
       ],
     },
