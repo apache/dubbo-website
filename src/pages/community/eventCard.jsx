@@ -6,7 +6,9 @@ class EventCard extends React.Component {
     const { event } = this.props;
     return (
       <div className="event-card">
-        <img src={event.img} />
+        <Link to={event.link}>
+          <img src={event.img} />
+        </Link>
         <div className="event-introduction">
           <h4>{event.title}</h4>
           <p>{event.content}</p>
