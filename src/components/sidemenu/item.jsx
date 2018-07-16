@@ -12,7 +12,7 @@ export default class Item extends React.Component {
     if (hasChildren) {
       if (opened === undefined) {
         // 未配置展开，则是否展开由是否选中决定
-        opened = item.children.find(child => child.link === window.location.hash.split('?')[0].slice(1));
+        opened = item.children.find(child => child.link === window.location.hash.split('?')[0].slice(2));
       }
     } else {
       opened = false;
@@ -45,7 +45,7 @@ export default class Item extends React.Component {
             className={classnames({
               'menu-item': true,
               'menu-item-level-3': true,
-              'menu-item-selected': item.link === window.location.hash.split('?')[0].slice(1),
+              'menu-item-selected': item.link === window.location.hash.split('?')[0].slice(2),
             })}
             key={index}
             onClick={this.onItemClick}
@@ -65,7 +65,7 @@ export default class Item extends React.Component {
     const cls = classnames({
       'menu-item': true,
       'menu-item-level-2': true,
-      'menu-item-selected': item.link === window.location.hash.split('?')[0].slice(1),
+      'menu-item-selected': item.link === window.location.hash.split('?')[0].slice(2),
     });
     const style = {
       height: opened ? 36 * (item.children.length + 1) : 36,
