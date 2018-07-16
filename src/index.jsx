@@ -12,10 +12,11 @@ const BlogDetail = asyncComponent(() => import('./pages/blogDetail'));
 const Documentation = asyncComponent(() => import('./pages/documentation'));
 
 class App extends React.Component {
+
   render() {
     // 最后两个未用模板参数的原因是路径深度不一定
     return (
-      <HashRouter>
+      <HashRouter hashType="hashbang">
         <Switch>
           <Redirect exact from="/docs" to="/docs/user/quick-start.md" />
           <Redirect exact from="/docs/" to="/docs/user/quick-start.md" />
