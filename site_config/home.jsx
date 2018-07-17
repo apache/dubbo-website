@@ -78,6 +78,7 @@ export default {
         './img/users_weidian.png',
         './img/users_icbc.png',
         './img/users_handu.png',
+        './img/users_rograndec.png',
         './img/users_other1.png',
         './img/users_other2.png'
       ],
@@ -160,6 +161,7 @@ export default {
         './img/users_weidian.png',
         './img/users_icbc.png',
         './img/users_handu.png',
+        './img/users_rograndec.png',
         './img/users_other1.png',
         './img/users_other2.png'
       ],
