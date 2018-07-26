@@ -5,9 +5,13 @@ export default {
     brand: {
       brandName: 'Apache Dubbo',
       briefIntroduction: 'Apache Dubbo™ (incubating)是一款高性能Java RPC框架。',
-      button: {
-        text: '立即开始',
+      getStartedButton: {
+        text: '快速开始',
         link: '/docs/user/quick-start.md',
+      },
+      viewOnGithubButton: {
+        text: '在Github中查看',
+        link: 'https://github.com/apache/incubator-dubbo',
       }
     },
     introduction: {
@@ -88,9 +92,13 @@ export default {
     brand: {
       brandName: 'Apache Dubbo',
       briefIntroduction: 'Apache Dubbo™ (incubating) is a high-performance, java based open source RPC framework.',
-      button: {
+      getStartedButton: {
         text: 'GET STARTED',
         link: '/docs/user/quick-start.md',
+      },
+      viewOnGithubButton: {
+        text: 'View on Github',
+        link: 'https://github.com/apache/incubator-dubbo',
       }
     },
     introduction: {

@@ -4,6 +4,7 @@ import cookie from 'js-cookie';
 import qs from 'querystring';
 import { getScrollTop } from '../../../utils';
 import Header from '../../components/header';
+import Button from '../../components/button';
 import Footer from '../../components/footer';
 import Language from '../../components/language';
 import Item from './featureItem';
@@ -69,11 +70,9 @@ class Home extends Language {
               <img src="./img/incubating.svg" />
             </div>
             <p className="product-desc">{dataSource.brand.briefIntroduction}</p>
-            <p style={{ marignTop: 20, height: 28 }}>
-              <a className="github-button" href="https://github.com/apache/incubator-dubbo" data-size="large" data-show-count="true" aria-label="Star apache/incubator-dubbo on GitHub">Star</a>
-            </p>
             <div className="button-area">
-              <Link className="button" to={dataSource.brand.button.link}>{dataSource.brand.button.text}</Link>
+              <Link className="button" to={dataSource.brand.getStartedButton.link}>{dataSource.brand.getStartedButton.text}</Link>
+              <Button type="primary" link={dataSource.brand.viewOnGithubButton.link}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
           </div>
           <div className="animation animation1" />
@@ -113,6 +112,9 @@ class Home extends Language {
         </section>
         <section className="users-section">
           <h3>{dataSource.users.title}</h3>
+          <p style={{ marginBottom: 20 }}>
+              <a className="github-button" href="https://github.com/apache/incubator-dubbo" data-size="large" data-show-count="true" aria-label="Star apache/incubator-dubbo on GitHub">Star</a>
+          </p>
           <p>{dataSource.users.desc}</p>
           <div className="users">
           {
