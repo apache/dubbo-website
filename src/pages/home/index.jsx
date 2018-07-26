@@ -69,6 +69,9 @@ class Home extends Language {
               <img src="./img/incubating.svg" />
             </div>
             <p className="product-desc">{dataSource.brand.briefIntroduction}</p>
+            <p style={{ marignTop: 20, height: 28 }}>
+              <a className="github-button" href="https://github.com/apache/incubator-dubbo" data-size="large" data-show-count="true" aria-label="Star apache/incubator-dubbo on GitHub">Star</a>
+            </p>
             <div className="button-area">
               <Link className="button" to={dataSource.brand.button.link}>{dataSource.brand.button.text}</Link>
             </div>
