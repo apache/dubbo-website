@@ -45,6 +45,13 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
+        title: 'Sentinel: Dubbo 服务的流量哨兵',
+        author: 'Eric Zhao',
+        dateStr: 'July 24th, 2018',
+        desc: '主要介绍了面向分布式服务架构的轻量级流量控制组件 Sentinel 以及在 Dubbo 中整合使用 Sentinel 的最佳实践。',
+        link: '/blog/sentinel-introduction-for-dubbo.md',
+      },
+      {
         title: '使用Pinpoint做分布式跟踪',
         author: '@majinkai',
         dateStr: 'July 12th, 2018',
