@@ -45,6 +45,13 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
+        title: '从跨语言调用到 dubbo2.js',
+        author: '徐靖峰',
+        dateStr: 'July 27th, 2018',
+        desc: '如何使用 dubbo2.js 进行跨语言的 dubbo 调用',
+        link: '/blog/dubbo2-js.md',
+      },
+      {
         title: 'Sentinel: Dubbo 服务的流量哨兵',
         author: 'Eric Zhao',
         dateStr: 'July 24th, 2018',
