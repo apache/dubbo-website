@@ -1,4 +1,4 @@
-# Sentinel: Dubbo 服务的流量哨兵
+# Sentinel 为 Dubbo 服务保驾护航
 
 在复杂的生产环境下可能部署着成千上万的 Dubbo 服务实例，流量持续不断地进入，服务之间进行相互调用。但是分布式系统中可能会因流量激增、系统负载过高、网络延迟等一系列问题，导致某些服务不可用，如果不进行相应的控制可能导致级联故障，影响服务的可用性，因此我们需要一个能够保障服务稳定性的利器 —— Sentinel，来为 Dubbo 服务保驾护航。
 
@@ -18,7 +18,7 @@ Hystrix 熔断降级功能采用熔断器模式，在某个服务失败比率高
 
 ## Sentinel 与 Dubbo 整合的最佳实践
 
-Sentinel 提供了与 Dubbo 整合的模块 - [Sentinel Dubbo Adapter](https://github.com/sczyh30/alibaba-sentinel-dubbo-adapter)，主要包括针对 Service Provider 和 Service Consumer 实现的 Filter。使用时用户只需引入以下模块（以 Maven 为例）：
+Sentinel 提供了与 Dubbo 整合的模块 - [Sentinel Dubbo Adapter](https://github.com/dubbo/dubbo-sentinel-support)，主要包括针对 Service Provider 和 Service Consumer 实现的 Filter。使用时用户只需引入以下模块（以 Maven 为例）：
 
 ```xml
 <dependency>
@@ -57,6 +57,18 @@ Service Provider 用于向外界提供服务，处理各个消费者的调用请
 1532423623000|2018-07-24 17:13:43|com.alibaba.csp.sentinel.demo.dubbo.FooService|15|0|15|0|3
 1532423623000|2018-07-24 17:13:43|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String)|10|5|10|0|0
 ```
+
+很多场景下，根据**调用方**来限流也是非常重要的。比如有两个服务 A 和 B 都向 Service Provider 发起调用请求，我们希望只对来自服务 B 的请求进行限流，则可以设置限流规则的 `limitApp` 为服务 B 的名称。Sentinel Dubbo Adapter 会自动解析 Dubbo 消费者（调用方）的 application name 作为调用方名称（`origin`），在进行资源保护的时候都会带上调用方名称。若限流规则未配置调用方（`default`），则该限流规则对所有调用方生效。若限流规则配置了调用方则限流规则将仅对指定调用方生效。
+
+> 注：Dubbo 默认通信不携带对端 application name 信息，因此需要开发者在调用端手动将 application name 置入 attachment 中，provider 端进行相应的解析。Sentinel Dubbo Adapter 实现了一个 Filter 用于自动从 consumer 端向 provider 端透传 application name。若调用端未引入 Sentinel Dubbo Adapter，又希望根据调用端限流，可以在调用端手动将 application name 置入 attachment 中，key 为 `dubboApplication`。
+
+在限流日志中会也会记录调用方的名称，如：
+
+```
+2018-07-25 16:26:48|1|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String),FlowException,default,demo-consumer|5,0
+```
+
+其中日志中的 `demo-consumer` 即为调用方名称。
 
 ## Service Consumer
 

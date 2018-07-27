@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
       {
+        title: 'Sentinel: The flow sentinel of Dubbo services',
+        author: 'Eric Zhao',
+        dateStr: 'July 27th, 2018',
+        desc: 'This blog introduces to the Sentinel and its best practice with Dubbo services. Sentinel is a powerful library that takes "flow" as the breakthrough point, and covers multiple fields including flow control, circuit breaking and load protection to guarantee service stability.',
+        link: '/blog/sentinel-introduction-for-dubbo.md',
+      },
+      {
         title: 'Tracking with Pinpoint',
         author: '@majinkai',
         dateStr: 'July 12th, 2018',
