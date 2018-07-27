@@ -2,6 +2,8 @@ import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import cookie from 'js-cookie';
 import qs from 'querystring';
+import GitHubButton from 'react-github-button';
+import 'react-github-button/assets/style.css';
 import { getScrollTop } from '../../../utils';
 import Header from '../../components/header';
 import Button from '../../components/button';
@@ -70,6 +72,9 @@ class Home extends Language {
               <img src="./img/incubating.svg" />
             </div>
             <p className="product-desc">{dataSource.brand.briefIntroduction}</p>
+            <div style={{ marginTop: 20, height: 28, textAlign: 'center' }}>
+              <GitHubButton size="large" type="stargazers" namespace="apache" repo="incubator-dubbo" />
+            </div>
             <div className="button-area">
               <Link className="button" to={dataSource.brand.getStartedButton.link}>{dataSource.brand.getStartedButton.text}</Link>
               <Button type="primary" link={dataSource.brand.viewOnGithubButton.link}>{dataSource.brand.viewOnGithubButton.text}</Button>
@@ -112,9 +117,6 @@ class Home extends Language {
         </section>
         <section className="users-section">
           <h3>{dataSource.users.title}</h3>
-          <p style={{ marginBottom: 20 }}>
-              <a className="github-button" href="https://github.com/apache/incubator-dubbo" data-size="large" data-show-count="true" aria-label="Star apache/incubator-dubbo on GitHub">Star</a>
-          </p>
           <p>{dataSource.users.desc}</p>
           <div className="users">
           {
