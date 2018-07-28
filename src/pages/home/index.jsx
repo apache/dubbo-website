@@ -77,7 +77,7 @@ class Home extends Language {
             </div>
             <div className="button-area">
               <Link className="button" to={dataSource.brand.getStartedButton.link}>{dataSource.brand.getStartedButton.text}</Link>
-              <Button type="primary" link={dataSource.brand.viewOnGithubButton.link}>{dataSource.brand.viewOnGithubButton.text}</Button>
+              {/* <Button type="primary" link={dataSource.brand.viewOnGithubButton.link}>{dataSource.brand.viewOnGithubButton.text}</Button> */}
             </div>
           </div>
           <div className="animation animation1" />
