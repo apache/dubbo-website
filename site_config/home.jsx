@@ -97,7 +97,7 @@ export default {
         link: '/docs/user/quick-start.md',
       },
       viewOnGithubButton: {
-        text: 'View on Github',
+        text: 'VIEW ON GITHUB',
         link: 'https://github.com/apache/incubator-dubbo',
       }
     },
@@ -170,8 +170,8 @@ export default {
         './img/users_icbc.png',
         './img/users_handu.png',
         './img/users_rograndec.png',
-        './img/users_other1.png',
-        './img/users_other2.png'
+        // './img/users_other1.png',
+        // './img/users_other2.png'
       ],
     },
   },
