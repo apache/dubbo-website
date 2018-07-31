@@ -72,12 +72,12 @@ class Home extends Language {
               <img src="./img/incubating.svg" />
             </div>
             <p className="product-desc">{dataSource.brand.briefIntroduction}</p>
-            <div style={{ marginTop: 20, height: 28, textAlign: 'center' }}>
+            {/* <div style={{ marginTop: 20, height: 28, textAlign: 'center' }}>
               <GitHubButton size="large" type="stargazers" namespace="apache" repo="incubator-dubbo" />
-            </div>
+            </div> */}
             <div className="button-area">
               <Link className="button" to={dataSource.brand.getStartedButton.link}>{dataSource.brand.getStartedButton.text}</Link>
-              {/* <Button type="primary" link={dataSource.brand.viewOnGithubButton.link}>{dataSource.brand.viewOnGithubButton.text}</Button> */}
+              <Button type="primary" link={dataSource.brand.viewOnGithubButton.link}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
           </div>
           <div className="animation animation1" />
