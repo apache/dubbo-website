@@ -333,7 +333,7 @@ static class ConsumerConfiguration {
   2. ConsumerConfig：服务消费者配置
   3. RegistryConfig：注册中心配置，注意：这里的配置需要与服务提供方启动的 EmbeddedZooKeeper 的配置信息保持一致
 
-### 客户端：发起远程调用
+### 7. 客户端：发起远程调用
 
 在 `main` 方法中通过启动一个 Spring Context，从其中查找到组装好的 Dubbo 的服务消费者，并发起一次远程调用。
 
