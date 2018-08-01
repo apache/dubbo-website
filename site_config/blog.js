@@ -52,6 +52,13 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
+        title: '在 Dubbo 中使用注解',
+        author: '@beiwei30',
+        dateStr: 'August 1st, 2018',
+        desc: '使用注解方式来开发 Dubbo 应用',
+        link: '/blog/dubbo-annotation.md',
+      },
+      {
         title: '从跨语言调用到 dubbo2.js',
         author: '徐靖峰',
         dateStr: 'July 27th, 2018',
