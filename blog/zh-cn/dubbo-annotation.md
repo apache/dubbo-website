@@ -236,10 +236,12 @@ static class ProviderConfiguration {
 
 * 通过 `@EnableDubbo` 指定在 `com.alibaba.dubbo.samples.impl` 下扫描所有标注有 `@Service` 的类
 * 通过 `@Configuration` 将 ProviderConfiguration 中所有的 `@Bean` 通过 Java Config 的方式组装出来并注入给 Dubbo 服务，也就是标注有 `@Service` 的类。这其中就包括了：
+
   1. ProviderConfig：服务提供方配置
   2. ApplicationConfig：应用配置
   3. RegistryConfig：注册中心配置
   4. ProtocolConfig：协议配置
+
 
 ### 4. 服务端：启动服务 
 
@@ -273,7 +275,7 @@ public class ProviderBootstrap {
 [01/08/18 02:12:51:051 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Register: dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=true&application=dubbo-annotation-provider&default.timeout=1000&dubbo=2.6.2&generic=false&interface=com.alibaba.dubbo.samples.api
 ```
 
-###5. 客户端：引用服务
+### 5. 客户端：引用服务
 
 通过 `@Reference` 来标记 `GreetingService` 接口的成员变量 greetingService 是一个 Dubbo 服务的引用，也就是说，可以简单的通过该接口向远端的服务提供方发起调用，而客户端并没有实现 `GreetingService` 接口。
 
