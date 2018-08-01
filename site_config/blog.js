@@ -55,7 +55,7 @@ export default {
         title: '在 Dubbo 中使用注解',
         author: '@beiwei30',
         dateStr: 'August 1st, 2018',
-        desc: '使用注解方式来开发 Dubbo 应用',
+        desc: '介绍了如何使用注解方式而非 XML 方式来开发 Dubbo 应用，可以学习到如何使用 @EnableDubbo、@Service、@Reference 的用法。',
         link: '/blog/dubbo-annotation.md',
       },
       {
