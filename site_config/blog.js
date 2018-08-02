@@ -52,6 +52,13 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
+        title: '通过QoS对服务进行动态控制',
+        author: 'Huxing Zhang',
+        dateStr: 'August 2nd, 2018',
+        desc: '介绍了如何使用Dubbo的QoS功能对服务进行动态配置，以及相关的参数及配置方式。',
+        link: '/blog/introduction-to-dubbo-qos.md',
+      },
+      {
         title: '在 Dubbo 中使用注解',
         author: '@beiwei30',
         dateStr: 'August 1st, 2018',
