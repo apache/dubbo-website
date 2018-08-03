@@ -52,6 +52,13 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
+        title: '在 Dubbo 应用中使用 Zookeeper',
+        author: '@beiwei30',
+        dateStr: 'August 3rd, 2018',
+        desc: '介绍了 Zookeeper 的基本概念、用法，以及如何在 Dubbo 应用中使用 Zookeeper 作为注册中心。',
+        link: '/blog/dubbo-zk.md',
+      },
+      {
         title: '通过QoS对服务进行动态控制',
         author: 'Huxing Zhang',
         dateStr: 'August 2nd, 2018',
