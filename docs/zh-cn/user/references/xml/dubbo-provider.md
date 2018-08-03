@@ -51,8 +51,8 @@ table tr:hover {
 | id | | string | 可选 | dubbo | 配置关联 | 协议BeanId，可以在&lt;dubbo:service proivder=""&gt;中引用此ID | 1.0.16以上版本 |
 | protocol | &lt;protocol&gt; | string | 可选 | dubbo | 性能调优 | 协议名称 | 1.0.16以上版本 |
 | host | &lt;host&gt; | string | 可选 | 自动查找本机IP | 服务发现 | 服务主机名，多网卡选择或指定VIP及域名时使用，为空则自动查找本机IP，建议不要配置，让Dubbo自动获取本机IP | 1.0.16以上版本 |
-| threads | threads | int | 可选 | 100 | 性能调优 | 服务线程池大小(固定大小) | 1.0.16以上版本 |
-| payload | payload | int | 可选 | 88388608(=8M) | 性能调优 | 请求及响应数据包大小限制，单位：字节 | 2.0.0以上版本 |
+| threads | threads | int | 可选 | 200 | 性能调优 | 服务线程池大小(固定大小) | 1.0.16以上版本 |
+| payload | payload | int | 可选 | 8388608(=8M) | 性能调优 | 请求及响应数据包大小限制，单位：字节 | 2.0.0以上版本 |
 | path | &lt;path&gt; | string | 可选 | | 服务发现 | 提供者上下文路径，为服务path的前缀 | 2.0.0以上版本 |
 | server | server | string | 可选 | dubbo协议缺省为netty，http协议缺省为servlet | 性能调优 | 协议的服务器端实现类型，比如：dubbo协议的mina,netty等，http协议的jetty,servlet等 | 2.0.0以上版本 |
 | client | client | string | 可选 | dubbo协议缺省为netty | 性能调优 | 协议的客户端实现类型，比如：dubbo协议的mina,netty等 | 2.0.0以上版本 |
