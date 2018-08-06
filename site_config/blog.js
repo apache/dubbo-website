@@ -80,7 +80,7 @@ export default {
         link: '/blog/dubbo2-js.md',
       },
       {
-        title: 'Sentinel: Dubbo 服务的流量哨兵',
+        title: 'Sentinel 为 Dubbo 服务保驾护航',
         author: 'Eric Zhao',
         dateStr: 'July 24th, 2018',
         desc: '主要介绍了面向分布式服务架构的轻量级流量控制组件 Sentinel 以及在 Dubbo 中整合使用 Sentinel 的最佳实践。',
