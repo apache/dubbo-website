@@ -45,6 +45,20 @@ export default {
         desc: 'Ian Luo has delivered a great talk at QCon Beijing 2018, where the roadmap of Dubbo has also be announced',
         link: '/blog/qcon-beijing-2018.md',
       },
+      {
+          title: 'Your First Dubbo Demo',
+          author: 'MasterHJG',
+          dateStr: 'August 7th，2018',
+          desc: 'Your First Dubbo Demo',
+          link: '/blog/your-first-dubbo-demo.md',
+      },
+      {
+          title: 'How to configure serialization thread',
+          author: 'XudongLiu',
+          dateStr: 'August 7th，2018',
+          desc: 'How to configure serialization thread',
+          link: '/blog/how-to-configure-serialization-thread.md',
+      },
     ]
   },
   'zh-cn': {
@@ -141,6 +155,13 @@ export default {
         dateStr: 'May 10th, 2018',
         desc: '在前面的博客中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。接下来，我们就深入Dubbo的源码，一睹庐山真面目。',
         link: '/blog/introduction-to-dubbo-spi-2.md',
+      },
+      {
+          title: '如何配置Dubbo序列化线程',
+          author: '刘旭东',
+          dateStr: 'August 7th，2018',
+          desc: '如何配置Dubbo序列化线程',
+          link: '/blog/dubbo-serialization-thread-switch.md',
       },
     ]
   },
