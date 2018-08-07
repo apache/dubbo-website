@@ -13,7 +13,7 @@ Here is how a typical RMI invocation usually works：
 3.	The client invokes methods of local stub object in the same way of invoking other local objects.
 4.	Local stub object zips invoking information and send it to the server via network.
 5.	The Skeleton object of server receives the network request and unzips the information.
-6.	Server runs invocation on the target object based on the information and return the zipped results back to client via network. 
+6.	Server runs invocation on the target object based on the information and return the zipped results back to client via network.
 
 
 ![RMI Flow](../../img/blog/rmi-flow.png)
@@ -185,7 +185,7 @@ public class Application {
 
 ### Run
 
-The complete example can be found at https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running. 
+The complete example can be found at https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running.
 
 #### Build Example
 
@@ -228,7 +228,7 @@ $ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples
 [INFO] ------------------------------------------------------------------------
 [INFO] Building dubbo-samples-api 1.0-SNAPSHOT
 [INFO] ------------------------------------------------------------------------
-[INFO] 
+[INFO]
 [INFO] --- exec-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
 log4j:WARN No appenders could be found for logger (com.alibaba.dubbo.common.logger.LoggerFactory).
 log4j:WARN Please initialize the log4j system properly.
@@ -249,7 +249,7 @@ $ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples
 [INFO] ------------------------------------------------------------------------
 [INFO] Building dubbo-samples-api 1.0-SNAPSHOT
 [INFO] ------------------------------------------------------------------------
-[INFO] 
+[INFO]
 [INFO] --- exec-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
 log4j:WARN No appenders could be found for logger (com.alibaba.dubbo.common.logger.LoggerFactory).
 log4j:WARN Please initialize the log4j system properly.
@@ -301,17 +301,17 @@ public class DemoApplication {
 Run it directly in IDE and here are the results:
 
 ```bash
-2018-05-28 16:59:38.072  INFO 59943 --- [           main] a.b.d.c.e.WelcomeLogoApplicationListener : 
+2018-05-28 16:59:38.072  INFO 59943 --- [           main] a.b.d.c.e.WelcomeLogoApplicationListener :
 
   ████████▄  ███    █▄  ▀█████████▄  ▀█████████▄   ▄██████▄  
-  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███ 
-  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███ 
-  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███ 
-  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███ 
-  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███ 
-  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███
+  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███
+  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███
+  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███
   ████████▀  ████████▀  ▄█████████▀  ▄█████████▀   ▀██████▀  
-                                                             
+
 
  :: Dubbo Spring Boot (v0.1.0) : https://github.com/dubbo/dubbo-spring-boot-project
  :: Dubbo (v2.0.1) : https://github.com/alibaba/dubbo
@@ -338,14 +338,14 @@ Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
   ████████▄  ███    █▄  ▀█████████▄  ▀█████████▄   ▄██████▄  
-  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███ 
-  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███ 
-  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███ 
-  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███ 
-  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███ 
-  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███
+  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███
+  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███
+  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███
   ████████▀  ████████▀  ▄█████████▀  ▄█████████▀   ▀██████▀  
-                                                             
+
 
 dubbo>
 dubbo>ls
@@ -376,8 +376,9 @@ Then for simplicity, we introduce how to develop a complete Dubbo demo in an eas
 
 Eventually, we give an outline of how to create a Dubbo application quickly based on Spring Boot using the public resources, start.dubbo.io, provided by the Dubbo development team and operate and maintain the Dubbo service by *qos*.
 
+---
 
-[^1]: [Getting Started Using JavaTM RMI](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html)
-[^2]: [直连提供者](http://dubbo.apache.org/books/dubbo-user-book/demos/explicit-target.html)
-[^3]: [Multicast 注册中心](http://dubbo.apache.org/books/dubbo-user-book/references/registry/multicast.html)
-[^4]: [在线运维命令](http://dubbo.apache.org/books/dubbo-user-book/references/qos.html)   
+1. [Getting Started Using JavaTM RMI](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html)
+2. [直连提供者](http://dubbo.apache.org/books/dubbo-user-book/demos/explicit-target.html)
+3. [Multicast 注册中心](http://dubbo.apache.org/books/dubbo-user-book/references/registry/multicast.html)
+4. [在线运维命令](http://dubbo.apache.org/books/dubbo-user-book/references/qos.html)   
