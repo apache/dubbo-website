@@ -45,6 +45,13 @@ export default {
         desc: 'Ian Luo has delivered a great talk at QCon Beijing 2018, where the roadmap of Dubbo has also be announced',
         link: '/blog/qcon-beijing-2018.md',
       },
+      {
+        title: 'Using Zookeeper in Dubbo',
+        author: '268_group_3',
+        dateStr: 'August 7th，2018',
+        desc: 'The translation of the dubbo-zk.md.',
+        link: '/blog/dubbo-zk(translated by 268_group 3).md',
+      },
     ]
   },
   'zh-cn': {
