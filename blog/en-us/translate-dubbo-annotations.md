@@ -1,5 +1,4 @@
 # Use Annotations In Dubbo
-------
 
 With the widely promotion and implementation of Microservices Architecture, the Microservices Architecture represented by Spring Boot and Spring Cloud, in Java ecosystem, introduced some brand new programming model, like:
  - Annotation-Driven
@@ -10,7 +9,7 @@ New programming model have some advantages, for example, it does not require `XM
 
 
 ## Introduce Annotations
----
+
 ### @EnableDubbo
 The annotations of `@EnableDubbo` is a combination of both `@EnableDubboConfig` and `@DubboComponentScan`.Related to the annotation driver is  `@DubboComponentScan`.
 
@@ -44,10 +43,13 @@ public @interface EnableDubbo {
     Class<?>[] scanBasePackageClasses() default {};    
 }
 ```
+
 The `@bableDubbo` can be used to scan Dubbo's service provider (marked by `@Service`) and Dubbo's service consumer (marked by `Reference`) under the specified package name (via `scanBasePackages`) or in the specified class (via `scanBasePackageClasses`). After Dubbo's service providers and consumers have been scanned,  they have been assembled corresponding and been initialized, and finally the service is exposed or referenced, if you do not use `External Configuration`, you can use `@DubboComponentScan` directly.
 
 ### @Service
+
 `@service` is used to configure Dubbo's Service provider,for example:
+
 ```java
 @Service
 public class AnnotatedGreetingService implements GreetingService {
@@ -56,7 +58,9 @@ public class AnnotatedGreetingService implements GreetingService {
     }
 }
 ```
+
 via `@Service`'s properties, you can customize Dubbo's Service provider:
+
 ```java
 package org.apache.dubbo.config.annotation;
 
@@ -80,25 +84,28 @@ public @interface Service {
     String[] registry() default {}; // #13
 }
 ```
+
 Which is more important:
-1. `@Service` :        Can only be defined on a class, represent a service
-2. `interfaceClass` : specified `interface`'s class implemented by the service provider
-3. `interfaceName`: specified `interface`'s class name implemented by the service provider
-4. `version`: specified the version number of the service
-5. `group`:specified the group of services
-6. `export`:whether to expose service
-7. `registry`:Whether to register service to the registry
-8. `application`:application configuration
-9. `module`:module configuration
-10. `provider`:service provider configuration
-11. `protocol`:protocol configuration
-12. `monitor`:monitoring center configuration
-13. `registr`:registry configuration
+1. **@Service**:        Can only be defined on a class, represent a service
+2. **interfaceClass**: specified `interface`'s class implemented by the service provider
+3. **interfaceName**: specified `interface`'s class name implemented by the service provider
+4. **version**: specified the version number of the service
+5. **group**:specified the group of services
+6. **export**:whether to expose service
+7. **registry**:Whether to register service to the registry
+8. **application**:application configuration
+9. **module**:module configuration
+10. **provider**:service provider configuration
+11. **protocol**:protocol configuration
+12. **monitor**:monitoring center configuration
+13. **registr**:registry configuration
 
 In addition, it should be noted that, `application`, `module`, `provider`, `protocol`, `monitor`, `registry` (from 8 to 13) need to provide the name of the corresponding `spring bean`,These bean assembly completed either through traditional XML configuration,or by the modern Java Config. This article will show you how to use `Java Config`.
 
 ### @Reference
+
 `@Reference` is used to configure Dubbo's Service consumer,for example:
+
 ```Java
 @Component
 public class GreetingServiceConsumer {
@@ -110,7 +117,9 @@ public class GreetingServiceConsumer {
     }
 }
 ```
+
 via `@Reference`'s properties, you can customize Dubbo's Service consumer:
+
 ```Java
 package org.apache.dubbo.config.annotation;
 
@@ -132,27 +141,30 @@ public @interface Reference {
     String[] registry() default {}; // #12
 }
 ```
+
 Which is more important:
-1. `@Reference`:you can define it on a field in a class, you can define it on a method, you can even modify another annotation, it represent a reference to a service.Normally `@Reference` is defined in one field
-2. `interfaceClass` : specified `interface`'s class implemented by the service provider
-3. `interfaceName`: specified `interface`'s class name implemented by the service provider
-4. `version`: specified the version number of the service
-5. `group`:pecified the group of services
-6. `url`: invoking the registry directly by specifying the URL of the service provider
-7. `application`:application configuration
-8. `module`:module configuration
-9. `consumer`:service consumer configuration
-10. `protocol`:protocol configuration
-11. `monitor`:monitoring center configuration
-12. `registr`:registry configuration
+
+1. **@Reference**:you can define it on a field in a class, you can define it on a method, you can even modify another annotation, it represent a reference to a service.Normally `@Reference` is defined in one field
+2. **interfaceClass** : specified `interface`'s class implemented by the service provider
+3. **interfaceName**: specified `interface`'s class name implemented by the service provider
+4. **version**: specified the version number of the service
+5. **group**:pecified the group of services
+6. **url**: invoking the registry directly by specifying the URL of the service provider
+7. **application**:application configuration
+8. **module**:module configuration
+9. **consumer**:service consumer configuration
+10. **protocol**:protocol configuration
+11. **monitor**:monitoring center configuration
+12. **registr**:registry configuration
 
 In addition, it should be noted that, `application`, `module`, `consumer`, `protocol`, `monitor`, `registry` (from 7 to 12) need to provide the name of the corresponding `spring bean`,These bean assembly completed either through traditional XML configuration,or by the modern Java Config. This article will show you how to use `Java Config`.
 
 ## Example practice
----
+
 After learn what `@EnableDubbo`, `@Service`, `@Reference` is, there is a practical example showing how to use the annotation to develop a Dubbo application.The following code can be found at https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-annotation
 
 ### 1.Interface Definition
+
 Define a simple `GreetingService` interface with only a simple method `sayHello` to the caller.
 ```Java
 public interface GreetingService {
@@ -161,7 +173,9 @@ public interface GreetingService {
 ```
 
 ### 2.Server:Service Implementation
+
 Implement the `GreetingService` interface, and mark it as a service for Dubbo via @Service.
+
 ```Java
 @Service
 public class AnnotatedGreetingService implements GreetingService {
@@ -171,9 +185,10 @@ public class AnnotatedGreetingService implements GreetingService {
 }
 ```
 
-
 ### 3.Server:Assembly Service Provider
+
 You can discover, assemble, and provide Dubbo's services through the Java config technology (@Configuration) and annotation scan (@EnableDubbo) in Spring.
+
 ```Java
 @Configuration
 @EnableDubbo(scanBasePackages = "com.alibaba.dubbo.samples.impl")
@@ -214,13 +229,15 @@ static class ProviderConfiguration {
 Description：
  - Scan all classes marked with `@Service` under `com.alibaba.dubbo.samples.impl` with `@EnableDubbo`
  - Via @Configuration, all @Beans in the ProviderConfiguration are assembled using the way of `Java Config` and then injected into the Dubbo service, which means the class marked with `@Service`.Which included:
-i. `ProviderConfig`:Service provider configuration
-ii. `ApplicationConfig`:Application configuration
-iii.`RegistryConfig`:registry configuration
-iv. `ProtocolConfig`:Protocol configuration
+i. **ProviderConfig**:Service provider configuration
+ii. **ApplicationConfig**:Application configuration
+iii.**RegistryConfig**:registry configuration
+iv. **ProtocolConfig**:Protocol configuration
   
  ### 4.Server:Start Service
+ 
 In the `main` method to provide external `Dubbo` service by starting a `Spring Context`. 
+
 ```Java
 public class ProviderBootstrap {
     public static void main(String[] args) throws Exception {
@@ -246,7 +263,9 @@ Start the `main` method of the server, you will see the following output, on beh
 ```
 
 ### 5.Server:Reference Service
+
 Marking the member variable of the `GreetingService` via `@Reference` .The `greetingService` is a reference to the `Dubbo` service, which means that it can simply provide through the interface to the remote party to initiate service calls, and the client does not implement `GreetingService` interface.
+
 ```Java
 @Component("annotatedConsumer")
 public class GreetingServiceConsumer {
@@ -260,7 +279,9 @@ public class GreetingServiceConsumer {
 ```
 
 ### 6.Server:Assembly Service consumer
+
 Just like  **3. Server:Assembly Service Provider** You can discover, assemble, and provide Dubbo's service consumer through the Java config technology (@Configuration) and annotation scan (@EnableDubbo) in Spring.
+
 ```Java
 @Configuration
 @EnableDubbo(scanBasePackages = "com.alibaba.dubbo.samples.action")
@@ -299,7 +320,9 @@ ii. `ConsumerConfig`:Service consumer configuration
 iii.`RegistryConfig`:Registry configuration.Note:The configuration here needs to be consistent with the configuration information of the EmbeddedZooKeeper when started by the service provider.
 
 ### 7.Server: Initiate Remote Calls
+
 In the `main` method, you can start a `Spring Context` to find the service consumer of the assembled `Dubbo` from it, and initiate a remote call.
+
 ```Java
 public class ConsumerBootstrap {
     public static void main(String[] args) {
@@ -319,41 +342,15 @@ Description：
  - Call the `doSayHello` method and finally initiate a remote call via Dubbo's service reference (marked by @Reference)
  - Print call result
 Start the Server's `main` method, you will see the following output, which returns the `result`:  hello, annotation:
+
 ```sh
 [01/08/18 02:38:40:040 CST] main  INFO config.AbstractConfig:  [DUBBO] Refer dubbo service com.alibaba.dubbo.samples.api.GreetingService from url zookeeper://localhost:2181/com.alibaba.dubbo.registry.RegistryService?anyhost=true&application=dubbo-annotation-consumer&check=false&default.timeout=3000&dubbo=2.6.2&generic=false&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=33001&register.ip=192.168.99.1&remote.timestamp=1533105502086&side=consumer&timestamp=1533105519216, dubbo version: 2.6.2, current host: 192.168.99.1
 [01/08/18 02:38:40:040 CST] main  INFO annotation.ReferenceBeanBuilder: <dubbo:reference object="com.alibaba.dubbo.common.bytecode.proxy0@673be18f" singleton="true" interface="com.alibaba.dubbo.samples.api.GreetingService" uniqueServiceName="com.alibaba.dubbo.samples.api.GreetingService" generic="false" id="com.alibaba.dubbo.samples.api.GreetingService" /> has been built.
 result: hello, annotation
 ```
 
-# Conclusion
----
+## Conclusion
+
 By studying this article, the reader can master the basic concepts of `Dubbo`'s exclusive `annotations` , `@EnableDubbo`, `@Service`, `@Reference`, and master it's basic usage through a simple `Dubbo` application.
 
 In addition to traditional `XML` configuration, `Spring` offers more modern configurations such as annotation drivers, externalization, and auto-assembly.This article focuses on the development of `Dubbo` applications through annotations. You can be seen that annotation mode programming is more concise and simple than XML configuration. In future, we will introduce the use of externalization configuration and automatic assembly in `Dubbo`  further.
-
-
-
-
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
-
-
-   [dill]: <https://github.com/joemccann/dillinger>
-   [git-repo-url]: <https://github.com/joemccann/dillinger.git>
-   [john gruber]: <http://daringfireball.net>
-   [df1]: <http://daringfireball.net/projects/markdown/>
-   [markdown-it]: <https://github.com/markdown-it/markdown-it>
-   [Ace Editor]: <http://ace.ajax.org>
-   [node.js]: <http://nodejs.org>
-   [Twitter Bootstrap]: <http://twitter.github.com/bootstrap/>
-   [jQuery]: <http://jquery.com>
-   [@tjholowaychuk]: <http://twitter.com/tjholowaychuk>
-   [express]: <http://expressjs.com>
-   [AngularJS]: <http://angularjs.org>
-   [Gulp]: <http://gulpjs.com>
-
-   [PlDb]: <https://github.com/joemccann/dillinger/tree/master/plugins/dropbox/README.md>
-   [PlGh]: <https://github.com/joemccann/dillinger/tree/master/plugins/github/README.md>
-   [PlGd]: <https://github.com/joemccann/dillinger/tree/master/plugins/googledrive/README.md>
-   [PlOd]: <https://github.com/joemccann/dillinger/tree/master/plugins/onedrive/README.md>
-   [PlMe]: <https://github.com/joemccann/dillinger/tree/master/plugins/medium/README.md>
-   [PlGa]: <https://github.com/RahulHP/dillinger/blob/master/plugins/googleanalytics/README.md>
