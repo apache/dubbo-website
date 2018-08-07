@@ -47,10 +47,24 @@ export default {
       },
       {
         title: 'Using Zookeeper in Dubbo',
-        author: 'manimnchn1110',
+        author: 'group3',
         dateStr: 'August 7th，2018',
         desc: 'The translation of the dubbo-zk.md.',
         link: '/blog/dubbo-zk(268_group_3).md',
+      },
+      {
+        title: 'Issue3',
+        author: 'group3',
+        dateStr: 'August 7th，2018',
+        desc: 'Issue3 solution',
+        link: '/blog/issue3(268_group3).md',
+      },
+      {
+        title: 'Issue5',
+        author: 'group3',
+        dateStr: 'August 7th，2018',
+        desc: 'Issue5 solution',
+        link: '/blog/issue5(268_group3).md',
       },
     ]
   },
@@ -148,6 +162,20 @@ export default {
         dateStr: 'May 10th, 2018',
         desc: '在前面的博客中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。接下来，我们就深入Dubbo的源码，一睹庐山真面目。',
         link: '/blog/introduction-to-dubbo-spi-2.md',
+      },
+      {
+        title: 'Issue3',
+        author: 'group3',
+        dateStr: 'August 7th，2018',
+        desc: 'Issue3 解决方案',
+        link: '/blog/issue3(268_group_3).md',
+      },
+      {
+        title: 'Issue5',
+        author: 'group3',
+        dateStr: 'August 7th，2018',
+        desc: 'Issue5 解决方案',
+        link: '/blog/issue5(268_group_3).md',
       },
     ]
   },
