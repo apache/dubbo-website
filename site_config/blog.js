@@ -45,6 +45,13 @@ export default {
         desc: 'Ian Luo has delivered a great talk at QCon Beijing 2018, where the roadmap of Dubbo has also be announced',
         link: '/blog/qcon-beijing-2018.md',
       },
+      {
+        title: 'translate-dubbo-annotations.md',
+        author: 'Ge Shao',
+        dateStr: 'August 7nd，2018',
+        desc: 'This blog introduces how to use annotations',
+        link: '/blog/translate-dubbo-annotations.md',
+      },
     ]
   },
   'zh-cn': {
