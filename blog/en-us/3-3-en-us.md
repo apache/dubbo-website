@@ -2,7 +2,7 @@
 If what happens next after finishing the IO thread does not invoke a new IO thread, and can be excuted quickly, this event should be excuted in IO thread. This will release the pressure of thread pool scheduling, and accelerate in IO as well. Therefore, 2 modes of deserialzation are provided for either decoding in IO thread or decoding in job thread.
 
 ````xml
-<dubbo:decode.in.io="true">
+<ddubbo:protocol decode.in.io="false">
 ````
 
 Decode in IO
