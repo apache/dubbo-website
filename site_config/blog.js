@@ -47,10 +47,10 @@ export default {
       },
       {
         title: 'Using Zookeeper in Dubbo',
-        author: '268_group_3',
+        author: 'manimnchn1110',
         dateStr: 'August 7th，2018',
         desc: 'The translation of the dubbo-zk.md.',
-        link: '/blog/dubbo-zk(translated by 268_group 3).md',
+        link: '/blog/dubbo-zk(268_group_3).md',
       },
     ]
   },
