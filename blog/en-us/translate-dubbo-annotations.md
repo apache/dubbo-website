@@ -319,14 +319,14 @@ Description：
  - Call the `doSayHello` method and finally initiate a remote call via Dubbo's service reference (marked by @Reference)
  - Print call result
 Start the Server's `main` method, you will see the following output, which returns the `result`:  hello, annotation:
-```
+```sh
 [01/08/18 02:38:40:040 CST] main  INFO config.AbstractConfig:  [DUBBO] Refer dubbo service com.alibaba.dubbo.samples.api.GreetingService from url zookeeper://localhost:2181/com.alibaba.dubbo.registry.RegistryService?anyhost=true&application=dubbo-annotation-consumer&check=false&default.timeout=3000&dubbo=2.6.2&generic=false&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=33001&register.ip=192.168.99.1&remote.timestamp=1533105502086&side=consumer&timestamp=1533105519216, dubbo version: 2.6.2, current host: 192.168.99.1
 [01/08/18 02:38:40:040 CST] main  INFO annotation.ReferenceBeanBuilder: <dubbo:reference object="com.alibaba.dubbo.common.bytecode.proxy0@673be18f" singleton="true" interface="com.alibaba.dubbo.samples.api.GreetingService" uniqueServiceName="com.alibaba.dubbo.samples.api.GreetingService" generic="false" id="com.alibaba.dubbo.samples.api.GreetingService" /> has been built.
 result: hello, annotation
 ```
 
 # Conclusion
----sh
+---
 By studying this article, the reader can master the basic concepts of `Dubbo`'s exclusive `annotations` , `@EnableDubbo`, `@Service`, `@Reference`, and master it's basic usage through a simple `Dubbo` application.
 
 In addition to traditional `XML` configuration, `Spring` offers more modern configurations such as annotation drivers, externalization, and auto-assembly.This article focuses on the development of `Dubbo` applications through annotations. You can be seen that annotation mode programming is more concise and simple than XML configuration. In future, we will introduce the use of externalization configuration and automatic assembly in `Dubbo`  further.
