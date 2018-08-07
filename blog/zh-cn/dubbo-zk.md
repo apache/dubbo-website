@@ -321,7 +321,7 @@ JLine support is enabled
 
 ## 总结
 
-本文侧重介绍了如何在 Dubbo 应用中使用 Zookeeper 做为注册中心，当然，本文也提到了 Zookeeper 在 Dubbo 的应用场景下还承担了配置中心和服务治理的职责。本文中的 Zookeeper 是单节点、Standalone 的模式，在生产环境中为了高可用的诉求，往往会组件 Zookeeper 集群，也就是 *Zookeeper ensemble* 模式。
+本文侧重介绍了如何在 Dubbo 应用中使用 Zookeeper 做为注册中心，当然，本文也提到了 Zookeeper 在 Dubbo 的应用场景下还承担了配置中心和服务治理的职责。本文中的 Zookeeper 是单节点、Standalone 的模式，在生产环境中为了高可用的诉求，往往会组建 Zookeeper 集群，也就是 *Zookeeper ensemble* 模式。
 
 通过本文的学习，读者可以掌握到：
 
