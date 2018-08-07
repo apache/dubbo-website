@@ -2,7 +2,7 @@
 由于在 IO 线程后的事件如果不启用新的 IO 线程， 逻辑能够快速完成, 那么事件应该在IO 线程上完成，这样能减少线程池的调度，会在 IO 上速度更快。 所以在反序列化时提供了在 IO 线程内或者在业务线程内进行的两种方式。
 
 ````xml
-<dubbo:decode.in.io="true">
+<dubbo:protocol decode.in.io="false">
 ````
 
 
