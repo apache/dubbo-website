@@ -59,7 +59,7 @@ public class AnnotatedGreetingService implements GreetingService {
 }
 ```
 
-via `@Service`'s properties, you can customize Dubbo's Service provider:
+Via `@Service`'s properties, you can customize Dubbo's Service provider:
 
 ```java
 package org.apache.dubbo.config.annotation;
@@ -118,7 +118,7 @@ public class GreetingServiceConsumer {
 }
 ```
 
-via `@Reference`'s properties, you can customize Dubbo's Service consumer:
+Via `@Reference`'s properties, you can customize Dubbo's Service consumer:
 
 ```Java
 package org.apache.dubbo.config.annotation;
