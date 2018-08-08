@@ -59,13 +59,20 @@ export default {
     postsTitle: '所有文章',
     list: [
       {
-        title: '在 Dubbo 应用中使用 Zookeeper',
-        author: '@beiwei30',
-        dateStr: 'August 3rd, 2018',
-        desc: '介绍了 Zookeeper 的基本概念、用法，以及如何在 Dubbo 应用中使用 Zookeeper 作为注册中心。',
-        link: '/blog/dubbo-zk.md',
+          title: '如何准备一次Apache发布',
+          author: '@chickenlj',
+          dateStr: 'August 8rd, 2018',
+          desc: '从如何搭建本地构建环境到如何发起投票，详细的介绍了Apache版本发布的完整流程',
+          link: '/blog/Prepare-an-Apache-release.md',
       },
       {
+          title: '在 Dubbo 应用中使用 Zookeeper',
+          author: '@beiwei30',
+          dateStr: 'August 3rd, 2018',
+          desc: '介绍了 Zookeeper 的基本概念、用法，以及如何在 Dubbo 应用中使用 Zookeeper 作为注册中心。',
+          link: '/blog/dubbo-zk.md',
+      },
+        {
         title: '通过QoS对服务进行动态控制',
         author: 'Huxing Zhang',
         dateStr: 'August 2nd, 2018',
