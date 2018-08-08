@@ -156,6 +156,42 @@ export default {
         desc: '在前面的博客中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。接下来，我们就深入Dubbo的源码，一睹庐山真面目。',
         link: '/blog/introduction-to-dubbo-spi-2.md',
       },
+      {
+        title: 'Instance of Dubbo Extension Mechanism',
+        author: '@alexchenwd@stacey',
+        dateStr: 'Aug 7th, 2018',
+        desc: 'In this article, we will discuss another great feature of Dubbo -- scalability',
+        link: '/blog/en-us/introduction-to-dubbo-spi-en-us.md',
+},
+{
+        title: 'Dubbo可扩展机制实战（修改）',
+        author: '@alexchenwd@stacey',
+        dateStr: 'Aug 7th, 2018',
+        desc: '修改了一些中文的错误',
+        link: '/blog/zh-cn/introduction-to-dubbo-spi-zh-cn.md',
+      },
+{
+        title: 'BaiJi 268 Problem 3-3 Solution en',
+        author: '@ranchoswng@shenpeiling@ HauyuChen’,
+        dateStr: 'Aug 7th, 2018',
+        desc: 'A detailed description for problem 3-3',
+        link: '/blog/en-us/3-3-en-us.md',
+      },
+{
+        title: 'BaiJi 268 Problem 3-3 Solution cn',
+        author: '@ranchoswng@shenpeiling@ HauyuChen’,
+        dateStr: 'Aug 7th, 2018',
+        desc: 'A detailed description for problem 3-3',
+        link: '/blog/en-us/3-3-zh-cn.md',
+      },
+{
+        title: 'BaiJi 268 Problem 3-5 Solution',
+        author: '@ranchoswng@shenpeiling@ HauyuChen’,
+        dateStr: 'Aug 7th, 2018',
+        desc: 'A detailed description for problem 3-5',
+        link: '/blog/en-us/3-5-zh-cn.md',
+      },
+
     ]
   },
 };
