@@ -46,12 +46,19 @@ export default {
         link: '/blog/qcon-beijing-2018.md',
       },
       {
-          title: 'Your First Dubbo Demo',
-          author: 'Yang Xinru',
-          dateStr: 'August 7th，2018',
-          desc: 'Your First Dubbo Demo',
-          link: '/blog/your-first-dubbo-demo.md',
+        title: 'translate-dubbo-annotations.md',
+        author: 'Ge Shao',
+        dateStr: 'August 7nd，2018',
+        desc: 'This blog introduces how to use annotations',
+        link: '/blog/translate-dubbo-annotations.md',
       },
+      {
+        title: 'Your First Dubbo Demo',
+        author: 'Yang Xinru',
+        dateStr: 'August 7th，2018',
+        desc: 'Your First Dubbo Demo',
+        link: '/blog/your-first-dubbo-demo.md',
+      }
     ]
   },
   'zh-cn': {
