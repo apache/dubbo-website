@@ -16,95 +16,95 @@
 
    - 如Mac OS
 
-     ```sh
-     $ brew install gpg
-     $ gpg --version #检查版本，应该为2.x
-     ```
+    ```sh
+    $ brew install gpg
+    $ gpg --version #检查版本，应该为2.x
+    ```
 
 2. 用gpg生成key
 
    - 根据提示，生成key
 
-   ```shell
-   $ gpg2 --full-gen-key
-   gpg (GnuPG) 2.0.12; Copyright (C) 2009 Free Software Foundation, Inc.
-   This is free software: you are free to change and redistribute it.
-   There is NO WARRANTY, to the extent permitted by law.
-
-   Please select what kind of key you want:
+    ```shell
+    $ gpg2 --full-gen-key
+    gpg (GnuPG) 2.0.12; Copyright (C) 2009 Free Software Foundation, Inc.
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.
+    
+    Please select what kind of key you want:
       (1) RSA and RSA (default)
       (2) DSA and Elgamal
       (3) DSA (sign only)
       (4) RSA (sign only)
-   Your selection? 1
-   RSA keys may be between 1024 and 4096 bits long.
-   What keysize do you want? (2048) 4096
-   Requested keysize is 4096 bits
-   Please specify how long the key should be valid.
+    Your selection? 1
+    RSA keys may be between 1024 and 4096 bits long.
+    What keysize do you want? (2048) 4096
+    Requested keysize is 4096 bits
+    Please specify how long the key should be valid.
             0 = key does not expire
          <n>  = key expires in n days
          <n>w = key expires in n weeks
          <n>m = key expires in n months
          <n>y = key expires in n years
-   Key is valid for? (0) 
-   Key does not expire at all
-   Is this correct? (y/N) y
-
-   GnuPG needs to construct a user ID to identify your key.
-
-   Real name: Robert Burrell Donkin
-   Email address: rdonkin@apache.org
-   Comment: CODE SIGNING KEY
-   You selected this USER-ID:
+    Key is valid for? (0) 
+    Key does not expire at all
+    Is this correct? (y/N) y
+    
+    GnuPG needs to construct a user ID to identify your key.
+    
+    Real name: Robert Burrell Donkin
+    Email address: rdonkin@apache.org
+    Comment: CODE SIGNING KEY
+    You selected this USER-ID:
        "Robert Burrell Donkin (CODE SIGNING KEY) <rdonkin@apache.org>"
-
-   Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
-   You need a Passphrase to protect your secret key. # 填入密码，以后打包过程中会经常用到
-   ```
+    
+    Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+    You need a Passphrase to protect your secret key. # 填入密码，以后打包过程中会经常用到
+    ```
 
    - 查看key id 
 
-     ```sh
-     $ gpg --list-keys
-     pub   rsa4096/28681CB1 2018-04-26 # 28681CB1就是key id
-     uid       [ultimate] liujun (apache-dubbo) <liujun@apache.org>
-     sub   rsa4096/D3D6984B 2018-04-26
-
-     # 通过key id发送public key到keyserver
-     $ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
-     # 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，因为相互之间是自动同步的，选任意一个都可以。
-     ```
+    ```sh
+    $ gpg --list-keys
+    pub   rsa4096/28681CB1 2018-04-26 # 28681CB1就是key id
+    uid       [ultimate] liujun (apache-dubbo) <liujun@apache.org>
+    sub   rsa4096/D3D6984B 2018-04-26
+    
+    # 通过key id发送public key到keyserver
+    $ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
+    # 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，因为相互之间是自动同步的，选任意一个都可以。
+    ```
 
    - 如果有多个public key，设置默认key
 
-     ~/.gnupg/gpg.conf
-
-     ```proper
-     # If you have more than 1 secret key in your keyring, you may want to
-     # uncomment the following option and set your preferred keyid.
-
-     default-key 28681CB1
-     ```
+    ~/.gnupg/gpg.conf
+    
+    ```proper
+    # If you have more than 1 secret key in your keyring, you may want to
+    # uncomment the following option and set your preferred keyid.
+    
+    default-key 28681CB1
+    ```
 
 3. 设置Apache中央仓库
 
    - Dubbo项目的父pom为apache pom
 
-     ```xml
-     <parent>
-       <groupId>org.apache</groupId>
-       <artifactId>apache</artifactId>
-       <version>19</version>
-     </parent>
-     ```
+    ```xml
+    <parent>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>19</version>
+    </parent>
+    ```
 
    - 添加以下内容到.m2/settings.xml
 
      所有密码请使用[maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html)加密后再填入
 
-   ```xml
-   <settings>
-   ...
+    ```xml
+    <settings>
+    ...
      <servers>
        <!-- To publish a snapshot of some part of Maven -->
        <server>
@@ -125,8 +125,8 @@
          <passphrase><!-- yourKeyPassword --></passphrase>
        </server>
      </servers>
-   </settings>
-   ```
+    </settings>
+    ```
 
    ​
 
@@ -146,24 +146,24 @@
 
    - 先用dryRun验证是否ok
 
-     ```shell
-     $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
-     ```
+    ```shell
+    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
+    ```
 
    - 验证通过后，执行release:prepare
 
-   ```shell
-   $ mvn release:clean
-   $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-   # 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为2.6.4-SNAPSHOT，并将修改推送到github仓库
-   ```
+    ```shell
+    $ mvn release:clean
+    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    # 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为2.6.4-SNAPSHOT，并将修改推送到github仓库
+    ```
 
    - 执行release:perform，做正式发布
 
-     ```shell
-     $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-     # 所有artifacts发布到配置的远程maven中央仓库，处于staging状态
-     ```
+    ```shell
+    $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    # 所有artifacts发布到配置的远程maven中央仓库，处于staging状态
+    ```
 
 ## 准备Apache发布
 
@@ -214,9 +214,6 @@
 验证环节包含但不限于以下内容和形式：
 
 1. Check signatures and hashes are good
-
-   ​
-
 ```sh
 sha512 dubbo-incubating-${release_version}-bin-release.zip.sha512
 sha512 dubbo-incubating-${release_version}-source-release.zip.sha512
