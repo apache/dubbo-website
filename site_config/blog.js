@@ -59,6 +59,13 @@ export default {
         desc: 'This blog introduces how to use annotations',
         link: '/blog/dubbo-annotations.md',
       },
+      {
+        title: 'Using Zookeeper in Dubbo',
+        author: 'Mani',
+        dateStr: 'August 7th，2018',
+        desc: 'This blog introduces how to use Zookeeper in Dubbo',
+        link: '/blog/dubbo-zk.md',
+      },
     ]
   },
   'zh-cn': {
