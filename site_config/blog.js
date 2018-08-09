@@ -71,7 +71,7 @@ export default {
         author: 'Yang Xinru',
         dateStr: 'August 7th，2018',
         desc: 'Your First Dubbo Demo',
-        link: '/blog/your-first-dubbo-demo.md',
+        link: '/blog/dubbo-101.md',
       }
     ]
   },
