@@ -53,7 +53,7 @@ export default {
         link: '/blog/translate-dubbo-annotations.md',
       },
       {
-        title: 'dubbo-zk.md',
+        title: 'Using Zookeeper in Dubbo',
         author: 'Mani',
         dateStr: 'August 7th，2018',
         desc: 'This blog introduces how to use Zookeeper in Dubbo',
