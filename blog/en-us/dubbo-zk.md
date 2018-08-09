@@ -9,12 +9,12 @@ In the mordern distrbuted applications, there are multiple coordination problems
 In order to ensure the high performance, highly available and strictly ordered access, the performance aspects of ZooKeeper means it can be used in large, distributed systems and can also be deployed in cluster mode, which called 'ZooKeeper ensemble'. In ZooKeeper ensemble, all write requests from clients are forwarded to a single server, called the leader, through the ZAB(Zookeeper Atomic Broadcast Protocol) to make sure the message in each nodes are same. Clients can access any one of the clusters to read and write data without worrying about inconsistencies in the data.
 
 
-![Diagram shows client-server architecture of ZooKeeper](https://github.com/apache/incubator-dubbo-website/blob/asf-site/img/blog/zk-emsemble.png)
+![Diagram shows client-server architecture of ZooKeeper](../../img/blog/zk-emsemble.png)
 *Image Credit : ebook -Zookeeper-Distributed Process Coordination from O'Reilly*
 
 The method to store the data in Zookeeper is similar as the standard UNIX file system, as a data model styled after the familiar directory tree structure of file systems. When we talking about ZooKeeper data nodes, we call it Znodes to clarify it.
 
-![zk-tree](https://github.com/apache/incubator-dubbo-website/blob/asf-site/img/blog/zk-tree.png)
+![zk-tree](../../img/blog/zk-tree.png)
 *Image Credit : ebook -Zookeeper-Distributed Process Coordination from O'Reilly*
 
 ### Basic Implementation
@@ -131,7 +131,7 @@ world
 ## Using Zookeeper in Dubbo
 Zookeeper is used for service registration discovery and configuration management in Dubbo, and the structure of data in Zookeeper is shown in the following figure:
 
-![dubbo-in-zk](https://github.com/apache/incubator-dubbo-website/blob/asf-site/img/blog/dubbo-in-zk.jpg)
+![dubbo-in-zk](../../img/blog/dubbo-in-zk.jpg)
 
 First, all data related to Dubbo is organized under the root node of `/duboo`.
 
