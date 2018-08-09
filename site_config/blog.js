@@ -53,7 +53,7 @@ export default {
         link: '/blog/introduction-to-dubbo-spi.md',
       },
       {
-        title: 'dubbo-annotations.md',
+        title: 'Use anntation in Dubbo',
         author: 'Ge Shao',
         dateStr: 'August 7nd，2018',
         desc: 'This blog introduces how to use annotations',
