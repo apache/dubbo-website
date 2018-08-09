@@ -66,6 +66,13 @@ export default {
         desc: 'This blog introduces how to use Zookeeper in Dubbo',
         link: '/blog/dubbo-zk.md',
       },
+      {
+        title: 'Your First Dubbo Demo',
+        author: 'Yang Xinru',
+        dateStr: 'August 7th，2018',
+        desc: 'Your First Dubbo Demo',
+        link: '/blog/your-first-dubbo-demo.md',
+      }
     ]
   },
   'zh-cn': {
