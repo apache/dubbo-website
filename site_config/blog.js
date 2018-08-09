@@ -50,14 +50,14 @@ export default {
         author: 'wangxuekui',
         dateStr: 'August 9th, 2018',
         desc: 'We have introduction to Dubbo spi.',
-        link: '/blog/en-us/introduction-to-dubbo-spi.md',
+        link: '/blog/introduction-to-dubbo-spi.md',
       },
       {
-        title: 'translate-dubbo-annotations.md',
+        title: 'dubbo-annotations.md',
         author: 'Ge Shao',
         dateStr: 'August 7nd，2018',
         desc: 'This blog introduces how to use annotations',
-        link: '/blog/translate-dubbo-annotations.md',
+        link: '/blog/dubbo-annotations.md',
       },
     ]
   },
