@@ -80,6 +80,13 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: 'Spring应用快速集成Dubbo + Hystrix',
+            author: '@hengyunabc',
+            dateStr: 'August 10th, 2018',
+            desc: '本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用',
+            link: '/blog/dubbo-integrate-with-hystrix.md',
+        },
+        {
             title: '如何基于Dubbo实现全异步调用链',
             author: '@chickenlj',
             dateStr: 'August 10th, 2018',
