@@ -57,7 +57,7 @@ export default {
         author: 'Ge Shao',
         dateStr: 'August 7nd，2018',
         desc: 'This blog introduces how to use annotations',
-        link: '/blog/dubbo-annotations.md',
+        link: '/blog/dubbo-annotation.md',
       },
       {
         title: 'Using Zookeeper in Dubbo',
