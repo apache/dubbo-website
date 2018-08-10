@@ -91,7 +91,7 @@ export default {
             author: '@leiwei',
             dateStr: 'August 10th, 2018',
             desc: '本文介绍了负载均衡的相关概念以及 Dubbo 中的负载均衡策略实现',
-            link: '/blog/dubbo-generic-invoke.md',
+            link: '/blog/dubbo-loadbalance.md',
         },
         {
             title: 'Dubbo的泛化调用',
