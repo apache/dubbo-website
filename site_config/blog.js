@@ -79,10 +79,31 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+        {
+            title: '如何基于Dubbo实现全异步调用链',
+            author: '@chickenlj',
+            dateStr: 'August 10th, 2018',
+            desc: '本文回顾了 2.6.x 版本的异步实现，然后引出了 2.7.0 版本基于 CompletableFuture 的异步编程方式',
+            link: '/blog/dubbo-new-async.md',
+        },
+        {
+            title: 'Dubbo的负载均衡',
+            author: '@leiwei',
+            dateStr: 'August 10th, 2018',
+            desc: '本文介绍了负载均衡的相关概念以及 Dubbo 中的负载均衡策略实现',
+            link: '/blog/dubbo-generic-invoke.md',
+        },
+        {
+            title: 'Dubbo的泛化调用',
+            author: '@jerrick',
+            dateStr: 'August 10th, 2018',
+            desc: '本文介绍了 Dubbo 泛化调用的使用场景及相关示例',
+            link: '/blog/dubbo-generic-invoke.md',
+        },
       {
           title: '如何准备一次Apache发布',
           author: '@chickenlj',
-          dateStr: 'August 8rd, 2018',
+          dateStr: 'August 8th, 2018',
           desc: '从如何搭建本地构建环境到如何发起投票，详细的介绍了Apache版本发布的完整流程',
           link: '/blog/Prepare-an-Apache-release.md',
       },
