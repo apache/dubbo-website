@@ -285,7 +285,7 @@ Thanks,
 The Apache Dubbo (Incubating) Team
 ```
 
-##正式发布
+## 正式发布
 
 1. 提交https://dist.apache.org/repos/dist/dev/incubator/dubbo目录下的发布包到https://dist.apache.org/repos/dist/release/incubator/dubbo/，完成正式发布。
 2. 发邮件到dev@dubbo.apache.org和general@apache.org，通知社区发布完成。
