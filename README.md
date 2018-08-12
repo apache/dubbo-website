@@ -3,6 +3,10 @@
 This project keeps all sources used for building up dubbo official website which's served at http://dubbo.io or http://dubbo.apache.org.
 
 
+## Attention
+
+If your version of docsite is less then `1.0.0`, please upgrade to `1.0.0`.
+
 ## Build instruction
 
 1. Run `npm install docsite -g` to install the dev tool.
