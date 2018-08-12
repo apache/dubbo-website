@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-generic-invoke" />
+	<meta name="description" content="dubbo-generic-invoke" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-generic-invoke</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-1656407808"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Dubbo的泛化调用</h1>
+<p>以下几种场景可以考虑使用泛化调用：</p>
+<ul>
+<li>服务测试平台</li>
+<li>API 服务网关</li>
+</ul>
+<p>泛化调用主要用于消费端没有 API 接口的情况；不需要引入接口 jar 包，而是直接通过 GenericService 接口来发起服务调用，参数及返回值中的所有 POJO 均用 <code>Map</code> 表示。泛化调用对于服务端无需关注，按正常服务进行暴露即可。</p>
+<p>下面来看看消费端如何使用泛化调用进行服务调用。</p>
+<h4>通过 Spring XML 配置进行泛化调用</h4>
+<p>在 Spring 配置申明 <code>generic=&quot;true&quot;</code>，如：</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"userService"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.alibaba.dubbo.samples.generic.api.IUserService"</span> <span class="hljs-attr">generic</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+</code></pre>
+<p>需要使用的地方，通过强制类型转化为 GenericService 进行调用：</p>
+<pre><code class="language-java">GenericService userService = (GenericService) context.getBean(<span class="hljs-string">"userService"</span>);
+<span class="hljs-comment">// primary param and return value</span>
+String name = (String) userService.$invoke(<span class="hljs-string">"delete"</span>, <span class="hljs-keyword">new</span> String[]{<span class="hljs-keyword">int</span>.class.getName()}, <span class="hljs-keyword">new</span> Object[]{<span class="hljs-number">1</span>});
+System.out.println(name);
+</code></pre>
+<p>其中：</p>
+<ol>
+<li>GenericService 这个接口只有一个方法，名为 <code>$invoke</code>，它接受三个参数，分别为方法名、方法参数类型数组和参数值数组；</li>
+<li>对于方法参数类型数组
+<ol>
+<li>如果是基本类型，如 int 或 long，可以使用 <code>int.class.getName()</code>获取其类型；</li>
+<li>如果是基本类型数组，如 int[]，则可以使用 <code>int[].class.getName()</code>；</li>
+<li>如果是 POJO，则直接使用全类名，如 <code>com.alibaba.dubbo.samples.generic.api.Params</code>。</li>
+</ol>
+</li>
+</ol>
+<h4>通过 API 编程进行泛化调用</h4>
+<pre><code>ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
+application.setName(&quot;api-generic-consumer&quot;);
+
+RegistryConfig registry = new RegistryConfig();
+registry.setAddress(&quot;zookeeper://127.0.0.1:2181&quot;);
+
+application.setRegistry(registry);
+
+ReferenceConfig&lt;GenericService&gt; reference = new ReferenceConfig&lt;GenericService&gt;();
+// 弱类型接口名
+reference.setInterface(&quot;com.alibaba.dubbo.samples.generic.api.IUserService&quot;);
+// 声明为泛化接口
+reference.setGeneric(true);
+
+reference.setApplication(application);
+
+// 用com.alibaba.dubbo.rpc.service.GenericService可以替代所有接口引用
+GenericService genericService = reference.get();
+
+String name = (String) genericService.$invoke(&quot;delete&quot;, new String[]{int.class.getName()}, new Object[]{1});
+System.out.println(name);
+</code></pre>
+<p>通过 API 的方式，不需要像 XML 的方式需要提前将服务配置好，可以动态构建 ReferenceConfig；相对 XML 来说，API 的方式更常见。</p>
+<h4>参数或返回值是 POJO 的场景</h4>
+<p>比如方法签名是 <code>User get(Params params);</code>其中 User 有 id 和 name 两个属性，Params 有 query 一个属性。</p>
+<p>以下是消费端的调用代码：</p>
+<pre><code class="language-java">String[] parameterTypes = <span class="hljs-keyword">new</span> String[]{<span class="hljs-string">"com.alibaba.dubbo.samples.generic.api.Params"</span>};
+Map&lt;String, Object&gt; params = <span class="hljs-keyword">new</span> HashMap&lt;String, Object&gt;();
+param.put(<span class="hljs-string">"class"</span>, <span class="hljs-string">"com.alibaba.dubbo.samples.generic.api.Params"</span>);
+param.put(<span class="hljs-string">"query"</span>, <span class="hljs-string">"a=b"</span>);
+Object user = userService.$invoke(<span class="hljs-string">"get"</span>, parameterTypes, <span class="hljs-keyword">new</span> Object[]{param});
+System.out.println(<span class="hljs-string">"sample one result: "</span> + user);
+</code></pre>
+<p>上述代码的输出结果为：</p>
+<pre><code class="language-shell">sample one result: {name=charles, id=1, class=com.alibaba.dubbo.samples.generic.api.User}
+</code></pre>
+<p>这里，Dubbo 框架会自动将 POJO 的返回值转换成 Map。可以看到，返回值 <code>user</code> 是一个 HashMap，里面分别存放了 name、id、class 三个 k/v。</p>
+<h4>泛接口实现</h4>
+<p>泛接口实现方式主要用于服务端没有 API 接口的情况，参数及返回值中的所有 POJO 均用 Map 表示，通常用于框架集成，如实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求。</p>
+<h5>服务端实现 GenericService</h5>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GenericServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GenericService</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> Object $invoke(String method, String[] parameterTypes, Object[] args) <span class="hljs-keyword">throws</span> GenericException {
+        <span class="hljs-keyword">if</span> (method.equals(<span class="hljs-string">"hi"</span>)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">"hi, "</span> + args[<span class="hljs-number">0</span>];
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (method.equals(<span class="hljs-string">"hello"</span>)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">"hello, "</span> + args[<span class="hljs-number">0</span>];
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"welcome"</span>;
+    }
+}
+</code></pre>
+<h5>服务端暴露服务</h5>
+<pre><code class="language-java">ApplicationConfig application = <span class="hljs-keyword">new</span> ApplicationConfig();
+application.setName(<span class="hljs-string">"api-generic-provider"</span>);
+
+RegistryConfig registry = <span class="hljs-keyword">new</span> RegistryConfig();
+registry.setAddress(<span class="hljs-string">"zookeeper://127.0.0.1:2181"</span>);
+
+application.setRegistry(registry);
+
+GenericService genericService = <span class="hljs-keyword">new</span> GenericServiceImpl();
+
+ServiceConfig&lt;GenericService&gt; service = <span class="hljs-keyword">new</span> ServiceConfig&lt;GenericService&gt;();
+service.setApplication(application);
+service.setInterface(<span class="hljs-string">"com.alibaba.dubbo.samples.generic.api.HelloService"</span>);
+service.setRef(genericService);
+service.export();
+
+ServiceConfig&lt;GenericService&gt; service2 = <span class="hljs-keyword">new</span> ServiceConfig&lt;GenericService&gt;();
+service2.setApplication(application);
+service2.setInterface(<span class="hljs-string">"com.alibaba.dubbo.samples.generic.api.HiService"</span>);
+service2.setRef(genericService);
+service2.export();
+</code></pre>
+<p>同样，也可以使用 XML 配置的方式暴露服务；此时服务端是没有依赖 HiService 和 HelloService 这两个接口的。</p>
+<h5>消费端进行服务调用</h5>
+<pre><code class="language-java">ApplicationConfig application = <span class="hljs-keyword">new</span> ApplicationConfig();
+application.setName(<span class="hljs-string">"api-generic-consumer"</span>);
+
+RegistryConfig registry = <span class="hljs-keyword">new</span> RegistryConfig();
+registry.setAddress(<span class="hljs-string">"zookeeper://127.0.0.1:2181"</span>);
+
+application.setRegistry(registry);
+
+ReferenceConfig&lt;GenericService&gt; reference = <span class="hljs-keyword">new</span> ReferenceConfig&lt;GenericService&gt;();
+<span class="hljs-comment">// 弱类型接口名</span>
+reference.setInterface(HiService.class);
+reference.setApplication(application);
+
+HiService hiService = (HiService) reference.get();
+System.out.println(hiService.hi(<span class="hljs-string">"dubbo"</span>));
+
+ReferenceConfig&lt;GenericService&gt; reference2 = <span class="hljs-keyword">new</span> ReferenceConfig&lt;GenericService&gt;();
+<span class="hljs-comment">// 弱类型接口名</span>
+reference2.setInterface(HelloService.class);
+reference2.setApplication(application);
+
+HelloService helloService = (HelloService) reference2.get();
+System.out.println(helloService.hello(<span class="hljs-string">"community"</span>));
+</code></pre>
+<p>同样，消费端也可以使用 XML 配置的方式引用服务，然后进行调用。这里可以看到调用方式为普通的服务调用，并非泛化调用。当然使用泛化调用也是可以的。</p>
+<p>到这里为止，一个简易的服务 Mock 平台就成功上线了！</p>
+<h4>其他</h4>
+<ul>
+<li>本文介绍的泛化调用和泛接口实现，都是在原生的 <code>Dubbo</code> 协议之上的。在 2.6.2 版本之前，其他协议如 http/hessian 等是不支持泛化调用的，2.6.3 版本将会对这两个协议的泛化调用做支持。</li>
+<li>本文中提到的相关示例代码可以在 dubbo-samples中找到：<a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic</a></li>
+</ul>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

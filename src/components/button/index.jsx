@@ -1,5 +1,6 @@
 import React from 'react';
 import classnames from 'classnames';
+import { getLink } from '../../../utils';
 import './index.scss';
 
 const Button = (props) => {
@@ -11,8 +12,8 @@ const Button = (props) => {
           [`button-${props.type}`]: true,
         })
       }
-      target="__blank"
-      href={props.link}
+      target="_blank"
+      href={getLink(props.link)}
     >
       {props.children}
     </a>

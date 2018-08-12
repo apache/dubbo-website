@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-101" />
+	<meta name="description" content="dubbo-101" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-101</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-461786743"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>第一个 Dubbo 应用</h1>
+<h2>Java RMI 简介</h2>
+<p>Java RMI （Remote Method Invocation）- 远程方法调用，能够让客户端像使用本地调用一样调用服务端 Java 虚拟机中的对象方法。RMI 是面向对象语言领域对 RPC （Remote Procedure Call）的完善，用户无需依靠 IDL 的帮助来完成分布式调用，而是通过依赖接口这种更简单自然的方式。</p>
+<h3>Java RMI 工作原理</h3>
+<p>一个典型的 RMI 调用如下图所示：</p>
+<ol>
+<li>服务端向 RMI 注册服务绑定自己的地址，</li>
+<li>客户端通过 RMI 注册服务获取目标地址，</li>
+<li>客户端调用本地的 Stub 对象上的方法，和调用本地对象上的方法一致，</li>
+<li>本地存根对象将调用信息打包，通过网络发送到服务端，</li>
+<li>服务端的 Skeleton 对象收到网络请求之后，将调用信息解包，</li>
+<li>然后找到真正的服务对象发起调用，并将返回结果打包通过网络发送回客户端。</li>
+</ol>
+<p><img src="../../img/blog/rmi-flow.png" alt="RMI Flow"></p>
+<p>(来源：<a href="https://www.cs.rutgers.edu/~pxk/417/notes/images/rpc-rmi_flow.png">https://www.cs.rutgers.edu/~pxk/417/notes/images/rpc-rmi_flow.png</a>)</p>
+<h3>Java RMI 基本概念</h3>
+<p>Java RMI 是 Java 领域创建分布式应用的技术基石。后续的 EJB 技术，以及现代的分布式服务框架，其中的基本理念依旧是 Java RMI 的延续。在 RMI 调用中，有以下几个核心的概念：</p>
+<ol>
+<li>
+<p>通过<strong>接口</strong>进行远程调用</p>
+</li>
+<li>
+<p>通过客户端的 <strong>Stub 对象</strong>和服务端的 <strong>Skeleton 对象</strong>的帮助将远程调用伪装成本地调用</p>
+</li>
+<li>
+<p>通过 <strong>RMI 注册服务</strong>完成服务的注册和发现</p>
+</li>
+</ol>
+<p>对于第一点，客户端需要依赖接口，而服务端需要提供该接口的实现。</p>
+<p>对于第二点，在 J2SE 1.5 版本之前需要通过 rmic 预先编译好客户端的 Stub 对象和服务端的 Skeleton 对象。在之后的版本中，不再需要事先生成 Stub 和 Skeleton 对象。</p>
+<p>下面通过示例代码简单的展示 RMI 中的服务注册和发现</p>
+<h4>服务端的服务注册</h4>
+<pre><code class="language-java">Hello obj = <span class="hljs-keyword">new</span> HelloImpl(); <span class="hljs-comment">// #1</span>
+Hello stub = (Hello) UnicastRemoteObject.exportObject(obj, <span class="hljs-number">0</span>); <span class="hljs-comment">// #2</span>
+Registry registry = LocateRegistry.createRegistry(<span class="hljs-number">1099</span>); <span class="hljs-comment">// #3</span>
+registry.rebind(<span class="hljs-string">"Hello"</span>, stub); <span class="hljs-comment">// #4</span>
+</code></pre>
+<p>说明：</p>
+<ol>
+<li>初始化服务对象实例，</li>
+<li>通过 <em>UnicastRemoteObject.exportObject</em> 生成可以与服务端通讯的 Stub 对象，</li>
+<li>创建一个本地的 RMI 注册服务，监听端口为 1099。该注册服务运行在服务端，也可以单独启动一个注册服务的进程，</li>
+<li>将 Stub 对象绑定到注册服务上，这样，客户端可以通过 <em>Hello</em> 这个名字查找到该远程对象。</li>
+</ol>
+<h4>客户端的服务发现</h4>
+<pre><code class="language-java">Registry registry = LocateRegistry.getRegistry(); <span class="hljs-comment">// #1</span>
+Hello stub = (Hello) registry.lookup(<span class="hljs-string">"Hello"</span>); <span class="hljs-comment">// #2</span>
+String response = stub.sayHello(); <span class="hljs-comment">// #3</span>
+</code></pre>
+<p>说明：</p>
+<ol>
+<li>获取注册服务实例，在本例中，由于没有传入任何参数，假定要获取的注册服务实例部署在本机，并监听在 1099 端口上，</li>
+<li>从注册服务中查找服务名为 <em>Hello</em> 的远程对象，</li>
+<li>通过获取的 Stub 对象发起一次 RMI 调用并获得结果。</li>
+</ol>
+<p>理解 RMI 的工作原理和基本概念，对掌握现代分布式服务框架很有帮助，建议进一步的阅读 RMI 官方教材 <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>。</p>
+<h2>Dubbo 基本概念</h2>
+<p>现代的分布式服务框架的基本概念与 RMI 是类似的，同样是使用 Java 的 Interface 作为服务契约，通过注册中心来完成服务的注册和发现，远程通讯的细节也是通过代理类来屏蔽。具体来说，Dubbo 在工作时有以下四个角色参与：</p>
+<ol>
+<li>服务提供者 - 启动时在指定端口上暴露服务，并将服务地址和端口注册到注册中心上</li>
+<li>服务消费者 - 启动时向注册中心订阅自己感兴趣的服务，以便获得服务提供方的地址列表</li>
+<li>注册中心 - 负责服务的注册和发现，负责保存服务提供方上报的地址信息，并向服务消费方推送</li>
+<li>监控中心 - 负责收集服务提供方和消费方的运行状态，比如服务调用次数、延迟等，用于监控</li>
+<li>运行容器 - 负责服务提供方的初始化、加载以及运行的生命周期管理</li>
+</ol>
+<p><img src="../../img/blog/dubbo-architecture.png" alt="dubbo-architecture"></p>
+<p><strong>部署阶段</strong></p>
+<ul>
+<li>服务提供者在指定端口暴露服务，并向注册中心注册服务信息。</li>
+<li>服务消费者向注册中心发起服务地址列表的订阅。</li>
+</ul>
+<p><strong>运行阶段</strong></p>
+<ul>
+<li>注册中心向服务消费者推送地址列表信息。</li>
+<li>服务消费者收到地址列表后，从其中选取一个向目标服务发起调用。</li>
+<li>调用过程服务消费者和服务提供者的运行状态上报给监控中心。</li>
+</ul>
+<h2>基于 API 的 Dubbo 应用</h2>
+<p>Dubbo 的应用一般都是通过 Spring 来组装的。为了快速获得一个可以工作的 Dubbo 应用，这里的示例摒弃了复杂的配置，而改用面向 Dubbo API 的方式来构建服务提供者和消费者，另外，注册中心和监控中心在本示例中也不需要安装和配置。</p>
+<p>在生产环境，Dubbo 的服务需要一个分布式的服务注册中心与之配合，比如，ZooKeeper。为了方便开发，Dubbo 提供了直连<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>以及组播<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>两种方式，从而避免额外搭建注册中心的工作。在本例中，将使用组播的方式来完成服务的注册和发现。</p>
+<h3>定义服务契约</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">GreetingsService</span> </span>{
+    <span class="hljs-function">String <span class="hljs-title">sayHi</span><span class="hljs-params">(String name)</span></span>; <span class="hljs-comment">// #1</span>
+}
+</code></pre>
+<p><strong>说明</strong>：</p>
+<ol>
+<li>定义了一个简单的服务契约 <em>GreetingsService</em>，其中只有一个方法 <em>sayHi</em> 可供调用，入参是 <em>String</em> 类型，返回值也是 <em>String</em> 类型。</li>
+</ol>
+<h3>提供契约的实现</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingsServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GreetingsService</span> </span>{ <span class="hljs-comment">// #1</span>
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHi</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hi, "</span> + name; <span class="hljs-comment">// #2</span>
+    }
+}
+</code></pre>
+<p><strong>说明</strong>：</p>
+<ol>
+<li>服务提供者需要实现服务契约 <em>GreetingsService</em> 接口。</li>
+<li>该实现简单的返回一个欢迎信息，如果入参是 <em>dubbo</em>，则返回 <em>hi, dubbo</em>。</li>
+</ol>
+<h3>实现 Dubbo 服务提供方</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Application</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException </span>{
+        ServiceConfig&lt;GreetingsService&gt; service = <span class="hljs-keyword">new</span> ServiceConfig&lt;&gt;(); <span class="hljs-comment">// #1</span>
+        service.setApplication(<span class="hljs-keyword">new</span> ApplicationConfig(<span class="hljs-string">"first-dubbo-provider"</span>)); <span class="hljs-comment">// #2</span>
+        service.setRegistry(<span class="hljs-keyword">new</span> RegistryConfig(<span class="hljs-string">"multicast://224.5.6.7:1234"</span>)); <span class="hljs-comment">// #3</span>
+        service.setInterface(GreetingsService.class); <span class="hljs-comment">// #4</span>
+        service.setRef(<span class="hljs-keyword">new</span> GreetingsServiceImpl()); <span class="hljs-comment">// #5</span>
+        service.export(); <span class="hljs-comment">// #6</span>
+        System.in.read(); <span class="hljs-comment">// #7</span>
+    }
+}
+</code></pre>
+<p><strong>说明</strong>：</p>
+<ol>
+<li>创建一个 <em>ServiceConfig</em> 的实例，泛型参数信息是服务接口类型，即 <em>GreetingsService</em>。</li>
+<li>生成一个 <em>AplicatonConfig</em> 的实例，并将其装配进 <em>ServiceConfig</em>。</li>
+<li>生成一个 <em>RegistryConfig</em> 实例，并将其装配进 <em>ServiceConfig</em>，这里使用的是组播方式，参数是 <code>multicast://224.5.6.7:1234</code>。合法的组播地址范围为：<em>224.0.0.0 - 239.255.255.255</em></li>
+<li>将服务契约 <em>GreetingsService</em> 装配进 <em>ServiceConfig</em>。</li>
+<li>将服务提供者提供的实现 <em>GreetingsServiceImpl</em> 的实例装配进 <em>ServiceConfig</em>。</li>
+<li><em>ServiceConfig</em> 已经具备足够的信息，开始对外暴露服务，默认监听端口是 <em>20880</em>。</li>
+<li>为了防止服务端退出，按任意键或者 <em>ctrl-c</em> 退出。</li>
+</ol>
+<h3>实现 Dubbo 服务调用方</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Application</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        ReferenceConfig&lt;GreetingsService&gt; reference = <span class="hljs-keyword">new</span> ReferenceConfig&lt;&gt;(); <span class="hljs-comment">// #1</span>
+        reference.setApplication(<span class="hljs-keyword">new</span> ApplicationConfig(<span class="hljs-string">"first-dubbo-client"</span>)); <span class="hljs-comment">// #2</span>
+        reference.setRegistry(<span class="hljs-keyword">new</span> RegistryConfig(<span class="hljs-string">"multicast://224.5.6.7:1234"</span>)); <span class="hljs-comment">// #3</span>
+        reference.setInterface(GreetingsService.class); <span class="hljs-comment">// #4</span>
+        GreetingsService greetingsService = reference.get(); <span class="hljs-comment">// #5</span>
+        String message = greetingsService.sayHi(<span class="hljs-string">"dubbo"</span>); <span class="hljs-comment">// #6</span>
+        System.out.println(message); <span class="hljs-comment">// #7</span>
+    }
+}
+</code></pre>
+<p><strong>说明</strong>：</p>
+<ol>
+<li>创建一个 <em>ReferenceConfig</em> 的实例，同样，泛型参数信息是服务接口类型，即 <em>GreetingService</em>。</li>
+<li>生成一个 <em>AplicatonConfig</em> 的实例，并将其装配进 <em>ReferenceConfig</em>。</li>
+<li>生成一个 <em>RegistryConfig</em> 实例，并将其装配进 <em>ReferenceConfig</em>，注意这里的组播地址信息需要与服务提供方的相同。</li>
+<li>将服务契约 <em>GreetingsService</em> 装配进 <em>ReferenceConfig</em>。</li>
+<li>从 <em>ReferenceConfig</em> 中获取到 <em>GreetingService</em> 的代理。</li>
+<li>通过 <em>GreetingService</em> 的代理发起远程调用，传入的参数为 <em>dubbo</em>。</li>
+<li>打印返回结果 <em>hi, dubbo</em>。</li>
+</ol>
+<h3>运行</h3>
+<p>完整的示例在 <a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-api">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-api</a> 上提供。在完整的示例中，由于配置了 <em>exec-maven-plugin</em>，可以很方便的在命令行下通过 maven 的方式执行。当然，您也可以在 IDE 里直接执行，但是需要注意的是，由于使用了组播的方式来发现服务，运行时需要指定 <em>-Djava.net.preferIPv4Stack=true</em>。</p>
+<h4>构建示例</h4>
+<p>通过以下的命令来同步示例代码并完成构建：</p>
+<ol>
+<li>同步代码：git clone <a href="https://github.com/dubbo/dubbo-samples.git">https://github.com/dubbo/dubbo-samples.git</a></li>
+<li>构建：mvn clean package</li>
+</ol>
+<pre><code class="language-bash">$ git <span class="hljs-built_in">clone</span> https://github.com/dubbo/dubbo-samples.git
+$ <span class="hljs-built_in">cd</span> dubbo-samples/dubbo-samples-api/
+$ mvn clean package
+INFO] Scanning <span class="hljs-keyword">for</span> projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dubbo-samples-api 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ dubbo-samples-api ---
+...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2.182 s
+[INFO] Finished at: 2018-05-28T14:56:08+08:00
+[INFO] Final Memory: 20M/353M
+[INFO] ------------------------------------------------------------------------
+</code></pre>
+<p>当看到 <em>BUILD SUCCESS</em> 的时候表明构建完成，下面就可以开始进入运行阶段了。</p>
+<h4>运行服务端</h4>
+<p>通过运行以下的 maven 命令来启动服务提供者：</p>
+<pre><code class="language-bash">$ mvn -Djava.net.preferIPv4Stack=<span class="hljs-literal">true</span> -Dexec.mainClass=com.alibaba.dubbo.samples.server.Application <span class="hljs-built_in">exec</span>:java
+[INFO] Scanning <span class="hljs-keyword">for</span> projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dubbo-samples-api 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- <span class="hljs-built_in">exec</span>-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
+log4j:WARN No appenders could be found <span class="hljs-keyword">for</span> logger (com.alibaba.dubbo.common.logger.LoggerFactory).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html<span class="hljs-comment">#noconfig for more info.</span>
+first-dubbo-provider is running.
+</code></pre>
+<p>当 <em>first-dubbo-provider is running.</em> 出现时，代表服务提供者已经启动就绪，等待客户端的调用。</p>
+<h4>运行客户端</h4>
+<p>通过运行以下的 maven 命令来调用服务：</p>
+<pre><code class="language-bash">$ mvn -Djava.net.preferIPv4Stack=<span class="hljs-literal">true</span> -Dexec.mainClass=com.alibaba.dubbo.samples.client.Application <span class="hljs-built_in">exec</span>:java
+[INFO] Scanning <span class="hljs-keyword">for</span> projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dubbo-samples-api 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- <span class="hljs-built_in">exec</span>-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
+log4j:WARN No appenders could be found <span class="hljs-keyword">for</span> logger (com.alibaba.dubbo.common.logger.LoggerFactory).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html<span class="hljs-comment">#noconfig for more info.</span>
+hi, dubbo
+</code></pre>
+<p>可以看到， <em>hi, dubbo</em> 是从服务提供者返回的执行结果。</p>
+<h2>快速生成 Dubbo 应用</h2>
+<p>Dubbo 还提供了一个公共服务快速搭建基于 Spring Boot 的 Dubbo 应用。访问 <a href="http://start.dubbo.io">http://start.dubbo.io</a> 并按照下图所示来生成示例工程：</p>
+<p><img src="../../img/blog/dubbo-initializr.png" alt="dubbo initializr"></p>
+<p><strong>说明</strong>：</p>
+<ol>
+<li>在 <em>Group</em> 中提供 maven groupId，默认值是 <em>com.example</em>。</li>
+<li>在 <em>Artifact</em> 中提供 maven artifactId，默认值是 <em>demo</em>。</li>
+<li>在 <em>DubboServiceName</em> 中提供服务名，默认值是 <em>com.example.HelloService</em>。</li>
+<li>在 <em>DubboServiceVersion</em> 中提供服务的版本，默认值是 <em>1.0.0</em>。</li>
+<li>在 <em>Client/Server</em> 中选取本次构建的工程是服务提供者 (Server) 还是服务消费者 (Client)，默认值是 <em>server</em>。</li>
+<li>使用 <em>embeddedZookeeper</em> 作为服务注册发现，默认为勾选。</li>
+<li>是否激活 qos 端口，默认为不勾选，如果勾选可以通过 <em>22222</em> 端口访问。</li>
+<li>点击 <em>Generate Project</em> 即可下载生成好的工程。</li>
+</ol>
+<p>在本例中展示的是服务提供者，同样的，通过在生成界面选取 <em>client</em> 来生成对应的服务消费者。</p>
+<h3>运行</h3>
+<p>用 IDE 打开生成好的工程，可以发现应用是一个典型的 Spring Boot 应用。程序的入口如下所示：</p>
+<pre><code class="language-java"><span class="hljs-meta">@SpringBootApplication</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoApplication</span> </span>{
+	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+		<span class="hljs-keyword">new</span> EmbeddedZooKeeper(<span class="hljs-number">2181</span>, <span class="hljs-keyword">false</span>).start();  <span class="hljs-comment">// #1</span>
+		SpringApplication.run(DemoApplication.class, args); <span class="hljs-comment">// #2</span>
+	}
+}
+</code></pre>
+<p><strong>说明</strong>：</p>
+<ol>
+<li>在 <em>2181</em> 端口上启动嵌入式 <em>ZooKeeper</em>。</li>
+<li>启动 <em>Spring Boot</em> 上下文。</li>
+</ol>
+<p>可以直接在 IDE 中运行，输出结果如下：</p>
+<pre><code class="language-bash">2018-05-28 16:59:38.072  INFO 59943 --- [           main] a.b.d.c.e.WelcomeLogoApplicationListener : 
+
+  ████████▄  ███    █▄  ▀█████████▄  ▀█████████▄   ▄██████▄  
+  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███ 
+  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███ 
+  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███ 
+  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ████████▀  ████████▀  ▄█████████▀  ▄█████████▀   ▀██████▀  
+                                                             
+
+ :: Dubbo Spring Boot (v0.1.0) : https://github.com/dubbo/dubbo-spring-boot-project
+ :: Dubbo (v2.0.1) : https://github.com/alibaba/dubbo
+ :: Google group : http://groups.google.com/group/dubbo
+
+2018-05-28 16:59:38.079  INFO 59943 --- [           main] e.OverrideDubboConfigApplicationListener : Dubbo Config was overridden by externalized configuration {dubbo.application.name=dubbo-demo-server, dubbo.application.qosAcceptForeignIp=<span class="hljs-literal">false</span>, dubbo.application.qosEnable=<span class="hljs-literal">true</span>, dubbo.application.qosPort=22222, dubbo.registry.address=zookeeper://localhost:2181?client=curator, dubbo.registry.id=my-registry, dubbo.scan.basePackages=com.example} <span class="hljs-comment">#1</span>
+
+...
+
+2018-05-28 16:59:39.624  INFO 59943 --- [           main] com.example.demo.DemoApplication         : Started DemoApplication <span class="hljs-keyword">in</span> 1.746 seconds (JVM running <span class="hljs-keyword">for</span> 2.963)
+</code></pre>
+<p><strong>说明</strong>：</p>
+<ol>
+<li>输出中打印的以 <em>dubbo.</em> 开头的配置信息，定义在 <em>main/resources/application.properties</em> 中。</li>
+</ol>
+<h3>通过 Telnet 管理服务</h3>
+<p>生成工程的时候如果选择了激活 <em>qos</em> 的话，就可以通过 <em>telnet</em> 或者 <em>nc</em> 来管理服务、查看服务状态。</p>
+<pre><code class="language-bash">$ telnet localhost 22222
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is <span class="hljs-string">'^]'</span>.
+  ████████▄  ███    █▄  ▀█████████▄  ▀█████████▄   ▄██████▄  
+  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███ 
+  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███ 
+  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███ 
+  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███ 
+  ████████▀  ████████▀  ▄█████████▀  ▄█████████▀   ▀██████▀  
+                                                             
+
+dubbo&gt;
+dubbo&gt;ls
+As Provider side:
++------------------------------+---+
+|     Provider Service Name    |PUB|
++------------------------------+---+
+|com.example.HelloService:1.0.0| Y |
++------------------------------+---+
+As Consumer side:
++---------------------+---+
+|Consumer Service Name|NUM|
++---------------------+---+
+</code></pre>
+<p>目前 <em>qos</em> 支持以下几个命令，更详细的信息请查阅官方文档<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>：</p>
+<ul>
+<li><em>ls</em>：列出消费者、提供者信息</li>
+<li><em>online</em>：上线服务</li>
+<li><em>offline</em>：下线服务</li>
+<li><em>help</em>：联机帮助</li>
+</ul>
+<h2>总结</h2>
+<p>在本文中，从 RMI 开始，介绍了 Java 领域分布式调用的基本概念，也就是基于接口编程、通过代理将远程调用伪装成本地、通过注册中心完成服务的注册和发现。</p>
+<p>然后为了简单起见，使用简单的组播注册方式和直接面向 Dubbo API 编程的方式介绍了如何开发一个 Dubbo 的完整应用。深入的了解 <em>ServiceConfig</em> 和 <em>ReferenceConfig</em> 的用法，对于进一步的使用 Spring XML 配置、乃至 Spring Boot 的编程方式有这很大的帮助。</p>
+<p>最后，简单的介绍了如何通过 Dubbo 团队提供的公共服务 <a href="http://start.dubbo.io">start.dubbo.io</a> 快速搭建基于 Spring Boot 的 Dubbo 应用，并通过 <em>qos</em> 来做 Dubbo 服务的简单运维。</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html">Getting Started Using JavaTM RMI</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="http://dubbo.apache.org/books/dubbo-user-book/demos/explicit-target.html">直连提供者</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="http://dubbo.apache.org/books/dubbo-user-book/references/registry/multicast.html">Multicast 注册中心</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="http://dubbo.apache.org/books/dubbo-user-book/references/qos.html">在线运维命令</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

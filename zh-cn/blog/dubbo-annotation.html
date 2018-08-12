@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-annotation" />
+	<meta name="description" content="dubbo-annotation" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-annotation</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-279888561"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>在 Dubbo 中使用注解</h1>
+<p>随着微服务架构的广泛地推广和实施。在 Java 生态系统中，以 Spring Boot 和 Spring Cloud 为代表的微服务框架，引入了全新的编程模型，包括：</p>
+<ul>
+<li>注解驱动（Annotation-Driven）</li>
+<li>外部化配置（External Configuration）</li>
+<li>以及自动装配（Auto-Configure）</li>
+</ul>
+<p>新的编程模型无需 XML 配置、简化部署、提升开发效率。为了更好地实践微服务架构，Dubbo 从 <code>2.5.8</code> 版本开始， 分别针对了上述的三个场景，提供了更完善的支持。本文不讨论传统的 XML 配置方式，而是侧重介绍注解这种方式。外部配置、自动装配两种自动装配会在另外的文章中专门介绍。</p>
+<h2>注解介绍</h2>
+<h3>@EnableDubbo</h3>
+<p><code>@EnableDubbo</code> 注解是 <code>@EnableDubboConfig</code> 和 <code>@DubboComponentScan</code>两者组合的便捷表达方式。与注解驱动相关的是 <code>@DubboComponentScan</code>。</p>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> org.apache.dubbo.config.spring.context.annotation;
+
+<span class="hljs-meta">@EnableDubboConfig</span>
+<span class="hljs-meta">@DubboComponentScan</span>
+<span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> EnableDubbo {
+    <span class="hljs-comment">/**
+     * Base packages to scan for annotated <span class="hljs-doctag">@Service</span> classes.
+     * &lt;p&gt;
+     * Use {<span class="hljs-doctag">@link</span> #scanBasePackageClasses()} for a type-safe alternative to String-based
+     * package names.
+     *
+     * <span class="hljs-doctag">@return</span> the base packages to scan
+     * <span class="hljs-doctag">@see</span> DubboComponentScan#basePackages()
+     */</span>
+    <span class="hljs-meta">@AliasFor</span>(annotation = DubboComponentScan.class, attribute = <span class="hljs-string">"basePackages"</span>)
+    String[] scanBasePackages() <span class="hljs-keyword">default</span> {};
+
+    <span class="hljs-comment">/**
+     * Type-safe alternative to {<span class="hljs-doctag">@link</span> #scanBasePackages()} for specifying the packages to
+     * scan for annotated <span class="hljs-doctag">@Service</span> classes. The package of each class specified will be
+     * scanned.
+     *
+     * <span class="hljs-doctag">@return</span> classes from the base packages to scan
+     * <span class="hljs-doctag">@see</span> DubboComponentScan#basePackageClasses
+     */</span>
+    <span class="hljs-meta">@AliasFor</span>(annotation = DubboComponentScan.class, attribute = <span class="hljs-string">"basePackageClasses"</span>)
+    Class&lt;?&gt;[] scanBasePackageClasses() <span class="hljs-keyword">default</span> {};    
+}
+</code></pre>
+<p>通过 <code>@EnableDubbo</code> 可以在指定的包名下（通过 <code>scanBasePackages</code>），或者指定的类中（通过 <code>scanBasePackageClasses</code>）扫描 Dubbo 的服务提供者（以 <code>@Service</code> 标注）以及 Dubbo 的服务消费者（以 <code>Reference</code> 标注）。</p>
+<p>扫描到 Dubbo 的服务提供方和消费者之后，对其做相应的组装并初始化，并最终完成服务暴露或者引用的工作。</p>
+<p>当然，如果不使用外部化配置（External Configuration）的话，也可以直接使用 <code>@DubboComponentScan</code>。</p>
+<h3>@Service</h3>
+<p><code>@Service</code> 用来配置 Dubbo 的服务提供方，比如：</p>
+<pre><code class="language-java"><span class="hljs-meta">@Service</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnnotatedGreetingService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hello, "</span> + name;
+    }
+}
+</code></pre>
+<p>通过 <code>@Service</code> 上提供的属性，可以进一步的定制化 Dubbo 的服务提供方：</p>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> org.apache.dubbo.config.annotation;
+
+<span class="hljs-meta">@Documented</span>
+<span class="hljs-meta">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="hljs-meta">@Target</span>({ElementType.TYPE}) <span class="hljs-comment">// #1</span>
+<span class="hljs-meta">@Inherited</span>
+<span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> Service {
+    Class&lt;?&gt; interfaceClass() <span class="hljs-keyword">default</span> <span class="hljs-keyword">void</span>.class; <span class="hljs-comment">// #2</span>
+    <span class="hljs-function">String <span class="hljs-title">interfaceName</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #3</span>
+    <span class="hljs-function">String <span class="hljs-title">version</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #4</span>
+    <span class="hljs-function">String <span class="hljs-title">group</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #5</span>
+    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">export</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">true</span></span>; <span class="hljs-comment">// #6</span>
+    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">register</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">true</span></span>; <span class="hljs-comment">// #7</span>
+    
+    <span class="hljs-function">String <span class="hljs-title">application</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #8</span>
+    <span class="hljs-function">String <span class="hljs-title">module</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #9</span>
+    <span class="hljs-function">String <span class="hljs-title">provider</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #10</span>
+    String[] protocol() <span class="hljs-keyword">default</span> {}; <span class="hljs-comment">// #11</span>
+    <span class="hljs-function">String <span class="hljs-title">monitor</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #12</span>
+    String[] registry() <span class="hljs-keyword">default</span> {}; <span class="hljs-comment">// #13</span>
+}
+</code></pre>
+<p>其中比较重要的有：</p>
+<ol>
+<li>@Service 只能定义在一个类上，表示一个服务的具体实现</li>
+<li>interfaceClass：指定服务提供方实现的 interface 的类</li>
+<li>interfaceName：指定服务提供方实现的 interface 的类名</li>
+<li>version：指定服务的版本号</li>
+<li>group：指定服务的分组</li>
+<li>export：是否暴露服务</li>
+<li>registry：是否向注册中心注册服务</li>
+<li>application：应用配置</li>
+<li>module：模块配置</li>
+<li>provider：服务提供方配置</li>
+<li>protocol：协议配置</li>
+<li>monitor：监控中心配置</li>
+<li>registry：注册中心配置</li>
+</ol>
+<p>另外，需要注意的是，application、module、provider、protocol、monitor、registry（从 8 到 13）需要提供的是对应的 spring bean 的名字，而这些 bean 的组装要么通过传统的 XML 配置方式完成，要么通过现代的 Java Config 来完成。在本文中，将会展示 Java Config 的使用方式。</p>
+<h3>@Reference</h3>
+<p><code>@Reference</code> 用来配置 Dubbo 的服务消费方，比如：</p>
+<pre><code class="language-java"><span class="hljs-meta">@Component</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingServiceConsumer</span> </span>{
+    <span class="hljs-meta">@Reference</span>
+    <span class="hljs-keyword">private</span> GreetingService greetingService;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">doSayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> greetingService.sayHello(name);
+    }
+}
+</code></pre>
+<p>通过 <code>@Reference</code> 上提供的属性，可以进一步的定制化 Dubbo 的服务消费方：</p>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> org.apache.dubbo.config.annotation;
+
+<span class="hljs-meta">@Documented</span>
+<span class="hljs-meta">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="hljs-meta">@Target</span>({ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE}) <span class="hljs-comment">// #1</span>
+<span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> Reference {
+    Class&lt;?&gt; interfaceClass() <span class="hljs-keyword">default</span> <span class="hljs-keyword">void</span>.class; <span class="hljs-comment">// #2</span>
+    <span class="hljs-function">String <span class="hljs-title">interfaceName</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #3</span>
+    <span class="hljs-function">String <span class="hljs-title">version</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #4</span>
+    <span class="hljs-function">String <span class="hljs-title">group</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #5</span>
+    <span class="hljs-function">String <span class="hljs-title">url</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #6</span>
+    
+    <span class="hljs-function">String <span class="hljs-title">application</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #7</span>
+    <span class="hljs-function">String <span class="hljs-title">module</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #8</span>
+    <span class="hljs-function">String <span class="hljs-title">consumer</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #9</span>
+    <span class="hljs-function">String <span class="hljs-title">protocol</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #10</span>
+    <span class="hljs-function">String <span class="hljs-title">monitor</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #11</span>
+    String[] registry() <span class="hljs-keyword">default</span> {}; <span class="hljs-comment">// #12</span>
+}
+</code></pre>
+<p>其中比较重要的有：</p>
+<ol>
+<li>@Reference 可以定义在类中的一个字段上，也可以定义在一个方法上，甚至可以用来修饰另一个 annotation，表示一个服务的引用。通常 @Reference 定义在一个字段上</li>
+<li>interfaceClass：指定服务的 interface 的类</li>
+<li>interfaceName：指定服务的 interface 的类名</li>
+<li>version：指定服务的版本号</li>
+<li>group：指定服务的分组</li>
+<li>url：通过指定服务提供方的 URL 地址直接绕过注册中心发起调用</li>
+<li>application：应用配置</li>
+<li>module：模块配置</li>
+<li>consumer：服务消费方配置</li>
+<li>protocol：协议配置</li>
+<li>monitor：监控中心配置</li>
+<li>registry：注册中心配置</li>
+</ol>
+<p>另外，需要注意的是，application、module、consumer、protocol、monitor、registry（从 7 到 12）需要提供的是对应的 spring bean 的名字，而这些 bean 的组装要么通过传统的 XML 配置方式完成，要么通过现代的 Java Config 来完成。在本文中，将会展示 Java Config 的使用方式。</p>
+<h2>示例实战</h2>
+<p>了解了 <code>@EnableDubbo</code>， <code>@Service</code>，<code>@Reference</code> 的作用，下面以一个实际的例子来展示如何使用 annotation 来开发 Dubbo 应用。以下的代码可以在 <a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-annotation">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-annotation</a> 中找到。</p>
+<h3>1. 接口定义</h3>
+<p>定义一个简单的 <code>GreetingService</code> 接口，里面只有一个简单的方法 <code>sayHello</code> 向调用者问好。</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function">String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span></span>;
+}
+</code></pre>
+<h3>2. 服务端：服务实现</h3>
+<p>实现 <code>GreetingService</code> 接口，并通过 <code>@Service</code> 来标注其为 Dubbo 的一个服务。</p>
+<pre><code class="language-java"><span class="hljs-meta">@Service</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnnotatedGreetingService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hello, "</span> + name;
+    }
+}
+</code></pre>
+<h3>3. 服务端：组装服务提供方</h3>
+<p>通过 Spring 中 Java Config 的技术（<code>@Configuration</code>）和 annotation 扫描（<code>@EnableDubbo</code>）来发现、组装、并向外提供 Dubbo 的服务。</p>
+<pre><code class="language-java"><span class="hljs-meta">@Configuration</span>
+<span class="hljs-meta">@EnableDubbo</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.dubbo.samples.impl"</span>)
+<span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProviderConfiguration</span> </span>{
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #1</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ProviderConfig <span class="hljs-title">providerConfig</span><span class="hljs-params">()</span> </span>{
+        ProviderConfig providerConfig = <span class="hljs-keyword">new</span> ProviderConfig();
+        providerConfig.setTimeout(<span class="hljs-number">1000</span>);
+        <span class="hljs-keyword">return</span> providerConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #2</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ApplicationConfig <span class="hljs-title">applicationConfig</span><span class="hljs-params">()</span> </span>{
+        ApplicationConfig applicationConfig = <span class="hljs-keyword">new</span> ApplicationConfig();
+        applicationConfig.setName(<span class="hljs-string">"dubbo-annotation-provider"</span>);
+        <span class="hljs-keyword">return</span> applicationConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #3</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> RegistryConfig <span class="hljs-title">registryConfig</span><span class="hljs-params">()</span> </span>{
+        RegistryConfig registryConfig = <span class="hljs-keyword">new</span> RegistryConfig();
+        registryConfig.setProtocol(<span class="hljs-string">"zookeeper"</span>);
+        registryConfig.setAddress(<span class="hljs-string">"localhost"</span>);
+        registryConfig.setPort(<span class="hljs-number">2181</span>);
+        <span class="hljs-keyword">return</span> registryConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #4</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ProtocolConfig <span class="hljs-title">protocolConfig</span><span class="hljs-params">()</span> </span>{
+        ProtocolConfig protocolConfig = <span class="hljs-keyword">new</span> ProtocolConfig();
+        protocolConfig.setName(<span class="hljs-string">"dubbo"</span>);
+        protocolConfig.setPort(<span class="hljs-number">20880</span>);
+        <span class="hljs-keyword">return</span> protocolConfig;
+    }
+}
+</code></pre>
+<p>说明：</p>
+<ul>
+<li>
+<p>通过 <code>@EnableDubbo</code> 指定在 <code>com.alibaba.dubbo.samples.impl</code> 下扫描所有标注有 <code>@Service</code> 的类</p>
+</li>
+<li>
+<p>通过 <code>@Configuration</code> 将 ProviderConfiguration 中所有的 <code>@Bean</code> 通过 Java Config 的方式组装出来并注入给 Dubbo 服务，也就是标注有 <code>@Service</code> 的类。这其中就包括了：</p>
+<ol>
+<li>ProviderConfig：服务提供方配置</li>
+<li>ApplicationConfig：应用配置</li>
+<li>RegistryConfig：注册中心配置</li>
+<li>ProtocolConfig：协议配置</li>
+</ol>
+</li>
+</ul>
+<h3>4. 服务端：启动服务</h3>
+<p>在 <code>main</code> 方法中通过启动一个 Spring Context 来对外提供 Dubbo 服务。</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProviderBootstrap</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        <span class="hljs-keyword">new</span> EmbeddedZooKeeper(<span class="hljs-number">2181</span>, <span class="hljs-keyword">false</span>).start(); <span class="hljs-comment">// #1</span>
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(ProviderConfiguration.class); <span class="hljs-comment">// #2</span>
+        context.start(); <span class="hljs-comment">// #3</span>
+        System.in.read(); <span class="hljs-comment">// #4</span>
+    }
+}
+</code></pre>
+<p>说明：</p>
+<ol>
+<li>启动一个嵌入式的 zookeeper 在 2181 端口上提供注册中心的服务</li>
+<li>初始化一个 <code>AnnotationConfigApplicationContext</code> 的示例，并将 <code>ProviderConfiguration</code> 传入以完成 Dubbo 服务的自动发现和装配</li>
+<li>启动 Spring Context，开始提供对外的 Dubbo 服务</li>
+<li>因为是服务端，需要通过阻塞主线程来防止进程退出</li>
+</ol>
+<p>启动服务端的 <code>main</code> 方法，将会看到下面的输出，代表服务端启动成功，并在注册中心（ZookeeperRegistry）上注册了 <code>GreetingService</code> 这个服务：</p>
+<pre><code class="language-sh">[01/08/18 02:12:51:051 CST] main  INFO transport.AbstractServer:  [DUBBO] Start NettyServer <span class="hljs-built_in">bind</span> /0.0.0.0:20880, <span class="hljs-built_in">export</span> /192.168.99.1:20880, dubbo version: 2.6.2, current host: 192.168.99.1
+
+[01/08/18 02:12:51:051 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Register: dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=<span class="hljs-literal">true</span>&amp;application=dubbo-annotation-provider&amp;default.timeout=1000&amp;dubbo=2.6.2&amp;generic=<span class="hljs-literal">false</span>&amp;interface=com.alibaba.dubbo.samples.api
+</code></pre>
+<h3>5. 客户端：引用服务</h3>
+<p>通过 <code>@Reference</code> 来标记 <code>GreetingService</code> 接口的成员变量 greetingService 是一个 Dubbo 服务的引用，也就是说，可以简单的通过该接口向远端的服务提供方发起调用，而客户端并没有实现 <code>GreetingService</code> 接口。</p>
+<pre><code class="language-java"><span class="hljs-meta">@Component</span>(<span class="hljs-string">"annotatedConsumer"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingServiceConsumer</span> </span>{
+    <span class="hljs-meta">@Reference</span>
+    <span class="hljs-keyword">private</span> GreetingService greetingService;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">doSayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> greetingService.sayHello(name);
+    }
+}
+</code></pre>
+<h3>6. 客户端：组装服务消费者</h3>
+<p>与 <strong>3. 服务端：组装服务提供方</strong> 类似，通过 Spring 中 Java Config 的技术（<code>@Configuration</code>）和 annotation 扫描（<code>@EnableDubbo</code>）来发现、组装 Dubbo 服务的消费者。</p>
+<pre><code class="language-java"><span class="hljs-meta">@Configuration</span>
+<span class="hljs-meta">@EnableDubbo</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.dubbo.samples.action"</span>)
+<span class="hljs-meta">@ComponentScan</span>(value = {<span class="hljs-string">"com.alibaba.dubbo.samples.action"</span>})
+<span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerConfiguration</span> </span>{
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #1</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ApplicationConfig <span class="hljs-title">applicationConfig</span><span class="hljs-params">()</span> </span>{
+        ApplicationConfig applicationConfig = <span class="hljs-keyword">new</span> ApplicationConfig();
+        applicationConfig.setName(<span class="hljs-string">"dubbo-annotation-consumer"</span>);
+        <span class="hljs-keyword">return</span> applicationConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #2</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ConsumerConfig <span class="hljs-title">consumerConfig</span><span class="hljs-params">()</span> </span>{
+        ConsumerConfig consumerConfig = <span class="hljs-keyword">new</span> ConsumerConfig();
+        consumerConfig.setTimeout(<span class="hljs-number">3000</span>);
+        <span class="hljs-keyword">return</span> consumerConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #3</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> RegistryConfig <span class="hljs-title">registryConfig</span><span class="hljs-params">()</span> </span>{
+        RegistryConfig registryConfig = <span class="hljs-keyword">new</span> RegistryConfig();
+        registryConfig.setProtocol(<span class="hljs-string">"zookeeper"</span>);
+        registryConfig.setAddress(<span class="hljs-string">"localhost"</span>);
+        registryConfig.setPort(<span class="hljs-number">2181</span>);
+        <span class="hljs-keyword">return</span> registryConfig;
+    }
+}
+</code></pre>
+<p>说明：</p>
+<ul>
+<li>通过 <code>@EnableDubbo</code> 指定在 <code>com.alibaba.dubbo.samples.impl</code> 下扫描所有标注有 `@Reference 的类</li>
+<li>通过 <code>@Configuration</code> 将 ConsumerConfiguration 中所有的 <code>@Bean</code> 通过 Java Config 的方式组装出来并注入给 Dubbo 服务消费者，也就是标注有 `@Reference 的类。这其中就包括了：
+<ol>
+<li>ApplicationConfig：应用配置</li>
+<li>ConsumerConfig：服务消费者配置</li>
+<li>RegistryConfig：注册中心配置，注意：这里的配置需要与服务提供方启动的 EmbeddedZooKeeper 的配置信息保持一致</li>
+</ol>
+</li>
+</ul>
+<h3>7. 客户端：发起远程调用</h3>
+<p>在 <code>main</code> 方法中通过启动一个 Spring Context，从其中查找到组装好的 Dubbo 的服务消费者，并发起一次远程调用。</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerBootstrap</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(ConsumerConfiguration.class); <span class="hljs-comment">// #1</span>
+        context.start(); <span class="hljs-comment">// #2</span>
+        GreetingServiceConsumer greetingServiceConsumer = context.getBean(GreetingServiceConsumer.class); <span class="hljs-comment">// #3</span>
+        String hello = greetingServiceConsumer.doSayHello(<span class="hljs-string">"annotation"</span>); <span class="hljs-comment">// #4</span>
+        System.out.println(<span class="hljs-string">"result: "</span> + hello); <span class="hljs-comment">// #5</span>
+    }
+}
+</code></pre>
+<p>说明：</p>
+<ol>
+<li>
+<p>初始化一个 <code>AnnotationConfigApplicationContext</code> 的示例，并将 <code>ConsumerConfiguration</code> 传入以完成 Dubbo 服务消费者的自动发现和装配</p>
+</li>
+<li>
+<p>启动 Spring Context</p>
+</li>
+<li>
+<p>从 Context 中查找出类型为 <code>GreetingServiceConsumer</code> 的 Bean</p>
+</li>
+<li>
+<p>调用 <code>doSayHello</code> 方法，最终通过 Dubbo 的服务引用（由 <code>@Reference</code> 标注）发起一次远程调用</p>
+</li>
+<li>
+<p>打印调用结果</p>
+</li>
+</ol>
+<p>启动客户端的 <code>main</code> 方法，将会看到下面的输出，其中返回结果为 result: hello, annotation：</p>
+<pre><code class="language-sh">[01/08/18 02:38:40:040 CST] main  INFO config.AbstractConfig:  [DUBBO] Refer dubbo service com.alibaba.dubbo.samples.api.GreetingService from url zookeeper://localhost:2181/com.alibaba.dubbo.registry.RegistryService?anyhost=<span class="hljs-literal">true</span>&amp;application=dubbo-annotation-consumer&amp;check=<span class="hljs-literal">false</span>&amp;default.timeout=3000&amp;dubbo=2.6.2&amp;generic=<span class="hljs-literal">false</span>&amp;interface=com.alibaba.dubbo.samples.api.GreetingService&amp;methods=sayHello&amp;pid=33001&amp;register.ip=192.168.99.1&amp;remote.timestamp=1533105502086&amp;side=consumer&amp;timestamp=1533105519216, dubbo version: 2.6.2, current host: 192.168.99.1
+[01/08/18 02:38:40:040 CST] main  INFO annotation.ReferenceBeanBuilder: &lt;dubbo:reference object=<span class="hljs-string">"com.alibaba.dubbo.common.bytecode.proxy0@673be18f"</span> singleton=<span class="hljs-string">"true"</span> interface=<span class="hljs-string">"com.alibaba.dubbo.samples.api.GreetingService"</span> uniqueServiceName=<span class="hljs-string">"com.alibaba.dubbo.samples.api.GreetingService"</span> generic=<span class="hljs-string">"false"</span> id=<span class="hljs-string">"com.alibaba.dubbo.samples.api.GreetingService"</span> /&gt; has been built.
+result: hello, annotation
+</code></pre>
+<h2>总结</h2>
+<p>通过本文的学习，读者可以掌握 Dubbo 专属的 annotation <code>@EnableDubbo</code>、<code>@Service</code>、<code>@Reference</code> 的基本概念，并通过一个简单 Dubbo 应用的实战开发掌握其基本的用法。</p>
+<p>Spring 除了传统的 XML 配置之外，还提供了注解驱动、外部化配置、以及自动装配等更现代的配置方式。本文专注在介绍通过注解方式来开发 Dubbo 应用，可以看到，与 XML 配置相比，注解方式编程更加简洁明快。在今后的博文中，会进一步的介绍在 Dubbo 中使用外部化配置、以及自动装配的方法。</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+{
+  "filename": "graceful-shutdown.md",
+  "__html": "<h1>优雅停机</h1>\n<p>Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用户使用 <code>kill -9 PID</code> 等强制关闭指令，是不会执行优雅停机的，只有通过 <code>kill PID</code> 时，才会执行。</p>\n<h2>原理</h2>\n<h3>服务提供方</h3>\n<ul>\n<li>停止时，先标记为不接收新请求，新请求过来时直接报错，让客户端重试其它机器。</li>\n<li>然后，检测线程池中的线程是否正在运行，如果有，等待所有线程执行完成，除非超时，则强制关闭。</li>\n</ul>\n<h3>服务消费方</h3>\n<ul>\n<li>停止时，不再发起新的调用请求，所有新的调用在客户端即报错。</li>\n<li>然后，检测有没有请求的响应还没有返回，等待响应返回，除非超时，则强制关闭。</li>\n</ul>\n<h2>设置方式</h2>\n<p>设置优雅停机超时时间，缺省超时时间是 10 秒，如果超时则强制关闭。</p>\n<pre><code class=\"language-properties\"># dubbo.properties\ndubbo.service.shutdown.wait=15000\n</code></pre>\n<p>如果 ShutdownHook 不能生效，可以自行调用，<strong>使用tomcat等容器部署的場景，建议通过扩展ContextListener等自行调用以下代码实现优雅停机</strong>：</p>\n<pre><code class=\"language-java\">ProtocolConfig.destroyAll();\n</code></pre>\n"
+}

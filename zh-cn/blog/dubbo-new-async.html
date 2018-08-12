@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-new-async" />
+	<meta name="description" content="dubbo-new-async" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-new-async</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-2039027517"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>如何基于Dubbo实现全异步调用链</h1>
+<p>基于Dubbo实现全异步编程，是在2.7.0版本中对现有异步方式增强后新引入的功能。本文先是回顾2.6.x及之前版本对异步的支持情况及存在的问题，引出了2.7.0版本基于CompletableFuture做了哪些针对性的增强，通过几个示例详细阐述了增强后的异步编程的使用方式，最后总结了引入异步模式带来的新问题及Dubbo的解决方法。通过阅读这篇文章，可以很容易的基于Dubbo2.7.0+版本实现一个全异步的远程服务调用链路。</p>
+<h2>2.6.x版本之前的异步方式</h2>
+<p>在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端<a href="http://dubbo.apache.org/books/dubbo-user-book/demos/async-call.html">异步调用</a>、<a href="http://dubbo.apache.org/books/dubbo-user-book/demos/callback-parameter.html">参数回调</a>、<a href="http://dubbo.apache.org/books/dubbo-user-book/demos/events-notify.html">事件通知</a>等，在上面的文档链接中有关于使用方式的简单介绍和Demo。</p>
+<p>但当前的异步方式存在以下问题：</p>
+<ul>
+<li>Future获取方式不够直接</li>
+<li>Future接口无法实现自动回调，而自定义ResponseFuture虽支持回调但支持的异步场景有限，如不支持Future间的相互协调或组合等</li>
+<li>不支持Provider端异步</li>
+</ul>
+<p>以Consumer端异步使用方式为例：</p>
+<ol>
+<li>定义一个普通的同步接口并声明支持异步调用</li>
+</ol>
+<pre><code>public interface FooService {
+    String findFoo(String name);
+}
+</code></pre>
+<pre><code>&lt;dubbo:reference id=&quot;fooService&quot; interface=&quot;com.alibaba.foo.FooService&quot;&gt;
+      &lt;dubbo:method name=&quot;findFoo&quot; async=&quot;true&quot; /&gt;
+&lt;/dubbo:reference&gt;
+</code></pre>
+<ol>
+<li>通过RpcContext获取Future</li>
+</ol>
+<pre><code>// 此调用会立即返回null
+fooService.findFoo(fooId);
+// 拿到调用的Future引用，当结果返回后，会被通知和设置到此Future
+Future&lt;Foo&gt; fooFuture = RpcContext.getContext().getFuture();
+fooFuture.get();
+</code></pre>
+<p>或</p>
+<pre><code>// 此调用会立即返回null
+fooService.findFoo(fooId);
+// 拿到Dubbo内置的ResponseFuture并设置回调
+ResponseFuture future = ((FutureAdapter)RpcContext.getContext().getFuture()).getFuture();
+future.setCallback(new ResponseCallback() {
+    @Override
+    public void done(Object response) {
+        System.out.print(response);
+    }
+
+    @Override
+    public void caught(Throwable exception) {
+        exception.printStackTrace();
+    }
+});
+</code></pre>
+<p>从这个简单的示例我们可以体会到一些使用中的不便之处：</p>
+<ol>
+<li>findFoo的同步接口，不能直接返回代表异步结果的Future，通过RpcContext进一步获取。</li>
+<li>Future只支持阻塞式的get()接口获取结果。</li>
+<li>通过获取内置的ResponseFuture接口，可以设置回调。但获取ResponseFuture的API使用不便，且仅支持设置回调其他异步场景均不支持，如多个Future协同工作的场景等。</li>
+</ol>
+<h2>2.7.0基于CompletableFuture的增强</h2>
+<p>了解Java中Future演进历史的同学应该知道，Dubbo 2.6.x及之前版本中使用的Future是在java 5中引入的，所以存在以上一些功能设计上的问题，而在java 8中引入的CompletableFuture进一步丰富了Future接口，很好的解决了这些问题。</p>
+<p>Dubbo在2.7.0版本已经升级了对Java 8的支持，同时基于CompletableFuture对当前的异步功能进行了增强。</p>
+<ol>
+<li>
+<p>支持直接定义返回CompletableFuture的服务接口。通过这种类型的接口，我们可以更自然的实现Consumer、Provider端的异步编程。</p>
+<pre><code>public interface AsyncService {
+    CompletableFuture&lt;String&gt; sayHello(String name);
+}
+</code></pre>
+</li>
+<li>
+<p>如果你不想将接口的返回值定义为Future类型，或者存在定义好的同步类型接口，则可以额外定义一个异步接口并提供Future类型的方法。</p>
+<pre><code>public interface GreetingsService {
+    String sayHi(String name);
+}
+</code></pre>
+<pre><code>@AsyncFor(AsyncService.class)
+public interface GrettingServiceAsync extends GreetingsService {
+    CompletableFuture&lt;String&gt; sayHiAsync(String name);
+}
+</code></pre>
+<p>这样，Provider可以只实现sayHi方法；而Consumer通过直接调用sayHiAsync可以拿到一个Future实例，Dubbo框架在Provider端会自动转换为对sayHi方法的调用。</p>
+<p>为每个同步方法提供一个异步方法定义会比较麻烦，更进一步的，利用Dubbo生态中的<a href="https://github.com/dubbo/dubbo-async-processor">Annotation Processor实现</a>，可以自动帮我们自动生成异步方法定义。</p>
+</li>
+<li>
+<p>同样的，如果你的原始接口定义不是Future类型的返回值，Provider端异步也提供了类似Servlet3.0里的Async Servlet的编程接口: <code>RpcContext.startAsync()</code>。</p>
+<pre><code>public interface AsyncService {
+    String sayHello(String name);
+}
+</code></pre>
+<pre><code>public class AsyncServiceImpl implements AsyncService {
+    public String sayHello(String name) {
+        final AsyncContext asyncContext = RpcContext.startAsync();
+        new Thread(() -&gt; {
+            asyncContext.write(&quot;Hello &quot; + name + &quot;, response from provider.&quot;);
+        }).start();
+        return null;
+    }
+}
+</code></pre>
+<p>在方法体的开始<code>RpcContext.startAsync()</code>启动异步，并开启新线程异步的执行业务逻辑，在耗时操作完成后通过<code>asyncContext.write</code>将结果写回。</p>
+</li>
+<li>
+<p>RpcContext直接返回CompletableFuture</p>
+<pre><code>CompletableFuture&lt;String&gt; f = RpcContext.getContext().getCompletableFuture();
+</code></pre>
+</li>
+</ol>
+<p>以上所有的增强，是在兼容已有异步编程的基础上进行的，因此基于2.6.x版本编写的异步程序不用做任何改造即可顺利编译通过。</p>
+<p>接下来，我们通过几个示例看一下如何实现一个全异步的Dubbo服务调用链。</p>
+<h2>示例1：CompletableFuture类型接口</h2>
+<p>CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见<a href="https://github.com/dubbo/dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-async-original-future">dubbo-samples-async-original-future</a>。</p>
+<ol>
+<li>
+<p>定义接口</p>
+<pre><code>public interface AsyncService {
+    CompletableFuture&lt;String&gt; sayHello(String name);
+}
+</code></pre>
+<p>注意接口的返回类型是<code>CompletableFuture&lt;String&gt;</code>。</p>
+</li>
+<li>
+<p>Provider端</p>
+<ul>
+<li>
+<p>实现</p>
+<pre><code>public class AsyncServiceImpl implements AsyncService {
+    public CompletableFuture&lt;String&gt; sayHello(String name) {
+        return CompletableFuture.supplyAsync(() -&gt; {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return &quot;async response from provider.&quot;;
+        });
+    }
+}
+</code></pre>
+<p>可以看到这里通过supplyAsync将业务代码切换到了新的线程执行，因此实现了Provider端异步。</p>
+</li>
+<li>
+<p>配置</p>
+<pre><code>&lt;bean id=&quot;asyncService&quot; class=&quot;com.alibaba.dubbo.samples.async.impl.AsyncServiceImpl&quot;/&gt;
+&lt;dubbo:service interface=&quot;com.alibaba.dubbo.samples.async.api.AsyncService&quot; ref=&quot;asyncService&quot;/&gt;
+</code></pre>
+<p>配置方式和普通接口是一样。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Consumer端</p>
+<ul>
+<li>配置</li>
+</ul>
+<pre><code>&lt;dubbo:reference id=&quot;asyncService&quot; timeout=&quot;10000&quot; interface=&quot;com.alibaba.dubbo.samples.async.api.AsyncService&quot;/&gt;
+</code></pre>
+<p>​	配置方式和普通接口是一样。</p>
+<ul>
+<li>调用远程服务</li>
+</ul>
+<pre><code>public static void main(String[] args) throws Exception {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{&quot;META-INF/spring/async-consumer.xml&quot;});
+        context.start();
+        final AsyncService asyncService = (AsyncService) context.getBean(&quot;asyncService&quot;);
+    
+        CompletableFuture&lt;String&gt; future = asyncService.sayHello(&quot;async call request&quot;);
+        future.whenComplete((v, t) -&gt; {
+            if (t != null) {
+                t.printStackTrace();
+            } else {
+                System.out.println(&quot;Response: &quot; + v);
+            }
+        });
+        System.out.println(&quot;Executed before response return.&quot;);
+        System.in.read();
+    }
+</code></pre>
+<p><code>CompletableFuture&lt;String&gt; future = asyncService.sayHello(&quot;async call request&quot;);</code>很自然的返回了Future示例，这样就实现了Consumer端的异步服务调用。</p>
+</li>
+</ol>
+<h2>示例2：同步接口使用Annotation Processor</h2>
+<p>这个示例演示了如何在只定义同步接口的基础上，使用Annotation Processor实现Consumer端异步方服务调用，具体代码参见地址<a href="https://github.com/dubbo/dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-async-generated-future">dubbo-samples-async-generated-future</a></p>
+<ol>
+<li>
+<p>定义接口</p>
+<pre><code>@DubboAsync
+public interface GreetingsService {
+    String sayHi(String name);
+}
+</code></pre>
+<p>这是一个普通的Dubbo服务接口定义。注意，使用Annotation Processor要加上@DubboAsync注解。</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+    &lt;artifactId&gt;dubbo-async-processer&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;plugin&gt;
+    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+    &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+    &lt;version&gt;3.7.0&lt;/version&gt;
+    &lt;configuration&gt;
+        &lt;source&gt;1.8&lt;/source&gt;
+        &lt;target&gt;1.8&lt;/target&gt;
+        &lt;annotationProcessorPaths&gt;
+            &lt;path&gt;
+                &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+                &lt;artifactId&gt;dubbo-async-processer&lt;/artifactId&gt;
+                &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+            &lt;/path&gt;
+        &lt;/annotationProcessorPaths&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt;
+</code></pre>
+<p>以上是引入dubbo-async-processer处理器的Maven依赖，通常定义接口（提供API）的开发者将以上依赖加到工程中，这样在做API打包的时候，API中会自动生成以下接口定义：</p>
+<pre><code>/**
+* Generated by dubbo-async-processer
+*/
+package com.alibaba.dubbo.samples.api;
+import java.util.concurrent.CompletableFuture;
+@javax.annotation.Generated(&quot;com.alibaba.dubbo.async.processor.AsyncAnnotationProcessor&quot;)
+@org.apache.dubbo.common.config.AsyncFor(com.alibaba.dubbo.samples.api.GreetingsService.class)
+public interface GreetingsServiceAsync extends GreetingsService {
+CompletableFuture&lt;java.lang.String&gt; sayHiAsync(java.lang.String name);
+}
+</code></pre>
+</li>
+<li>
+<p>Provider端</p>
+<ul>
+<li>配置</li>
+</ul>
+<pre><code>&lt;bean id=&quot;greetingsService&quot; class=&quot;com.alibaba.dubbo.samples.async.impl.GreetingsServiceImpl&quot;/&gt;
+&lt;dubbo:service interface=&quot;com.alibaba.dubbo.samples.api.GreetingsService&quot; ref=&quot;greetingsService&quot;/&gt;
+</code></pre>
+<ul>
+<li>服务实现</li>
+</ul>
+<pre><code>public class GreetingsServiceImpl implements GreetingsService {
+    @Override
+    public String sayHi(String name) {
+        return &quot;hi, &quot; + name;
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>Consumer端</p>
+<ul>
+<li>配置</li>
+</ul>
+<pre><code> &lt;dubbo:reference id=&quot;greetingsService&quot; interface=&quot;com.alibaba.dubbo.samples.api.GreetingsServiceAsync&quot;/&gt;
+</code></pre>
+<p>注意，服务接口用的是<strong>GreetingsServiceAsync</strong></p>
+<ul>
+<li>调用服务</li>
+</ul>
+<pre><code> public static void main(String[] args) throws Exception {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{&quot;META-INF/spring/async-consumer.xml&quot;});
+        context.start();
+
+        GreetingsServiceAsync greetingsService = (GreetingsServiceAsync) context.getBean(&quot;greetingsService&quot;);
+        CompletableFuture&lt;String&gt; future = greetingsService.sayHiAsync(&quot;async call reqeust&quot;);
+        System.out.println(&quot;async call ret :&quot; + future.get());
+     
+        System.in.read();
+    }
+</code></pre>
+<p>这样，我们就可以直接使用<code>CompletableFuture&lt;String&gt; future = greetingsService.sayHiAsync(&quot;async call reqeust&quot;);</code>，直接返回CompletableFuture。</p>
+</li>
+</ol>
+<h2>示例3：使用AsyncContext</h2>
+<p>本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见<a href="https://github.com/dubbo/dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-async-provider">dubbo-samples-async-provider</a>。</p>
+<ol>
+<li>
+<p>定义接口</p>
+<pre><code>public interface AsyncService {
+    String sayHello(String name);
+}
+</code></pre>
+</li>
+<li>
+<p>Provider端</p>
+<ul>
+<li>配置</li>
+</ul>
+<pre><code>&lt;bean id=&quot;asyncService&quot; class=&quot;com.alibaba.dubbo.samples.async.impl.AsyncServiceImpl&quot;/&gt;
+&lt;dubbo:service async=&quot;true&quot; interface=&quot;com.alibaba.dubbo.samples.async.api.AsyncService&quot; ref=&quot;asyncService&quot;/&gt;
+</code></pre>
+<p>注意，要加上<code>async=&quot;true&quot;</code>表明这是一个开启Provider端异步执行的服务。</p>
+<ul>
+<li>异步执行实现</li>
+</ul>
+<pre><code>public class AsyncServiceImpl implements AsyncService {
+    public String sayHello(String name) {
+        final AsyncContext asyncContext = RpcContext.startAsync();
+        new Thread(() -&gt; {
+            asyncContext.signalContextSwitch();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            asyncContext.write(&quot;Hello &quot; + name + &quot;, response from provider.&quot;);
+        }).start();
+        return null;
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>Consumer端</p>
+<ul>
+<li>配置</li>
+</ul>
+<pre><code>&lt;dubbo:reference id=&quot;asyncService&quot; interface=&quot;com.alibaba.dubbo.samples.async.api.AsyncService&quot;/&gt;
+</code></pre>
+<ul>
+<li>服务调用</li>
+</ul>
+<pre><code> public static void main(String[] args) throws Exception {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{&quot;META-INF/spring/async-consumer.xml&quot;});
+        context.start();
+
+        AsyncService asyncService = (AsyncService) context.getBean(&quot;asyncService&quot;);
+        System.out.println(asyncService.sayHello(&quot;async call request&quot;));
+     
+        System.in.read();
+    }
+</code></pre>
+</li>
+</ol>
+<h2>异步引入的新问题</h2>
+<h3>Filter链</h3>
+<p>以下是一次普通Dubbo调用的完整Filter链</p>
+<p>而采用异步调用后，由于异步结果在异步线程中单独执行，所以流经后半段Filter链的Result是空值，当真正的结果返回时已无法被Filter链处理。</p>
+<p>为了解决这个问题，2.7.0中引入了PostProcessFilter和AbstractPostProcessFilter，其中，PostProcessFilter接口继承自Filter接口，AbstractPostProcessFilter是PostProcessFilter的抽象实现。</p>
+<p>以下是一个扩展Filter并支持异步Filter链的例子</p>
+<pre><code>@Activate(group = {Constants.PROVIDER, Constants.CONSUMER})
+public class AsyncPostprocessFilter extends AbstractPostProcessFilter {
+
+    @Override
+    public Result invoke(Invoker&lt;?&gt; invoker, Invocation invocation) throws RpcException {
+        return postProcessResult(invoker.invoke(invocation), invoker, invocation);
+    }
+
+    @Override
+    protected Result doPostProcess(Result result, Invoker&lt;?&gt; invoker, Invocation invocation) {
+        System.out.println(&quot;Filter get the return value: &quot; + result.getValue());
+        return result;
+    }
+}
+</code></pre>
+<h3>上下文传递</h3>
+<p>当前我们考虑的上下文主要是指保存在RpcContext中的数据，大多数场景是需要用户在切换业务线程前自己完成Context的传递。</p>
+<pre><code>public class AsyncServiceImpl implements AsyncService {
+    // 保存当前线程的上下文
+    RpcContext context = RpcContext.getContext();
+    public CompletableFuture&lt;String&gt; sayHello(String name) {
+        return CompletableFuture.supplyAsync(() -&gt; {
+            // 设置到新线程中
+            RpcContext.setContext(context);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return &quot;async response from provider.&quot;;
+        });
+    }
+}
+</code></pre>
+<p>不过AsyncContext也提供了signalContextSwitch()的方法来实现方便的Context切换。</p>
+<pre><code>public class AsyncServiceImpl implements AsyncService {
+    public String sayHello(String name) {
+        final AsyncContext asyncContext = RpcContext.startAsync();
+        new Thread(() -&gt; {
+            asyncContext.signalContextSwitch();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            asyncContext.write(&quot;Hello &quot; + name + &quot;, response from provider.&quot;);
+        }).start();
+        return null;
+    }
+}
+</code></pre>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

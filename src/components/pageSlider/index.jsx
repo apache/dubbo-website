@@ -1,14 +1,20 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { autobind } from 'core-decorators';
 import classnames from 'classnames';
 import { throttle } from '../../../utils';
 
 import './index.scss';
 
+const propTypes = {
+  pageSize: PropTypes.number, // 每页最多显示的条数
+
+};
 const defaultProps = {
   pageSize: 5,
 };
 
+@autobind
 class pageSlider extends React.Component {
   constructor(props) {
     super(props);
@@ -43,7 +49,6 @@ class pageSlider extends React.Component {
     });
   }
 
-  @autobind
   renderSliderList() {
     const { children, pageSize } = this.props;
     const { page, pageWidth } = this.state;
@@ -105,7 +110,7 @@ class pageSlider extends React.Component {
               'slider-control-prev-hidden': page === 0,
             })
           }
-          src="./img/prev.png"
+          src={`${window.rootPath}/img/prev.png`}
           onClick={this.changePage.bind(this, page - 1)}
         />
         <img
@@ -115,7 +120,7 @@ class pageSlider extends React.Component {
               'slider-control-next-hidden': page === splitNum - 1,
             })
           }
-          src="./img/next.png"
+          src={`${window.rootPath}/img/next.png`}
           onClick={this.changePage.bind(this, page + 1)}
         />
       </div>
@@ -132,6 +137,7 @@ class pageSlider extends React.Component {
   }
 }
 
+pageSlider.propTypes = propTypes;
 pageSlider.defaultProps = defaultProps;
 
 export default pageSlider;
