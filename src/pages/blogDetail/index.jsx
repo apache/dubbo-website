@@ -1,14 +1,12 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import cookie from 'js-cookie';
 import { scroller } from 'react-scroll';
 import path from 'path';
-import qs from 'querystring';
-import { Redirect } from 'react-router-dom';
 import Language from '../../components/language';
 import Header from '../../components/header';
 import Footer from '../../components/footer';
 import siteConfig from '../../../site_config/site';
-import blogData from '../../../md_json/blog.json';
 import './index.scss';
 
 // 锚点正则
@@ -17,33 +15,21 @@ const anchorReg = /^#[^/]/;
 const relativeReg = /^((\.{1,2}\/)|([\w-]+[/.]))/;
 class BlogDetail extends Language {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      __html: '',
+    };
+  }
+
   componentDidMount() {
-    if (!this.markdownContainer) {
-      // 如果进入重定向，直接返回
-      return;
-    }
-    // 因单页的缘故，需要滚动到页面顶部，否则原先页面滚动位置不会变
-    window.scrollTo && window.scrollTo(0, 0);
-    // 可能带有语言版本，所以有split('?')[0]
-    const filename = this.props.match.url.split('?')[0].split('/').slice(2).join('/');
-    // 获取当前文档所在的部分的相对路径，除去文件名
-    const relativePath = filename.split('/').slice(0, -1).join('/');
-    const hashSearch = window.location.hash.split('?');
-    const search = qs.parse(hashSearch[1] || '');
-    const language = search.lang || cookie.get('docsite_language') || siteConfig.defaultLanguage;
-    const imgs = Array.from(this.markdownContainer.querySelectorAll('img'));
-    const alinks = Array.from(this.markdownContainer.querySelectorAll('a'));
-    imgs.forEach((img) => {
-      const src = img.getAttribute('src');
-      if (relativeReg.test(src)) {
-        img.src = `${window.location.protocol}//${window.location.host}${path.join(window.location.pathname, './docs', language, relativePath, src)}`;
-      }
-    });
-    alinks.forEach((alink) => {
-      const href = alink.getAttribute('href');
-      if (relativeReg.test(href)) {
-        alink.href = `${window.location.protocol}//${window.location.host}${window.location.pathname}${window.location.search}#/${path.join('./blog', relativePath, href)}`;
-      }
+    // 通过请求获取生成好的json数据，静态页和json文件在同一个目录下
+    fetch(window.location.pathname.replace(/\.html$/i, '.json'))
+    .then(res => res.json())
+    .then((md) => {
+      this.setState({
+        __html: md && md.__html ? md.__html : '',
+      });
     });
     this.markdownContainer.addEventListener('click', (e) => {
       const isAnchor = e.target.nodeName.toLowerCase() === 'a' && e.target.getAttribute('href') && anchorReg.test(e.target.getAttribute('href'));
@@ -59,40 +45,80 @@ class BlogDetail extends Language {
   }
 
   componentDidUpdate() {
-    // 需要加上这个，否则点击浏览器回退时，componentDidMount不触发
-    this.componentDidMount();
+    this.handleRelativeLink();
+    this.handleRelativeImg();
+  }
+
+  handleRelativeLink() {
+    const language = cookie.get('docsite_language') || siteConfig.defaultLanguage;
+    // 获取当前文档所在文件系统中的路径
+    // rootPath/en-us/blog/dir/hello.html => /blog/en-us/dir
+    const splitPart = window.location.pathname.replace(`${window.rootPath}/${language}`, '').split('/').slice(0, -1);
+    const filePath = splitPart.join('/');
+    const alinks = Array.from(this.markdownContainer.querySelectorAll('a'));
+    alinks.forEach((alink) => {
+      const href = alink.getAttribute('href');
+      if (relativeReg.test(href)) {
+        // 文档之间有中英文之分，md的相对地址要转换为对应HTML的地址
+        alink.href = `${path.join(`${window.rootPath}/${language}`, filePath, href.replace(/\.(md|markdown)$/, '.html'))}`;
+      }
+    });
+  }
+
+  handleRelativeImg() {
+    const language = cookie.get('docsite_language') || siteConfig.defaultLanguage;
+    // 获取当前文档所在文件系统中的路径
+    // rootPath/en-us/blog/dir/hello.html => /blog/en-us/dir
+    const splitPart = window.location.pathname.replace(`${window.rootPath}/${language}`, '').split('/').slice(0, -1);
+    splitPart.splice(2, 0, language);
+    const filePath = splitPart.join('/');
+    const imgs = Array.from(this.markdownContainer.querySelectorAll('img'));
+    imgs.forEach((img) => {
+      const src = img.getAttribute('src');
+      if (relativeReg.test(src)) {
+        // 图片无中英文之分
+        img.src = `${path.join(window.rootPath, filePath, src)}`;
+      }
+    });
   }
 
   render() {
-    const hashSearch = window.location.hash.split('?');
-    const search = qs.parse(hashSearch[1] || '');
-    let language = search.lang || cookie.get('docsite_language') || siteConfig.defaultLanguage;
+    let urlLang;
+    if (window.rootPath) {
+      urlLang = window.location.pathname.split('/')[2];
+    } else {
+      urlLang = window.location.pathname.split('/')[1];
+    }
+    let language = this.props.lang || urlLang || cookie.get('docsite_language') || siteConfig.defaultLanguage;
     // 防止链接被更改导致错误的cookie存储
     if (language !== 'en-us' && language !== 'zh-cn') {
       language = siteConfig.defaultLanguage;
     }
-    // 同步cookie和search上的语言版本
+    // 同步cookie的语言版本
     if (language !== cookie.get('docsite_language')) {
       cookie.set('docsite_language', language, { expires: 365, path: '' });
     }
-    if (!search.lang) {
-      return <Redirect to={`${this.props.match.url}?lang=${language}`} />;
-    }
-    const filename = this.props.match.url.split('/').slice(2).join('/');
-    const md = blogData[language].find(blog => blog.filename === filename);
-    const __html = md && md.__html ? md.__html : '';
+    const __html = this.props.__html || this.state.__html;
     return (
       <div className="blog-detail-page">
-        <Header type="normal" logo="./img/dubbo_colorful.png" language={language} onLanguageChange={this.onLanguageChange} />
+      <Header
+        type="normal"
+        currentKey="blog"
+        logo={`${window.rootPath}/img/dubbo_colorful.png`}
+        language={language}
+        onLanguageChange={this.onLanguageChange}
+      />
         <section
           className="blog-content markdown-body"
           ref={(node) => { this.markdownContainer = node; }}
           dangerouslySetInnerHTML={{ __html }}
         />
-        <Footer logo="./img/dubbo_gray.png" />
+        <Footer logo={`${window.rootPath}/img/dubbo_gray.png`} />
       </div>
     );
   }
 }
+
+document.getElementById('root') && ReactDOM.render(<BlogDetail />, document.getElementById('root'));
 
 export default BlogDetail;

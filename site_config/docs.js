@@ -9,52 +9,52 @@ export default {
                         children: [
                             {
                                 title: 'Background',
-                                link: '/docs/user/preface/background.md',
+                                link: '/en-us/docs/user/preface/background.html',
                             },
                             {
                                 title: 'Requirements',
-                                link: '/docs/user/preface/requirements.md',
+                                link: '/en-us/docs/user/preface/requirements.html',
                             },
                             {
                                 title: 'Architecture',
-                                link: '/docs/user/preface/architecture.md'
+                                link: '/en-us/docs/user/preface/architecture.html'
                             },
                             {
                                 title: 'Usage',
-                                link: '/docs/user/preface/usage.md'
+                                link: '/en-us/docs/user/preface/usage.html'
                             }
                         ],
                     },
                     {
                         title: 'Quick start',
-                        link: '/docs/user/quick-start.md'
+                        link: '/en-us/docs/user/quick-start.html'
                     },
                     {
                         title: 'Dependencies',
-                        link: '/docs/user/dependencies.md'
+                        link: '/en-us/docs/user/dependencies.html'
                     },
                     {
                         title: 'Maturality',
-                        link: '/docs/user/maturity.md'
+                        link: '/en-us/docs/user/maturity.html'
                     },
                     {
                         title: 'Configuration',
                         children: [
                             {
                                 title: 'XML configuration',
-                                link: '/docs/user/configuration/xml.md',
+                                link: '/en-us/docs/user/configuration/xml.html',
                             },
                             {
                                 title: 'Properties configuration',
-                                link: '/docs/user/configuration/properties.md',
+                                link: '/en-us/docs/user/configuration/properties.html',
                             },
                             {
                                 title: 'API configuration',
-                                link: '/docs/user/configuration/api.md'
+                                link: '/en-us/docs/user/configuration/api.html'
                             },
                             {
                                 title: 'Annotation configuration',
-                                link: '/docs/user/configuration/annotation.md'
+                                link: '/en-us/docs/user/configuration/annotation.html'
                             }
                         ],
                     },
@@ -63,240 +63,240 @@ export default {
                         children: [
                             {
                                 title: 'Start check',
-                                link: '/docs/user/demos/preflight-check.md',
+                                link: '/en-us/docs/user/demos/preflight-check.html',
                             },
                             {
                                 title: 'Fault-tolerent strategy',
-                                link: '/docs/user/demos/fault-tolerent-strategy.md',
+                                link: '/en-us/docs/user/demos/fault-tolerent-strategy.html',
                             },
                             {
                                 title: 'Load balance',
-                                link: '/docs/user/demos/loadbalance.md'
+                                link: '/en-us/docs/user/demos/loadbalance.html'
                             },
                             {
                                 title: 'Thread model',
-                                link: '/docs/user/demos/thread-model.md'
+                                link: '/en-us/docs/user/demos/thread-model.html'
                             },
                             {
                                 title: 'Connecting certain provider straightly',
-                                link: '/docs/user/demos/explicit-target.md',
+                                link: '/en-us/docs/user/demos/explicit-target.html',
                             },
                             {
                                 title: 'Subscribe only',
-                                link: '/docs/user/demos/subscribe-only.md',
+                                link: '/en-us/docs/user/demos/subscribe-only.html',
                             },
                             {
                                 title: 'Registry only',
-                                link: '/docs/user/demos/registry-only.md'
+                                link: '/en-us/docs/user/demos/registry-only.html'
                             },
                             {
                                 title: 'Static service',
-                                link: '/docs/user/demos/static-service.md'
+                                link: '/en-us/docs/user/demos/static-service.html'
                             },
                             {
                                 title: 'Multi-protocols',
-                                link: '/docs/user/demos/multi-protocols.md',
+                                link: '/en-us/docs/user/demos/multi-protocols.html',
                             },
                             {
                                 title: 'Multi-registries',
-                                link: '/docs/user/demos/multi-registry.md',
+                                link: '/en-us/docs/user/demos/multi-registry.html',
                             },
                             {
                                 title: 'Service group',
-                                link: '/docs/user/demos/service-group.md'
+                                link: '/en-us/docs/user/demos/service-group.html'
                             },
                             {
                                 title: 'Multi-versions',
-                                link: '/docs/user/demos/multi-versions.md'
+                                link: '/en-us/docs/user/demos/multi-versions.html'
                             },
                             {
                                 title: 'Group merger',
-                                link: '/docs/user/demos/group-merger.md',
+                                link: '/en-us/docs/user/demos/group-merger.html',
                             },
                             {
                                 title: 'Parameter validation',
-                                link: '/docs/user/demos/parameter-validation.md',
+                                link: '/en-us/docs/user/demos/parameter-validation.html',
                             },
                             {
                                 title: 'Result cache',
-                                link: '/docs/user/demos/result-cache.md'
+                                link: '/en-us/docs/user/demos/result-cache.html'
                             },
                             {
                                 title: 'Generic reference',
-                                link: '/docs/user/demos/generic-reference.md'
+                                link: '/en-us/docs/user/demos/generic-reference.html'
                             },
                             {
                                 title: 'Generic service',
-                                link: '/docs/user/demos/generic-service.md',
+                                link: '/en-us/docs/user/demos/generic-service.html',
                             },
                             {
                                 title: 'Echo service',
-                                link: '/docs/user/demos/echo-service.md',
+                                link: '/en-us/docs/user/demos/echo-service.html',
                             },
                             {
                                 title: 'Context',
-                                link: '/docs/user/demos/context.md'
+                                link: '/en-us/docs/user/demos/context.html'
                             },
                             {
                                 title: 'Attachment',
-                                link: '/docs/user/demos/attachment.md'
+                                link: '/en-us/docs/user/demos/attachment.html'
                             },
                             {
                                 title: 'Asynchronous call',
-                                link: '/docs/user/demos/async-call.md',
+                                link: '/en-us/docs/user/demos/async-call.html',
                             },
                             {
                                 title: 'Local call',
-                                link: '/docs/user/demos/local-call.md',
+                                link: '/en-us/docs/user/demos/local-call.html',
                             },
                             {
                                 title: 'Callback parameter',
-                                link: '/docs/user/demos/callback-parameter.md'
+                                link: '/en-us/docs/user/demos/callback-parameter.html'
                             },
                             {
                                 title: 'Events notify',
-                                link: '/docs/user/demos/events-notify.md'
+                                link: '/en-us/docs/user/demos/events-notify.html'
                             },
                             {
                                 title: 'Local stub',
-                                link: '/docs/user/demos/local-stub.md',
+                                link: '/en-us/docs/user/demos/local-stub.html',
                             },
                             {
                                 title: 'Local mock',
-                                link: '/docs/user/demos/local-mock.md',
+                                link: '/en-us/docs/user/demos/local-mock.html',
                             },
                             {
                                 title: 'Delay publish',
-                                link: '/docs/user/demos/delay-publish.md'
+                                link: '/en-us/docs/user/demos/delay-publish.html'
                             },
                             {
                                 title: 'Concurrency control',
-                                link: '/docs/user/demos/concurrency-control.md'
+                                link: '/en-us/docs/user/demos/concurrency-control.html'
                             },
                             {
                                 title: 'Connections limitation',
-                                link: '/docs/user/demos/config-connections.md',
+                                link: '/en-us/docs/user/demos/config-connections.html',
                             },
                             {
                                 title: 'Lazy connect',
-                                link: '/docs/user/demos/lazy-connect.md',
+                                link: '/en-us/docs/user/demos/lazy-connect.html',
                             },
                             {
                                 title: 'Stickness connections',
-                                link: '/docs/user/demos/stickiness.md'
+                                link: '/en-us/docs/user/demos/stickiness.html'
                             },
                             {
                                 title: 'Token authorization',
-                                link: '/docs/user/demos/token-authorization.md'
+                                link: '/en-us/docs/user/demos/token-authorization.html'
                             },
                             {
                                 title: 'Routing rule',
-                                link: '/docs/user/demos/routing-rule.md',
+                                link: '/en-us/docs/user/demos/routing-rule.html',
                             },
                             {
                                 title: 'Configuration rule',
-                                link: '/docs/user/demos/config-rule.md',
+                                link: '/en-us/docs/user/demos/config-rule.html',
                             },
                             {
                                 title: 'Service downgrade',
-                                link: '/docs/user/demos/service-downgrade.md'
+                                link: '/en-us/docs/user/demos/service-downgrade.html'
                             },
                             {
                                 title: 'Graceful shutdown',
-                                link: '/docs/user/demos/graceful-shutdown.md'
+                                link: '/en-us/docs/user/demos/graceful-shutdown.html'
                             },
                             {
                                 title: 'Hostname binding',
-                                link: '/docs/user/demos/hostname-binding.md',
+                                link: '/en-us/docs/user/demos/hostname-binding.html',
                             },
                             {
                                 title: 'Logger strategy',
-                                link: '/docs/user/demos/logger-strategy.md',
+                                link: '/en-us/docs/user/demos/logger-strategy.html',
                             },
                             {
                                 title: 'Accesslog',
-                                link: '/docs/user/demos/accesslog.md'
+                                link: '/en-us/docs/user/demos/accesslog.html'
                             },
                             {
                                 title: 'Service container',
-                                link: '/docs/user/demos/service-container.md'
+                                link: '/en-us/docs/user/demos/service-container.html'
                             },
                             {
                                 title: 'Reference config cache',
-                                link: '/docs/user/demos/reference-config-cache.md',
+                                link: '/en-us/docs/user/demos/reference-config-cache.html',
                             },
                             {
                                 title: 'Distributed transaction',
-                                link: '/docs/user/demos/distributed-transaction.md',
+                                link: '/en-us/docs/user/demos/distributed-transaction.html',
                             },
                             {
                                 title: 'Automatic thread dump',
-                                link: '/docs/user/demos/dump.md'
+                                link: '/en-us/docs/user/demos/dump.html'
                             },
                             {
                                 title: 'Netty4',
-                                link: '/docs/user/demos/netty4.md'
+                                link: '/en-us/docs/user/demos/netty4.html'
                             },
                         ],
                     },
                     {
                         title: 'API configuration reference',
-                        link: '/docs/user/references/api.md'
+                        link: '/en-us/docs/user/references/api.html'
                     },
                     {
                         title: 'Schema configuration reference',
                         children: [
                             {
                                 title: 'Introduction',
-                                link: '/docs/user/references/xml/introduction.md',
+                                link: '/en-us/docs/user/references/xml/introduction.html',
                             },
                             {
                                 title: 'dubbo:service',
-                                link: '/docs/user/references/xml/dubbo-service.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-service.html',
                             },
                             {
                                 title: 'dubbo:reference',
-                                link: '/docs/user/references/xml/dubbo-reference.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-reference.html',
                             },
                             {
                                 title: 'dubbo:protocol',
-                                link: '/docs/user/references/xml/dubbo-protocol.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-protocol.html',
                             },
                             {
                                 title: 'dubbo:registry',
-                                link: '/docs/user/references/xml/dubbo-registry.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-registry.html',
                             },
                             {
                                 title: 'dubbo:monitor',
-                                link: '/docs/user/references/xml/dubbo-monitor.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-monitor.html',
                             },
                             {
                                 title: 'dubbo:application',
-                                link: '/docs/user/references/xml/dubbo-application.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-application.html',
                             },
                             {
                                 title: 'dubbo:module',
-                                link: '/docs/user/references/xml/dubbo-module.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-module.html',
                             },
                             {
                                 title: 'dubbo:provider',
-                                link: '/docs/user/references/xml/dubbo-provider.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-provider.html',
                             },
                             {
                                 title: 'dubbo:consumer',
-                                link: '/docs/user/references/xml/dubbo-consumer.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-consumer.html',
                             },
                             {
                                 title: 'dubbo:method',
-                                link: '/docs/user/references/xml/dubbo-method.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-method.html',
                             },
                             {
                                 title: 'dubbo:argument',
-                                link: '/docs/user/references/xml/dubbo-argument.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-argument.html',
                             },
                             {
                                 title: 'dubbo:parameter',
-                                link: '/docs/user/references/xml/dubbo-parameter.md',
+                                link: '/en-us/docs/user/references/xml/dubbo-parameter.html',
                             },
                         ]
                     },
@@ -305,43 +305,43 @@ export default {
                         children: [
                             {
                                 title: 'Introduction',
-                                link: '/docs/user/references/protocol/introduction.md',
+                                link: '/en-us/docs/user/references/protocol/introduction.html',
                             },
                             {
                                 title: 'dubbo://',
-                                link: '/docs/user/references/protocol/dubbo.md',
+                                link: '/en-us/docs/user/references/protocol/dubbo.html',
                             },
                             {
                                 title: 'rmi://',
-                                link: '/docs/user/references/protocol/rmi.md',
+                                link: '/en-us/docs/user/references/protocol/rmi.html',
                             },
                             {
                                 title: 'hessian://',
-                                link: '/docs/user/references/protocol/hessian.md',
+                                link: '/en-us/docs/user/references/protocol/hessian.html',
                             },
                             {
                                 title: 'http://',
-                                link: '/docs/user/references/protocol/http.md',
+                                link: '/en-us/docs/user/references/protocol/http.html',
                             },
                             {
                                 title: 'webservice://',
-                                link: '/docs/user/references/protocol/webservice.md',
+                                link: '/en-us/docs/user/references/protocol/webservice.html',
                             },
                             {
                                 title: 'thrift://',
-                                link: '/docs/user/references/protocol/thrift.md',
+                                link: '/en-us/docs/user/references/protocol/thrift.html',
                             },
                             {
                                 title: 'memcached://',
-                                link: '/docs/user/references/protocol/memcached.md',
+                                link: '/en-us/docs/user/references/protocol/memcached.html',
                             },
                             {
                                 title: 'redis://',
-                                link: '/docs/user/references/protocol/redis.md',
+                                link: '/en-us/docs/user/references/protocol/redis.html',
                             },
                             {
                                 title: 'rest://',
-                                link: '/docs/user/references/protocol/rest.md',
+                                link: '/en-us/docs/user/references/protocol/rest.html',
                             },
                         ]
                     },
@@ -350,53 +350,53 @@ export default {
                         children: [
                             {
                                 title: 'Introduction',
-                                link: '/docs/user/references/registry/introduction.md',
+                                link: '/en-us/docs/user/references/registry/introduction.html',
                             },
                             {
                                 title: 'Multicast registry',
-                                link: '/docs/user/references/registry/multicast.md',
+                                link: '/en-us/docs/user/references/registry/multicast.html',
                             },
                             {
                                 title: 'Zookeeper registry',
-                                link: '/docs/user/references/registry/zookeeper.md',
+                                link: '/en-us/docs/user/references/registry/zookeeper.html',
                             },
                             {
                                 title: 'Redis registry',
-                                link: '/docs/user/references/registry/redis.md',
+                                link: '/en-us/docs/user/references/registry/redis.html',
                             },
                             {
                                 title: 'Simple registry',
-                                link: '/docs/user/references/registry/simple.md',
+                                link: '/en-us/docs/user/references/registry/simple.html',
                             },
                         ]
                     },
                     {
                         title: 'Telnet command',
-                        link: '/docs/user/references/telnet.md'
+                        link: '/en-us/docs/user/references/telnet.html'
                     },
                     {
                         title: 'Maven plugin',
-                        link: '/docs/user/references/maven.md'
+                        link: '/en-us/docs/user/references/maven.html'
                     },
                     {
                         title: 'Best practice',
-                        link: '/docs/user/best-practice.md'
+                        link: '/en-us/docs/user/best-practice.html'
                     },
                     {
                         title: 'Recommended usage',
-                        link: '/docs/user/recommend.md'
+                        link: '/en-us/docs/user/recommend.html'
                     },
                     {
                         title: 'Capacity plan',
-                        link: '/docs/user/capacity-plan.md'
+                        link: '/en-us/docs/user/capacity-plan.html'
                     },
                     {
                         title: 'Performance testing reports',
-                        link: '/docs/user/perf-test.md'
+                        link: '/en-us/docs/user/perf-test.html'
                     },
                     {
                         title: 'Test coverage report',
-                        link: '/docs/user/coveragence.md'
+                        link: '/en-us/docs/user/coveragence.html'
                     }
                 ],
             },
@@ -405,156 +405,156 @@ export default {
                 children: [
                     {
                         title: 'How To Build',
-                        link: '/docs/dev/build.md'
+                        link: '/en-us/docs/dev/build.html'
                     },
                     {
                         title: 'Architecture',
-                        link: '/docs/dev/design.md'
+                        link: '/en-us/docs/dev/design.html'
                     },
                     {
                         title: 'How SPI Works',
-                        link: '/docs/dev/SPI.md'
+                        link: '/en-us/docs/dev/SPI.html'
                     },
                     {
                         title: 'Init, Process, Protocols',
-                        link: '/docs/dev/implementation.md'
+                        link: '/en-us/docs/dev/implementation.html'
                     },
                     {
                         title: 'SPI Extensions',
                         children: [
                             {
                                 title: 'Protocol',
-                                link: '/docs/dev/impls/protocol.md'
+                                link: '/en-us/docs/dev/impls/protocol.html'
                             },
                             {
                                 title: 'Filter',
-                                link: '/docs/dev/impls/filter.md'
+                                link: '/en-us/docs/dev/impls/filter.html'
                             },
                             {
                                 title: 'InvokerListener',
-                                link: '/docs/dev/impls/invoker-listener.md'
+                                link: '/en-us/docs/dev/impls/invoker-listener.html'
                             },
                             {
                                 title: 'ExporterListener',
-                                link: '/docs/dev/impls/exporter-listener.md'
+                                link: '/en-us/docs/dev/impls/exporter-listener.html'
                             },
                             {
                                 title: 'Cluster',
-                                link: '/docs/dev/impls/cluster.md'
+                                link: '/en-us/docs/dev/impls/cluster.html'
                             },
                             {
                                 title: 'Router',
-                                link: '/docs/dev/impls/router.md'
+                                link: '/en-us/docs/dev/impls/router.html'
                             },
                             {
                                 title: 'LoadBalance',
-                                link: '/docs/dev/impls/load-balance.md'
+                                link: '/en-us/docs/dev/impls/load-balance.html'
                             },
                             {
                                 title: 'Merger',
-                                link: '/docs/dev/impls/merger.md'
+                                link: '/en-us/docs/dev/impls/merger.html'
                             },
                             {
                                 title: 'Registry',
-                                link: '/docs/dev/impls/registry.md'
+                                link: '/en-us/docs/dev/impls/registry.html'
                             },
                             {
                                 title: 'Monitor',
-                                link: '/docs/dev/impls/monitor.md'
+                                link: '/en-us/docs/dev/impls/monitor.html'
                             },
                             {
                                 title: 'ExtensionFactory',
-                                link: '/docs/dev/impls/extension-factory.md'
+                                link: '/en-us/docs/dev/impls/extension-factory.html'
                             },
                             {
                                 title: 'ProxyFactory',
-                                link: '/docs/dev/impls/proxy-factory.md'
+                                link: '/en-us/docs/dev/impls/proxy-factory.html'
                             },
                             {
                                 title: 'Compiler',
-                                link: '/docs/dev/impls/compiler.md'
+                                link: '/en-us/docs/dev/impls/compiler.html'
                             },
                             {
                                 title: 'Dispatcher',
-                                link: '/docs/dev/impls/dispatcher.md'
+                                link: '/en-us/docs/dev/impls/dispatcher.html'
                             },
                             {
                                 title: 'Threadpool',
-                                link: '/docs/dev/impls/threadpool.md'
+                                link: '/en-us/docs/dev/impls/threadpool.html'
                             },
                             {
                                 title: 'Serialization',
-                                link: '/docs/dev/impls/serialize.md'
+                                link: '/en-us/docs/dev/impls/serialize.html'
                             },
                             {
                                 title: 'Remoting',
-                                link: '/docs/dev/impls/remoting.md'
+                                link: '/en-us/docs/dev/impls/remoting.html'
                             },
                             {
                                 title: 'Exchanger',
-                                link: '/docs/dev/impls/exchanger.md'
+                                link: '/en-us/docs/dev/impls/exchanger.html'
                             },
                             {
                                 title: 'Networker',
-                                link: '/docs/dev/impls/networker.md'
+                                link: '/en-us/docs/dev/impls/networker.html'
                             },
                             {
                                 title: 'TelnetHandler',
-                                link: '/docs/dev/impls/telnet-handler.md'
+                                link: '/en-us/docs/dev/impls/telnet-handler.html'
                             },
                             {
                                 title: 'StatusChecker',
-                                link: '/docs/dev/impls/status-checker.md'
+                                link: '/en-us/docs/dev/impls/status-checker.html'
                             },
                             {
                                 title: 'Container',
-                                link: '/docs/dev/impls/container.md'
+                                link: '/en-us/docs/dev/impls/container.html'
                             },
                             {
                                 title: 'PageHandler',
-                                link: '/docs/dev/impls/page.md'
+                                link: '/en-us/docs/dev/impls/page.html'
                             },
                             {
                                 title: 'Cache',
-                                link: '/docs/dev/impls/cache.md'
+                                link: '/en-us/docs/dev/impls/cache.html'
                             },
                             {
                                 title: 'Validation',
-                                link: '/docs/dev/impls/validation.md'
+                                link: '/en-us/docs/dev/impls/validation.html'
                             },
                             {
                                 title: 'LoggerAdapter',
-                                link: '/docs/dev/impls/logger-adapter.md'
+                                link: '/en-us/docs/dev/impls/logger-adapter.html'
                             }
                         ]
                     },
                     {
                         title: 'Contract',
-                        link: '/docs/dev/contract.md'
+                        link: '/en-us/docs/dev/contract.html'
                     },
                     {
                         title: 'Code Style',
-                        link: '/docs/dev/coding.md'
+                        link: '/en-us/docs/dev/coding.html'
                     },
                     {
                         title: 'Versions',
-                        link: '/docs/dev/release.md'
+                        link: '/en-us/docs/dev/release.html'
                     },
                     {
                         title: 'Contribution',
-                        link: '/docs/dev/contribution.md'
+                        link: '/en-us/docs/dev/contribution.html'
                     },
                     {
                         title: 'Checklist',
-                        link: '/docs/dev/checklist.md'
+                        link: '/en-us/docs/dev/checklist.html'
                     },
                     {
                         title: 'Code Smell',
-                        link: '/docs/dev/code-smell.md'
+                        link: '/en-us/docs/dev/code-smell.html'
                     },
                     {
                         title: 'TCK',
-                        link: '/docs/dev/TCK.md'
+                        link: '/en-us/docs/dev/TCK.html'
                     }
                 ],
             },
@@ -566,31 +566,31 @@ export default {
                         children: [
                             {
                                 title: 'Install provider demo',
-                                link: '/docs/admin/install/provider-demo.md'
+                                link: '/en-us/docs/admin/install/provider-demo.html'
                             },
                             {
                                 title: 'Install consumer demo',
-                                link: '/docs/admin/install/consumer-demo.md'
+                                link: '/en-us/docs/admin/install/consumer-demo.html'
                             },
                             {
                                 title: 'Install Zookeeper configuration center',
-                                link: '/docs/admin/install/zookeeper.md'
+                                link: '/en-us/docs/admin/install/zookeeper.html'
                             },
                             {
                                 title: 'Install Redis configuration center',
-                                link: '/docs/admin/install/redis.md'
+                                link: '/en-us/docs/admin/install/redis.html'
                             },
                             {
                                 title: 'Install Simple configuration center',
-                                link: '/docs/admin/install/simple-registry-center.md'
+                                link: '/en-us/docs/admin/install/simple-registry-center.html'
                             },
                             {
                                 title: 'Install Simple monitor center',
-                                link: '/docs/admin/install/simple-monitor-center.md'
+                                link: '/en-us/docs/admin/install/simple-monitor-center.html'
                             },
                             {
                                 title: 'Install admin console',
-                                link: '/docs/admin/install/admin-console.md'
+                                link: '/en-us/docs/admin/install/admin-console.html'
                             }
                         ],
                     },
@@ -599,11 +599,11 @@ export default {
                         children: [
                             {
                                 title: 'Admin console operation guide',
-                                link: '/docs/admin/ops/dubbo-ops.md'
+                                link: '/en-us/docs/admin/ops/dubbo-ops.html'
                             },
                             {
                                 title: 'Tracking with Pinpoint',
-                                link: '/docs/admin/ops/pinpoint.md'
+                                link: '/en-us/docs/admin/ops/pinpoint.html'
                             }
                         ]
                     }
@@ -623,52 +623,52 @@ export default {
                         children: [
                             {
                                 title: '背景',
-                                link: '/docs/user/preface/background.md',
+                                link: '/zh-cn/docs/user/preface/background.html',
                             },
                             {
                                 title: '需求',
-                                link: '/docs/user/preface/requirements.md',
+                                link: '/zh-cn/docs/user/preface/requirements.html',
                             },
                             {
                                 title: '架构',
-                                link: '/docs/user/preface/architecture.md'
+                                link: '/zh-cn/docs/user/preface/architecture.html'
                             },
                             {
                                 title: '用法',
-                                link: '/docs/user/preface/usage.md'
+                                link: '/zh-cn/docs/user/preface/usage.html'
                             }
                         ],
                     },
                     {
                         title: '快速启动',
-                        link: '/docs/user/quick-start.md'
+                        link: '/zh-cn/docs/user/quick-start.html'
                     },
                     {
                         title: '依赖',
-                        link: '/docs/user/dependencies.md'
+                        link: '/zh-cn/docs/user/dependencies.html'
                     },
                     {
                         title: '成熟度',
-                        link: '/docs/user/maturity.md'
+                        link: '/zh-cn/docs/user/maturity.html'
                     },
                     {
                         title: '配置',
                         children: [
                             {
                                 title: 'XML配置',
-                                link: '/docs/user/configuration/xml.md',
+                                link: '/zh-cn/docs/user/configuration/xml.html',
                             },
                             {
                                 title: '属性配置',
-                                link: '/docs/user/configuration/properties.md',
+                                link: '/zh-cn/docs/user/configuration/properties.html',
                             },
                             {
                                 title: 'API配置',
-                                link: '/docs/user/configuration/api.md'
+                                link: '/zh-cn/docs/user/configuration/api.html'
                             },
                             {
                                 title: '注解配置',
-                                link: '/docs/user/configuration/annotation.md'
+                                link: '/zh-cn/docs/user/configuration/annotation.html'
                             }
                         ],
                     },
@@ -677,244 +677,244 @@ export default {
                         children: [
                             {
                                 title: '启动时检查',
-                                link: '/docs/user/demos/preflight-check.md',
+                                link: '/zh-cn/docs/user/demos/preflight-check.html',
                             },
                             {
                                 title: '集群容错',
-                                link: '/docs/user/demos/fault-tolerent-strategy.md',
+                                link: '/zh-cn/docs/user/demos/fault-tolerent-strategy.html',
                             },
                             {
                                 title: '负载均衡',
-                                link: '/docs/user/demos/loadbalance.md'
+                                link: '/zh-cn/docs/user/demos/loadbalance.html'
                             },
                             {
                                 title: '线程模型',
-                                link: '/docs/user/demos/thread-model.md'
+                                link: '/zh-cn/docs/user/demos/thread-model.html'
                             },
                             {
                                 title: '直连提供者',
-                                link: '/docs/user/demos/explicit-target.md',
+                                link: '/zh-cn/docs/user/demos/explicit-target.html',
                             },
                             {
                                 title: '只订阅',
-                                link: '/docs/user/demos/subscribe-only.md',
+                                link: '/zh-cn/docs/user/demos/subscribe-only.html',
                             },
                             {
                                 title: '只注册',
-                                link: '/docs/user/demos/registry-only.md'
+                                link: '/zh-cn/docs/user/demos/registry-only.html'
                             },
                             {
                                 title: '静态服务',
-                                link: '/docs/user/demos/static-service.md'
+                                link: '/zh-cn/docs/user/demos/static-service.html'
                             },
                             {
                                 title: '多协议',
-                                link: '/docs/user/demos/multi-protocols.md',
+                                link: '/zh-cn/docs/user/demos/multi-protocols.html',
                             },
                             {
                                 title: '多注册中心',
-                                link: '/docs/user/demos/multi-registry.md',
+                                link: '/zh-cn/docs/user/demos/multi-registry.html',
                             },
                             {
                                 title: '服务分组',
-                                link: '/docs/user/demos/service-group.md'
+                                link: '/zh-cn/docs/user/demos/service-group.html'
                             },
                             {
                                 title: '多版本',
-                                link: '/docs/user/demos/multi-versions.md'
+                                link: '/zh-cn/docs/user/demos/multi-versions.html'
                             },
                             {
                                 title: '分组聚合',
-                                link: '/docs/user/demos/group-merger.md',
+                                link: '/zh-cn/docs/user/demos/group-merger.html',
                             },
                             {
                                 title: '参数验证',
-                                link: '/docs/user/demos/parameter-validation.md',
+                                link: '/zh-cn/docs/user/demos/parameter-validation.html',
                             },
                             {
                                 title: '结果缓存',
-                                link: '/docs/user/demos/result-cache.md'
+                                link: '/zh-cn/docs/user/demos/result-cache.html'
                             },
                             {
                                 title: '泛化引用',
-                                link: '/docs/user/demos/generic-reference.md'
+                                link: '/zh-cn/docs/user/demos/generic-reference.html'
                             },
                             {
                                 title: '泛化实现',
-                                link: '/docs/user/demos/generic-service.md',
+                                link: '/zh-cn/docs/user/demos/generic-service.html',
                             },
                             {
                                 title: '回声测试',
-                                link: '/docs/user/demos/echo-service.md',
+                                link: '/zh-cn/docs/user/demos/echo-service.html',
                             },
                             {
                                 title: '上下文信息',
-                                link: '/docs/user/demos/context.md'
+                                link: '/zh-cn/docs/user/demos/context.html'
                             },
                             {
                                 title: '隐式参数',
-                                link: '/docs/user/demos/attachment.md'
+                                link: '/zh-cn/docs/user/demos/attachment.html'
                             },
                             {
                                 title: '异步调用',
-                                link: '/docs/user/demos/async-call.md',
+                                link: '/zh-cn/docs/user/demos/async-call.html',
                             },
                             {
                                 title: '本地调用',
-                                link: '/docs/user/demos/local-call.md',
+                                link: '/zh-cn/docs/user/demos/local-call.html',
                             },
                             {
                                 title: '参数回调',
-                                link: '/docs/user/demos/callback-parameter.md'
+                                link: '/zh-cn/docs/user/demos/callback-parameter.html'
                             },
                             {
                                 title: '事件通知',
-                                link: '/docs/user/demos/events-notify.md'
+                                link: '/zh-cn/docs/user/demos/events-notify.html'
                             },
                             {
                                 title: '本地存根',
-                                link: '/docs/user/demos/local-stub.md',
+                                link: '/zh-cn/docs/user/demos/local-stub.html',
                             },
                             {
                                 title: '本地伪装',
-                                link: '/docs/user/demos/local-mock.md',
+                                link: '/zh-cn/docs/user/demos/local-mock.html',
                             },
                             {
                                 title: '延迟暴露',
-                                link: '/docs/user/demos/delay-publish.md'
+                                link: '/zh-cn/docs/user/demos/delay-publish.html'
                             },
                             {
                                 title: '并发控制',
-                                link: '/docs/user/demos/concurrency-control.md'
+                                link: '/zh-cn/docs/user/demos/concurrency-control.html'
                             },
                             {
                                 title: '连接控制',
-                                link: '/docs/user/demos/config-connections.md',
+                                link: '/zh-cn/docs/user/demos/config-connections.html',
                             },
                             {
                                 title: '延迟连接',
-                                link: '/docs/user/demos/lazy-connect.md',
+                                link: '/zh-cn/docs/user/demos/lazy-connect.html',
                             },
                             {
                                 title: '粘滞连接',
-                                link: '/docs/user/demos/stickiness.md'
+                                link: '/zh-cn/docs/user/demos/stickiness.html'
                             },
                             {
                                 title: '令牌验证',
-                                link: '/docs/user/demos/token-authorization.md'
+                                link: '/zh-cn/docs/user/demos/token-authorization.html'
                             },
                             {
                                 title: '路由规则',
-                                link: '/docs/user/demos/routing-rule.md',
+                                link: '/zh-cn/docs/user/demos/routing-rule.html',
                             },
                             {
                                 title: '配置规则',
-                                link: '/docs/user/demos/config-rule.md',
+                                link: '/zh-cn/docs/user/demos/config-rule.html',
                             },
                             {
                                 title: '服务降级',
-                                link: '/docs/user/demos/service-downgrade.md'
+                                link: '/zh-cn/docs/user/demos/service-downgrade.html'
                             },
                             {
                                 title: '优雅停机',
-                                link: '/docs/user/demos/graceful-shutdown.md'
+                                link: '/zh-cn/docs/user/demos/graceful-shutdown.html'
                             },
                             {
                                 title: '主机绑定',
-                                link: '/docs/user/demos/hostname-binding.md',
+                                link: '/zh-cn/docs/user/demos/hostname-binding.html',
                             },
                             {
                                 title: '日志适配',
-                                link: '/docs/user/demos/logger-strategy.md',
+                                link: '/zh-cn/docs/user/demos/logger-strategy.html',
                             },
                             {
                                 title: '访问日志',
-                                link: '/docs/user/demos/accesslog.md'
+                                link: '/zh-cn/docs/user/demos/accesslog.html'
                             },
                             {
                                 title: '服务容器',
-                                link: '/docs/user/demos/service-container.md'
+                                link: '/zh-cn/docs/user/demos/service-container.html'
                             },
                             {
                                 title: 'Reference Config 缓存',
-                                link: '/docs/user/demos/reference-config-cache.md',
+                                link: '/zh-cn/docs/user/demos/reference-config-cache.html',
                             },
                             {
                                 title: '分布式事务',
-                                link: '/docs/user/demos/distributed-transaction.md',
+                                link: '/zh-cn/docs/user/demos/distributed-transaction.html',
                             },
                             {
                                 title: '线程栈自动dump',
-                                link: '/docs/user/demos/dump.md'
+                                link: '/zh-cn/docs/user/demos/dump.html'
                             },
                             {
                                 title: 'Netty4',
-                                link: '/docs/user/demos/netty4.md'
+                                link: '/zh-cn/docs/user/demos/netty4.html'
                             },
                             {
                                 title: 'Kryo和FST序列化',
-                                link: '/docs/user/demos/serialization.md',
+                                link: '/zh-cn/docs/user/demos/serialization.html',
                             },
                         ],
                     },
                     {
                         title: 'API配置参考手册',
-                        link: '/docs/user/references/api.md'
+                        link: '/zh-cn/docs/user/references/api.html'
                     },
                     {
                         title: 'schema配置参考手册',
                         children: [
                             {
                                 title: '介绍',
-                                link: '/docs/user/references/xml/introduction.md',
+                                link: '/zh-cn/docs/user/references/xml/introduction.html',
                             },
                             {
                                 title: 'dubbo:service',
-                                link: '/docs/user/references/xml/dubbo-service.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-service.html',
                             },
                             {
                                 title: 'dubbo:reference',
-                                link: '/docs/user/references/xml/dubbo-reference.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-reference.html',
                             },
                             {
                                 title: 'dubbo:protocol',
-                                link: '/docs/user/references/xml/dubbo-protocol.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-protocol.html',
                             },
                             {
                                 title: 'dubbo:registry',
-                                link: '/docs/user/references/xml/dubbo-registry.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-registry.html',
                             },
                             {
                                 title: 'dubbo:monitor',
-                                link: '/docs/user/references/xml/dubbo-monitor.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-monitor.html',
                             },
                             {
                                 title: 'dubbo:application',
-                                link: '/docs/user/references/xml/dubbo-application.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-application.html',
                             },
                             {
                                 title: 'dubbo:module',
-                                link: '/docs/user/references/xml/dubbo-module.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-module.html',
                             },
                             {
                                 title: 'dubbo:provider',
-                                link: '/docs/user/references/xml/dubbo-provider.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-provider.html',
                             },
                             {
                                 title: 'dubbo:consumer',
-                                link: '/docs/user/references/xml/dubbo-consumer.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-consumer.html',
                             },
                             {
                                 title: 'dubbo:method',
-                                link: '/docs/user/references/xml/dubbo-method.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-method.html',
                             },
                             {
                                 title: 'dubbo:argument',
-                                link: '/docs/user/references/xml/dubbo-argument.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-argument.html',
                             },
                             {
                                 title: 'dubbo:parameter',
-                                link: '/docs/user/references/xml/dubbo-parameter.md',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-parameter.html',
                             },
                         ]
                     },
@@ -923,43 +923,43 @@ export default {
                         children: [
                             {
                                 title: '介绍',
-                                link: '/docs/user/references/protocol/introduction.md',
+                                link: '/zh-cn/docs/user/references/protocol/introduction.html',
                             },
                             {
                                 title: 'dubbo://',
-                                link: '/docs/user/references/protocol/dubbo.md',
+                                link: '/zh-cn/docs/user/references/protocol/dubbo.html',
                             },
                             {
                                 title: 'rmi://',
-                                link: '/docs/user/references/protocol/rmi.md',
+                                link: '/zh-cn/docs/user/references/protocol/rmi.html',
                             },
                             {
                                 title: 'hessian://',
-                                link: '/docs/user/references/protocol/hessian.md',
+                                link: '/zh-cn/docs/user/references/protocol/hessian.html',
                             },
                             {
                                 title: 'http://',
-                                link: '/docs/user/references/protocol/http.md',
+                                link: '/zh-cn/docs/user/references/protocol/http.html',
                             },
                             {
                                 title: 'webservice://',
-                                link: '/docs/user/references/protocol/webservice.md',
+                                link: '/zh-cn/docs/user/references/protocol/webservice.html',
                             },
                             {
                                 title: 'thrift://',
-                                link: '/docs/user/references/protocol/thrift.md',
+                                link: '/zh-cn/docs/user/references/protocol/thrift.html',
                             },
                             {
                                 title: 'memcached://',
-                                link: '/docs/user/references/protocol/memcached.md',
+                                link: '/zh-cn/docs/user/references/protocol/memcached.html',
                             },
                             {
                                 title: 'redis://',
-                                link: '/docs/user/references/protocol/redis.md',
+                                link: '/zh-cn/docs/user/references/protocol/redis.html',
                             },
                             {
                                 title: 'rest://',
-                                link: '/docs/user/references/protocol/rest.md',
+                                link: '/zh-cn/docs/user/references/protocol/rest.html',
                             },
                         ]
                     },
@@ -968,57 +968,57 @@ export default {
                         children: [
                             {
                                 title: '介绍',
-                                link: '/docs/user/references/registry/introduction.md',
+                                link: '/zh-cn/docs/user/references/registry/introduction.html',
                             },
                             {
                                 title: 'Multicast 注册中心',
-                                link: '/docs/user/references/registry/multicast.md',
+                                link: '/zh-cn/docs/user/references/registry/multicast.html',
                             },
                             {
                                 title: 'Zookeeper 注册中心',
-                                link: '/docs/user/references/registry/zookeeper.md',
+                                link: '/zh-cn/docs/user/references/registry/zookeeper.html',
                             },
                             {
                                 title: 'Redis 注册中心',
-                                link: '/docs/user/references/registry/redis.md',
+                                link: '/zh-cn/docs/user/references/registry/redis.html',
                             },
                             {
                                 title: 'Simple 注册中心',
-                                link: '/docs/user/references/registry/simple.md',
+                                link: '/zh-cn/docs/user/references/registry/simple.html',
                             },
                         ]
                     },
                     {
                         title: 'telnet命令参考手册',
-                        link: '/docs/user/references/telnet.md'
+                        link: '/zh-cn/docs/user/references/telnet.html'
                     },
                     {
                         title: '在线运维命令-QOS',
-                        link: '/docs/user/references/qos.md'
+                        link: '/zh-cn/docs/user/references/qos.html'
                     },
                     {
                         title: 'maven插件参考手册',
-                        link: '/docs/user/references/maven.md'
+                        link: '/zh-cn/docs/user/references/maven.html'
                     },
                     {
                         title: '服务化最佳实践',
-                        link: '/docs/user/best-practice.md'
+                        link: '/zh-cn/docs/user/best-practice.html'
                     },
                     {
                         title: '推荐用法',
-                        link: '/docs/user/recommend.md'
+                        link: '/zh-cn/docs/user/recommend.html'
                     },
                     {
                         title: '容量规划',
-                        link: '/docs/user/capacity-plan.md'
+                        link: '/zh-cn/docs/user/capacity-plan.html'
                     },
                     {
                         title: '性能测试报告',
-                        link: '/docs/user/perf-test.md'
+                        link: '/zh-cn/docs/user/perf-test.html'
                     },
                     {
                         title: '测试覆盖率报告',
-                        link: '/docs/user/coveragence.md'
+                        link: '/zh-cn/docs/user/coveragence.html'
                     }
                 ],
             },
@@ -1027,189 +1027,189 @@ export default {
                 children: [
                     {
                         title: '源码构建',
-                        link: '/docs/dev/build.md'
+                        link: '/zh-cn/docs/dev/build.html'
                     },
                     {
                         title: '框架设计',
-                        link: '/docs/dev/design.md'
+                        link: '/zh-cn/docs/dev/design.html'
                     },
                     {
                         title: '扩展点加载',
-                        link: '/docs/dev/SPI.md'
+                        link: '/zh-cn/docs/dev/SPI.html'
                     },
                     {
                         title: '实现细节',
-                        link: '/docs/dev/implementation.md'
+                        link: '/zh-cn/docs/dev/implementation.html'
                     },
                     {
                         title: 'SPI 扩展实现',
                         children: [
                             {
                                 title: '协议扩展',
-                                link: '/docs/dev/impls/protocol.md'
+                                link: '/zh-cn/docs/dev/impls/protocol.html'
                             },
                             {
                                 title: '调用拦截扩展',
-                                link: '/docs/dev/impls/filter.md'
+                                link: '/zh-cn/docs/dev/impls/filter.html'
                             },
                             {
                                 title: '引用监听扩展',
-                                link: '/docs/dev/impls/invoker-listener.md'
+                                link: '/zh-cn/docs/dev/impls/invoker-listener.html'
                             },
                             {
                                 title: '暴露监听扩展',
-                                link: '/docs/dev/impls/exporter-listener.md'
+                                link: '/zh-cn/docs/dev/impls/exporter-listener.html'
                             },
                             {
                                 title: '集群扩展',
-                                link: '/docs/dev/impls/cluster.md'
+                                link: '/zh-cn/docs/dev/impls/cluster.html'
                             },
                             {
                                 title: '路由扩展',
-                                link: '/docs/dev/impls/router.md'
+                                link: '/zh-cn/docs/dev/impls/router.html'
                             },
                             {
                                 title: '负载均衡扩展',
-                                link: '/docs/dev/impls/load-balance.md'
+                                link: '/zh-cn/docs/dev/impls/load-balance.html'
                             },
                             {
                                 title: '合并结果扩展',
-                                link: '/docs/dev/impls/merger.md'
+                                link: '/zh-cn/docs/dev/impls/merger.html'
                             },
                             {
                                 title: '注册中心扩展',
-                                link: '/docs/dev/impls/registry.md'
+                                link: '/zh-cn/docs/dev/impls/registry.html'
                             },
                             {
                                 title: '监控中心扩展',
-                                link: '/docs/dev/impls/monitor.md'
+                                link: '/zh-cn/docs/dev/impls/monitor.html'
                             },
                             {
                                 title: '扩展点加载扩展',
-                                link: '/docs/dev/impls/extension-factory.md'
+                                link: '/zh-cn/docs/dev/impls/extension-factory.html'
                             },
                             {
                                 title: '动态代理扩展',
-                                link: '/docs/dev/impls/proxy-factory.md'
+                                link: '/zh-cn/docs/dev/impls/proxy-factory.html'
                             },
                             {
                                 title: '编译器扩展',
-                                link: '/docs/dev/impls/compiler.md'
+                                link: '/zh-cn/docs/dev/impls/compiler.html'
                             },
                             {
                                 title: '消息派发扩展',
-                                link: '/docs/dev/impls/dispatcher.md'
+                                link: '/zh-cn/docs/dev/impls/dispatcher.html'
                             },
                             {
                                 title: '线程池扩展',
-                                link: '/docs/dev/impls/threadpool.md'
+                                link: '/zh-cn/docs/dev/impls/threadpool.html'
                             },
                             {
                                 title: '序列化扩展',
-                                link: '/docs/dev/impls/serialize.md'
+                                link: '/zh-cn/docs/dev/impls/serialize.html'
                             },
                             {
                                 title: '网络传输扩展',
-                                link: '/docs/dev/impls/remoting.md'
+                                link: '/zh-cn/docs/dev/impls/remoting.html'
                             },
                             {
                                 title: '信息交换扩展',
-                                link: '/docs/dev/impls/exchanger.md'
+                                link: '/zh-cn/docs/dev/impls/exchanger.html'
                             },
                             {
                                 title: '组网扩展',
-                                link: '/docs/dev/impls/networker.md'
+                                link: '/zh-cn/docs/dev/impls/networker.html'
                             },
                             {
                                 title: 'Telnet 命令扩展',
-                                link: '/docs/dev/impls/telnet-handler.md'
+                                link: '/zh-cn/docs/dev/impls/telnet-handler.html'
                             },
                             {
                                 title: '状态检查扩展',
-                                link: '/docs/dev/impls/status-checker.md'
+                                link: '/zh-cn/docs/dev/impls/status-checker.html'
                             },
                             {
                                 title: '容器扩展',
-                                link: '/docs/dev/impls/container.md'
+                                link: '/zh-cn/docs/dev/impls/container.html'
                             },
                             {
                                 title: '页面扩展',
-                                link: '/docs/dev/impls/page.md'
+                                link: '/zh-cn/docs/dev/impls/page.html'
                             },
                             {
                                 title: '缓存扩展',
-                                link: '/docs/dev/impls/cache.md'
+                                link: '/zh-cn/docs/dev/impls/cache.html'
                             },
                             {
                                 title: '验证扩展',
-                                link: '/docs/dev/impls/validation.md'
+                                link: '/zh-cn/docs/dev/impls/validation.html'
                             },
                             {
                                 title: '日志适配扩展',
-                                link: '/docs/dev/impls/logger-adapter.md'
+                                link: '/zh-cn/docs/dev/impls/logger-adapter.html'
                             }
                         ]
                     },
                     {
                         title: '公共契约',
-                        link: '/docs/dev/contract.md'
+                        link: '/zh-cn/docs/dev/contract.html'
                     },
                     {
                         title: '编码约定',
-                        link: '/docs/dev/coding.md'
+                        link: '/zh-cn/docs/dev/coding.html'
                     },
                     {
                         title: '设计原则',
                         children: [
                             {
                                 title: '魔鬼在细节',
-                                link: '/docs/dev/principals/code-detail.md'
+                                link: '/zh-cn/docs/dev/principals/code-detail.html'
                             },
                             {
                                 title: '一些设计上的基本常识',
-                                link: '/docs/dev/principals/general-knowledge.md'
+                                link: '/zh-cn/docs/dev/principals/general-knowledge.html'
                             },
                             {
                                 title: '谈谈扩充式扩展与增量式扩展',
-                                link: '/docs/dev/principals/expansibility.md'
+                                link: '/zh-cn/docs/dev/principals/expansibility.html'
                             },
                             {
                                 title: '配置设计',
-                                link: '/docs/dev/principals/configuration.md'
+                                link: '/zh-cn/docs/dev/principals/configuration.html'
                             },
                             {
                                 title: '设计实现的健壮性',
-                                link: '/docs/dev/principals/robustness.md'
+                                link: '/zh-cn/docs/dev/principals/robustness.html'
                             },
                             {
                                 title: '防痴呆设计',
-                                link: '/docs/dev/principals/dummy.md'
+                                link: '/zh-cn/docs/dev/principals/dummy.html'
                             },
                             {
                                 title: '扩展点重构',
-                                link: '/docs/dev/principals/extension.md'
+                                link: '/zh-cn/docs/dev/principals/extension.html'
                             }
                         ],
                     },
                     {
                         title: '版本管理',
-                        link: '/docs/dev/release.md'
+                        link: '/zh-cn/docs/dev/release.html'
                     },
                     {
                         title: '贡献',
-                        link: '/docs/dev/contribution.md'
+                        link: '/zh-cn/docs/dev/contribution.html'
                     },
                     {
                         title: '检查列表',
-                        link: '/docs/dev/checklist.md'
+                        link: '/zh-cn/docs/dev/checklist.html'
                     },
                     {
                         title: '坏味道',
-                        link: '/docs/dev/code-smell.md'
+                        link: '/zh-cn/docs/dev/code-smell.html'
                     },
                     {
                         title: '技术兼容性测试',
-                        link: '/docs/dev/TCK.md'
+                        link: '/zh-cn/docs/dev/TCK.html'
                     }
                 ],
             },
@@ -1221,31 +1221,31 @@ export default {
                         children: [
                             {
                                 title: '示例提供者安装',
-                                link: '/docs/admin/install/provider-demo.md'
+                                link: '/zh-cn/docs/admin/install/provider-demo.html'
                             },
                             {
                                 title: '示例消费者安装',
-                                link: '/docs/admin/install/consumer-demo.md'
+                                link: '/zh-cn/docs/admin/install/consumer-demo.html'
                             },
                             {
                                 title: 'Zookeeper 注册中心安装',
-                                link: '/docs/admin/install/zookeeper.md'
+                                link: '/zh-cn/docs/admin/install/zookeeper.html'
                             },
                             {
                                 title: 'Redis 注册中心安装',
-                                link: '/docs/admin/install/redis.md'
+                                link: '/zh-cn/docs/admin/install/redis.html'
                             },
                             {
                                 title: 'Simple 注册中心安装',
-                                link: '/docs/admin/install/simple-registry-center.md'
+                                link: '/zh-cn/docs/admin/install/simple-registry-center.html'
                             },
                             {
                                 title: 'Simple 监控中心安装',
-                                link: '/docs/admin/install/simple-monitor-center.md'
+                                link: '/zh-cn/docs/admin/install/simple-monitor-center.html'
                             },
                             {
                                 title: '管理控制台安装',
-                                link: '/docs/admin/install/admin-console.md'
+                                link: '/zh-cn/docs/admin/install/admin-console.html'
                             }
                         ],
                     },
@@ -1254,11 +1254,11 @@ export default {
                         children: [
                             {
                                 title: '管理控制台运维',
-                                link: '/docs/admin/ops/dubbo-ops.md'
+                                link: '/zh-cn/docs/admin/ops/dubbo-ops.html'
                             },
                             {
                                 title: '使用Pinpoint做分布式跟踪',
-                                link: '/docs/admin/ops/pinpoint.md'
+                                link: '/zh-cn/docs/admin/ops/pinpoint.html'
                             }
                         ]
                     }

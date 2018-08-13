@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="pinpoint" />
+	<meta name="description" content="pinpoint" />
+	<!-- 网页标签标题 -->
+	<title>pinpoint</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-262747941"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>使用Pinpoint做分布式跟踪</h1>
+<p>在使用Dubbo进行服务化或者整合应用后，假设某个服务后台日志显示有异常，这个服务又被多个应用调用的情况下，我们通常很难判断是哪个应用调用的，问题的起因是什么，因此我们需要一套分布式跟踪系统来快速定位问题，Pinpoint可以帮助我们快速定位问题（当然，解决方案也不止这一种）。</p>
+<h2>什么是Pinpoint(摘自<a href="https://skyao.gitbooks.io/learning-pinpoint/">Pinpoint学习笔记</a>)</h2>
+<p><a href="https://github.com/naver/pinpoint">Pinpoint</a>是一个开源的 APM (Application Performance Management/应用性能管理)工具，用于基于java的大规模分布式系统。
+仿照Google Dapper，Pinpoint通过跟踪分布式应用之间的调用来提供解决方案，以帮助分析系统的总体结构和内部模块之间如何相互联系。</p>
+<blockquote>
+<p>注：对于各个模块之间的通讯英文原文中用的是transaction一词，但是我觉得如果翻译为&quot;事务&quot;容易引起误解，所以替换为&quot;交互&quot;或者&quot;调用&quot;这种比较直白的字眼。</p>
+</blockquote>
+<p>在使用上力图简单高效：</p>
+<ul>
+<li>安装agent，不需要修改哪怕一行代码</li>
+<li>最小化性能损失</li>
+</ul>
+<h3>服务器地图(ServerMap)</h3>
+<p>通过可视化分布式系统的模块和他们之间的相互联系来理解系统拓扑。点击某个节点会展示这个模块的详情，比如它当前的状态和请求数量。</p>
+<h3>实时活动线程图表(Realtime Active Thread Chart)</h3>
+<p>实时监控应用内部的活动线程。</p>
+<h3>请求/应答分布图表(Request/Response Scatter Chart)</h3>
+<p>长期可视化请求数量和应答模式来定位潜在问题。通过在图表上拉拽可以选择请求查看更多的详细信息。</p>
+<h3>调用栈(CallStack)</h3>
+<p>在分布式环境中为每个调用生成代码级别的可视图，在单个视图中定位瓶颈和失败点。</p>
+<h3>巡查(Inspector)</h3>
+<p>查看应用上的其他详细信息，比如CPU使用率，内存/垃圾回收，TPS，和JVM参数。</p>
+<h3>支持模块</h3>
+<ul>
+<li>JDK 6+</li>
+<li>Tomcat 6/7/8, Jetty 8/9, JBoss EAP 6, Resin 4, Websphere 6/7/8, Vertx 3.3/3.4/3.5</li>
+<li>Spring, Spring Boot (Embedded Tomcat, Jetty)</li>
+<li>Apache HTTP Client 3.x/4.x, JDK HttpConnector, GoogleHttpClient, OkHttpClient, NingAsyncHttpClient</li>
+<li>Thrift Client, Thrift Service, DUBBO PROVIDER, DUBBO CONSUMER</li>
+<li>ActiveMQ, RabbitMQ</li>
+<li>MySQL, Oracle, MSSQL, CUBRID,POSTGRESQL, MARIA</li>
+<li>Arcus, Memcached, Redis, CASSANDRA</li>
+<li>iBATIS, MyBatis</li>
+<li>DBCP, DBCP2, HIKARICP</li>
+<li>gson, Jackson, Json Lib</li>
+<li>log4j, Logback</li>
+<li>自定义模块</li>
+</ul>
+<h2>Pinpoint与Dubbo的结合</h2>
+<h3>启动Pinpoint</h3>
+<p>参考Pinpoint的<a href="http://naver.github.io/pinpoint/quickstart.html">Quick start</a>搭建环境（不需要启动TestApp）</p>
+<h3>准备Dubbo示例程序</h3>
+<h4>创建API包</h4>
+<p>pom.xml</p>
+<pre><code class="language-xml"><span class="php"><span class="hljs-meta">&lt;?</span>xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span><span class="hljs-meta">?&gt;</span></span>
+<span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://maven.apache.org/POM/4.0.0"</span>
+         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>demo-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span>
+</code></pre>
+<p>新建API接口：</p>
+<pre><code>package com.example.demoapi;
+
+public interface HelloService {
+    String sayHello(String name);
+}
+</code></pre>
+<h4>实现 Dubbo 服务提供方</h4>
+<p>pom.xml</p>
+<pre><code class="language-xml"><span class="php"><span class="hljs-meta">&lt;?</span>xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span><span class="hljs-meta">?&gt;</span></span>
+<span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://maven.apache.org/POM/4.0.0"</span> <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>demo-provider<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">packaging</span>&gt;</span>jar<span class="hljs-tag">&lt;/<span class="hljs-name">packaging</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>demo-provider<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.0.3.RELEASE<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">relativePath</span>/&gt;</span> <span class="hljs-comment">&lt;!-- lookup parent from repository --&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="hljs-tag">&lt;/<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">project.reporting.outputEncoding</span>&gt;</span>UTF-8<span class="hljs-tag">&lt;/<span class="hljs-name">project.reporting.outputEncoding</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">java.version</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">java.version</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">repositories</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">repository</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>sonatype-nexus-snapshots<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">url</span>&gt;</span>https://oss.sonatype.org/content/repositories/snapshots<span class="hljs-tag">&lt;/<span class="hljs-name">url</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">releases</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">enabled</span>&gt;</span>false<span class="hljs-tag">&lt;/<span class="hljs-name">enabled</span>&gt;</span>
+			<span class="hljs-tag">&lt;/<span class="hljs-name">releases</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">snapshots</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">enabled</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">enabled</span>&gt;</span>
+			<span class="hljs-tag">&lt;/<span class="hljs-name">snapshots</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">repository</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">repositories</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>dubbo-spring-boot-starter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.2.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>demo-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-test<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">build</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">plugins</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">plugin</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+			<span class="hljs-tag">&lt;/<span class="hljs-name">plugin</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">plugins</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">build</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span>
+</code></pre>
+<ol>
+<li>实现 <code>HelloService</code> 接口：</li>
+</ol>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.example.demoprovider.provider;
+
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.config.annotation.Service;
+<span class="hljs-keyword">import</span> com.example.demoapi.HelloService;
+
+<span class="hljs-meta">@Service</span>(version = <span class="hljs-string">"${demo.service.version}"</span>,
+        application = <span class="hljs-string">"${dubbo.application.id}"</span>,
+        protocol = <span class="hljs-string">"${dubbo.protocol.id}"</span>,
+        registry = <span class="hljs-string">"${dubbo.registry.id}"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HelloServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">HelloService</span> </span>{
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>;
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        i++;
+        <span class="hljs-keyword">if</span> (i % <span class="hljs-number">3</span> == <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">"ex"</span>);
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"Hello "</span> + name + <span class="hljs-string">"!"</span>;
+    }
+}
+</code></pre>
+<ol start="2">
+<li>编写 Spring Boot 引导程序：</li>
+</ol>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.example.demoprovider;
+
+<span class="hljs-keyword">import</span> org.springframework.boot.SpringApplication;
+<span class="hljs-keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="hljs-meta">@SpringBootApplication</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoProviderApplication</span> </span>{
+
+	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+		SpringApplication.run(DemoProviderApplication.class, args);
+	}
+}
+</code></pre>
+<ol start="3">
+<li>配置 <code>application.properties</code>：</li>
+</ol>
+<pre><code class="language-properties"># Spring boot application
+spring.application.name = dubbo-provider-demo
+server.port = 9090
+management.port = 9091
+
+# Service version
+demo.service.version = 1.0.0
+
+# Base packages to scan Dubbo Components (e.g @Service , @Reference)
+dubbo.scan.basePackages  = com.example.demoprovider
+
+# Dubbo Config properties
+## ApplicationConfig Bean
+dubbo.application.id = dubbo-provider-demo
+dubbo.application.name = dubbo-provider-demo
+
+## ProtocolConfig Bean
+dubbo.protocol.id = dubbo
+dubbo.protocol.name = dubbo
+dubbo.protocol.port = 12345
+
+## RegistryConfig Bean
+dubbo.registry.id = my-registry
+dubbo.registry.address = N/A
+</code></pre>
+<h4>实现 Dubbo 服务消费方</h4>
+<p>pom.xml</p>
+<pre><code class="language-xml"><span class="php"><span class="hljs-meta">&lt;?</span>xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span><span class="hljs-meta">?&gt;</span></span>
+<span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://maven.apache.org/POM/4.0.0"</span> <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>demo-consumer<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">packaging</span>&gt;</span>jar<span class="hljs-tag">&lt;/<span class="hljs-name">packaging</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>demo-consumer<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.0.3.RELEASE<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">relativePath</span>/&gt;</span> <span class="hljs-comment">&lt;!-- lookup parent from repository --&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="hljs-tag">&lt;/<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">project.reporting.outputEncoding</span>&gt;</span>UTF-8<span class="hljs-tag">&lt;/<span class="hljs-name">project.reporting.outputEncoding</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">java.version</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">java.version</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">repositories</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">repository</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>sonatype-nexus-snapshots<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">url</span>&gt;</span>https://oss.sonatype.org/content/repositories/snapshots<span class="hljs-tag">&lt;/<span class="hljs-name">url</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">releases</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">enabled</span>&gt;</span>false<span class="hljs-tag">&lt;/<span class="hljs-name">enabled</span>&gt;</span>
+			<span class="hljs-tag">&lt;/<span class="hljs-name">releases</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">snapshots</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">enabled</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">enabled</span>&gt;</span>
+			<span class="hljs-tag">&lt;/<span class="hljs-name">snapshots</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">repository</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">repositories</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>dubbo-spring-boot-starter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.2.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>demo-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+
+		<span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-test<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">build</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">plugins</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">plugin</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">configuration</span>&gt;</span>
+					<span class="hljs-tag">&lt;<span class="hljs-name">classifier</span>&gt;</span>exec<span class="hljs-tag">&lt;/<span class="hljs-name">classifier</span>&gt;</span>
+				<span class="hljs-tag">&lt;/<span class="hljs-name">configuration</span>&gt;</span>
+			<span class="hljs-tag">&lt;/<span class="hljs-name">plugin</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">plugins</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">build</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span>
+</code></pre>
+<ol>
+<li>通过 <code>@Reference</code> 注入 <code>HelloService</code></li>
+</ol>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.example.democonsumer.controller;
+
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.config.annotation.Reference;
+<span class="hljs-keyword">import</span> com.example.demoapi.HelloService;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.RequestParam;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.RestController;
+
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoConsumerController</span> </span>{
+    <span class="hljs-meta">@Reference</span>(version = <span class="hljs-string">"${demo.service.version}"</span>,
+            application = <span class="hljs-string">"${dubbo.application.id}"</span>,
+            url = <span class="hljs-string">"dubbo://&lt;注意，这里填写具体IP&gt;:12345"</span>)
+    <span class="hljs-keyword">private</span> HelloService helloService;
+
+    <span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">"/sayHello"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(@RequestParam String name)</span> </span>{
+        <span class="hljs-keyword">return</span> helloService.sayHello(name);
+    }
+}
+</code></pre>
+<blockquote>
+<p>直连提供者调用需要填写具体IP地址，如果写localhost也可以，但是会被Pinpoint额外识别为一个未知服务</p>
+</blockquote>
+<ol start="2">
+<li>编写 Spring Boot 引导程序（Web 应用）：</li>
+</ol>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.example.democonsumer;
+
+<span class="hljs-keyword">import</span> org.springframework.boot.SpringApplication;
+<span class="hljs-keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="hljs-meta">@SpringBootApplication</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoConsumerApplication</span> </span>{
+
+	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+		SpringApplication.run(DemoConsumerApplication.class, args);
+	}
+}
+</code></pre>
+<ol start="3">
+<li>配置 <code>application.properties</code>：</li>
+</ol>
+<pre><code class="language-properties"># Spring boot application
+spring.application.name=dubbo-consumer-demo
+server.port=8080
+management.port=8081
+
+# Service Version
+demo.service.version=1.0.0
+
+# Dubbo Config properties
+## ApplicationConfig Bean
+dubbo.application.id=dubbo-consumer-demo
+dubbo.application.name=dubbo-consumer-demo
+
+## ProtocolConfig Bean
+dubbo.protocol.id=dubbo
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=12345
+</code></pre>
+<h3>使用Pinpoint-agent启动服务提供方和服务消费方</h3>
+<h4>启动服务提供方</h4>
+<ol>
+<li>编译打包</li>
+</ol>
+<pre><code>mvn clean package
+</code></pre>
+<ol start="2">
+<li>附加参数启动服务提供方</li>
+</ol>
+<pre><code>java -jar -javaagent:$AGENT_PATH/pinpoint-bootstrap-$VERSION.jar -Dpinpoint.agentId=demo-provider -Dpinpoint.applicationName=DP target/demo-provider-0.0.1-SNAPSHOT.jar
+</code></pre>
+<ol start="3">
+<li>附加参数启动服务消费方</li>
+</ol>
+<pre><code>java -jar -javaagent:$AGENT_PATH/pinpoint-bootstrap-$VERSION.jar -Dpinpoint.agentId=demo-consumer -Dpinpoint.applicationName=DC target/demo-comsumer-0.0.1-SNAPSHOT-exec.jar
+</code></pre>
+<ol start="4">
+<li>访问消费方地址模拟用户请求</li>
+</ol>
+<p><code>http://localhost:8080/sayHello?name=ABC</code></p>
+<h2>使用Pinpoint快速定位问题</h2>
+<h3>首页</h3>
+<p><img src="../../img/blog/pinpoint-home.png" alt="/admin-guide/images/pinpoint-home.png"></p>
+<blockquote>
+<p>这里的用户请求是请求DubboProvider数量的双倍，原因是记录了favicon.ico图标请求导致的</p>
+</blockquote>
+<h3>调用树</h3>
+<p><img src="../../img/blog/pinpoint-calltree.png" alt="/admin-guide/images/pinpoint-calltree.png"></p>
+<h3>深入跟踪</h3>
+<p><img src="../../img/blog/pinpoint-mixedview.png" alt="/admin-guide/images/pinpoint-mixedview.png"></p>
+<h3>其他</h3>
+<p>示例简单的模拟了Dubbo的提供和调用，并没有进行数据库等其他中间件的应用，详细使用请参照Pinpoint文档。</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

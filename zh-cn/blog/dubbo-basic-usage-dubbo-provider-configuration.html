@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-basic-usage-dubbo-provider-configuration" />
+	<meta name="description" content="dubbo-basic-usage-dubbo-provider-configuration" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-basic-usage-dubbo-provider-configuration</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1887887037"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>Dubbo基本用法-Dubbo Provider配置</h2>
+<h1>Dubbo基本用法</h1>
+<p>本章节主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
+按照功能角度进行划分，可以分为Dubbo Provider和Dubbo Consumer。接下来章节中，分别对dubbo provider和Dubbo consumer进行讲解。</p>
+<h2>Dubbo Provider配置</h2>
+<h3>Provider 配置详解</h3>
+<p>配置Dubbo Provider有4种方式：XML配置，properties方式配置，API调用方式配置，注解方式配置。</p>
+<h4>XML配置</h4>
+<h6>最简单的配置的样例：</h6>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:dubbo=&quot;http://dubbo.apache.org/schema/dubbo&quot;
+    xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&quot;&gt;  
+    &lt;dubbo:application name=&quot;hello-world-app&quot; /&gt;  
+    &lt;dubbo:registry address=&quot;multicast://224.5.6.7:1234&quot; /&gt;  
+    &lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20880&quot; /&gt;  
+    &lt;dubbo:service interface=&quot;com.alibaba.dubbo.demo.DemoService&quot; ref=&quot;demoServiceLocal&quot; /&gt;  
+    &lt;dubbo:reference id=&quot;demoServiceRemote&quot; interface=&quot;com.alibaba.dubbo.demo.DemoService&quot; /&gt;  
+&lt;/beans&gt;
+</code></pre>
+<p>上面样例中，注意下dubbo schema的写法：</p>
+<pre><code>&lt;beans xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+       xmlns:dubbo=&quot;http://code.alibabatech.com/schema/dubbo&quot;
+       xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&quot;&gt;
+</code></pre>
+<h6>支持的配置标签</h6>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>用途</th>
+<th style="text-align:left">解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;dubbo:service/&gt;</td>
+<td>服务配置</td>
+<td style="text-align:left">用于暴露一个服务，定义服务的元信息，一个服务可以用多个协议暴露，一个服务也可以注册到多个注册中心</td>
+</tr>
+<tr>
+<td>&lt;dubbo:reference/&gt;</td>
+<td>引用配置</td>
+<td style="text-align:left">用于创建一个远程服务代理，一个引用可以指向多个注册中心</td>
+</tr>
+<tr>
+<td>&lt;dubbo:protocol/&gt;</td>
+<td>协议配置</td>
+<td style="text-align:left">用于配置提供服务的协议信息，协议由提供方指定，消费方被动接受</td>
+</tr>
+<tr>
+<td>&lt;dubbo:application/&gt;</td>
+<td>应用配置</td>
+<td style="text-align:left">用于配置当前应用信息，不管该应用是提供者还是消费者</td>
+</tr>
+<tr>
+<td>&lt;dubbo:module/&gt;</td>
+<td>模块配置</td>
+<td style="text-align:left">用于配置当前模块信息，可选</td>
+</tr>
+<tr>
+<td>&lt;dubbo:registry/&gt;</td>
+<td>注册中心配置</td>
+<td style="text-align:left">用于配置连接注册中心相关信息</td>
+</tr>
+<tr>
+<td>&lt;dubbo:monitor/&gt;</td>
+<td>监控中心配置</td>
+<td style="text-align:left">用于配置连接监控中心相关信息，可选</td>
+</tr>
+<tr>
+<td>&lt;dubbo:provider/&gt;</td>
+<td>提供方配置</td>
+<td style="text-align:left">当 ProtocolConfig 和 ServiceConfig 某属性没有配置时，采用此缺省值，可选</td>
+</tr>
+<tr>
+<td>&lt;dubbo:consumer/&gt;</td>
+<td>消费方配置</td>
+<td style="text-align:left">当 ReferenceConfig 某属性没有配置时，采用此缺省值，可选</td>
+</tr>
+<tr>
+<td>&lt;dubbo:method/&gt;</td>
+<td>方法配置</td>
+<td style="text-align:left">用于 ServiceConfig 和 ReferenceConfig 指定方法级的配置信息</td>
+</tr>
+<tr>
+<td>&lt;dubbo:argument/&gt;</td>
+<td>参数配置</td>
+<td style="text-align:left">用于指定方法参数配置</td>
+</tr>
+</tbody>
+</table>
+<p><img src="https://cdn.yuque.com/lark/0/2018/png/15841/1527849348155-8423d401-9ea4-4dc6-8720-d9e3d90963b6.png" alt="undefined"></p>
+ <center>配置之间关系图</center>
+<h6>配置项详解</h6>
+<ul>
+<li>
+<p>&lt;dubbo:application name=&quot;hello-world-app&quot; /&gt;<br>
+用于指定应用名，这里需要保证应用名唯一，这个应用名在后续的console admin中可以在列表中显示，方便管理。</p>
+</li>
+<li>
+<p>&lt;dubbo:registry address=&quot;multicast://224.5.6.7:1234&quot; /&gt;<br>
+注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地质，也可以eureka地质。上面这个是广播地址，在本地服务调用的测试过程中非常方便。</p>
+</li>
+<li>
+<p>&lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20880&quot; /&gt;<br>
+这里是传输的协议和默认端口，一般不需要更改。</p>
+</li>
+</ul>
+<blockquote>
+<p>接下来重点讲解下&lt;dubbo:service/&gt;的配置。</p>
+</blockquote>
+<ul>
+<li>&lt;dubbo:service/&gt;支持的主要属性列表：
+| 属性名 | 说明 |
+| -------- | ----- |
+| version | 版本号 |
+| scope | 服务可见性, 值为：local 或者 remote，默认为remote |
+| actives | 最大的激活的请求数 |
+| async | 方法调用是否异步，默认为false |
+| cache | 服务缓存，可选值：lru/threadlocal/jcache |
+| callbacks | callback实例的限制 |
+| generic | 泛化调用，可以绕过 |
+| class | Service的实现的类名 |
+| connections | 这个服务里的连接数 |
+| delay | 发布服务延迟的毫秒数 |
+| executes | 服务执行的请求上限 |
+| retries | 超时重试次数 |
+| timeout | 调用超时时间 |</li>
+</ul>
+<p>其他配置属性请参考xsd：<a href="http://dubbo.apache.org/schema/dubbo/dubbo.xsd">http://dubbo.apache.org/schema/dubbo/dubbo.xsd</a></p>
+<ul>
+<li>&lt;dubbo:method/&gt;作为&lt;dubbo:service/&gt;的子元素，它可以针对方法进行配置。比较常用的属性有：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>属性名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>executes</td>
+<td>服务执行的请求上限</td>
+</tr>
+<tr>
+<td>retries</td>
+<td>超时重试次数</td>
+</tr>
+<tr>
+<td>timeout</td>
+<td>调用超时时间</td>
+</tr>
+</tbody>
+</table>
+<p>其他属性，可以参考上面的xsd。</p>
+<h6>配置的覆盖关系</h6>
+<p><img src="https://cdn.yuque.com/lark/0/2018/png/15841/1527849374313-94a5ea24-0e72-4d83-871b-e0e95eab646a.png" alt="undefined"></p>
+<center>配置的覆盖关系图</center>
+<p>这里的覆盖关系包含了Provider和Consumer两端的配置，如果对consumer有疑问，可以参考后一章节的consumer章节之后再来理解。</p>
+<h4>dubbo.properties方式配置</h4>
+<blockquote>
+<p>如果公共配置很简单，没有多注册中心，多协议等情况，或者想多个 Spring 容器想共享配置，可以使用 dubbo.properties 作为缺省配置。</p>
+</blockquote>
+<p>Dubbo 将自动加载 classpath 根目录下的 dubbo.properties，可以通过JVM启动参数 -Ddubbo.properties.file=xxx.properties 改变缺省配置位置。</p>
+<h6>dubbo.properties配置样例</h6>
+<pre><code># 应用名
+dubbo.application.name=dubbodemo-provider
+# 注册中心地址
+dubbo.registry.address=zookeeper://localhost:2181
+# 广播的注册中心样例
+#dubbo.registry.address=multicast://224.5.6.7:1234
+# 调用协议地址
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=28080
+</code></pre>
+<h6>映射规则</h6>
+<p>将 XML 配置的标签名，加属性名，用点分隔，多个属性拆成多行</p>
+<ul>
+<li>比如：dubbo.application.name=foo等价于&lt;dubbo:application name=&quot;foo&quot; /&gt;</li>
+<li>比如：dubbo.registry.address=10.20.153.10:9090等价于&lt;dubbo:registry address=&quot;10.20.153.10:9090&quot; /&gt;</li>
+</ul>
+<p>如果 XML 有多行同名标签配置，可用 id 号区分，如果没有 id 号将对所有同名标签生效</p>
+<ul>
+<li>比如：dubbo.protocol.rmi.port=1234等价于&lt;dubbo:protocol id=&quot;rmi&quot; name=&quot;rmi&quot; port=&quot;1099&quot; /&gt; 2</li>
+<li>比如：dubbo.registry.china.address=10.20.153.10:9090等价于&lt;dubbo:registry id=&quot;china&quot; address=&quot;10.20.153.10:9090&quot; /&gt;</li>
+</ul>
+<h6>覆盖策略</h6>
+<p><img src="https://cdn.yuque.com/lark/0/2018/png/15841/1527849393591-2c3de248-1b3d-47d3-bd10-8b415e9fcd39.png" alt="undefined"></p>
+<ul>
+<li>JVM 启动 -D 参数优先，这样可以使用户在部署和启动时进行参数重写，比如在启动时需改变协议的端口。</li>
+<li>XML 次之，如果在 XML 中有配置，则 dubbo.properties 中的相应配置项无效。</li>
+<li>Properties 最后，相当于缺省值，只有 XML 没有配置时，dubbo.properties 的相应配置项才会生效，通常用于共享公共配置，比如应用名。</li>
+</ul>
+<blockquote>
+<p>注意：</p>
+</blockquote>
+<ol>
+<li>如果 classpath 根目录下存在多个 dubbo.properties，比如多个 jar 包中有 dubbo.properties，Dubbo 会任意加载，并打印 Error 日志，后续可能改为抛异常。 ↩</li>
+<li>协议的 id 没配时，缺省使用协议名作为 id</li>
+</ol>
+<h4>annotation</h4>
+<h6>Service注解暴露服务</h6>
+<pre><code>import com.alibaba.dubbo.config.annotation.Service;
+
+@Service(timeout = 5000)
+public class AnnotateServiceImpl implements AnnotateService { 
+    // ...
+}
+</code></pre>
+<h6>javaconfig形式配置公共模块</h6>
+<pre><code>@Configuration
+public class DubboConfiguration {
+
+    @Bean
+    public ApplicationConfig applicationConfig() {
+        ApplicationConfig applicationConfig = new ApplicationConfig();
+        applicationConfig.setName(&quot;provider-test&quot;);
+        return applicationConfig;
+    }
+
+    @Bean
+    public RegistryConfig registryConfig() {
+        RegistryConfig registryConfig = new RegistryConfig();
+        registryConfig.setAddress(&quot;zookeeper://127.0.0.1:2181&quot;);
+        registryConfig.setClient(&quot;curator&quot;);
+        return registryConfig;
+    }
+}
+</code></pre>
+<p>这种方式的配置和前面用xml配置的方式是一样的效果。</p>
+<h6>指定dubbo扫描路径</h6>
+<pre><code>@SpringBootApplication
+@DubboComponentScan(basePackages = &quot;com.alibaba.dubbo.test.service.impl&quot;)
+public class ProviderTestApp {
+    // ...
+}
+</code></pre>
+<p>或者使用spring bean xml配置方式：</p>
+<pre><code>&lt;dubbo:annotation package=&quot;com.chanshuyi.service.impl&quot; /&gt;
+</code></pre>
+<h4>api直接触发</h4>
+<pre><code>import com.alibaba.dubbo.rpc.config.ApplicationConfig;
+import com.alibaba.dubbo.rpc.config.RegistryConfig;
+import com.alibaba.dubbo.rpc.config.ProviderConfig;
+import com.alibaba.dubbo.rpc.config.ServiceConfig;
+import com.xxx.XxxService;
+import com.xxx.XxxServiceImpl;
+
+// 服务实现
+XxxService xxxService = new XxxServiceImpl();
+
+// 当前应用配置
+ApplicationConfig application = new ApplicationConfig();
+application.setName(&quot;xxx&quot;);
+
+// 连接注册中心配置
+RegistryConfig registry = new RegistryConfig();
+registry.setAddress(&quot;10.20.130.230:9090&quot;);
+registry.setUsername(&quot;aaa&quot;);
+registry.setPassword(&quot;bbb&quot;);
+
+// 服务提供者协议配置
+ProtocolConfig protocol = new ProtocolConfig();
+protocol.setName(&quot;dubbo&quot;);
+protocol.setPort(12345);
+protocol.setThreads(200);
+
+// 注意：ServiceConfig为重对象，内部封装了与注册中心的连接，以及开启服务端口
+
+// 服务提供者暴露服务配置
+ServiceConfig&lt;XxxService&gt; service = new ServiceConfig&lt;XxxService&gt;(); // 此实例很重，封装了与注册中心的连接，请自行缓存，否则可能造成内存和连接泄漏
+service.setApplication(application);
+service.setRegistry(registry); // 多个注册中心可以用setRegistries()
+service.setProtocol(protocol); // 多个协议可以用setProtocols()
+service.setInterface(XxxService.class);
+service.setRef(xxxService);
+service.setVersion(&quot;1.0.0&quot;);
+
+// 暴露及注册服务
+service.export();
+</code></pre>
+<p>一般在spring应用中，不推荐使用这种方式。 具体的含义这里不做解释，可以通过github查看源码。</p>
+<h3>Provider 接口和实现</h3>
+<p>上面章节更多从配置角度出发，接下来通过一个完整的例子，来讲解下dubbo provider的完整使用。</p>
+<p>这个例子中只有一个服务UserReadService，有一个方法 getUserById。 需要将这个服务通过Dubbo暴露给远程的服务。具体的步骤如下：</p>
+<p>1.创建工程
+如果本来已经有工程，可以忽略。创建一个spring boot工程，可以通过 <a href="https://start.spring.io/">https://start.spring.io/</a> 创建。
+2.定义接口
+定义接口：UserReadService</p>
+<pre><code>public interface UserReadService{
+public User getUserById(Long userId);
+}
+</code></pre>
+<p>这个接口一般来说会放到独立的jar包里，作为client包。 其他应用要消费这个服务的时候，一般来说需要应用引用这个client包。(除了泛化调用)
+3.实现接口
+实现UserReadService, 当前实现部署在Provider的应用中。</p>
+<pre><code>public UserReadServiceImpl implements UserReadService{
+    public User getUserById(Long userId){
+        return xxx;
+    }
+}
+</code></pre>
+<p>4.Dubbo配置</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:dubbo=&quot;http://dubbo.apache.org/schema/dubbo&quot;
+    xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&quot;&gt;  
+    &lt;dubbo:application name=&quot;hello-world-app&quot; /&gt;  
+    &lt;dubbo:registry address=&quot;multicast://224.5.6.7:1234&quot; /&gt;  
+    &lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20880&quot; /&gt;  
+    &lt;bean id=&quot;userReadService&quot; class=&quot;com.package.UserReadServiceImpl&quot;/&gt;
+    &lt;dubbo:service interface=&quot;com.package.UserReadService&quot; ref=&quot;userReadService&quot; /&gt;  
+&lt;/beans&gt;
+</code></pre>
+<p>Dubbo配置的其他方式可以参考上一章节的相关配置，或者使用集成dubbo spring boot starter方式。</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

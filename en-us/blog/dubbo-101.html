@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-101" />
+	<meta name="description" content="dubbo-101" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-101</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1013358927"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Your First Dubbo Demo</h1>
+<h2>Java RMI Introduction</h2>
+<p>Java RMI (Remote Method Invocation) is a mechanism that allows users to access or invocate an object and a method running on another JVM (Java Virtual Machine). RMI is an implementation of RPC (Remote Procedure Call) in java with support of OOP (Object Oriented Paradigms). Instead of bothering IDL (Interface Define Language), users can build distributed applications by depending on interfaces in an easy and natural way.</p>
+<h3>Java RMI Work Flow</h3>
+<p>Here is how a typical RMI invocation usually works：</p>
+<ol>
+<li>The server registers service from RMI and binds its address.</li>
+<li>The client registers service from RMI and obtains target address.</li>
+<li>The client invokes methods of local stub object in the same way of invoking other local objects.</li>
+<li>Local stub object zips invoking information and send it to the server via network.</li>
+<li>The Skeleton object of server receives the network request and unzips the information.</li>
+<li>Server runs invocation on the target object based on the information and return the zipped results back to client via network.</li>
+</ol>
+<p><img src="../../img/blog/rmi-flow.png" alt="RMI Flow"></p>
+<p>(source：<a href="https://www.cs.rutgers.edu/~pxk/417/notes/images/rpc-rmi_flow.png">https://www.cs.rutgers.edu/~pxk/417/notes/images/rpc-rmi_flow.png</a>)</p>
+<h3>Java RMI Concepts</h3>
+<p>Java RMI is a technique foundation stone of creating distributed applications in Java. The following EJB techniques and current framework of distributed services still inherit the fundamental concepts of Java RMI. In RMI invocation, there are some core concepts：</p>
+<ol>
+<li>The invocation is run remotely on <strong>interface</strong>.</li>
+<li>
+<ol start="2">
+<li>Disguise remote invocation as local invocation by <strong>Stub object</strong> on client and <strong>Skeleton object</strong> on server.</li>
+</ol>
+</li>
+<li>The service is registered and looked up by <strong>RMI</strong> registry service.</li>
+</ol>
+<p>For 1. users are dependent on interfaces which should be implemented by server.</p>
+<p>For 2. In J2SE 1.5 version and before, it needs to pre-compile Stub on client and Skeleton on server by rmic. In the later versions there is no need to do so.</p>
+<p>The following is a code example of registry and look-up in RMI.</p>
+<h4>Server service registry</h4>
+<pre><code class="language-java">Hello obj = <span class="hljs-keyword">new</span> HelloImpl(); <span class="hljs-comment">// #1</span>
+Hello stub = (Hello) UnicastRemoteObject.exportObject(obj, <span class="hljs-number">0</span>); <span class="hljs-comment">// #2</span>
+Registry registry = LocateRegistry.createRegistry(<span class="hljs-number">1099</span>); <span class="hljs-comment">// #3</span>
+registry.rebind(<span class="hljs-string">"Hello"</span>, stub); <span class="hljs-comment">// #4</span>
+</code></pre>
+<p>Notes:</p>
+<ol>
+<li>
+<p>Initiate service object instance.</p>
+</li>
+<li>
+<p>Create stub object to communicate with the server by UnicastRemoteObject.exportObject.</p>
+</li>
+<li>
+<p>Create a local RMI registry service on port 1099 which is run on server. It can also be registered as an independent process.</p>
+</li>
+<li>
+<p>Bind stub object into registry so the client can find the remote object by looking up Hello.</p>
+</li>
+</ol>
+<h4>Client service look-up</h4>
+<pre><code class="language-java">Registry registry = LocateRegistry.getRegistry(); <span class="hljs-comment">// #1</span>
+Hello stub = (Hello) registry.lookup(<span class="hljs-string">"Hello"</span>); <span class="hljs-comment">// #2</span>
+String response = stub.sayHello(); <span class="hljs-comment">// #3</span>
+</code></pre>
+<p>Notes:</p>
+<ol>
+<li>Acquire registry service instances. In this case, there is no input parameters so it is assumed that the acquired instance is located on port 1099.</li>
+<li>Look up the remote object named Hello in registry service.</li>
+<li>Run a RMI invocation via acquired Stub object and get results.
+Understand the work flow and basic concepts of RMI is helpful to handle current framework of distributed service. It is recommended to refer to RMI official documents for further information[^1].</li>
+</ol>
+<h2>Basic Concepts of Dubbo</h2>
+<p>The basic concepts of current framework of distributed service is similar to the one of RMI. They both use Java interface as service contract, register and look up by registry center and use agency to block the details of remote communications. Specifically, Dubbo has following four types of roles to play when running：</p>
+<ol>
+<li>Serve the provider – Expose service at assigned ports at initialization and register the service address and ports at registry center</li>
+<li>Serve the consumer – Subscribe the service of interests at registry center at initialization to acquire the list of addresses provided by the service provider.</li>
+<li>Registry center – Register and look up service. Store the address provided by the service provider and send it to the consumer.</li>
+<li>Monitor center – Collect and monitor running status of providers and consumers, e.g., times of invocations, delay of invocations, etc.</li>
+<li>Running container – Initialize and load the provider and manage the lifecycle of running.</li>
+</ol>
+<p><img src="../../img/blog/dubbo-architecture.png" alt="dubbo-architecture"></p>
+<p><strong>Deploy stage</strong></p>
+<ul>
+<li>Service providers expose service at assigned ports and register information of service at registry center.</li>
+<li>Service consumers subscribe the list of service addresses from registry center.</li>
+</ul>
+<p><strong>Run stage</strong></p>
+<ul>
+<li>Registry center sends the address to service consumers.</li>
+<li>After receiving the list of addresses, service consumers select one of them and invoke an object service.</li>
+<li>During invocation, the running status of service providers and consumers is reported to the monitor center.</li>
+</ul>
+<h2>Dubbo Applications Based on API</h2>
+<p>The applications of Dubbo are usually assembled by Spring. To obtain an available Dubbo application quickly, the example shown here abandons complex configurations but to create service provider and consumer in Dubbo API oriented way. Additionally, the registry center and monitor center do not need installation or configuration in this example.</p>
+<p>In production environment, the service of Dubbo usually requires cooperation with a distributed service registry center, such as ZooKeeper. For convenience, Dubbo offers two ways to avoid extra work of building registry center, namely direct connection [2] and assembled podcast [3] respectively. In this example, the latter way is applied to register and look up service.</p>
+<h3>Define Service Contract</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">GreetingsService</span> </span>{
+    <span class="hljs-function">String <span class="hljs-title">sayHi</span><span class="hljs-params">(String name)</span></span>; <span class="hljs-comment">// #1</span>
+}
+</code></pre>
+<p><strong>Notes</strong>：</p>
+<ol>
+<li>The codes define a simple service contract where there is only one function, sayHi, can be invoked. The type of input parameter and return value are both String.</li>
+</ol>
+<h3>Provide Contract Implementation</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingsServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GreetingsService</span> </span>{ <span class="hljs-comment">// #1</span>
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHi</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hi, "</span> + name; <span class="hljs-comment">// #2</span>
+    }
+}
+</code></pre>
+<p><strong>Notes</strong>：</p>
+<ol>
+<li>Service providers need to implement the interface of service contract, GreetingsService.</li>
+<li>This function simply returns a welcome message. For example, if the input value is <em>dubbo</em>，it will return <em>hi, dubbo</em>.</li>
+</ol>
+<h3>Implement Dubbo Service Provider</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Application</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException </span>{
+        ServiceConfig&lt;GreetingsService&gt; service = <span class="hljs-keyword">new</span> ServiceConfig&lt;&gt;(); <span class="hljs-comment">// #1</span>
+        service.setApplication(<span class="hljs-keyword">new</span> ApplicationConfig(<span class="hljs-string">"first-dubbo-provider"</span>)); <span class="hljs-comment">// #2</span>
+        service.setRegistry(<span class="hljs-keyword">new</span> RegistryConfig(<span class="hljs-string">"multicast://224.5.6.7:1234"</span>)); <span class="hljs-comment">// #3</span>
+        service.setInterface(GreetingsService.class); <span class="hljs-comment">// #4</span>
+        service.setRef(<span class="hljs-keyword">new</span> GreetingsServiceImpl()); <span class="hljs-comment">// #5</span>
+        service.export(); <span class="hljs-comment">// #6</span>
+        System.in.read(); <span class="hljs-comment">// #7</span>
+    }
+}
+</code></pre>
+<p><strong>Notes</strong>：</p>
+<ol>
+<li>Create an instance <em>ServiceConfig</em> with service interface type as generics parameters, which is <em>GreetingsService</em> in this example.</li>
+<li>Generate an instance of <em>ApplicationConfig</em> and assemble it into <em>ServiceConfig</em>.</li>
+<li>Generate an instance <em>RegistryConfig</em> and assemble it into <em>ServiceConfig</em>. Since the assembled way is applied here, the parameter should be <code>multicast://224.5.6.7:1234</code>. The valid range of assembled address is <em>224.0.0.0 - 239.255.255.255</em></li>
+<li>Assemble the service contract <em>GreetingsService</em> into <em>ServiceConfig</em>.</li>
+<li>Assemble the instance with implementation of <em>GreetingsServicelmpl</em> provided by service providers into <em>ServiceConfig</em>.</li>
+<li><em>ServiceConfig</em> starts to expose itself at default ports <em>20880</em>. after being equipped with enough information.</li>
+<li>Press any key or <em>ctrl-C</em> to exit to avoid server halt.</li>
+</ol>
+<h3>Implement Dubbo Service Consumer</h3>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Application</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        ReferenceConfig&lt;GreetingsService&gt; reference = <span class="hljs-keyword">new</span> ReferenceConfig&lt;&gt;(); <span class="hljs-comment">// #1</span>
+        reference.setApplication(<span class="hljs-keyword">new</span> ApplicationConfig(<span class="hljs-string">"first-dubbo-client"</span>)); <span class="hljs-comment">// #2</span>
+        reference.setRegistry(<span class="hljs-keyword">new</span> RegistryConfig(<span class="hljs-string">"multicast://224.5.6.7:1234"</span>)); <span class="hljs-comment">// #3</span>
+        reference.setInterface(GreetingsService.class); <span class="hljs-comment">// #4</span>
+        GreetingsService greetingsService = reference.get(); <span class="hljs-comment">// #5</span>
+        String message = greetingsService.sayHi(<span class="hljs-string">"dubbo"</span>); <span class="hljs-comment">// #6</span>
+        System.out.println(message); <span class="hljs-comment">// #7</span>
+    }
+}
+</code></pre>
+<p><strong>Notes</strong>：</p>
+<ol>
+<li>Create an instance of <em>ReferenceConfig</em> with service interface type as generics parameters, which is <em>GreetingsService</em> in this example.</li>
+<li>Create an instance of <em>AplicatonConfig</em>, and assemble it into <em>ReferenceConfig</em>.</li>
+<li>Generate an instance <em>RegistryConfig</em>, and assemble it into <em>ReferenceConfig</em>. Note that the address information here should be the same as the one of the service provider.</li>
+<li>Assemble the service contract <em>GreetingsService</em> into <em>ReferenceConfig</em>.</li>
+<li>Obtain the agency of <em>GreetingsService</em> from <em>ReferenceConfig</em>.</li>
+<li>Invoke a remote call through <em>GreetingsSerive</em>’s agency and pass in <code>dubbo</code> as input parameter.</li>
+<li>Return and print results <code>hi, dubbo</code>.</li>
+</ol>
+<h3>Run</h3>
+<p>The complete example can be found at <a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-api">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-api</a>. In the complete version, it is convenient to execute by maven in command line with the configuration of <em>exec-maven-plugin</em>. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign <em>-Djava.net.preferIPv4Stack=true</em> when running.</p>
+<h4>Build Example</h4>
+<p>Synchronize the example codes and build by the following command lines:</p>
+<ol>
+<li>Synchronize the example codes: git clone <a href="https://github.com/dubbo/dubbo-samples.git">https://github.com/dubbo/dubbo-samples.git</a></li>
+<li>Build：mvn clean package</li>
+</ol>
+<pre><code class="language-bash">$ git <span class="hljs-built_in">clone</span> https://github.com/dubbo/dubbo-samples.git
+$ <span class="hljs-built_in">cd</span> dubbo-samples/dubbo-samples-api/
+$ mvn clean package
+INFO] Scanning <span class="hljs-keyword">for</span> projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dubbo-samples-api 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ dubbo-samples-api ---
+...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2.182 s
+[INFO] Finished at: 2018-05-28T14:56:08+08:00
+[INFO] Final Memory: 20M/353M
+[INFO] ------------------------------------------------------------------------
+</code></pre>
+<p>The build is finished when it shows <code>BUILD SUCCESS</code>. Then comes the running stage.</p>
+<h4>Run the server</h4>
+<p>Run the service provider by the following maven command lines:</p>
+<pre><code class="language-bash">$ mvn -Djava.net.preferIPv4Stack=<span class="hljs-literal">true</span> -Dexec.mainClass=com.alibaba.dubbo.samples.server.Application <span class="hljs-built_in">exec</span>:java
+[INFO] Scanning <span class="hljs-keyword">for</span> projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dubbo-samples-api 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] --- <span class="hljs-built_in">exec</span>-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
+log4j:WARN No appenders could be found <span class="hljs-keyword">for</span> logger (com.alibaba.dubbo.common.logger.LoggerFactory).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html<span class="hljs-comment">#noconfig for more info.</span>
+first-dubbo-provider is running.
+</code></pre>
+<p>When <em>first-dubbo-provider is running</em> appears, the service provider is ready to be called by the client.</p>
+<h4>Run the client</h4>
+<p>Run the service consumer by the following maven command lines:</p>
+<pre><code class="language-bash">$ mvn -Djava.net.preferIPv4Stack=<span class="hljs-literal">true</span> -Dexec.mainClass=com.alibaba.dubbo.samples.client.Application <span class="hljs-built_in">exec</span>:java
+[INFO] Scanning <span class="hljs-keyword">for</span> projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dubbo-samples-api 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] --- <span class="hljs-built_in">exec</span>-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
+log4j:WARN No appenders could be found <span class="hljs-keyword">for</span> logger (com.alibaba.dubbo.common.logger.LoggerFactory).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html<span class="hljs-comment">#noconfig for more info.</span>
+hi, dubbo
+</code></pre>
+<p><code>hi, dubbo</code> is the execution results from service provider.</p>
+<h2>Quick Creation of A Dubbo Application</h2>
+<p>Dubbo also provides a public platform that can create a Dubbo application quickly based on Spring Boot. Visit  <a href="http://start.dubbo.io">http://start.dubbo.io</a> and follow the figure below to create an example project:</p>
+<p><img src="../../img/blog/dubbo-initializr.png" alt="dubbo initializr"></p>
+<p><strong>Notes</strong>：</p>
+<ol>
+<li>Provide maven groupId in <em>Group</em> with default value <code>com.example</code>.</li>
+<li>Provide maven artifactId in <em>Artifact</em> with default value <code>demo</code>.</li>
+<li>Provide the name of service in <em>DubboServiceName</em> with default value <code>com.example.HelloService</code>.</li>
+<li>Provide the version of service in <em>DubboServiceVersion</em> with default value <code>1.0.0</code>.</li>
+<li>Choose server or client in <em>Client/Server</em> with default value <code>server</code>.</li>
+<li><em>embeddedZookeeper</em> is selected by default as service registry look up.</li>
+<li>qos ports activation is not selected by default but if it is, it can be accessed by port <em>22222</em>.</li>
+<li>Click <em>Generate Project</em> to download the generated project.</li>
+</ol>
+<p>This example shows how to generate a server. Similarly, it can generate a <em>client</em> by selecting client on the generation interface.</p>
+<h3>Run</h3>
+<p>Open the generated project with an IDE and to see the application is a typical Spring Boot application with the following program entry:</p>
+<pre><code class="language-java"><span class="hljs-meta">@SpringBootApplication</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoApplication</span> </span>{
+	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+		<span class="hljs-keyword">new</span> EmbeddedZooKeeper(<span class="hljs-number">2181</span>, <span class="hljs-keyword">false</span>).start();  <span class="hljs-comment">// #1</span>
+		SpringApplication.run(DemoApplication.class, args); <span class="hljs-comment">// #2</span>
+	}
+}
+</code></pre>
+<p><strong>Notes</strong>：</p>
+<ol>
+<li>Launch embedded <em>ZooKeeper</em> on port <em>2181</em>.</li>
+<li>Launch the context of <em>Spring Boot</em>.</li>
+</ol>
+<p>Run it directly in IDE and here are the results:</p>
+<pre><code class="language-bash">2018-05-28 16:59:38.072  INFO 59943 --- [           main] a.b.d.c.e.WelcomeLogoApplicationListener :
+
+  ████████▄  ███    █▄  ▀█████████▄  ▀█████████▄   ▄██████▄  
+  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███
+  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███
+  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███
+  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███
+  ████████▀  ████████▀  ▄█████████▀  ▄█████████▀   ▀██████▀  
+
+
+ :: Dubbo Spring Boot (v0.1.0) : https://github.com/dubbo/dubbo-spring-boot-project
+ :: Dubbo (v2.0.1) : https://github.com/alibaba/dubbo
+ :: Google group : http://groups.google.com/group/dubbo
+
+2018-05-28 16:59:38.079  INFO 59943 --- [           main] e.OverrideDubboConfigApplicationListener : Dubbo Config was overridden by externalized configuration {dubbo.application.name=dubbo-demo-server, dubbo.application.qosAcceptForeignIp=<span class="hljs-literal">false</span>, dubbo.application.qosEnable=<span class="hljs-literal">true</span>, dubbo.application.qosPort=22222, dubbo.registry.address=zookeeper://localhost:2181?client=curator, dubbo.registry.id=my-registry, dubbo.scan.basePackages=com.example} <span class="hljs-comment">#1</span>
+
+...
+
+2018-05-28 16:59:39.624  INFO 59943 --- [           main] com.example.demo.DemoApplication         : Started DemoApplication <span class="hljs-keyword">in</span> 1.746 seconds (JVM running <span class="hljs-keyword">for</span> 2.963)
+</code></pre>
+<p><strong>Notes</strong>：</p>
+<ol>
+<li>In the printouts, the configuration starting with <code>dubbo.</code> Is defined in <em>main/resources/application.properties</em>.</li>
+</ol>
+<h3>Manage service by Telnet</h3>
+<p>If <em>qos</em> is actived during generation, the service can be watched and managed by <em>telnet</em> or <em>nc</em>.</p>
+<pre><code class="language-bash">$ telnet localhost 22222
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is <span class="hljs-string">'^]'</span>.
+  ████████▄  ███    █▄  ▀█████████▄  ▀█████████▄   ▄██████▄  
+  ███   ▀███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███   ███    ███   ███    ███ ███    ███
+  ███    ███ ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  ███    ███
+  ███    ███ ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  ███    ███
+  ███    ███ ███    ███   ███    ██▄   ███    ██▄ ███    ███
+  ███   ▄███ ███    ███   ███    ███   ███    ███ ███    ███
+  ████████▀  ████████▀  ▄█████████▀  ▄█████████▀   ▀██████▀  
+
+
+dubbo&gt;
+dubbo&gt;ls
+As Provider side:
++------------------------------+---+
+|     Provider Service Name    |PUB|
++------------------------------+---+
+|com.example.HelloService:1.0.0| Y |
++------------------------------+---+
+As Consumer side:
++---------------------+---+
+|Consumer Service Name|NUM|
++---------------------+---+
+</code></pre>
+<p>Currently, <em>qos</em> supports following command lines. For more information please refer to the official document. [^4]:</p>
+<ul>
+<li><em>ls</em>：List the information of client and server.</li>
+<li><em>online</em>：Bring the service online.</li>
+<li><em>offline</em>：Bring the service offline.</li>
+<li><em>help</em>：View online help.</li>
+</ul>
+<h2>Summary</h2>
+<p>In this tutorial, we start with RMI and introduce the basic concepts in Java distributed invocations. Based on interface programming, it disguises remote calls as local by agency and run the service registry and looking up by registry center.</p>
+<p>Then for simplicity, we introduce how to develop a complete Dubbo demo in an easy way of assembled registry and direct Dubbo API oriented programming. Additionally, we look into the usage of <em>ServiceConfig</em> and <em>RefenceConfig</em>, which is of great help for further using Spring XML configuration and the programming pattern of Spring Boot.</p>
+<p>Eventually, we give an outline of how to create a Dubbo application quickly based on Spring Boot using the public resources, <a href="http://start.dubbo.io">start.dubbo.io</a>, provided by the Dubbo development team and operate and maintain the Dubbo service by <em>qos</em>.</p>
+<hr>
+<ol>
+<li><a href="https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html">Getting Started Using JavaTM RMI</a></li>
+<li><a href="http://dubbo.apache.org/books/dubbo-user-book/demos/explicit-target.html">直连提供者</a></li>
+<li><a href="http://dubbo.apache.org/books/dubbo-user-book/references/registry/multicast.html">Multicast 注册中心</a></li>
+<li><a href="http://dubbo.apache.org/books/dubbo-user-book/references/qos.html">在线运维命令</a></li>
+</ol>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

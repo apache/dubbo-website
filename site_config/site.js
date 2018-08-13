@@ -1,22 +1,28 @@
 export default {
+  rootPath: '', // 发布到服务器的根目录，需以/开头但不能有尾/，如果只有/，请填写空字符串
+  port: 8080, // 本地开发服务器的启动端口
   defaultLanguage: 'en-us',
   'en-us': {
     pageMenu: [
       {
+        key: 'home', // 用作顶部菜单的选中
         text: 'HOME',
-        link: '/',
+        link: '/en-us/index.html',
       },
       {
+        key: 'docs',
         text: 'DOCS',
-        link: '/docs/user/quick-start.md',
+        link: '/en-us/docs/user/quick-start.html',
       },
       {
+        key: 'blog',
         text: 'BLOG',
-        link: '/blog',
+        link: '/en-us/blog/index.html',
       },
       {
+        key: 'community',
         text: 'COMMUNITY',
-        link: '/community',
+        link: '/en-us/community/index.html',
       },
     ],
     disclaimer: {
@@ -28,15 +34,15 @@ export default {
       list: [
         {
           text: 'Quick start',
-          link: '/docs/user/quick-start.md',
+          link: '/en-us/docs/user/quick-start.html',
         },
         {
           text: 'Developer guide',
-          link: '/docs/dev/build.md',
+          link: '/en-us/docs/dev/build.html',
         },
         {
           text: 'Admin manual',
-          link: '/docs/admin/ops/dubbo-ops.md',
+          link: '/en-us/docs/admin/ops/dubbo-ops.html',
         },
       ],
     },
@@ -45,11 +51,11 @@ export default {
       list: [
         {
           text: 'Blog',
-          link: '/blog',
+          link: '/en-us/blog/index.html',
         },
         {
           text: 'Community',
-          link: '/community',
+          link: '/en-us/community/index.html',
         },
       ],
     },
@@ -58,20 +64,24 @@ export default {
   'zh-cn': {
     pageMenu: [
       {
+        key: 'home',
         text: '首页',
-        link: '/',
+        link: '/zh-cn/index.html',
       },
       {
+        key: 'docs',
         text: '文档',
-        link: '/docs/user/quick-start.md',
+        link: '/zh-cn/docs/user/quick-start.html',
       },
       {
+        key: 'blog',
         text: '博客',
-        link: '/blog',
+        link: '/zh-cn/blog/index.html',
       },
       {
+        key: 'community',
         text: '社区',
-        link: '/community',
+        link: '/zh-cn/community/index.html',
       }
     ],
     disclaimer: {
@@ -83,15 +93,15 @@ export default {
       list: [
         {
           text: '快速开始',
-          link: '/docs/user/quick-start.md',
+          link: '/zh-cn/docs/user/quick-start.html',
         },
         {
           text: '开发者指南',
-          link: '/docs/dev/build.md',
+          link: '/zh-cn/docs/dev/build.html',
         },
         {
           text: '运维管理',
-          link: '/docs/admin/ops/dubbo-ops.md',
+          link: '/zh-cn/docs/admin/ops/dubbo-ops.html',
         },
       ]
     },
@@ -100,11 +110,11 @@ export default {
       list: [
         {
           text: '博客',
-          link: '/blog',
+          link: '/zh-cn/blog/index.html',
         },
         {
           text: '社区',
-          link: '/community',
+          link: '/zh-cn/community/index.html',
         }
       ]
     },

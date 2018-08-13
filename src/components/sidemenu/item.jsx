@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { autobind } from 'core-decorators';
 import classnames from 'classnames';
+import { getLink } from '../../../utils';
 
 export default class Item extends React.Component {
   constructor(props) {
@@ -12,7 +12,7 @@ export default class Item extends React.Component {
     if (hasChildren) {
       if (opened === undefined) {
         // 未配置展开，则是否展开由是否选中决定
-        opened = item.children.find(child => child.link === window.location.hash.split('?')[0].slice(2));
+        opened = item.children.find(child => `${window.rootPath}${child.link}` === window.location.pathname);
       }
     } else {
       opened = false;
@@ -45,12 +45,12 @@ export default class Item extends React.Component {
             className={classnames({
               'menu-item': true,
               'menu-item-level-3': true,
-              'menu-item-selected': item.link === window.location.hash.split('?')[0].slice(2),
+              'menu-item-selected': getLink(item.link) === window.location.pathname,
             })}
             key={index}
             onClick={this.onItemClick}
           >
-            <Link to={item.link}>{item.title}</Link>
+            <a href={getLink(item.link)} target={item.target || '_self'}>{item.title}</a>
           </li>
         ))
       }
@@ -65,7 +65,7 @@ export default class Item extends React.Component {
     const cls = classnames({
       'menu-item': true,
       'menu-item-level-2': true,
-      'menu-item-selected': item.link === window.location.hash.split('?')[0].slice(2),
+      'menu-item-selected': `${window.rootPath}${item.link}` === window.location.pathname,
     });
     const style = {
       height: opened ? 36 * (item.children.length + 1) : 36,
@@ -77,7 +77,7 @@ export default class Item extends React.Component {
         {
           <span>
             {item.title}
-            <img style={{ transform: `rotate(${opened ? 0 : -90}deg)` }} className="menu-toggle" src="./img/arrow_down.png" />
+            <img style={{ transform: `rotate(${opened ? 0 : -90}deg)` }} className="menu-toggle" src={`${window.rootPath}/img/arrow_down.png`} />
           </span>
         }
         {this.renderSubMenu(item.children)}
@@ -86,7 +86,7 @@ export default class Item extends React.Component {
     }
     return (
       <li style={style} className={cls} onClick={this.onItemClick}>
-        <Link to={item.link}>{item.title}</Link>
+        <a href={getLink(item.link)} target={item.target || '_self'}>{item.title}</a>
       </li>
     );
   }

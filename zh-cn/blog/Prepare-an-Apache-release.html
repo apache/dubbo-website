@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="Prepare-an-Apache-release" />
+	<meta name="description" content="Prepare-an-Apache-release" />
+	<!-- 网页标签标题 -->
+	<title>Prepare-an-Apache-release</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="855852892"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>理解Apache发布的内容和流程</h2>
+<p>总的来说，Source Release是Apache关注的重点，也是发布的必须内容；而Binary Release是可选项，Dubbo可以选择是否发布二进制包到Apache仓库或者发布到Maven中央仓库。</p>
+<p>请参考以下链接，找到更多关于ASF的发布指南:</p>
+<ul>
+<li><a href="http://www.apache.org/dev/release-publishing">Apache Release Guide</a></li>
+<li><a href="http://www.apache.org/dev/release.html">Apache Release Policy</a></li>
+<li><a href="http://www.apache.org/dev/publishing-maven-artifacts.html">Maven Release Info</a></li>
+</ul>
+<h2>本地构建环境准备</h2>
+<p>主要包括签名工具、Maven仓库认证相关准备</p>
+<ol>
+<li>
+<p>安装GPG，参见 <a href="https://www.gnupg.org/download/index.html">https://www.gnupg.org/download/index.html</a></p>
+<ul>
+<li>如Mac OS</li>
+</ul>
+<pre><code class="language-sh">$ brew install gpg
+$ gpg --version <span class="hljs-comment">#检查版本，应该为2.x</span>
+</code></pre>
+</li>
+<li>
+<p>用gpg生成key</p>
+<ul>
+<li>根据提示，生成key</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> gpg2 --full-gen-key</span>
+gpg (GnuPG) 2.0.12; Copyright (C) 2009 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+  (1) RSA and RSA (default)
+  (2) DSA and Elgamal
+  (3) DSA (sign only)
+  (4) RSA (sign only)
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+        0 = key does not expire
+     &lt;n&gt;  = key expires in n days
+     &lt;n&gt;w = key expires in n weeks
+     &lt;n&gt;m = key expires in n months
+     &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: Robert Burrell Donkin
+Email address: rdonkin@apache.org
+Comment: CODE SIGNING KEY
+You selected this USER-ID:
+   "Robert Burrell Donkin (CODE SIGNING KEY) &lt;rdonkin@apache.org&gt;"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+You need a Passphrase to protect your secret key. # 填入密码，以后打包过程中会经常用到
+</code></pre>
+<ul>
+<li>查看key id</li>
+</ul>
+<pre><code class="language-sh">$ gpg --list-keys
+pub   rsa4096/28681CB1 2018-04-26 <span class="hljs-comment"># 28681CB1就是key id</span>
+uid       [ultimate] liujun (apache-dubbo) &lt;liujun@apache.org&gt;
+sub   rsa4096/D3D6984B 2018-04-26
+
+<span class="hljs-comment"># 通过key id发送public key到keyserver</span>
+$ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
+<span class="hljs-comment"># 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，因为相互之间是自动同步的，选任意一个都可以。</span>
+</code></pre>
+<ul>
+<li>如果有多个public key，设置默认key</li>
+</ul>
+<p>~/.gnupg/gpg.conf</p>
+<pre><code class="language-proper"># If you have more than 1 secret key in your keyring, you may want to
+# uncomment the following option and set your preferred keyid.
+
+default-key 28681CB1
+</code></pre>
+</li>
+<li>
+<p>设置Apache中央仓库</p>
+<ul>
+<li>Dubbo项目的父pom为apache pom</li>
+</ul>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.apache<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>apache<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>19<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span>
+</code></pre>
+<ul>
+<li>
+<p>添加以下内容到.m2/settings.xml</p>
+<p>所有密码请使用<a href="http://maven.apache.org/guides/mini/guide-encryption.html">maven-encryption-plugin</a>加密后再填入</p>
+</li>
+</ul>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">settings</span>&gt;</span>
+...
+ <span class="hljs-tag">&lt;<span class="hljs-name">servers</span>&gt;</span>
+   <span class="hljs-comment">&lt;!-- To publish a snapshot of some part of Maven --&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-name">server</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>apache.snapshots.https<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">username</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP USERNAME --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">username</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">password</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP PASSWORD (encrypted) --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">password</span>&gt;</span>
+   <span class="hljs-tag">&lt;/<span class="hljs-name">server</span>&gt;</span>
+   <span class="hljs-comment">&lt;!-- To stage a release of some part of Maven --&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-name">server</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>apache.releases.https<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">username</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP USERNAME --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">username</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">password</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP PASSWORD (encrypted) --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">password</span>&gt;</span>
+   <span class="hljs-tag">&lt;/<span class="hljs-name">server</span>&gt;</span>
+  ...
+     <span class="hljs-comment">&lt;!-- gpg passphrase used when generate key --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">server</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>gpg.passphrase<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">passphrase</span>&gt;</span><span class="hljs-comment">&lt;!-- yourKeyPassword --&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">passphrase</span>&gt;</span>
+   <span class="hljs-tag">&lt;/<span class="hljs-name">server</span>&gt;</span>
+ <span class="hljs-tag">&lt;/<span class="hljs-name">servers</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">settings</span>&gt;</span>
+</code></pre>
+<p>​</p>
+</li>
+</ol>
+<h2>打包&amp;上传</h2>
+<ol>
+<li>
+<p>从主干分支拉取新分支作为发布分支，如现在要发布2.6.4版本，则从2.6.x拉出新分支2.6.4-release，此后2.6.4 Release Candidates涉及的修改及打标签等都在2.6.4-release分支进行，最终发布完成后合入主干分支。</p>
+</li>
+<li>
+<p>首先，在2.6.4-release分支验证maven组件打包、source源码打包、签名等是否都正常工作</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn clean install -Papache-release</span>
+<span class="hljs-meta">$</span><span class="bash"> mvn deploy</span>
+<span class="hljs-meta">#</span><span class="bash"> 将snapshot包推送到maven中央仓库，处于staging状态</span>
+</code></pre>
+</li>
+<li>
+<p>用maven-release-plugin发布</p>
+<ul>
+<li>先用dryRun验证是否ok</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Papache-release -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID -DdryRun=<span class="hljs-literal">true</span></span>
+</code></pre>
+<ul>
+<li>验证通过后，执行release:prepare</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:clean</span>
+<span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Papache-release -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
+<span class="hljs-meta">#</span><span class="bash"> 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为2.6.4-SNAPSHOT，并将修改推送到github仓库</span>
+</code></pre>
+<ul>
+<li>执行release:perform，做正式发布</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn -Prelease release:perform -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
+<span class="hljs-meta">#</span><span class="bash"> 所有artifacts发布到配置的远程maven中央仓库，处于staging状态</span>
+</code></pre>
+</li>
+</ol>
+<h2>准备Apache发布</h2>
+<ol>
+<li>
+<p>准备svn本机环境（Apache使用svn托管项目的发布内容）</p>
+</li>
+<li>
+<p>将dubbo checkout到本地目录</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo</span>
+<span class="hljs-meta">#</span><span class="bash"> 假定本地目录为 ~/apache/incubator/dubbo</span>
+</code></pre>
+</li>
+<li>
+<p>当前发布版本为2.6.4，新建目录</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> ~/apache/incubator/dubbo <span class="hljs-comment"># dubbo svn根目录</span></span>
+<span class="hljs-meta">$</span><span class="bash"> mkdir 2.6.4</span>
+</code></pre>
+</li>
+<li>
+<p>添加public key到<a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS">KEYS</a>文件。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性</p>
+</li>
+<li>
+<p>拷贝Dubbo根目录下的source.zip包到svn本地仓库dubbo/2.6.4</p>
+</li>
+<li>
+<p>生成sha512签名</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> shasum -a 512 dubbo-incubating-2.6.4-source-release.zip &gt;&gt; dubbo-incubating-2.6.4-source-release.zip.sha512</span>
+</code></pre>
+</li>
+<li>
+<p>如果有binary release要同时发布</p>
+<pre><code class="language-shell"><span class="hljs-meta">#</span><span class="bash"> 到dubbo项目distribution的module下，执行：</span>
+<span class="hljs-meta">$</span><span class="bash"> mvn install</span>
+<span class="hljs-meta">#</span><span class="bash"> target目录下，拷贝bin-release.zip以及bin-release.zip.asc到svn本地仓库dubbo/2.6.4</span>
+<span class="hljs-meta">#</span><span class="bash"> 参考第6步，生成sha512签名</span>
+</code></pre>
+</li>
+<li>
+<p>提交到Apache svn</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> svn status</span>
+<span class="hljs-meta">$</span><span class="bash"> svn commit -m <span class="hljs-string">'prepare for 2.6.4 RC1'</span></span>
+</code></pre>
+</li>
+</ol>
+<h2>验证Release Candidates</h2>
+<p>验证环节包含但不限于以下内容和形式：</p>
+<ol>
+<li>Check signatures and hashes are good</li>
+</ol>
+<pre><code class="language-sh">sha512 dubbo-incubating-<span class="hljs-variable">${release_version}</span>-bin-release.zip.sha512
+sha512 dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512
+</code></pre>
+<ol start="2">
+<li>Unzip dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:</li>
+</ol>
+<ul>
+<li>
+<p>Directory with 'incubating' in name
+<code>dubbo-incubating-${release_version}-bin-release</code></p>
+</li>
+<li>
+<p>DISCLAIMER exists</p>
+</li>
+<li>
+<p>LICENSE and NOTICE exists and contents are good</p>
+</li>
+<li>
+<p>All files and no binary files exist</p>
+</li>
+<li>
+<p>All files has standard ASF License header</p>
+</li>
+<li>
+<p>Can compile from source</p>
+</li>
+<li>
+<p>All unit tests can pass</p>
+<pre><code class="language-sh">mvn clean <span class="hljs-built_in">test</span> <span class="hljs-comment"># This will run all unit tests</span>
+<span class="hljs-comment"># you can also open rat and style plugin to check if every file meets requirements.</span>
+mvn clean install -Drat.skip=<span class="hljs-literal">false</span> -Dcheckstyle.skip=<span class="hljs-literal">false</span>
+</code></pre>
+</li>
+<li>
+<p>Release candidates match with corresponding tags, you can find tag link and hash in vote email.</p>
+</li>
+</ul>
+<h2>进入投票</h2>
+<p>投票分两个阶段：</p>
+<ol>
+<li>Dubbo社区投票，发起投票邮件到dev@dubbo.apache.org。在社区开发者Review，并统计到3个同意发版的binding票后，即可进入下一阶段的投票。</li>
+<li>Apache社区投票，发起投票邮件到general@apache.org。在Apache PMC Review，并统计到3个统一发版的binding票后，即可进行正式发布。</li>
+</ol>
+<p>邮件模板：</p>
+<pre><code class="language-tex">Hello Dubbo Community,
+
+This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
+
+The release candidates:
+https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
+
+Git tag for the release:
+https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.2
+
+Hash for the release tag:
+afab04c53edab38d52275d2a198ea1aff7a4f41e
+
+Release Notes:
+https://github.com/apache/incubator-dubbo/releases/tag/untagged-4775c0a22c60fca55118
+
+The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
+https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+
+The vote will be open for at least 72 hours or until necessary number of votes are reached.
+
+Please vote accordingly:
+
+[ ] +1 approve 
+[ ] +0 no opinion 
+[ ] -1 disapprove with the reason
+
+Thanks,
+The Apache Dubbo (Incubating) Team
+</code></pre>
+<h2>正式发布</h2>
+<ol>
+<li>提交https://dist.apache.org/repos/dist/dev/incubator/dubbo目录下的发布包到https://dist.apache.org/repos/dist/release/incubator/dubbo/，完成正式发布。</li>
+<li>发邮件到dev@dubbo.apache.org和general@apache.org，通知社区发布完成。</li>
+</ol>
+<h2>完成Maven Convenient Binary发布（可选）</h2>
+<p><strong><a href="http://apache.repository.org">apache.repository.org</a> nexus仓库的权限已经申请，参见<a href="https://issues.apache.org/jira/browse/INFRA-16451">jira</a>。</strong></p>
+<p>之前发布到maven仓库的atifacts都处于staging状态，用Apache <a href="http://xn--idapache-zm2p156p.repository.org">id登录apache.repository.org</a>，发布即可。</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>
