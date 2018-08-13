@@ -1,9 +1,9 @@
 # Generalized Calls of Dubbo
 The following scenarios can be considered using generalized calls:
 - Service test platform
--	API service gateway
+- API service gateway
 
-The generalization call is mainly used when the consumer【指“消费端”用不用大写】 does not have an API interface; 
+The generalization call is mainly used when the consumer does not have an API interface; 
 instead of introducing the interface jar package, the service call is initiated directly through the GenericService interface, and all POJOs in the parameters and return values are represented by a `Map`. 
 Generalized calls do not require attention on the server side, and can be exposed as normal services.
 
@@ -36,7 +36,7 @@ Among them,
    
    iii.	If it is a POJO, use the full class name directly, such as `com.alibaba.dubbo.samples.generic.api.Params`.
 
-### Generalized calls through API programming【同样译成了名词性短语】
+### Generalized calls through API programming
 
 ```
 ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
@@ -72,10 +72,10 @@ The following is the calling code of the consumer:
 
 The output of the above code is:
 
-Here, the Dubbo framework automatically converts the POJO return value to a Map【converts the return value from POJO to Map】.
-It can be seen that the return value user is a HashMap, which stores three k/vs, name, id, and class.
+Here, the Dubbo framework automatically converts the return value from POJO to Map.
+It can be seen that the return value `user` is a HashMap, which stores three k/vs, name, id, and class.
 
-### **Universal interface implementation**
+### Universal interface implementation
 
 The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, implementing a generic remote service Mock framework can be implemented by implementing the GenericService interface. All service requests.
 
@@ -122,7 +122,7 @@ service2.setRef(genericService);
 service2.export();
 ```
 
-Similarly, you can expose the service using XML configuration; in this case, the server does not depend on the two interfaces HiService and HelloService.
+Similarly, you can expose the service using XML configuration; in this case, the server does not depend on the two interfaces _HiService_ and _HelloService_.
 Server exposed service
 
 #### Service call on the consumer
@@ -155,11 +155,11 @@ System.out.println(helloService.hello("community"));
 
 Similarly, the consumer can also reference the service using an XML configuration and then make the call. Here you can see that the calling method is a normal service call, not a generalized call. Of course, it is also possible to use generalized calls.
 
-So far, a simple service Mock platform【服务Mock平台】 has been successfully launched!
+So far, a simple service Mock platform has been successfully launched!
 
 The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, implementing a generic remote service Mock framework can be implemented by implementing the GenericService interface. All service requests.
 
 ### What’s more
--	The generalization calls and generic interface implementations described in this article are all based on the native Dubbo protocol. Prior to version 2.6.2【版本的翻译方法】, other protocols such as http/hessian did not support generalized calls. The 2.6.3 version would support the generalized call of these two protocols.
+-	The generalization calls and generic interface implementations described in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian did not support generalized calls. Version 2.6.3 would support the generalized call of these two protocols.
 -	The relevant sample code mentioned in this article can be found in dubbo-samples: https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic
 
