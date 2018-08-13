@@ -1,44 +1,41 @@
-# 通过QoS对服务进行动态控制
+# Manipulating Services Dynamically via QoS
 
+QoS (short form of **Quality of Service**), is a common terminology talking about network devices. For example, by adjusting and manipulating the weights of ports of a router dynamically via QoS, engineers could give priority to services running on these ports and make sure these services' quality and reliability.
 
-QoS，全称为`Quality of Service`, 是常见于网络设备中的一个术语 ，例如在路由器中，可以通过Qos动态的调整和控制某些端口的权重，从而优先的保障运行在这些端口上的服务质量。
+In Dubbo, QoS is used to query and manipulate services dynamically, like getting a list of active provider and consumer services, and launching or withdrawing services (i.e registering to or unregistering services from registration center).
 
-在Dubbo中，QoS这个概念被用于动态的对服务进行查询和控制。例如对获取当前提供和消费的所有服务，以及对服务进行动态的上下线，即从注册中心上进行注册和反注册操作。
+## Mechanism of QoS
 
-### QoS工作机制
+From 2.5.8, QoS is introduced into Dubbo and is activated by default. All QoS's features are abstracted to commands, which could be executed to get responses from QoS.
 
-从Dubbo 2.5.8开始，默认引入了Qos功能，默认处于启动状态。所有的QoS功能被抽象成一个个的命令，通过执行这些命令，Qos会返回响应的结果。
-
->  Qos功能基于Netty4实现，在Dubbo 2.6.x之前的版本中，默认依赖的是Netty3，因此需要显示的添加Netty4的依赖，才能确保Netty4正常工作。如果使用http://start.dubbo.io自动生成的Dubbo应用，则无需添加额外的配置，因为已经默认加上了Netty4的依赖。
-
-Qos的工作机制如下图所示：
+> QoS is based on Netty4. In versions earlier than 2.6.x, Dubbo relies on Netty3, so you have to add Netty4 as a dependency explicitly to ensure that Netty4 works. If you generate a Dubbo application on http://start.dubbo.io, there's no need to add configurations because Netty4 is listed as a dependency by default.
 
 ![undefined](../../img/blog/qos-architecture.png)
 
+The picture above shows how QoS works:
 
+1. Start and listen to a port (22222 by default).
+2. Choose a corresponding request handler by detecting the protocol (telnet or http) a request comply with.
+3. Decode and parse the request to generate corresponding command according to the protocol.
+4. Execute commands and return with responses.
 
-1. 启动并监听一个端口，默认端口是22222
-2. 识别目标请求的协议是Http或者是Telnet，根据协议不同动态添加对应的处理器
-3. 针对不同的协议进行解码，解析出需要执行的命令
-4. 执行命令并返回结果
+### QoS Commands:
 
-### QoS命令
+Commands that QoS supports at the current moment include:
 
-QoS目前支持的命令包括：
+* `help`, list available commands
+* `ls`: list all active provider services and consumer services
+* `online`: dynamically register a service or all services to registration center
+* `offline`: dynamically remove (unregister) a services or all services from registration center
+* `quit`: quit the current telnet session
 
-* help: 帮助命令，列出
-* ls: 列出当前所有的正在提供的服务，以及消费的服务
-* online: 动态将某个或全部服务向注册中心进行注册
-* offline: 动态将某个或全部服务从注册中心摘除（反注册）
-* quit: 退出当前telnet会话
+Now we are going to demonstrate how to manipulate services dynamically via QoS.
 
-下面，我们具体来操作一下如何通过用QoS对服务进行动态控制。
+#### Access QoS via Telnet
 
-#### 通过Telnet方式访问QoS
+Assuming that our Dubbo server has started, connect to it via telnet:
 
-假设我们的Dubbo服务端已经启动，我们通过Telnet方式进行连接：
-
-```
+```shell
 $ telnet localhost 22222
 Trying 127.0.0.1...
 Connected to localhost.
@@ -56,9 +53,9 @@ Escape character is '^]'.
 dubbo>
 ```
 
-连接成功后，会出现`dubbo>`提示符，此时输入`help`命令
+A `dubbo>` prompt would show up once you connect to server. Now input `help`:
 
-```
+```sh
 dubbo>help
 +---------+----------------------------------------------------------------------------------+
 |    help | help command                                                                     |
@@ -75,11 +72,11 @@ dubbo>help
 dubbo>
 ```
 
-会列出当前所有可用的命令，及相应的说明。
+This command lists all available commands with explanations.
 
-也可以对单个命令进行help操作，可以看到该命令对应的示例
+You can also use `help` to a specific command to read examples of that command.
 
-```
+```sh
 dubbo>help online
 +--------------+----------------------------------------------------------------------------------+
 | COMMAND NAME | online                                                                           |
@@ -89,9 +86,9 @@ dubbo>help online
 +--------------+----------------------------------------------------------------------------------+
 ```
 
-通过`ls` 查看当前的服务状态
+Use `ls` to check services' status:
 
-```
+```sh
 dubbo>ls
 As Provider side:
 +------------------------------------------+---+
@@ -105,18 +102,18 @@ As Consumer side:
 +---------------------+---+
 ```
 
-可以看到，在服务端可以看到一个服务`org.apache.dubbo.demo.provider.DemoService`，第二列里面的`PUB=Y`代表改服务已经发布到注册中心，可供消费端进行调用。
+There is a service named `org.apache.dubbo.demo.provider.DemoService` in the provider side. `PUB=Y` in the second columns means that the service has been published to the registration center, waiting to be called by the consumer side.
 
-假设我们需要动态的对该服务进行下线操作，可以通过`offline`命令来完成
+Assuming that we need to withdraw a service dynamically, we can use `offline` command:
 
 ```
 dubbo>offline org.apache.dubbo.demo.provider.DemoService
 OK
 ```
 
-可以看到命令返回了OK，我们再通过ls看下当前的状态：
+You can see that the command responds with `OK`. Check the services' status using `ls`:
 
-```
+```sh
 dubbo>ls
 As Provider side:
 +------------------------------------------+---+
@@ -130,23 +127,21 @@ As Consumer side:
 +---------------------+---+
 ```
 
-可以看到`org.apache.dubbo.demo.provider.DemoService`的`PUB`已经被设置成了`N`。
+You can see that `PUB` of `org.apache.dubbo.demo.provider.DemoService` has been set to `N`.
 
-通过`quit`命令退出当前的telnet会话：
+Quit the current telnet session using `quit`:
 
-```
+```sh
 dubbo>quit
 BYE!
 Connection closed by foreign host.
 ```
 
+#### Access QoS via HTTP
 
+In the example above we performed an offline action to `org.apache.dubbo.demo.provider.DemoService`. Now we are going to demonstrate how to register the service above via HTTP.
 
-#### 通过HTTP方式访问QOS
-
-在上面的例子中，我们已经对`org.apache.dubbo.demo.provider.DemoService`进行了下线操作，下面，我们通过对Http方式对上面的服务进行注册操作：
-
-```
+```sh
 $ curl -i http://localhost:22222/online?service=org.apache.dubbo.demo.provider.DemoService
 HTTP/1.1 200 OK
 Content-Type: text/plain
@@ -155,9 +150,9 @@ Content-Length: 2
 OK%
 ```
 
->  注意online操作对应的参数，需要以`key=value`的形式提供，但实际上key会被忽略
+> Beware of the parameters of online action. They need to be provided in the form of `key=value`. However, `key` would be ignored actually.
 
-看到操作返回了OK，下面通过ls命令查看下当前的状态
+The action responds with `OK`. Now use `ls` to check providers' status at the current moment.
 
 ```
 $ curl -i http://localhost:22222/ls
@@ -177,32 +172,30 @@ As Consumer side:
 +---------------------+---+
 ```
 
-可以看到服务的`PUB`状态已经变成了`Y`。
+You can see that the service's `PUB` status has been changed to `Y`.
 
+### QoS' Parameters
 
+You can use parameters that QoS provides to config its startup. These parameters include:
 
-### QoS相关参数说明
-
-QoS提供了一些启动参数，来对启动进行配置，他们主要包括：
-
-| 参数               | 说明              | 默认值 |
+| Parameter             | Explanation              | Default |
 | ------------------ | ----------------- | ------ |
-| qosEnable          | 是否启动QoS       | true   |
-| qosPort            | 启动QoS绑定的端口 | 22222  |
-| qosAcceptForeignIp | 是否允许远程访问  | false  |
+| qosEnable          | Activate QoS or not       | true   |
+| qosPort            | The port QoS would bind to | 22222  |
+| qosAcceptForeignIp | Enable remote access or not  | false  |
 
-> 注意，从2.6.4/2.7.0开始，qosAcceptForeignIp默认配置改为false，如果qosAcceptForeignIp设置为true，有可能带来安全风险，请仔细评估后再打开。
+> Attention. From 2.6.4/2.7.0, `qosAcceptForeignIp` is set to `false` by default, because it's risky if this property is set to `true`. Think twice before you turn it on.
 
-QoS参数可以通过如下方式进行配置
+You can configure these parameters in the following ways:
 
-* 系统属性
-* dubbo.properties
-* XML方式
-* Spring-boot自动装配方式
+* System property
+* `dubbo.properties`
+* XML
+* Spring-boot auto configuration
 
-其中，上述方式的优先顺序为系统属性 > dubbo.properties > XML/Spring-boot自动装配方式。
+They have priority in the following order: system property > `dubbo.properties` > XML > spring-boot.
 
-#### 使用系统属性方式进行配置
+#### System Property
 
 ```
 -Ddubbo.application.qos.enable=true
@@ -210,18 +203,19 @@ QoS参数可以通过如下方式进行配置
 -Ddubbo.application.qos.accept.foreign.ip=false
 ```
 
-#### 使用dubbo.properties文件进行配置
+#### `Dubbo.properties`
 
-在项目的`src/main/resources`目录下添加dubbo.properties文件，内容如下:
+Create a `dubbo.properties` file in this directory `src/main/resources` in your project, and copy the following codes into it:
+
 ```
 dubbo.application.qos.enable=true
 dubbo.application.qos.port=33333
 dubbo.application.qos.accept.foreign.ip=false
 ```
 
-#### 使用XML方法进行配置
+#### XML
 
-如果要通过XML配置响应的QoS相关的参数，可以进行如下配置：
+If you are going to config using XML, you can try this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -243,12 +237,14 @@ dubbo.application.qos.accept.foreign.ip=false
 </beans>
 ```
 
-#### 使用spring-boot自动装配方式配置
+#### `spring-boot` auto configuration
 
-如果是spring-boot的应用，可以在`application.properties`或者`application.yml`上配置:
+If you are developing a spring-boot application, you can configure in `application.properties` or `application.yml`:
 
 ```
 dubbo.application.qosEnable=true
 dubbo.application.qosPort=33333
 dubbo.application.qosAcceptForeignIp=false
 ```
+
+
