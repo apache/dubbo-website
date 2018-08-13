@@ -123,7 +123,6 @@ service2.export();
 ```
 
 Similarly, you can expose the service using XML configuration; in this case, the server does not depend on the two interfaces _HiService_ and _HelloService_.
-Server exposed service
 
 #### Service call on the consumer
 
