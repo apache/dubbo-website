@@ -63,7 +63,7 @@ Dubbo基本用法-Dubbo Provider配置
 用于指定应用名，这里需要保证应用名唯一，这个应用名在后续的console admin中可以在列表中显示，方便管理。
 
 * &lt;dubbo:registry address="multicast://224.5.6.7:1234" /&gt;   
-注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地质，也可以eureka地质。上面这个是广播地址，在本地服务调用的测试过程中非常方便。
+注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地址，也可以eureka地址。上面这个是广播地址，在本地服务调用的测试过程中非常方便。
 
 * &lt;dubbo:protocol name="dubbo" port="20880" /&gt;   
 这里是传输的协议和默认端口，一般不需要更改。
