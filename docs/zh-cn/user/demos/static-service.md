@@ -14,7 +14,7 @@
 
 服务提供者初次注册时为禁用状态，需人工启用。断线时，将不会被自动删除，需人工禁用。
 
-如果是一个第三方独立提供者，比如 memcached，可以直接向注册中心写入提供者地址信息，消费者正常使用 [^1]：
+如果是一个第三方服务提供者，比如 memcached，可以直接向注册中心写入提供者地址信息，消费者正常使用 [^1]：
 
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();

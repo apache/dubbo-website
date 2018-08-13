@@ -4,20 +4,20 @@
 
 0. 命令行
 
-    ```sh
-java -Ddubbo.application.logger=log4j
-```
+ ```sh
+ java -Ddubbo.application.logger=log4j
+ ```
 
 0. 在 `dubbo.properties` 中指定
 
-    ```
-dubbo.application.logger=log4j
-```
+ ```
+ dubbo.application.logger=log4j
+ ```
 
 0. 在 `dubbo.xml` 中配置
 
-    ```xml
-<dubbo:application logger="log4j" />
-```
+ ```xml
+ <dubbo:application logger="log4j" />
+ ```
 
 [^1]: 自定义扩展可以参考[日志适配扩展](http://dubbo.apache.org/books/dubbo-dev-book/impls/logger-adapter.html)
