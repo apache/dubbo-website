@@ -1,5 +1,5 @@
 # Generic Calls of Dubbo
-The Generic call could be considered to be used in the following cases:
+The generic call could be considered to be used in the following cases:
 - Service test platform
 - API service gateway
 
