@@ -69,7 +69,8 @@ Here is the transport protocol and the default port, generally no changes are re
 
 > Next, we will focus on the configuration of &lt;dubbo:service/&gt;
 
-* &lt;dubbo:service/&gt;List of main properties supported：
+* &lt;dubbo:service/&gt;mainly supports the following properties：
+
 | Properties Name | Description | 
 | -------- | ----- |
 | version | Version number | 
