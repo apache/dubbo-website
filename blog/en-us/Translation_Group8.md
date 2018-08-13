@@ -1,13 +1,13 @@
-# Generalized Calls of Dubbo
-The following scenarios can be considered using generalized calls:
+# Generic Calls of Dubbo
+Generic calls could be considered using in the following cases:
 - Service test platform
 - API service gateway
 
-The generalization call is mainly used when the consumer does not have an API interface; 
+The generic call is mainly used when the consumer does not have an API interface; 
 instead of introducing the interface jar package, the service call is initiated directly through the GenericService interface, and all POJOs in the parameters and return values are represented by a `Map`. 
-Generalized calls do not require attention on the server side, and can be exposed as normal services.
+Generic calls do not require attention on the server, and can be exposed as normal services.
 
-### Generalized calls through Spring XML configuration
+### Generic calls through Spring XML configuration
 
 Declare `generic="true"` in Spring configuration, such as
 
@@ -36,7 +36,7 @@ Among them,
    
    iii.	If it is a POJO, use the full class name directly, such as `com.alibaba.dubbo.samples.generic.api.Params`.
 
-### Generalized calls through API programming
+### Generic calls through API programming
 
 ```
 ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
@@ -64,22 +64,35 @@ System.out.println(name);
 
 Through the API, you don't need to configure the service in advance like XML. You can dynamically construct ReferenceConfig; the API is more common than XML.
 
-### The scence where parameters or return values are POJO
+### The scence where parameters or return values are POJOs
 
-For example, the method signature is `User get(Params params)`, where User has two attributes id and name, and Params has one attribute query.
+For example, the method signature is `User get(Params params)`, where `User` has two attributes id and name, and `Params` has one attribute query.
 
 The following is the calling code of the consumer:
 
+```
+String[] parameterTypes = new String[]{"com.alibaba.dubbo.samples.generic.api.Params"};
+Map<String, Object> params = new HashMap<String, Object>();
+param.put("class", "com.alibaba.dubbo.samples.generic.api.Params");
+param.put("query", "a=b");
+Object user = userService.$invoke("get", parameterTypes, new Object[]{param});
+System.out.println("sample one result: " + user);
+```
+
 The output of the above code is:
 
-Here, the Dubbo framework automatically converts the return value from POJO to Map.
+```
+sample one result: {name=charles, id=1, class=com.alibaba.dubbo.samples.generic.api.User}
+```
+
+Here, the Dubbo framework will automatically convert the return value from POJO to Map.
 It can be seen that the return value `user` is a HashMap, which stores three k/vs, name, id, and class.
 
-### Universal interface implementation
+### Generic interface implementation
 
-The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, implementing a generic remote service Mock framework can be implemented by implementing the GenericService interface. All service requests.
+The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, to implement a generic remote service Mock framework, all service requests can be handled by implementing the GenericService interface.
 
-#### Implementation GenericService on the server side
+#### Implementation GenericService on the server
 
 ```
 public class GenericServiceImpl implements GenericService {
@@ -122,7 +135,7 @@ service2.setRef(genericService);
 service2.export();
 ```
 
-Similarly, you can expose the service using XML configuration; in this case, the server does not depend on the two interfaces _HiService_ and _HelloService_.
+Similarly, you can expose the service using XML configuration; in this case, the server does not depend on the two interfaces HiService and HelloService.
 
 #### Service call on the consumer
 
@@ -156,9 +169,8 @@ Similarly, the consumer can also reference the service using an XML configuratio
 
 So far, a simple service Mock platform has been successfully launched!
 
-The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, implementing a generic remote service Mock framework can be implemented by implementing the GenericService interface. All service requests.
 
-### What’s more
--	The generalization calls and generic interface implementations described in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian did not support generalized calls. Version 2.6.3 would support the generalized call of these two protocols.
--	The relevant sample code mentioned in this article can be found in dubbo-samples: https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic
+### Others
+-	The generalization calls and generic interface implementations described in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian did not support generalized calls. Version 2.6.3 would support the generic call of these two protocols.
+-	The relevant sample codes mentioned in this article can be found in dubbo-samples: https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic
 
