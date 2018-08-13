@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="spring-boot-dubbo-start-stop-analysis" />
+	<meta name="description" content="spring-boot-dubbo-start-stop-analysis" />
+	<!-- 网页标签标题 -->
+	<title>spring-boot-dubbo-start-stop-analysis</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="68597831"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Spring-boot+Dubbo应用启停源码分析</h1>
+<h3>背景介绍</h3>
+<p><a href="https://github.com/apache/incubator-dubbo-spring-boot-project">Dubbo Spring Boot</a> 工程致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发。同时也整合了 Spring Boot 特性：</p>
+<ul>
+<li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure">自动装配</a> (比如： 注解驱动, 自动装配等).</li>
+<li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator">Production-Ready</a> (比如： 安全, 健康检查, 外部化配置等).</li>
+</ul>
+<h3>DubboConsumer启动分析</h3>
+<p>你有没有想过一个问题？<code>incubator-dubbo-spring-boot-project</code>中的<code>DubboConsumerDemo</code>应用就一行代码，<code>main</code>方法执行完之后，为什么不会直接退出呢？</p>
+<pre><code class="language-java"><span class="hljs-meta">@SpringBootApplication</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.boot.dubbo.demo.consumer.controller"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboConsumerDemo</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        SpringApplication.run(DubboConsumerDemo.class,args);
+    }
+
+}
+</code></pre>
+<p>其实要回答这样一个问题，我们首先需要把这个问题进行一个抽象，即一个JVM进程，在什么情况下会退出？</p>
+<p>以Java 8为例，通过查阅JVM语言规范[1]，在12.8章节中有清晰的描述：</p>
+<p>A program terminates all its activity and <em>exits</em> when one of two things happens:</p>
+<ul>
+<li>All the threads that are not daemon threads terminate.</li>
+<li>Some thread invokes the <code>exit</code> method of class <code>Runtime</code> or class <code>System</code>, and the <code>exit</code> operation is not forbidden by the security manager.</li>
+</ul>
+<p>也就是说，导致JVM的退出只有2种情况：</p>
+<ol>
+<li>所有的非daemon进程完全终止</li>
+<li>某个线程调用了<code>System.exit()</code>或<code>Runtime.exit()</code></li>
+</ol>
+<p>因此针对上面的情况，我们判断，一定是有某个非daemon线程没有退出导致。我们知道，通过jstack可以看到所有的线程信息，包括他们是否是daemon线程，可以通过jstack找出那些是非deamon的线程。</p>
+<pre><code class="language-sh">➜  jstack 57785 | grep tid | grep -v <span class="hljs-string">"daemon"</span>
+<span class="hljs-string">"container-0"</span> <span class="hljs-comment">#37 prio=5 os_prio=31 tid=0x00007fbe312f5800 nid=0x7103 waiting on condition  [0x0000700010144000]</span>
+<span class="hljs-string">"container-1"</span> <span class="hljs-comment">#49 prio=5 os_prio=31 tid=0x00007fbe3117f800 nid=0x7b03 waiting on condition  [0x0000700010859000]</span>
+<span class="hljs-string">"DestroyJavaVM"</span> <span class="hljs-comment">#83 prio=5 os_prio=31 tid=0x00007fbe30011000 nid=0x2703 waiting on condition  [0x0000000000000000]</span>
+<span class="hljs-string">"VM Thread"</span> os_prio=31 tid=0x00007fbe3005e800 nid=0x3703 runnable
+<span class="hljs-string">"GC Thread#0"</span> os_prio=31 tid=0x00007fbe30013800 nid=0x5403 runnable
+<span class="hljs-string">"GC Thread#1"</span> os_prio=31 tid=0x00007fbe30021000 nid=0x5303 runnable
+<span class="hljs-string">"GC Thread#2"</span> os_prio=31 tid=0x00007fbe30021800 nid=0x2d03 runnable
+<span class="hljs-string">"GC Thread#3"</span> os_prio=31 tid=0x00007fbe30022000 nid=0x2f03 runnable
+<span class="hljs-string">"G1 Main Marker"</span> os_prio=31 tid=0x00007fbe30040800 nid=0x5203 runnable
+<span class="hljs-string">"G1 Conc#0"</span> os_prio=31 tid=0x00007fbe30041000 nid=0x4f03 runnable
+<span class="hljs-string">"G1 Refine#0"</span> os_prio=31 tid=0x00007fbe31044800 nid=0x4e03 runnable
+<span class="hljs-string">"G1 Refine#1"</span> os_prio=31 tid=0x00007fbe31045800 nid=0x4d03 runnable
+<span class="hljs-string">"G1 Refine#2"</span> os_prio=31 tid=0x00007fbe31046000 nid=0x4c03 runnable
+<span class="hljs-string">"G1 Refine#3"</span> os_prio=31 tid=0x00007fbe31047000 nid=0x4b03 runnable
+<span class="hljs-string">"G1 Young RemSet Sampling"</span> os_prio=31 tid=0x00007fbe31047800 nid=0x3603 runnable
+<span class="hljs-string">"VM Periodic Task Thread"</span> os_prio=31 tid=0x00007fbe31129000 nid=0x6703 waiting on condition
+
+</code></pre>
+<blockquote>
+<p>此处通过grep tid 找出所有的线程摘要，通过grep -v找出不包含daemon关键字的行</p>
+</blockquote>
+<p>通过上面的结果，我们发现了一些信息：</p>
+<ul>
+<li>有两个线程<code>container-0</code>, <code>container-1</code>非常可疑，他们是非daemon线程，处于wait状态</li>
+<li>有一些GC相关的线程，和VM打头的线程，也是非daemon线程，但他们很有可能是JVM自己的线程，在此暂时忽略。</li>
+</ul>
+<p>综上，我们可以推断，很可能是因为<code>container-0</code>和<code>container-1</code>导致JVM没有退出。现在我们通过源码，搜索一下到底是谁创建的这两个线程。</p>
+<p>通过对spring-boot的源码分析，我们在<code>org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer</code>的<code>startDaemonAwaitThread</code>找到了如下代码</p>
+<pre><code class="language-java">	<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">startDaemonAwaitThread</span><span class="hljs-params">()</span> </span>{
+		Thread awaitThread = <span class="hljs-keyword">new</span> Thread(<span class="hljs-string">"container-"</span> + (containerCounter.get())) {
+
+			<span class="hljs-meta">@Override</span>
+			<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+				TomcatEmbeddedServletContainer.<span class="hljs-keyword">this</span>.tomcat.getServer().await();
+			}
+
+		};
+		awaitThread.setContextClassLoader(getClass().getClassLoader());
+		awaitThread.setDaemon(<span class="hljs-keyword">false</span>);
+		awaitThread.start();
+	}
+</code></pre>
+<p>在这个方法加个断点，看下调用堆栈：</p>
+<pre><code>initialize:115, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+&lt;init&gt;:84, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+getTomcatEmbeddedServletContainer:554, TomcatEmbeddedServletContainerFactory (org.springframework.boot.context.embedded.tomcat)
+getEmbeddedServletContainer:179, TomcatEmbeddedServletContainerFactory (org.springframework.boot.context.embedded.tomcat)
+createEmbeddedServletContainer:164, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+onRefresh:134, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+refresh:537, AbstractApplicationContext (org.springframework.context.support)
+refresh:122, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+refresh:693, SpringApplication (org.springframework.boot)
+refreshContext:360, SpringApplication (org.springframework.boot)
+run:303, SpringApplication (org.springframework.boot)
+run:1118, SpringApplication (org.springframework.boot)
+run:1107, SpringApplication (org.springframework.boot)
+main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
+</code></pre>
+<p>可以看到，spring-boot应用在启动的过程中，由于默认启动了Tomcat暴露HTTP服务，所以执行到了上述方法，而Tomcat启动的所有的线程，默认都是daemon线程，例如监听请求的Acceptor，工作线程池等等，如果这里不加控制的话，启动完成之后JVM也会退出。因此需要显示的启动一个线程，在某个条件下进行持续等待，从而避免线程退出。</p>
+<p>下面我们在深挖一下，在Tomcat的<code>this.tomcat.getServer().await()</code>这个方法中，线程是如何实现不退出的。这里为了阅读方便，去掉了不相关的代码。</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">await</span><span class="hljs-params">()</span> </span>{
+    	<span class="hljs-comment">// ...</span>
+        <span class="hljs-keyword">if</span>( port==-<span class="hljs-number">1</span> ) {
+            <span class="hljs-keyword">try</span> {
+                awaitThread = Thread.currentThread();
+                <span class="hljs-keyword">while</span>(!stopAwait) {
+                    <span class="hljs-keyword">try</span> {
+                        Thread.sleep( <span class="hljs-number">10000</span> );
+                    } <span class="hljs-keyword">catch</span>( InterruptedException ex ) {
+                        <span class="hljs-comment">// continue and check the flag</span>
+                    }
+                }
+            } <span class="hljs-keyword">finally</span> {
+                awaitThread = <span class="hljs-keyword">null</span>;
+            }
+            <span class="hljs-keyword">return</span>;
+        }
+		<span class="hljs-comment">// ...</span>
+    }
+</code></pre>
+<p>在await方法中，实际上当前线程在一个while循环中每10秒检查一次 <code>stopAwait</code>这个变量，它是一个<code>volatile</code>类型变量，用于确保被另一个线程修改后，当前线程能够立即看到这个变化。如果没有变化，就会一直处于while循环中。这就是该线程不退出的原因，也就是整个spring-boot应用不退出的原因。</p>
+<p>因为Springboot应用同时启动了8080和8081(management port)两个端口，实际是启动了两个Tomcat，因此会有两个线程<code>container-0</code>和<code>container-1</code>。</p>
+<p>接下来，我们再看看，这个Spring-boot应用又是如何退出的呢？</p>
+<h3>DubboConsumer退出分析</h3>
+<p>在前面的描述中提到，有一个线程持续的在检查<code>stopAwait</code>这个变量，那么我们自然想到，在Stop的时候，应该会有一个线程去修改<code>stopAwait</code>，打破这个while循环，那又是谁在修改这个变量呢？</p>
+<p>通过对源码分析，可以看到只有一个方法修改了<code>stopAwait</code>,即<code>org.apache.catalina.core.StandardServer#stopAwait</code>，我们在此处加个断点，看看是谁在调用。</p>
+<blockquote>
+<p>注意，当我们在Intellij IDEA的Debug模式，加上一个断点后，需要在命令行下使用<code>kill -s INT $PID</code>或者<code>kill -s TERM $PID</code>才能触发断点，点击IDE上的Stop按钮，不会触发断点。这是IDEA的bug</p>
+</blockquote>
+<p>可以看到有一个名为<code>Thread-3</code>的线程调用了该方法：</p>
+<pre><code class="language-java">stopAwait:<span class="hljs-number">390</span>, StandardServer (org.apache.catalina.core)
+stopInternal:<span class="hljs-number">819</span>, StandardServer (org.apache.catalina.core)
+stop:<span class="hljs-number">226</span>, LifecycleBase (org.apache.catalina.util)
+stop:<span class="hljs-number">377</span>, Tomcat (org.apache.catalina.startup)
+stopTomcat:<span class="hljs-number">241</span>, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+stop:<span class="hljs-number">295</span>, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+stopAndReleaseEmbeddedServletContainer:<span class="hljs-number">306</span>, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+onClose:<span class="hljs-number">155</span>, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+doClose:<span class="hljs-number">1014</span>, AbstractApplicationContext (org.springframework.context.support)
+run:<span class="hljs-number">929</span>, AbstractApplicationContext$<span class="hljs-number">2</span> (org.springframework.context.support)
+</code></pre>
+<p>通过源码分析，原来是通过Spring注册的<code>ShutdownHook</code>来执行的</p>
+<pre><code class="language-java">	<span class="hljs-meta">@Override</span>
+	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerShutdownHook</span><span class="hljs-params">()</span> </span>{
+		<span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.shutdownHook == <span class="hljs-keyword">null</span>) {
+			<span class="hljs-comment">// No shutdown hook registered yet.</span>
+			<span class="hljs-keyword">this</span>.shutdownHook = <span class="hljs-keyword">new</span> Thread() {
+				<span class="hljs-meta">@Override</span>
+				<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+					<span class="hljs-keyword">synchronized</span> (startupShutdownMonitor) {
+						doClose();
+					}
+				}
+			};
+			Runtime.getRuntime().addShutdownHook(<span class="hljs-keyword">this</span>.shutdownHook);
+		}
+	}
+</code></pre>
+<p>通过查阅Java的API文档[2], 我们可以知道ShutdownHook将在下面两种情况下执行</p>
+<blockquote>
+<p>The Java virtual machine <em>shuts down</em> in response to two kinds of events:</p>
+<ul>
+<li>The program <em>exits</em> normally, when the last non-daemon thread exits or when the <code>exit</code> (equivalently, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#exit-int-"><code>System.exit</code></a>) method is invoked, or</li>
+<li>The virtual machine is <em>terminated</em> in response to a user interrupt, such as typing <code>^C</code>, or a system-wide event, such as user logoff or system shutdown.</li>
+</ul>
+</blockquote>
+<ol>
+<li>调用了System.exit()方法</li>
+<li>响应外部的信号，例如Ctrl+C（其实发送的是SIGINT信号），或者是<code>SIGTERM</code>信号（默认<code>kill $PID</code>发送的是<code>SIGTERM</code>信号）</li>
+</ol>
+<p>因此，正常的应用在停止过程中(<code>kill -9 $PID</code>除外)，都会执行上述ShutdownHook，它的作用不仅仅是关闭tomcat，还有进行其他的清理工作，在此不再赘述。</p>
+<h3>总结</h3>
+<ol>
+<li>在<code>DubboConsumer</code>启动的过程中，通过启动一个独立的非daemon线程循环检查变量的状态，确保进程不退出</li>
+<li>在<code>DubboConsumer</code>停止的过程中，通过执行spring容器的shutdownhook，修改了变量的状态，使得程序正常退出</li>
+</ol>
+<h3>问题</h3>
+<p>在DubboProvider的例子中，我们看到Provider并没有启动Tomcat提供HTTP服务，那又是如何实现不退出的呢？我们将在下一篇文章中回答这个问题。</p>
+<h4>彩蛋</h4>
+<p>在<code>Intellij IDEA</code>中运行了如下的单元测试，创建一个线程执行睡眠1000秒的操作，我们惊奇的发现，代码并没有线程执行完就退出了，这又是为什么呢？（被创建的线程是非daemon线程）</p>
+<pre><code class="language-java">    <span class="hljs-meta">@Test</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() {
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">try</span> {
+                    Thread.sleep(<span class="hljs-number">1000000</span>);
+                } <span class="hljs-keyword">catch</span> (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+</code></pre>
+<p>[1] <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-12.html#jls-12.8">https://docs.oracle.com/javase/specs/jls/se8/html/jls-12.html#jls-12.8</a></p>
+<p>[2] <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runtime.html#addShutdownHook">https://docs.oracle.com/javase/8/docs/api/java/lang/Runtime.html#addShutdownHook</a></p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">文档</dt><dd data-reactid="30"><a href="/zh-cn/docs/user/quick-start.html" target="_self" data-reactid="31">快速开始</a></dd><dd data-reactid="32"><a href="/zh-cn/docs/dev/build.html" target="_self" data-reactid="33">开发者指南</a></dd><dd data-reactid="34"><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">运维管理</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">资源</dt><dd data-reactid="39"><a href="/zh-cn/blog/index.html" target="_self" data-reactid="40">博客</a></dd><dd data-reactid="41"><a href="/zh-cn/community/index.html" target="_self" data-reactid="42">社区</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

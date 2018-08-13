@@ -1,10 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { autobind } from 'core-decorators';
+import { getLink } from '../../../utils';
 
 import './blogItem.scss';
 
-
+@autobind
 class BlogItem extends React.Component {
   constructor(props) {
     super(props);
@@ -13,14 +13,12 @@ class BlogItem extends React.Component {
     };
   }
 
-  @autobind
   onMouseOver() {
     this.setState({
       isHovered: true,
     });
   }
 
-  @autobind
   onMouseOut() {
     this.setState({
       isHovered: false,
@@ -29,28 +27,29 @@ class BlogItem extends React.Component {
 
   render() {
     const { dataSource } = this.props;
-    const { link, title, author, companyIcon, companyIconHover, dateStr, desc } = dataSource;
+    const { link, target, title, author, companyIcon, companyIconHover, dateStr, desc } = dataSource;
     const { isHovered } = this.state;
     return (
-      <Link
-        to={link}
+      <a
+        href={getLink(link)}
+        target={target || '_self'}
         className="blog-item"
         onMouseOver={this.onMouseOver}
         onMouseOut={this.onMouseOut}
       >
         <div className="title">
-          <img src={isHovered ? './img/docs_hover.png' : './img/docs_normal.png'} />
+        <img src={isHovered ? `${window.rootPath}/img/docs_hover.png` : `${window.rootPath}/img/docs_normal.png`} />
           <span>{title}</span>
         </div>
         <div className="brief-info">
           <span className="author">{author}</span>
           {
-            companyIcon ? <img src={isHovered ? companyIconHover : companyIcon} /> : null
+            companyIcon ? <img src={isHovered ? `${window.rootPath}${companyIconHover}` : `${window.rootPath}${companyIcon}`} /> : null
           }
           <span className="date">{dateStr}</span>
         </div>
         <p>{desc}</p>
-      </Link>
+      </a>
     );
   }
 }

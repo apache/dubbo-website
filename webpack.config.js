@@ -1,21 +1,24 @@
 const path = require('path');
+const fs = require('fs');
 const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+const entry = {};
+const targetPath = path.join(__dirname, './src/pages');
+fs.readdirSync(targetPath).forEach((page) => {
+  if (fs.statSync(path.join(targetPath, page)).isDirectory() && fs.existsSync(path.join(targetPath, page, 'index.jsx'))) {
+    entry[page] = path.join(targetPath, page, 'index.jsx');
+  }
+});
 module.exports = {
-  cache: true,
-  entry: {
-    page: './src/index.jsx'
-  },
+  entry,
   output: {
     path: path.join(__dirname, 'build'),
-    publicPath: './build/',
     filename: '[name].js',
-    chunkFilename: '[chunkhash].js',
   },
   externals: {
     react: 'React',
     'react-dom': 'ReactDOM',
-    'react-router-dom': 'ReactRouterDOM',
   },
   module: {
     loaders: [
@@ -26,7 +29,10 @@ module.exports = {
       },
       {
         test: /\.(s)?css$/,
-        use: ['style-loader', 'raw-loader', 'sass-loader'],
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader', 'sass-loader'],
+        }),
       },
       {
         test: /\.json?$/,
@@ -41,5 +47,6 @@ module.exports = {
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
+    new ExtractTextPlugin('[name].css'),
   ]
 };

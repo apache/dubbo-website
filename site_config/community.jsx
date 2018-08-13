@@ -7,32 +7,32 @@ export default {
       title: 'Events & News',
       list: [
         {
-          img: './img/blog/dubbo-shanghai-meetup.jpeg',
+          img: '/img/blog/dubbo-shanghai-meetup.jpeg',
           title: 'Dubbo Shanghai meetup has been held successfully',
           content: 'The Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.',
           dateStr: 'June 23rd，2018',
-          link: '/blog/dubbo-meetup-shanghai-jun-23rd-2018.md',
+          link: '/en-us/blog/dubbo-meetup-shanghai-jun-23rd-2018.html',
         },
         {
-          img: './img/blog/dubbo-beijing-meetup.png',
+          img: '/img/blog/dubbo-beijing-meetup.png',
           title: 'The first Dubbo meetup has successfully been held in Beijing',
           content: 'The first Dubbo meetup has successfully been held in Beijing, over 400+ people were present. What a great event!',
           dateStr: 'May 12nd，2018',
-          link: '/blog/dubbo-meetup-beijing-may-12th-2018.md',
+          link: '/en-us/blog/dubbo-meetup-beijing-may-12th-2018.html',
         },
         {
-          img: './img/blog/apachecon-na-2018.png',
+          img: '/img/blog/apachecon-na-2018.png',
           title: 'The ApacheCon NA schedule has been announced',
           content: 'Ian Luo/Jun Liu will talk about "Introducing Apache Dubbo(Incubating): What is Dubbo and How it Works" at ApacheCon NA this year in Montréal!',
           dateStr: 'May 2nd，2018',
-          link: '/blog/apachecon-na-2018.md',
+          link: '/en-us/blog/apachecon-na-2018.html',
         },
         {
-          img: './img/blog/qcon-beijing-2018.jpeg',
+          img: '/img/blog/qcon-beijing-2018.jpeg',
           title: 'Dubbo roadmap is announced in QCon Beijing 2018',
           content: 'Ian Luo has delivered a great talk at QCon Beijing 2018, where the roadmap of Dubbo has also be announced.',
           dateStr: 'April 21st，2018',
-          link: '/blog/qcon-beijing-2018.md',
+          link: '/en-us/blog/qcon-beijing-2018.html',
         },
       ]
     },
@@ -41,26 +41,26 @@ export default {
       desc: 'Feel free to contact us via the following channel.',
       list: [
         {
-          img: './img/mailinglist.png',
-          imgHover: './img/mailinglist_hover.png',
+          img: '/img/mailinglist.png',
+          imgHover: '/img/mailinglist_hover.png',
           title: 'Mailing List',
           link: 'https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide'
         },
         {
-          img: './img/alibaba.png',
-          imgHover: './img/alibaba_hover.png',
+          img: '/img/alibaba.png',
+          imgHover: '/img/alibaba_hover.png',
           title: '#alibaba/dubbo',
           link: 'https://gitter.im/alibaba/dubbo',
         },
         {
-          img: './img/segmentfault.png',
-          imgHover: './img/segmentfault_hover.png',
+          img: '/img/segmentfault.png',
+          imgHover: '/img/segmentfault_hover.png',
           title: 'Segment Fault',
           link: 'https://segmentfault.com/t/dubbo'
         },
         {
-          img: './img/twitter.png',
-          imgHover: './img/twitter_hover.png',
+          img: '/img/twitter.png',
+          imgHover: '/img/twitter_hover.png',
           title: '@ApacheDubbo',
           link: 'https://twitter.com/ApacheDubbo',
         },
@@ -71,22 +71,22 @@ export default {
       desc: 'Want to contribute to Dubbo?',
       list: [
         {
-          img: './img/mailinglist.png',
+          img: '/img/mailinglist.png',
           title: 'Mailing List',
           content: <span>Join the <a href="https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide">mailing list </a>and discussion your ideas with us.</span>,
         },
         {
-          img: './img/issue.png',
+          img: '/img/issue.png',
           title: 'Issue',
           content: <span>Reporting issues via <a href="https://github.com/apache/incubator-dubbo/issues">Github issues</a>.</span>,
         },
         {
-          img: './img/documents.png',
+          img: '/img/documents.png',
           title: 'Documents',
           content: <span>Improve the <a href="https://github.com/apache/incubator-dubbo-docs">documentation</a>.</span>,
         },
         {
-          img: './img/pullrequest.png',
+          img: '/img/pullrequest.png',
           title: 'Pull Request',
           content: <span>Send your awesome enhancement via <a href="https://github.com/apache/incubator-dubbo/pulls">Pull requests.</a></span>,
         },
@@ -138,17 +138,17 @@ export default {
           tags: [
             {
               text: 'Spring XML',
-              link: '#/docs/user/configuration/xml.md',
+              link: '/en-us/docs/user/configuration/xml.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Spring Annotation',
-              link: '#/docs/user/configuration/annotation.md',
+              link: '/en-us/docs/user/configuration/annotation.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Plain Java',
-              link: '#/docs/user/configuration/properties.md',
+              link: '/en-us/docs/user/configuration/properties.html',
               bgColor: '#00D0D9',
             },
             {
@@ -164,22 +164,22 @@ export default {
           tags: [
             {
               text: 'Zookeeper',
-              link: '#/docs/user/references/registry/zookeeper.md',
+              link: '/en-us/docs/user/references/registry/zookeeper.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Redis',
-              link: '#/docs/user/references/registry/redis.md',
+              link: '/en-us/docs/user/references/registry/redis.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Simple',
-              link: '#/docs/user/references/registry/simple.md',
+              link: '/en-us/docs/user/references/registry/simple.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Multicast',
-              link: '#/docs/user/references/registry/multicast.md',
+              link: '/en-us/docs/user/references/registry/multicast.html',
               bgColor: '#00D0D9',
             },
             {
@@ -195,32 +195,32 @@ export default {
           tags: [
             {
               text: 'Fail over',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/en-us/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Fail safe',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/en-us/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail fast',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/en-us/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail back',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/en-us/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Forking',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/en-us/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Broadcast',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/en-us/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
           ],
@@ -231,22 +231,22 @@ export default {
           tags: [
             {
               text: 'Random',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/en-us/docs/user/demos/loadbalance.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Least Active',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/en-us/docs/user/demos/loadbalance.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Round Robin',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/en-us/docs/user/demos/loadbalance.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Consistent hash',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/en-us/docs/user/demos/loadbalance.html',
               bgColor: '#00D0D9',
             },
           ],
@@ -257,32 +257,32 @@ export default {
           tags: [
             {
               text: 'Dubbo',
-              link: '#/docs/user/references/protocol/dubbo.md',
+              link: '/en-us/docs/user/references/protocol/dubbo.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'RMI',
-              link: '#/docs/user/references/protocol/rmi.md',
+              link: '/en-us/docs/user/references/protocol/rmi.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Hessian',
-              link: '#/docs/user/references/protocol/hessian.md',
+              link: '/en-us/docs/user/references/protocol/hessian.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'HTTP',
-              link: '#/docs/user/references/protocol/http.md',
+              link: '/en-us/docs/user/references/protocol/http.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'WebService',
-              link: '#/docs/user/references/protocol/webservice.md',
+              link: '/en-us/docs/user/references/protocol/webservice.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Thrift',
-              link: '#/docs/user/references/protocol/thrift.md',
+              link: '/en-us/docs/user/references/protocol/thrift.html',
               bgColor: '#00D0D9',
             },
             {
@@ -292,17 +292,17 @@ export default {
             },
             {
               text: 'Memcached',
-              link: '#/docs/user/references/protocol/memcached.md',
+              link: '/en-us/docs/user/references/protocol/memcached.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Redis',
-              link: '#/docs/user/references/protocol/redis.md',
+              link: '/en-us/docs/user/references/protocol/redis.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Rest',
-              link: '#/docs/user/references/protocol/rest.md',
+              link: '/en-us/docs/user/references/protocol/rest.html',
               bgColor: '#00D0D9',
             },
             {
@@ -333,7 +333,7 @@ export default {
             },
             {
               text: 'Netty4',
-              link: '#/docs/user/demos/netty4.md',
+              link: '/en-us/docs/user/demos/netty4.html',
               bgColor: '#00D0D9',
             },
             {
@@ -413,32 +413,32 @@ export default {
       title: '事件 & 新闻',
       list: [
         {
-          img: './img/blog/dubbo-shanghai-meetup.jpeg',
+          img: '/img/blog/dubbo-shanghai-meetup.jpeg',
           title: '第二届Dubbo开发者沙龙在上海成功举办',
           content: '第二届Dubbo开发者沙龙在上海成功举办，超过700位开发者报名，现场参与人数300+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数10000+',
           dateStr: 'Jun 23rd，2018',
-          link: '/blog/dubbo-meetup-shanghai-jun-23rd-2018.md',
+          link: '/zh-cn/blog/dubbo-meetup-shanghai-jun-23rd-2018.html',
         },
         {
-          img: './img/blog/dubbo-beijing-meetup.png',
+          img: '/img/blog/dubbo-beijing-meetup.png',
           title: '首届Dubbo开发者沙龙在北京成功举办',
           content: '首届Dubbo开发者沙龙在北京成功举办，超过400位开发者参加！',
           dateStr: 'May 12nd，2018',
-          link: '/blog/dubbo-meetup-beijing-may-12th-2018.md',
+          link: '/zh-cn/blog/dubbo-meetup-beijing-may-12th-2018.html',
         },
         {
-          img: './img/blog/apachecon-na-2018.png',
+          img: '/img/blog/apachecon-na-2018.png',
           title: 'ApacheCon大会议程公布',
           content: '罗毅/刘军 将进行题为"Introducing Apache Dubbo(Incubating): What is Dubbo and How it Works"的演讲。',
           dateStr: 'May 2nd，2018',
-          link: '/blog/apachecon-na-2018.md',
+          link: '/zh-cn/blog/apachecon-na-2018.html',
         },
         {
-          img: './img/blog/qcon-beijing-2018.jpeg',
+          img: '/img/blog/qcon-beijing-2018.jpeg',
           title: 'Dubbo路线图在QCon Beijing 2018上公布',
           content: '罗毅在Qcon Beijing 2018上进行了Dubbo开源现状及未来规划的主题演讲。',
           dateStr: 'April 21st，2018',
-          link: '/blog/qcon-beijing-2018.md',
+          link: '/zh-cn/blog/qcon-beijing-2018.html',
         },
       ]
     },
@@ -447,26 +447,26 @@ export default {
       desc: '有问题需要反馈？请通过一下方式联系我们。',
       list: [
         {
-          img: './img/mailinglist.png',
-          imgHover: './img/mailinglist_hover.png',
+          img: '/img/mailinglist.png',
+          imgHover: '/img/mailinglist_hover.png',
           title: '邮件列表',
           link: 'https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide'
         },
         {
-          img: './img/alibaba.png',
-          imgHover: './img/alibaba_hover.png',
+          img: '/img/alibaba.png',
+          imgHover: '/img/alibaba_hover.png',
           title: 'Gitter',
           link: 'https://gitter.im/alibaba/dubbo',
         },
         {
-          img: './img/segmentfault.png',
-          imgHover: './img/segmentfault_hover.png',
+          img: '/img/segmentfault.png',
+          imgHover: '/img/segmentfault_hover.png',
           title: 'Segment Fault',
           link: 'https://segmentfault.com/t/dubbo'
         },
         {
-          img: './img/twitter.png',
-          imgHover: './img/twitter_hover.png',
+          img: '/img/twitter.png',
+          imgHover: '/img/twitter_hover.png',
           title: '@ApacheDubbo',
           link: 'https://twitter.com/ApacheDubbo',
         },
@@ -477,22 +477,22 @@ export default {
       desc: 'Dubbo社区欢迎任何形式的贡献。',
       list: [
         {
-          img: './img/mailinglist.png',
+          img: '/img/mailinglist.png',
           title: '邮件列表',
           content: <span>加入 <a href="https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide">邮件列表 </a>参与讨论。</span>,
         },
         {
-          img: './img/issue.png',
+          img: '/img/issue.png',
           title: '报告缺陷',
           content: <span>通过<a href="https://github.com/apache/incubator-dubbo/issues"> Github issues </a>报告缺陷。</span>,
         },
         {
-          img: './img/documents.png',
+          img: '/img/documents.png',
           title: '文档',
           content: <span>优化Dubbo <a href="http://dubbo.apache.org/#/docs/"> 文档</a>。</span>,
         },
         {
-          img: './img/pullrequest.png',
+          img: '/img/pullrequest.png',
           title: 'Pull Request',
           content: <span>提交 <a href="https://github.com/apache/incubator-dubbo/pulls"> Pull requests </a>来修复问题。</span>,
         },
@@ -544,17 +544,17 @@ export default {
           tags: [
             {
               text: 'Spring XML',
-              link: '#/docs/user/configuration/xml.md',
+              link: '/zh-cn/docs/user/configuration/xml.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Spring Annotation',
-              link: '#/docs/user/configuration/annotation.md',
+              link: '/zh-cn/docs/user/configuration/annotation.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Plain Java',
-              link: '#/docs/user/configuration/properties.md',
+              link: '/zh-cn/docs/user/configuration/properties.html',
               bgColor: '#00D0D9',
             },
             {
@@ -570,22 +570,22 @@ export default {
           tags: [
             {
               text: 'Zookeeper',
-              link: '#/docs/user/references/registry/zookeeper.md',
+              link: '/zh-cn/docs/user/references/registry/zookeeper.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Redis',
-              link: '#/docs/user/references/registry/redis.md',
+              link: '/zh-cn/docs/user/references/registry/redis.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Simple',
-              link: '#/docs/user/references/registry/simple.md',
+              link: '/zh-cn/docs/user/references/registry/simple.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Multicast',
-              link: '#/docs/user/references/registry/multicast.md',
+              link: '/zh-cn/docs/user/references/registry/multicast.html',
               bgColor: '#00D0D9',
             },
             {
@@ -601,32 +601,32 @@ export default {
           tags: [
             {
               text: 'Fail over',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/zh-cn/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Fail safe',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/zh-cn/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail fast',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/zh-cn/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Fail back',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/zh-cn/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Forking',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/zh-cn/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Broadcast',
-              link: '#/docs/user/demos/fault-tolerent-strategy.md',
+              link: '/zh-cn/docs/user/demos/fault-tolerent-strategy.html',
               bgColor: '#00D0D9',
             },
           ],
@@ -637,22 +637,22 @@ export default {
           tags: [
             {
               text: 'Random',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/zh-cn/docs/user/demos/loadbalance.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'Least Active',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/zh-cn/docs/user/demos/loadbalance.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Round Robin',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/zh-cn/docs/user/demos/loadbalance.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Consistent hash',
-              link: '#/docs/user/demos/loadbalance.md',
+              link: '/zh-cn/docs/user/demos/loadbalance.html',
               bgColor: '#00D0D9',
             },
           ],
@@ -663,32 +663,32 @@ export default {
           tags: [
             {
               text: 'Dubbo',
-              link: '#/docs/user/references/protocol/dubbo.md',
+              link: '/zh-cn/docs/user/references/protocol/dubbo.html',
               bgColor: '#7A63FC',
             },
             {
               text: 'RMI',
-              link: '#/docs/user/references/protocol/rmi.md',
+              link: '/zh-cn/docs/user/references/protocol/rmi.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Hessian',
-              link: '#/docs/user/references/protocol/hessian.md',
+              link: '/zh-cn/docs/user/references/protocol/hessian.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'HTTP',
-              link: '#/docs/user/references/protocol/http.md',
+              link: '/zh-cn/docs/user/references/protocol/http.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'WebService',
-              link: '#/docs/user/references/protocol/webservice.md',
+              link: '/zh-cn/docs/user/references/protocol/webservice.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Thrift',
-              link: '#/docs/user/references/protocol/thrift.md',
+              link: '/zh-cn/docs/user/references/protocol/thrift.html',
               bgColor: '#00D0D9',
             },
             {
@@ -698,17 +698,17 @@ export default {
             },
             {
               text: 'Memcached',
-              link: '#/docs/user/references/protocol/memcached.md',
+              link: '/zh-cn/docs/user/references/protocol/memcached.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Redis',
-              link: '#/docs/user/references/protocol/redis.md',
+              link: '/zh-cn/docs/user/references/protocol/redis.html',
               bgColor: '#00D0D9',
             },
             {
               text: 'Rest',
-              link: '#/docs/user/references/protocol/rest.md',
+              link: '/zh-cn/docs/user/references/protocol/rest.html',
               bgColor: '#00D0D9',
             },
             {
@@ -739,7 +739,7 @@ export default {
             },
             {
               text: 'Netty4',
-              link: '#/docs/user/demos/netty4.md',
+              link: '/zh-cn/docs/user/demos/netty4.html',
               bgColor: '#00D0D9',
             },
             {

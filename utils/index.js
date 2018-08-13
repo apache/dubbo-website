@@ -19,3 +19,10 @@ export const getScrollTop = () => {
   }
   return scrollTop;
 };
+
+export const getLink = (link) => {
+  if (`${link}`.length > 1 && /^\/[^/]/.test(`${link}`)) {
+    return `${window.rootPath}${link}`;
+  }
+  return link;
+};

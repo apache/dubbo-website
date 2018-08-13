@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-zk" />
+	<meta name="description" content="dubbo-zk" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-zk</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-1739895533"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Using Zookeeper in Dubbo</h1>
+<h2>Introduction of Zookeeper</h2>
+<h3>The basic concept</h3>
+<p>In the mordern distrbuted applications, there are multiple coordination problems between nodes and nodes, including: leader election, group service, locking, configuration management, naming and synchronization. Apache Zookeeper, as its name implied, is a distributed, open-source coordination service framwork to address these demand.</p>
+<p>In order to ensure the high performance, highly available and strictly ordered access, the performance aspects of ZooKeeper means it can be used in large, distributed systems and can also be deployed in cluster mode, which called 'ZooKeeper ensemble'. In ZooKeeper ensemble, all write requests from clients are forwarded to a single server, called the leader, through the ZAB(Zookeeper Atomic Broadcast Protocol) to make sure the message in each nodes are same. Clients can access any one of the clusters to read and write data without worrying about inconsistencies in the data.</p>
+<p><img src="../../img/blog/zk-emsemble.png" alt="Diagram shows client-server architecture of ZooKeeper">
+<em>Image Credit : ebook -Zookeeper-Distributed Process Coordination from O'Reilly</em></p>
+<p>The method to store the data in Zookeeper is similar as the standard UNIX file system, as a data model styled after the familiar directory tree structure of file systems. When we talking about ZooKeeper data nodes, we call it Znodes to clarify it.</p>
+<p><img src="../../img/blog/zk-tree.png" alt="zk-tree">
+<em>Image Credit : ebook -Zookeeper-Distributed Process Coordination from O'Reilly</em></p>
+<h3>Basic Implementation</h3>
+<p>You could donwload and install Zookeeper directly<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>.
+Or you could use Homebrew <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> <code>brew install zookeeper</code> to install Zookeeper in Mac OS.
+Considering the versatility, we run the Zookeeper by using docker in this blog. If you have not installed the docker yet, please prepare the docker environment first. <sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup></p>
+<h4>1. Running the Zookeeper</h4>
+<p>Execute the command to run zookeeper in a docker container</p>
+<pre><code class="language-shell">docker run --rm --name zookeeper -p 2181:2181 zookeeper
+</code></pre>
+<h4>2. Entering the zookeeper container</h4>
+<pre><code class="language-shell">docker exec -it zookeeper bash
+</code></pre>
+<p>In the <code>bin</code> directory, there is a command to start zookeeper <code>zkServer</code> and the Management Console <code>zkCli</code></p>
+<pre><code class="language-shell">bash-4.4# ls -l bin
+total 36
+-rwxr-xr-x    1 zookeepe zookeepe       232 Mar 27 04:32 README.txt
+-rwxr-xr-x    1 zookeepe zookeepe      1937 Mar 27 04:32 zkCleanup.sh
+-rwxr-xr-x    1 zookeepe zookeepe      1056 Mar 27 04:32 zkCli.cmd
+-rwxr-xr-x    1 zookeepe zookeepe      1534 Mar 27 04:32 zkCli.sh
+-rwxr-xr-x    1 zookeepe zookeepe      1759 Mar 27 04:32 zkEnv.cmd
+-rwxr-xr-x    1 zookeepe zookeepe      2696 Mar 27 04:32 zkEnv.sh
+-rwxr-xr-x    1 zookeepe zookeepe      1089 Mar 27 04:32 zkServer.cmd
+-rwxr-xr-x    1 zookeepe zookeepe      6773 Mar 27 04:32 zkServer.sh
+</code></pre>
+<h4>3. Entering the zookeeper management interface via zkCli</h4>
+<p>Since it was started through docker, the process of Zookeeper has been started and will provide the services to the public via port 2181.</p>
+<pre><code class="language-shell">bash-4.4# ps
+PID   USER     TIME  COMMAND
+    1 zookeepe  0:02 /usr/lib/jvm/java-1.8-openjdk/jre/bin/java -Dzookeeper.log.dir=. -Dzookeeper.root
+   32 root      0:00 bash
+   42 root      0:00 ps
+</code></pre>
+<p>So, it allows you to access Zookeeper's console directly through <code>zkCli</code> for management.</p>
+<pre><code class="language-shell">bash-4.4# bin/zkCli.sh -server 127.0.0.1:2181
+Connecting to 127.0.0.1:2181
+...
+WATCHER::
+
+WatchedEvent state:SyncConnected type:None path:null
+
+[zk: 127.0.0.1:2181(CONNECTED) 0] help
+ZooKeeper -server host:port cmd args
+	stat path [watch]
+	set path data [version]
+	ls path [watch]
+	delquota [-n|-b] path
+	ls2 path [watch]
+	setAcl path acl
+	setquota -n|-b val path
+	history
+	redo cmdno
+	printwatches on|off
+	delete path [version]
+	sync path
+	listquota path
+	rmr path
+	get path [watch]
+	create [-s] [-e] path data acl
+	addauth scheme auth
+	quit
+	getAcl path
+	close
+	connect host:port
+</code></pre>
+<h4>4. Basic Examples on zkCli</h4>
+<p>Create <code>/hello-zone</code> node:</p>
+<pre><code class="language-shell">[zk: 127.0.0.1:2181(CONNECTED) 19] create /hello-zone 'world'
+Created /hello-zone
+</code></pre>
+<p>List the child nodes under <code>/</code> and confirm that <code>hello-zone</code> is created:</p>
+<pre><code class="language-shell">[zk: 127.0.0.1:2181(CONNECTED) 20] ls /
+[zookeeper, hello-zone]
+</code></pre>
+<p>List the child nodes for <code>/hello-zone</code> and verify that it is empty:</p>
+<pre><code class="language-shell">[zk: 127.0.0.1:2181(CONNECTED) 21] ls /hello-zone
+[]
+</code></pre>
+<p>Get the data stored on the <code>/hello-zone</code> node:</p>
+<pre><code class="language-shell">[zk: 127.0.0.1:2181(CONNECTED) 22] get /hello-zone
+world
+</code></pre>
+<h2>Using Zookeeper in Dubbo</h2>
+<p>Zookeeper is used for service registration discovery and configuration management in Dubbo, and the structure of data in Zookeeper is shown in the following figure:</p>
+<p><img src="../../img/blog/dubbo-in-zk.jpg" alt="dubbo-in-zk"></p>
+<p>First, all data related to Dubbo is organized under the root node of <code>/duboo</code>.</p>
+<p>The secondary directory is the service name like <code>com.foo.BarService</code>.</p>
+<p>The three-level directory has two child nodes, <code>providers</code> and <code>consumers</code>, representing the supplier and customers of the service.</p>
+<p>The URL information for each application instance associated with the service will be recorded by the Level 4 directory. The <code>providers</code> and <code>consumer</code> will stored the providers information and the consumers information of the services seperately.<br>
+For example, the service provider of <code>com.foo.BarService</code>  will register its URL Information to <code>/dubbo/com.foo.BarService/providers</code>; Similarly, service consumers will register their information under the corresponding <code>consumer</code> node. At the same time, consumers will subscribe to the corresponding <code>providers</code> node to be able to detect the changes of the service provider address list.</p>
+<h3>Prepare the sample code</h3>
+<p>The code in this document can be found in <a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-zookeeper">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-zookeeper</a>.</p>
+<h4>1. Interface definition</h4>
+<p>Define a simple <code>greetingservice</code> interface with only one simple method named <code>sayHello</code> to greet to the caller.</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function">String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span></span>;
+}
+</code></pre>
+<h4>2. Server: Implementation</h4>
+<p>Implement the <code>GreetingService</code>  interface and mark it as a service for Dubbo via <code>@Service</code>.</p>
+<pre><code class="language-java"><span class="hljs-meta">@Service</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnnotatedGreetingService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hello, "</span> + name;
+    }
+}
+</code></pre>
+<h4>3. Server: Assembly</h4>
+<p>Define ProviderConfiguration to assemble Dubbo services.</p>
+<pre><code class="language-java"><span class="hljs-meta">@Configuration</span>
+<span class="hljs-meta">@EnableDubbo</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.dubbo.samples.impl"</span>)
+<span class="hljs-meta">@PropertySource</span>(<span class="hljs-string">"classpath:/spring/dubbo-provider.properties"</span>)
+<span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProviderConfiguration</span> </span>{}
+</code></pre>
+<p>Dubbo-provider.properties is an external configuration in a spring application, as follows:</p>
+<pre><code class="language-properties">dubbo.application.name=demo-provider
+dubbo.registry.address=zookeeper://$DOCKER_HOST:2181
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=20880
+</code></pre>
+<p>Since zookeeper runs in a docker container, please be noted that:</p>
+<ul>
+<li>We assumes that Dubbo applications is running on the host machine (outside the docker container) in this document, and  needs to replace the PATH of Zookeeper with the IP address of the Environment Variable <em>${DOCKER_HOST}</em>. Please find more detail in the official Docker documentation.</li>
+<li>When the Dubbo application is a docker application, the container's name is equivalent to Zookeeper's. The container's name is ** zookeeper ** in this document.</li>
+<li>Of course, if you don't want to run the Zookeeper in a container mode, just simply replace <em>$DOCKER_HOST</em> with <strong>localhost</strong>.</li>
+</ul>
+<h4>4. Server: Starting Service</h4>
+<p>In the <code>main</code> method, you could provide the Dubbo service by running a Spring Context.</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProviderBootstrap</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(ProviderConfiguration.class);
+        context.start();
+        System.in.read();
+    }
+}
+</code></pre>
+<p>Start the <code>main</code> method of server,  you will get the following output, which represents the success of the server's startup, and  the <code>GreetingService</code> service is registered on the ZookeeperRegistry:</p>
+<pre><code class="language-sh">[03/08/18 10:50:33:033 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Register: dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=<span class="hljs-literal">true</span>&amp;application=demo-provider&amp;dubbo=2.6.2&amp;generic=<span class="hljs-literal">false</span>&amp;interface=com.alibaba.dubbo.samples.api.GreetingService&amp;methods=sayHello&amp;pid=12938&amp;side=provider&amp;timestamp=1533264631849, dubbo version: 2.6.2, current host: 192.168.99.1
+</code></pre>
+<p>You could find the registration information of the service provider through the Zookeeper management terminal:</p>
+<pre><code class="language-sh">$ docker <span class="hljs-built_in">exec</span> -it zookeeper bash
+bash-4.4<span class="hljs-comment"># bin/zkCli.sh -server localhost:218</span>
+Connecting to localhost:2181
+...
+Welcome to ZooKeeper!
+JLine support is enabled
+...
+[zk: localhost:2181(CONNECTED) 0] ls /dubbo/com.alibaba.dubbo.samples.api.GreetingService/providers
+[dubbo%3A%2F%2F192.168.99.1%3A20880%2Fcom.alibaba.dubbo.samples.api.GreetingService%3Fanyhost%3Dtrue%26application%3Ddemo-provider%26dubbo%3D2.6.2%26generic%3Dfalse%26interface%3Dcom.alibaba.dubbo.samples.api.GreetingService%26methods%3DsayHello%26pid%3D12938%26side%3Dprovider%26timestamp%3D1533264631849]
+</code></pre>
+<p>You could find that the Dubbo services just registered its URL address at the <code>providers</code> node as follows:
+<em>dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=true&amp;application=demo-provider&amp;dubbo=2.6.2&amp;generic=false&amp;interface=com.alibaba.dubbo.samples.api.GreetingService&amp;methods=sayHello&amp;pid=12938&amp;side=provider&amp;timestamp=1533264631849</em></p>
+<h4>5. Client: Reference Service</h4>
+<p>You could declare the reference service by @Reference, while it will generate a full call. The target address of the service could be queried by the Zookeeper's <code>provider</code> node.</p>
+<pre><code class="language-java"><span class="hljs-meta">@Component</span>(<span class="hljs-string">"annotatedConsumer"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingServiceConsumer</span> </span>{
+    <span class="hljs-meta">@Reference</span>
+    <span class="hljs-keyword">private</span> GreetingService greetingService;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">doSayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> greetingService.sayHello(name);
+    }
+}
+</code></pre>
+<h4>6. Client: Assembling</h4>
+<p>Define the ConsumerConfiguration to assemble Dubbo service.</p>
+<pre><code class="language-java"><span class="hljs-meta">@Configuration</span>
+<span class="hljs-meta">@EnableDubbo</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.dubbo.samples.action"</span>)
+<span class="hljs-meta">@PropertySource</span>(<span class="hljs-string">"classpath:/spring/dubbo-consumer.properties"</span>)
+<span class="hljs-meta">@ComponentScan</span>(value = {<span class="hljs-string">"com.alibaba.dubbo.samples.action"</span>})
+<span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerConfiguration</span> </span>{}
+</code></pre>
+<p>&quot;dubbo-consumer.properties&quot; is a method of external configuration in a Spring application, as follows:</p>
+<pre><code class="language-properties">dubbo.application.name=demo-consumer
+dubbo.registry.address=zookeeper://$DOCKER_HOST:2181
+dubbo.consumer.timeout=3000
+</code></pre>
+<p>Same as <strong>3. Server: Assembling</strong>, You need to modify <em>$DOCKER_HOST</em> defined in <em>dubbo.registry.address</em> according to your own  environment. You could find more instructions in step 3.</p>
+<h4>7. Client: Initiating A Remote Call</h4>
+<p>Run <code>main</code> to initiate a remote call from a existed service provider. Dubbo first subscribes to the zookeeper service address and then selects one from the list of returned addresses to invoke the client:</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerBootstrap</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerBootstrap</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException </span>{
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(ConsumerConfiguration.class);
+        context.start();
+        GreetingServiceConsumer greetingServiceConsumer = context.getBean(GreetingServiceConsumer.class);
+        String hello = greetingServiceConsumer.doSayHello(<span class="hljs-string">"zookeeper"</span>);
+        System.out.println(<span class="hljs-string">"result: "</span> + hello);
+        System.in.read();
+    }
+}
+</code></pre>
+<p>The output are as follows:</p>
+<pre><code class="language-shell">[03/08/18 01:42:31:031 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Register: consumer://192.168.99.1/com.alibaba.dubbo.samples.api.GreetingService?application=demo-consumer&amp;category=consumers&amp;check=false&amp;default.timeout=3000&amp;dubbo=2.6.2&amp;interface=com.alibaba.dubbo.samples.api.GreetingService&amp;methods=sayHello&amp;pid=82406&amp;side=consumer&amp;timestamp=1533274951195, dubbo version: 2.6.2, current host: 192.168.99.1 #1
+[03/08/18 01:42:31:031 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Subscribe: consumer://192.168.99.1/com.alibaba.dubbo.samples.api.GreetingService?application=demo-consumer&amp;category=providers,configurators,routers&amp;default.timeout=3000&amp;dubbo=2.6.2&amp;interface=com.alibaba.dubbo.samples.api.GreetingService&amp;methods=sayHello&amp;pid=82406&amp;side=consumer&amp;timestamp=1533274951195, dubbo version: 2.6.2, current host: 192.168.99.1 #2
+...
+result: hello, zookeeper
+</code></pre>
+<p>Description:</p>
+<ol>
+<li><strong>Register</strong>: consumer://192.168.99.1/...&amp;<strong>category=consumers</strong>&amp;： In Zookeeper, consumers could register their information and store it at the <code>consumers</code> node</li>
+<li><strong>Subscribe</strong>: consumer://192.168.99.1/...&amp;<strong>category=providers,configurators,routers</strong>&amp;：Consumers subscribe <code>providers</code>, <code>configurators</code>, <code>routers</code> from Zookeepers. The <code>configurations</code> is related to the Dubbo configuration, and <code>routers</code> is related to routing rules. The providers node subscription should be noted. When a new service provider to join, due to the relationship between the subscription, the new address list will be pushed to the subscriber. So service consumers also dynamically perceive changes in address lists.</li>
+</ol>
+<p>You could find the registration information of the service provider through the Zookeeper management terminal:</p>
+<pre><code class="language-sh">$ docker <span class="hljs-built_in">exec</span> -it zookeeper bash
+bash-4.4<span class="hljs-comment"># bin/zkCli.sh -server localhost:218</span>
+Connecting to localhost:2181
+...
+Welcome to ZooKeeper!
+JLine support is enabled
+...
+[zk: localhost:2181(CONNECTED) 4] ls /dubbo/com.alibaba.dubbo.samples.api.GreetingService/consumers
+[consumer%3A%2F%2F192.168.99.1%2Fcom.alibaba.dubbo.samples.api.GreetingService%3Fapplication%3Ddemo-consumer%26category%3Dconsumers%26check%3Dfalse%26default.timeout%3D3000%26dubbo%3D2.6.2%26interface%3Dcom.alibaba.dubbo.samples.api.GreetingService%26methods%3DsayHello%26pid%3D82406%26side%3Dconsumer%26timestamp%3D1533274951195]
+</code></pre>
+<p>You could see that  consumers of Dubbo's servicehas registered its URL address at the <code>consumers</code> node:</p>
+<p><em>consumer://192.168.99.1/com.alibaba.dubbo.samples.api.GreetingService?application=demo-consumer&amp;category=providers,configurators,routers&amp;default.timeout=3000&amp;dubbo=2.6.2&amp;interface=com.alibaba.dubbo.samples.api.GreetingService&amp;methods=sayHello&amp;pid=82406&amp;side=consumer&amp;timestamp=1533274951195</em></p>
+<h2>Summary</h2>
+<p>This document focuses on how to use ZooKeeper as a registry in Dubbo. This document also mentioned that the Zookeeper could be a configuration center and a service management in Dubbo. Zookeeper is a single-node, standalone mode. However, developers always bulid a Zookeeper server cluster called * Zookeeper ensemble * in the real world.</p>
+<p>Through this document, readers can learn:</p>
+<ul>
+<li>Basic concepts and applications of ZooKeeper</li>
+<li>The function of Zookeeper in Dubbo application</li>
+<li>Learn about Zookeeper's interaction through practical sample codes</li>
+<li>The storage of service registration and consumption information of Dubbo with ZooKeeper</li>
+</ul>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://www.apache.org/dyn/closer.cgi/zookeeper/">https://www.apache.org/dyn/closer.cgi/zookeeper/</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://brew.sh">https://brew.sh</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://www.docker.com/community-edition">https://www.docker.com/community-edition</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

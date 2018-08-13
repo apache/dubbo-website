@@ -1,8 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import './index.scss';
 
-export default function Bar(props) {
+const propTypes = {
+  text: PropTypes.string.isRequired, // 显示的文案
+  img: PropTypes.string.isRequired, // 显示的图片链接
+};
+
+const Bar = (props) => {
   const { text, img } = props;
   const cls = classnames({
     bar: true,
@@ -16,4 +22,8 @@ export default function Bar(props) {
       </div>
     </div>
   );
-}
+};
+
+Bar.propTypes = propTypes;
+
+export default Bar;

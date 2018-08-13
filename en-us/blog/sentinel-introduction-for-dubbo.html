@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="sentinel-introduction-for-dubbo" />
+	<meta name="description" content="sentinel-introduction-for-dubbo" />
+	<!-- 网页标签标题 -->
+	<title>sentinel-introduction-for-dubbo</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-1101796846"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Sentinel: The flow sentinel of Dubbo services</h1>
+<p>In large clusters there may be thousands of Dubbo service instances in production, with continuous traffic coming in. However, in distributed systems, some services may be unavailable due to various of failure such as traffic surge, high system load, and network latency. If no control actions are performed, this may cause cascading failure, affecting the availability of the service. So we need a powerful library - Sentinel, which can guarantee the stability of the service, to protect the Dubbo service.</p>
+<h2>Introduction to Sentinel</h2>
+<p><a href="https://github.com/alibaba/Sentinel">Sentinel</a> is a powerful library opensourced by Alibaba Middleware Team. Sentinel takes &quot;<strong>flow</strong>&quot; as the breakthrough point, and covers multiple fields including flow control, concurrency, circuit breaking and load protection to protect service stability.</p>
+<p>There are mainly three features in Sentinel:</p>
+<ul>
+<li><strong>Flow Control</strong>: Sentinel can control the traffic flow of resource calls based on different runtime metrics (such as QPS, number of threads, system load, etc.), for different invocation paths, and adjust random traffic to appropriate shapes (e.g. uniform speed).</li>
+<li><strong>Circuit Breaking</strong>: When a resource in the invocation chain is unstable (average RT increase or exception ratio increase), Sentinel will fast-fail the call request for this resource to avoid affecting other resources, causing cascade failure.</li>
+<li><strong>System Load Protection</strong>: Sentinel can be used to protect your server in case the system load goes too high. It helps you to achieve a good balance between system load and incoming requests.</li>
+</ul>
+<p>The commonly used circuit breaker/isolation library in production is <a href="https://github.com/Netflix/Hystrix">Netflix Hystrix</a>. Hystrix focuses on the concept of isolation, which isolates dependencies (that is resource in Sentinel) through thread pools or semaphores. The benefit of Hystrix thread pool isolation is that the isolation is thorough, but the downside is that you have to create a lot of thread pools, pre-divide dependencies, and allocate thread pools to each dependency. Sentinel provides another idea for resource isolation: it is controlled by <strong>the number of concurrent threads</strong>. In this way, developer does not need to specify the size of the thread pool in advance, and there is less loss of thread context switching. When the resource is in an unstable state, the response time becomes longer and the number of threads gradually increases. When the number of threads of a resource is raised to a threshold, traffic flow limit is triggered until the stacked thread completes the task and then continues to accept the requests.</p>
+<p>Hystrix uses Circuit Breaker Pattern to automatically fast-fail the service when exception ratio exceeds the threshold. Sentinel's circuit breaking feature is more versatile, which supports two metrics: average response time and failure ratio. Sentinel also provides various invocation chain path and flow control effects support, as well as the ability to adjust the traffic in real time according to the system load to protect the system. At the same time, Sentinel also provides a real-time monitoring API and dashboard, which allows developers to quickly understand the current state of the system and understand the stability of the service. The scenarios are more abundant.</p>
+<h2>Best Practice for using Dubbo with Sentinel</h2>
+<p><a href="https://github.com/dubbo/dubbo-sentinel-support">Sentinel Dubbo Adapter</a> provides service consumer filter and provider filter for Dubbo services. We can add the following dependency in <code>pom.xml</code> (if you are using Maven):</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.csp<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>sentinel-dubbo-adapter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>x.y.z<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+</code></pre>
+<p>The two filters are enabled by default. Once you add the dependency, the Dubbo services and methods will become protected resources in Sentinel, which can leverage Sentinel's flow control and guard ability when rules are configured. If you don't want to enable the filter, you can manually disable it. For example:</p>
+<pre><code class="language-java"><span class="hljs-meta">@Bean</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> ConsumerConfig <span class="hljs-title">consumerConfig</span><span class="hljs-params">()</span> </span>{
+    ConsumerConfig consumerConfig = <span class="hljs-keyword">new</span> ConsumerConfig();
+    consumerConfig.setFilter(<span class="hljs-string">"-sentinel.dubbo.consumer.filter"</span>);
+    <span class="hljs-keyword">return</span> consumerConfig;
+}
+</code></pre>
+<p>We've provided sereval demos, you can check here: <a href="https://github.com/alibaba/Sentinel/tree/master/sentinel-demo/sentinel-demo-dubbo">sentinel-demo-dubbo</a>。</p>
+<h3>Service Provider</h3>
+<p>Dubbo service providers provide services for outside world and handle requests from consumers. To protect the service provider from suffering the proliferation of traffic flow, you can set flow rules in <strong>QPS mode</strong> to the service provider. Thus, when the number of requests per second exceeds the threshold, new requests are automatically rejected.</p>
+<p>The flow control for Dubbo services has two granularities: service interface and service method.</p>
+<ul>
+<li>Service interface：resourceName format is <code>interfaceName</code>，e.g. <code>com.alibaba.csp.sentinel.demo.dubbo.FooService</code></li>
+<li>Service method：resourceName format is <code>interfaceName:methodSignature</code>，e.g. <code>com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String)</code></li>
+</ul>
+<p>For the detail of flow rule configuration and flow control, please refer to <a href="https://github.com/alibaba/Sentinel/wiki/Flow-Control">Flow Control | Sentinel</a>.</p>
+<p>Let's take a look at the effect of the QPS flow control. Assume that we have a service interface <code>com.alibaba.csp.sentinel.demo.dubbo.FooService</code>, which contains a method <code>sayHello(java.lang.String)</code>. We set flow rule for service provider (QPS count = 10). Then we do RPC 15 times at service consumer continuously in 1s. We can see the blocked metrics in the log. The log of blocked calls is located in <code>~/logs/csp/sentinel-block.log</code>：</p>
+<pre><code>2018-07-24 17:13:43|1|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String),FlowException,default,|5,0
+</code></pre>
+<p>Log messages will also appear in provider's metric log：</p>
+<pre><code>1532423623000|2018-07-24 17:13:43|com.alibaba.csp.sentinel.demo.dubbo.FooService|15|0|15|0|3
+1532423623000|2018-07-24 17:13:43|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String)|10|5|10|0|0
+</code></pre>
+<p>In many circumstances, it's also significant to control traffic flow based on the <strong>caller</strong>. For example, assuming that there are two services A and B, both of them initiate remote call requests to the service provider. If we want to limit the calls from service B only, we can set the <code>limitApp</code> of flow rule as the identifier of service B (e.g. service name). The Sentinel Dubbo Adapter will automatically resolve the Dubbo consumer's <em>application name</em> as the caller's name (<code>origin</code>), and will bring the caller's name when doing resource protection. If <code>limitApp</code> of flow rules is not configured (<code>default</code>), flow control will take effects on all callers. If <code>limitApp</code> of a flow rule is configured with a caller, then the corresponding flow rule will only take effect on the specific caller.</p>
+<blockquote>
+<p>Note: Dubbo consumer does not provide its Dubbo application name when doing RPC, so developers should manually put the application name into <em>attachment</em> at consumer side, then extract it at provider side. Sentinel Dubbo Adapter has implemented a filter where consumer can carry application name information to provider automatically. If the counsmer does not use Sentinel Dubbo Adapter but requires flow control based on caller, developers can manually put the application name into attachment with the key <code>dubboApplication</code>.</p>
+</blockquote>
+<p>The <code>sentinel-block.log</code> will also record caller name. For example:</p>
+<pre><code>2018-07-25 16:26:48|1|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String),FlowException,default,demo-consumer|5,0
+</code></pre>
+<p>The <code>demo-consumer</code> in the log is the caller name (origin).</p>
+<h3>Service Consumer</h3>
+<p>Dubbo service consumers act as a client to invoke the remote service. Each service may depend on several downstream services. If a service A depends on the downstream service B, and service B is unstable (i.e. the response time becomes longer), the number of threads where service A invokes service B will accumulate, thus may eventually run out of service A's thread pool. We use the thread count to control access to downstream service B. This can ensure service itself not affected by others when downstream services are not stable and reliable. Based on this scenario, it is recommended to set flow rules with <strong>thread count mode</strong> to consumers so that it's not affected by unstable services.</p>
+<p>The thread-count-based flow control mode does not require us to explicitly perform thread pool isolation. Sentinel will control the number of threads of the resource, and the excess requests will be rejected directly until the stacked tasks are completed.</p>
+<h3>Sentinel Dashboard</h3>
+<p>For ease of use, Sentinel provides a Dashboard for configuring rules, viewing monitoring metrics, machine discovery, and more. We only need to start the dashborad according to the <a href="https://github.com/alibaba/Sentinel/wiki/Dashboard">Sentinel dashboard documentation</a>, then add the appropriate parameters to the corresponding application and launch it. For example, the startup parameters of the service provider demo in this article is:</p>
+<pre><code class="language-bash">-Djava.net.preferIPv4Stack=<span class="hljs-literal">true</span> -Dcsp.sentinel.api.port=8720 -Dcsp.sentinel.dashboard.server=localhost:8080 -Dproject.name=dubbo-provider-demo
+</code></pre>
+<p>After launching the service provider demo, we can find our application in the Sentinel dashboard. It's convenient to configure the rules in the dashboard：</p>
+<p><img src="../../img/blog/sentinel-dashboard-view-rules.png" alt="Rule List"></p>
+<p>Or view real-time metrics：</p>
+<p><img src="../../img/blog/sentinel-dashboard-metrics.png" alt="Real-time metrics monitoring"></p>
+<h2>Summary</h2>
+<p>This blog post only introduces the simplest scenario in Sentinel - Traffic Flow Control. Sentinel can handle more complex scenarios like circuit breaking, cold starting and uniform traffic flow. For more scenarios, you can dig into <a href="https://github.com/alibaba/Sentinel/wiki">Sentinel Wiki</a>.</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

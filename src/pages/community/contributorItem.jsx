@@ -5,7 +5,7 @@ const ContributorItem = (props) => {
   const { img, title, content } = contributor;
   return (
     <div className="contributor-item">
-      <img src={img} />
+      <img src={`${window.rootPath}${img}`} />
       <div>{title}</div>
       <p>{content}</p>
     </div>

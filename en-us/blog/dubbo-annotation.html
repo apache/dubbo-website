@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-annotation" />
+	<meta name="description" content="dubbo-annotation" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-annotation</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-1449152407"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Use Annotations In Dubbo</h1>
+<p>With the widely promotion and implementation of Microservices Architecture, the Microservices Architecture represented by Spring Boot and Spring Cloud, in Java ecosystem, introduced some brand new programming model, like:</p>
+<ul>
+<li>Annotation-Driven</li>
+<li>External Configuration</li>
+<li>Auto-Configure</li>
+</ul>
+<p>New programming model have some advantages, for example, it does not require <code>XML</code> configuration, it can simplify deployment process, beyond that，it can promote development efficiency. In order to implement the microservice architecture better，Dubbo has provided more perfect support for the above three scenarios since version 2.5.8. This article focuses on introduce annotations rather than discuss the traditional XML configuration approach. There are two kinds of automatic assembly, external configuration and automatic assembly, will be introduced in another aricle.</p>
+<h2>Introduce Annotations</h2>
+<h3>@EnableDubbo</h3>
+<p>The annotations of <code>@EnableDubbo</code> is a combination of both <code>@EnableDubboConfig</code> and <code>@DubboComponentScan</code>.Related to the annotation driver is  <code>@DubboComponentScan</code>.</p>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> org.apache.dubbo.config.spring.context.annotation;
+
+<span class="hljs-meta">@EnableDubboConfig</span>
+<span class="hljs-meta">@DubboComponentScan</span>
+<span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> EnableDubbo {
+    <span class="hljs-comment">/**
+     * Base packages to scan for annotated <span class="hljs-doctag">@Service</span> classes.
+     * &lt;p&gt;
+     * Use {<span class="hljs-doctag">@link</span> #scanBasePackageClasses()} for a type-safe alternative to String-based
+     * package names.
+     *
+     * <span class="hljs-doctag">@return</span> the base packages to scan
+     * <span class="hljs-doctag">@see</span> DubboComponentScan#basePackages()
+     */</span>
+    <span class="hljs-meta">@AliasFor</span>(annotation = DubboComponentScan.class, attribute = <span class="hljs-string">"basePackages"</span>)
+    String[] scanBasePackages() <span class="hljs-keyword">default</span> {};
+
+    <span class="hljs-comment">/**
+     * Type-safe alternative to {<span class="hljs-doctag">@link</span> #scanBasePackages()} for specifying the packages to
+     * scan for annotated <span class="hljs-doctag">@Service</span> classes. The package of each class specified will be
+     * scanned.
+     *
+     * <span class="hljs-doctag">@return</span> classes from the base packages to scan
+     * <span class="hljs-doctag">@see</span> DubboComponentScan#basePackageClasses
+     */</span>
+    <span class="hljs-meta">@AliasFor</span>(annotation = DubboComponentScan.class, attribute = <span class="hljs-string">"basePackageClasses"</span>)
+    Class&lt;?&gt;[] scanBasePackageClasses() <span class="hljs-keyword">default</span> {};    
+}
+</code></pre>
+<p>The <code>@bableDubbo</code> can be used to scan Dubbo's service provider (marked by <code>@Service</code>) and Dubbo's service consumer (marked by <code>Reference</code>) under the specified package name (via <code>scanBasePackages</code>) or in the specified class (via <code>scanBasePackageClasses</code>). After Dubbo's service providers and consumers have been scanned,  they have been assembled corresponding and been initialized, and finally the service is exposed or referenced, if you do not use <code>External Configuration</code>, you can use <code>@DubboComponentScan</code> directly.</p>
+<h3>@Service</h3>
+<p><code>@service</code> is used to configure Dubbo's Service provider,for example:</p>
+<pre><code class="language-java"><span class="hljs-meta">@Service</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnnotatedGreetingService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hello, "</span> + name;
+    }
+}
+</code></pre>
+<p>Via <code>@Service</code>'s properties, you can customize Dubbo's Service provider:</p>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> org.apache.dubbo.config.annotation;
+
+<span class="hljs-meta">@Documented</span>
+<span class="hljs-meta">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="hljs-meta">@Target</span>({ElementType.TYPE}) <span class="hljs-comment">// #1</span>
+<span class="hljs-meta">@Inherited</span>
+<span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> Service {
+    Class&lt;?&gt; interfaceClass() <span class="hljs-keyword">default</span> <span class="hljs-keyword">void</span>.class; <span class="hljs-comment">// #2</span>
+    <span class="hljs-function">String <span class="hljs-title">interfaceName</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #3</span>
+    <span class="hljs-function">String <span class="hljs-title">version</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #4</span>
+    <span class="hljs-function">String <span class="hljs-title">group</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #5</span>
+    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">export</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">true</span></span>; <span class="hljs-comment">// #6</span>
+    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">register</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">true</span></span>; <span class="hljs-comment">// #7</span>
+    
+    <span class="hljs-function">String <span class="hljs-title">application</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #8</span>
+    <span class="hljs-function">String <span class="hljs-title">module</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #9</span>
+    <span class="hljs-function">String <span class="hljs-title">provider</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #10</span>
+    String[] protocol() <span class="hljs-keyword">default</span> {}; <span class="hljs-comment">// #11</span>
+    <span class="hljs-function">String <span class="hljs-title">monitor</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #12</span>
+    String[] registry() <span class="hljs-keyword">default</span> {}; <span class="hljs-comment">// #13</span>
+}
+</code></pre>
+<p>Which is more important:</p>
+<ol>
+<li><strong>@Service</strong>:        Can only be defined on a class, represent a service</li>
+<li><strong>interfaceClass</strong>: specified <code>interface</code>'s class implemented by the service provider</li>
+<li><strong>interfaceName</strong>: specified <code>interface</code>'s class name implemented by the service provider</li>
+<li><strong>version</strong>: specified the version number of the service</li>
+<li><strong>group</strong>:specified the group of services</li>
+<li><strong>export</strong>:whether to expose service</li>
+<li><strong>registry</strong>:Whether to register service to the registry</li>
+<li><strong>application</strong>:application configuration</li>
+<li><strong>module</strong>:module configuration</li>
+<li><strong>provider</strong>:service provider configuration</li>
+<li><strong>protocol</strong>:protocol configuration</li>
+<li><strong>monitor</strong>:monitoring center configuration</li>
+<li><strong>registr</strong>:registry configuration</li>
+</ol>
+<p>In addition, it should be noted that, <code>application</code>, <code>module</code>, <code>provider</code>, <code>protocol</code>, <code>monitor</code>, <code>registry</code> (from 8 to 13) need to provide the name of the corresponding <code>spring bean</code>,These bean assembly completed either through traditional XML configuration,or by the modern Java Config. This article will show you how to use <code>Java Config</code>.</p>
+<h3>@Reference</h3>
+<p><code>@Reference</code> is used to configure Dubbo's Service consumer,for example:</p>
+<pre><code class="language-Java"><span class="hljs-meta">@Component</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingServiceConsumer</span> </span>{
+    <span class="hljs-meta">@Reference</span>
+    <span class="hljs-keyword">private</span> GreetingService greetingService;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">doSayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> greetingService.sayHello(name);
+    }
+}
+</code></pre>
+<p>Via <code>@Reference</code>'s properties, you can customize Dubbo's Service consumer:</p>
+<pre><code class="language-Java"><span class="hljs-keyword">package</span> org.apache.dubbo.config.annotation;
+
+<span class="hljs-meta">@Documented</span>
+<span class="hljs-meta">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="hljs-meta">@Target</span>({ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE}) <span class="hljs-comment">// #1</span>
+<span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> Reference {
+    Class&lt;?&gt; interfaceClass() <span class="hljs-keyword">default</span> <span class="hljs-keyword">void</span>.class; <span class="hljs-comment">// #2</span>
+    <span class="hljs-function">String <span class="hljs-title">interfaceName</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #3</span>
+    <span class="hljs-function">String <span class="hljs-title">version</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #4</span>
+    <span class="hljs-function">String <span class="hljs-title">group</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #5</span>
+    <span class="hljs-function">String <span class="hljs-title">url</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #6</span>
+    
+    <span class="hljs-function">String <span class="hljs-title">application</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #7</span>
+    <span class="hljs-function">String <span class="hljs-title">module</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #8</span>
+    <span class="hljs-function">String <span class="hljs-title">consumer</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #9</span>
+    <span class="hljs-function">String <span class="hljs-title">protocol</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #10</span>
+    <span class="hljs-function">String <span class="hljs-title">monitor</span><span class="hljs-params">()</span> <span class="hljs-keyword">default</span> ""</span>; <span class="hljs-comment">// #11</span>
+    String[] registry() <span class="hljs-keyword">default</span> {}; <span class="hljs-comment">// #12</span>
+}
+</code></pre>
+<p>Which is more important:</p>
+<ol>
+<li><strong>@Reference</strong>:you can define it on a field in a class, you can define it on a method, you can even modify another annotation, it represent a reference to a service.Normally <code>@Reference</code> is defined in one field</li>
+<li><strong>interfaceClass</strong> : specified <code>interface</code>'s class implemented by the service provider</li>
+<li><strong>interfaceName</strong>: specified <code>interface</code>'s class name implemented by the service provider</li>
+<li><strong>version</strong>: specified the version number of the service</li>
+<li><strong>group</strong>:pecified the group of services</li>
+<li><strong>url</strong>: invoking the registry directly by specifying the URL of the service provider</li>
+<li><strong>application</strong>:application configuration</li>
+<li><strong>module</strong>:module configuration</li>
+<li><strong>consumer</strong>:service consumer configuration</li>
+<li><strong>protocol</strong>:protocol configuration</li>
+<li><strong>monitor</strong>:monitoring center configuration</li>
+<li><strong>registr</strong>:registry configuration</li>
+</ol>
+<p>In addition, it should be noted that, <code>application</code>, <code>module</code>, <code>consumer</code>, <code>protocol</code>, <code>monitor</code>, <code>registry</code> (from 7 to 12) need to provide the name of the corresponding <code>spring bean</code>,These bean assembly completed either through traditional XML configuration,or by the modern Java Config. This article will show you how to use <code>Java Config</code>.</p>
+<h2>Example practice</h2>
+<p>After learn what <code>@EnableDubbo</code>, <code>@Service</code>, <code>@Reference</code> is, there is a practical example showing how to use the annotation to develop a Dubbo application.The following code can be found at <a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-annotation">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-annotation</a></p>
+<h3>1.Interface Definition</h3>
+<p>Define a simple <code>GreetingService</code> interface with only a simple method <code>sayHello</code> to the caller.</p>
+<pre><code class="language-Java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function">String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span></span>;
+}
+</code></pre>
+<h3>2.Server:Service Implementation</h3>
+<p>Implement the <code>GreetingService</code> interface, and mark it as a service for Dubbo via @Service.</p>
+<pre><code class="language-Java"><span class="hljs-meta">@Service</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnnotatedGreetingService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">GreetingService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hello, "</span> + name;
+    }
+}
+</code></pre>
+<h3>3.Server:Assembly Service Provider</h3>
+<p>You can discover, assemble, and provide Dubbo's services through the Java config technology (@Configuration) and annotation scan (@EnableDubbo) in Spring.</p>
+<pre><code class="language-Java"><span class="hljs-meta">@Configuration</span>
+<span class="hljs-meta">@EnableDubbo</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.dubbo.samples.impl"</span>)
+<span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProviderConfiguration</span> </span>{
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #1</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ProviderConfig <span class="hljs-title">providerConfig</span><span class="hljs-params">()</span> </span>{
+        ProviderConfig providerConfig = <span class="hljs-keyword">new</span> ProviderConfig();
+        providerConfig.setTimeout(<span class="hljs-number">1000</span>);
+        <span class="hljs-keyword">return</span> providerConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #2</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ApplicationConfig <span class="hljs-title">applicationConfig</span><span class="hljs-params">()</span> </span>{
+        ApplicationConfig applicationConfig = <span class="hljs-keyword">new</span> ApplicationConfig();
+        applicationConfig.setName(<span class="hljs-string">"dubbo-annotation-provider"</span>);
+        <span class="hljs-keyword">return</span> applicationConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #3</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> RegistryConfig <span class="hljs-title">registryConfig</span><span class="hljs-params">()</span> </span>{
+        RegistryConfig registryConfig = <span class="hljs-keyword">new</span> RegistryConfig();
+        registryConfig.setProtocol(<span class="hljs-string">"zookeeper"</span>);
+        registryConfig.setAddress(<span class="hljs-string">"localhost"</span>);
+        registryConfig.setPort(<span class="hljs-number">2181</span>);
+        <span class="hljs-keyword">return</span> registryConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #4</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ProtocolConfig <span class="hljs-title">protocolConfig</span><span class="hljs-params">()</span> </span>{
+        ProtocolConfig protocolConfig = <span class="hljs-keyword">new</span> ProtocolConfig();
+        protocolConfig.setName(<span class="hljs-string">"dubbo"</span>);
+        protocolConfig.setPort(<span class="hljs-number">20880</span>);
+        <span class="hljs-keyword">return</span> protocolConfig;
+    }
+}
+</code></pre>
+<p>Description：</p>
+<ul>
+<li>Scan all classes marked with <code>@Service</code> under <code>com.alibaba.dubbo.samples.impl</code> with <code>@EnableDubbo</code></li>
+<li>Via @Configuration, all @Beans in the ProviderConfiguration are assembled using the way of <code>Java Config</code> and then injected into the Dubbo service, which means the class marked with <code>@Service</code>.Which included:
+i. <strong>ProviderConfig</strong>:Service provider configuration
+ii. <strong>ApplicationConfig</strong>:Application configuration
+iii.<strong>RegistryConfig</strong>:registry configuration
+iv. <strong>ProtocolConfig</strong>:Protocol configuration</li>
+</ul>
+<h3>4.Server:Start Service</h3>
+<p>In the <code>main</code> method to provide external <code>Dubbo</code> service by starting a <code>Spring Context</code>.</p>
+<pre><code class="language-Java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProviderBootstrap</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        <span class="hljs-keyword">new</span> EmbeddedZooKeeper(<span class="hljs-number">2181</span>, <span class="hljs-keyword">false</span>).start(); <span class="hljs-comment">// #1</span>
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(ProviderConfiguration.class); <span class="hljs-comment">// #2</span>
+        context.start(); <span class="hljs-comment">// #3</span>
+        System.in.read(); <span class="hljs-comment">// #4</span>
+    }
+}
+</code></pre>
+<p>Description：</p>
+<ol>
+<li>Start an embedded <code>zookeeper</code> and provide service registry on port <code>2181</code></li>
+<li>Initialize an example of an AnnotationConfigApplicationContext and pass the <code>ProviderConfiguration</code> into the example to complete the automatic discovery and assembly of the <code>Dubbo</code> service.</li>
+<li>Start the <code>Spring Context</code> and start providing external <code>Dubbo</code> services.</li>
+<li>Because it is a server, you need to prevent the process exit by blocking the main thread.</li>
+</ol>
+<p>Start the <code>main</code> method of the server, you will see the following output, on behalf of the server startup success, and registered the <code>GreetingService</code> service in the <code>ZookeeperRegistry</code>:</p>
+<pre><code class="language-sh">[01/08/18 02:12:51:051 CST] main  INFO transport.AbstractServer:  [DUBBO] Start NettyServer <span class="hljs-built_in">bind</span> /0.0.0.0:20880, <span class="hljs-built_in">export</span> /192.168.99.1:20880, dubbo version: 2.6.2, current host: 192.168.99.1
+
+[01/08/18 02:12:51:051 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Register: dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=<span class="hljs-literal">true</span>&amp;application=dubbo-annotation-provider&amp;default.timeout=1000&amp;dubbo=2.6.2&amp;generic=<span class="hljs-literal">false</span>&amp;interface=com.alibaba.dubbo.samples.api
+</code></pre>
+<h3>5.Server:Reference Service</h3>
+<p>Marking the member variable of the <code>GreetingService</code> via <code>@Reference</code> .The <code>greetingService</code> is a reference to the <code>Dubbo</code> service, which means that it can simply provide through the interface to the remote party to initiate service calls, and the client does not implement <code>GreetingService</code> interface.</p>
+<pre><code class="language-Java"><span class="hljs-meta">@Component</span>(<span class="hljs-string">"annotatedConsumer"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingServiceConsumer</span> </span>{
+    <span class="hljs-meta">@Reference</span>
+    <span class="hljs-keyword">private</span> GreetingService greetingService;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">doSayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">return</span> greetingService.sayHello(name);
+    }
+}
+</code></pre>
+<h3>6.Server:Assembly Service consumer</h3>
+<p>Just like  <strong>3. Server:Assembly Service Provider</strong> You can discover, assemble, and provide Dubbo's service consumer through the Java config technology (@Configuration) and annotation scan (@EnableDubbo) in Spring.</p>
+<pre><code class="language-Java"><span class="hljs-meta">@Configuration</span>
+<span class="hljs-meta">@EnableDubbo</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.dubbo.samples.action"</span>)
+<span class="hljs-meta">@ComponentScan</span>(value = {<span class="hljs-string">"com.alibaba.dubbo.samples.action"</span>})
+<span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerConfiguration</span> </span>{
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #1</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ApplicationConfig <span class="hljs-title">applicationConfig</span><span class="hljs-params">()</span> </span>{
+        ApplicationConfig applicationConfig = <span class="hljs-keyword">new</span> ApplicationConfig();
+        applicationConfig.setName(<span class="hljs-string">"dubbo-annotation-consumer"</span>);
+        <span class="hljs-keyword">return</span> applicationConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #2</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ConsumerConfig <span class="hljs-title">consumerConfig</span><span class="hljs-params">()</span> </span>{
+        ConsumerConfig consumerConfig = <span class="hljs-keyword">new</span> ConsumerConfig();
+        consumerConfig.setTimeout(<span class="hljs-number">3000</span>);
+        <span class="hljs-keyword">return</span> consumerConfig;
+    }
+
+    <span class="hljs-meta">@Bean</span> <span class="hljs-comment">// #3</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> RegistryConfig <span class="hljs-title">registryConfig</span><span class="hljs-params">()</span> </span>{
+        RegistryConfig registryConfig = <span class="hljs-keyword">new</span> RegistryConfig();
+        registryConfig.setProtocol(<span class="hljs-string">"zookeeper"</span>);
+        registryConfig.setAddress(<span class="hljs-string">"localhost"</span>);
+        registryConfig.setPort(<span class="hljs-number">2181</span>);
+        <span class="hljs-keyword">return</span> registryConfig;
+    }
+}
+</code></pre>
+<p>Description：</p>
+<ul>
+<li>Scan all classes marked with <code>@Service</code> under <code>com.alibaba.dubbo.samples.impl</code> with <code>@Reference</code></li>
+<li>Via @Configuration, all @Beans in the ProviderConfiguration are assembled using the way of <code>Java Config</code> and then injected into the Dubbo service, which means the class marked with <code>@Reference</code>.Which included:
+i. <code>ApplicationConfig</code>: Application configuration
+ii. <code>ConsumerConfig</code>:Service consumer configuration
+iii.<code>RegistryConfig</code>:Registry configuration.Note:The configuration here needs to be consistent with the configuration information of the EmbeddedZooKeeper when started by the service provider.</li>
+</ul>
+<h3>7.Server: Initiate Remote Calls</h3>
+<p>In the <code>main</code> method, you can start a <code>Spring Context</code> to find the service consumer of the assembled <code>Dubbo</code> from it, and initiate a remote call.</p>
+<pre><code class="language-Java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerBootstrap</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(ConsumerConfiguration.class); <span class="hljs-comment">// #1</span>
+        context.start(); <span class="hljs-comment">// #2</span>
+        GreetingServiceConsumer greetingServiceConsumer = context.getBean(GreetingServiceConsumer.class); <span class="hljs-comment">// #3</span>
+        String hello = greetingServiceConsumer.doSayHello(<span class="hljs-string">"annotation"</span>); <span class="hljs-comment">// #4</span>
+        System.out.println(<span class="hljs-string">"result: "</span> + hello); <span class="hljs-comment">// #5</span>
+    }
+}
+</code></pre>
+<p>Description：</p>
+<ul>
+<li>Initialize an example of an AnnotationConfigApplicationContext and pass the <code>ProviderConfiguration</code> into the example to complete the automatic discovery and assembly of the <code>Dubbo</code> service consumer.</li>
+<li>start <code>Spring Context</code>.</li>
+<li>Find <code>bean</code> which type is <code>GreetingServiceConsumer</code> from <code>Context</code>.</li>
+<li>Call the <code>doSayHello</code> method and finally initiate a remote call via Dubbo's service reference (marked by @Reference)</li>
+<li>Print call result
+Start the Server's <code>main</code> method, you will see the following output, which returns the <code>result</code>:  hello, annotation:</li>
+</ul>
+<pre><code class="language-sh">[01/08/18 02:38:40:040 CST] main  INFO config.AbstractConfig:  [DUBBO] Refer dubbo service com.alibaba.dubbo.samples.api.GreetingService from url zookeeper://localhost:2181/com.alibaba.dubbo.registry.RegistryService?anyhost=<span class="hljs-literal">true</span>&amp;application=dubbo-annotation-consumer&amp;check=<span class="hljs-literal">false</span>&amp;default.timeout=3000&amp;dubbo=2.6.2&amp;generic=<span class="hljs-literal">false</span>&amp;interface=com.alibaba.dubbo.samples.api.GreetingService&amp;methods=sayHello&amp;pid=33001&amp;register.ip=192.168.99.1&amp;remote.timestamp=1533105502086&amp;side=consumer&amp;timestamp=1533105519216, dubbo version: 2.6.2, current host: 192.168.99.1
+[01/08/18 02:38:40:040 CST] main  INFO annotation.ReferenceBeanBuilder: &lt;dubbo:reference object=<span class="hljs-string">"com.alibaba.dubbo.common.bytecode.proxy0@673be18f"</span> singleton=<span class="hljs-string">"true"</span> interface=<span class="hljs-string">"com.alibaba.dubbo.samples.api.GreetingService"</span> uniqueServiceName=<span class="hljs-string">"com.alibaba.dubbo.samples.api.GreetingService"</span> generic=<span class="hljs-string">"false"</span> id=<span class="hljs-string">"com.alibaba.dubbo.samples.api.GreetingService"</span> /&gt; has been built.
+result: hello, annotation
+</code></pre>
+<h2>Conclusion</h2>
+<p>By studying this article, the reader can master the basic concepts of <code>Dubbo</code>'s exclusive <code>annotations</code> , <code>@EnableDubbo</code>, <code>@Service</code>, <code>@Reference</code>, and master it's basic usage through a simple <code>Dubbo</code> application.</p>
+<p>In addition to traditional <code>XML</code> configuration, <code>Spring</code> offers more modern configurations such as annotation drivers, externalization, and auto-assembly.This article focuses on the development of <code>Dubbo</code> applications through annotations. You can be seen that annotation mode programming is more concise and simple than XML configuration. In future, we will introduce the use of externalization configuration and automatic assembly in <code>Dubbo</code>  further.</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>
