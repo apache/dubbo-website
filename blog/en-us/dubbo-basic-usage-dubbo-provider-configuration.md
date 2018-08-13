@@ -123,3 +123,159 @@ dubbo.registry.address=zookeeper://localhost:2181
 dubbo.protocol.name=dubbo
 dubbo.protocol.port=28080
 ```
+
+
+###### Mapping Rule
+Split the tag name and properties in XML configuration with dots, and multiple properties should be split into multiple lines
+* For example: dubbo.application.name=foo equivalents to <dubbo:application name="foo" />
+* For example: dubbo.registry.address=10.20.153.10:9090 equivalents to <dubbo:registry address="10.20.153.10:9090" />
+
+If there are multiple configurations having the same tag name, they can be distinguished by id, and if there is no id, the configurations will be applied to all tags with the same name.
+* For example: dubbo.protocol.rmi.port=1234 equivalents to <dubbo:protocol id="rmi" name="rmi" port="1099" /> 2
+* For example: dubbo.registry.china.address=10.20.153.10:9090 equivalents to <dubbo:registry id="china" address="10.20.153.10:9090" />
+
+###### Coverage Strategy
+![undefined](https://cdn.yuque.com/lark/0/2018/png/15841/1527849393591-2c3de248-1b3d-47d3-bd10-8b415e9fcd39.png)
+
+* When JVM starts, -D parameter has priority, so that users can rewrite the parameters when deploy and start, for example, the protocol port should be changed when start.
+* Then comes to XML, the configurations in dubbo.properties are invalid, if they are configured in XML.
+* Properties are the last, which can be considered as default value. Only when there is no configuration in XML, the corresponding configuarations in dubbo.properties will become effective, which usually applies to shared public configuration, like application name.
+
+> Note:
+1. If there are multiple dubbo.properties in the classpath root directory, for example, if dubbo.properties exist in multiple JAR files, Dubbo will load anyone arbitrarily and print the Error logs, which may change to throwing exceptions later.↩
+2. When the protocol's id is not configured, protocol name will be used as id as default.
+
+#### Annotation
+
+###### Service Annotation Exposure Service
+```
+import com.alibaba.dubbo.config.annotation.Service;
+
+@Service(timeout = 5000)
+public class AnnotateServiceImpl implements AnnotateService { 
+    // ...
+}
+```
+###### Javaconfig Configuration Public Module
+```
+@Configuration
+public class DubboConfiguration {
+
+    @Bean
+    public ApplicationConfig applicationConfig() {
+        ApplicationConfig applicationConfig = new ApplicationConfig();
+        applicationConfig.setName("provider-test");
+        return applicationConfig;
+    }
+
+    @Bean
+    public RegistryConfig registryConfig() {
+        RegistryConfig registryConfig = new RegistryConfig();
+        registryConfig.setAddress("zookeeper://127.0.0.1:2181");
+        registryConfig.setClient("curator");
+        return registryConfig;
+    }
+}
+```
+
+The result of configuration using this method is the same as that of using xml.
+
+###### Specify the Dubbo Scan Path
+```
+@SpringBootApplication
+@DubboComponentScan(basePackages = "com.alibaba.dubbo.test.service.impl")
+public class ProviderTestApp {
+    // ...
+}
+```
+or use the spring bean xml configuration:
+```
+<dubbo:annotation package="com.chanshuyi.service.impl" />
+```
+
+#### API Trigger Directly
+```
+import com.alibaba.dubbo.rpc.config.ApplicationConfig;
+import com.alibaba.dubbo.rpc.config.RegistryConfig;
+import com.alibaba.dubbo.rpc.config.ProviderConfig;
+import com.alibaba.dubbo.rpc.config.ServiceConfig;
+import com.xxx.XxxService;
+import com.xxx.XxxServiceImpl;
+
+// Service implementation
+XxxService xxxService = new XxxServiceImpl();
+
+// current application configuration
+ApplicationConfig application = new ApplicationConfig();
+application.setName("xxx");
+
+// connect to registry center configuration
+RegistryConfig registry = new RegistryConfig();
+registry.setAddress("10.20.130.230:9090");
+registry.setUsername("aaa");
+registry.setPassword("bbb");
+
+// service provider's protocol configuration
+ProtocolConfig protocol = new ProtocolConfig();
+protocol.setName("dubbo");
+protocol.setPort(12345);
+protocol.setThreads(200);
+
+// Note: ServiceConfig is a heavy object, which encapsulated the connection with registry center internally, and open the service port
+
+// Service provider exposes service configuration
+ServiceConfig<XxxService> service = new ServiceConfig<XxxService>(); // This instance is very heavy, which encapsulated the connection with registry center, please cache it by yourself, it might cause memory and connection leakage otherwise.
+service.setApplication(application);
+service.setRegistry(registry); // multiple registry centers can use setRegistries()
+service.setProtocol(protocol); // multiple protocols can use setProtocols()
+service.setInterface(XxxService.class);
+service.setRef(xxxService);
+service.setVersion("1.0.0");
+
+// exposure and register service
+service.export();
+```
+
+Generally, this method is not recommended in spring applications. The reason can be checked by reading the source code on github, which would not be explained here.
+
+### Provider Interface and Implement
+The above chapters are described mainly from a configuration perspective, and lets explain the complete use of Dubbo provider by going through a complete example.
+
+There is only one service UserReadService, and one method getUserById in this example.
+This service need to be exposed to a remote service by Dubbo. Detail steps are shown below:
+
+1. Create Project
+Skip this step if there is already a project. Create a Spring Boot project, which can be created through https://start.spring.io/.
+2. Define Interface
+Define interface: UserReadService
+```
+public interface UserReadService{
+public User getUserById(Long userId);
+}
+```
+Generally, this interface should be placed in an independent JAR file as a client package.
+Generally, the other services need to refer this client package if they want to consume this service(except for generalized call).
+3. Implement Interface
+Implement UserReadService, and deploy current implementation in the Provider's application.
+```
+public UserReadServiceImpl implements UserReadService{
+    public User getUserById(Long userId){
+        return xxx;
+    }
+}
+```
+4. Dubbo Configuration
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">  
+    <dubbo:application name="hello-world-app" />  
+    <dubbo:registry address="multicast://224.5.6.7:1234" />  
+    <dubbo:protocol name="dubbo" port="20880" />  
+    <bean id="userReadService" class="com.package.UserReadServiceImpl"/>
+    <dubbo:service interface="com.package.UserReadService" ref="userReadService" />  
+</beans>
+```
+For the other modes of Dubbo configuration, please refer to the related configurations in the previous chapter, or use the integrated Dubbo Spring Boot starter method.
