@@ -131,7 +131,7 @@ Split the tag name and properties in XML configuration with dots, and multiple p
 * For example: dubbo.registry.address=10.20.153.10:9090 equivalents to <dubbo:registry address="10.20.153.10:9090" />
 
 If there are multiple configurations having the same tag name, they can be distinguished by id, and if there is no id, the configurations will be applied to all tags with the same name.
-* For example: dubbo.protocol.rmi.port=1234 equivalents to <dubbo:protocol id="rmi" name="rmi" port="1099" /> 2
+* For example: dubbo.protocol.rmi.port=1234 equivalents to <dubbo:protocol id="rmi" name="rmi" port="1234" /> 
 * For example: dubbo.registry.china.address=10.20.153.10:9090 equivalents to <dubbo:registry id="china" address="10.20.153.10:9090" />
 
 ###### Coverage Strategy
