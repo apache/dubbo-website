@@ -130,7 +130,7 @@ dubbo.protocol.port=28080
 * 比如：dubbo.registry.address=10.20.153.10:9090等价于<dubbo:registry address="10.20.153.10:9090" />
 
 如果 XML 有多行同名标签配置，可用 id 号区分，如果没有 id 号将对所有同名标签生效  
-* 比如：dubbo.protocol.rmi.port=1234等价于<dubbo:protocol id="rmi" name="rmi" port="1099" /> 2
+* 比如：dubbo.protocol.rmi.port=1234等价于<dubbo:protocol id="rmi" name="rmi" port="1234" /> 
 * 比如：dubbo.registry.china.address=10.20.153.10:9090等价于<dubbo:registry id="china" address="10.20.153.10:9090" />
 
 ###### 覆盖策略  
