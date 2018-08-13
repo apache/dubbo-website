@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="spring-boot-dubbo-start-stop-analysis" />
+	<meta name="description" content="spring-boot-dubbo-start-stop-analysis" />
+	<!-- 网页标签标题 -->
+	<title>spring-boot-dubbo-start-stop-analysis</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-789393817"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Source code analysis of spring-boot+Dubbo App start and stop</h1>
+<h3>Introduction</h3>
+<p><a href="https://github.com/apache/incubator-dubbo-spring-boot-project">Dubbo Spring Boot</a> project is dedicated to simplifying the development of the Dubbo RPC framework in the Spring Boot application. It also integrates the feature of Spring Boot:</p>
+<ul>
+<li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure">Autoconfigure</a> (ex: Annotation driver, Autoconfigure, etc.)</li>
+<li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator">Production-Ready</a> (ex: Security, Healthy check, Externalize configuration, etc.)</li>
+</ul>
+<h3>The analysis of DubboConsumer startup</h3>
+<p>Have you ever thought about a problem? <code>DubboConsumerDemo</code> application in <code>incubator-dubbo-spring-boot-project</code> just have one line of code, why not exit directly when the <code>main</code> method is executed?</p>
+<pre><code class="language-java"><span class="hljs-meta">@SpringBootApplication</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.boot.dubbo.demo.consumer.controller"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboConsumerDemo</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{
+        SpringApplication.run(DubboConsumerDemo.class,args);
+    }
+
+}
+</code></pre>
+<p>In fact, if you want to answer such a question. We need to abstract this problem firstly, that is, a JVM process, under what circumstances will it exit?</p>
+<p>Take Java 8 as an example. By referring to the JVM language specification[1], there is a clear description in Section 12.8:</p>
+<p>A program terminates all its activity and <em>exits</em> when one of two things happens:</p>
+<ul>
+<li>All the threads that are not daemon threads terminate.</li>
+<li>Some thread invokes the <code>exit</code> method of class <code>Runtime</code> or class <code>System</code>, and the <code>exit</code> operation is not forbidden by the security manager.</li>
+</ul>
+<p>Therefore, in view of the above situation, we judge that there must be some non-daemon thread not exiting. All thread information can be seen by <code>jstack</code>, including whether they are daemon threads, and <code>jstack</code> can be used to find out which threads are non-deamon.</p>
+<pre><code class="language-sh">➜  jstack 57785 | grep tid | grep -v <span class="hljs-string">"daemon"</span>
+<span class="hljs-string">"container-0"</span> <span class="hljs-comment">#37 prio=5 os_prio=31 tid=0x00007fbe312f5800 nid=0x7103 waiting on condition  [0x0000700010144000]</span>
+<span class="hljs-string">"container-1"</span> <span class="hljs-comment">#49 prio=5 os_prio=31 tid=0x00007fbe3117f800 nid=0x7b03 waiting on condition  [0x0000700010859000]</span>
+<span class="hljs-string">"DestroyJavaVM"</span> <span class="hljs-comment">#83 prio=5 os_prio=31 tid=0x00007fbe30011000 nid=0x2703 waiting on condition  [0x0000000000000000]</span>
+<span class="hljs-string">"VM Thread"</span> os_prio=31 tid=0x00007fbe3005e800 nid=0x3703 runnable
+<span class="hljs-string">"GC Thread#0"</span> os_prio=31 tid=0x00007fbe30013800 nid=0x5403 runnable
+<span class="hljs-string">"GC Thread#1"</span> os_prio=31 tid=0x00007fbe30021000 nid=0x5303 runnable
+<span class="hljs-string">"GC Thread#2"</span> os_prio=31 tid=0x00007fbe30021800 nid=0x2d03 runnable
+<span class="hljs-string">"GC Thread#3"</span> os_prio=31 tid=0x00007fbe30022000 nid=0x2f03 runnable
+<span class="hljs-string">"G1 Main Marker"</span> os_prio=31 tid=0x00007fbe30040800 nid=0x5203 runnable
+<span class="hljs-string">"G1 Conc#0"</span> os_prio=31 tid=0x00007fbe30041000 nid=0x4f03 runnable
+<span class="hljs-string">"G1 Refine#0"</span> os_prio=31 tid=0x00007fbe31044800 nid=0x4e03 runnable
+<span class="hljs-string">"G1 Refine#1"</span> os_prio=31 tid=0x00007fbe31045800 nid=0x4d03 runnable
+<span class="hljs-string">"G1 Refine#2"</span> os_prio=31 tid=0x00007fbe31046000 nid=0x4c03 runnable
+<span class="hljs-string">"G1 Refine#3"</span> os_prio=31 tid=0x00007fbe31047000 nid=0x4b03 runnable
+<span class="hljs-string">"G1 Young RemSet Sampling"</span> os_prio=31 tid=0x00007fbe31047800 nid=0x3603 runnable
+<span class="hljs-string">"VM Periodic Task Thread"</span> os_prio=31 tid=0x00007fbe31129000 nid=0x6703 waiting on condition
+
+</code></pre>
+<blockquote>
+<p>We can find all the thread digests by <code>grep tid</code> here, and find the line that doesn't contain the daemon keyword by <code>grep -v</code> command.</p>
+</blockquote>
+<p>We can get some information by the above results:</p>
+<ul>
+<li>There are two threads <code>container-0</code>, <code>container-1</code> is very suspicious, Ther are non-daemon threads in wait state.</li>
+<li>There are alse some threads about GC, and threads that start with <code>VM</code>, They are also non-daemon threads, but they are most likely the JVM's own threads, which are ignored here.</li>
+</ul>
+<p>In summary, we can infer that it is likely that the <code>container-0</code> and <code>container-1</code> cause the JVM to not exit. Now let's search through the source code to find out who created the two threads.</p>
+<p>By the source code analysis of Spring-boot, we can find these code on <code>org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer</code>'s <code>startDaemonAwaitThread</code>.</p>
+<pre><code class="language-java">    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">startDaemonAwaitThread</span><span class="hljs-params">()</span> </span>{
+        Thread awaitThread = <span class="hljs-keyword">new</span> Thread(<span class="hljs-string">"container-"</span> + (containerCounter.get())) {
+
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+                TomcatEmbeddedServletContainer.<span class="hljs-keyword">this</span>.tomcat.getServer().await();
+            }
+
+        };
+        awaitThread.setContextClassLoader(getClass().getClassLoader());
+        awaitThread.setDaemon(<span class="hljs-keyword">false</span>);
+        awaitThread.start();
+    }
+</code></pre>
+<p>Let's add a breakpoint in this method, and focus on the call stack:</p>
+<pre><code class="language-plain">initialize:115, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+&lt;init&gt;:84, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+getTomcatEmbeddedServletContainer:554, TomcatEmbeddedServletContainerFactory (org.springframework.boot.context.embedded.tomcat)
+getEmbeddedServletContainer:179, TomcatEmbeddedServletContainerFactory (org.springframework.boot.context.embedded.tomcat)
+createEmbeddedServletContainer:164, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+onRefresh:134, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+refresh:537, AbstractApplicationContext (org.springframework.context.support)
+refresh:122, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+refresh:693, SpringApplication (org.springframework.boot)
+refreshContext:360, SpringApplication (org.springframework.boot)
+run:303, SpringApplication (org.springframework.boot)
+run:1118, SpringApplication (org.springframework.boot)
+run:1107, SpringApplication (org.springframework.boot)
+main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
+</code></pre>
+<p>It can be seen that during the startup process of the Spring-boot application, the above method is executed since the Tomcat exposes the HTTP service by default, and all threads started by Tomcat are daemon threads by default, such as the Acceptor of the listening request, working thread pool etc.The JVM will also exit after the startup is completed if there is no control here. Therefore, it is necessary to explicitly start a thread and continue to wait under certain conditions. We can avoid thread exit by this way.</p>
+<p>Let's dig deeper. In Tomcat's <code>this.tomcat.getServer().await()</code> method, how the thread doesn‘t exit. The irrelevant code is removed here for the convenience of reading.</p>
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">await</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-keyword">if</span>( port==-<span class="hljs-number">1</span> ) {
+            <span class="hljs-keyword">try</span> {
+                awaitThread = Thread.currentThread();
+                <span class="hljs-keyword">while</span>(!stopAwait) {
+                    <span class="hljs-keyword">try</span> {
+                        Thread.sleep( <span class="hljs-number">10000</span> );
+                    } <span class="hljs-keyword">catch</span>( InterruptedException ex ) {
+                        <span class="hljs-comment">// continue and check the flag</span>
+                    }
+                }
+            } <span class="hljs-keyword">finally</span> {
+                awaitThread = <span class="hljs-keyword">null</span>;
+            }
+            <span class="hljs-keyword">return</span>;
+        }
+        <span class="hljs-comment">// ...</span>
+    }
+</code></pre>
+<p>In the await method, the current thread checks the variable <code>stopAwait</code> every 10 seconds in a while loop. It is a <code>volatile</code> variable that is used to ensure that the current thread can see the change immediately after being modified by another thread. If there is no change, it will always be in the while loop. This is why the thread does not exit, which is why the entire Spring-boot application doesn't exit.</p>
+<p>Because Spring-boot application enable 2 port that 8080 and 8081(management port) at the same time. Two Tomcat are startup actually, so there are two threads that <code>container-0</code> and <code>container-1</code>.</p>
+<p>Then, let's see how this Spring-boot application exits.</p>
+<h3>The analysis of DubboConsumer exit</h3>
+<p>As mentioned in the previous description, there is a thread that checks the variable <code>stopAwait</code> continuously. Then we can think that should be a thread to modify <code>stopAwait</code> at Stop, it can break the while loop. So, who is modifying this variable?</p>
+<p>By analyzing the source code, you can see that there is only one way to modify <code>stopAwait</code>, in <code>org.apache.catalina.core.StandardServer#stopAwait</code>, we add a breakpoint here to see who is calling.</p>
+<blockquote>
+<p>Note that when we add a breakpoint in Intellij IDEA's Debug mode, we need to use <code>kill -s INT $PID</code> or <code>kill -s TERM $PID</code> on command line to trigger the breakpoint. The breakpoint will not be trigger if you just click the stop button on the IDE.</p>
+</blockquote>
+<p>You can see the method is called by a thread called <code>Thread-3</code>:</p>
+<pre><code class="language-java">stopAwait:<span class="hljs-number">390</span>, StandardServer (org.apache.catalina.core)
+stopInternal:<span class="hljs-number">819</span>, StandardServer (org.apache.catalina.core)
+stop:<span class="hljs-number">226</span>, LifecycleBase (org.apache.catalina.util)
+stop:<span class="hljs-number">377</span>, Tomcat (org.apache.catalina.startup)
+stopTomcat:<span class="hljs-number">241</span>, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+stop:<span class="hljs-number">295</span>, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
+stopAndReleaseEmbeddedServletContainer:<span class="hljs-number">306</span>, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+onClose:<span class="hljs-number">155</span>, EmbeddedWebApplicationContext (org.springframework.boot.context.embedded)
+doClose:<span class="hljs-number">1014</span>, AbstractApplicationContext (org.springframework.context.support)
+run:<span class="hljs-number">929</span>, AbstractApplicationContext$<span class="hljs-number">2</span> (org.springframework.context.support)
+</code></pre>
+<p>Through source code analysis, it was executed by Spring's registered <code>ShutdownHook</code>.</p>
+<pre><code class="language-java">    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerShutdownHook</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.shutdownHook == <span class="hljs-keyword">null</span>) {
+            <span class="hljs-comment">// No shutdown hook registered yet.</span>
+            <span class="hljs-keyword">this</span>.shutdownHook = <span class="hljs-keyword">new</span> Thread() {
+                <span class="hljs-meta">@Override</span>
+                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+                    <span class="hljs-keyword">synchronized</span> (startupShutdownMonitor) {
+                        doClose();
+                    }
+                }
+            };
+            Runtime.getRuntime().addShutdownHook(<span class="hljs-keyword">this</span>.shutdownHook);
+        }
+    }
+</code></pre>
+<p>We found that ShutdownHook will execute in the following two cases by referring the Java API documentation[2].</p>
+<blockquote>
+<p>The Java virtual machine <em>shuts down</em> in response to two kinds of events:</p>
+<ul>
+<li>The program <em>exits</em> normally, when the last non-daemon thread exits or when the <code>exit</code> (equivalently, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#exit-int-"><code>System.exit</code></a>) method is invoked, or</li>
+<li>The virtual machine is <em>terminated</em> in response to a user interrupt, such as typing <code>^C</code>, or a system-wide event, such as user logoff or system shutdown.</li>
+</ul>
+</blockquote>
+<ol>
+<li>call System.exit()</li>
+<li>Respond to external signals, such as Ctrl+C(actually sent as SIGINT signal), or <code>SIGTERM</code> signal (<code>kill $PID</code> will send <code>SIGTERM</code> signal by default)</li>
+</ol>
+<p>Therefore, the normal application will execute the above ShutdownHook during the stop process (except <code>kill -9 $PID</code>). Its function is not only to close the Tomcat, but also to perform other cleanup work, it is unnecessary to go into details.</p>
+<h3>Summary</h3>
+<ol>
+<li>Make sure the process can't be exited by start a independency non-daemon thread loop to check the status of variable while <code>DubboConsumer</code>startup.</li>
+<li>Change the status of variable to make program exit normaly by execute ShutdownHook while <code>DubboConsumer</code> exit.</li>
+</ol>
+<h3>Problems</h3>
+<p>In the example of DubboProvider, we see that Provider doesn't start Tomcat to provide HTTP service, then how to achieve it without exiting? We will answer this question in the next article.</p>
+<h4>Easter Eggs/Extra/Bonus/Surprise(?)</h4>
+<p>Run the following unit test in <code>Intellij IDEA</code>, create a thread to perform sleep 1000 seconds of operation, we are surprised to find that the code does not exit after the thread is executed, why is this? (The thread being created is a non-daemon thread)</p>
+<pre><code class="language-java">    <span class="hljs-meta">@Test</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() {
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">try</span> {
+                    Thread.sleep(<span class="hljs-number">1000000</span>);
+                } <span class="hljs-keyword">catch</span> (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+</code></pre>
+<p>[1] <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-12.html#jls-12.8">https://docs.oracle.com/javase/specs/jls/se8/html/jls-12.html#jls-12.8</a></p>
+<p>[2] <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runtime.html#addShutdownHook">https://docs.oracle.com/javase/8/docs/api/java/lang/Runtime.html#addShutdownHook</a></p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>
