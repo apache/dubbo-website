@@ -72,8 +72,8 @@ class Home extends Language {
             </div>
             <p className="product-desc">{dataSource.brand.briefIntroduction}</p>
             <div className="button-area">
-              <a className="button" href={getLink(dataSource.brand.getStartedButton.link)}>{dataSource.brand.getStartedButton.text}</a>
-              <Button type="primary" link={getLink(dataSource.brand.viewOnGithubButton.link)}>{dataSource.brand.viewOnGithubButton.text}</Button>
+              <Button type="primary" link={getLink(dataSource.brand.getStartedButton.link)}>{dataSource.brand.getStartedButton.text}</Button>
+              <Button type="normal" link={getLink(dataSource.brand.viewOnGithubButton.link)}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
           </div>
           <div className="animation animation1" />
