@@ -66,7 +66,7 @@ System.out.println(name);
 
 Through the API, you don't need to configure the service in advance like XML. You can dynamically construct ReferenceConfig; the API is more common than XML.
 
-### The scence where parameters or return values are POJOs
+### The case where parameters or return values are POJOs
 
 For example, the method signature is `User get(Params params)`, where `User` has two attributes, id and name, and `Params` has one attribute, query.
 
@@ -92,7 +92,7 @@ It can be seen that the return value `user` is a HashMap, which stores three k/v
 
 ### Generic interface implementation
 
-The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, to implement a generic remote service Mock framework, all service requests can be handled by implementing the GenericService interface.
+The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, to implement a generic remote service Mock framework, all service requests can be handled by implementing the interface GenericService.
 
 #### Implementation GenericService on the server
 
