@@ -71,6 +71,7 @@ Dubbo基本用法-Dubbo Provider配置
 > 接下来重点讲解下&lt;dubbo:service/&gt;的配置。
 
 * &lt;dubbo:service/&gt;支持的主要属性列表：
+
 | 属性名 | 说明 | 
 | -------- | ----- |
 | version | 版本号 | 
