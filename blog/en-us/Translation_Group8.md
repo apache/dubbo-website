@@ -1,11 +1,13 @@
 # Generic Calls of Dubbo
-Generic calls could be considered using in the following cases:
+The Generic call could be considered to be used in the following cases:
 - Service test platform
 - API service gateway
 
 The generic call is mainly used when the consumer does not have an API interface; 
 instead of introducing the interface jar package, the service call is initiated directly through the GenericService interface, and all POJOs in the parameters and return values are represented by a `Map`. 
 Generic calls do not require attention on the server, and can be exposed as normal services.
+
+Next, let's take a look at how the consumer uses generic calls for service calls.
 
 ### Generic calls through Spring XML configuration
 
@@ -26,7 +28,7 @@ System.out.println(name);
 
 Among them,
 
-1. The GenericService interface has only one method, named $invoke, which takes three arguments, a method name, an array of method parameter types, and an array of parameter values.
+1. The interface GenericService has only one method, named $invoke, which takes three arguments, a method name, an array of method parameter types, and an array of parameter values.
 
 2. For array of method parameter types
 
@@ -66,7 +68,7 @@ Through the API, you don't need to configure the service in advance like XML. Yo
 
 ### The scence where parameters or return values are POJOs
 
-For example, the method signature is `User get(Params params)`, where `User` has two attributes id and name, and `Params` has one attribute query.
+For example, the method signature is `User get(Params params)`, where `User` has two attributes, id and name, and `Params` has one attribute, query.
 
 The following is the calling code of the consumer:
 
@@ -165,12 +167,12 @@ HelloService helloService = (HelloService) reference2.get();
 System.out.println(helloService.hello("community"));
 ```
 
-Similarly, the consumer can also reference the service using an XML configuration and then make the call. Here you can see that the calling method is a normal service call, not a generalized call. Of course, it is also possible to use generalized calls.
+Similarly, the consumer can also reference the service using an XML configuration and then make the call. Here you can see that the calling method is a normal service call, not a generic call. Of course, it is also possible to use generic calls.
 
 So far, a simple service Mock platform has been successfully launched!
 
 
 ### Others
--	The generalization calls and generic interface implementations described in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian did not support generalized calls. Version 2.6.3 would support the generic call of these two protocols.
+-	The generic calls and generic interface implementations introduced in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian don't support generic calls. Version 2.6.3 will support the generic call of these two protocols.
 -	The relevant sample codes mentioned in this article can be found in dubbo-samples: https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic
 
