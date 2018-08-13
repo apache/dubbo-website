@@ -67,7 +67,7 @@ Configure registry center, related to the specific mechanism of service discover
 * &lt;dubbo:protocol name="dubbo" port="20880" /&gt;   
 Here is the transport protocol and the default port, generally no changes are required.
 
-> Next, we will focuse on the configuration of &lt;dubbo:service/&gt;
+> Next, we will focus on the configuration of &lt;dubbo:service/&gt;
 
 * &lt;dubbo:service/&gt;List of main properties supported：
 | Properties Name | Description | 
