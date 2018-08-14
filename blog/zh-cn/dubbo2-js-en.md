@@ -60,7 +60,7 @@ After observation we find out that there is no big difference between the config
 
 #### Dubbo for cross-language support
 
-Instead of cross-language support, the dubbo protocol was originally designed only for common rpc requests. However, it’s not always the case that we can only choose to support it or not. We can always choose to offer different levels of support. It may be hard to offer cross-language support based on the dubbo protocol, but not impossible. Actually, Qianmi website succeeded. It conquered the front-end cross-language business field built by nodejs with dubbo2.js. It builds the bridge between Nodejs and the native dubbo protocol. Next, we will focus on what we can do with dubbo2.js.
+Instead of cross-language support, the dubbo protocol was originally designed only for common rpc requests. However, it’s not always the case that we can only choose to support it or not. We can always choose to offer different levels of support. It may be hard to offer cross-language support based on the dubbo protocol, but not impossible. Actually, Qianmiwang succeeded. It conquered the front-end cross-language business field built by nodejs with dubbo2.js. It builds the bridge between Nodejs and the native dubbo protocol. Next, we will focus on what we can do with dubbo2.js.
 
 ##### Dubbo protocol message format:
 
@@ -77,7 +77,7 @@ Details in dubbo protocol header message:
 - Body length: message body length, type int,record bytes of body content.
 - Body content: request param, where serializedresponse parameters are stored. 
 
-<span data-type="color" style="color:#212121">Protocol messages will eventually become bytes and be transmitted using TCP. Any language that supports network modules and has a socket will be able to be communicatedwith. Then, why cross-language support is difficult? There are two main obstaclesin calling service in Java using other languages:</span>
+Protocol messages will eventually become bytes and be transmitted using TCP. Any language that supports network modules and has a socket will be able to be communicatedwith. Then, why cross-language support is difficult? There are two main obstaclesin calling service in Java using other languages:
 
 1. <span data-type="color" style="color:#24292E">How </span><span data-type="color" style="color:#212121">can different languages ​​represent data types in java, especially dynamiclanguages with possible non-strict data types</span>?
 2. <span data-type="color" style="color:#24292E">How to serialize string across language?</span>
@@ -85,16 +85,16 @@ Details in dubbo protocol header message:
 ## How does dubbo2.js solve problems?
 
 
-<span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">We have analyzed two obstacles above. The key to dubbo2.js in solving these two problems depends on two class libraries: </span></span>[js-to-java](https://github.com/node-modules/js-to-java)，[hessian.js](https://github.com/node-modules/hessian.js)<span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">. js-to-java, which makes nodejs have the ability to express Java objects. Hessian.js provides serialization capabilities. With the help of nodejs socket,  and a duplicate set of dubbo protocol message format, we can finally achieve nodejs call to java-dubbo-provider.</span></span>
+We have analyzed two obstacles above. The key to dubbo2.js in solving these two problems depends on two class libraries: [js-to-java](https://github.com/node-modules/js-to-java)，[hessian.js](https://github.com/node-modules/hessian.js). js-to-java, which makes nodejs have the ability to express Java objects. Hessian.js provides serialization capabilities. With the help of nodejs socket,  and a duplicate set of dubbo protocol message format, we can finally achieve nodejs call to java-dubbo-provider.
 
 
-## <span data-type="color" style="color:#24292E">Quick Start</span>
+## Quick Start
 
 
-<span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">To give an intuitive feeling to readers interested in dubbo2.js, this section presents a quick start example that shows how easy it is to call dubbo service using dubbo2.js.</span></span>
+To give an intuitive feeling to readers interested in dubbo2.js, this section presents a quick start example that shows how easy it is to call dubbo service using dubbo2.js.
 
-### <span data-type="color" style="color:#24292E">1. Initiate dubbo-java-provider</span>
-<span data-type="color" style="color:#24292E">Java provides the backend dubbo service. Firstly, let’s define the service interface:</span>
+### 1. Initiate dubbo-java-provider
+Java provides the backend dubbo service. Firstly, let’s define the service interface:
 ```java
 public interface DemoProvider {
     String sayHello(String name);
@@ -104,7 +104,7 @@ public interface DemoProvider {
 }
 ```
 
-<span data-type="color" style="color:#24292E">Then we implement the interface: </span>
+Then we implement the interface: 
 ```java
 public class DemoProviderImpl implements DemoProvider {
     public String sayHello(String name) {
@@ -174,12 +174,12 @@ public class Provider {
 ```
 
 ### 2. Implement dubbo client-side for nodejs
-<span data-type="color" style="color:#24292E">Install dubbo2.js using npm:</span>
+Install dubbo2.js using npm:
 ```sh
 npm install dubbo2.js --save
 ```
 
-<span data-type="color" style="color:rgb(36, 41, 46)"><span data-type="background" style="background-color:rgb(255, 255, 255)">Configure dubboConfig.ts:</span></span>
+Configure dubboConfig.ts:
 ```typescript
 import { Dubbo, java, TDubboCallResult } from 'dubbo2.js'
 
@@ -247,20 +247,20 @@ Checkout running results:
 Hello kirito, response form provider: 172.19.6.151:20880
 ```
 
-<span data-type="color" style="color:rgb(36, 41, 46)"><span data-type="background" style="background-color:rgb(255, 255, 255)">Congratulations！</span></span>
+Congratulations！
 
-## <span data-type="color" style="color:#24292E">Features</span>
+## Features
 
 
-- <span data-type="color" style="color:#24292E">Support zookeeper as register center</span>
+- Support zookeeper as register center
 - Support TCP Dubbo Native protocol
 - Support directly Dubbo connection
 - Support link tracing
-- <span data-type="color" style="color:#24292E">Generate dubbo interface Automatically</span>
+- Generate dubbo interface Automatically
 
 ## More details
 
-<span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">The sample code in this article is available here, </span></span>[https://github.com/lexburner/Dubbojs-Learning](https://github.com/lexburner/Dubbojs-Learning).
-<span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">If you don&#x27;t know much about the dubbo protocol and want to understand how it works, the project provides a sub-moudle: java-socket-consumer, which is implemented in a process-oriented approach, realizing a process of sending dubbo protocal message with native socket and making function calls, and then get response.</span></span>
+The sample code in this article is available here, [https://github.com/lexburner/Dubbojs-Learning](https://github.com/lexburner/Dubbojs-Learning).
+If you don&#x27;t know much about the dubbo protocol and want to understand how it works, the project provides a sub-moudle: java-socket-consumer, which is implemented in a process-oriented approach, realizing a process of sending dubbo protocal message with native socket and making function calls, and then get response.
 
 
