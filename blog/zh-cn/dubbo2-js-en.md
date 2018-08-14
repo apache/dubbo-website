@@ -5,9 +5,7 @@ The so-called protocol of the microservice framework can be simply interpreted a
 #### Motan2 for cross-language support
 
 
-
 ![图片 1.png | center | 747x473](https://cdn.nlark.com/lark/0/2018/png/128723/1534165564097-aaddeb4a-c982-4d56-835e-b324745c3f3c.png "")
-
 
 
 In the original Motan protocol, the protocol message consisted only of the Header and the Body, making deserialization indispensable for acquiring data stored in the Body, like path, param and group, which is terribly unfriendly for cross-language support. Therefore, the content of the protocol was modifiedin Motan2, Weibo released the open-source projects, [motan-go](https://github.com/weibocom/motan-go/), [motan-php](https://github.com/weibocom/motan-php) and [motan-openresty](https://github.com/weibocom/motan-openresty). It used motan-go as an interpreter and the Simple serialization scheme to serialize the Body of protocol message. (Simple is a comparably weaker serialization scheme)
@@ -31,12 +29,12 @@ Instead of cross-language support, the dubbo protocol was originally designed on
 
 Details in dubbo protocol header message:
 
-* Magic: similar to magic number in Java bytes code files, which is used to determine whether it is a data pack of dubbo protocol. The magic number is the constant, 0xdabb.
-* Flag: contains 8 bits. The lower four bits are used to indicate the type of serialization tool used for message body data (default hessian). Among the upper four bits, the 1 at first bit indicates request, the 1 at second bit indicates dual transfer, 1 at third bits indicates the heartbeat.
-* Status: used toset response status. Dubbo defines some types for response. Details can be found in <span data-type="color" style="color:rgb(36, 41, 46)"><span data-type="background" style="background-color:rgba(27, 31, 35, 0.05)">com.alibaba.dubbo.remoting.exchange.Response</span></span>
-* Invoke id: Message id,Type long, Unique indentifier for each request (Due to asynchronous communication, it is used to match the request to the corresponding returned response)
-* Body length: message body length, type int,record bytes of body content.
-* Body content: request param, where serializedresponse parameters are stored. 
+- Magic: similar to magic number in Java bytes code files, which is used to determine whether it is a data pack of dubbo protocol. The magic number is the constant, 0xdabb.
+- Flag: contains 8 bits. The lower four bits are used to indicate the type of serialization tool used for message body data (default hessian). Among the upper four bits, the 1 at first bit indicates request, the 1 at second bit indicates dual transfer, 1 at third bits indicates the heartbeat.
+- Status: used toset response status. Dubbo defines some types for response. Details can be found in <span data-type="color" style="color:rgb(36, 41, 46)"><span data-type="background" style="background-color:rgba(27, 31, 35, 0.05)">com.alibaba.dubbo.remoting.exchange.Response</span></span>
+- Invoke id: Message id,Type long, Unique indentifier for each request (Due to asynchronous communication, it is used to match the request to the corresponding returned response)
+- Body length: message body length, type int,record bytes of body content.
+- Body content: request param, where serializedresponse parameters are stored. 
 
 <span data-type="color" style="color:#212121">Protocol messages will eventually become bytes and be transmitted using TCP. Any language that supports network modules and has a socket will be able to be communicatedwith. Then, why cross-language support is difficult? There are two main obstaclesin calling service in Java using other languages:</span>
 
@@ -45,7 +43,6 @@ Details in dubbo protocol header message:
 
 ## How does dubbo2.js solve problems?
 
----
 
 
 <span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">We have analyzed two obstacles above. The key to dubbo2.js in solving these two problems depends on two class libraries: </span></span>[js-to-java](https://github.com/node-modules/js-to-java)，[hessian.js](https://github.com/node-modules/hessian.js)<span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">. js-to-java, which makes nodejs have the ability to express Java objects. Hessian.js provides serialization capabilities. With the help of nodejs socket,  and a duplicate set of dubbo protocol message format, we can finally achieve nodejs call to java-dubbo-provider.</span></span>
@@ -53,7 +50,6 @@ Details in dubbo protocol header message:
 
 ## <span data-type="color" style="color:#24292E">Quick Start</span>
 
----
 
 <span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">To give an intuitive feeling to readers interested in dubbo2.js, this section presents a quick start example that shows how easy it is to call dubbo service using dubbo2.js.</span></span>
 
@@ -100,7 +96,7 @@ public class DemoProviderImpl implements DemoProvider {
 
 After that,<span data-type="color" style="color:#24292E"> we expose the dubbo service with xml files:</span>
 
-```java
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
@@ -139,12 +135,12 @@ public class Provider {
 
 ### 2. Implement dubbo client-side for nodejs
 <span data-type="color" style="color:#24292E">Install dubbo2.js using npm:</span>
-```java
+```sh
 npm install dubbo2.js --save
 ```
 
 <span data-type="color" style="color:rgb(36, 41, 46)"><span data-type="background" style="background-color:rgb(255, 255, 255)">Configure dubboConfig.ts:</span></span>
-```java
+```typescript
 import { Dubbo, java, TDubboCallResult } from 'dubbo2.js'
 
 const dubbo = new Dubbo({
@@ -186,9 +182,10 @@ export const demoService = dubbo.proxyService<IDemoService>({
 ```
 
 > Using typescript brings better coding experience.
+
 Implement caller class main.ts：
 
-```java
+```typescript
 import {demoService} from './dubboConfig'
 
 demoService.sayHello('kirito').then(({res,err})=>{
@@ -197,13 +194,16 @@ demoService.sayHello('kirito').then(({res,err})=>{
 ```
 
 ### 3. Call main.ts:
+
 Run nodejs client in Debug mode:
-```java
+
+```sh
 DEBUG=dubbo* ts-node main.ts
 ```
 
 Checkout running results:
-```java
+
+```sh
 Hello kirito, response form provider: 172.19.6.151:20880
 ```
 
@@ -211,17 +211,14 @@ Hello kirito, response form provider: 172.19.6.151:20880
 
 ## <span data-type="color" style="color:#24292E">Features</span>
 
----
 
-* <span data-type="color" style="color:#24292E">Support zookeeper as register center</span>
-* Support TCP Dubbo Native protocol
-* Support directly Dubbo connection
-* Support link tracing
-* <span data-type="color" style="color:#24292E">Generate dubbo interface Automatically</span>
+- <span data-type="color" style="color:#24292E">Support zookeeper as register center</span>
+- Support TCP Dubbo Native protocol
+- Support directly Dubbo connection
+- Support link tracing
+- <span data-type="color" style="color:#24292E">Generate dubbo interface Automatically</span>
 
 ## More details
-
----
 
 <span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">The sample code in this article is available here, </span></span>[https://github.com/lexburner/Dubbojs-Learning](https://github.com/lexburner/Dubbojs-Learning).
 <span data-type="color" style="color:rgb(33, 33, 33)"><span data-type="background" style="background-color:rgb(255, 255, 255)">If you don&#x27;t know much about the dubbo protocol and want to understand how it works, the project provides a sub-moudle: java-socket-consumer, which is implemented in a process-oriented approach, realizing a process of sending dubbo protocal message with native socket and making function calls, and then get response.</span></span>
