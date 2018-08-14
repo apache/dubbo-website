@@ -33,7 +33,7 @@ public interface FooService {
 ```
 // this call will return null immediately
 fooService.findFoo(fooId);
-// get Dubbo's built-in ResponseFuture, and set the callback
+// Obtain the Future instance. When the result is returned, Future instance will be notified and the result will be set to Future instance.
 Future<Foo> fooFuture = RpcContext.getContext().getFuture();
 fooFuture.get();
 ```
@@ -138,7 +138,7 @@ Support for Java 8 has been upgraded in Dubbo 2.7.0, and Dubbo has enhanced the 
    ```
    
       
-   At the beginning of the method body, it starts asynchronization by running `RpcContext.startAsync()` , and it starts the new thread to execute the business logic asynchronously. After the time-consuming operation is completed, the result is written back by `asyncContext.write`.
+   At the beginning of the method body, it starts asynchronization by running `RpcContext.startAsync()` , and it starts a new thread to execute the business logic asynchronously. After the time-consuming operation is completed, the result is written back by `asyncContext.write`.
 
 4. RpcContext returns CompletableFuture directly.
 
@@ -273,7 +273,7 @@ This example demonstrates how to implement the Consumer-side asynchronous servic
 
    
 
-   This is a generic definition of a Dubbo service interface. Note that add the @DubboAsync annotation when using Annotation Processor.
+   This is a generic definition of the Dubbo service interface. Note that add the @DubboAsync annotation when using Annotation Processor.
    
 
    ```
