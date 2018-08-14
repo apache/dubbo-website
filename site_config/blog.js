@@ -72,6 +72,13 @@ export default {
         dateStr: 'August 7th，2018',
         desc: 'Your First Dubbo Demo',
         link: '/en-us/blog/dubbo-101.html',
+      },
+      {
+        title: 'Dubbo Basic Usage Dubbo Provider Configuration',
+        author: 'Yan Wei and Ziyang Wu',
+        dateStr: 'August 14th，2018',
+        desc: 'Dubbo Basic Usage Dubbo Provider Configuration',
+        link: '/en-us/blog/dubbo-basic-usage-dubbo-provider-conofiguration.html',
       }
     ]
   },
