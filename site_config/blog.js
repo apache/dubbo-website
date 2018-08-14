@@ -18,6 +18,13 @@ export default {
         link: '/en-us/blog/pinpoint.html',
       },
       {
+        title: 'Dubbo Loadbalancing',
+        author: '@leiwei',
+        dateStr: 'August 10th, 2018',
+        desc: 'This blog introduces serval loadbalancing concepts and Dubbo loadbalancing strategy implementation.',
+        link: '/en-us/blog/dubbo-loadbalance.html',
+      },
+      {
         title: 'The first Dubbo meetup has been held in Beijing',
         author: 'Huxing Zhang',
         dateStr: 'May 12nd，2018',

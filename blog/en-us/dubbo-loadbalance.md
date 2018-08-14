@@ -21,7 +21,7 @@ These three concepts are confusing. They all describe how to choose from multipl
 There is a Dubbo user service, 10 deployed in Beijing and 20 deployed in Shanghai. A service consumer in Hangzhou initiated a call and then the following steps executed:
 
 1. According to the configured routing rule, if the call is initiated by Hangzhou, it will be routed to the nearest 20 Providers in Shanghai.
-2. According to the configured random load balancing strategy, one of the 20 Providers is randomly selected to be called, assuming that the 7th Provider is random selected.
+2. According to the configured random load balancing strategy, one of the 20 Providers is randomly selected to be called, assuming that the 7th Provider is randomly selected.
 3. As a result, calling the 7th Provider failed.
 4. Retried other servers according to the configured Fault-tolerant Cluster mode.
 5. The call to the 13th Provider was successful.
@@ -235,7 +235,7 @@ public interface LoadBalance {
 
 This is the interface of the SPI. The parameters of the select method are as follows:
 
-* invrowers: A list of all service Providers.
+* invokers: A list of all service Providers.
 * url: Some configuration information, such as interface name, check or not, serialization.
 * invocation: Information called by the RPC, including the method name, method parameter type, and method parameters. Here is a LoadBalance implemented by us. The implementation is very simple - Choose the first Invoker:
 ```
