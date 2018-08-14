@@ -55,4 +55,4 @@ Application configuration. The corresponding class: `com.alibaba.dubbo.config.Ap
 | architecture <br class="atl-forced-newline" /> | architecture <br class="atl-forced-newline" /> | string | N | | service governance | The architecture of service layering. Like intl,china and so on. Different architecture use different layer | above 2.0.7 |
 | environment | environment | string | N | | service governance | Application environment. Like develop,test,product. Work as the limit condition of developing new function| above 2.0.0 |
 | compiler | compiler | string | N | javassist | performance optimization | Java class compile.It is used for the generating of dynamic class. The options are JDK and javassist | above 2.1.0 |
-| logger | logger | string | N | slf4j | performance optimization | The format of log output，The options are slf4j,jcl,log4j and jdk | above 2.2.0 |
+| logger | logger | string | N | slf4j | performance optimization | The format of log output，The options are slf4j,jcl,log4j,log4j2 and jdk | above 2.2.0 |
