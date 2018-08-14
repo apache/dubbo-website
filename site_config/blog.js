@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
       {
+        title: 'Dubbo Loadbalance',
+        author: '@cyancity',
+        dateStr: 'August 10th, 2018',
+        desc: 'This blog introduces serval loadbalancing concepts and Dubbo loadbalancing strategy implementation.',
+        link: '/en-us/blog/dubbo-loadbalance.html',
+      },
+      {
         title: 'Sentinel: The flow sentinel of Dubbo services',
         author: 'Eric Zhao',
         dateStr: 'July 27th, 2018',
@@ -16,13 +23,6 @@ export default {
         dateStr: 'July 12th, 2018',
         desc: 'Call chain tracking and performance monitoring for Dubbo distributed applications using Pinpoint',
         link: '/en-us/blog/pinpoint.html',
-      },
-      {
-        title: 'Dubbo Loadbalancing',
-        author: '@leiwei',
-        dateStr: 'August 10th, 2018',
-        desc: 'This blog introduces serval loadbalancing concepts and Dubbo loadbalancing strategy implementation.',
-        link: '/en-us/blog/dubbo-loadbalance.html',
       },
       {
         title: 'The first Dubbo meetup has been held in Beijing',

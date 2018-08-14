@@ -1,6 +1,6 @@
 
 
-# Dubbo's Load Balancing
+# Dubbo's Load Balance
 
 
 
