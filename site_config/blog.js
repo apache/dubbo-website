@@ -53,6 +53,13 @@ export default {
         link: '/en-us/blog/introduction-to-dubbo-spi.html',
       },
       {
+        title: 'Manipulating Services Dynamically via QoS',
+        author: 'Huxing Zhang',
+        dateStr: 'August 2nd, 2018',
+        desc: 'This blog introduces how to use QoS of Dubbo to configure services dynamically, and QoS\'s parameters and ways to configure',
+        link: '/en-us/blog/introduction-to-dubbo-qos.html',
+      },
+      {
         title: 'Use anntation in Dubbo',
         author: 'Ge Shao',
         dateStr: 'August 7nd，2018',

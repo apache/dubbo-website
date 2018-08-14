@@ -246,5 +246,3 @@ dubbo.application.qosEnable=true
 dubbo.application.qosPort=33333
 dubbo.application.qosAcceptForeignIp=false
 ```
-
-
