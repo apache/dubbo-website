@@ -13,13 +13,13 @@ Next, let's take a look at how the consumer uses generic calls for service calls
 
 Declare `generic="true"` in Spring configuration, such as
 
-```
+```xml
 "userService" interface="com.alibaba.dubbo.samples.generic.api.IUserService" generic="true"/>
 ```
 
 Where you need to use it, you can call it by forcing a type conversion to GenericService.
 
-```
+```java
 GenericService userService = (GenericService) context.getBean("userService");
 // primary param and return value
 String name = (String) userService.$invoke("delete", new String[]{int.class.getName()}, new Object[]{1});
@@ -40,7 +40,7 @@ Among them,
 
 ### Generic calls through API programming
 
-```
+```java
 ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
 application.setName("api-generic-consumer");
 
@@ -72,7 +72,7 @@ For example, the method signature is `User get(Params params)`, where `User` has
 
 The following is the calling code of the consumer:
 
-```
+```java
 String[] parameterTypes = new String[]{"com.alibaba.dubbo.samples.generic.api.Params"};
 Map<String, Object> params = new HashMap<String, Object>();
 param.put("class", "com.alibaba.dubbo.samples.generic.api.Params");
@@ -96,7 +96,7 @@ The implementation of the generic interface is mainly used when the server does 
 
 #### Implementation GenericService on the server
 
-```
+```java
 public class GenericServiceImpl implements GenericService {
     @Override
     public Object $invoke(String method, String[] parameterTypes, Object[] args) throws GenericException {
@@ -113,7 +113,7 @@ public class GenericServiceImpl implements GenericService {
 
 #### Server exposed service
 
-```
+```java
 ApplicationConfig application = new ApplicationConfig();
 application.setName("api-generic-provider");
 
@@ -141,7 +141,7 @@ Similarly, you can expose the service using XML configuration; in this case, the
 
 #### Service call on the consumer
 
-```
+```java
 ApplicationConfig application = new ApplicationConfig();
 application.setName("api-generic-consumer");
 
