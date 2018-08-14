@@ -26,7 +26,7 @@
 * `com.alibaba.dubbo.common.logger.jcl.JclLoggerAdapter`
 * `com.alibaba.dubbo.common.logger.log4j.Log4jLoggerAdapter`
 * `com.alibaba.dubbo.common.logger.jdk.JdkLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.log4j.Log4j2LoggerAdapter`
+* `com.alibaba.dubbo.common.logger.log4j2.Log4j2LoggerAdapter`
 
 ## 扩展示例
 
