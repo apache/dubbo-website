@@ -5,7 +5,7 @@ The generic call could be considered to be used in the following cases:
 
 The generic call is mainly used when the consumer does not have an API interface; 
 instead of introducing the interface jar package, the service call is initiated directly through the GenericService interface, and all POJOs in the parameters and return values are represented by a `Map`. 
-Generic calls do not require attention on the server, and can be exposed as normal services.
+Generic calls do not require attention on the server and can be exposed as normal services.
 
 Next, let's take a look at how the consumer uses generic calls for service calls.
 
@@ -30,7 +30,7 @@ Among them,
 
 1. The interface GenericService has only one method, named $invoke, which takes three arguments, a method name, an array of method parameter types, and an array of parameter values.
 
-2. For array of method parameter types
+2. For arrays of method parameter types
 
    i.	If it is a basic type, such as int or long, use `int.class.getName()` to get its type;
    
