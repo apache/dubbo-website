@@ -210,7 +210,8 @@ export default {
         author: 'Siqi Zhuo',
         dateStr: 'Aug 13th, 2018',
         desc: 'Introduce the new feature of implementing the full asynchronous programming in Dubbo 2.7.0, mainly about previous asynchronous method before 2.6.x versions, enhancement in version 2.7.0 and a few examples to demonstrate its usage',
-        link: '/blog/en-us/how-to-implement-full-asynchronous-call-chain-based-on-dubbo.md',
+        link: '/en-us/blog/how-to-implement-full-asynchronous-call-chain-based-on-dubbo.html',
+      }
     ]
   },
 };
