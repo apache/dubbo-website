@@ -19,7 +19,7 @@ export default {
       },
       {
         title: 'Dubbo Loadbalancing',
-        author: '@leiwei',
+        author: '@CyanCity',
         dateStr: 'August 10th, 2018',
         desc: 'This blog introduces serval loadbalancing concepts and Dubbo loadbalancing strategy implementation.',
         link: '/en-us/blog/dubbo-loadbalance.html',
