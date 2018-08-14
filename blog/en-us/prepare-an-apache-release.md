@@ -129,7 +129,6 @@ Mainly including the related preparation of signature utilities and Maven reposi
     </settings>
     ```
 
-   ​
 
 ## Pack & Upload
 
