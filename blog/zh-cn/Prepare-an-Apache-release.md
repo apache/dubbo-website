@@ -101,7 +101,7 @@ Mainly including the related preparation of signature utilities and Maven reposi
    - Add the following contents to .m2/settings.xml
 
      Enter the passwords after
-     encrypting by [maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html)
+     encrypting by [maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html)
 
     ```xml
     <settings>
@@ -146,7 +146,7 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
 
 3. Release with maven-release-plugin
 
-   - verify with dryRun
+   - verify with dryRun
 
     ```shell
     $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
@@ -169,20 +169,20 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
 
 ## Prepare Apache Release 
 
-1. Prepare the svn local environment (Apache hosting the release content of project by svn)
+1. Prepare the svn local environment (Apache hosting the release content of project by svn)
 
-2. Checkout dubbo to local directory
+2. Checkout dubbo to local directory
 
    ```shell
    $ svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo
-   # Assume that the local directory is
+   # Assume that the local directory is
    ~/apache/incubator/dubbo
    ```
 
 3. The current release version is 2.6.4,new directory
 
    ```shell
-   $ cd ~/apache/incubator/dubbo # dubbo svn root directory
+   $ cd ~/apache/incubator/dubbo # dubbo svn root directory
    $ mkdir 2.6.4
    ```
 
