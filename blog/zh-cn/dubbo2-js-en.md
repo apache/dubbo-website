@@ -18,7 +18,7 @@ Nowadays, Internet architecture tends to be micro-service way. The discussions a
 
 ## Cross-language calls by a common protocol 
 
-  ### springmvc
+  ### SpringMVC
 
   ![springmvc](../../img/blog/springmvc.png)
 
