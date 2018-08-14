@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
       {
+        title: 'Dubbo Loadbalance',
+        author: '@CyanCity, @liaoandi',
+        dateStr: 'August 10th, 2018',
+        desc: 'This blog introduces serval loadbalancing concepts and Dubbo loadbalancing strategy implementation.',
+        link: '/en-us/blog/dubbo-loadbalance.html',
+      },
+      {
         title: 'Sentinel: The flow sentinel of Dubbo services',
         author: 'Eric Zhao',
         dateStr: 'July 27th, 2018',
