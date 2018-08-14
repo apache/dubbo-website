@@ -9,7 +9,7 @@
 
 ### The analysis of DubboConsumer startup
 
-Have you ever thought about a problem? `DubboConsumerDemo` application in `incubator-dubbo-spring-boot-project` just have one line of code, why not exit directly when the `main` method is executed?
+Have you ever thought about this : since the `DubboConsumerDemo` application in `incubator-dubbo-spring-boot-project` has only one line of code, why not just exit directly when the `main` method is executed?
 
 ```java
 @SpringBootApplication(scanBasePackages = "com.alibaba.boot.dubbo.demo.consumer.controller")
@@ -22,16 +22,16 @@ public class DubboConsumerDemo {
 }
 ```
 
-In fact, if you want to answer such a question. We need to abstract this problem firstly, that is, a JVM process, under what circumstances will it exit?
+In fact, to answer this question, we need to abstract it first, that is, under what circumstances will a JVM process exit?
 
 Take Java 8 as an example. By referring to the JVM language specification[1], there is a clear description in Section 12.8:
 
-A program terminates all its activity and *exits* when one of two things happens:
+> A program terminates all its activity and *exits* when one of two things happens:
+>
+> - All the threads that are not daemon threads terminate.
+> - Some thread invokes the `exit` method of class `Runtime` or class `System`, and the `exit` operation is not forbidden by the security manager.
 
-- All the threads that are not daemon threads terminate.
-- Some thread invokes the `exit` method of class `Runtime` or class `System`, and the `exit` operation is not forbidden by the security manager.
-
-Therefore, in view of the above situation, we judge that there must be some non-daemon thread not exiting. All thread information can be seen by `jstack`, including whether they are daemon threads, and `jstack` can be used to find out which threads are non-deamon.
+Therefore, in view of the above situation, we judge that there must be some non-daemon thread not exiting. All thread information can be seen by `jstack`, including whether they are daemon threads, and `jstack` can be used to find out which threads are non-daemon.
 
 ```sh
 ➜  jstack 57785 | grep tid | grep -v "daemon"
@@ -56,14 +56,14 @@ Therefore, in view of the above situation, we judge that there must be some non-
 
 > We can find all the thread digests by `grep tid` here, and find the line that doesn't contain the daemon keyword by `grep -v` command.
 
-We can get some information by the above results:
+We can get some information from the above results:
 
-- There are two threads `container-0`, `container-1` is very suspicious, Ther are non-daemon threads in wait state.
-- There are alse some threads about GC, and threads that start with `VM`, They are also non-daemon threads, but they are most likely the JVM's own threads, which are ignored here.
+- There are two "suspicious" threads : `container-0`, `container-1`. They are non-daemon thread in wait state.
+- There are alse some threads about GC, and threads that start with `VM`. They are also some non-daemon threads, but they are most likely the JVM's own threads, which we can ignore for now.
 
 In summary, we can infer that it is likely that the `container-0` and `container-1` cause the JVM to not exit. Now let's search through the source code to find out who created the two threads.
 
-By the source code analysis of Spring-boot, we can find these code on `org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer`'s `startDaemonAwaitThread`.
+By the source code analysis of Spring-boot, we can find these code in the `startDaemonAwaitThread` method of `org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer`.
 
 ```java
     private void startDaemonAwaitThread() {
@@ -100,9 +100,9 @@ run:1107, SpringApplication (org.springframework.boot)
 main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
 ```
 
-It can be seen that during the startup process of the Spring-boot application, the above method is executed since the Tomcat exposes the HTTP service by default, and all threads started by Tomcat are daemon threads by default, such as the Acceptor of the listening request, working thread pool etc.The JVM will also exit after the startup is completed if there is no control here. Therefore, it is necessary to explicitly start a thread and continue to wait under certain conditions. We can avoid thread exit by this way.
+It can be seen that during the startup process of the Spring-boot application, the above method is executed since the execution of Tomcat exposes the HTTP service by default. Also, all threads started by Tomcat are daemon threads by default, such as the Acceptor of the listening request, threads in working threads, etc. Thus the JVM will also exit after the startup is complete in there is no extra control here. Therefore, it is necessary to explicity start a thread and continue to wait under certain conditions, thereby avoid thread exit.
 
-Let's dig deeper. In Tomcat's `this.tomcat.getServer().await()` method, how the thread doesn‘t exit. The irrelevant code is removed here for the convenience of reading.
+Let's dig deeper to find out how the thread stay alive in Tomcat's `this.tomcat.getServer().await()` method.
 
 ```java
 public void await() {
@@ -126,19 +126,19 @@ public void await() {
     }
 ```
 
-In the await method, the current thread checks the variable `stopAwait` every 10 seconds in a while loop. It is a `volatile` variable that is used to ensure that the current thread can see the change immediately after being modified by another thread. If there is no change, it will always be in the while loop. This is why the thread does not exit, which is why the entire Spring-boot application doesn't exit.
+In the await method, the current thread checks the variable `stopAwait` every 10 seconds in a while loop. It is a `volatile` variable that is used to ensure that the current thread can see the change immediately after the variable being modified by another thread. If there is no change, it will stay in the loop. This is the reason why the thread does not exit, which is also the reason that the entire Spring-boot application doesn't exit.
 
-Because Spring-boot application enable 2 port that 8080 and 8081(management port) at the same time. Two Tomcat are startup actually, so there are two threads that `container-0` and `container-1`.
+Since Spring-boot application enables port 8080 and 8081(management port) at the same time, there are actually two Tomcats. So there are two threads named `container-0` and `container-1`.
 
-Then, let's see how this Spring-boot application exits.
+Next, let's see how this Spring-boot application exits.
 
 ### The analysis of DubboConsumer exit
 
-As mentioned in the previous description, there is a thread that checks the variable `stopAwait` continuously. Then we can think that should be a thread to modify `stopAwait` at Stop, it can break the while loop. So, who is modifying this variable?
+As mentioned in the previous description, there is a thread that checks the variable `stopAwait` continuously. So there must be a thread to modify `stopAwait` at Stop, thus break the while loop. But who is modifying this variable?
 
-By analyzing the source code, you can see that there is only one way to modify `stopAwait`, in `org.apache.catalina.core.StandardServer#stopAwait`, we add a breakpoint here to see who is calling.
+By analyzing the source code, we can see that there is only one method that modifies `stopAwait` : `org.apache.catalina.core.StandardServer#stopAwait`. To figure out who is calling this method, we add a breakpoint here.
 
-> Note that when we add a breakpoint in Intellij IDEA's Debug mode, we need to use `kill -s INT $PID` or `kill -s TERM $PID` on command line to trigger the breakpoint. The breakpoint will not be trigger if you just click the stop button on the IDE.
+> Note that after adding a breakpoint in Intellij IDEA's Debug mode, we also need to type `kill -s INT $PID` or `kill -s TERM $PID` in command line to trigger the breakpoint. Due to buggy IDEA, a single click to the stop button won't trigger the breakpoint.
 
 You can see the method is called by a thread called `Thread-3`:
 
@@ -175,30 +175,30 @@ Through source code analysis, it was executed by Spring's registered `ShutdownHo
     }
 ```
 
-We found that ShutdownHook will execute in the following two cases by referring the Java API documentation[2].
+By reffering the Java API documentation[2], we found that ShutdownHook will be executed under the following two cases.
 
 > The Java virtual machine *shuts down* in response to two kinds of events:
 >
 > - The program *exits* normally, when the last non-daemon thread exits or when the `exit` (equivalently, [`System.exit`](https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#exit-int-)) method is invoked, or
 > - The virtual machine is *terminated* in response to a user interrupt, such as typing `^C`, or a system-wide event, such as user logoff or system shutdown.
 
-1. call System.exit()
+1. So it's either a call of `System.exit()`
 2. Respond to external signals, such as Ctrl+C(actually sent as SIGINT signal), or `SIGTERM` signal (`kill $PID` will send `SIGTERM` signal by default)
 
-Therefore, the normal application will execute the above ShutdownHook during the stop process (except `kill -9 $PID`). Its function is not only to close the Tomcat, but also to perform other cleanup work, it is unnecessary to go into details.
+Therefore, the normal application will execute the above ShutdownHook during the stop process (except `kill -9 $PID`). Its function is not only to close the Tomcat, but also to perform other cleanup work. It is unnecessary to go into details.
 
 ### Summary
 
-1. Make sure the process can't be exited by start a independency non-daemon thread loop to check the status of variable while `DubboConsumer`startup.
-2. Change the status of variable to make program exit normaly by execute ShutdownHook while `DubboConsumer` exit.
+1. During the startup of `DubboConsumer`, an independent non-daemon thread is launched to query the status of the variable continuously, thus the process can't exit.
+2. To stop the `DubboConsumer`, one should call ShutdownHook to change the variable to let the thread break the loop.
 
 ### Problems
 
-In the example of DubboProvider, we see that Provider doesn't start Tomcat to provide HTTP service, then how to achieve it without exiting? We will answer this question in the next article.
+In the example of DubboProvider, we see that Provider doesn't start Tomcat to provide HTTP service, then how does the program stays alive without exiting? We will answer this question in the next article.
 
-#### Easter Eggs/Extra/Bonus/Surprise(?)
+#### Notice
 
-Run the following unit test in `Intellij IDEA`, create a thread to perform sleep 1000 seconds of operation, we are surprised to find that the code does not exit after the thread is executed, why is this? (The thread being created is a non-daemon thread)
+By running the following unit test which create a thread in `Intellij IDEA` , we are surprised to find that the program exits with less than 1000s. Why?(The thread being created is a non-daemon thread)
 
 ```java
     @Test
