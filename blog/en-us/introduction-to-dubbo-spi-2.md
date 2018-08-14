@@ -13,7 +13,7 @@ The common usages are:
 * `LoadBalance lb = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(loadbalanceName)`
 * `RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getAdaptiveExtension()`
 
-Notice: in the source code shown below, I'll remove extraneous code (such as logging, exception catching, and so on) to make it easy to read and understand.
+Notice: In the source code shown below, I'll remove extraneous code (such as logging, exception catching, and so on) to make it easy to read and understand.
 
 1. getExtensionLoader
     This is a static factory method that enters an extensible interface and returns an ExtensionLoader entity class for this interface. With this entity class, you can get not only a specific extension based on name, but also an adaptive extension.
