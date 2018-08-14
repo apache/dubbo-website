@@ -179,7 +179,7 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
    ~/apache/incubator/dubbo
    ```
 
-3. The current release version is 2.6.4,new directory
+3. The current release version is 2.6.4,new directory
 
    ```shell
    $ cd ~/apache/incubator/dubbo # dubbo svn root directory
