@@ -100,7 +100,7 @@ run:1107, SpringApplication (org.springframework.boot)
 main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
 ```
 
-It can be seen that during the startup process of the Spring-boot application, the above method is executed since the execution of Tomcat exposes the HTTP service by default. Also, all threads started by Tomcat are daemon threads by default, such as the Acceptor of the listening request, threads in working threads, etc. Thus the JVM will also exit after the startup is complete in there is no extra control here. Therefore, it is necessary to explicity start a thread and continue to wait under certain conditions, thereby avoid thread exit.
+It can be seen that during the startup process of the Spring-boot application, the above method is executed since the execution of Tomcat exposes the HTTP service by default. Also, all threads started by Tomcat are daemon threads by default, such as the Acceptor of the listening request, threads in working threads, etc. Thus the JVM will also exit after the startup is complete in there is no extra control here. Therefore, it is necessary to explicitly start a thread and continue to wait under certain conditions, thereby avoid thread exit.
 
 Let's dig deeper to find out how the thread stay alive in Tomcat's `this.tomcat.getServer().await()` method.
 
