@@ -5,14 +5,14 @@ The so-called protocol of the microservice framework can be simply interpreted a
 #### Motan2 for cross-language support
 
 
-![图片 1.png | center | 747x473](https://cdn.nlark.com/lark/0/2018/png/128723/1534165564097-aaddeb4a-c982-4d56-835e-b324745c3f3c.png "")
+![motan2](../../img/blog/motan-protocol-en.png)
 
 
 In the original Motan protocol, the protocol message consisted only of the Header and the Body, making deserialization indispensable for acquiring data stored in the Body, like path, param and group, which is terribly unfriendly for cross-language support. Therefore, the content of the protocol was modifiedin Motan2, Weibo released the open-source projects, [motan-go](https://github.com/weibocom/motan-go/), [motan-php](https://github.com/weibocom/motan-php) and [motan-openresty](https://github.com/weibocom/motan-openresty). It used motan-go as an interpreter and the Simple serialization scheme to serialize the Body of protocol message. (Simple is a comparably weaker serialization scheme)
 
 
 
-![image.png | left | 747x300](https://cdn.nlark.com/lark/0/2018/png/128723/1534161514042-6189386b-720e-40d1-9be4-621af5090da8.png "")
+![agent](../../img/blog/motan-agent.png)
 
 
 After observation we find out that there is no big difference between the configuration of Motan2 and the dual protocol. It’s just that the agent here is implicit, and it co-exists with the main service. The most obvious difference is that different languages do not interact directly in agent scheme.
@@ -24,7 +24,7 @@ Instead of cross-language support, the dubbo protocol was originally designed on
 ##### Dubbo protocol message format:
 
 
-![image.png | left | 747x214](https://cdn.nlark.com/lark/0/2018/png/128723/1534165611470-e3eda448-7e5c-4ad4-9401-f55086f5ee2e.png "")
+![dubbo协议](../../img/blog/dubbo-protocol.png)
 
 
 Details in dubbo protocol header message:
