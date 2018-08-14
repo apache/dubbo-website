@@ -54,8 +54,8 @@ export default {
       },
       {
         title: 'Manipulating Services Dynamically via QoS',
-        author: 'Huxing Zhang',
-        dateStr: 'August 2nd, 2018',
+        author: 'Wendell Hu (@wendzhue)',
+        dateStr: 'August 14th, 2018',
         desc: 'This blog introduces how to use QoS of Dubbo to configure services dynamically, and QoS\'s parameters and ways to configure',
         link: '/en-us/blog/introduction-to-dubbo-qos.html',
       },
