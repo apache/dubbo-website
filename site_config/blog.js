@@ -4,6 +4,20 @@ export default {
     postsTitle: 'All posts',
     list: [
         {
+            title: 'Generic invoke of Dubbo',
+            author: '@ChasePGit',
+            dateStr: 'August 14th，2018',
+            desc: 'This blog describes details of Dubbo generic invoke including usage and examples.',
+            link: '/en-us/blog/dubbo-generic-invoke.html',
+        },
+        {
+            title: 'Several ways about synchronous/asynchronous invoke of Dubbo',
+            author: '@Hou Yongxu',
+            dateStr: 'August 14th，2018',
+            desc: 'This blog describes several ways about synchronous/asynchronous invoke of Dubbo',
+            link: '/en-us/blog/dubbo-invoke.html',
+        },
+        {
             title: 'Implementation of cross-language calls by dubbo2.js',
             author: '@Stella0824',
             dateStr: 'August 14th, 2018',
