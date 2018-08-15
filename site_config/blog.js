@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
         {
+            title: 'How to implement a fully asynchronous calls chain based on Dubbo',
+            author: '@Siqi Zhuo',
+            dateStr: 'Aug 13th, 2018',
+            desc: 'Introduce the new feature of implementing the full asynchronous programming in Dubbo 2.7.0, mainly about previous asynchronous method before 2.6.x versions, enhancement in version 2.7.0 and a few examples to demonstrate its usage',
+            link: '/en-us/blog/dubbo-new-async.html',
+        },
+        {
             title: 'Generic invoke of Dubbo',
             author: '@ChasePGit',
             dateStr: 'August 14th，2018',
@@ -54,7 +61,7 @@ export default {
       },
       {
         title: 'Sentinel: The flow sentinel of Dubbo services',
-        author: 'Eric Zhao',
+        author: '@Eric Zhao',
         dateStr: 'July 27th, 2018',
         desc: 'This blog introduces to the Sentinel and its best practice with Dubbo services. Sentinel is a powerful library that takes "flow" as the breakthrough point, and covers multiple fields including flow control, circuit breaking and load protection to guarantee service stability.',
         link: '/en-us/blog/sentinel-introduction-for-dubbo.html',
@@ -75,56 +82,56 @@ export default {
       },
       {
         title: 'The ApacheCon NA schedule has been announced',
-        author: 'Huxing Zhang',
+        author: '@Huxing Zhang',
         dateStr: 'May 2nd，2018',
         desc: 'Ian Luo and Jun Liu will talk about "Introducing Apache Dubbo(Incubating): What is Dubbo and How it Works" at ApacheCon NA this year in Montréal!',
         link: '/en-us/blog/apachecon-na-2018.html',
       },
       {
         title: 'The GSoC (Google Summer of Code) 2018 projects has been announced',
-        author: 'Huxing Zhang',
+        author: '@Huxing Zhang',
         dateStr: 'April 25th，2018',
         desc: 'Raghu Reddy\'s project "Extending Serialization protocols support for Apache Dubbo" has been accepted! Congratulations!',
         link: '/en-us/blog/gsoc-2018.html',
       },
       {
         title: 'Dubbo roadmap is announced in QCon Beijing 2018',
-        author: 'Huxing Zhang',
+        author: '@Huxing Zhang',
         dateStr: 'April 22nd，2018',
         desc: 'Ian Luo has delivered a great talk at QCon Beijing 2018, where the roadmap of Dubbo has also be announced',
         link: '/en-us/blog/qcon-beijing-2018.html',
       },
       {
         title: 'Introduction to Dubbo spi ',
-        author: 'wangxuekui',
+        author: '@wangxuekui',
         dateStr: 'August 9th, 2018',
         desc: 'We have introduction to Dubbo spi.',
         link: '/en-us/blog/introduction-to-dubbo-spi.html',
       },
       {
         title: 'Manipulating Services Dynamically via QoS',
-        author: 'Wendell Hu (@wendzhue)',
+        author: '@Wendell Hu (@wendzhue)',
         dateStr: 'August 14th, 2018',
         desc: 'This blog introduces how to use QoS of Dubbo to configure services dynamically, and QoS\'s parameters and ways to configure',
         link: '/en-us/blog/introduction-to-dubbo-qos.html',
       },
       {
         title: 'Use annotation in Dubbo',
-        author: 'Ge Shao',
+        author: '@Ge Shao',
         dateStr: 'August 7nd，2018',
         desc: 'This blog introduces how to use annotations',
         link: '/en-us/blog/dubbo-annotation.html',
       },
       {
         title: 'Using Zookeeper in Dubbo',
-        author: 'Mani',
+        author: '@Mani',
         dateStr: 'August 7th，2018',
         desc: 'This blog introduces how to use Zookeeper in Dubbo',
         link: '/en-us/blog/dubbo-zk.html',
       },
       {
         title: 'Your First Dubbo Demo',
-        author: 'Yang Xinru',
+        author: '@Yang Xinru',
         dateStr: 'August 7th，2018',
         desc: 'Your First Dubbo Demo',
         link: '/en-us/blog/dubbo-101.html',
@@ -151,7 +158,7 @@ export default {
         },
         {
             title: 'Dubbo的负载均衡',
-            author: '@leiwei',
+            author: '@vangoleo',
             dateStr: 'August 10th, 2018',
             desc: '本文介绍了负载均衡的相关概念以及 Dubbo 中的负载均衡策略实现',
             link: '/zh-cn/blog/dubbo-loadbalance.html',
@@ -179,7 +186,7 @@ export default {
       },
         {
         title: '通过QoS对服务进行动态控制',
-        author: 'Huxing Zhang',
+        author: '@Huxing Zhang',
         dateStr: 'August 2nd, 2018',
         desc: '介绍了如何使用Dubbo的QoS功能对服务进行动态配置，以及相关的参数及配置方式。',
         link: '/zh-cn/blog/introduction-to-dubbo-qos.html',
@@ -193,14 +200,14 @@ export default {
       },
       {
         title: '从跨语言调用到 dubbo2.js',
-        author: '徐靖峰',
+        author: '@徐靖峰',
         dateStr: 'July 27th, 2018',
         desc: '如何使用 dubbo2.js 进行跨语言的 dubbo 调用',
         link: '/zh-cn/blog/dubbo2-js.html',
       },
       {
         title: 'Sentinel 为 Dubbo 服务保驾护航',
-        author: 'Eric Zhao',
+        author: '@Eric Zhao',
         dateStr: 'July 24th, 2018',
         desc: '主要介绍了面向分布式服务架构的轻量级流量控制组件 Sentinel 以及在 Dubbo 中整合使用 Sentinel 的最佳实践。',
         link: '/zh-cn/blog/sentinel-introduction-for-dubbo.html',
@@ -235,7 +242,7 @@ export default {
       },
       {
         title: 'Spring Boot+Dubbo应用启停源码分析',
-        author: 'Huxing Zhang',
+        author: '@Huxing Zhang',
         dateStr: 'May 28th, 2018',
         desc: 'dubbo-spring-boot-project致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发，同时也整合了Spring Boot特性。',
         link: '/zh-cn/blog/spring-boot-dubbo-start-stop-analysis.html',
@@ -256,17 +263,11 @@ export default {
       },
       {
         title: 'Dubbo可扩展机制源码解析',
-        author: '@hengyunabc',
+        author: '@vangoleo',
         dateStr: 'May 10th, 2018',
         desc: '在前面的博客中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。接下来，我们就深入Dubbo的源码，一睹庐山真面目。',
         link: '/zh-cn/blog/introduction-to-dubbo-spi-2.html',
-      },
-      {
-        title: 'How to implement a fully asynchronous calls chain based on Dubbo',
-        author: 'Siqi Zhuo',
-        dateStr: 'Aug 13th, 2018',
-        desc: 'Introduce the new feature of implementing the full asynchronous programming in Dubbo 2.7.0, mainly about previous asynchronous method before 2.6.x versions, enhancement in version 2.7.0 and a few examples to demonstrate its usage',
-        link: '/blog/en-us/how-to-implement-full-asynchronous-call-chain-based-on-dubbo.md',
+      }
     ]
   },
 };
