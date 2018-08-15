@@ -63,7 +63,7 @@ Dubbo基本用法-Dubbo Provider配置
 用于指定应用名，这里需要保证应用名唯一，这个应用名在后续的console admin中可以在列表中显示，方便管理。
 
 * &lt;dubbo:registry address="multicast://224.5.6.7:1234" /&gt;   
-注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地质，也可以eureka地质。上面这个是广播地址，在本地服务调用的测试过程中非常方便。
+注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地址，也可以eureka地址。上面这个是广播地址，在本地服务调用的测试过程中非常方便。
 
 * &lt;dubbo:protocol name="dubbo" port="20880" /&gt;   
 这里是传输的协议和默认端口，一般不需要更改。
@@ -71,6 +71,7 @@ Dubbo基本用法-Dubbo Provider配置
 > 接下来重点讲解下&lt;dubbo:service/&gt;的配置。
 
 * &lt;dubbo:service/&gt;支持的主要属性列表：
+
 | 属性名 | 说明 | 
 | -------- | ----- |
 | version | 版本号 | 
@@ -130,7 +131,7 @@ dubbo.protocol.port=28080
 * 比如：dubbo.registry.address=10.20.153.10:9090等价于<dubbo:registry address="10.20.153.10:9090" />
 
 如果 XML 有多行同名标签配置，可用 id 号区分，如果没有 id 号将对所有同名标签生效  
-* 比如：dubbo.protocol.rmi.port=1234等价于<dubbo:protocol id="rmi" name="rmi" port="1099" /> 2
+* 比如：dubbo.protocol.rmi.port=1234等价于<dubbo:protocol id="rmi" name="rmi" port="1234" /> 
 * 比如：dubbo.registry.china.address=10.20.153.10:9090等价于<dubbo:registry id="china" address="10.20.153.10:9090" />
 
 ###### 覆盖策略  
