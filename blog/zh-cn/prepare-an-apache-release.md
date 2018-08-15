@@ -294,4 +294,4 @@ The Apache Dubbo (Incubating) Team
 
 **apache.repository.org nexus仓库的权限已经申请，参见[jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
-之前发布到maven仓库的atifacts都处于staging状态，用Apache id登录apache.repository.org，发布即可。
+之前发布到maven仓库的artifacts都处于staging状态，用Apache id登录apache.repository.org，发布即可。

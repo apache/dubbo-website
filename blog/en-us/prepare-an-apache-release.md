@@ -297,4 +297,4 @@ The Apache Dubbo (Incubating) Team
 
 **apache.repository.org The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
-The atifacts that were previously published to the maven repository are in the staging state. Log in to apache.repository.org with the Apache id and release it.
+The artifacts that were previously published to the maven repository are in the staging state. Log in to apache.repository.org with the Apache id and release it.
