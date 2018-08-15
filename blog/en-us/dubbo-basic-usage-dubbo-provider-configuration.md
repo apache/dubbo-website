@@ -99,12 +99,12 @@ For other configuration properties, please refer to xsd：http://dubbo.apache.or
 
 For other properties，you can refer to xsd above。
 
-###### Configuration Coverage Relationship  
+###### Configuration Override Relationship  
 ![undefined](https://cdn.yuque.com/lark/0/2018/png/15841/1527849374313-94a5ea24-0e72-4d83-871b-e0e95eab646a.png) 
 
 <center>Configuration Coverage Relationship Diagram</center>
 
-The coverage relationship here includes the configuration of both provider end and consumer end. If you have any questions about consumer, you can refer to the next chapter, consumer chapter, to understand.
+The Override relationship here includes the configuration of both provider end and consumer end. If you have any questions about consumer, you can refer to the next chapter, consumer chapter, to understand.
 
 #### dubbo.properties Configuration  
 
@@ -251,7 +251,7 @@ Skip this step if there is already a project. Create a Spring Boot project, whic
 Define interface: UserReadService
 ```
 public interface UserReadService{
-public User getUserById(Long userId);
+    public User getUserById(Long userId);
 }
 ```
 Generally, this interface should be placed in an independent JAR file as a client package.

@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
         {
+            title: 'The basic usage of Dubbo Provider configuration',
+            author: '@Ziyang-Wu',
+            dateStr: 'August 14th, 2018',
+            desc: 'This blog describes how to configure Dubbo Provider in detail from XML, properties, annotation and API configurations. ',
+            link: '/en-us/blog/dubbo-basic-usage-dubbo-provider-configuration.html',
+        },
+        {
             title: 'How to prepare an Apache release',
             author: '@smilechenjia',
             dateStr: 'August 14th, 2018',
