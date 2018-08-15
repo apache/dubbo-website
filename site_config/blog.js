@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
         {
+            title: 'How to prepare an Apache release',
+            author: '@smilechenjia',
+            dateStr: 'August 14th, 2018',
+            desc: 'This blog describes the full flow of Apache release in detail from how to install local environment and start vote.',
+            link: '/en-us/blog/prepare-an-apache-release.html',
+        },
+        {
           title: 'Source code analysis of spring-boot+Dubbo App start and stop',
           author: '@noahziheng',
           dateStr: 'August 14th, 2018',
@@ -133,7 +140,7 @@ export default {
           author: '@chickenlj',
           dateStr: 'August 8th, 2018',
           desc: '从如何搭建本地构建环境到如何发起投票，详细的介绍了Apache版本发布的完整流程',
-          link: '/zh-cn/blog/Prepare-an-Apache-release.html',
+          link: '/zh-cn/blog/prepare-an-apache-release.html',
       },
       {
           title: '在 Dubbo 应用中使用 Zookeeper',
