@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
       {
+        title: 'Dubbo Loadbalance',
+        author: '@CyanCity, @liaoandi',
+        dateStr: 'August 10th, 2018',
+        desc: 'This blog introduces serval loadbalancing concepts and Dubbo loadbalancing strategy implementation.',
+        link: '/en-us/blog/dubbo-loadbalance.html',
+      },
+      {
         title: 'Sentinel: The flow sentinel of Dubbo services',
         author: 'Eric Zhao',
         dateStr: 'July 27th, 2018',
@@ -51,6 +58,13 @@ export default {
         dateStr: 'August 9th, 2018',
         desc: 'We have introduction to Dubbo spi.',
         link: '/en-us/blog/introduction-to-dubbo-spi.html',
+      },
+      {
+        title: 'Manipulating Services Dynamically via QoS',
+        author: 'Wendell Hu (@wendzhue)',
+        dateStr: 'August 14th, 2018',
+        desc: 'This blog introduces how to use QoS of Dubbo to configure services dynamically, and QoS\'s parameters and ways to configure',
+        link: '/en-us/blog/introduction-to-dubbo-qos.html',
       },
       {
         title: 'Use anntation in Dubbo',
