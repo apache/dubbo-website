@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="introduction-to-dubbo-qos" />
+	<meta name="description" content="introduction-to-dubbo-qos" />
+	<!-- 网页标签标题 -->
+	<title>introduction-to-dubbo-qos</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-1448616405"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Manipulating Services Dynamically via QoS</h1>
+<p>QoS (short form of <strong>Quality of Service</strong>), is a common terminology talking about network devices. For example, by adjusting and manipulating the weights of ports of a router dynamically via QoS, engineers could give priority to services running on these ports and make sure these services' quality and reliability.</p>
+<p>In Dubbo, QoS is used to query and manipulate services dynamically, like getting a list of active provider and consumer services, and launching or withdrawing services (i.e registering to or unregistering services from registration center).</p>
+<h2>Mechanism of QoS</h2>
+<p>From 2.5.8, QoS is introduced into Dubbo and is activated by default. All QoS's features are abstracted to commands, which could be executed to get responses from QoS.</p>
+<blockquote>
+<p>QoS is based on Netty4. In versions earlier than 2.6.x, Dubbo relies on Netty3, so you have to add Netty4 as a dependency explicitly to ensure that Netty4 works. If you generate a Dubbo application on <a href="http://start.dubbo.io">http://start.dubbo.io</a>, there's no need to add configurations because Netty4 is listed as a dependency by default.</p>
+</blockquote>
+<p><img src="../../img/blog/qos-architecture.png" alt="undefined"></p>
+<p>The picture above shows how QoS works:</p>
+<ol>
+<li>Start and listen to a port (22222 by default).</li>
+<li>Choose a corresponding request handler by detecting the protocol (telnet or http) a request comply with.</li>
+<li>Decode and parse the request to generate corresponding command according to the protocol.</li>
+<li>Execute commands and return with responses.</li>
+</ol>
+<h3>QoS Commands:</h3>
+<p>Commands that QoS supports at the current moment include:</p>
+<ul>
+<li><code>help</code>, list available commands</li>
+<li><code>ls</code>: list all active provider services and consumer services</li>
+<li><code>online</code>: dynamically register a service or all services to registration center</li>
+<li><code>offline</code>: dynamically remove (unregister) a services or all services from registration center</li>
+<li><code>quit</code>: quit the current telnet session</li>
+</ul>
+<p>Now we are going to demonstrate how to manipulate services dynamically via QoS.</p>
+<h4>Access QoS via Telnet</h4>
+<p>Assuming that our Dubbo server has started, connect to it via telnet:</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> telnet localhost 22222</span>
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+  ?????????  ???    ??  ???????????  ???????????   ????????
+  ???   ???? ???    ???   ???    ???   ???    ??? ???    ???
+  ???    ??? ???    ???   ???    ???   ???    ??? ???    ???
+  ???    ??? ???    ???  ??????????   ??????????  ???    ???
+  ???    ??? ???    ??? ???????????  ???????????  ???    ???
+  ???    ??? ???    ???   ???    ???   ???    ??? ???    ???
+  ???   ???? ???    ???   ???    ???   ???    ??? ???    ???
+  ?????????  ?????????  ???????????  ???????????   ????????
+<span class="hljs-meta">
+
+dubbo&gt;</span><span class="bash"></span>
+</code></pre>
+<p>A <code>dubbo&gt;</code> prompt would show up once you connect to server. Now input <code>help</code>:</p>
+<pre><code class="language-sh">dubbo&gt;<span class="hljs-built_in">help</span>
++---------+----------------------------------------------------------------------------------+
+|    <span class="hljs-built_in">help</span> | <span class="hljs-built_in">help</span> <span class="hljs-built_in">command</span>                                                                     |
++---------+----------------------------------------------------------------------------------+
+|      ls | ls service                                                                       |
++---------+----------------------------------------------------------------------------------+
+| offline | offline dubbo                                                                    |
++---------+----------------------------------------------------------------------------------+
+|  online | online dubbo                                                                     |
++---------+----------------------------------------------------------------------------------+
+|    quit | quit telnet console                                                              |
++---------+----------------------------------------------------------------------------------+
+
+dubbo&gt;
+</code></pre>
+<p>This command lists all available commands with explanations.</p>
+<p>You can also use <code>help</code> to a specific command to read examples of that command.</p>
+<pre><code class="language-sh">dubbo&gt;<span class="hljs-built_in">help</span> online
++--------------+----------------------------------------------------------------------------------+
+| COMMAND NAME | online                                                                           |
++--------------+----------------------------------------------------------------------------------+
+|      EXAMPLE | online dubbo                                                                     |
+|              | online xx.xx.xxx.service                                                         |
++--------------+----------------------------------------------------------------------------------+
+</code></pre>
+<p>Use <code>ls</code> to check services' status:</p>
+<pre><code class="language-sh">dubbo&gt;ls
+As Provider side:
++------------------------------------------+---+
+|           Provider Service Name          |PUB|
++------------------------------------------+---+
+|org.apache.dubbo.demo.provider.DemoService| Y |
++------------------------------------------+---+
+As Consumer side:
++---------------------+---+
+|Consumer Service Name|NUM|
++---------------------+---+
+</code></pre>
+<p>There is a service named <code>org.apache.dubbo.demo.provider.DemoService</code> in the provider side. <code>PUB=Y</code> in the second columns means that the service has been published to the registration center, waiting to be called by the consumer side.</p>
+<p>Assuming that we need to withdraw a service dynamically, we can use <code>offline</code> command:</p>
+<pre><code>dubbo&gt;offline org.apache.dubbo.demo.provider.DemoService
+OK
+</code></pre>
+<p>You can see that the command responds with <code>OK</code>. Check the services' status using <code>ls</code>:</p>
+<pre><code class="language-sh">dubbo&gt;ls
+As Provider side:
++------------------------------------------+---+
+|           Provider Service Name          |PUB|
++------------------------------------------+---+
+|org.apache.dubbo.demo.provider.DemoService| N |
++------------------------------------------+---+
+As Consumer side:
++---------------------+---+
+|Consumer Service Name|NUM|
++---------------------+---+
+</code></pre>
+<p>You can see that <code>PUB</code> of <code>org.apache.dubbo.demo.provider.DemoService</code> has been set to <code>N</code>.</p>
+<p>Quit the current telnet session using <code>quit</code>:</p>
+<pre><code class="language-sh">dubbo&gt;quit
+BYE!
+Connection closed by foreign host.
+</code></pre>
+<h4>Access QoS via HTTP</h4>
+<p>In the example above we performed an offline action to <code>org.apache.dubbo.demo.provider.DemoService</code>. Now we are going to demonstrate how to register the service above via HTTP.</p>
+<pre><code class="language-sh">$ curl -i http://localhost:22222/online?service=org.apache.dubbo.demo.provider.DemoService
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 2
+
+OK%
+</code></pre>
+<blockquote>
+<p>Beware of the parameters of online action. They need to be provided in the form of <code>key=value</code>. However, <code>key</code> would be ignored actually.</p>
+</blockquote>
+<p>The action responds with <code>OK</code>. Now use <code>ls</code> to check providers' status at the current moment.</p>
+<pre><code>$ curl -i http://localhost:22222/ls
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 365
+
+As Provider side:
++------------------------------------------+---+
+|           Provider Service Name          |PUB|
++------------------------------------------+---+
+|org.apache.dubbo.demo.provider.DemoService| Y |
++------------------------------------------+---+
+As Consumer side:
++---------------------+---+
+|Consumer Service Name|NUM|
++---------------------+---+
+</code></pre>
+<p>You can see that the service's <code>PUB</code> status has been changed to <code>Y</code>.</p>
+<h3>QoS' Parameters</h3>
+<p>You can use parameters that QoS provides to config its startup. These parameters include:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Explanation</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>qosEnable</td>
+<td>Activate QoS or not</td>
+<td>true</td>
+</tr>
+<tr>
+<td>qosPort</td>
+<td>The port QoS would bind to</td>
+<td>22222</td>
+</tr>
+<tr>
+<td>qosAcceptForeignIp</td>
+<td>Enable remote access or not</td>
+<td>false</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Attention. From 2.6.4/2.7.0, <code>qosAcceptForeignIp</code> is set to <code>false</code> by default, because it's risky if this property is set to <code>true</code>. Think twice before you turn it on.</p>
+</blockquote>
+<p>You can configure these parameters in the following ways:</p>
+<ul>
+<li>System property</li>
+<li><code>dubbo.properties</code></li>
+<li>XML</li>
+<li>Spring-boot auto configuration</li>
+</ul>
+<p>They have priority in the following order: system property &gt; <code>dubbo.properties</code> &gt; XML &gt; spring-boot.</p>
+<h4>System Property</h4>
+<pre><code>-Ddubbo.application.qos.enable=true
+-Ddubbo.application.qos.port=33333
+-Ddubbo.application.qos.accept.foreign.ip=false
+</code></pre>
+<h4><code>Dubbo.properties</code></h4>
+<p>Create a <code>dubbo.properties</code> file in this directory <code>src/main/resources</code> in your project, and copy the following codes into it:</p>
+<pre><code>dubbo.application.qos.enable=true
+dubbo.application.qos.port=33333
+dubbo.application.qos.accept.foreign.ip=false
+</code></pre>
+<h4>XML</h4>
+<p>If you are going to config using XML, you can try this:</p>
+<pre><code class="language-xml"><span class="php"><span class="hljs-meta">&lt;?</span>xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span><span class="hljs-meta">?&gt;</span></span>
+<span class="hljs-tag">&lt;<span class="hljs-name">beans</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans"</span>
+       <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+       <span class="hljs-attr">xmlns:dubbo</span>=<span class="hljs-string">"http://dubbo.apache.org/schema/dubbo"</span>
+       <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:application</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"demo-provider"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"qos.enable"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"qos.accept.foreign.ip"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"false"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"qos.port"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"33333"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">dubbo:application</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:registry</span> <span class="hljs-attr">address</span>=<span class="hljs-string">"multicast://224.5.6.7:1234"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:protocol</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dubbo"</span> <span class="hljs-attr">port</span>=<span class="hljs-string">"20880"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"org.apache.dubbo.demo.provider.DemoService"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"demoService"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"org.apache.dubbo.demo.provider.DemoServiceImpl"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">beans</span>&gt;</span>
+</code></pre>
+<h4><code>spring-boot</code> auto configuration</h4>
+<p>If you are developing a spring-boot application, you can configure in <code>application.properties</code> or <code>application.yml</code>:</p>
+<pre><code>dubbo.application.qosEnable=true
+dubbo.application.qosPort=33333
+dubbo.application.qosAcceptForeignIp=false
+</code></pre>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>
