@@ -6,7 +6,7 @@ Extension for adapting logger output
 
 ## Extension Interface
 
-`com.alibaba.dubbo.common.logger.LoggerAdapter`
+`org.apache.dubbo.common.logger.LoggerAdapter`
 
 ## Extension Configuration
 
@@ -22,10 +22,11 @@ Or:
 
 ## Existing Extension
 
-* `com.alibaba.dubbo.common.logger.slf4j.Slf4jLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.jcl.JclLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.log4j.Log4jLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.jdk.JdkLoggerAdapter`
+* `org.apache.dubbo.common.logger.slf4j.Slf4jLoggerAdapter`
+* `org.apache.dubbo.common.logger.jcl.JclLoggerAdapter`
+* `org.apache.dubbo.common.logger.log4j.Log4jLoggerAdapter`
+* `org.apache.dubbo.common.logger.jdk.JdkLoggerAdapter`
+* `org.apache.dubbo.common.logger.log4j2.Log4j2LoggerAdapter`
 
 ## Extension Guide
 
@@ -41,7 +42,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.common.logger.LoggerAdapter (plain text file with the content: xxx=com.xxx.XxxLoggerAdapter)
+                |-org.apache.dubbo.common.logger.LoggerAdapter (plain text file with the content: xxx=com.xxx.XxxLoggerAdapter)
 ```
 
 XxxLoggerAdapter.java：
@@ -49,7 +50,7 @@ XxxLoggerAdapter.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.logger.LoggerAdapter;
+import org.apache.dubbo.common.logger.LoggerAdapter;
  
 public class XxxLoggerAdapter implements LoggerAdapter {
     public Logger getLogger(URL url) {
@@ -63,7 +64,7 @@ XxxLogger.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.logger.Logger;
+import org.apache.dubbo.common.logger.Logger;
  
 public class XxxLogger implements Logger {
     public XxxLogger(URL url) {
@@ -76,7 +77,7 @@ public class XxxLogger implements Logger {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.common.logger.LoggerAdapter：
+META-INF.dubbo.internal/org.apache.dubbo.common.logger.LoggerAdapter：
 
 ```properties
 xxx=com.xxx.XxxLoggerAdapter
