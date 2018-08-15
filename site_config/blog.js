@@ -52,6 +52,20 @@ export default {
           desc: 'Dubbo Spring Boot project is dedicated to simplifying the development of the Dubbo RPC framework in the Spring Boot application.',
           link: '/en-us/blog/spring-boot-dubbo-start-stop-analysis.html',
         },
+        {
+            title: 'Dubbo extensible mechanism source code analysis',
+            author: '@cuteSoul',
+            dateStr: 'August 14th, 2018',
+            desc: 'This blog will go deep into the source code of Dubbo extension mechanism.',
+            link: '/en-us/blog/introduction-to-dubbo-spi-2.html',
+        },
+        {
+            title: 'Manipulating Services Dynamically via QoS',
+            author: '@Wendell Hu (@wendzhue)',
+            dateStr: 'August 14th, 2018',
+            desc: 'This blog introduces how to use QoS of Dubbo to configure services dynamically, and QoS\'s parameters and ways to configure',
+            link: '/en-us/blog/introduction-to-dubbo-qos.html',
+        },
       {
         title: 'Dubbo Loadbalance',
         author: '@CyanCity, @liaoandi',
@@ -107,13 +121,6 @@ export default {
         dateStr: 'August 9th, 2018',
         desc: 'We have introduction to Dubbo spi.',
         link: '/en-us/blog/introduction-to-dubbo-spi.html',
-      },
-      {
-        title: 'Manipulating Services Dynamically via QoS',
-        author: '@Wendell Hu (@wendzhue)',
-        dateStr: 'August 14th, 2018',
-        desc: 'This blog introduces how to use QoS of Dubbo to configure services dynamically, and QoS\'s parameters and ways to configure',
-        link: '/en-us/blog/introduction-to-dubbo-qos.html',
       },
       {
         title: 'Use annotation in Dubbo',
