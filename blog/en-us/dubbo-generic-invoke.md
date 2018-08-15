@@ -1,15 +1,15 @@
-# Generic Calls of Dubbo
-The generic call could be considered to be used in the following cases:
+# Generic invoke of Dubbo
+The generic invoke could be considered to be used in the following cases:
 - Service test platform
 - API service gateway
 
-The generic call is mainly used when the consumer does not have an API interface; 
-instead of introducing the interface jar package, the service call is initiated directly through the GenericService interface, and all POJOs in the parameters and return values are represented by a `Map`. 
-Generic calls do not require attention on the server and can be exposed as normal services.
+The generic invoke is mainly used when the consumer does not have an API interface; 
+instead of depending the interface jar package, the service call is initiated directly through the GenericService interface, and all POJOs in the parameters and return values are represented by a `Map`. 
+Generic invoke does not require attention on the server and can be exposed as normal services.
 
-Next, let's take a look at how the consumer uses generic calls for service calls.
+Next, let's take a look at how the consumer uses generic invoke for service call.
 
-### Generic calls through Spring XML configuration
+### Generic invoke through Spring XML configuration
 
 Declare `generic="true"` in Spring configuration, such as
 
@@ -17,7 +17,7 @@ Declare `generic="true"` in Spring configuration, such as
 "userService" interface="com.alibaba.dubbo.samples.generic.api.IUserService" generic="true"/>
 ```
 
-Where you need to use it, you can call it by forcing a type conversion to GenericService.
+Where you need to use it, you can call it by forcing a type cast to GenericService.
 
 ```java
 GenericService userService = (GenericService) context.getBean("userService");
@@ -38,7 +38,7 @@ Among them,
    
    iii.	If it is a POJO, use the full class name directly, such as `com.alibaba.dubbo.samples.generic.api.Params`.
 
-### Generic calls through API programming
+### Generic invoke through API programming
 
 ```java
 ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
@@ -70,7 +70,7 @@ Through the API, you don't need to configure the service in advance like XML. Yo
 
 For example, the method signature is `User get(Params params)`, where `User` has two attributes, id and name, and `Params` has one attribute, query.
 
-The following is the calling code of the consumer:
+The following is the code of the consumer:
 
 ```java
 String[] parameterTypes = new String[]{"com.alibaba.dubbo.samples.generic.api.Params"};
@@ -139,7 +139,7 @@ service2.export();
 
 Similarly, you can expose the service using XML configuration; in this case, the server does not depend on the two interfaces HiService and HelloService.
 
-#### Service call on the consumer
+#### Service invoke on the consumer
 
 ```java
 ApplicationConfig application = new ApplicationConfig();
@@ -173,6 +173,6 @@ So far, a simple service Mock platform has been successfully launched!
 
 
 ### Others
--	The generic calls and generic interface implementations introduced in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian don't support generic calls. Version 2.6.3 will support the generic call of these two protocols.
+-	The generic invoke and generic interface implementations introduced in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian don't support generic invoke. Version 2.6.3 will support the generic invoke of these two protocols.
 -	The relevant sample codes mentioned in this article can be found in dubbo-samples: https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic
 
