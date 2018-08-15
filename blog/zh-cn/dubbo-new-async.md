@@ -28,7 +28,7 @@ public interface FooService {
 </dubbo:reference>
 ```
 
-1. 通过RpcContext获取Future
+2. 通过RpcContext获取Future
 
 ```
 // 此调用会立即返回null
