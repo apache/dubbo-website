@@ -412,6 +412,20 @@ export default {
     events: {
       title: '事件 & 新闻',
       list: [
+          {
+              img: '/img/blog/dubbo-chengdu-meetup.jpg',
+              title: 'Aliware Open Source·成都站——Apache Dubbo开发者沙龙',
+              content: '第四届Dubbo开发者沙龙将于8月26日(周日)在成都高新区天府五街200号菁蓉国际广场8号楼2楼会议厅举办',
+              dateStr: 'August 14th，2018',
+              link: '/zh-cn/blog/dubbo-meetup-chengdu.html',
+          },
+          {
+              img: '/img/blog/dubbo-shenzhen-meetup.jpg',
+              title: '第三届Dubbo开发者沙龙在深圳成功举办',
+              content: '第三届Dubbo开发者沙龙在深圳成功举办，超过2000位开发者报名，现场参与人数700+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数17000+',
+              dateStr: 'July 14th，2018',
+              link: '/zh-cn/blog/dubbo-meetup-shenzhen.html',
+          },
         {
           img: '/img/blog/dubbo-shanghai-meetup.jpeg',
           title: '第二届Dubbo开发者沙龙在上海成功举办',
