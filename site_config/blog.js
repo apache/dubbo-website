@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
         {
+            title: 'Implementation of cross-language calls by dubbo2.js',
+            author: '@Stella0824',
+            dateStr: 'August 14th, 2018',
+            desc: 'This blog describes how to use dubbo2.js for cross-language calls',
+            link: '/en-us/blog/dubbo2-js.html',
+        },
+        {
             title: 'The basic usage of Dubbo Provider configuration',
             author: '@Ziyang-Wu',
             dateStr: 'August 14th, 2018',
