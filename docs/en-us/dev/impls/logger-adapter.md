@@ -25,7 +25,6 @@ Or:
 * `com.alibaba.dubbo.common.logger.slf4j.Slf4jLoggerAdapter`
 * `com.alibaba.dubbo.common.logger.jcl.JclLoggerAdapter`
 * `com.alibaba.dubbo.common.logger.log4j.Log4jLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.log4j2.Log4j2LoggerAdapter`
 * `com.alibaba.dubbo.common.logger.jdk.JdkLoggerAdapter`
 
 ## Extension Guide
