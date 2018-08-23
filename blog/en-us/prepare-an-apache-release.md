@@ -218,8 +218,10 @@ The verification link includes but is not limited to the following contents and 
 
 1. Check signatures and hashes are good
 ```sh
-sha512 dubbo-incubating-${release_version}-bin-release.zip.sha512
-sha512 dubbo-incubating-${release_version}-source-release.zip.sha512
+shasum -c dubbo-incubating-${release_version}-source-release.zip.sha512
+shasum -c dubbo-incubating-${release_version}-bin-release.zip.sha512
+gpg2 --keyserver pgpkeys.mit.edu --recv-key 208B0AB1D63011C7
+gpg2 --verify dubbo-incubating-2.6.2-source-release.zip.asc dubbo-incubating-2.6.2-source-release.zip
 ```
 
 2. Unzip dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
@@ -246,6 +248,10 @@ sha512 dubbo-incubating-${release_version}-source-release.zip.sha512
   ```
 
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
+
+3. Unzip dubbo-incubating-${release_version}-bin-release.zip and check:
+* 'incubating' in name
+* LICENSE and NOTICE exists and contents are good
 
 ## Begin voting
 
