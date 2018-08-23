@@ -215,16 +215,16 @@
 
 1. Check signatures and hashes are good
 ```sh
-shasum -c dubbo-incubating-${release_version}-source-release.zip.sha512
-shasum -c dubbo-incubating-${release_version}-bin-release.zip.sha512
+shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
+shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 gpg2 --keyserver pgpkeys.mit.edu --recv-key 208B0AB1D63011C7
-gpg2 --verify dubbo-incubating-2.6.2-source-release.zip.asc dubbo-incubating-2.6.2-source-release.zip
+gpg2 --verify apache-dubbo-incubating-${release_version}-source-release.zip.asc apache-dubbo-incubating-${release_version}-source-release.zip
 ```
 
-2. Unzip dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
+2. Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
 
 - Directory with 'incubating' in name
-  `dubbo-incubating-${release_version}-bin-release`
+  `apache-dubbo-incubating-${release_version}-bin-release`
   
 - DISCLAIMER exists
 
@@ -245,8 +245,11 @@ gpg2 --verify dubbo-incubating-2.6.2-source-release.zip.asc dubbo-incubating-2.6
   ```
 
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
+  - check the version number in pom.xml are the same
+  - check there are no extra files or directories in the source package, such no empty directories or useless log files.
+  - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
-3. Unzip dubbo-incubating-${release_version}-bin-release.zip and check:
+3. Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:
 * 'incubating' in name
 * LICENSE and NOTICE exists and contents are good
 
