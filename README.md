@@ -13,5 +13,7 @@ If your version of docsite is less then `1.0.0`, please upgrade to `1.0.0`.
 2. Run `npm i` in the root directory to install the dependencies.
 3. Run `docsite start` in the root directory to start a local server, you will see the website in '127.0.0.1://8080'.
 4. Run `docsite build` to build source code.
-5. Commit all the changes.
+5. Verify your change locally: `python -m SimpleHTTPServer 8000`
+6. Commit all the changes.
+7. Push to asf-site branch.
 
