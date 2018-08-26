@@ -2,7 +2,7 @@
 
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `random` 随机调用。
 
-可以自行扩展负载均衡策略，参见：[负载均衡扩展](http://dubbo.apache.org/books/dubbo-dev-book/impls/load-balance.html)
+可以自行扩展负载均衡策略，参见：[负载均衡扩展](../../dev/impls/load-balance.md)
 
 ## 负载均衡策略
 

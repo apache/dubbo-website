@@ -2,7 +2,7 @@
 
 Dubbo offers a number of balancing strategies for cluster load balancing, which defaults to `random`.
 
-You can extend the load balancing strategy by yourself, see:[LoadBalance extension](http://dubbo.apache.org/books/dubbo-dev-book-en/impls/load-balance.html)
+You can extend the load balancing strategy by yourself, see: [LoadBalance extension](../../dev/impls/load-balance.md)
 
 ## LoadBalance strategy
 
