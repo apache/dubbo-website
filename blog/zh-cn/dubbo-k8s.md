@@ -50,7 +50,7 @@ kubernetes是天然可作为微服务的地址注册中心，类似于zookeeper�
 
 ![img](../../img/blog/k8s/4.png)
 
-1. API：DNS是依靠DNS插件进行的，相当于额外的运维开销，所以考虑直接通过kubernetes的client来获取endpoint。事实上，通过访问kubernetes的API server接口是可以直接获取某个servie背后的endpoint列表，同时可以监听其地址列表的变化。从而实现Dubbo/HSF所推荐的软负载发现策略。具体可以参考代码：
+2. API：DNS是依靠DNS插件进行的，相当于额外的运维开销，所以考虑直接通过kubernetes的client来获取endpoint。事实上，通过访问kubernetes的API server接口是可以直接获取某个servie背后的endpoint列表，同时可以监听其地址列表的变化。从而实现Dubbo/HSF所推荐的软负载发现策略。具体可以参考代码：
 
 以上两种思路都需要考虑以下两点
 
@@ -65,21 +65,21 @@ kubernetes是天然可作为微服务的地址注册中心，类似于zookeeper�
 
 ![img](../../img/blog/k8s/5.png)
 
-1. 点击管理进行创建好的仓库，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。
+2. 点击管理进行创建好的仓库，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。
 
 ![img](../../img/blog/k8s/6.png)
 
-1. 切换到企业级分布式应用服务（EDAS）产品，在资源管理 - 》集群 下创建kubernetes集群并绑定ECS，如下图.
+3. 切换到企业级分布式应用服务（EDAS）产品，在资源管理 - 》集群 下创建kubernetes集群并绑定ECS，如下图.
 
 ![img](../../img/blog/k8s/7.png)
 
-1. 应用管理 -》创建应用，类型为kubernetes应用 并且指定在容器镜像服务中的镜像。如下图。
+4. 应用管理 -》创建应用，类型为kubernetes应用 并且指定在容器镜像服务中的镜像。如下图。
 
 ![img](../../img/blog/k8s/8.png)
 
 ![img](../../img/blog/k8s/9.png)
 
-1. 创建完成后，进行应用部署。如下图
+5. 创建完成后，进行应用部署。如下图
 
 ![img](../../img/blog/k8s/10.png)
 
