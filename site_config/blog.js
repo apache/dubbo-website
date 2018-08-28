@@ -150,6 +150,13 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: '以Dubbo为例，聊聊如何向开源项目做贡献',
+            author: '@徐靖峰',
+            dateStr: 'August 28th, 2018',
+            desc: '开源从来不是高级开发者的专属词汇',
+            link: '/zh-cn/blog/dubbo-contribue-to-opensource.html',
+        },
+        {
             title: 'Spring应用快速集成Dubbo + Hystrix',
             author: '@hengyunabc',
             dateStr: 'August 10th, 2018',
