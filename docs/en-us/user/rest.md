@@ -654,8 +654,6 @@ Let the Provider implementer think about the service features and service qualit
 
 > Note: If dubbo REST service is released to non-dubbo clients, the configuration on `<dubbo:service/>` is completely invalid because the client is not under dubbo control.
 
-Part 1
-Part 2
 ### GZIP data compresssion
 
 Dubbo RESTful Remoting supports the use of Gzip to compress request and response data to reduce network transmission time and bandwidth consumption, but this will also increase CPU overhead.
