@@ -711,7 +711,7 @@ public class GZIPWriterInterceptor implements WriterInterceptor {
 <dubbo:protocol name="rest" port="8888" extension="xxx.TraceInterceptor, xxx.TraceFilter"/>
 ```
 
-在此，我们可以将Filter、Interceptor和DynamicFuture这三种类型的对象都添加到extension属性上，多个之间用逗号分隔。（DynamicFuture是另一个接口，可以方便我们更动态的启用Filter和Interceptor，感兴趣请自行google。）
+在此，我们可以将Filter、Interceptor和DynamicFuture这三种类型的对象都添加到`extension`属性上，多个之间用逗号分隔。（DynamicFuture是另一个接口，可以方便我们更动态的启用Filter和Interceptor，感兴趣请自行google。）
 
 当然，dubbo自身也支持Filter的概念，但我们这里讨论的Filter和Interceptor更加接近协议实现的底层，相比dubbo的filter，可以做更底层的定制化。
 
@@ -769,7 +769,7 @@ Dubbo rest支持输出所有HTTP请求/响应中的header字段和body消息体�
 <dubbo:protocol name="rest" port="8888" extension="com.alibaba.dubbo.rpc.protocol.rest.support.LoggingFilter"/>
 ```
 
-然后配置在logging配置中至少为com.alibaba.dubbo.rpc.protocol.rest.support打开INFO级别日志输出，例如，在log4j.xml中配置：
+**然后在logging配置中至少为com.alibaba.dubbo.rpc.protocol.rest.support打开INFO级别日志输出**，例如，在log4j.xml中配置：
 
 ```xml
 <logger name="com.alibaba.dubbo.rpc.protocol.rest.support">
@@ -872,7 +872,7 @@ public class MyValidationExceptionMapper extends RpcExceptionMapper {
 
 Dubbo的REST调用和dubbo中其它某些RPC不同的是，需要在服务代码中添加JAX-RS的annotation（以及JAXB、Jackson的annotation），如果你觉得这些annotation一定程度“污染”了你的服务代码，你可以考虑编写额外的Facade和DTO类，在Facade和DTO上添加annotation，而Facade将调用转发给真正的服务实现类。当然事实上，直接在服务代码中添加annotation基本没有任何负面作用，而且这本身是Java EE的标准用法，另外JAX-RS和JAXB的annotation是属于java标准，比我们经常使用的spring、dubbo等等annotation更没有vendor lock-in的问题，所以一般没有必要因此而引入额外对象。
 
-另外，如果你想用前述的@Context annotation，通过方法参数注入HttpServletRequest（如`public User getUser(@PathParam("id") Long id, @Context HttpServletRequest request)`），这时候由于改变了服务的方法签名，并且HttpServletRequest是REST特有的参数，如果你的服务要支持多种RPC机制的话，则引入额外的Facade类是比较适当的。
+另外，如果你想用前述的@Context annotation，通过方法参数注入HttpServletRequest（如`public User getUser(@PathParam("id") Long id, @Context HttpServletRequest request)`），这时候由于改变了服务的方法签名，并且HttpServletRequest是REST特有的参数，**所以如果你的服务要支持多种RPC机制的话**，则引入额外的Facade类是比较适当的。
 
 当然，在没有添加REST调用之前，你的服务代码可能本身已经就充当了Facade和DTO的角色（至于为什么有些场景需要这些角色，有兴趣可参考[微观SOA：服务设计原则及其实践方式](http://www.infoq.com/cn/articles/micro-soa-1)）。这种情况下，在添加REST之后，如果你再额外添加与REST相关的Facade和DTO，就相当于对原有代码对再一次包装，即形成如下调用链：
 
