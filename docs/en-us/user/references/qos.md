@@ -30,9 +30,9 @@ or by configuring the JVM parameter
 
 to reject command sent from the remote host, allowing only the local server to run the command 
 
-### Telnet and http protocal 
+### Telnet and http protocol 
 
-The telnet module supports both http and telnet protocal for usage convenience under most situations. 
+The telnet module supports both http and telnet protocol for usage convenience under most situations. 
 
 For example, 
 
