@@ -1,46 +1,40 @@
+# Telnet (new version) Command Usage 
+dubbo 2.5.8 version reconstructs the telnet module, providing new telnet command support. 
 
-
-
-
-# 新版本 telnet 命令使用说明
-
-dubbo 2.5.8 新版本重构了 telnet 模块，提供了新的 telnet 命令支持。
-
-### 端口
-新版本的 telnet 端口 与 dubbo 协议的端口是不同的端口，默认为 `22222`，可通过配置文件`dubbo.properties` 修改:
+### Port
+the port of new version telnet is different from the port of dubbo protocol. The default port is `22222`, which can be changed by modifying configuration file `dubbo.properties`
 
 ```
 dubbo.application.qos.port=33333
 ```
 
-或者通过设置 JVM 参数:
+or by modifying the JVM parameter
 
 ```
 -Ddubbo.application.qos.port=33333
 ```
 
-### 安全
+### Safety
 
-默认情况下，dubbo 接收任何主机发起的命令，可通过配置文件`dubbo.properties` 修改:
+In default situation, dubbo can receive any command sent from the host, which can be changed by modifying the configuration file `dubbo.properties`  
 
 ```
 dubbo.application.qos.accept.foreign.ip=false
 ```
 
-或者通过设置 JVM 参数:
+or by configuring the JVM parameter
 
 ```
 -Ddubbo.application.qos.accept.foreign.ip=false
 ```
 
-拒绝远端主机发出的命令，只允许服务本机执行
+to reject command sent from the remote host, allowing only the local server to run the command 
 
+### Telnet and http protocal 
 
-### telnet 与 http 协议
+The telnet module supports both http and telnet protocal for usage convenience under most situations. 
 
-telnet 模块现在同时支持 http 协议和 telnet 协议，方便各种情况的使用
-
-示例如下：
+For example, 
 
 ```
 ➜  ~ telnet localhost 22222
@@ -89,7 +83,7 @@ As Consumer side:
 +---------------------+---+
 ```
 
-### ls 列出消费者和生产者
+### ls List consumers and providers 
 
 ```
 dubbo>ls
@@ -105,53 +99,47 @@ As Consumer side:
 +---------------------+---+
 ```
 
-列出dubbo为生产者和消费者所提供的服务
+List the services that dubbo provides to providers and consumers
 
-### Online 上线服务命令
-当使用延迟发布功能的时候(通过设置com.alibaba.dubbo.config.AbstractServiceConfig#register 为 false)，可通过Online命令上线服务
+### Online service command
 
+When using delay publishing function(com.alibaba.dubbo.config.AbstractServiceConfig#register set as false), you can use “online” command to online the service 
 
 ```
-//上线所有服务
+//online all services
 dubbo>online
 OK
 
-//根据正则，上线部分服务
+//online part of servies according to regularity.
 dubbo>online com.*
 OK
 ```
 
-常见使用场景：
+Common usage situations:
+- Because there is no JIT or the related resources warm-up, when the machine is restarted and the online QPS is relatively high , a large amount of timeout situations may occur. At this time,the problem can be solved by distributing the wholesale service and increasing the traffic gradually.
+- A machine needs to be back online after going offline due to some reasons.
 
-- 由于没有进行JIT或相关资源的预热，当重启机器且线上QPS较高时，大量超时情况可能会发生。此时，可通过分批发布任务和逐渐加大流量来解决。
-- 某台机器由于某种原因需要下线服务后，然后需要重新上线。
+### Offline service Command
 
-
-
-### Offline 下线服务命令
-
-由于故障等原因，需要临时下线服务保持现场，可以使用 Offline 下线命令。
-
+Offline command can be used if temporary offline service is needed when bug occurs. 
 
 ```
-//下线所有服务
+//offline all service 
 dubbo>offline
 OK
 
-//根据正则，下线部分服务
+//offline some services according to regular rules
 dubbo>offline com.*
 OK
 ```
 
-### help 命令
-
-
+### help command
 
 ```
-//列出所有命令
+//list all commands
 dubbo>help
 
-//列出单个命令的具体使用情况
+//list the specific use case of a command 
 dubbo>help online
 +--------------+----------------------------------------------------------------------------------+
 | COMMAND NAME | online                                                                           |
@@ -159,7 +147,5 @@ dubbo>help online
 |      EXAMPLE | online dubbo                                                                     |
 |              | online xx.xx.xxx.service                                                         |
 +--------------+----------------------------------------------------------------------------------+
-
 dubbo>
 ```
-
