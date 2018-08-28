@@ -1,5 +1,5 @@
 # Telnet (new version) Command Usage 
-dubbo 2.5.8 version reconstructs the telnet module, providing new telnet command support. 
+dubbo 2.5.8 version refactor the telnet module, providing new telnet command support. 
 
 ### Port
 the port of new version telnet is different from the port of dubbo protocol. The default port is `22222`, which can be changed by modifying configuration file `dubbo.properties`
@@ -16,7 +16,7 @@ or by modifying the JVM parameter
 
 ### Safety
 
-In default situation, dubbo can receive any command sent from the host, which can be changed by modifying the configuration file `dubbo.properties`  
+By default, dubbo can receive any command sent from the host, which can be changed by modifying the configuration file `dubbo.properties`  
 
 ```
 dubbo.application.qos.accept.foreign.ip=false
@@ -32,7 +32,7 @@ to reject command sent from the remote host, allowing only the local server to r
 
 ### Telnet and http protocol 
 
-The telnet module supports both http and telnet protocol for usage convenience under most situations. 
+The telnet module supports both http and telnet protocol, in order to facilitate the use of various situations
 
 For example, 
 
@@ -99,7 +99,7 @@ As Consumer side:
 +---------------------+---+
 ```
 
-List the services that dubbo provides to providers and consumers
+List the services of the provides and the consumers that dubbo provide
 
 ### Online service command
 
@@ -116,12 +116,12 @@ OK
 ```
 
 Common usage situations:
-- Because there is no JIT or the related resources warm-up, when the machine is restarted and the online QPS is relatively high , a large amount of timeout situations may occur. At this time,the problem can be solved by distributing the wholesale service and increasing the traffic gradually.
+- Because there is no JIT or the related resources warm-up, when the machine is restarted and the online QPS is relatively high , a large amount of timeout situations may occur. At this time,the problem can be solved by distributing the batch service and increasing the traffic gradually.
 - A machine needs to be back online after going offline due to some reasons.
 
 ### Offline service Command
 
-Offline command can be used if temporary offline service is needed when bug occurs. 
+Offline command can be used if temporary offline service is needed when fault occurs. 
 
 ```
 //offline all service 
