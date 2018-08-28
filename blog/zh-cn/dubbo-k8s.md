@@ -1,8 +1,8 @@
-## 大体目标大体上
+## 大体目标
 
-Dubbo的provider不在关心服务注册的事宜，只需要把其Dubbo服务端口打开，由kubernetes来进行服务的声明和发布；Dubbo的consumer在服务发现时直接发现kubernetes的对应服务endpoints，从而复用Dubbo已有的微服务通道能力。好处是无需依赖三方的软负载注册中心；同时无缝融入kubernetes的多租户安全体系。Demo的代码参照： https://github.com/dubbo/dubbo-kubernetes
+Dubbo的provider不再关心服务注册的事宜，只需要把其Dubbo服务端口打开，由kubernetes来进行服务的声明和发布；Dubbo的consumer在服务发现时直接发现kubernetes的对应服务endpoints，从而复用Dubbo已有的微服务通道能力。好处是无需依赖三方的软负载注册中心；同时无缝融入kubernetes的多租户安全体系。Demo的代码参照： https://github.com/dubbo/dubbo-kubernetes
 
-## 闲淡
+## 闲谈
 
 Kubernates是建立在扩展性的具备二次开发的功能层次丰富的体系化系统
 
