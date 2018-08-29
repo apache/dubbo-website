@@ -259,7 +259,7 @@ $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
   - check the version number in pom.xml are the same
-  - check there are no extra files or directories in the source package, such no empty directories or useless log files.  
+  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files.  
     `diff -r a rc_dir tag_dir`
   - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
