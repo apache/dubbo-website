@@ -217,13 +217,23 @@ https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/
 然后，开始验证环节，验证包含但不限于以下内容和形式
 
 1. Check signatures and hashes are good
+* sha512
 ```sh
-shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
-shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
-gpg2 --keyserver pgpkeys.mit.edu --recv-key 208B0AB1D63011C7
-gpg2 --verify apache-dubbo-incubating-${release_version}-source-release.zip.asc apache-dubbo-incubating-${release_version}-source-release.zip
+$ shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
+$ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 ```
-
+* gpg
+   * If it's your first time verify a release candidte, you should import public keys first.  
+   ```sh
+   $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
+   $ gpg --import KEYS # import keys
+   $ gpg —edit-key liujun
+     > trust # 输入trust子命令
+   ```
+   * Now, you can verify signature with command
+   ```
+   gpg --verify apache-dubbo-incubating-2.6.3-source-release.zip.asc apache-dubbo-incubating-2.6.3-source-release.zip
+   ```
 2. Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
 
 - Directory with 'incubating' in name
