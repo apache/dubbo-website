@@ -228,7 +228,7 @@ $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
    $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
    $ gpg --import KEYS # import keys
    $ gpg —edit-key liujun
-     > trust # 输入trust子命令
+     > trust # type trust command
    ```
    * Now, you can verify signature with command
    ```
