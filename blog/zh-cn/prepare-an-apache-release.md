@@ -224,7 +224,7 @@ gpg2 --verify apache-dubbo-incubating-${release_version}-source-release.zip.asc 
 2. Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
 
 - Directory with 'incubating' in name
-  `apache-dubbo-incubating-${release_version}-bin-release`
+  `apache-dubbo-incubating-${release_version}-source-release`
   
 - DISCLAIMER exists
 
