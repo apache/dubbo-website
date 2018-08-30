@@ -43,51 +43,50 @@ kubernetes是天然可作为微服务的地址注册中心，类似于zookeeper�
 - 每个Service都有一个唯一的名字，及对应IP。IP是kubernetes自动分配的，名字是开发者自己定义的。
 - Service的IP有几种表现形式，分别是ClusterIP，NodePort,LoadBalance,Ingress。 ClusterIP主要用于集群内通信；NodePort，Ingress，LoadBalance用于暴露服务给集群外的访问入口。
 
-乍一看，kubernetes的service都是唯一的IP，在原有的Dubbo/HSF固定思维下：Dubbo/HSF的service是有整个服务集群的IP聚合而成，貌似是有本质区别的，细想下来差别不大，因为kubernetes下的唯一IP只是一个VIP，背后挂在了多个endpoint，那才是事实上的处理节点。
-此处只讨论集群内的Dubbo服务在同一个kubernetes集群内访问；至于kubernetes外的consumer访问kubernetes内的provider，涉及到网络地址空间的问题，一般需要GateWay/loadbalance来做映射转换，不展开讨论。针对kubernetes内有两种方案可选：
+乍一看，kubernetes的service都是唯一的IP，在原有的Dubbo/HSF固定思维下：Dubbo/HSF的service是由整个服务集群的IP聚合而成，貌似是有本质区别的，细想下来差别不大，因为kubernetes下的唯一IP只是一个VIP，背后挂在了多个endpoint，那才是事实上的处理节点。此处只讨论集群内的Dubbo服务在同一个kubernetes集群内访问；至于kubernetes外的consumer访问kubernetes内的provider，涉及到网络地址空间的问题，一般需要GateWay/loadbalance来做映射转换，不展开讨论。针对kubernetes内有两种方案可选： ：
 
-1. DNS： 默认kubernetes的service是靠DNS插件(最新版推荐是coreDNS)， Dubbo上有个proposal是关于这个的。我的理解是static resolution的机制是最简单最需要支持的一种service discovery机制，具体也可以参考Envoy在此的观点，由于HSF/Dubbo一直突出其软负载的地址发现能力，反而忽略Static的策略。同时蚂蚁的SOFA一直是支持此种策略，那一个SOFA工程的工程片段做一个解释。这样做有两个好处，1）当软负载中心crash不可用造成无法获取地址列表时，有一定的机制Failover到此策略来处理一定的请求。 2）在LDC/单元化下，蚂蚁的负载中心集群是机房/区域内收敛部署的，首先保证软负载中心的LDC化了进而稳定可控，当单元需要请求中心时，此VIP的地址发现就排上用场了。 
+1. DNS： 默认kubernetes的service是靠DNS插件(最新版推荐是coreDNS)， Dubbo上有个proposal是关于这个的。我的理解是static resolution的机制是最简单最需要支持的一种service discovery机制，具体也可以参考Envoy在此的观点，由于HSF/Dubbo一直突出其软负载的地址发现能力，反而忽略Static的策略。同时蚂蚁的SOFA一直是支持此种策略，那一个SOFA工程的工程片段做一个解释。这样做有两个好处，1）当软负载中心crash不可用造成无法获取地址列表时，有一定的机制Failover到此策略来处理一定的请求。 2）在LDC/单元化下，蚂蚁的负载中心集群是机房/区域内收敛部署的，首先保证软负载中心的LDC化了进而稳定可控，当单元需要请求中心时，此VIP的地址发现就排上用场了。
 
-![img](../../img/blog/k8s/4.png)
+![img](https://img.alicdn.com/tfs/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png)
 
 2. API：DNS是依靠DNS插件进行的，相当于额外的运维开销，所以考虑直接通过kubernetes的client来获取endpoint。事实上，通过访问kubernetes的API server接口是可以直接获取某个servie背后的endpoint列表，同时可以监听其地址列表的变化。从而实现Dubbo/HSF所推荐的软负载发现策略。具体可以参考代码：
 
-以上两种思路都需要考虑以下两点
+以上两种思路都需要考虑以下两点:
 
-1. kubernetes和Dubbo对于service的名字是映射一致的。Dubbo的服务是由serviename，group，version三个来确定其唯一性，而且servicename一般其服务接口的包名称，比较长。需要映射kubernetes的servie名与dubbo的服务名。要么是像SOFA那样增加一个属性来进行定义，这个是改造大点，但最合理；要么是通过固定规则来引用部署的环境变量，可用于快速验证。
-2. 端口问题。默认Pod与Pod的网络互通算是解决了。需要验证。
+1. kubernetes和Dubbo对于service的名字是映射一致的。Dubbo的服务是由serviename，group，version三个来确定其唯一性，而且servicename一般其服务接口的包名称，比较长。需要映射kubernetes的servie名与dubbo的服务名。要么是像SOFA那样增加一个属性来进行定义，这是个大的改动，但最合理；要么是通过固定规则来引用部署的环境变量，可用于快速验证。
+2. 端口问题：默认Pod与Pod的网络互通算是解决了，需要验证。
+
+
 
 ## Demo验证
 
 下面通过阿里云的容器镜像服务和EDAS中的kubernetes服务来做一次Demo部署。访问阿里云-》容器镜像服务。
 
-1.  创建镜像仓库并绑定github代码库。如下图
+1. 创建镜像仓库并绑定github代码库。如下图
 
-![img](../../img/blog/k8s/5.png)
+![img](https://img.alicdn.com/tfs/TB1m.tEtrorBKNjSZFjXXc_SpXa-1892-870.png)
 
-2. 点击管理进行创建好的仓库，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。
+2. 点击管理***进行创建好的仓库***，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。
 
-![img](../../img/blog/k8s/6.png)
+![img](https://img.alicdn.com/tfs/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png)
 
 3. 切换到企业级分布式应用服务（EDAS）产品，在资源管理 - 》集群 下创建kubernetes集群并绑定ECS，如下图.
 
-![img](../../img/blog/k8s/7.png)
+![img](https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
 
-4. 应用管理 -》创建应用，类型为kubernetes应用 并且指定在容器镜像服务中的镜像。如下图。
+4. 应用管理 -》创建应用，***类型为kubernetes应用*** 并且指定在容器镜像服务中的镜像。如下图。
 
-![img](../../img/blog/k8s/8.png)
+![img](https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
 
-![img](../../img/blog/k8s/9.png)
+![](https://img.alicdn.com/tfs/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
 
 5. 创建完成后，进行应用部署。如下图
 
-![img](../../img/blog/k8s/10.png)
+![](https://img.alicdn.com/tfs/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
 
+- 补充应用名不能有大写字母，全部小写，否则有部署失败的问题。
 
-
-- 补充应用名不能有大写字母，是要小写，否则有部署失败的问题。
-
-- 在创建应用时，选中镜像后，下一步的按钮无法点击，需要点击选择继续。
+- 在创建应用时，选中镜像后，下一步的按钮无法点击，需要点击选择来继续。
 
 - EDAS有两套独立的kubernetes服务，一套是基于阿里云的容器服务，一套是Lark自己搞的。本人体验的是后者。
 
