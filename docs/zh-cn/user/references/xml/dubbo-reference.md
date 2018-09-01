@@ -74,4 +74,4 @@ table tr:hover {
 | listener | invoker.listener | string | 可选 | default | 性能调优 | 服务消费方引用服务监听器名称，多个名称用逗号分隔 | 2.0.5以上版本  |
 | layer | layer | string | 可选 | | 服务治理 | 服务调用者所在的分层。如：biz、dao、intl:web、china:acton。 | 2.0.7以上版本  |
 | init | init | boolean | 可选 | false | 性能调优 | 是否在afterPropertiesSet()时饥饿初始化引用，否则等到有人注入或引用该实例时再初始化。 | 2.0.10以上版本  |
-| protocol | protocol | string | 可选 | | 服力治理 | 只调用指定协议的服务提供方，其它协议忽略。 | 2.2.0以上版本 |
+| protocol | protocol | string | 可选 | | 服务治理 | 只调用指定协议的服务提供方，其它协议忽略。 | 2.2.0以上版本 |
