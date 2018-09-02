@@ -12,7 +12,7 @@
 	<link rel="stylesheet" href="/build/blogDetail.css" />
 </head>
 <body>
-	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1869382422"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>理解Apache发布的内容和流程</h2>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-639324997"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>理解Apache发布的内容和流程</h2>
 <p>总的来说，Source Release是Apache关注的重点，也是发布的必须内容；而Binary Release是可选项，Dubbo可以选择是否发布二进制包到Apache仓库或者发布到Maven中央仓库。</p>
 <p>请参考以下链接，找到更多关于ASF的发布指南:</p>
 <ul>
@@ -141,10 +141,10 @@ default-key 28681CB1
 <h2>打包&amp;上传</h2>
 <ol>
 <li>
-<p>从主干分支拉取新分支作为发布分支，如现在要发布2.6.4版本，则从2.6.x拉出新分支2.6.4-release，此后2.6.4 Release Candidates涉及的修改及打标签等都在2.6.4-release分支进行，最终发布完成后合入主干分支。</p>
+<p>从主干分支拉取新分支作为发布分支，如现在要发布${release_version}版本，则从2.6.x拉出新分支${release_version}-release，此后${release_version} Release Candidates涉及的修改及打标签等都在${release_version}-release分支进行，最终发布完成后合入主干分支。</p>
 </li>
 <li>
-<p>首先，在2.6.4-release分支验证maven组件打包、source源码打包、签名等是否都正常工作</p>
+<p>首先，在${release_version}-release分支验证maven组件打包、source源码打包、签名等是否都正常工作</p>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn clean install -Papache-release</span>
 <span class="hljs-meta">$</span><span class="bash"> mvn deploy</span>
 <span class="hljs-meta">#</span><span class="bash"> 将snapshot包推送到maven中央仓库，处于staging状态</span>
@@ -162,7 +162,7 @@ default-key 28681CB1
 </ul>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:clean</span>
 <span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Papache-release -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
-<span class="hljs-meta">#</span><span class="bash"> 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为2.6.4-SNAPSHOT，并将修改推送到github仓库</span>
+<span class="hljs-meta">#</span><span class="bash"> 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为<span class="hljs-variable">${release_version}</span>-SNAPSHOT，并将修改推送到github仓库</span>
 </code></pre>
 <ul>
 <li>执行release:perform，做正式发布</li>
@@ -184,54 +184,74 @@ default-key 28681CB1
 </code></pre>
 </li>
 <li>
-<p>当前发布版本为2.6.4，新建目录</p>
+<p>当前发布版本为${release_version}，新建目录</p>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> ~/apache/incubator/dubbo <span class="hljs-comment"># dubbo svn根目录</span></span>
-<span class="hljs-meta">$</span><span class="bash"> mkdir 2.6.4</span>
+<span class="hljs-meta">$</span><span class="bash"> mkdir <span class="hljs-variable">${release_version}</span></span>
 </code></pre>
 </li>
 <li>
 <p>添加public key到<a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS">KEYS</a>文件。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性</p>
 </li>
 <li>
-<p>拷贝Dubbo根目录下的source.zip包到svn本地仓库dubbo/2.6.4</p>
+<p>拷贝Dubbo根目录下的source.zip包到svn本地仓库dubbo/${release_version}</p>
 </li>
 <li>
 <p>生成sha512签名</p>
-<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> shasum -a 512 dubbo-incubating-2.6.4-source-release.zip &gt;&gt; dubbo-incubating-2.6.4-source-release.zip.sha512</span>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> shasum -a 512 apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip &gt;&gt; apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512</span>
 </code></pre>
 </li>
 <li>
 <p>如果有binary release要同时发布</p>
 <pre><code class="language-shell"><span class="hljs-meta">#</span><span class="bash"> 到dubbo项目distribution的module下，执行：</span>
 <span class="hljs-meta">$</span><span class="bash"> mvn install</span>
-<span class="hljs-meta">#</span><span class="bash"> target目录下，拷贝bin-release.zip以及bin-release.zip.asc到svn本地仓库dubbo/2.6.4</span>
+<span class="hljs-meta">#</span><span class="bash"> target目录下，拷贝bin-release.zip以及bin-release.zip.asc到svn本地仓库dubbo/<span class="hljs-variable">${release_version}</span></span>
 <span class="hljs-meta">#</span><span class="bash"> 参考第6步，生成sha512签名</span>
 </code></pre>
 </li>
 <li>
 <p>提交到Apache svn</p>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> svn status</span>
-<span class="hljs-meta">$</span><span class="bash"> svn commit -m <span class="hljs-string">'prepare for 2.6.4 RC1'</span></span>
+<span class="hljs-meta">$</span><span class="bash"> svn commit -m <span class="hljs-string">'prepare for ${release_version} RC1'</span></span>
 </code></pre>
 </li>
 </ol>
 <h2>验证Release Candidates</h2>
-<p>验证环节包含但不限于以下内容和形式：</p>
+<p>首先，从以下地址下载要发布的Release Candidate到本地环境：
+<a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo/$%7Brelease_version%7D/">https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/</a></p>
+<p>然后，开始验证环节，验证包含但不限于以下内容和形式</p>
 <ol>
 <li>Check signatures and hashes are good</li>
 </ol>
-<pre><code class="language-sh">shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512
-shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-bin-release.zip.sha512
-gpg2 --keyserver pgpkeys.mit.edu --recv-key 208B0AB1D63011C7
-gpg2 --verify apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.asc apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip
+<ul>
+<li>sha512</li>
+</ul>
+<pre><code class="language-sh">$ shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512
+$ shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-bin-release.zip.sha512
 </code></pre>
+<ul>
+<li>gpg
+<ul>
+<li>If it's your first time verify a release candidte, you should import public keys first.</li>
+</ul>
+<pre><code class="language-sh">$ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS &gt;&gt; KEYS <span class="hljs-comment"># download public keys to local directory</span>
+$ gpg --import KEYS <span class="hljs-comment"># import keys</span>
+$ gpg —edit-key liujun
+  &gt; trust <span class="hljs-comment"># 输入trust子命令</span>
+</code></pre>
+<ul>
+<li>Now, you can verify signature with command</li>
+</ul>
+<pre><code>gpg --verify apache-dubbo-incubating-2.6.3-source-release.zip.asc apache-dubbo-incubating-2.6.3-source-release.zip
+</code></pre>
+</li>
+</ul>
 <ol start="2">
 <li>Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:</li>
 </ol>
 <ul>
 <li>
 <p>Directory with 'incubating' in name
-<code>apache-dubbo-incubating-${release_version}-bin-release</code></p>
+<code>apache-dubbo-incubating-${release_version}-source-release</code></p>
 </li>
 <li>
 <p>DISCLAIMER exists</p>
@@ -252,14 +272,15 @@ gpg2 --verify apache-dubbo-incubating-<span class="hljs-variable">${release_vers
 <p>All unit tests can pass</p>
 <pre><code class="language-sh">mvn clean <span class="hljs-built_in">test</span> <span class="hljs-comment"># This will run all unit tests</span>
 <span class="hljs-comment"># you can also open rat and style plugin to check if every file meets requirements.</span>
-mvn clean install -Drat.skip=<span class="hljs-literal">false</span> -Dcheckstyle.skip=<span class="hljs-literal">false</span>
+mvn clean <span class="hljs-built_in">test</span> -Drat.skip=<span class="hljs-literal">false</span> -Dcheckstyle.skip=<span class="hljs-literal">false</span>
 </code></pre>
 </li>
 <li>
 <p>Release candidates match with corresponding tags, you can find tag link and hash in vote email.</p>
 <ul>
 <li>check the version number in pom.xml are the same</li>
-<li>check there are no extra files or directories in the source package, such no empty directories or useless log files.</li>
+<li>check there are no extra files or directories in the source package, for example, no empty directories or useless log files.<br>
+<code>diff -r a rc_dir tag_dir</code></li>
 <li>check the top n tag commits, dive into the related files and check if the source package has the same changes</li>
 </ul>
 </li>
@@ -268,6 +289,7 @@ mvn clean install -Drat.skip=<span class="hljs-literal">false</span> -Dcheckstyl
 <li>Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:</li>
 </ol>
 <ul>
+<li>Check signatures are good</li>
 <li>'incubating' in name</li>
 <li>LICENSE and NOTICE exists and contents are good</li>
 </ul>

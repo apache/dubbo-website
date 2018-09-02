@@ -12,7 +12,7 @@
 	<link rel="stylesheet" href="/build/blogDetail.css" />
 </head>
 <body>
-	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-570239913"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>大体目标大体上</h2>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1278218845"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>大体目标大体上</h2>
 <p>Dubbo的provider不在关心服务注册的事宜，只需要把其Dubbo服务端口打开，由kubernetes来进行服务的声明和发布；Dubbo的consumer在服务发现时直接发现kubernetes的对应服务endpoints，从而复用Dubbo已有的微服务通道能力。好处是无需依赖三方的软负载注册中心；同时无缝融入kubernetes的多租户安全体系。Demo的代码参照： <a href="https://github.com/dubbo/dubbo-kubernetes">https://github.com/dubbo/dubbo-kubernetes</a></p>
 <h2>闲淡</h2>
 <p>Kubernates是建立在扩展性的具备二次开发的功能层次丰富的体系化系统</p>
@@ -45,49 +45,48 @@ kubernetes解决得只是少部分，而像动态路由，稳定性控制（断�
 <li>每个Service都有一个唯一的名字，及对应IP。IP是kubernetes自动分配的，名字是开发者自己定义的。</li>
 <li>Service的IP有几种表现形式，分别是ClusterIP，NodePort,LoadBalance,Ingress。 ClusterIP主要用于集群内通信；NodePort，Ingress，LoadBalance用于暴露服务给集群外的访问入口。</li>
 </ul>
-<p>乍一看，kubernetes的service都是唯一的IP，在原有的Dubbo/HSF固定思维下：Dubbo/HSF的service是有整个服务集群的IP聚合而成，貌似是有本质区别的，细想下来差别不大，因为kubernetes下的唯一IP只是一个VIP，背后挂在了多个endpoint，那才是事实上的处理节点。
-此处只讨论集群内的Dubbo服务在同一个kubernetes集群内访问；至于kubernetes外的consumer访问kubernetes内的provider，涉及到网络地址空间的问题，一般需要GateWay/loadbalance来做映射转换，不展开讨论。针对kubernetes内有两种方案可选：</p>
+<p>乍一看，kubernetes的service都是唯一的IP，在原有的Dubbo/HSF固定思维下：Dubbo/HSF的service是由整个服务集群的IP聚合而成，貌似是有本质区别的，细想下来差别不大，因为kubernetes下的唯一IP只是一个VIP，背后挂在了多个endpoint，那才是事实上的处理节点。此处只讨论集群内的Dubbo服务在同一个kubernetes集群内访问；至于kubernetes外的consumer访问kubernetes内的provider，涉及到网络地址空间的问题，一般需要GateWay/loadbalance来做映射转换，不展开讨论。针对kubernetes内有两种方案可选： ：</p>
 <ol>
 <li>DNS： 默认kubernetes的service是靠DNS插件(最新版推荐是coreDNS)， Dubbo上有个proposal是关于这个的。我的理解是static resolution的机制是最简单最需要支持的一种service discovery机制，具体也可以参考Envoy在此的观点，由于HSF/Dubbo一直突出其软负载的地址发现能力，反而忽略Static的策略。同时蚂蚁的SOFA一直是支持此种策略，那一个SOFA工程的工程片段做一个解释。这样做有两个好处，1）当软负载中心crash不可用造成无法获取地址列表时，有一定的机制Failover到此策略来处理一定的请求。 2）在LDC/单元化下，蚂蚁的负载中心集群是机房/区域内收敛部署的，首先保证软负载中心的LDC化了进而稳定可控，当单元需要请求中心时，此VIP的地址发现就排上用场了。</li>
 </ol>
-<p><img src="../../img/blog/k8s/4.png" alt="img"></p>
+<p><img src="https://img.alicdn.com/tfs/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png" alt="img"></p>
 <ol start="2">
 <li>API：DNS是依靠DNS插件进行的，相当于额外的运维开销，所以考虑直接通过kubernetes的client来获取endpoint。事实上，通过访问kubernetes的API server接口是可以直接获取某个servie背后的endpoint列表，同时可以监听其地址列表的变化。从而实现Dubbo/HSF所推荐的软负载发现策略。具体可以参考代码：</li>
 </ol>
-<p>以上两种思路都需要考虑以下两点</p>
+<p>以上两种思路都需要考虑以下两点:</p>
 <ol>
-<li>kubernetes和Dubbo对于service的名字是映射一致的。Dubbo的服务是由serviename，group，version三个来确定其唯一性，而且servicename一般其服务接口的包名称，比较长。需要映射kubernetes的servie名与dubbo的服务名。要么是像SOFA那样增加一个属性来进行定义，这个是改造大点，但最合理；要么是通过固定规则来引用部署的环境变量，可用于快速验证。</li>
-<li>端口问题。默认Pod与Pod的网络互通算是解决了。需要验证。</li>
+<li>kubernetes和Dubbo对于service的名字是映射一致的。Dubbo的服务是由serviename，group，version三个来确定其唯一性，而且servicename一般其服务接口的包名称，比较长。需要映射kubernetes的servie名与dubbo的服务名。要么是像SOFA那样增加一个属性来进行定义，这是个大的改动，但最合理；要么是通过固定规则来引用部署的环境变量，可用于快速验证。</li>
+<li>端口问题：默认Pod与Pod的网络互通算是解决了，需要验证。</li>
 </ol>
 <h2>Demo验证</h2>
 <p>下面通过阿里云的容器镜像服务和EDAS中的kubernetes服务来做一次Demo部署。访问阿里云-》容器镜像服务。</p>
 <ol>
 <li>创建镜像仓库并绑定github代码库。如下图</li>
 </ol>
-<p><img src="../../img/blog/k8s/5.png" alt="img"></p>
+<p><img src="https://img.alicdn.com/tfs/TB1m.tEtrorBKNjSZFjXXc_SpXa-1892-870.png" alt="img"></p>
 <ol start="2">
-<li>点击管理进行创建好的仓库，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。</li>
+<li>点击管理***进行创建好的仓库***，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。</li>
 </ol>
-<p><img src="../../img/blog/k8s/6.png" alt="img"></p>
+<p><img src="https://img.alicdn.com/tfs/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png" alt="img"></p>
 <ol start="3">
 <li>切换到企业级分布式应用服务（EDAS）产品，在资源管理 - 》集群 下创建kubernetes集群并绑定ECS，如下图.</li>
 </ol>
-<p><img src="../../img/blog/k8s/7.png" alt="img"></p>
+<p><img src="https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png" alt="img"></p>
 <ol start="4">
-<li>应用管理 -》创建应用，类型为kubernetes应用 并且指定在容器镜像服务中的镜像。如下图。</li>
+<li>应用管理 -》创建应用，<em><strong>类型为kubernetes应用</strong></em> 并且指定在容器镜像服务中的镜像。如下图。</li>
 </ol>
-<p><img src="../../img/blog/k8s/8.png" alt="img"></p>
-<p><img src="../../img/blog/k8s/9.png" alt="img"></p>
+<p><img src="https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png" alt="img"></p>
+<p><img src="https://img.alicdn.com/tfs/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png" alt=""></p>
 <ol start="5">
 <li>创建完成后，进行应用部署。如下图</li>
 </ol>
-<p><img src="../../img/blog/k8s/10.png" alt="img"></p>
+<p><img src="https://img.alicdn.com/tfs/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png" alt=""></p>
 <ul>
 <li>
-<p>补充应用名不能有大写字母，是要小写，否则有部署失败的问题。</p>
+<p>补充应用名不能有大写字母，全部小写，否则有部署失败的问题。</p>
 </li>
 <li>
-<p>在创建应用时，选中镜像后，下一步的按钮无法点击，需要点击选择继续。</p>
+<p>在创建应用时，选中镜像后，下一步的按钮无法点击，需要点击选择来继续。</p>
 </li>
 <li>
 <p>EDAS有两套独立的kubernetes服务，一套是基于阿里云的容器服务，一套是Lark自己搞的。本人体验的是后者。</p>

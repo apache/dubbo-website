@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
         {
+            title: 'Prepare an Apache Release',
+            author: 'Jun Liu',
+            dateStr: 'Sep 2nd, 2018',
+            desc: 'How to prepare an Apache release',
+            link: '/en-us/blog/prepare-an-apache-release.html',
+        },
+        {
             title: 'How to implement a fully asynchronous calls chain based on Dubbo',
             author: '@Siqi Zhuo',
             dateStr: 'Aug 13th, 2018',
@@ -149,6 +156,13 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+        {
+            title: '如何准备Apache Release',
+            author: 'Jun Liu',
+            dateStr: 'Sep 2nd, 2018',
+            desc: '如何准备Apache Release',
+            link: '/zh-cn/blog/prepare-an-apache-release.html',
+        },
         {
             title: '以Dubbo为例，聊聊如何向开源项目做贡献',
             author: '@徐靖峰',
