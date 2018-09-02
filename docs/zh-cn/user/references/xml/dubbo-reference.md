@@ -55,7 +55,7 @@ table tr:hover {
 | timeout | timeout | long | 可选 | 缺省使用&lt;dubbo:consumer&gt;的timeout | 性能调优 | 服务方法调用超时时间(毫秒) | 1.0.5以上版本  |
 | retries | retries | int | 可选 | 缺省使用&lt;dubbo:consumer&gt;的retries | 性能调优 | 远程服务调用重试次数，不包括第一次调用，不需要重试请设为0 | 2.0.0以上版本  |
 | connections | connections | int | 可选 | 缺省使用&lt;dubbo:consumer&gt;的connections | 性能调优 | 对每个提供者的最大连接数，rmi、http、hessian等短连接协议表示限制连接数，dubbo等长连接协表示建立的长连接个数 | 2.0.0以上版本  |
-| loadbalance | loadbalance | string | 可选 | 缺省使用&lt;dubbo:consumer&gt;的loadbalance | 性能调优 | 负载均衡策略，可选值：random,roundrobin,leastactive，分别表示：随机，轮循，最少活跃调用 | 2.0.0以上版本  |
+| loadbalance | loadbalance | string | 可选 | 缺省使用&lt;dubbo:consumer&gt;的loadbalance | 性能调优 | 负载均衡策略，可选值：random,roundrobin,leastactive，分别表示：随机，轮询，最少活跃调用 | 2.0.0以上版本  |
 | async | async | boolean | 可选 | 缺省使用&lt;dubbo:consumer&gt;的async | 性能调优 | 是否异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 2.0.0以上版本  |
 | generic | generic | boolean | 可选 | 缺省使用&lt;dubbo:consumer&gt;的generic | 服务治理 | 是否缺省泛化接口，如果为泛化接口，将返回GenericService | 2.0.0以上版本  |
 | check | check | boolean | 可选 | 缺省使用&lt;dubbo:consumer&gt;的check | 服务治理 | 启动时检查提供者是否存在，true报错，false忽略 | 2.0.0以上版本  |
@@ -74,4 +74,4 @@ table tr:hover {
 | listener | invoker.listener | string | 可选 | default | 性能调优 | 服务消费方引用服务监听器名称，多个名称用逗号分隔 | 2.0.5以上版本  |
 | layer | layer | string | 可选 | | 服务治理 | 服务调用者所在的分层。如：biz、dao、intl:web、china:acton。 | 2.0.7以上版本  |
 | init | init | boolean | 可选 | false | 性能调优 | 是否在afterPropertiesSet()时饥饿初始化引用，否则等到有人注入或引用该实例时再初始化。 | 2.0.10以上版本  |
-| protocol | protocol | string | 可选 | | 服力治理 | 只调用指定协议的服务提供方，其它协议忽略。 | 2.2.0以上版本 |
+| protocol | protocol | string | 可选 | | 服务治理 | 只调用指定协议的服务提供方，其它协议忽略。 | 2.2.0以上版本 |

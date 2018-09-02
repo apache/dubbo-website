@@ -63,7 +63,7 @@
 |Broadcast Cluster | Tested | 广播调用所有提供者，逐个调用，任意一台报错则报错，通常用于更新提供方本地状态 | 速度慢，任意一台报错则报错 | 可用于生产环境 | | 
 |Feature | Maturity | Strength | Problem | Advise | User|
 |Random LoadBalance | Stable | 随机，按权重设置随机概率（推荐使用） | 在一个截面上碰撞的概率高，重试时，可能出现瞬间压力不均 | 可用于生产环境 | Alibaba|
-|RoundRobin LoadBalance | Stable | 轮循，按公约后的权重设置轮循比率 | 存在慢的机器累积请求问题，极端情况可能产生雪崩 | 可用于生产环境 |  |
+|RoundRobin LoadBalance | Stable | 轮询，按公约后的权重设置轮询比率 | 存在慢的机器累积请求问题，极端情况可能产生雪崩 | 可用于生产环境 |  |
 |LeastActive LoadBalance | Stable | 最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差，使慢的机器收到更少请求 | 不支持权重，在容量规划时，不能通过权重把压力导向一台机器压测容量 | 可用于生产环境 |  |
 |ConsistentHash LoadBalance | Stable | 一致性Hash，相同参数的请求总是发到同一提供者，当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动 | 压力分摊不均 | 可用于生产环境 |  |
 |Feature | Maturity | Strength | Problem | Advise | User|
