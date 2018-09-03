@@ -1,7 +1,7 @@
 ## <font size=6>Using Efficient Java Serialization in Dubbo (Kryo and FST)</font>
 ## Start Kryo and FST
 
-<font size=3>It is easy to use Kryo and FST. You only need to add an attribute in the XML configuration of Dubbo RPC:</font>
+<font size=3>Using Kryo and FST is very simple, just add an attribute to the dubbo RPC XML configurition:</font>
 
 ```
 <dubbo:protocol name="dubbo" serialization="kryo"/>
@@ -13,7 +13,7 @@
 
 ## Register serialized class
 
-<font size=3>To make Kryo and FST have high-performance, it is better to register those classes that need serialization to the Dubbo system. For example, we can implement the following callback interface: </font>
+<font size=3>For releasing the high ability of Kryo and FST, it's best to register the classes that need serializing into the dubbo system. For example, we can implement the following callback interface: </font>
 
 	public class SerializationOptimizerImpl implements SerializationOptimizer {
 
