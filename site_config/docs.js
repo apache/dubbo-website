@@ -608,7 +608,12 @@ export default {
                             {
                                 title: 'Tracking with Pinpoint',
                                 link: '/en-us/docs/admin/ops/pinpoint.html'
+                            },
+                            {
+                                title: 'Tracking with Skywalking',
+                                link: '/en-us/docs/admin/ops/skywalking.html'
                             }
+			    
                         ]
                     }
 
