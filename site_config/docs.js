@@ -237,6 +237,10 @@ export default {
                                 title: 'Netty4',
                                 link: '/en-us/docs/user/demos/netty4.html'
                             },
+                            {
+                                title: 'Serialization with FST and Kyro',
+                                link: '/en-us/docs/user/demos/serialization.html'
+                            }
                         ],
                     },
                     {

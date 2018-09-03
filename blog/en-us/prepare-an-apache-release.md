@@ -132,10 +132,10 @@ Mainly including the related preparation of signature utilities and Maven reposi
 
 ## Pack & Upload
 
-1. Pull the new branch from the master branch as the release branch. If you want to release the 2.6.4 version now, pull the new branch 2.6.4-release from 2.6.x. Then the 
-modifications and taggings related to 2.6.4 Release Candidates are applied to 2.6.4-release branch, and is merged into the master branch after the final release. 
+1. Pull the new branch from the master branch as the release branch. If you want to release the ${release_version} version now, pull the new branch ${release_version}-release from 2.6.x. Then the 
+modifications and taggings related to ${release_version} Release Candidates are applied to ${release_version}-release branch, and is merged into the master branch after the final release. 
 
-2. First of all, verify that the maven component packing, source packing, signature, etc are working properly on the 2.6.4-release branch.
+2. First of all, verify that the maven component packing, source packing, signature, etc are working properly on the ${release_version}-release branch.
 
    ```shell
    $ mvn clean install -Papache-release
@@ -156,7 +156,7 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
     ```shell
     $ mvn release:clean
     $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-    # After running：1. Generate source.zip; 2. Tag and push to github repository; 3. The branch version is upgraded to 2.6.4-SNAPSHOT automatically and the modifications are pushed to the github repository
+    # After running：1. Generate source.zip; 2. Tag and push to github repository; 3. The branch version is upgraded to ${release_version}-SNAPSHOT automatically and the modifications are pushed to the github repository
     ```
 
    - Run release:perform, make an offical release
@@ -178,21 +178,21 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
    ~/apache/incubator/dubbo
    ```
 
-3. The current release version is 2.6.4,new directory
+3. The current release version is ${release_version},new directory
 
    ```shell
    $ cd ~/apache/incubator/dubbo # dubbo svn root directory
-   $ mkdir 2.6.4
+   $ mkdir ${release_version}
    ```
 
 4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS) file.KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
 
-5. Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/2.6.4 
+5. Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version} 
 
 6. Generate sha512 sign
 
    ```shell
-   $ shasum -a 512 dubbo-incubating-2.6.4-source-release.zip >> dubbo-incubating-2.6.4-source-release.zip.sha512
+   $ shasum -a 512 apache-dubbo-incubating-${release_version}-source-release.zip >> apache-dubbo-incubating-${release_version}-source-release.zip.sha512
    ```
 
 7. If the binary release is accompanied with the source release
@@ -201,7 +201,7 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
    # In the module of the dubbo project distribution
    run：
    $ mvn install
-   # In target directory,copy bin-release.zip and bin-release.zip.asc to svn local repository dubbo/2.6.4
+   # In target directory,copy bin-release.zip and bin-release.zip.asc to svn local repository dubbo/${release_version}
    # Refer to the six step,generate sha512 sign
    ```
 
@@ -209,7 +209,7 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
 
    ```shell
    $ svn status
-   $ svn commit -m 'prepare for 2.6.4 RC1'
+   $ svn commit -m 'prepare for ${release_version} RC1'
    ```
 
 ## Verify Release Candidates
@@ -217,17 +217,29 @@ modifications and taggings related to 2.6.4 Release Candidates are applied to 2.
 The verification link includes but is not limited to the following contents and forms:
 
 1. Check signatures and hashes are good
+* sha512
 ```sh
-shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
-shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
-gpg2 --keyserver pgpkeys.mit.edu --recv-key 208B0AB1D63011C7
-gpg2 --verify apache-dubbo-incubating-${release_version}-source-release.zip.asc apache-dubbo-incubating-${release_version}-source-release.zip
+$ shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
+$ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 ```
+* gpg
+   * If it's your first time verify a release candidte, you should import public keys first.  
+   ```sh
+   $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
+   $ gpg --import KEYS # import keys
+   $ gpg —edit-key liujun
+     > trust # type trust command
+   ```
+   * Now, you can verify signature with command
+   ```
+   gpg --verify apache-dubbo-incubating-2.6.3-source-release.zip.asc apache-dubbo-incubating-2.6.3-source-release.zip
+   ```
+
 
 2. Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
 
 - Directory with 'incubating' in name
-  `apache-dubbo-incubating-${release_version}-bin-release`
+  `apache-dubbo-incubating-${release_version}-source-release`
   
 - DISCLAIMER exists
 
@@ -244,12 +256,17 @@ gpg2 --verify apache-dubbo-incubating-${release_version}-source-release.zip.asc 
   ```sh
   mvn clean test # This will run all unit tests
   # you can also open rat and style plugin to check if every file meets requirements.
-  mvn clean install -Drat.skip=false -Dcheckstyle.skip=false
+  mvn clean test -Drat.skip=false -Dcheckstyle.skip=false
   ```
 
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
+  - check the version number in pom.xml are the same
+  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files.  
+    `diff -r a rc_dir tag_dir`
+  - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
 3. Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:
+* Check signatures are good
 * 'incubating' in name
 * LICENSE and NOTICE exists and contents are good
 
