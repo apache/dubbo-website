@@ -1,15 +1,18 @@
 # Dubbo extensible mechanism source code analysis
 ---
 
-In the [actual implementation of the Dubbo extensibility mechanism](#/blog/introduction-to-dubbo-spi.md), we learned some concepts of the Dubbo extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance on our own. Do you think Dubbo's extension mechanism is great? Next, we will go deep into the source code of Dubbo and see what it is.
+In the [actual implementation of the Dubbo extensibility mechanism](./introduction-to-dubbo-spi.md), we learned some concepts of the Dubbo extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance on our own. Do you think Dubbo's extension mechanism is great? Next, we will go deep into the source code of Dubbo and see what it is.
 
-# ExtensionLoader
-ExtentionLoader is the core class, which is responsible for the loading and lifecycle management of extension points. Let's start with this class. There are many methods of Extension, and the common methods include:
+## ExtensionLoader
+
+`ExtentionLoader` is the core class, which is responsible for the loading and lifecycle management of extension points. Let's start with this class. There are many methods of Extension, and the common methods include:
+
 * `public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type)`
 * `public T getExtension(String name)`
 * `public T getAdaptiveExtension()`
 
 The common usages are:
+
 * `LoadBalance lb = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(loadbalanceName)`
 * `RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getAdaptiveExtension()`
 
@@ -149,7 +152,8 @@ This process is very simple. Get the extension class from the cache first, and i
 
 After the above 4 steps, Dubbo creates and initializes an extended instance. The dependencies of this instance are injected and packaged as needed. At this point, this extended instance can be used.
 
-# Auto-assembly of Dubbo SPI advanced usage
+## Auto-assembly of Dubbo SPI advanced usage
+
 The relevant code for auto-assembly is in the injectExtension method:
 
 ```java
@@ -219,11 +223,13 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
 The AdaptiveExtensionLoader class has @Adaptive annotations. As mentioned earlier, Dubbo creates an adaptive instance for each extension. If the extension class has @Adaptive annotations, it will use it as an adaptive class. If not, Dubbo will create one for us. So `ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())` will return an AdaptiveExtensionLoader instance as an adaptive extension instance. 
 The AdaptiveExtentionLoader will iterate through all the ExtensionFactory implementations and try to load the extensions. If found, return. If not, continue to find it in the next ExtensionFactory. Dubbo has two ExtensionFactory built in, which are searched from Dubbo's own extension mechanism and Spring container. Since ExtensionFactory itself is also an extension point, we can implement our own ExtensionFactory to enable automatic assembly of Dubbo to support our custom components. For example, we used Google's guice as an IoC container in our project. We can implement our own GuiceExtensionFactory to enable Dubbo to load extensions from the guice container.
 
-# AoP of Dubbo SPI advanced usage
+## AoP of Dubbo SPI advanced usage
+
 We often use AOP functionality when using Spring. Insert other logic before and after the method of the target class. For example, Spring AOP is usually used to implement logging, monitoring, and authentication, and so on. 
 Does Dubbo's extension mechanism also support similar features? The answer is yes. In Dubbo, there is a special class called the Wrapper class. It uses the wrapper class to wrap the original extension point instance through the decorator pattern, and then inserts additional logic before and after the original extension point implementation to implement AOP functionality. 
 
 ### What is the Wrapper class
+
 So what kind of class is the Wrapper class in the Dubbo extension mechanism? The Wrapper class is a class that has a replication constructor and also is a typical decorator pattern. Here's a Wrapper class:
 
 ```java
@@ -235,7 +241,9 @@ class A{
 }
 ```
 Class A has a constructor `public A(A a)`, and the argument to the constructor is A itself. Such a class can be a Wrapper class in the Dubbo extension mechanism. Such Wrapper classes in Dubbo include ProtocolFilterWrapper, ProtocolListenerWrapper, and so on. You can check the source code to deepen your understanding.
+
 ### How to configure the Wrapper class
+
 The Wipper class in Dubbo is also an extension point. Like other extension points, it is also configured in the `META-INF` folder. For example, the ProtocolFilterWrapper and ProtocolListenerWrapper in the previous example are configured in the path `dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/com.alibaba.dubbo.rpc.Protocol`:
 ```text
 filter=com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper
@@ -274,7 +282,8 @@ public class ProtocolFilterWrapper implements Protocol {
 ```
 ProtocolFilterWrapper has a constructor `public ProtocolFilterWrapper(Protocol protocol)`, and the parameter is the extension point Protocol. So it is a Wrapper class in the Dubbo extension mechanism. The ExtensionLoader will cache it. When creating Extension instances later, the ExtensionLoader use these wrapper classes to wrap the original Extension point in turn.
 
-# Extension point adaptive
+## Extension point adaptive
+
 As mentioned earlier, Dubbo needs to determine which extension to use based on method parameters at runtime. So there is an extension point adaptive instance. In fact, it is an extension point proxy that delays the selection of extensions from starting Dubbo to calling RPC. Each extension point in Dubbo has an adaptive class. If it is not explicitly provided, Dubbo will automatically create one for us. By default, Javaassist is used. 
 Let's first look at the code to create an adaptive extension class:
 

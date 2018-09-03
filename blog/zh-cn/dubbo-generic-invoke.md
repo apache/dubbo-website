@@ -9,7 +9,7 @@
 
 下面来看看消费端如何使用泛化调用进行服务调用。
 
-#### 通过 Spring XML 配置进行泛化调用
+## 通过 Spring XML 配置进行泛化调用
 
 在 Spring 配置申明 `generic="true"`，如：
 
@@ -34,7 +34,7 @@ System.out.println(name);
    2. 如果是基本类型数组，如 int[]，则可以使用 `int[].class.getName()`；
    3. 如果是 POJO，则直接使用全类名，如 `com.alibaba.dubbo.samples.generic.api.Params`。
 
-#### 通过 API 编程进行泛化调用
+## 通过 API 编程进行泛化调用
 
 ```
 ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
@@ -62,7 +62,7 @@ System.out.println(name);
 
 通过 API 的方式，不需要像 XML 的方式需要提前将服务配置好，可以动态构建 ReferenceConfig；相对 XML 来说，API 的方式更常见。
 
-#### 参数或返回值是 POJO 的场景
+## 参数或返回值是 POJO 的场景
 
 比如方法签名是 `User get(Params params);`其中 User 有 id 和 name 两个属性，Params 有 query 一个属性。
 
@@ -89,7 +89,7 @@ sample one result: {name=charles, id=1, class=com.alibaba.dubbo.samples.generic.
 
 泛接口实现方式主要用于服务端没有 API 接口的情况，参数及返回值中的所有 POJO 均用 Map 表示，通常用于框架集成，如实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求。
 
-##### 服务端实现 GenericService
+### 服务端实现 GenericService
 
 ```java
 public class GenericServiceImpl implements GenericService {
@@ -106,7 +106,7 @@ public class GenericServiceImpl implements GenericService {
 }
 ```
 
-##### 服务端暴露服务
+### 服务端暴露服务
 
 ```java
 ApplicationConfig application = new ApplicationConfig();
@@ -134,7 +134,7 @@ service2.export();
 
 同样，也可以使用 XML 配置的方式暴露服务；此时服务端是没有依赖 HiService 和 HelloService 这两个接口的。
 
-##### 消费端进行服务调用
+### 消费端进行服务调用
 
 ```java
 ApplicationConfig application = new ApplicationConfig();
@@ -166,7 +166,7 @@ System.out.println(helloService.hello("community"));
 
 到这里为止，一个简易的服务 Mock 平台就成功上线了！
 
-#### 其他
+## 其他
 
 * 本文介绍的泛化调用和泛接口实现，都是在原生的 `Dubbo` 协议之上的。在 2.6.2 版本之前，其他协议如 http/hessian 等是不支持泛化调用的，2.6.3 版本将会对这两个协议的泛化调用做支持。
 * 本文中提到的相关示例代码可以在 dubbo-samples中找到：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic

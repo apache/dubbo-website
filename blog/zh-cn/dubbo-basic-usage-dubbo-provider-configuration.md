@@ -1,18 +1,18 @@
-Dubbo基本用法-Dubbo Provider配置
+# Dubbo基本用法-Dubbo Provider配置
 ---
 
-# Dubbo基本用法
+## Dubbo基本用法
 
 本章节主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
 按照功能角度进行划分，可以分为Dubbo Provider和Dubbo Consumer。接下来章节中，分别对dubbo provider和Dubbo consumer进行讲解。
 
-## Dubbo Provider配置
+### Dubbo Provider配置
 
-### Provider 配置详解
+#### Provider 配置详解
 
 配置Dubbo Provider有4种方式：XML配置，properties方式配置，API调用方式配置，注解方式配置。
 
-#### XML配置
+##### XML配置
 
 ###### 最简单的配置的样例：
 ```
@@ -145,7 +145,7 @@ dubbo.protocol.port=28080
 1. 如果 classpath 根目录下存在多个 dubbo.properties，比如多个 jar 包中有 dubbo.properties，Dubbo 会任意加载，并打印 Error 日志，后续可能改为抛异常。 ↩
 2. 协议的 id 没配时，缺省使用协议名作为 id 
 
-#### annotation
+##### 注解配置
 
 ###### Service注解暴露服务  
 ```
@@ -194,7 +194,8 @@ public class ProviderTestApp {
 <dubbo:annotation package="com.chanshuyi.service.impl" />
 ```
 
-#### api直接触发
+##### 代码配置
+
 ```
 import com.alibaba.dubbo.rpc.config.ApplicationConfig;
 import com.alibaba.dubbo.rpc.config.RegistryConfig;
@@ -240,6 +241,7 @@ service.export();
 一般在spring应用中，不推荐使用这种方式。 具体的含义这里不做解释，可以通过github查看源码。
 
 ### Provider 接口和实现
+
 上面章节更多从配置角度出发，接下来通过一个完整的例子，来讲解下dubbo provider的完整使用。
 
 这个例子中只有一个服务UserReadService，有一个方法 getUserById。 需要将这个服务通过Dubbo暴露给远程的服务。具体的步骤如下：
@@ -278,11 +280,3 @@ public UserReadServiceImpl implements UserReadService{
 </beans>
 ```
 Dubbo配置的其他方式可以参考上一章节的相关配置，或者使用集成dubbo spring boot starter方式。
-
-
-
-
-
-
-
-

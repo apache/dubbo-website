@@ -1,13 +1,13 @@
 # Source code analysis of spring-boot+Dubbo App start and stop
 
-### Introduction
+## Introduction
 
 [Dubbo Spring Boot](https://github.com/apache/incubator-dubbo-spring-boot-project) project is dedicated to simplifying the development of the Dubbo RPC framework in the Spring Boot application. It also integrates the feature of Spring Boot:
 
 - [Autoconfigure](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (ex: Annotation driver, Autoconfigure, etc.)
 - [Production-Ready](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (ex: Security, Healthy check, Externalize configuration, etc.)
 
-### The analysis of DubboConsumer startup
+## The analysis of DubboConsumer startup
 
 Have you ever thought about this : since the `DubboConsumerDemo` application in `incubator-dubbo-spring-boot-project` has only one line of code, why not just exit directly when the `main` method is executed?
 
@@ -132,7 +132,7 @@ Since Spring-boot application enables port 8080 and 8081(management port) at the
 
 Next, let's see how this Spring-boot application exits.
 
-### The analysis of DubboConsumer exit
+## The analysis of DubboConsumer exit
 
 As mentioned in the previous description, there is a thread that checks the variable `stopAwait` continuously. So there must be a thread to modify `stopAwait` at Stop, thus break the while loop. But who is modifying this variable?
 
@@ -187,16 +187,16 @@ By reffering the Java API documentation[2], we found that ShutdownHook will be e
 
 Therefore, the normal application will execute the above ShutdownHook during the stop process (except `kill -9 $PID`). Its function is not only to close the Tomcat, but also to perform other cleanup work. It is unnecessary to go into details.
 
-### Summary
+## Summary
 
 1. During the startup of `DubboConsumer`, an independent non-daemon thread is launched to query the status of the variable continuously, thus the process can't exit.
 2. To stop the `DubboConsumer`, one should call ShutdownHook to change the variable to let the thread break the loop.
 
-### Problems
+## Problems
 
 In the example of DubboProvider, we see that Provider doesn't start Tomcat to provide HTTP service, then how does the program stays alive without exiting? We will answer this question in the next article.
 
-#### Notice
+### Notice
 
 By running the following unit test which create a thread in `Intellij IDEA` , we are surprised to find that the program exits with less than 1000s. Why?(The thread being created is a non-daemon thread)
 
