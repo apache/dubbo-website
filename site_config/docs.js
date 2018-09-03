@@ -1263,6 +1263,10 @@ export default {
                             {
                                 title: '使用Pinpoint做分布式跟踪',
                                 link: '/zh-cn/docs/admin/ops/pinpoint.html'
+                            },
+                            {
+                                title: '使用Skywalking做分布式跟踪',
+                                link: '/zh-cn/docs/admin/ops/skywalking.html'
                             }
                         ]
                     }
