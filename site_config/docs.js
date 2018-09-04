@@ -608,7 +608,12 @@ export default {
                             {
                                 title: 'Tracking with Pinpoint',
                                 link: '/en-us/docs/admin/ops/pinpoint.html'
+                            },
+                            {
+                                title: 'Tracking with Skywalking',
+                                link: '/en-us/docs/admin/ops/skywalking.html'
                             }
+			    
                         ]
                     }
 
@@ -1263,6 +1268,10 @@ export default {
                             {
                                 title: '使用Pinpoint做分布式跟踪',
                                 link: '/zh-cn/docs/admin/ops/pinpoint.html'
+                            },
+                            {
+                                title: '使用Skywalking做分布式跟踪',
+                                link: '/zh-cn/docs/admin/ops/skywalking.html'
                             }
                         ]
                     }
