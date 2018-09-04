@@ -1,3 +1,9 @@
+---
+title: 如何参与贡献Dubbo社区
+keywords: Dubbo, Apache Way
+description: 本文介绍了如何以Apache Way的方式参与Dubbo社区并做贡献
+---
+
 # 如何参与贡献Dubbo社区
 
 ![img](../../img/blog/involve-dubbo/head.jpg)

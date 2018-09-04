@@ -1,3 +1,9 @@
+---
+title: 通过QoS对服务进行动态控制
+keywords: Dubbo, qos
+description: 本文介绍了如何使用Dubbo的QoS功能对服务进行动态配置，以及相关的参数及配置方式。
+---
+
 # 通过QoS对服务进行动态控制
 
 

@@ -1,3 +1,9 @@
+---
+title: Dubbo可扩展机制实战
+keywords: Dubbo, SPI
+description: 本文介绍了Dubbo框架的核心，SPI扩展机制。
+---
+
 # Dubbo可扩展机制实战
 ---
 

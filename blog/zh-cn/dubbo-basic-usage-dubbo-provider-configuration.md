@@ -1,4 +1,10 @@
-# Dubbo基本用法-Dubbo Provider配置
+---
+title: Dubbo基础用法之Provider配置
+keywords: Dubbo, Provider, Configuration
+description: 主要讲述如何配置dubbo，按照配置方式上可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
+---
+
+# Dubbo基本用法之Provider配置
 ---
 
 ## Dubbo基本用法

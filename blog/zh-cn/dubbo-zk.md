@@ -1,3 +1,10 @@
+---
+title: 在 Dubbo 应用中使用 Zookeeper
+keywords: Dubbo, 注册中心, Zookeeper, ZK
+description: 本文介绍了 Zookeeper 的基本概念、用法，以及如何在 Dubbo 应用中使用 Zookeeper 作为注册中心。
+---
+
+
 # 在 Dubbo 应用中使用 Zookeeper
 
 ## Zookeeper 介绍

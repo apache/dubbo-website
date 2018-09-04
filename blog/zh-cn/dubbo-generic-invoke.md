@@ -1,3 +1,9 @@
+---
+title: Dubbo的泛化调用
+keywords: Dubbo, Generic invoke
+description: 本文介绍了 Dubbo 泛化调用的使用场景及相关示例
+---
+
 # Dubbo的泛化调用
 
 以下几种场景可以考虑使用泛化调用：

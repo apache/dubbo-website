@@ -1,3 +1,9 @@
+---
+title: 从跨语言调用到dubbo2.js
+keywords: Dubbo, 跨语言, Node, NodeJS, js
+description: 本文介绍了如何使用 dubbo2.js 进行跨语言的 dubbo 调用。
+---
+
 # 从跨语言调用到dubbo2.js
 
 > [dubbo2.js](https://github.com/dubbo/dubbo2.js) 是 [千米网](https://www.qianmi.com/) 贡献给 dubbo 社区的一款 nodejs dubbo 客户端，它提供了 nodejs 对原生 dubbo 协议的支持，使得 nodejs 和 java 这两种异构语言的 rpc 调用变得便捷，高效。

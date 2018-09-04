@@ -1,5 +1,9 @@
-# Dubbo可扩展机制源码解析
 ---
+title: Dubbo可扩展机制源码解析
+keywords: Dubbo, SPI, 源码分析
+---
+
+# Dubbo可扩展机制源码解析
 
 在[Dubbo可扩展机制实战](./introduction-to-dubbo-spi.md)中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。是不是觉得Dubbo的扩展机制很不错呀，接下来，我们就深入Dubbo的源码，一睹庐山真面目。
 

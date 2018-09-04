@@ -1,3 +1,9 @@
+---
+title: 以Dubbo为例，聊聊如何向开源项目做贡献
+keywords: Dubbo, opensource
+description: 本文将会以 incubator-dubbo 项目为例向你阐释，给开源项目做贡献并不是一件难事
+---
+
 # 以Dubbo为例，聊聊如何向开源项目做贡献
 ---
 

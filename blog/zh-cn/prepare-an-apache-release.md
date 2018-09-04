@@ -1,3 +1,10 @@
+---
+title: 如何准备Apache Release
+keywords: Dubbo, Apache, Release
+---
+
+# 如何准备Apache Release
+
 ## 理解Apache发布的内容和流程
 
 总的来说，Source Release是Apache关注的重点，也是发布的必须内容；而Binary Release是可选项，Dubbo可以选择是否发布二进制包到Apache仓库或者发布到Maven中央仓库。

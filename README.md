@@ -23,3 +23,16 @@ If your version of docsite is less then `1.0.0`, please upgrade to `1.0.0`.
 	* blog.js or docs.js or site.js
 3. Send a PR to asf-site branch.
 
+## SEO
+
+Make sure each .md starts with the following texts:
+
+```
+---
+title: title
+keywords: keywords1,keywords2,keywords3
+description: some description
+---
+```
+
+Refer to [this blog](blog/zh-cn/how-to-involve-dubbo-community.md)

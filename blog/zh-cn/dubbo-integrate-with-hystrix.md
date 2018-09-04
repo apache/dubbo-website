@@ -1,3 +1,9 @@
+---
+title: Spring应用快速集成Dubbo + Hystrix
+keywords: Dubbo, Spring, Hystrix
+description: 本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。
+---
+
 # Spring应用快速集成Dubbo + Hystrix
 
 ## 背景

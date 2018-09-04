@@ -1,3 +1,9 @@
+---
+title: Dubbo 关于同步/异步调用的几种方式
+keywords: Dubbo, Invoke, Async
+description: 本文介绍了Dubbo基于异步通讯机制实现的几种同步和异步调用方式。
+---
+
 # Dubbo 关于同步/异步调用的几种方式
 
 我们知道，Dubbo 缺省协议采用单一长连接，底层实现是 Netty 的 NIO 异步通讯机制；基于这种机制，Dubbo 实现了以下几种调用方式：

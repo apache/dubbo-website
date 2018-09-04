@@ -1,3 +1,9 @@
+---
+title: 第四届Dubbo开发者沙龙将于8月26日在成都举行
+keywords: Dubbo, 成都, meetup
+description: 第四届Dubbo开发者沙龙将于8月26日在成都举行。
+---
+
 第四届Dubbo开发者沙龙将于8月26日在成都举行
 ---
 

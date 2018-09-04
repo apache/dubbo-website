@@ -157,10 +157,17 @@ export default {
     postsTitle: '所有文章',
     list: [
 		{
+		    title: 'Dubbo与Kubernetes集成',
+		    author:'@kongming',
+		    dateStr: 'Sep 4th, 2018',
+		    desc: '本文主要尝试将Dubbo服务注册到Kubernetes，同时无缝融入kubernetes的多租户安全体系。',
+		    link: '/zh-cn/blog/dubbo-k8s.html',
+		},
+		{
 		    title: '如何参与贡献Dubbo开源',
 		    author:'@jerrick',
 		    dateStr: 'Sep 4th, 2018',
-		    desc: '以Apache Way的方式参与Dubbo并做贡献',
+		    desc: '本文介绍了如何以Apache Way的方式参与Dubbo社区并做贡献',
 		    link: '/zh-cn/blog/how-to-involve-dubbo-community.html',
 		},
 	    {
@@ -276,14 +283,14 @@ export default {
         link: '/zh-cn/blog/dubbo-101.html',
       },
       {
-        title: 'Dubbo基本用法-Dubbo Provider配置',
+        title: 'Dubbo基本用法之Provider配置',
         author: '@cvictory',
         dateStr: 'June 1st, 2018',
         desc: '主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。',
         link: '/zh-cn/blog/dubbo-basic-usage-dubbo-provider-configuration.html',
       },
       {
-        title: 'Spring Boot+Dubbo应用启停源码分析',
+        title: 'Spring Boot Dubbo应用启停源码分析',
         author: '@Huxing Zhang',
         dateStr: 'May 28th, 2018',
         desc: 'dubbo-spring-boot-project致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发，同时也整合了Spring Boot特性。',

@@ -1,3 +1,11 @@
+---
+title: Dubbo与Kubernetes集成
+keywords: Dubbo, Kubernetes, K8S
+description: 本文主要尝试将Dubbo服务注册到Kubernetes，同时无缝融入kubernetes的多租户安全体系。
+---
+
+# Dubbo与Kubernetes集成
+
 ## 大体目标
 
 Dubbo的provider不再关心服务注册的事宜，只需要把其Dubbo服务端口打开，由kubernetes来进行服务的声明和发布；Dubbo的consumer在服务发现时直接发现kubernetes的对应服务endpoints，从而复用Dubbo已有的微服务通道能力。好处是无需依赖三方的软负载注册中心；同时无缝融入kubernetes的多租户安全体系。Demo的代码参照： https://github.com/dubbo/dubbo-kubernetes
@@ -26,16 +34,12 @@ kubernetes解决得只是少部分，而像动态路由，稳定性控制（断�
 
 可以得出现有Dubbo集成云原生基础设施kubernetes的基础能力而并解决微服务相关核心问题也算是一种狭义上的servicemesh方案，只是是Java领域的罢了；当玩笑理解也行，哈哈。
 
-
-
 ## 思路/方案
 
 kubernetes是天然可作为微服务的地址注册中心，类似于zookeeper， 阿里巴巴内部用到的VIPserver，Configserver。 具体来说，kubernetes中的Pod是对于应用的运行实例，Pod的被调度部署/启停都会调用API-Server的服务来保持其状态到ETCD；kubernetes中的service是对应微服务的概念，定义如下
 
 
-
 > A Kubernetes Service is an abstraction layer which defines a logical set of Pods and enables external traffic exposure, load balancing and service discovery for those Pods.
-
 
 
 概括来说kubernetes service具有如下特点
@@ -55,8 +59,6 @@ kubernetes是天然可作为微服务的地址注册中心，类似于zookeeper�
 
 1. kubernetes和Dubbo对于service的名字是映射一致的。Dubbo的服务是由serviename，group，version三个来确定其唯一性，而且servicename一般其服务接口的包名称，比较长。需要映射kubernetes的servie名与dubbo的服务名。要么是像SOFA那样增加一个属性来进行定义，这是个大的改动，但最合理；要么是通过固定规则来引用部署的环境变量，可用于快速验证。
 2. 端口问题：默认Pod与Pod的网络互通算是解决了，需要验证。
-
-
 
 ## Demo验证
 
@@ -93,7 +95,5 @@ kubernetes是天然可作为微服务的地址注册中心，类似于zookeeper�
 - Docker与IDE集成的开发联调，需要考虑集成IDEA的相关插件。
 
 - 部署时总是出错，感觉kubernetes服务上哪里有问题。需要进一步排查。
-
-  ​
 
   {"kind":"Pod","namespace":"lzumwsrddf831iwarhehd14zh2-default","name":"dubbo-k8s-demo-610694273-jq238","uid":"12892e67-8bc8-11e8-b96a-00163e02c37b","apiVersion":"v1","resourceVersion":"850282769"},"reason":"FailedSync","message":"Error syncing pod","
