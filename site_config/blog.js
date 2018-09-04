@@ -156,14 +156,21 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
-	{
-	    title: '使用Skywalking追踪Dubbo服务',
-	    author:'张鑫',
-	    dateStr: 'Sep 3nd, 2018',
-	    desc: '使用Skywalking追踪Dubbo服务',
-	    link: '/zh-cn/blog/tracing-with-skywalking.html',
-	},
-	{
+		{
+		    title: '如何参与贡献Dubbo开源',
+		    author:'@jerrick',
+		    dateStr: 'Sep 4th, 2018',
+		    desc: '以Apache Way的方式参与Dubbo并做贡献',
+		    link: '/zh-cn/blog/how-to-involve-dubbo-community.html',
+		},
+	    {
+	        title: '使用Skywalking追踪Dubbo服务',
+	        author:'张鑫',
+	        dateStr: 'Sep 3nd, 2018',
+	        desc: '使用Skywalking追踪Dubbo服务',
+	        link: '/zh-cn/blog/tracing-with-skywalking.html',
+	    },
+	    {
             title: '如何准备Apache Release',
             author: 'Jun Liu',
             dateStr: 'Sep 2nd, 2018',
