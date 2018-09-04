@@ -1,4 +1,10 @@
-Dubbo Basic Usage-Dubbo Provider Configuration
+---
+title: Dubbo Basic Usage -- Dubbo Provider Configuration
+keywords: Dubbo, Provider, Configuration
+description: This article will introduce you how to config Dubbo, by XML, property files, annotations or Java code.
+---
+
+Dubbo Basic Usage -- Dubbo Provider Configuration
 ---
 
 # Dubbo Basic Usage

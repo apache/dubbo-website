@@ -1,4 +1,11 @@
-# How to implement a fully asynchronous calls chain based on Dubbo.
+---
+title: How to implement a fully asynchronous calls chain based on Dubbo
+keywords: Dubbo, asynchronous, async chain
+description: This article recalls how asynchronous call is implemented in Dubbo 2.6.x, and introduces the new way based on CompletableFuture in 2.7.0.
+---
+
+
+# How to implement a fully asynchronous calls chain based on Dubbo
 
 Implementing the full asynchronous programming based on Dubbo, which is a new feature introduced in version 2.7.0 after the enhancement of the existing asynchronous mode.This article first reviews the supported functions and existing problems of asynchronization in 2.6.x and earlier versions, and introduces the targeted enhancements based on CompletableFuture in version 2.7.0. Then, the use of enhanced asynchronous programming is elaborated through several examples. Finally, it summarizes the new problems brought by the introduction of asynchronous mode and corresponding solutions from Dubbo.By reading this article, it is easy to implement a fully asynchronous remote service call chain based on Dubbo 2.7.0+.
 

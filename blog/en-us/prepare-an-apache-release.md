@@ -1,3 +1,8 @@
+---
+title: Understanding the Apache Release Cycle
+keywords: Dubbo, Apache, Release
+---
+
 ## Understanding the Apache Release Cycle
 
 In general, Source Release is the key and the required content of Apache. But Binary Release is optional, Dubbo can choose whether to release binary packages to the Apache repository or to the Maven central repository.

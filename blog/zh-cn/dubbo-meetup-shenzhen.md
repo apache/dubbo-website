@@ -1,3 +1,9 @@
+---
+title: 第三届Dubbo开发者沙龙在深圳成功举办
+keywords: Dubbo, 深圳, meetup
+description: 第三届Dubbo开发者沙龙在深圳成功举办。
+---
+
 # 第三届Dubbo开发者沙龙在深圳成功举办
 
 

@@ -1,8 +1,16 @@
+---
+title: Implementation of cross-language calls by Dubbo2.js
+keywords: Dubbo, 跨语言, Node, NodeJS, js
+description: This article introduces how to use Dubbo.js to implement cross-language calls.
+---
 
-# Implementation of cross-language calls by dubbo2.js
+
+# Implementation of cross-language calls by Dubbo2.js
+
 > [dubbo2.js](https://github.com/dubbo/dubbo2.js) is a Dubbo client for node.js developped by [Qianmiwang](https://www.qianmi.com/). It supports Dubbo's native protocol, which makes the RPC calls between javascript and java efficient and agile. This tool has been contributed to Dubbo's community.
 
 ## Cross-language calls for micro service
+
 Nowadays, Internet architecture tends to be micro-service way. The discussions about micro-service architecture becomes the most mentioned topic in different technical conferences. In China, most of the companies, such as Qianmiwang, choose Dubbo as their micro-servie architecture solution. As most of the internet companies, Qianmiwang uses various of programming languages. Java is for most of the backend services. Each business based on these backend can choose its own programming language such as go, python and javascript. Therefore, here comes a challenge, cross language calls. Some well mentioned solutions are as follows:
 
   - Spring cloud. Spring cloud provides a set of components for micro-service development. It is based on HTTP protocol and is designed in the restful way, which makes it support cross-language calls. Other languages can call the services simply by implementing an HTTP interface.

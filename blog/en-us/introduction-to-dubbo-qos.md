@@ -1,3 +1,9 @@
+---
+title: Manipulating Services Dynamically via QoS
+keywords: Dubbo, qos
+description: This article introduces how to use Dubbo's QoS to achieve dynamic configuration.
+---
+
 # Manipulating Services Dynamically via QoS
 
 QoS (short form of **Quality of Service**), is a common terminology talking about network devices. For example, by adjusting and manipulating the weights of ports of a router dynamically via QoS, engineers could give priority to services running on these ports and make sure these services' quality and reliability.

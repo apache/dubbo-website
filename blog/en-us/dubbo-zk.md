@@ -1,3 +1,9 @@
+---
+title: Using Zookeeper in Dubbo
+keywords: Dubbo, registry center, Zookeeper, ZK
+description: This article introduces basic concepts of Zookeeper, and how to use Zookeeper as a registry center.
+---
+
 # Using Zookeeper in Dubbo
 
 ## Introduction of Zookeeper

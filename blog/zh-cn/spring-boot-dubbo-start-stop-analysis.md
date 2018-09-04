@@ -1,6 +1,7 @@
 ---
 title: Spring Boot Dubbo应用启停源码分析
 keywords: Dubbo, Spring Boot, 源码分析
+description: 本文分析 `incubator-dubbo-spring-boot-project` 中 Dubbo 启停源码的实现原理。
 ---
 
 # Spring Boot Dubbo应用启停源码分析

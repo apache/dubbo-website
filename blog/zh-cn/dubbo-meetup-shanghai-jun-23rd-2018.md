@@ -1,3 +1,9 @@
+---
+title: 第二届Dubbo开发者沙龙在上海成功举办
+keywords: Dubbo, 上海, meetup
+description: 第二届Dubbo开发者沙龙在上海成功举办。
+---
+
 # 第二届Dubbo开发者沙龙在上海成功举办
 
 

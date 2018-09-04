@@ -1,3 +1,9 @@
+---
+title: Generic invoke of Dubbo
+keywords: Dubbo, Generic invoke
+description: This article introduces you when and how to use generic invoke of Dubbo.
+---
+
 # Generic invoke of Dubbo
 
 The generic invoke could be considered to be used in the following cases:

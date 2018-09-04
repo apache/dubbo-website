@@ -1,6 +1,7 @@
 ---
 title: 使用Apache Skywalking (Incubator) 做分布式跟踪
 keywords: Dubbo, Skywalking, tracing, 分布式跟踪
+description: 本文介绍如何使用 Apache Skywalking 对 Dubbo 应用做分布式链路追踪。
 ---
 
 # 使用Apache Skywalking (Incubator) 做分布式跟踪

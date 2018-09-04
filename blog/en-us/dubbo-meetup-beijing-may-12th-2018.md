@@ -1,3 +1,9 @@
+---
+title: The first Dubbo meetup has been held in Beijing
+keywords: Dubbo, Beijing, meetup
+description: The first Dubbo meetup has been held in Beijing
+---
+
 The first Dubbo meetup has been held in Beijing
 ---
 
