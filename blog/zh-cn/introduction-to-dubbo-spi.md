@@ -1,7 +1,7 @@
-Dubbo可扩展机制实战
+# Dubbo可扩展机制实战
 ---
 
-# 1. Dubbo的扩展机制
+## 1. Dubbo的扩展机制
 在Dubbo的官网上，Dubbo描述自己是一个高性能的RPC框架。今天我想聊聊Dubbo的另一个很棒的特性, 就是它的可扩展性。
 如同罗马不是一天建成的，任何系统都一定是从小系统不断发展成为大系统的，想要从一开始就把系统设计的足够完善是不可能的，相反的，我们应该关注当下的需求，然后再不断地对系统进行迭代。在代码层面，要求我们适当的对关注点进行抽象和隔离，在软件不断添加功能和特性时，依然能保持良好的结构和可维护性，同时允许第三方开发者对其功能进行扩展。在某些时候，软件设计者对扩展性的追求甚至超过了性能。
 
@@ -11,7 +11,7 @@ Dubbo可扩展机制实战
 
 Dubbo很好的做到了上面两点。这要得益于Dubbo的微内核+插件的机制。接下来的章节中我们会慢慢揭开Dubbo扩展机制的神秘面纱。
 
-# 2. 可扩展的几种解决方案
+## 2. 可扩展的几种解决方案
 通常可扩展的实现有下面几种:
 * Factory模式
 * IoC容器
@@ -19,7 +19,7 @@ Dubbo很好的做到了上面两点。这要得益于Dubbo的微内核+插件的
 
 Dubbo作为一个框架，不希望强依赖其他的IoC容器，比如Spring，Guice。OSGI也是一个很重的实现，不适合Dubbo。最终Dubbo的实现参考了Java原生的SPI机制，但对其进行了一些扩展，以满足Dubbo的需求。
 
-# 3. Java SPI机制
+## 3. Java SPI机制
 既然Dubbo的扩展机制是基于Java原生的SPI机制，那么我们就先来了解下Java SPI吧。了解了Java的SPI，也就是对Dubbo的扩展机制有一个基本的了解。如果对Java SPI比较了解的同学，可以跳过。
 
 Java SPI(Service Provider Interface)是JDK内置的一种动态加载扩展点的实现。在ClassPath的`META-INF/services`目录下放置一个与接口同名的文本文件，文件的内容为接口的实现类，多个实现类用换行符分隔。JDK中使用`java.util.ServiceLoader`来加载具体的实现。
@@ -77,7 +77,7 @@ Save tom to Mongo
 class:testDubbo.MysqlRepository
 Save tom to Mysql
 
-# 4. Dubbo的SPI机制
+## 4. Dubbo的SPI机制
 
 Java SPI的使用很简单。也做到了基本的加载扩展点的功能。但Java SPI有以下的不足:
 * 需要遍历所有的实现，并实例化，然后我们在循环中才能找到我们需要的实现。
@@ -88,7 +88,7 @@ Java SPI的使用很简单。也做到了基本的加载扩展点的功能。但
 
 所以Java SPI应付一些简单的场景是可以的，但对于Dubbo，它的功能还是比较弱的。Dubbo对原生SPI机制进行了一些扩展。接下来，我们就更深入地了解下Dubbo的SPI机制。
 
-# 5. Dubbo扩展点机制基本概念
+## 5. Dubbo扩展点机制基本概念
 在深入学习Dubbo的扩展机制之前，我们先明确Dubbo SPI中的一些基本概念。在接下来的内容中，我们会多次用到这些术语。
 
 ### 5.1 扩展点(Extension Point)
@@ -132,7 +132,7 @@ roundrobin=com.alibaba.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance
 * `META-INF/dubbo`
 * `META-INF/services`
 
-# 6. Dubbo的LoadBalance扩展点解读
+## 6. Dubbo的LoadBalance扩展点解读
 在了解了Dubbo的一些基本概念后，让我们一起来看一个Dubbo中实际的扩展点，对这些概念有一个更直观的认识。
 
 我们选择的是Dubbo中的LoadBalance扩展点。Dubbo中的一个服务，通常有多个Provider，consumer调用服务时，需要在多个Provider中选择一个。这就是一个LoadBalance。我们一起来看看在Dubbo中，LoadBalance是如何成为一个扩展点的。
@@ -175,7 +175,7 @@ LoadBalance lb = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtens
 ```
 使用ExtensionLoader.getExtensionLoader(LoadBalance.class)方法获取一个ExtensionLoader的实例，然后调用getExtension，传入一个扩展的别名来获取对应的扩展实例。
 
-# 7. 自定义一个LoadBalance扩展
+## 7. 自定义一个LoadBalance扩展
 本节中，我们通过一个简单的例子，来自己实现一个LoadBalance，并把它集成到Dubbo中。我会列出一些关键的步骤和代码，也可以从这个地址([https://github.com/vangoleo/dubbo-spi-demo](https://github.com/vangoleo/dubbo-spi-demo))下载完整的demo。
 
 ### 7.1 实现LoadBalance接口
@@ -211,7 +211,7 @@ demo=com.dubbo.spi.demo.consumer.DemoLoadBalance
 启动Dubbo，调用一次IHelloService，可以看到控制台会输出一条`DemoLoadBalance: Select the first invoker...`日志。说明Dubbo的确是使用了我们自定义的LoadBalance。
 
 
-# 总结 
+## 总结 
 到此，我们从Java SPI开始，了解了Dubbo SPI 的基本概念，并结合了Dubbo中的LoadBalance加深了理解。最后，我们还实践了一下，创建了一个自定义LoadBalance，并集成到Dubbo中。相信通过这里理论和实践的结合，大家对Dubbo的可扩展有更深入的理解。
 总结一下，Dubbo SPI有以下的特点:
 * 对Dubbo进行扩展，不需要改动Dubbo的源码

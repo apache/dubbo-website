@@ -5,7 +5,7 @@ QoS，全称为`Quality of Service`, 是常见于网络设备中的一个术语 
 
 在Dubbo中，QoS这个概念被用于动态的对服务进行查询和控制。例如对获取当前提供和消费的所有服务，以及对服务进行动态的上下线，即从注册中心上进行注册和反注册操作。
 
-### QoS工作机制
+## QoS工作机制
 
 从Dubbo 2.5.8开始，默认引入了Qos功能，默认处于启动状态。所有的QoS功能被抽象成一个个的命令，通过执行这些命令，Qos会返回响应的结果。
 
@@ -22,7 +22,7 @@ Qos的工作机制如下图所示：
 3. 针对不同的协议进行解码，解析出需要执行的命令
 4. 执行命令并返回结果
 
-### QoS命令
+## QoS命令
 
 QoS目前支持的命令包括：
 
@@ -34,7 +34,7 @@ QoS目前支持的命令包括：
 
 下面，我们具体来操作一下如何通过用QoS对服务进行动态控制。
 
-#### 通过Telnet方式访问QoS
+### 通过Telnet方式访问QoS
 
 假设我们的Dubbo服务端已经启动，我们通过Telnet方式进行连接：
 
@@ -142,7 +142,7 @@ Connection closed by foreign host.
 
 
 
-#### 通过HTTP方式访问QOS
+### 通过HTTP方式访问QOS
 
 在上面的例子中，我们已经对`org.apache.dubbo.demo.provider.DemoService`进行了下线操作，下面，我们通过对Http方式对上面的服务进行注册操作：
 
@@ -181,7 +181,7 @@ As Consumer side:
 
 
 
-### QoS相关参数说明
+## QoS相关参数说明
 
 QoS提供了一些启动参数，来对启动进行配置，他们主要包括：
 
@@ -202,7 +202,7 @@ QoS参数可以通过如下方式进行配置
 
 其中，上述方式的优先顺序为系统属性 > dubbo.properties > XML/Spring-boot自动装配方式。
 
-#### 使用系统属性方式进行配置
+### 使用系统属性方式进行配置
 
 ```
 -Ddubbo.application.qos.enable=true
@@ -210,7 +210,7 @@ QoS参数可以通过如下方式进行配置
 -Ddubbo.application.qos.accept.foreign.ip=false
 ```
 
-#### 使用dubbo.properties文件进行配置
+### 使用dubbo.properties文件进行配置
 
 在项目的`src/main/resources`目录下添加dubbo.properties文件，内容如下:
 ```
@@ -219,7 +219,7 @@ dubbo.application.qos.port=33333
 dubbo.application.qos.accept.foreign.ip=false
 ```
 
-#### 使用XML方法进行配置
+### 使用XML方法进行配置
 
 如果要通过XML配置响应的QoS相关的参数，可以进行如下配置：
 
@@ -243,7 +243,7 @@ dubbo.application.qos.accept.foreign.ip=false
 </beans>
 ```
 
-#### 使用spring-boot自动装配方式配置
+### 使用spring-boot自动装配方式配置
 
 如果是spring-boot的应用，可以在`application.properties`或者`application.yml`上配置:
 

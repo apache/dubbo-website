@@ -1,9 +1,9 @@
 # Dubbo可扩展机制源码解析
 ---
 
-在[Dubbo可扩展机制实战](#/blog/introduction-to-dubbo-spi.md)中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。是不是觉得Dubbo的扩展机制很不错呀，接下来，我们就深入Dubbo的源码，一睹庐山真面目。
+在[Dubbo可扩展机制实战](./introduction-to-dubbo-spi.md)中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。是不是觉得Dubbo的扩展机制很不错呀，接下来，我们就深入Dubbo的源码，一睹庐山真面目。
 
-# ExtensionLoader
+## ExtensionLoader
 ExtentionLoader是最核心的类，负责扩展点的加载和生命周期管理。我们就以这个类开始吧。
 Extension的方法比较多，比较常用的方法有:
 * `public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type)`
@@ -154,7 +154,7 @@ private Map<String, Class<?>> getExtensionClasses() {
 
 经过上面的4步，Dubbo就创建并初始化了一个扩展实例。这个实例的依赖被注入了，也根据需要被包装了。到此为止，这个扩展实例就可以被使用了。
 
-# Dubbo SPI高级用法之自动装配
+## Dubbo SPI高级用法之自动装配
 自动装配的相关代码在injectExtension方法中:
 
 ```java
@@ -225,7 +225,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
 AdaptiveExtensionLoader类有@Adaptive注解。前面提到了，Dubbo会为每一个扩展创建一个自适应实例。如果扩展类上有@Adaptive，会使用该类作为自适应类。如果没有，Dubbo会为我们创建一个。所以`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())`会返回一个AdaptiveExtensionLoader实例，作为自适应扩展实例。
 AdaptiveExtentionLoader会遍历所有的ExtensionFactory实现，尝试着去加载扩展。如果找到了，返回。如果没有，在下一个ExtensionFactory中继续找。Dubbo内置了两个ExtensionFactory，分别从Dubbo自身的扩展机制和Spring容器中去寻找。由于ExtensionFactory本身也是一个扩展点，我们可以实现自己的ExtensionFactory，让Dubbo的自动装配支持我们自定义的组件。比如，我们在项目中使用了Google的guice这个IoC容器。我们可以实现自己的GuiceExtensionFactory，让Dubbo支持从guice容器中加载扩展。
 
-# Dubbo SPI高级用法之AoP
+## Dubbo SPI高级用法之AoP
 在用Spring的时候，我们经常会用到AOP功能。在目标类的方法前后插入其他逻辑。比如通常使用Spring AOP来实现日志，监控和鉴权等功能。
 Dubbo的扩展机制，是否也支持类似的功能呢？答案是yes。在Dubbo中，有一种特殊的类，被称为Wrapper类。通过装饰者模式，使用包装类包装原始的扩展点实例。在原始扩展点实现前后插入其他逻辑，实现AOP功能。
 
@@ -241,7 +241,9 @@ class A{
 }
 ```
 类A有一个构造函数`public A(A a)`，构造函数的参数是A本身。这样的类就可以成为Dubbo扩展机制中的一个Wrapper类。Dubbo中这样的Wrapper类有ProtocolFilterWrapper, ProtocolListenerWrapper等, 大家可以查看源码加深理解。
+
 ### 怎么配置Wrapper类
+
 在Dubbo中Wrapper类也是一个扩展点，和其他的扩展点一样，也是在`META-INF`文件夹中配置的。比如前面举例的ProtocolFilterWrapper和ProtocolListenerWrapper就是在路径`dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/com.alibaba.dubbo.rpc.Protocol`中配置的:
 ```text
 filter=com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper
@@ -280,7 +282,8 @@ public class ProtocolFilterWrapper implements Protocol {
 ```
 ProtocolFilterWrapper有一个构造函数`public ProtocolFilterWrapper(Protocol protocol)`，参数是扩展点Protocol，所以它是一个Dubbo扩展机制中的Wrapper类。ExtensionLoader会把它缓存起来，供以后创建Extension实例的时候，使用这些包装类依次包装原始扩展点。
 
-# 扩展点自适应
+## 扩展点自适应
+
 前面讲到过，Dubbo需要在运行时根据方法参数来决定该使用哪个扩展，所以有了扩展点自适应实例。其实是一个扩展点的代理，将扩展的选择从Dubbo启动时，延迟到RPC调用时。Dubbo中每一个扩展点都有一个自适应类，如果没有显式提供，Dubbo会自动为我们创建一个，默认使用Javaassist。
 先来看下创建自适应扩展类的代码:
 

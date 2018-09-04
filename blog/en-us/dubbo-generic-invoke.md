@@ -1,5 +1,7 @@
 # Generic invoke of Dubbo
+
 The generic invoke could be considered to be used in the following cases:
+
 - Service test platform
 - API service gateway
 
@@ -9,7 +11,7 @@ Generic invoke does not require attention on the server and can be exposed as no
 
 Next, let's take a look at how the consumer uses generic invoke for service call.
 
-### Generic invoke through Spring XML configuration
+## Generic invoke through Spring XML configuration
 
 Declare `generic="true"` in Spring configuration, such as
 
@@ -38,7 +40,7 @@ Among them,
    
    iii.	If it is a POJO, use the full class name directly, such as `com.alibaba.dubbo.samples.generic.api.Params`.
 
-### Generic invoke through API programming
+## Generic invoke through API programming
 
 ```java
 ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
@@ -66,7 +68,7 @@ System.out.println(name);
 
 Through the API, you don't need to configure the service in advance like XML. You can dynamically construct ReferenceConfig; the API is more common than XML.
 
-### The case where parameters or return values are POJOs
+## The case where parameters or return values are POJOs
 
 For example, the method signature is `User get(Params params)`, where `User` has two attributes, id and name, and `Params` has one attribute, query.
 
@@ -90,11 +92,11 @@ sample one result: {name=charles, id=1, class=com.alibaba.dubbo.samples.generic.
 Here, the Dubbo framework will automatically convert the return value from POJO to Map.
 It can be seen that the return value `user` is a HashMap, which stores three k/vs, name, id, and class.
 
-### Generic interface implementation
+## Generic interface implementation
 
 The implementation of the generic interface is mainly used when the server does not have an API interface. All POJOs in the parameters and return values are represented by Map, which is usually used for framework integration. For example, to implement a generic remote service Mock framework, all service requests can be handled by implementing the interface GenericService.
 
-#### Implementation GenericService on the server
+### Implementation GenericService on the server
 
 ```java
 public class GenericServiceImpl implements GenericService {
@@ -111,7 +113,7 @@ public class GenericServiceImpl implements GenericService {
 }
 ```
 
-#### Server exposed service
+### Server exposed service
 
 ```java
 ApplicationConfig application = new ApplicationConfig();
@@ -139,7 +141,7 @@ service2.export();
 
 Similarly, you can expose the service using XML configuration; in this case, the server does not depend on the two interfaces HiService and HelloService.
 
-#### Service invoke on the consumer
+### Service invoke on the consumer
 
 ```java
 ApplicationConfig application = new ApplicationConfig();
@@ -172,7 +174,7 @@ Similarly, the consumer can also reference the service using an XML configuratio
 So far, a simple service Mock platform has been successfully launched!
 
 
-### Others
+## Others
+
 -	The generic invoke and generic interface implementations introduced in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian don't support generic invoke. Version 2.6.3 will support the generic invoke of these two protocols.
 -	The relevant sample codes mentioned in this article can be found in dubbo-samples: https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-generic
-

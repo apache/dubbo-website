@@ -7,7 +7,7 @@
 * 参数回调
 * 事件通知
 
-### 同步调用
+## 同步调用
 
 同步调用是一种阻塞式的调用方式，即 Consumer 端代码一直阻塞等待，直到 Provider 端返回为止；
 
@@ -24,7 +24,7 @@
 
 其实，Dubbo 的底层 IO 操作都是异步的。Consumer 端发起调用后，得到一个 Future 对象。对于同步调用，业务线程通过`Future#get(timeout)`，阻塞等待 Provider 端将结果返回；`timeout`则是 Consumer 端定义的超时时间。当结果返回后，会设置到此 Future，并唤醒阻塞的业务线程；当超时时间到结果还未返回时，业务线程将会异常返回。
 
-### 异步调用
+## 异步调用
 
 基于 Dubbo 底层的异步 NIO 实现异步调用，对于 Provider 响应时间较长的场景是必须的，它能有效利用 Consumer 端的资源，相对于 Consumer 端使用多线程来说开销较小。
 
@@ -36,7 +36,7 @@ public interface AsyncService {
 }
 ```
 
-##### Consumer 配置
+### Consumer 配置
 
 ```xml
 <dubbo:reference id="asyncService" interface="com.alibaba.dubbo.samples.async.api.AsyncService">
@@ -46,7 +46,7 @@ public interface AsyncService {
 
 需要异步调用的方法，均需要使用 `<dubbo:method/>`标签进行描述。
 
-##### Consumer 端发起调用
+### Consumer 端发起调用
 
 ```java
 AsyncService service = ...;
@@ -83,11 +83,11 @@ Dubbo Consumer 端发起调用后，同时通过`RpcContext.getContext().getFutu
 
 此示例代码位于：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async
 
-### 参数回调
+## 参数回调
 
 参数回调有点类似于本地 Callback 机制，但 Callback 并不是 Dubbo 内部的类或接口，而是由 Provider 端自定义的；Dubbo 将基于长连接生成反向代理，从而实现从 Provider 端调用 Consumer 端的逻辑。
 
-##### Provider 端定义 Service 和 Callback
+### Provider 端定义 Service 和 Callback
 
 ```java
 public interface CallbackService {
@@ -99,7 +99,7 @@ public interface CallbackListener {
 }
 ```
 
-##### Provider 端 Service 实现
+#### Provider 端 Service 实现
 
 ```java
 public class CallbackServiceImpl implements CallbackService {
@@ -140,7 +140,7 @@ public class CallbackServiceImpl implements CallbackService {
 }
 ```
 
-##### Provider 端暴露服务
+#### Provider 端暴露服务
 
 ```xml
 <bean id="callbackService" class="com.alibaba.dubbo.samples.callback.impl.CallbackServiceImpl"/>
@@ -155,7 +155,7 @@ public class CallbackServiceImpl implements CallbackService {
 
 这里，Provider 需要在方法中声明哪个参数是 Callback 参数。
 
-##### Consumer 端实现 Callback 接口
+#### Consumer 端实现 Callback 接口
 
 ```java
 CallbackService callbackService = ...;
@@ -172,7 +172,7 @@ Callback 接口的实现类在 Consumer 端，当方法发生调用时，Consume
 
 这种调用方式有点像消息的发布和订阅，但又有区别。比如当 Consumer 端 完成了Callback 服务的 export 后，如果后续重启了，这时 Provider 端就会调不通；同时 Provider 端如何清理掉这个 proxy 也是一个问题。
 
-### 事件通知
+## 事件通知
 
 事件通知允许 Consumer 端在调用之前、调用之后或出现异常时，触发 `oninvoke`、`onreturn`、`onthrow` 三个事件。
 
