@@ -12,14 +12,14 @@
 	<link rel="stylesheet" href="/build/blogDetail.css" />
 </head>
 <body>
-	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-194004511"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Source code analysis of spring-boot+Dubbo App start and stop</h1>
-<h3>Introduction</h3>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="827242965"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Source code analysis of spring-boot+Dubbo App start and stop</h1>
+<h2>Introduction</h2>
 <p><a href="https://github.com/apache/incubator-dubbo-spring-boot-project">Dubbo Spring Boot</a> project is dedicated to simplifying the development of the Dubbo RPC framework in the Spring Boot application. It also integrates the feature of Spring Boot:</p>
 <ul>
 <li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure">Autoconfigure</a> (ex: Annotation driver, Autoconfigure, etc.)</li>
 <li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator">Production-Ready</a> (ex: Security, Healthy check, Externalize configuration, etc.)</li>
 </ul>
-<h3>The analysis of DubboConsumer startup</h3>
+<h2>The analysis of DubboConsumer startup</h2>
 <p>Have you ever thought about this : since the <code>DubboConsumerDemo</code> application in <code>incubator-dubbo-spring-boot-project</code> has only one line of code, why not just exit directly when the <code>main</code> method is executed?</p>
 <pre><code class="language-java"><span class="hljs-meta">@SpringBootApplication</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.boot.dubbo.demo.consumer.controller"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboConsumerDemo</span> </span>{
@@ -124,7 +124,7 @@ main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
 <p>In the await method, the current thread checks the variable <code>stopAwait</code> every 10 seconds in a while loop. It is a <code>volatile</code> variable that is used to ensure that the current thread can see the change immediately after the variable being modified by another thread. If there is no change, it will stay in the loop. This is the reason why the thread does not exit, which is also the reason that the entire Spring-boot application doesn't exit.</p>
 <p>Since Spring-boot application enables port 8080 and 8081(management port) at the same time, there are actually two Tomcats. So there are two threads named <code>container-0</code> and <code>container-1</code>.</p>
 <p>Next, let's see how this Spring-boot application exits.</p>
-<h3>The analysis of DubboConsumer exit</h3>
+<h2>The analysis of DubboConsumer exit</h2>
 <p>As mentioned in the previous description, there is a thread that checks the variable <code>stopAwait</code> continuously. So there must be a thread to modify <code>stopAwait</code> at Stop, thus break the while loop. But who is modifying this variable?</p>
 <p>By analyzing the source code, we can see that there is only one method that modifies <code>stopAwait</code> : <code>org.apache.catalina.core.StandardServer#stopAwait</code>. To figure out who is calling this method, we add a breakpoint here.</p>
 <blockquote>
@@ -172,14 +172,14 @@ run:<span class="hljs-number">929</span>, AbstractApplicationContext$<span class
 <li>Respond to external signals, such as Ctrl+C(actually sent as SIGINT signal), or <code>SIGTERM</code> signal (<code>kill $PID</code> will send <code>SIGTERM</code> signal by default)</li>
 </ol>
 <p>Therefore, the normal application will execute the above ShutdownHook during the stop process (except <code>kill -9 $PID</code>). Its function is not only to close the Tomcat, but also to perform other cleanup work. It is unnecessary to go into details.</p>
-<h3>Summary</h3>
+<h2>Summary</h2>
 <ol>
 <li>During the startup of <code>DubboConsumer</code>, an independent non-daemon thread is launched to query the status of the variable continuously, thus the process can't exit.</li>
 <li>To stop the <code>DubboConsumer</code>, one should call ShutdownHook to change the variable to let the thread break the loop.</li>
 </ol>
-<h3>Problems</h3>
+<h2>Problems</h2>
 <p>In the example of DubboProvider, we see that Provider doesn't start Tomcat to provide HTTP service, then how does the program stays alive without exiting? We will answer this question in the next article.</p>
-<h4>Notice</h4>
+<h3>Notice</h3>
 <p>By running the following unit test which create a thread in <code>Intellij IDEA</code> , we are surprised to find that the program exits with less than 1000s. Why?(The thread being created is a non-daemon thread)</p>
 <pre><code class="language-java">    <span class="hljs-meta">@Test</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{

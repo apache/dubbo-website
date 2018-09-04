@@ -12,11 +12,11 @@
 	<link rel="stylesheet" href="/build/blogDetail.css" />
 </head>
 <body>
-	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1212085058"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Dubbo extensible mechanism source code analysis</h1>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1160050139"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Dubbo extensible mechanism source code analysis</h1>
 <hr>
-<p>In the <a href="#/blog/introduction-to-dubbo-spi.md">actual implementation of the Dubbo extensibility mechanism</a>, we learned some concepts of the Dubbo extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance on our own. Do you think Dubbo's extension mechanism is great? Next, we will go deep into the source code of Dubbo and see what it is.</p>
-<h1>ExtensionLoader</h1>
-<p>ExtentionLoader is the core class, which is responsible for the loading and lifecycle management of extension points. Let's start with this class. There are many methods of Extension, and the common methods include:</p>
+<p>In the <a href="./introduction-to-dubbo-spi.md">actual implementation of the Dubbo extensibility mechanism</a>, we learned some concepts of the Dubbo extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance on our own. Do you think Dubbo's extension mechanism is great? Next, we will go deep into the source code of Dubbo and see what it is.</p>
+<h2>ExtensionLoader</h2>
+<p><code>ExtentionLoader</code> is the core class, which is responsible for the loading and lifecycle management of extension points. Let's start with this class. There are many methods of Extension, and the common methods include:</p>
 <ul>
 <li><code>public static &lt;T&gt; ExtensionLoader&lt;T&gt; getExtensionLoader(Class&lt;T&gt; type)</code></li>
 <li><code>public T getExtension(String name)</code></li>
@@ -161,7 +161,7 @@ This is a static factory method that enters an extensible interface and returns 
 <li>Extended instance is auto-wrapping. Auto-wrapping is about implementing Spring like AOP functionality. Dubbo uses it to implement some common functions internally, such as logging, monitoring, and so on. The contents of the extended instance auto-wrapper will also be explained separately later.</li>
 </ol>
 <p>After the above 4 steps, Dubbo creates and initializes an extended instance. The dependencies of this instance are injected and packaged as needed. At this point, this extended instance can be used.</p>
-<h1>Auto-assembly of Dubbo SPI advanced usage</h1>
+<h2>Auto-assembly of Dubbo SPI advanced usage</h2>
 <p>The relevant code for auto-assembly is in the injectExtension method:</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> T <span class="hljs-title">injectExtension</span><span class="hljs-params">(T instance)</span> </span>{
     <span class="hljs-keyword">for</span> (Method method : instance.getClass().getMethods()) {
@@ -222,7 +222,7 @@ This is a static factory method that enters an extensible interface and returns 
 </code></pre>
 <p>The AdaptiveExtensionLoader class has @Adaptive annotations. As mentioned earlier, Dubbo creates an adaptive instance for each extension. If the extension class has @Adaptive annotations, it will use it as an adaptive class. If not, Dubbo will create one for us. So <code>ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())</code> will return an AdaptiveExtensionLoader instance as an adaptive extension instance.
 The AdaptiveExtentionLoader will iterate through all the ExtensionFactory implementations and try to load the extensions. If found, return. If not, continue to find it in the next ExtensionFactory. Dubbo has two ExtensionFactory built in, which are searched from Dubbo's own extension mechanism and Spring container. Since ExtensionFactory itself is also an extension point, we can implement our own ExtensionFactory to enable automatic assembly of Dubbo to support our custom components. For example, we used Google's guice as an IoC container in our project. We can implement our own GuiceExtensionFactory to enable Dubbo to load extensions from the guice container.</p>
-<h1>AoP of Dubbo SPI advanced usage</h1>
+<h2>AoP of Dubbo SPI advanced usage</h2>
 <p>We often use AOP functionality when using Spring. Insert other logic before and after the method of the target class. For example, Spring AOP is usually used to implement logging, monitoring, and authentication, and so on.
 Does Dubbo's extension mechanism also support similar features? The answer is yes. In Dubbo, there is a special class called the Wrapper class. It uses the wrapper class to wrap the original extension point instance through the decorator pattern, and then inserts additional logic before and after the original extension point implementation to implement AOP functionality.</p>
 <h3>What is the Wrapper class</h3>
@@ -268,7 +268,7 @@ The code of ProtocolFilterWrapper is as follows:</p>
     }
 </code></pre>
 <p>ProtocolFilterWrapper has a constructor <code>public ProtocolFilterWrapper(Protocol protocol)</code>, and the parameter is the extension point Protocol. So it is a Wrapper class in the Dubbo extension mechanism. The ExtensionLoader will cache it. When creating Extension instances later, the ExtensionLoader use these wrapper classes to wrap the original Extension point in turn.</p>
-<h1>Extension point adaptive</h1>
+<h2>Extension point adaptive</h2>
 <p>As mentioned earlier, Dubbo needs to determine which extension to use based on method parameters at runtime. So there is an extension point adaptive instance. In fact, it is an extension point proxy that delays the selection of extensions from starting Dubbo to calling RPC. Each extension point in Dubbo has an adaptive class. If it is not explicitly provided, Dubbo will automatically create one for us. By default, Javaassist is used.
 Let's first look at the code to create an adaptive extension class:</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">getAdaptiveExtension</span><span class="hljs-params">()</span> </span>{
