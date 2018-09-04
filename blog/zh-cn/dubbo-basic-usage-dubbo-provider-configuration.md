@@ -5,7 +5,7 @@ description: 主要讲述如何配置dubbo，按照配置方式上可以分为�
 ---
 
 # Dubbo基本用法之Provider配置
----
+
 
 ## Dubbo基本用法
 

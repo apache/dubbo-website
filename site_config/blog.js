@@ -157,6 +157,13 @@ export default {
     postsTitle: '所有文章',
     list: [
 		{
+		    title: 'Dubbo 2.7.x repackage后的兼容实现方案',
+		    author:'@jerrick',
+		    dateStr: 'Sep 4th, 2018',
+		    desc: '本文简单描述了2.7.x repackage后对老版本的兼容性实现方案。',
+		    link: '/zh-cn/blog/dubbo-compatible.html',
+		},
+		{
 		    title: 'Dubbo与Kubernetes集成',
 		    author:'@kongming',
 		    dateStr: 'Sep 4th, 2018',

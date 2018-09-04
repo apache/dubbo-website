@@ -5,7 +5,6 @@ description: 本文介绍了Dubbo框架的核心，SPI扩展机制。
 ---
 
 # Dubbo可扩展机制实战
----
 
 ## 1. Dubbo的扩展机制
 在Dubbo的官网上，Dubbo描述自己是一个高性能的RPC框架。今天我想聊聊Dubbo的另一个很棒的特性, 就是它的可扩展性。
