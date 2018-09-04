@@ -11,9 +11,15 @@ If your version of docsite is less then `1.0.0`, please upgrade to `1.0.0`.
 
 1. Run `npm install docsite -g` to install the dev tool.
 2. Run `npm i` in the root directory to install the dependencies.
-3. Run `docsite start` in the root directory to start a local server, you will see the website in '127.0.0.1://8080'.
+3. Run `docsite start` in the root directory to start a local server, you will see the website in 'http://127.0.0.1:8080'.
 4. Run `docsite build` to build source code.
 5. Verify your change locally: `python -m SimpleHTTPServer 8000`
-6. Commit all the changes.
-7. Push to asf-site branch.
+
+## How to send a PR
+
+1. Do not use `git add .` to commit all the changes.
+2. Just push your changed files, such as:
+    * *.md
+	* blog.js or docs.js or site.js
+3. Send a PR to asf-site branch.
 
