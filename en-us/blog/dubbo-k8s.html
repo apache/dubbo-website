@@ -4,17 +4,17 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<meta name="keywords" content="dubbo-k8s" />
-	<meta name="description" content="dubbo-k8s" />
+	<meta name="keywords" content="Dubbo, Kubernetes, K8S" />
+	<meta name="description" content="This article will try to register Dubbo service to Kubernetes and integrate with Kubernetes&#39;s multi-tenancy security system." />
 	<!-- 网页标签标题 -->
-	<title>dubbo-k8s</title>
+	<title>Integrate Dubbo with Kubernetes</title>
 	<link rel="shortcut icon" href="/img/dubbo.ico"/>
 	<link rel="stylesheet" href="/build/blogDetail.css" />
 </head>
 <body>
-	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-1794022383"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>General goal</h1>
-<p>Dubbo's provider don't care about service registration.Open its Dubbo service port,the declaration and publishment of the service will be executed by kubernetes.
-Dubbo's consumer directly discovers the corresponding service endpoints of kubernetes during service discovery procedure, thereby reusing Dubbo's existing microservice channel capabilities.The benefit is that there is no need to rely on any third-party soft-loaded registry and it can be seamlessly integrated into the multi-tenant security system of kubernetes. Reference demo : <a href="https://github.com/dubbo/dubbo-kubernetes">https://github.com/dubbo/dubbo-kubernetes</a></p>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-1662254296"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>General goal</h1>
+<p>Dubbo's provider don't care about service registration.Open its Dubbo service port,the declaration and publishment of the service will be executed by Kubernetes.
+Dubbo's consumer directly discovers the corresponding service endpoints of Kubernetes during service discovery procedure, thereby reusing Dubbo's existing microservice channel capabilities.The benefit is that there is no need to rely on any third-party soft-loaded registry and it can be seamlessly integrated into the multi-tenant security system of Kubernetes. Reference demo : <a href="https://github.com/dubbo/dubbo-Kubernetes">https://github.com/dubbo/dubbo-ubernetes</a></p>
 <h1>Introduction</h1>
 <p>Kubernates is a hierarchical system with rich secondary development function based on the expansibility.</p>
 <ul>
@@ -102,33 +102,33 @@ Dubbo's consumer directly discovers the corresponding service endpoints of kuber
 </blockquote>
 <p>We will know the existing solution, Dubbo integrates the Clould Native Equipment - Kubernetes's basic abilities to solve the microservices's core problems, can be regarded as a Service Mesh solution in a narrow sense, but it can only be used in the Java field. You can understand the above words as a joke, haha.</p>
 <h1>T<span data-type="color" style="color:rgb(51, 51, 51)"><span data-type="background" style="background-color:rgb(255, 255, 255)">hought</span></span>/Plan</h1>
-<p>Kubernetes is a natural address registration center for microservices, similar to zookeeper, VIPserver and Configserver used internally by Alibaba. Specifically, the Pod in kubernetes is a running instance of the application. The scheduled deployment/start/stop of the Pod will call the API-Server service to maintain its state to ETCD. The service in kubernetes is coresponded to the concept of the microservices defined as follows.</p>
+<p>Kubernetes is a natural address registration center for microservices, similar to zookeeper, VIPserver and Configserver used internally by Alibaba. Specifically, the Pod in Kubernetes is a running instance of the application. The scheduled deployment/start/stop of the Pod will call the API-Server service to maintain its state to ETCD. The service in Kubernetes is coresponded to the concept of the microservices defined as follows.</p>
 <blockquote>
 <p>A Kubernetes Service is an abstraction layer which defines a logical set of Pods and enables external traffic exposure, load balancing and service discovery for those Pods.</p>
 </blockquote>
-<p>In conclusion, the kubernetes service has the following characteristics:</p>
+<p>In conclusion, the Kubernetes service has the following characteristics:</p>
 <ul>
-<li>Each Service has a unique name and corresponding IP. IP is automatically assigned by kubernetes and the name is defined by the developer.</li>
+<li>Each Service has a unique name and corresponding IP. IP is automatically assigned by Kubernetes and the name is defined by the developer.</li>
 <li>Service IP has several manifestations: ClusterIP, NodePort, LoadBalance and Ingress. ClusterIP is mainly used for intra-cluster communication; NodePort, Ingress and LoadBalance, which are used to expose services to access portals outside the cluster.</li>
 </ul>
-<p>At first sight, the service of kubernetes has its own IP, while under the original fixed mindset: Dubbo/HSF service is aggregated by the IP of the entire service cluster, that means, kubernetes and Dubbo/HSF look like something different in natural, but when carefully thinking, the difference becomes insignificant. Because the only IP under kubernetes is just a Virtural IP--VIP, behind the vip are multiple endpoints, which is the factual processing node.</p>
-<p>Here we only discuss the situation that the Dubbo service in the cluster is accessed in the same kubernetes cluster, As for the provider outside kubernetes to access the provider in kubernetes, since it involves the problem of network address space, and it usually requires GateWay/loadbalance for mapping conversion, which there not detail discussion for this case. Besides, there are two options available for kubernetes:</p>
+<p>At first sight, the service of Kubernetes has its own IP, while under the original fixed mindset: Dubbo/HSF service is aggregated by the IP of the entire service cluster, that means, Kubernetes and Dubbo/HSF look like something different in natural, but when carefully thinking, the difference becomes insignificant. Because the only IP under Kubernetes is just a Virtural IP--VIP, behind the vip are multiple endpoints, which is the factual processing node.</p>
+<p>Here we only discuss the situation that the Dubbo service in the cluster is accessed in the same Kubernetes cluster, As for the provider outside Kubernetes to access the provider in Kubernetes, since it involves the problem of network address space, and it usually requires GateWay/loadbalance for mapping conversion, which there not detail discussion for this case. Besides, there are two options available for Kubernetes:</p>
 <ol>
 <li>
-<p>DNS: The default kubernetes service is based on the DNS plugin (The latest version of the recommendation is coreDNS), one proposal on Dubbo is about this.  since HSF/Dubbo has always highlighted its soft-load address discovery capability, it ignores Static's strategy insteadily, my understanding is that as a service discovery mechanism, the static resolution mechanism is one of the simplest and most needed to support mechanism, you can also refer to Envoy's point of views. While at the same time, ant's SOFA has always supported this static strategy, it can provides an explanation for an engineering fragment of the SOFA project. There are two advantages to doing this. 1) When the soft load center crash is unavailable and the address list cannot be obtained, there is a mechanism to Failover to this policy to handle certain requests. 2) Under LDC/unitization, the ant's load center cluster is deployed in the equipment room/area. First, the LDC of the soft load center is guaranteed to be stable and controllable. When the unit needs the request center, the address of the VIP can come in handy.</p>
+<p>DNS: The default Kubernetes service is based on the DNS plugin (The latest version of the recommendation is coreDNS), one proposal on Dubbo is about this.  since HSF/Dubbo has always highlighted its soft-load address discovery capability, it ignores Static's strategy insteadily, my understanding is that as a service discovery mechanism, the static resolution mechanism is one of the simplest and most needed to support mechanism, you can also refer to Envoy's point of views. While at the same time, ant's SOFA has always supported this static strategy, it can provides an explanation for an engineering fragment of the SOFA project. There are two advantages to doing this. 1) When the soft load center crash is unavailable and the address list cannot be obtained, there is a mechanism to Failover to this policy to handle certain requests. 2) Under LDC/unitization, the ant's load center cluster is deployed in the equipment room/area. First, the LDC of the soft load center is guaranteed to be stable and controllable. When the unit needs the request center, the address of the VIP can come in handy.</p>
 <p><img src="https://img.alicdn.com/tfs/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png" alt="img"></p>
 </li>
 <li>
-<p>API：DNS relies on the DNS plugin, which will generate additional operation, so consider directly obtaining the endpoint through the client of kubernetes. In fact, by accessing the API server interface of kubernetes, you can directly obtain the list of endpoints behind a certain servie, and can also monitor the changes in its address list. Thereby implementing the soft load discovery strategy recommended by Dubbo/HSF. Refer to the code for details:</p>
+<p>API：DNS relies on the DNS plugin, which will generate additional operation, so consider directly obtaining the endpoint through the client of Kubernetes. In fact, by accessing the API server interface of Kubernetes, you can directly obtain the list of endpoints behind a certain servie, and can also monitor the changes in its address list. Thereby implementing the soft load discovery strategy recommended by Dubbo/HSF. Refer to the code for details:</p>
 </li>
 </ol>
 <p>The above two thoughts need to consider the following two points:</p>
 <ol>
-<li>Kubernetes and Dubbo are consistent with the mapping name of service. Dubbo's service is determined by serviename, group, version to determine its uniqueness, and servicename generally has a longer package name for its service interface. Need to map the servie name of kubernetes and the service name of dubbo. Either add a property like SOFA to define it. This is a big change, but it is most reasonable. Or it is a fixed rule to reference the deployed environment variables, which can be used for quick verification.</li>
+<li>Kubernetes and Dubbo are consistent with the mapping name of service. Dubbo's service is determined by serviename, group, version to determine its uniqueness, and servicename generally has a longer package name for its service interface. Need to map the servie name of Kubernetes and the service name of dubbo. Either add a property like SOFA to define it. This is a big change, but it is most reasonable. Or it is a fixed rule to reference the deployed environment variables, which can be used for quick verification.</li>
 <li>Port problem:The default Pod and Pod network interoperability is solved, need to be validated.</li>
 </ol>
 <h2>Demo Verification</h2>
-<p>The following is a demo deployment through kubernetes service in Alibaba Cloud's Container Registry and   EDAS. Visit Alibaba Cloud -》Container Registry.</p>
+<p>The following is a demo deployment through Kubernetes service in Alibaba Cloud's Container Registry and   EDAS. Visit Alibaba Cloud -》Container Registry.</p>
 <ol>
 <li>Create repo and bind the github codebase. As shown below.</li>
 </ol>
@@ -139,11 +139,11 @@ Dubbo's consumer directly discovers the corresponding service endpoints of kuber
 <p><img src="https://img.alicdn.com/tfs/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png" alt="img"></p>
 </li>
 <li>
-<p>Switch to Enterprise Distributed Application Services (EDAS) products panel, visit Resource Management -》Clusters. Create kubernetes cluster and bind ECS. As shown below.</p>
+<p>Switch to Enterprise Distributed Application Services (EDAS) products panel, visit Resource Management -&gt; Clusters. Create Kubernetes cluster and bind ECS. As shown below.</p>
 <p><img src="https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png" alt="img"></p>
 </li>
 <li>
-<p>Application Management - 》Create  application, type kubernetes application and specify the image in the container registry . As shown below.</p>
+<p>Application Management -&gt; Create  application, type Kubernetes application and specify the image in the container registry . As shown below.</p>
 <p><img src="https://img.alicdn.com/tfs/TB1_YywtDCWBKNjSZFtXXaC3FXa-1737-588.png" alt="img"></p>
 <p><img src="https://img.alicdn.com/tfs/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png" alt=""></p>
 </li>
@@ -160,13 +160,13 @@ Dubbo's consumer directly discovers the corresponding service endpoints of kuber
 <p>When creating an app, after selecting the image, the next button cannot be clicked and you need to click Choose to continue.</p>
 </li>
 <li>
-<p>EDAS has two independent kubernetes services, one based on Alibaba Cloud's container service, and one set by Lark. I experience the latter.</p>
+<p>EDAS has two independent Kubernetes services, one based on Alibaba Cloud's container service, and one set by Lark. I experience the latter.</p>
 </li>
 <li>
 <p>The development joint of Docker and IDE integration, you need to consider the relevant plug-ins for integrating IDEA.</p>
 </li>
 <li>
-<p>There is always an error in deployment, maybe there is a problem with the kubernetes service. Need further investigation.</p>
+<p>There is always an error in deployment, maybe there is a problem with the Kubernetes service. Need further investigation.</p>
 </li>
 </ul>
 <p>{&quot;kind&quot;:&quot;Pod&quot;,&quot;namespace&quot;:&quot;lzumwsrddf831iwarhehd14zh2-default&quot;,&quot;name&quot;:&quot;dubbo-k8s-demo-610694273-jq238&quot;,&quot;uid&quot;:&quot;12892e67-8bc8-11e8-b96a-00163e02c37b&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;resourceVersion&quot;:&quot;850282769&quot;},&quot;reason&quot;:&quot;FailedSync&quot;,&quot;message&quot;:&quot;Error syncing pod&quot;,&quot;</p>
