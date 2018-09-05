@@ -1,3 +1,8 @@
+---
+title: Dubbo: Several ways about synchronous/asynchronous invoke
+keywords: Dubbo, Invoke, Async
+description: This article introduces you how to use Dubbo synchronously or asynchronously.
+---
 
 # Dubbo: Several ways about synchronous/asynchronous invoke
 

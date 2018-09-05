@@ -1,20 +1,34 @@
+---
+title: Tracing Dubbo service with Apache Skywalking(incubator)
+keywords: Dubbo, Skywalking, tracing, distribute tracking
+description: This article introduces how to use Apache Skywalking to track Dubbo applications.
+---
+
 # Tracing Dubbo service with Apache Skywalking(incubator)
+
 ## Introduction to Apache Skywalking(Incubator)
+
 [Apache Skywalking(Incubator)](https://github.com/apache/incubator-skywalking)  is the APM system that it designed for micro-services architectures and cloud native architecture systems and supports distribute tracking. [Apache skywalking (incubator)](https://github.com/apache/incubator-skywalking) collects and analyzes the trace data and generates the relationship between the application and the service metric, Apache skywalking (incubating) supports multiple languages agent, for example [Java](https://github.com/apache/incubator-skywalking),[.net core](https://github.com/OpenSkywalking/skywalking-netcore),[Node.js](https://github.com/OpenSkywalking/skywalking-nodejs) and [Go](https://github.com/OpenSkywalking/skywalking-go).
 
 Currently, Skywalking has supported analysis the operation of distributed systems from 6 visual dimensions. The overview view is a global view of your applications and components, including the number of components and applications, application alarm fluctuations, slow service lists, and application throughput; The topology shows the topological relationship of the whole application; The application view represents the upstream and downstream relationship of the application from single application, TOP N services and servers, JVM, host and process info. The service view focuses on the operation of a single service portal and the upstream and downstream dependencies of this service and it helps the user to optimize and monitor a single service; the trace graph shows all the buried points of the invocation and the execution time of each burial point, and the alarm view is based on the configuration threshold for the application, server, service for real-time alarms
 
 ## Dubbo and Apache Skywalking(Incubator)
+
 ### Build the Dubbo demo  project
+
 The Dubbo demo has been uploaded to the [GitHub repository](https://github.com/SkywalkingTest/dubbo-trace-example). 
+
 #### API project
+
 Service interface definition:
 package org.apache.skywalking.demo.interfaces;
 
 public interface HelloService {
 	String sayHello(String name);
 }
+
 #### Service provider project
+
 package org.apache.skywalking.demo.provider;
 
 @Service(version = "${demo.service.version}",
@@ -29,7 +43,9 @@ public class HelloServiceImpl implements HelloService {
 	}
 
 }
+
 #### Service consumer project
+
 package org.apache.skywalking.demo.consumer;
 
 @RestController
@@ -51,12 +67,18 @@ public class ConsumerController {
 		return helloService.sayHello(name);
 	}
 }
+
 ### Deploy Apache Skywalking(incubator)
+
 [Apache skywalking (Incubator)](https://github.com/apache/incubator-skywalking) offers  two deployment modes: single-node mode and cluster mode,Here is  the single-node mode deployment step, and more about how to deploy skywalking with cluster mode, please reference [document](https://github.com/apache/incubator-skywalking/blob/master/docs/en/Deploy-backend-in-cluster-mode.md).
+
 #### Third-party components
+
 1. JDK 8+
 2. Elasticsearch 5.x
+
 #### Deployment step
+
 1. Download [Apache Skywalking Collector](http://skywalking.apache.org/downloads/)
 2. Deploy Elasticsearch service
    * Set `cluster.name` to `CollectorDBCluster`
@@ -65,6 +87,7 @@ public class ConsumerController {
 3. Unzip and start the Skywalking Collector. Run the ' bin/startup.sh ' command to start skywalking Collector 
 
 #### Deploy the demo
+
 Before you deploy the demo service, please run the following command:
 
 ```
@@ -92,12 +115,15 @@ curl http://localhost:8080/sayHello/test
 ## Skywalking scren snapshot
 
 ### Dashboard
+
 ![/admin-guide/images/skywalking-dashboard.png](../../img/blog/skywalking-dashboard.png)
 
 ### Topology
+
 ![/admin-guide/images/skywalking-topology.png](../../img/blog/skywalking-topology.png)
 
 ### Application view
+
 ![/admin-guide/images/skywalking-application.png](../../img/blog/skywalking-application.png)
 
 JVM Information
@@ -112,10 +138,12 @@ provider side
 ![/admin-guide/images/skywalking-service-provider.png](../../img/blog/skywalking-service-provider.png)
 
 ### Trace
+
 ![/admin-guide/images/skywalking-trace.png](../../img/blog/skywalking-trace.png)
 
 Span info
 ![/admin-guide/images/skywalking-span-Info.png](../../img/blog/skywalking-span-Info.png)
 
 ### Alarm view
+
 ![/admin-guide/images/skywalking-alarm.png](../../img/blog/skywalking-alarm.png)

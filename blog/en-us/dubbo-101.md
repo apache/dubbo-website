@@ -1,3 +1,9 @@
+---
+title: Your First Dubbo Demo
+keywords: Dubbo, RPC, RMI
+description: Modern distributed frameworks is similiar to RMI in terms of concepts. They both use Java interface as a service contract, archive service registry and discovery by a registry center, and Shield communication details by a proxy.
+---
+
 # Your First Dubbo Demo
 
 ## Java RMI Introduction

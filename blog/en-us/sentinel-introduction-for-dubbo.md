@@ -1,3 +1,9 @@
+---
+title: Sentinel: The flow sentinel of Dubbo services
+keywords: Dubbo, Sentinel, current limit, fuse
+description: This article introduces the Sentinel and how to integrate it with Dubbo.
+---
+
 # Sentinel: The flow sentinel of Dubbo services
 
 In large clusters there may be thousands of Dubbo service instances in production, with continuous traffic coming in. However, in distributed systems, some services may be unavailable due to various of failure such as traffic surge, high system load, and network latency. If no control actions are performed, this may cause cascading failure, affecting the availability of the service. So we need a powerful library - Sentinel, which can guarantee the stability of the service, to protect the Dubbo service.

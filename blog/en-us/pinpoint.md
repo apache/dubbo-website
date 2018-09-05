@@ -1,3 +1,9 @@
+---
+title: Tracking with Pinpoint
+keywords: Dubbo, Pinpoint, tracing
+description: This article introduces how to use Pinpoint to track Dubbo applications and monitor applications' performance.
+---
+
 # Tracking with Pinpoint
 
 After using Dubbo to serve or integrate applications, assuming that a service backstage log shows an exception and that the service is invoked by multiple applications, it is often difficult to determine which application is called, and what is the cause of the problem, so we need a set of distributed tracking systems to quickly locate the problem. Pinpoint can help us quickly locate problems (of course, there are more than one solution).

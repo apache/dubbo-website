@@ -1,3 +1,9 @@
+---
+title: Use Annotations In Dubbo
+keywords: Dubbo, Annotation, Spring
+description: This article will introduce you how to use annotations instead of XML to develop Dubbo applications, such as `@EnableDubbo`, `@Service` and `@Reference`.
+---
+
 # Use Annotations In Dubbo
 
 With the widely promotion and implementation of Microservices Architecture, the Microservices Architecture represented by Spring Boot and Spring Cloud, in Java ecosystem, introduced some brand new programming model, like:

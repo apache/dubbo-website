@@ -1,3 +1,9 @@
+---
+title: Source code analysis of spring-boot+Dubbo App start and stop
+keywords: Dubbo, Spring Boot, source code analysis
+description: This article introduces the implementation details of app start and stop in `incubator-dubbo-spring-boot-project`.
+---
+
 # Source code analysis of spring-boot+Dubbo App start and stop
 
 ## Introduction

@@ -1,6 +1,7 @@
 ---
 title: Dubbo可扩展机制源码解析
 keywords: Dubbo, SPI, 源码分析
+description: 本文介绍了SPI扩展机制的实现原理与细节。
 ---
 
 # Dubbo可扩展机制源码解析

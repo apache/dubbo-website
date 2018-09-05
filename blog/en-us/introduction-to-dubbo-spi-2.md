@@ -1,3 +1,9 @@
+---
+title: Dubbo extensible mechanism source code analysis
+keywords: Dubbo, SPI, source code analysis
+description: This article introduces the principles and details of Dubbo's SPI.
+---
+
 # Dubbo extensible mechanism source code analysis
 ---
 
