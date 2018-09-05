@@ -1,10 +1,9 @@
 
 # Quick start
 
-The most common way to configure Dubbo is to use Spring.
-If you don't want to use the Spring configuration, you can try using [API configuration](./configuration/api.md).
+The most common way to use Dubbo is to run it in Spring framework. The following content will guide you to develop a Dubbo application with Spring framework's [XML configuration](https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/xsd-configuration.html). 
 
-The following content will guide you to start dubbo using Spring configuration.
+If you don't want to rely on Spring, you can try using [API configuration](./configuration/api.md).
 
 First let's create a root directory called dubbo-demo:
 
