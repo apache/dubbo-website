@@ -14,8 +14,8 @@
 * 配置 spring 配置加载位置：
 
     ```properties
-dubbo.spring.config=classpath*:META-INF/spring/*.xml
-```
+    dubbo.spring.config=classpath*:META-INF/spring/*.xml
+    ```
 
 ### Jetty Container
 
