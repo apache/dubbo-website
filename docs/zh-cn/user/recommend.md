@@ -145,8 +145,8 @@ Dubbo 中所有的配置项都可以配置在 Spring 配置文件中，并且可
 4. 服务提供者协议 `dubbo.service.protocol`、服务的监听端口 `dubbo.service.server.port`
 
     ```xml
-<dubbo:protocol name="dubbo" port="20880" />
-```
+    <dubbo:protocol name="dubbo" port="20880" />
+    ```
     
 5. 服务线程池大小 `dubbo.service.max.thread.threads.size`
 
