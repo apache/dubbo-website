@@ -156,6 +156,13 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+        {
+            title: '遇见Dubbo',
+            author:'@carryxyh',
+            dateStr: 'Sep 7th, 2018',
+            desc: '本文记录了一个小白成长为Dubbo committer的过程',
+            link: '/zh-cn/blog/meet-dubbo.html',
+        },
 		{
 		    title: 'Dubbo 2.7.x repackage后的兼容实现方案',
 		    author:'@jerrick',
