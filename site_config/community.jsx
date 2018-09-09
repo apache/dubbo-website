@@ -611,7 +611,7 @@ export default {
         },
         {
           title: 'Cluster',
-          content: <span>Dubbo支持一下容错机制:</span>,
+          content: <span>Dubbo支持以下容错机制:</span>,
           tags: [
             {
               text: 'Fail over',
