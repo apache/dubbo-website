@@ -31,7 +31,7 @@ package com.alibaba.xxx;
  
 import com.alibaba.dubbo.rpc.Protocol;
  
-public class XxxProtocol implemenets Protocol { 
+public class XxxProtocol implements Protocol { 
     // ...
 }
 ```
@@ -57,7 +57,7 @@ package com.alibaba.xxx;
  
 import com.alibaba.dubbo.rpc.Protocol;
  
-public class XxxProtocolWrapper implemenets Protocol {
+public class XxxProtocolWrapper implements Protocol {
     Protocol impl;
  
     public XxxProtocolWrapper(Protocol protocol) { impl = protocol; }
@@ -100,7 +100,7 @@ public interface WheelMaker {
 `CarMaker`  implementation：
 
 ```java
-public class RaceCarMaker implemenets CarMaker {
+public class RaceCarMaker implements CarMaker {
     WheelMaker wheelMaker;
  
     public setWheelMaker(WheelMaker wheelMaker) {
@@ -149,7 +149,7 @@ public interface WheelMaker {
 `CarMaker`  implementation：
 
 ```java
-public class RaceCarMaker implemenets CarMaker {
+public class RaceCarMaker implements CarMaker {
     WheelMaker wheelMaker;
  
     public setWheelMaker(WheelMaker wheelMaker) {
