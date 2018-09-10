@@ -60,7 +60,7 @@ import com.alibaba.dubbo.rpc.Protocol;
 public class XxxProtocolWrapper implemenets Protocol {
     Protocol impl;
  
-    public XxxProtocol(Protocol protocol) { impl = protocol; }
+    public XxxProtocolWrapper(Protocol protocol) { impl = protocol; }
  
     //after interface method is executed，the method in extension will be executed
     public void refer() {

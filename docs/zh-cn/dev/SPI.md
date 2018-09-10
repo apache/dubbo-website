@@ -60,7 +60,7 @@ import com.alibaba.dubbo.rpc.Protocol;
 public class XxxProtocolWrapper implemenets Protocol {
     Protocol impl;
  
-    public XxxProtocol(Protocol protocol) { impl = protocol; }
+    public XxxProtocolWrapper(Protocol protocol) { impl = protocol; }
  
     // 接口方法做一个操作后，再调用extension的方法
     public void refer() {
