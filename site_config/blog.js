@@ -157,6 +157,13 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: 'Dubbo Mesh ｜ Service Mesh的实践与探索',
+            author:'@liyun',
+            dateStr: 'Sep 14th, 2018',
+            desc: '本文介绍了Dubbo在Service Mesh方向的实践与探索',
+            link: '/zh-cn/blog/dubbo-mesh-service-mesh-exploring.html',
+        },
+        {
             title: '遇见Dubbo',
             author:'@carryxyh',
             dateStr: 'Sep 7th, 2018',
