@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="Dubbo, Provider, Configuration" />
+	<meta name="description" content="This article will introduce you how to config Dubbo, by XML, property files, annotations or Java code." />
+	<!-- 网页标签标题 -->
+	<title>Dubbo Basic Usage -- Dubbo Provider Configuration</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1554307727"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>Dubbo Basic Usage -- Dubbo Provider Configuration</h2>
+<h1>Dubbo Basic Usage</h1>
+<p>This chapter mainly talking about how to configure dubbo. According to the configuration mode, it can be divided into the following mode: XML Configuration, Properties Configuration, Annotation Configuration, API Invocation Mode Configuration. And according to the function, we can divide them into Dubbo Provider and Dubbo Consumer. In the following sections, we would explain Dubbo Provider and Dubbo Consumer respectively.</p>
+<h2>Dubbo Provider Configuration</h2>
+<h3>Provider Configuration in Detail</h3>
+<p>The configuration mode of Dubbo Provider has 4 different ways: XML Configuration, Properties Configuration, API Invocation Mode Configuration and Annotation Configuration.</p>
+<h4>XML Configuration</h4>
+<h6>The simplest configuration example：</h6>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:dubbo=&quot;http://dubbo.apache.org/schema/dubbo&quot;
+    xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&quot;&gt;  
+    &lt;dubbo:application name=&quot;hello-world-app&quot; /&gt;  
+    &lt;dubbo:registry address=&quot;multicast://224.5.6.7:1234&quot; /&gt;  
+    &lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20880&quot; /&gt;  
+    &lt;dubbo:service interface=&quot;com.alibaba.dubbo.demo.DemoService&quot; ref=&quot;demoServiceLocal&quot; /&gt;  
+    &lt;dubbo:reference id=&quot;demoServiceRemote&quot; interface=&quot;com.alibaba.dubbo.demo.DemoService&quot; /&gt;  
+&lt;/beans&gt;
+</code></pre>
+<p>In the example above，note the way to write dubbo schema：</p>
+<pre><code>&lt;beans xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+       xmlns:dubbo=&quot;http://code.alibabatech.com/schema/dubbo&quot;
+       xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&quot;&gt;
+</code></pre>
+<h6>Supported Configuration Tags</h6>
+<table>
+<thead>
+<tr>
+<th>Tags</th>
+<th>Application</th>
+<th style="text-align:left">Describe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;dubbo:service/&gt;</td>
+<td>Service Configuration</td>
+<td style="text-align:left">Expose a service, define the meta information of the service. One service can use multiple protocols to expose and can be registered to multiple registry centers</td>
+</tr>
+<tr>
+<td>&lt;dubbo:reference/&gt;</td>
+<td>Reference Configuration</td>
+<td style="text-align:left">Create a remote service agent, one reference can point to multiple registry centers</td>
+</tr>
+<tr>
+<td>&lt;dubbo:protocol/&gt;</td>
+<td>Protocol Configuration</td>
+<td style="text-align:left">Configure protocol information for providing services, protocol is specified by the provider and accepted passively by the consumer</td>
+</tr>
+<tr>
+<td>&lt;dubbo:application/&gt;</td>
+<td>Application Configuration</td>
+<td style="text-align:left">Configure current application information, regardless of whether the application is provider or consumer</td>
+</tr>
+<tr>
+<td>&lt;dubbo:module/&gt;</td>
+<td>Module Configuration</td>
+<td style="text-align:left">Configure current module information. Optional</td>
+</tr>
+<tr>
+<td>&lt;dubbo:registry/&gt;</td>
+<td>Registry Center Configuration</td>
+<td style="text-align:left">Configure information related to connect registry centers</td>
+</tr>
+<tr>
+<td>&lt;dubbo:monitor/&gt;</td>
+<td>Monitoring Center Configuration</td>
+<td style="text-align:left">Configure information related to connect monitor centers. Optional</td>
+</tr>
+<tr>
+<td>&lt;dubbo:provider/&gt;</td>
+<td>Provider Configuration</td>
+<td style="text-align:left">When some properties ProtocolConfig or ServiceConfig are not configured, use this default value. Optional</td>
+</tr>
+<tr>
+<td>&lt;dubbo:consumer/&gt;</td>
+<td>Consumer Configuration</td>
+<td style="text-align:left">When some properties of ReferenceConfig are not configured, use this default value. Optional</td>
+</tr>
+<tr>
+<td>&lt;dubbo:method/&gt;</td>
+<td>Method Configuration</td>
+<td style="text-align:left">Configure specific method level information of ServiceConfig and ReferenceConfig</td>
+</tr>
+<tr>
+<td>&lt;dubbo:argument/&gt;</td>
+<td>Parameter Configuration</td>
+<td style="text-align:left">Configure parameters of specific method</td>
+</tr>
+</tbody>
+</table>
+<p><img src="https://cdn.yuque.com/lark/0/2018/png/15841/1527849348155-8423d401-9ea4-4dc6-8720-d9e3d90963b6.png" alt="undefined"></p>
+ <center>Configuration Diagram</center>
+<h6>Configuration item in detail</h6>
+<ul>
+<li>
+<p>&lt;dubbo:application name=&quot;hello-world-app&quot; /&gt;<br>
+Apply to specific application name, note that you need to make sure that the application name is unique. The application name can be displayed in the following console admin for easy management.</p>
+</li>
+<li>
+<p>&lt;dubbo:registry address=&quot;multicast://224.5.6.7:1234&quot; /&gt;<br>
+Configure registry center, related to the specific mechanism of service discovery. It can be zookeeper address or eureka address. The address above is the broadcast address, which is very convenient in the test process of the local service invocation.</p>
+</li>
+<li>
+<p>&lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20880&quot; /&gt;<br>
+Here is the transport protocol and the default port, generally no changes are required.</p>
+</li>
+</ul>
+<blockquote>
+<p>Next, we will focus on the configuration of &lt;dubbo:service/&gt;</p>
+</blockquote>
+<ul>
+<li>&lt;dubbo:service/&gt;mainly supports the following properties：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Properties Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>version</td>
+<td>Version number</td>
+</tr>
+<tr>
+<td>scope</td>
+<td>Service visibility, value can be local or remote，remote by default</td>
+</tr>
+<tr>
+<td>actives</td>
+<td>Maximum number of activated requests</td>
+</tr>
+<tr>
+<td>async</td>
+<td>Whether the method called asynchronously，false by default</td>
+</tr>
+<tr>
+<td>cache</td>
+<td>Service cache，optional value：lru/threadlocal/jcache</td>
+</tr>
+<tr>
+<td>callbacks</td>
+<td>Limitation of callback instance</td>
+</tr>
+<tr>
+<td>generic</td>
+<td>Generalized calls which can be bypassed</td>
+</tr>
+<tr>
+<td>class</td>
+<td>The implementation of the service's class name</td>
+</tr>
+<tr>
+<td>connections</td>
+<td>The number of connections in the service</td>
+</tr>
+<tr>
+<td>delay</td>
+<td>The number of milliseconds delay for publicating the service</td>
+</tr>
+<tr>
+<td>executes</td>
+<td>Upper bound of service execution requests</td>
+</tr>
+<tr>
+<td>retries</td>
+<td>Timeout retry times</td>
+</tr>
+<tr>
+<td>timeout</td>
+<td>Invocation timeout time</td>
+</tr>
+</tbody>
+</table>
+<p>For other configuration properties, please refer to xsd：<a href="http://dubbo.apache.org/schema/dubbo/dubbo.xsd">http://dubbo.apache.org/schema/dubbo/dubbo.xsd</a></p>
+<ul>
+<li>&lt;dubbo:method/&gt; as the sub-element of &lt;dubbo:service/&gt; can be configured corresponding to method. Properties that are commonly used are：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Properties Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>executes</td>
+<td>Upper bound of service execution requests</td>
+</tr>
+<tr>
+<td>retries</td>
+<td>Timeout retry times</td>
+</tr>
+<tr>
+<td>timeout</td>
+<td>Invocation timeout time</td>
+</tr>
+</tbody>
+</table>
+<p>For other properties，you can refer to xsd above。</p>
+<h6>Configuration Override Relationship</h6>
+<p><img src="https://cdn.yuque.com/lark/0/2018/png/15841/1527849374313-94a5ea24-0e72-4d83-871b-e0e95eab646a.png" alt="undefined"></p>
+<center>Configuration Coverage Relationship Diagram</center>
+<p>The Override relationship here includes the configuration of both provider end and consumer end. If you have any questions about consumer, you can refer to the next chapter, consumer chapter, to understand.</p>
+<h4>dubbo.properties Configuration</h4>
+<blockquote>
+<p>If the public configuration is very simple, no multiple registry centers, no multiple protocols, etc., or if you want multiple Spring containers to share the configuration, you can use dubbo.properties as the default configurations.</p>
+</blockquote>
+<p>Dubbo would load dubbo.properties under the classpath root directory automaticaly，you can change the default configuration location by JVM startup parameter -Ddubbo.properties.file=xxx.properties.</p>
+<h6>dubbo.properties Configuration example</h6>
+<pre><code># application name
+dubbo.application.name=dubbodemo-provider
+# registry center address
+dubbo.registry.address=zookeeper://localhost:2181
+# Example of broadcasting registry center
+#dubbo.registry.address=multicast://224.5.6.7:1234
+# address for calling protocol
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=28080
+</code></pre>
+<h6>Mapping Rule</h6>
+<p>Split the tag name and properties in XML configuration with dots, and multiple properties should be split into multiple lines</p>
+<ul>
+<li>For example: dubbo.application.name=foo equivalents to &lt;dubbo:application name=&quot;foo&quot; /&gt;</li>
+<li>For example: dubbo.registry.address=10.20.153.10:9090 equivalents to &lt;dubbo:registry address=&quot;10.20.153.10:9090&quot; /&gt;</li>
+</ul>
+<p>If there are multiple configurations having the same tag name, they can be distinguished by id, and if there is no id, the configurations will be applied to all tags with the same name.</p>
+<ul>
+<li>For example: dubbo.protocol.rmi.port=1234 equivalents to &lt;dubbo:protocol id=&quot;rmi&quot; name=&quot;rmi&quot; port=&quot;1234&quot; /&gt;</li>
+<li>For example: dubbo.registry.china.address=10.20.153.10:9090 equivalents to &lt;dubbo:registry id=&quot;china&quot; address=&quot;10.20.153.10:9090&quot; /&gt;</li>
+</ul>
+<h6>Coverage Strategy</h6>
+<p><img src="https://cdn.yuque.com/lark/0/2018/png/15841/1527849393591-2c3de248-1b3d-47d3-bd10-8b415e9fcd39.png" alt="undefined"></p>
+<ul>
+<li>When JVM starts, -D parameter has priority, so that users can rewrite the parameters when deploy and start, for example, the protocol port should be changed when start.</li>
+<li>Then comes to XML, the configurations in dubbo.properties are invalid, if they are configured in XML.</li>
+<li>Properties are the last, which can be considered as default value. Only when there is no configuration in XML, the corresponding configuarations in dubbo.properties will become effective, which usually applies to shared public configuration, like application name.</li>
+</ul>
+<blockquote>
+<p>Note:</p>
+</blockquote>
+<ol>
+<li>If there are multiple dubbo.properties in the classpath root directory, for example, if dubbo.properties exist in multiple JAR files, Dubbo will load anyone arbitrarily and print the Error logs, which may change to throwing exceptions later.↩</li>
+<li>When the protocol's id is not configured, protocol name will be used as id as default.</li>
+</ol>
+<h4>Annotation</h4>
+<h6>Service Annotation Exposure Service</h6>
+<pre><code>import com.alibaba.dubbo.config.annotation.Service;
+
+@Service(timeout = 5000)
+public class AnnotateServiceImpl implements AnnotateService { 
+    // ...
+}
+</code></pre>
+<h6>Javaconfig Configuration Public Module</h6>
+<pre><code>@Configuration
+public class DubboConfiguration {
+
+    @Bean
+    public ApplicationConfig applicationConfig() {
+        ApplicationConfig applicationConfig = new ApplicationConfig();
+        applicationConfig.setName(&quot;provider-test&quot;);
+        return applicationConfig;
+    }
+
+    @Bean
+    public RegistryConfig registryConfig() {
+        RegistryConfig registryConfig = new RegistryConfig();
+        registryConfig.setAddress(&quot;zookeeper://127.0.0.1:2181&quot;);
+        registryConfig.setClient(&quot;curator&quot;);
+        return registryConfig;
+    }
+}
+</code></pre>
+<p>The result of configuration using this method is the same as that of using xml.</p>
+<h6>Specify the Dubbo Scan Path</h6>
+<pre><code>@SpringBootApplication
+@DubboComponentScan(basePackages = &quot;com.alibaba.dubbo.test.service.impl&quot;)
+public class ProviderTestApp {
+    // ...
+}
+</code></pre>
+<p>or use the spring bean xml configuration:</p>
+<pre><code>&lt;dubbo:annotation package=&quot;com.chanshuyi.service.impl&quot; /&gt;
+</code></pre>
+<h4>API Trigger Directly</h4>
+<pre><code>import com.alibaba.dubbo.rpc.config.ApplicationConfig;
+import com.alibaba.dubbo.rpc.config.RegistryConfig;
+import com.alibaba.dubbo.rpc.config.ProviderConfig;
+import com.alibaba.dubbo.rpc.config.ServiceConfig;
+import com.xxx.XxxService;
+import com.xxx.XxxServiceImpl;
+
+// Service implementation
+XxxService xxxService = new XxxServiceImpl();
+
+// current application configuration
+ApplicationConfig application = new ApplicationConfig();
+application.setName(&quot;xxx&quot;);
+
+// connect to registry center configuration
+RegistryConfig registry = new RegistryConfig();
+registry.setAddress(&quot;10.20.130.230:9090&quot;);
+registry.setUsername(&quot;aaa&quot;);
+registry.setPassword(&quot;bbb&quot;);
+
+// service provider's protocol configuration
+ProtocolConfig protocol = new ProtocolConfig();
+protocol.setName(&quot;dubbo&quot;);
+protocol.setPort(12345);
+protocol.setThreads(200);
+
+// Note: ServiceConfig is a heavy object, which encapsulated the connection with registry center internally, and open the service port
+
+// Service provider exposes service configuration
+ServiceConfig&lt;XxxService&gt; service = new ServiceConfig&lt;XxxService&gt;(); // This instance is very heavy, which encapsulated the connection with registry center, please cache it by yourself, it might cause memory and connection leakage otherwise.
+service.setApplication(application);
+service.setRegistry(registry); // multiple registry centers can use setRegistries()
+service.setProtocol(protocol); // multiple protocols can use setProtocols()
+service.setInterface(XxxService.class);
+service.setRef(xxxService);
+service.setVersion(&quot;1.0.0&quot;);
+
+// exposure and register service
+service.export();
+</code></pre>
+<p>Generally, this method is not recommended in spring applications. The reason can be checked by reading the source code on github, which would not be explained here.</p>
+<h3>Provider Interface and Implement</h3>
+<p>The above chapters are described mainly from a configuration perspective, and lets explain the complete use of Dubbo provider by going through a complete example.</p>
+<p>There is only one service UserReadService, and one method getUserById in this example.
+This service need to be exposed to a remote service by Dubbo. Detail steps are shown below:</p>
+<ol>
+<li>Create Project
+Skip this step if there is already a project. Create a Spring Boot project, which can be created through <a href="https://start.spring.io/">https://start.spring.io/</a>.</li>
+<li>Define Interface
+Define interface: UserReadService</li>
+</ol>
+<pre><code>public interface UserReadService{
+    public User getUserById(Long userId);
+}
+</code></pre>
+<p>Generally, this interface should be placed in an independent JAR file as a client package.
+Generally, the other services need to refer this client package if they want to consume this service(except for generalized call).
+3. Implement Interface
+Implement UserReadService, and deploy current implementation in the Provider's application.</p>
+<pre><code>public UserReadServiceImpl implements UserReadService{
+    public User getUserById(Long userId){
+        return xxx;
+    }
+}
+</code></pre>
+<ol start="4">
+<li>Dubbo Configuration</li>
+</ol>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:dubbo=&quot;http://dubbo.apache.org/schema/dubbo&quot;
+    xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&quot;&gt;  
+    &lt;dubbo:application name=&quot;hello-world-app&quot; /&gt;  
+    &lt;dubbo:registry address=&quot;multicast://224.5.6.7:1234&quot; /&gt;  
+    &lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20880&quot; /&gt;  
+    &lt;bean id=&quot;userReadService&quot; class=&quot;com.package.UserReadServiceImpl&quot;/&gt;
+    &lt;dubbo:service interface=&quot;com.package.UserReadService&quot; ref=&quot;userReadService&quot; /&gt;  
+&lt;/beans&gt;
+</code></pre>
+<p>For the other modes of Dubbo configuration, please refer to the related configurations in the previous chapter, or use the integrated Dubbo Spring Boot starter method.</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

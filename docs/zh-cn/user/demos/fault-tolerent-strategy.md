@@ -14,7 +14,7 @@
 
 ## 集群容错模式
 
-可以自行扩展集群容错策略，参见：[集群扩展](http://dubbo.apache.org/books/dubbo-dev-book/impls/cluster.html)
+可以自行扩展集群容错策略，参见：[集群扩展](../../dev/impls/load-balance.md)
 
 ### Failover Cluster
 

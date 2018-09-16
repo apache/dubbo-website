@@ -1,4 +1,10 @@
-# Instance for Dubbo Extension Mechanism
+---
+title: Dubbo Extension Mechanism in Action
+keywords: Dubbo, SPI
+description: This article introduces Dubbo's SPI mechanism.
+---
+
+# Dubbo Extension Mechanism in Action
 
 ## 1. Extension Mechanism of Dubbo
 

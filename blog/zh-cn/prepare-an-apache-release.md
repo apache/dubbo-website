@@ -1,3 +1,10 @@
+---
+title: 如何准备Apache Release
+keywords: Dubbo, Apache, Release
+---
+
+# 如何准备Apache Release
+
 ## 理解Apache发布的内容和流程
 
 总的来说，Source Release是Apache关注的重点，也是发布的必须内容；而Binary Release是可选项，Dubbo可以选择是否发布二进制包到Apache仓库或者发布到Maven中央仓库。
@@ -132,9 +139,9 @@
 
 ## 打包&上传
 
-1. 从主干分支拉取新分支作为发布分支，如现在要发布2.6.4版本，则从2.6.x拉出新分支2.6.4-release，此后2.6.4 Release Candidates涉及的修改及打标签等都在2.6.4-release分支进行，最终发布完成后合入主干分支。
+1. 从主干分支拉取新分支作为发布分支，如现在要发布${release_version}版本，则从2.6.x拉出新分支${release_version}-release，此后${release_version} Release Candidates涉及的修改及打标签等都在${release_version}-release分支进行，最终发布完成后合入主干分支。
 
-2. 首先，在2.6.4-release分支验证maven组件打包、source源码打包、签名等是否都正常工作
+2. 首先，在${release_version}-release分支验证maven组件打包、source源码打包、签名等是否都正常工作
 
    ```shell
    $ mvn clean install -Papache-release
@@ -155,7 +162,7 @@
     ```shell
     $ mvn release:clean
     $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-    # 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为2.6.4-SNAPSHOT，并将修改推送到github仓库
+    # 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为${release_version}-SNAPSHOT，并将修改推送到github仓库
     ```
 
    - 执行release:perform，做正式发布
@@ -176,21 +183,21 @@
    # 假定本地目录为 ~/apache/incubator/dubbo
    ```
 
-3. 当前发布版本为2.6.4，新建目录
+3. 当前发布版本为${release_version}，新建目录
 
    ```shell
    $ cd ~/apache/incubator/dubbo # dubbo svn根目录
-   $ mkdir 2.6.4
+   $ mkdir ${release_version}
    ```
 
 4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS)文件。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
 
-5. 拷贝Dubbo根目录下的source.zip包到svn本地仓库dubbo/2.6.4
+5. 拷贝Dubbo根目录下的source.zip包到svn本地仓库dubbo/${release_version}
 
 6. 生成sha512签名
 
    ```shell
-   $ shasum -a 512 dubbo-incubating-2.6.4-source-release.zip >> dubbo-incubating-2.6.4-source-release.zip.sha512
+   $ shasum -a 512 apache-dubbo-incubating-${release_version}-source-release.zip >> apache-dubbo-incubating-${release_version}-source-release.zip.sha512
    ```
 
 7. 如果有binary release要同时发布
@@ -198,7 +205,7 @@
    ```shell
    # 到dubbo项目distribution的module下，执行：
    $ mvn install
-   # target目录下，拷贝bin-release.zip以及bin-release.zip.asc到svn本地仓库dubbo/2.6.4
+   # target目录下，拷贝bin-release.zip以及bin-release.zip.asc到svn本地仓库dubbo/${release_version}
    # 参考第6步，生成sha512签名
    ```
 
@@ -206,23 +213,38 @@
 
    ```shell
    $ svn status
-   $ svn commit -m 'prepare for 2.6.4 RC1'
+   $ svn commit -m 'prepare for ${release_version} RC1'
    ```
 
 ## 验证Release Candidates
 
-验证环节包含但不限于以下内容和形式：
+首先，从以下地址下载要发布的Release Candidate到本地环境：
+https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/
+
+然后，开始验证环节，验证包含但不限于以下内容和形式
 
 1. Check signatures and hashes are good
+* sha512
 ```sh
-sha512 dubbo-incubating-${release_version}-bin-release.zip.sha512
-sha512 dubbo-incubating-${release_version}-source-release.zip.sha512
+$ shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
+$ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 ```
-
-2. Unzip dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
+* gpg
+   * If it's your first time verify a release candidte, you should import public keys first.  
+   ```sh
+   $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
+   $ gpg --import KEYS # import keys
+   $ gpg —edit-key liujun
+     > trust # 输入trust子命令
+   ```
+   * Now, you can verify signature with command
+   ```
+   gpg --verify apache-dubbo-incubating-2.6.3-source-release.zip.asc apache-dubbo-incubating-2.6.3-source-release.zip
+   ```
+2. Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
 
 - Directory with 'incubating' in name
-  `dubbo-incubating-${release_version}-bin-release`
+  `apache-dubbo-incubating-${release_version}-source-release`
   
 - DISCLAIMER exists
 
@@ -239,10 +261,19 @@ sha512 dubbo-incubating-${release_version}-source-release.zip.sha512
   ```sh
   mvn clean test # This will run all unit tests
   # you can also open rat and style plugin to check if every file meets requirements.
-  mvn clean install -Drat.skip=false -Dcheckstyle.skip=false
+  mvn clean test -Drat.skip=false -Dcheckstyle.skip=false
   ```
 
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
+  - check the version number in pom.xml are the same
+  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files.  
+    `diff -r a rc_dir tag_dir`
+  - check the top n tag commits, dive into the related files and check if the source package has the same changes
+
+3. Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:
+* Check signatures are good
+* 'incubating' in name
+* LICENSE and NOTICE exists and contents are good
 
 ## 进入投票
 
@@ -294,4 +325,4 @@ The Apache Dubbo (Incubating) Team
 
 **apache.repository.org nexus仓库的权限已经申请，参见[jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
-之前发布到maven仓库的atifacts都处于staging状态，用Apache id登录apache.repository.org，发布即可。
+之前发布到maven仓库的artifacts都处于staging状态，用Apache id登录apache.repository.org，发布即可。

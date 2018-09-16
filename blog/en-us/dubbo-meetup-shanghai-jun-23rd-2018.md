@@ -1,3 +1,9 @@
+---
+title: Dubbo Shanghai meetup has been held successfully
+keywords: Dubbo, Shanghai, meetup
+description: Dubbo Shanghai meetup has been held successfully
+---
+
 Dubbo Shanghai meetup has been held successfully
 ---
 

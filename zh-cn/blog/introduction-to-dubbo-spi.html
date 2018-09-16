@@ -4,16 +4,16 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<meta name="keywords" content="introduction-to-dubbo-spi" />
-	<meta name="description" content="introduction-to-dubbo-spi" />
+	<meta name="keywords" content="Dubbo, SPI" />
+	<meta name="description" content="本文介绍了Dubbo框架的核心，SPI扩展机制。" />
 	<!-- 网页标签标题 -->
-	<title>introduction-to-dubbo-spi</title>
+	<title>Dubbo可扩展机制实战</title>
 	<link rel="shortcut icon" href="/img/dubbo.ico"/>
 	<link rel="stylesheet" href="/build/blogDetail.css" />
 </head>
 <body>
-	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1806745375"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>Dubbo可扩展机制实战</h2>
-<h1>1. Dubbo的扩展机制</h1>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="1372176173"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Dubbo可扩展机制实战</h1>
+<h2>1. Dubbo的扩展机制</h2>
 <p>在Dubbo的官网上，Dubbo描述自己是一个高性能的RPC框架。今天我想聊聊Dubbo的另一个很棒的特性, 就是它的可扩展性。
 如同罗马不是一天建成的，任何系统都一定是从小系统不断发展成为大系统的，想要从一开始就把系统设计的足够完善是不可能的，相反的，我们应该关注当下的需求，然后再不断地对系统进行迭代。在代码层面，要求我们适当的对关注点进行抽象和隔离，在软件不断添加功能和特性时，依然能保持良好的结构和可维护性，同时允许第三方开发者对其功能进行扩展。在某些时候，软件设计者对扩展性的追求甚至超过了性能。</p>
 <p>在谈到软件设计时，可扩展性一直被谈起，那到底什么才是可扩展性，什么样的框架才算有良好的可扩展性呢？它必须要做到以下两点:</p>
@@ -22,7 +22,7 @@
 <li>作为框架的使用者，在添加一个新功能时，不需要去修改框架的源码，在自己的工程中添加代码即可。</li>
 </ol>
 <p>Dubbo很好的做到了上面两点。这要得益于Dubbo的微内核+插件的机制。接下来的章节中我们会慢慢揭开Dubbo扩展机制的神秘面纱。</p>
-<h1>2. 可扩展的几种解决方案</h1>
+<h2>2. 可扩展的几种解决方案</h2>
 <p>通常可扩展的实现有下面几种:</p>
 <ul>
 <li>Factory模式</li>
@@ -30,7 +30,7 @@
 <li>OSGI容器</li>
 </ul>
 <p>Dubbo作为一个框架，不希望强依赖其他的IoC容器，比如Spring，Guice。OSGI也是一个很重的实现，不适合Dubbo。最终Dubbo的实现参考了Java原生的SPI机制，但对其进行了一些扩展，以满足Dubbo的需求。</p>
-<h1>3. Java SPI机制</h1>
+<h2>3. Java SPI机制</h2>
 <p>既然Dubbo的扩展机制是基于Java原生的SPI机制，那么我们就先来了解下Java SPI吧。了解了Java的SPI，也就是对Dubbo的扩展机制有一个基本的了解。如果对Java SPI比较了解的同学，可以跳过。</p>
 <p>Java SPI(Service Provider Interface)是JDK内置的一种动态加载扩展点的实现。在ClassPath的<code>META-INF/services</code>目录下放置一个与接口同名的文本文件，文件的内容为接口的实现类，多个实现类用换行符分隔。JDK中使用<code>java.util.ServiceLoader</code>来加载具体的实现。
 让我们通过一个简单的例子，来看看Java SPI是如何工作的。</p>
@@ -81,7 +81,7 @@ class:testDubbo.MongoRepository
 Save tom to Mongo
 class:testDubbo.MysqlRepository
 Save tom to Mysql</p>
-<h1>4. Dubbo的SPI机制</h1>
+<h2>4. Dubbo的SPI机制</h2>
 <p>Java SPI的使用很简单。也做到了基本的加载扩展点的功能。但Java SPI有以下的不足:</p>
 <ul>
 <li>需要遍历所有的实现，并实例化，然后我们在循环中才能找到我们需要的实现。</li>
@@ -91,7 +91,7 @@ Save tom to Mysql</p>
 <li>扩展很难和其他的框架集成，比如扩展里面依赖了一个Spring bean，原生的Java SPI不支持</li>
 </ul>
 <p>所以Java SPI应付一些简单的场景是可以的，但对于Dubbo，它的功能还是比较弱的。Dubbo对原生SPI机制进行了一些扩展。接下来，我们就更深入地了解下Dubbo的SPI机制。</p>
-<h1>5. Dubbo扩展点机制基本概念</h1>
+<h2>5. Dubbo扩展点机制基本概念</h2>
 <p>在深入学习Dubbo的扩展机制之前，我们先明确Dubbo SPI中的一些基本概念。在接下来的内容中，我们会多次用到这些术语。</p>
 <h3>5.1 扩展点(Extension Point)</h3>
 <p>是一个Java的接口。</p>
@@ -126,7 +126,7 @@ roundrobin=com.alibaba.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance
 <li><code>META-INF/dubbo</code></li>
 <li><code>META-INF/services</code></li>
 </ul>
-<h1>6. Dubbo的LoadBalance扩展点解读</h1>
+<h2>6. Dubbo的LoadBalance扩展点解读</h2>
 <p>在了解了Dubbo的一些基本概念后，让我们一起来看一个Dubbo中实际的扩展点，对这些概念有一个更直观的认识。</p>
 <p>我们选择的是Dubbo中的LoadBalance扩展点。Dubbo中的一个服务，通常有多个Provider，consumer调用服务时，需要在多个Provider中选择一个。这就是一个LoadBalance。我们一起来看看在Dubbo中，LoadBalance是如何成为一个扩展点的。</p>
 <h3>6.1 LoadBalance接口</h3>
@@ -160,7 +160,7 @@ consistenthash=com.alibaba.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalan
 <pre><code class="language-java">LoadBalance lb = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(loadbalanceName);
 </code></pre>
 <p>使用ExtensionLoader.getExtensionLoader(LoadBalance.class)方法获取一个ExtensionLoader的实例，然后调用getExtension，传入一个扩展的别名来获取对应的扩展实例。</p>
-<h1>7. 自定义一个LoadBalance扩展</h1>
+<h2>7. 自定义一个LoadBalance扩展</h2>
 <p>本节中，我们通过一个简单的例子，来自己实现一个LoadBalance，并把它集成到Dubbo中。我会列出一些关键的步骤和代码，也可以从这个地址(<a href="https://github.com/vangoleo/dubbo-spi-demo">https://github.com/vangoleo/dubbo-spi-demo</a>)下载完整的demo。</p>
 <h3>7.1 实现LoadBalance接口</h3>
 <p>首先，编写一个自己实现的LoadBalance，因为是为了演示Dubbo的扩展机制，而不是LoadBalance的实现，所以这里LoadBalance的实现非常简单，选择第一个invoker，并在控制台输出一条日志。</p>
@@ -184,7 +184,7 @@ consistenthash=com.alibaba.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalan
 <p>在consumer端的<a href="dubbo:reference">dubbo:reference</a>中配置&lt;loadbalance=&quot;demo&quot;&gt;</p>
 <h3>7.4 启动Dubbo</h3>
 <p>启动Dubbo，调用一次IHelloService，可以看到控制台会输出一条<code>DemoLoadBalance: Select the first invoker...</code>日志。说明Dubbo的确是使用了我们自定义的LoadBalance。</p>
-<h1>总结</h1>
+<h2>总结</h2>
 <p>到此，我们从Java SPI开始，了解了Dubbo SPI 的基本概念，并结合了Dubbo中的LoadBalance加深了理解。最后，我们还实践了一下，创建了一个自定义LoadBalance，并集成到Dubbo中。相信通过这里理论和实践的结合，大家对Dubbo的可扩展有更深入的理解。
 总结一下，Dubbo SPI有以下的特点:</p>
 <ul>

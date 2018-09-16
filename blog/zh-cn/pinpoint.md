@@ -1,3 +1,9 @@
+---
+title: 使用Pinpoint做分布式跟踪
+keywords: Dubbo, Pinpoint, tracing
+description: 本文介绍了利用Pinpoint对Dubbo分布式应用进行调用链跟踪与性能监控。
+---
+
 # 使用Pinpoint做分布式跟踪
 
 在使用Dubbo进行服务化或者整合应用后，假设某个服务后台日志显示有异常，这个服务又被多个应用调用的情况下，我们通常很难判断是哪个应用调用的，问题的起因是什么，因此我们需要一套分布式跟踪系统来快速定位问题，Pinpoint可以帮助我们快速定位问题（当然，解决方案也不止这一种）。

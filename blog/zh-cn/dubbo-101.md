@@ -1,3 +1,9 @@
+---
+title: 第一个 Dubbo 应用
+keywords: Dubbo, RPC, RMI
+description: 现代的分布式服务框架的基本概念与 RMI 是类似的，同样是使用 Java 的 Interface 作为服务契约，通过注册中心来完成服务的注册和发现，远程通讯的细节也是通过代理类来屏蔽。
+---
+
 # 第一个 Dubbo 应用
 
 ## Java RMI 简介

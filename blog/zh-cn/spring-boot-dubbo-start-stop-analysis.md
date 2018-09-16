@@ -1,13 +1,19 @@
-# Spring-boot+Dubbo应用启停源码分析
+---
+title: Spring Boot Dubbo应用启停源码分析
+keywords: Dubbo, Spring Boot, 源码分析
+description: 本文分析 `incubator-dubbo-spring-boot-project` 中 Dubbo 启停源码的实现原理。
+---
 
-### 背景介绍
+# Spring Boot Dubbo应用启停源码分析
+
+## 背景介绍
 
 [Dubbo Spring Boot](https://github.com/apache/incubator-dubbo-spring-boot-project) 工程致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发。同时也整合了 Spring Boot 特性：
 
 - [自动装配](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (比如： 注解驱动, 自动装配等).
 - [Production-Ready](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (比如： 安全, 健康检查, 外部化配置等).
 
-### DubboConsumer启动分析
+## DubboConsumer启动分析
 
 你有没有想过一个问题？`incubator-dubbo-spring-boot-project`中的`DubboConsumerDemo`应用就一行代码，`main`方法执行完之后，为什么不会直接退出呢？
 
@@ -105,7 +111,7 @@ run:1107, SpringApplication (org.springframework.boot)
 main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
 ```
 
-可以看到，spring-boot应用在启动的过程中，由于默认启动了Tomcat暴露HTTP服务，所以执行到了上述方法，而Tomcat启动的所有的线程，默认都是daemon线程，例如监听请求的Acceptor，工作线程池等等，如果这里不加控制的话，启动完成之后JVM也会退出。因此需要显示的启动一个线程，在某个条件下进行持续等待，从而避免线程退出。
+可以看到，spring-boot应用在启动的过程中，由于默认启动了Tomcat暴露HTTP服务，所以执行到了上述方法，而Tomcat启动的所有的线程，默认都是daemon线程，例如监听请求的Acceptor，工作线程池等等，如果这里不加控制的话，启动完成之后JVM也会退出。因此需要显式地启动一个线程，在某个条件下进行持续等待，从而避免线程退出。
 
 下面我们在深挖一下，在Tomcat的`this.tomcat.getServer().await()`这个方法中，线程是如何实现不退出的。这里为了阅读方便，去掉了不相关的代码。
 
@@ -137,7 +143,7 @@ public void await() {
 
 接下来，我们再看看，这个Spring-boot应用又是如何退出的呢？
 
-### DubboConsumer退出分析
+## DubboConsumer退出分析
 
 在前面的描述中提到，有一个线程持续的在检查`stopAwait`这个变量，那么我们自然想到，在Stop的时候，应该会有一个线程去修改`stopAwait`，打破这个while循环，那又是谁在修改这个变量呢？
 
@@ -192,18 +198,18 @@ run:929, AbstractApplicationContext$2 (org.springframework.context.support)
 
 因此，正常的应用在停止过程中(`kill -9 $PID`除外)，都会执行上述ShutdownHook，它的作用不仅仅是关闭tomcat，还有进行其他的清理工作，在此不再赘述。
 
-### 总结
+## 总结
 
 1. 在`DubboConsumer`启动的过程中，通过启动一个独立的非daemon线程循环检查变量的状态，确保进程不退出
 2. 在`DubboConsumer`停止的过程中，通过执行spring容器的shutdownhook，修改了变量的状态，使得程序正常退出
 
-### 问题
+## 问题
 
 在DubboProvider的例子中，我们看到Provider并没有启动Tomcat提供HTTP服务，那又是如何实现不退出的呢？我们将在下一篇文章中回答这个问题。
 
-#### 彩蛋
+### 彩蛋
 
-在` Intellij IDEA`中运行了如下的单元测试，创建一个线程执行睡眠1000秒的操作，我们惊奇的发现，代码并没有线程执行完就退出了，这又是为什么呢？（被创建的线程是非daemon线程）
+在`Intellij IDEA`中运行了如下的单元测试，创建一个线程执行睡眠1000秒的操作，我们惊奇的发现，代码并没有线程执行完就退出了，这又是为什么呢？（被创建的线程是非daemon线程）
 
 ```java
     @Test

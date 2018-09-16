@@ -2,7 +2,7 @@
 
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `random` 随机调用。
 
-可以自行扩展负载均衡策略，参见：[负载均衡扩展](http://dubbo.apache.org/books/dubbo-dev-book/impls/load-balance.html)
+可以自行扩展负载均衡策略，参见：[负载均衡扩展](../../dev/impls/load-balance.md)
 
 ## 负载均衡策略
 
@@ -13,7 +13,7 @@
 
 ### RoundRobin LoadBalance
 
-* **轮循**，按公约后的权重设置轮循比率。
+* **轮询**，按公约后的权重设置轮询比率。
 * 存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。
 
 ### LeastActive LoadBalance

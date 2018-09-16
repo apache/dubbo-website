@@ -1,3 +1,9 @@
+---
+title: 从跨语言调用到dubbo2.js
+keywords: Dubbo, 跨语言, Node, NodeJS, js
+description: 本文介绍了如何使用 dubbo2.js 进行跨语言的 dubbo 调用。
+---
+
 # 从跨语言调用到dubbo2.js
 
 > [dubbo2.js](https://github.com/dubbo/dubbo2.js) 是 [千米网](https://www.qianmi.com/) 贡献给 dubbo 社区的一款 nodejs dubbo 客户端，它提供了 nodejs 对原生 dubbo 协议的支持，使得 nodejs 和 java 这两种异构语言的 rpc 调用变得便捷，高效。
@@ -90,7 +96,7 @@ dubbo协议报文消息头详解：
 
 ## dubbo2.js解决方案
 
-上面我们分析出了两个难点，dubbo2.js 解决这两个问题的关键依赖于两个类库：[js-to-java](https://github.com/node-modules/js-to-java)，[hessian.js](https://github.com/node-modules/hessian.js) 。js-to-java 使得 nodejs 具备 java 对象的表达能力，而 hessian.js 提供了序列化能力。借助于 nodejs 的 socket ，妇科一套 dubbo 协议的报文格式，最终便实现了 nodejs 对 java-dubbo-provider 的调用。
+上面我们分析出了两个难点，dubbo2.js 解决这两个问题的关键依赖于两个类库：[js-to-java](https://github.com/node-modules/js-to-java)，[hessian.js](https://github.com/node-modules/hessian.js) 。js-to-java 使得 nodejs 具备 java 对象的表达能力，而 hessian.js 提供了序列化能力。借助于 nodejs 的 socket ，复制一套 dubbo 协议的报文格式，最终便实现了 nodejs 对 java-dubbo-provider 的调用。
 
  ## dubbo2.js快速入门
 
@@ -268,4 +274,4 @@ Congratulation！
 
 ## 更多细节
 
-本文中的示例代码，提供在此处，<https://github.com/lexburner/Dubbojs-Learning> 。如果你对 dubbo 协议不慎了解，想要理解它的工作原理，项目中提供了一个子 moudle — java-socket-consumer，使用面向过程的思路实现了 java-socket-consumer，完成了原生 socket 发送 dubbo 协议报文，完成方法调用，并获取响应的全流程。
+本文中的示例代码，提供在此处，<https://github.com/lexburner/Dubbojs-Learning> 。如果你对 dubbo 协议不甚了解，想要理解它的工作原理，项目中提供了一个子 moudle — java-socket-consumer，使用面向过程的思路实现了 java-socket-consumer，完成了原生 socket 发送 dubbo 协议报文，完成方法调用，并获取响应的全流程。

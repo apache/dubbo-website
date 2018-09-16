@@ -9,7 +9,7 @@
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
 Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.153.10:2181"));
-registry.register(URL.valueOf("condition://0.0.0.0/com.foo.BarService?category=routers&dynamic=false&rule=" + URL.encode("host = 10.20.153.10 => host = 10.20.153.11") + "));
+registry.register(URL.valueOf("condition://0.0.0.0/com.foo.BarService?category=routers&dynamic=false&rule=" + URL.encode("host = 10.20.153.10 => host = 10.20.153.11")));
 ```
 
 其中：
@@ -65,7 +65,7 @@ registry.register(URL.valueOf("condition://0.0.0.0/com.foo.BarService?category=r
     => host != 172.22.3.91
     ```
 1. 白名单 [^3]：
-    
+  
     ```
     host != 10.20.153.10,10.20.153.11 =>
     ```
@@ -133,7 +133,61 @@ registry.register(URL.valueOf("condition://0.0.0.0/com.foo.BarService?category=r
 } (invokers)）; // 表示立即执行方法
 ```
 
+## 标签路由规则
+
+标签路由规则 [^5] ，当应用选择装配标签路由(TagRouter)之后，一次 dubbo 调用能够根据请求携带的 tag 标签智能地选择对应 tag 的服务提供者进行调用。
+
+### 服务提供者
+
+1. 给应用装配标签路由器：
+
+```Java
+@Bean
+public ApplicationConfig applicationConfig() {
+    ApplicationConfig applicationConfig = new ApplicationConfig();
+    applicationConfig.setName("provider-book");
+    applicationConfig.setQosEnable(false);
+    // instruct tag router
+    Map<String,String> parameters = new HashMap<>();
+    parameters.put(Constants.ROUTER_KEY, "tag");
+    applicationConfig.setParameters(parameters);
+    return applicationConfig;
+}
+```
+
+2. 给应用设置具体的标签：
+
+```java
+@Bean
+public ProviderConfig providerConfig(){
+	ProviderConfig providerConfig = new ProviderConfig();
+	providerConfig.setTag("red");
+	return providerConfig;
+}
+```
+
+应用未装配 tag 属性或服务提供者未设置 tag 属性，都将被认为是默认的应用，这些默认应用将会在调用无法匹配 provider 时当作降级方案。
+
+### 服务消费者
+
+```Java
+RpcContext.getContext().setAttachment(Constants.REQUEST_TAG_KEY,"red");
+```
+
+请求标签的作用域为每一次 invocation，使用 attachment 来传递请求标签，注意保存在 attachment 中的值将会在一次完整的远程调用中持续传递，得益于这样的特性，我们只需要在起始调用时，通过一行代码的设置，达到标签的持续传递。
+
+> 目前仅仅支持 hardcoding 的方式设置 requestTag。注意到 RpcContext 是线程绑定的，优雅的使用 TagRouter 特性，建议通过 servlet 过滤器(在 web 环境下)，或者定制的 SPI 过滤器设置 requestTag。
+
+### 规则描述
+
+1. request.tag=red 时优先选择 tag=red 的 provider。若集群中不存在与请求标记对应的服务，可以降级请求 tag=null 的 provider，即默认 provider。
+
+2. request.tag=null 时，只会匹配 tag=null 的 provider。即使集群中存在可用的服务，若 tag 不匹配就无法调用，这与规则1不同，携带标签的请求可以降级访问到无标签的服务，但不携带标签/携带其他种类标签的请求永远无法访问到其他标签的服务。
+
+   
+
 [^1]: `2.2.0` 以上版本支持
 [^2]: 路由规则扩展点：[路由扩展](http://dubbo.apache.org/books/dubbo-dev-book/impls/router.html)
 [^3]: 注意：一个服务只能有一条白名单规则，否则两条规则交叉，就都被筛选掉了
 [^4]: 注意：脚本没有沙箱约束，可执行任意代码，存在后门风险
+[^5]: 该特性在 `2.7.0` 以上版本支持

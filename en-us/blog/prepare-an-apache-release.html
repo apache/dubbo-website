@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="Dubbo, Apache, Release" />
+	<meta name="description" content="prepare-an-apache-release" />
+	<!-- 网页标签标题 -->
+	<title>Understanding the Apache Release Cycle</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="-709203683"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/en-us/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">中</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/en-us/index.html" data-reactid="11">HOME</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/en-us/docs/user/quick-start.html" data-reactid="13">DOCS</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/en-us/blog/index.html" data-reactid="15">BLOG</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/en-us/community/index.html" data-reactid="17">COMMUNITY</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h2>Understanding the Apache Release Cycle</h2>
+<p>In general, Source Release is the key and the required content of Apache. But Binary Release is optional, Dubbo can choose whether to release binary packages to the Apache repository or to the Maven central repository.</p>
+<p>Please refer to the following links for more information on ASF's release guide:</p>
+<ul>
+<li><a href="http://www.apache.org/dev/release-publishing">Apache Release Guide</a></li>
+<li><a href="http://www.apache.org/dev/release.html">Apache Release Policy</a></li>
+<li><a href="http://www.apache.org/dev/publishing-maven-artifacts.html">Maven Release Info</a></li>
+</ul>
+<h2>Preparation of Local Building Environment</h2>
+<p>Mainly including the related preparation of signature utilities and Maven repository certification</p>
+<ol>
+<li>
+<p>Install GPG,refer to <a href="https://www.gnupg.org/download/index.html">https://www.gnupg.org/download/index.html</a></p>
+<ul>
+<li>For example, in Mac OS</li>
+</ul>
+<pre><code class="language-sh">$ brew install gpg
+$ gpg --version <span class="hljs-comment">#check version,should be 2.x</span>
+</code></pre>
+</li>
+<li>
+<p>Generate the key with GPG</p>
+<ul>
+<li>Generate the key according to the prompt</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> gpg2 --full-gen-key</span>
+gpg (GnuPG) 2.0.12; Copyright (C) 2009 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+  (1) RSA and RSA (default)
+  (2) DSA and Elgamal
+  (3) DSA (sign only)
+  (4) RSA (sign only)
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+        0 = key does not expire
+     &lt;n&gt;  = key expires in n days
+     &lt;n&gt;w = key expires in n weeks
+     &lt;n&gt;m = key expires in n months
+     &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: Robert Burrell Donkin
+Email address: rdonkin@apache.org
+Comment: CODE SIGNING KEY
+You selected this USER-ID:
+   "Robert Burrell Donkin (CODE SIGNING KEY) &lt;rdonkin@apache.org&gt;"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+You need a Passphrase to protect your secret key. # enter the password, which will be used frequently when packaging.
+</code></pre>
+<ul>
+<li>View key id</li>
+</ul>
+<pre><code class="language-sh">$ gpg --list-keys
+pub   rsa4096/28681CB1 2018-04-26 <span class="hljs-comment"># 28681CB1 is the key id</span>
+uid       [ultimate] liujun (apache-dubbo) &lt;liujun@apache.org&gt;
+sub   rsa4096/D3D6984B 2018-04-26
+
+<span class="hljs-comment"># send public key to keyserver via key id </span>
+$ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
+<span class="hljs-comment"># Here pgpkeys.mit.edu is a random selection of keyserver. Any key server from the list https://sks-keyservers.net/status/ is acceptable because they are automatically synchronized.</span>
+</code></pre>
+<ul>
+<li>If there are multiple public keys，set the default key</li>
+</ul>
+<p>~/.gnupg/gpg.conf</p>
+<pre><code class="language-proper"># If you have more than 1 secret key in your keyring, you may want to
+# uncomment the following option and set your preferred keyid.
+
+default-key 28681CB1
+</code></pre>
+</li>
+<li>
+<p>Set up Apache central repository.</p>
+<ul>
+<li>The parent pom of Dubbo project is apache pom</li>
+</ul>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.apache<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>apache<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>19<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span>
+</code></pre>
+<ul>
+<li>
+<p>Add the following contents to .m2/settings.xml</p>
+<p>Enter the passwords after
+encrypting by <a href="http://maven.apache.org/guides/mini/guide-encryption.html">maven-encryption-plugin</a></p>
+</li>
+</ul>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">settings</span>&gt;</span>
+...
+ <span class="hljs-tag">&lt;<span class="hljs-name">servers</span>&gt;</span>
+   <span class="hljs-comment">&lt;!-- To publish a snapshot of some part of Maven --&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-name">server</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>apache.snapshots.https<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">username</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP USERNAME --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">username</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">password</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP PASSWORD (encrypted) --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">password</span>&gt;</span>
+   <span class="hljs-tag">&lt;/<span class="hljs-name">server</span>&gt;</span>
+   <span class="hljs-comment">&lt;!-- To stage a release of some part of Maven --&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-name">server</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>apache.releases.https<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">username</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP USERNAME --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">username</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">password</span>&gt;</span> <span class="hljs-comment">&lt;!-- YOUR APACHE LDAP PASSWORD (encrypted) --&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">password</span>&gt;</span>
+   <span class="hljs-tag">&lt;/<span class="hljs-name">server</span>&gt;</span>
+  ...
+     <span class="hljs-comment">&lt;!-- gpg passphrase used when generate key --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">server</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>gpg.passphrase<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">passphrase</span>&gt;</span><span class="hljs-comment">&lt;!-- yourKeyPassword --&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">passphrase</span>&gt;</span>
+   <span class="hljs-tag">&lt;/<span class="hljs-name">server</span>&gt;</span>
+ <span class="hljs-tag">&lt;/<span class="hljs-name">servers</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">settings</span>&gt;</span>
+</code></pre>
+</li>
+</ol>
+<h2>Pack &amp; Upload</h2>
+<ol>
+<li>
+<p>Pull the new branch from the master branch as the release branch. If you want to release the ${release_version} version now, pull the new branch ${release_version}-release from 2.6.x. Then the
+modifications and taggings related to ${release_version} Release Candidates are applied to ${release_version}-release branch, and is merged into the master branch after the final release.</p>
+</li>
+<li>
+<p>First of all, verify that the maven component packing, source packing, signature, etc are working properly on the ${release_version}-release branch.</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn clean install -Papache-release</span>
+<span class="hljs-meta">$</span><span class="bash"> mvn deploy</span>
+<span class="hljs-meta">#</span><span class="bash"> push the snapshot package to the maven central repository,<span class="hljs-keyword">in</span> staging state</span>
+</code></pre>
+</li>
+<li>
+<p>Release with maven-release-plugin</p>
+<ul>
+<li>verify with dryRun</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Papache-release -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID -DdryRun=<span class="hljs-literal">true</span></span>
+</code></pre>
+<ul>
+<li>After verification, run release:prepare</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:clean</span>
+<span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Papache-release -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
+<span class="hljs-meta">#</span><span class="bash"> After running：1. Generate source.zip; 2. Tag and push to github repository; 3. The branch version is upgraded to <span class="hljs-variable">${release_version}</span>-SNAPSHOT automatically and the modifications are pushed to the github repository</span>
+</code></pre>
+<ul>
+<li>Run release:perform, make an offical release</li>
+</ul>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn -Prelease release:perform -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
+<span class="hljs-meta">#</span><span class="bash"> All artifacts are released to  configured remote maven central repository, <span class="hljs-keyword">in</span> staging state </span>
+</code></pre>
+</li>
+</ol>
+<h2>Prepare Apache Release</h2>
+<ol>
+<li>
+<p>Prepare the svn local environment (Apache hosting the release content of project by svn)</p>
+</li>
+<li>
+<p>Checkout dubbo to local directory</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo</span>
+<span class="hljs-meta">#</span><span class="bash"> Assume that the <span class="hljs-built_in">local</span> directory is</span>
+~/apache/incubator/dubbo
+</code></pre>
+</li>
+<li>
+<p>The current release version is ${release_version},new directory</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> ~/apache/incubator/dubbo <span class="hljs-comment"># dubbo svn root directory</span></span>
+<span class="hljs-meta">$</span><span class="bash"> mkdir <span class="hljs-variable">${release_version}</span></span>
+</code></pre>
+</li>
+<li>
+<p>Add public key to <a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS">KEYS</a> file.KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.</p>
+</li>
+<li>
+<p>Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version}</p>
+</li>
+<li>
+<p>Generate sha512 sign</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> shasum -a 512 apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip &gt;&gt; apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512</span>
+</code></pre>
+</li>
+<li>
+<p>If the binary release is accompanied with the source release</p>
+<pre><code class="language-shell"><span class="hljs-meta">#</span><span class="bash"> In the module of the dubbo project distribution</span>
+run：
+<span class="hljs-meta">$</span><span class="bash"> mvn install</span>
+<span class="hljs-meta">#</span><span class="bash"> In target directory,copy bin-release.zip and bin-release.zip.asc to svn <span class="hljs-built_in">local</span> repository dubbo/<span class="hljs-variable">${release_version}</span></span>
+<span class="hljs-meta">#</span><span class="bash"> Refer to the six step,generate sha512 sign</span>
+</code></pre>
+</li>
+<li>
+<p>Commit to Apache svn</p>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> svn status</span>
+<span class="hljs-meta">$</span><span class="bash"> svn commit -m <span class="hljs-string">'prepare for ${release_version} RC1'</span></span>
+</code></pre>
+</li>
+</ol>
+<h2>Verify Release Candidates</h2>
+<p>The verification link includes but is not limited to the following contents and forms:</p>
+<ol>
+<li>Check signatures and hashes are good</li>
+</ol>
+<ul>
+<li>sha512</li>
+</ul>
+<pre><code class="language-sh">$ shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512
+$ shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-bin-release.zip.sha512
+</code></pre>
+<ul>
+<li>gpg
+<ul>
+<li>If it's your first time verify a release candidte, you should import public keys first.</li>
+</ul>
+<pre><code class="language-sh">$ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS &gt;&gt; KEYS <span class="hljs-comment"># download public keys to local directory</span>
+$ gpg --import KEYS <span class="hljs-comment"># import keys</span>
+$ gpg —edit-key liujun
+  &gt; trust <span class="hljs-comment"># type trust command</span>
+</code></pre>
+<ul>
+<li>Now, you can verify signature with command</li>
+</ul>
+<pre><code>gpg --verify apache-dubbo-incubating-2.6.3-source-release.zip.asc apache-dubbo-incubating-2.6.3-source-release.zip
+</code></pre>
+</li>
+</ul>
+<ol start="2">
+<li>Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:</li>
+</ol>
+<ul>
+<li>
+<p>Directory with 'incubating' in name
+<code>apache-dubbo-incubating-${release_version}-source-release</code></p>
+</li>
+<li>
+<p>DISCLAIMER exists</p>
+</li>
+<li>
+<p>LICENSE and NOTICE exists and contents are good</p>
+</li>
+<li>
+<p>All files and no binary files exist</p>
+</li>
+<li>
+<p>All files has standard ASF License header</p>
+</li>
+<li>
+<p>Can compile from source</p>
+</li>
+<li>
+<p>All unit tests can pass</p>
+<pre><code class="language-sh">mvn clean <span class="hljs-built_in">test</span> <span class="hljs-comment"># This will run all unit tests</span>
+<span class="hljs-comment"># you can also open rat and style plugin to check if every file meets requirements.</span>
+mvn clean <span class="hljs-built_in">test</span> -Drat.skip=<span class="hljs-literal">false</span> -Dcheckstyle.skip=<span class="hljs-literal">false</span>
+</code></pre>
+</li>
+<li>
+<p>Release candidates match with corresponding tags, you can find tag link and hash in vote email.</p>
+<ul>
+<li>check the version number in pom.xml are the same</li>
+<li>check there are no extra files or directories in the source package, for example, no empty directories or useless log files.<br>
+<code>diff -r a rc_dir tag_dir</code></li>
+<li>check the top n tag commits, dive into the related files and check if the source package has the same changes</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:</li>
+</ol>
+<ul>
+<li>Check signatures are good</li>
+<li>'incubating' in name</li>
+<li>LICENSE and NOTICE exists and contents are good</li>
+</ul>
+<h2>Begin voting</h2>
+<p>The voting is divided into two phases:</p>
+<ol>
+<li>Dubbo community votes and sends the voting email to <a href="mailto:dev@dubbo.apache.org">dev@dubbo.apache.org</a>. After reviewing by community developers and winning 3 binding tickets that agree to release, you can go to the next stage of voting.</li>
+<li>Apache community votes and sends the voting email to <a href="mailto:general@apache.org">general@apache.org</a>. After reviewing by Apache PMC Review and winning 3 binding tickets that agree to release,you will be allowed to release officially.</li>
+</ol>
+<p>Mail template：</p>
+<pre><code class="language-tex">Hello Dubbo Community,
+
+This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
+
+The release candidates:
+https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
+
+Git tag for the release:
+https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.2
+
+Hash for the release tag:
+afab04c53edab38d52275d2a198ea1aff7a4f41e
+
+Release Notes:
+https://github.com/apache/incubator-dubbo/releases/tag/untagged-4775c0a22c60fca55118
+
+The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
+https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+
+The vote will be open for at least 72 hours or until necessary number of votes are reached.
+
+Please vote accordingly:
+
+[ ] +1 approve 
+[ ] +0 no opinion 
+[ ] -1 disapprove with the reason
+
+Thanks,
+The Apache Dubbo (Incubating) Team
+</code></pre>
+<h2>Official Release</h2>
+<ol>
+<li>Commit release package of  <a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo">https://dist.apache.org/repos/dist/dev/incubator/dubbo</a> to <a href="https://dist.apache.org/repos/dist/release/incubator/dubbo/">https://dist.apache.org/repos/dist/release/incubator/dubbo/</a>, complete official release。</li>
+<li>Send mail to <a href="mailto:dev@dubbo.apache.org">dev@dubbo.apache.org</a> and <a href="mailto:general@apache.org">general@apache.org</a>, notify the community that the release is completed.</li>
+</ol>
+<h2>Complete Maven Convenient Binary release（Optional）</h2>
+<p><strong><a href="http://apache.repository.org">apache.repository.org</a> The permissions of the nexus repository have been applied, see <a href="https://issues.apache.org/jira/browse/INFRA-16451">jira</a>。</strong></p>
+<p>The artifacts that were previously published to the maven repository are in the staging state. Log in to <a href="http://apache.repository.org">apache.repository.org</a> with the Apache id and release it.</p>
+</section><footer class="footer-container" data-reactid="19"><div class="footer-body" data-reactid="20"><img src="/img/dubbo_gray.png" data-reactid="21"/><img class="apache" src="/img/apache_logo.png" data-reactid="22"/><div class="cols-container" data-reactid="23"><div class="col col-12" data-reactid="24"><h3 data-reactid="25">Disclaimer</h3><p data-reactid="26">Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-6" data-reactid="27"><dl data-reactid="28"><dt data-reactid="29">Documentation</dt><dd data-reactid="30"><a href="/en-us/docs/user/quick-start.html" target="_self" data-reactid="31">Quick start</a></dd><dd data-reactid="32"><a href="/en-us/docs/dev/build.html" target="_self" data-reactid="33">Developer guide</a></dd><dd data-reactid="34"><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self" data-reactid="35">Admin manual</a></dd></dl></div><div class="col col-6" data-reactid="36"><dl data-reactid="37"><dt data-reactid="38">Resources</dt><dd data-reactid="39"><a href="/en-us/blog/index.html" target="_self" data-reactid="40">Blog</a></dd><dd data-reactid="41"><a href="/en-us/community/index.html" target="_self" data-reactid="42">Community</a></dd></dl></div></div><div class="copyright" data-reactid="43"><span data-reactid="44">Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

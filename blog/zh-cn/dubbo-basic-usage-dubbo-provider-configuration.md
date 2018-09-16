@@ -1,18 +1,24 @@
-Dubbo基本用法-Dubbo Provider配置
+---
+title: Dubbo基础用法之Provider配置
+keywords: Dubbo, Provider, Configuration
+description: 主要讲述如何配置dubbo，按照配置方式上可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
 ---
 
-# Dubbo基本用法
+# Dubbo基本用法之Provider配置
+
+
+## Dubbo基本用法
 
 本章节主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
 按照功能角度进行划分，可以分为Dubbo Provider和Dubbo Consumer。接下来章节中，分别对dubbo provider和Dubbo consumer进行讲解。
 
-## Dubbo Provider配置
+### Dubbo Provider配置
 
-### Provider 配置详解
+#### Provider 配置详解
 
 配置Dubbo Provider有4种方式：XML配置，properties方式配置，API调用方式配置，注解方式配置。
 
-#### XML配置
+##### XML配置
 
 ###### 最简单的配置的样例：
 ```
@@ -63,7 +69,7 @@ Dubbo基本用法-Dubbo Provider配置
 用于指定应用名，这里需要保证应用名唯一，这个应用名在后续的console admin中可以在列表中显示，方便管理。
 
 * &lt;dubbo:registry address="multicast://224.5.6.7:1234" /&gt;   
-注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地质，也可以eureka地质。上面这个是广播地址，在本地服务调用的测试过程中非常方便。
+注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地址，也可以eureka地址。上面这个是广播地址，在本地服务调用的测试过程中非常方便。
 
 * &lt;dubbo:protocol name="dubbo" port="20880" /&gt;   
 这里是传输的协议和默认端口，一般不需要更改。
@@ -71,6 +77,7 @@ Dubbo基本用法-Dubbo Provider配置
 > 接下来重点讲解下&lt;dubbo:service/&gt;的配置。
 
 * &lt;dubbo:service/&gt;支持的主要属性列表：
+
 | 属性名 | 说明 | 
 | -------- | ----- |
 | version | 版本号 | 
@@ -130,7 +137,7 @@ dubbo.protocol.port=28080
 * 比如：dubbo.registry.address=10.20.153.10:9090等价于<dubbo:registry address="10.20.153.10:9090" />
 
 如果 XML 有多行同名标签配置，可用 id 号区分，如果没有 id 号将对所有同名标签生效  
-* 比如：dubbo.protocol.rmi.port=1234等价于<dubbo:protocol id="rmi" name="rmi" port="1099" /> 2
+* 比如：dubbo.protocol.rmi.port=1234等价于<dubbo:protocol id="rmi" name="rmi" port="1234" /> 
 * 比如：dubbo.registry.china.address=10.20.153.10:9090等价于<dubbo:registry id="china" address="10.20.153.10:9090" />
 
 ###### 覆盖策略  
@@ -144,7 +151,7 @@ dubbo.protocol.port=28080
 1. 如果 classpath 根目录下存在多个 dubbo.properties，比如多个 jar 包中有 dubbo.properties，Dubbo 会任意加载，并打印 Error 日志，后续可能改为抛异常。 ↩
 2. 协议的 id 没配时，缺省使用协议名作为 id 
 
-#### annotation
+##### 注解配置
 
 ###### Service注解暴露服务  
 ```
@@ -193,7 +200,8 @@ public class ProviderTestApp {
 <dubbo:annotation package="com.chanshuyi.service.impl" />
 ```
 
-#### api直接触发
+##### 代码配置
+
 ```
 import com.alibaba.dubbo.rpc.config.ApplicationConfig;
 import com.alibaba.dubbo.rpc.config.RegistryConfig;
@@ -239,6 +247,7 @@ service.export();
 一般在spring应用中，不推荐使用这种方式。 具体的含义这里不做解释，可以通过github查看源码。
 
 ### Provider 接口和实现
+
 上面章节更多从配置角度出发，接下来通过一个完整的例子，来讲解下dubbo provider的完整使用。
 
 这个例子中只有一个服务UserReadService，有一个方法 getUserById。 需要将这个服务通过Dubbo暴露给远程的服务。具体的步骤如下：
@@ -277,11 +286,3 @@ public UserReadServiceImpl implements UserReadService{
 </beans>
 ```
 Dubbo配置的其他方式可以参考上一章节的相关配置，或者使用集成dubbo spring boot starter方式。
-
-
-
-
-
-
-
-

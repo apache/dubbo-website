@@ -31,7 +31,7 @@ package com.alibaba.xxx;
  
 import com.alibaba.dubbo.rpc.Protocol;
  
-public class XxxProtocol implemenets Protocol { 
+public class XxxProtocol implements Protocol { 
     // ...
 }
 ```
@@ -57,10 +57,10 @@ package com.alibaba.xxx;
  
 import com.alibaba.dubbo.rpc.Protocol;
  
-public class XxxProtocolWrapper implemenets Protocol {
+public class XxxProtocolWrapper implements Protocol {
     Protocol impl;
  
-    public XxxProtocol(Protocol protocol) { impl = protocol; }
+    public XxxProtocolWrapper(Protocol protocol) { impl = protocol; }
  
     // 接口方法做一个操作后，再调用extension的方法
     public void refer() {
@@ -100,7 +100,7 @@ public interface WheelMaker {
 `CarMaker` 的一个实现类：
 
 ```java
-public class RaceCarMaker implemenets CarMaker {
+public class RaceCarMaker implements CarMaker {
     WheelMaker wheelMaker;
  
     public setWheelMaker(WheelMaker wheelMaker) {
@@ -149,7 +149,7 @@ public interface WheelMaker {
 `CarMaker` 的一个实现类：
 
 ```java
-public class RaceCarMaker implemenets CarMaker {
+public class RaceCarMaker implements CarMaker {
     WheelMaker wheelMaker;
  
     public setWheelMaker(WheelMaker wheelMaker) {

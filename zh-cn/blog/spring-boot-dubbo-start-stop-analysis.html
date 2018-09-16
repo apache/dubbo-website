@@ -4,22 +4,22 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<meta name="keywords" content="spring-boot-dubbo-start-stop-analysis" />
-	<meta name="description" content="spring-boot-dubbo-start-stop-analysis" />
+	<meta name="keywords" content="Dubbo, Spring Boot, 源码分析" />
+	<meta name="description" content="本文分析 `incubator-dubbo-spring-boot-project` 中 Dubbo 启停源码的实现原理。" />
 	<!-- 网页标签标题 -->
-	<title>spring-boot-dubbo-start-stop-analysis</title>
+	<title>Spring Boot Dubbo应用启停源码分析</title>
 	<link rel="shortcut icon" href="/img/dubbo.ico"/>
 	<link rel="stylesheet" href="/build/blogDetail.css" />
 </head>
 <body>
-	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="68597831"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Spring-boot+Dubbo应用启停源码分析</h1>
-<h3>背景介绍</h3>
+	<div id="root"><div class="blog-detail-page" data-reactroot="" data-reactid="1" data-react-checksum="991133316"><header class="header-container header-container-normal" data-reactid="2"><div class="header-body" data-reactid="3"><a href="/zh-cn/index.html" data-reactid="4"><img class="logo" src="/img/dubbo_colorful.png" data-reactid="5"/></a><span class="language-switch language-switch-normal" data-reactid="6">En</span><div class="header-menu" data-reactid="7"><img class="header-menu-toggle" src="/img/menu_gray.png" data-reactid="8"/><ul data-reactid="9"><li class="menu-item menu-item-normal" data-reactid="10"><a href="/zh-cn/index.html" data-reactid="11">首页</a></li><li class="menu-item menu-item-normal" data-reactid="12"><a href="/zh-cn/docs/user/quick-start.html" data-reactid="13">文档</a></li><li class="menu-item menu-item-normal menu-item-normal-active" data-reactid="14"><a href="/zh-cn/blog/index.html" data-reactid="15">博客</a></li><li class="menu-item menu-item-normal" data-reactid="16"><a href="/zh-cn/community/index.html" data-reactid="17">社区</a></li></ul></div></div></header><section class="blog-content markdown-body" data-reactid="18"><h1>Spring Boot Dubbo应用启停源码分析</h1>
+<h2>背景介绍</h2>
 <p><a href="https://github.com/apache/incubator-dubbo-spring-boot-project">Dubbo Spring Boot</a> 工程致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发。同时也整合了 Spring Boot 特性：</p>
 <ul>
 <li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure">自动装配</a> (比如： 注解驱动, 自动装配等).</li>
 <li><a href="https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator">Production-Ready</a> (比如： 安全, 健康检查, 外部化配置等).</li>
 </ul>
-<h3>DubboConsumer启动分析</h3>
+<h2>DubboConsumer启动分析</h2>
 <p>你有没有想过一个问题？<code>incubator-dubbo-spring-boot-project</code>中的<code>DubboConsumerDemo</code>应用就一行代码，<code>main</code>方法执行完之后，为什么不会直接退出呢？</p>
 <pre><code class="language-java"><span class="hljs-meta">@SpringBootApplication</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.boot.dubbo.demo.consumer.controller"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboConsumerDemo</span> </span>{
@@ -102,7 +102,7 @@ run:1118, SpringApplication (org.springframework.boot)
 run:1107, SpringApplication (org.springframework.boot)
 main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
 </code></pre>
-<p>可以看到，spring-boot应用在启动的过程中，由于默认启动了Tomcat暴露HTTP服务，所以执行到了上述方法，而Tomcat启动的所有的线程，默认都是daemon线程，例如监听请求的Acceptor，工作线程池等等，如果这里不加控制的话，启动完成之后JVM也会退出。因此需要显示的启动一个线程，在某个条件下进行持续等待，从而避免线程退出。</p>
+<p>可以看到，spring-boot应用在启动的过程中，由于默认启动了Tomcat暴露HTTP服务，所以执行到了上述方法，而Tomcat启动的所有的线程，默认都是daemon线程，例如监听请求的Acceptor，工作线程池等等，如果这里不加控制的话，启动完成之后JVM也会退出。因此需要显式地启动一个线程，在某个条件下进行持续等待，从而避免线程退出。</p>
 <p>下面我们在深挖一下，在Tomcat的<code>this.tomcat.getServer().await()</code>这个方法中，线程是如何实现不退出的。这里为了阅读方便，去掉了不相关的代码。</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">await</span><span class="hljs-params">()</span> </span>{
     	<span class="hljs-comment">// ...</span>
@@ -127,7 +127,7 @@ main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
 <p>在await方法中，实际上当前线程在一个while循环中每10秒检查一次 <code>stopAwait</code>这个变量，它是一个<code>volatile</code>类型变量，用于确保被另一个线程修改后，当前线程能够立即看到这个变化。如果没有变化，就会一直处于while循环中。这就是该线程不退出的原因，也就是整个spring-boot应用不退出的原因。</p>
 <p>因为Springboot应用同时启动了8080和8081(management port)两个端口，实际是启动了两个Tomcat，因此会有两个线程<code>container-0</code>和<code>container-1</code>。</p>
 <p>接下来，我们再看看，这个Spring-boot应用又是如何退出的呢？</p>
-<h3>DubboConsumer退出分析</h3>
+<h2>DubboConsumer退出分析</h2>
 <p>在前面的描述中提到，有一个线程持续的在检查<code>stopAwait</code>这个变量，那么我们自然想到，在Stop的时候，应该会有一个线程去修改<code>stopAwait</code>，打破这个while循环，那又是谁在修改这个变量呢？</p>
 <p>通过对源码分析，可以看到只有一个方法修改了<code>stopAwait</code>,即<code>org.apache.catalina.core.StandardServer#stopAwait</code>，我们在此处加个断点，看看是谁在调用。</p>
 <blockquote>
@@ -175,14 +175,14 @@ run:<span class="hljs-number">929</span>, AbstractApplicationContext$<span class
 <li>响应外部的信号，例如Ctrl+C（其实发送的是SIGINT信号），或者是<code>SIGTERM</code>信号（默认<code>kill $PID</code>发送的是<code>SIGTERM</code>信号）</li>
 </ol>
 <p>因此，正常的应用在停止过程中(<code>kill -9 $PID</code>除外)，都会执行上述ShutdownHook，它的作用不仅仅是关闭tomcat，还有进行其他的清理工作，在此不再赘述。</p>
-<h3>总结</h3>
+<h2>总结</h2>
 <ol>
 <li>在<code>DubboConsumer</code>启动的过程中，通过启动一个独立的非daemon线程循环检查变量的状态，确保进程不退出</li>
 <li>在<code>DubboConsumer</code>停止的过程中，通过执行spring容器的shutdownhook，修改了变量的状态，使得程序正常退出</li>
 </ol>
-<h3>问题</h3>
+<h2>问题</h2>
 <p>在DubboProvider的例子中，我们看到Provider并没有启动Tomcat提供HTTP服务，那又是如何实现不退出的呢？我们将在下一篇文章中回答这个问题。</p>
-<h4>彩蛋</h4>
+<h3>彩蛋</h3>
 <p>在<code>Intellij IDEA</code>中运行了如下的单元测试，创建一个线程执行睡眠1000秒的操作，我们惊奇的发现，代码并没有线程执行完就退出了，这又是为什么呢？（被创建的线程是非daemon线程）</p>
 <pre><code class="language-java">    <span class="hljs-meta">@Test</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span> </span>{

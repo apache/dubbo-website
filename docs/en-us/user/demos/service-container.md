@@ -13,8 +13,8 @@ The content of Service container can be extended, built-in spring, jetty, log4j 
 * Automatically load all spring configurations in the `META-INF/spring`.
 
     ```properties
-dubbo.spring.config=classpath*:META-INF/spring/*.xml
-```
+    dubbo.spring.config=classpath*:META-INF/spring/*.xml
+    ```
 
 ### Jetty Container
 

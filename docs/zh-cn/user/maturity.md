@@ -34,7 +34,7 @@
 | -------- |---------|---------|---------|---------|---------|
 |Zookeeper注册中心 | Stable | 支持基于网络的集群方式，有广泛周边开源产品，建议使用dubbo-2.3.3以上版本（推荐使用） | 依赖于Zookeeper的稳定性 | 可用于生产环境 |  |
 |Redis注册中心 | Stable | 支持基于客户端双写的集群方式，性能高 | 要求服务器时间同步，用于检查心跳过期脏数据 | 可用于生产环境 |  |
-|Multicast注册中心 | Tested | 去中心化，不需要安装注册中心 | 依赖于网络拓普和路由，跨机房有风险 | 小规模应用或开发测试环境 |  |
+|Multicast注册中心 | Tested | 去中心化，不需要安装注册中心 | 依赖于网络拓扑和路由，跨机房有风险 | 小规模应用或开发测试环境 |  |
 |Simple注册中心 | Tested | Dogfooding，注册中心本身也是一个标准的RPC服务 | 没有集群支持，可能单点故障 | 试用 |  |
 |Feature | Maturity | Strength | Problem | Advise | User|
 |Simple监控中心 | Stable | 支持JFreeChart统计报表 | 没有集群支持，可能单点故障，但故障后不影响RPC运行 | 可用于生产环境 |  |
@@ -63,7 +63,7 @@
 |Broadcast Cluster | Tested | 广播调用所有提供者，逐个调用，任意一台报错则报错，通常用于更新提供方本地状态 | 速度慢，任意一台报错则报错 | 可用于生产环境 | | 
 |Feature | Maturity | Strength | Problem | Advise | User|
 |Random LoadBalance | Stable | 随机，按权重设置随机概率（推荐使用） | 在一个截面上碰撞的概率高，重试时，可能出现瞬间压力不均 | 可用于生产环境 | Alibaba|
-|RoundRobin LoadBalance | Stable | 轮循，按公约后的权重设置轮循比率 | 存在慢的机器累积请求问题，极端情况可能产生雪崩 | 可用于生产环境 |  |
+|RoundRobin LoadBalance | Stable | 轮询，按公约后的权重设置轮询比率 | 存在慢的机器累积请求问题，极端情况可能产生雪崩 | 可用于生产环境 |  |
 |LeastActive LoadBalance | Stable | 最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差，使慢的机器收到更少请求 | 不支持权重，在容量规划时，不能通过权重把压力导向一台机器压测容量 | 可用于生产环境 |  |
 |ConsistentHash LoadBalance | Stable | 一致性Hash，相同参数的请求总是发到同一提供者，当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动 | 压力分摊不均 | 可用于生产环境 |  |
 |Feature | Maturity | Strength | Problem | Advise | User|

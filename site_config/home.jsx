@@ -10,7 +10,7 @@ export default {
         link: '/zh-cn/docs/user/quick-start.html',
       },
       viewOnGithubButton: {
-        text: '在Github中查看',
+        text: 'GITHUB',
         link: 'https://github.com/apache/incubator-dubbo',
       }
     },
@@ -97,7 +97,7 @@ export default {
         link: '/en-us/docs/user/quick-start.html',
       },
       viewOnGithubButton: {
-        text: 'VIEW ON GITHUB',
+        text: 'GITHUB',
         link: 'https://github.com/apache/incubator-dubbo',
       }
     },
