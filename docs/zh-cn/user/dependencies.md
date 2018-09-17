@@ -1,3 +1,9 @@
+---
+title: 依赖
+keywords: 必须依赖, 缺省依赖, 可选依赖
+description: Dubbo 依赖基本介绍
+---
+
 # 依赖
 
 ## 必须依赖
