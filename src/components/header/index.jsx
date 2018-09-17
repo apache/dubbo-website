@@ -15,6 +15,16 @@ const languageSwitch = [
     value: 'zh-cn',
   },
 ];
+const searchSwitch = {
+  baidu: {
+    logo: 'https://img.alicdn.com/tfs/TB1n6DQayLaK1RjSZFxXXamPFXa-300-300.png',
+    url: 'https://www.baidu.com/s?wd=',
+  },
+  google: {
+    logo: 'https://img.alicdn.com/tfs/TB1REfuaCzqK1RjSZFjXXblCFXa-300-300.jpg',
+    url: 'https://www.google.com/search?q=',
+  },
+};
 const noop = () => {};
 const propTypes = {
   currentKey: PropTypes.string,
@@ -36,6 +46,9 @@ class Header extends React.Component {
     this.state = {
       menuBodyVisible: false,
       language: props.language,
+      search: siteConfig.defaultSearch,
+      searchValue: '',
+      inputVisible: false,
     };
   }
 
@@ -64,9 +77,44 @@ class Header extends React.Component {
     this.props.onLanguageChange(language);
   }
 
+  switchSearch() {
+    let search;
+    if (this.state.search === 'baidu') {
+      search = 'google';
+    } else {
+      search = 'baidu';
+    }
+    this.setState({
+      search,
+    });
+  }
+
+  toggleSearch() {
+    this.setState({
+      searchVisible: !this.state.searchVisible,
+    });
+  }
+
+  onInputChange(e) {
+    this.setState({
+      searchValue: e.target.value,
+    });
+  }
+
+  goSearch() {
+    const { search, searchValue } = this.state;
+    window.open(`${searchSwitch[search].url}${window.encodeURIComponent(`${searchValue} site:${siteConfig.domain}`)}`);
+  }
+
+  onKeyDown(e) {
+    if (e.keyCode === 13) {
+      this.goSearch();
+    }
+  }
+
   render() {
     const { type, logo, onLanguageChange, currentKey } = this.props;
-    const { menuBodyVisible, language } = this.state;
+    const { menuBodyVisible, language, search, searchVisible } = this.state;
     return (
       <header
         className={
@@ -80,6 +128,28 @@ class Header extends React.Component {
           <a href={`${window.rootPath}/${language}/index.html`}>
             <img className="logo" alt={siteConfig.name} title={siteConfig.name} src={logo} />
           </a>
+          {
+            siteConfig.defaultSearch ?
+            (
+              <div
+                className={classnames({
+                  search: true,
+                  [`search-${type}`]: true,
+                })}
+              >
+                <span className="icon-search" onClick={this.toggleSearch} />
+                {
+                  searchVisible ?
+                  (
+                    <div className="search-input">
+                      <img src={searchSwitch[search].logo} onClick={this.switchSearch} />
+                      <input autoFocus onChange={this.onInputChange} onKeyDown={this.onKeyDown} />
+                    </div>
+                  ) : null
+                }
+              </div>
+            ) : null
+          }
           {
             onLanguageChange !== noop ?
             (<span
