@@ -33,7 +33,7 @@ keywords: Dubbo, Apache, Release
    - 根据提示，生成key
 
     ```shell
-    $ gpg2 --full-gen-key
+    $ gpg --full-gen-key
     gpg (GnuPG) 2.0.12; Copyright (C) 2009 Free Software Foundation, Inc.
     This is free software: you are free to change and redistribute it.
     There is NO WARRANTY, to the extent permitted by law.
@@ -93,9 +93,11 @@ keywords: Dubbo, Apache, Release
     default-key 28681CB1
     ```
 
+    PS: 最新版本经过实测，本地没有gpg.conf这个文件，因此如果在执行过程中遇到签名失败，可以参考这个文章：https://blog.csdn.net/wenbo20182/article/details/72850810 或 https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors
+
 3. 设置Apache中央仓库
 
-   - Dubbo项目的父pom为apache pom
+   - Dubbo项目的父pom为apache pom(2.6.x发布版本不需要此操作)
 
     ```xml
     <parent>
@@ -141,7 +143,7 @@ keywords: Dubbo, Apache, Release
 
 1. 从主干分支拉取新分支作为发布分支，如现在要发布${release_version}版本，则从2.6.x拉出新分支${release_version}-release，此后${release_version} Release Candidates涉及的修改及打标签等都在${release_version}-release分支进行，最终发布完成后合入主干分支。
 
-2. 首先，在${release_version}-release分支验证maven组件打包、source源码打包、签名等是否都正常工作
+2. 首先，在${release_version}-release分支验证maven组件打包、source源码打包、签名等是否都正常工作(2.6.x记得要使用1.7或以下版本JDK进行编译打包)
 
    ```shell
    $ mvn clean install -Papache-release
@@ -154,14 +156,14 @@ keywords: Dubbo, Apache, Release
    - 先用dryRun验证是否ok
 
     ```shell
-    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
+    $ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
     ```
 
    - 验证通过后，执行release:prepare
 
     ```shell
     $ mvn release:clean
-    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    $ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     # 执行完成后：1.生成source.zip包； 2.打出tag，并推送到github仓库； 3.分支版本自动升级为${release_version}-SNAPSHOT，并将修改推送到github仓库
     ```
 
@@ -169,8 +171,10 @@ keywords: Dubbo, Apache, Release
 
     ```shell
     $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-    # 所有artifacts发布到配置的远程maven中央仓库，处于staging状态
+    # 所有artifacts发布到配置的远程maven中央仓库，处于staging状态，这里一定要去仓库检查一下是否完整发布上去，尤其是dubbo-parent模块
     ```
+
+    PS: 执行release插件时，需要输入github的密码，这里不是输入web页面的登录密码，而是一个token，详见这里：https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 
 ## 准备Apache发布
 
@@ -190,9 +194,9 @@ keywords: Dubbo, Apache, Release
    $ mkdir ${release_version}
    ```
 
-4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS)文件。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
+4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
 
-5. 拷贝Dubbo根目录下的source.zip包到svn本地仓库dubbo/${release_version}
+5. 拷贝distribution/target下的source相关的包到svn本地仓库dubbo/${release_version}
 
 6. 生成sha512签名
 
@@ -203,9 +207,7 @@ keywords: Dubbo, Apache, Release
 7. 如果有binary release要同时发布
 
    ```shell
-   # 到dubbo项目distribution的module下，执行：
-   $ mvn install
-   # target目录下，拷贝bin-release.zip以及bin-release.zip.asc到svn本地仓库dubbo/${release_version}
+   # distribution/target目录下，拷贝bin-release.zip以及bin-release.zip.asc到svn本地仓库dubbo/${release_version}
    # 参考第6步，生成sha512签名
    ```
 
