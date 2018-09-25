@@ -1,3 +1,8 @@
+---
+title: 快速启动
+keywords: XML configuration, Consumer, Provider
+description: 使用 XML 配置方式快速上手 Dubbo
+---
 
 # 快速启动
 
