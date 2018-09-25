@@ -1,3 +1,12 @@
+---
+title: Dubbo在Service Mesh下的思考和方案
+keywords: Dubbo, Service Mesh, Cloud Native
+description: Dubbo是实现框架，融入servcemesh理念就是我们今天分享的。
+---
+
+# Dubbo在Service Mesh下的思考和方案
+
+
 ### 开头
 Service Mesh这个“热”词是2016年9月被“造”出来，而今年2018年更是被称为service Mesh的关键之年，各家大公司都希望能在这个思潮下领先一步。今天我也分享阿里中间件在这方面的观点，思考和实践。考虑到有些人没了解过Dubbo(集团内以HSF为主)和Servicemesh，先简单介绍下这两个词。Dubbo应该是国内最受欢迎的远程服务框架，在Github上有超过2w的star数，也是阿里分布式架构互联互通的核心所在。跟Dubbo一样，servicemesh也是面向服务互联互通这一问题域，是云原生技术栈的核心之一；大家可以简单理解service mesh就是云原生组织定义的微服务架构解决理念。Dubbo是实现框架，融入servcemesh理念就是我们今天分享的。
 
