@@ -146,9 +146,9 @@ keywords: Dubbo, Apache, Release
 2. 首先，在${release_version}-release分支验证maven组件打包、source源码打包、签名等是否都正常工作(2.6.x记得要使用1.7或以下版本JDK进行编译打包)
 
    ```shell
-   $ mvn clean install -Papache-release
+   $ mvn clean install -Prelease
    $ mvn deploy
-   # 将snapshot包推送到maven中央仓库，处于staging状态
+   # 将snapshot包推送到maven中央仓库，处于staging状态，可选
    ```
 
 3. 用maven-release-plugin发布
@@ -320,11 +320,11 @@ The Apache Dubbo (Incubating) Team
 
 ## 正式发布
 
-1. 提交https://dist.apache.org/repos/dist/dev/incubator/dubbo目录下的发布包到https://dist.apache.org/repos/dist/release/incubator/dubbo/，完成正式发布。
-2. 发邮件到dev@dubbo.apache.org和general@apache.org，通知社区发布完成。
+1. 提交 https://dist.apache.org/repos/dist/dev/incubator/dubbo 目录下的发布包到 https://dist.apache.org/repos/dist/release/incubator/dubbo/ ，完成正式发布（KEYS有更新的，也需要同步发布）。
+2. 发邮件到 dev@dubbo.apache.org 和 general@apache.org ，通知社区发布完成。
 
 ## 完成Maven Convenient Binary发布（可选）
 
 **apache.repository.org nexus仓库的权限已经申请，参见[jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
-之前发布到maven仓库的artifacts都处于staging状态，用Apache id登录apache.repository.org，发布即可。
+之前发布到maven仓库的artifacts都处于staging状态，用Apache id登录 apache.repository.org ，发布即可。
