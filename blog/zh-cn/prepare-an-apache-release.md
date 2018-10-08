@@ -322,9 +322,10 @@ The Apache Dubbo (Incubating) Team
 
 1. 提交 https://dist.apache.org/repos/dist/dev/incubator/dubbo 目录下的发布包到 https://dist.apache.org/repos/dist/release/incubator/dubbo/ ，完成正式发布（KEYS有更新的，也需要同步发布）。
 2. 发邮件到 dev@dubbo.apache.org 和 general@apache.org，通知社区发布完成。
-3. 在Github上发布[release notes](https://github.com/apache/incubator-dubbo/releases)。
-4. 更新[Github](https://github.com/apache/incubator-dubbo#maven-dependency)上的推荐依赖到最新版本。
-5. 在[官网](http://dubbo.apache.org/)发布公告，宣布版本发布成功。
+3. 合并${release-version}-release分支到对应的主干分支。
+4. 在Github上发布[release notes](https://github.com/apache/incubator-dubbo/releases)。
+5. 更新[Github](https://github.com/apache/incubator-dubbo#maven-dependency)上的推荐依赖到最新版本。
+6. 在[官网](http://dubbo.apache.org/)发布公告，宣布版本发布成功。
 
 ## 完成Maven Convenient Binary发布（可选）
 
