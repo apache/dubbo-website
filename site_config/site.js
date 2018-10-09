@@ -31,6 +31,31 @@ export default {
       title: 'Disclaimer',
       content: 'Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
     },
+    asf: {
+      title: 'ASF',
+      list: [
+        {
+          text: 'Foundation',
+          link: 'http://www.apache.org',
+        },
+        {
+          text: 'License',
+          link: 'http://www.apache.org/licenses/',
+        },
+        {
+          text: 'Events',
+          link: 'http://www.apache.org/events/current-event',
+        },
+        {
+          text: 'Sponsorship',
+          link: 'http://www.apache.org/foundation/sponsorship.html',
+        },
+        {
+          text: 'Thanks',
+          link: 'http://www.apache.org/foundation/thanks.html',
+        },
+      ],
+    },
     documentation: {
       title: 'Documentation',
       list: [
@@ -89,6 +114,31 @@ export default {
     disclaimer: {
       title: 'Disclaimer',
       content: 'Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
+    },
+    asf: {
+      title: 'ASF',
+      list: [
+        {
+          text: '基金会',
+          link: 'http://www.apache.org',
+        },
+        {
+          text: '证书',
+          link: 'http://www.apache.org/licenses/',
+        },
+        {
+          text: '事件',
+          link: 'http://www.apache.org/events/current-event',
+        },
+        {
+          text: '赞助',
+          link: 'http://www.apache.org/foundation/sponsorship.html',
+        },
+        {
+          text: '致谢',
+          link: 'http://www.apache.org/foundation/thanks.html',
+        },
+      ],
     },
     documentation: {
       title: '文档',

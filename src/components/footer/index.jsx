@@ -25,16 +25,16 @@ class Footer extends React.Component {
               <h3>{dataSource.disclaimer.title}</h3>
               <p>{dataSource.disclaimer.content}</p>
             </div>
-              <div className="col col-4">
-                  <dl>
-                      <dt>ASF</dt>
-                      <dd><a href="http://www.apache.org">Foundation</a></dd>
-                      <dd><a href="http://www.apache.org/licenses/">License</a></dd>
-                      <dd><a href="http://www.apache.org/events/current-event">Events</a></dd>
-                      <dd><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></dd>
-                      <dd><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></dd>
-                  </dl>
-              </div>
+            <div className="col col-4">
+              <dl>
+                <dt>{dataSource.asf.title}</dt>
+                {
+                  dataSource.asf.list.map((d, i) => (
+                    <dd key={i}><a href={getLink(d.link)} target={d.target || '_self'}>{d.text}</a></dd>
+                  ))
+                }
+              </dl>
+            </div>
             <div className="col col-4">
               <dl>
                 <dt>{dataSource.documentation.title}</dt>
