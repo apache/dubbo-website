@@ -25,7 +25,17 @@ class Footer extends React.Component {
               <h3>{dataSource.disclaimer.title}</h3>
               <p>{dataSource.disclaimer.content}</p>
             </div>
-            <div className="col col-6">
+              <div className="col col-4">
+                  <dl>
+                      <dt>ASF</dt>
+                      <dd><a href="http://www.apache.org">Foundation</a></dd>
+                      <dd><a href="http://www.apache.org/licenses/">License</a></dd>
+                      <dd><a href="http://www.apache.org/events/current-event">Events</a></dd>
+                      <dd><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></dd>
+                      <dd><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></dd>
+                  </dl>
+              </div>
+            <div className="col col-4">
               <dl>
                 <dt>{dataSource.documentation.title}</dt>
                 {
@@ -35,7 +45,7 @@ class Footer extends React.Component {
                 }
               </dl>
             </div>
-            <div className="col col-6">
+            <div className="col col-4">
             <dl>
             <dt>{dataSource.resources.title}</dt>
             {

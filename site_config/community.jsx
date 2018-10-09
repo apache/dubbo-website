@@ -83,7 +83,7 @@ export default {
         {
           img: '/img/documents.png',
           title: 'Documents',
-          content: <span>Improve the <a href="https://github.com/apache/incubator-dubbo-docs">documentation</a>.</span>,
+          content: <span>Improve the <a href="http://dubbo.apache.org/en-us/docs/user/quick-start.html">documentation</a>.</span>,
         },
         {
           img: '/img/pullrequest.png',
@@ -503,7 +503,7 @@ export default {
         {
           img: '/img/documents.png',
           title: '文档',
-          content: <span>优化Dubbo <a href="http://dubbo.apache.org/#/docs/"> 文档</a>。</span>,
+          content: <span>优化Dubbo <a href="http://dubbo.apache.org/zh-cn/docs/user/quick-start.html"> 文档</a>。</span>,
         },
         {
           img: '/img/pullrequest.png',
