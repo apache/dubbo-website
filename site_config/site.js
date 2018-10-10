@@ -84,6 +84,10 @@ export default {
           text: 'Community',
           link: '/en-us/community/index.html',
         },
+        {
+            text: 'Security',
+            link: 'https://www.apache.org/security/',
+        },
       ],
     },
     copyright: 'Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.',
@@ -167,6 +171,10 @@ export default {
         {
           text: '社区',
           link: '/zh-cn/community/index.html',
+        },
+        {
+            text: '安全',
+            link: 'https://www.apache.org/security',
         }
       ]
     },
