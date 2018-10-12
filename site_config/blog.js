@@ -156,6 +156,13 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+        {
+            title: '在 Dubbo 中使用 Zipkin',
+            author:'@beiwei30',
+            dateStr: 'Oct 12th, 2018',
+            desc: '本文介绍如何使用 Zipkin 在 Dubbo 中进行全链路追踪',
+            link: '/zh-cn/blog/use-zipkin-in-dubbo.html',
+        },
 		{
             title: 'Dubbo在Service Mesh下的思考和方案',
             author: '@JeffLv',
