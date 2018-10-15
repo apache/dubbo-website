@@ -134,7 +134,7 @@ public class DemoServiceImpl implements DemoService {
 
 ### 协议头约定
 
-![/dev-guide/images/dubbo_protocol_header.jpg](sources/images/dubbo_protocol_header.jpg)
+![/dev-guide/images/dubbo_protocol_header.jpg](sources/images/dubbo_protocol_header.png)
 
 ### 线程派发模型
 
