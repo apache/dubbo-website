@@ -134,7 +134,7 @@ The above class would be encapsulated to be a `AbstractProxyInvoker` instance, a
 
 ### Protocol header agreement
 
-![/dev-guide/images/dubbo_protocol_header.jpg](sources/images/dubbo_protocol_header.jpg)
+![/dev-guide/images/dubbo_protocol_header.jpg](sources/images/dubbo_protocol_header.png)
 
 ### Thread dispatch model
 
