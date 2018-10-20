@@ -17,6 +17,11 @@ export default {
         link: '/en-us/docs/user/quick-start.html',
       },
       {
+        key: 'developers',
+        text: 'DEVELOPERS',
+        link: '/en-us/docs/developers/developer1_dev.html',
+      },
+      {
         key: 'blog',
         text: 'BLOG',
         link: '/en-us/blog/index.html',
@@ -25,6 +30,11 @@ export default {
         key: 'community',
         text: 'COMMUNITY',
         link: '/en-us/community/index.html',
+      },
+      {
+        key: 'download',
+        text: 'DOWNLOAD',
+        link: '/en-us/blog/download.html',
       },
     ],
     disclaimer: {
@@ -105,6 +115,11 @@ export default {
         link: '/zh-cn/docs/user/quick-start.html',
       },
       {
+        key: 'developers',
+        text: '开发者',
+        link: '/zh-cn/docs/developers/developer1_dev.html',
+      },
+      {
         key: 'blog',
         text: '博客',
         link: '/zh-cn/blog/index.html',
@@ -113,7 +128,12 @@ export default {
         key: 'community',
         text: '社区',
         link: '/zh-cn/community/index.html',
-      }
+      },
+      {
+        key: 'download',
+        text: '下载',
+        link: '/zh-cn/blog/download.html',
+      },
     ],
     disclaimer: {
       title: 'Disclaimer',
