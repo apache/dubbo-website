@@ -19,7 +19,7 @@ export default {
       {
         key: 'developers',
         text: 'DEVELOPERS',
-        link: '/en-us/docs/developers/developer1_dev.html',
+        link: '/en-us/docs/developers/developers_dev.html',
       },
       {
         key: 'blog',
@@ -117,7 +117,7 @@ export default {
       {
         key: 'developers',
         text: '开发者',
-        link: '/zh-cn/docs/developers/developer1_dev.html',
+        link: '/zh-cn/docs/developers/developers_dev.html',
       },
       {
         key: 'blog',
