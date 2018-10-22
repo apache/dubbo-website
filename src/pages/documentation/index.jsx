@@ -11,6 +11,8 @@ import Sidemenu from '../../components/sidemenu';
 import Footer from '../../components/footer';
 import siteConfig from '../../../site_config/site';
 import docsConfig from '../../../site_config/docs';
+// 开发者页面借用文档页面
+import developConfig from '../../../site_config/develop';
 import './index.scss';
 
 // 锚点正则
@@ -88,27 +90,15 @@ class Documentation extends Language {
   }
 
   render() {
-    let urlLang;
-    if (window.rootPath) {
-      urlLang = window.location.pathname.split('/')[2];
-    } else {
-      urlLang = window.location.pathname.split('/')[1];
-    }
-    let language = this.props.lang || urlLang || cookie.get('docsite_language') || siteConfig.defaultLanguage;
-    // 防止链接被更改导致错误的cookie存储
-    if (language !== 'en-us' && language !== 'zh-cn') {
-      language = siteConfig.defaultLanguage;
-    }
-    // 同步cookie的语言版本
-    if (language !== cookie.get('docsite_language')) {
-      cookie.set('docsite_language', language, { expires: 365, path: '' });
-    }
-    const dataSource = docsConfig[language];
+    const language = this.getLanguage();
+    // 开发者页借助文档页载体
+    const isDevelop = window.location.pathname.split('/').pop().lastIndexOf('_dev.html') !== -1;
+    const dataSource = isDevelop ? developConfig[language] : docsConfig[language];
     const __html = this.props.__html || this.state.__html;
     return (
       <div className="documentation-page">
       <Header
-        currentKey="docs"
+        currentKey={isDevelop ? 'developers' : 'docs'}
         type="normal"
         logo={`${window.rootPath}/img/dubbo_colorful.png`}
         language={language}

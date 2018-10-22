@@ -36,21 +36,7 @@ class Home extends Language {
   }
 
   render() {
-    let urlLang;
-    if (window.rootPath) {
-      urlLang = window.location.pathname.split('/')[2];
-    } else {
-      urlLang = window.location.pathname.split('/')[1];
-    }
-    let language = this.props.lang || urlLang || cookie.get('docsite_language') || siteConfig.defaultLanguage;
-    // 防止链接被更改导致错误的cookie存储
-    if (language !== 'en-us' && language !== 'zh-cn') {
-      language = siteConfig.defaultLanguage;
-    }
-    // 同步cookie语言版本
-    if (language !== cookie.get('docsite_language')) {
-      cookie.set('docsite_language', language, { expires: 365, path: '' });
-    }
+    const language = this.getLanguage();
     const dataSource = homeConfig[language];
     const { headerType } = this.state;
     const headerLogo = headerType === 'primary' ? `${window.rootPath}/img/dubbo_white.png` : `${window.rootPath}/img/dubbo_colorful.png`;

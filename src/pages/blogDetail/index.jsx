@@ -83,27 +83,15 @@ class BlogDetail extends Language {
   }
 
   render() {
-    let urlLang;
-    if (window.rootPath) {
-      urlLang = window.location.pathname.split('/')[2];
-    } else {
-      urlLang = window.location.pathname.split('/')[1];
-    }
-    let language = this.props.lang || urlLang || cookie.get('docsite_language') || siteConfig.defaultLanguage;
-    // 防止链接被更改导致错误的cookie存储
-    if (language !== 'en-us' && language !== 'zh-cn') {
-      language = siteConfig.defaultLanguage;
-    }
-    // 同步cookie的语言版本
-    if (language !== cookie.get('docsite_language')) {
-      cookie.set('docsite_language', language, { expires: 365, path: '' });
-    }
+    const language = this.getLanguage();
     const __html = this.props.__html || this.state.__html;
+    // 下载页借助博客页载体
+    const isDownload = window.location.pathname.split('/').pop().replace('.html', '') === 'download';
     return (
       <div className="blog-detail-page">
       <Header
         type="normal"
-        currentKey="blog"
+        currentKey={isDownload ? 'download' : 'blog'}
         logo={`${window.rootPath}/img/dubbo_colorful.png`}
         language={language}
         onLanguageChange={this.onLanguageChange}
