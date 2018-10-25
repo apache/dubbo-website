@@ -45,7 +45,7 @@ Or:
 
 tag  | purpose | introduction
 ------------- | ------------- | -------------
-`<dubbo:service/>` | Service Export  | Used to export service, define service metadata, export service with mutiple protocols, register service to multiple registries
+`<dubbo:service/>` | Service Export  | Used to export service, define service metadata, export service with multiple protocols, register service to multiple registries
 `<dubbo:reference/>`  | Service Reference  | Used to create a remote proxy, subscribe to multiple registries
 `<dubbo:protocol/>`  | Protocol Config  | Configure the protocol for services on provider side, the consumer side follows.
 `<dubbo:application/>`  | Application Config  | Applies to both provider and consumer.
