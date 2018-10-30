@@ -31,7 +31,9 @@
 
 ### 贡献者
 
-| Github ID  | Github URL                      | 组织 | 时区 |
-| ---------- | ------------------------------- | ---- | ---- |
-| leyou240   | <https://github.com/leyou240>   |      | +8   |
-| chenzhiguo | <https://github.com/chenzhiguo> |      | +8   |
+| Github ID  | Github URL                      | 组织         | 时区 |
+| ---------- | ------------------------------- | ------------ | ---- |
+| leyou240   | <https://github.com/leyou240>   |              | +8   |
+| chenzhiguo | <https://github.com/chenzhiguo> |              | +8   |
+| biyuhao    | <https://github.com/biyuhao>    | Asiainfo-sec | +8   |
+
