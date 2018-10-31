@@ -23,7 +23,7 @@ The specified method to merge the results, other unspecified methods, will only 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">
     <dubbo:method name="getMenuItems" merger="true" />
-</dubbo:service>
+</dubbo:reference>
 ```
 
 The Specified a method does not merge the results, others merge the results
@@ -31,7 +31,7 @@ The Specified a method does not merge the results, others merge the results
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*" merger="true">
     <dubbo:method name="getMenuItems" merger="false" />
-</dubbo:service>
+</dubbo:reference>
 ```
 
 Specify the merge strategy, the default according to the type of return value automatically match, if the same type has two mergers, you need to specify the name of the merger[^2]
@@ -39,7 +39,7 @@ Specify the merge strategy, the default according to the type of return value au
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">
     <dubbo:method name="getMenuItems" merger="mymerge" />
-</dubbo:service>
+</dubbo:reference>
 ```
 
 Specify the merge method, it will call the return type's method for merging, the merging method parameter type must be the return type
@@ -47,7 +47,7 @@ Specify the merge method, it will call the return type's method for merging, the
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">
     <dubbo:method name="getMenuItems" merger=".addAll" />
-</dubbo:service>
+</dubbo:reference>
 ```
 
 [^1]: since `2.1.0` began to support
