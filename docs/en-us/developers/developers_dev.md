@@ -35,3 +35,5 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | ---------- | ------------------------------- | ------------ | -------- |
 | leyou240   | <https://github.com/leyou240>   |              | +8       |
 | chenzhiguo | <https://github.com/chenzhiguo> |              | +8       |
+| biyuhao    | <https://github.com/biyuhao>    | Asiainfo-sec | +8       |
+
