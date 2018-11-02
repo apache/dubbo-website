@@ -1,53 +1,55 @@
-## Contributing to Dubbo
+## 为Dubbo做贡献
 
-Dubbo is released under the non-restrictive Apache 2.0 license, and follows a very standard Github development process, using Github tracker for issues and merging pull requests into master. If you want to contribute even something trivial please do not hesitate, but follow the guidelines below.
+Dubbo是在非限制性的Apache 2.0许可下发布的，遵循标准的Github开发流程，使用Github追踪处理问题，并将pull request合并到master中。如果您想为Dubbo 做贡献（即便是一些微小的），请不要犹豫，遵循下面的指导方针。
 
-### Sign the Contributor License Agreement
-Before we accept a non-trivial patch or pull request we will need you to sign the Contributor License Agreement. Signing the contributor’s agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do. Active contributors might be asked to join the core team, and given the ability to merge pull requests.
+### 签署贡献者许可协议
+在我们接受一个补丁或pull request之前，我们需要您签署贡献者许可协议。签署贡献者协议并不授予任何人对代码仓库的提交权限，但是它意味着我们可以接受您的贡献，并且如果我们这样做，您将获得一个作者标注。主动贡献者可能会被邀请加入核心团队，并有权限合并pull request。
 
-### Contact
+### 联系我们
 
-#### Mailing list
+#### 邮件列表
 
-The mailing list is the recommended way for discussing almost anything that related to Dubbo. Please refer to this [guide](https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide) for detailed documentation on how to subscribe.
 
-- [dev@dubbo.incubator.apache.org](mailto:dev-subscribe@dubbo.incubator.apache.org): the develop mailing list, you can ask question here if you have encountered any problem when using or developing Dubbo.
-- [commits@dubbo.incubator.apache.org](mailto:commits-subscribe@dubbo.incubator.apache.org): all the commits will be sent to this mailing list. You can subscribe to it if you are interested in Dubbo's development.
-- [notification@dubbo.incubator.apache.org](mailto:notification-subscribe@dubbo.incubator.apache.org): all the Github [issue](https://github.com/apache/incubator-dubbo/issues) updates and [pull request](https://github.com/apache/incubator-dubbo/pulls) updates will be sent to this mailing list.
+邮件列表是讨论几乎所有与Dubbo有关事情的推荐方式。有关如何订阅的详细文档，请参阅[指南](https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide)。
 
-### Reporting issue
+- [dev@dubbo.incubator.apache.org](mailto:dev-subscribe@dubbo.incubator.apache.org): 开发邮件列表，如果您在使用或开发Dubbo时遇到任何问题，您可以在此提出问题。
+- [commits@dubbo.incubator.apache.org](mailto:commits-subscribe@dubbo.incubator.apache.org): 所有提交将被发送到这个邮件列表。如果您对Dubbo的发展感兴趣，您可以订阅它。
+- [notification@dubbo.incubator.apache.org](mailto:notification-subscribe@dubbo.incubator.apache.org): 所有Github  [issue](https://github.com/apache/incubator-dubbo/issues)和[pull request](https://github.com/apache/incubator-dubbo/pulls)的更新都会被发送到这个邮件列表。
 
-Please follow the [template](https://github.com/apache/incubator-dubbo/issues/new?template=dubbo-issue-report-template.md) for reporting any issues.
+### 报告问题
 
-### Code Conventions
-Our code style is almost in line with the standard java conventions (Popular IDE's default setting satisfy this), with the following additional restricts:  
-* If there are more than 120 characters in current line, start a new line.
+在报告任何问题时请遵循[模版](https://github.com/apache/incubator-dubbo/issues/new?template=dubbo-issue-report-template.md)。
 
-* Make sure all new .java files to have a simple Javadoc class comment with at least a @date tag identifying birth, and preferably at least a paragraph on what the class is for.
+### 代码约定
+我们的代码风格几乎和标准Java约定一致（流行IDE的默认设置满足这一点），主要有以下附加限制：
 
-* Add the ASF license header comment to all new .java files (copy from existing files in the project)
+* 如果当前行中有超过120个字符，则起一个新的行。
 
-* Make sure no @author tag added to the file you contribute since @author tag is not used at Apache, other ways such as cvs will record all your contributions fairly.
+* 确保所有新的.java文件都有一个简单的JavaDoc类注释，其中至少有一个标识创建日期的标签，最好至少有一个关于该类的解释说明。
 
-* Add some Javadocs and, if you change the namespace, some XSD doc elements.
+* 将ASF许可注释添加到所有新的.java文件（从项目中的现有文件复制）
 
-* A few unit tests should be added for a new feature or an important bugfix.
+* 请确保没有将@author标记添加到您所贡献的文件中，因为Apache不使用@author标记，其他方式（如cvs）将公平地记录所有您的贡献。
 
-* If no-one else is using your branch, please rebase it against the current master (or other target branch in the main project).
+* 为代码添加一些JavaDoc，如果您更改命名空间，则需要一些XSD DOC元素。
 
-* When writing a commit message please follow these conventions, if you are fixing an existing issue please add Fixes #XXX at the end of the commit message (where XXX is the issue number).
+* 对于新的特征或重要的修复程序，应该添加单元测试。
 
-### Contribution flow
+* 如果没有其他人使用您的分支，请将它与master（或主项目中的其他目标分支）同步。
 
-This is a rough outline of what a contributor's workflow looks like:
+* 当编写提交消息时，请遵循这些约定，如果您正在修复一个现有问题，请在提交消息的末尾添加Fixes XXX（其中XXX是问题编号）。
 
-* Fork the current repository
-* Create a topic branch from where to base the contribution. This is usually master.
-* Make commits of logical units.
-* Make sure commit messages are in the proper format (see below).
-* Push changes in a topic branch to your forked repository.
-* Follow the checklist in the [pull request template](https://github.com/apache/incubator-dubbo/blob/master/PULL_REQUEST_TEMPLATE.md)
-* Before you sending out the pull request, please sync your forked repository with remote repository, this will make your pull request simple and clear. See guide below:
+### 贡献流程
+
+这是一个贡献者工作流程的大致说明：
+
+* 克隆当前项目
+* 从希望贡献的分支上创新新的分支，通常是master分支。
+* 提交您的更改。
+* 确保提交消息的格式正确。
+* 将新分支推送到您克隆的代码库中。
+* 执行检查表 [pull request模版](https://github.com/apache/incubator-dubbo/blob/master/PULL_REQUEST_TEMPLATE.md)。
+* 在提交pull requsest请求前, 请将您克隆的代码和远程代码库同步，这样您的pull request会简单清晰。具体操作如下：
 ```
 git remote add upstream git@github.com:apache/incubator-dubbo.git
 git fetch upstream
@@ -56,11 +58,13 @@ git checkout -b your_awesome_patch
 ... add some work
 git push origin your_awesome_patch
 ```
-* Submit a pull request to apache/incubator-dubbo and wait for the reply.
+* 提交pull request请求到apache/incubator-dubbo并等待回复。
 
-Thanks for contributing!
+谢谢您的贡献！
 
-### Code style
+### 代码风格
 
-We provide a template file [dubbo_codestyle_for_idea.xml](https://github.com/apache/incubator-dubbo/tree/master/codestyle/dubbo_codestyle_for_idea.xml) for IntelliJ idea, you can import it to you IDE. 
-If you use Eclipse you can config manually by referencing the same file.
+
+我们提供了IntelliJ idea的模版文件[dubbo_codestyle_for_idea.xml](https://github.com/apache/incubator-dubbo/tree/master/codestyle/dubbo_codestyle_for_idea.xml)，您可以将它导入到IDE。
+
+如果使用Eclipse，可以通过参考该文件手动配置。
