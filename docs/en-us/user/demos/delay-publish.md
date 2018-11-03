@@ -1,6 +1,6 @@
 # Delay publish service
 
-If your services need time to warm up, such as: initialization cache or another reference resources has to be ready. You can use the delay feature to delay publishing services. We fine-tuned the service delay exposure logic in Dubbo 2.6.5, delaying the countdown of services that require delayed exposure (delay > 0) until Spring initialization is complete. You won't be aware of this change while using Dubbo, so please be assured that use.
+If your services need time to warm up, such as: initialization cache or another reference resources has to be ready. You can use the delay feature to delay publishing services. We fine-tuned the service delay exposure logic in Dubbo 2.6.5, delaying the countdown of services that require delayed exposure until Spring initialization is complete. You won't be aware of this change while using Dubbo, so please be assured that use.
 
 ## Prior to Dubbo-2.6.5
 ### Delay five second publish
