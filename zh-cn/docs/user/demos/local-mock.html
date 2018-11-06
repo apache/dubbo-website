@@ -40,6 +40,38 @@
 <p>请考虑改为 Mock 实现，并在 Mock 实现中 return null。如果只是想简单的忽略异常，在 <code>2.0.11</code> 以上版本可用：</p>
 <pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"return null"</span> /&gt;</span>
 </code></pre>
+<h2>进阶用法</h2>
+<h3>return</h3>
+<p>使用 <code>return</code> 来返回一个字符串表示的对象，作为 Mock 的返回值。合法的字符串可以是：</p>
+<ul>
+<li><em>empty</em>: 代表空，基本类型的默认值，或者集合类的空值</li>
+<li><em>null</em>: <code>null</code></li>
+<li><em>true</em>: <code>true</code></li>
+<li><em>false</em>: <code>false</code></li>
+<li><em>JSON 格式</em>: 反序列化 JSON 所得到的对象</li>
+</ul>
+<h3>throw</h3>
+<p>使用 <code>throw</code> 来返回一个 Exception 对象，作为 Mock 的返回值。</p>
+<p>当调用出错时，抛出一个默认的 RPCException:</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"throw"</span> /&gt;</span>
+</code></pre>
+<p>当调用出错时，抛出指定的 Exception：</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"throw com.foo.MockException"</span> /&gt;</span>
+</code></pre>
+<h3>force 和 fail</h3>
+<p>在 <code>2.6.6</code> 以上的版本，可以开始在 Spring XML 配置文件中使用 <code>fail:</code> 和 <code>force:</code>。<code>force:</code> 代表强制使用 Mock 行为，在这种情况下不会走远程调用。<code>fail:</code> 与默认行为一致，只有当远程调用发生错误时才使用 Mock 行为。<code>force:</code> 和 <code>fail:</code> 都支持与 <code>throw</code> 或者 <code>return</code> 组合使用。</p>
+<p>强制返回指定值：</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"force:return fake"</span> /&gt;</span>
+</code></pre>
+<p>强制抛出指定异常：</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"force:throw com.foo.MockException"</span> /&gt;</span>
+</code></pre>
+<h3>在方法级别配置 Mock</h3>
+<p>Mock 可以在方法级别上指定，假定 <code>com.foo.BarService</code> 上有好几个方法，我们可以单独为 <code>sayHello()</code> 方法指定 Mock 行为。具体配置如下所示，在本例中，只要 <code>sayHello()</code> 被调用到时，强制返回 &quot;fake&quot;:</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">check</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"sayHello.mock"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"force:return fake"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dubbo:reference</span>&gt;</span>
+</code></pre>
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">

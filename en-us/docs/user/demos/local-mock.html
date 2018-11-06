@@ -40,6 +40,38 @@
 <p>Consider changing to Mock implementation and return null in Mock implementation. If you just want to simply ignore the exception, <code>2.0.11</code> version or later version is available:</p>
 <pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"return null"</span> /&gt;</span>
 </code></pre>
+<h2>Advanced Usage</h2>
+<h3>return</h3>
+<p><code>return</code> can be used to return an object's string representation as the mocked return value. The legal values incude:</p>
+<ul>
+<li><em>empty</em>: empty value, default value for primary type, and empty value for collections.</li>
+<li><em>null</em>: <code>null</code></li>
+<li><em>true</em>: <code>true</code></li>
+<li><em>false</em>: <code>false</code></li>
+<li><em>JSON format</em>: a mocked return value in JSON format, will be deserialized at runtime</li>
+</ul>
+<h3>throw</h3>
+<p><code>throw</code> can be used to throw an exception object as the mocked return value.</p>
+<p>Throw a default RPCException when invocation gets wrong:</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"throw"</span> /&gt;</span>
+</code></pre>
+<p>Throw a specified exception when invocation gets wrong:</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"throw com.foo.MockException"</span> /&gt;</span>
+</code></pre>
+<h3>force &amp; fail</h3>
+<p>Since <code>2.6.6</code> and above, it is possible to use <code>fail:</code> and <code>force:</code> in Spring's XML configuration to define mock behavior. <code>force:</code> means the mocked value is forced to use no matter the invocation gets wrong or not, in fact, the remote invocation will not happen at all. <code>fail:</code> is consistent with the default behavior, that is, mock happens only when invocation gets wrong. Futhermore, both <code>force:</code> and <code>fail:</code> can be used together with <code>throw</code> or <code>return</code> to define the mock behavior further.</p>
+<p>Force to return the specified value:</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"force:return fake"</span> /&gt;</span>
+</code></pre>
+<p>Force to throw the specified exception:</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span> <span class="hljs-attr">mock</span>=<span class="hljs-string">"force:throw com.foo.MockException"</span> /&gt;</span>
+</code></pre>
+<h3>Specify Mock For Particular Method Only</h3>
+<p>Mock behavior can be specified on the method level. Assume there are a couple of methods on <code>com.foo.BarService</code>, we can specify the mock behavior for one particular method only, say <code>sayHello()</code>. In the example below, &quot;fake&quot; is forced to return everytime when <code>sayHello()</code> is called, but other methods will not be effected:</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">check</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.foo.BarService"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"sayHello.mock"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"force:return fake"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dubbo:reference</span>&gt;</span>
+</code></pre>
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">
