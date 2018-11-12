@@ -1,6 +1,6 @@
 # Callback parameter
 
-The parameter callback is the same as calling a local callback or listener, just declare which parameter is a callback type in Spring's configuration file, and Dubbo will generate a reverse proxy based on the long connection so that client logic can be called from the server.Can ref to [Sample code in the dubbo project](https://github.com/apache/incubator-dubbo/tree/master/dubbo-test/dubbo-test-examples/src/main/java/com/alibaba/dubbo/examples/callback).
+The parameter callback is the same as calling a local callback or listener, just declare which parameter is a callback type in Spring's configuration file, and Dubbo will generate a reverse proxy based on the long connection so that client logic can be called from the server.Can ref to [Sample code in the dubbo project](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-callback).
 
 ## Example of service interface
 
@@ -100,7 +100,7 @@ context.start();
 
 CallbackService callbackService = (CallbackService) context.getBean("callbackService");
 
-callbackService.addListener("http://10.20.160.198/wiki/display/dubbo/foo.bar", new CallbackListener(){
+callbackService.addListener("foo.bar", new CallbackListener(){
     public void changed(String msg) {
         System.out.println("callback1:" + msg);
     }
