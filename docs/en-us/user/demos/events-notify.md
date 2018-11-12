@@ -24,7 +24,7 @@ class NormalDemoService implements IDemoService {
 
 ```xml
 <dubbo:application name="rpc-callback-demo" />
-<dubbo:registry address="http://10.20.160.198/wiki/display/dubbo/10.20.153.186" />
+<dubbo:registry address="zookeeper://127.0.0.1:2181"/>
 <bean id="demoService" class="com.alibaba.dubbo.callback.implicit.NormalDemoService" />
 <dubbo:service interface="com.alibaba.dubbo.callback.implicit.IDemoService" ref="demoService" version="1.0.0" group="cn"/>
 ```
