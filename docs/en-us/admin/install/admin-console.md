@@ -15,12 +15,8 @@ Configuration [^1]:
 ```sh
 configuration file：
 dubbo-admin-backend/src/main/resources/application.properties
-dubbo-admin-backend/src/main/resources/application-develop.properties
-dubbo-admin-backend/src/main/resources/application-production.properties
 configurations：
 dubbo.registry.address=zookeeper://127.0.0.1:2181
-dubbo.admin.root.password=root
-dubbo.admin.guest.password=guest
 ```
 
 Start:

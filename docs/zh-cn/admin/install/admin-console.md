@@ -13,14 +13,10 @@ mvn clean package
 配置 [^1]:
 
 ```sh
-目前的配置文件做了环境区分：
+配置文件为：
 dubbo-admin-backend/src/main/resources/application.properties
-dubbo-admin-backend/src/main/resources/application-develop.properties
-dubbo-admin-backend/src/main/resources/application-production.properties
 主要的配置有：
 dubbo.registry.address=zookeeper://127.0.0.1:2181
-dubbo.admin.root.password=root
-dubbo.admin.guest.password=guest
 ```
 
 启动:
