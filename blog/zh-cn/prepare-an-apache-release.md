@@ -284,7 +284,7 @@ $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 1. Dubbo社区投票，发起投票邮件到dev@dubbo.apache.org。在社区开发者Review，并统计到3个同意发版的binding票后，即可进入下一阶段的投票。
 2. Apache社区投票，发起投票邮件到general@apache.org。在Apache PMC Review，并统计到3个统一发版的binding票后，即可进行正式发布。
 
-dev投票邮件模板：
+Dubbo社区投票邮件模板：
 
 ```text
 Hello Dubbo Community,
@@ -318,7 +318,7 @@ Thanks,
 The Apache Dubbo (Incubating) Team
 ```
 
-general投票邮件模板：
+Apache社区投票邮件模板：
 
 ```text
 Hello all,
