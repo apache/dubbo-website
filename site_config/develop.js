@@ -77,7 +77,7 @@ export default {
         {
             sidemenu: [
                 {
-                    title: 'User Guide',
+                    title: '用户向导',
                     children: [
                         {
                             title: 'FAQ',
