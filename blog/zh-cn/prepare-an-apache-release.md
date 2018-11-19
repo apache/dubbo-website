@@ -284,9 +284,9 @@ $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 1. Dubbo社区投票，发起投票邮件到dev@dubbo.apache.org。在社区开发者Review，并统计到3个同意发版的binding票后，即可进入下一阶段的投票。
 2. Apache社区投票，发起投票邮件到general@apache.org。在Apache PMC Review，并统计到3个统一发版的binding票后，即可进行正式发布。
 
-邮件模板：
+dev投票邮件模板：
 
-```tex
+```text
 Hello Dubbo Community,
 
 This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
@@ -315,6 +315,76 @@ Please vote accordingly:
 [ ] -1 disapprove with the reason
 
 Thanks,
+The Apache Dubbo (Incubating) Team
+```
+
+general投票邮件模板：
+
+```text
+Hello all,
+
+This is a call for vote to release Apache Dubbo (Incubating) version 2.6.4.
+
+The Apache Dubbo community has voted on and approved a proposal to release
+Apache Dubbo (Incubating) version 2.6.4.
+
+We now kindly request the Incubator PMC members review and vote on this
+incubator release.
+
+Apache Dubbo™ (incubating) is a high-performance, java based, open source
+RPC framework. Dubbo offers three key functionalities, which include
+interface based remote call, fault tolerance & load balancing, and
+automatic service registration & discovery.
+
+Dubbo community vote and result thread:
+https://lists.apache.org/thread.html/8d5c39eece6288beed2e22ca976350728c571d2a9cef1c9a9e56a409@%3Cdev.dubbo.apache.org%3E
+A minor issue also can be found in the above thread.
+
+The release candidates (RC1):
+https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4
+
+Git tag for the release (RC1):
+https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.4
+
+Hash for the release tag:
+88037747a3b69d3225c73f6fbcda36ebd8435887
+
+Release Notes:
+*https://github.com/apache/incubator-dubbo/blob/dubbo-2.6.4/CHANGES.md
+<https://github.com/apache/incubator-dubbo/blob/dubbo-2.6.4/CHANGES.md>*
+
+The artifacts have been signed with Key : 7955FB6D1DD21CF7, which can be
+found in the keys file:
+https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+
+Look at here for how to verify this release candidate:
+https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/prepare-an-apache-release.md#prepare-apache-release
+
+The vote will be open for at least 72 hours or until necessary number of
+votes are reached.
+
+Please vote accordingly:
+[ ] +1 approve
+[ ] +0 no opinion
+[ ] -1 disapprove with the reason
+
+Thanks,
+The Apache Dubbo (Incubating) Team
+```
+
+宣布投票结果模板：
+```text
+We’ve received 3 +1 binding votes and one +1 non-binding vote:
+
++1 binding, Ian Luo
++1 binding, Huxing Zhang
++1 binding, Jun Liu
+
++1 non-binding, Jerrick
+
+I will create a new vote thread in Apache community now.
+
+Best regards,
 The Apache Dubbo (Incubating) Team
 ```
 
