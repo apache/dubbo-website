@@ -322,7 +322,7 @@ The Apache Dubbo (Incubating) Team
 ## Official Release
 
 1. Commit release package of  https://dist.apache.org/repos/dist/dev/incubator/dubbo to https://dist.apache.org/repos/dist/release/incubator/dubbo/, complete official release。
-2. Send mail to dev@dubbo.apache.org and general@apache.org, notify the community that the release is completed.
+2. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed.
 
 ## Complete Maven Convenient Binary release（Optional）
 
