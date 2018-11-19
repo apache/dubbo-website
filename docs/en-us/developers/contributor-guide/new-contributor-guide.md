@@ -1,4 +1,4 @@
-#New contributor guide
+# New contributor guide
 
 This is a guide for new comers who wants to contribute to Dubbo.
 
