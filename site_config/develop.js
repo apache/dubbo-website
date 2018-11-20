@@ -27,12 +27,12 @@ export default {
                     },
                     {
                         title: 'Mailing list subscription guide',
-                        link: '/en-us/docs/developers/contributor-guide/cla-signing-guide_dev.html',
+                        link: '/en-us/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html',
                     }
                     ,
                     {
                         title: 'CLA Signing Guide',
-                        link: '/en-us/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html',
+                        link: '/en-us/docs/developers/contributor-guide/cla-signing-guide_dev.html',
                     }
                     ,
                     {
@@ -102,12 +102,12 @@ export default {
                         },
                         {
                             title: '邮件列表订阅向导',
-                            link: '/zh-cn/docs/developers/contributor-guide/cla-signing-guide_dev.html',
+                            link: '/zh-cn/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html',
                         }
                         ,
                         {
                             title: 'CLA签署向导',
-                            link: '/zh-cn/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html',
+                            link: '/zh-cn/docs/developers/contributor-guide/cla-signing-guide_dev.html',
                         }
                         ,
                         {
