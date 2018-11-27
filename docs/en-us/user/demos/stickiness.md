@@ -5,6 +5,13 @@ Sticky connections are used for stateful services, as much as possible so that c
 Sticky connections will automatically open [Delayed Connections](./lazy-connect.md) to reduce the number of long connections.
 
 ```xml
-<dubbo:protocol name="dubbo" sticky="true" />
+<dubbo:reference id="xxxService" interface="com.xxx.XxxService" sticky="true" />
 ```
 
+Dubbo supports method-level sticky connection, and if you want more granular control, you can also configure as follow.
+
+```xml
+<dubbo:reference id="xxxService" interface="com.xxx.XxxService">
+    <dubbo:mothod name="sayHello" sticky="true" />
+</dubbo:reference>
+```
