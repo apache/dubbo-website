@@ -44,7 +44,7 @@ export default {
           img: '/img/mailinglist.png',
           imgHover: '/img/mailinglist_hover.png',
           title: 'Mailing List',
-          link: 'mailto:dev@dubbo.apache.org'
+          link: 'mailto:dev-subscribe@dubbo.apache.org'
         },
         {
           img: '/img/alibaba.png',
@@ -73,7 +73,7 @@ export default {
         {
           img: '/img/mailinglist.png',
           title: 'Mailing List',
-          content: <span>Join the <a href="mailto:dev@dubbo.apache.org">mailing list </a>and discussion your ideas with us.</span>,
+          content: <span>Join the <a href="mailto:dev-subscribe@dubbo.apache.org">mailing list </a>and discussion your ideas with us.</span>,
         },
         {
           img: '/img/issue.png',
@@ -464,7 +464,7 @@ export default {
           img: '/img/mailinglist.png',
           imgHover: '/img/mailinglist_hover.png',
           title: '邮件列表',
-          link: 'mailto:dev@dubbo.apache.org'
+          link: 'mailto:dev-subscribe@dubbo.apache.org'
         },
         {
           img: '/img/alibaba.png',
@@ -493,7 +493,7 @@ export default {
         {
           img: '/img/mailinglist.png',
           title: '邮件列表',
-          content: <span>加入 <a href="mailto:dev@dubbo.apache.org">邮件列表 </a>参与讨论。</span>,
+          content: <span>加入 <a href="mailto:dev-subscribe@dubbo.apache.org">邮件列表 </a>参与讨论。</span>,
         },
         {
           img: '/img/issue.png',
