@@ -15,7 +15,7 @@ Combine the tag name and attribute name of the XML tag, use `.` to split. One pr
 
 If you have more than one tags in a XML configuration, you can use the `id` value to distinguish. If you don't specify a id, ti will applied to all tags.
 
-* `dubbo.protocol.rmi.port=1234` equals to `<dubbo:protocol id="rmi" name="rmi" port="1099" /> `
+* `dubbo.protocol.rmi.port=1099` equals to `<dubbo:protocol id="rmi" name="rmi" port="1099" /> `
 * `dubbo.registry.china.address=10.20.153.10:9090` equals to `<dubbo:registry id="china" address="10.20.153.10:9090" />`
 
 Here is a typical dubbo.properties demo configuration：
