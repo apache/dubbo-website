@@ -4,9 +4,9 @@
 
 # 新版本 telnet 命令使用说明
 
-dubbo 2.5.8 新版本重构了 telnet 模块，提供了新的 telnet 命令支持。
+dubbo `2.5.8` 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
 
-### 端口
+## 端口
 新版本的 telnet 端口 与 dubbo 协议的端口是不同的端口，默认为 `22222`，可通过配置文件`dubbo.properties` 修改:
 
 ```
@@ -19,7 +19,7 @@ dubbo.application.qos.port=33333
 -Ddubbo.application.qos.port=33333
 ```
 
-### 安全
+## 安全
 
 默认情况下，dubbo 接收任何主机发起的命令，可通过配置文件`dubbo.properties` 修改:
 
@@ -36,7 +36,7 @@ dubbo.application.qos.accept.foreign.ip=false
 拒绝远端主机发出的命令，只允许服务本机执行
 
 
-### telnet 与 http 协议
+## telnet 与 http 协议
 
 telnet 模块现在同时支持 http 协议和 telnet 协议，方便各种情况的使用
 
@@ -88,6 +88,8 @@ As Consumer side:
 |Consumer Service Name|NUM|
 +---------------------+---+
 ```
+
+## 支持的命令
 
 ### ls 列出消费者和提供者
 
@@ -162,5 +164,78 @@ dubbo>help online
 
 dubbo>
 ```
+
+## 相关参数说明
+
+QoS提供了一些启动参数，来对启动进行配置，他们主要包括：
+
+| 参数               | 说明              | 默认值 |
+| ------------------ | ----------------- | ------ |
+| qosEnable          | 是否启动QoS       | true   |
+| qosPort            | 启动QoS绑定的端口 | 22222  |
+| qosAcceptForeignIp | 是否允许远程访问  | false  |
+
+> 注意，从2.6.4/2.7.0开始，qosAcceptForeignIp默认配置改为false，如果qosAcceptForeignIp设置为true，有可能带来安全风险，请仔细评估后再打开。
+
+QoS参数可以通过如下方式进行配置
+
+* 系统属性
+* dubbo.properties
+* XML方式
+* Spring-boot自动装配方式
+
+其中，上述方式的优先顺序为系统属性 > dubbo.properties > XML/Spring-boot自动装配方式。
+
+### 使用系统属性方式进行配置
+
+```
+-Ddubbo.application.qos.enable=true
+-Ddubbo.application.qos.port=33333
+-Ddubbo.application.qos.accept.foreign.ip=false
+```
+
+### 使用dubbo.properties文件进行配置
+
+在项目的`src/main/resources`目录下添加dubbo.properties文件，内容如下:
+```
+dubbo.application.qos.enable=true
+dubbo.application.qos.port=33333
+dubbo.application.qos.accept.foreign.ip=false
+```
+
+### 使用XML方法进行配置
+
+如果要通过XML配置响应的QoS相关的参数，可以进行如下配置：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+  <dubbo:application name="demo-provider">
+    <dubbo:parameter key="qos.enable" value="true"/>
+    <dubbo:parameter key="qos.accept.foreign.ip" value="false"/>
+    <dubbo:parameter key="qos.port" value="33333"/>
+  </dubbo:application>
+  <dubbo:registry address="multicast://224.5.6.7:1234"/>
+  <dubbo:protocol name="dubbo" port="20880"/>
+  <dubbo:service interface="org.apache.dubbo.demo.provider.DemoService" ref="demoService"/>
+  <bean id="demoService" class="org.apache.dubbo.demo.provider.DemoServiceImpl"/>
+</beans>
+```
+
+### 使用spring-boot自动装配方式配置
+
+如果是spring-boot的应用，可以在`application.properties`或者`application.yml`上配置:
+
+```
+dubbo.application.qosEnable=true
+dubbo.application.qosPort=33333
+dubbo.application.qosAcceptForeignIp=false
+```
+
 
 
