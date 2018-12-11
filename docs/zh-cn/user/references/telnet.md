@@ -62,8 +62,13 @@ status命令所检查的资源也可以扩展，参见：[扩展参考手册](..
 
 ### `invoke`
 
-0. `invoke XxxService.xxxMethod({"prop": "value"})`: 调用服务的方法
-0. `invoke xxxMethod({"prop": "value"})`: 调用服务的方法(自动查找包含此方法的服务)
+0. `invoke xxxService.xxxMethod("paramStr")`或`invoke xxxService.xxxMethod(18)`: 调用参数为基本类型的方法
+0. `invoke xxxService.xxxMethod("paramStr") -p java.lang.String`: 调用参数为String类型的方法
+0. `invoke xxxService.xxxMethod(18) -p java.lang.Integer`: 调用参数为Integer类型的方法
+0. `invoke xxxService.xxxMethod(18L) -p java.lang.Long`: 调用参数为Long类型的方法
+0. `invoke xxxService.xxxMethod(18, 18L) -p java.lang.Integer java.lang.Long`: 调用参数为Integer、Long类型的方法
+0. `invoke xxxService.xxxMethod({"prop": "value"}) -p xxx.xx.XxxClass`: 调用参数为XxxClass（属性prop的值为value）类型的方法
+0. `invoke xxxService.xxxMethod({"prop": "value"},{"prop1":"value1"}) -p xxx.xx.XxxClass1 xxx.xx.XxxClass`: 调用参数为XxxClass1、XxxClass类型的方法
 
 ### `status`
 

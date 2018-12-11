@@ -60,8 +60,13 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 
 ### `invoke`
 
-0. `invoke XxxService.xxxMethod({"prop": "value"})`: invoke particular method for the given service
-0. `invoke xxxMethod({"prop": "value"})`: invoke particular method for the default service
+0. `invoke xxxService.xxxMethod("paramStr")`或`invoke xxxService.xxxMethod(18)`: invoke particular method with a primitive type parameter
+0. `invoke xxxService.xxxMethod("paramStr") -p java.lang.String`: invoke particular method with a String type parameter
+0. `invoke xxxService.xxxMethod(18) -p java.lang.Integer`: invoke particular method with an Integer type parameter
+0. `invoke xxxService.xxxMethod(18L) -p java.lang.Long`: invoke particular method with a Long type parameter
+0. `invoke xxxService.xxxMethod(18, 18L) -p java.lang.Integer java.lang.Long`: invoke particular method with an Integer and a Long type parameters
+0. `invoke xxxService.xxxMethod({"prop": "value1"}) -p xxx.xx.XxxClass`: invoke particular method with a XxxClass(witch prop attribute's value is value1) type parameter
+0. `invoke xxxService.xxxMethod({"prop": "value"},{"prop1":"value1"}) -p xxx.xx.XxxClass1 xxx.xx.XxxClass`: invoke particular method with a XxxCalss1 and a XxxClass type parameters
 
 ### `status`
 
