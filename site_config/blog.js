@@ -157,13 +157,20 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
-            title: '在 Dubbo 中使用 Zipkin',
-            author:'@beiwei30',
-            dateStr: 'Oct 12th, 2018',
-            desc: '本文介绍如何使用 Zipkin 在 Dubbo 中进行全链路追踪',
-            link: '/zh-cn/blog/use-zipkin-in-dubbo.html',
+            title: 'Dubbo集群容错',
+            author:'@ralf0131',
+            dateStr: 'Dec 11th, 2018',
+            desc: '本文介绍了Dubbo框架提供的多种错误处理策略，并通过实例说明如何进行配置。',
+            link: '/zh-cn/blog/dubbo-cluster-error-handling.html',
         },
-		{
+        {
+          title: '在 Dubbo 中使用 Zipkin',
+          author:'@beiwei30',
+          dateStr: 'Oct 12th, 2018',
+          desc: '本文介绍如何使用 Zipkin 在 Dubbo 中进行全链路追踪',
+          link: '/zh-cn/blog/use-zipkin-in-dubbo.html',
+        },
+		    {
             title: 'Dubbo在Service Mesh下的思考和方案',
             author: '@JeffLv',
             dateStr: 'Sep 25th, 2018',
