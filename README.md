@@ -5,7 +5,7 @@ This project keeps all sources used for building up dubbo official website which
 
 ## Attention
 
-If your version of docsite is less then `1.0.0`, please upgrade to `1.0.0`.
+If your version of docsite is less then `1.3.3`, please upgrade to `1.3.3`.
 
 ## Build instruction
 
