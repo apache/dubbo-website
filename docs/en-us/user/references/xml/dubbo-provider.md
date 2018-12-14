@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:provider
 
-The default configuration of service provider. The corresponding class is `com.alibaba.dubbo.config.ProviderConfig`. This tag provider default values for `<dubbo:service>` and `<dubbo:protocol>`.
+The default configuration of service provider. The corresponding class is `org.apache.dubbo.config.ProviderConfig`. This tag provider default values for `<dubbo:service>` and `<dubbo:protocol>`.
 
 | Attribute     | Corresponding URL parameter | Type           | Required | Default Value                            | Function                  | Description                              | Compatibility |
 | ------------- | --------------------------- | -------------- | -------- | ---------------------------------------- | ------------------------- | ---------------------------------------- | ------------- |

@@ -6,7 +6,7 @@ Fire events when there's any service exported.
 
 ## Extension Interface
 
-`com.alibaba.dubbo.rpc.ExporterListener`
+`org.apache.dubbo.rpc.ExporterListener`
 
 ## Extension Configuration
 
@@ -19,7 +19,7 @@ Fire events when there's any service exported.
 
 ## Existing Extension
 
-`com.alibaba.dubbo.registry.directory.RegistryExporterListener`
+`org.apache.dubbo.registry.directory.RegistryExporterListener`
 
 ## Extension Guide
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.ExporterListener (plain text file with the content: xxx=com.xxx.XxxExporterListener)
+                |-org.apache.dubbo.rpc.ExporterListener (plain text file with the content: xxx=com.xxx.XxxExporterListener)
 ```
 
 XxxExporterListener.java：
@@ -43,9 +43,9 @@ XxxExporterListener.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.ExporterListener;
-import com.alibaba.dubbo.rpc.Exporter;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.ExporterListener;
+import org.apache.dubbo.rpc.Exporter;
+import org.apache.dubbo.rpc.RpcException;
  
  
 public class XxxExporterListener implements ExporterListener {
@@ -58,7 +58,7 @@ public class XxxExporterListener implements ExporterListener {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.ExporterListener：
+META-INF/dubbo/org.apache.dubbo.rpc.ExporterListener：
 
 ```properties
 xxx=com.xxx.XxxExporterListener

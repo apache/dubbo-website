@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.validation.Validation`
+`org.apache.dubbo.validation.Validation`
 
 ## 扩展配置
 
@@ -18,7 +18,7 @@
 
 ## 已知扩展
 
-`com.alibaba.dubbo.validation.support.jvalidation.JValidation`
+`org.apache.dubbo.validation.support.jvalidation.JValidation`
 
 ## 扩展示例
 
@@ -34,7 +34,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.validation.Validation (纯文本文件，内容为：xxx=com.xxx.XxxValidation)
+                |-org.apache.dubbo.validation.Validation (纯文本文件，内容为：xxx=com.xxx.XxxValidation)
 ```
 
 XxxValidation.java：
@@ -42,7 +42,7 @@ XxxValidation.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.validation.Validation;
+import org.apache.dubbo.validation.Validation;
  
 public class XxxValidation implements Validation {
     public Object getValidator(URL url) {
@@ -56,7 +56,7 @@ XxxValidator.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.validation.Validator;
+import org.apache.dubbo.validation.Validator;
  
 public class XxxValidator implements Validator {
     public XxxValidator(URL url) {
@@ -68,7 +68,7 @@ public class XxxValidator implements Validator {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.validation.Validation：
+META-INF/dubbo/org.apache.dubbo.validation.Validation：
 
 ```properties
 xxx=com.xxx.XxxValidation

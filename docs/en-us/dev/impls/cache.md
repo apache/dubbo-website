@@ -6,7 +6,7 @@ Cache the return value, use request parameter as the key.
 
 ## Extension Interface
 
-`com.alibaba.dubbo.cache.CacheFactory`
+`org.apache.dubbo.cache.CacheFactory`
 
 ## Extension Configuration
 
@@ -21,9 +21,9 @@ Cache the return value, use request parameter as the key.
 
 ## Existing Extensions
 
-* `com.alibaba.dubbo.cache.support.lru.LruCacheFactory`
-* `com.alibaba.dubbo.cache.support.threadlocal.ThreadLocalCacheFactory`
-* `com.alibaba.dubbo.cache.support.jcache.JCacheFactory`
+* `org.apache.dubbo.cache.support.lru.LruCacheFactory`
+* `org.apache.dubbo.cache.support.threadlocal.ThreadLocalCacheFactory`
+* `org.apache.dubbo.cache.support.jcache.JCacheFactory`
 
 
 ## Extension Guide
@@ -40,7 +40,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.cache.CacheFactory (plain text file with contents: xxx=com.xxx.XxxCacheFactory)
+                |-org.apache.dubbo.cache.CacheFactory (plain text file with contents: xxx=com.xxx.XxxCacheFactory)
 ```
 
 XxxCacheFactory.java：
@@ -48,7 +48,7 @@ XxxCacheFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.cache.CacheFactory;
+import org.apache.dubbo.cache.CacheFactory;
  
 public class XxxCacheFactory implements CacheFactory {
     public Cache getCache(URL url, String name) {
@@ -62,7 +62,7 @@ XxxCacheFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.cache.Cache;
+import org.apache.dubbo.cache.Cache;
  
 public class XxxCache implements Cache {
     public Cache(URL url, String name) {
@@ -77,7 +77,7 @@ public class XxxCache implements Cache {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.cache.CacheFactory：
+META-INF/dubbo/org.apache.dubbo.cache.CacheFactory：
 
 ```properties
 xxx=com.xxx.XxxCacheFactory

@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:reference
 
-The configuration of service consumer. The corresponding class is`com.alibaba.dubbo.config.ReferenceConfig`
+The configuration of service consumer. The corresponding class is`org.apache.dubbo.config.ReferenceConfig`
 
 | Attribute   | Corresponding URL parameter | Type           | Required    | Default Value                            | Function                  | Description                              | Compatibility |
 | ----------- | --------------------------- | -------------- | ----------- | ---------------------------------------- | ------------------------- | ---------------------------------------- | ------------- |

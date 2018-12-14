@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:argument
 
-Method argument configuration. The corresponding class：`com.alibaba.dubbo.config.ArgumentConfig`. This tag is child of `<dubbo:method>`, which is for feature description of method argument, such as:
+Method argument configuration. The corresponding class：`org.apache.dubbo.config.ArgumentConfig`. This tag is child of `<dubbo:method>`, which is for feature description of method argument, such as:
 
 ```xml
 <dubbo:method name="findXxx" timeout="3000" retries="2">

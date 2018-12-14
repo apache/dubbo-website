@@ -16,9 +16,9 @@ Notes:
 
 ## Extension Interface
 
-* `com.alibaba.dubbo.rpc.Protocol`
-* `com.alibaba.dubbo.rpc.Exporter`
-* `com.alibaba.dubbo.rpc.Invoker`
+* `org.apache.dubbo.rpc.Protocol`
+* `org.apache.dubbo.rpc.Exporter`
+* `org.apache.dubbo.rpc.Invoker`
 
 ```java
 public interface Protocol {
@@ -65,11 +65,11 @@ public interface Protocol {
 
 ## Existing Protocol
 
-* `com.alibaba.dubbo.rpc.injvm.InjvmProtocol`
-* `com.alibaba.dubbo.rpc.dubbo.DubboProtocol`
-* `com.alibaba.dubbo.rpc.rmi.RmiProtocol`
-* `com.alibaba.dubbo.rpc.http.HttpProtocol`
-* `com.alibaba.dubbo.rpc.http.hessian.HessianProtocol`
+* `org.apache.dubbo.rpc.injvm.InjvmProtocol`
+* `org.apache.dubbo.rpc.dubbo.DubboProtocol`
+* `org.apache.dubbo.rpc.rmi.RmiProtocol`
+* `org.apache.dubbo.rpc.http.HttpProtocol`
+* `org.apache.dubbo.rpc.http.hessian.HessianProtocol`
 
 ## Extension Guide
 
@@ -87,7 +87,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.Protocol (plain text file with the content: xxx=com.xxx.XxxProtocol)
+                |-org.apache.dubbo.rpc.Protocol (plain text file with the content: xxx=com.xxx.XxxProtocol)
 ```
 
 XxxProtocol.java：
@@ -95,7 +95,7 @@ XxxProtocol.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.Protocol;
+import org.apache.dubbo.rpc.Protocol;
  
 public class XxxProtocol implements Protocol {
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
@@ -112,7 +112,7 @@ XxxExporter.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.support.AbstractExporter;
+import org.apache.dubbo.rpc.support.AbstractExporter;
  
 public class XxxExporter<T> extends AbstractExporter<T> {
     public XxxExporter(Invoker<T> invoker) throws RemotingException{
@@ -131,7 +131,7 @@ XxxInvoker.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.support.AbstractInvoker;
+import org.apache.dubbo.rpc.support.AbstractInvoker;
  
 public class XxxInvoker<T> extends AbstractInvoker<T> {
     public XxxInvoker(Class<T> type, URL url) throws RemotingException{
@@ -143,7 +143,7 @@ public class XxxInvoker<T> extends AbstractInvoker<T> {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.Protocol：
+META-INF/dubbo/org.apache.dubbo.rpc.Protocol：
 
 ```properties
 xxx=com.xxx.XxxProtocol

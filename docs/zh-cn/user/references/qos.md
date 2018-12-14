@@ -64,7 +64,7 @@ As Provider side:
 +----------------------------------+---+
 |       Provider Service Name      |PUB|
 +----------------------------------+---+
-|com.alibaba.dubbo.demo.DemoService| N |
+|org.apache.dubbo.demo.DemoService| N |
 +----------------------------------+---+
 As Consumer side:
 +---------------------+---+
@@ -81,7 +81,7 @@ As Provider side:
 +----------------------------------+---+
 |       Provider Service Name      |PUB|
 +----------------------------------+---+
-|com.alibaba.dubbo.demo.DemoService| N |
+|org.apache.dubbo.demo.DemoService| N |
 +----------------------------------+---+
 As Consumer side:
 +---------------------+---+
@@ -99,7 +99,7 @@ As Provider side:
 +----------------------------------+---+
 |       Provider Service Name      |PUB|
 +----------------------------------+---+
-|com.alibaba.dubbo.demo.DemoService| Y |
+|org.apache.dubbo.demo.DemoService| Y |
 +----------------------------------+---+
 As Consumer side:
 +---------------------+---+
@@ -111,7 +111,7 @@ As Consumer side:
 
 ### Online 上线服务命令
 
-当使用延迟发布功能的时候(通过设置 com.alibaba.dubbo.config.AbstractServiceConfig#register 为 false)，后续需要上线的时候，可通过 Online 命令
+当使用延迟发布功能的时候(通过设置 org.apache.dubbo.config.AbstractServiceConfig#register 为 false)，后续需要上线的时候，可通过 Online 命令
 
 ```
 //上线所有服务

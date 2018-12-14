@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:reference
 
-服务消费者引用服务配置。对应的配置类： `com.alibaba.dubbo.config.ReferenceConfig`
+服务消费者引用服务配置。对应的配置类： `org.apache.dubbo.config.ReferenceConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

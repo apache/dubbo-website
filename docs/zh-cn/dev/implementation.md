@@ -23,7 +23,7 @@
 
 #### 2. 向注册中心暴露服务：
 
-在有注册中心，需要注册提供者地址的情况下 [^2]，`ServiceConfig` 解析出的 URL 的格式为: `registry://registry-host/com.alibaba.dubbo.registry.RegistryService?export=URL.encode("dubbo://service-host/com.foo.FooService?version=1.0.0")`，
+在有注册中心，需要注册提供者地址的情况下 [^2]，`ServiceConfig` 解析出的 URL 的格式为: `registry://registry-host/org.apache.dubbo.registry.RegistryService?export=URL.encode("dubbo://service-host/com.foo.FooService?version=1.0.0")`，
 
 基于扩展点自适应机制，通过 URL 的 `registry://` 协议头识别，就会调用  `RegistryProtocol` 的 `export()` 方法，将 `export` 参数中的提供者 URL，先注册到注册中心。
 
@@ -40,7 +40,7 @@
 #### 2. 从注册中心发现引用服务：
 
 在有注册中心，通过注册中心发现提供者地址的情况下 [^4]，`ReferenceConfig` 解析出的 URL 的格式为：
-`registry://registry-host/com.alibaba.dubbo.registry.RegistryService?refer=URL.encode("consumer://consumer-host/com.foo.FooService?version=1.0.0")`。
+`registry://registry-host/org.apache.dubbo.registry.RegistryService?refer=URL.encode("consumer://consumer-host/com.foo.FooService?version=1.0.0")`。
 
 基于扩展点自适应机制，通过 URL 的 `registry://` 协议头识别，就会调用 `RegistryProtocol` 的 `refer()` 方法，基于 `refer` 参数中的条件，查询提供者 URL，如：
 `dubbo://service-host/com.foo.FooService?version=1.0.0`。

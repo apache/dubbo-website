@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.container.page.PageHandler`
+`org.apache.dubbo.container.page.PageHandler`
 
 ## 扩展配置
 
@@ -18,10 +18,10 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.container.page.pages.HomePageHandler`
-* `com.alibaba.dubbo.container.page.pages.StatusPageHandler`
-* `com.alibaba.dubbo.container.page.pages.LogPageHandler`
-* `com.alibaba.dubbo.container.page.pages.SystemPageHandler`
+* `org.apache.dubbo.container.page.pages.HomePageHandler`
+* `org.apache.dubbo.container.page.pages.StatusPageHandler`
+* `org.apache.dubbo.container.page.pages.LogPageHandler`
+* `org.apache.dubbo.container.page.pages.SystemPageHandler`
 
 ## 扩展示例
 
@@ -37,7 +37,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.container.page.PageHandler (纯文本文件，内容为：xxx=com.xxx.XxxPageHandler)
+                |-org.apache.dubbo.container.page.PageHandler (纯文本文件，内容为：xxx=com.xxx.XxxPageHandler)
 ```
 
 XxxPageHandler.java：
@@ -45,7 +45,7 @@ XxxPageHandler.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.container.page.PageHandler;
+import org.apache.dubbo.container.page.PageHandler;
  
 public class XxxPageHandler implements PageHandler {
     public Group lookup(URL url) {
@@ -54,7 +54,7 @@ public class XxxPageHandler implements PageHandler {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.container.page.PageHandler：
+META-INF/dubbo/org.apache.dubbo.container.page.PageHandler：
 
 ```properties
 xxx=com.xxx.XxxPageHandler

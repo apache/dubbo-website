@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.common.logger.LoggerAdapter`
+`org.apache.dubbo.common.logger.LoggerAdapter`
 
 ## 扩展配置
 
@@ -22,11 +22,11 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.common.logger.slf4j.Slf4jLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.jcl.JclLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.log4j.Log4jLoggerAdapter`
-* `com.alibaba.dubbo.common.logger.log4j2.Log4j2LoggerAdapter`
-* `com.alibaba.dubbo.common.logger.jdk.JdkLoggerAdapter`
+* `org.apache.dubbo.common.logger.slf4j.Slf4jLoggerAdapter`
+* `org.apache.dubbo.common.logger.jcl.JclLoggerAdapter`
+* `org.apache.dubbo.common.logger.log4j.Log4jLoggerAdapter`
+* `org.apache.dubbo.common.logger.log4j2.Log4j2LoggerAdapter`
+* `org.apache.dubbo.common.logger.jdk.JdkLoggerAdapter`
 
 ## 扩展示例
 
@@ -42,7 +42,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.common.logger.LoggerAdapter (纯文本文件，内容为：xxx=com.xxx.XxxLoggerAdapter)
+                |-org.apache.dubbo.common.logger.LoggerAdapter (纯文本文件，内容为：xxx=com.xxx.XxxLoggerAdapter)
 ```
 
 XxxLoggerAdapter.java：
@@ -50,7 +50,7 @@ XxxLoggerAdapter.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.logger.LoggerAdapter;
+import org.apache.dubbo.common.logger.LoggerAdapter;
  
 public class XxxLoggerAdapter implements LoggerAdapter {
     public Logger getLogger(URL url) {
@@ -64,7 +64,7 @@ XxxLogger.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.logger.Logger;
+import org.apache.dubbo.common.logger.Logger;
  
 public class XxxLogger implements Logger {
     public XxxLogger(URL url) {
@@ -77,7 +77,7 @@ public class XxxLogger implements Logger {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.common.logger.LoggerAdapter：
+META-INF/dubbo/org.apache.dubbo.common.logger.LoggerAdapter：
 
 ```properties
 xxx=com.xxx.XxxLoggerAdapter

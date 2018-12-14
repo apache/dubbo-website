@@ -6,7 +6,7 @@ Convert `Invoker` into business interface.
 
 ## Extension Interface
 
-`com.alibaba.dubbo.rpc.ProxyFactory`
+`org.apache.dubbo.rpc.ProxyFactory`
 
 ## Extension Configuration
 
@@ -18,8 +18,8 @@ Convert `Invoker` into business interface.
 
 ## Existing Extension
 
-* `com.alibaba.dubbo.rpc.proxy.JdkProxyFactory`
-* `com.alibaba.dubbo.rpc.proxy.JavassistProxyFactory`
+* `org.apache.dubbo.rpc.proxy.JdkProxyFactory`
+* `org.apache.dubbo.rpc.proxy.JavassistProxyFactory`
 
 ## Extension Guide
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.ProxyFactory (plain text file with the content: xxx=com.xxx.XxxProxyFactory)
+                |-org.apache.dubbo.rpc.ProxyFactory (plain text file with the content: xxx=com.xxx.XxxProxyFactory)
 ```
 
 XxxProxyFactory.java：
@@ -43,9 +43,9 @@ XxxProxyFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.ProxyFactory;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.ProxyFactory;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.RpcException;
  
  
 public class XxxProxyFactory implements ProxyFactory {
@@ -58,7 +58,7 @@ public class XxxProxyFactory implements ProxyFactory {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.ProxyFactory：
+META-INF/dubbo/org.apache.dubbo.rpc.ProxyFactory：
 
 ```properties
 xxx=com.xxx.XxxProxyFactory

@@ -6,8 +6,8 @@
 
 ## 扩展接口
 
-* `com.alibaba.dubbo.registry.RegistryFactory`
-* `com.alibaba.dubbo.registry.Registry`
+* `org.apache.dubbo.registry.RegistryFactory`
+* `org.apache.dubbo.registry.Registry`
 
 ## 扩展配置
 
@@ -105,9 +105,9 @@ public interface RegistryService { // Registry extends RegistryService
     /**
      * 查询注册列表，与订阅的推模式相对应，这里为拉模式，只返回一次结果。
      * 
-     * @see com.alibaba.dubbo.registry.NotifyListener#notify(List)
+     * @see org.apache.dubbo.registry.NotifyListener#notify(List)
      * @param url 查询条件，不允许为空，如：consumer://10.20.153.10/com.alibaba.foo.BarService?version=1.0.0&application=kylin
-     * @return 已注册信息列表，可能为空，含义同{@link com.alibaba.dubbo.registry.NotifyListener#notify(List<URL>)}的参数。
+     * @return 已注册信息列表，可能为空，含义同{@link org.apache.dubbo.registry.NotifyListener#notify(List<URL>)}的参数。
      */
     List<URL> lookup(URL url);
  
@@ -128,7 +128,7 @@ public interface NotifyListener {
      * 4. 如果一种类型的数据为空，需通知一个empty协议并带category参数的标识性URL数据。<br>
      * 5. 通知者(即注册中心实现)需保证通知的顺序，比如：单线程推送，队列串行化，带版本对比。<br>
      * 
-     * @param urls 已注册信息列表，总不为空，含义同{@link com.alibaba.dubbo.registry.RegistryService#lookup(URL)}的返回值。
+     * @param urls 已注册信息列表，总不为空，含义同{@link org.apache.dubbo.registry.RegistryService#lookup(URL)}的返回值。
      */
     void notify(List<URL> urls);
  
@@ -137,7 +137,7 @@ public interface NotifyListener {
 
 ## 已知扩展
 
-`com.alibaba.dubbo.registry.support.dubbo.DubboRegistryFactory`
+`org.apache.dubbo.registry.support.dubbo.DubboRegistryFactory`
 
 ## 扩展示例
 
@@ -154,7 +154,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.registry.RegistryFactory (纯文本文件，内容为：xxx=com.xxx.XxxRegistryFactory)
+                |-org.apache.dubbo.registry.RegistryFactory (纯文本文件，内容为：xxx=com.xxx.XxxRegistryFactory)
 ```
 
 XxxRegistryFactory.java：
@@ -162,9 +162,9 @@ XxxRegistryFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.registry.RegistryFactory;
-import com.alibaba.dubbo.registry.Registry;
-import com.alibaba.dubbo.common.URL;
+import org.apache.dubbo.registry.RegistryFactory;
+import org.apache.dubbo.registry.Registry;
+import org.apache.dubbo.common.URL;
  
 public class XxxRegistryFactory implements RegistryFactory {
     public Registry getRegistry(URL url) {
@@ -178,9 +178,9 @@ XxxRegistry.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.registry.Registry;
-import com.alibaba.dubbo.registry.NotifyListener;
-import com.alibaba.dubbo.common.URL;
+import org.apache.dubbo.registry.Registry;
+import org.apache.dubbo.registry.NotifyListener;
+import org.apache.dubbo.common.URL;
  
 public class XxxRegistry implements Registry {
     public void register(URL url) {
@@ -198,7 +198,7 @@ public class XxxRegistry implements Registry {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.registry.RegistryFactory：
+META-INF/dubbo/org.apache.dubbo.registry.RegistryFactory：
 
 ```properties
 xxx=com.xxx.XxxRegistryFactory

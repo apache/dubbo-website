@@ -6,7 +6,7 @@ Extension for parameter validation.
 
 ## Extension Inteface
 
-`com.alibaba.dubbo.validation.Validation`
+`org.apache.dubbo.validation.Validation`
 
 ## Extension Configuration
 
@@ -18,7 +18,7 @@ Extension for parameter validation.
 
 ## Existing Extension
 
-`com.alibaba.dubbo.validation.support.jvalidation.JValidation`
+`org.apache.dubbo.validation.support.jvalidation.JValidation`
 
 ## Extension Guide
 
@@ -34,7 +34,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.validation.Validation (plain text file with the content: xxx=com.xxx.XxxValidation)
+                |-org.apache.dubbo.validation.Validation (plain text file with the content: xxx=com.xxx.XxxValidation)
 ```
 
 XxxValidation.java：
@@ -42,7 +42,7 @@ XxxValidation.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.validation.Validation;
+import org.apache.dubbo.validation.Validation;
  
 public class XxxValidation implements Validation {
     public Object getValidator(URL url) {
@@ -56,7 +56,7 @@ XxxValidator.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.validation.Validator;
+import org.apache.dubbo.validation.Validator;
  
 public class XxxValidator implements Validator {
     public XxxValidator(URL url) {
@@ -68,7 +68,7 @@ public class XxxValidator implements Validator {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.validation.Validation：
+META-INF/dubbo/org.apache.dubbo.validation.Validation：
 
 ```properties
 xxx=com.xxx.XxxValidation

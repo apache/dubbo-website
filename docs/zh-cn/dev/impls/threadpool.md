@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.common.threadpool.ThreadPool`
+`org.apache.dubbo.common.threadpool.ThreadPool`
 
 ## 扩展配置
 
@@ -18,8 +18,8 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.common.threadpool.FixedThreadPool`
-* `com.alibaba.dubbo.common.threadpool.CachedThreadPool`
+* `org.apache.dubbo.common.threadpool.FixedThreadPool`
+* `org.apache.dubbo.common.threadpool.CachedThreadPool`
 
 ## 扩展示例
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.common.threadpool.ThreadPool (纯文本文件，内容为：xxx=com.xxx.XxxThreadPool)
+                |-org.apache.dubbo.common.threadpool.ThreadPool (纯文本文件，内容为：xxx=com.xxx.XxxThreadPool)
 ```
 
 XxxThreadPool.java：
@@ -43,7 +43,7 @@ XxxThreadPool.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.threadpool.ThreadPool;
+import org.apache.dubbo.common.threadpool.ThreadPool;
 import java.util.concurrent.Executor;
  
 public class XxxThreadPool implements ThreadPool {
@@ -53,7 +53,7 @@ public class XxxThreadPool implements ThreadPool {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.common.threadpool.ThreadPool：
+META-INF/dubbo/org.apache.dubbo.common.threadpool.ThreadPool：
 
 ```properties
 xxx=com.xxx.XxxThreadPool

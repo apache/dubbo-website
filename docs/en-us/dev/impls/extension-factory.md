@@ -6,7 +6,7 @@ Factory to load dubbo extensions.
 
 ## Extension Interface
 
-`com.alibaba.dubbo.common.extension.ExtensionFactory`
+`org.apache.dubbo.common.extension.ExtensionFactory`
 
 ## Extension Configuration
 
@@ -16,8 +16,8 @@ Factory to load dubbo extensions.
 
 ## Existing Extension
 
-* `com.alibaba.dubbo.common.extension.factory.SpiExtensionFactory`
-* `com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory`
+* `org.apache.dubbo.common.extension.factory.SpiExtensionFactory`
+* `org.apache.dubbo.config.spring.extension.SpringExtensionFactory`
 
 ## Extension Guide
 
@@ -33,7 +33,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.common.extension.ExtensionFactory (plain text file with the content: xxx=com.xxx.XxxExtensionFactory)
+                |-org.apache.dubbo.common.extension.ExtensionFactory (plain text file with the content: xxx=com.xxx.XxxExtensionFactory)
 ```
 
 XxxExtensionFactory.java：
@@ -41,7 +41,7 @@ XxxExtensionFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.extension.ExtensionFactory;
+import org.apache.dubbo.common.extension.ExtensionFactory;
  
 public class XxxExtensionFactory implements ExtensionFactory {
     public Object getExtension(Class<?> type, String name) {
@@ -50,7 +50,7 @@ public class XxxExtensionFactory implements ExtensionFactory {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.common.extension.ExtensionFactory：
+META-INF/dubbo/org.apache.dubbo.common.extension.ExtensionFactory：
 
 ```properties
 xxx=com.xxx.XxxExtensionFactory

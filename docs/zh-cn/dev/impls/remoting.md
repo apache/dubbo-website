@@ -6,9 +6,9 @@
 
 ## 扩展接口
 
-* `com.alibaba.dubbo.remoting.Transporter`
-* `com.alibaba.dubbo.remoting.Server`
-* `com.alibaba.dubbo.remoting.Client`
+* `org.apache.dubbo.remoting.Transporter`
+* `org.apache.dubbo.remoting.Server`
+* `org.apache.dubbo.remoting.Client`
 
 ## 扩展配置
 
@@ -23,9 +23,9 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.remoting.transport.transporter.netty.NettyTransporter`
-* `com.alibaba.dubbo.remoting.transport.transporter.mina.MinaTransporter`
-* `com.alibaba.dubbo.remoting.transport.transporter.grizzly.GrizzlyTransporter`
+* `org.apache.dubbo.remoting.transport.transporter.netty.NettyTransporter`
+* `org.apache.dubbo.remoting.transport.transporter.mina.MinaTransporter`
+* `org.apache.dubbo.remoting.transport.transporter.grizzly.GrizzlyTransporter`
 
 ## 扩展示例
 
@@ -43,7 +43,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.remoting.Transporter (纯文本文件，内容为：xxx=com.xxx.XxxTransporter)
+                |-org.apache.dubbo.remoting.Transporter (纯文本文件，内容为：xxx=com.xxx.XxxTransporter)
 ```
 
 XxxTransporter.java：
@@ -51,7 +51,7 @@ XxxTransporter.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.Transporter;
+import org.apache.dubbo.remoting.Transporter;
  
 public class XxxTransporter implements Transporter {
     public Server bind(URL url, ChannelHandler handler) throws RemotingException {
@@ -68,7 +68,7 @@ XxxServer.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.transport.transporter.AbstractServer;
+import org.apache.dubbo.remoting.transport.transporter.AbstractServer;
  
 public class XxxServer extends AbstractServer {
     public XxxServer(URL url, ChannelHandler handler) throws RemotingException{
@@ -94,7 +94,7 @@ XxxClient.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.transport.transporter.AbstractClient;
+import org.apache.dubbo.remoting.transport.transporter.AbstractClient;
  
 public class XxxClient extends AbstractClient {
     public XxxServer(URL url, ChannelHandler handler) throws RemotingException{
@@ -115,7 +115,7 @@ public class XxxClient extends AbstractClient {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.remoting.Transporter：
+META-INF/dubbo/org.apache.dubbo.remoting.Transporter：
 
 ```properties
 xxx=com.xxx.XxxTransporter

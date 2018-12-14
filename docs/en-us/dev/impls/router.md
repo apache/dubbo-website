@@ -6,13 +6,13 @@ Pick one from service providers and fire the invocation.
 
 ## Extension Interface
 
-* `com.alibaba.dubbo.rpc.cluster.RouterFactory`
-* `com.alibaba.dubbo.rpc.cluster.Router`
+* `org.apache.dubbo.rpc.cluster.RouterFactory`
+* `org.apache.dubbo.rpc.cluster.Router`
 
 ## Existing Extension
 
-* `com.alibaba.dubbo.rpc.cluster.router.ScriptRouterFactory`
-* `com.alibaba.dubbo.rpc.cluster.router.FileRouterFactory`
+* `org.apache.dubbo.rpc.cluster.router.ScriptRouterFactory`
+* `org.apache.dubbo.rpc.cluster.router.FileRouterFactory`
 
 ## Extension Guide
 
@@ -28,7 +28,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.cluster.RouterFactory (plain text file with the content: xxx=com.xxx.XxxRouterFactory)
+                |-org.apache.dubbo.rpc.cluster.RouterFactory (plain text file with the content: xxx=com.xxx.XxxRouterFactory)
 
 ```
 
@@ -37,10 +37,10 @@ XxxRouterFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.cluster.RouterFactory;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.Invocation;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.cluster.RouterFactory;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.RpcException;
  
 public class XxxRouterFactory implements RouterFactory {
     public <T> List<Invoker<T>> select(List<Invoker<T>> invokers, Invocation invocation) throws RpcException {
@@ -49,7 +49,7 @@ public class XxxRouterFactory implements RouterFactory {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.RouterFactory：
+META-INF/dubbo/org.apache.dubbo.rpc.cluster.RouterFactory：
 
 ```properties
 xxx=com.xxx.XxxRouterFactory
