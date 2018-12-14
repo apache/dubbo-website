@@ -157,6 +157,13 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+          title: '当Dubbo遇上Arthas：排查问题的实践',
+          author:'@hengyunabc',
+          dateStr: 'Dec 14th, 2018',
+          desc: '本文介绍使用Alibaba开源的应用诊断利器Arthas来排查Dubbo应用的问题。',
+          link: '/zh-cn/blog/dubbo-meet-arthas.html',
+        },
+        {
             title: 'Dubbo集群容错',
             author:'@ralf0131',
             dateStr: 'Dec 11th, 2018',
