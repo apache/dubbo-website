@@ -281,6 +281,9 @@ The voting is divided into two phases:
 
 1. Dubbo community votes and sends the voting email to dev@dubbo.apache.org. After reviewing by community developers and winning 3 binding tickets that agree to release, you can go to the next stage of voting.
 2. Apache community votes and sends the voting email to general@apache.org. After reviewing by Apache PMC Review and winning 3 binding tickets that agree to release,you will be allowed to release officially.
+3. Publish [release notes](https://github.com/apache/incubator-dubbo/releases) on Github.
+4. Update the recommend dependency on [Github](https://github.com/apache/incubator-dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
+5. Announce on the [official site](http://dubbo.apache.org/) that the version was successfully released.
 
 Mail template：
 
@@ -319,7 +322,7 @@ The Apache Dubbo (Incubating) Team
 ## Official Release
 
 1. Commit release package of  https://dist.apache.org/repos/dist/dev/incubator/dubbo to https://dist.apache.org/repos/dist/release/incubator/dubbo/, complete official release。
-2. Send mail to dev@dubbo.apache.org and general@apache.org, notify the community that the release is completed.
+2. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed.
 
 ## Complete Maven Convenient Binary release（Optional）
 

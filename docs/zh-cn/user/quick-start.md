@@ -1,3 +1,8 @@
+---
+title: 快速启动
+keywords: XML configuration, Consumer, Provider
+description: 使用 XML 配置方式快速上手 Dubbo
+---
 
 # 快速启动
 
@@ -84,7 +89,7 @@ public class Provider {
 
 ## 服务消费者
 
-完整安装步骤，请参见：[示例消费者安装](http://dubbo.apache.org/books/dubbo-admin-book/install/consumer-demo.html)
+完整安装步骤，请参见：[示例消费者安装](../admin/install/consumer-demo.md)
 
 ### 通过 Spring 配置引用远程服务
 

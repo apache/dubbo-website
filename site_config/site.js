@@ -1,6 +1,8 @@
 export default {
   rootPath: '', // 发布到服务器的根目录，需以/开头但不能有尾/，如果只有/，请填写空字符串
   port: 8080, // 本地开发服务器的启动端口
+  domain: 'dubbo.apache.org', // 站点部署域名
+  defaultSearch: 'google', // 默认搜索引擎，baidu或者google
   defaultLanguage: 'en-us',
   'en-us': {
     pageMenu: [
@@ -15,6 +17,11 @@ export default {
         link: '/en-us/docs/user/quick-start.html',
       },
       {
+        key: 'developers',
+        text: 'DEVELOPERS',
+        link: '/en-us/docs/developers/developers_dev.html',
+      },
+      {
         key: 'blog',
         text: 'BLOG',
         link: '/en-us/blog/index.html',
@@ -24,10 +31,40 @@ export default {
         text: 'COMMUNITY',
         link: '/en-us/community/index.html',
       },
+      {
+        key: 'download',
+        text: 'DOWNLOAD',
+        link: '/en-us/blog/download.html',
+      },
     ],
     disclaimer: {
       title: 'Disclaimer',
       content: 'Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
+    },
+    asf: {
+      title: 'ASF',
+      list: [
+        {
+          text: 'Foundation',
+          link: 'http://www.apache.org',
+        },
+        {
+          text: 'License',
+          link: 'http://www.apache.org/licenses/',
+        },
+        {
+          text: 'Events',
+          link: 'http://www.apache.org/events/current-event',
+        },
+        {
+          text: 'Sponsorship',
+          link: 'http://www.apache.org/foundation/sponsorship.html',
+        },
+        {
+          text: 'Thanks',
+          link: 'http://www.apache.org/foundation/thanks.html',
+        },
+      ],
     },
     documentation: {
       title: 'Documentation',
@@ -57,6 +94,10 @@ export default {
           text: 'Community',
           link: '/en-us/community/index.html',
         },
+        {
+            text: 'Security',
+            link: 'https://www.apache.org/security/',
+        },
       ],
     },
     copyright: 'Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.',
@@ -74,6 +115,11 @@ export default {
         link: '/zh-cn/docs/user/quick-start.html',
       },
       {
+        key: 'developers',
+        text: '开发者',
+        link: '/zh-cn/docs/developers/developers_dev.html',
+      },
+      {
         key: 'blog',
         text: '博客',
         link: '/zh-cn/blog/index.html',
@@ -82,11 +128,41 @@ export default {
         key: 'community',
         text: '社区',
         link: '/zh-cn/community/index.html',
-      }
+      },
+      {
+        key: 'download',
+        text: '下载',
+        link: '/zh-cn/blog/download.html',
+      },
     ],
     disclaimer: {
       title: 'Disclaimer',
       content: 'Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
+    },
+    asf: {
+      title: 'ASF',
+      list: [
+        {
+          text: '基金会',
+          link: 'http://www.apache.org',
+        },
+        {
+          text: '证书',
+          link: 'http://www.apache.org/licenses/',
+        },
+        {
+          text: '事件',
+          link: 'http://www.apache.org/events/current-event',
+        },
+        {
+          text: '赞助',
+          link: 'http://www.apache.org/foundation/sponsorship.html',
+        },
+        {
+          text: '致谢',
+          link: 'http://www.apache.org/foundation/thanks.html',
+        },
+      ],
     },
     documentation: {
       title: '文档',
@@ -115,6 +191,10 @@ export default {
         {
           text: '社区',
           link: '/zh-cn/community/index.html',
+        },
+        {
+            text: '安全',
+            link: 'https://www.apache.org/security',
         }
       ]
     },

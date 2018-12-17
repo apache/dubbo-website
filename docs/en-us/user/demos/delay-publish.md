@@ -1,21 +1,32 @@
 # Delay publish service
 
-If your service need time to warm up.such as:initialization cache,or another reference resources has to be ready.so you can use the delay feature for delay publish service.
+If your services need time to warm up, such as: initialization cache or another reference resources has to be ready. You can use the delay feature to delay publishing services. We fine-tuned the service delay exposure logic in Dubbo 2.6.5, delaying the countdown of services that require delayed exposure until Spring initialization is complete. You won't be aware of this change while using Dubbo, so please be assured that use.
 
-## Delay five second publish
+## Prior to Dubbo-2.6.5
+### Delay five second publish
 
 ```xml
 <dubbo:service delay="5000" />
 ```
 
-## Delay until Spring initialization is complete before exposing the service
+### Delay until Spring initialization is complete before exposing the service
 ```xml
 <dubbo:service delay="-1" />
 ```
 
-### The initialization deadlock problem of Spring 2.x
+## Dubbo-2.6.5 and later
 
-#### Trigger condition
+All services will be exposed after Spring initialization is complete, and you don't need to configure delay if you don't need to delay exposing the service.
+
+### Delay five second publish
+
+```xml
+<dubbo:service delay="5000" />
+```
+
+## The initialization deadlock problem of Spring 2.x
+
+### Trigger condition
 
 The service has already published when `Spring` parse the `<dubbo:service />` element,but the `Spring` is still initializing other beans.If there is a request coming in, and the service implementation class has a call to `applicationContext.getBean ()` usage.
 
@@ -29,7 +40,7 @@ The service has already published when `Spring` parse the `<dubbo:service />` el
 
 This will cause the getBean thread to lock the singletonObjects first, then lock the beanDefinitionMap, and lock the singletonObjects again.The Spring initialization thread, the first lock beanDefinitionMap, then lock singletonObjects. Reverse lock thread deadlock, can not provide services, can not start.
 
-#### Avoid ways
+### Avoid ways
 
 1. It is highly recommended not to call applicationContext.getBean() in the service implementation class, all using Spring's beans using IoC injection.
 2. If you really want to tune getBean(), you can put the configuration of Dubbo Spring final loading.

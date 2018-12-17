@@ -1,4 +1,10 @@
-# 在Dubbo中开发REST风格的远程调用（RESTful Remoting）
+---
+title: 在 Dubbo 中开发 REST 风格的远程调用（RESTful Remoting）
+keywords: RESTful Remoting, REST
+description: 在 Dubbo 中开发 REST 风格的远程调用
+---
+
+# 在 Dubbo 中开发 REST 风格的远程调用（RESTful Remoting）
 
 **作者：沈理**
 

@@ -5,6 +5,14 @@
 粘滞连接将自动开启[延迟连接](./lazy-connect.md)，以减少长连接数。
 
 ```xml
-<dubbo:protocol name="dubbo" sticky="true" />
+<dubbo:reference id="xxxService" interface="com.xxx.XxxService" sticky="true" />
+```
+
+Dubbo 支持方法级别的粘滞连接，如果你想进行更细力度的控制，还可以这样配置。
+
+```xml
+<dubbo:reference id="xxxService" interface="com.xxx.XxxService">
+    <dubbo:mothod name="sayHello" sticky="true" />
+</dubbo:reference>
 ```
 

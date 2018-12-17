@@ -4,33 +4,23 @@
 
 If you need to manage a Dubbo service, you need to search it first and open it's management page
 
-![/admin-guide/images/dubbo-search.png](../sources/images/dubbo-search.png)
+![/admin-guide/images/dubbo-search.png](../sources/images/dubbo-search.jpg)
 
 ## Service provider page
 
-![/admin-guide/images/dubbo-providers.png](../sources/images/dubbo-providers.png)
+![/admin-guide/images/dubbo-providers.png](../sources/images/dubbo-providers.jpg)
 
 ## Service consumer page
 
-![/admin-guide/images/dubbo-consumers.png](../sources/images/dubbo-consumers.png)
+![/admin-guide/images/dubbo-consumers.png](../sources/images/dubbo-consumers.jpg)
 
-## Service application page
 
-![/admin-guide/images/dubbo-applications.png](../sources/images/dubbo-applications.png)
 
 ## Add route rule page
 
-![/admin-guide/images/dubbo-add-route.png](../sources/images/dubbo-add-route.png)
+![/admin-guide/images/dubbo-add-route.png](../sources/images/dubbo-add-route.jpg)
 
 ## Add dynamic configuration page
 
-![/admin-guide/images/dubbo-add-config.png](../sources/images/dubbo-add-config.png)
+![/admin-guide/images/dubbo-add-config.png](../sources/images/dubbo-add-config.jpg)
 
-##### Service register
-##### Service downgrade
-##### Route rule
-##### Access control
-##### Dynamic configuration
-##### Weight adjustment
-##### Load balance
-##### Service owner

@@ -44,7 +44,7 @@ export default {
           img: '/img/mailinglist.png',
           imgHover: '/img/mailinglist_hover.png',
           title: 'Mailing List',
-          link: 'https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide'
+          link: 'mailto:dev-subscribe@dubbo.apache.org'
         },
         {
           img: '/img/alibaba.png',
@@ -73,7 +73,7 @@ export default {
         {
           img: '/img/mailinglist.png',
           title: 'Mailing List',
-          content: <span>Join the <a href="https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide">mailing list </a>and discussion your ideas with us.</span>,
+          content: <span>Join the <a href="mailto:dev-subscribe@dubbo.apache.org">mailing list </a>and discussion your ideas with us.</span>,
         },
         {
           img: '/img/issue.png',
@@ -83,7 +83,7 @@ export default {
         {
           img: '/img/documents.png',
           title: 'Documents',
-          content: <span>Improve the <a href="https://github.com/apache/incubator-dubbo-docs">documentation</a>.</span>,
+          content: <span>Improve the <a href="http://dubbo.apache.org/en-us/docs/user/quick-start.html">documentation</a>.</span>,
         },
         {
           img: '/img/pullrequest.png',
@@ -464,7 +464,7 @@ export default {
           img: '/img/mailinglist.png',
           imgHover: '/img/mailinglist_hover.png',
           title: '邮件列表',
-          link: 'https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide'
+          link: 'mailto:dev-subscribe@dubbo.apache.org'
         },
         {
           img: '/img/alibaba.png',
@@ -493,7 +493,7 @@ export default {
         {
           img: '/img/mailinglist.png',
           title: '邮件列表',
-          content: <span>加入 <a href="https://github.com/apache/incubator-dubbo/wiki/New-contributor-guide">邮件列表 </a>参与讨论。</span>,
+          content: <span>加入 <a href="mailto:dev-subscribe@dubbo.apache.org">邮件列表 </a>参与讨论。</span>,
         },
         {
           img: '/img/issue.png',
@@ -503,7 +503,7 @@ export default {
         {
           img: '/img/documents.png',
           title: '文档',
-          content: <span>优化Dubbo <a href="http://dubbo.apache.org/#/docs/"> 文档</a>。</span>,
+          content: <span>优化Dubbo <a href="http://dubbo.apache.org/zh-cn/docs/user/quick-start.html"> 文档</a>。</span>,
         },
         {
           img: '/img/pullrequest.png',

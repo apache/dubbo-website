@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="service-and-version" />
+	<meta name="description" content="service-and-version" />
+	<!-- 网页标签标题 -->
+	<title>service-and-version</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot=""><header class="header-container header-container-normal"><div class="header-body"><a href="/zh-cn/index.html"><img class="logo" src="/img/dubbo_colorful.png"/></a><div class="search search-normal"><span class="icon-search"></span></div><span class="language-switch language-switch-normal">En</span><div class="header-menu"><img class="header-menu-toggle" src="/img/menu_gray.png"/><ul><li class="menu-item menu-item-normal"><a href="/zh-cn/index.html">首页</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/user/quick-start.html">文档</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/developers/developers_dev.html">开发者</a></li><li class="menu-item menu-item-normal menu-item-normal-active"><a href="/zh-cn/blog/index.html">博客</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/community/index.html">社区</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/blog/download.html">下载</a></li></ul></div></div></header><section class="blog-content markdown-body"><h1>Dubbo服务分组和版本聚合</h1>
+<p>我们在调用Dubbo服务的时候，一般只需要将Consumer端的<code>dubbo:reference</code>指定成服务端中<code>dubbo:service</code>暴露的服务，就可以找到服务端，完成调用，也就是说，Dubbo只需要服务接口信息就可以找到服务提供者。
+其实除了服务提供者以外，Dubbo也有服务分组和版本的概念，在客户端去寻找“匹配”的服务端的时候，需要服务接口，版本号，组别这三个信息都匹配，才算是一个有效的服务端：</p>
+<pre><code class="language-java">   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">isMatch</span><span class="hljs-params">(URL consumerUrl, URL providerUrl)</span> </span>{
+        String consumerInterface = consumerUrl.getServiceInterface();
+        String providerInterface = providerUrl.getServiceInterface();
+        <span class="hljs-keyword">if</span> (!(Constants.ANY_VALUE.equals(consumerInterface) || StringUtils.isEquals(consumerInterface, providerInterface)))
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+
+        <span class="hljs-keyword">if</span> (!isMatchCategory(providerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY),
+                consumerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY))) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        }
+        <span class="hljs-keyword">if</span> (!providerUrl.getParameter(Constants.ENABLED_KEY, <span class="hljs-keyword">true</span>)
+                &amp;&amp; !Constants.ANY_VALUE.equals(consumerUrl.getParameter(Constants.ENABLED_KEY))) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        }
+
+        String consumerGroup = consumerUrl.getParameter(Constants.GROUP_KEY);
+        String consumerVersion = consumerUrl.getParameter(Constants.VERSION_KEY);
+        String consumerClassifier = consumerUrl.getParameter(Constants.CLASSIFIER_KEY, Constants.ANY_VALUE);
+
+        String providerGroup = providerUrl.getParameter(Constants.GROUP_KEY);
+        String providerVersion = providerUrl.getParameter(Constants.VERSION_KEY);
+        String providerClassifier = providerUrl.getParameter(Constants.CLASSIFIER_KEY, Constants.ANY_VALUE);
+        <span class="hljs-keyword">return</span> (Constants.ANY_VALUE.equals(consumerGroup) || StringUtils.isEquals(consumerGroup, providerGroup) || StringUtils.isContains(consumerGroup, providerGroup))
+                &amp;&amp; (Constants.ANY_VALUE.equals(consumerVersion) || StringUtils.isEquals(consumerVersion, providerVersion))
+                &amp;&amp; (consumerClassifier == <span class="hljs-keyword">null</span> || Constants.ANY_VALUE.equals(consumerClassifier) || StringUtils.isEquals(consumerClassifier, providerClassifier));
+    }
+</code></pre>
+<p>如果没有配置组别和版本号，默认值为空。服务端和消费端都没有配，只有服务接口，其他两个信息都为空，也是可以“找到”对方的，那服务名和版本号可以如何使用呢？下面我们来看一下具体的场景：</p>
+<h3>服务分组</h3>
+<p>当一个接口有多种实现时，可以用 group 区分。</p>
+<p>服务</p>
+<pre><code>&lt;dubbo:service group=&quot;feedback&quot; interface=&quot;com.xxx.IndexService&quot; /&gt;
+&lt;dubbo:service group=&quot;member&quot; interface=&quot;com.xxx.IndexService&quot; /&gt;
+</code></pre>
+<p>引用</p>
+<pre><code>&lt;dubbo:reference id=&quot;feedbackIndexService&quot; group=&quot;feedback&quot; interface=&quot;com.xxx.IndexService&quot; /&gt;
+&lt;dubbo:reference id=&quot;memberIndexService&quot; group=&quot;member&quot; interface=&quot;com.xxx.IndexService&quot; /&gt;
+</code></pre>
+<p>任意组</p>
+<pre><code>&lt;dubbo:reference id=&quot;barService&quot; interface=&quot;com.foo.BarService&quot; group=&quot;*&quot; /&gt;
+</code></pre>
+<h3>多版本</h3>
+<p>当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。</p>
+<p>可以按照以下的步骤进行版本迁移：</p>
+<ol>
+<li>在低压力时间段，先升级一半提供者为新版本</li>
+<li>再将所有消费者升级为新版本</li>
+<li>然后将剩下的一半提供者升级为新版本</li>
+</ol>
+<p>老版本服务提供者配置：</p>
+<pre><code>&lt;dubbo:service interface=&quot;com.foo.BarService&quot; version=&quot;1.0.0&quot; /&gt;  
+</code></pre>
+<p>新版本服务提供者配置：</p>
+<pre><code>&lt;dubbo:service interface=&quot;com.foo.BarService&quot; version=&quot;2.0.0&quot; /&gt;
+</code></pre>
+<p>老版本服务消费者配置：</p>
+<pre><code>&lt;dubbo:reference id=&quot;barService&quot; interface=&quot;com.foo.BarService&quot; version=&quot;1.0.0&quot; /&gt;
+</code></pre>
+<p>新版本服务消费者配置：</p>
+<pre><code>&lt;dubbo:reference id=&quot;barService&quot; interface=&quot;com.foo.BarService&quot; version=&quot;2.0.0&quot; /&gt;
+</code></pre>
+<p>如果不需要区分版本，可以按照以下的方式配置：</p>
+<pre><code>&lt;dubbo:reference id=&quot;barService&quot; interface=&quot;com.foo.BarService&quot; version=&quot;*&quot; /&gt; 
+</code></pre>
+<h3>分组聚合</h3>
+<p>按组合并返回结果，比如菜单服务，接口一样，但有多种实现，用group区分，现在消费方需从每种group中调用一次返回结果，合并结果返回，这样就可以实现聚合菜单项。</p>
+<h4>配置</h4>
+<p>搜索所有分组</p>
+<pre><code>&lt;dubbo:reference interface=&quot;com.xxx.MenuService&quot; group=&quot;*&quot; merger=&quot;true&quot; /&gt;
+</code></pre>
+<p>合并指定分组</p>
+<pre><code>&lt;dubbo:reference interface=&quot;com.xxx.MenuService&quot; group=&quot;aaa,bbb&quot; merger=&quot;true&quot; /&gt;
+</code></pre>
+<p>指定方法合并结果，其它未指定的方法，将只调用一个 Group</p>
+<pre><code>&lt;dubbo:reference interface=&quot;com.xxx.MenuService&quot; group=&quot;*&quot;&gt;
+&lt;dubbo:method name=&quot;getMenuItems&quot; merger=&quot;true&quot; /&gt;
+&lt;/dubbo:service&gt;
+</code></pre>
+<p>某个方法不合并结果，其它都合并结果</p>
+<pre><code>&lt;dubbo:reference interface=&quot;com.xxx.MenuService&quot; group=&quot;*&quot; merger=&quot;true&quot;&gt;
+&lt;dubbo:method name=&quot;getMenuItems&quot; merger=&quot;false&quot; /&gt;
+&lt;/dubbo:service&gt;
+</code></pre>
+<p>指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称</p>
+<pre><code>&lt;dubbo:reference interface=&quot;com.xxx.MenuService&quot; group=&quot;*&quot;&gt;
+&lt;dubbo:method name=&quot;getMenuItems&quot; merger=&quot;mymerge&quot; /&gt;
+&lt;/dubbo:service&gt;
+</code></pre>
+<p>指定合并方法，将调用返回结果的指定方法进行合并，合并方法的参数类型必须是返回结果类型本身</p>
+<pre><code>&lt;dubbo:reference interface=&quot;com.xxx.MenuService&quot; group=&quot;*&quot;&gt;
+&lt;dubbo:method name=&quot;getMenuItems&quot; merger=&quot;.addAll&quot; /&gt;
+&lt;/dubbo:service&gt;  
+</code></pre>
+<h4>实现原理</h4>
+<p>如果配置了merge，Dubbo会分别调用多个组别的服务提供者，然后把结果聚合，返回给消费端，具体的实现在<code>MergeableClusterInvoker.java</code>里：</p>
+<pre><code class="language-java"> <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(<span class="hljs-keyword">final</span> Invocation invocation)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
+        List&lt;Invoker&lt;T&gt;&gt; invokers = directory.list(invocation);
+
+        String merger = getUrl().getMethodParameter(invocation.getMethodName(), Constants.MERGER_KEY);
+        <span class="hljs-keyword">if</span> (ConfigUtils.isEmpty(merger)) { <span class="hljs-comment">// If a method doesn't have a merger, only invoke one Group</span>
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">final</span> Invoker&lt;T&gt; invoker : invokers) {
+                <span class="hljs-keyword">if</span> (invoker.isAvailable()) {
+                    <span class="hljs-keyword">return</span> invoker.invoke(invocation);
+                }
+            }
+            <span class="hljs-keyword">return</span> invokers.iterator().next().invoke(invocation);
+        }
+
+        Class&lt;?&gt; returnType;
+        <span class="hljs-keyword">try</span> {
+            returnType = getInterface().getMethod(
+                    invocation.getMethodName(), invocation.getParameterTypes()).getReturnType();
+        } <span class="hljs-keyword">catch</span> (NoSuchMethodException e) {
+            returnType = <span class="hljs-keyword">null</span>;
+        }
+
+        Map&lt;String, Future&lt;Result&gt;&gt; results = <span class="hljs-keyword">new</span> HashMap&lt;String, Future&lt;Result&gt;&gt;();
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">final</span> Invoker&lt;T&gt; invoker : invokers) {
+            Future&lt;Result&gt; future = executor.submit(<span class="hljs-keyword">new</span> Callable&lt;Result&gt;() {
+                <span class="hljs-meta">@Override</span>
+                <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">call</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Exception </span>{
+                    <span class="hljs-keyword">return</span> invoker.invoke(<span class="hljs-keyword">new</span> RpcInvocation(invocation, invoker));
+                }
+            });
+            results.put(invoker.getUrl().getServiceKey(), future);
+        }
+
+        Object result = <span class="hljs-keyword">null</span>;
+
+        List&lt;Result&gt; resultList = <span class="hljs-keyword">new</span> ArrayList&lt;Result&gt;(results.size());
+
+        <span class="hljs-keyword">int</span> timeout = getUrl().getMethodParameter(invocation.getMethodName(), Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
+        <span class="hljs-keyword">for</span> (Map.Entry&lt;String, Future&lt;Result&gt;&gt; entry : results.entrySet()) {
+            Future&lt;Result&gt; future = entry.getValue();
+            <span class="hljs-keyword">try</span> {
+                Result r = future.get(timeout, TimeUnit.MILLISECONDS);
+                <span class="hljs-keyword">if</span> (r.hasException()) {
+                    log.error(<span class="hljs-string">"Invoke "</span> + getGroupDescFromServiceKey(entry.getKey()) + 
+                                    <span class="hljs-string">" failed: "</span> + r.getException().getMessage(), 
+                            r.getException());
+                } <span class="hljs-keyword">else</span> {
+                    resultList.add(r);
+                }
+            } <span class="hljs-keyword">catch</span> (Exception e) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(<span class="hljs-string">"Failed to invoke service "</span> + entry.getKey() + <span class="hljs-string">": "</span> + e.getMessage(), e);
+            }
+        }
+
+        <span class="hljs-keyword">if</span> (resultList.isEmpty()) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RpcResult((Object) <span class="hljs-keyword">null</span>);
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (resultList.size() == <span class="hljs-number">1</span>) {
+            <span class="hljs-keyword">return</span> resultList.iterator().next();
+        }
+
+        <span class="hljs-keyword">if</span> (returnType == <span class="hljs-keyword">void</span>.class) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RpcResult((Object) <span class="hljs-keyword">null</span>);
+        }
+</code></pre>
+<p>如果配置了merger，会依次调用，结果都放在results里面，其中value都是future类型，等调用完成之后，再遍历results，通过future.get拿到真正的结果，到此为止，所有调用的结果都放在resultList里面了，接下来要做的是把结果进行聚合：</p>
+<pre><code class="language-java">  Merger resultMerger;
+  <span class="hljs-keyword">if</span> (ConfigUtils.isDefault(merger)) {
+      resultMerger = MergerFactory.getMerger(returnType);
+  } <span class="hljs-keyword">else</span> {
+      resultMerger = ExtensionLoader.getExtensionLoader(Merger.class).getExtension(merger);
+  }
+  <span class="hljs-keyword">if</span> (resultMerger != <span class="hljs-keyword">null</span>) {
+      List&lt;Object&gt; rets = <span class="hljs-keyword">new</span> ArrayList&lt;Object&gt;(resultList.size());
+      <span class="hljs-keyword">for</span> (Result r : resultList) {
+          rets.add(r.getValue());
+      }
+      result = resultMerger.merge(
+                        rets.toArray((Object[]) Array.newInstance(returnType, <span class="hljs-number">0</span>)));
+  } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(<span class="hljs-string">"There is no merger to merge result."</span>)
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RpcResult(result);
+</code></pre>
+<p>这里会根据返回值的类型，获取到对应的resultMerger，除了Dubbo默认实现的类型外，也可以自己指定merger类型并且添加相应的扩展，通过实现<code>merge</code>方法类进行结果聚合。</p>
+</section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>
