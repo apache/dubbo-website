@@ -25,13 +25,13 @@
 <h3>约定：</h3>
 <p>在扩展类的 jar 包内 <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>，放置扩展点配置文件 <code>META-INF/dubbo/接口全限定名</code>，内容为：<code>配置名=扩展实现类全限定名</code>，多个实现类用换行符分隔。</p>
 <h3>示例：</h3>
-<p>以扩展 Dubbo 的协议为例，在协议的实现 jar 包内放置文本文件：<code>META-INF/dubbo/com.alibaba.dubbo.rpc.Protocol</code>，内容为：</p>
+<p>以扩展 Dubbo 的协议为例，在协议的实现 jar 包内放置文本文件：<code>META-INF/dubbo/org.apache.dubbo.rpc.Protocol</code>，内容为：</p>
 <pre><code class="language-properties"><span class="hljs-attr">xxx</span>=<span class="hljs-string">com.alibaba.xxx.XxxProtocol</span>
 </code></pre>
 <p>实现类内容 <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>：</p>
 <pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.xxx;
  
-<span class="hljs-keyword">import</span> com.alibaba.dubbo.rpc.Protocol;
+<span class="hljs-keyword">import</span> org.apache.dubbo.rpc.Protocol;
  
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XxxProtocol</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Protocol</span> </span>{ 
     <span class="hljs-comment">// ...</span>
@@ -47,7 +47,7 @@
 <p>Wrapper类内容：</p>
 <pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.xxx;
  
-<span class="hljs-keyword">import</span> com.alibaba.dubbo.rpc.Protocol;
+<span class="hljs-keyword">import</span> org.apache.dubbo.rpc.Protocol;
  
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XxxProtocolWrapper</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Protocol</span> </span>{
     Protocol impl;
@@ -148,8 +148,8 @@ Wheel wheel = wheelMaker.makeWheel(url);
 <p>对于 bind() 方法，Adaptive 实现先查找 <code>server</code> key，如果该 Key 没有值则找 <code>transport</code> key 值，来决定代理到哪个实际扩展点。</p>
 <h3>扩展点自动激活</h3>
 <p>对于集合类扩展点，比如：<code>Filter</code>, <code>InvokerListener</code>, <code>ExportListener</code>, <code>TelnetHandler</code>, <code>StatusChecker</code> 等，可以同时加载多个实现，此时，可以用自动激活来简化配置，如：</p>
-<pre><code class="language-java"><span class="hljs-keyword">import</span> com.alibaba.dubbo.common.extension.Activate;
-<span class="hljs-keyword">import</span> com.alibaba.dubbo.rpc.Filter;
+<pre><code class="language-java"><span class="hljs-keyword">import</span> org.apache.dubbo.common.extension.Activate;
+<span class="hljs-keyword">import</span> org.apache.dubbo.rpc.Filter;
  
 <span class="hljs-meta">@Activate</span> <span class="hljs-comment">// 无条件自动激活</span>
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XxxFilter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Filter</span> </span>{
@@ -157,8 +157,8 @@ Wheel wheel = wheelMaker.makeWheel(url);
 }
 </code></pre>
 <p>或：</p>
-<pre><code class="language-java"><span class="hljs-keyword">import</span> com.alibaba.dubbo.common.extension.Activate;
-<span class="hljs-keyword">import</span> com.alibaba.dubbo.rpc.Filter;
+<pre><code class="language-java"><span class="hljs-keyword">import</span> org.apache.dubbo.common.extension.Activate;
+<span class="hljs-keyword">import</span> org.apache.dubbo.rpc.Filter;
  
 <span class="hljs-meta">@Activate</span>(<span class="hljs-string">"xxx"</span>) <span class="hljs-comment">// 当配置了xxx参数，并且参数为有效值时激活，比如配了cache="lru"，自动激活CacheFilter。</span>
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XxxFilter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Filter</span> </span>{
@@ -166,8 +166,8 @@ Wheel wheel = wheelMaker.makeWheel(url);
 }
 </code></pre>
 <p>或：</p>
-<pre><code class="language-java"><span class="hljs-keyword">import</span> com.alibaba.dubbo.common.extension.Activate;
-<span class="hljs-keyword">import</span> com.alibaba.dubbo.rpc.Filter;
+<pre><code class="language-java"><span class="hljs-keyword">import</span> org.apache.dubbo.common.extension.Activate;
+<span class="hljs-keyword">import</span> org.apache.dubbo.rpc.Filter;
  
 <span class="hljs-meta">@Activate</span>(group = <span class="hljs-string">"provider"</span>, value = <span class="hljs-string">"xxx"</span>) <span class="hljs-comment">// 只对提供方激活，group可选"provider"或"consumer"</span>
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XxxFilter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Filter</span> </span>{

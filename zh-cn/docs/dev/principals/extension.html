@@ -25,7 +25,7 @@
 <p>即然要扩展，扩展点的加载方式，首先要统一，微核心+插件式，是比较能达到 OCP 原则的思路。</p>
 <p>由一个插件生命周期管理容器，构成微核心，核心不包括任何功能，这样可以确保所有功能都能被替换，并且，框架作者能做到的功能，扩展者也一定要能做到，以保证平等对待第三方，所以，框架自身的功能也要用插件的方式实现，不能有任何硬编码。</p>
 <p>通常微核心都会采用 Factory、IoC、OSGi 等方式管理插件生命周期。考虑 Dubbo 的适用面，不想强依赖 Spring 等 IoC 容器。自已造一个小的 IoC 容器，也觉得有点过度设计，所以打算采用最简单的 Factory 方式管理插件。</p>
-<p>最终决定采用的是 JDK 标准的 SPI 扩展机制，参见：<code>java.util.ServiceLoader</code>，也就是扩展者在 jar 包的 <code>META-INF/services/</code> 目录下放置与接口同名的文本文件，内容为接口实现类名，多个实现类名用换行符分隔。比如，需要扩展 Dubbo 的协议，只需在 xxx.jar 中放置文件：<code>META-INF/services/com.alibaba.dubbo.rpc.Protocol</code>，内容为 <code>com.alibaba.xxx.XxxProtocol</code>。Dubbo 通过 ServiceLoader 扫描到所有 Protocol 实现。</p>
+<p>最终决定采用的是 JDK 标准的 SPI 扩展机制，参见：<code>java.util.ServiceLoader</code>，也就是扩展者在 jar 包的 <code>META-INF/services/</code> 目录下放置与接口同名的文本文件，内容为接口实现类名，多个实现类名用换行符分隔。比如，需要扩展 Dubbo 的协议，只需在 xxx.jar 中放置文件：<code>META-INF/services/org.apache.dubbo.rpc.Protocol</code>，内容为 <code>com.alibaba.xxx.XxxProtocol</code>。Dubbo 通过 ServiceLoader 扫描到所有 Protocol 实现。</p>
 <p>并约定所有插件，都必须标注：<code>@Extension(&quot;name&quot;)</code>，作为加载后的标识性名称，用于配置选择。</p>
 <h2>第二步，每个扩展点只封装一个变化因子，最大化复用</h2>
 <p>每个扩展点的实现者，往往都只是关心一件事，现在的扩展点，并没有完全分离。比如：Failover, Route, LoadBalance, Directory 没有完全分开，全由 RoutingInvokerGroup 写死了。</p>
