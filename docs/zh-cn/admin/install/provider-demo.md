@@ -5,7 +5,7 @@
 ```sh
 git clone https://github.com/apache/incubator-dubbo.git
 cd incubator-dubbo
-运行 dubbo-demo-provider中的com.alibaba.dubbo.demo.provider.Provider
+运行 dubbo-demo-provider中的org.apache.dubbo.demo.provider.Provider
 如果使用Intellij Idea 请加上-Djava.net.preferIPv4Stack=true
 ```
 

@@ -13,7 +13,7 @@
     ...
 ```
 可以看到,只配置了端口号,没有配置`host`,此时设置的`host`又是什么呢?
-查看代码发现,在`com.alibaba.dubbo.config.ServiceConfig#findConfigedHosts()`中,通过`InetAddress.getLocalHost().getHostAddress()`获取默认`host`.其返回值如下:
+查看代码发现,在`org.apache.dubbo.config.ServiceConfig#findConfigedHosts()`中,通过`InetAddress.getLocalHost().getHostAddress()`获取默认`host`.其返回值如下:
 
  1. 未联网时,返回127.0.0.1
  2. 在阿里云服务器中,返回私有地址,如:172.18.46.234

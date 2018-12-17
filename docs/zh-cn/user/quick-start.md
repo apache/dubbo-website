@@ -19,7 +19,7 @@ Dubbo 采用全 Spring 配置方式，透明化接入应用，对应用没有任
 DemoService.java [^1]：
 
 ```java
-package com.alibaba.dubbo.demo;
+package org.apache.dubbo.demo;
 
 public interface DemoService {
     String sayHello(String name);
@@ -32,9 +32,9 @@ DemoServiceImpl.java [^2]：
 
 ```java
 
-package com.alibaba.dubbo.demo.provider;
+package org.apache.dubbo.demo.provider;
  
-import com.alibaba.dubbo.demo.DemoService;
+import org.apache.dubbo.demo.DemoService;
  
 public class DemoServiceImpl implements DemoService {
     public String sayHello(String name) {
@@ -64,10 +64,10 @@ provider.xml：
     <dubbo:protocol name="dubbo" port="20880" />
  
     <!-- 声明需要暴露的服务接口 -->
-    <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" />
+    <dubbo:service interface="org.apache.dubbo.demo.DemoService" ref="demoService" />
  
     <!-- 和本地bean一样实现服务 -->
-    <bean id="demoService" class="com.alibaba.dubbo.demo.provider.DemoServiceImpl" />
+    <bean id="demoService" class="org.apache.dubbo.demo.provider.DemoServiceImpl" />
 </beans>
 ```
 
@@ -109,7 +109,7 @@ consumer.xml：
     <dubbo:registry address="multicast://224.5.6.7:1234" />
  
     <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
-    <dubbo:reference id="demoService" interface="com.alibaba.dubbo.demo.DemoService" />
+    <dubbo:reference id="demoService" interface="org.apache.dubbo.demo.DemoService" />
 </beans>
 ```
 
@@ -119,7 +119,7 @@ Consumer.java [^3]：
 
 ```java
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import com.alibaba.dubbo.demo.DemoService;
+import org.apache.dubbo.demo.DemoService;
  
 public class Consumer {
     public static void main(String[] args) throws Exception {

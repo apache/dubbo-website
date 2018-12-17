@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:service
 
-The configuration of the service provider. The corresponding class is `com.alibaba.dubbo.config.ServiceConfig`.
+The configuration of the service provider. The corresponding class is `org.apache.dubbo.config.ServiceConfig`.
 
 | Attribute   | Corresponding URL parameter | Type           | Required    | Default Value                         | Function                  | Description                              | Compatibility |
 | ----------- | --------------------------- | -------------- | ----------- | ------------------------------------- | ------------------------- | ---------------------------------------- | ------------- |

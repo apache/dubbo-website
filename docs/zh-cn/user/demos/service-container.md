@@ -39,19 +39,19 @@
 缺省只加载 spring
 
 ```sh
-java com.alibaba.dubbo.container.Main
+java org.apache.dubbo.container.Main
 ```
 
 通过 main 函数参数传入要加载的容器
 
 ```sh
-java com.alibaba.dubbo.container.Main spring jetty log4j
+java org.apache.dubbo.container.Main spring jetty log4j
 ```
 
 通过 JVM 启动参数传入要加载的容器
 
 ```sh
-java com.alibaba.dubbo.container.Main -Ddubbo.container=spring,jetty,log4j
+java org.apache.dubbo.container.Main -Ddubbo.container=spring,jetty,log4j
 ```
 
 通过 classpath 下的 `dubbo.properties` 配置传入要加载的容器

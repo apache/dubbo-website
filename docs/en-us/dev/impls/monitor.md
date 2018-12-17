@@ -6,8 +6,8 @@ Extension to monitor service invocation times and time taken for each service in
 
 ## Extension Interface
 
-* `com.alibaba.dubbo.monitor.MonitorFactory`
-* `com.alibaba.dubbo.monitor.Monitor`
+* `org.apache.dubbo.monitor.MonitorFactory`
+* `org.apache.dubbo.monitor.Monitor`
 
 ## Extension Configuration
 
@@ -18,7 +18,7 @@ Extension to monitor service invocation times and time taken for each service in
 
 ## Existing Extension
 
-com.alibaba.dubbo.monitor.support.dubbo.DubboMonitorFactory
+org.apache.dubbo.monitor.support.dubbo.DubboMonitorFactory
 
 ## Extension Guide
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.monitor.MonitorFactory (plain text file with the format: xxx=com.xxx.XxxMonitorFactory)
+                |-org.apache.dubbo.monitor.MonitorFactory (plain text file with the format: xxx=com.xxx.XxxMonitorFactory)
 ```
 
 XxxMonitorFactory.java：
@@ -43,9 +43,9 @@ XxxMonitorFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.monitor.MonitorFactory;
-import com.alibaba.dubbo.monitor.Monitor;
-import com.alibaba.dubbo.common.URL;
+import org.apache.dubbo.monitor.MonitorFactory;
+import org.apache.dubbo.monitor.Monitor;
+import org.apache.dubbo.common.URL;
  
 public class XxxMonitorFactory implements MonitorFactory {
     public Monitor getMonitor(URL url) {
@@ -59,7 +59,7 @@ XxxMonitor.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.monitor.Monitor;
+import org.apache.dubbo.monitor.Monitor;
  
 public class XxxMonitor implements Monitor {
     public void count(URL statistics) {
@@ -68,7 +68,7 @@ public class XxxMonitor implements Monitor {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.monitor.MonitorFactory：
+META-INF/dubbo/org.apache.dubbo.monitor.MonitorFactory：
 
 ```properties
 xxx=com.xxx.XxxMonitorFactory

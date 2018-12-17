@@ -92,7 +92,7 @@ public class SerializationOptimizerImpl implements SerializationOptimizer {
 然后在XML配置中添加：
 
 ```xml
-<dubbo:protocol name="dubbo" serialization="kryo" optimizer="com.alibaba.dubbo.demo.SerializationOptimizerImpl"/>
+<dubbo:protocol name="dubbo" serialization="kryo" optimizer="org.apache.dubbo.demo.SerializationOptimizerImpl"/>
 ```
 
 在注册这些类后，序列化的性能可能被大大提升，特别针对小数量的嵌套对象的时候。

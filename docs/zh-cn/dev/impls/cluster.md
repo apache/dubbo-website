@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.rpc.cluster.Cluster`
+`org.apache.dubbo.rpc.cluster.Cluster`
 
 ## 扩展配置
 
@@ -18,12 +18,12 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.rpc.cluster.support.FailoverCluster`
-* `com.alibaba.dubbo.rpc.cluster.support.FailfastCluster`
-* `com.alibaba.dubbo.rpc.cluster.support.FailsafeCluster`
-* `com.alibaba.dubbo.rpc.cluster.support.FailbackCluster`
-* `com.alibaba.dubbo.rpc.cluster.support.ForkingCluster`
-* `com.alibaba.dubbo.rpc.cluster.support.AvailableCluster`
+* `org.apache.dubbo.rpc.cluster.support.FailoverCluster`
+* `org.apache.dubbo.rpc.cluster.support.FailfastCluster`
+* `org.apache.dubbo.rpc.cluster.support.FailsafeCluster`
+* `org.apache.dubbo.rpc.cluster.support.FailbackCluster`
+* `org.apache.dubbo.rpc.cluster.support.ForkingCluster`
+* `org.apache.dubbo.rpc.cluster.support.AvailableCluster`
 
 ## 扩展示例
 
@@ -39,7 +39,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.cluster.Cluster (纯文本文件，内容为：xxx=com.xxx.XxxCluster)
+                |-org.apache.dubbo.rpc.cluster.Cluster (纯文本文件，内容为：xxx=com.xxx.XxxCluster)
 ```
 
 XxxCluster.java：
@@ -47,14 +47,14 @@ XxxCluster.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.cluster.Cluster;
-import com.alibaba.dubbo.rpc.cluster.support.AbstractClusterInvoker;
-import com.alibaba.dubbo.rpc.cluster.Directory;
-import com.alibaba.dubbo.rpc.cluster.LoadBalance;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.Invocation;
-import com.alibaba.dubbo.rpc.Result;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.cluster.Cluster;
+import org.apache.dubbo.rpc.cluster.support.AbstractClusterInvoker;
+import org.apache.dubbo.rpc.cluster.Directory;
+import org.apache.dubbo.rpc.cluster.LoadBalance;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.Result;
+import org.apache.dubbo.rpc.RpcException;
  
 public class XxxCluster implements Cluster {
     public <T> Invoker<T> merge(Directory<T> directory) throws RpcException {
@@ -67,7 +67,7 @@ public class XxxCluster implements Cluster {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.Cluster：
+META-INF/dubbo/org.apache.dubbo.rpc.cluster.Cluster：
 
 ```properties
 xxx=com.xxx.XxxCluster

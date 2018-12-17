@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:service
 
-服务提供者暴露服务配置。对应的配置类：`com.alibaba.dubbo.config.ServiceConfig`
+服务提供者暴露服务配置。对应的配置类：`org.apache.dubbo.config.ServiceConfig`
 
 |  属性 |  对应URL参数 |  类型 |  是否必填 |  缺省值 |  作用 |  描述 |  兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

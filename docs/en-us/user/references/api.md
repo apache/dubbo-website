@@ -7,17 +7,17 @@ These APIs are summarized here below:
 ## Configuration API
 
 ```
-com.alibaba.dubbo.config.ServiceConfig
-com.alibaba.dubbo.config.ReferenceConfig
-com.alibaba.dubbo.config.ProtocolConfig
-com.alibaba.dubbo.config.RegistryConfig
-com.alibaba.dubbo.config.MonitorConfig
-com.alibaba.dubbo.config.ApplicationConfig
-com.alibaba.dubbo.config.ModuleConfig
-com.alibaba.dubbo.config.ProviderConfig
-com.alibaba.dubbo.config.ConsumerConfig
-com.alibaba.dubbo.config.MethodConfig
-com.alibaba.dubbo.config.ArgumentConfig
+org.apache.dubbo.config.ServiceConfig
+org.apache.dubbo.config.ReferenceConfig
+org.apache.dubbo.config.ProtocolConfig
+org.apache.dubbo.config.RegistryConfig
+org.apache.dubbo.config.MonitorConfig
+org.apache.dubbo.config.ApplicationConfig
+org.apache.dubbo.config.ModuleConfig
+org.apache.dubbo.config.ProviderConfig
+org.apache.dubbo.config.ConsumerConfig
+org.apache.dubbo.config.MethodConfig
+org.apache.dubbo.config.ArgumentConfig
 ```
 
 Pls. refer to [API Configuration](../configuration/api.md) for further information. 
@@ -25,8 +25,8 @@ Pls. refer to [API Configuration](../configuration/api.md) for further informati
 ## Annotation API
 
 ```
-com.alibaba.dubbo.config.annotation.Service
-com.alibaba.dubbo.config.annotation.Reference
+org.apache.dubbo.config.annotation.Service
+org.apache.dubbo.config.annotation.Reference
 ```
 
 Pls. refer to [Annotation Configuration](../configuration/annotation.md) for further information.
@@ -34,14 +34,14 @@ Pls. refer to [Annotation Configuration](../configuration/annotation.md) for fur
 ## Model API
 
 ```
-com.alibaba.dubbo.common.URL
-com.alibaba.dubbo.rpc.RpcException
+org.apache.dubbo.common.URL
+org.apache.dubbo.rpc.RpcException
 ```
 
 ## Context API
 
 ```
-com.alibaba.dubbo.rpc.RpcContext
+org.apache.dubbo.rpc.RpcContext
 ```
 
 Pls. refer to [context](../demos/context.md) & [pass parameter in attachment](../demos/attachment.md) & [asynchronous call](../demos/async-call.md) for further information.
@@ -49,14 +49,14 @@ Pls. refer to [context](../demos/context.md) & [pass parameter in attachment](..
 ## Service API
 
 ```
-com.alibaba.dubbo.rpc.service.GenericService
-com.alibaba.dubbo.rpc.service.GenericException
+org.apache.dubbo.rpc.service.GenericService
+org.apache.dubbo.rpc.service.GenericException
 ```
 
 Pls. refer to [generic reference](../demos/generic-reference.md) & [generic service](../demos/generic-service.md) for further information.
 
 ```
-com.alibaba.dubbo.rpc.service.EchoService
+org.apache.dubbo.rpc.service.EchoService
 ```
 Pls. refer to [test via echo service](../demos/echo-service.md) for further details.
 

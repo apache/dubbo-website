@@ -34,7 +34,7 @@
 <font size=3>Then add in the XML configuration:</font>
 
 ```
-<dubbo:protocol name="dubbo" serialization="kryo" optimizer="com.alibaba.dubbo.demo.SerializationOptimizerImpl"/>
+<dubbo:protocol name="dubbo" serialization="kryo" optimizer="org.apache.dubbo.demo.SerializationOptimizerImpl"/>
 ```
 
 <font size=3>After registering these classes, serialization performance can be greatly improved, especially for small numbers of nested objects.

@@ -18,7 +18,7 @@ Dubbo 改进了 JDK 标准的 SPI 的以下问题：
 
 ### 示例：
 
-以扩展 Dubbo 的协议为例，在协议的实现 jar 包内放置文本文件：`META-INF/dubbo/com.alibaba.dubbo.rpc.Protocol`，内容为：
+以扩展 Dubbo 的协议为例，在协议的实现 jar 包内放置文本文件：`META-INF/dubbo/org.apache.dubbo.rpc.Protocol`，内容为：
 
 ```properties
 xxx=com.alibaba.xxx.XxxProtocol
@@ -29,7 +29,7 @@ xxx=com.alibaba.xxx.XxxProtocol
 ```java
 package com.alibaba.xxx;
  
-import com.alibaba.dubbo.rpc.Protocol;
+import org.apache.dubbo.rpc.Protocol;
  
 public class XxxProtocol implements Protocol { 
     // ...
@@ -55,7 +55,7 @@ Wrapper类内容：
 ```java
 package com.alibaba.xxx;
  
-import com.alibaba.dubbo.rpc.Protocol;
+import org.apache.dubbo.rpc.Protocol;
  
 public class XxxProtocolWrapper implements Protocol {
     Protocol impl;
@@ -197,8 +197,8 @@ public interface Transporter {
 对于集合类扩展点，比如：`Filter`, `InvokerListener`, `ExportListener`, `TelnetHandler`, `StatusChecker` 等，可以同时加载多个实现，此时，可以用自动激活来简化配置，如：
 
 ```java
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.rpc.Filter;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.rpc.Filter;
  
 @Activate // 无条件自动激活
 public class XxxFilter implements Filter {
@@ -209,8 +209,8 @@ public class XxxFilter implements Filter {
 或：
 
 ```java
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.rpc.Filter;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.rpc.Filter;
  
 @Activate("xxx") // 当配置了xxx参数，并且参数为有效值时激活，比如配了cache="lru"，自动激活CacheFilter。
 public class XxxFilter implements Filter {
@@ -221,8 +221,8 @@ public class XxxFilter implements Filter {
 或：
 
 ```java
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.rpc.Filter;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.rpc.Filter;
  
 @Activate(group = "provider", value = "xxx") // 只对提供方激活，group可选"provider"或"consumer"
 public class XxxFilter implements Filter {

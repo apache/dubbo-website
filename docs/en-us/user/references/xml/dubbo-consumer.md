@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:consumer
 
-Consumer default configuration. The corresponding clas： `com.alibaba.dubbo.config.ConsumerConfig`. It is also default configuration of `<dubbo:reference>`.
+Consumer default configuration. The corresponding clas： `org.apache.dubbo.config.ConsumerConfig`. It is also default configuration of `<dubbo:reference>`.
 
 | Property | Corresponding URL parameter | Type | Requisite | Default | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

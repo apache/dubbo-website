@@ -59,7 +59,7 @@ As Provider side:
 +----------------------------------+---+
 |       Provider Service Name      |PUB|
 +----------------------------------+---+
-|com.alibaba.dubbo.demo.DemoService| N |
+|org.apache.dubbo.demo.DemoService| N |
 +----------------------------------+---+
 As Consumer side:
 +---------------------+---+
@@ -76,7 +76,7 @@ As Provider side:
 +----------------------------------+---+
 |       Provider Service Name      |PUB|
 +----------------------------------+---+
-|com.alibaba.dubbo.demo.DemoService| N |
+|org.apache.dubbo.demo.DemoService| N |
 +----------------------------------+---+
 As Consumer side:
 +---------------------+---+
@@ -94,7 +94,7 @@ As Provider side:
 +----------------------------------+---+
 |       Provider Service Name      |PUB|
 +----------------------------------+---+
-|com.alibaba.dubbo.demo.DemoService| Y |
+|org.apache.dubbo.demo.DemoService| Y |
 +----------------------------------+---+
 As Consumer side:
 +---------------------+---+
@@ -106,7 +106,7 @@ List the services of the provides and the consumers that dubbo provide
 
 ### Online service command
 
-When using delay publishing function(com.alibaba.dubbo.config.AbstractServiceConfig#register set as false), you can use “online” command to online the service 
+When using delay publishing function(org.apache.dubbo.config.AbstractServiceConfig#register set as false), you can use “online” command to online the service 
 
 ```
 //online all services

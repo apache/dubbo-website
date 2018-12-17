@@ -6,19 +6,19 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.container.Container`
+`org.apache.dubbo.container.Container`
 
 ## 扩展配置
 
 ```sh
-java com.alibaba.dubbo.container.Main spring jetty log4j
+java org.apache.dubbo.container.Main spring jetty log4j
 ```
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.container.spring.SpringContainer`
-* `com.alibaba.dubbo.container.spring.JettyContainer`
-* `com.alibaba.dubbo.container.spring.Log4jContainer`
+* `org.apache.dubbo.container.spring.SpringContainer`
+* `org.apache.dubbo.container.spring.JettyContainer`
+* `org.apache.dubbo.container.spring.Log4jContainer`
 
 ## 扩展示例
 
@@ -34,7 +34,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.container.Container (纯文本文件，内容为：xxx=com.xxx.XxxContainer)
+                |-org.apache.dubbo.container.Container (纯文本文件，内容为：xxx=com.xxx.XxxContainer)
 ```
 
 XxxContainer.java：
@@ -42,7 +42,7 @@ XxxContainer.java：
 ```java
 package com.xxx;
  
-com.alibaba.dubbo.container.Container;
+org.apache.dubbo.container.Container;
  
  
 public class XxxContainer implements Container {
@@ -55,7 +55,7 @@ public class XxxContainer implements Container {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.container.Container：
+META-INF/dubbo/org.apache.dubbo.container.Container：
 
 ```properties
 xxx=com.xxx.XxxContainer

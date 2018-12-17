@@ -6,8 +6,8 @@ Registry extension is used for service registration and discovery.
 
 ## Extension Interface
 
-* `com.alibaba.dubbo.registry.RegistryFactory`
-* `com.alibaba.dubbo.registry.Registry`
+* `org.apache.dubbo.registry.RegistryFactory`
+* `org.apache.dubbo.registry.Registry`
 
 ## Extension Configuration
 
@@ -107,9 +107,9 @@ public interface RegistryService { // Registry extends RegistryService
      * 查询注册列表，与订阅的推模式相对应，这里为拉模式，只返回一次结果。
      * Lookup subscription list. Compared to push mode for subscription, this is pull mode and returns result only once.
      * 
-     * @see com.alibaba.dubbo.registry.NotifyListener#notify(List)
+     * @see org.apache.dubbo.registry.NotifyListener#notify(List)
      * @param url URL for  query, null is not allowed, e.g.: consumer://10.20.153.10/com.alibaba.foo.BarService?version=1.0.0&application=kylin
-     * @return subscription list, could be null, has the same meaning as the parameters in {@link com.alibaba.dubbo.registry.NotifyListener#notify(List<URL>)}.
+     * @return subscription list, could be null, has the same meaning as the parameters in {@link org.apache.dubbo.registry.NotifyListener#notify(List<URL>)}.
      */
     List<URL> lookup(URL url);
  
@@ -130,7 +130,7 @@ public interface NotifyListener {
      * 4. If the data for one particular type is empty, need to notify with a special URL which has empty as its protocol and has category parameter for this particluar type.
      * 5. Notifier (usually it is monitor center) needs to guarantee the notification sequence by, for say: single thread push, queuing in order,  versioning, etc. <br>
      * 
-     * @param urls subscription list, always not empty, equivalent to the return result of {@link com.alibaba.dubbo.registry.RegistryService#lookup(URL)}.
+     * @param urls subscription list, always not empty, equivalent to the return result of {@link org.apache.dubbo.registry.RegistryService#lookup(URL)}.
      */
     void notify(List<URL> urls);
  
@@ -139,7 +139,7 @@ public interface NotifyListener {
 
 ## Existing Extension
 
-`com.alibaba.dubbo.registry.support.dubbo.DubboRegistryFactory`
+`org.apache.dubbo.registry.support.dubbo.DubboRegistryFactory`
 
 ## Extension Guide
 
@@ -156,7 +156,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.registry.RegistryFactory (plain text file with the content: xxx=com.xxx.XxxRegistryFactory)
+                |-org.apache.dubbo.registry.RegistryFactory (plain text file with the content: xxx=com.xxx.XxxRegistryFactory)
 ```
 
 XxxRegistryFactory.java：
@@ -164,9 +164,9 @@ XxxRegistryFactory.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.registry.RegistryFactory;
-import com.alibaba.dubbo.registry.Registry;
-import com.alibaba.dubbo.common.URL;
+import org.apache.dubbo.registry.RegistryFactory;
+import org.apache.dubbo.registry.Registry;
+import org.apache.dubbo.common.URL;
  
 public class XxxRegistryFactory implements RegistryFactory {
     public Registry getRegistry(URL url) {
@@ -180,9 +180,9 @@ XxxRegistry.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.registry.Registry;
-import com.alibaba.dubbo.registry.NotifyListener;
-import com.alibaba.dubbo.common.URL;
+import org.apache.dubbo.registry.Registry;
+import org.apache.dubbo.registry.NotifyListener;
+import org.apache.dubbo.common.URL;
  
 public class XxxRegistry implements Registry {
     public void register(URL url) {
@@ -200,7 +200,7 @@ public class XxxRegistry implements Registry {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.registry.RegistryFactory：
+META-INF/dubbo/org.apache.dubbo.registry.RegistryFactory：
 
 ```properties
 xxx=com.xxx.XxxRegistryFactory

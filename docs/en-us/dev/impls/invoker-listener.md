@@ -6,7 +6,7 @@ Fire event when there's any service referenced.
 
 ## Extension Interface
 
-`com.alibaba.dubbo.rpc.InvokerListener`
+`org.apache.dubbo.rpc.InvokerListener`
 
 ## Extension Configuration
 
@@ -20,7 +20,7 @@ Fire event when there's any service referenced.
 
 ## Existing Extension
 
-`com.alibaba.dubbo.rpc.listener.DeprecatedInvokerListener`
+`org.apache.dubbo.rpc.listener.DeprecatedInvokerListener`
 
 ## Extension Guide
 
@@ -36,7 +36,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.InvokerListener (plain text file with the content: xxx=com.xxx.XxxInvokerListener)
+                |-org.apache.dubbo.rpc.InvokerListener (plain text file with the content: xxx=com.xxx.XxxInvokerListener)
 ```
 
 XxxInvokerListener.java：
@@ -44,9 +44,9 @@ XxxInvokerListener.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.InvokerListener;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.InvokerListener;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.RpcException;
  
 public class XxxInvokerListener implements InvokerListener {
     public void referred(Invoker<?> invoker) throws RpcException {
@@ -58,7 +58,7 @@ public class XxxInvokerListener implements InvokerListener {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.InvokerListener：
+META-INF/dubbo/org.apache.dubbo.rpc.InvokerListener：
 
 ```properties
 xxx=com.xxx.XxxInvokerListener

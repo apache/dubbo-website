@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.remoting.Dispatcher`
+`org.apache.dubbo.remoting.Dispatcher`
 
 ## 扩展配置
 
@@ -18,11 +18,11 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.remoting.transport.dispatcher.all.AllDispatcher`
-* `com.alibaba.dubbo.remoting.transport.dispatcher.direct.DirectDispatcher`
-* `com.alibaba.dubbo.remoting.transport.dispatcher.message.MessageOnlyDispatcher`
-* `com.alibaba.dubbo.remoting.transport.dispatcher.execution.ExecutionDispatcher`
-* `com.alibaba.dubbo.remoting.transport.dispatcher.connection.ConnectionOrderedDispatcher`
+* `org.apache.dubbo.remoting.transport.dispatcher.all.AllDispatcher`
+* `org.apache.dubbo.remoting.transport.dispatcher.direct.DirectDispatcher`
+* `org.apache.dubbo.remoting.transport.dispatcher.message.MessageOnlyDispatcher`
+* `org.apache.dubbo.remoting.transport.dispatcher.execution.ExecutionDispatcher`
+* `org.apache.dubbo.remoting.transport.dispatcher.connection.ConnectionOrderedDispatcher`
 
 ## 扩展示例
 
@@ -38,7 +38,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.remoting.Dispatcher (纯文本文件，内容为：xxx=com.xxx.XxxDispatcher)
+                |-org.apache.dubbo.remoting.Dispatcher (纯文本文件，内容为：xxx=com.xxx.XxxDispatcher)
 ```
 
 XxxDispatcher.java：
@@ -46,7 +46,7 @@ XxxDispatcher.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.Dispatcher;
+import org.apache.dubbo.remoting.Dispatcher;
  
 public class XxxDispatcher implements Dispatcher {
     public Group lookup(URL url) {
@@ -55,7 +55,7 @@ public class XxxDispatcher implements Dispatcher {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.remoting.Dispatcher：
+META-INF/dubbo/org.apache.dubbo.remoting.Dispatcher：
 
 ```properties
 xxx=com.xxx.XxxDispatcher

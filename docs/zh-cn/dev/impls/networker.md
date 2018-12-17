@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.remoting.p2p.Networker`
+`org.apache.dubbo.remoting.p2p.Networker`
 
 ## 扩展配置
 
@@ -18,8 +18,8 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.remoting.p2p.support.MulticastNetworker`
-* `com.alibaba.dubbo.remoting.p2p.support.FileNetworker`
+* `org.apache.dubbo.remoting.p2p.support.MulticastNetworker`
+* `org.apache.dubbo.remoting.p2p.support.FileNetworker`
 
 ## 扩展示例
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.remoting.p2p.Networker (纯文本文件，内容为：xxx=com.xxx.XxxNetworker)
+                |-org.apache.dubbo.remoting.p2p.Networker (纯文本文件，内容为：xxx=com.xxx.XxxNetworker)
 ```
 
 XxxNetworker.java：
@@ -43,7 +43,7 @@ XxxNetworker.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.p2p.Networker;
+import org.apache.dubbo.remoting.p2p.Networker;
  
 public class XxxNetworker implements Networker {
     public Group lookup(URL url) {
@@ -52,7 +52,7 @@ public class XxxNetworker implements Networker {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.remoting.p2p.Networker：
+META-INF/dubbo/org.apache.dubbo.remoting.p2p.Networker：
 
 ```properties
 xxx=com.xxx.XxxNetworker

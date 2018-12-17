@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.rpc.cluster.Merger`
+`org.apache.dubbo.rpc.cluster.Merger`
 
 ## 扩展配置
 
@@ -16,10 +16,10 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.rpc.cluster.merger.ArrayMerger`
-* `com.alibaba.dubbo.rpc.cluster.merger.ListMerger`
-* `com.alibaba.dubbo.rpc.cluster.merger.SetMerger`
-* `com.alibaba.dubbo.rpc.cluster.merger.MapMerger`
+* `org.apache.dubbo.rpc.cluster.merger.ArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.ListMerger`
+* `org.apache.dubbo.rpc.cluster.merger.SetMerger`
+* `org.apache.dubbo.rpc.cluster.merger.MapMerger`
 
 ## 扩展示例
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.cluster.Merger (纯文本文件，内容为：xxx=com.xxx.XxxMerger)
+                |-org.apache.dubbo.rpc.cluster.Merger (纯文本文件，内容为：xxx=com.xxx.XxxMerger)
 ```
 
 XxxMerger.java：
@@ -43,7 +43,7 @@ XxxMerger.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.cluster.Merger;
+import org.apache.dubbo.rpc.cluster.Merger;
  
 public class XxxMerger<T> implements Merger<T> {
     public T merge(T... results) {
@@ -52,7 +52,7 @@ public class XxxMerger<T> implements Merger<T> {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.Merger：
+META-INF/dubbo/org.apache.dubbo.rpc.cluster.Merger：
 
 ```properties
 xxx=com.xxx.XxxMerger

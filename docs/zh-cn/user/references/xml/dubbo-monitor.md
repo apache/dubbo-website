@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:monitor
 
-监控中心配置。对应的配置类： `com.alibaba.dubbo.config.MonitorConfig`
+监控中心配置。对应的配置类： `org.apache.dubbo.config.MonitorConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
