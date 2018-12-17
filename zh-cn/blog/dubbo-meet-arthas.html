@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="Dubbo, Arthas" />
+	<meta name="description" content="使用Alibaba开源的应用诊断利器Arthas来排查Dubbo应用的问题。" />
+	<!-- 网页标签标题 -->
+	<title>当Dubbo遇上Arthas：排查问题的实践</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot=""><header class="header-container header-container-normal"><div class="header-body"><a href="/zh-cn/index.html"><img class="logo" src="/img/dubbo_colorful.png"/></a><div class="search search-normal"><span class="icon-search"></span></div><span class="language-switch language-switch-normal">En</span><div class="header-menu"><img class="header-menu-toggle" src="/img/menu_gray.png"/><ul><li class="menu-item menu-item-normal"><a href="/zh-cn/index.html">首页</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/user/quick-start.html">文档</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/developers/developers_dev.html">开发者</a></li><li class="menu-item menu-item-normal menu-item-normal-active"><a href="/zh-cn/blog/index.html">博客</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/community/index.html">社区</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/blog/download.html">下载</a></li></ul></div></div></header><section class="blog-content markdown-body"><h1>当Dubbo遇上Arthas：排查问题的实践</h1>
+<p>Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用户。</p>
+<ul>
+<li>Github: <a href="https://github.com/apache/incubator-dubbo">https://github.com/apache/incubator-dubbo</a></li>
+<li>文档：<a href="http://dubbo.incubator.apache.org/zh-cn/">http://dubbo.incubator.apache.org/zh-cn/</a></li>
+</ul>
+<p>Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。</p>
+<ul>
+<li>Github: <a href="https://github.com/alibaba/arthas">https://github.com/alibaba/arthas</a></li>
+<li>文档：<a href="https://alibaba.github.io/arthas/">https://alibaba.github.io/arthas/</a></li>
+<li>Arthas开源交流QQ群: 916328269</li>
+<li>Arthas开源交流钉钉群: 21965291</li>
+</ul>
+<p>当Dubbo遇上Arthas，会碰撞出什么样的火花呢？下面来分享Arthas排查Dubbo问题的一些经验。</p>
+<h3>dubbo-arthas-demo</h3>
+<p>下面的排查分享基于这个<code>dubbo-arthas-demo</code>，非常简单的一个应用，浏览器请求从Spring MVC到Dubbo Client，再发送到Dubbo Server。</p>
+<p>Demo里有两个spring boot应用，可以先启动<code>server-demo</code>，再启动<code>client-demo</code>。</p>
+<ul>
+<li><a href="https://github.com/hengyunabc/dubbo-arthas-demo">https://github.com/hengyunabc/dubbo-arthas-demo</a></li>
+</ul>
+<pre><code>  /user/{id}    -&gt;   UserService    -&gt;   UserServiceImpl 
+   Browser           Dubbo Client          Dubbo Server
+</code></pre>
+<p>Client端：</p>
+<pre><code class="language-java"><span class="hljs-meta">@RestController</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> </span>{
+
+	<span class="hljs-meta">@Reference</span>(version = <span class="hljs-string">"1.0.0"</span>)
+	<span class="hljs-keyword">private</span> UserService userService;
+
+	<span class="hljs-meta">@GetMapping</span>(<span class="hljs-string">"/user/{id}"</span>)
+	<span class="hljs-function"><span class="hljs-keyword">public</span> User <span class="hljs-title">findUserById</span><span class="hljs-params">(@PathVariable Integer id)</span> </span>{
+		<span class="hljs-keyword">return</span> userService.findUser(id);
+	}
+</code></pre>
+<p>Server端：</p>
+<pre><code class="language-java"><span class="hljs-meta">@Service</span>(version = <span class="hljs-string">"1.0.0"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span> </span>{
+	<span class="hljs-meta">@Override</span>
+	<span class="hljs-function"><span class="hljs-keyword">public</span> User <span class="hljs-title">findUser</span><span class="hljs-params">(<span class="hljs-keyword">int</span> id)</span> </span>{
+		<span class="hljs-keyword">if</span> (id &lt; <span class="hljs-number">1</span>) {
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"user id &lt; 1, id: "</span> + id);
+		}
+		<span class="hljs-keyword">for</span> (User user : users) {
+			<span class="hljs-keyword">if</span> (user.getId() == id) {
+				<span class="hljs-keyword">return</span> user;
+			}
+		}
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">"Can not find user, id: "</span> + id);
+	}
+</code></pre>
+<h3>Arthas快速开始</h3>
+<ul>
+<li><a href="https://alibaba.github.io/arthas/install-detail.html">https://alibaba.github.io/arthas/install-detail.html</a></li>
+</ul>
+<pre><code class="language-bash">$ wget https://alibaba.github.io/arthas/arthas-boot.jar
+$ java -jar arthas-boot.jar
+</code></pre>
+<p>启动后，会列出所有的java进程，选择1，然后回车，就会连接上<code>ServerDemoApplication</code></p>
+<pre><code class="language-bash">$ java -jar arthas-boot.jar
+* [1]: 43523 ServerDemoApplication
+  [2]: 22342
+  [3]: 44108 ClientDemoApplication
+1
+[INFO] arthas home: /Users/hengyunabc/.arthas/lib/3.0.5/arthas
+[INFO] Try to attach process 43523
+[INFO] Attach process 43523 success.
+[INFO] arthas-client connect 127.0.0.1 3658
+  ,---.  ,------. ,--------.,--.  ,--.  ,---.   ,---.
+ /  O  \ |  .--. <span class="hljs-string">''</span>--.  .--<span class="hljs-string">'|  '</span>--<span class="hljs-string">'  | /  O  \ '</span>   .-<span class="hljs-string">'
+|  .-.  ||  '</span>--<span class="hljs-string">'.'</span>   |  |   |  .--.  ||  .-.  |`.  `-.
+|  | |  ||  |\  \    |  |   |  |  |  ||  | |  |.-<span class="hljs-string">'    |
+`--'</span> `--<span class="hljs-string">'`--'</span> <span class="hljs-string">'--'</span>   `--<span class="hljs-string">'   `--'</span>  `--<span class="hljs-string">'`--'</span> `--<span class="hljs-string">'`-----'</span>
+
+wiki: https://alibaba.github.io/arthas
+version: 3.0.5
+pid: 43523
+time: 2018-12-05 16:23:52
+
+$
+</code></pre>
+<h3>Dubbo线上服务抛出异常，怎么获取调用参数？</h3>
+<ul>
+<li><a href="https://alibaba.github.io/arthas/watch.html">https://alibaba.github.io/arthas/watch.html</a></li>
+</ul>
+<p>当线上服务抛出异常时，最着急的是什么参数导致了抛异常？</p>
+<p>在demo里，访问 <a href="http://localhost:8080/user/0">http://localhost:8080/user/0</a> ，<code>UserServiceImpl</code>就会抛出一个异常，因为user id不合法。</p>
+<p>在Arthas里执行 <code>watch com.example.UserService * -e -x 2 '{params,throwExp}'</code> ，然后再次访问，就可以看到watch命令把参数和异常都打印出来了。</p>
+<pre><code>$ watch com.example.UserService * -e -x 2 '{params,throwExp}'
+Press Ctrl+C to abort.
+Affect(class-cnt:1 , method-cnt:4) cost in 230 ms.
+ts=2018-12-05 16:26:44; [cost=3.905523ms] result=@ArrayList[
+    @Object[][
+        @Integer[0],
+    ],
+    java.lang.IllegalArgumentException: user id &lt; 1, id: 0
+	at com.example.UserServiceImpl.findUser(UserServiceImpl.java:24)
+	at com.alibaba.dubbo.common.bytecode.Wrapper1.invokeMethod(Wrapper1.java)
+	at com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory$1.doInvoke(JavassistProxyFactory.java:45)
+	at com.alibaba.dubbo.rpc.proxy.AbstractProxyInvoker.invoke(AbstractProxyInvoker.java:71)
+	at com.alibaba.dubbo.config.invoker.DelegateProviderMetaDataInvoker.invoke(DelegateProviderMetaDataInvoker.java:48)
+	at com.alibaba.dubbo.rpc.protocol.InvokerWrapper.invoke(InvokerWrapper.java:52)
+	at com.alibaba.dubbo.rpc.filter.ExceptionFilter.invoke(ExceptionFilter.java:61)
+</code></pre>
+<h3>怎样线上调试Dubbo服务代码?</h3>
+<ul>
+<li><a href="https://alibaba.github.io/arthas/redefine.html">https://alibaba.github.io/arthas/redefine.html</a></li>
+</ul>
+<p>在本地开发时，可能会用到热部署工具，直接改代码，不需要重启应用。但是在线上环境，有没有办法直接动态调试代码？比如增加日志。</p>
+<p>在Arthas里，可以通过<code>redefine</code>命令来达到线上不重启，动态更新代码的效果。</p>
+<p>比如我们修改下<code>UserServiceImpl</code>，用<code>System.out</code>打印出具体的<code>User</code>对象来：</p>
+<pre><code class="language-java">	<span class="hljs-function"><span class="hljs-keyword">public</span> User <span class="hljs-title">findUser</span><span class="hljs-params">(<span class="hljs-keyword">int</span> id)</span> </span>{
+		<span class="hljs-keyword">if</span> (id &lt; <span class="hljs-number">1</span>) {
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"user id &lt; 1, id: "</span> + id);
+		}
+		<span class="hljs-keyword">for</span> (User user : users) {
+			<span class="hljs-keyword">if</span> (user.getId() == id) {
+				System.out.println(user);
+				<span class="hljs-keyword">return</span> user;
+			}
+		}
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">"Can not find user, id: "</span> + id);
+	}
+</code></pre>
+<p>本地编绎后，把<code>server-demo/target/classes/com/example/UserServiceImpl.class</code>传到线上服务器，然后用<code>redefine</code>命令来更新代码：</p>
+<pre><code>$ redefine -p /tmp/UserServiceImpl.class
+redefine success, size: 1
+</code></pre>
+<p>这样子更新成功之后，访问 <a href="http://localhost:8080/user/1">http://localhost:8080/user/1</a> ，在<code>ServerDemoApplication</code>的控制台里就可以看到打印出了user信息。</p>
+<h3>怎样动态修改Dubbo的logger级别?</h3>
+<ul>
+<li><a href="https://alibaba.github.io/arthas/ognl.html">https://alibaba.github.io/arthas/ognl.html</a></li>
+<li><a href="https://alibaba.github.io/arthas/sc.html">https://alibaba.github.io/arthas/sc.html</a></li>
+<li><a href="https://commons.apache.org/proper/commons-ognl/language-guide.html">https://commons.apache.org/proper/commons-ognl/language-guide.html</a></li>
+</ul>
+<p>在排查问题时，需要查看到更多的信息，如果可以把logger级别修改为<code>DEBUG</code>，就非常有帮助。</p>
+<p><code>ognl</code>是apache开源的一个轻量级表达式引擎。下面通过Arthas里的<code>ognl</code>命令来动态修改logger级别。</p>
+<p>首先获取Dubbo里<code>TraceFilter</code>的一个logger对象，看下它的实现类，可以发现是log4j。</p>
+<pre><code class="language-bash">$ ognl <span class="hljs-string">'@com.alibaba.dubbo.rpc.protocol.dubbo.filter.TraceFilter@logger.logger'</span>
+@Log4jLogger[
+    FQCN=@String[com.alibaba.dubbo.common.logger.support.FailsafeLogger],
+    logger=@Logger[org.apache.log4j.Logger@2f19bdcf],
+]
+</code></pre>
+<p>再用<code>sc</code>命令来查看具体从哪个jar包里加载的：</p>
+<pre><code class="language-bash">$ sc -d org.apache.log4j.Logger
+ class-info        org.apache.log4j.Logger
+ code-source       /Users/hengyunabc/.m2/repository/org/slf4j/log4j-over-slf4j/1.7.25/log4j-over-slf4j-1.7.25.jar
+ name              org.apache.log4j.Logger
+ isInterface       <span class="hljs-literal">false</span>
+ isAnnotation      <span class="hljs-literal">false</span>
+ isEnum            <span class="hljs-literal">false</span>
+ isAnonymousClass  <span class="hljs-literal">false</span>
+ isArray           <span class="hljs-literal">false</span>
+ isLocalClass      <span class="hljs-literal">false</span>
+ isMemberClass     <span class="hljs-literal">false</span>
+ isPrimitive       <span class="hljs-literal">false</span>
+ isSynthetic       <span class="hljs-literal">false</span>
+ simple-name       Logger
+ modifier          public
+ annotation
+ interfaces
+ super-class       +-org.apache.log4j.Category
+                     +-java.lang.Object
+ class-loader      +-sun.misc.Launcher<span class="hljs-variable">$AppClassLoader</span>@5c647e05
+                     +-sun.misc.Launcher<span class="hljs-variable">$ExtClassLoader</span>@59878d35
+ classLoaderHash   5c647e05
+
+Affect(row-cnt:1) cost <span class="hljs-keyword">in</span> 126 ms.
+</code></pre>
+<p><strong>可以看到log4j是通过slf4j代理的。</strong></p>
+<p>那么通过<code>org.slf4j.LoggerFactory</code>获取<code>root</code> logger，再修改它的level：</p>
+<pre><code>$ ognl '@org.slf4j.LoggerFactory@getLogger(&quot;root&quot;).setLevel(@ch.qos.logback.classic.Level@DEBUG)'
+null
+$ ognl '@org.slf4j.LoggerFactory@getLogger(&quot;root&quot;).getLevel().toString()'
+@String[DEBUG]
+</code></pre>
+<p>可以看到修改之后，<code>root</code> logger的level变为<code>DEBUG</code>。</p>
+<h3>怎样减少测试小姐姐重复发请求的麻烦?</h3>
+<ul>
+<li><a href="https://alibaba.github.io/arthas/tt.html">https://alibaba.github.io/arthas/tt.html</a></li>
+</ul>
+<p>在平时开发时，可能需要测试小姐姐发请求过来联调，但是我们在debug时，可能不小心直接跳过去了。这样子就尴尬了，需要测试小姐姐再发请求过来。</p>
+<p>Arthas里提供了<code>tt</code>命令，可以减少这种麻烦，可以直接重放请求。</p>
+<pre><code class="language-bash">$ tt -t com.example.UserServiceImpl findUser
+Press Ctrl+C to abort.
+Affect(class-cnt:1 , method-cnt:1) cost <span class="hljs-keyword">in</span> 145 ms.
+ INDEX      TIMESTAMP              COST(ms)      IS-RET     IS-EXP    OBJECT       CLASS              METHOD
+----------------------------------------------------------------------------------------------------------------
+ 1000       2018-12-05 17:47:52    1.56523       <span class="hljs-literal">true</span>       <span class="hljs-literal">false</span>     0x3233483    UserServiceImpl    findUser
+ 1001       2018-12-05 17:48:03    0.286176      <span class="hljs-literal">false</span>      <span class="hljs-literal">true</span>      0x3233483    UserServiceImpl    findUser
+ 1002       2018-12-05 17:48:11    90.324335     <span class="hljs-literal">true</span>       <span class="hljs-literal">false</span>     0x3233483    UserServiceImpl    findUser
+</code></pre>
+<p>上面的<code>tt -t</code>命令捕获到了3个请求。然后通过<code>tt --play</code>可以重放请求：</p>
+<pre><code class="language-bash">$ tt --play -i 1000
+ RE-INDEX       1000
+ GMT-REPLAY     2018-12-05 17:55:50
+ OBJECT         0x3233483
+ CLASS          com.example.UserServiceImpl
+ METHOD         findUser
+ PARAMETERS[0]  @Integer[1]
+ IS-RETURN      <span class="hljs-literal">true</span>
+ IS-EXCEPTION   <span class="hljs-literal">false</span>
+ RETURN-OBJ     @User[
+                    id=@Integer[1],
+                    name=@String[Deanna Borer],
+                ]
+Time fragment[1000] successfully replayed.
+Affect(row-cnt:1) cost <span class="hljs-keyword">in</span> 4 ms.
+</code></pre>
+<h3>Dubbo运行时有哪些Filter? 耗时是多少?</h3>
+<ul>
+<li><a href="https://alibaba.github.io/arthas/trace.html">https://alibaba.github.io/arthas/trace.html</a></li>
+</ul>
+<p>Dubbo运行时会加载很多的Filter，那么一个请求会经过哪些Filter处理，Filter里的耗时又是多少呢？</p>
+<p>通过Arthas的<code>trace</code>命令，可以很方便地知道Filter的信息，可以看到详细的调用栈和耗时。</p>
+<pre><code class="language-bash">$ trace com.alibaba.dubbo.rpc.Filter *
+Press Ctrl+C to abort.
+Affect(class-cnt:19 , method-cnt:59) cost <span class="hljs-keyword">in</span> 1441 ms.
+`---ts=2018-12-05 19:07:26;thread_name=DubboServerHandler-30.5.125.152:20880-thread-10;id=3e;is_daemon=<span class="hljs-literal">true</span>;priority=5;TCCL=sun.misc.Launcher<span class="hljs-variable">$AppClassLoader</span>@5c647e05
+    `---[8.435844ms] com.alibaba.dubbo.rpc.filter.EchoFilter:invoke()
+        +---[0.124572ms] com.alibaba.dubbo.rpc.Invocation:getMethodName()
+        +---[0.065123ms] java.lang.String:equals()
+        `---[7.762928ms] com.alibaba.dubbo.rpc.Invoker:invoke()
+            `---[7.494124ms] com.alibaba.dubbo.rpc.filter.ClassLoaderFilter:invoke()
+                +---[min=0.00355ms,max=0.049922ms,total=0.057637ms,count=3] java.lang.Thread:currentThread()
+                +---[0.0126ms] java.lang.Thread:getContextClassLoader()
+                +---[0.02188ms] com.alibaba.dubbo.rpc.Invoker:getInterface()
+                +---[0.004115ms] java.lang.Class:getClassLoader()
+                +---[min=0.003906ms,max=0.014058ms,total=0.017964ms,count=2] java.lang.Thread:setContextClassLoader()
+                `---[7.033486ms] com.alibaba.dubbo.rpc.Invoker:invoke()
+                    `---[6.869488ms] com.alibaba.dubbo.rpc.filter.GenericFilter:invoke()
+                        +---[0.01481ms] com.alibaba.dubbo.rpc.Invocation:getMethodName()
+</code></pre>
+<h3>Dubbo动态代理是怎样实现的?</h3>
+<ul>
+<li><a href="https://alibaba.github.io/arthas/jad.html">https://alibaba.github.io/arthas/jad.html</a></li>
+<li>com.alibaba.dubbo.common.bytecode.Wrapper</li>
+</ul>
+<p>通过Arthas的<code>jad</code>命令，可以看到Dubbo通过javaassist动态生成的Wrappr类的代码：</p>
+<pre><code class="language-java">$ jad com.alibaba.dubbo.common.bytecode.Wrapper1
+
+ClassLoader:
++-sun.misc.Launcher$AppClassLoader@<span class="hljs-number">5</span>c647e05
+  +-sun.misc.Launcher$ExtClassLoader@<span class="hljs-number">59878</span>d35
+
+Location:
+/Users/hengyunabc/.m2/repository/com/alibaba/dubbo/<span class="hljs-number">2.5</span>.10/dubbo-<span class="hljs-number">2.5</span>.10.jar
+
+<span class="hljs-keyword">package</span> com.alibaba.dubbo.common.bytecode;
+
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Wrapper1</span>
+<span class="hljs-keyword">extends</span> <span class="hljs-title">Wrapper</span>
+<span class="hljs-keyword">implements</span> <span class="hljs-title">ClassGenerator</span>.<span class="hljs-title">DC</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">invokeMethod</span><span class="hljs-params">(Object object, String string, Class[] arrclass, Object[] arrobject)</span> <span class="hljs-keyword">throws</span> InvocationTargetException </span>{
+        UserServiceImpl userServiceImpl;
+        <span class="hljs-keyword">try</span> {
+            userServiceImpl = (UserServiceImpl)object;
+        }
+        <span class="hljs-keyword">catch</span> (Throwable throwable) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(throwable);
+        }
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-keyword">if</span> (<span class="hljs-string">"findUser"</span>.equals(string) &amp;&amp; arrclass.length == <span class="hljs-number">1</span>) {
+                <span class="hljs-keyword">return</span> userServiceImpl.findUser(((Number)arrobject[<span class="hljs-number">0</span>]).intValue());
+            }
+            <span class="hljs-keyword">if</span> (<span class="hljs-string">"listUsers"</span>.equals(string) &amp;&amp; arrclass.length == <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">return</span> userServiceImpl.listUsers();
+            }
+            <span class="hljs-keyword">if</span> (<span class="hljs-string">"findUserByName"</span>.equals(string) &amp;&amp; arrclass.length == <span class="hljs-number">1</span>) {
+                <span class="hljs-keyword">return</span> userServiceImpl.findUserByName((String)arrobject[<span class="hljs-number">0</span>]);
+            }
+        }
+</code></pre>
+<h3>获取Spring context</h3>
+<p>除了上面介绍的一些排查技巧，下面分享一个获取Spring Context，然后“为所欲为”的例子。</p>
+<p>在Dubbo里有一个扩展<code>com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory</code>，把Spring Context保存到了里面。
+因此，我们可以通过<code>ognl</code>命令获取到。</p>
+<pre><code class="language-bash">$ ognl <span class="hljs-string">'#context=@com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory@contexts.iterator.next, #context.getBean("userServiceImpl").findUser(1)'</span>
+@User[
+    id=@Integer[1],
+    name=@String[Deanna Borer],
+]
+</code></pre>
+<ul>
+<li><code>SpringExtensionFactory@contexts.iterator.next</code> 获取到<code>SpringExtensionFactory</code>里保存的spring context对象</li>
+<li><code>#context.getBean(&quot;userServiceImpl&quot;).findUser(1)</code> 获取到<code>userServiceImpl</code>再执行一次调用</li>
+</ul>
+<p>只要充分发挥想像力，组合Arthas里的各种命令，可以发挥出神奇的效果。</p>
+<h2>总结</h2>
+<p>本篇文章来自杭州Dubbo Meetup的分享《当DUBBO遇上Arthas - 排查问题的实践》，希望对大家线上排查Dubbo问题有帮助。</p>
+<p>分享的PDF可以在 <a href="https://github.com/alibaba/arthas/issues/327">https://github.com/alibaba/arthas/issues/327</a> 里下载。</p>
+</section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>
