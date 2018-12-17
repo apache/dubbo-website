@@ -455,7 +455,7 @@ public class User implements Serializable {
     </context-param>
     
     <listener>
-        <listener-class>com.alibaba.dubbo.remoting.http.servlet.BootstrapListener</listener-class>
+        <listener-class>org.apache.dubbo.remoting.http.servlet.BootstrapListener</listener-class>
     </listener>
     
     <listener>
@@ -464,7 +464,7 @@ public class User implements Serializable {
     
     <servlet>
         <servlet-name>dispatcher</servlet-name>
-        <servlet-class>com.alibaba.dubbo.remoting.http.servlet.DispatcherServlet</servlet-class>
+        <servlet-class>org.apache.dubbo.remoting.http.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     
@@ -772,13 +772,13 @@ Dubbo rest支持输出所有HTTP请求/响应中的header字段和body消息体�
 在XML配置中添加如下自带的REST filter：
 
 ```xml
-<dubbo:protocol name="rest" port="8888" extension="com.alibaba.dubbo.rpc.protocol.rest.support.LoggingFilter"/>
+<dubbo:protocol name="rest" port="8888" extension="org.apache.dubbo.rpc.protocol.rest.support.LoggingFilter"/>
 ```
 
-**然后在logging配置中至少为com.alibaba.dubbo.rpc.protocol.rest.support打开INFO级别日志输出**，例如，在log4j.xml中配置：
+**然后在logging配置中至少为org.apache.dubbo.rpc.protocol.rest.support打开INFO级别日志输出**，例如，在log4j.xml中配置：
 
 ```xml
-<logger name="com.alibaba.dubbo.rpc.protocol.rest.support">
+<logger name="org.apache.dubbo.rpc.protocol.rest.support">
     <level value="INFO"/>
     <appender-ref ref="CONSOLE"/>
 </logger>

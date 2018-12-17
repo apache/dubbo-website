@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:argument
 
-方法参数配置。对应的配置类： `com.alibaba.dubbo.config.ArgumentConfig`。该标签为 `<dubbo:method>` 的子标签，用于方法参数的特征描述，比如： 
+方法参数配置。对应的配置类： `org.apache.dubbo.config.ArgumentConfig`。该标签为 `<dubbo:method>` 的子标签，用于方法参数的特征描述，比如： 
  
 ```xml
 <dubbo:method name="findXxx" timeout="3000" retries="2">

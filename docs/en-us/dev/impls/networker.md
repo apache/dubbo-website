@@ -6,7 +6,7 @@ Extension for peer to peer network grouping.
 
 ## Extension Interface
 
-`com.alibaba.dubbo.remoting.p2p.Networker`
+`org.apache.dubbo.remoting.p2p.Networker`
 
 ## Extension Configuration
 
@@ -18,8 +18,8 @@ Extension for peer to peer network grouping.
 
 ## Existing Extension
 
-* `com.alibaba.dubbo.remoting.p2p.support.MulticastNetworker`
-* `com.alibaba.dubbo.remoting.p2p.support.FileNetworker`
+* `org.apache.dubbo.remoting.p2p.support.MulticastNetworker`
+* `org.apache.dubbo.remoting.p2p.support.FileNetworker`
 
 ## Extension Guide
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.remoting.p2p.Networker (plain text file with the content: xxx=com.xxx.XxxNetworker)
+                |-org.apache.dubbo.remoting.p2p.Networker (plain text file with the content: xxx=com.xxx.XxxNetworker)
 ```
 
 XxxNetworker.java：
@@ -43,7 +43,7 @@ XxxNetworker.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.p2p.Networker;
+import org.apache.dubbo.remoting.p2p.Networker;
  
 public class XxxNetworker implements Networker {
     public Group lookup(URL url) {
@@ -52,7 +52,7 @@ public class XxxNetworker implements Networker {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.remoting.p2p.Networker：
+META-INF/dubbo/org.apache.dubbo.remoting.p2p.Networker：
 
 ```properties
 xxx=com.xxx.XxxNetworker

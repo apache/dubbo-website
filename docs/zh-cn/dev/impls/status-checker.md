@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.common.status.StatusChecker`
+`org.apache.dubbo.common.status.StatusChecker`
 
 ## 扩展配置
 
@@ -18,13 +18,13 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.common.status.support.MemoryStatusChecker`
-* `com.alibaba.dubbo.common.status.support.LoadStatusChecker`
-* `com.alibaba.dubbo.rpc.dubbo.status.ServerStatusChecker`
-* `com.alibaba.dubbo.rpc.dubbo.status.ThreadPoolStatusChecker`
-* `com.alibaba.dubbo.registry.directory.RegistryStatusChecker`
-* `com.alibaba.dubbo.rpc.config.spring.status.SpringStatusChecker`
-* `com.alibaba.dubbo.rpc.config.spring.status.DataSourceStatusChecker`
+* `org.apache.dubbo.common.status.support.MemoryStatusChecker`
+* `org.apache.dubbo.common.status.support.LoadStatusChecker`
+* `org.apache.dubbo.rpc.dubbo.status.ServerStatusChecker`
+* `org.apache.dubbo.rpc.dubbo.status.ThreadPoolStatusChecker`
+* `org.apache.dubbo.registry.directory.RegistryStatusChecker`
+* `org.apache.dubbo.rpc.config.spring.status.SpringStatusChecker`
+* `org.apache.dubbo.rpc.config.spring.status.DataSourceStatusChecker`
 
 ## 扩展示例
 
@@ -40,7 +40,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.common.status.StatusChecker (纯文本文件，内容为：xxx=com.xxx.XxxStatusChecker)
+                |-org.apache.dubbo.common.status.StatusChecker (纯文本文件，内容为：xxx=com.xxx.XxxStatusChecker)
 ```
 
 XxxStatusChecker.java：
@@ -48,7 +48,7 @@ XxxStatusChecker.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.status.StatusChecker;
+import org.apache.dubbo.common.status.StatusChecker;
  
 public class XxxStatusChecker implements StatusChecker {
     public Status check() {
@@ -57,7 +57,7 @@ public class XxxStatusChecker implements StatusChecker {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.common.status.StatusChecker：
+META-INF/dubbo/org.apache.dubbo.common.status.StatusChecker：
 
 ```properties
 xxx=com.xxx.XxxStatusChecker

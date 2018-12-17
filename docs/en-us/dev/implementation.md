@@ -23,7 +23,7 @@ Based on extension point adaptive mechanism, call `export()` method of `DubboPro
 
 #### 2. Expose to Registry:
 
-Expose provider address to Registry [^2], the URL format which parsing by `ServiceConfig`: `registry://registry-host/com.alibaba.dubbo.registry.RegistryService?export=URL.encode("dubbo://service-host/com.foo.FooService?version=1.0.0")`，
+Expose provider address to Registry [^2], the URL format which parsing by `ServiceConfig`: `registry://registry-host/org.apache.dubbo.registry.RegistryService?export=URL.encode("dubbo://service-host/com.foo.FooService?version=1.0.0")`，
 
 Based on extension point adaptive mechanism, call `export()` method of `RegistryProtocol` by identifying  `registry://` protocol header, register the provider URL parameter of `export` to Registry.
 
@@ -40,7 +40,7 @@ Based on extension point adaptive mechanism, call `refer()` method of `DubboProt
 #### 2. Service Registry discovery
 
 Discover provider address by Registry [^4], the URL format which parsing by `ReferenceConfig`:
-`registry://registry-host/com.alibaba.dubbo.registry.RegistryService?refer=URL.encode("consumer://consumer-host/com.foo.FooService?version=1.0.0")`.
+`registry://registry-host/org.apache.dubbo.registry.RegistryService?refer=URL.encode("consumer://consumer-host/com.foo.FooService?version=1.0.0")`.
 
 Based on extension point adaptive mechanism, call `refer()` method of `RegistryProtocol` by identifying `registry://` protocol header of URL, then based on the condition of parameter of `refer` to search provider URL, for example: `dubbo://service-host/com.foo.FooService?version=1.0.0`.
 

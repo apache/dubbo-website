@@ -23,14 +23,14 @@ REFER(dubbo://provider-address/com.xxx.XxxService?version=1.0.0)
 export service to registry：
 
 ```
-EXPORT(registry://registry-address/com.alibaba.dubbo.registry.RegistrySerevice?registry=dubbo&export=ENCODE(dubbo://provider-address/com.xxx.XxxService?version=1.0.0))
+EXPORT(registry://registry-address/org.apache.dubbo.registry.RegistrySerevice?registry=dubbo&export=ENCODE(dubbo://provider-address/com.xxx.XxxService?version=1.0.0))
 ```
 
 accquire registry：
 
 ```
 url.setProtocol(url.getParameter("registry", "dubbo"))
-GETREGISTRY(dubbo://registry-address/com.alibaba.dubbo.registry.RegistrySerevice)
+GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice)
 ```
 
 registry service address：
@@ -45,14 +45,14 @@ REGISTER(dubbo://provider-address/com.xxx.XxxService?version=1.0.0)
 refer service from registry：
 
 ```
-REFER(registry://registry-address/com.alibaba.dubbo.registry.RegistrySerevice?registry=dubbo&refer=ENCODE(version=1.0.0))
+REFER(registry://registry-address/org.apache.dubbo.registry.RegistrySerevice?registry=dubbo&refer=ENCODE(version=1.0.0))
 ```
 
 accquire registry：
 
 ```
 url.setProtocol(url.getParameter("registry", "dubbo"))
-GETREGISTRY(dubbo://registry-address/com.alibaba.dubbo.registry.RegistrySerevice)
+GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice)
 ```
 
 subscribe service address：
@@ -155,7 +155,7 @@ public class <SPI interface name>$Adpative implements <SPI interface> {
 
 `@Adaptive`  annotation usage：
 
-If no value is configed for those Keys in URL，default SPI implementation is used。For example ，String[] {"key1", "key2"}，firstly Dubbo will look up value for key1 and use it as SPI name;if key1 value is not founded then look up for key2，if value of key2 is also not found ,then use default spi implementation. If no default implementation is configed, then the method will throw IllegalStateException。if not configed , then default implement is lower case of the interface class full package name. For Extension interface `com.alibaba.dubbo.xxx.YyyInvokerWrapper` , default value is `new String[] {"yyy.invoker.wrapper"}`
+If no value is configed for those Keys in URL，default SPI implementation is used。For example ，String[] {"key1", "key2"}，firstly Dubbo will look up value for key1 and use it as SPI name;if key1 value is not founded then look up for key2，if value of key2 is also not found ,then use default spi implementation. If no default implementation is configed, then the method will throw IllegalStateException。if not configed , then default implement is lower case of the interface class full package name. For Extension interface `org.apache.dubbo.xxx.YyyInvokerWrapper` , default value is `new String[] {"yyy.invoker.wrapper"}`
 
 ## Callback Function
 

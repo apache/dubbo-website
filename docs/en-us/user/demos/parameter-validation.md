@@ -138,13 +138,13 @@ public interface ValidationService {
 ### Validate Parameter on the client
 
 ```xml
-<dubbo:reference id="validationService" interface="com.alibaba.dubbo.examples.validation.api.ValidationService" validation="true" />
+<dubbo:reference id="validationService" interface="org.apache.dubbo.examples.validation.api.ValidationService" validation="true" />
 ```
 
 ### Validate Parameter on the server
 
 ```xml
-<dubbo:service interface="com.alibaba.dubbo.examples.validation.api.ValidationService" ref="validationService" validation="true" />
+<dubbo:service interface="org.apache.dubbo.examples.validation.api.ValidationService" ref="validationService" validation="true" />
 ```
 
 ## Validate Exception 
@@ -155,9 +155,9 @@ import javax.validation.ConstraintViolationException;
  
 import org.springframework.context.support.ClassPathXmlApplicationContext;
  
-import com.alibaba.dubbo.examples.validation.api.ValidationParameter;
-import com.alibaba.dubbo.examples.validation.api.ValidationService;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.examples.validation.api.ValidationParameter;
+import org.apache.dubbo.examples.validation.api.ValidationService;
+import org.apache.dubbo.rpc.RpcException;
  
 public class ValidationConsumer {   
     public static void main(String[] args) throws Exception {

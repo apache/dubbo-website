@@ -20,9 +20,9 @@
     <dubbo:protocol port="7070" />
      
     <!-- 暴露服务配置 -->
-    <dubbo:service interface="com.alibaba.dubbo.monitor.MonitorService" ref="monitorService" />
+    <dubbo:service interface="org.apache.dubbo.monitor.MonitorService" ref="monitorService" />
      
-    <bean id="monitorService" class="com.alibaba.dubbo.monitor.simple.SimpleMonitorService" />
+    <bean id="monitorService" class="org.apache.dubbo.monitor.simple.SimpleMonitorService" />
 </beans>
 ```
 
@@ -55,16 +55,16 @@
     <dubbo:protocol port="7070" />
      
     <!-- 暴露服务配置 -->
-    <dubbo:service interface="com.alibaba.dubbo.monitor.MonitorService" ref="monitorService" registry="N/A" />
+    <dubbo:service interface="org.apache.dubbo.monitor.MonitorService" ref="monitorService" registry="N/A" />
      
-    <bean id="monitorService" class="com.alibaba.dubbo.monitor.simple.SimpleMonitorService" />   
+    <bean id="monitorService" class="org.apache.dubbo.monitor.simple.SimpleMonitorService" />   
 </beans>
     ```
     
 3. 直连监控中心服务
 
     ```xml
-    <dubbo:monitor address="dubbo://127.0.0.1:7070/com.alibaba.dubbo.monitor.MonitorService" />
+    <dubbo:monitor address="dubbo://127.0.0.1:7070/org.apache.dubbo.monitor.MonitorService" />
     ```
     
     或：

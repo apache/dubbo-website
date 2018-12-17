@@ -458,7 +458,7 @@ By setting the server as the servlet, dubbo will use the servlet container of th
     </context-param>
 
     <listener>
-        <listener-class>com.alibaba.dubbo.remoting.http.servlet.BootstrapListener</listener-class>
+        <listener-class>org.apache.dubbo.remoting.http.servlet.BootstrapListener</listener-class>
     </listener>
 
     <listener>
@@ -467,7 +467,7 @@ By setting the server as the servlet, dubbo will use the servlet container of th
 
     <servlet>
         <servlet-name>dispatcher</servlet-name>
-        <servlet-class>com.alibaba.dubbo.remoting.http.servlet.DispatcherServlet</servlet-class>
+        <servlet-class>org.apache.dubbo.remoting.http.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -782,13 +782,13 @@ Dubbo RESTful Remoting supports outputting the header and body in all HTTP reque
  Add the following REST filter to the XML configuration:
 
 ```xml
-<dubbo:protocol name="rest" port="8888" extension="com.alibaba.dubbo.rpc.protocol.rest.support.LoggingFilter"/>
+<dubbo:protocol name="rest" port="8888" extension="org.apache.dubbo.rpc.protocol.rest.support.LoggingFilter"/>
 ```
 
-**Then turn on at least INFO level log output for com.alibaba.dubbo.rpc.protocol.rest.support in the logging configuration**,for example,in log4j.xml:
+**Then turn on at least INFO level log output for org.apache.dubbo.rpc.protocol.rest.support in the logging configuration**,for example,in log4j.xml:
 
 ```xml
-<logger name="com.alibaba.dubbo.rpc.protocol.rest.support">
+<logger name="org.apache.dubbo.rpc.protocol.rest.support">
     <level value="INFO"/>
     <appender-ref ref="CONSOLE"/>
 </logger>

@@ -25,8 +25,8 @@ class NormalDemoService implements IDemoService {
 ```xml
 <dubbo:application name="rpc-callback-demo" />
 <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
-<bean id="demoService" class="com.alibaba.dubbo.callback.implicit.NormalDemoService" />
-<dubbo:service interface="com.alibaba.dubbo.callback.implicit.IDemoService" ref="demoService" version="1.0.0" group="cn"/>
+<bean id="demoService" class="org.apache.dubbo.callback.implicit.NormalDemoService" />
+<dubbo:service interface="org.apache.dubbo.callback.implicit.IDemoService" ref="demoService" version="1.0.0" group="cn"/>
 ```
 
 ##  Declare the Callback interface at service consumer-side.
@@ -59,8 +59,8 @@ class NotifyImpl implements Notify {
 ## Configure the Callback at service consumer-side.
 
 ```xml
-<bean id ="demoCallback" class = "com.alibaba.dubbo.callback.implicit.NofifyImpl" />
-<dubbo:reference id="demoService" interface="com.alibaba.dubbo.callback.implicit.IDemoService" version="1.0.0" group="cn" >
+<bean id ="demoCallback" class = "org.apache.dubbo.callback.implicit.NofifyImpl" />
+<dubbo:reference id="demoService" interface="org.apache.dubbo.callback.implicit.IDemoService" version="1.0.0" group="cn" >
       <dubbo:method name="get" async="true" onreturn = "demoCallback.onreturn" onthrow="demoCallback.onthrow" />
 </dubbo:reference>
 ```

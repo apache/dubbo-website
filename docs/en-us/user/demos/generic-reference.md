@@ -20,7 +20,7 @@ Object result = barService.$invoke("sayHello", new String[] { "java.lang.String"
 ## Use generic invocation via API
 
 ```java
-import com.alibaba.dubbo.rpc.service.GenericService;
+import org.apache.dubbo.rpc.service.GenericService;
 ...
 
 // reference remote service
@@ -32,7 +32,7 @@ reference.setVersion("1.0.0");
 // declared as generic service
 reference.setGeneric(true);  
 
-// service stub type is also the com.alibaba.dubbo.rpc.service.GenericService
+// service stub type is also the org.apache.dubbo.rpc.service.GenericService
 GenericService genericService = reference.get();
 
 // basic types and Date, List, Map, etc. do not need conversion, direct use them

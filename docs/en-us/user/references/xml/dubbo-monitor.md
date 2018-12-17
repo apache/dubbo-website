@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:monitor
 
-Monitor center configuration. The corresponding class: `com.alibaba.dubbo.config.MonitorConfig`
+Monitor center configuration. The corresponding class: `org.apache.dubbo.config.MonitorConfig`
 
 | Property | The corresponding class | Type | Requisite | Default | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

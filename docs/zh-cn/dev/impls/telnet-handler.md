@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.remoting.telnet.TelnetHandler`
+`org.apache.dubbo.remoting.telnet.TelnetHandler`
 
 ## 扩展配置
 
@@ -18,17 +18,17 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.remoting.telnet.support.ClearTelnetHandler`
-* `com.alibaba.dubbo.remoting.telnet.support.ExitTelnetHandler`
-* `com.alibaba.dubbo.remoting.telnet.support.HelpTelnetHandler`
-* `com.alibaba.dubbo.remoting.telnet.support.StatusTelnetHandler`
-* `com.alibaba.dubbo.rpc.dubbo.telnet.ListTelnetHandler`
-* `com.alibaba.dubbo.rpc.dubbo.telnet.ChangeTelnetHandler`
-* `com.alibaba.dubbo.rpc.dubbo.telnet.CurrentTelnetHandler`
-* `com.alibaba.dubbo.rpc.dubbo.telnet.InvokeTelnetHandler`
-* `com.alibaba.dubbo.rpc.dubbo.telnet.TraceTelnetHandler`
-* `com.alibaba.dubbo.rpc.dubbo.telnet.CountTelnetHandler`
-* `com.alibaba.dubbo.rpc.dubbo.telnet.PortTelnetHandler`
+* `org.apache.dubbo.remoting.telnet.support.ClearTelnetHandler`
+* `org.apache.dubbo.remoting.telnet.support.ExitTelnetHandler`
+* `org.apache.dubbo.remoting.telnet.support.HelpTelnetHandler`
+* `org.apache.dubbo.remoting.telnet.support.StatusTelnetHandler`
+* `org.apache.dubbo.rpc.dubbo.telnet.ListTelnetHandler`
+* `org.apache.dubbo.rpc.dubbo.telnet.ChangeTelnetHandler`
+* `org.apache.dubbo.rpc.dubbo.telnet.CurrentTelnetHandler`
+* `org.apache.dubbo.rpc.dubbo.telnet.InvokeTelnetHandler`
+* `org.apache.dubbo.rpc.dubbo.telnet.TraceTelnetHandler`
+* `org.apache.dubbo.rpc.dubbo.telnet.CountTelnetHandler`
+* `org.apache.dubbo.rpc.dubbo.telnet.PortTelnetHandler`
 
 ## 扩展示例
 
@@ -44,7 +44,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.remoting.telnet.TelnetHandler (纯文本文件，内容为：xxx=com.xxx.XxxTelnetHandler)
+                |-org.apache.dubbo.remoting.telnet.TelnetHandler (纯文本文件，内容为：xxx=com.xxx.XxxTelnetHandler)
 ```
 
 XxxTelnetHandler.java：
@@ -52,7 +52,7 @@ XxxTelnetHandler.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.telnet.TelnetHandler;
+import org.apache.dubbo.remoting.telnet.TelnetHandler;
  
 @Help(parameter="...", summary="...", detail="...")
  
@@ -63,7 +63,7 @@ public class XxxTelnetHandler implements TelnetHandler {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.remoting.telnet.TelnetHandler：
+META-INF/dubbo/org.apache.dubbo.remoting.telnet.TelnetHandler：
 
 ```properties
 xxx=com.xxx.XxxTelnetHandler

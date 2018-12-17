@@ -13,7 +13,7 @@ Contract:
 
 ## Extension Interface
 
-`com.alibaba.dubbo.rpc.Filter`
+`org.apache.dubbo.rpc.Filter`
 
 ## Extension Configuration
 
@@ -30,19 +30,19 @@ Contract:
 
 ## Existing Extension
 
-* `com.alibaba.dubbo.rpc.filter.EchoFilter`
-* `com.alibaba.dubbo.rpc.filter.GenericFilter`
-* `com.alibaba.dubbo.rpc.filter.GenericImplFilter`
-* `com.alibaba.dubbo.rpc.filter.TokenFilter`
-* `com.alibaba.dubbo.rpc.filter.AccessLogFilter`
-* `com.alibaba.dubbo.rpc.filter.CountFilter`
-* `com.alibaba.dubbo.rpc.filter.ActiveLimitFilter`
-* `com.alibaba.dubbo.rpc.filter.ClassLoaderFilter`
-* `com.alibaba.dubbo.rpc.filter.ContextFilter`
-* `com.alibaba.dubbo.rpc.filter.ConsumerContextFilter`
-* `com.alibaba.dubbo.rpc.filter.ExceptionFilter`
-* `com.alibaba.dubbo.rpc.filter.ExecuteLimitFilter`
-* `com.alibaba.dubbo.rpc.filter.DeprecatedFilter`
+* `org.apache.dubbo.rpc.filter.EchoFilter`
+* `org.apache.dubbo.rpc.filter.GenericFilter`
+* `org.apache.dubbo.rpc.filter.GenericImplFilter`
+* `org.apache.dubbo.rpc.filter.TokenFilter`
+* `org.apache.dubbo.rpc.filter.AccessLogFilter`
+* `org.apache.dubbo.rpc.filter.CountFilter`
+* `org.apache.dubbo.rpc.filter.ActiveLimitFilter`
+* `org.apache.dubbo.rpc.filter.ClassLoaderFilter`
+* `org.apache.dubbo.rpc.filter.ContextFilter`
+* `org.apache.dubbo.rpc.filter.ConsumerContextFilter`
+* `org.apache.dubbo.rpc.filter.ExceptionFilter`
+* `org.apache.dubbo.rpc.filter.ExecuteLimitFilter`
+* `org.apache.dubbo.rpc.filter.DeprecatedFilter`
 
 ## Extension Guide
 
@@ -58,7 +58,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.Filter (plain text file with the content: xxx=com.xxx.XxxFilter)
+                |-org.apache.dubbo.rpc.Filter (plain text file with the content: xxx=com.xxx.XxxFilter)
 ```
 
 XxxFilter.java：
@@ -66,11 +66,11 @@ XxxFilter.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.Filter;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.Invocation;
-import com.alibaba.dubbo.rpc.Result;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.Filter;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.Result;
+import org.apache.dubbo.rpc.RpcException;
  
 public class XxxFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
@@ -82,7 +82,7 @@ public class XxxFilter implements Filter {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.Filter：
+META-INF/dubbo/org.apache.dubbo.rpc.Filter：
 
 ```properties
 xxx=com.xxx.XxxFilter

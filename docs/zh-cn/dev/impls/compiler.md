@@ -6,7 +6,7 @@ Java 代码编译器，用于动态生成字节码，加速调用。
 
 ## 扩展接口
 
-`com.alibaba.dubbo.common.compiler.Compiler`
+`org.apache.dubbo.common.compiler.Compiler`
 
 ## 扩展配置
 
@@ -14,8 +14,8 @@ Java 代码编译器，用于动态生成字节码，加速调用。
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.common.compiler.support.JdkCompiler`
-* `com.alibaba.dubbo.common.compiler.support.JavassistCompiler`
+* `org.apache.dubbo.common.compiler.support.JdkCompiler`
+* `org.apache.dubbo.common.compiler.support.JavassistCompiler`
 
 ## 扩展示例
 
@@ -31,7 +31,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.common.compiler.Compiler (纯文本文件，内容为：xxx=com.xxx.XxxCompiler)
+                |-org.apache.dubbo.common.compiler.Compiler (纯文本文件，内容为：xxx=com.xxx.XxxCompiler)
 ```
 
 XxxCompiler.java：
@@ -39,7 +39,7 @@ XxxCompiler.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.common.compiler.Compiler;
+import org.apache.dubbo.common.compiler.Compiler;
  
 public class XxxCompiler implements Compiler {
     public Object getExtension(Class<?> type, String name) {
@@ -48,7 +48,7 @@ public class XxxCompiler implements Compiler {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.common.compiler.Compiler：
+META-INF/dubbo/org.apache.dubbo.common.compiler.Compiler：
 
 ```properties
 xxx=com.xxx.XxxCompiler

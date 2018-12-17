@@ -7,25 +7,25 @@ API 汇总如下：
 ## 配置 API
 
 ```
-com.alibaba.dubbo.config.ServiceConfig
-com.alibaba.dubbo.config.ReferenceConfig
-com.alibaba.dubbo.config.ProtocolConfig
-com.alibaba.dubbo.config.RegistryConfig
-com.alibaba.dubbo.config.MonitorConfig
-com.alibaba.dubbo.config.ApplicationConfig
-com.alibaba.dubbo.config.ModuleConfig
-com.alibaba.dubbo.config.ProviderConfig
-com.alibaba.dubbo.config.ConsumerConfig
-com.alibaba.dubbo.config.MethodConfig
-com.alibaba.dubbo.config.ArgumentConfig
+org.apache.dubbo.config.ServiceConfig
+org.apache.dubbo.config.ReferenceConfig
+org.apache.dubbo.config.ProtocolConfig
+org.apache.dubbo.config.RegistryConfig
+org.apache.dubbo.config.MonitorConfig
+org.apache.dubbo.config.ApplicationConfig
+org.apache.dubbo.config.ModuleConfig
+org.apache.dubbo.config.ProviderConfig
+org.apache.dubbo.config.ConsumerConfig
+org.apache.dubbo.config.MethodConfig
+org.apache.dubbo.config.ArgumentConfig
 ```
 详细参见：[API配置](../configuration/api.md)  
 
 ## 注解 API
 
 ```
-com.alibaba.dubbo.config.annotation.Service
-com.alibaba.dubbo.config.annotation.Reference
+org.apache.dubbo.config.annotation.Service
+org.apache.dubbo.config.annotation.Reference
 ```
 
 详细参见：[注解配置](../configuration/annotation.md)
@@ -33,14 +33,14 @@ com.alibaba.dubbo.config.annotation.Reference
 ## 模型 API
 
 ```
-com.alibaba.dubbo.common.URL
-com.alibaba.dubbo.rpc.RpcException
+org.apache.dubbo.common.URL
+org.apache.dubbo.rpc.RpcException
 ```
 
 ## 上下文 API
 
 ```
-com.alibaba.dubbo.rpc.RpcContext
+org.apache.dubbo.rpc.RpcContext
 ```
 
 详细参见：[上下文信息](../demos/context.md) & [隐式传参](../demos/attachment.md) & [异步调用](../demos/async-call.md)
@@ -48,14 +48,14 @@ com.alibaba.dubbo.rpc.RpcContext
 ## 服务API
 
 ```
-com.alibaba.dubbo.rpc.service.GenericService
-com.alibaba.dubbo.rpc.service.GenericException
+org.apache.dubbo.rpc.service.GenericService
+org.apache.dubbo.rpc.service.GenericException
 ```
 
 详细参见：[泛化引用](../demos/generic-reference.md) & [泛化实现](../demos/generic-service.md)
 
 ```
-com.alibaba.dubbo.rpc.service.EchoService
+org.apache.dubbo.rpc.service.EchoService
 ```
 详细参见：[回声测试](../demos/echo-service.md)
 

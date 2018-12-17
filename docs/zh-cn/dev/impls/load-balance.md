@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.rpc.cluster.LoadBalance`
+`org.apache.dubbo.rpc.cluster.LoadBalance`
 
 ## 扩展配置
 
@@ -18,9 +18,9 @@
 
 ## 已知扩展
 
-* `com.alibaba.dubbo.rpc.cluster.loadbalance.RandomLoadBalance`
-* `com.alibaba.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance`
-* `com.alibaba.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance`
+* `org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance`
+* `org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance`
+* `org.apache.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance`
 
 ## 扩展示例
 
@@ -36,7 +36,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.cluster.LoadBalance (纯文本文件，内容为：xxx=com.xxx.XxxLoadBalance)
+                |-org.apache.dubbo.rpc.cluster.LoadBalance (纯文本文件，内容为：xxx=com.xxx.XxxLoadBalance)
 ```
 
 XxxLoadBalance.java：
@@ -44,10 +44,10 @@ XxxLoadBalance.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.cluster.LoadBalance;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.Invocation;
-import com.alibaba.dubbo.rpc.RpcException; 
+import org.apache.dubbo.rpc.cluster.LoadBalance;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.RpcException; 
  
 public class XxxLoadBalance implements LoadBalance {
     public <T> Invoker<T> select(List<Invoker<T>> invokers, Invocation invocation) throws RpcException {
@@ -56,7 +56,7 @@ public class XxxLoadBalance implements LoadBalance {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.LoadBalance：
+META-INF/dubbo/org.apache.dubbo.rpc.cluster.LoadBalance：
 
 ```properties
 xxx=com.xxx.XxxLoadBalance

@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:application
 
-Application configuration. The corresponding class: `com.alibaba.dubbo.config.ApplicationConfig`
+Application configuration. The corresponding class: `org.apache.dubbo.config.ApplicationConfig`
 
 | Property | Corresponding URL parameter | Type | Requisite | Default | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

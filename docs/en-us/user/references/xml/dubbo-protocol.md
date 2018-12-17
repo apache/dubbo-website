@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:protocol
 
-Service provider protocol configuration. The corresponding class is `com.alibaba.dubbo.config.ProtocolConfig`. If you need to support multiple protocols, you could declare multiple `<dubbo:protocol>` tags, and specify the protocol via `protocol` property.
+Service provider protocol configuration. The corresponding class is `org.apache.dubbo.config.ProtocolConfig`. If you need to support multiple protocols, you could declare multiple `<dubbo:protocol>` tags, and specify the protocol via `protocol` property.
 
 | Attribute     | Corresponding URL parameter | Type           | Required    | Default Value                            | Function                  | Description                              | Compatibility |
 | ------------- | --------------------------- | -------------- | ----------- | ---------------------------------------- | ------------------------- | ---------------------------------------- | ------------- |

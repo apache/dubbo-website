@@ -5,9 +5,9 @@
 
 ## 扩展接口
 
-* `com.alibaba.dubbo.remoting.exchange.Exchanger`
-* `com.alibaba.dubbo.remoting.exchange.ExchangeServer`
-* `com.alibaba.dubbo.remoting.exchange.ExchangeClient`
+* `org.apache.dubbo.remoting.exchange.Exchanger`
+* `org.apache.dubbo.remoting.exchange.ExchangeServer`
+* `org.apache.dubbo.remoting.exchange.ExchangeClient`
 
 ## 扩展配置
 
@@ -19,7 +19,7 @@
 
 ## 已知扩展
 
-`com.alibaba.dubbo.remoting.exchange.exchanger.HeaderExchanger`
+`org.apache.dubbo.remoting.exchange.exchanger.HeaderExchanger`
 
 ## 扩展示例
 
@@ -37,7 +37,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.remoting.exchange.Exchanger (纯文本文件，内容为：xxx=com.xxx.XxxExchanger)
+                |-org.apache.dubbo.remoting.exchange.Exchanger (纯文本文件，内容为：xxx=com.xxx.XxxExchanger)
 ```
 
 XxxExchanger.java：
@@ -45,7 +45,7 @@ XxxExchanger.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.exchange.Exchanger;
+import org.apache.dubbo.remoting.exchange.Exchanger;
  
  
 public class XxxExchanger implements Exchanger {
@@ -64,7 +64,7 @@ XxxExchangeServer.java：
 
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.exchange.ExchangeServer;
+import org.apache.dubbo.remoting.exchange.ExchangeServer;
  
 public class XxxExchangeServer impelements ExchangeServer {
     // ...
@@ -76,14 +76,14 @@ XxxExchangeClient.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.remoting.exchange.ExchangeClient;
+import org.apache.dubbo.remoting.exchange.ExchangeClient;
  
 public class XxxExchangeClient impelments ExchangeClient {
     // ...
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.remoting.exchange.Exchanger：
+META-INF/dubbo/org.apache.dubbo.remoting.exchange.Exchanger：
 
 ```properties
 xxx=com.xxx.XxxExchanger

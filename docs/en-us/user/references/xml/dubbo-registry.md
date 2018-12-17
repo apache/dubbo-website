@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:registry
 
-The configuration of the registry center. The corresponding class is `com.alibaba.dubbo.config.RegistryConfig`. If you have multiple different registries, you can declare multiple `<dubbo:registry>` tags, and then reference specified registry with `registry` property in `<dubbo:service>` or `<dubbo:reference>` tag.
+The configuration of the registry center. The corresponding class is `org.apache.dubbo.config.RegistryConfig`. If you have multiple different registries, you can declare multiple `<dubbo:registry>` tags, and then reference specified registry with `registry` property in `<dubbo:service>` or `<dubbo:reference>` tag.
 
 | Attribute | Corresponding URL parameter | Type    | Required    | Default Value | Function                  | Description                              | Compatibility |
 | --------- | --------------------------- | ------- | ----------- | ------------- | ------------------------- | ---------------------------------------- | ------------- |

@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:provider
 
-服务提供者缺省值配置。对应的配置类： `com.alibaba.dubbo.config.ProviderConfig`。同时该标签为 `<dubbo:service>` 和 `<dubbo:protocol>` 标签的缺省值设置。
+服务提供者缺省值配置。对应的配置类： `org.apache.dubbo.config.ProviderConfig`。同时该标签为 `<dubbo:service>` 和 `<dubbo:protocol>` 标签的缺省值设置。
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

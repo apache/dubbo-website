@@ -7,7 +7,7 @@
 ### `Service`注解暴露服务
 
 ```java
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
  
 @Service(timeout = 5000)
 public class AnnotateServiceImpl implements AnnotateService { 
@@ -42,7 +42,7 @@ public class DubboConfiguration {
 
 ```java
 @SpringBootApplication
-@DubboComponentScan(basePackages = "com.alibaba.dubbo.test.service.impl")
+@DubboComponentScan(basePackages = "org.apache.dubbo.test.service.impl")
 public class ProviderTestApp {
     // ...
 }
@@ -56,7 +56,7 @@ public class ProviderTestApp {
 ```java
 public class AnnotationConsumeService {
 
-    @com.alibaba.dubbo.config.annotation.Reference
+    @org.apache.dubbo.config.annotation.Reference
     public AnnotateService annotateService;
     
     // ...
@@ -99,7 +99,7 @@ public class DubboConfiguration {
 
 ```java
 @SpringBootApplication
-@DubboComponentScan(basePackages = "com.alibaba.dubbo.test.service")
+@DubboComponentScan(basePackages = "org.apache.dubbo.test.service")
 public class ConsumerTestApp {
     // ...
 }
@@ -110,7 +110,7 @@ public class ConsumerTestApp {
 如果你曾使用旧版annotation配置，请删除所有相关配置，我们将在下个版本删除所有旧版配置项。
 
 ```xml
-<dubbo:annotation package="com.alibaba.dubbo.test.service" /> 
+<dubbo:annotation package="org.apache.dubbo.test.service" /> 
 ```
 
 

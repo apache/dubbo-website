@@ -17,12 +17,12 @@ Register simple registry server as dubbo service:
     <!-- service protocol configuration -->
     <dubbo:protocol port="9090" />
     <!-- service configuration -->
-    <dubbo:service interface="com.alibaba.dubbo.registry.RegistryService" ref="registryService" registry="N/A" ondisconnect="disconnect" callbacks="1000">
+    <dubbo:service interface="org.apache.dubbo.registry.RegistryService" ref="registryService" registry="N/A" ondisconnect="disconnect" callbacks="1000">
         <dubbo:method name="subscribe"><dubbo:argument index="1" callback="true" /></dubbo:method>
         <dubbo:method name="unsubscribe"><dubbo:argument index="1" callback="false" /></dubbo:method>
     </dubbo:service>
     <!-- simple registry server implementation, register other implementation if cluster ability is a requirement-->
-    <bean id="registryService" class="com.alibaba.dubbo.registry.simple.SimpleRegistryService" />
+    <bean id="registryService" class="org.apache.dubbo.registry.simple.SimpleRegistryService" />
 </beans>
 ```
 
@@ -35,7 +35,7 @@ Reference simple registry server service:
 Or:
 
 ```xml
-<dubbo:service interface="com.alibaba.dubbo.registry.RegistryService" group="simple" version="1.0.0" ... >
+<dubbo:service interface="org.apache.dubbo.registry.RegistryService" group="simple" version="1.0.0" ... >
 ```
 
 Or:

@@ -18,7 +18,7 @@ In the jar file containing extension class [^1]，places a config file  `META-IN
 
 ### Example：
 
-To extend  Dubbo Protocol，placee a text file in the extension jar file：`META-INF/dubbo/com.alibaba.dubbo.rpc.Protocol`，content：
+To extend  Dubbo Protocol，placee a text file in the extension jar file：`META-INF/dubbo/org.apache.dubbo.rpc.Protocol`，content：
 
 ```properties
 xxx=com.alibaba.xxx.XxxProtocol
@@ -29,7 +29,7 @@ content of the implementation [^2]：
 ```java
 package com.alibaba.xxx;
  
-import com.alibaba.dubbo.rpc.Protocol;
+import org.apache.dubbo.rpc.Protocol;
  
 public class XxxProtocol implements Protocol { 
     // ...
@@ -55,7 +55,7 @@ Wrapper class content：
 ```java
 package com.alibaba.xxx;
  
-import com.alibaba.dubbo.rpc.Protocol;
+import org.apache.dubbo.rpc.Protocol;
  
 public class XxxProtocolWrapper implements Protocol {
     Protocol impl;
@@ -197,8 +197,8 @@ for the method bind(),Adaptive will firstly search `server` key，if no Key  wer
 As for Collections SPI, such as：`Filter`, `InvokerListener`, `ExportListener`, `TelnetHandler`, `StatusChecker`  etc，multi implementations can be loaded at one time. User can simplify configuration by using auto activation，Like：
 
 ```java
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.rpc.Filter;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.rpc.Filter;
  
 @Activate // Active for any condition
 public class XxxFilter implements Filter {
@@ -209,8 +209,8 @@ public class XxxFilter implements Filter {
 Or：
 
 ```java
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.rpc.Filter;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.rpc.Filter;
  
 @Activate("xxx") // when configed xxx parameter and the parameter has a valid value,the SPI is activated，for example configed cache="lru"，auto acitivate CacheFilter。
 public class XxxFilter implements Filter {
@@ -221,8 +221,8 @@ public class XxxFilter implements Filter {
 Or：
 
 ```java
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.rpc.Filter;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.rpc.Filter;
  
 @Activate(group = "provider", value = "xxx") // only activate for provider，group can be "provider" or "consumer"
 public class XxxFilter implements Filter {

@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:module
 
-Module configuration. The corresponding class `com.alibaba.dubbo.config.ModuleConfig`
+Module configuration. The corresponding class `org.apache.dubbo.config.ModuleConfig`
 
 | Property | The corresponding class | Type | Requisite | Default | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

@@ -5,10 +5,10 @@ All API properties have counterparts in XML, see [XML References](../references/
 ## Provider Side
 
 ```java
-import com.alibaba.dubbo.rpc.config.ApplicationConfig;
-import com.alibaba.dubbo.rpc.config.RegistryConfig;
-import com.alibaba.dubbo.rpc.config.ProviderConfig;
-import com.alibaba.dubbo.rpc.config.ServiceConfig;
+import org.apache.dubbo.rpc.config.ApplicationConfig;
+import org.apache.dubbo.rpc.config.RegistryConfig;
+import org.apache.dubbo.rpc.config.ProviderConfig;
+import org.apache.dubbo.rpc.config.ServiceConfig;
 import com.xxx.XxxService;
 import com.xxx.XxxServiceImpl;
  
@@ -49,10 +49,10 @@ service.export();
 ## Consumer Side
 
 ```java
-import com.alibaba.dubbo.rpc.config.ApplicationConfig;
-import com.alibaba.dubbo.rpc.config.RegistryConfig;
-import com.alibaba.dubbo.rpc.config.ConsumerConfig;
-import com.alibaba.dubbo.rpc.config.ReferenceConfig;
+import org.apache.dubbo.rpc.config.ApplicationConfig;
+import org.apache.dubbo.rpc.config.RegistryConfig;
+import org.apache.dubbo.rpc.config.ConsumerConfig;
+import org.apache.dubbo.rpc.config.ReferenceConfig;
 import com.xxx.XxxService;
  
 // Application Info
