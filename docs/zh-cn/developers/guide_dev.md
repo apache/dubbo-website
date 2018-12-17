@@ -68,3 +68,15 @@ git push origin your_awesome_patch
 我们提供了IntelliJ idea的模版文件[dubbo_codestyle_for_idea.xml](https://github.com/apache/incubator-dubbo/tree/master/codestyle/dubbo_codestyle_for_idea.xml)，您可以将它导入到IDE。
 
 如果使用Eclipse，可以通过参考该文件手动配置。
+
+**注意事项**
+
+使用 dubbo_codestyle_for_idea.xml 为你的 IDEA 设置代码格式是贡献代码前至关重要的一个步骤，否则你将会无法通过 Travis CI 的代码风格校验，下面几个步骤给你演示了如何配置代码格式：
+
+1. 进入菜单页 `Editor > Code Style`
+2. 在 Code Style 页面的 scheme 菜单中点击 ![manage profiles](/img/manage_profiles.png) 选项
+在下拉列表中选择 `Import Scheme`, 接着选择 `IntelliJ IDEA code style XML` 导入 xml 文件
+3. 输入你的格式名称，方便在不同工程之间进行识别，最后别忘了 ⏎ 来保存更改.
+
+设置完成后，IDEA 会帮助你自动 reformat 代码
+
