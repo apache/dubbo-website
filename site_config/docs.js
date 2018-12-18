@@ -1223,6 +1223,43 @@ export default {
                 ],
             },
             {
+                title: '源码导读',
+                children: [
+                    {
+                        title: 'Dubbo SPI',
+                        link: '/zh-cn/docs/source_code_guide/dubbo-spi.html'
+                    },
+                    {
+                        title: '自适应拓展机制',
+                        link: '/zh-cn/docs/source_code_guide/adaptive-extension.html'
+                    },
+                    {
+                        title: '服务导出',
+                        link: '/zh-cn/docs/source_code_guide/export-service.html'
+                    },
+                    {
+                        title: '服务引入',
+                        link: '/zh-cn/docs/source_code_guide/refer-service.html'
+                    },
+                    {
+                        title: '服务字典',
+                        link: '/zh-cn/docs/source_code_guide/directory.html'
+                    },
+                    {
+                        title: '服务路由',
+                        link: '/zh-cn/docs/source_code_guide/router.html'
+                    },
+                    {
+                        title: '集群',
+                        link: '/zh-cn/docs/source_code_guide/cluster.html'
+                    },
+                    {
+                        title: '负载均衡',
+                        link: '/zh-cn/docs/source_code_guide/loadbalance.html'
+                    }
+                ]
+            },
+            {
                 title: '运维管理',
                 children: [
                     {
