@@ -1,8 +1,4 @@
 # Test coverage report 
-
-
-
-
 * v2.0   Codecov report , Statistics since  2017-12-29
   The test coverage is : [![codecov](https://codecov.io/gh/apache/incubator-dubbo/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/incubator-dubbo) , we can get the report in https://codecov.io/gh/apache/incubator-dubbo
 * v1.0   Based on version `2.0.12`，Statistics on 2012-02-03
