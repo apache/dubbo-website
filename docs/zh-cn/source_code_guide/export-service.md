@@ -624,7 +624,7 @@ getWrapper 方法仅包含一些缓存操作逻辑，不难理解。下面我们
 
 ```java
 private static Wrapper makeWrapper(Class<?> c) {
-    // 检测 c 是否为私有类型，若是则抛出异常
+    // 检测 c 是否为基本类型，若是则抛出异常
     if (c.isPrimitive())
         throw new IllegalArgumentException("Can not create wrapper for primitive type: " + c);
 
