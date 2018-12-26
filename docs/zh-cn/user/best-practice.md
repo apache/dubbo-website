@@ -50,7 +50,7 @@ description: Dubbo 最佳实践
 
 服务参数及返回值不建议使用接口，因为数据模型抽象的意义不大，并且序列化需要接口实现类的元信息，并不能起到隐藏实现的意图。
 
-服务参数及返回值都必需是[传值调用](https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_value)，而不能是[传引用调用](https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_reference)，消费方和提供方的参数或返回值引用并不是同一个，只是值相同，Dubbo 不支持引用远程对象。
+服务参数及返回值都必须是[传值调用](https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_value)，而不能是[传引用调用](https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_reference)，消费方和提供方的参数或返回值引用并不是同一个，只是值相同，Dubbo 不支持引用远程对象。
 
 ## 异常
 
