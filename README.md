@@ -19,7 +19,7 @@ If your version of docsite is less then `1.3.3`, please upgrade to `1.3.3`.
 
 1. Do not use `git add .` to commit all the changes.
 2. Just push your changed files, such as:
-    * *.md
+    * `*.md`
 	* blog.js or docs.js or site.js
 3. Send a PR to asf-site branch.
 
