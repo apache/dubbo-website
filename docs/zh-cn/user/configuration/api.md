@@ -5,10 +5,10 @@ API 属性与配置项一对一，各属性含义，请参见：[配置参考手
 ## 服务提供者
 
 ```java
-import com.alibaba.dubbo.rpc.config.ApplicationConfig;
-import com.alibaba.dubbo.rpc.config.RegistryConfig;
-import com.alibaba.dubbo.rpc.config.ProviderConfig;
-import com.alibaba.dubbo.rpc.config.ServiceConfig;
+import org.apache.dubbo.rpc.config.ApplicationConfig;
+import org.apache.dubbo.rpc.config.RegistryConfig;
+import org.apache.dubbo.rpc.config.ProviderConfig;
+import org.apache.dubbo.rpc.config.ServiceConfig;
 import com.xxx.XxxService;
 import com.xxx.XxxServiceImpl;
  
@@ -49,10 +49,10 @@ service.export();
 ## 服务消费者
 
 ```java
-import com.alibaba.dubbo.rpc.config.ApplicationConfig;
-import com.alibaba.dubbo.rpc.config.RegistryConfig;
-import com.alibaba.dubbo.rpc.config.ConsumerConfig;
-import com.alibaba.dubbo.rpc.config.ReferenceConfig;
+import org.apache.dubbo.rpc.config.ApplicationConfig;
+import org.apache.dubbo.rpc.config.RegistryConfig;
+import org.apache.dubbo.rpc.config.ConsumerConfig;
+import org.apache.dubbo.rpc.config.ReferenceConfig;
 import com.xxx.XxxService;
  
 // 当前应用配置

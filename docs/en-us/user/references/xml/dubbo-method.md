@@ -44,7 +44,7 @@ table tr:hover {
 </script>
 # dubbo:method
 
-Method level configuration. The corresponding class: `com.alibaba.dubbo.config.MethodConfig`. This tag is a child tag of `<dubbo:service>` or `<dubbo:reference>`, for accuracy to method level.
+Method level configuration. The corresponding class: `org.apache.dubbo.config.MethodConfig`. This tag is a child tag of `<dubbo:service>` or `<dubbo:reference>`, for accuracy to method level.
 
 | Property | Corresponding URL parameter | Type | Requisite | Default | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |

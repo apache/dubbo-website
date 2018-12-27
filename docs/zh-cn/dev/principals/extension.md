@@ -20,7 +20,7 @@
 
 通常微核心都会采用 Factory、IoC、OSGi 等方式管理插件生命周期。考虑 Dubbo 的适用面，不想强依赖 Spring 等 IoC 容器。自已造一个小的 IoC 容器，也觉得有点过度设计，所以打算采用最简单的 Factory 方式管理插件。 
 
-最终决定采用的是 JDK 标准的 SPI 扩展机制，参见：`java.util.ServiceLoader `，也就是扩展者在 jar 包的 `META-INF/services/` 目录下放置与接口同名的文本文件，内容为接口实现类名，多个实现类名用换行符分隔。比如，需要扩展 Dubbo 的协议，只需在 xxx.jar 中放置文件：`META-INF/services/com.alibaba.dubbo.rpc.Protocol`，内容为 `com.alibaba.xxx.XxxProtocol`。Dubbo 通过 ServiceLoader 扫描到所有 Protocol 实现。 
+最终决定采用的是 JDK 标准的 SPI 扩展机制，参见：`java.util.ServiceLoader `，也就是扩展者在 jar 包的 `META-INF/services/` 目录下放置与接口同名的文本文件，内容为接口实现类名，多个实现类名用换行符分隔。比如，需要扩展 Dubbo 的协议，只需在 xxx.jar 中放置文件：`META-INF/services/org.apache.dubbo.rpc.Protocol`，内容为 `com.alibaba.xxx.XxxProtocol`。Dubbo 通过 ServiceLoader 扫描到所有 Protocol 实现。 
 
 并约定所有插件，都必须标注：`@Extension("name")`，作为加载后的标识性名称，用于配置选择。
 

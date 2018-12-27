@@ -29,7 +29,7 @@ public class MyGenericService implements GenericService {
 
 ```java
 ... 
-// 用com.alibaba.dubbo.rpc.service.GenericService可以替代所有接口实现 
+// 用org.apache.dubbo.rpc.service.GenericService可以替代所有接口实现 
 GenericService xxxService = new XxxGenericService(); 
 
 // 该实例很重量，里面封装了所有与注册中心及服务提供方连接，请缓存 

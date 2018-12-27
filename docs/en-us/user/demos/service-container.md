@@ -38,20 +38,20 @@ The content of Service container can be extended, built-in spring, jetty, log4j 
 load spring by default.
 
 ```sh
-java com.alibaba.dubbo.container.Main
+java org.apache.dubbo.container.Main
 ```
 
 Load the container that passed in by the main method
 
 ```sh
-java com.alibaba.dubbo.container.Main spring jetty log4j
+java org.apache.dubbo.container.Main spring jetty log4j
 ```
 
 Load the container that passed in by the JVM option.
 
 
 ```sh
-java com.alibaba.dubbo.container.Main -Ddubbo.container=spring,jetty,log4j
+java org.apache.dubbo.container.Main -Ddubbo.container=spring,jetty,log4j
 ```
 
 Load the container that passed in by `dubbo.properties` in the classpath.

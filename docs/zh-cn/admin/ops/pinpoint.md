@@ -164,7 +164,7 @@ pom.xml
 ```java
 package com.example.demoprovider.provider;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.example.demoapi.HelloService;
 
 @Service(version = "${demo.service.version}",
@@ -313,7 +313,7 @@ pom.xml
 ```java
 package com.example.democonsumer.controller;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.example.demoapi.HelloService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

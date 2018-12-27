@@ -7,7 +7,7 @@
 ### `Service` annotation for exporting
 
 ```java
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
  
 @Service(timeout = 5000)
 public class AnnotateServiceImpl implements AnnotateService { 
@@ -42,7 +42,7 @@ public class DubboConfiguration {
 
 ```java
 @SpringBootApplication
-@DubboComponentScan(basePackages = "com.alibaba.dubbo.test.service.impl")
+@DubboComponentScan(basePackages = "org.apache.dubbo.test.service.impl")
 public class ProviderTestApp {
     // ...
 }
@@ -56,7 +56,7 @@ public class ProviderTestApp {
 ```java
 public class AnnotationConsumeService {
 
-    @com.alibaba.dubbo.config.annotation.Reference
+    @org.apache.dubbo.config.annotation.Reference
     public AnnotateService annotateService;
     
     // ...
@@ -99,7 +99,7 @@ public class DubboConfiguration {
 
 ```java
 @SpringBootApplication
-@DubboComponentScan(basePackages = "com.alibaba.dubbo.test.service")
+@DubboComponentScan(basePackages = "org.apache.dubbo.test.service")
 public class ConsumerTestApp {
     // ...
 }
@@ -110,7 +110,7 @@ public class ConsumerTestApp {
 All annotations in 2.5.7 will be removed later, if you have used these annotations in your project, please upgrade to the latest version.
 
 ```xml
-<dubbo:annotation package="com.alibaba.dubbo.test.service" /> 
+<dubbo:annotation package="org.apache.dubbo.test.service" /> 
 ```
 
 

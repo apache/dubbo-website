@@ -20,7 +20,7 @@ Object result = barService.$invoke("sayHello", new String[] { "java.lang.String"
 ## 通过 API 方式使用泛化调用
 
 ```java
-import com.alibaba.dubbo.rpc.service.GenericService; 
+import org.apache.dubbo.rpc.service.GenericService; 
 ... 
  
 // 引用远程服务 
@@ -32,7 +32,7 @@ reference.setVersion("1.0.0");
 // 声明为泛化接口 
 reference.setGeneric(true);  
 
-// 用com.alibaba.dubbo.rpc.service.GenericService可以替代所有接口引用  
+// 用org.apache.dubbo.rpc.service.GenericService可以替代所有接口引用  
 GenericService genericService = reference.get(); 
  
 // 基本类型以及Date,List,Map等不需要转换，直接调用 

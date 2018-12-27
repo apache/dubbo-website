@@ -29,7 +29,7 @@ Declared in the Spring configuration file：
 
 ```java
 ...
-// use com.alibaba.dubbo.rpc.service.GenericService can replace all implements
+// use org.apache.dubbo.rpc.service.GenericService can replace all implements
 GenericService xxxService = new XxxGenericService();
 
 // The instance is very heavy, which encapsulates all the registration center and service provider connection, please cache

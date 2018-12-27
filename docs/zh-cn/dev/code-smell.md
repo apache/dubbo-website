@@ -23,14 +23,14 @@ REFER(dubbo://provider-address/com.xxx.XxxService?version=1.0.0)
 向注册中心暴露服务：
 
 ```
-EXPORT(registry://registry-address/com.alibaba.dubbo.registry.RegistrySerevice?registry=dubbo&export=ENCODE(dubbo://provider-address/com.xxx.XxxService?version=1.0.0))
+EXPORT(registry://registry-address/org.apache.dubbo.registry.RegistrySerevice?registry=dubbo&export=ENCODE(dubbo://provider-address/com.xxx.XxxService?version=1.0.0))
 ```
 
 获取注册中心：
 
 ```
 url.setProtocol(url.getParameter("registry", "dubbo"))
-GETREGISTRY(dubbo://registry-address/com.alibaba.dubbo.registry.RegistrySerevice)
+GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice)
 ```
 
 注册服务地址：
@@ -45,14 +45,14 @@ REGISTER(dubbo://provider-address/com.xxx.XxxService?version=1.0.0)
 从注册中心订阅服务：
 
 ```
-REFER(registry://registry-address/com.alibaba.dubbo.registry.RegistrySerevice?registry=dubbo&refer=ENCODE(version=1.0.0))
+REFER(registry://registry-address/org.apache.dubbo.registry.RegistrySerevice?registry=dubbo&refer=ENCODE(version=1.0.0))
 ```
 
 获取注册中心：
 
 ```
 url.setProtocol(url.getParameter("registry", "dubbo"))
-GETREGISTRY(dubbo://registry-address/com.alibaba.dubbo.registry.RegistrySerevice)
+GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice)
 ```
 
 订阅服务地址：
@@ -155,7 +155,7 @@ public class <扩展点接口名>$Adpative implements <扩展点接口> {
 
 `@Adaptive` 注解使用如下：
 
-如果 URL 这些 Key 都没有 Value，使用缺省的扩展（在接口的 Default 中设定的值）。比如，String[] {"key1", "key2"}，表示先在 URL 上找 key1 的 Value 作为要 Adapt 成的 Extension 名；key1 没有 Value，则使用 key2 的 Value 作为要 Adapt 成的 Extension 名。 key2 没有 Value，使用缺省的扩展。如果没有设定缺省扩展，则方法调用会抛出 IllegalStateException。如果不设置则缺省使用 Extension 接口类名的点分隔小写字串。即对于 Extension 接口 `com.alibaba.dubbo.xxx.YyyInvokerWrapper` 的缺省值为 `new String[] {"yyy.invoker.wrapper"}`
+如果 URL 这些 Key 都没有 Value，使用缺省的扩展（在接口的 Default 中设定的值）。比如，String[] {"key1", "key2"}，表示先在 URL 上找 key1 的 Value 作为要 Adapt 成的 Extension 名；key1 没有 Value，则使用 key2 的 Value 作为要 Adapt 成的 Extension 名。 key2 没有 Value，使用缺省的扩展。如果没有设定缺省扩展，则方法调用会抛出 IllegalStateException。如果不设置则缺省使用 Extension 接口类名的点分隔小写字串。即对于 Extension 接口 `org.apache.dubbo.xxx.YyyInvokerWrapper` 的缺省值为 `new String[] {"yyy.invoker.wrapper"}`
 
 ## Callback 功能
 

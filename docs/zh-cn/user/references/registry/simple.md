@@ -17,12 +17,12 @@ Simple 注册中心本身就是一个普通的 Dubbo 服务，可以减少第三
     <!-- 暴露服务协议配置 -->
     <dubbo:protocol port="9090" />
     <!-- 暴露服务配置 -->
-    <dubbo:service interface="com.alibaba.dubbo.registry.RegistryService" ref="registryService" registry="N/A" ondisconnect="disconnect" callbacks="1000">
+    <dubbo:service interface="org.apache.dubbo.registry.RegistryService" ref="registryService" registry="N/A" ondisconnect="disconnect" callbacks="1000">
         <dubbo:method name="subscribe"><dubbo:argument index="1" callback="true" /></dubbo:method>
         <dubbo:method name="unsubscribe"><dubbo:argument index="1" callback="false" /></dubbo:method>
     </dubbo:service>
     <!-- 简单注册中心实现，可自行扩展实现集群和状态同步 -->
-    <bean id="registryService" class="com.alibaba.dubbo.registry.simple.SimpleRegistryService" />
+    <bean id="registryService" class="org.apache.dubbo.registry.simple.SimpleRegistryService" />
 </beans>
 ```
 
@@ -35,7 +35,7 @@ Simple 注册中心本身就是一个普通的 Dubbo 服务，可以减少第三
 或者：
 
 ```xml
-<dubbo:service interface="com.alibaba.dubbo.registry.RegistryService" group="simple" version="1.0.0" ... >
+<dubbo:service interface="org.apache.dubbo.registry.RegistryService" group="simple" version="1.0.0" ... >
 ```
 
 或者：

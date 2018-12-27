@@ -40,7 +40,7 @@
 ```xml
 <servlet>
          <servlet-name>dubbo</servlet-name>
-         <servlet-class>com.alibaba.dubbo.remoting.http.servlet.DispatcherServlet</servlet-class>
+         <servlet-class>org.apache.dubbo.remoting.http.servlet.DispatcherServlet</servlet-class>
          <load-on-startup>1</load-on-startup>
 </servlet>
 <servlet-mapping>

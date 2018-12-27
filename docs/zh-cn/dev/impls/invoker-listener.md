@@ -6,7 +6,7 @@
 
 ## 扩展接口
 
-`com.alibaba.dubbo.rpc.InvokerListener`
+`org.apache.dubbo.rpc.InvokerListener`
 
 ## 扩展配置
 
@@ -19,7 +19,7 @@
 
 ## 已知扩展
 
-`com.alibaba.dubbo.rpc.listener.DeprecatedInvokerListener`
+`org.apache.dubbo.rpc.listener.DeprecatedInvokerListener`
 
 ## 扩展示例
 
@@ -35,7 +35,7 @@ src
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.InvokerListener (纯文本文件，内容为：xxx=com.xxx.XxxInvokerListener)
+                |-org.apache.dubbo.rpc.InvokerListener (纯文本文件，内容为：xxx=com.xxx.XxxInvokerListener)
 ```
 
 XxxInvokerListener.java：
@@ -43,9 +43,9 @@ XxxInvokerListener.java：
 ```java
 package com.xxx;
  
-import com.alibaba.dubbo.rpc.InvokerListener;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.InvokerListener;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.RpcException;
  
 public class XxxInvokerListener implements InvokerListener {
     public void referred(Invoker<?> invoker) throws RpcException {
@@ -57,7 +57,7 @@ public class XxxInvokerListener implements InvokerListener {
 }
 ```
 
-META-INF/dubbo/com.alibaba.dubbo.rpc.InvokerListener：
+META-INF/dubbo/org.apache.dubbo.rpc.InvokerListener：
 
 ```properties
 xxx=com.xxx.XxxInvokerListener
