@@ -157,6 +157,20 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: 'Dubbo 博客文档中文排版指南',
+            author:'@徐靖峰',
+            dateStr: 'Dec 27th, 2018',
+            desc: '文案排版的一些规范，遵守规范可以使得网站更加优雅',
+            link: '/zh-cn/blog/dubbo-copywriting-style.html',
+        },
+        {
+            title: 'Dubbo 中的 URL 统一模型',
+            author:'@徐靖峰',
+            dateStr: 'Dec 27th, 2018',
+            desc: 'URL 是 Dubbo 种一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。',
+            link: '/zh-cn/blog/introduction-to-dubbo-url.html',
+        },
+        {
           title: '当Dubbo遇上Arthas：排查问题的实践',
           author:'@hengyunabc',
           dateStr: 'Dec 14th, 2018',
