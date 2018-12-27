@@ -160,7 +160,7 @@ export default {
             title: 'Dubbo 博客文档中文排版指南',
             author:'@徐靖峰',
             dateStr: 'Dec 27th, 2018',
-            desc: '文案排版的一些规范，遵守规范可以使得网站更加优雅',
+            desc: '统一中文文案、排版的相关用法，降低团队成员之间的沟通成本，增强网站气质。',
             link: '/zh-cn/blog/dubbo-copywriting-style.html',
         },
         {

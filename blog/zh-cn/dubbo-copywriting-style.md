@@ -1,7 +1,7 @@
 ---
 title: Dubbo 博客文档中文排版指南
 keywords: Dubbo, Copywriting
-description: URL 是 Dubbo 种一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。
+description: 统一中文文案、排版的相关用法，降低团队成员之间的沟通成本，增强网站气质。
 ---
 
 # Dubbo 博客文档中文排版指南
