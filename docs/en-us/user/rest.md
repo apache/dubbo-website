@@ -725,7 +725,7 @@ In standard JAX-RS applications, we generally add @Provider annotations to Filte
 <dubbo:protocol name="rest" port="8888" extension="xxx.TraceInterceptor, xxx.TraceFilter"/>
 ```
 
-Here, we can add these three types of objects, Filter, Interceptor and DynamicFuture, to the `extension` attributes, separated by commas. (DynamicFuture is another interface that allows us to enable Filter and Interceptor more dynamically. Please feel free to google.)
+Here, we can add these three types of objects, Filter, Interceptor and DynamicFeature, to the `extension` attributes, separated by commas. (DynamicFeature is another interface that allows us to enable Filter and Interceptor more dynamically. Please feel free to google.)
 
 Of course, Dubbo itself also supports Filter, but the Filter and Interceptor we discuss here are more like the bottom of the protocol implementation. Compared to Dubbo's filter, you can do a lower level of customization here.
 
