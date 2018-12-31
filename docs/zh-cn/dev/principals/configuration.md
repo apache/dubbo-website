@@ -28,7 +28,7 @@ Dubbo 新版本去掉了 dubbo.properties，因为该约定经常造成配置冲
 
 而对于描述配置，因为要参与业务逻辑，通常会嵌到应用的生命周期管理中。现在使用 spring 的项目越来越多，直接使用 spring 配置的比较普遍，而且 spring 允许自定义 schema，配置简化后很方便。当然，也有它的缺点，就是强依赖 spring，可以提编程接口做了配套方案。 
 
-在 Dubbo 即存在描述配置，也有环境配置。一部分用 spring 的 schame 配置加载，一部分从 classpath 扫描 properties 配置加载。用户感觉非常不便，所以在新版本中进行了合并，统一放到 spring 的 schame 配置加载，也增加了配置的灵活性。 
+在 Dubbo 即存在描述配置，也有环境配置。一部分用 spring 的 schema 配置加载，一部分从 classpath 扫描 properties 配置加载。用户感觉非常不便，所以在新版本中进行了合并，统一放到 spring 的 schema 配置加载，也增加了配置的灵活性。 
 
 扩展配置，通常对配置的聚合要求比较高。因为产品需要发现第三方实现，将其加入产品内部。在 java 世界里，通常是约定在每个 jar 包下放一个指定文件加载，比如：eclipse 的 plugin.xml，struts2 的 struts-plugin.xml 等，这类配置可以考虑 java 标准的服务发现机制，即在 jar 包的 META-INF/services 下放置接口类全名文件，内容为每行一个实现类类名，就像 jdk 中的加密算法扩展，脚本引擎扩展，新的 JDBC 驱动等，都是采用这种方式。参见：[ServiceProvider 规范](http://download.oracle.com/javase/1.4.2/docs/guide/jar/jar.html#Service%20Provider)。
 
