@@ -156,6 +156,13 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+      {
+        title: '在 Dubbo 中使用 REST',
+        author:'@beiwei30',
+        dateStr: 'Jan 1st, 2019',
+        desc: '本文介绍 REST 的基本概念，如何在 Dubbo 中开发 REST HTTP 应用，以及如何集成 Swagger',
+        link: '/zh-cn/blog/dubbo-rest.html',
+      },
         {
           title: '当Dubbo遇上Arthas：排查问题的实践',
           author:'@hengyunabc',
