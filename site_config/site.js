@@ -198,6 +198,6 @@ export default {
         }
       ]
     },
-    copyright: 'Copyright © 2018 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.'
+    copyright: 'Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.'
   }
 };
