@@ -13,5 +13,5 @@ configuration:
 
 ```sh
 resource/META-INFO.spring/dubbo-demo-provider.xml
-change dubbo:registry to a real registry server address, zookeeper is recommanded
+change dubbo:registery to a real registery server address, zookeeper is recommanded
 ```

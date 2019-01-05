@@ -13,6 +13,6 @@ cd incubator-dubbo
 
 ```sh
 resource/META-INFO.spring/dubbo-demo-provider.xml
-修改其中的dubbo:registry，替换成真实的注册中心地址，推荐使用zookeeper
+修改其中的dubbo:registery，替换成真实的注册中心地址，推荐使用zookeeper
 ```
 

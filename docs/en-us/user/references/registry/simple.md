@@ -46,4 +46,4 @@ Or:
 
 ## Applicability
 
-This `SimpleRegistryService` is just a simple implementation for register server, and it doesn't have cluster support. It is useful for the implementation reference for the custom registry server, but not suitable for use in production environment directly.
+This `SimpleRegistryService` is just a simple implementation for register server, and it doesn't have cluster support. It is useful for the implementation reference for the custom registery server, but not suitable for use in production environment directly.
