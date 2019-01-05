@@ -26,7 +26,7 @@ public class AdaptiveWheelMaker implements WheelMaker {
         
     	// 1.从 URL 中获取 WheelMaker 名称
         String wheelMakerName = url.getParameter("Wheel.maker");
-        if (name == null) {
+        if (wheelMakerName == null) {
             throw new IllegalArgumentException("wheelMakerName == null");
         }
         
