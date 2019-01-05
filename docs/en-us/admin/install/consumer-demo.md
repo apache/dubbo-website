@@ -14,5 +14,5 @@ configuration:
 
 ```sh
 resource/META-INFO.spring/dubbo-demo-consumer.xml
-change dubbo:registery to the real registery center address
+change dubbo:registry to the real registry center address
 ```
