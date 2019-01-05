@@ -3,9 +3,11 @@
 This project keeps all sources used for building up dubbo official website which's served at http://dubbo.io or http://dubbo.apache.org.
 
 
-## Attention
+## Prerequisite
 
+Dubbo website is powered by [docsite](https://github.com/txd-team/docsite).
 If your version of docsite is less then `1.3.3`, please upgrade to `1.3.3`.
+Please also make sure your node version is 8.x, versions higher than 8.x is not supported by docsite yet.
 
 ## Build instruction
 
