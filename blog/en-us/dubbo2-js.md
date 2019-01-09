@@ -268,7 +268,7 @@ Congratulations！
 
 ## More details
 
-The sample code in this article is available here, [https://github.com/lexburner/Dubbojs-Learning](https://github.com/lexburner/Dubbojs-Learning).
+The sample code in this article is available here, [https://github.com/dubbo/dubbo2.js](https://github.com/dubbo/dubbo2.js).
 If you don&#x27;t know much about the dubbo protocol and want to understand how it works, the project provides a sub-moudle: java-socket-consumer, which is implemented in a process-oriented approach, realizing a process of sending dubbo protocal message with native socket and making function calls, and then get response.
 
 

@@ -31,7 +31,7 @@ The above configuration will turn on `accesslog` switch for all provide services
         <appender-ref ref="accesslogAppender"/>
 </logger>
 ```
-The above is the demonstration of logback framework.Other logging framework is same too.It will logging the access log of all provide services into single file(`accesslog/logging.log`). And you can also config the access log of each provide service to logging separately,Only change `name` attribute of the `logger` tag,set the `name` attribute to `dubbo.accesslog.serviceInterfaceClassFullName`.The Example:
+The above is the demonstration of logback framework.Other logging framework is same too. It will logging the access log of all provide services into single file(`accesslog/logging.log`). And you can also config the access log of each provide service to logging separately,Only change `name` attribute of the `logger` tag,set the `name` attribute to `dubbo.accesslog.serviceInterfaceClassFullName`.The Example:
 
 ```xml
 <logger name="dubbo.accesslog.com.dubbo.FooServiceInterface" level="INFO" additivity="false">
@@ -39,7 +39,7 @@ The above is the demonstration of logback framework.Other logging framework is s
 </logger>
 ```
 
-If you only want logging the access log of specified provide service,but not all services.It's supported too.The Example:
+If you only want logging the access log of specified provide service,but not all services, it's supported too.The Example:
 ```xml
 <dubbo:service accesslog="true" .../>
 ```

@@ -30,7 +30,7 @@ dubbo.service.protocol=rmi
 ```sh
 java -Dsun.rmi.transport.tcp.responseTimeout=3000
 ```
-更多 RMI 优化参数请查看 [JDK 文档](http://download.oracle.com/docs/cd/E17409_01/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
+更多 RMI 优化参数请查看 [JDK 文档](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
 
 
 ## 接口
