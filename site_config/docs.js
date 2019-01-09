@@ -1256,6 +1256,10 @@ export default {
                     {
                         title: '负载均衡',
                         link: '/zh-cn/docs/source_code_guide/loadbalance.html'
+                    },
+                    {
+                        title: '服务调用过程',
+                        link: '/zh-cn/docs/source_code_guide/service-invoking-process.html'
                     }
                 ]
             },
