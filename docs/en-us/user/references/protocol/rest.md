@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 }
 ```
-上面的服务实现代码非常简单，但是由于REST服务是要被发布到特定HTTP URL，供任意语言客户端甚至浏览器来访问，所以这里要额外添加了几个JAX-RS的标准annotation来做相关的配置：
+上面的实现非常简单，但是由于该 REST 服务是要发布到指定 URL 上，供任意语言的客户端甚至浏览器来访问，所以这里额外添加了几个 JAX-RS 的标准 annotation 来做相关的配置。
 
 @Path("users")：指定访问UserService的URL相对路径是/users，即http://localhost:8080/users
 
@@ -282,7 +282,7 @@ public class User implements Serializable {
 
 ### 配置REST Server的实现
 
-目前在dubbo中，我们支持5种嵌入式rest server的实现，并同时支持采用外部应用服务器来做rest server的实现。rest server的实现是通过如下server这个XML属性来选择的：
+目前在dubbo中，我们支持5种嵌入式rest server的实现，并同时支持采用外部应用服务器来做rest server的实现。rest server可以通过如下配置实现：
 
 ```xml
 <dubbo:protocol name="rest" server="jetty"/>
@@ -368,7 +368,7 @@ public User getUser(@PathParam("id") Long id, @Context HttpServletRequest reques
 	
 用Context修饰getUser()的一个方法参数后，就可以将当前的HttpServletRequest注入进来，然后直接调用servlet api获取IP。
 
-> 注意：这种方式只能在设置server="tjws"或者server="tomcat"或者server="jetty"或者server="servlet"的时候才能工作，因为只有这几种REST server的实现才提供了servlet容器。另外，标准的JAX-RS还支持用@Context修饰service类的一个实例字段来获取HttpServletRequest，但在dubbo中我们没有对此作出支持。
+> 注意：这种方式只能在将server设置为 tjws、tomcat、jetty 或者 servlet 的时候才能工作，因为只有这几种 server 的实现才提供了 servlet 容器。另外，标准的JAX-RS还支持用@Context修饰service类的一个实例字段来获取HttpServletRequest，但在dubbo中我们没有对此作出支持。
 
 第二种方式，用dubbo中常用的RpcContext：
 
@@ -541,7 +541,7 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-annotation的配置更简单更精确，经常也更便于维护（当然现代IDE都可以在xml中支持比如类名重构，所以就这里的特定用例而言，xml的维护性也很好）。而xml对代码的侵入性更小一些，尤其有利于动态修改配置，特别是比如你要针对单个服务配置连接超时时间、每客户端最大连接数、集群策略、权重等等。另外，特别对复杂应用或者模块来说，xml提供了一个中心点来涵盖的所有组件和配置，更一目了然，一般更便于项目长时期的维护。
+annotation的配置更简单更精确，通常也更便于维护（当然现代IDE都可以在xml中支持比如类名重构，所以就这里的特定用例而言，xml的维护性也很好）。而xml对代码的侵入性更小一些，尤其有利于动态修改配置，特别是比如你要针对单个服务配置连接超时时间、每客户端最大连接数、集群策略、权重等等。另外，特别对复杂应用或者模块来说，xml提供了一个中心点来涵盖的所有组件和配置，更一目了然，一般更便于项目长时期的维护。
 
 当然，选择哪种配置方式没有绝对的优劣，和个人的偏好也不无关系。
 
@@ -583,7 +583,7 @@ public class GZIPWriterInterceptor implements WriterInterceptor {
 <dubbo:protocol name="rest" port="8888" extension="xxx.TraceInterceptor, xxx.TraceFilter"/>
 ```
 
-在此，我们可以将Filter、Interceptor和DynamicFeature这三种类型的对象都添加到extension属性上，多个之间用逗号分隔。（DynamicFeature是另一个接口，可以方便我们更动态的启用Filter和Interceptor，感兴趣请自行google。）
+在此，我们可以将Filter、Interceptor和DynamicFeature这三种类型的对象都添加到`extension`属性上，多个之间用逗号分隔。（DynamicFeature是另一个接口，可以方便我们更动态的启用Filter和Interceptor，感兴趣请自行google。）
 
 当然，dubbo自身也支持Filter的概念，但我们这里讨论的Filter和Interceptor更加接近协议实现的底层，相比dubbo的filter，可以做更底层的定制化。
 
