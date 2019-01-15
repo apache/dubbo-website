@@ -376,6 +376,6 @@ As Consumer side:
 最后，简单的介绍了如何通过 Dubbo 团队提供的公共服务 start.dubbo.io 快速搭建基于 Spring Boot 的 Dubbo 应用，并通过 *qos* 来做 Dubbo 服务的简单运维。
 
 [^1]: [Getting Started Using JavaTM RMI](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html)
-[^2]: [直连提供者](http://dubbo.apache.org/books/dubbo-user-book/demos/explicit-target.html)
-[^3]: [Multicast 注册中心](http://dubbo.apache.org/books/dubbo-user-book/references/registry/multicast.html)
+[^2]: [直连提供者](http://dubbo.apache.org/zh-cn/docs/user/demos/explicit-target.html)
+[^3]: [Multicast 注册中心](http://dubbo.apache.org/zh-cn/docs/user/references/registry/multicast.html)
 [^4]: [在线运维命令](http://dubbo.apache.org/zh-cn/docs/user/references/qos.html)
