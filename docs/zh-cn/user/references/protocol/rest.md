@@ -583,7 +583,7 @@ public class GZIPWriterInterceptor implements WriterInterceptor {
 <dubbo:protocol name="rest" port="8888" extension="xxx.TraceInterceptor, xxx.TraceFilter"/>
 ```
 
-在此，我们可以将Filter、Interceptor和DynamicFuture这三种类型的对象都添加到extension属性上，多个之间用逗号分隔。（DynamicFuture是另一个接口，可以方便我们更动态的启用Filter和Interceptor，感兴趣请自行google。）
+在此，我们可以将Filter、Interceptor和DynamicFeature这三种类型的对象都添加到extension属性上，多个之间用逗号分隔。（DynamicFeature是另一个接口，可以方便我们更动态的启用Filter和Interceptor，感兴趣请自行google。）
 
 当然，dubbo自身也支持Filter的概念，但我们这里讨论的Filter和Interceptor更加接近协议实现的底层，相比dubbo的filter，可以做更底层的定制化。
 

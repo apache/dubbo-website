@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-registry-nacos-integration" />
+	<meta name="description" content="dubbo-registry-nacos-integration" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-registry-nacos-integration</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot=""><header class="header-container header-container-normal"><div class="header-body"><a href="/zh-cn/index.html"><img class="logo" src="/img/dubbo_colorful.png"/></a><div class="search search-normal"><span class="icon-search"></span></div><span class="language-switch language-switch-normal">En</span><div class="header-menu"><img class="header-menu-toggle" src="/img/menu_gray.png"/><ul><li class="menu-item menu-item-normal"><a href="/zh-cn/index.html">首页</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/user/quick-start.html">文档</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/developers/developers_dev.html">开发者</a></li><li class="menu-item menu-item-normal menu-item-normal-active"><a href="/zh-cn/blog/index.html">博客</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/community/index.html">社区</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/blog/download.html">下载</a></li></ul></div></div></header><section class="blog-content markdown-body"><h1>Dubbo 融合 Nacos 成为注册中心</h1>
+<p>Nacos 作为 Dubbo 生态系统中重要的注册中心实现，其中 <a href="https://github.com/dubbo/dubbo-registry-nacos"><code>dubbo-registry-nacos</code></a> 则是 Dubbo 融合 Nacos 注册中心的实现。</p>
+<h2>预备工作</h2>
+<p>当您将 <a href="https://github.com/dubbo/dubbo-registry-nacos"><code>dubbo-registry-nacos</code></a> 整合到您的 Dubbo 工程之前，请确保后台已经启动 Nacos 服务。如果您尚且不熟悉 Nacos 的基本使用的话，可先行参考 <a href="https://nacos.io/en-us/docs/quick-start.html">Nacos 快速入门</a>：<a href="https://nacos.io/en-us/docs/quick-start.html%E3%80%82%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8">https://nacos.io/en-us/docs/quick-start.html。建议使用</a> Nacos <code>0.6.1</code> 以上的版本。</p>
+<h2>快速上手</h2>
+<p>Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤可分为“增加 Maven 依赖”以及“配置注册中心“。</p>
+<h3>增加 Maven 依赖</h3>
+<p>首先，您需要 <code>dubbo-registry-nacos</code> 的 Maven 依赖添加到您的项目中 <code>pom.xml</code> 文件中，并且强烈地推荐您使用 Dubbo <code>2.6.5</code>：</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span>
+
+    ...
+        
+    <span class="hljs-comment">&lt;!-- Dubbo Nacos registry dependency --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>dubbo-registry-nacos<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.0.2<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>   
+    
+    <span class="hljs-comment">&lt;!-- Keep latest Nacos client version --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.nacos<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>nacos-client<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>[0.6.1,)<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+    
+    <span class="hljs-comment">&lt;!-- Dubbo dependency --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>dubbo<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.6.5<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+    
+    <span class="hljs-comment">&lt;!-- Alibaba Spring Context extension --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.spring<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-context-support<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0.2<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+
+    ...
+    
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span>
+</code></pre>
+<p>当项目中添加  <code>dubbo-registry-nacos</code> 后，您无需显示地编程实现服务发现和注册逻辑，实际实现由该三方包提供，接下来配置 Naocs 注册中心。</p>
+<h3>配置注册中心</h3>
+<p>假设您 Dubbo 应用使用 Spring Framework 装配，将有两种配置方法可选，分别为：<a href="https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/">Dubbo Spring 外部化配置</a>以及 Spring XML 配置文件以及 ，笔者强烈推荐前者。</p>
+<h3><a href="https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/">Dubbo Spring 外部化配置</a></h3>
+<p>Dubbo Spring 外部化配置是由 Dubbo <code>2.5.8</code> 引入的新特性，可通过 Spring <code>Environment</code> 属性自动地生成并绑定 Dubbo 配置 Bean，实现配置简化，并且降低微服务开发门槛。</p>
+<p>假设您 Dubbo 应用的使用 Zookeeper 作为注册中心，并且其服务器 IP 地址为：<code>10.20.153.10</code>，同时，该注册地址作为 Dubbo 外部化配置属性存储在 <code>dubbo-config.properties</code> 文件，如下所示：</p>
+<pre><code class="language-properties"><span class="hljs-comment">## application</span>
+<span class="hljs-meta">dubbo.application.name</span> = <span class="hljs-string">your-dubbo-application</span>
+<span class="hljs-comment">
+## Zookeeper registry address</span>
+<span class="hljs-meta">dubbo.registry.address</span> = <span class="hljs-string">zookeeper://10.20.153.10:2181</span>
+<span class="hljs-attr">...</span>
+</code></pre>
+<p>假设您的 Nacos Server 同样运行在服务器 <code>10.20.153.10</code> 上，并使用默认 Nacos 服务端口 <code>8848</code>，您只需将 <code>dubbo.registry.address</code> 属性调整如下：</p>
+<pre><code class="language-properties"><span class="hljs-comment">## 其他属性保持不变</span>
+<span class="hljs-comment">
+## Nacos registry address</span>
+<span class="hljs-meta">dubbo.registry.address</span> = <span class="hljs-string">nacos://10.20.153.10:8848</span>
+<span class="hljs-attr">...</span>
+</code></pre>
+<p>随后，重启您的 Dubbo 应用，Dubbo 的服务提供和消费信息在 Nacos 控制台中可以显示：</p>
+<p><img src="../../img/blog/dubbo-registry-nacos-1.png" alt="image-20181213103845976"></p>
+<p>如图所示，服务名前缀为 <code>providers:</code> 的信息为服务提供者的元信息，<code>consumers:</code> 则代表服务消费者的元信息。点击“<strong>详情</strong>”可查看服务状态详情：</p>
+<p><img src="../../img/blog/dubbo-registry-nacos-2.png" alt="image-20181213104145998"></p>
+<p>如果您正在使用 Spring XML 配置文件装配 Dubbo 注册中心的话，请参考下一节。</p>
+<h3>Spring XML 配置文件</h3>
+<p>同样，假设您 Dubbo 应用的使用 Zookeeper 作为注册中心，并且其服务器 IP 地址为：<code>10.20.153.10</code>，并且装配 Spring Bean 在 XML 文件中，如下所示：</p>
+<pre><code class="language-xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">beans</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:dubbo</span>=<span class="hljs-string">"http://dubbo.apache.org/schema/dubbo"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd"</span>&gt;</span>
+ 
+    <span class="hljs-comment">&lt;!-- 提供方应用信息，用于计算依赖关系 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:application</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dubbo-provider-xml-demo"</span>  /&gt;</span>
+ 
+    <span class="hljs-comment">&lt;!-- 使用 Zookeeper 注册中心 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:registry</span> <span class="hljs-attr">address</span>=<span class="hljs-string">"zookeeper://10.20.153.10:2181"</span> /&gt;</span>
+ 	...
+<span class="hljs-tag">&lt;/<span class="hljs-name">beans</span>&gt;</span>
+</code></pre>
+<p>与 <a href="https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/">Dubbo Spring 外部化配置</a> 配置类似，只需要调整 <code>address</code> 属性配置即可：</p>
+<pre><code class="language-xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">beans</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:dubbo</span>=<span class="hljs-string">"http://dubbo.apache.org/schema/dubbo"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd"</span>&gt;</span>
+ 
+    <span class="hljs-comment">&lt;!-- 提供方应用信息，用于计算依赖关系 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:application</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dubbo-provider-xml-demo"</span>  /&gt;</span>
+ 
+    <span class="hljs-comment">&lt;!-- 使用 Nacos 注册中心 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:registry</span> <span class="hljs-attr">address</span>=<span class="hljs-string">"nacos://10.20.153.10:8848"</span> /&gt;</span>
+ 	...
+<span class="hljs-tag">&lt;/<span class="hljs-name">beans</span>&gt;</span>
+</code></pre>
+<p>重启 Dubbo 应用后，您同样也能发现服务提供方和消费方的注册元信息呈现在 Nacos 控制台中：</p>
+<p><img src="../../img/blog/dubbo-registry-nacos-3.png" alt="image-20181213113049185"></p>
+<p>您是否绝对配置或切换 Nacos 注册中心超级 Easy 呢？如果您仍旧意犹未尽或者不甚明白的话，可参考以下完整的示例。</p>
+<h2>完整示例</h2>
+<p>以上图片中的元数据源于 Dubbo Spring 注解驱动示例以及 Dubbo Spring XML 配置驱动示例，下面将分别介绍两者，您可以选择自己偏好的编程模型。在正式讨论之前，先来介绍两者的预备工作，因为它们皆依赖 Java 服务接口和实现。同时，<strong>请确保本地（<code>127.0.0.1</code>）环境已启动 Nacos 服务</strong>。</p>
+<h3>示例接口与实现</h3>
+<p>首先定义示例接口，如下所示：</p>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.dubbo.demo.service;
+
+<span class="hljs-comment">/**
+ * DemoService
+ *
+ * <span class="hljs-doctag">@since</span> 2.6.5
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">DemoService</span> </span>{
+
+    <span class="hljs-function">String <span class="hljs-title">sayName</span><span class="hljs-params">(String name)</span></span>;
+
+}
+</code></pre>
+<p>提供以上接口的实现类：</p>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.dubbo.demo.service;
+
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.config.annotation.Service;
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.rpc.RpcContext;
+
+<span class="hljs-keyword">import</span> org.springframework.beans.factory.annotation.Value;
+
+<span class="hljs-comment">/**
+ * Default {<span class="hljs-doctag">@link</span> DemoService}
+ *
+ * <span class="hljs-doctag">@since</span> 2.6.5
+ */</span>
+<span class="hljs-meta">@Service</span>(version = <span class="hljs-string">"${demo.service.version}"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DemoService</span> </span>{
+
+    <span class="hljs-meta">@Value</span>(<span class="hljs-string">"${demo.service.name}"</span>)
+    <span class="hljs-keyword">private</span> String serviceName;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayName</span><span class="hljs-params">(String name)</span> </span>{
+        RpcContext rpcContext = RpcContext.getContext();
+        <span class="hljs-keyword">return</span> String.format(<span class="hljs-string">"Service [name :%s , port : %d] %s(\"%s\") : Hello,%s"</span>,
+                serviceName,
+                rpcContext.getLocalPort(),
+                rpcContext.getMethodName(),
+                name,
+                name);
+    }
+}
+</code></pre>
+<p>接口与实现准备妥当后，下面将采用注解驱动和 XML 配置驱动各自实现。</p>
+<h3>Spring 注解驱动示例</h3>
+<p>Dubbo <code>2.5.7</code> 重构了 Spring 注解驱动的编程模型。</p>
+<h4>服务提供方注解驱动实现</h4>
+<ul>
+<li>定义 Dubbo 提供方外部化配置属性源 -  <code>provider-config.properties</code></li>
+</ul>
+<pre><code class="language-properties"><span class="hljs-comment">## application</span>
+<span class="hljs-meta">dubbo.application.name</span> = <span class="hljs-string">dubbo-provider-demo</span>
+<span class="hljs-comment">
+## Nacos registry address</span>
+<span class="hljs-meta">dubbo.registry.address</span> = <span class="hljs-string">nacos://127.0.0.1:8848</span>
+<span class="hljs-comment">
+## Dubbo Protocol</span>
+<span class="hljs-meta">dubbo.protocol.name</span> = <span class="hljs-string">dubbo</span>
+<span class="hljs-meta">dubbo.protocol.port</span> = <span class="hljs-string">-1</span>
+<span class="hljs-comment">
+# Provider @Service version</span>
+<span class="hljs-meta">demo.service.version</span>=<span class="hljs-string">1.0.0</span>
+<span class="hljs-meta">demo.service.name</span> = <span class="hljs-string">demoService</span>
+</code></pre>
+<ul>
+<li>实现服务提供方引导类 - <code>DemoServiceProviderBootstrap</code></li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.dubbo.demo.provider;
+
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.demo.service.DemoService;
+
+<span class="hljs-keyword">import</span> org.springframework.context.annotation.AnnotationConfigApplicationContext;
+<span class="hljs-keyword">import</span> org.springframework.context.annotation.PropertySource;
+
+<span class="hljs-keyword">import</span> java.io.IOException;
+
+<span class="hljs-comment">/**
+ * {<span class="hljs-doctag">@link</span> DemoService} provider demo
+ */</span>
+<span class="hljs-meta">@EnableDubbo</span>(scanBasePackages = <span class="hljs-string">"com.alibaba.dubbo.demo.service"</span>)
+<span class="hljs-meta">@PropertySource</span>(value = <span class="hljs-string">"classpath:/provider-config.properties"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoServiceProviderBootstrap</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException </span>{
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext();
+        context.register(DemoServiceProviderBootstrap.class);
+        context.refresh();
+        System.out.println(<span class="hljs-string">"DemoService provider is starting..."</span>);
+        System.in.read();
+    }
+}
+
+</code></pre>
+<p>其中注解 <code>@EnableDubbo</code> 激活 Dubbo 注解驱动以及外部化配置，其 <code>scanBasePackages</code> 属性扫描指定 Java 包，将所有标注 <code>@Service</code> 的服务接口实现类暴露为 Spring Bean，随即被导出 Dubbo 服务。</p>
+<p><code>@PropertySource</code> 是 Spring Framework 3.1 引入的标准导入属性配置资源注解，它将为 Dubbo 提供外部化配置。</p>
+<h4>服务消费方注解驱动实现</h4>
+<ul>
+<li>定义 Dubbo 消费方外部化配置属性源 -  <code>consumer-config.properties</code></li>
+</ul>
+<pre><code class="language-properties"><span class="hljs-comment">## Dubbo Application info</span>
+<span class="hljs-meta">dubbo.application.name</span> = <span class="hljs-string">dubbo-consumer-demo</span>
+<span class="hljs-comment">
+## Nacos registry address</span>
+<span class="hljs-meta">dubbo.registry.address</span> = <span class="hljs-string">nacos://127.0.0.1:8848</span>
+<span class="hljs-comment">
+# @Reference version</span>
+<span class="hljs-meta">demo.service.version</span>= <span class="hljs-string">1.0.0</span>
+</code></pre>
+<p>同样地，<code>dubbo.registry.address</code> 属性指向 Nacos 注册中心，其他 Dubbo 服务相关的元信息通过 Nacos 注册中心获取。</p>
+<ul>
+<li>实现服务消费方引导类 - <code>DemoServiceConsumerBootstrap</code></li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.dubbo.demo.consumer;
+
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.config.annotation.Reference;
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.demo.service.DemoService;
+
+<span class="hljs-keyword">import</span> org.springframework.context.annotation.AnnotationConfigApplicationContext;
+<span class="hljs-keyword">import</span> org.springframework.context.annotation.PropertySource;
+
+<span class="hljs-keyword">import</span> javax.annotation.PostConstruct;
+<span class="hljs-keyword">import</span> java.io.IOException;
+
+<span class="hljs-comment">/**
+ * {<span class="hljs-doctag">@link</span> DemoService} consumer demo
+ */</span>
+<span class="hljs-meta">@EnableDubbo</span>
+<span class="hljs-meta">@PropertySource</span>(value = <span class="hljs-string">"classpath:/consumer-config.properties"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoServiceConsumerBootstrap</span> </span>{
+
+    <span class="hljs-meta">@Reference</span>(version = <span class="hljs-string">"${demo.service.version}"</span>)
+    <span class="hljs-keyword">private</span> DemoService demoService;
+
+    <span class="hljs-meta">@PostConstruct</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+            System.out.println(demoService.sayName(<span class="hljs-string">"小马哥（mercyblitz）"</span>));
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException </span>{
+        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext();
+        context.register(DemoServiceConsumerBootstrap.class);
+        context.refresh();
+        context.close();
+    }
+}
+
+</code></pre>
+<p>同样地，<code>@EnableDubbo</code>  注解激活 Dubbo 注解驱动和外部化配置，不过当前属于服务消费者，无需指定 Java 包名扫描标注 <code>@Service</code> 的服务实现。</p>
+<p><code>@Reference</code> 是 Dubbo 远程服务的依赖注入注解，需要服务提供方和消费端约定接口（interface）、版本（version）以及分组（group）信息。在当前服务消费示例中，<code>DemoService</code> 的服务版本来源于属性配置文件 <code>consumer-config.properties</code>。</p>
+<p><code>@PostConstruct</code> 部分代码则说明当 <code>DemoServiceConsumerBootstrap</code> Bean 初始化时，执行十次 Dubbo 远程方法调用。</p>
+<h4>运行注解驱动示例</h4>
+<p>在本地启动两次 <code>DemoServiceProviderBootstrap</code>，注册中心将出现两个健康服务：</p>
+<p><img src="../../img/blog/dubbo-registry-nacos-4.png" alt="image-20181213123909636"></p>
+<p>再运行 <code>DemoServiceConsumerBootstrap</code>，运行结果如下：</p>
+<pre><code>Service [name :demoService , port : 20880] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20881] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20880] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20880] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20881] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20881] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20880] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20880] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20881] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20881] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+</code></pre>
+<p>运行无误，并且服务消费方使用了负载均衡策略，将十次 RPC 调用平均分摊到两个 Dubbo 服务提供方实例中。</p>
+<h3>Spring XML 配置驱动示例</h3>
+<p>Spring XML 配置驱动是传统 Spring 装配组件的编程模型。</p>
+<h4>服务提供方  XML 配置驱动</h4>
+<ul>
+<li>定义服务提供方 XML 上下文配置文件 - <code>/META-INF/spring/dubbo-provider-context.xml</code></li>
+</ul>
+<pre><code class="language-xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">beans</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans"</span>
+       <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+       <span class="hljs-attr">xmlns:dubbo</span>=<span class="hljs-string">"http://dubbo.apache.org/schema/dubbo"</span>
+       <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 提供方应用信息，用于计算依赖关系 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:application</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dubbo-provider-xml-demo"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 使用 Nacos 注册中心 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:registry</span> <span class="hljs-attr">address</span>=<span class="hljs-string">"nacos://127.0.0.1:8848"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 用dubbo协议在随机端口暴露服务 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:protocol</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dubbo"</span> <span class="hljs-attr">port</span>=<span class="hljs-string">"-1"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 声明需要暴露的服务接口 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:service</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.alibaba.dubbo.demo.service.DemoService"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"2.0.0"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 和本地bean一样实现服务 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"com.alibaba.dubbo.demo.service.DefaultService"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">beans</span>&gt;</span>
+</code></pre>
+<ul>
+<li>实现服务提供方引导类 - <code>DemoServiceProviderXmlBootstrap</code></li>
+</ul>
+<pre><code class="language-xml">package com.alibaba.dubbo.demo.provider;
+
+import com.alibaba.dubbo.demo.service.DemoService;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.io.IOException;
+
+/**
+ * {@link DemoService} provider demo XML bootstrap
+ */
+public class DemoServiceProviderXmlBootstrap {
+
+    public static void main(String[] args) throws IOException {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext();
+        context.setConfigLocation("/META-INF/spring/dubbo-provider-context.xml");
+        context.refresh();
+        System.out.println("DemoService provider (XML) is starting...");
+        System.in.read();
+    }
+}
+</code></pre>
+<h4>服务消费方 XML 配置驱动</h4>
+<ul>
+<li>定义服务消费方 XML 上下文配置文件 - <code>/META-INF/spring/dubbo-consumer-context.xml</code></li>
+</ul>
+<pre><code class="language-xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">beans</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans"</span>
+       <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+       <span class="hljs-attr">xmlns:dubbo</span>=<span class="hljs-string">"http://dubbo.apache.org/schema/dubbo"</span>
+       <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 提供方应用信息，用于计算依赖关系 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:application</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dubbo-consumer-xml-demo"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 使用 Nacos 注册中心 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:registry</span> <span class="hljs-attr">address</span>=<span class="hljs-string">"nacos://127.0.0.1:8848"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- 引用服务接口 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.alibaba.dubbo.demo.service.DemoService"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"2.0.0"</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">beans</span>&gt;</span>
+</code></pre>
+<ul>
+<li>实现服务消费方引导类 - <code>DemoServiceConsumerXmlBootstrap</code></li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.dubbo.demo.consumer;
+
+<span class="hljs-keyword">import</span> com.alibaba.dubbo.demo.service.DemoService;
+
+<span class="hljs-keyword">import</span> org.springframework.context.support.ClassPathXmlApplicationContext;
+
+<span class="hljs-keyword">import</span> java.io.IOException;
+
+<span class="hljs-comment">/**
+ * {<span class="hljs-doctag">@link</span> DemoService} consumer demo XML bootstrap
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoServiceConsumerXmlBootstrap</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException </span>{
+        ClassPathXmlApplicationContext context = <span class="hljs-keyword">new</span> ClassPathXmlApplicationContext();
+        context.setConfigLocation(<span class="hljs-string">"/META-INF/spring/dubbo-consumer-context.xml"</span>);
+        context.refresh();
+        System.out.println(<span class="hljs-string">"DemoService consumer (XML) is starting..."</span>);
+        DemoService demoService = context.getBean(<span class="hljs-string">"demoService"</span>, DemoService.class);
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+            System.out.println(demoService.sayName(<span class="hljs-string">"小马哥（mercyblitz）"</span>));
+        }
+        context.close();
+    }
+}
+</code></pre>
+<h4>运行 XML 配置驱动示例</h4>
+<p>同样地，先启动两个 <code>DemoServiceProviderXmlBootstrap</code> 引导类，观察 Nacos 注册中心服务提供者变化：</p>
+<p><img src="../../img/blog/dubbo-registry-nacos-5.png" alt="image-20181213125527201"></p>
+<p>XML 配置驱动的服务版本为 <code>2.0.0</code>，因此注册服务无误。</p>
+<p>再运行服务消费者引导类 <code>DemoServiceConsumerXmlBootstrap</code>，观察控制台输出内容：</p>
+<pre><code>Service [name :null , port : 20882] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20882] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20883] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20882] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20882] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20883] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20882] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20883] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20883] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20883] sayName(&quot;小马哥（mercyblitz）&quot;) : Hello,小马哥（mercyblitz）
+</code></pre>
+<p>结果同样运行和负载均衡正常，不过由于当前示例尚未添加属性 <code>demo.service.name</code> 的缘故，因此，“name”部分信息输出为 <code>null</code>。更多内容请参考：<a href="https://github.com/dubbo/dubbo-registry-nacos%E3%80%82">https://github.com/dubbo/dubbo-registry-nacos。</a></p>
+<p>如果您关注或喜爱 Dubbo 以及 Nacos 等开源工程，不妨为它们点 “star”，加油打气链接：</p>
+<ul>
+<li>Apache Dubbo：<a href="https://github.com/apache/incubator-dubbo">https://github.com/apache/incubator-dubbo</a></li>
+<li>Dubbo Nacos Registry：<a href="https://github.com/dubbo/dubbo-registry-nacos">https://github.com/dubbo/dubbo-registry-nacos</a></li>
+<li>Alibaba Nacos：<a href="https://github.com/alibaba/nacos">https://github.com/alibaba/nacos</a></li>
+</ul>
+</section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

@@ -15,6 +15,6 @@ cd incubator-dubbo
 
 ```sh
 resource/META-INFO.spring/dubbo-demo-consumer.xml
-修改其中的dubbo:registery，替换成Provider提供的注册中心地址
+修改其中的dubbo:registry，替换成Provider提供的注册中心地址
 ```
 

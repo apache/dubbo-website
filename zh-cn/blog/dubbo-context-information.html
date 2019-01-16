@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="Dubbo,RPC Context, Attachment" />
+	<meta name="description" content="介绍Dubbo上下文信息的作用、应用场景、使用方式以及注意事项" />
+	<!-- 网页标签标题 -->
+	<title>Dubbo 上下文信息</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot=""><header class="header-container header-container-normal"><div class="header-body"><a href="/zh-cn/index.html"><img class="logo" src="/img/dubbo_colorful.png"/></a><div class="search search-normal"><span class="icon-search"></span></div><span class="language-switch language-switch-normal">En</span><div class="header-menu"><img class="header-menu-toggle" src="/img/menu_gray.png"/><ul><li class="menu-item menu-item-normal"><a href="/zh-cn/index.html">首页</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/user/quick-start.html">文档</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/developers/developers_dev.html">开发者</a></li><li class="menu-item menu-item-normal menu-item-normal-active"><a href="/zh-cn/blog/index.html">博客</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/community/index.html">社区</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/blog/download.html">下载</a></li></ul></div></div></header><section class="blog-content markdown-body"><h1>Dubbo 上下文信息</h1>
+<h2>简介</h2>
+<p>上下文信息是一次 RPC 调用过程中附带的环境信息，如方法名、参数类型、真实参数、本端/对端地址等。这些数据仅属于一次调用，作用于 Consumer 到 Provider 调用的整个流程。</p>
+<p>提供上下文信息是 RPC 框架很重要的一个功能，使用上下文不仅可以为单次调用指定不同配置，还能在此基础上提供强大的上层功能，如分布式链路追踪。其实现原理就是在上下文中维护一个<code>span_id</code>，Consumer 和 Provider 通过传递<code>span_id</code>来连接一次RPC调用，分别上报日志后可以在追踪系统中串联并展示完整的调用流程。这样可以更方便地发现异常，定位问题。</p>
+<h2>使用说明</h2>
+<p>Dubbo中代表上下文的类是<code>org.apache.dubbo.rpc.RpcContext</code>，可通过下述代码来获取上下文信息。</p>
+<pre><code>RpcContext.getContext()
+</code></pre>
+<h2>使用场景</h2>
+<h3>获取调用信息</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">方法名</th>
+<th>用途</th>
+<th>作用范围</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">getRequest</td>
+<td>获取 RPC 请求对象</td>
+<td>Consumer</td>
+<td>获取底层 RPC 请求对象，例如 HttpServletRequest，其他情况为 null</td>
+</tr>
+<tr>
+<td style="text-align:left">getResponse</td>
+<td>获取 RPC 请求响应</td>
+<td>Consumer</td>
+<td>获取底层 RPC 响应对象，例如HttpServletResponse，其他情况为 null</td>
+</tr>
+<tr>
+<td style="text-align:left">isProviderSide</td>
+<td>当前是否属于 Provider 上下文</td>
+<td>Both</td>
+<td>服务被调用时为 true，调用其他服务时为false</td>
+</tr>
+<tr>
+<td style="text-align:left">isConsumerSide</td>
+<td>当前是否属于 Consumer 上下文</td>
+<td>Both</td>
+<td>服务被调用时为 false，调用其他服务时为 true</td>
+</tr>
+<tr>
+<td style="text-align:left">getUrls</td>
+<td>获取当前能调用的 Url 列表</td>
+<td>Both</td>
+<td>Consumer 端会根据不同的 Failover 策略实时变化</td>
+</tr>
+<tr>
+<td style="text-align:left">getRemotePort</td>
+<td>获取远端端口</td>
+<td>Both</td>
+<td>Consumer 端为最后一次调用的 Provider 端口，Provider 为当前请求的 Consumer 端口</td>
+</tr>
+<tr>
+<td style="text-align:left">getRemoteHost</td>
+<td>获取远端主机地址</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getRemoteHostName</td>
+<td>获取远端主机名</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getRemoteAddressString</td>
+<td>获取远端地址</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getRemoteAddress</td>
+<td>获取远端地址</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getLocalPort</td>
+<td>获取本端端口</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getLocalHost</td>
+<td>获取本端主机地址</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getLocalHostName</td>
+<td>获取本端主机名</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getLocalAddressString</td>
+<td>获取本端地址</td>
+<td>Both</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">getLocalAddress</td>
+<td>获取本端地址</td>
+<td>Both</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3>传递用户参数</h3>
+<h4>本端传递</h4>
+<p>调用<code>get</code>和<code>set</code>方法即可完成参数传递。主要用于本端 Filter 之间的数据共享。</p>
+<h4>对端传递</h4>
+<p>调用<code>setAttachment</code>和<code>getAttachment</code>即可完成对端数据传递，这些数据会经过 RPC 传递到对端。例如 Consumer 向 Provider 传递<code>span_id</code>。</p>
+<ul>
+<li>Dubbo已经支持从 Provider 端向 Consumer 端传递参数，读写方式和 Consumer 端调用时的方式一样。</li>
+</ul>
+<h3>异步调用</h3>
+<p>在异步调用时，可通过<code>getCompletableFuture</code>或<code>getFuture</code>获取相关的 Future，异步调用相关文档请参阅：<a href="http://Dubbo.apache.org/zh-cn/docs/user/demos/async-call.html">异步调用</a></p>
+<h2>注意事项</h2>
+<p>Dubbo 内部使用 ThreadLocal 的方式存储每次调用的上下文信息，当接收到请求或发起请求时，当前线程会更新 RpcContext。例如，服务 A 调用服务 B，服务 B 调用服务 C，在 B 调 C 之前，RpcContext 记录的是 A 调 B 的信息，在 B 调 C 之后，RpcContext 记录的是 B 调 C 的信息。</p>
+</section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

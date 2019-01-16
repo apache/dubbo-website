@@ -6,14 +6,14 @@ description: Dubbo 推荐用法举例
 
 # 推荐用法
 
-## 在 Provider 上尽量多配置 Consumer 端属性
+## 在 Provider 端尽量多配置 Consumer 端属性
 
 原因如下：
 
-* 作服务的提供者，比服务使用方更清楚服务性能参数，如调用的超时时间、合理的重试次数等
-* 在 Provider 配置后，Consumer 不配置则会使用 Provider 的配置值，即 Provider 配置可以作为 Consumer 的缺省值 [^1]。否则，Consumer 会使用 Consumer 端的全局设置，这对于 Provider 是不可控的，并且往往是不合理的
+* 作服务的提供方，比服务消费方更清楚服务的性能参数，如调用的超时时间、合理的重试次数等
+* 在 Provider 端配置后，Consumer 端不配置则会使用 Provider 端的配置，即 Provider 端的配置可以作为 Consumer 的缺省值 [^1]。否则，Consumer 会使用 Consumer 端的全局设置，这对于 Provider 是不可控的，并且往往是不合理的
 
-Provider 上尽量多配置 Consumer 端的属性，让 Provider 实现者一开始就思考 Provider 服务特点、服务质量等问题。
+Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一开始就思考 Provider 端的服务特点和服务质量等问题。
 
 示例：
 
@@ -27,16 +27,16 @@ Provider 上尽量多配置 Consumer 端的属性，让 Provider 实现者一开
 <dubbo:service/>
 ```
 
-在 Provider 上可以配置的 Consumer 端属性有：
+建议在 Provider 端配置的 Consumer 端属性有：
 
-1. `timeout` 方法调用超时
-2. `retries` 失败重试次数，缺省是 2 [^2]
-3. `loadbalance` 负载均衡算法 [^3]，缺省是随机 `random`。还可以有轮询 `roundrobin`、最不活跃优先 [^4] `leastactive` 等
-4. `actives` 消费者端，最大并发调用限制，即当 Consumer 对一个服务的并发调用到上限后，新调用会阻塞直到超时，在方法上配置 `dubbo:method` 则并发限制针对方法，在接口上配置 `dubbo:service`，则并发限制针对服务
+1. `timeout`：方法调用的超时时间
+2. `retries`：失败重试次数，缺省是 2 [^2]
+3. `loadbalance`：负载均衡算法 [^3]，缺省是随机 `random`。还可以配置轮询 `roundrobin`、最不活跃优先 [^4] `leastactive` 和一致性哈希 `consistenthash` 等
+4. `actives`：消费者端的最大并发调用限制，即当 Consumer 对一个服务的并发调用到上限后，新调用会阻塞直到超时，在方法上配置 `dubbo:method` 则针对该方法进行并发限制，在接口上配置 `dubbo:service`，则针对该服务进行并发限制
 
-详细配置说明参见：[Dubbo配置参考手册](./references/xml/introduction.md)
+详细配置说明请参考：[Dubbo配置参考手册](./references/xml/introduction.md)
 
-## Provider 上配置合理的 Provider 端属性
+## 在 Provider 端配置合理的 Provider 端属性
 
 ```xml
 <dubbo:protocol threads="200" /> 
@@ -46,34 +46,34 @@ Provider 上尽量多配置 Consumer 端的属性，让 Provider 实现者一开
 </dubbo:service>
 ```
 
-Provider 上可以配置的 Provider 端属性有：
+建议在 Provider 端配置的 Provider 端属性有：
 
-1. `threads` 服务线程池大小
-2. `executes` 一个服务提供者并行执行请求上限，即当 Provider 对一个服务的并发调用达到上限后，新调用会阻塞，此时 Consumer 可能会超时。在方法上配置 `dubbo:method` 则并发限制针对方法，在接口上配置 `dubbo:service`，则并发限制针对服务
+1. `threads`：服务线程池大小
+2. `executes`：一个服务提供者并行执行请求上限，即当 Provider 对一个服务的并发调用达到上限后，新调用会阻塞，此时 Consumer 可能会超时。在方法上配置 `dubbo:method` 则针对该方法进行并发限制，在接口上配置 `dubbo:service`，则针对该服务进行并发限制
 
 ## 配置管理信息
 
-目前有负责人信息和组织信息用于区分站点。有问题时便于的找到服务的负责人，至少写两个人以便备份。负责人和组织的信息可以在注册中心的上看到。
+目前有负责人信息和组织信息用于区分站点。以便于在发现问题时找到服务对应负责人，建议至少配置两个人以便备份。负责人和组织信息可以在运维平台 (Dubbo Ops) 上看到。
 
-应用配置负责人、组织：
+在应用层面配置负责人、组织信息：
 
 ```xml
 <dubbo:application owner=”ding.lid,william.liangf” organization=”intl” />
 ```
 
-service 配置负责人：
+在服务层面（服务端）配置负责人：
 
 ```xml
 <dubbo:service owner=”ding.lid,william.liangf” />
 ```
 
-reference 配置负责人：
+在服务层面（消费端）配置负责人：
 
 ```xml
 <dubbo:reference owner=”ding.lid,william.liangf” />
 ```
 
-若没有配置 service 和 reference 的负责人，则默认使用 `dubbo:application` 设置的负责人。
+若没有配置服务层面的负责人，则默认使用 `dubbo:application` 设置的负责人。
 
 ## 配置 Dubbo 缓存文件
 
@@ -85,8 +85,8 @@ reference 配置负责人：
 
 注意：
 
-1. 应用可以根据需要调整缓存文件的路径，保证这个文件不会在发布过程中被清除；
-2. 如果有多个应用进程，注意不要使用同一个文件，避免内容被覆盖；
+1. 可以根据需要调整缓存文件的路径，保证这个文件不会在发布过程中被清除；
+2. 如果有多个应用进程，请注意不要使用同一个文件，避免内容被覆盖；
 
 该文件会缓存注册中心列表和服务提供者列表。配置缓存文件后，应用重启过程中，若注册中心不可用，应用会从该缓存文件读取服务提供者列表，进一步保证应用可靠性。
 
@@ -100,11 +100,11 @@ reference 配置负责人：
 
     使用 [Dubbo Ops](https://github.com/apache/incubator-dubbo-ops) 监控服务在注册中心上的状态，确保注册中心上有该服务的存在。
 
-3. 服务提供方，使用 Dubbo Qos 的 telnet 或 shell 监控项
+3. 服务提供方可使用 Dubbo Qos 的 telnet 或 shell 监控项
 
     监控服务提供者端口状态：`echo status | nc -i 1 20880 | grep OK | wc -l`，其中的 20880 为服务端口
 
-4. 服务消费方，通过将服务强制转型为 EchoService，并调用 `$echo()` 测试该服务的提供者是可用
+4. 服务消费方可通过将服务强制转型为 EchoService，并调用 `$echo()` 测试该服务的提供者是可用
 
     如 `assertEqauls(“OK”, ((EchoService)memberService).$echo(“OK”));`
     
@@ -112,7 +112,7 @@ reference 配置负责人：
 
 Dubbo 中所有的配置项都可以配置在 Spring 配置文件中，并且可以针对单个服务配置。
 
-如完全不配置则使用 Dubbo 缺省值，参见 [Dubbo配置参考手册](./references/xml/introduction.md) 中的说明。
+如完全不配置则使用 Dubbo 缺省值，详情请参考 [Dubbo配置参考手册](./references/xml/introduction.md) 中的说明。
 
 ### dubbo.properties 中属性名与 XML 的对应关系
 
@@ -164,8 +164,8 @@ Dubbo 中所有的配置项都可以配置在 Spring 配置文件中，并且可
     <dubbo:reference interface="com.alibaba.xxx.XxxService" check="false" />
     ```
     
-[^1]: 配置的覆盖规则：1) 方法级别配置优于接口级别，即小 Scope 优先 2) Consumer 端配置优于 Provider 配置，优于全局配置，最后是Dubbo 硬编码的配置值（[Dubbo 配置参考手册](./configuration/properties.md#覆盖策略)）
+[^1]: 配置的覆盖规则：1) 方法级别配置优于接口级别，即小 Scope 优先 2) Consumer 端配置优于 Provider 端配置，优于全局配置，最后是 Dubbo 硬编码的配置值（[Dubbo 配置参考手册](./configuration/properties.md#覆盖策略)）
 [^2]: 表示加上第一次调用，会调用 3 次
 [^3]: 有多个 Provider 时，如何挑选 Provider 调用
-[^4]: 指从 Consume r端并发调用最好的 Provider，可以减少的反应慢的 Provider 的调用，因为反应更容易累积并发的调用
-[^5]: `timeout` 可以在多处设置，配置项及覆盖规则详见： [Dubbo 配置参考手册](./references/xml/introduction.md)
+[^4]: 指从 Consumer 端并发调用最好的 Provider，可以减少对响应慢的 Provider 的调用，因为响应慢更容易累积并发调用
+[^5]: `timeout` 可以在多处设置，配置项及覆盖规则请参考： [Dubbo 配置参考手册](./references/xml/introduction.md)
