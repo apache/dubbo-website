@@ -157,6 +157,13 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: 'Dubbo 现有心跳方案总结以及改进建议',
+            author:'@徐靖峰',
+            dateStr: 'Jan 16th, 2019',
+            desc: '一种心跳，两种设计',
+            link: '/zh-cn/blog/dubbo-heartbeat-design.html',
+        },
+        {
             title: 'Dubbo 博客文档中文排版指南',
             author:'@徐靖峰',
             dateStr: 'Dec 27th, 2018',
@@ -197,7 +204,7 @@ export default {
             dateStr: 'Sep 25th, 2018',
             desc: 'Dubbo在Service Mesh下的思考和方案',
             link: '/zh-cn/blog/dubbo-mesh-in-thinking.html',
-        },	
+        },
         {
             title: 'Dubbo Mesh ｜ Service Mesh的实践与探索',
             author:'@liyun',
