@@ -23,5 +23,5 @@
 ## Partner Check
 
 * Partner 以用户的方式运行一下功能
-* Partner 发现问题、添加测试（集成测试）复现总是；Owner 完成实现。（保证两方的时间投入 PatternerCheck 的给予时间保证）
+* Partner 发现问题、添加测试（集成测试）直到不再复现；Owner 完成实现。（保证两方在Partner Check上的时间投入）
 * Owner 向 Partner 讲述一遍实现。
