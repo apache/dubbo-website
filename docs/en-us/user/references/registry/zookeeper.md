@@ -133,7 +133,7 @@ Configure single zookeeper to serve as multiple registry servers:
 
 ## Zookeeper Installation
 
-Pls. refer to [zookeeper install manual](http://dubbo.apache.org/books/dubbo-admin-book/install/zookeeper.html) for how to install zookeeper based registry server. To set it up, specify `dubbo.registry.address` to `zookeeper://127.0.0.1:2181` in `conf/dubbo.properties` for both provider and consumer (you can refer to [quick start](../../preface/usage.md)) after install a zookeeper server.
+Pls. refer to [zookeeper install manual](http://dubbo.apache.org/en-us/docs/admin/install/zookeeper.html) for how to install zookeeper based registry server. To set it up, specify `dubbo.registry.address` to `zookeeper://127.0.0.1:2181` in `conf/dubbo.properties` for both provider and consumer (you can refer to [quick start](../../preface/usage.md)) after install a zookeeper server.
 
 ## Declaration of Reliability
 

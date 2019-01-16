@@ -11,7 +11,7 @@ description: 本文回顾了 2.6.x 版本的异步实现，然后引出了 2.7.0
 
 ## 2.6.x版本之前的异步方式
 
-在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](http://dubbo.apache.org/books/dubbo-user-book/demos/async-call.html)、[参数回调](http://dubbo.apache.org/books/dubbo-user-book/demos/callback-parameter.html)、[事件通知](http://dubbo.apache.org/books/dubbo-user-book/demos/events-notify.html)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
+在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](http://dubbo.apache.org/zh-cn/docs/user/demos/async-call.html)、[参数回调](http://dubbo.apache.org/zh-cn/docs/user/demos/callback-parameter.html)、[事件通知](http://dubbo.apache.org/zh-cn/docs/user/demos/events-notify.html)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
 
 但当前的异步方式存在以下问题：
 
@@ -160,7 +160,7 @@ Dubbo在2.7.0版本已经升级了对Java 8的支持，同时基于CompletableFu
 
 ## 示例1：CompletableFuture类型接口
 
-CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见[dubbo-samples-async-original-future](https://github.com/dubbo/dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-async-original-future)。
+CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见[dubbo-samples-async-original-future](https://github.com/apache/incubator-dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-async/dubbo-samples-async-original-future)。
 
 1. 定义接口
 
