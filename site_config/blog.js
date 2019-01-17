@@ -4,6 +4,13 @@ export default {
     postsTitle: 'All posts',
     list: [
         {
+            title: 'How to use Fescar to ensure consistency between Dubbo Microservices',
+            author: '@slievrly',
+            dateStr: 'Jan 17th, 2019',
+            desc: 'This blog describes details of using Fescar to ensure consistency between Dubbo Microservices',
+            link: '/en-us/blog/dubbo-fescar.html',
+        },
+        {
             title: 'Prepare an Apache Release',
             author: 'Jun Liu',
             dateStr: 'Sep 2nd, 2018',

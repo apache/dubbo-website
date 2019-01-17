@@ -12,7 +12,7 @@ A business logic for user purchasing commodities. The whole business logic is po
 
 ### Architecture
 
-![Architecture](https://cdn.nlark.com/lark/0/2018/png/18862/1536060281719-07f33361-6014-410e-a5b7-c4a85857c906.png) 
+![Architecture](../../img/blog/fescar/fescar-1.png) 
 
 
 ### StorageService
@@ -73,6 +73,21 @@ public class BusinessServiceImpl implements BusinessService {
 ```
 
 ```java
+public class StorageServiceImpl implements StorageService {
+
+  private StorageDAO storageDAO;
+  
+    @Override
+    public void deduct(String commodityCode, int count) {
+        Storage storage = new Storage();
+        storage.setCount(count);
+        storage.setCommodityCode(commodityCode);
+        storageDAO.update(storage);
+    }
+}
+```
+
+```java
 public class OrderServiceImpl implements OrderService {
 
     private OrderDAO orderDAO;
@@ -91,14 +106,14 @@ public class OrderServiceImpl implements OrderService {
         order.count = orderCount;
         order.money = orderMoney;
 
-        // INSERT INTO orders ...
         return orderDAO.insert(order);
     }
+}
 ```
 
 ## Distributed Transaction Solution with Fescar
 
-![undefined](https://cdn.nlark.com/lark/0/2018/png/18862/1545209155589-11ebe02d-72ef-47a4-92f5-36be54fe9b17.png) 
+![undefined](../../img/blog/fescar/fescar-2.png) 
 
 We just need an annotation `@GlobalTransactional` on business method: 
 
@@ -125,11 +140,11 @@ dubbo-order-service.xml
 dubbo-storage-service.xml
 
 ```xml
-        <property name="url" value="jdbc:mysql://x.x.x.x:3306/xxx" />
-        <property name="username" value="xxx" />
-        <property name="password" value="xxx" />
+    <property name="url" value="jdbc:mysql://x.x.x.x:3306/xxx" />
+    <property name="username" value="xxx" />
+    <property name="password" value="xxx" />
 ```
-### Step 2: Create UNDO_LOG table
+### Step 2: Create UNDO_LOG table for Fescar
 
 `UNDO_LOG` table is required by Fescar AT mode.
 
@@ -181,9 +196,10 @@ CREATE TABLE `account_tbl` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
-### Step 4: Start Server
+### Step 4: Start Fescar-Server
 
-- Download server package from <https://github.com/alibaba/fescar/releases>, unzip it.
+- Download server [package](https://github.com/alibaba/fescar/releases), unzip it.
+- Start Fescar-Server
 
 ```shell
 sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA
@@ -198,8 +214,7 @@ sh fescar-server.sh 8091 /home/admin/fescar/data/
 - Start AccountService
 - Start StorageService
 - Start OrderService
-- Run BusinessService for demo test
+- Run BusinessService for test
 
-TBD: scripts for run demo applications
-
+[Related code](https://github.com/alibaba/fescar/tree/develop/examples/src/main/java/com/alibaba/fescar/tm/dubbo)   
 [learn more about Fescar](https://github.com/alibaba/fescar/)
