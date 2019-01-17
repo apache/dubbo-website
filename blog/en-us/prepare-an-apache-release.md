@@ -145,31 +145,41 @@ modifications and taggings related to ${release_version} Release Candidates are 
    ```shell
    $ mvn clean install -Papache-release
    $ mvn deploy
-   # push the snapshot package to the maven central repository,in staging state
    ```
+
+  This push the snapshot package to the maven central repository.
 
 3. Release with maven-release-plugin
 
    - verify with dryRun
 
     ```shell
-    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
     ```
 
    - After verification, run release:prepare
 
     ```shell
     $ mvn release:clean
-    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-    # After running：1. Generate source.zip; 2. Tag and push to github repository; 3. The branch version is upgraded to ${release_version}-SNAPSHOT automatically and the modifications are pushed to the github repository
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     ```
+
+    > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not.
+ 
+
+
+    After executing the above commands, you will find that:
+    1. source-release.zip and bin-release.zip are generated under dubbo-distribution directory, please unzip it and check the file structure
+    2. The version tag has been push to github repository, you will see a commit called `[maven-release-plugin] prepare release dubbo-x.x.x` were added
+    3. The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically and the modifications are pushed to the github repository, you will see a commit called `[maven-release-plugin] prepare for next development iteration` were added
 
    - Run release:perform, make an offical release
 
     ```shell
-    $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-    # All artifacts are released to  configured remote maven central repository, in staging state 
+    $ mvn -Prelease release:perform -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     ```
+
+    All artifacts are released to configured remote maven central repository, in staging state 
 
 ## Prepare Apache Release 
 
@@ -183,14 +193,14 @@ modifications and taggings related to ${release_version} Release Candidates are 
    ~/apache/incubator/dubbo
    ```
 
-3. The current release version is ${release_version},new directory
+3. The current release version is ${release_version}, new directory
 
    ```shell
    $ cd ~/apache/incubator/dubbo # dubbo svn root directory
    $ mkdir ${release_version}
    ```
 
-4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS) file.KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
+4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS) file. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
 
 5. Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version} 
 
@@ -223,7 +233,7 @@ The verification link includes but is not limited to the following contents and 
 
 1. Check signatures and hashes are good
 * sha512
-```sh
+  ```sh
 $ shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
 $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 ```
@@ -267,7 +277,7 @@ $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
   - check the version number in pom.xml are the same
   - check there are no extra files or directories in the source package, for example, no empty directories or useless log files.  
-    `diff -r a rc_dir tag_dir`
+    `diff -r rc_dir tag_dir`
   - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
 3. Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:
@@ -326,6 +336,6 @@ The Apache Dubbo (Incubating) Team
 
 ## Complete Maven Convenient Binary release（Optional）
 
-**apache.repository.org The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
+**[apache.repository.org](https://repository.apache.org/) The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
-The artifacts that were previously published to the maven repository are in the staging state. Log in to apache.repository.org with the Apache id and release it.
+The artifacts that were previously published to the maven repository are in the staging state. Log in to [apache.repository.org](https://repository.apache.org/) with the Apache id and release it.

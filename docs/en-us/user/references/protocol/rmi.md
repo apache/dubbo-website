@@ -28,7 +28,7 @@ dubbo.service.protocol=rmi
 ```sh
 java -Dsun.rmi.transport.tcp.responseTimeout=3000
 ```
-more RMI options please check [JDK Document](http://download.oracle.com/docs/cd/E17409_01/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
+more RMI options please check [JDK Document](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
 
 
 ## Interface

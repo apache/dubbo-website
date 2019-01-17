@@ -134,11 +134,11 @@ Zookeeper 集群配置：
 ```
 
 ## zookeeper 安装
- 
-安装方式参见: [Zookeeper安装手册](http://dubbo.apache.org/books/dubbo-admin-book/install/zookeeper.html)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../preface/usage.md) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.addrss` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
+
+安装方式参见: [Zookeeper安装手册](../../../admin/install/zookeeper.md)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../preface/usage.md) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.addrss` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
 
 ## 可靠性声明
-  
+
 阿里内部并没有采用 Zookeeper 做为注册中心，而是使用自己实现的基于数据库的注册中心，即：Zookeeper 注册中心并没有在阿里内部长时间运行的可靠性保障，此 Zookeeper 桥接实现只为开源版本提供，其可靠性依赖于 Zookeeper 本身的可靠性。
 
 ## 兼容性声明
