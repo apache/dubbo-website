@@ -148,29 +148,39 @@ modifications and taggings related to ${release_version} Release Candidates are 
 <p>First of all, verify that the maven component packing, source packing, signature, etc are working properly on the ${release_version}-release branch.</p>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn clean install -Papache-release</span>
 <span class="hljs-meta">$</span><span class="bash"> mvn deploy</span>
-<span class="hljs-meta">#</span><span class="bash"> push the snapshot package to the maven central repository,<span class="hljs-keyword">in</span> staging state</span>
 </code></pre>
 </li>
+</ol>
+<p>This push the snapshot package to the maven central repository.</p>
+<ol start="3">
 <li>
 <p>Release with maven-release-plugin</p>
 <ul>
 <li>verify with dryRun</li>
 </ul>
-<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Papache-release -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID -DdryRun=<span class="hljs-literal">true</span></span>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Prelease -Darguments=<span class="hljs-string">"-Dmaven.test.skip=true"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID -DdryRun=<span class="hljs-literal">true</span></span>
 </code></pre>
 <ul>
 <li>After verification, run release:prepare</li>
 </ul>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:clean</span>
-<span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Papache-release -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
-<span class="hljs-meta">#</span><span class="bash"> After running：1. Generate source.zip; 2. Tag and push to github repository; 3. The branch version is upgraded to <span class="hljs-variable">${release_version}</span>-SNAPSHOT automatically and the modifications are pushed to the github repository</span>
+<span class="hljs-meta">$</span><span class="bash"> mvn release:prepare -Prelease -Darguments=<span class="hljs-string">"-Dmaven.test.skip=true"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
 </code></pre>
+<blockquote>
+<p>If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use <code>Personal access tokens</code> instead. You can go to <a href="https://github.com/settings/profile">https://github.com/settings/profile</a>, click <code>Developer settings</code> -&gt; <code>Personal access tokens</code>, and generate a new token if not.</p>
+</blockquote>
+<p>After executing the above commands, you will find that:</p>
+<ol>
+<li>source-release.zip and bin-release.zip are generated under dubbo-distribution directory, please unzip it and check the file structure</li>
+<li>The version tag has been push to github repository, you will see a commit called <code>[maven-release-plugin] prepare release dubbo-x.x.x</code> were added</li>
+<li>The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically and the modifications are pushed to the github repository, you will see a commit called <code>[maven-release-plugin] prepare for next development iteration</code> were added</li>
+</ol>
 <ul>
 <li>Run release:perform, make an offical release</li>
 </ul>
-<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn -Prelease release:perform -Darguments=<span class="hljs-string">"-DskipTests"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
-<span class="hljs-meta">#</span><span class="bash"> All artifacts are released to  configured remote maven central repository, <span class="hljs-keyword">in</span> staging state </span>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn -Prelease release:perform -Darguments=<span class="hljs-string">"-Dmaven.test.skip=true"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
 </code></pre>
+<p>All artifacts are released to configured remote maven central repository, in staging state</p>
 </li>
 </ol>
 <h2>Prepare Apache Release</h2>
@@ -186,13 +196,13 @@ modifications and taggings related to ${release_version} Release Candidates are 
 </code></pre>
 </li>
 <li>
-<p>The current release version is ${release_version},new directory</p>
+<p>The current release version is ${release_version}, new directory</p>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> ~/apache/incubator/dubbo <span class="hljs-comment"># dubbo svn root directory</span></span>
 <span class="hljs-meta">$</span><span class="bash"> mkdir <span class="hljs-variable">${release_version}</span></span>
 </code></pre>
 </li>
 <li>
-<p>Add public key to <a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS">KEYS</a> file.KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.</p>
+<p>Add public key to <a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS">KEYS</a> file. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.</p>
 </li>
 <li>
 <p>Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version}</p>
@@ -224,28 +234,24 @@ run：
 <li>Check signatures and hashes are good</li>
 </ol>
 <ul>
-<li>sha512</li>
+<li>sha512<pre><code class="language-sh"></code></pre>
+</li>
 </ul>
-<pre><code class="language-sh">$ shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512
-$ shasum -c apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-bin-release.zip.sha512
-</code></pre>
-<ul>
-<li>gpg
-<ul>
-<li>If it's your first time verify a release candidte, you should import public keys first.</li>
-</ul>
-<pre><code class="language-sh">$ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS &gt;&gt; KEYS <span class="hljs-comment"># download public keys to local directory</span>
-$ gpg --import KEYS <span class="hljs-comment"># import keys</span>
-$ gpg —edit-key liujun
-  &gt; trust <span class="hljs-comment"># type trust command</span>
+<p>$ shasum -c apache-dubbo-incubating-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mrow><mi>r</mi><mi>e</mi><mi>l</mi><mi>e</mi><mi>a</mi><mi>s</mi><msub><mi>e</mi><mi>v</mi></msub><mi>e</mi><mi>r</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi></mrow><mo>−</mo><mi>s</mi><mi>o</mi><mi>u</mi><mi>r</mi><mi>c</mi><mi>e</mi><mo>−</mo><mi>r</mi><mi>e</mi><mi>l</mi><mi>e</mi><mi>a</mi><mi>s</mi><mi>e</mi><mi mathvariant="normal">.</mi><mi>z</mi><mi>i</mi><mi>p</mi><mi mathvariant="normal">.</mi><mi>s</mi><mi>h</mi><mi>a</mi><mn>5</mn><mn>1</mn><mn>2</mn></mrow><annotation encoding="application/x-tex">{release_version}-source-release.zip.sha512
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="base textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mord mathit">e</span><span class="mord mathit" style="margin-right:0.01968em;">l</span><span class="mord mathit">e</span><span class="mord mathit">a</span><span class="mord mathit">s</span><span class="mord"><span class="mord mathit">e</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.03588em;">v</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord mathit">e</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mord mathit">s</span><span class="mord mathit">i</span><span class="mord mathit">o</span><span class="mord mathit">n</span></span><span class="mbin">−</span><span class="mord mathit">s</span><span class="mord mathit">o</span><span class="mord mathit">u</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mord mathit">c</span><span class="mord mathit">e</span><span class="mbin">−</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mord mathit">e</span><span class="mord mathit" style="margin-right:0.01968em;">l</span><span class="mord mathit">e</span><span class="mord mathit">a</span><span class="mord mathit">s</span><span class="mord mathit">e</span><span class="mord mathrm">.</span><span class="mord mathit" style="margin-right:0.04398em;">z</span><span class="mord mathit">i</span><span class="mord mathit">p</span><span class="mord mathrm">.</span><span class="mord mathit">s</span><span class="mord mathit">h</span><span class="mord mathit">a</span><span class="mord mathrm">5</span><span class="mord mathrm">1</span><span class="mord mathrm">2</span></span></span></span> shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512</p>
+<pre><code>* gpg
+   * If it's your first time verify a release candidte, you should import public keys first.  
+   ```sh
+   $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS &gt;&gt; KEYS # download public keys to local directory
+   $ gpg --import KEYS # import keys
+   $ gpg —edit-key liujun
+     &gt; trust # type trust command
 </code></pre>
 <ul>
 <li>Now, you can verify signature with command</li>
 </ul>
 <pre><code>gpg --verify apache-dubbo-incubating-2.6.3-source-release.zip.asc apache-dubbo-incubating-2.6.3-source-release.zip
 </code></pre>
-</li>
-</ul>
 <ol start="2">
 <li>Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:</li>
 </ol>
@@ -281,7 +287,7 @@ mvn clean <span class="hljs-built_in">test</span> -Drat.skip=<span class="hljs-l
 <ul>
 <li>check the version number in pom.xml are the same</li>
 <li>check there are no extra files or directories in the source package, for example, no empty directories or useless log files.<br>
-<code>diff -r a rc_dir tag_dir</code></li>
+<code>diff -r rc_dir tag_dir</code></li>
 <li>check the top n tag commits, dive into the related files and check if the source package has the same changes</li>
 </ul>
 </li>
@@ -340,8 +346,8 @@ The Apache Dubbo (Incubating) Team
 <li>Send mail to <a href="mailto:dev@dubbo.apache.org">dev@dubbo.apache.org</a> and <a href="mailto:general@incubator.apache.org">general@incubator.apache.org</a>, notify the community that the release is completed.</li>
 </ol>
 <h2>Complete Maven Convenient Binary release（Optional）</h2>
-<p><strong><a href="http://apache.repository.org">apache.repository.org</a> The permissions of the nexus repository have been applied, see <a href="https://issues.apache.org/jira/browse/INFRA-16451">jira</a>。</strong></p>
-<p>The artifacts that were previously published to the maven repository are in the staging state. Log in to <a href="http://apache.repository.org">apache.repository.org</a> with the Apache id and release it.</p>
+<p><strong><a href="https://repository.apache.org/">apache.repository.org</a> The permissions of the nexus repository have been applied, see <a href="https://issues.apache.org/jira/browse/INFRA-16451">jira</a>。</strong></p>
+<p>The artifacts that were previously published to the maven repository are in the staging state. Log in to <a href="https://repository.apache.org/">apache.repository.org</a> with the Apache id and release it.</p>
 </section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">Foundation</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">License</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">Events</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">Sponsorship</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">Thanks</a></dd></dl></div><div class="col col-4"><dl><dt>Documentation</dt><dd><a href="/en-us/docs/user/quick-start.html" target="_self">Quick start</a></dd><dd><a href="/en-us/docs/dev/build.html" target="_self">Developer guide</a></dd><dd><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self">Admin manual</a></dd></dl></div><div class="col col-4"><dl><dt>Resources</dt><dd><a href="/en-us/blog/index.html" target="_self">Blog</a></dd><dd><a href="/en-us/community/index.html" target="_self">Community</a></dd><dd><a href="https://www.apache.org/security/" target="_self">Security</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
 	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
 	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
