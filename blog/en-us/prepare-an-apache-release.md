@@ -154,25 +154,29 @@ modifications and taggings related to ${release_version} Release Candidates are 
    - verify with dryRun
 
     ```shell
-    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
     ```
 
    - After verification, run release:prepare
 
     ```shell
     $ mvn release:clean
-    $ mvn release:prepare -Papache-release -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     ```
 
+    > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not.
+ 
+
+
     After executing the above commands, you will find that:
-    1. Generate source.zip
-    2. Tag and push to github repository
-    3. The branch version is upgraded to ${release_version}-SNAPSHOT automatically and the modifications are pushed to the github repository
+    1. source-release.zip and bin-release.zip are generated under dubbo-distribution directory, please unzip it and check the file structure
+    2. The version tag has been push to github repository, you will see a commit called `[maven-release-plugin] prepare release dubbo-x.x.x` were added
+    3. The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically and the modifications are pushed to the github repository, you will see a commit called `[maven-release-plugin] prepare for next development iteration` were added
 
    - Run release:perform, make an offical release
 
     ```shell
-    $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    $ mvn -Prelease release:perform -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     ```
 
     All artifacts are released to configured remote maven central repository, in staging state 
