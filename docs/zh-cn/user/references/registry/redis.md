@@ -67,7 +67,7 @@
 
 ## 安装
 
-安装方式参见: [Redis安装手册](https://redis.io/download)，只需搭一个原生的 Redis 服务器，并将 [Quick Start](../../preface/usage.md) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.addrss` 的值改为 `redis://127.0.0.1:6379` 即可使用。
+安装方式参见: [Redis安装手册](../../../admin/install/redis.md)，只需搭一个原生的 Redis 服务器，并将 [Quick Start](../../preface/usage.md) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.addrss` 的值改为 `redis://127.0.0.1:6379` 即可使用。
 
 [^1]: [Redis](http://redis.io) 是一个高效的 KV 存储服务器
 [^2]: 从 `2.1.0` 版本开始支持
