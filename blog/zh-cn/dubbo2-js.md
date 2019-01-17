@@ -274,4 +274,4 @@ Congratulation！
 
 ## 更多细节
 
-本文中的示例代码，提供在此处，<https://github.com/lexburner/Dubbojs-Learning> 。如果你对 dubbo 协议不甚了解，想要理解它的工作原理，项目中提供了一个子 moudle — java-socket-consumer，使用面向过程的思路实现了 java-socket-consumer，完成了原生 socket 发送 dubbo 协议报文，完成方法调用，并获取响应的全流程。
+本文中的示例代码，提供在此处，<https://github.com/dubbo/dubbo2.js> 。如果你对 dubbo 协议不甚了解，想要理解它的工作原理，项目中提供了一个子 moudle — java-socket-consumer，使用面向过程的思路实现了 java-socket-consumer，完成了原生 socket 发送 dubbo 协议报文，完成方法调用，并获取响应的全流程。

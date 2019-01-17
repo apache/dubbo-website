@@ -33,7 +33,7 @@ public interface DemoService {
 }
 ```
 
-The proejct structure should look like this:
+The project structure should look like this:
 
 ```
 .
