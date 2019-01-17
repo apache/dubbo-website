@@ -66,4 +66,4 @@
 
 ## 增量式扩展，而不要扩充原始核心概念
 
-参见：[谈谈扩充式扩展与增量式扩展](./principals/expansibility.md)
+参见：[谈谈扩充式扩展与增量式扩展](./expansibility.md)
