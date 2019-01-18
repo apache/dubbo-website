@@ -12,7 +12,7 @@
 static {  
     Duplicate.checkDuplicate(Xxx.class);  
 }  
-``` 
+```
 
 检查重复工具类：
 

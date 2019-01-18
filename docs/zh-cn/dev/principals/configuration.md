@@ -52,7 +52,7 @@ Dubbo 新版本提供了与 xml 配置一对一的配置类，如：ServiceConfi
 0. 是否允许重试，重试次数。 
 
 你可以约定：
- 
+
 0. 每个都是先配置一个 boolean 类型的开关，再配置一个值。 
 0. 用一个无效值代表关闭，N/A地址，0重试次数等。 
 
@@ -62,7 +62,7 @@ Dubbo 新版本提供了与 xml 配置一对一的配置类，如：ServiceConfi
 
 提供配置时，要同时考虑开发人员，测试人员，配管人员，系统管理员。测试人员是不能修改代码的，而测试的环境很可能较为复杂，需要为测试人员留一些“后门”，可以在外围修改配置项。就像 spring 的 PropertyPlaceholderConfigurer 配置，支持 `SYSTEM_PROPERTIES_MODE_OVERRIDE`，可以通过 JVM 的 -D 参数，或者像 hosts 一样约定一个覆盖配置文件，在程序外部，修改部分配置，便于测试。
 
- 
+
 Dubbo 支持通过 JVM 参数 `-Dcom.xxx.XxxService=dubbo://10.1.1.1:1234 
 ` 直接使远程服务调用绕过注册中心，进行点对点测试。还有一种情况，开发人员增加配置时，都会按线上的部署情况做配置，如：`<dubbo:registry address="${dubbo.registry.address}" />` 因为线上只有一个注册中心，这样的配置是没有问题的，而测试环境可能有两个注册中心，测试人员不可能去修改配置，改为： 
 `<dubbo:registry address="${dubbo.registry.address1}" />`， 
@@ -74,7 +74,7 @@ Dubbo 支持通过 JVM 参数 `-Dcom.xxx.XxxService=dubbo://10.1.1.1:1234
 
 另外，Dubbo 旧版本所有的超时时间，重试次数，负载均衡策略等都只能在服务消费方配置。但实际使用过程中发现，服务提供方比消费方更清楚，但这些配置项是在消费方执行时才用到的。新版本，就加入了在服务提供方也能配这些参数，通过注册中心传递到消费方， 
 做为参考值，如果消费方没有配置，就以提供方的配置为准，相当于消费方继承了提供方的建议配置值。而注册中心在传递配置时，也可以在中途修改配置，这样就达到了治理的目的，继承关系相当于：服务消费者 --> 注册中心 --> 服务提供者 
- 
+
 ![configuration-override](../sources/images/configuration-override.png)
 
 ## 配置向后兼容 
