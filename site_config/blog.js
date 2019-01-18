@@ -163,13 +163,20 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
-      {
-        title: 'Dubbo 注解驱动',
-        author:'@mercyblitz',
-        dateStr: 'Jan 2nd, 2019',
-        desc: '本文介绍 Dubbo 编程模型：注册驱动，包括设计思考以及使用方法',
-        link: '/zh-cn/blog/dubbo-annotation-driven.html',
-      },
+        {
+            title: '如何使用Fescar保证Dubbo微服务间的一致性',
+            author: '@slievrly',
+            dateStr: 'Jan 17th, 2019',
+            desc: '本文详细介绍了如何使用Fescar保证Dubbo微服务间的一致性',
+            link: '/zh-cn/blog/dubbo-fescar.html',
+        },
+        {
+            title: 'Dubbo 注解驱动',
+            author:'@mercyblitz',
+            dateStr: 'Jan 2nd, 2019',
+            desc: '本文介绍 Dubbo 编程模型：注册驱动，包括设计思考以及使用方法',
+            link: '/zh-cn/blog/dubbo-annotation-driven.html',
+        },
       {
         title: 'Dubbo 外部化配置',
         author:'@mercyblitz',
