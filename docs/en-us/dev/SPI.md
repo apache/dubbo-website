@@ -116,7 +116,7 @@ public class RaceCarMaker implements CarMaker {
 }
 ```
 
-when`ExtensionLoader` loading `CarMaker`  implementation `RaceCar` ，`setWheelMaker`  needs paramType `WheelMaker`  which is also an SPI, It will be automatically loaded .
+when`ExtensionLoader` loading `CarMaker`  implementation `RaceCarMaker` ，`setWheelMaker`  needs paramType `WheelMaker`  which is also an SPI, It will be automatically loaded .
 
 This brings a new question:How `ExtensionLoader` determines which implementation to use when load the injected SPI。As for this demo, when existing multi `WheelMaker`  implementation, which one should the `ExtensionLoader`  chooses.
 

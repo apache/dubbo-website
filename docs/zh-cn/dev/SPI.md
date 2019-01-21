@@ -116,7 +116,7 @@ public class RaceCarMaker implements CarMaker {
 }
 ```
 
-`ExtensionLoader` 加载 `CarMaker` 的扩展点实现 `RaceCar` 时，`setWheelMaker` 方法的 `WheelMaker` 也是扩展点则会注入 `WheelMaker` 的实现。
+`ExtensionLoader` 加载 `CarMaker` 的扩展点实现 `RaceCarMaker` 时，`setWheelMaker` 方法的 `WheelMaker` 也是扩展点则会注入 `WheelMaker` 的实现。
 
 这里带来另一个问题，`ExtensionLoader` 要注入依赖扩展点时，如何决定要注入依赖扩展点的哪个实现。在这个示例中，即是在多个`WheelMaker` 的实现中要注入哪个。
 
