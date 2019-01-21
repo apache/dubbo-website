@@ -63,6 +63,10 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 0. `invoke XxxService.xxxMethod({"prop": "value"})`: invoke particular method for the given service
 0. `invoke xxxMethod({"prop": "value"})`: invoke particular method for the default service
 
+### `select` [^2]
+
+0. `select 1`: Used when the invoke command matches multiple methods, select the method to be called according to the prompt list
+
 ### `status`
 
 0. `status`: show summarized status. This status summarizes statuses from all resources, and it shows OK when all resources are OK, shows ERROR when any resource has ERROR, and WARN when any has WARN.
@@ -76,7 +80,6 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 ### `help`
 
 0. `help`: show help for telnet commands
-0. `help xxx`: 显示xxx命令的详细帮助信息
 0. `help xxx`: show help for particular telnet command
 
 ### `clear`
@@ -88,4 +91,11 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 
 `exit`: exit current telnet session
 
+### `shutdown` [^2]
+
+0. `shutdown`: shutdown dubbo application
+0. `shutdown -t 1000`: delay the 1000 ms to shutdown dubbo application
+
 [^1]: support since `2.0.6`
+[^2]: support since `2.7.1`
+
