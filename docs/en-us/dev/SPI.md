@@ -130,7 +130,7 @@ Dubbo use URL (containing Key-Value) to pass the configuration.
 
 The SPI method invocation has the URL parameter（Or Entity that has URL attribute）
 
-In this way depended SPI can get configuration from URL, after config all SPI key needed, configuration information will be passed from outer by URL.URL act as a bus when pass the config information.
+In this way depended SPI can get configuration from URL, after config all SPI key needed, configuration information will be passed from outer by URL. URL acts as a bus when passing the config information.
 
 Demo: two SPI `CarMaker`、`WheelMaker`
 
