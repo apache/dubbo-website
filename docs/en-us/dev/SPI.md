@@ -124,7 +124,7 @@ Good question, we will explain it in the following chapter: SPI Auto Adaptive.
 
 ### SPI Auto Adaptive
 
-The depency SPI that `ExtensionLoader` injects is an instance of `Adaptive`, the real spi implementation is known until the adaptive instance is be executed.
+The depency SPI that `ExtensionLoader` injects is an instance of `Adaptive`, the real spi implementation is known until the adaptive instance is executed.
 
 Dubbo use URL (containing Key-Value) to pass the configuration.
 
