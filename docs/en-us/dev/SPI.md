@@ -231,7 +231,7 @@ public class XxxFilter implements Filter {
 ```
 
 
-[^1]: Note: The config file here is in you own jar file, not in dubbo release jar file, Dubbo will scan all jar files for the same filename in ClassPath and merge together then
+[^1]: Note: The config file here is in you own jar file, not in dubbo release jar file, Dubbo will scan all jar files with the same filename in classpath and then merge them together
 [^2]: Note: SPI will be loaded in singleton pattern(Please ensure thread safety), cached in `ExtensionLoader` 
 
 
