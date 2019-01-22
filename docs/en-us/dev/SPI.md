@@ -8,7 +8,7 @@ Dubbo SPI is inherited from standard JDK SPI(Service Provider Interface) and mak
 
 Dubbo fixed below issues of the standard JDK SPI:
 
-* the standard JDK SPI will load and instantize all implementation at once. It will be a waste of resources if the implementation is timecosted, but never be used.
+* The standard JDK SPI will load and instantize all the implementations at once. It will be a waste of resources if one implementation is timecosted, but never be used.
 * We cann't accquire the SPI name, if loading the SPI implementation is failed.For example: standard JDK ScriptEngine, get script type by invoking method getName(). RubyScriptEngine class will load failed if the depenency jar jruby.jar is missing, and the real error info will be lost. When user executes ruby scripts, program throws exception, telling not support ruby, but it is not the real cause.
 * Enhance the SPI functionality by supporting IoC and AOP, one SPI can be easily injected by another SPI simply using setter.
 
