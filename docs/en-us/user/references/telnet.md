@@ -65,7 +65,7 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 
 ### `select` [^2]
 
-0. `select 1`: Used when the invoke command matches multiple methods, select the method to be called according to the prompt list
+0. `select 1`: used when the invoke command matches multiple methods, select the method to be called according to the prompt list
 
 ### `status`
 
