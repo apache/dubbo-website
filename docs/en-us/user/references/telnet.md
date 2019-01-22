@@ -94,7 +94,7 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 ### `shutdown` [^2]
 
 0. `shutdown`: shutdown dubbo application
-0. `shutdown -t 1000`: delay the 1000 ms to shutdown dubbo application
+0. `shutdown -t 1000`: delay 1000 ms to shutdown dubbo application
 
 [^1]: support since `2.0.6`
 [^2]: support since `2.7.1`
