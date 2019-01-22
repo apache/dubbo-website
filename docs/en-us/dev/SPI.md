@@ -77,7 +77,7 @@ Wrapper class also implements the same SPI interface, but Wrapper is not the rea
 
 There can be many Wrapper for one spi, simply add one if you need.
 
-By Wrapper class,you will be able move same logics into Wrapper for all SPIs. Newly added Wrapper class add external logics for all spis, looks like AOP, Wrapper acts as a proxy for SPI.
+With Wrapper class, you will be able to move same logics into Wrapper for all SPIs. Newly added Wrapper class add external logics for all SPIs, looks like AOP, Wrapper acts as a proxy for SPI.
 
 ### SPI Auto Load
 
