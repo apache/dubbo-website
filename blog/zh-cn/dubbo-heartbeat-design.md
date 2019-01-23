@@ -112,7 +112,7 @@ public class HeaderExchangeClient implements ExchangeClient {
 
 不仅 `HeaderExchangeClient` 客户端开起了定时器，`HeaderExchangeServer` 服务端同样开起了定时器，由于服务端的逻辑和客户端几乎一致，所以后续我并不会重复粘贴服务端的代码。
 
-> Dubbo 在早期版本版本中使用的是 shedule 方案，在 2.7.x 中替换成了 HashWheelTimer。
+> Dubbo 在早期版本版本中使用的是 schedule 方案，在 2.7.x 中替换成了 HashedWheelTimer。
 
 #### 3.2 开启两个定时任务
 
