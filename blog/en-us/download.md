@@ -5,7 +5,17 @@
 
 > Release Notes: https://github.com/apache/incubator-dubbo/releases
 
-### 2.6.4 (latest version)
+### 2.7.0 (latest version)
+
+* [source](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-source-release.zip) | [asc](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-source-release.zip.asc) | [sha512](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-source-release.zip.sha512)
+* [binary](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-bin-release.zip) | [asc](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-bin-release.zip.asc) | [sha512](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-bin-release.zip.sha512)
+
+### 2.6.5 
+
+* [source](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.5/apache-dubbo-incubating-2.6.5-source-release.zip) | [asc](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.5/apache-dubbo-incubating-2.6.5-source-release.zip.asc) | [sha512](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.5/apache-dubbo-incubating-2.6.5-source-release.zip.sha512)
+* [binary](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.5/apache-dubbo-incubating-2.6.5-bin-release.zip) | [asc](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.5/apache-dubbo-incubating-2.6.5-bin-release.zip.asc) | [sha512](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.5/apache-dubbo-incubating-2.6.5-bin-release.zip.sha512)
+
+### 2.6.4 
 
 * [source](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4/apache-dubbo-incubating-2.6.4-source-release.zip) | [asc](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4/apache-dubbo-incubating-2.6.4-source-release.zip.asc) | [sha512](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4/apache-dubbo-incubating-2.6.4-source-release.zip.sha512)
 * [binary](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4/apache-dubbo-incubating-2.6.4-bin-release.zip) | [asc](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4/apache-dubbo-incubating-2.6.4-bin-release.zip.asc) | [sha512](https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4/apache-dubbo-incubating-2.6.4-bin-release.zip.sha512)
