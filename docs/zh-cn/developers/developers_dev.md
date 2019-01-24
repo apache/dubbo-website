@@ -32,6 +32,7 @@
 | victory    | Victory Cao         | Alibaba      | Committer | +8       |
 | purpleforce | Liandong Chen      | Alibaba      | Committer | +8       |
 | jefflv     | 	Jeff Lv            | Alibaba   |    Committer | +8       |
+| tswstarplanet     | 	Taosheng Wei            | NetsUnion   |    Committer | +8       |
 
 ### 贡献者
 
