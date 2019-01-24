@@ -209,7 +209,7 @@ export default {
             title: 'Dubbo 中的 URL 统一模型',
             author:'@徐靖峰',
             dateStr: 'Dec 27th, 2018',
-            desc: 'URL 是 Dubbo 种一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。',
+            desc: 'URL 是 Dubbo 中一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。',
             link: '/zh-cn/blog/introduction-to-dubbo-url.html',
         },
         {

@@ -201,7 +201,7 @@ long heartbeatTick = calculateLeastDuration(heartbeat);
 long heartbeatTimeoutTick = calculateLeastDuration(heartbeatTimeout);
 ```
 
-其中 `calculateLeastDuration` 根据心跳时间和超时时间分别计算出了一个 tick 时间，实际上就是将两个变量除以了 3，使得他们的值缩小，并传入了 `HashWeelTimer` 的第二个参数之中
+其中 `calculateLeastDuration` 根据心跳时间和超时时间分别计算出了一个 tick 时间，实际上就是将两个变量除以了 3，使得他们的值缩小，并传入了 `HashedWheelTimer` 的第二个参数之中
 
 ```java
 heartbeatTimer.newTimeout(heartBeatTimerTask, heartbeatTick, TimeUnit.MILLISECONDS);
