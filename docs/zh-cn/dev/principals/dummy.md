@@ -105,9 +105,9 @@ public final class Version {
             if (version == null || version.length() == 0) {  
                 // 如果MANIFEST.MF规范中没有版本号，基于jar包名获取版本号  
                 String file = cls.getProtectionDomain().getCodeSource().getLocation().getFile();  
-                if (file != null && file.length() > 0 && file.endsWith(".jar")) {  
+                if (file != null &amp;&amp; file.length() &gt; 0 &amp;&amp; file.endsWith(".jar")) {  
                     Matcher matcher = VERSION_PATTERN.matcher(file);  
-                    while (matcher.find() && matcher.groupCount() > 0) {  
+                    while (matcher.find() &amp;&amp; matcher.groupCount() &gt; 0) {  
                         version = matcher.group(1);  
                     }  
                 }  
