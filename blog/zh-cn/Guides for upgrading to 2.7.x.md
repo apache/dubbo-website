@@ -81,12 +81,13 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 ```
 
 建议将此配置集中管理，参考[外部化配置](#使用外部化配置)。
+[元数据中心]()设计及用途，请参考文档。
 
 
 
 #### 使用外部化配置
 
-在项目启动前，使用[最新版本Dubbo-OPS](https://github.com/apache/incubator-dubbo-ops)完成Dubbo配置，理论上支持所有本地dubbo.properties所支持的配置项。
+需要在项目启动前，使用[最新版本Dubbo-OPS](https://github.com/apache/incubator-dubbo-ops)完成外部化配置迁移，理论上配置中心支持所有本地dubbo.properties所支持的配置项。
 
 以XML开发形式为例，假设我们本地有如下配置：
 
