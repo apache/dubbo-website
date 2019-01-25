@@ -1,6 +1,8 @@
 # Mailing list subscription guide
 
-The Dubbo developer mailing list (dev@dubbo.incubator.apache.org) for Apache Incubator has been established, please feel free to subscribe and refer to [1] for more details.
+The Dubbo developer mailing list (dev@dubbo.incubator.apache.org) for Apache Incubator has been established, please feel free to subscribe and refer to [^1] for more details.
+
+You can also view [the archive of the mailing list](https://lists.apache.org/list.html?dev@dubbo.apache.org)
 
 Here is a brief guide specific to Dubbo:
 
@@ -75,4 +77,4 @@ subscription address.
 
 > Note that both dev@dubbo.apache.org and dev@dubbo.incubator.apache.org should work, you can pick any of it.
 
-[1] http://apache.org/foundation/mailinglists.html#subscribing
+[^1] http://apache.org/foundation/mailinglists.html#subscribing
