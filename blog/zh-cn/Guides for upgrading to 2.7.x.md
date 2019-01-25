@@ -133,7 +133,7 @@ dubbo.protocol.port=20880
 
 #### 服务治理规则迁移
 
-2.7版本可以读取到老的治理规则，因此不用担心升级2.7的应用后老规则会失效，因此可以选择先升级上线，慢慢的做增量式规则迁移。
+2.7版本可以读取到老的治理规则，因此不用担心升级2.7的应用后老规则会失效，可以选择先升级上线，再慢慢的做增量式规则迁移。
 
 请参考[OPS -> 服务治理](http://47.91.207.147/#/governance/routingRule)了解规则配置方式，这里我们重点关注的是规则格式，以下提供几个简单示例：
 
@@ -197,7 +197,7 @@ dubbo.protocol.port=20880
 
 #### 使用异步API
 
-这部分的接口和低版本同样是完全兼容的，你仅须在需要使用CompletableFuture<T>提供的回调或者异步组装能力时，再考虑升级这部分内容。
+这部分的接口和低版本同样是完全兼容的，你仅须在打算使用CompletableFuture<T>提供的回调或者异步组装能力时，再考虑升级这部分内容即可。
 
 - 定义CompletableFuture<T>类型接口
 - 同步签名接口实现Provider端异步执行
@@ -206,7 +206,7 @@ dubbo.protocol.port=20880
 
 
 
-    [使用示例]()。
+点击链接，了解关于异步API如何使用的更多[使用示例]()。
 
 
 
@@ -214,11 +214,11 @@ dubbo.protocol.port=20880
 
 1. Maven坐标
 
-  groupId 由 `com.alibaba` 改为 `org.apache.dubbo`
+  **groupId 由 `com.alibaba` 改为 `org.apache.dubbo`**
 
 2. package
 
-  package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`
+  **package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`**
 
 
 
