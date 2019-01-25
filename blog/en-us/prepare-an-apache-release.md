@@ -161,22 +161,21 @@ modifications and taggings related to ${release_version} Release Candidates are 
 
     ```shell
     $ mvn release:clean
-    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
     ```
 
     > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not.
- 
 
 
     After executing the above commands, you will find that:
     1. source-release.zip and bin-release.zip are generated under dubbo-distribution directory, please unzip it and check the file structure
-    2. The version tag has been push to github repository, you will see a commit called `[maven-release-plugin] prepare release dubbo-x.x.x` were added
-    3. The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically and the modifications are pushed to the github repository, you will see a commit called `[maven-release-plugin] prepare for next development iteration` were added
+    2. -DpushChanges tells maven not to push the commits and tags to the remote repostiroy. If not specified, the version tag will be pushed to github repository, you will see a commit called `[maven-release-plugin] prepare release dubbo-x.x.x` added.
+    3. The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically. If -DpushChanges=true is specified, the modifications will be pushed to the remote repository, you will see a commit called `[maven-release-plugin] prepare for next development iteration` added.
 
    - Run release:perform, make an offical release
 
     ```shell
-    $ mvn -Prelease release:perform -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    $ mvn release:perform -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     ```
 
     All artifacts are released to configured remote maven central repository, in staging state 
@@ -339,3 +338,24 @@ The Apache Dubbo (Incubating) Team
 **[apache.repository.org](https://repository.apache.org/) The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
 The artifacts that were previously published to the maven repository are in the staging state. Log in to [apache.repository.org](https://repository.apache.org/) with the Apache id and release it.
+
+## Post Release steps
+
+If the release candidate is succesfully released, please don't forget about the following steps.
+
+1. Move the release files to official release directory, which is under https://dist.apache.org/repos/dist/release/incubator/dubbo/.
+2. Remove the release files in dev directory, which is under https://dist.apache.org/repos/dist/dev/incubator/dubbo/
+3. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip. The download link for the previous release version should be changed to https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip. Please refer to the download page for more details.
+
+
+
+FAQ
+
+
+#### gpg: signing failed: Inappropriate ioctl for device
+
+If you've encoutered this error, try the following commands:
+
+```
+export GPG_TTY=$(tty)
+```
