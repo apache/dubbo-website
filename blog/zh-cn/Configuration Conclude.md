@@ -23,7 +23,7 @@
 
 下图展示了配置覆盖关系的优先级，从上到下优先级依次降低：
 
-![覆盖关系](/Users/ken.lj/Documents/Dubbo核心演进/2.7相关文档/用户文档/覆盖关系.jpg)
+![覆盖关系](../../img/blog/configuration.jpg)
 
 
 
