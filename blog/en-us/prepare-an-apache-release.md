@@ -347,10 +347,7 @@ If the release candidate is succesfully released, please don't forget about the 
 2. Remove the release files in dev directory, which is under https://dist.apache.org/repos/dist/dev/incubator/dubbo/
 3. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip. The download link for the previous release version should be changed to https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip. Please refer to the download page for more details.
 
-
-
-FAQ
-
+## FAQ
 
 #### gpg: signing failed: Inappropriate ioctl for device
 
