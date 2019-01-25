@@ -3,7 +3,7 @@
 ## 流程
 
 * 如果是扩展功能，直接新增工程，黑盒依赖 Dubbo 进行扩展。
-* 如果是改 BUG，或修改框架本身，可以从 Dubb 的 GitHub 上 Fork 工程。
+* 如果是改 BUG，或修改框架本身，可以从 Dubbo 的 GitHub 上 Fork 工程。
 * 修改后通过 Push Request 反馈修改。
 
 ## 任务

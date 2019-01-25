@@ -2,7 +2,7 @@
 
 According to the group to invoke server and return the merge result [^1], such as the menu service, the same interface, but there are a variety of implementations, using group distinction, consumers call each group and get the results, the merger can merge the resules, so that you can achieve aggregation Menu Item.
 
-Related code can refer to [dubbo project example](https://github.com/apache/incubator-dubbo/tree/master/dubbo-test/dubbo-test-examples/src/main/java/com/alibaba/dubbo/examples/merge)
+Related code can refer to [dubbo project example](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-merge)
 
 ## Configuration
 

@@ -601,4 +601,4 @@ $ mvn exec:java -Dexec.mainClass=com.alibaba.dubbo.samples.client.Application
 
 Zipkin 对 Dubbo 的支持是构建在 Dubbo 的 filter 扩展机制上的，有兴趣的读者可以通过 https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo-rpc/src/main/java/brave/dubbo/rpc/TracingFilter.java 了解其实现细节。
 
-本文中涉及的例子可以从 https://github.com/dubbo/dubbo-samples 中的 "dubbo-samples-zipkin" 子模块中获取。另外，spring-cloud-sleth 2.0 中开始 [正式支持 Dubbo](https://cloud.spring.io/spring-cloud-static/spring-cloud-sleuth/2.0.0.RC2/single/spring-cloud-sleuth.html#_dubbo_rpc_support)，相关的文章和例子后续计划提供。
+本文中涉及的例子可以从 https://github.com/dubbo/dubbo-samples 中的 "dubbo-samples-zipkin" 子模块中获取。另外，spring-cloud-sleth 2.0 中开始 [正式支持 Dubbo](https://cloud.spring.io/spring-cloud-static/spring-cloud-sleuth/2.0.2.RELEASE/single/spring-cloud-sleuth.html#_dubbo_rpc_support)，相关的文章和例子后续计划提供。

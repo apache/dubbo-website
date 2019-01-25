@@ -221,7 +221,9 @@ keywords: Dubbo, Apache, Release
 ## 验证Release Candidates
 
 首先，从以下地址下载要发布的Release Candidate到本地环境：
+<pre>
 https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/
+</pre>
 
 然后，开始验证环节，验证包含但不限于以下内容和形式
 

@@ -179,5 +179,5 @@ public class ValidationConsumer {
 }
 ```
 
-[^1]: Support since `2.1.0` version. If you want to know how to use it, refer to  [Sample code in dubbo project] (https://github.com/apache/incubator-dubbo/tree/master/dubbo-test/dubbo-test-examples/src/main/java/com/alibaba/dubbo/examples/validation)
-[^2]: The validation method is extensible, refer to [Developer Extension](https://github.com/apache/incubator-dubbo/tree/master/dubbo-test/dubbo-test-examples/src/main/java/com/alibaba/dubbo/examples/validation) in the developer's manual.
+[^1]: Support since `2.1.0` version. If you want to know how to use it, refer to  [Sample code in dubbo project] (https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-validation)
+[^2]: The validation method is extensible, refer to [Developer Extension](http://dubbo.apache.org/zh-cn/docs/dev/impls/validation.html) in the developer's manual.
