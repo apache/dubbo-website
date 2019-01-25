@@ -55,12 +55,12 @@
 
 #### 简化的URL
 
-    ```xml
+```xml
 <!-- simplified="true"表示注册简化版的URL到Registry -->
 <dubbo:registry address="zookeeper://127.0.0.1:2181" simplified="true"/>
 ```
 
-    ```properties
+```properties
 dubbo.registry.simplified=true
 ```
 
@@ -72,11 +72,11 @@ dubbo.registry.simplified=true
 
 #### 配置元数据中心
 
-    ```xml
+```xml
 <dubbo:metadata-report address="redis://127.0.0.1:6379"/>
 ```
 
-    ```properties
+```properties
 dubbo.metadataReport.address=redis://127.0.0.1:6379
 ```
 
@@ -213,11 +213,11 @@ dubbo.protocol.port=20880
 
 1. Maven坐标
 
-groupId 由 `com.alibaba` 改为 `org.apache.dubbo`
+  groupId 由 `com.alibaba` 改为 `org.apache.dubbo`
 
 2. package
 
-package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`
+  package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`
 
 
 
