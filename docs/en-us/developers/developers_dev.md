@@ -22,7 +22,7 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | wangxin    | Xin Wang            | Weidian      | PPMC      | +8       |
 | yuyijq     | Zhaohui Yu          | Qunar        | PPMC      | +8       |
 | yiji       | Shang Zonghai       | Youzan       | PPMC      | +8       |
-| carryxyh   | Yuhang Xiu          | Netease      | Committer | +8       |
+| carryxyh   | Yuhang Xiu          | Netease      | PPMC      | +8       |
 | hyunkun    | YunKun Huang        |              | Committer | +8       |
 | jerrick    | Yong Zhu            | Alibaba      | Committer | +8       |
 | kimmking   | Kimm King           | Rongguan     | Committer | +8       |
