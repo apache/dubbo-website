@@ -22,16 +22,17 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | wangxin    | Xin Wang            | Weidian      | PPMC      | +8       |
 | yuyijq     | Zhaohui Yu          | Qunar        | PPMC      | +8       |
 | yiji       | Shang Zonghai       | Youzan       | PPMC      | +8       |
+| carryxyh   | Yuhang Xiu          | Netease      | PPMC      | +8       |
 | hyunkun    | YunKun Huang        |              | Committer | +8       |
 | jerrick    | Yong Zhu            | Alibaba      | Committer | +8       |
 | kimmking   | Kimm King           | Rongguan     | Committer | +8       |
-| carryxyh   | Yuhang Xiu          | Netease      | Committer | +8       |
 | min        | Minxuan Zhuang      | Alibaba      | Committer | +8       |
 | mjk        | Jinkai Ma           | Handuyishe   | Committer | +8       |
 | yizhenqiang | Zhenqiang Yi       | Didi         | Committer | +8       |
 | victory    | Victory Cao         | Alibaba      | Committer | +8       |
 | purpleforce | Liandong Chen      | Alibaba      | Committer | +8       |
-| jefflv     | 	Jeff Lv            | Alibaba   |    Committer | +8       |
+| jefflv     | 	Jeff Lv            | Alibaba      | Committer | +8       |
+| tswstarplanet   | Taosheng Wei   | NetsUnion    | Committer | +8       |
 
 ### Contributors
 
