@@ -20,3 +20,7 @@ Dubbo的信息页地址是https://incubator.apache.org/projects/dubbo.html。
 
 6.用SVN的commit命令将dubbo.xml文件提交到服务器，并且不要提交dubbo.html文件（因为服务器端会定时自动构建）。
 此过程会要求输入Apache id和密码。
+
+参考:
+1.http://incubator.apache.org/guides/website.html
+2.https://svn.apache.org/repos/asf/incubator/public/trunk/README.txt

@@ -25,3 +25,7 @@ please install SVN first.
 6. Use the commit command of SVN to submit the dubbo.xml file to the server, and do not submit the dubbo.html file 
 (because the server will automatically build it at regular intervals).
 This process will ask for the Apache id and password.
+
+References:
+1.http://incubator.apache.org/guides/website.html
+2.https://svn.apache.org/repos/asf/incubator/public/trunk/README.txt
