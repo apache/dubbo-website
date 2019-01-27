@@ -108,7 +108,7 @@ public class HeaderExchangeClient implements ExchangeClient {
 
 <1> **默认开启心跳检测的定时器**
 
-<2> **创建了一个 `HashedWheelTimer ` 开启心跳检测**，这是 Netty 所提供的一个经典的时间轮定时器实现，至于它和 jdk 的实现有何不同，不了解的同学也可以关注下，我就拓展了。
+<2> **创建了一个 `HashedWheelTimer ` 开启心跳检测**，这是 Netty 所提供的一个经典的时间轮定时器实现，至于它和 jdk 的实现有何不同，不了解的同学也可以关注下，我就不拓展了。
 
 不仅 `HeaderExchangeClient` 客户端开起了定时器，`HeaderExchangeServer` 服务端同样开起了定时器，由于服务端的逻辑和客户端几乎一致，所以后续我并不会重复粘贴服务端的代码。
 
