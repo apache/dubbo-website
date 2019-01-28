@@ -1,6 +1,8 @@
 # 邮件列表订阅向导
 
-Apache incubator的Dubbo开发者邮件列表（dev@dubbo.incubator.apache.org）已经建立，请随时订阅并参考[1]获取更多细节。
+Apache incubator的Dubbo开发者邮件列表（dev@dubbo.incubator.apache.org）已经建立，请随时订阅并参考[^1]获取更多细节。
+
+你也可以直接查看[历史邮件](https://lists.apache.org/list.html?dev@dubbo.apache.org)
 
 下面是一个关于Dubbo邮件列表订阅的简短指南：
 
@@ -75,4 +77,4 @@ subscription address.
 
 > 请注意：dev@dubbo.apache.org和dev@dubbo.incubator.apache.org都是有效的, 您可以订阅它们中的任何一个。
 
-[1] http://apache.org/foundation/mailinglists.html#subscribing
+[^1] http://apache.org/foundation/mailinglists.html#subscribing

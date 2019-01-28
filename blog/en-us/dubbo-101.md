@@ -31,7 +31,7 @@ Here is how a typical RMI invocation usually works：
 Java RMI is a technique foundation stone of creating distributed applications in Java. The following EJB techniques and current framework of distributed services still inherit the fundamental concepts of Java RMI. In RMI invocation, there are some core concepts：
 
 1.	The invocation is run remotely on **interface**.
-2.	2.	Disguise remote invocation as local invocation by **Stub object** on client and **Skeleton object** on server.
+2.	Disguise remote invocation as local invocation by **Stub object** on client and **Skeleton object** on server.
 3.	The service is registered and looked up by **RMI** registry service.
 
 For 1. users are dependent on interfaces which should be implemented by server.
@@ -228,7 +228,7 @@ The build is finished when it shows `BUILD SUCCESS`. Then comes the running stag
 Run the service provider by the following maven command lines:
 
 ```bash
-$ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples.server.Application exec:java
+$ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=org.apache.dubbo.samples.provider.Application exec:java
 [INFO] Scanning for projects...
 [INFO]                                                                         
 [INFO] ------------------------------------------------------------------------
@@ -236,7 +236,7 @@ $ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples
 [INFO] ------------------------------------------------------------------------
 [INFO]
 [INFO] --- exec-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
-log4j:WARN No appenders could be found for logger (com.alibaba.dubbo.common.logger.LoggerFactory).
+log4j:WARN No appenders could be found for logger (org.apache.dubbo.common.logger.LoggerFactory).
 log4j:WARN Please initialize the log4j system properly.
 log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
 first-dubbo-provider is running.
@@ -249,7 +249,7 @@ When *first-dubbo-provider is running* appears, the service provider is ready to
 Run the service consumer by the following maven command lines:
 
 ```bash
-$ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples.client.Application exec:java
+$ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=org.apache.dubbo.samples.consumer.Application exec:java
 [INFO] Scanning for projects...
 [INFO]                                                                         
 [INFO] ------------------------------------------------------------------------
@@ -257,7 +257,7 @@ $ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples
 [INFO] ------------------------------------------------------------------------
 [INFO]
 [INFO] --- exec-maven-plugin:1.6.0:java (default-cli) @ dubbo-samples-api ---
-log4j:WARN No appenders could be found for logger (com.alibaba.dubbo.common.logger.LoggerFactory).
+log4j:WARN No appenders could be found for logger (org.apache.dubbo.common.logger.LoggerFactory).
 log4j:WARN Please initialize the log4j system properly.
 log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
 hi, dubbo
