@@ -9,12 +9,12 @@
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
 Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.153.10:2181"));
-registry.register(URL.valueOf("condition://0.0.0.0/com.foo.BarService?category=routers&dynamic=false&rule=" + URL.encode("host = 10.20.153.10 => host = 10.20.153.11")));
+registry.register(URL.valueOf("route://0.0.0.0/com.foo.BarService?category=routers&dynamic=false&rule=" + URL.encode("host = 10.20.153.10 => host = 10.20.153.11")));
 ```
 
 其中：
 
-* `condition://` 表示路由规则的类型，支持条件路由规则和脚本路由规则，可扩展，**必填**。
+* `route://` 表示路由规则的类型，支持条件路由规则和脚本路由规则，可扩展，**必填**。
 * `0.0.0.0` 表示对所有 IP 地址生效，如果只想对某个 IP 的生效，请填入具体 IP，**必填**。
 * `com.foo.BarService` 表示只对指定服务生效，**必填**。
 * `group=foo` 对指定服务的指定group生效，不填表示对未配置group的指定服务生效
