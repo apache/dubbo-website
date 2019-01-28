@@ -23,7 +23,7 @@
 
 下图展示了配置覆盖关系的优先级，从上到下优先级依次降低：
 
-![覆盖关系](../../img/blog/configuration.jpg)
+![覆盖关系](/img/blog/configuration.jpg)
 
 点此查看[外部化配置详情](./config-center.md)
 
