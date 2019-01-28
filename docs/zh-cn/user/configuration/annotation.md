@@ -1,50 +1,40 @@
 # 注解配置
 
-需要 `2.5.7` 及以上版本支持  
+需要 `2.6.3` 及以上版本支持
+点此查看[完整示例](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-annotation)
 
 ## 服务提供方
 
 ### `Service`注解暴露服务
 
 ```java
-import org.apache.dubbo.config.annotation.Service;
- 
-@Service(timeout = 5000)
-public class AnnotateServiceImpl implements AnnotateService { 
-    // ...
+@Service
+public class AnnotationServiceImpl implements AnnotationService {
+    @Override
+    public String sayHello(String name) {
+        return "annotation: hello, " + name;
+    }
 }
 ```
     
-### javaconfig形式配置公共模块
+### 增加应用共享配置
+
+```properties
+# dubbo-provider.properties
+dubbo.application.name=annotation-provider
+dubbo.registry.address=zookeeper://127.0.0.1:2181
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=20880
+```
+
+### 指定Spring扫描路径
 
 ```java
 @Configuration
-public class DubboConfiguration {
-
-    @Bean
-    public ApplicationConfig applicationConfig() {
-        ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setName("provider-test");
-        return applicationConfig;
-    }
-
-    @Bean
-    public RegistryConfig registryConfig() {
-        RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setAddress("zookeeper://127.0.0.1:2181");
-        registryConfig.setClient("curator");
-        return registryConfig;
-    }
-}
-```
-
-### 指定dubbo扫描路径
-
-```java
-@SpringBootApplication
-@DubboComponentScan(basePackages = "org.apache.dubbo.test.service.impl")
-public class ProviderTestApp {
-    // ...
+@EnableDubbo(scanBasePackages = "org.apache.dubbo.samples.simple.annotation.impl")
+@PropertySource("classpath:/spring/dubbo-provider.properties")
+static public class ProviderConfiguration {
+       
 }
 ```
 
@@ -54,63 +44,49 @@ public class ProviderTestApp {
 ### `Reference`注解引用服务
 
 ```java
-public class AnnotationConsumeService {
+@Component("annotationAction")
+public class AnnotationAction {
 
-    @org.apache.dubbo.config.annotation.Reference
-    public AnnotateService annotateService;
+    @Reference
+    private AnnotationService annotationService;
     
-    // ...
+    public String doSayHello(String name) {
+        return annotationService.sayHello(name);
+    }
 }
 
 ```
 
     
-### javaconfig形式配置公共模块
+### 增加应用共享配置
+
+```properties
+# dubbo-consumer.properties
+dubbo.application.name=annotation-consumer
+dubbo.registry.address=zookeeper://127.0.0.1:2181
+dubbo.consumer.timeout=3000
+```
+
+### 指定Spring扫描路径
 
 ```java
 @Configuration
-public class DubboConfiguration {
+@EnableDubbo(scanBasePackages = "org.apache.dubbo.samples.simple.annotation.action")
+@PropertySource("classpath:/spring/dubbo-consumer.properties")
+@ComponentScan(value = {"org.apache.dubbo.samples.simple.annotation.action"})
+static public class ConsumerConfiguration {
 
-    @Bean
-    public ApplicationConfig applicationConfig() {
-        ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setName("consumer-test");
-        return applicationConfig;
-    }
-
-    @Bean
-    public ConsumerConfig consumerConfig() {
-        ConsumerConfig consumerConfig = new ConsumerConfig();
-        consumerConfig.setTimeout(3000);
-        return consumerConfig;
-    }
-
-    @Bean
-    public RegistryConfig registryConfig() {
-        RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setAddress("zookeeper://127.0.0.1:2181");
-        registryConfig.setClient("curator");
-        return registryConfig;
-    }
 }
 ```
 
-### 指定dubbo扫描路径
+### 调动服务
 
 ```java
-@SpringBootApplication
-@DubboComponentScan(basePackages = "org.apache.dubbo.test.service")
-public class ConsumerTestApp {
-    // ...
+public static void main(String[] args) throws Exception {
+    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConsumerConfiguration.class);
+    context.start();
+    final AnnotationAction annotationAction = (AnnotationAction) context.getBean("annotationAction");
+    String hello = annotationAction.doSayHello("world");
 }
-``` 
-
-## 注意
-
-如果你曾使用旧版annotation配置，请删除所有相关配置，我们将在下个版本删除所有旧版配置项。
-
-```xml
-<dubbo:annotation package="org.apache.dubbo.test.service" /> 
 ```
-
 

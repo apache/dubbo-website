@@ -1,8 +1,8 @@
 # 下载中心
 
-## [Dubbo-RPC](https://github.com/apache/incubator-dubbo)
+## 版本与升级
 
-> Release Notes: https://github.com/apache/incubator-dubbo/releases
+请点击了解各[版本详情和升级注意事项](../../docs/zh-cn/user/version-upgrading.md)
 
 ### 2.6.5 (2018-11-23)
 

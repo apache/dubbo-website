@@ -139,7 +139,7 @@ dubbo.protocol.port=20880
 
 - 条件路由
 
-    ```yaml
+  ```yaml
   ---
   scope: application
   force: true
@@ -147,8 +147,8 @@ dubbo.protocol.port=20880
   enabled: true
   key: governance-conditionrouter-consumer
   conditions:
-  - method=sayHello => address=*:20880
-  - method=sayHi => address=*:20881
+    - application=app1 => address=*:20880
+    - application=app2 => address=*:20881
   ...
   ```
 
@@ -156,17 +156,17 @@ dubbo.protocol.port=20880
 
 - 标签路由
 
-    ```yaml
+  ```yaml
   ---
   force: false
   runtime: true
   enabled: true
   key: governance-tagrouter-provider
   tags:
-  - name: tag1
-    addresses: ["127.0.0.1:20880"]
-  - name: tag2
-    addresses: ["127.0.0.1:20881"]
+    - name: tag1
+      addresses: ["127.0.0.1:20880"]
+    - name: tag2
+      addresses: ["127.0.0.1:20881"]
   ...
   ```
 
@@ -189,9 +189,9 @@ dubbo.protocol.port=20880
 
 
 
-关于治理规则更多详细说明，请参考[路由规则]()和[覆盖规则]()用户文档。
+关于治理规则更多详细说明，请参考[路由规则](/docs/zh-cn/user/demos/routing-rule.md)和[覆盖规则](/docs/zh-cn/user/demos/config-rule.md)用户文档。
 
-也可继续了解[使用示例]()。
+也可继续了解[使用示例](https://github.com/apache/incubator-dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-governance)。
 
 
 
