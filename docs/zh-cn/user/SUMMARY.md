@@ -9,9 +9,9 @@
 * [4 成熟度](./maturity.md)
 * [5 配置](./configuration/index.md)
     * [5.1 XML 配置](./configuration/xml.md)
-    * [5.2 属性配置](./configuration/properties.md)
-    * [5.3 API 配置](./configuration/api.md)
-    * [5.4 注解配置](./configuration/annotation.md)
+    * [5.2 API 配置](./configuration/api.md)
+    * [5.3 Annotation 配置](./configuration/annotation.md)
+    * [5.4 配置加载流程](./configuration/configuration-load-process.md)
 * [6 示例](./demos/index.md)
     * [6.1 启动时检查](./demos/preflight-check.md)
     * [6.2 集群容错](./demos/fault-tolerent-strategy.md)
@@ -95,5 +95,6 @@
 * [16 容量规划](./capacity-plan.md)
 * [17 性能测试报告](./perf-test.md)
 * [18 测试覆盖率报告](./coveragence.md)
+* [19 版本与升级](./version-upgrading.md)
 
 

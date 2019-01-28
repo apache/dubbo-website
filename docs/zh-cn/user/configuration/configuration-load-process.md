@@ -1,12 +1,12 @@
-# 配置方式总结
+# 配置加载流程
 
-我们这篇文章主要讲在**应用启动阶段，Dubbo框架如何将所需要的配置采集起来**（包括应用配置、注册中心配置、服务配置等），以完成服务的暴露和引用流程。
+此篇文档主要讲在**应用启动阶段，Dubbo框架如何将所需要的配置采集起来**（包括应用配置、注册中心配置、服务配置等），以完成服务的暴露和引用流程。
 
-根据驱动方式的不同（比如Spring或裸API编程）配置形式上肯定会有所差异，这个我们接下来会对[每种方式分别展开介绍](#几种编程配置方式)。除了外围驱动方式上的差异，Dubbo的配置读取总体上遵循了以下几个原则：
+根据驱动方式的不同（比如Spring或裸API编程）配置形式上肯定会有所差异，具体请参考[XML配置](./xml.md)、[Annotation配置](./annotation.md)、[API配置](./api.md)三篇文档。除了外围驱动方式上的差异，Dubbo的配置读取总体上遵循了以下几个原则：
 
-1. Dubbo支持了多层级的配置，并预定按优先级自动实现配置间的覆盖，最终被汇总到数据总线URL驱动后续的服务暴露、引用等流程。
+1. Dubbo支持了多层级的配置，并按预定优先级自动实现配置间的覆盖，最终所有配置汇总到数据总线URL后驱动后续的服务暴露、引用等流程。
 2. ApplicationConfig、ServiceConfig、ReferenceConfig可以被理解成配置来源的一种，是直接面向用户编程的配置采集方式。
-3. 配置格式以Properties为主，在key的命名上有一套自己的[规范](#配置格式)
+3. 配置格式以Properties为主，在配置内容上遵循约定的`path-based`的命名[规范](#配置格式)
 
 
 
@@ -25,42 +25,7 @@
 
 ![覆盖关系](../../img/blog/configuration.jpg)
 
-
-
-### 外部化配置
-
-外部化配置即Config Center是2.7.0中新引入的一种配置源，目的是能实现配置的集中式管理，对于配置集中管理业界已经有很多成熟的专业配置系统如Apollo, Nacos等，Dubbo所做的只是保证能配合这些系统正常工作。
-
-2.7.0版本开始支持`Zookeeper`、`Apollo`两种配置存储。
-
-以Zookeeper为例，外部化配置就是存储在`/dubbo/config/dubbo/dubbo.properties`路径下的`.properties`文件：
-
-```properties
-# 将注册中心地址、元数据中心地址等配置集中管理，可以做到统一环境、减少开发侧感知。
-dubbo.registry.address=zookeeper://127.0.0.1:2181
-dubbo.registry.simplified=true
-
-dubbo.metadataReport.address=zookeeper://127.0.0.1:2181
-
-dubbo.protocol.name=dubbo
-dubbo.protocol.port=20880
-
-dubbo.application.qos.port=33333
-```
-
-
-
-所谓Dubbo对这些配置中心的支持，本质上就是把`.properties`从远程拉取到本地，然后和本地的配置做一次融合。所以理论上只要Dubbo框架能拿到需要的配置就可以正常的工作，所以Dubbo还提供了以下API，让用户将自己组织好的配置塞给Dubbo框架（至于配置从哪里来是用户要完成的事情），这样Dubbo框架就不再直接和Apollo或Zookeeper做读取配置交互。
-
-```java
-Map<String, String> dubboConfigurations = new HashMap<>();
-dubboConfigurations.put("dubbo.registry.address", "zookeeper://127.0.0.1:2181");
-dubboConfigurations.put("dubbo.registry.simplified", "true");
-
-ConfigCenterConfig configCenter = new ConfigCenterConfig();
-configCenter.setExternalConfig(dubboConfigurations);
-```
-
+点此查看[外部化配置详情](./config-center.md)
 
 
 ## 配置格式
@@ -105,7 +70,14 @@ dubbo.protocols.hessian.name=hessian
 dubbo.protocols.hessian.port=8089
 ```
 
+- 扩展配置
 
+```properties
+dubbo.application.parameters.item1=value1
+dubbo.application.parameters.item2=value2
+dubbo.registry.parameters.item3=value3
+dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters.item4=value4
+```
 
 ## 几种编程配置方式
 

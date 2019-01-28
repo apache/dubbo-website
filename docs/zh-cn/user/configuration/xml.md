@@ -2,20 +2,34 @@
 
 有关 XML 的详细配置项，请参见：[配置参考手册](../references/xml/introduction.md)。如果不想使用 Spring 配置，而希望通过 API 的方式进行调用，请参见：[API配置](./api.md)。想知道如何使用配置，请参见：[快速启动](../quick-start.md)。
 
+请在此查看文档描述的[完整示例](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-basic)
 
 ## provider.xml 示例
 
 ``` xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">  
-    <dubbo:application name="hello-world-app"  />  
-    <dubbo:registry address="multicast://224.5.6.7:1234" />  
-    <dubbo:protocol name="dubbo" port="20880" />  
-    <dubbo:service interface="org.apache.dubbo.demo.DemoService" ref="demoServiceLocal" />  
-    <dubbo:reference id="demoServiceRemote" interface="org.apache.dubbo.demo.DemoService" />  
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+    <dubbo:application name="demo-provider"/>
+    <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
+    <dubbo:protocol name="dubbo" port="20890"/>
+    <bean id="demoService" class="org.apache.dubbo.samples.basic.impl.DemoServiceImpl"/>
+    <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService" ref="demoService"/>
+</beans>
+```
+
+## consumer.xml示例
+```xml
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+    <dubbo:application name="demo-consumer"/>
+    <dubbo:registry group="aaa" address="zookeeper://127.0.0.1:2181"/>
+    <dubbo:reference id="demoService" check="false" interface="org.apache.dubbo.samples.basic.api.DemoService"/>
 </beans>
 ```
 
@@ -58,9 +72,9 @@
 `<dubbo:argument/>`  | 参数配置  | 用于指定方法参数配置
 
 
-## 配置覆盖关系
+## 不同粒度配置的覆盖关系
 
-以 timeout 为例，显示了配置的查找顺序，其它 retries, loadbalance, actives 等类似：
+以 timeout 为例，下图显示了配置的查找顺序，其它 retries, loadbalance, actives 等类似：
 
 * 方法级优先，接口级次之，全局配置再次之。
 * 如果级别一样，则消费方优先，提供方次之。
@@ -69,9 +83,9 @@
 
 ![dubbo-config-override](../sources/images/dubbo-config-override.jpg)
 
-建议由服务提供方设置超时，因为一个方法需要执行多长时间，服务提供方更清楚，如果一个消费方同时引用多个服务，就不需要关心每个服务的超时设置。
+（建议由服务提供方设置超时，因为一个方法需要执行多长时间，服务提供方更清楚，如果一个消费方同时引用多个服务，就不需要关心每个服务的超时设置）。
 
-理论上 ReferenceConfig 的非服务标识配置，在 ConsumerConfig，ServiceConfig, ProviderConfig 均可以缺省配置。
+理论上 ReferenceConfig 中除了`interface`这一项，其他所有配置项都可以缺省不配置，框架会自动使用ConsumerConfig，ServiceConfig, ProviderConfig等提供的缺省配置。
 
 [^1]: `2.1.0` 开始支持，注意声明：`xmlns:p="http://www.springframework.org/schema/p"`
 [^2]: 引用缺省是延迟初始化的，只有引用被注入到其它 Bean，或被 `getBean()` 获取，才会初始化。如果需要饥饿加载，即没有人引用也立即生成动态代理，可以配置：`<dubbo:reference ... init="true" />`
