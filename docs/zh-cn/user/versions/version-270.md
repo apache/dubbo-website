@@ -55,12 +55,12 @@
 
 #### 简化的URL
 
-    ```xml
+```xml
 <!-- simplified="true"表示注册简化版的URL到Registry -->
 <dubbo:registry address="zookeeper://127.0.0.1:2181" simplified="true"/>
 ```
 
-    ```properties
+```properties
 dubbo.registry.simplified=true
 ```
 
@@ -72,11 +72,11 @@ dubbo.registry.simplified=true
 
 #### 配置元数据中心
 
-    ```xml
+```xml
 <dubbo:metadata-report address="redis://127.0.0.1:6379"/>
 ```
 
-    ```properties
+```properties
 dubbo.metadataReport.address=redis://127.0.0.1:6379
 ```
 
@@ -139,7 +139,7 @@ dubbo.protocol.port=20880
 
 - 条件路由
 
-    ```yaml
+  ```yaml
   ---
   scope: application
   force: true
@@ -156,7 +156,7 @@ dubbo.protocol.port=20880
 
 - 标签路由
 
-    ```yaml
+  ```yaml
   ---
   force: false
   runtime: true
