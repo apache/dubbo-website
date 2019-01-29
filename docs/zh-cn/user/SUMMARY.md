@@ -97,6 +97,8 @@
 * [16 容量规划](./capacity-plan.md)
 * [17 性能测试报告](./perf-test.md)
 * [18 测试覆盖率报告](./coveragence.md)
-* [19 版本与升级](./version-upgrading.md)
+* [19 版本与升级](./versions/index.md)
+    * [19.1 2.7.x升级步骤及注意事项](./version-270.md)
+
 
 

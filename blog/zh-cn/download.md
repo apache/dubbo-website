@@ -2,7 +2,7 @@
 
 ## 版本与升级
 
-请点击了解各[版本详情和升级注意事项](../../docs/zh-cn/user/version-upgrading.md)
+请点击了解各[版本详情和升级注意事项](http://dubbo.apache.org/zh-cn/docs/user/versions/index.html)
 
 ### 2.6.5 (2018-11-23)
 
