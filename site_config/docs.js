@@ -668,16 +668,20 @@ export default {
                                 link: '/zh-cn/docs/user/configuration/xml.html',
                             },
                             {
-                                title: '属性配置',
-                                link: '/zh-cn/docs/user/configuration/properties.html',
-                            },
-                            {
                                 title: 'API配置',
                                 link: '/zh-cn/docs/user/configuration/api.html'
                             },
                             {
                                 title: '注解配置',
                                 link: '/zh-cn/docs/user/configuration/annotation.html'
+                            },
+                            {
+                                title: '动态配置中心',
+                                link: '/zh-cn/docs/user/configuration/config-center.html'
+                            },
+                            {
+                                title: '配置加载流程',
+                                link: '/zh-cn/docs/user/configuration/configuration-load-process.html'
                             }
                         ],
                     },
@@ -765,8 +769,12 @@ export default {
                                 link: '/zh-cn/docs/user/demos/attachment.html'
                             },
                             {
-                                title: '异步调用',
+                                title: 'Consumer异步调用',
                                 link: '/zh-cn/docs/user/demos/async-call.html',
+                            },
+                            {
+                                title: 'Provider异步执行',
+                                link: '/zh-cn/docs/user/demos/async-execute-on-provider.html',
                             },
                             {
                                 title: '本地调用',
@@ -1028,6 +1036,10 @@ export default {
                     {
                         title: '测试覆盖率报告',
                         link: '/zh-cn/docs/user/coveragence.html'
+                    },
+                    {
+                        title: '版本与升级',
+                        link: '/zh-cn/docs/user/version-upgrading.html'
                     }
                 ],
             },
