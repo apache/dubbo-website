@@ -164,6 +164,13 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: 'Dubbo Admin服务测试介绍',
+            author: '@nzomkxia',
+            dateStr: 'Jan 29th, 2019',
+            desc: '本文介绍了新版本的Dubbo Admin的服务测试功能',
+            link: '/zh-cn/blog/service-test.html',
+        },
+        {
             title: '新版本Dubbo Admin介绍',
             author: '@nzomkxia',
             dateStr: 'Jan 28th, 2019',
