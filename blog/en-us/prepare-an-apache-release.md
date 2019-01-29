@@ -284,15 +284,12 @@ $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 * 'incubating' in name
 * LICENSE and NOTICE exists and contents are good
 
-## Begin voting
+## Release vote
 
 The voting is divided into two phases:
 
 1. Dubbo community votes and sends the voting email to dev@dubbo.apache.org. After reviewing by community developers and winning 3 binding tickets that agree to release, you can go to the next stage of voting.
-2. Apache community votes and sends the voting email to general@apache.org. After reviewing by Apache PMC Review and winning 3 binding tickets that agree to release,you will be allowed to release officially.
-3. Publish [release notes](https://github.com/apache/incubator-dubbo/releases) on Github.
-4. Update the recommend dependency on [Github](https://github.com/apache/incubator-dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
-5. Announce on the [official site](http://dubbo.apache.org/) that the version was successfully released.
+2. Apache community votes and sends the voting email to general@incubator.apache.org. After reviewing by Apache IPMC(Incubator PMC) members and winning 3 binding votes that agree to release, you will be allowed to release officially.
 
 Mail template：
 
@@ -330,22 +327,27 @@ The Apache Dubbo (Incubating) Team
 
 ## Official Release
 
-1. Commit release package of  https://dist.apache.org/repos/dist/dev/incubator/dubbo to https://dist.apache.org/repos/dist/release/incubator/dubbo/, complete official release。
+When the release vote has passed, 
+
+0. Release the maven artifacts. This is **required step** for 2.7.0 and above. Go to [here](https://repository.apache.org), and choose the staging repository, click the release button. Wait for a moment and verify it at [here](https://repository.apache.org/content/repositories/releases/org/apache/dubbo/), make sure your artifacts are there and correct. It will take some time to sync to maven central repository. You can verify it at [here](https://repo.maven.apache.org/maven2/org/apache/dubbo)
+1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo)
+2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/incubator/dubbo)
+3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
+5. Publish [release notes](https://github.com/apache/incubator-dubbo/releases) on Github.
+6. Update the recommend dependency on [Github](https://github.com/apache/incubator-dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
+7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like this `https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip`. The download link for the previous release version should be changed to `https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip`. Please refer to the [download page](https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
+
+4. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
 2. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed.
 
-## Complete Maven Convenient Binary release（Optional）
+## Complete Maven Convenient Binary release
 
-**[apache.repository.org](https://repository.apache.org/) The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
+> This is an option step for 2.6.x release.
+
+**[repository.apache.org](https://repository.apache.org/) The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
 The artifacts that were previously published to the maven repository are in the staging state. Log in to [apache.repository.org](https://repository.apache.org/) with the Apache id and release it.
 
-## Post Release steps
-
-If the release candidate is succesfully released, please don't forget about the following steps.
-
-1. Move the release files to official release directory, which is under https://dist.apache.org/repos/dist/release/incubator/dubbo/.
-2. Remove the release files in dev directory, which is under https://dist.apache.org/repos/dist/dev/incubator/dubbo/
-3. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip. The download link for the previous release version should be changed to https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip. Please refer to the download page for more details.
 
 ## FAQ
 
