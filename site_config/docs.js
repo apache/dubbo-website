@@ -1039,7 +1039,7 @@ export default {
                     },
                     {
                         title: '版本与升级',
-                        link: '/zh-cn/docs/user/versions/index.html'
+                        link: '/zh-cn/docs/user/versions/index.html',
                         children: [
                             {
                                 title: '2.7.x升级步骤及注意事项',
