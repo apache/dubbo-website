@@ -41,6 +41,7 @@ dubbo%3A%2F%2F30.5.124.158%3A20880%2Forg.apache.dubbo.samples.simplified.registr
 开启provider或者consumer简化配置之后，默认保留的配置项如下：
 
 provider：
+
 | Constant Key  | Key  | remark |
 | ------ | ------ | ------ |
 | APPLICATION_KEY | application |  |
@@ -65,6 +66,7 @@ provider：
 
 
 consumer：
+
 | Constant Key  | Key  | remark |
 | ------ | ------ | ------ |
 | APPLICATION_KEY | application |  |
