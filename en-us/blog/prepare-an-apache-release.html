@@ -80,18 +80,36 @@ pub   rsa4096/28681CB1 2018-04-26 <span class="hljs-comment"># 28681CB1 is the k
 uid       [ultimate] liujun (apache-dubbo) &lt;liujun@apache.org&gt;
 sub   rsa4096/D3D6984B 2018-04-26
 
+<span class="hljs-comment">########### Note: Different diaplay for different version.</span>
+$ gpg --list-keys
+pub   rsa4096 2018-11-12 [SC]
+      63AAE9838F4A303E40BAF5FEA3A1CA7A5D4A3981     <span class="hljs-comment"># Last 8 character(5D4A3981) as key id，it will be used when send public key to keyserver</span>
+uid           [ 绝对 ] Victory Cao (CODE SIGNING KEY) &lt;victory@apache.org&gt;
+sub   rsa4096 2018-11-12 [E]
+    
+
 <span class="hljs-comment"># send public key to keyserver via key id </span>
 $ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
 <span class="hljs-comment"># Here pgpkeys.mit.edu is a random selection of keyserver. Any key server from the list https://sks-keyservers.net/status/ is acceptable because they are automatically synchronized.</span>
 </code></pre>
 <ul>
-<li>If there are multiple public keys，set the default key</li>
+<li>If there are multiple public keys，you can set the default key</li>
 </ul>
 <p>~/.gnupg/gpg.conf</p>
 <pre><code class="language-proper"># If you have more than 1 secret key in your keyring, you may want to
 # uncomment the following option and set your preferred keyid.
 
 default-key 28681CB1
+</code></pre>
+<ul>
+<li>If there are multiple public keys, you can also delete unuseful key：</li>
+</ul>
+<pre><code class="language-sh"><span class="hljs-comment">### Delete the private key first, then delete the public key.</span>
+
+$ gpg --yes --delete-secret-keys shenglicao2@gmail.com   <span class="hljs-comment">### indicate email address  </span>
+
+$ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4 
+
 </code></pre>
 </li>
 <li>
@@ -180,9 +198,18 @@ modifications and taggings related to ${release_version} Release Candidates are 
 </ul>
 <pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> mvn release:perform -Prelease -Darguments=<span class="hljs-string">"-Dmaven.test.skip=true"</span> -DautoVersionSubmodules=<span class="hljs-literal">true</span> -Dusername=YOUR GITHUB ID</span>
 </code></pre>
-<p>All artifacts are released to configured remote maven central repository, in staging state</p>
 </li>
 </ol>
+<h4>Note</h4>
+<ul>
+<li>
+<p>When you deploy the package into repository, it will be interrupted for network. So you must restart to desploy。</p>
+</li>
+<li>
+<p>The problem that missing package occurred many times at deploying. So you should check the quantity of package, especially parent package。</p>
+<p>All artifacts are released to configured remote maven central repository, in staging state</p>
+</li>
+</ul>
 <h2>Prepare Apache Release</h2>
 <ol>
 <li>
@@ -209,7 +236,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
 </li>
 <li>
 <p>Generate sha512 sign</p>
-<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> shasum -a 512 apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip &gt;&gt; apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512</span>
+<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> shasum -b -a 512 apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip &gt;&gt; apache-dubbo-incubating-<span class="hljs-variable">${release_version}</span>-<span class="hljs-built_in">source</span>-release.zip.sha512</span>
 </code></pre>
 </li>
 <li>
@@ -338,35 +365,18 @@ Thanks,
 The Apache Dubbo (Incubating) Team
 </code></pre>
 <h2>Official Release</h2>
-<p>When the release vote has passed,</p>
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; Updated upstream
+When the release vote has passed,</p>
 <ol start="0">
-<li>
-<p>Release the maven artifacts. This is <strong>required step</strong> for 2.7.0 and above. Go to <a href="https://repository.apache.org">here</a>, and choose the staging repository, click the release button. Wait for a moment and verify it at <a href="https://repository.apache.org/content/repositories/releases/org/apache/dubbo/">here</a>, make sure your artifacts are there and correct. It will take some time to sync to maven central repository. You can verify it at <a href="https://repo.maven.apache.org/maven2/org/apache/dubbo">here</a></p>
-</li>
-<li>
-<p>Add the release files to <a href="https://dist.apache.org/repos/dist/release/incubator/dubbo">official release directory</a></p>
-</li>
-<li>
-<p>Remove the release files in <a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo">dev directory</a></p>
-</li>
-<li>
-<p>Remove the the release file for the previous release under <a href="https://dist.apache.org/repos/dist/release/incubator/dubbo/">official release directory</a>, which will be archived and can be found <a href="https://archive.apache.org/dist/incubator/dubbo/">here</a></p>
-</li>
-<li>
-<p>Publish <a href="https://github.com/apache/incubator-dubbo/releases">release notes</a> on Github.</p>
-</li>
-<li>
-<p>Update the recommend dependency on <a href="https://github.com/apache/incubator-dubbo#maven-dependency">Github</a> to the latest version, also update the version in other place if necessary.</p>
-</li>
-<li>
-<p>Add the download link to official website <a href="http://dubbo.apache.org/en-us/blog/download.html">http://dubbo.apache.org/en-us/blog/download.html</a>, using the ASF mirror system. The latest release download link should be something like this <code>https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip</code>. The download link for the previous release version should be changed to <code>https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip</code>. Please refer to the <a href="https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md">download page</a> for more details.</p>
-</li>
-<li>
-<p>Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: <code>git push origin --delete 2.7.0-release</code></p>
-</li>
-<li>
-<p>Send mail to <a href="mailto:dev@dubbo.apache.org">dev@dubbo.apache.org</a> and <a href="mailto:general@incubator.apache.org">general@incubator.apache.org</a>, notify the community that the release is completed.</p>
-</li>
+<li>Release the maven artifacts. This is <strong>required step</strong> for 2.7.0 and above. Go to <a href="https://repository.apache.org">here</a>, and choose the staging repository, click the release button. Wait for a moment and verify it at <a href="https://repository.apache.org/content/repositories/releases/org/apache/dubbo/">here</a>, make sure your artifacts are there and correct. It will take some time to sync to maven central repository. You can verify it at <a href="https://repo.maven.apache.org/maven2/org/apache/dubbo">here</a></li>
+<li>Add the release files to <a href="https://dist.apache.org/repos/dist/release/incubator/dubbo">official release directory</a></li>
+<li>Remove the release files in <a href="https://dist.apache.org/repos/dist/dev/incubator/dubbo">dev directory</a></li>
+<li>Remove the the release file for the previous release under <a href="https://dist.apache.org/repos/dist/release/incubator/dubbo/">official release directory</a>, which will be archived and can be found <a href="https://archive.apache.org/dist/incubator/dubbo/">here</a></li>
+<li>Publish <a href="https://github.com/apache/incubator-dubbo/releases">release notes</a> on Github.</li>
+<li>Update the recommend dependency on <a href="https://github.com/apache/incubator-dubbo#maven-dependency">Github</a> to the latest version, also update the version in other place if necessary.</li>
+<li>Add the download link to official website <a href="http://dubbo.apache.org/en-us/blog/download.html">http://dubbo.apache.org/en-us/blog/download.html</a>, using the ASF mirror system. The latest release download link should be something like this <code>https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip</code>. The download link for the previous release version should be changed to <code>https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip</code>. Please refer to the <a href="https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md">download page</a> for more details.</li>
+<li>Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: <code>git push origin --delete 2.7.0-release</code></li>
+<li>Send mail to <a href="mailto:dev@dubbo.apache.org">dev@dubbo.apache.org</a> and <a href="mailto:general@incubator.apache.org">general@incubator.apache.org</a>, notify the community that the release is completed.</li>
 </ol>
 <h2>Complete Maven Convenient Binary release</h2>
 <blockquote>
