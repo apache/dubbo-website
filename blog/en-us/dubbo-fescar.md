@@ -222,5 +222,5 @@ sh fescar-server.sh 8091 /home/admin/fescar/data/
 - Run BusinessService for test ([DubboBusinessTester](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboBusinessTester.java)).
 
 Related projects
-fescar:          https://github.com/alibaba/fescar/
-fescar-samples : https://github.com/fescar-group/fescar-samples  
+* fescar:          https://github.com/alibaba/fescar/
+* fescar-samples : https://github.com/fescar-group/fescar-samples  
