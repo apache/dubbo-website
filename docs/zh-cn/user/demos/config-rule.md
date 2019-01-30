@@ -1,48 +1,174 @@
 # 配置规则
 
-向注册中心写入动态配置覆盖规则 [^1]。该功能通常由监控中心或治理中心的页面完成。
+查看[老版本配置规则](./config-rule-deprecated.md)。
 
-```java
-RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
-Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.153.10:2181"));
-registry.register(URL.valueOf("override://0.0.0.0/com.foo.BarService?category=configurators&dynamic=false&application=foo&timeout=1000"));
+覆盖规则是Dubbo设计的在无需重启应用的情况下，动态调整RPC调用行为的一种能力。2.7.0版本开始，支持从**服务**和**应用**两个粒度来调整动态配置。
+
+## 概览
+
+请在[服务治理控制台](http://47.91.207.147/#/governance/config)查看或修改覆盖规则。
+
+- 应用粒度
+
+  ```yaml
+  # 将应用demo（key:demo）在20880端口上提供（side:provider）的所有服务（scope:application）的权重修改为1000（weight:1000）。
+  ---
+  scope: application
+  key: demo
+  enabled: true
+  configs:
+  - addresses: ["0.0.0.0:20880"]
+    side: provider
+    parameters:
+      weight: 1000
+  ...
+  ```
+
+
+
+- 服务粒度
+
+  ```yaml
+  # 所有消费（side:consumer）DemoService服务（key:org.apache.dubbo.samples.governance.api.DemoService）的应用实例（addresses:[0.0.0.0]），超时时间修改为6000ms
+  ---
+  scope: service
+  key: org.apache.dubbo.samples.governance.api.DemoService
+  enabled: true
+  configs:
+  - addresses: [0.0.0.0]
+    side: consumer
+    parameters:
+      timeout: 6000
+  ...
+  
+  ```
+
+
+
+## 规则详解
+
+#### 配置模板
+
+```yaml
+---
+scope: application/service
+key: app-name/group+service+version
+enabled: true
+configs:
+- addresses: ["0.0.0.0"]
+  providerAddresses: ["1.1.1.1:20880", "2.2.2.2:20881"]
+  side: consumer
+  applications/services: []
+  parameters:
+    timeout: 1000
+    cluster: failfase
+    loadbalance: random
+- addresses: ["0.0.0.0:20880"]
+  side: provider
+  applications/services: []
+  parameters:
+    threadpool: fixed
+    threads: 200
+    iothreads: 4
+    dispatcher: all
+    weight: 200
+...
 ```
 
 其中：
 
-* `override://` 表示数据采用覆盖方式，支持 `override` 和 `absent`，可扩展，**必填**。
-* `0.0.0.0` 表示对所有 IP 地址生效，如果只想覆盖某个 IP 的数据，请填入具体 IP，**必填**。
-* `com.foo.BarService` 表示只对指定服务生效，**必填**。
-* `category=configurators` 表示该数据为动态配置类型，**必填**。
-* `dynamic=false` 表示该数据为持久数据，当注册方退出时，数据依然保存在注册中心，**必填**。
-* `enabled=true` 覆盖规则是否生效，可不填，缺省生效。
-* `application=foo` 表示只对指定应用生效，可不填，表示对所有应用生效。
-* `timeout=1000` 表示将满足以上条件的 `timeout` 参数的值覆盖为 1000。如果想覆盖其它参数，直接加在 `override` 的 URL 参数上。
+- `scope`表示配置作用范围，分别是应用（application）或服务（service）粒度。**必填**。
+- `key` 指定规则体作用在哪个服务或应用。**必填**。
+  - scope=service时，key取值为[{group}:]{service}[:{version}]的组合
+- scope=application时，key取值为application名称
+- `enabled=true` 覆盖规则是否生效，可不填，缺省生效。
+- `configs` 定义具体的覆盖规则内容，可以指定n（n>=1）个规则体。**必填**。
+  - side，
+  - applications
+  - services
+  - parameters
+  - addresses
+  - providerAddresses
 
-示例：
+
+<br/>
+**对于绝大多数配置场景，只需要理清楚以下问题基本就知道配置该怎么写了：**
+
+1. 要修改整个应用的配置还是某个服务的配置。
+
+   - 应用：`scope: application, key: app-name`（还可使用`services`指定某几个服务）。
+   - 服务：`scope: service, key:group+service+version `。
+
+2. 修改是作用到消费者端还是提供者端。
+
+   - 消费者：`side: consumer` ，作用到消费端时（你还可以进一步使用`providerAddress`, `applications`选定特定的提供者示例或应用）。
+   - 提供者：`side: provider`。
+
+3. 配置是否只对某几个特定实例生效。
+
+   - 所有实例：`addresses: ["0.0.0.0"] `或`addresses: ["0.0.0.0:*"] `具体由side值决定。
+   - 指定实例：`addersses[实例地址列表]`。
+
+4. 要修改的属性是哪个。
+
+
+
+#### 示例
 
 1. 禁用提供者：(通常用于临时踢除某台提供者机器，相似的，禁止消费者访问请使用路由规则)
 
-    ```
-    override://10.20.153.10/com.foo.BarService?category=configurators&dynamic=false&disbaled=true
-    ```
-    
-2. 调整权重：(通常用于容量评估，缺省权重为 100)
+   ```yaml
+   ---
+   scope: application
+   key: demo-provider
+   enabled: true
+   configs:
+   - addresses: ["10.20.153.10:20880"]
+     side: provider
+     parameters:
+       disabled: true
+   ...
+   ```
 
-    ```
-    override://10.20.153.10/com.foo.BarService?category=configurators&dynamic=false&weight=200
-    ```
-    
+2. 调整权重：(通常用于容量评估，缺省权重为 200)
+
+   ```yaml
+   ---
+   scope: application
+   key: demo-provider
+   enabled: true
+   configs:
+   - addresses: ["10.20.153.10:20880"]
+     side: provider
+     parameters:
+       weight: 200
+   ...
+   ```
+
 3. 调整负载均衡策略：(缺省负载均衡策略为 random)
 
-    ```
-    override://10.20.153.10/com.foo.BarService?category=configurators&dynamic=false&loadbalance=leastactive
-    ```
-    
+   ```yaml
+   ---
+   scope: application
+   key: demo-consumer
+   enabled: true
+   configs:
+   - side: consumer
+     parameters:
+       loadbalance: random
+   ...
+   ```
+
 4. 服务降级：(通常用于临时屏蔽某个出错的非关键服务)
 
-    ```
-    override://0.0.0.0/com.foo.BarService?category=configurators&dynamic=false&application=foo&mock=force:return+null
-    ```
-    
-[^1]: `2.2.0` 以上版本支持
+    ```yaml
+   ---
+   scope: service
+   key: org.apache.dubbo.samples.governance.api.DemoService
+   enabled: true
+   configs:
+   - side: consumer
+     parameters:
+       force: return null
+   ...
+   ```

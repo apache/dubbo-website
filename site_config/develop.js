@@ -55,6 +55,10 @@ export default {
                     {
                         title: 'Website Guide',
                         link: '/en-us/docs/developers/committer-guide/website-guide_dev.html',
+                    },
+                    {
+                        title: 'Release Guide',
+                        link: '/en-us/docs/developers/committer-guide/release-guide_dev.html',
                     }
                 ]
             },
@@ -130,6 +134,10 @@ export default {
                         {
                             title: '网站向导',
                             link: '/zh-cn/docs/developers/committer-guide/website-guide_dev.html',
+                        },
+                        {
+                            title: '版本发布向导',
+                            link: '/zh-cn/docs/developers/committer-guide/release-guide_dev.html',
                         }
                     ]
                 },
