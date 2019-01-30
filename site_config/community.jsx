@@ -7,20 +7,6 @@ export default {
       title: 'Events & News',
       list: [
         {
-          img: '/img/blog/dubbo-chengdu-meetup.jpg',
-          title: 'Aliware Open Source, chengdu - Apache Dubbo salon developers',
-          content: 'The fourth Dubbo developers salon on August 26 (Sunday) in chengdu high-tech zone tianfu hemicyenine rong international plaza, 200 five street on the 8th floor conference held on the second floor.',
-          dateStr: 'August 14th，2018',
-          link: '/en-us/blog/dubbo-meetup-chengdu.html',
-        },
-        {
-          img: '/img/blog/dubbo-shenzhen-meetup.jpg',
-          title: 'Dubbo shenzhen meetup has been held successfully',
-          content: 'The Dubbo meetup has successfully been held in shenzhen, over 2000 people submitted registration, and over 700 were present, more than 17,000 watched the live online.',
-          dateStr: 'July 14th，2018',
-          link: '/en-us/blog/dubbo-meetup-shenzhen.html',
-        },
-        {
           img: '/img/blog/dubbo-shanghai-meetup.jpeg',
           title: 'Dubbo Shanghai meetup has been held successfully',
           content: 'The Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.',
