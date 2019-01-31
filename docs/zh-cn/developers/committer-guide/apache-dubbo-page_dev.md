@@ -1,4 +1,4 @@
-# Apache官方Dubbo页面的维护
+# Apache官方Dubbo主页的维护
 
 Apache有一个官方的网站，用来维护所有的孵化项目的信息。每一个孵化项目在这个网站下都有一个信息页。
 Dubbo的信息页地址是https://incubator.apache.org/projects/dubbo.html。
@@ -22,5 +22,6 @@ Dubbo的信息页地址是https://incubator.apache.org/projects/dubbo.html。
 此过程会要求输入Apache id和密码。
 
 参考:
+
 1.http://incubator.apache.org/guides/website.html
 2.https://svn.apache.org/repos/asf/incubator/public/trunk/README.txt

@@ -1,4 +1,4 @@
-# Apache official Dubbo page maintenance
+# Apache Official Dubbo Page Maintenance
 
 Apache has an official website that maintains information about all incubation projects. 
 Each incubation project has an information page under this website. 
@@ -27,5 +27,6 @@ please install SVN first.
 This process will ask for the Apache id and password.
 
 References:
+
 1.http://incubator.apache.org/guides/website.html
 2.https://svn.apache.org/repos/asf/incubator/public/trunk/README.txt
