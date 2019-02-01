@@ -235,6 +235,8 @@ keywords: Dubbo, Apache, Release
 
 ## 验证Release Candidates
 
+详细的检查列表请参考官方的[check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)
+
 首先，从以下地址下载要发布的Release Candidate到本地环境：
 <pre>
 https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/

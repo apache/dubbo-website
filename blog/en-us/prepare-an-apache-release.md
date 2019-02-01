@@ -253,6 +253,8 @@ modifications and taggings related to ${release_version} Release Candidates are 
 
 ## Verify Release Candidates
 
+A full check list can be found [here](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)
+
 The verification link includes but is not limited to the following contents and forms:
 
 1. Check signatures and hashes are good
