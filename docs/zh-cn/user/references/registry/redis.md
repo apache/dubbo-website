@@ -21,7 +21,7 @@
 0. 服务提供方启动时，向 `Key:/dubbo/com.foo.BarService/providers` 下，添加当前提供者的地址
 1. 并向 `Channel:/dubbo/com.foo.BarService/providers` 发送 `register` 事件
 2. 服务消费方启动时，从 `Channel:/dubbo/com.foo.BarService/providers` 订阅 `register` 和 `unregister` 事件
-3. 并向 `Key:/dubbo/com.foo.BarService/providers` 下，添加当前消费者的地址
+3. 并向 `Key:/dubbo/com.foo.BarService/consumers` 下，添加当前消费者的地址
 4. 服务消费方收到 `register` 和 `unregister` 事件后，从 `Key:/dubbo/com.foo.BarService/providers` 下获取提供者地址列表
 5. 服务监控中心启动时，从 `Channel:/dubbo/*` 订阅 `register` 和 `unregister`，以及 `subscribe` 和`unsubsribe `事件
 6. 服务监控中心收到 `register` 和 `unregister` 事件后，从 `Key:/dubbo/com.foo.BarService/providers` 下获取提供者地址列表

@@ -164,6 +164,20 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: 'Dubbo Admin服务测试介绍',
+            author: '@nzomkxia',
+            dateStr: 'Jan 29th, 2019',
+            desc: '本文介绍了新版本的Dubbo Admin的服务测试功能',
+            link: '/zh-cn/blog/service-test.html',
+        },
+        {
+            title: '新版本Dubbo Admin介绍',
+            author: '@nzomkxia',
+            dateStr: 'Jan 28th, 2019',
+            desc: '本文介绍了新版本的Dubbo Admin的设计和功能',
+            link: '/zh-cn/blog/dubbo-admin.html',
+        },
+        {
             title: '如何使用Fescar保证Dubbo微服务间的一致性',
             author: '@slievrly',
             dateStr: 'Jan 17th, 2019',
@@ -191,7 +205,7 @@ export default {
         desc: '本文介绍 Dubbo 如何整合注册中心 Nacos，包括 Nacos 控制台使用',
         link: '/zh-cn/blog/dubbo-registry-nacos-integration.html',
       },
-      {   
+      {
          title: 'Dubbo协议详解',
          author: '@authorlove',
          dateStr: 'Jan 2nd, 2019',
@@ -211,6 +225,27 @@ export default {
           dateStr: 'Dec 29th, 2018',
           desc: '本文介绍了Dubbo框架上下文信息的应用场景和使用方式。',
           link: '/zh-cn/blog/dubbo-context-information.html',
+        },
+        {
+            title: 'Dubbo 博客文档中文排版指南',
+            author:'@徐靖峰',
+            dateStr: 'Dec 27th, 2018',
+            desc: '统一中文文案、排版的相关用法，降低团队成员之间的沟通成本，增强网站气质。',
+            link: '/zh-cn/blog/dubbo-copywriting-style.html',
+        },
+        {
+            title: 'Dubbo 中的 URL 统一模型',
+            author:'@徐靖峰',
+            dateStr: 'Dec 27th, 2018',
+            desc: 'URL 是 Dubbo 中一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。',
+            link: '/zh-cn/blog/introduction-to-dubbo-url.html',
+        },
+        {
+            title: 'Dubbo 现有心跳方案总结以及改进建议',
+            author:'@徐靖峰',
+            dateStr: 'Jan 16th, 2019',
+            desc: '一种心跳，两种设计',
+            link: '/zh-cn/blog/dubbo-heartbeat-design.html',
         },
         {
             title: 'Dubbo 博客文档中文排版指南',

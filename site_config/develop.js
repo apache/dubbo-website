@@ -57,8 +57,12 @@ export default {
                         link: '/en-us/docs/developers/committer-guide/website-guide_dev.html',
                     },
                     {
-                        title: 'Apache Official Dubbo Page Maintenance',
+                        title: 'Apache Dubbo Page Maintenance',
                         link: '/en-us/docs/developers/committer-guide/apache-dubbo-page_dev.html',
+                    },
+                    {
+                        title: 'Release Guide',
+                        link: '/en-us/docs/developers/committer-guide/release-guide_dev.html',
                     }
                 ]
             },
@@ -134,8 +138,12 @@ export default {
                             link: '/zh-cn/docs/developers/committer-guide/website-guide_dev.html',
                         },
                         {
-                            title: 'Apache官方Dubbo主页的维护',
+                            title: 'Apache Dubbo主页的维护',
                             link: '/zh-cn/docs/developers/committer-guide/apache-dubbo-page_dev.html',
+                        },
+                        {
+                            title: '版本发布向导',
+                            link: '/zh-cn/docs/developers/committer-guide/release-guide_dev.html',
                         }
                     ]
                 },
