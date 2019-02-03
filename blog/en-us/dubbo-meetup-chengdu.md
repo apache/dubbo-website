@@ -19,7 +19,7 @@ The event is still full, total enrollment of 976, 350 + site users, live PV 1320
 
 ## The registration information
 
-Aliware Open Source, headquarters - Apache Dubbo developers salon on August 26 (Sunday) in chengdu high-tech zone tianfu hemicyenine rong international plaza, 200 five street on the 8th floor held the second floor conference room, technical thinking is GG feast, dry goods and welfare will not one less.
+Aliware Open Source, headquarters - Apache Dubbo developers salon on August 26 (Sunday) in chengdu high-tech zone tianfu hemicyenine rong international plaza, 200 five street on the 8th floor held the second floor conference room, technical thinking is GG feast, dry goods and welfare will not one less.</br>
 Sign up link：http://www.huodongxing.com/event/7453091088400
  
 <img src="../../img/blog/dubbo-chengdu-meetup-img.jpg"/>
