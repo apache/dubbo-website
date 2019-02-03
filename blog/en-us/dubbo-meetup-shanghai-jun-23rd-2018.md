@@ -7,7 +7,7 @@ description: Dubbo Shanghai meetup has been held successfully
 Dubbo Shanghai meetup has been held successfully
 ---
 
-The sencond Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online. A great event again! 
+The sencond Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.
 
 Please enjoy the slides of the topics:
   * Jerrick Zhu: Dubbo Status and Roadmap (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-status-and-roadmap.pdf)
