@@ -21,7 +21,7 @@ Procedure:
 0. When service provider boots up, it adds its address under `Key:/dubbo/com.foo.BarService/providers`.
 1. Then service provider sends `register` event to `Channel:/dubbo/com.foo.BarService/providers`
 2. When service consumer boots up, it subscribe events `register` and `unregister` from `Channel:/dubbo/com.foo.BarService/providers`
-3. Then service consumer add its address under `Key:/dubbo/com.foo.BarService/providers`
+3. Then service consumer add its address under `Key:/dubbo/com.foo.BarService/consumers`
 4. When service consumer receives events `register` and `unregister`, it will fetch provider's addresses from `Key:/dubbo/com.foo.BarService/providers`
 5. When monitor center boots up, it subscribes events `register`, `unregister`, `subscribe`, and `unsubsribe`.
 6. After monitor center receives `register` and `unregister`, it fetches provider's addresses from `Key:/dubbo/com.foo.BarService/providers`

@@ -75,12 +75,20 @@ Mainly including the related preparation of signature utilities and Maven reposi
     uid       [ultimate] liujun (apache-dubbo) <liujun@apache.org>
     sub   rsa4096/D3D6984B 2018-04-26
     
+    ########### Note: Different diaplay for different version.
+    $ gpg --list-keys
+    pub   rsa4096 2018-11-12 [SC]
+          63AAE9838F4A303E40BAF5FEA3A1CA7A5D4A3981     # Last 8 character(5D4A3981) as key id，it will be used when send public key to keyserver
+    uid           [ 绝对 ] Victory Cao (CODE SIGNING KEY) <victory@apache.org>
+    sub   rsa4096 2018-11-12 [E]
+        
+    
     # send public key to keyserver via key id 
     $ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
     # Here pgpkeys.mit.edu is a random selection of keyserver. Any key server from the list https://sks-keyservers.net/status/ is acceptable because they are automatically synchronized.
     ```
 
-   - If there are multiple public keys，set the default key 
+   - If there are multiple public keys，you can set the default key 
 
     ~/.gnupg/gpg.conf
     
@@ -89,6 +97,17 @@ Mainly including the related preparation of signature utilities and Maven reposi
     # uncomment the following option and set your preferred keyid.
     
     default-key 28681CB1
+    ```
+    
+   - If there are multiple public keys, you can also delete unuseful key：
+   
+    ```sh  
+    ### Delete the private key first, then delete the public key.
+    
+    $ gpg --yes --delete-secret-keys shenglicao2@gmail.com   ### indicate email address  
+    
+    $ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4 
+    
     ```
 
 3. Set up Apache central repository.
@@ -161,23 +180,28 @@ modifications and taggings related to ${release_version} Release Candidates are 
 
     ```shell
     $ mvn release:clean
-    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
     ```
 
     > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not.
- 
 
 
     After executing the above commands, you will find that:
     1. source-release.zip and bin-release.zip are generated under dubbo-distribution directory, please unzip it and check the file structure
-    2. The version tag has been push to github repository, you will see a commit called `[maven-release-plugin] prepare release dubbo-x.x.x` were added
-    3. The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically and the modifications are pushed to the github repository, you will see a commit called `[maven-release-plugin] prepare for next development iteration` were added
+    2. -DpushChanges tells maven not to push the commits and tags to the remote repostiroy. If not specified, the version tag will be pushed to github repository, you will see a commit called `[maven-release-plugin] prepare release dubbo-x.x.x` added.
+    3. The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically. If -DpushChanges=true is specified, the modifications will be pushed to the remote repository, you will see a commit called `[maven-release-plugin] prepare for next development iteration` added.
 
    - Run release:perform, make an offical release
 
     ```shell
-    $ mvn -Prelease release:perform -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    $ mvn release:perform -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     ```
+    
+#### Note
+
+- When you deploy the package into repository, it will be interrupted for network. So you must restart to desploy。  
+- The problem that missing package occurred many times at deploying. So you should check the quantity of package, especially parent package。
+  
 
     All artifacts are released to configured remote maven central repository, in staging state 
 
@@ -207,7 +231,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
 6. Generate sha512 sign
 
    ```shell
-   $ shasum -a 512 apache-dubbo-incubating-${release_version}-source-release.zip >> apache-dubbo-incubating-${release_version}-source-release.zip.sha512
+   $ shasum -b -a 512 apache-dubbo-incubating-${release_version}-source-release.zip >> apache-dubbo-incubating-${release_version}-source-release.zip.sha512
    ```
 
 7. If the binary release is accompanied with the source release
@@ -228,6 +252,8 @@ modifications and taggings related to ${release_version} Release Candidates are 
    ```
 
 ## Verify Release Candidates
+
+A full check list can be found [here](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)
 
 The verification link includes but is not limited to the following contents and forms:
 
@@ -285,15 +311,12 @@ $ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
 * 'incubating' in name
 * LICENSE and NOTICE exists and contents are good
 
-## Begin voting
+## Release vote
 
 The voting is divided into two phases:
 
 1. Dubbo community votes and sends the voting email to dev@dubbo.apache.org. After reviewing by community developers and winning 3 binding tickets that agree to release, you can go to the next stage of voting.
-2. Apache community votes and sends the voting email to general@apache.org. After reviewing by Apache PMC Review and winning 3 binding tickets that agree to release,you will be allowed to release officially.
-3. Publish [release notes](https://github.com/apache/incubator-dubbo/releases) on Github.
-4. Update the recommend dependency on [Github](https://github.com/apache/incubator-dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
-5. Announce on the [official site](http://dubbo.apache.org/) that the version was successfully released.
+2. Apache community votes and sends the voting email to general@incubator.apache.org. After reviewing by Apache IPMC(Incubator PMC) members and winning 3 binding votes that agree to release, you will be allowed to release officially.
 
 Mail template：
 
@@ -331,11 +354,35 @@ The Apache Dubbo (Incubating) Team
 
 ## Official Release
 
-1. Commit release package of  https://dist.apache.org/repos/dist/dev/incubator/dubbo to https://dist.apache.org/repos/dist/release/incubator/dubbo/, complete official release。
-2. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed.
+<<<<<<< Updated upstream
+When the release vote has passed, 
 
-## Complete Maven Convenient Binary release（Optional）
+0. Release the maven artifacts. This is **required step** for 2.7.0 and above. Go to [here](https://repository.apache.org), and choose the staging repository, click the release button. Wait for a moment and verify it at [here](https://repository.apache.org/content/repositories/releases/org/apache/dubbo/), make sure your artifacts are there and correct. It will take some time to sync to maven central repository. You can verify it at [here](https://repo.maven.apache.org/maven2/org/apache/dubbo)
+1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo)
+2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/incubator/dubbo)
+3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
+5. Publish [release notes](https://github.com/apache/incubator-dubbo/releases) on Github.
+6. Update the recommend dependency on [Github](https://github.com/apache/incubator-dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
+7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like this `https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip`. The download link for the previous release version should be changed to `https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip`. Please refer to the [download page](https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
+8. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
+9. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed.
 
-**[apache.repository.org](https://repository.apache.org/) The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
+
+## Complete Maven Convenient Binary release
+
+> This is an option step for 2.6.x release.
+
+**[repository.apache.org](https://repository.apache.org/) The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
 The artifacts that were previously published to the maven repository are in the staging state. Log in to [apache.repository.org](https://repository.apache.org/) with the Apache id and release it.
+
+
+## FAQ
+
+#### gpg: signing failed: Inappropriate ioctl for device
+
+If you've encoutered this error, try the following commands:
+
+```
+export GPG_TTY=$(tty)
+```
