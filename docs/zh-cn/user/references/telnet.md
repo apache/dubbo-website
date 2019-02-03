@@ -65,6 +65,10 @@ status命令所检查的资源也可以扩展，参见：[扩展参考手册](..
 0. `invoke XxxService.xxxMethod({"prop": "value"})`: 调用服务的方法
 0. `invoke xxxMethod({"prop": "value"})`: 调用服务的方法(自动查找包含此方法的服务)
 
+### `select` [^2]
+
+0. `select 1`: 当 invoke 命令匹配到多个方法时使用，根据提示列表选择需要调用的方法
+
 ### `status`
 
 0. `status`: 显示汇总状态，该状态将汇总所有资源的状态，当全部 OK 时则显示 OK，只要有一个 ERROR 则显示 ERROR，只要有一个 WARN 则显示 WARN
@@ -89,5 +93,10 @@ status命令所检查的资源也可以扩展，参见：[扩展参考手册](..
 
 `exit`: 退出当前 telnet 命令行
 
-[^1]: `2.0.6` 以上版本支持
+### `shutdown` [^2]
 
+0. `shutdown`: 关闭 dubbo 应用
+0. `shutdown -t 1000`: 延迟 1000 毫秒关闭 dubbo 应用
+
+[^1]: `2.0.6` 以上版本支持
+[^2]: `2.7.1` 以上版本支持

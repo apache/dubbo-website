@@ -81,7 +81,7 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 ```
 
 建议将此配置集中管理，参考[外部化配置](#使用外部化配置)。
-[元数据中心]()设计及用途，请参考文档。
+在此了解更多[元数据中心]()设计目的与用途。
 
 
 
@@ -139,7 +139,7 @@ dubbo.protocol.port=20880
 
 - 条件路由
 
-    ```yaml
+  ```yaml
   ---
   scope: application
   force: true
@@ -147,8 +147,8 @@ dubbo.protocol.port=20880
   enabled: true
   key: governance-conditionrouter-consumer
   conditions:
-  - method=sayHello => address=*:20880
-  - method=sayHi => address=*:20881
+    - application=app1 => address=*:20880
+    - application=app2 => address=*:20881
   ...
   ```
 
@@ -156,17 +156,17 @@ dubbo.protocol.port=20880
 
 - 标签路由
 
-    ```yaml
+  ```yaml
   ---
   force: false
   runtime: true
   enabled: true
   key: governance-tagrouter-provider
   tags:
-  - name: tag1
-    addresses: ["127.0.0.1:20880"]
-  - name: tag2
-    addresses: ["127.0.0.1:20881"]
+    - name: tag1
+      addresses: ["127.0.0.1:20880"]
+    - name: tag2
+      addresses: ["127.0.0.1:20881"]
   ...
   ```
 
@@ -189,9 +189,9 @@ dubbo.protocol.port=20880
 
 
 
-关于治理规则更多详细说明，请参考[路由规则]()和[覆盖规则]()用户文档。
+关于治理规则更多详细说明，请参考[路由规则](/docs/zh-cn/user/demos/routing-rule.md)和[覆盖规则](/docs/zh-cn/user/demos/config-rule.md)用户文档。
 
-也可继续了解[使用示例]()。
+也可继续了解[使用示例](https://github.com/apache/incubator-dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-governance)。
 
 
 
@@ -214,15 +214,15 @@ dubbo.protocol.port=20880
 
 1. Maven坐标
 
-  **groupId 由 `com.alibaba` 改为 `org.apache.dubbo`**
+**groupId 由 `com.alibaba` 改为 `org.apache.dubbo`**
 
 2. package
 
-  **package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`**
+**package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`**
 
 
 
-Maven坐标升级比较直观，只需要修改相应的pom文件就可以了；而package变更则可能会带来编译问题，升级过程需要用户修改代码。因此为了减少用户升级成本，让用户可以做到渐进式升级，2.7.0版本继续保留了一些常用基础API和SP`com.alibaba.dubb`的支持。
+Maven坐标升级比较直观，只需要修改相应的pom文件就可以了；而package变更则可能会带来编译问题，升级过程需要用户修改代码。因此为了减少用户升级成本，让用户可以做到渐进式升级，2.7.0版本继续保留了一些常用基础API和SPI`com.alibaba.dubbo`的支持。
 
 #### API编程接口
 
