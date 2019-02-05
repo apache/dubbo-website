@@ -44,4 +44,5 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | chenzhiguo | <https://github.com/chenzhiguo> |              | +8       |
 | biyuhao    | <https://github.com/biyuhao>    | Asiainfo-sec | +8       |
 | huyuechy   | <https://github.com/huyuechy>   |              | +8       |
+| kezhenxu94 | <https://github.com/kezhenxu94> |              | +8   |
 
