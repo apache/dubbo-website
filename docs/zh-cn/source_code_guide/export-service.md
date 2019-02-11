@@ -394,7 +394,7 @@ private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> r
 
 上面的代码首先是将一些信息，比如版本、时间戳、方法名以及各种配置对象的字段信息放入到 map 中，map 中的内容将作为 URL 的查询字符串。构建好 map 后，紧接着是获取上下文路径、主机名以及端口号等信息。最后将 map 和主机名等数据传给 URL 构造方法创建 URL 对象。需要注意的是，这里出现的 URL 并非 java.net.URL，而是 com.alibaba.dubbo.common.URL。
 
-上面省略了一段代码，这里简单分析一下。这段代码用于检测 \<dubbo:argument\> 标签中的配置信息，并将相关配置添加到 map 中。代码如下：
+上面省略了一段代码，这里简单分析一下。这段代码用于检测 \<dubbo:method\> 标签中的配置信息，并将相关配置添加到 map 中。代码如下：
 
 ```java
 private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs) {
