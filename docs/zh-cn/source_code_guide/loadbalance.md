@@ -262,7 +262,7 @@ int offsetWeight = random.nextInt(totalWeight) + 1;
 
 ### 2.3 ConsistentHashLoadBalance
 
-一致性 hash 算法由麻省理工学院的 Karger 及其合作者于1997年提供出的，算法提出之初是用于大规模缓存系统的负载均衡。它的工作过程是这样的，首先根据 ip 或其他的信息为缓存节点生成一个 hash，并将这个 hash 投射到 [0, 2<sup>32</sup> - 1] 的圆环上。当有查询或写入请求时，则为缓存项的 key 生成一个 hash 值。然后查找第一个大于或等于该 hash 值的缓存节点，并到这个节点中查询或写入缓存项。如果当前节点挂了，则在下一次查询或写入缓存时，为缓存项查找另一个大于其 hash 值的缓存节点即可。大致效果如下图所示，每个缓存节点在圆环上占据一个位置。如果缓存项的 key 的 hash 值小于缓存节点 hash 值，则到该缓存节点中存储或读取缓存项。比如下面绿色点对应的缓存项将会被存储到 cache-2 节点中。由于 cache-3 挂了，原本应该存到该节点中的缓存想最终会存储到 cache-4 节点中。
+一致性 hash 算法由麻省理工学院的 Karger 及其合作者于1997年提出的，算法提出之初是用于大规模缓存系统的负载均衡。它的工作过程是这样的，首先根据 ip 或者其他的信息为缓存节点生成一个 hash，并将这个 hash 投射到 [0, 2<sup>32</sup> - 1] 的圆环上。当有查询或写入请求时，则为缓存项的 key 生成一个 hash 值。然后查找第一个大于或等于该 hash 值的缓存节点，并到这个节点中查询或写入缓存项。如果当前节点挂了，则在下一次查询或写入缓存时，为缓存项查找另一个大于其 hash 值的缓存节点即可。大致效果如下图所示，每个缓存节点在圆环上占据一个位置。如果缓存项的 key 的 hash 值小于缓存节点 hash 值，则到该缓存节点中存储或读取缓存项。比如下面绿色点对应的缓存项将会被存储到 cache-2 节点中。由于 cache-3 挂了，原本应该存到该节点中的缓存项最终会存储到 cache-4 节点中。
 
 ![](./sources/images/consistent-hash.jpg)
 
@@ -375,7 +375,7 @@ private Invoker<T> selectForKey(long hash) {
     // 到 TreeMap 中查找第一个节点值大于或等于当前 hash 的 Invoker
     Map.Entry<Long, Invoker<T>> entry = virtualInvokers.tailMap(hash, true).firstEntry();
     // 如果 hash 大于 Invoker 在圆环上最大的位置，此时 entry = null，
-    // 需要将 TreeMap 的头结点赋值给 entry
+    // 需要将 TreeMap 的头节点赋值给 entry
     if (entry == null) {
         entry = virtualInvokers.firstEntry();
     }
