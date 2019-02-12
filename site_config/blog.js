@@ -164,6 +164,20 @@ export default {
     postsTitle: '所有文章',
     list: [
         {
+            title: 'Dubbo Admin服务测试介绍',
+            author: '@nzomkxia',
+            dateStr: 'Jan 29th, 2019',
+            desc: '本文介绍了新版本的Dubbo Admin的服务测试功能',
+            link: '/zh-cn/blog/service-test.html',
+        },
+        {
+            title: '新版本Dubbo Admin介绍',
+            author: '@nzomkxia',
+            dateStr: 'Jan 28th, 2019',
+            desc: '本文介绍了新版本的Dubbo Admin的设计和功能',
+            link: '/zh-cn/blog/dubbo-admin.html',
+        },
+        {
             title: '如何使用Fescar保证Dubbo微服务间的一致性',
             author: '@slievrly',
             dateStr: 'Jan 17th, 2019',
@@ -191,7 +205,7 @@ export default {
         desc: '本文介绍 Dubbo 如何整合注册中心 Nacos，包括 Nacos 控制台使用',
         link: '/zh-cn/blog/dubbo-registry-nacos-integration.html',
       },
-      {   
+      {
          title: 'Dubbo协议详解',
          author: '@authorlove',
          dateStr: 'Jan 2nd, 2019',

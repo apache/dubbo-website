@@ -55,6 +55,14 @@ export default {
                     {
                         title: 'Website Guide',
                         link: '/en-us/docs/developers/committer-guide/website-guide_dev.html',
+                    },
+                    {
+                        title: 'Apache Dubbo Page Maintenance',
+                        link: '/en-us/docs/developers/committer-guide/apache-dubbo-page_dev.html',
+                    },
+                    {
+                        title: 'Release Guide',
+                        link: '/en-us/docs/developers/committer-guide/release-guide_dev.html',
                     }
                 ]
             },
@@ -103,13 +111,11 @@ export default {
                         {
                             title: '邮件列表订阅向导',
                             link: '/zh-cn/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html',
-                        }
-                        ,
+                        },
                         {
                             title: 'CLA签署向导',
                             link: '/zh-cn/docs/developers/contributor-guide/cla-signing-guide_dev.html',
-                        }
-                        ,
+                        },
                         {
                             title: 'Dubbo Extension向导',
                             link: '/zh-cn/docs/developers/contributor-guide/dubbo-extension-guide_dev.html',
@@ -130,6 +136,14 @@ export default {
                         {
                             title: '网站向导',
                             link: '/zh-cn/docs/developers/committer-guide/website-guide_dev.html',
+                        },
+                        {
+                            title: 'Apache Dubbo主页的维护',
+                            link: '/zh-cn/docs/developers/committer-guide/apache-dubbo-page_dev.html',
+                        },
+                        {
+                            title: '版本发布向导',
+                            link: '/zh-cn/docs/developers/committer-guide/release-guide_dev.html',
                         }
                     ]
                 },
