@@ -74,6 +74,7 @@
     * [8.10 dubbo:method](./references/xml/dubbo-method.md)
     * [8.11 dubbo:argument](./references/xml/dubbo-argument.md)
     * [8.12 dubbo:parameter](./references/xml/dubbo-parameter.md)
+    * [8.13 dubbo:config-center](./references/xml/dubbo-config-center.md)
 * [9 协议参考手册](./references/protocol/introduction.md)
     * [9.1 dubbo://](./references/protocol/dubbo.md)
     * [9.2 rmi//](./references/protocol/rmi.md)

@@ -933,6 +933,10 @@ export default {
                                 title: 'dubbo:parameter',
                                 link: '/zh-cn/docs/user/references/xml/dubbo-parameter.html',
                             },
+                            {
+                                title: 'dubbo:config-center',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-config-center.html',
+                            },
                         ]
                     },
                     {
