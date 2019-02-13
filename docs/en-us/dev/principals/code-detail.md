@@ -1,35 +1,36 @@
-# 魔鬼在细节
+# The devil is in the details
 
 > http://javatar.iteye.com/blog/1056664
 
-最近一直担心 Dubbo 分布式服务框架后续如果维护人员增多或变更，会出现质量的下降， 我在想，有没有什么是需要大家共同遵守的，根据平时写代码时的一习惯，总结了一下在写代码过程中，尤其是框架代码，要时刻牢记的细节。可能下面要讲的这些，大家都会觉得很简单，很基础，但要做到时刻牢记。在每一行代码中都考虑这些因素，是需要很大耐心的， 大家经常说，魔鬼在细节中，确实如此。 
+Recently, I have been worried about the quality of the Dubbo distributed service framework. If there are more maintenance personnel or changes, there will be a decline in quality. I am thinking, is there any need for everyone to abide by it, according to a habit when writing code, I have summarized it. The code process, especially the framework code, should always keep in mind the details. Maybe the following will be said, everyone will feel very simple, very basic, but always keep in mind. Considering these factors in every line of code requires a lot of patience. It is often said that the devil is in the details.
 
-## 防止空指针和下标越界 
+## Prevent null pointer dereference and index out of bounds
 
-这是我最不喜欢看到的异常，尤其在核心框架中，我更愿看到信息详细的参数不合法异常。这也是一个健状的程序开发人员，在写每一行代码都应在潜意识中防止的异常。基本上要能确保一次写完的代码，在不测试的情况，都不会出现这两个异常才算合格。 
+This is the exception I least like to see, especially in the core framework, in contrast I would like to see a parameter not legal exception with detail information. This is also a robust program developer who should be prevented in the subconscious by writing every line of code. Basically, you must be able to ensure that the code that is written once will not appear in the case of no test.
 
-## 保证线程安全性和可见性
+## Ensure thread safety and visibility
 
-对于框架的开发人员，对线程安全性和可见性的深入理解是最基本的要求。需要开发人员，在写每一行代码时都应在潜意识中确保其正确性。因为这种代码，在小并发下做功能测试时，会显得很正常。但在高并发下就会出现莫明其妙的问题，而且场景很难重现，极难排查。 
+For framework developers, a deep understanding of thread safety and visibility is the most basic requirement. Developers are required to ensure that they are correct in the subconscious when writing each line of code. Because of this kind of code, it will look normal when doing functional tests under small concurrency. However, under high concurrency, there will be inexplicable problems, and the scene is difficult to reproduce, and it is extremely difficult to check.
 
-## 尽早失败和前置断言
+## Fail fast and precondition
 
-尽早失败也应该成为潜意识，在有传入参数和状态变化时，均在入口处全部断言。一个不合法的值和状态，在第一时间就应报错，而不是等到要用时才报错。因为等到要用时，可能前面已经修改其它相关状态，而在程序中很少有人去处理回滚逻辑。这样报错后，其实内部状态可能已经混乱，极易在一个隐蔽分支上引发程序不可恢复。 
+Fail fast should also become a subconscious mind, assert at the entrance when there are incoming parameters and state changes. An illegal value and state should be reported at the first time, rather than waiting until the time is needed. Because when it is time to use, other related states may have been modified before, and few people in the program handle the rollback logic. After this error, the internal state may be confusing, and it is easy to cause the program to be unrecoverable on a hidden branch.
 
-## 分离可靠操作和不可靠操作
+## Separate reliable operation and unreliable operation
  
-这里的可靠是狭义的指是否会抛出异常或引起状态不一致，比如，写入一个线程安全的 Map，可以认为是可靠的，而写入数据库等，可以认为是不可靠的。开发人员必须在写每一行代码时，都注意它的可靠性与否，在代码中尽量划分开，并对失败做异常处理，并为容错，自我保护，自动恢复或切换等补偿逻辑提供清晰的切入点，保证后续增加的代码不至于放错位置，而导致原先的容错处理陷入混乱。 
+The reliability here is narrowly defined whether it will throw an exception or cause a state inconsistency. For example, writing a thread-safe Map can be considered reliable, but writing to a database can be considered unreliable. Developers must pay attention to its reliability when writing each line of code, divide it as much as possible in the code, and handle exceptions for failures, and provide clear logic for fault-tolerant, self-protection, automatic recovery or switching. The entry point ensures that the code that is subsequently added is not misplaced, and the original fault-tolerant processing is confusing.
 
-## 异常防御，但不忽略异常
+## Safeguard against exceptions, but does not ignore exceptions
 
-这里讲的异常防御，指的是对非必须途径上的代码进行最大限度的容忍，包括程序上的 BUG，比如：获取程序的版本号，会通过扫描 Manifest 和 jar 包名称抓取版本号，这个逻辑是辅助性的，但代码却不少，初步测试也没啥问题，但应该在整个 getVersion() 中加上一个全函数的 try-catch 打印错误日志，并返回基本版本，因为 getVersion() 可能存在未知特定场景异常，或被其他的开发人员误修改逻辑(但一般人员不会去掉 try-catch)，而如果它抛出异常会导致主流程异常，这是我们不希望看到的。但这里要控制个度，不要随意 try-catch，更不要无声无息的吃掉异常。 
+The exception defense mentioned here refers to the maximum tolerance of the code on the non-crucial path, including the bug on the program. For example, the version number of program is retrieved by scanning the Manifest and jar package names. This logic is auxiliary, but the code is quite a bit. Although the initial test works well but you should add a try-catch block to cover the whole getVersion() function, if something goes wrong then print error message and return the basic version. Because getVersion() may encounter exception for specific unknown scene, or other developers mistakenly modify the logic (usually they won't remove try-catch). Otherwise if it throws an exception, the main process will be interrupted which we don't want to see. It should be controlled properly, do not abuse try-catch, and do not eat the exception silently.
 
-## 缩小可变域和尽量 final 
-如果一个类可以成为不变类(Immutable Class)，就优先将它设计成不变类。不变类有天然的并发共享优势，减少同步或复制，而且可以有效帮忙分析线程安全的范围。就算是可变类，对于从构造函数传入的引用，在类中持有时，最好将字段 final，以免被中途误修改引用。不要以为这个字段是私有的，这个类的代码都是我自己写的，不会出现对这个字段的重新赋值。要考虑的一个因素是，这个代码可能被其他人修改，他不知道你的这个弱约定，final 就是一个不变契约。 
+## Reduce scope of variable and use final liberally
 
-## 降低修改时的误解性，不埋雷
+If a class can be an Immutable Class, it is preferred to design it as an Immutable Class. The immutable class has natural concurrency advantages, reduce synchronization and replication, it can efficiently help analyze the scope of thread safety. Even if a mutable class, for references passed in from constructor then held internally, it is better to make this field final, so as not to be mistakenly modified. Don't assume that the field won't be reassigned if this field is private or this class is written by myself. One factor to consider is that this code may be modified by others. He may not aware your weak convention， and the Final is a invariant contract.
+
+## Reduce misunderstanding when modifying, do not bury mine
  
-前面不停的提到代码被其他人修改，这也开发人员要随时紧记的。这个其他人包括未来的自己，你要总想着这个代码可能会有人去改它。我应该给修改的人一点什么提示，让他知道我现在的设计意图，而不要在程序里面加潜规则，或埋一些容易忽视的雷，比如：你用 null 表示不可用，size 等于 0 表示黑名单，这就是一个雷，下一个修改者，包括你自己，都不会记得有这样的约定，可能后面为了改某个其它 BUG，不小心改到了这里，直接引爆故障。对于这个例子，一个原则就是永远不要区分 null 引用和 empty 值。 
+It is repeatedly mentioned that the code being modified by the others, and this is something developers should keep in mind. This other person includes the future of yourself, you always have to think about this code, someone may change it. I should give the modified person a hint, let him know my current design intent, instead of adding hidden rules in the program, or bury some easily overlooked mines, such as: use null to indicate that it is not available, the size is equal to 0 means black list, this is a mine. The next modifier, including yourself, will not remember to have such an agreement, may later change some of the other bugs, accidentally changed to here, directly detonated the fault. For this example, one principle is to never distinguish between null references and null values.
 
-## 提高代码的可测性 
-这里的可测性主要指 Mock 的容易程度，和测试的隔离性。至于测试的自动性，可重复性，非偶然性，无序性，完备性(全覆盖)，轻量性(可快速执行)，一般开发人员，加上 JUnit 等工具的辅助基本都能做到，也能理解它的好处，只是工作量问题。这里要特别强调的是测试用例的单一性(只测目标类本身)和隔离性(不传染失败)。现在的测试代码，过于强调完备性，大量重复交叉测试，看起来没啥坏处，但测试代码越多，维护代价越高。经常出现的问题是，修改一行代码或加一个判断条件，引起 100 多个测试用例不通过。时间一紧，谁有这个闲功夫去改这么多形态各异的测试用例？久而久之，这个测试代码就已经不能真实反应代码现在的状况，很多时候会被迫绕过。最好的情况是，修改一行代码，有且只有一行测试代码不通过。如果修改了代码而测试用例还能通过，那也不行，表示测试没有覆盖到。另外，可 Mock 性是隔离的基础，把间接依赖的逻辑屏蔽掉。可 Mock 性的一个最大的杀手就是静态方法，尽量少用。 
+## Improve code testability
+The testability here mainly refers to the ease of Mock and the isolation of the test cases. As for the automation, repeatability, stability, disorder, completeness (full coverage), lightweight (fast execution) of the test, the general developer, plus the assist of tools such as JUnit can do it. Can also understand its benefits, just the matter of workload. Primary emphasis on unicity(only test the target class itself) and isolation(do not propagate failure). Nowadays there is too much emphasis on completeness, a lot of crossed and repeated test cases. It seems fine, but the more test code, the higher maintenance cost. A common problem is that modifying a line of code or adding an assertion causes more than 100 test cases to fail. It will cost a lot of time to fix these variance test cases. Over time, this test cases can't really reflect the current state of the code, and it will often be compromised to bypass. In the best case, modify a line of code, and only one line of test code does not pass. If the code is modified and the test case can still pass, that doesn't work, indicating that the scenario is not covered. In addition, Mockability is the basis of isolation, it hide the logic of indirect dependencies. One of the biggest killers of Mockability is the static method, which should be avoid as possible.
