@@ -1,3 +1,3 @@
-# 设计原则
+# Design principals
 
-本章节的设计原则摘录自梁飞在 javaeye 上发表的系列文章。
+The design principles in this chapter are taken from a series of articles published by Liang Fei on javaeye.
