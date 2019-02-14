@@ -93,7 +93,7 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 
 ```xml
 <dubbo:application name="demo-provider"/>
-<dubbo:conig-center address="zookeeper://127.0.0.1:2181"/>
+<dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 
 <dubbo:registry address="zookeeper://127.0.0.1:2181" simplified="true"/>
 <dubbo:metadata-report address="redis://127.0.0.1:6379"/>
@@ -119,7 +119,7 @@ dubbo.protocol.port=20880
 
 ```xml
 <dubbo:application name="demo-provider"/>
-<dubbo:conig-center address="zookeeper://127.0.0.1:2181"/>
+<dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 
 <bean id="demoService" class="org.apache.dubbo.samples.basic.impl.DemoServiceImpl"/>
 <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService" ref="demoService"/>
