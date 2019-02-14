@@ -9,12 +9,12 @@ Writing routing rules to the registry is usually done by the monitoring center o
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
 Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.153.10:2181"));
-registry.register(URL.valueOf("condition://0.0.0.0/com.foo.BarService?category=routers&dynamic=false&rule=" + URL.encode("host = 10.20.153.10 => host = 10.20.153.11")));
+registry.register(URL.valueOf("route://0.0.0.0/com.foo.BarService?category=routers&dynamic=false&rule=" + URL.encode("host = 10.20.153.10 => host = 10.20.153.11")));
 ```
 
 其中：
 
-* `condition://` It indicates the type of routing rules, supports routing rules and script routing rules, and can be extended. **Required**。
+* `route://` It indicates the type of routing rules, supports routing rules and script routing rules, and can be extended. **Required**。
 * `0.0.0.0` It indicates that all IP addresses are valid. If you want to take effect for only one IP address, fill in the IP address. **Required**。
 * `com.foo.BarService` It indicates that the specified service is effective. **Required**。
 * `group=foo` It indicates that the specified service in specified group is effective. When absent, the specified service which dosen't configure group is effective.
