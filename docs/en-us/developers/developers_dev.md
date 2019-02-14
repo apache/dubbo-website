@@ -35,6 +35,7 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | tswstarplanet   | Taosheng Wei        | NetsUnion        | Committer | +8       |
 | kexianjun       | Xianjun Ke          | Caocaokeji       | Committer | +8       |
 | songkun         | Kun Song            | Huawei           | Committer | +8       |
+| lixiaojie       | Xiaojie Li          | GomeFinance      | Committer | +8       |
 
 ### Contributors
 
