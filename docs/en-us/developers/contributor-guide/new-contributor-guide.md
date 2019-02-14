@@ -27,7 +27,11 @@ git checkout -b your_awesome_patch
 git push origin your_awesome_patch
 ```
 
-
 ### Code convention
 
 Please check the [CONTRIBUTING.md](https://github.com/apache/incubator-dubbo/blob/master/CONTRIBUTING.md) for code convention.
+
+### Participate in the release vote
+
+Participate in the release vote is an important way to contribute to Dubbo. The Dubbo community welcomes everyone to partipate, you can check the release vote using this [check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist). 
+If you have any question regarding the check list, please feel free to ask on dev@dubbo.apache.org.

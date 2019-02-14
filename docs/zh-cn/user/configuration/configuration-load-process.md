@@ -93,7 +93,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters.item4=value4
   <!-- dubbo-provier.xml -->
   
   <dubbo:application name="demo-provider"/>
-  <dubbo:conig-center address="zookeeper://127.0.0.1:2181"/>
+  <dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
   
   <dubbo:registry address="zookeeper://127.0.0.1:2181" simplified="true"/>
   <dubbo:metadata-report address="redis://127.0.0.1:6379"/>

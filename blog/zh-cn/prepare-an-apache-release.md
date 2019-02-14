@@ -92,6 +92,15 @@ keywords: Dubbo, Apache, Release
     
     default-key 28681CB1
     ```
+    - 如果有多个public key, 也可以删除无用的key：
+    ```sh  
+    ### 先删除私钥，再删除公钥
+    
+    $ gpg --yes --delete-secret-keys shenglicao2@gmail.com   ###老的私钥，指明邮箱即可
+    
+    $ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4
+    
+    ```
 
     PS: 最新版本经过实测，本地没有gpg.conf这个文件，因此如果在执行过程中遇到签名失败，可以参考这个文章：https://blog.csdn.net/wenbo20182/article/details/72850810 或 https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors
 
@@ -176,6 +185,12 @@ keywords: Dubbo, Apache, Release
 
     PS: 执行release插件时，需要输入github的密码，这里不是输入web页面的登录密码，而是一个token，详见这里：https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 
+#### 注意点
+
+- 在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，可以重新开始执行。  
+- deploy执行到maven仓库的时候，请确认下包的总量是否正确。多次出现了包丢失的情况，特别是parent包。
+
+
 ## 准备Apache发布
 
 1. 准备svn本机环境（Apache使用svn托管项目的发布内容）
@@ -219,6 +234,8 @@ keywords: Dubbo, Apache, Release
    ```
 
 ## 验证Release Candidates
+
+详细的检查列表请参考官方的[check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)
 
 首先，从以下地址下载要发布的Release Candidate到本地环境：
 <pre>

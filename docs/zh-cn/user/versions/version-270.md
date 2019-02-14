@@ -81,7 +81,7 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 ```
 
 建议将此配置集中管理，参考[外部化配置](#使用外部化配置)。
-[元数据中心]()设计及用途，请参考文档。
+在此了解更多[元数据中心]()设计目的与用途。
 
 
 
@@ -93,7 +93,7 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 
 ```xml
 <dubbo:application name="demo-provider"/>
-<dubbo:conig-center address="zookeeper://127.0.0.1:2181"/>
+<dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 
 <dubbo:registry address="zookeeper://127.0.0.1:2181" simplified="true"/>
 <dubbo:metadata-report address="redis://127.0.0.1:6379"/>
@@ -119,7 +119,7 @@ dubbo.protocol.port=20880
 
 ```xml
 <dubbo:application name="demo-provider"/>
-<dubbo:conig-center address="zookeeper://127.0.0.1:2181"/>
+<dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 
 <bean id="demoService" class="org.apache.dubbo.samples.basic.impl.DemoServiceImpl"/>
 <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService" ref="demoService"/>
@@ -214,15 +214,15 @@ dubbo.protocol.port=20880
 
 1. Maven坐标
 
-  **groupId 由 `com.alibaba` 改为 `org.apache.dubbo`**
+**groupId 由 `com.alibaba` 改为 `org.apache.dubbo`**
 
 2. package
 
-  **package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`**
+**package 由 `com.alibaba.dubbo` 改为 `org.apache.dubbo`**
 
 
 
-Maven坐标升级比较直观，只需要修改相应的pom文件就可以了；而package变更则可能会带来编译问题，升级过程需要用户修改代码。因此为了减少用户升级成本，让用户可以做到渐进式升级，2.7.0版本继续保留了一些常用基础API和SP`com.alibaba.dubb`的支持。
+Maven坐标升级比较直观，只需要修改相应的pom文件就可以了；而package变更则可能会带来编译问题，升级过程需要用户修改代码。因此为了减少用户升级成本，让用户可以做到渐进式升级，2.7.0版本继续保留了一些常用基础API和SPI`com.alibaba.dubbo`的支持。
 
 #### API编程接口
 

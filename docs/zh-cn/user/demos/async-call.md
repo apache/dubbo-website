@@ -9,7 +9,7 @@
 
 ## 使用CompletableFuture签名的接口
 
-需要服务提供者事先定义CompletableFuture签名的服务，具体参见[服务端异步执行](./async-execute-on-provider)接口定义：
+需要服务提供者事先定义CompletableFuture签名的服务，具体参见[服务端异步执行](./async-execute-on-provider.md)接口定义：
 
 ```java
 public interface AsyncService {

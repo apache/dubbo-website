@@ -148,6 +148,6 @@ configCenter.setExternalConfig(dubboConfigurations);
 
 不同的规则以不同的key后缀区分：
 
-- configurators，[覆盖规则]()
-- tag-router，[标签路由]()
-- condition-router，[条件路由
+- configurators，[覆盖规则](../demos/config-rule.md)
+- tag-router，[标签路由](../demos/routing-rule.md)
+- condition-router，[条件路由](../demos/routing-rule.md)

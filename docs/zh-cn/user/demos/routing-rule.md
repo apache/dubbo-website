@@ -1,6 +1,6 @@
 # 路由规则
 
-在此查看[老版本路由规则(2.6.x or before)](./routing-rule.md)
+在此查看[老版本路由规则(2.6.x or before)](./routing-rule-deprecated.md)
 
 
 
@@ -194,13 +194,13 @@ host != 172.22.3.* => host != 172.22.3.*
   <dubbo:provider tag="tag1"/>
   ```
 
-or
+  or
 
-  ```xml
-  <dubbo:service tag="tag1"/>
-  ```
+    ```xml
+    <dubbo:service tag="tag1"/>
+    ```
 
-or
+  or
 
   ```properties
   java -jar xxx-provider.jar -Ddubbo.provider.tag={the tag you want}
