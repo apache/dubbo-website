@@ -168,7 +168,7 @@ META-INF/dubbo/com.alibaba.dubbo.rpc.Filter：
 xxx=com.xxx.XxxFilter
 ```
 
-配置 xml:
+在 xml 中配置:
 
 ```xml
 <!-- 消费方调用过程拦截 -->
