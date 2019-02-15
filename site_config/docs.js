@@ -837,6 +837,10 @@ export default {
                                 title: 'Kryo和FST序列化',
                                 link: '/zh-cn/docs/user/demos/serialization.html',
                             },
+                            {
+                                title: '简化注册中心URL',
+                                link: '/zh-cn/docs/user/demos/simplify-registry-data.html',
+                            },
                         ],
                     },
                     {
@@ -971,6 +975,23 @@ export default {
                             {
                                 title: 'Simple 注册中心',
                                 link: '/zh-cn/docs/user/references/registry/simple.html',
+                            },
+                        ]
+                    },
+                    {
+                        title: '元数据中心参考手册',
+                        children: [
+                            {
+                                title: '介绍',
+                                link: '/zh-cn/docs/user/references/metadata/introduction.html',
+                            },
+                            {
+                                title: 'Redis',
+                                link: '/zh-cn/docs/user/references/metadata/metadata-redis.html',
+                            },
+                            {
+                                title: 'Zookeeper',
+                                link: '/zh-cn/docs/user/references/metadata/metadata-zookeeper.html',
                             },
                         ]
                     },

@@ -77,7 +77,7 @@ consumer：
 
 Constant Key表示来自于类org.apache.dubbo.common.Constants的字段。
 
-下面介绍几种常用的使用方式。所有的sample，都可以查看[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT)
+下面介绍几种常用的使用方式。所有的sample，都可以查看[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)
 
 ### 方式1. 配置dubbo.properties
 
