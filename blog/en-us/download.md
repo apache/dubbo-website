@@ -74,4 +74,8 @@
 
 ## [Dubbo Admin](https://github.com/apache/incubator-dubbo-ops)
 
-All new Dubbo Admin is coming.
+### 0.1 (2019-02-15)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/dubbo-ops/0.1/apache-dubbo-ops-incubating-0.1-source-release.zip) |
+[asc](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/dubbo-ops/0.1/apache-dubbo-ops-incubating-0.1-source-release.zip.asc) |
+[sha512](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/dubbo-ops/0.1/apache-dubbo-ops-incubating-0.1-source-release.sha512)
