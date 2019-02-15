@@ -64,3 +64,5 @@ table tr:hover {
 | subscribe | subscribe | boolean | 可选 | true | 服务治理 | 是否向此注册中心订阅服务，如果设为false，将只注册，不订阅 | 2.0.5以上版本 |
 | dynamic | dynamic | boolean | 可选 | true | 服务治理 | 服务是否动态注册，如果设为false，注册后将显示为disable状态，需人工启用，并且服务提供者停止时，也不会自动取消注册，需人工禁用。 | 2.0.5以上版本 |
 | group | group | string | 可选 | dubbo | 服务治理 | 服务注册分组，跨组的服务不会相互影响，也无法相互调用，适用于环境隔离。 | 2.0.5以上版本 |
+| simplified | simplified | boolean | 可选 | false | 服务治理 | 注册到注册中心的URL是否采用精简模式的（与低版本兼容） | 2.7.0以上版本 |
+| extra-keys | extraKeys | string | 可选 |  | 服务治理 | 在simplified=true时，extraKeys允许你在默认参数外将额外的key放到URL中，格式："interface,key1,key2"。 | 2.0.5以上版本 |
