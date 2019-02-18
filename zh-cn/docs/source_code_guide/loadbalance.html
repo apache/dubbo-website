@@ -213,7 +213,7 @@
 </code></pre>
 <pre><code class="language-java">offsetWeight -= getWeight(invokers.get(leastIndex), invocation);
 </code></pre>
-<p>问题出在服务预热阶段，第一行代码直接从 url 中去权重值，未被降权过。第二行代码获取到的是经过降权后的权重。第一行代码获取到的权重值最终会被累加到权重总和 totalWeight 中，这个时候会导致一个问题。offsetWeight 是一个在 [0, totalWeight) 范围内的随机数，而它所减去的是经过降权的权重。很有可能在经过 leastCount 次运算后，offsetWeight 仍然是大于0的，导致无法选中 Invoker。这个问题对应的 issue 为 <a href="https://github.com/apache/incubator-dubbo/issues/904">#904</a>，并在 pull request <a href="https://github.com/apache/incubator-dubbo/pull/2172">#2172</a> 中被修复。具体的修复逻辑是将标注一处的代码修改为：</p>
+<p>问题出在服务预热阶段，第一行代码直接从 url 中取权重值，未被降权过。第二行代码获取到的是经过降权后的权重。第一行代码获取到的权重值最终会被累加到权重总和 totalWeight 中，这个时候会导致一个问题。offsetWeight 是一个在 [0, totalWeight) 范围内的随机数，而它所减去的是经过降权的权重。很有可能在经过 leastCount 次运算后，offsetWeight 仍然是大于0的，导致无法选中 Invoker。这个问题对应的 issue 为 <a href="https://github.com/apache/incubator-dubbo/issues/904">#904</a>，并在 pull request <a href="https://github.com/apache/incubator-dubbo/pull/2172">#2172</a> 中被修复。具体的修复逻辑是将标注一处的代码修改为：</p>
 <pre><code class="language-java"><span class="hljs-comment">// afterWarmup 等价于上面的 weight 变量，这样命名是为了强调该变量经过了 warmup 降权处理</span>
 <span class="hljs-keyword">int</span> afterWarmup = getWeight(invoker, invocation);
 </code></pre>
