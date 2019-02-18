@@ -28,16 +28,18 @@ export default {
                     {
                         title: 'Mailing list subscription guide',
                         link: '/en-us/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html',
-                    }
-                    ,
+                    },
                     {
                         title: 'CLA Signing Guide',
                         link: '/en-us/docs/developers/contributor-guide/cla-signing-guide_dev.html',
-                    }
-                    ,
+                    },
                     {
                         title: 'Extension guide',
                         link: '/en-us/docs/developers/contributor-guide/dubbo-extension-guide_dev.html',
+                    },
+                    {
+                        title: 'How to become a committer',
+                        link: '/en-us/docs/developers/contributor-guide/become-a-committer_dev.html',
                     }
                 ]
             },
@@ -119,6 +121,10 @@ export default {
                         {
                             title: 'Dubbo Extension向导',
                             link: '/zh-cn/docs/developers/contributor-guide/dubbo-extension-guide_dev.html',
+                        },
+                        {
+                            title: '如何成为committer',
+                            link: '/zh-cn/docs/developers/contributor-guide/become-a-committer_dev.html',
                         }
                     ]
                 },
