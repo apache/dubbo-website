@@ -163,6 +163,20 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+	    {
+            title: 'Dubbo客户端异步接口的实现背景和实践',
+            author: '@JeffLv',
+            dateStr: 'Feb 20th, 2019',
+            desc: 'Dubbo客户端异步接口的实现背景和实践',
+            link: '/zh-cn/blog/dubboAync_client.html',
+        },
+	    {
+            title: 'Dubbo服务端异步接口的实现背景和实践',
+            author: '@JeffLv',
+            dateStr: 'Feb 20th, 2019',
+            desc: 'Dubbo服务端异步接口的实现背景和实践',
+            link: '/zh-cn/blog/dubboAsync_server.html',
+        },
         {
             title: 'Dubbo Admin服务测试介绍',
             author: '@nzomkxia',
