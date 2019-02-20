@@ -77,7 +77,7 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181 ###元数据存储的�
 
 ```
 ###dubbo.properties
-dubbo.configCenter.address=zookeeper://127.0.0.1:2181
+dubbo.config-center.address=zookeeper://127.0.0.1:2181
 ... 
 ```
 
