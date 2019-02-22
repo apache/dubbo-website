@@ -163,6 +163,13 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+        {
+            title: 'Dubbo优雅停机介绍',
+            author: '@guohao',
+            dateStr: 'Feb 22th, 2019',
+            desc: 'Dubbo优雅停机的实现背景和实践',
+            link: '/zh-cn/blog/dubbo-gracefully-shutdown.html',
+        },
 	    {
             title: 'Dubbo客户端异步接口的实现背景和实践',
             author: '@JeffLv',
