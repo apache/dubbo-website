@@ -2,7 +2,7 @@
 
 环境要求：需要**Java 8**及以上版本。
 
-2.7.0版本在改造的过程中遵循了一个原则，即**保持与低版本的兼容性，因此从功能层面来说它是与2.6.x及更低版本完全兼容的**。这里所说的兼容性主要是和[包重命名](#包名改造)相关的，接下来会详细说明影响点。另外，虽然功能用法保持向后兼容，但参考本文能帮助您尽快用到2.7.0版本的新特性。
+2.7.0版本在改造的过程中遵循了一个原则，即**保持与低版本的兼容性，因此从功能层面来说它是与2.6.x及更低版本完全兼容的**，而接下来将要提到的兼容性问题主要是[包重命名](#包名改造)带来的。另外，虽然功能用法保持向后兼容，但参考本文能帮助您尽快用到2.7.0版本的新特性。
 
 ## 升级步骤
 
@@ -93,7 +93,7 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 
 ```xml
 <dubbo:application name="demo-provider"/>
-<dubbo:conig-center address="zookeeper://127.0.0.1:2181"/>
+<dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 
 <dubbo:registry address="zookeeper://127.0.0.1:2181" simplified="true"/>
 <dubbo:metadata-report address="redis://127.0.0.1:6379"/>
@@ -119,7 +119,7 @@ dubbo.protocol.port=20880
 
 ```xml
 <dubbo:application name="demo-provider"/>
-<dubbo:conig-center address="zookeeper://127.0.0.1:2181"/>
+<dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 
 <bean id="demoService" class="org.apache.dubbo.samples.basic.impl.DemoServiceImpl"/>
 <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService" ref="demoService"/>
@@ -191,7 +191,7 @@ dubbo.protocol.port=20880
 
 关于治理规则更多详细说明，请参考[路由规则](/docs/zh-cn/user/demos/routing-rule.md)和[覆盖规则](/docs/zh-cn/user/demos/config-rule.md)用户文档。
 
-也可继续了解[使用示例](https://github.com/apache/incubator-dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT/dubbo-samples-governance)。
+也可继续了解[使用示例](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-governance)。
 
 
 

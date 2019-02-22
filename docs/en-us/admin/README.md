@@ -1,4 +1,3 @@
-# dubbo-admin-book
-The installation and maintenance guidance of registry center and dubbo-admin.
+This document explains the structure, deploy procedure and function of Dubbo OPS
 
 

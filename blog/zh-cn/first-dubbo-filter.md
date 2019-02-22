@@ -152,7 +152,7 @@ src
 
 XxxFilter.java：
 
-```
+```java
 public class XxxFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         // before filter ...
@@ -167,4 +167,29 @@ META-INF/dubbo/com.alibaba.dubbo.rpc.Filter：
 ```
 xxx=com.xxx.XxxFilter
 ```
+
+在 xml 中配置:
+
+```xml
+<!-- 消费方调用过程拦截 -->
+<dubbo:reference filter="xxx" />
+<!-- 消费方调用过程缺省拦截器，将拦截所有reference -->
+<dubbo:consumer filter="xxx"/>
+<!-- 提供方调用过程拦截 -->
+<dubbo:service filter="xxx" />
+<!-- 提供方调用过程缺省拦截器，将拦截所有service -->
+<dubbo:provider filter="xxx"/>
+```
+
+或者使用注解：
+
+```java
+@Activate(group = "consumer")
+public class XxxFilter implements Filter {
+    // ...
+}
+```
+
+使用 xml 的配置方式会更加灵活，粒度更细。
+
 在before和after中，可以实现自己的业务逻辑来赋予改filter一定的功能。编写和配置完成后，该filter就会被Dubbo框架激活并且在调用链中执行。

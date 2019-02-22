@@ -7,7 +7,7 @@
 
 
 
-启用动态配置（以Zookeeper为例）：
+启用动态配置（以Zookeeper为例，可查看[动态配置配置项详解](../references/xml/dubbo-config-center.md)）：
 
 ```xml
 <dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
@@ -16,7 +16,7 @@
 或者
 
 ```properties
-dubbo.configCenter.address=zookeeper://127.0.0.1:2181
+dubbo.config-center.address=zookeeper://127.0.0.1:2181
 ```
 
 或者

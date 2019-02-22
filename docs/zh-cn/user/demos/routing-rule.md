@@ -57,10 +57,12 @@
 
 #### 各字段含义
 
-- `scope`表示路由规则的作用粒度，service - 务粒度，application - 应用粒度，scope的取值会决定key的取值。**必填**。
+- `scope`表示路由规则的作用粒度，scope的取值会决定key的取值。**必填**。
+  - service 务粒度
+  - application 应用粒度
 - `Key`明确规则体作用在哪个服务或应用。**必填**。
   - scope=service时，key取值为[{group}:]{service}[:{version}]的组合
-- scope=application时，key取值为application名称
+  - scope=application时，key取值为application名称
 - `enabled=true` 当前路由规则是否生效，可不填，缺省生效。
 - `force=false` 当路由结果为空时，是否强制执行，如果不强制执行，路由结果为空的路由规则将自动失效，可不填，缺省为 `false`。
 - `runtime=false` 是否在每次调用时执行路由规则，否则只在提供者地址列表变更时预先执行并缓存结果，调用时直接从缓存中获取路由结果。如果用了参数路由，必须设为 `true`，需要注意设置会影响调用的性能，可不填，缺省为 `false`。
@@ -78,7 +80,7 @@
 - 如果匹配条件为空，表示对所有消费方应用，如：`=> host != 10.20.153.11`
 - 如果过滤条件为空，表示禁止访问，如：`host = 10.20.153.10 =>`
 
-1. **表达式**
+2. **表达式**
 
 参数支持：
 
@@ -97,7 +99,7 @@
 - 以星号 `*` 结尾，表示通配，如：`host != 10.20.*`
 - 以美元符 `$` 开头，表示引用消费者参数，如：`host = $host`
 
-1. **Condition示例**
+3. **Condition示例**
 
 - 排除预发布机：
 
@@ -203,7 +205,7 @@ host != 172.22.3.* => host != 172.22.3.*
   or
 
   ```properties
-  java -jar xxx-provider.jar -Ddubbo.provider.tag={the tag you want}
+  java -jar xxx-provider.jar -Ddubbo.provider.tag={the tag you want, may come from OS ENV}
   ```
 
 

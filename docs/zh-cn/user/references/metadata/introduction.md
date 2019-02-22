@@ -56,7 +56,7 @@ dubbo.metadata-report.cycle-report=false   ##非必须,default值true
     <artifactId>dubbo-metadata-report-redis</artifactId>
 </dependency>
 ```
-> **完整的sample，查看[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/samples-for-2.7.0-SNAPSHOT)**
+> **完整的sample，查看[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)**
 
 ## 方式一：配置中心配置
 
@@ -77,7 +77,7 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181 ###元数据存储的�
 
 ```
 ###dubbo.properties
-dubbo.configCenter.address=zookeeper://127.0.0.1:2181
+dubbo.config-center.address=zookeeper://127.0.0.1:2181
 ... 
 ```
 
@@ -366,3 +366,4 @@ redis=org.apache.dubbo.metadata.store.redis.RedisMetadataReportFactory
 只要将上面的修改和project打包成jar包，然后配置元数据中心的url：redis://10.20.153.10:6379。
 
 至此，一个自定义的元数据存储就可以运行了。
+ookeeper.md)

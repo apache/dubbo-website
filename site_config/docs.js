@@ -566,55 +566,20 @@ export default {
                 title: 'Admin guide',
                 children: [
                     {
-                        title: 'Installation',
-                        children: [
-                            {
-                                title: 'Install provider demo',
-                                link: '/en-us/docs/admin/install/provider-demo.html'
-                            },
-                            {
-                                title: 'Install consumer demo',
-                                link: '/en-us/docs/admin/install/consumer-demo.html'
-                            },
-                            {
-                                title: 'Install Zookeeper configuration center',
-                                link: '/en-us/docs/admin/install/zookeeper.html'
-                            },
-                            {
-                                title: 'Install Redis configuration center',
-                                link: '/en-us/docs/admin/install/redis.html'
-                            },
-                            {
-                                title: 'Install Simple configuration center',
-                                link: '/en-us/docs/admin/install/simple-registry-center.html'
-                            },
-                            {
-                                title: 'Install Simple monitor center',
-                                link: '/en-us/docs/admin/install/simple-monitor-center.html'
-                            },
-                            {
-                                title: 'Install admin console',
-                                link: '/en-us/docs/admin/install/admin-console.html'
-                            }
-                        ],
+                        title: 'introduction of dubbo ops',
+                        link: '/en-us/docs/admin/introduction.html',
                     },
                     {
-                        title: 'Operation manual',
-                        children: [
-                            {
-                                title: 'Admin console operation guide',
-                                link: '/en-us/docs/admin/ops/dubbo-ops.html'
-                            },
-                            {
-                                title: 'Tracking with Pinpoint',
-                                link: '/en-us/docs/admin/ops/pinpoint.html'
-                            },
-                            {
-                                title: 'Tracking with Skywalking',
-                                link: '/en-us/docs/admin/ops/skywalking.html'
-                            }
-			    
-                        ]
+                        title: 'service search',
+                        link: '/en-us/docs/admin/serviceSearch.html',
+                    },
+                    {
+                        title: 'service governance',
+                        link: '/en-us/docs/admin/serviceGovernance.html',
+                    },
+                    {
+                        title: 'service test',
+                        link: '/en-us/docs/admin/serviceTest.html',
                     }
 
                 ]
@@ -872,6 +837,10 @@ export default {
                                 title: 'Kryo和FST序列化',
                                 link: '/zh-cn/docs/user/demos/serialization.html',
                             },
+                            {
+                                title: '简化注册中心URL',
+                                link: '/zh-cn/docs/user/demos/simplify-registry-data.html',
+                            },
                         ],
                     },
                     {
@@ -932,6 +901,10 @@ export default {
                             {
                                 title: 'dubbo:parameter',
                                 link: '/zh-cn/docs/user/references/xml/dubbo-parameter.html',
+                            },
+                            {
+                                title: 'dubbo:config-center',
+                                link: '/zh-cn/docs/user/references/xml/dubbo-config-center.html',
                             },
                         ]
                     },
@@ -1002,6 +975,23 @@ export default {
                             {
                                 title: 'Simple 注册中心',
                                 link: '/zh-cn/docs/user/references/registry/simple.html',
+                            },
+                        ]
+                    },
+                    {
+                        title: '元数据中心参考手册',
+                        children: [
+                            {
+                                title: '介绍',
+                                link: '/zh-cn/docs/user/references/metadata/introduction.html',
+                            },
+                            {
+                                title: 'Redis',
+                                link: '/zh-cn/docs/user/references/metadata/metadata-redis.html',
+                            },
+                            {
+                                title: 'Zookeeper',
+                                link: '/zh-cn/docs/user/references/metadata/metadata-zookeeper.html',
                             },
                         ]
                     },
@@ -1285,54 +1275,20 @@ export default {
                 title: '运维管理',
                 children: [
                     {
-                        title: '安装手册',
-                        children: [
-                            {
-                                title: '示例提供者安装',
-                                link: '/zh-cn/docs/admin/install/provider-demo.html'
-                            },
-                            {
-                                title: '示例消费者安装',
-                                link: '/zh-cn/docs/admin/install/consumer-demo.html'
-                            },
-                            {
-                                title: 'Zookeeper 注册中心安装',
-                                link: '/zh-cn/docs/admin/install/zookeeper.html'
-                            },
-                            {
-                                title: 'Redis 注册中心安装',
-                                link: '/zh-cn/docs/admin/install/redis.html'
-                            },
-                            {
-                                title: 'Simple 注册中心安装',
-                                link: '/zh-cn/docs/admin/install/simple-registry-center.html'
-                            },
-                            {
-                                title: 'Simple 监控中心安装',
-                                link: '/zh-cn/docs/admin/install/simple-monitor-center.html'
-                            },
-                            {
-                                title: '管理控制台安装',
-                                link: '/zh-cn/docs/admin/install/admin-console.html'
-                            }
-                        ],
+                        title: '控制台介绍',
+                        link: '/zh-cn/docs/admin/introduction.html',
                     },
                     {
-                        title: '运维手册',
-                        children: [
-                            {
-                                title: '管理控制台运维',
-                                link: '/zh-cn/docs/admin/ops/dubbo-ops.html'
-                            },
-                            {
-                                title: '使用Pinpoint做分布式跟踪',
-                                link: '/zh-cn/docs/admin/ops/pinpoint.html'
-                            },
-                            {
-                                title: '使用Skywalking做分布式跟踪',
-                                link: '/zh-cn/docs/admin/ops/skywalking.html'
-                            }
-                        ]
+                        title: '服务搜索',
+                        link: '/zh-cn/docs/admin/serviceSearch.html',
+                    },
+                    {
+                        title: '服务治理',
+                        link: '/zh-cn/docs/admin/serviceGovernance.html',
+                    },
+                    {
+                        title: '服务测试',
+                        link: '/zh-cn/docs/admin/serviceTest.html',
                     }
 
                 ]

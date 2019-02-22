@@ -7,6 +7,13 @@ export default {
       title: 'Events & News',
       list: [
         {
+          img: '/img/blog/meetup-chengdu/all-hands.webp',
+          title: 'Dubbo chengdu meetup has been held successfully',
+          content: 'The Dubbo Chengdu meetup has been held successfully, over 350+ people were present.',
+          dateStr: 'August 14th，2018',
+          link: '/en-us/blog/dubbo-meetup-chengdu.html',
+        },
+        {
           img: '/img/blog/dubbo-shanghai-meetup.jpeg',
           title: 'Dubbo Shanghai meetup has been held successfully',
           content: 'The Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.',
