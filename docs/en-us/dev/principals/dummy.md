@@ -1,12 +1,12 @@
-# 防痴呆设计
+# "Fool-proof" design
 
 > http://javatar.iteye.com/blog/804187
 
-最近有点痴呆，因为解决了太多的痴呆问题。服务框架实施面超来超广，已有 50 多个项目在使用，每天都要去帮应用查问题，来来回回，发现大部分都是配置错误，或者重复的文件或类，或者网络不通等，所以准备在新版本中加入防痴呆设计。估且这么叫吧，可能很简单，但对排错速度还是有点帮助，希望能抛砖引玉，也希望大家多给力，想出更多的防范措施共享出来。
+Recently I was feeling stupid because I solved too many stupid problems. The service framework is becoming more widely used. Every day, I have to help the endpoint user to resolve problems. Gradually, it is found that most of the problems are configuration errors, or duplicated files or classes, or network failure. So I prepare to add some "fool-proof" design to the further version. It may be very simple, but it is still a little help for troubleshooting speed. I hope that I can throw a brick to attract jade, and everyone can help to come up with more preventive measures to share.
 
-## 检查重复的jar包 
+## Check for duplicated jars
 
-最痴呆的问题，就是有多个版本的相同jar包，会出现新版本的 A 类，调用了旧版本的 B 类，而且和JVM加载顺序有关，问题带有偶然性，误导性，遇到这种莫名其妙的问题，最头疼，所以，第一条，先把它防住，在每个 jar 包中挑一个一定会加载的类，加上重复类检查，给个示例：
+The most annoying problem is that, if we have several jars with different version number at the same time, there will be a problem. Imagine that, a new version of the Class A may invoke a old version of the Class B, it's related to the JVM loading order. The problem may encounter occasionally and hard to resolve. So the first, let's try to avoid it. For each jar package, pick a class that will be loaded, check it for duplication for example:
 
 ```java
 static {  
@@ -14,7 +14,7 @@ static {
 }  
 ``` 
 
-检查重复工具类：
+Utility class for check duplication：
 
 ```java
 public final class Duplicate {  
@@ -27,7 +27,7 @@ public final class Duplicate {
   
     public static void checkDuplicate(String path) {  
         try {  
-            // 在ClassPath搜文件  
+            // search from ClassPath
             Enumeration urls = Thread.currentThread().getContextClassLoader().getResources(path);  
             Set files = new HashSet();  
             while (urls.hasMoreElements()) {  
@@ -39,11 +39,11 @@ public final class Duplicate {
                     }  
                 }  
             }  
-            // 如果有多个，就表示重复  
+            // if there are more than one indicates duplication
             if (files.size() &gt; 1) {  
                 logger.error("Duplicate class " + path + " in " + files.size() + " jar " + files);  
             }  
-        } catch (Throwable e) { // 防御性容错  
+        } catch (Throwable e) { // safe guard
             logger.error(e.getMessage(), e);  
         }  
     }  
@@ -51,26 +51,25 @@ public final class Duplicate {
 }  
 ```
 
-## 检查重复的配置文件 
+## Check for duplicate configuration files
 
-配置文件加载错，也是经常碰到的问题。用户通常会和你说：“我配置的很正确啊，不信我发给你看下，但就是报错”。然后查一圈下来，原来他发过来的配置根本没加载，平台很多产品都会在 classpath 下放一个约定的配置，如果项目中有多个，通常会取JVM加载的第一个，为了不被这么低级的问题折腾，和上面的重复jar包一样，在配置加载的地方，加上：
+It is also a frequently encountered problem that the configuration file is loaded incorrectly. Users often complain that they have the right configuration but program says something is wrong. After some troubleshooting, found that the configuration file is not even loaded. Many products put a default configuration file under classpath, if there are several, usually the first one loaded by JVM is effective. In order not to be bothered by such problem, just like checking duplicate jars, add this:
 
 ```java
 Duplicate.checkDuplicate("xxx.properties"); 
 ```
 
-## 检查所有可选配置
+## Check for optional configuration
 
-必填配置估计大家都会检查，因为没有的话，根本没法运行。但对一些可选参数，也应该做一些检查，比如：服务框架允许通过注册中心关联服务消费者和服务提供者，也允许直接配置服务提供者地址点对点直连，这时候，注册中心地址是可选的，但如果没有配点对点直连配置，注册中心地址就一定要配，这时候也要做相应检查。
+The required configuration is estimated to be checked by everyone, because without it the program may not even start. However, for some optional parameters, some checks should also be made. For example, the service framework allows the service consumers and service providers to be associated with the registry, and allows direct configuring the service provider address to point-to-point direct connect. At this time, the registry address is optional, but if there is no point-to-point direct connect configured, the registry center address must be matched, and this time you have to check accordingly.
 
-## 异常信息给出解决方案 
+## Provide error message with a solution if possible
 
-在给应用排错时，最怕的就是那种只有简单的一句错误描述，啥信息都没有的异常信息。比如上次碰到一个 Failed to get session 异常，就这几个单词，啥都没有，哪个 session 出错? 什么原因 Failed? 看了都快疯掉，因是线上环境不好调试，而且有些场景不是每次都能重现。异常最基本要带有上下文信息，包括操作者，操作目标，原因等，最好的异常信息，应给出解决方案，比如上面可以给出："从 10.20.16.3 到 10.20.130.20:20880 之间的网络不通，请在 10.20.16.3 使用 telnet 10.20.130.20 20880 测试一下网络，如果是跨机房调用，可能是防火墙阻挡，请联系 SA 开通访问权限" 等等，上面甚至可以根据 IP 段判断是不是跨机房。另外一个例子，是 spring-web 的 context 加载，如果在 getBean 时 spring 没有被启动，spring 会报一个错，错误信息写着：请在 web.xml 中加入: `<listener>...<init-param>...`，多好的同学，看到错误的人复制一下就完事了，我们该学学。可以把常见的错误故意犯一遍，看看错误信息能否自我搞定问题， 
-或者把平时支持应用时遇到的问题及解决办法都写到异常信息里。 
+It's hard to troubleshooting problem with a simple error message which has no detail information. For example, the last time I encountered a "Failed to get session" exception, just the few words. I'm wondering which session is wrong? What is the reason Failed? It makes me crazy, the problem happens in an production environment and it's hard to reproduce. The exception should have some basic context information, such as author info, operation system, failed reason. The best exception information should be given a solution, such as the above: "From 10.20.16.3 to 10.20.130.20:20880 The network is unreachable. Please use telnet 10.20.130.20 20880 to test the network at 10.20.16.3. If it is called across data center, it may be blocked by the firewall. Please contact SA to grant access permission." etc. The above can even judge whether it is cross data center based on IP address. Another example is the spring-web context loading, If spring is not started when getBean, spring will report an error. The error message says: "Please add: `<listener>...<init-param>...`", just copy and paste.  We should learn from it. You can deliberately make a common mistake and see if you can solve the problem yourself by the error message. Or we can write some solution of common problems in error message.
 
-## 日志信息包含环境信息 
+## And also the environment information
 
-每次应用一出错，应用的开发或测试就会把出错信息发过来，询问原因，这时候我都会问一大堆套话，用的哪个版本呀？是生产环境还是开发测试环境？哪个注册中心呀？哪个项目中的？哪台机器呀？哪个服务? 累啊，最主要的是，有些开发或测试人员根本分不清，没办法，只好提供上门服务，浪费的时间可不是浮云，所以，日志中最好把需要的环境信息一并打进去，最好给日志输出做个包装，统一处理掉，免得忘了。包装Logger接口如： 
+Every time an application error occurs, the developer or QA will send the error message and ask the reason. At this time, I will ask some question again, which version is used? Is it a production environment or a development environment? Which registry center? Which project is it? Which machine? And which service? The problem is, some developers or QA can't tell the difference, it waste me a lot of time. So, it is best to log some environment information, we can make a wrapper. Decorate the Logger interface such as:
 
 ```java
 public void error(String msg, Throwable e) {  
@@ -78,7 +77,7 @@ public void error(String msg, Throwable e) {
 }  
 ```
 
-获取版本号工具类：
+Utility class for retrieve version：
 
 ```java
 public final class Version {  
@@ -97,13 +96,13 @@ public final class Version {
   
     public static String getVersion(Class cls, String defaultVersion) {  
         try {  
-            // 首先查找MANIFEST.MF规范中的版本号  
+            // search version number from MANIFEST.MF 
             String version = cls.getPackage().getImplementationVersion();  
             if (version == null || version.length() == 0) {  
                 version = cls.getPackage().getSpecificationVersion();  
             }  
             if (version == null || version.length() == 0) {  
-                // 如果MANIFEST.MF规范中没有版本号，基于jar包名获取版本号  
+                // if not found, extract from jar name
                 String file = cls.getProtectionDomain().getCodeSource().getLocation().getFile();  
                 if (file != null &amp;&amp; file.length() &gt; 0 &amp;&amp; file.endsWith(".jar")) {  
                     Matcher matcher = VERSION_PATTERN.matcher(file);  
@@ -112,10 +111,10 @@ public final class Version {
                     }  
                 }  
             }  
-            // 返回版本号，如果为空返回缺省版本号  
+            // return version, return default if null
             return version == null || version.length() == 0 ? defaultVersion : version;  
-        } catch (Throwable e) { // 防御性容错  
-            // 忽略异常，返回缺省版本号  
+        } catch (Throwable e) { 
+            // ignore exception, return default version
             logger.error(e.getMessage(), e);  
             return defaultVersion;  
         }  
@@ -124,9 +123,9 @@ public final class Version {
 }
 ```
 
-## kill 之前先 dump 
+## Dump before kill 
 
-每次线上环境一出问题，大家就慌了，通常最直接的办法回滚重启，以减少故障时间，这样现场就被破坏了，要想事后查问题就麻烦了，有些问题必须在线上的大压力下才会发生，线下测试环境很难重现，不太可能让开发或 Appops 在重启前，先手工将出错现场所有数据备份一下，所以最好在 kill 脚本之前调用 dump，进行自动备份，这样就不会有人为疏忽。dump脚本示例：
+Every time there is a problem with the production environment, everyone panics. Usually the most direct way is to rollback and restart, to reduce the downtime. So that the scene is destroyed, and it's hard to check the problem afterwards. Some problem is hard to reproduce in development environment and may happen under hard pressure. It is unlikely let the developer or Appops manually backup all the data before. Therefore, it is best to call dump before the kill script to backup automatically and avoid  mistake. Dump script for example:
 
 ```sh
 JAVA_HOME=/usr/java  
