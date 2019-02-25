@@ -166,7 +166,7 @@ export default {
         {
             title: 'Dubbo优雅停机介绍',
             author: '@guohao',
-            dateStr: 'Feb 22th, 2019',
+            dateStr: 'Feb 22nd, 2019',
             desc: 'Dubbo优雅停机的实现背景和实践',
             link: '/zh-cn/blog/dubbo-gracefully-shutdown.html',
         },
