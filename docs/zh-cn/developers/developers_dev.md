@@ -36,6 +36,7 @@
 | kexianjun       | Xianjun Ke          | Caocaokeji       | Committer | +8       |
 | songkun         | Kun Song            | Huawei           | Committer | +8       |
 | lixiaojie       | Xiaojie Li          | GomeFinance      | Committer | +8       |
+| biyuhao         | Yuhao Bi            | Asiainfo-sec     | Committer | +8       |
 
 ### 贡献者
 
@@ -43,6 +44,5 @@
 | ---------- | ------------------------------- | ------------ | ---- |
 | leyou240   | <https://github.com/leyou240>   |              | +8   |
 | chenzhiguo | <https://github.com/chenzhiguo> |              | +8   |
-| biyuhao    | <https://github.com/biyuhao>    | Asiainfo-sec | +8   |
 | huyuechy   | <https://github.com/huyuechy>   |              | +8   |
 | kezhenxu94 | <https://github.com/kezhenxu94> |              | +8   |
