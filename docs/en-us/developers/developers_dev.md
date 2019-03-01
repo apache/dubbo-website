@@ -24,9 +24,9 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | yiji            | Shang Zonghai       | Youzan           | PPMC      | +8       |
 | jerrick         | Yong Zhu            | Alibaba          | PPMC      | +8       |
 | carryxyh        | Yuhang Xiu          | Netease          | PPMC      | +8       |
-| hyunkun         | YunKun Huang        | Meituan-Dianping | Committer | +8       |
+| hyunkun         | YunKun Huang        | Meituan-Dianping | PPMC      | +8       |
+| min             | Minxuan Zhuang      | Alibaba          | PPMC      | +8       |
 | kimmking        | Kimm King           | Rongguan         | Committer | +8       |
-| min             | Minxuan Zhuang      | Alibaba          | Committer | +8       |
 | mjk             | Jinkai Ma           | Handuyishe       | Committer | +8       |
 | yizhenqiang     | Zhenqiang Yi        | Didi             | Committer | +8       |
 | victory         | Victory Cao         | Alibaba          | Committer | +8       |
@@ -37,6 +37,7 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | songkun         | Kun Song            | Huawei           | Committer | +8       |
 | lixiaojie       | Xiaojie Li          | GomeFinance      | Committer | +8       |
 | biyuhao         | Yuhao Bi            | Asiainfo-sec     | Committer | +8       |
+| crazyhzm        | Zhongming Hua       | iFlytek          | Committer | +8       |
 
 ### Contributors
 
