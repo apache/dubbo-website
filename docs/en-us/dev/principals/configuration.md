@@ -1,84 +1,83 @@
-# 配置设计
+# The configuration design
 
 > http://javatar.iteye.com/blog/949527
 
-Dubbo 现在的设计是完全无侵入，也就是使用者只依赖于配置契约。经过多个版本的发展，为了满足各种需求场景，配置越来越多。为了保持兼容，配置只增不减，里面潜伏着各种风格，约定，规则。新版本也将配置做了一次调整，去掉了 dubbo.properties，改为全 spring 配置。将想到的一些记在这，备忘。 
+Dubbo design is now completely unobtrusive, namely the user only depends on the configuration of contract.After multiple versions of the development, in order to meet the demand of various scenarios, configuration is more and more.In order to maintain compatibility with only grow, lurking inside all sorts of styles, convention, rules.The new version will also be configured for a adjustment, remove the dubbo, properties, instead of all the spring configuration.Will think of some written in this memo. 
 
-## 配置分类 
+## Classification of configuration
 
-首先，配置的用途是有多种的，大致可以分为： 
+First of all, the purpose is to have a variety of configuration, which can be roughly divided into: 
 
-0. 环境配置，比如：连接数，超时等配置。 
-0. 描述配置，比如：服务接口描述，服务版本等。 
-0. 扩展配置，比如：协议扩展，策略扩展等。 
+0. Environment configuration, such as: the number of connections, the timeout configuration, etc. 
+0. Describe the configuration, such as: service interface description, service version, etc.
+0. Extension configuration, such as: protocol extension, strategy to expand, etc.
 
-## 配置格式 
+## Configuration format
 
-通常环境配置，用 properties 配置会比较方便，因为都是一些离散的简单值，用 key-value 配置可以减少配置的学习成本。 
+Usually environment configuration, using the configuration properties will be more convenient, because is some simple discrete values, with the key - value configuration can reduce the learning cost configuration. 
 
-而描述配置，通常信息比较多，甚至有层次关系，用 xml 配置会比较方便，因为树结构的配置表现力更强。如果非常复杂，也可以考自定义 DSL 做为配置。有时候这类配置也可以用 Annotation 代替， 因为这些配置和业务逻辑相关，放在代码里也是合理的。 
+Describe the configuration, information more often, and even have a hierarchy, using XML configuration would be more convenient, because the tree structure configuration expression was stronger.If very complex, and can also custom DSL as configuration.Sometimes such configuration can also use the Annotation instead of, because the configuration and related business logic, in the code is also reasonable.
 
-另外扩展配置，可能不尽相同。如果只是策略接口实现类替换，可以考虑 properties 等结构。如果有复杂的生命周期管理，可能需要 XML 等配置。有时候扩展会通过注册接口的方式提供。 
+Another extension configuration, which may be different.If only policy interface implementation class to replace, can consider the properties of the structure.If there is a complex life cycle management, may need to configure such as XML.Sometimes extended by registering interface provided. 
 
-## 配置加载 
+## Configuration is loaded 
 
-对于环境配置，在 java 世界里，比较常规的做法，是在 classpath 下约定一个以项目为名称的 properties 配置，比如：log4j.properties，velocity.properties等。产品在初始化时，自动从 classpath 下加载该配置。我们平台的很多项目也使用类似策略，如：dubbo.properties，comsat.xml 等。这样有它的优势，就是基于约定，简化了用户对配置加载过程的干预。但同样有它的缺点，当 classpath 存在同样的配置时，可能误加载，以及在 ClassLoader 隔离时，可能找不到配置，并且，当用户希望将配置放到统一的目录时，不太方便。 
+For environment configuration, in the Java world, comparing to conventional approach, was agreed in a project under the classpath for the name of the configuration properties, such as: log4j. Properties, velocity. The properties and so on.Product during initialization, automatically from the classpath under loading the configuration.Our platform of many programs use a similar strategy, such as: dubbo. Properties, comsat. XML, etc.This has its advantages, is based on agreement, simplifies the user to configure the loading process of intervention.But also has its disadvantages, when the classpath is the same configuration, may be loaded by mistake, and when this isolation, may can't find the configuration, and, when the user wants to configure into the unified directory, not very convenient. 
 
-Dubbo 新版本去掉了 dubbo.properties，因为该约定经常造成配置冲突。 
+Dubbo new version removes `dubbo.properties`, because the contract often conflicts configuration. 
 
-而对于描述配置，因为要参与业务逻辑，通常会嵌到应用的生命周期管理中。现在使用 spring 的项目越来越多，直接使用 spring 配置的比较普遍，而且 spring 允许自定义 schema，配置简化后很方便。当然，也有它的缺点，就是强依赖 spring，可以提编程接口做了配套方案。 
+And to describe the configuration, because want to participate in the business logic, usually embedded into the application of life cycle management.There are more and more using spring projects, directly using the spring configuration is common, and spring permits custom schema, configuration simplified is very convenient.Also has its disadvantages, of course, is strongly dependent on the spring, can ask programming interface to do the matching scheme
 
-在 Dubbo 即存在描述配置，也有环境配置。一部分用 spring 的 schame 配置加载，一部分从 classpath 扫描 properties 配置加载。用户感觉非常不便，所以在新版本中进行了合并，统一放到 spring 的 schame 配置加载，也增加了配置的灵活性。 
+In Dubbo configuration is described, but also environment configuration.Part with spring schame configuration is loaded, in part, from the classpath scanning properties configuration is loaded.Users feel very inconvenient, so in the new version of the merged, unified into spring schame configuration load, also increases the flexibility of configuration.
 
-扩展配置，通常对配置的聚合要求比较高。因为产品需要发现第三方实现，将其加入产品内部。在 java 世界里，通常是约定在每个 jar 包下放一个指定文件加载，比如：eclipse 的 plugin.xml，struts2 的 struts-plugin.xml 等，这类配置可以考虑 java 标准的服务发现机制，即在 jar 包的 META-INF/services 下放置接口类全名文件，内容为每行一个实现类类名，就像 jdk 中的加密算法扩展，脚本引擎扩展，新的 JDBC 驱动等，都是采用这种方式。参见：[ServiceProvider 规范](http://download.oracle.com/javase/1.4.2/docs/guide/jar/jar.html#Service%20Provider)。
+Extension configuration, usually to the configuration of aggregate demand is higher.Because the product need to find the third party implementation, add it to the product inside.Agreed in the Java world, usually in a specified file each jar package down load, such as: the eclipse plugin. The XML, struts 2 struts - plugin. XML, and so on, this kind of configuration can consider Java standard service discovery mechanisms, namely in the jar meta-inf/services placed under the interface class name file, content is an implementation class name of the class in a row, like encryption algorithm in the JDK extension, the script engine extension, new JDBC driver, etc., are all in this way.see：[ServiceProvider Provider](http://download.oracle.com/javase/1.4.2/docs/guide/jar/jar.html#Service%20Provider)。
 
-Dubbo 旧版本通过约定在每个 jar 包下，放置名为 dubbo-context.xml 的 spring 配置进行扩展与集成，新版本改成用 jdk 自带的 META-INF/services 方式，去掉过多的 spring 依赖。 
+Dubbo old version under each jar package through agreement, place called Dubbo - context. The spring configuration XML extensions and integration, the new version to use the JDK's own meta-inf/services, spring from too much dependence.
 
-## 可编程配置 
+## Programmable configuration
 
-配置的可编程性是非常必要的，不管你以何种方式加载配置文件，都应该提供一个编程的配置方式，允许用户不使用配置文件，直接用代码完成配置过程。因为一个产品，尤其是组件类产品，通常需要和其它产品协作使用，当用户集成你的产品时，可能需要适配配置方式。 
+Configuration of programmability is very necessary, no matter in what way you load the configuration file, should provide a programming way of configuration, allows the user to not using a configuration file, complete the configuration process with code directly.As a product, especially the component products, usually require collaboration use and other products, when a user integration of your product, may need adapter configuration mode.
 
-Dubbo 新版本提供了与 xml 配置一对一的配置类，如：ServiceConfig 对应 `<dubbo:service />`，并且属性也一对一，这样有利于文件配置与编程配置的一致性理解，减少学习成本。 
+Dubbo new version offers one-on-one configuration class with XML configuration, such as: ServiceConfig corresponding ` < Dubbo: service / > `, and one-to-one attributes, this configuration file configuration and programming the consistency of the understanding, reduce the learning cost.
 
-## 配置缺省值 
+## Configure the default 
 
-配置的缺省值，通常是设置一个常规环境的合理值，这样可以减少用户的配置量。通常建议以线上环境为参考值，开发环境可以通过修改配置适应。缺省值的设置，最好在最外层的配置加载就做处理。程序底层如果发现配置不正确，就应该直接报错，容错在最外层做。如果在程序底层使用时，发现配置值不合理，就填一个缺省值，很容易掩盖表面问题，而引发更深层次的问题。并且配置的中间传递层，很可能并不知道底层使用了一个缺省值，一些中间的检测条件就可能失效。Dubbo 就出现过这样的问题，中间层用“地址”做为缓存 Key， 而底层，给“地址”加了一个缺省端口号，导致不加端口号的“地址”和加了缺省端口的“地址”并没有使用相同的缓存。 
+Configuration of the default, usually set the reasonable value of a regular environment, thus reducing the user's configuration.Is generally recommended that in online environment for reference, the development environment can adapt by changing the configuration.The default Settings, had better be in the outermost configuration do processing load.The underlying program if found configuration is not correct, you should direct error, fault tolerance in the outermost layer.If, when the underlying program to use, found unreasonable configuration values, just fill a default value, it is easy to cover up the surface, and trigger a deeper problem.And configuration of the middle layer, probably don't know the underlying USES a default value, some may be failure in the middle of the testing conditions.Dubbo first appeared in this problem, the middle layer with "address" as the cache Key, and the bottom, to "address" a default port number, lead to don't add port number "address" and add the default port "address" did not use the same cache. 
 
-## 配置一致性 
+## Configuration consistency 
 
-配置总会隐含一些风格或潜规则，应尽可能保持其一致性。比如：很多功能都有开关，然后有一个配置值： 
+Configuration is always implied some style or hidden rules, should as far as possible to keep its consistency.For example: a lot of functions have switch, and then have a configuration value： 
 
-0. 是否使用注册中心，注册中心地址。 
-0. 是否允许重试，重试次数。 
+0. Whether to use the registry, the registry address. 
+0. Whether to allow a retry, retries. 
 
-你可以约定：
+You may agree:
  
-0. 每个都是先配置一个 boolean 类型的开关，再配置一个值。 
-0. 用一个无效值代表关闭，N/A地址，0重试次数等。 
+0. Each is to configure a Boolean type of switch, to configure a value.
+0. On behalf of the closed with an invalid values, N/A address 0 retries, etc. 
 
-不管选哪种方式，所有配置项，都应保持同一风格，Dubbo 选的是第二种。相似的还有，超时时间，重试时间，定时器间隔时间。如果一个单位是秒，另一个单位是毫秒(C3P0的配置项就是这样)，配置人员会疯掉。 
+No matter which way, all the configuration items, should keep the same style, Dubbo selected is the second.Also, similar to that of timeout, retry time, timer interval.If a unit is second, another unit is milliseconds (C3P0 configuration item is) so, staff will be crazy. 
 
-## 配置覆盖 
+## Configuration coverage 
 
-提供配置时，要同时考虑开发人员，测试人员，配管人员，系统管理员。测试人员是不能修改代码的，而测试的环境很可能较为复杂，需要为测试人员留一些“后门”，可以在外围修改配置项。就像 spring 的 PropertyPlaceholderConfigurer 配置，支持 `SYSTEM_PROPERTIES_MODE_OVERRIDE`，可以通过 JVM 的 -D 参数，或者像 hosts 一样约定一个覆盖配置文件，在程序外部，修改部分配置，便于测试。
+Provide configuration, want to consider developers, testers, piping, the system administrator.Testers can't modify the code, and test environment is likely to be more complex, need to have some set aside for testers "back door", can be modified in the peripheral configuration items.Like spring is accomplished configuration, support ` SYSTEM_PROPERTIES_MODE_OVERRIDE `, can through the JVM -d parameters, or like hosts agreed a cover configuration files, on the outside of the program, modify some configuration, easy to test.
 
  
-Dubbo 支持通过 JVM 参数 `-Dcom.xxx.XxxService=dubbo://10.1.1.1:1234 
-` 直接使远程服务调用绕过注册中心，进行点对点测试。还有一种情况，开发人员增加配置时，都会按线上的部署情况做配置，如：`<dubbo:registry address="${dubbo.registry.address}" />` 因为线上只有一个注册中心，这样的配置是没有问题的，而测试环境可能有两个注册中心，测试人员不可能去修改配置，改为： 
+Dubbo support through the JVM parameter ` - Dcom. XXX. XxxService = Dubbo: / / 10.1.1.1:1234` directly make the remote service call bypass registry, point to point test.There is a kind of situation, developers to increase the configuration, can according to the deployment of online configuration, such as: ` < dubbo: registry address = "${dubbo. Registry. Address}" / > ` because only one online registry, this configuration is no problem, and the testing environment may have two registry, testers can't to modify configuration, changed to: 
 `<dubbo:registry address="${dubbo.registry.address1}" />`， 
-`<dubbo:registry address="${dubbo.registry.address2}" />`，所以这个地方，Dubbo 支持在 ${dubbo.registry.address} 的值中，通过竖号分隔多个注册中心地址，用于表示多注册中心地址。 
+`<dubbo:registry address="${dubbo.registry.address2}" />`，So this place, Dubbo support in the ${Dubbo. Registry. Address} value, through vertical dividing multiple registry addresses, used to represent a registry address.
 
-## 配置继承 
+## Configuration inheritance 
 
-配置也存在“重复代码”，也存在“泛化与精化”的问题。比如：Dubbo 的超时时间设置，每个服务，每个方法，都应该可以设置超时时间。但很多服务不关心超时，如果要求每个方法都配置，是不现实的。所以 Dubbo 采用了方法超时继承服务超时，服务超时再继承缺省超时，没配置时，一层层向上查找。 
+Configuration is also "duplicate code", there is also a "generalization and elaboration" problem.Such as: Dubbo timeout Settings, each service, and each method, should be can set the timeout.But a lot of service don't care about overtime, if required each method configuration, it is not realistic.So Dubbo adopted method inherit service timeout, overtime service timeout to inherit the default timeout, no configuration, opens up search.
 
-另外，Dubbo 旧版本所有的超时时间，重试次数，负载均衡策略等都只能在服务消费方配置。但实际使用过程中发现，服务提供方比消费方更清楚，但这些配置项是在消费方执行时才用到的。新版本，就加入了在服务提供方也能配这些参数，通过注册中心传递到消费方， 
-做为参考值，如果消费方没有配置，就以提供方的配置为准，相当于消费方继承了提供方的建议配置值。而注册中心在传递配置时，也可以在中途修改配置，这样就达到了治理的目的，继承关系相当于：服务消费者 --> 注册中心 --> 服务提供者 
+Dubbo, moreover, the old version all the timeout, retries, load balancing strategies are only in the service consumer configuration.But in the process of actual use, found that the service provider knows better than consumer, but the configuration items are used in consumer.The new version, joined in the provider can match these parameters, through the registry to the consumer,As a reference, if there is no configuration, consumer to provide configuration shall prevail, the equivalent of consumption ji-cheng fang the provider's advice configuration values.And at the time of the relay configuration registry, can also be on the way to modify configuration, so that achieve the purpose of governance, the equivalent of inheritance relationship：Service consumers --> Registry --> Service provider 
+Dubbo, moreover, the old version all the timeout, retries, load balancing strategies are only in the service consumer configuration.But in the process of actual use, found that the service provider knows better than consumer, but the configuration items are used in consumer.The new version, joined in the provider can match these parameters, through the registry to the consumer. 
  
 ![configuration-override](../sources/images/configuration-override.png)
 
-## 配置向后兼容 
+## Configuration backward compatibility 
 
-向前兼容很好办，你只要保证配置只增不减，就基本上能保证向前兼容。但向后兼容，也是要注意的，要为后续加入新的配置项做好准备。如果配置出现一个特殊配置，就应该为这个“特殊”情况约定一个兼容规则，因为这个特殊情况，很有可能在以后还会发生。比如：有一个配置文件是保存“服务=地址”映射关系的，其中有一行特殊，保存的是“注册中心=地址”。现在程序加载时，约定“注册中心”这个Key是特殊的，做特别处理，其它的都是“服务”。然而，新版本发现，要加一项“监控中心=地址”，这时，旧版本的程序会把“监控中心”做为“服务”处理，因为旧代码是不能改的，兼容性就很会很麻烦。如果先前约定“特殊标识+XXX”为特殊处理，后续就会方便很多。 
+Forwards compatibility is very good, as long as you guarantee configuration only grow, basically can guarantee forwards compatibility.But backward compatibility, but also should pay attention to, to prepare for subsequent to join the new configuration items.If a special configuration in configuration, you should make an appointment a compatibility for the "special" case rules, because the special case, probably will happen later.For example, have a configuration file is save "service = address mapping", one of the special line, is saved "registry = address".Now application load time to define "registry" the Key is special, do special processing, the other is "service".New version found, however, to add a "monitoring center" = address, at this point, the old version of the program will handle "monitoring center" as a "service", because the old code can't be change, compatibility is will be very troublesome.If previously agreed upon in the "special" logo + XXX for special treatment, follow-up will be more convenient. 
 
 向后兼容性，可以多向HTML5学习，参见：[HTML5设计原理](http://javatar.iteye.com/blog/949390)
