@@ -76,7 +76,7 @@ class Home extends Language {
             <div className="github-buttons">
               <a href="https://github.com/apache/incubator-dubbo">
                 <div className="star">
-                  <img src="img/star.png" />
+                  <img src="/img/star.png" />
                   <span className="type">Star</span>
                   <span className="line" />
                   <span className="count">{starCount}</span>
@@ -84,7 +84,7 @@ class Home extends Language {
               </a>
               <a href="https://github.com/apache/incubator-dubbo/fork">
                 <div className="fork">
-                  <img src="img/fork.png" />
+                  <img src="/img/fork.png" />
                   <span className="type">Fork</span>
                   <span className="line" />
                   <span className="count">{forkCount}</span>
