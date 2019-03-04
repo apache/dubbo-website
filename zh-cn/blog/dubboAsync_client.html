@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="Dubbo, 异步, Reactive" />
+	<meta name="description" content="Dubbo客户端异步接口的实现背景和实践" />
+	<!-- 网页标签标题 -->
+	<title>Dubbo客户端异步接口的实现背景和实践</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot=""><header class="header-container header-container-normal"><div class="header-body"><a href="/zh-cn/index.html"><img class="logo" src="/img/dubbo_colorful.png"/></a><div class="search search-normal"><span class="icon-search"></span></div><span class="language-switch language-switch-normal">En</span><div class="header-menu"><img class="header-menu-toggle" src="/img/menu_gray.png"/><ul><li class="menu-item menu-item-normal"><a href="/zh-cn/index.html">首页</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/user/quick-start.html">文档</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/developers/developers_dev.html">开发者</a></li><li class="menu-item menu-item-normal menu-item-normal-active"><a href="/zh-cn/blog/index.html">博客</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/community/index.html">社区</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/blog/download.html">下载</a></li></ul></div></div></header><section class="blog-content markdown-body"><h1>Dubbo客户端异步接口的实现背景和实践</h1>
+<h2>铺垫</h2>
+<p><img src="../../img/blog/dubboasyn_client/1.png" alt="image | left"></p>
+<p>先简单介绍下一次完整的Dubbo调用所经历的线程阶段。几个信息这里罗列下</p>
+<ol>
+<li>
+<p>Biz~代表业务线程，即便是业务逻辑处理所处的线程，Biz~线程池可能是业务自己创建维护，大多数的可能是系统框架自身管理的（比如web型的业务系统跑在Tomcat容器下，Biz~线程就是Tomcat维护）；IO~代表网络数据处理线程，是IO框架（比如Netty，Grizzly）创建维护，Dubbo Remoting所默认Netty实现是NioEventloopLoopGroup；另外按照Channel与IO线程的绑定关系，也可以直接把IO~看成一个可接受事件消息的Channel。像Biz和IO这样的异步处理阶段在JDK8中有个很精确地抽象描述，叫CompletionStage。</p>
+</li>
+<li>
+<p>大家知道，线程与线程之间做数据通信的方式是共享变量，Biz和IO两个stage之间的数据通信是Queue，具体到Dubbo实现，在客户端一侧的实现（即上图中用1所标注的步骤）中Biz是通过向EventLoop的LinkedBlockingQueue放置一个Task，而EventLoop有对应的Thread会不停的迭代Queue来执行Task中所包含的信息，具体代码可以看SingleThreadEventExecutor（顺便提下，Netty中默认是用无上限的LinkedBlockingQueue，在Biz的速率高于网络速率情况下，似乎好像有Memory Leak的风险）。</p>
+</li>
+<li>
+<p>如上图所示，标准的一次RPC调用经过了图中所示的1,2,3,4的四次消息(事件)传递，分别是客户端业务线程到IO线程的请求发出，服务端IO线程到业务逻辑线程的__请求接受，__服务端处理完成后由业务逻辑线程到IO线程的响应写出，客户端收到结果后从IO线程到业务逻辑的响应处理。除了1与4之间一般需要维护响应和请求的映射对应关系，四次的事件处理都是完全独立的，所以一次RPC调用天然是异步的，而同步是基于异步而来。</p>
+</li>
+</ol>
+<h2>客户端异步</h2>
+<h3>实现背景</h3>
+<p>在Java语言（其他语言不清楚）下一次本地接口的调用可以透明地通过代理机制转为远程RPC的调用，大多数业务方也比较喜欢这种与本地接口类似的编程方式做远程服务集成，所以虽然RPC内部天然是异步的，但使用Dubbo的用户使用最广泛的还是同步，而异步反而成为小众的使用场景。同步的优点是编程模型更加符合业务方的“传统”习惯，代价是在图中的1代表的请求发出事件后需要阻塞当前的Biz~线程，一直等到4代表的响应处理后才能唤醒。在这个短则微妙级别，长则秒级的1,2,3,4处理过程中都要阻塞Biz~线程，就会消耗线程资源，增加系统资源的开销。</p>
+<p>所以，客户端异步的出发点是节省线程资源开销，代价是需要了解下异步的使用方式:)。在同步方式下API接口的返回类型是代表着某个业务类，而当异步情况下，响应返回与请求发出是完全独立的两个事件，需要API接口的返回类型变为上述中说的CompletionStage才是最贴合的，这是Dubbo在异步上支持的必然异步。回到最近的Dubbo发布版，是不改变接口的情况下，需要在服务创建时注册一个回调接口来处理响应返回事件。</p>
+<p>下面以示例来说。</p>
+<h3>示例</h3>
+<p>事件通知的示例代码请参考：<a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify</a></p>
+<p>事件通知允许 Consumer 端在调用之前、调用正常返回之后或调用出现异常时，触发 <code>oninvoke</code>、<code>onreturn</code>、<code>onthrow</code> 三个事件。</p>
+<p>可以通过在配置 Consumer 时，指定事件需要通知的方法，如：</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoCallback"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"com.alibaba.dubbo.samples.notify.impl.NotifyImpl"</span> /&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">check</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"com.alibaba.dubbo.samples.notify.api.DemoService"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"1.0.0"</span> <span class="hljs-attr">group</span>=<span class="hljs-string">"cn"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:method</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"sayHello"</span> <span class="hljs-attr">onreturn</span>=<span class="hljs-string">"demoCallback.onreturn"</span> <span class="hljs-attr">onthrow</span>=<span class="hljs-string">"demoCallback.onthrow"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dubbo:reference</span>&gt;</span>
+</code></pre>
+<p>其中，NotifyImpl 的代码如下：</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NotifyImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Notify</span></span>{
+
+    <span class="hljs-keyword">public</span> Map&lt;Integer, String&gt; ret = <span class="hljs-keyword">new</span> HashMap&lt;Integer, String&gt;();
+    
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onreturn</span><span class="hljs-params">(String name, <span class="hljs-keyword">int</span> id)</span> </span>{
+        ret.put(id, name);
+        System.out.println(<span class="hljs-string">"onreturn: "</span> + name);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onthrow</span><span class="hljs-params">(Throwable ex, String name, <span class="hljs-keyword">int</span> id)</span> </span>{
+        System.out.println(<span class="hljs-string">"onthrow: "</span> + name);
+    }
+}
+</code></pre>
+<p>这里要强调一点，自定义 Notify 接口中的三个方法的参数规则如下：</p>
+<ul>
+<li><code>oninvoke</code> 方法参数与调用方法的参数相同；</li>
+<li><code>onreturn</code>方法第一个参数为调用方法的返回值，其余为调用方法的参数；</li>
+<li><code>onthrow</code>方法第一个参数为调用异常，其余为调用方法的参数。</li>
+</ul>
+<p>上述配置中，<code>sayHello</code>方法为同步调用，因此事件通知方法的执行也是同步执行。可以配置 <code>async=true</code>让方法调用为异步，这时事件通知的方法也是异步执行的。特别强调一下，<code>oninvoke</code>方法不管是否异步调用，都是同步执行的。</p>
+<h3>实践建议</h3>
+<ul>
+<li>
+<div data-type="alignment" data-value="justify" style="text-align:justify">
+<div data-type="p">RPC调用后的逻辑非强依赖结果：异步回调是在客户端<strong>非强依赖服务端的结果</strong>情况下，是适用客户端的异步调用。</div>
+</div>
+</li>
+<li>
+<div data-type="alignment" data-value="justify" style="text-align:justify">
+<div data-type="p">rx场景：自从了解到reactive的编程模型后，认为只要编程思维能够拥抱reactive，并且业务模型的状态机设计能做适当的调整，任何场景下都比较适用异步来解决，从而得到更好的终端响应体验。 对于Dubbo来说，当下的异步接口模型是需要像reactive的模型接口做改进，才能使得用户更自然地适用异步接口。</div>
+</div>
+</li>
+</ul>
+<h3>小结</h3>
+<ul>
+<li>客户端异步的出发点就是请求发出和响应处理本身为两个不同的独立事件，响应如何被处理和在哪个线程中处理等都是不需要和请求发出事件的业务逻辑线程做耦合绑定。</li>
+<li>响应事件回调的处理逻辑在哪个线程中做处理是需要根据情况来选择。建议，如果回调逻辑比较简单，建议直接在IO线程中；如果包含了远程访问或者DB访问等IO型的__同步__操作，建议在独立的线程池做处理。</li>
+</ul>
+</section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>

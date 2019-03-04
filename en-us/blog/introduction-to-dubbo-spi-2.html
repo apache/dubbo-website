@@ -13,10 +13,9 @@
 </head>
 <body>
 	<div id="root"><div class="blog-detail-page" data-reactroot=""><header class="header-container header-container-normal"><div class="header-body"><a href="/en-us/index.html"><img class="logo" src="/img/dubbo_colorful.png"/></a><div class="search search-normal"><span class="icon-search"></span></div><span class="language-switch language-switch-normal">中</span><div class="header-menu"><img class="header-menu-toggle" src="/img/menu_gray.png"/><ul><li class="menu-item menu-item-normal"><a href="/en-us/index.html">HOME</a></li><li class="menu-item menu-item-normal"><a href="/en-us/docs/user/quick-start.html">DOCS</a></li><li class="menu-item menu-item-normal"><a href="/en-us/docs/developers/developers_dev.html">DEVELOPERS</a></li><li class="menu-item menu-item-normal menu-item-normal-active"><a href="/en-us/blog/index.html">BLOG</a></li><li class="menu-item menu-item-normal"><a href="/en-us/community/index.html">COMMUNITY</a></li><li class="menu-item menu-item-normal"><a href="/en-us/blog/download.html">DOWNLOAD</a></li></ul></div></div></header><section class="blog-content markdown-body"><h1>Dubbo extensible mechanism source code analysis</h1>
-<hr>
 <p>In the <a href="./introduction-to-dubbo-spi.md">actual implementation of the Dubbo extensibility mechanism</a>, we learned some concepts of the Dubbo extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance on our own. Do you think Dubbo's extension mechanism is great? Next, we will go deep into the source code of Dubbo and see what it is.</p>
 <h2>ExtensionLoader</h2>
-<p><code>ExtentionLoader</code> is the core class, which is responsible for the loading and lifecycle management of extension points. Let's start with this class. There are many methods of Extension, and the common methods include:</p>
+<p><code>ExtensionLoader</code> is the core class, which is responsible for the loading and lifecycle management of extension points. Let's start with this class. There are many methods of Extension, and the common methods include:</p>
 <ul>
 <li><code>public static &lt;T&gt; ExtensionLoader&lt;T&gt; getExtensionLoader(Class&lt;T&gt; type)</code></li>
 <li><code>public T getExtension(String name)</code></li>
@@ -50,12 +49,12 @@ This is a static factory method that enters an extensible interface and returns 
             loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);
         }
         <span class="hljs-keyword">return</span> loader;
-    }
+}
     
 <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">ExtensionLoader</span><span class="hljs-params">(Class&lt;?&gt; type)</span> </span>{
         <span class="hljs-keyword">this</span>.type = type;
         objectFactory = (type == ExtensionFactory.class ? <span class="hljs-keyword">null</span> : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
-    }
+}
 </code></pre>
 <ol start="2">
 <li>getExtension</li>
@@ -78,9 +77,9 @@ This is a static factory method that enters an extensible interface and returns 
             }
         }
         <span class="hljs-keyword">return</span> (T) instance;
-    }
+}
 </code></pre>
-<p>Some judgments and caching have been made in the getExtention method, and the main logic is in the createExtension method. Let's move on to the createExtention method.</p>
+<p>Some judgments and caching have been made in the getExtension method, and the main logic is in the createExtension method. Let's move on to the createExtension method.</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> T <span class="hljs-title">createExtension</span><span class="hljs-params">(String name)</span> </span>{
         <span class="hljs-comment">// Get the extension class according to the name of extension point. For example,  for LoadBalance, get the RandomLoadBalance class according to random</span>
         Class&lt;?&gt; clazz = getExtensionClasses().get(name);
@@ -108,7 +107,7 @@ This is a static factory method that enters an extensible interface and returns 
 <li>First, get the corresponding extension class according to name. Read the extension point configuration file from the <code>META-INF</code> folder under ClassPath.</li>
 <li>Use reflection to create an instance of an extended class.</li>
 <li>make dependency injection for the attributes of the extended class instance. That is, IoC.</li>
-<li>If there is a wrapper, add the wrapper. That is, AoP.</li>
+<li>If there is a wrapper, add the wrapper. That is, AOP.</li>
 </ol>
 <p>Let's focus on these four processes.</p>
 <ol>
@@ -128,8 +127,8 @@ This is a static factory method that enters an extensible interface and returns 
         <span class="hljs-keyword">return</span> classes;
     }
 
-    <span class="hljs-comment">// synchronized in getExtensionClasses</span>
-    <span class="hljs-keyword">private</span> Map&lt;String, Class&lt;?&gt;&gt; loadExtensionClasses() {
+<span class="hljs-comment">// synchronized in getExtensionClasses</span>
+<span class="hljs-keyword">private</span> Map&lt;String, Class&lt;?&gt;&gt; loadExtensionClasses() {
         <span class="hljs-keyword">final</span> SPI defaultAnnotation = type.getAnnotation(SPI.class);
         <span class="hljs-keyword">if</span> (defaultAnnotation != <span class="hljs-keyword">null</span>) {
             String value = defaultAnnotation.value();
@@ -147,7 +146,7 @@ This is a static factory method that enters an extensible interface and returns 
         loadFile(extensionClasses, DUBBO_DIRECTORY);
         loadFile(extensionClasses, SERVICES_DIRECTORY);
         <span class="hljs-keyword">return</span> extensionClasses;
-    }
+}
 </code></pre>
 <p>This process is very simple. Get the extension class from the cache first, and if it does not exist, load it from the configuration file. The path of the configuration file has been mentioned before:</p>
 <ul>
@@ -184,15 +183,15 @@ This is a static factory method that enters an extensible interface and returns 
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">ExtensionLoader</span><span class="hljs-params">(Class&lt;?&gt; type)</span> </span>{
         <span class="hljs-keyword">this</span>.type = type;
         objectFactory = (type == ExtensionFactory.class ? <span class="hljs-keyword">null</span> : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
-    }
+}
 </code></pre>
 <p>ObjectFacore is also an extension, obtained through <code>ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension()</code>.</p>
 <p><img src="https://raw.githubusercontent.com/vangoleo/wiki/master/dubbo/dubbo-extensionfactory.png" alt="Dubbo-ExtensionFactory | left"></p>
-<p>ExtensionLoader includes three implementations:</p>
+<p>ExtensionFactory includes three implementations:</p>
 <ol>
-<li>SpiExtensionLoader: use Dubbo's Spi to load Extension.</li>
-<li>SpringExtensionLoader: load Extension from the Spring container.</li>
-<li>AdaptiveExtensionLoader: adaptive AdaptiveExtensionLoader</li>
+<li>SpiExtensionFactory: use Dubbo's Spi to load Extension.</li>
+<li>SpringExtensionFactory: load Extension from the Spring container.</li>
+<li>AdaptiveExtensionFactory: adaptive AdaptiveExtensionLoader</li>
 </ol>
 <p>Pay attention to the AdaptiveExtensionLoader here, the source code is as follows:</p>
 <pre><code class="language-java"><span class="hljs-meta">@Adaptive</span>
@@ -221,8 +220,8 @@ This is a static factory method that enters an extensible interface and returns 
 }
 </code></pre>
 <p>The AdaptiveExtensionLoader class has @Adaptive annotations. As mentioned earlier, Dubbo creates an adaptive instance for each extension. If the extension class has @Adaptive annotations, it will use it as an adaptive class. If not, Dubbo will create one for us. So <code>ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())</code> will return an AdaptiveExtensionLoader instance as an adaptive extension instance.
-The AdaptiveExtentionLoader will iterate through all the ExtensionFactory implementations and try to load the extensions. If found, return. If not, continue to find it in the next ExtensionFactory. Dubbo has two ExtensionFactory built in, which are searched from Dubbo's own extension mechanism and Spring container. Since ExtensionFactory itself is also an extension point, we can implement our own ExtensionFactory to enable automatic assembly of Dubbo to support our custom components. For example, we used Google's guice as an IoC container in our project. We can implement our own GuiceExtensionFactory to enable Dubbo to load extensions from the guice container.</p>
-<h2>AoP of Dubbo SPI advanced usage</h2>
+The AdaptiveExtensionLoader will iterate through all the ExtensionFactory implementations and try to load the extensions. If found, return. If not, continue to find it in the next ExtensionFactory. Dubbo has two ExtensionFactory built in, which are searched from Dubbo's own extension mechanism and Spring container. Since ExtensionFactory itself is also an extension point, we can implement our own ExtensionFactory to enable automatic assembly of Dubbo to support our custom components. For example, we used Google's guice as an IoC container in our project. We can implement our own GuiceExtensionFactory to enable Dubbo to load extensions from the guice container.</p>
+<h2>AOP of Dubbo SPI advanced usage</h2>
 <p>We often use AOP functionality when using Spring. Insert other logic before and after the method of the target class. For example, Spring AOP is usually used to implement logging, monitoring, and authentication, and so on.
 Does Dubbo's extension mechanism also support similar features? The answer is yes. In Dubbo, there is a special class called the Wrapper class. It uses the wrapper class to wrap the original extension point instance through the decorator pattern, and then inserts additional logic before and after the original extension point implementation to implement AOP functionality.</p>
 <h3>What is the Wrapper class</h3>
@@ -236,10 +235,10 @@ Does Dubbo's extension mechanism also support similar features? The answer is ye
 </code></pre>
 <p>Class A has a constructor <code>public A(A a)</code>, and the argument to the constructor is A itself. Such a class can be a Wrapper class in the Dubbo extension mechanism. Such Wrapper classes in Dubbo include ProtocolFilterWrapper, ProtocolListenerWrapper, and so on. You can check the source code to deepen your understanding.</p>
 <h3>How to configure the Wrapper class</h3>
-<p>The Wipper class in Dubbo is also an extension point. Like other extension points, it is also configured in the <code>META-INF</code> folder. For example, the ProtocolFilterWrapper and ProtocolListenerWrapper in the previous example are configured in the path <code>dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/com.alibaba.dubbo.rpc.Protocol</code>:</p>
-<pre><code class="language-text">filter=com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper
-listener=com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper
-mock=com.alibaba.dubbo.rpc.support.MockProtocol
+<p>The Wrapper class in Dubbo is also an extension point. Like other extension points, it is also configured in the <code>META-INF</code> folder. For example, the ProtocolFilterWrapper and ProtocolListenerWrapper in the previous example are configured in the path <code>dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol</code>:</p>
+<pre><code class="language-text">filter=org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper
+listener=org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper
+mock=org.apache.dubbo.rpc.support.MockProtocol
 </code></pre>
 <p>When Dubbo loads the extension configuration file, there is a piece of code as follows:</p>
 <pre><code class="language-java"><span class="hljs-keyword">try</span> {  
@@ -253,7 +252,7 @@ mock=com.alibaba.dubbo.rpc.support.MockProtocol
 } <span class="hljs-keyword">catch</span> (NoSuchMethodException e) {}
 </code></pre>
 <p>The meaning of this code is that if the extension class has a copy constructor, it will be saved for later use. The class that has the copy constructor is the Wrapper class. The parameter obtained by <code>clazz.getConstructor(type)</code> is the constructor of the extension point interface. Note that the parameter type of the constructor is an extension point interface, not an extension class.
-Take Protocol as an example. The configuration file <code>dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/com.alibaba.dubbo.rpc.Protocol defines filter=com.alibaba.dubbo.rpc.protocol. ProtocolFilterWrapper</code>.
+Take Protocol as an example. The configuration file <code>dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol defines filter=org.apache.dubbo.rpc.protocol. ProtocolFilterWrapper</code>.
 The code of ProtocolFilterWrapper is as follows:</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProtocolFilterWrapper</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Protocol</span> </span>{
 
@@ -266,6 +265,7 @@ The code of ProtocolFilterWrapper is as follows:</p>
         }
         <span class="hljs-keyword">this</span>.protocol = protocol;
     }
+}
 </code></pre>
 <p>ProtocolFilterWrapper has a constructor <code>public ProtocolFilterWrapper(Protocol protocol)</code>, and the parameter is the extension point Protocol. So it is a Wrapper class in the Dubbo extension mechanism. The ExtensionLoader will cache it. When creating Extension instances later, the ExtensionLoader use these wrapper classes to wrap the original Extension point in turn.</p>
 <h2>Extension point adaptive</h2>
@@ -298,15 +298,15 @@ Let's first look at the code to create an adaptive extension class:</p>
             <span class="hljs-keyword">return</span> cachedAdaptiveClass;
         }
         <span class="hljs-keyword">return</span> cachedAdaptiveClass = createAdaptiveExtensionClass();
-    }
+}
 </code></pre>
 <p>Continue to read the createAdaptiveExtensionClass method. After a long journey, we finally come to a concrete realization. Look at this createAdaptiveExtensionClass method, which first generates the Java source code for the adaptive class, and then compile the source code into Java bytecode and load it into the JVM.</p>
 <pre><code class="language-java"><span class="hljs-keyword">private</span> Class&lt;?&gt; createAdaptiveExtensionClass() {
         String code = createAdaptiveExtensionClassCode();
         ClassLoader classLoader = findClassLoader();
-        com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
+        org.apache.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(org.apache.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
         <span class="hljs-keyword">return</span> compiler.compile(code, classLoader);
-    }
+}
 </code></pre>
 <p>The default implementation of Compiler's code is javassist.</p>
 <pre><code class="language-java"><span class="hljs-meta">@SPI</span>(<span class="hljs-string">"javassist"</span>)
@@ -316,44 +316,44 @@ Let's first look at the code to create an adaptive extension class:</p>
 </code></pre>
 <p>The createAdaptiveExtensionClassCode () method uses a StringBuilder to build Java source code for the adaptive class. The method implementation is relatively long, and the code is not posted here. The approach to bytecode generation is also interesting, first generating Java source code, then compiling it and loading it into the jvm. In this way, the generated Java class can be better controlled. And it doesn't have to care about the API of the bytecode generation framework. Because the xxx.java file is universal in Java, it is also the one we are most familiar with. However, the code is not very readable and you need to build xx. Java content bit by bit.
 Below are the Java code example for Protocol adaptive class created by createAdaptiveExtensionClassCode method:</p>
-<pre><code class="language-java"><span class="hljs-keyword">package</span> com.alibaba.dubbo.rpc;
+<pre><code class="language-java"><span class="hljs-keyword">package</span> org.apache.dubbo.rpc;
 
-<span class="hljs-keyword">import</span> com.alibaba.dubbo.common.extension.ExtensionLoader;
+<span class="hljs-keyword">import</span> org.apache.dubbo.common.extension.ExtensionLoader;
 
-<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Protocol</span>$<span class="hljs-title">Adpative</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">com</span>.<span class="hljs-title">alibaba</span>.<span class="hljs-title">dubbo</span>.<span class="hljs-title">rpc</span>.<span class="hljs-title">Protocol</span> </span>{
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Protocol</span>$<span class="hljs-title">Adaptive</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">org</span>.<span class="hljs-title">apache</span>.<span class="hljs-title">dubbo</span>.<span class="hljs-title">rpc</span>.<span class="hljs-title">Protocol</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> UnsupportedOperationException(<span class="hljs-string">"method public abstract void com.alibaba.dubbo.rpc.Protocol.destroy() of interface com.alibaba.dubbo.rpc.Protocol is not adaptive method!"</span>);
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> UnsupportedOperationException(<span class="hljs-string">"method public abstract void org.apache.dubbo.rpc.Protocol.destroy() of interface org.apache.dubbo.rpc.Protocol is not adaptive method!"</span>);
     }
 
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getDefaultPort</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> UnsupportedOperationException(<span class="hljs-string">"method public abstract int com.alibaba.dubbo.rpc.Protocol.getDefaultPort() of interface com.alibaba.dubbo.rpc.Protocol is not adaptive method!"</span>);
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> UnsupportedOperationException(<span class="hljs-string">"method public abstract int org.apache.dubbo.rpc.Protocol.getDefaultPort() of interface org.apache.dubbo.rpc.Protocol is not adaptive method!"</span>);
     }
 
-    <span class="hljs-keyword">public</span> com.alibaba.dubbo.rpc.<span class="hljs-function">Exporter <span class="hljs-title">export</span><span class="hljs-params">(com.alibaba.dubbo.rpc.Invoker arg0)</span> <span class="hljs-keyword">throws</span> com.alibaba.dubbo.rpc.RpcException </span>{
-        <span class="hljs-keyword">if</span> (arg0 == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"com.alibaba.dubbo.rpc.Invoker argument == null"</span>);
+    <span class="hljs-keyword">public</span> org.apache.dubbo.rpc.<span class="hljs-function">Exporter <span class="hljs-title">export</span><span class="hljs-params">(org.apache.dubbo.rpc.Invoker arg0)</span> <span class="hljs-keyword">throws</span> org.apache.dubbo.rpc.RpcException </span>{
+        <span class="hljs-keyword">if</span> (arg0 == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"org.apache.dubbo.rpc.Invoker argument == null"</span>);
         <span class="hljs-keyword">if</span> (arg0.getUrl() == <span class="hljs-keyword">null</span>)
-            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"com.alibaba.dubbo.rpc.Invoker argument getUrl() == null"</span>);
-        com.alibaba.dubbo.common.URL url = arg0.getUrl();
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"org.apache.dubbo.rpc.Invoker argument getUrl() == null"</span>);
+        org.apache.dubbo.common.URL url = arg0.getUrl();
         String extName = (url.getProtocol() == <span class="hljs-keyword">null</span> ? <span class="hljs-string">"dubbo"</span> : url.getProtocol());
         <span class="hljs-keyword">if</span> (extName == <span class="hljs-keyword">null</span>)
-            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Fail to get extension(com.alibaba.dubbo.rpc.Protocol) name from url("</span> + url.toString() + <span class="hljs-string">") use keys([protocol])"</span>);
-        com.alibaba.dubbo.rpc.Protocol extension = (com.alibaba.dubbo.rpc.Protocol) ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.rpc.Protocol.class).getExtension(extName);
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Fail to get extension(org.apache.dubbo.rpc.Protocol) name from url("</span> + url.toString() + <span class="hljs-string">") use keys([protocol])"</span>);
+        org.apache.dubbo.rpc.Protocol extension = (org.apache.dubbo.rpc.Protocol) ExtensionLoader.getExtensionLoader(org.apache.dubbo.rpc.Protocol.class).getExtension(extName);
         <span class="hljs-keyword">return</span> extension.export(arg0);
     }
 
-    <span class="hljs-keyword">public</span> com.alibaba.dubbo.rpc.<span class="hljs-function">Invoker <span class="hljs-title">refer</span><span class="hljs-params">(java.lang.Class arg0, com.alibaba.dubbo.common.URL arg1)</span> <span class="hljs-keyword">throws</span> com.alibaba.dubbo.rpc.RpcException </span>{
+    <span class="hljs-keyword">public</span> org.apache.dubbo.rpc.<span class="hljs-function">Invoker <span class="hljs-title">refer</span><span class="hljs-params">(java.lang.Class arg0, org.apache.dubbo.common.URL arg1)</span> <span class="hljs-keyword">throws</span> org.apache.dubbo.rpc.RpcException </span>{
         <span class="hljs-keyword">if</span> (arg1 == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"url == null"</span>);
-        com.alibaba.dubbo.common.URL url = arg1;
+        org.apache.dubbo.common.URL url = arg1;
         String extName = (url.getProtocol() == <span class="hljs-keyword">null</span> ? <span class="hljs-string">"dubbo"</span> : url.getProtocol());
         <span class="hljs-keyword">if</span> (extName == <span class="hljs-keyword">null</span>)
-            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Fail to get extension(com.alibaba.dubbo.rpc.Protocol) name from url("</span> + url.toString() + <span class="hljs-string">") use keys([protocol])"</span>);
-        com.alibaba.dubbo.rpc.Protocol extension = (com.alibaba.dubbo.rpc.Protocol) ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.rpc.Protocol.class).getExtension(extName);
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Fail to get extension(org.apache.dubbo.rpc.Protocol) name from url("</span> + url.toString() + <span class="hljs-string">") use keys([protocol])"</span>);
+        org.apache.dubbo.rpc.Protocol extension = (org.apache.dubbo.rpc.Protocol) ExtensionLoader.getExtensionLoader(org.apache.dubbo.rpc.Protocol.class).getExtension(extName);
         <span class="hljs-keyword">return</span> extension.refer(arg0, arg1);
     }
 }
 </code></pre>
 <p>The general logic is the same as at the beginning. The parameters are parsed through the url, and the parsed logic is controlled by the value parameter of @adaptive, and then the extension points implementation are obtained according to the name of the extension point. And then finally make the call. If you want to know the specific construction logic of .Java code, you can see the complete implementation of <code>createAdaptiveExtensionClassCode</code>.
-In the generated Protocol$Adpative, both the getDefaultPort and destroy methods are found to throw the exception directly. Why? Take a look at the source code of Protocol:</p>
+In the generated Protocol$Adaptive, both the getDefaultPort and destroy methods are found to throw the exception directly. Why? Take a look at the source code of Protocol:</p>
 <pre><code class="language-java"><span class="hljs-meta">@SPI</span>(<span class="hljs-string">"dubbo"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Protocol</span> </span>{
 
@@ -366,8 +366,9 @@ In the generated Protocol$Adpative, both the getDefaultPort and destroy methods 
     &lt;T&gt; <span class="hljs-function">Invoker&lt;T&gt; <span class="hljs-title">refer</span><span class="hljs-params">(Class&lt;T&gt; type, URL url)</span> <span class="hljs-keyword">throws</span> RpcException</span>;
 
     <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">destroy</span><span class="hljs-params">()</span></span>;
+}
 </code></pre>
-<p>As you can see, there are four methods in the Protocol interface, but only the methods of export and refer use the @adaptive annotation. Dubbo automatically generates adaptive instances, and only the methods modified by @Adaptive has a specific implementation. Therefore, in the Protocol$Adpative class, only the export and refer methods have specific implementations, and the rest of the methods throw exceptions.</p>
+<p>As you can see, there are four methods in the Protocol interface, but only the methods of export and refer use the @Adaptive annotation. Dubbo automatically generates adaptive instances, and only the methods modified by @Adaptive has a specific implementation. Therefore, in the Protocol$Adaptive class, only the export and refer methods have specific implementations, and the rest of the methods throw exceptions.</p>
 </section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">Foundation</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">License</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">Events</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">Sponsorship</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">Thanks</a></dd></dl></div><div class="col col-4"><dl><dt>Documentation</dt><dd><a href="/en-us/docs/user/quick-start.html" target="_self">Quick start</a></dd><dd><a href="/en-us/docs/dev/build.html" target="_self">Developer guide</a></dd><dd><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self">Admin manual</a></dd></dl></div><div class="col col-4"><dl><dt>Resources</dt><dd><a href="/en-us/blog/index.html" target="_self">Blog</a></dd><dd><a href="/en-us/community/index.html" target="_self">Community</a></dd><dd><a href="https://www.apache.org/security/" target="_self">Security</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
 	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
 	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
