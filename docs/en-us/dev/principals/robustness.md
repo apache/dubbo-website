@@ -1,84 +1,83 @@
-# 设计实现的健壮性
+# The robustness of the design implementation
 
 > http://oldratlee.com/380/tech/java/robustness-of-implement.html
 
 
-Dubbo 作为远程服务暴露、调用和治理的解决方案，是应用运转的经络，其本身实现健壮性的重要程度是不言而喻的。
+Dubbo as a remote service exposure, calls and management solutions, through the meridians of the application is running, its itself to achieve robustness of importance is self-evident.
 
-这里列出一些 Dubbo 用到的原则和方法。
+Here are some Dubbo principle and method of use.
 
-## 日志
+## The log
 
-日志是发现问题、查看问题一个最常用的手段。日志质量往往被忽视，没有日志使用上的明确约定。重视 Log 的使用，提高 Log 的信息浓度。日志过多、过于混乱，会导致有用的信息被淹没。
+Logging is found, view problems one of the most commonly used method.Log quality is often neglected, there is no log on using expressly agreed upon.Attaches great importance to the use of the Log, and improve the concentration of the Log information.Log too much, too much chaos, could lead to useful information.
 
-要有效利用这个工具要注意：
+To effectively use this tool to note:
 
-### 严格约定WARN、ERROR级别记录的内容
+### Record the contents of the stipulated strictly WARN, the ERROR level
 
-* WARN 表示可以恢复的问题，无需人工介入。
-* ERROR 表示需要人工介入问题。
+* WARN that can restore the problem without human intervention.
+* The ERROR says requires human intervention.
 
-有了这样的约定，监管系统发现日志文件的中出现 ERROR 字串就报警，又尽量减少了发生。过多的报警会让人疲倦，使人对报警失去警惕性，使 ERROR 日志失去意义。再辅以人工定期查看 WARN 级别信息，以评估系统的“亚健康”程度。
+With such agreement, the regulatory system found in the ERROR log file of the string will call the police, and to minimize the occurrence.Excessive alarm can let a person tired, make the person lose vigilance in alarm, make the ERROR log.Along with artificial, regularly check the WARN level information to assess the degree of "subhealth" system.
 
-### 日志中，尽量多的收集关键信息
+### In the log, as much as possible to collect key information
 
-哪些是关键信息呢？
+What is the key information?
 
-* 出问题时的现场信息，即排查问题要用到的信息。如服务调用失败时，要给出使用 Dubbo 的版本、服务提供者的 IP、使用的是哪个注册中心；调用的是哪个服务、哪个方法等等。这些信息如果不给出，那么事后人工收集的，问题过后现场可能已经不能复原，加大排查问题的难度。
-* 如果可能，给出问题的原因和解决方法。这让维护和问题解决变得简单，而不是寻求精通者（往往是实现者）的帮助。
+* Site information at the time of the problem, namely the screening questions to use information.Such as service invocation fails, to give the use of Dubbo version, the service provider's IP, which is used in the registry;Which service invocation, which method and so on.This information if not given, then later artificial collection, problem after the site may have already can't recover, increase the difficulty of the problem.
+* If possible, the cause of the problem and the solution is given.This makes maintenance and problem solving becomes simple, rather than seeking savvy (often the implementer) for help.
 
-### 同一个或是一类问题不要重复记录多次
+### Don't duplicate records many times the same or a class of problems
 
-同一个或是一类异常日志连续出现几十遍的情况，还是常常能看到的。人眼很容易漏掉淹没在其中不一样的重要日志信息。要尽量避免这种情况。在可以预见会出现的情况，有必要加一些逻辑来避免。
+The same or a kind of abnormal log continuous there dozens of times, still can often see.The human eye is easy to miss under the different important log information.Try to avoid this situation.Will appear in the foreseeable, it is necessary to add some logic to avoid.
 
-如为一个问题准备一个标志，出问题后打日志后设置标志，避免重复打日志。问题恢复后清除标志。
+As a symbol for a question, a problem after log Settings after sign and avoid a repeat of the log.The problem clear sign after recovery.
 
-虽然有点麻烦，但是这样做保证日志信息浓度，让监控更有效。
+Although a bit troublesome, but do ensure log information concentration, the more effective for monitoring.
 
-## 界限设置
+## Limit set
 
-资源是有限的，CPU、内存、IO 等等。不要因为外部的请求、数据不受限的而崩溃。
+Resources are limited, CPU, memory, IO, etc.Don't cry because it is outside of the request, the data is not limited.
 
-### 线程池(ExectorService)的大小和饱和策略
+### The size of the thread pool (ExectorService) and saturated strategy
 
-Server 端用于处理请求的 ExectorService 设置上限。ExecutorService 的任务等待队列使用有限队列，避免资源耗尽。当任务等待队列饱和时，选择一个合适的饱和策略。这样保证平滑劣化。
+The Server end ExectorService set limit for processing requests.Use limited queue ExecutorService task waiting queue, avoid resource depletion.When the task waiting queue saturated, choose a suitable saturated strategy.This ensures smooth degradation.
 
-在 Dubbo 中，饱和策略是丢弃数据，等待结果也只是请求的超时。
+In Dubbo, saturated strategy is to discard data, waiting for the result is only a request timeout.
 
-达到饱和时，说明已经达到服务提供方的负荷上限，要在饱和策略的操作中日志记录这个问题，以发出监控警报。记得注意不要重复多次记录哦。（注意，缺省的饱和策略不会有这些附加的操作。）根据警报的频率，已经决定扩容调整等等，避免系统问题被忽略。
+Saturated, the specification has reached the maximum load, the service provider to logging in the operation of the saturated strategy of the problem, in order to monitor warnings.Remember to be careful not to repeat many times record well.(note that the default saturation strategy will not have these additional operation.)According to the frequency of the alarm, has decided to increase adjustment, etc., avoid system problems are ignored.
 
-### 集合容量
+### The collection capacity
 
-如果确保进入集合的元素是可控的且是足够少，则可以放心使用。这是大部分的情况。如果不能保证，则使用有有界的集合。当到达界限时，选择一个合适的丢弃策略。
+If to ensure element is controlled on the collection and is small enough, then you can rest assured use.This is most of the situation.If can't guarantee anything, use a bounded set.When reach the boundary, choose a suitable strategy.
 
-## 容错-重试-恢复
+## Fault tolerant - retry - recovery
 
-高可用组件要容忍其依赖组件的失败。
+High availability components to tolerate its dependence on the failure of the component.
 
-### Dubbo 的服务注册中心
+### Dubbo service registry
 
-目前服务注册中心使用了数据库来保存服务提供者和消费者的信息。注册中心集群不同注册中心也通过数据库来之间同步数据，以感知其它注册中心上提供者。注册中心会内存中保证一份提供者和消费者数据，数据库不可用时，注册中心独立对外正常运转，只是拿不到其它注册中心的数据。当数据库恢复时，重试逻辑会内存中修改的数据写回数据库，并拿到数据库中新数据。
+The service registry using the database to store the information service providers and consumers.Different registry registry cluster through the database to synchronize data, to perceive other providers on the registry.Registry would ensure a provider and consumer data in memory, the database is unavailable, independent of the normal operation of foreign registry, just can't get other registry data.When the database recovery, retry logic will modify memory write data back to the database, and get a new database data.
 
-### 服务的消费者
+### Service consumers
 
-服务消息者从注册中心拿到提供者列表后，会保存提供者列表到内存和磁盘文件中。这样注册中心宕后消费者可以正常运转，甚至可以在注册中心宕机过程中重启消费者。消费者启动时，发现注册中心不可用，会读取保存在磁盘文件中提供者列表。重试逻辑保证注册中心恢复后，更新信息。
+After the message service provider list from the registry, will save the provider list to memory and disk file.Consumers can function properly after this registry is down, even in the registry during outage restart consumers.Consumers started, find the registry is not available, will read the list stored in the disk file provider.Retry logic to ensure the registry after recovery, update the information.
 
-## 重试延迟策略
+## Retry delay strategy
 
-上一点的子问题。Dubbo 中碰到有两个相关的场景。
+On a bit of the subproblem.Dubbo encountered two related scenario.
 
-### 数据库上的活锁
+### On the database lock
 
-注册中心会定时更新数据库一条记录的时间戳，这样集群中其它的注册中心感知它是存活。过期注册中心和它的相关数据 会被清除。数据库正常时，这个机制运行良好。但是数据库负荷高时，其上的每个操作都会很慢。这就出现：
+Registration center will regularly update the database of a record timestamp, such cluster other registry perceive it is alive.Overdue registry and its associated data will be cleared.Database is normal, the mechanism as well.But the database load is high, its every action is slow.This occurs:
 
-A 注册中心认为 B 过期，删除 B 的数据。 B 发现自己的数据没有了，重新写入自己的数据的反复操作。这些反复的操作又加重了数据库的负荷，恶化问题。
+A registry that B expired, delete B data.B find their data, to write their own data repeatedly.These repeated operation and increase load the database, deterioration.
 
-可以使用下面逻辑：
+Use the following logic:
 
-当 B 发现自己数据被删除时（写入失败），选择等待这段时间再重试。重试时间可以选择指数级增长，如第一次等 1 分钟，第二次 10 分钟、第三次 100 分钟。
-
+When data is deleted B found themselves fail (write), choose to wait for this period of time and try again.Can choose to retry time exponentially, such as first class 1 minute, the second for 10 minutes, 100 minutes for the third time.
 这样操作减少后，保证数据库可以冷却（Cool Down）下来。
 
-### Client 重连注册中心
+### The Client reconnection registry
 
-当一个注册中心停机时，其它的 Client 会同时接收事件，而去重连另一个注册中心。Client 数量相对比较多，会对注册中心造成冲击。避免方法可以是 Client 重连时随机延时 3 分钟，把重连分散开。
+When a registry downtime, other Client will receive events at the same time, and to reconnect to another registry.The Client number is relatively more, will be the impact of the registry.Avoid method can be a Client reconnection random delay for 3 minutes, when the reconnection spread out.
