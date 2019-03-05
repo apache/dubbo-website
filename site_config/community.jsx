@@ -60,10 +60,10 @@ export default {
           link: 'https://gitter.im/alibaba/dubbo',
         },
         {
-          img: '/img/segmentfault.png',
-          imgHover: '/img/segmentfault_hover.png',
-          title: 'Segment Fault',
-          link: 'https://segmentfault.com/t/dubbo'
+          img: '/img/so-icon.png',
+          imgHover: '/img/so-icon-hover.png',
+          title: 'StackOverflow',
+          link: 'https://stackoverflow.com/questions/tagged/apache-dubbo'
         },
         {
           img: '/img/twitter.png',
@@ -465,7 +465,7 @@ export default {
     },
     contacts: {
       title: '联系我们',
-      desc: '有问题需要反馈？请通过一下方式联系我们。',
+      desc: '有问题需要反馈？请通过以下方式联系我们。',
       list: [
         {
           img: '/img/mailinglist.png',
@@ -480,10 +480,10 @@ export default {
           link: 'https://gitter.im/alibaba/dubbo',
         },
         {
-          img: '/img/segmentfault.png',
-          imgHover: '/img/segmentfault_hover.png',
-          title: 'Segment Fault',
-          link: 'https://segmentfault.com/t/dubbo'
+          img: '/img/so-icon.png',
+          imgHover: '/img/so-icon-hover.png',
+          title: 'StackOverflow',
+          link: 'https://stackoverflow.com/questions/tagged/apache-dubbo'
         },
         {
           img: '/img/twitter.png',
