@@ -38,6 +38,7 @@
 | lixiaojie       | Xiaojie Li          | GomeFinance      | Committer | +8       |
 | biyuhao         | Yuhao Bi            | Asiainfo-sec     | Committer | +8       |
 | crazyhzm        | Zhongming Hua       | iFlytek          | Committer | +8       |
+| kezhenxu94      | Zhenxu Ke           |                  | Committer | +8       |
 
 ### 贡献者
 
@@ -46,6 +47,5 @@
 | leyou240   | <https://github.com/leyou240>   |              | +8   |
 | chenzhiguo | <https://github.com/chenzhiguo> |              | +8   |
 | huyuechy   | <https://github.com/huyuechy>   |              | +8   |
-| kezhenxu94 | <https://github.com/kezhenxu94> |              | +8   |
 | caojiele   | <https://github.com/caojiele>   |              | +8   |
 
