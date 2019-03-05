@@ -65,4 +65,4 @@ This is part of the design by contract, try to keep to a return value method is 
 
 ## Incremental extension, and not to extend the original core concept
 
-参见：[expansibility](./principals/expansibility.md)
+see here：[expansibility](./principals/expansibility.md)
