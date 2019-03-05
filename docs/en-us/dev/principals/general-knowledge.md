@@ -1,69 +1,68 @@
-# 一些设计上的基本常识
+# Some in the design of the basic common sense
 
 > http://javatar.iteye.com/blog/706098
 
-最近给团队新人讲了一些设计上的常识，可能会对其它的新人也有些帮助，把暂时想到的几条，先记在这里。 
+Recently told the new team some design on the common sense, is likely to be new and some other help, the thought of a few temporarily, first write here. 
 
-## API 与 SPI 分离 
+## The API and SPI separation 
 
-框架或组件通常有两类客户，一个是使用者，一个是扩展者。API (Application Programming Interface) 是给使用者用的，而 SPI (Service Provide Interface) 是给扩展者用的。在设计时，尽量把它们隔离开，而不要混在一起。也就是说，使用者是看不到扩展者写的实现的。
+Framework or component there are generally two types of customers, one is a consumer, is an extension.API (Application Programming Interface) is used to users, and SPI (Service dojo.provide Interface) is used to expand.At design time, try to put them off, and don't mix.In other words, the user is can't see write the implementation of the extension.
 
-比如：一个 Web 框架，它有一个 API 接口叫 Action，里面有个 execute() 方法，是给使用者用来写业务逻辑的。然后，Web 框架有一个 SPI 接口给扩展者控制输出方式，比如用 velocity 模板输出还是用 json 输出等。如果这个 Web 框架使用一个都继承 Action 的 VelocityAction 和一个 JsonAction 做为扩展方式，要用 velocity 模板输出的就继承 VelocityAction，要用 json 输出的就继承 JsonAction，这就是 API 和 SPI 没有分离的反面例子，SPI 接口混在了 API 接口中。
+For example, a Web framework, it has an API interface to call the Action, there is a the execute () method, which is for the user to write business logic.Then, Web frameworks have a SPI interface to extend the control output, such as velocity templates output or a json output, etc.If this Web framework using an inheritance VelocityAction and a JsonAction as extension of the Action, with output velocity templates will inherit VelocityAction, want to use the json output will inherit JsonAction, this is the opposite of the API and SPI no separation example, SPI interface in the API interface.
 
 ![mix-api-spi](../sources/images/mix-api-spi.jpg)
 
 
-合理的方式是，有一个单独的 Renderer 接口，有 VelocityRenderer 和 JsonRenderer 实现，Web 框架将 Action 的输出转交给 Renderer 接口做渲染输出。 
+Is a reasonable way, there is a separate Renderer interface, VelocityRenderer and JsonRenderer implementation, Web framework will transfer the output of the Action to the Renderer interface for rendering output.
 
 ![seperate-api-spi](../sources/images/seperate-api-spi.jpg)
  
 
-## 服务域/实体域/会话域分离 
+## Service domain/entity/session domains separation
 
-任何框架或组件，总会有核心领域模型，比如：Spring 的 Bean，Struts 的 Action，Dubbo 的 Service，Napoli 的 Queue 等等。这个核心领域模型及其组成部分称为实体域，它代表着我们要操作的目标本身。实体域通常是线程安全的，不管是通过不变类，同步状态，或复制的方式。
+Any framework or component, there will always be the core domain model, such as: Spring Bean, Struts Action, Service of Dubbo, Napoli Queue, and so on.The core areas of the model and its component is called physical domain, it represents our goal to operate on itself.Physical domain is thread-safe, usually either through the same class, sync, or copy the way.
 
-服务域也就是行为域，它是组件的功能集，同时也负责实体域和会话域的生命周期管理， 
-比如 Spring 的 ApplicationContext，Dubbo 的 ServiceManager 等。服务域的对象通常会比较重，而且是线程安全的，并以单一实例服务于所有调用。
+Service domain, that is, behavior domain, it is the function of the components, but also is responsible for the entity and session domains of life cycle management, such as Spring ApplicationContext, Dubbo ServiceManager, etc.Service domain objects often is heavy, and is thread-safe, and serve all calls to a single instance.
  
-什么是会话？就是一次交互过程。会话中重要的概念是上下文，什么是上下文？比如我们说：“老地方见”，这里的“老地方”就是上下文信息。为什么说“老地方”对方会知道，因为我们前面定义了“老地方”的具体内容。所以说，上下文通常持有交互过程中的状态变量等。会话对象通常较轻，每次请求都重新创建实例，请求结束后销毁。简而言之：把元信息交由实体域持有，把一次请求中的临时状态由会话域持有，由服务域贯穿整个过程。 
+What is a session?Is an interactive process.Session key is the concept of context, the context is what?For example, we said: "old place", the "old place" is the context information.Why do you say "old place" other person will know, because we defined earlier the specific content of the "old place".So, the context often hold state variables in the process of interaction, etc.The session object, were generally mild and every request to create an instance, destroyed after the request.In short: the meta information held by the entity domain, the temporary state of a request by the session domain, by the service domain throughout the entire process. 
 
 ![ddd](../sources/images/ddd.jpg)
  
 
-## 在重要的过程上设置拦截接口 
+## On the important process to interceptor interface 
 
-如果你要写个远程调用框架，那远程调用的过程应该有一个统一的拦截接口。如果你要写一个 ORM 框架，那至少 SQL 的执行过程，Mapping 过程要有拦截接口；如果你要写一个 Web 框架，那请求的执行过程应该要有拦截接口，等等。没有哪个公用的框架可以 Cover 住所有需求，允许外置行为，是框架的基本扩展方式。这样，如果有人想在远程调用前，验证下令牌，验证下黑白名单，统计下日志；如果有人想在 SQL 执行前加下分页包装，做下数据权限控制，统计下 SQL 执行时间；如果有人想在请求执行前检查下角色，包装下输入输出流，统计下请求量，等等，就可以自行完成，而不用侵入框架内部。拦截接口，通常是把过程本身用一个对象封装起来，传给拦截器链，比如：远程调用主过程为 invoke()，那拦截器接口通常为 invoke(Invocation)，Invocation 对象封装了本来要执行过程的上下文，并且 Invocation 里有一个 invoke() 方法，由拦截器决定什么时候执行，同时，Invocation 也代表拦截器行为本身，这样上一拦截器的 Invocation 其实是包装的下一拦截器的过程，直到最后一个拦截器的 Invocation 是包装的最终的 invoke() 过程；同理，SQL 主过程为 execute()，那拦截器接口通常为 execute(Execution)，原理一样。当然，实现方式可以任意，上面只是举例。 
+If you want to write a remote invocation framework, the remote call block the process should have a unified interface.If you want to write an ORM framework, that at least the SQL execution, the Mapping process to intercept interface;If you want to write a Web framework, the request execution should be interception interfaces, and so on.No common framework can Cover all requirements, allowing external behavior, is the basic extension of the framework.Before a remote call, so that if someone wants to verify ordered CARDS, verification of black and white list, log statistics;If someone wants to add paging under packing before SQL execution, do data access control, statistics under the SQL execution time.If someone wants to check before the request execution, packaging, input and output flow request quantity statistics, and so on, can accomplish on their own, rather than into frame inside.Interception interfaces, usually to encapsulate process itself with an object, to the interceptor chain, such as: remote calls the main process for the invoke (), the interceptor interface to invoke usually (Invocation), Invocation object encapsulates the would have the execution context, and Invocation in an invoke () method, performed by the interceptor decide when, at the same time, also on behalf of the interceptor Invocation itself, such a interceptor Invocation is actually the process of packaging the next interceptor, until the last interceptor Invocation is packing the final invoke () process;Similarly, the main process for the execute SQL (), the interceptor interface is usually the execute (Execution), principle.Can implement ways, of course, the above is only for example. 
 
 ![filter-chain](../sources/images/filter-chain.jpg)
 
-## 重要的状态的变更发送事件并留出监听接口 
+## The important status of sending events and set aside to monitor interface 
 
-这里先要讲一个事件和上面拦截器的区别，拦截器是干预过程的，它是过程的一部分，是基于过程行为的，而事件是基于状态数据的，任何行为改变的相同状态，对事件应该是一致的。事件通常是事后通知，是一个 Callback 接口，方法名通常是过去式的，比如 onChanged()。比如远程调用框架，当网络断开或连上应该发出一个事件，当出现错误也可以考虑发出一个事件，这样外围应用就有可能观察到框架内部的变化，做相应适应。 
+Here to tell the difference between an event and the interceptor above, the interceptor is in the process of intervention, it is part of the process, is based on process behavior, and event is based on state data, any behavior changes of the same condition, the event should be consistent.Event is usually after the event notification is a Callback interface, the method name is usually past tense, such as onChanged ().Remote invocation framework, for example, when the network disconnect or even should send out an event, when there is an error can also be considered an event, such peripheral applications could be observed within the framework of change, make corresponding adjustment.
 
 ![event-listener](../sources/images/event-listener.jpg)
 
-## 扩展接口职责尽可能单一，具有可组合性 
+## Extension interface functions as a single, composability
 
-比如，远程调用框架它的协议是可以替换的。如果只提供一个总的扩展接口，当然可以做到切换协议，但协议支持是可以细分为底层通讯，序列化，动态代理方式等等。如果将接口拆细，正交分解，会更便于扩展者复用已有逻辑，而只是替换某部分实现策略。当然这个分解的粒度需要把握好。 
+For example, the remote invocation framework agreement is to replace it.If only provide a general extension interface, switch can deal, of course, but the protocol support can be subdivided into the underlying communication, serialization, dynamic proxy mode and so on.If the interface split, orthogonal decomposition, will be easier to reuse existing logical extension, and just replace a part of the implementation strategy.Of course the decomposition the granularity of the need to grasp.
 
-## 微核插件式，平等对待第三方 
+## Micronucleus plug-in, equal treatment to the third party
 
-大凡发展的比较好的框架，都遵守微核的理念。Eclipse 的微核是 OSGi， Spring 的微核是 BeanFactory，Maven 的微核是 Plexus。通常核心是不应该带有功能性的，而是一个生命周期和集成容器，这样各功能可以通过相同的方式交互及扩展，并且任何功能都可以被替换。如果做不到微核，至少要平等对待第三方，即原作者能实现的功能，扩展者应该可以通过扩展的方式全部做到。原作者要把自己也当作扩展者，这样才能保证框架的可持续性及由内向外的稳定性。 
+"A good framework of development, abide by the concept of micronucleus.Eclipse is OSGi microkernel, Spring's microkernel is the BeanFactory, Maven microkernel is breadth.With functional core is usually should not be, but a life cycle and integrated container, so that each function can interact through the same way and extension, and any function can be replaced.If they do not microkernel, must be at least equal treatment to a third party, namely, the author can realize the function of extension should can be done by extending all the way.The author want to regard themselves as extension, so as to ensure framework of sustainability and stability of the outside introversion. 
 
-## 不要控制外部对象的生命周期 
+## Don't control the external object lifecycle 
 
-比如上面说的 Action 使用接口和 Renderer 扩展接口。框架如果让使用者或扩展者把 Action 或 Renderer 实现类的类名或类元信息报上来，然后在内部通过反射 newInstance() 创建一个实例，这样框架就控制了 Action 或 Renderer 实现类的生命周期，Action 或 Renderer 的生老病死，框架都自己做了，外部扩展或集成都无能为力。好的办法是让使用者或扩展者把 Action 或 Renderer 实现类的实例报上来，框架只是使用这些实例，这些对象是怎么创建的，怎么销毁的，都和框架无关，框架最多提供工具类辅助管理，而不是绝对控制。 
+Such as the above said the Action using the interface and the Renderer extension interface.Framework if let users or extend the Action or the Renderer implementation class name of the class or kind of meta information submitted, then internally by reflecting newInstance () to create an instance of this framework is to control the Action or the Renderer implementation class life cycle, the Action or the Renderer physical, frameworks do it himself, external extension or integration are powerless.Good idea is to let the user or extend the Action or submitted to the realization of the Renderer class instance, framework just use these instances, is how to create these objects, how to destroy, had nothing to do with frame, frame up to provide assistant management tools, rather than absolute control. 
 
-## 可配置一定可编程，并保持友好的 CoC 约定 
+## Configurable must be programmable, and maintain friendly CoC conventions 
 
-因为使用环境的不确定因素很多，框架总会有一些配置，一般都会到 classpath 直扫某个指定名称的配置，或者启动时允许指定配置路径。做为一个通用框架，应该做到凡是能配置文件做的一定要能通过编程方式进行，否则当使用者需要将你的框架与另一个框架集成时就会带来很多不必要的麻烦。
+Framework using the environment uncertainty because of the many, there will always be some configuration, usually to a specified name classpath straight sweep configuration, or startup allows you to specify the configuration path.As a common framework, should do all can do configuration file must be able to programmatically, or when the user needs to be your frame with another frame integration will bring a lot of unnecessary trouble.
 
-另外，尽可能做一个标准约定，如果用户按某种约定做事时，就不需要该配置项。比如：配置模板位置，你可以约定，如果放在 templates 目录下就不用配了，如果你想换个目录，就配置下。 
+In addition, as far as possible do a standard contract, if the user has to do things by some sort of agreement, there is no need for the configuration items.Such as: configuration templates location, you can agree, if in the templates directory doesn't have to match, if you want to change the directory, and configuration.
 
-## 区分命令与查询，明确前置条件与后置条件 
+## Distinguish between commands and queries, clear pre-conditions and post-conditions
 
-这个是契约式设计的一部分，尽量遵守有返回值的方法是查询方法，void 返回的方法是命令。查询方法通常是幂等性的，无副作用的，也就是不改变任何状态，调 n 次结果都是一样的，比如 get 某个属性值，或查询一条数据库记录。命令是指有副作用的，也就是会修改状态，比如 set 某个值，或 update 某条数据库记录。如果你的方法即做了修改状态的操作，又做了查询返回，如果可能，将其拆成写读分离的两个方法，比如：User deleteUser(id)，删除用户并返回被删除的用户，考虑改为 getUser() 和 void 的 deleteUser()。 另外，每个方法都尽量前置断言传入参数的合法性，后置断言返回结果的合法性，并文档化。 
+This is part of the design by contract, try to keep to a return value method is to query methods, void return method is to command.Query methods are usually idempotence, without side effects, also is not change any state, the n results are the same, such as the get a property value, or query a database record.Command is to point to have side effects, namely will change state, such as set a value, or update a database record.If you have modified the status of the operation, do a query returns again, if possible, to split it into writing reading separation of the two methods, such as: User deleteUser (id), delete users and returns the deleted users, consider to the getUser () and void deleteUser ().In addition, each method is front-facing assert that the legitimacy of the incoming parameters, as far as possible the rear assertion returns the legitimacy, and documented. 
 
-## 增量式扩展，而不要扩充原始核心概念
+## Incremental extension, and not to extend the original core concept
 
-参见：[谈谈扩充式扩展与增量式扩展](./principals/expansibility.md)
+参见：[expansibility](./principals/expansibility.md)
