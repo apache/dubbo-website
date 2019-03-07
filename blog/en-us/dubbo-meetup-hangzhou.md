@@ -9,7 +9,7 @@ description: The fifth Dubbo meetup has been held in Hangzhou
 
 The fifth Dubbo meetup has been held in Hangzhou,
 
-分享嘉宾
+Please enjoy the slides of the topics:
   * Ding Li: How to involve in dubbo community [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/how-to-involve-in-dubbo-community.pdf)
   * Shenli Cao: Dubbo 2.7 introduction [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/dubbo-2.7-introduction.pdf)
   * Tao Yang:  Dubbo practice in netease koala [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/dubbo-practice-in-netease-koala.pdf)
