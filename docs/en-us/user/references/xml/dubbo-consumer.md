@@ -49,7 +49,7 @@ Consumer default configuration. The corresponding clas： `org.apache.dubbo.conf
 | Property | Corresponding URL parameter | Type | Requisite | Default | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
 | timeout | default.timeout | int | N | 1000 | performance optimization | invoking timeout(ms) | above 1.0.16 |
-| retries | default.retries | int | N | 2 | performance optimization | Invoking retry times, exclude the first invoking. Set 0 to disable it | above 1.0.16 |
+| retries | default.retries | int | N | 2 | performance optimization | Invoking retry times, exclude the first invoking. Set 0 to disable it.Only valid if the cluster's value is failback/failover | above 1.0.16 |
 | loadbalance | default.loadbalance | string | N | random | performance optimization | Load balancing strategy. Choices：random, roundrobin(polling), leastactive(invoking least active service) | above 1.0.16 |
 | async | default.async | boolean | N | false | performance optimization | Whether invoke asynchronously | above 2.0.0 |
 | connections | default.connections | int | N | 100 | performance optimization | The maximum number of connections of per service provider. Only short link protocol such as rmi,http,hessian etc. supports. Long link protocol such as dubbo doesn't support | above 1.0.16 |
