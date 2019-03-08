@@ -142,6 +142,9 @@ $ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4
 <blockquote>
 <p>执行release插件时，如果指定了<code>-DpushChanges=true</code>, 插件会自动提交到远端的GitHub仓库中，此时就需要输入GitHub的密码，注意不是输入web页面的登录密码，而是一个<code>Personal access tokens</code>，获取方式详见<a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line">这里</a></p>
 </blockquote>
+<blockquote>
+<p>这里有一点要注意的是tag， 在执行过程中，需要选择发布的artifactId, 下一个版本artifactId以及发布版本的tag, tag默认的是dubbo-parent-xxxx，需要改成dubbo-xxxx</p>
+</blockquote>
 <p>执行完上述步骤后，你会发现：</p>
 <ol>
 <li><code>source-release.zip</code> 和 <code>bin-release.zip</code>包已经生成在<code>dubbo-distribution</code>目录下，请解压并检查文件是否完整</li>
@@ -246,7 +249,7 @@ mvn clean <span class="hljs-built_in">test</span> -Drat.skip=<span class="hljs-l
 <li>Release candidates match with corresponding tags, you can find tag link and hash in vote email.
 <ul>
 <li>check the version number in pom.xml are the same</li>
-<li>check there are no extra files or directories in the source package, for example, no empty directories or useless log files.<br>
+<li>check there are no extra files or directories in the source package, for example, no empty directories or useless log files，这里需要注意换行符是否一致<br>
 <code>diff -r a rc_dir tag_dir</code></li>
 <li>check the top n tag commits, dive into the related files and check if the source package has the same changes</li>
 </ul>
@@ -371,8 +374,42 @@ The Apache Dubbo (Incubating) Team
 <li>修改GitHub的Readme文件，将版本号更新到最新发布的版本</li>
 <li>在官网下载<a href="http://dubbo.apache.org/en-us/blog/download.html">页面</a>上添加最新版本的下载链接。最新的下载链接应该类似<a href="https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip">这样</a>. 同时更新以前版本的下载链接，改为类似<a href="https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip">这样</a>. 具体可以参考过往的<a href="https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md">下载链接</a></li>
 <li>合并<code>${release-version}-release</code>分支到对应的主干分支， 然后删除相应的release分支，例如: <code>git push origin --delete 2.7.0-release</code></li>
-<li>发邮件到 <code>dev@dubbo.apache.org</code> 和 <code>general@incubator.apache.org</code>，通知社区发布完成。</li>
+<li>发邮件到 <code>dev@dubbo.apache.org</code> 和 <code>general@incubator.apache.org</code>
+宣布release邮件模板：</li>
 </ol>
+<pre><code class="language-text">Hello Community,
+
+The Apache Dubbo(incubating) team is pleased to announce that the
+2.6.6 has just been released.
+
+Apache Dubbo™ (incubating) is a high-performance, java based, open source
+RPC framework. Dubbo offers three key functionalities, which include
+interface based remote call, fault tolerance &amp; load balancing, and
+automatic service registration &amp; discovery.
+
+Both the source release[1] and the maven binary release[2] are available
+now, you can also find the detailed release notes in here[3].
+
+
+If you have any usage questions, or have problems when upgrading or find
+any problems about enhancements included in this release, please don’t
+hesitate to let us know by sending feedback to this mailing list or filing
+an issue on GitHub[4].
+
+
+
+=====
+*Disclaimer*
+
+Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
+
+
+[1] http://dubbo.apache.org/en-us/blog/download.html
+[2] http://central.maven.org/maven2/com/alibaba/dubbo
+[3] https://github.com/apache/incubator-dubbo/releases
+[4] https://github.com/apache/incubator-dubbo/issues
+
+</code></pre>
 <h2>完成Maven Convenient Binary发布（可选）</h2>
 <p><strong><a href="http://repository.apache.org">repository.apache.org</a></strong> nexus仓库的权限已经申请，参见<a href="https://issues.apache.org/jira/browse/INFRA-16451">jira</a></p>
 <p>发布jar包到maven仓库，首先访问<a href="https://repository.apache.org">repository.apache.org</a>, 选择<code>staging repository</code>, 点击<code>release</code>按钮。等待一段时间之后，在<a href="https://repository.apache.org/content/repositories/releases/org/apache/dubbo/">这里</a>确认完整性和正确性. 发布到Maven中央仓库则还需要等待一段时间。可以在<a href="https://repo.maven.apache.org/maven2/org/apache/dubbo">这里</a>进行确认。</p>
