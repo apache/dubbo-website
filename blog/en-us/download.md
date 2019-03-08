@@ -1,5 +1,8 @@
 # Downloads
 
+## Verification  
+
+you can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://dist.apache.org/repos/dist/release/incubator/dubbo/KEYS) file to verify the download files
 
 ## [Dubbo-RPC](https://github.com/apache/incubator-dubbo)
 

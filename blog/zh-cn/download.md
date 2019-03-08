@@ -1,5 +1,9 @@
 # 下载中心
 
+## 验证  
+
+可以按照这里的[步骤](https://www.apache.org/info/verification), 利用[KEYS](https://dist.apache.org/repos/dist/release/incubator/dubbo/KEYS)文件来验证下载。
+
 ## 版本与升级
 
 请点击了解各[版本详情和升级注意事项](http://dubbo.apache.org/zh-cn/docs/user/versions/index.html)
