@@ -172,6 +172,8 @@ $ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodule
 
 > 执行release插件时，如果指定了`-DpushChanges=true`, 插件会自动提交到远端的GitHub仓库中，此时就需要输入GitHub的密码，注意不是输入web页面的登录密码，而是一个`Personal access tokens`，获取方式详见[这里](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line)
 
+> 这里有一点要注意的是tag， 在执行过程中，需要选择发布的artifactId, 下一个版本artifactId以及发布版本的tag, tag默认的是dubbo-parent-xxxx，需要改成dubbo-xxxx
+
 执行完上述步骤后，你会发现：
 1. `source-release.zip` 和 `bin-release.zip`包已经生成在`dubbo-distribution`目录下，请解压并检查文件是否完整
 2. 本地已经打出相应的tag，同时新增一个commit，名叫`[maven-release-plugin] prepare release dubbo-x.x.x`
@@ -303,7 +305,7 @@ gpg --verify apache-dubbo-incubating-2.6.3-bin-release.zip.asc apache-dubbo-incu
   ```
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
   - check the version number in pom.xml are the same
-  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files.  
+  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files，这里需要注意换行符是否一致  
     `diff -r a rc_dir tag_dir`
   - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
@@ -437,7 +439,7 @@ The Apache Dubbo (Incubating) Team
 5. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
 6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似[这样](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip). 具体可以参考过往的[下载链接](https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md)
 7. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
-8. 发邮件到 `dev@dubbo.apache.org` 和 `general@incubator.apache.org`，通知社区发布完成。
+8. 发邮件到 `dev@dubbo.apache.org` 和 `general@incubator.apache.org`，通知社区发布完成, 邮件的最后要加上一段Disclaimer,内容就是发布项目的DISCLAIMEWR文件。
 
 ## 完成Maven Convenient Binary发布（可选）
 

@@ -184,6 +184,8 @@ modifications and taggings related to ${release_version} Release Candidates are 
     ```
 
     > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not. Please refer to this [guide](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for more infomation.
+    > 这里有一点要注意的是tag， 在执行过程中，需要选择发布的artifactId, 下一个版本artifactId以及发布版本的tag, tag默认的是dubbo-parent-xxxx，需要改成dubbo-xxxx
+    > you need to choose the release artifactId, next artifactId and the release tag, the default tag is dubbo-parent-xxxx, you need to change it to dubbo-xxxx
 
 
     After executing the above commands, you will find that:
@@ -460,7 +462,7 @@ When the release vote has passed,
 6. Update the recommend dependency on [Github](https://github.com/apache/incubator-dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
 7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip). Please refer to the [download page](https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
 8. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
-9. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed.
+9. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed, you need to add disclaimer part at the end of announce email, the content is the project DISCLAIMER file.
 
 
 ## Complete Maven Convenient Binary release
