@@ -81,6 +81,14 @@ export default {
           text: 'Admin manual',
           link: '/en-us/docs/admin/ops/dubbo-ops.html',
         },
+        {
+          text: 'Report a Doc Issue',
+          link: 'https://github.com/apache/incubator-dubbo-website/issues/new',
+        },
+        {
+          text: 'Edit This Page on GitHub',
+          link: 'https://github.com/apache/incubator-dubbo-website',
+        },
       ],
     },
     resources: {
@@ -178,6 +186,14 @@ export default {
         {
           text: '运维管理',
           link: '/zh-cn/docs/admin/ops/dubbo-ops.html',
+        },
+        {
+          text: '报告文档问题',
+          link: 'https://github.com/apache/incubator-dubbo-website/issues/new',
+        },
+        {
+          text: '编辑此文档',
+          link: 'https://github.com/apache/incubator-dubbo-website',
         },
       ]
     },
