@@ -76,7 +76,7 @@ A registry that B expired, delete B data.B find their data, to write their own d
 Use the following logic:
 
 When data is deleted B found themselves fail (write), choose to wait for this period of time and try again.Can choose to retry time exponentially, such as first class 1 minute, the second for 10 minutes, 100 minutes for the third time.
-这样操作减少后，保证数据库可以冷却（Cool Down）下来。
+This decrease after operation, ensure database can cooling Down (Cool Down).
 
 ### The Client reconnection registry
 
