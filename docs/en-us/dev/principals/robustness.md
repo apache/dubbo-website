@@ -9,7 +9,7 @@ Here are some Dubbo principle and method of use.
 
 ## The log
 
-Logging is found, view problems one of the most commonly used method.Log quality is often neglected, there is no log on using expressly agreed upon.Attaches great importance to the use of the Log, and improve the concentration of the Log information.Log too much, too much chaos, could lead to useful information.
+Logging is one of the most commonly used way to find, discover problems.Log quality is often neglected, there is no log on using expressly agreed upon.Attaches great importance to the use of the Log, and improve the concentration of the Log information.Log too much, too much chaos, could lead to useful information.
 
 To effectively use this tool to note:
 
