@@ -17,6 +17,8 @@ class Home extends Language {
     super(props);
     this.state = {
       headerType: 'primary',
+      starCount: 0,
+      forkCount: 0,
     };
   }
 
@@ -33,9 +35,19 @@ class Home extends Language {
         });
       }
     });
+
+    fetch('//api.github.com/repos/apache/incubator-dubbo')
+        .then(res => res.json())
+        .then((data) => {
+          this.setState({
+            starCount: data.stargazers_count,
+            forkCount: data.forks_count,
+          });
+        });
   }
 
   render() {
+    const { starCount, forkCount } = this.state;
     const language = this.getLanguage();
     const dataSource = homeConfig[language];
     const { headerType } = this.state;
@@ -61,16 +73,24 @@ class Home extends Language {
               <Button type="primary" link={getLink(dataSource.brand.getStartedButton.link)}>{dataSource.brand.getStartedButton.text}</Button>
               <Button type="normal" link={getLink(dataSource.brand.viewOnGithubButton.link)}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
-					  <div className="github-buttons">
-							<a href="https://github.com/apache/incubator-dubbo">
-								<img alt="GitHub stars"
-										 src="https://img.shields.io/github/stars/apache/incubator-dubbo.svg?style=for-the-badge" />
-							</a>
-							<a href="https://github.com/apache/incubator-dubbo">
-								<img alt="GitHub forks"
-										 src="https://img.shields.io/github/forks/apache/incubator-dubbo.svg?style=for-the-badge" />
-							</a>
-					  </div>
+            <div className="github-buttons">
+              <a href="https://github.com/apache/incubator-dubbo">
+                <div className="star">
+                  <img src="/img/star.png" />
+                  <span className="type">Star</span>
+                  <span className="line" />
+                  <span className="count">{starCount}</span>
+                </div>
+              </a>
+              <a href="https://github.com/apache/incubator-dubbo/fork">
+                <div className="fork">
+                  <img src="/img/fork.png" />
+                  <span className="type">Fork</span>
+                  <span className="line" />
+                  <span className="count">{forkCount}</span>
+                </div>
+              </a>
+            </div>
           </div>
           <div className="animation animation1" />
           <div className="animation animation2" />
