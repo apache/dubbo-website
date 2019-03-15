@@ -216,7 +216,7 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
 
    ```sh
-   $ gpg -a --export your_key_id >> KEYS
+   $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
    ```
 
 5. 拷贝`distribution/target`下的source相关的包到svn本地仓库`dubbo/${release_version}`
