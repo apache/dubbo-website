@@ -149,11 +149,12 @@ dubbo-storage-service.xml
     <property name="username" value="xxx" />
     <property name="password" value="xxx" />
 ```
-### Step 2: 为 Fescar 创建 UNDO_LOG 表
+### Step 2: 为 Fescar 创建 undo_log 表
 
 `UNDO_LOG` 此表用于 Fescar 的AT模式。
 
 ```sql
+-- 注意此处0.3.0+ 由之前的普通索引变更为唯一索引 `ux_undo_log`
 CREATE TABLE `undo_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `branch_id` bigint(20) NOT NULL,
@@ -164,8 +165,8 @@ CREATE TABLE `undo_log` (
   `log_modified` datetime NOT NULL,
   `ext` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_unionkey` (`xid`,`branch_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8
+  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 ```
 
 ### Step 3: 创建相关业务表
