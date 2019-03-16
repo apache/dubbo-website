@@ -149,11 +149,12 @@ dubbo-storage-service.xml
     <property name="username" value="xxx" />
     <property name="password" value="xxx" />
 ```
-### Step 2: Create UNDO_LOG table for Fescar
+### Step 2: Create undo_log table for Fescar
 
 `UNDO_LOG` table is required by Fescar AT mode.
 
 ```sql
+-- Note that when Fescar version is upgraded to 0.3.0+, it is changed from the previous normal index to the unique index.
 CREATE TABLE `undo_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `branch_id` bigint(20) NOT NULL,
@@ -164,8 +165,8 @@ CREATE TABLE `undo_log` (
   `log_modified` datetime NOT NULL,
   `ext` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_unionkey` (`xid`,`branch_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8
+  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 ```
 
 ### Step 3: Create tables for example business
