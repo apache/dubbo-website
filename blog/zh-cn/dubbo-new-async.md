@@ -475,7 +475,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
 
    ```
     public static void main(String[] args) throws Exception {
-           ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"META-INF/spring/async-``consumer.xml"});
+           ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"META-INF/spring/async-consumer.xml"});
            context.start();
    
            AsyncService asyncService = (AsyncService) context.getBean("asyncService");
