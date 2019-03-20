@@ -163,6 +163,13 @@ export default {
     barText: '博客',
     postsTitle: '所有文章',
     list: [
+      {
+        title: 'Dubbo 本地调用',
+        author: '@beiwei30',
+        dateStr: 'Mar 20th, 2019',
+        desc: 'Dubbo 本地调用的概念和用法',
+        link: '/zh-cn/blog/dubbo-local-call.html',
+    },
         {
             title: 'Dubbo优雅停机介绍',
             author: '@guohao',
