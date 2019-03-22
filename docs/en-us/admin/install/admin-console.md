@@ -5,8 +5,8 @@ The current version of dubbo admin is under development, including: route rule, 
 Install:
 
 ```sh
-git clone https://github.com/apache/incubator-dubbo-ops.git /var/tmp/dubbo-ops
-cd /var/tmp/dubbo-ops
+git clone https://github.com/apache/incubator-dubbo-admin.git /var/tmp/dubbo-admin
+cd /var/tmp/dubbo-admin
 mvn clean package
 ```
 
@@ -28,7 +28,7 @@ mvn --projects dubbo-admin-backend spring-boot:run
 For more information, please visit:
 
 ```sh
-https://github.com/apache/incubator-dubbo-ops
+https://github.com/apache/incubator-dubbo-admin
 ```
 
 Visit [^2]:
