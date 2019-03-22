@@ -1,3 +1,3 @@
-This document explains the structure, deploy procedure and function of Dubbo OPS
+This document explains the structure, deploy procedure and function of Dubbo Admin
 
 
