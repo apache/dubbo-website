@@ -228,7 +228,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
 4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS) file if you are the first time to be a release manager. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
 
    ```shell
-   $ gpg -a --export your_key_id >> KEYS
+   $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
    ```
 
    For more information on how to get your key id, please refer to this [guide](https://help.github.com/articles/generating-a-new-gpg-key/)

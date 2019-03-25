@@ -27,7 +27,7 @@ public class BarServiceStub implements BarService {
     private final BarService barService;
 
     // The real remote proxy object is passed in through the constructor
-    public (BarService barService) {
+    public BarServiceStub(BarService barService){
         this.barService = barService;
     }
 

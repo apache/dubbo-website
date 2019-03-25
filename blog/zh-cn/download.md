@@ -96,9 +96,9 @@
 [asc](https://archive.apache.org/dist/incubator/dubbo/spring-boot-project/0.1.2/apache-dubbo-spring-boot-project-incubating-0.1.2-bin-release.zip.asc) |
 [sha512](https://archive.apache.org/dist/incubator/dubbo/spring-boot-project/0.1.2/apache-dubbo-spring-boot-project-incubating-0.1.2-bin-release.zip.sha512)
 
-## [Dubbo Admin](https://github.com/apache/incubator-dubbo-ops)
+## [Dubbo Admin](https://github.com/apache/incubator-dubbo-admin)
 
-> 发布说明：https://github.com/apache/incubator-dubbo-ops/releases
+> 发布说明：https://github.com/apache/incubator-dubbo-admin/releases
 
 ### 0.1 (2019-02-15)
 

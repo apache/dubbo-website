@@ -263,7 +263,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
 
 ## 示例2：同步接口使用Annotation Processor
 
-这个示例演示了如何在只定义同步接口的基础上，使用Annotation Processor实现Consumer端异步方服务调用，具体代码参见地址[dubbo-samples-async-generated-future](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async-generated-future)
+这个示例演示了如何在只定义同步接口的基础上，使用Annotation Processor实现Consumer端异步方服务调用，具体代码参见地址[dubbo-samples-async-generated-future](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-generated-future)
 
 1. 定义接口
 
@@ -398,7 +398,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
 
 ## 示例3：使用AsyncContext
 
-本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见[dubbo-samples-async-provider](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async-provider)。
+本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见[dubbo-samples-async-provider](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-provider)。
 
 1. 定义接口
 

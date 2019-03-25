@@ -1,13 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import cookie from 'js-cookie';
+import 'whatwg-fetch'; // fetch polyfill
 import { getScrollTop, getLink } from '../../../utils';
 import Header from '../../components/header';
 import Button from '../../components/button';
 import Footer from '../../components/footer';
 import Language from '../../components/language';
 import Item from './featureItem';
-import siteConfig from '../../../site_config/site';
 import homeConfig from '../../../site_config/home';
 import './index.scss';
 
@@ -35,15 +34,14 @@ class Home extends Language {
         });
       }
     });
-
     fetch('//api.github.com/repos/apache/incubator-dubbo')
-        .then(res => res.json())
-        .then((data) => {
-          this.setState({
-            starCount: data.stargazers_count,
-            forkCount: data.forks_count,
-          });
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({
+          starCount: data.stargazers_count,
+          forkCount: data.forks_count,
         });
+      });
   }
 
   render() {
@@ -74,23 +72,19 @@ class Home extends Language {
               <Button type="normal" link={getLink(dataSource.brand.viewOnGithubButton.link)}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
             <div className="github-buttons">
-              <a href="https://github.com/apache/incubator-dubbo">
-                <div className="star">
-                  <img src="/img/star.png" />
-                  <span className="type">Star</span>
-                  <span className="line" />
-                  <span className="count">{starCount}</span>
-                </div>
-              </a>
-              <a href="https://github.com/apache/incubator-dubbo/fork">
+                <a href="https://github.com/apache/incubator-dubbo" target="_blank" rel="noopener noreferrer">
+                  <div className="star">
+                    <img src="https://img.alicdn.com/tfs/TB1FlB1JwHqK1RjSZFPXXcwapXa-32-32.png" />
+                    <span className="count">{starCount}</span>
+                  </div>
+                </a>
+                <a href="https://github.com/apache/incubator-dubbo/fork" target="_blank" rel="noopener noreferrer">
                 <div className="fork">
-                  <img src="/img/fork.png" />
-                  <span className="type">Fork</span>
-                  <span className="line" />
+                  <img src="https://img.alicdn.com/tfs/TB1zbxSJwDqK1RjSZSyXXaxEVXa-32-32.png" />
                   <span className="count">{forkCount}</span>
                 </div>
-              </a>
-            </div>
+                </a>
+              </div>
           </div>
           <div className="animation animation1" />
           <div className="animation animation2" />

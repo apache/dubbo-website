@@ -7,7 +7,7 @@ description: This article recalls how asynchronous call is implemented in Dubbo 
 
 # How to implement a fully asynchronous calls chain based on Dubbo
 
-Implementing the full asynchronous programming based on Dubbo, which is a new feature introduced in version 2.7.0 after the enhancement of the existing asynchronous mode.This article first reviews the supported functions and existing problems of asynchronization in 2.6.x and earlier versions, and introduces the targeted enhancements based on CompletableFuture in version 2.7.0. Then, the use of enhanced asynchronous programming is elaborated through several examples. Finally, it summarizes the new problems brought by the introduction of asynchronous mode and corresponding solutions from Dubbo.By reading this article, it is easy to implement a fully asynchronous remote service call chain based on Dubbo 2.7.0+.
+Implementing the full asynchronous programming based on Dubbo, which is a new feature introduced in version 2.7.0 after the enhancement of the existing asynchronous mode.This article first reviews the supported functions and existing problems of asynchronization in 2.6.x and earlier versions, and introduces the targeted enhancements based on CompletableFuture in version 2.7.0. Then, the use of enhanced asynchronous programming is elaborated through several examples. Finally, it summarizes the new problems brought by the introduction of asynchronous mode and corresponding solutions from Dubbo. By reading this article, it is easy to implement a fully asynchronous remote service call chain based on Dubbo 2.7.0+.
 
 ## Asynchronous mode before version 2.6.x
 
@@ -162,7 +162,8 @@ Next, let's illustrate how to implement a fully asynchronous Dubbo service call 
 
 ## example 1：CompletableFuture interface
 
-CompletableFuture interface can be used both for a synchronous call and for an asynchronous call on Consumer or Provider side. This example implements asynchronous calls between Consumer and Provider sides. Code link [dubbo-samples-async-original-future](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async-original-future).
+CompletableFuture interface can be used both for a synchronous call and for an asynchronous call on Consumer or Provider side. This example implements asynchronous calls between Consumer and Provider sides. Code link [dubbo-samples-async-original-future](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-original-future
+).
 
 1. Interface definition
 
@@ -265,7 +266,7 @@ CompletableFuture interface can be used both for a synchronous call and for an a
    
 ## Example 2：Synchronous interface uses Annotation Processor
 
-This example demonstrates how to implement the Consumer-side asynchronous service call using the Annotation Processor based on the original synchronous interface. Code link [dubbo-samples-async-generated-future](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async-generated-future).
+This example demonstrates how to implement the Consumer-side asynchronous service call using the Annotation Processor based on the original synchronous interface. Code link [dubbo-samples-async-generated-future](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-generated-future).
 
 1. Interface definition
 
@@ -398,7 +399,7 @@ This example demonstrates how to implement the Consumer-side asynchronous servic
 
 ## Example 3：Use AsyncContext
 
-This example demonstrates how to implement the Provider-side asynchronous execution through AsyncContext based on the original synchronous interface. Code link [dubbo-samples-async-provider](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async-provider).
+This example demonstrates how to implement the Provider-side asynchronous execution through AsyncContext based on the original synchronous interface. Code link [dubbo-samples-async-provider](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-provider).
 
 1. Interface definition
 

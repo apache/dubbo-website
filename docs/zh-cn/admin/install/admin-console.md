@@ -5,8 +5,8 @@
 安装:
 
 ```sh
-git clone https://github.com/apache/incubator-dubbo-ops.git /var/tmp/dubbo-ops
-cd /var/tmp/dubbo-ops
+git clone https://github.com/apache/incubator-dubbo-admin.git /var/tmp/dubbo-admin
+cd /var/tmp/dubbo-admin
 mvn clean package
 ```
 
@@ -28,7 +28,7 @@ mvn --projects dubbo-admin-backend spring-boot:run
 其他配置请访问github中的文档:
 
 ```sh
-https://github.com/apache/incubator-dubbo-ops
+https://github.com/apache/incubator-dubbo-admin
 ```
 
 访问:

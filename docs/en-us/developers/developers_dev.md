@@ -39,6 +39,7 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | biyuhao         | Yuhao Bi            | Asiainfo-sec     | Committer | +8       |
 | crazyhzm        | Zhongming Hua       | iFlytek          | Committer | +8       |
 | kezhenxu94      | Zhenxu Ke           |                  | Committer | +8       |
+| lexburner       | Jingfeng Xu         | Alibaba          | Committer | +8       |
 
 ### Contributors
 
