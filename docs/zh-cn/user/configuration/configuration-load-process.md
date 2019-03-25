@@ -54,7 +54,7 @@ dubbo.protocol.port=-1
 
 ```properties
 dubbo.service.org.apache.dubbo.samples.api.DemoService.timeout=5000
-dubbo.reference.org.apache.dubbo.samples.api.DemoService.tineout=6000
+dubbo.reference.org.apache.dubbo.samples.api.DemoService.timeout=6000
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.timeout=7000
 ```
 
