@@ -31,6 +31,12 @@ table tr:hover {
 .table-area {
   overflow: auto;
 }
+table td,th {
+    font-size: 12px;
+}
+.documentation-page .content-section .doc-content {
+    padding: 20px 0% 0 5%;
+}
 </style>
 
 <script type="text/javascript">
