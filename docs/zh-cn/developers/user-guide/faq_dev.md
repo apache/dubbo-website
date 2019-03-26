@@ -2,7 +2,7 @@
 
 ### dubbo-admin在哪里？
 
-从Dubbo 2.6.1版本开始，dubbo-admin已经从核心库迁移到https://github.com/apache/incubator-dubbo-ops
+从Dubbo 2.6.1版本开始，dubbo-admin已经从核心库迁移到https://github.com/apache/incubator-dubbo-admin
 
 ### 我应该选择哪个版本？
 

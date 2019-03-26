@@ -272,6 +272,12 @@ modifications and taggings related to ${release_version} Release Candidates are 
    $ svn commit -m 'prepare for ${release_version} RC1'
    ```
 
+9. Close the maven staging repository
+
+   This step is required when prepare for a 2.7.0+ release, where package name has been changed to org.apache. Before that, please make sure all the maven artifacts look good. Login to http://repository.apache.org, click the `Staging repositories` on the left bar, search with keyword Dubbo, and you will see a list of repositories. Find the one you just uploaded, and then click the close button in the top area. This will do some sannity check, such as gpg signature check, and checksum check. After that, a link will be shown in the summary tab in the bottom. Please copy that link, it will be used for release vote. The link should look like this: https://repository.apache.org/content/repositories/orgapachedubbo-1015.
+
+   > Please be aware that it may fail when you close the repository, this is normally due to network issues, please try again if it failed. You can confirm it by clicking the `Activiey` tab next to `Summary`.
+
 ## Verify Release Candidates
 
 **A full check list can be found [here](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)**
@@ -354,6 +360,9 @@ This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
 The release candidates:
 https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
 
+The staging repo:
+https://repository.apache.org/content/repositories/orgapachedubbo-1005
+
 Git tag for the release:
 https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.2
 
@@ -402,6 +411,9 @@ A minor issue also can be found in the above thread.
 
 The release candidates (RC1):
 https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4
+
+The staging repo:
+https://repository.apache.org/content/repositories/orgapachedubbo-1005
 
 Git tag for the release (RC1):
 https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.4

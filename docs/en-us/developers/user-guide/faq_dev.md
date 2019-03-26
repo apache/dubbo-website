@@ -2,7 +2,7 @@
 
 ### Where is dubbo-admin?
 
-dubbo-admin has been moved from core repository to https://github.com/apache/incubator-dubbo-ops since 2.6.1
+dubbo-admin has been moved from core repository to https://github.com/apache/incubator-dubbo-admin since 2.6.1
 
 ### Which version should I choose?
 

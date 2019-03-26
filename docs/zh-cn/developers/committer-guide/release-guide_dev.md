@@ -247,6 +247,12 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
    $ svn commit -m 'prepare for ${release_version} RC1'
    ```
 
+9. 关闭Maven的staging仓库
+
+   此步骤为发布2.7.0及以上版本必须要的步骤。在此之前请先确保所有的artifact都是ok的。登录http://repository.apache.org，点击左侧的`Staging repositories`，然后搜索Dubbo关键字，会出现一系列的仓库，选择你最近上传的仓库，然后点击上方的Close按钮，这个过程会进行一系列检查，检查通过以后，在下方的Summary标签页上出现一个连接，请保存好这个链接，需要放在接下来的投票邮件当中。链接应该是类似这样的: https://repository.apache.org/content/repositories/orgapachedubbo-1015
+
+   > 请注意点击Close可能会出现失败，通常是网络原因，只要重试几次就可以了。可以点击Summary旁边的Activity标签来确认。  
+
 ## 验证Release Candidates
 
 详细的检查列表请参考官方的[check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)
@@ -336,6 +342,9 @@ This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
 The release candidates:
 https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
 
+The staging repo:
+https://repository.apache.org/content/repositories/orgapachedubbo-1005
+
 Git tag for the release:
 https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.2
 
@@ -384,6 +393,9 @@ A minor issue also can be found in the above thread.
 
 The release candidates (RC1):
 https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4
+
+The staging repo:
+https://repository.apache.org/content/repositories/orgapachedubbo-1005
 
 Git tag for the release (RC1):
 https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.4
