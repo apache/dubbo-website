@@ -8,6 +8,14 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 
 > Release Notes: https://github.com/apache/incubator-dubbo/releases
 
+### 2.7.1 (2019-03-26)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-src.zip) |
+[asc](https://dist.apache.org/repos/dist/release/incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-src.zip.asc) |
+[sha512](https://dist.apache.org/repos/dist/release/incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-src.zip.sha512)
+* [binary](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-bin.zip) |
+[asc](https://dist.apache.org/repos/dist/release/incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-bin.zip.asc) |
+[sha512](https://dist.apache.org/repos/dist/release/incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-bin.zip.sha512)
 
 ### 2.7.0 (2019-01-29)
 
