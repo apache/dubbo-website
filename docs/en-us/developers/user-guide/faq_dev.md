@@ -12,7 +12,7 @@ Currently, dubbo keeps 3 versions evolve in parallel:
 
 * 2.6.x: requires Java 1.6, minor feature & bugfix branch, GA, production ready.
 
-* 2.5.x: requires Java 1.6, maintenance branch, only accept security vulnerability and critical bugfix, expected to be EOL soon.
+* 2.5.x: requires Java 1.6, maintenance branch, only accept security vulnerability and critical bugfix, the support will end on 2019-6-15, please upgrade to 2.6.x as soon as possible.
 
 check [this](https://github.com/apache/incubator-dubbo/issues/1208) for detailed version management plan.
 
