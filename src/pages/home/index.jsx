@@ -34,7 +34,8 @@ class Home extends Language {
         });
       }
     });
-    fetch('//api.github.com/repos/apache/incubator-dubbo')
+    // 写死协议，因github会做协议跳转，这种跳转会被Safari拦截
+    fetch('https://api.github.com/repos/apache/incubator-dubbo')
       .then(res => res.json())
       .then((data) => {
         this.setState({
