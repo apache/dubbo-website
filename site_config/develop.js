@@ -40,6 +40,10 @@ export default {
                     {
                         title: 'How to become a committer',
                         link: '/en-us/docs/developers/contributor-guide/become-a-committer_dev.html',
+                    },
+                    {
+                        title: 'How to report security issues',
+                        link: '/en-us/docs/developers/contributor-guide/reporting-security-issues_dev.html',
                     }
                 ]
             },
@@ -125,6 +129,10 @@ export default {
                         {
                             title: '如何成为committer',
                             link: '/zh-cn/docs/developers/contributor-guide/become-a-committer_dev.html',
+                        },
+                        {
+                            title: '如何汇报安全漏洞',
+                            link: '/zh-cn/docs/developers/contributor-guide/reporting-security-issues_dev.html',
                         }
                     ]
                 },
