@@ -13,6 +13,12 @@ The mailing list is the recommended way for discussing almost anything that rela
 
 ### Reporting issue
 
+You can always reporting an issue to Dubbo via Github [Issues](https://github.com/apache/incubator-dubbo/issues). 
+
+If you are reporting bugs, please refer to the issue report [template](https://github.com/apache/incubator-dubbo/issues/new?template=dubbo-issue-report-template.md).
+
+If you are reporting regualur issues, like raise an question, you can open an [regular issue](https://github.com/apache/incubator-dubbo/issues/new)
+
 ### Sending pull request
 
 * Follow the checklist in the [pull request template](https://github.com/apache/incubator-dubbo/blob/master/PULL_REQUEST_TEMPLATE.md)
@@ -35,3 +41,20 @@ Please check the [CONTRIBUTING.md](https://github.com/apache/incubator-dubbo/blo
 
 Participate in the release vote is an important way to contribute to Dubbo. The Dubbo community welcomes everyone to partipate, you can check the release vote using this [check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist). 
 If you have any question regarding the check list, please feel free to ask on dev@dubbo.apache.org.
+
+
+### What can I contribute?
+
+* Take a look at issues with tag called [`Good first issue`](https://github.com/apache/incubator-dubbo/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or [`Help wanted`](https://github.com/apache/incubator-dubbo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+* Join the discussion on mailing list, subscription [guide](https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide).
+* Answer questions on [issues](https://github.com/apache/incubator-dubbo/issues).
+* Fix bugs reported on [issues](https://github.com/apache/incubator-dubbo/issues), and send us pull request.
+* Review the existing [pull request](https://github.com/apache/incubator-dubbo/pulls).
+* Improve the [website](https://github.com/apache/incubator-dubbo-website), typically we need
+  * blog post
+  * translation on documentation
+  * use cases about how Dubbo is being used in enterprise system.
+* Improve the [dubbo-admin/dubbo-monitor](https://github.com/apache/incubator-dubbo-admin).
+* Contribute to the projects listed in [ecosystem](https://github.com/dubbo).
+* Any form of contribution that is not mentioned above.
+* If you would like to contribute, please send an email to dev@dubbo.incubator.apache.org to let us know!
