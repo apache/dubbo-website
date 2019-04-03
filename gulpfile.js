@@ -4,6 +4,7 @@ const gutil = require('gulp-util');
 const webpack = require('webpack');
 const opn = require('opn');
 const WebpackDevServer = require('webpack-dev-server');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const siteConfig = require('./site_config/site.js').default;
 const webpackConfig = require('./webpack.config.js');
 
@@ -44,6 +45,13 @@ gulp.task('webpack:build', (callback) => {
       }
     }),
     new webpack.optimize.UglifyJsPlugin(),
+    // 压缩css代码
+    new OptimizeCssAssetsPlugin({
+      cssProcessor: require('cssnano'),
+      cssProcessorPluginOptions: {
+        preset: ['default', { discardComments: { removeAll: true } }],
+      },
+    })
   );
 
   // run webpack
