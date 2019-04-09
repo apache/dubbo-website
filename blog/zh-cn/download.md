@@ -78,6 +78,15 @@
 
 > 发布说明：https://github.com/apache/incubator-dubbo-spring-boot-project/releases
 
+### 2.7.1 (2019-04-09)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip) |
+[asc](https://dist.apache.org/repos/dist/release/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip.asc) |
+[sha512](https://dist.apache.org/repos/dist/release/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip.sha512)
+* [binary](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip) |
+[asc](https://dist.apache.org/repos/dist/release/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip.asc) |
+[sha512](https://dist.apache.org/repos/dist/release/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip.sha512)
+
 ### 2.7.0 (2019-02-14)
 
 * [source](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/spring-boot-project/2.7.0/apache-dubbo-spring-boot-project-incubating-2.7.0-source-release.zip) |
