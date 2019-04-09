@@ -164,6 +164,13 @@ export default {
         postsTitle: '所有文章',
         list: [
             {
+                title: 'Dubbo 本地存根和本地伪装',
+                author: '@beiwei30',
+                dateStr: 'Apr 9th, 2019',
+                desc: '介绍本地伪装、本地存根的概念以及如何开发',
+                link: '/zh-cn/blog/dubbo-stub-mock.html',
+            },
+            {
                 title: 'Dubbo2.7 三大新特性详解',
                 author: '@lexburner',
                 dateStr: 'Mar 22nd, 2019',

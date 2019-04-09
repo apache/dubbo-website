@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="keywords" content="dubbo-stub-mock" />
+	<meta name="description" content="dubbo-stub-mock" />
+	<!-- 网页标签标题 -->
+	<title>dubbo-stub-mock</title>
+	<link rel="shortcut icon" href="/img/dubbo.ico"/>
+	<link rel="stylesheet" href="/build/blogDetail.css" />
+</head>
+<body>
+	<div id="root"><div class="blog-detail-page" data-reactroot=""><header class="header-container header-container-normal"><div class="header-body"><a href="/zh-cn/index.html"><img class="logo" src="/img/dubbo_colorful.png"/></a><div class="search search-normal"><span class="icon-search"></span></div><span class="language-switch language-switch-normal">En</span><div class="header-menu"><img class="header-menu-toggle" src="/img/menu_gray.png"/><ul><li class="menu-item menu-item-normal"><a href="/zh-cn/index.html">首页</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/user/quick-start.html">文档</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/docs/developers/developers_dev.html">开发者</a></li><li class="menu-item menu-item-normal menu-item-normal-active"><a href="/zh-cn/blog/index.html">博客</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/community/index.html">社区</a></li><li class="menu-item menu-item-normal"><a href="/zh-cn/blog/download.html">下载</a></li></ul></div></div></header><section class="blog-content markdown-body"><h1>本地存根和本地伪装</h1>
+<h2>基本概念</h2>
+<p>典型的 RPC 调用客户端是依赖并且只依赖接口编程来进行远程调用的。在真正发起远程调用之前，用户往往需要做一些预处理的工作，比如提前校验参数。在拿到返回调用结果之后，用户可能需要缓存结果，或者是在调用失败的时候构造容错数据，而不是简单的抛出异常。</p>
+<p>这个时候，用户可以编写出类似以下的代码来处理上面提出的这些场景：</p>
+<pre><code class="language-java"><span class="hljs-keyword">try</span> {
+    preProcess();
+    <span class="hljs-keyword">return</span> service.invoke(...);
+} <span class="hljs-keyword">catch</span> (Throwable e) {
+    <span class="hljs-keyword">return</span> mockValue;
+} <span class="hljs-keyword">finally</span> {
+    postProcess();
+}
+</code></pre>
+<p>类似的，用户也可以通过面向切面编程 <em>AOP</em> 的高级技巧来解决上面的诉求，比如通过 <em>Spring AOP</em> 的方式可以通过类似下面的这段配置来完成。使用 <em>AOP</em> 的技巧相比上面的代码来说，避免了容错处理等与业务无关的代码对业务代码的侵入，使得业务处理主逻辑更简洁。</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demo-service-stub"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"org.apache.dubbo.demo.DemoServiceStub"</span>/&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demo-service-mock"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"org.apache.dubbo.demo.DemoServiceMock"</span>/&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">aop:config</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">aop:aspect</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"stub"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"demo-service-stub"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">aop:pointcut</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"stubPointcut"</span> <span class="hljs-attr">expression</span>=<span class="hljs-string">"execution(* org.apache.dubbo.samples.DemoService+.*(..))"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">aop:before</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"preProcess"</span> <span class="hljs-attr">pointcut-ref</span>=<span class="hljs-string">"stubPointcut"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">aop:after-returning</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"postProcess"</span> <span class="hljs-attr">pointcut-ref</span>=<span class="hljs-string">"stubPointcut"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">aop:aspect</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">aop:aspect</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"mock"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"demo-service-mock"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">aop:pointcut</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"mockPointcut"</span> <span class="hljs-attr">expression</span>=<span class="hljs-string">"execution(* org.apache.dubbo.samples.DemoService+.*(..))"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">aop:after-throwing</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"mock"</span> <span class="hljs-attr">pointcut-ref</span>=<span class="hljs-string">"mockPointcut"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">aop:aspect</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">aop:config</span>&gt;</span>
+</code></pre>
+<p>为了进一步的方便用户做 Dubbo 开发，框架提出了本地存根 <em>Stub</em> 和本地伪装 <em>Mock</em> 的概念。通过约定大于配置的理念，进一步的简化了配置，使用起来更加方便，并且不依赖额外的 <em>AOP</em> 框架就达到了 <em>AOP</em> 的效果。</p>
+<p>本地存根的工作方式与 <em>AOP</em> 的 <strong>around</strong> advice 类似，而本地伪装的工作方式等同于 <em>AOP</em> 中的 <strong>after-throwing</strong> advice，也就是说，只有当远程调用发生 <em>exception</em> 的时候才会执行本地伪装。本地存根和本地伪装的工作流程如下图所示：</p>
+<p><img src="../../img/blog/dubbo-mock-stub-flow.png" alt="dubbo-mock-stub-flow"></p>
+<ol>
+<li>服务消费者发起调用</li>
+<li>如果服务消费者端存在本地存根 <em>Stub</em> 的话，会先执行本地存根</li>
+<li>本地存根 Stub 持有远程服务的 <em>Proxy</em> 对象，<em>Stub</em> 在执行的时候，会先执行自己的逻辑 (<em>before</em>)，然后通过 <em>Proxy</em> 发起远程调用，最后在返回过程之前也会执行自己的逻辑 (<em>after-returning</em>)</li>
+<li>如果远程服务的 <em>Proxy</em> 对象在执行过程中抛出了 <em>exception</em>，会执行服务消费端的本地伪装 <em>Mock</em> 的逻辑 (<em>after-throwing</em>)，返回容错数据，从而达到服务降级的目的</li>
+</ol>
+<h2>开发一个本地存根 Stub</h2>
+<p>本地存根 <em>Stub</em> 由用户来提供，并在服务消费方部署。完整的示例可以在这里 <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup> 获得。</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoServiceStub</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DemoService</span> </span>{ <span class="hljs-comment">// #1</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Logger logger = LoggerFactory.getLogger(DemoServiceStub.class);
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> DemoService demoService;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">DemoServiceStub</span><span class="hljs-params">(DemoService demoService)</span> </span>{ <span class="hljs-comment">// #2</span>
+        <span class="hljs-keyword">this</span>.demoService = demoService;
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{ <span class="hljs-comment">// #3</span>
+        logger.info(<span class="hljs-string">"before execute remote service, parameter: "</span> + name); <span class="hljs-comment">// #4</span>
+        <span class="hljs-keyword">try</span> {
+            String result = demoService.sayHello(name); <span class="hljs-comment">// #5</span>
+            logger.info(<span class="hljs-string">"after execute remote service, result: "</span> + result); <span class="hljs-comment">// #6</span>
+            <span class="hljs-keyword">return</span> result;
+        } <span class="hljs-keyword">catch</span> (Exception e) {
+            logger.warn(<span class="hljs-string">"fail to execute service"</span>, e); <span class="hljs-comment">// #7</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+        }
+    }
+}
+</code></pre>
+<p>要和框架在一起工作，本地存根的实现需要遵循一些与框架事先做出的约定：</p>
+<ol>
+<li>首先本地存根 <em>Stub</em> 是服务接口的一个实现</li>
+<li>本地存根的实现需要提供一个拷贝构造方法，方便框架将远程调用的 <em>Proxy</em> 对象注入进来</li>
+<li>同样的，本地存根需要提供服务接口中所有方法的实现。在本例中，需要实现 <em>sayHello</em> 方法</li>
+<li>在真正发起远程调用之前，用户可以在本地执行一些操作。在本例中，在日志中记录传入的参数</li>
+<li>通过框架传入的 <em>Proxy</em> 对象真正发起远程调用</li>
+<li>在远程调用结束后，也可以加入本地代码的执行。在本例中，在日志中记录远程调用的返回结果</li>
+<li>如果发生错误的时候，也可以做一些错误恢复的动作。在本例中，在日志中记录异常。当然，如果提供了本地伪装的话，<em>catch</em> 中的逻辑是可以省略掉的</li>
+</ol>
+<p>其中步骤 4、步骤 6、和步骤 7 共同构建了等同于面向切面编程中的概念，分别对应于 <strong>before</strong>、<strong>after-returning</strong>、以及 <strong>after-throwing</strong>。</p>
+<p><em>DemoServiceStub</em> 运行在客户端，要使用本地存根的话，还需要在 <em>stub-consumer.xml</em> 中配置属性 <em>stub</em>。可以简单的通过指定 <em>stub=&quot;true&quot;</em> 来告诉 Dubbo 框架使用本地存根，这个时候，本地存根的包名需要和服务接口的包名一致，类名必须在服务接口的类名后加上 <strong>Stub</strong> 的后缀。例如，当服务接口名是 <em>org.apache.dubbo.samples.stub.api.DemoService</em> 时，本地存根的全类名应该是 <em>org.apache.dubbo.samples.stub.api.DemoServiceStub</em>。</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">check</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"org.apache.dubbo.samples.stub.api.DemoService"</span> <span class="hljs-attr">stub</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+</code></pre>
+<p>如果不希望使用默认的命名规则，也可以直接通过 <em>stub</em> 属性来指定本地存根的全类名。</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">check</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"org.apache.dubbo.samples.stub.api.DemoService"</span> <span class="hljs-attr">stub</span>=<span class="hljs-string">"org.apache.dubbo.samples.stub.impl.DemoStub"</span>/&gt;</span>
+</code></pre>
+<p>启动服务端 <em>StubProvider</em> 后，再运行客户端 <em>StubConsumer</em>，可以通过观察客户端的日志来验证本地存根的运行结果。</p>
+<pre><code class="language-bash">[09/04/19 11:52:21:021 CST] main  INFO api.DemoServiceStub: before execute remote service, parameter: dubbo
+[09/04/19 11:52:21:021 CST] main  INFO api.DemoServiceStub: after execute remote service, result: greeting dubbo
+[09/04/19 11:52:21:021 CST] main  INFO stub.StubConsumer: result: greeting dubbo
+</code></pre>
+<h2>开发一个本地伪装 Mock</h2>
+<p>上面说了本地伪装通常用于在远程调用出错的情况下服务降级。完整的示例可以在这里 <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> 获得。</p>
+<p>这里通过在服务提供方的代码中睡眠来模拟调用端超时，从而执行本地伪装来做容错处理。</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DemoService</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        <span class="hljs-keyword">try</span> {
+            Thread.sleep(<span class="hljs-number">5000</span>); <span class="hljs-comment">// #1</span>
+        } <span class="hljs-keyword">catch</span> (InterruptedException e) {
+            e.printStackTrace();
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"hello "</span> + name; <span class="hljs-comment">// #2</span>
+    }
+}
+</code></pre>
+<ol>
+<li>Dubbo 默认的超时时间是 <em>1000 ms</em>，这里通过睡眠 <em>5000ms</em> 来达到触发超时异常的发生</li>
+<li>由于超时的发生，这个结果并不会被返回给客户端，取而代之的是 <em>org.apache.dubbo.remoting.TimeoutException</em></li>
+</ol>
+<p>在客户端提供本地伪装的实现。当远程调用发生错误的时候，返回给调用方的不是服务端的 &quot;hello name&quot;，取而代之的是 &quot;mock name&quot;。</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DemoServiceMock</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DemoService</span> </span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Logger logger = LoggerFactory.getLogger(DemoServiceMock.class);
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello</span><span class="hljs-params">(String name)</span> </span>{
+        logger.warn(<span class="hljs-string">"about to execute mock: "</span> + DemoServiceMock.class.getSimpleName());
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"mock "</span> + name;
+    }
+}
+</code></pre>
+<p>同样的，要使用本地伪装的话，还需要在 <em>mock-consumer.xml</em> 中配置属性 <em>mock</em>。可以简单的通过指定 <em>mock=&quot;true&quot;</em> 来告诉 Dubbo 框架使用本地伪装，这个时候，本地伪装的包名需要和服务接口的包名一致，类名必须在服务接口的类名后加上 <strong>Mock</strong> 的后缀。例如，当服务接口名是 <em>org.apache.dubbo.samples.stub.api.DemoService</em> 时，本地存根的全类名应该是 <em>org.apache.dubbo.samples.stub.api.DemoServiceMock</em>。</p>
+<pre><code class="language-xml">    <span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">check</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"org.apache.dubbo.samples.mock.api.DemoService"</span>
+                     <span class="hljs-attr">mock</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+</code></pre>
+<p>如果不希望使用默认的命名规则，也可以直接通过 <em>mock</em> 属性来指定本地伪装的全类名。</p>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:reference</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"demoService"</span> <span class="hljs-attr">check</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"org.apache.dubbo.samples.mock.api.DemoService"</span> <span class="hljs-attr">stub</span>=<span class="hljs-string">"org.apache.dubbo.samples.mock.impl.DemoMock"</span>/&gt;</span>
+</code></pre>
+<p>通过提供一个本地伪装的类，可以最大限度的控制出错之后的容错逻辑。有的时候，业务上并不需要这样灵活的机制，只有返回一个默认值的诉求，这个时候提供一个完整的本地伪装的实现就显得有点重了。或者线上出错的时候，应用并没有打包本地伪装，需要通过推送规则的方式临时对服务降级。Dubbo 框架为上面的这两种诉求都提供了快捷方式，帮助用户快速配置服务降级。</p>
+<p>启动服务端 <em>MockProvider</em> 之后，然后再执行 <em>MockConsumer</em> 就可以看到下面的结果：</p>
+<pre><code class="language-bash">Caused by: org.apache.dubbo.remoting.TimeoutException: Waiting server-side response timeout by scan timer. start time: 2019-04-09 14:20:48.061, end time: 2019-04-09 14:20:49.077, client elapsed: 0 ms, server elapsed: 1015 ms, timeout: 1000 ms, request: Request [id=2, version=2.0.2, twoway=<span class="hljs-literal">true</span>, event=<span class="hljs-literal">false</span>, broken=<span class="hljs-literal">false</span>, data=RpcInvocation [methodName=sayHello, parameterTypes=[class java.lang.String], arguments=[world], attachments={path=org.apache.dubbo.samples.mock.api.DemoService, interface=org.apache.dubbo.samples.mock.api.DemoService, version=0.0.0}]], channel: /30.5.125.99:56433 -&gt; /30.5.125.99:20880
+	at org.apache.dubbo.remoting.exchange.support.DefaultFuture.returnFromResponse(DefaultFuture.java:295)
+	at org.apache.dubbo.remoting.exchange.support.DefaultFuture.get(DefaultFuture.java:191)
+	at org.apache.dubbo.remoting.exchange.support.DefaultFuture.get(DefaultFuture.java:164)
+	at org.apache.dubbo.rpc.protocol.dubbo.DubboInvoker.doInvoke(DubboInvoker.java:108)
+	at org.apache.dubbo.rpc.protocol.AbstractInvoker.invoke(AbstractInvoker.java:157)
+	at org.apache.dubbo.monitor.support.MonitorFilter.invoke(MonitorFilter.java:88)
+	at org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper<span class="hljs-variable">$1</span>.invoke(ProtocolFilterWrapper.java:73)
+	at org.apache.dubbo.rpc.protocol.dubbo.filter.FutureFilter.invoke(FutureFilter.java:49)
+	at org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper<span class="hljs-variable">$1</span>.invoke(ProtocolFilterWrapper.java:73)
+	at org.apache.dubbo.rpc.filter.ConsumerContextFilter.invoke(ConsumerContextFilter.java:54)
+	at org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper<span class="hljs-variable">$1</span>.invoke(ProtocolFilterWrapper.java:73)
+	at org.apache.dubbo.rpc.listener.ListenerInvokerWrapper.invoke(ListenerInvokerWrapper.java:78)
+	at org.apache.dubbo.rpc.protocol.InvokerWrapper.invoke(InvokerWrapper.java:56)
+	at org.apache.dubbo.rpc.cluster.support.FailoverClusterInvoker.doInvoke(FailoverClusterInvoker.java:80)
+	... 5 more
+[09/04/19 02:20:49:049 CST] main  WARN api.DemoServiceMock: about to execute mock: DemoServiceMock
+[09/04/19 02:20:49:049 CST] main  INFO mock.MockConsumer: result: mock world
+</code></pre>
+<p>下面通过规则推送为例展示这种快捷方式的用法，更多的用法请参考 Dubbo 官方用户手册 <sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>。通过向配置中心推送指定服务的配置，就可以做到动态服务降级的目的。</p>
+<pre><code class="language-yaml"><span class="hljs-bullet">-</span><span class="hljs-bullet">--</span> <span class="hljs-comment"># 1</span>
+<span class="hljs-attr">configVersion:</span> <span class="hljs-string">v2.7</span>
+<span class="hljs-attr">scope:</span> <span class="hljs-string">service</span>
+<span class="hljs-attr">  key:</span> <span class="hljs-string">org.apache.dubbo.samples.mock.api.DemoService</span> <span class="hljs-comment">#2</span>
+<span class="hljs-attr">  enabled:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">  configs:</span>
+<span class="hljs-attr">    - addresses:</span> <span class="hljs-string">[0.0.0.0]</span>
+<span class="hljs-attr">      side:</span> <span class="hljs-string">consumer</span> <span class="hljs-comment">#3</span>
+<span class="hljs-attr">      parameters:</span>
+<span class="hljs-attr">        mock:</span> <span class="hljs-string">return</span> <span class="hljs-string">configured-mock-value</span> <span class="hljs-comment">#4</span>
+      <span class="hljs-string">...</span>
+</code></pre>
+<ol>
+<li>以 <em>Zookeeper</em> 为例，规则的路径是 /dubbo/config/org.apache.dubbo.samples.mock.api.DemoService/configurators</li>
+<li>该规则作用在 <em>org.apache.dubbo.samples.mock.api.DemoService</em> 服务上</li>
+<li>该规则作用在客户端</li>
+<li>当错误发送时，对服务的调用返回默认值 <em>configured-mock-value</em></li>
+</ol>
+<p>启动服务端 <em>MockProvider</em> 之后，再执行例子<sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup>中的 <em>Configurator</em> 完成对服务降级规则的配置，然后再执行 <em>MockConsumer</em> 就可以看到下面的结果：</p>
+<pre><code class="language-bash">[09/04/19 02:19:01:001 CST] main  INFO integration.AbstractConfiguratorListener:  [DUBBO] Notification of overriding rule, change <span class="hljs-built_in">type</span> is: MODIFIED, raw config content is:
+ ---
+configVersion: v2.7
+scope: service
+key: org.apache.dubbo.samples.mock.api.DemoService
+enabled: <span class="hljs-literal">true</span>
+configs:
+- addresses: [0.0.0.0]
+  side: consumer
+  parameters:
+    mock: <span class="hljs-built_in">return</span> configured-mock-value
+...
+, dubbo version: 2.7.1, current host: 30.5.125.99
+
+...
+
+Caused by: org.apache.dubbo.remoting.TimeoutException: Waiting server-side response timeout. start time: 2019-04-09 14:19:03.737, end time: 2019-04-09 14:19:04.741, client elapsed: 1 ms, server elapsed: 1002 ms, timeout: 1000 ms, request: Request [id=2, version=2.0.2, twoway=<span class="hljs-literal">true</span>, event=<span class="hljs-literal">false</span>, broken=<span class="hljs-literal">false</span>, data=RpcInvocation [methodName=sayHello, parameterTypes=[class java.lang.String], arguments=[world], attachments={path=org.apache.dubbo.samples.mock.api.DemoService, interface=org.apache.dubbo.samples.mock.api.DemoService, version=0.0.0}]], channel: /30.5.125.99:56412 -&gt; /30.5.125.99:20880
+	at org.apache.dubbo.remoting.exchange.support.DefaultFuture.get(DefaultFuture.java:188)
+	at org.apache.dubbo.remoting.exchange.support.DefaultFuture.get(DefaultFuture.java:164)
+	at org.apache.dubbo.rpc.protocol.dubbo.DubboInvoker.doInvoke(DubboInvoker.java:108)
+	at org.apache.dubbo.rpc.protocol.AbstractInvoker.invoke(AbstractInvoker.java:157)
+	at org.apache.dubbo.monitor.support.MonitorFilter.invoke(MonitorFilter.java:88)
+	at org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper<span class="hljs-variable">$1</span>.invoke(ProtocolFilterWrapper.java:73)
+	at org.apache.dubbo.rpc.protocol.dubbo.filter.FutureFilter.invoke(FutureFilter.java:49)
+	at org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper<span class="hljs-variable">$1</span>.invoke(ProtocolFilterWrapper.java:73)
+	at org.apache.dubbo.rpc.filter.ConsumerContextFilter.invoke(ConsumerContextFilter.java:54)
+	at org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper<span class="hljs-variable">$1</span>.invoke(ProtocolFilterWrapper.java:73)
+	at org.apache.dubbo.rpc.listener.ListenerInvokerWrapper.invoke(ListenerInvokerWrapper.java:78)
+	at org.apache.dubbo.rpc.protocol.InvokerWrapper.invoke(InvokerWrapper.java:56)
+	at org.apache.dubbo.rpc.cluster.support.FailoverClusterInvoker.doInvoke(FailoverClusterInvoker.java:80)
+	... 5 more
+[09/04/19 02:19:04:004 CST] main  INFO mock.MockConsumer: result: configured-mock-value
+</code></pre>
+<h2>总结</h2>
+<p>本文介绍了 Dubbo 中本地存根和本地伪装的概念和用法。从本质来讲，本地存根和本地伪装等同于面向切面编程中的概念，通过诸如 Spring 框架提供的 <em>AOP</em> 编程可以达到同样的目的。通过本文如何开发一个本地存根和本地伪装的示例，读者可以直观的感受到通过框架提供的机制更加方便快捷。同时，对于很多简单的场景和动态配置推送的场景，框架提供了仅通过配置而无需编码的方式来满足，进一步提升了框架使用者的效率。</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-stub">https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-stub</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-mock">https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-mock</a> <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="http://dubbo.apache.org/zh-cn/docs/user/demos/local-mock.html">http://dubbo.apache.org/zh-cn/docs/user/demos/local-mock.html</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+</section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3>Disclaimer</h3><p>Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.</p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website/issues/new" target="_self">报告文档问题</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website" target="_self">编辑此文档</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
+	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
+	<script>
+		window.rootPath = '';
+  </script>
+  <script src="/build/blogDetail.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112489517-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-112489517-1');
+	</script>
+</body>
+</html>
