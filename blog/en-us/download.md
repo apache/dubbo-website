@@ -6,7 +6,7 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 
 ## Apache Dubbo
 
-> GitHub: https://github.com/apache/incubator-dubbo
+> GitHub: https://github.com/apache/incubator-dubbo \
 > Release Notes: https://github.com/apache/incubator-dubbo/releases
 
 ### 2.7.1 (2019-03-26)
@@ -74,7 +74,7 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 
 ## Dubbo Spring Boot Starter
 
-> GitHub: https://github.com/apache/incubator-dubbo-spring-boot-project
+> GitHub: https://github.com/apache/incubator-dubbo-spring-boot-project \
 > Release Notes: https://github.com/apache/incubator-dubbo-spring-boot-project/releases
 
 ### 2.7.1 (2019-04-09)
@@ -115,7 +115,7 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 
 ## Dubbo Admin
 
-> GitHub: https://github.com/apache/incubator-dubbo-admin 
+> GitHub: https://github.com/apache/incubator-dubbo-admin \
 > Release Notes: https://github.com/apache/incubator-dubbo-admin/releases
 
 ### 0.1 (2019-02-15)

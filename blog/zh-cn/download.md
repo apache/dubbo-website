@@ -8,7 +8,7 @@
 
 请点击了解各[版本详情和升级注意事项](http://dubbo.apache.org/zh-cn/docs/user/versions/index.html)
 
-> GitHub: https://github.com/apache/incubator-dubbo
+> GitHub: https://github.com/apache/incubator-dubbo \
 > 发布说明：https://github.com/apache/incubator-dubbo/releases
 
 ### 2.7.1 (2019-03-26)
@@ -77,7 +77,7 @@
 
 ## Dubbo Spring Boot Starter
 
-> GitHub: https://github.com/apache/incubator-dubbo-spring-boot-project 
+> GitHub: https://github.com/apache/incubator-dubbo-spring-boot-project \
 > 发布说明：https://github.com/apache/incubator-dubbo-spring-boot-project/releases
 
 ### 2.7.1 (2019-04-09)
@@ -118,7 +118,7 @@
 
 ## Dubbo Admin
 
-> GitHub: https://github.com/apache/incubator-dubbo-admin 
+> GitHub: https://github.com/apache/incubator-dubbo-admin \
 > 发布说明：https://github.com/apache/incubator-dubbo-admin/releases
 
 ### 0.1 (2019-02-15)
