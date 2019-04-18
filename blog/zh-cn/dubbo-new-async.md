@@ -10,10 +10,10 @@ description: 本文回顾了 2.6.x 版本的异步实现，然后引出了 2.7.0
 基于Dubbo实现全异步编程，是在2.7.0版本中对现有异步方式增强后新引入的功能。本文先是回顾2.6.x及之前版本对异步的支持情况及存在的问题，引出了2.7.0版本基于CompletableFuture做了哪些针对性的增强，通过几个示例详细阐述了增强后的异步编程的使用方式，最后总结了引入异步模式带来的新问题及Dubbo的解决方法。通过阅读这篇文章，可以很容易的基于Dubbo2.7.0+版本实现一个全异步的远程服务调用链路。
 
 从3.0.0版本开始，Dubbo框架提供了对Reactive编程范式的支持，除了编程接口之外，在跨进程的RPC通信中引入了Reactive的语义。如果你所在的环境需要使用Reactive编程范式，或者你的RPC调用需要支持流式传输，Reactive应该会给你带来帮助，具体请参考发布在阿里巴巴中间件公众号上的[响应式编程支持]()相关文章。
-> 注意，你可能并不是总需要Reactive的语义，尤其是在RPC的场景，CompletableFuture本身也能带给你Reactive模式的编程模型，在选择Reactive（RxJava之类）而不是理解和编程成本更低的CompletableFuture前，请尝试关注以下问题：
-> 1. 你是请求/相应是一次性传输还是流式传输，一个明显特征是数据类型是 `List<String>` 还是 `Stream<String>`
-> 2. 你是否需要RPC请求可以是Cold，在subscribe后触发，CompletableFuture总是hot的
-> 3. 你的依赖的编程上下文中是否已经在大量使用Reactive的编程接口
+> 注意，你可能并不是总需要Reactive的语义，尤其是在RPC的场景，CompletableFuture本身也能带给你Reactive模式的编程模型，在选择Reactive（RxJava、Reactor之类）而不是理解及使用成本更低的CompletableFuture前，请尝试关注以下问题：
+> 1. 你是请求/响应是一次性传输的还是流式传输的，一个明显特征是你定义的数据类型是 `List<String>` 还是 `Stream<String>`
+> 2. 你的RPC请求有没有要求是Cold，即在subscribe后触发，因为CompletableFuture总是hot的
+> 3. 你依赖的编程上下文中是否已经在大量使用Reactive的编程接口
 > 4. 你是否需要Rx框架提供的更丰富的Operator，而这点和1又是密切相关的
                                                                                                                         
 
