@@ -315,7 +315,18 @@ gpg --verify apache-dubbo-incubating-2.6.3-bin-release.zip.asc apache-dubbo-incu
     `diff -r a rc_dir tag_dir`
   - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
-### 检查二进制包的文件内容C
+### 检查三方依赖的合规性
+
+按照Apache基金会合规性规定，源码或者是二进制分发包中均不能包含Category X的依赖，其中就常见的是包含了GPL/LGPL的依赖，即使是传递依赖也不行。因此在发版的时候需要通过以下的命令进行检查：
+
+```sh
+mvn license:add-third-party -Dlicense.useMissingFile
+find . -name THIRD-PARTY.txt | xargs grep -E 'GPL|General Public License' | grep -v Apache | grep -v MIT | grep -v CDDL
+```
+
+如果一个依赖提供了双协议或多重协议，可以选择与Apache最兼容的一个协议。
+
+### 检查二进制包的文件内容
 
 解压缩`apache-dubbo-incubating-${release_version}-bin-release.zip`，进行如下检查:
 
