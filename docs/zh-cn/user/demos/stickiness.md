@@ -8,7 +8,7 @@
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService" sticky="true" />
 ```
 
-Dubbo 支持方法级别的粘滞连接，如果你想进行更细力度的控制，还可以这样配置。
+Dubbo 支持方法级别的粘滞连接，如果你想进行更细粒度的控制，还可以这样配置。
 
 ```xml
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService">
