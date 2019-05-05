@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import cookie from 'js-cookie';
 import Language from '../../components/language';
 import Header from '../../components/header';
 import Bar from '../../components/bar';
@@ -8,7 +7,6 @@ import PageSlider from '../../components/pageSlider';
 import BlogItem from './blogItem';
 import Footer from '../../components/footer';
 import blogConfig from '../../../site_config/blog';
-import siteConfig from '../../../site_config/site';
 import { getLink } from '../../../utils';
 import './index.scss';
 
@@ -20,14 +18,14 @@ class Blog extends Language {
     const blogs = dataSource.list;
     return (
       <div className="blog-list-page">
-      <Header
-        type="normal"
-        currentKey="blog"
-        logo={`${window.rootPath}/img/dubbo_colorful.png`}
-        language={language}
-        onLanguageChange={this.onLanguageChange}
-      />
-      <Bar img={`${window.rootPath}/img/blog.png`} text={dataSource.barText} />
+        <Header
+          type="normal"
+          currentKey="blog"
+          logo={`${window.rootPath}/img/dubbo_colorful.png`}
+          language={language}
+          onLanguageChange={this.onLanguageChange}
+        />
+        <Bar img={`${window.rootPath}/img/blog.png`} text={dataSource.barText} />
         <section className="blog-container">
           <div className="col col-18 left-part">
             <PageSlider pageSize={5}>
