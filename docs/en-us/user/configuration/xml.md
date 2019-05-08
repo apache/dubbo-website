@@ -63,7 +63,7 @@ tag  | purpose | introduction
 Take timeout as an example, here is the priorities, from high to low (retries, loadbalance, actives also applies  the same rule): 
 
 * method level，interface level，default/global level。
-* at the same leveel, consumer has higher priority than provider
+* at the same level, consumer has higher priority than provider
 
 Configurations on the provider side are passed to the consumer side through registry in the form of URL.
 
