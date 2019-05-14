@@ -15,7 +15,7 @@ Please also make sure your node version is 8.x, versions higher than 8.x is not 
 2. Run `npm i` in the root directory to install the dependencies.
 3. Run `docsite start` in the root directory to start a local server, you will see the website in 'http://127.0.0.1:8080'.
 4. Run `docsite build` to build source code.
-5. Verify your change locally: `python -m SimpleHTTPServer 8000`
+5. Verify your change locally: `python -m SimpleHTTPServer 8000`, when your python version is 3 use :python.exe -m http.server 8000 instead.
 
 ## How to send a PR
 
