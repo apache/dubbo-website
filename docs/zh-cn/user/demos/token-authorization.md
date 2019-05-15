@@ -29,16 +29,3 @@
 <!--固定token令牌，相当于密码-->
 <dubbo:service interface="com.foo.BarService" token="123456" />
 ```
-
-还可在协议级别设置：
-
-```xml
-<!--随机token令牌，使用UUID生成-->
-<dubbo:protocol name="dubbo" token="true" />
-```
-或
-
-```xml
-<!--固定token令牌，相当于密码-->
-<dubbo:protocol name="dubbo" token="123456" />
-```
