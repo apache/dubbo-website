@@ -18,7 +18,7 @@ Dubbo Admin之前的版本过于老旧，也长期疏于维护，因此在去年
 ```properties
 admin.registry.address=zookeeper://127.0.0.1:2181
 admin.config-center=zookeeper://127.0.0.1:2181
-admin.metadata.address=zookeeper://127.0.0.1:2181
+admin.metadata-report.address=zookeeper://127.0.0.1:2181
 ```
 也可以和Dubbo2.7一样，在配置中心指定元数据和注册中心的地址，以zookeeper为例，配置的路径和内容如下: 
 ```properties

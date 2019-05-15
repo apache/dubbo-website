@@ -7,8 +7,15 @@ export default {
       title: 'Events & News',
       list: [
         {
+          img: '/img/blog/dubbo-hangzhou-meetup.jpg',
+          title: 'Dubbo Hangzhou meetup has been held successfully',
+          content: 'The Dubbo Hangzhou meetup has been held successfully.',
+          dateStr: 'December 1th，2018',
+          link: '/en-us/blog/dubbo-meetup-hangzhou.html',
+        },
+        {
           img: '/img/blog/meetup-chengdu/all-hands.webp',
-          title: 'Dubbo chengdu meetup has been held successfully',
+          title: 'Dubbo Chengdu meetup has been held successfully',
           content: 'The Dubbo Chengdu meetup has been held successfully, over 350+ people were present.',
           dateStr: 'August 14th，2018',
           link: '/en-us/blog/dubbo-meetup-chengdu.html',
@@ -60,10 +67,10 @@ export default {
           link: 'https://gitter.im/alibaba/dubbo',
         },
         {
-          img: '/img/segmentfault.png',
-          imgHover: '/img/segmentfault_hover.png',
-          title: 'Segment Fault',
-          link: 'https://segmentfault.com/t/dubbo'
+          img: '/img/so-icon.png',
+          imgHover: '/img/so-icon-hover.png',
+          title: 'StackOverflow',
+          link: 'https://stackoverflow.com/questions/tagged/apache-dubbo'
         },
         {
           img: '/img/twitter.png',
@@ -419,20 +426,27 @@ export default {
     events: {
       title: '事件 & 新闻',
       list: [
-          {
-              img: '/img/blog/dubbo-chengdu-meetup.jpg',
-              title: 'Aliware Open Source·成都站——Apache Dubbo开发者沙龙',
-              content: '第四届Dubbo开发者沙龙将于8月26日(周日)在成都高新区天府五街200号菁蓉国际广场8号楼2楼会议厅举办',
-              dateStr: 'August 14th，2018',
-              link: '/zh-cn/blog/dubbo-meetup-chengdu.html',
-          },
-          {
-              img: '/img/blog/dubbo-shenzhen-meetup.jpg',
-              title: '第三届Dubbo开发者沙龙在深圳成功举办',
-              content: '第三届Dubbo开发者沙龙在深圳成功举办，超过2000位开发者报名，现场参与人数700+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数17000+',
-              dateStr: 'July 14th，2018',
-              link: '/zh-cn/blog/dubbo-meetup-shenzhen.html',
-          },
+        {
+          img: '/img/blog/dubbo-hangzhou-meetup.jpg',
+          title: 'Aliware Open Source·杭州站——Apache Dubbo开发者沙龙',
+          content: '第五届Dubbo开发者沙龙将于12月1日(周六)在杭州市萧山区启迪路198号杭州湾信息港A座国际报告厅举办',
+          dateStr: 'December 1th，2018',
+          link: '/zh-cn/blog/dubbo-meetup-hangzhou.html',
+        },
+        {
+          img: '/img/blog/dubbo-chengdu-meetup.jpg',
+          title: 'Aliware Open Source·成都站——Apache Dubbo开发者沙龙',
+          content: '第四届Dubbo开发者沙龙将于8月26日(周日)在成都高新区天府五街200号菁蓉国际广场8号楼2楼会议厅举办',
+          dateStr: 'August 14th，2018',
+          link: '/zh-cn/blog/dubbo-meetup-chengdu.html',
+        },
+        {
+          img: '/img/blog/dubbo-shenzhen-meetup.jpg',
+          title: '第三届Dubbo开发者沙龙在深圳成功举办',
+          content: '第三届Dubbo开发者沙龙在深圳成功举办，超过2000位开发者报名，现场参与人数700+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数17000+',
+          dateStr: 'July 14th，2018',
+          link: '/zh-cn/blog/dubbo-meetup-shenzhen.html',
+        },
         {
           img: '/img/blog/dubbo-shanghai-meetup.jpeg',
           title: '第二届Dubbo开发者沙龙在上海成功举办',
@@ -465,7 +479,7 @@ export default {
     },
     contacts: {
       title: '联系我们',
-      desc: '有问题需要反馈？请通过一下方式联系我们。',
+      desc: '有问题需要反馈？请通过以下方式联系我们。',
       list: [
         {
           img: '/img/mailinglist.png',
@@ -480,10 +494,10 @@ export default {
           link: 'https://gitter.im/alibaba/dubbo',
         },
         {
-          img: '/img/segmentfault.png',
-          imgHover: '/img/segmentfault_hover.png',
-          title: 'Segment Fault',
-          link: 'https://segmentfault.com/t/dubbo'
+          img: '/img/so-icon.png',
+          imgHover: '/img/so-icon-hover.png',
+          title: 'StackOverflow',
+          link: 'https://stackoverflow.com/questions/tagged/apache-dubbo'
         },
         {
           img: '/img/twitter.png',

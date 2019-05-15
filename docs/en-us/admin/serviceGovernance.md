@@ -36,7 +36,7 @@ weigth adjuest is part of dynamic configuration, change the weight of server sid
 load balancing is also poart of dynamic configuration, to specify the route strategy in client side. now we have three strategies: random, least active and round robin, to read more, please refer [here](../user/demos/loadbalance.md)
 
 ## configuration management
-configuration management is also a new feaature for Dubbo 2.7. In Dubbo 2.7, we can specify configurations in global scope and application scope(including services in application), you can view, modify and create new configurations in Dubbo OPS.
+configuration management is also a new feaature for Dubbo 2.7. In Dubbo 2.7, we can specify configurations in global scope and application scope(including services in application), you can view, modify and create new configurations in Dubbo Admin.
 * global configuration: 
 ![config](../../../img/blog/admin/config.jpg)  
 you can set registry center, metadata center, timeout for provider and consumer in global configurations. If the implementation of registry center and metadata center is zookeeper, you can also check the location of configuration file. 

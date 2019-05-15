@@ -2,7 +2,7 @@
 
 > http://javatar.iteye.com/blog/949527
 
-Dubbo 现在的设计是完全无侵入，也就是使用者只依赖于配置契约。经过多个版本的发展，为了满足各种需求场景，配置越来越多。为了保持兼容，配置只增不减，里面潜伏着各种风格，约定，规则。新版本也将配置做了一次调整，去掉了 dubbo.properties，改为全 spring 配置。将想到的一些记在这，备忘。 
+Dubbo 现在的设计是完全无侵入，也就是使用者只依赖于配置契约。经过多个版本的发展，为了满足各种需求场景，配置越来越多。为了保持兼容，配置只增不减，里面潜伏着各种风格，约定，规则。新版本也将配置做了一次调整，将想到的一些记在这，备忘。 
 
 ## 配置分类 
 
@@ -24,11 +24,24 @@ Dubbo 现在的设计是完全无侵入，也就是使用者只依赖于配置�
 
 对于环境配置，在 java 世界里，比较常规的做法，是在 classpath 下约定一个以项目为名称的 properties 配置，比如：log4j.properties，velocity.properties等。产品在初始化时，自动从 classpath 下加载该配置。我们平台的很多项目也使用类似策略，如：dubbo.properties，comsat.xml 等。这样有它的优势，就是基于约定，简化了用户对配置加载过程的干预。但同样有它的缺点，当 classpath 存在同样的配置时，可能误加载，以及在 ClassLoader 隔离时，可能找不到配置，并且，当用户希望将配置放到统一的目录时，不太方便。 
 
-Dubbo 新版本去掉了 dubbo.properties，因为该约定经常造成配置冲突。 
-
 而对于描述配置，因为要参与业务逻辑，通常会嵌到应用的生命周期管理中。现在使用 spring 的项目越来越多，直接使用 spring 配置的比较普遍，而且 spring 允许自定义 schema，配置简化后很方便。当然，也有它的缺点，就是强依赖 spring，可以提编程接口做了配套方案。 
 
-在 Dubbo 即存在描述配置，也有环境配置。一部分用 spring 的 schema 配置加载，一部分从 classpath 扫描 properties 配置加载。用户感觉非常不便，所以在新版本中进行了合并，统一放到 spring 的 schema 配置加载，也增加了配置的灵活性。 
+在 Dubbo 既存在描述配置也有环境配置。一部分用 spring 的 schema 做配置加载，一部分从 classpath 扫描 properties 做配置加载。在新版本中做了一个优先级约定，统一以 spring 的 schema 驱动配置加载，dubbo.properties作为配置补充。
+
+同时，在 Spring 的场景下，除了使用 schema 外，还支持完全以 application.properties 的方式配置：
+
+```xml
+# Dubbo Application
+## The default value of dubbo.application.name is ${spring.application.name}
+## dubbo.application.name=${spring.application.name}
+
+# Dubbo Protocol
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=12345
+
+## Dubbo Registry
+dubbo.registry.address=N/A
+``` 
 
 扩展配置，通常对配置的聚合要求比较高。因为产品需要发现第三方实现，将其加入产品内部。在 java 世界里，通常是约定在每个 jar 包下放一个指定文件加载，比如：eclipse 的 plugin.xml，struts2 的 struts-plugin.xml 等，这类配置可以考虑 java 标准的服务发现机制，即在 jar 包的 META-INF/services 下放置接口类全名文件，内容为每行一个实现类类名，就像 jdk 中的加密算法扩展，脚本引擎扩展，新的 JDBC 驱动等，都是采用这种方式。参见：[ServiceProvider 规范](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html)。
 

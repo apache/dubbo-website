@@ -20,11 +20,11 @@
 
 ```java
 package com.foo;
-public class BarServiceStub implements BarService { 
+public class BarServiceStub implements BarService {
     private final BarService barService;
     
     // 构造函数传入真正的远程代理对象
-    public (BarService barService) {
+    public BarServiceStub(BarService barService){
         this.barService = barService;
     }
  

@@ -1,47 +1,3 @@
-<style>
-table {
-  width: 100%;
-  max-width: 65em;
-  border: 1px solid #dedede;
-  margin: 15px auto;
-  border-collapse: collapse;
-  empty-cells: show;
-}
-table th,
-table td {
-  height: 35px;
-  border: 1px solid #dedede;
-  padding: 0 10px;
-}
-table th {
-  font-weight: bold;
-  text-align: center !important;
-  background: rgba(158,188,226,0.2);
-  white-space: nowrap;
-}
-table tbody tr:nth-child(2n) {
-  background: rgba(158,188,226,0.12);
-}
-table td:nth-child(1) {
-  white-space: nowrap;
-}
-table tr:hover {
-  background: #efefef;
-}
-.table-area {
-  overflow: auto;
-}
-</style>
-
-<script type="text/javascript">
-[].slice.call(document.querySelectorAll('table')).forEach(function(el){
-    var wrapper = document.createElement('div');
-    wrapper.className = 'table-area';
-    el.parentNode.insertBefore(wrapper, el);
-    el.parentNode.removeChild(el);
-    wrapper.appendChild(el);
-})
-</script>
 # dubbo:consumer
 
 Consumer default configuration. The corresponding clas： `org.apache.dubbo.config.ConsumerConfig`. It is also default configuration of `<dubbo:reference>`.
@@ -49,7 +5,7 @@ Consumer default configuration. The corresponding clas： `org.apache.dubbo.conf
 | Property | Corresponding URL parameter | Type | Requisite | Default | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
 | timeout | default.timeout | int | N | 1000 | performance optimization | invoking timeout(ms) | above 1.0.16 |
-| retries | default.retries | int | N | 2 | performance optimization | Invoking retry times, exclude the first invoking. Set 0 to disable it | above 1.0.16 |
+| retries | default.retries | int | N | 2 | performance optimization | Invoking retry times, exclude the first invoking. Set 0 to disable it.Only valid if the cluster's value is failback/failover | above 1.0.16 |
 | loadbalance | default.loadbalance | string | N | random | performance optimization | Load balancing strategy. Choices：random, roundrobin(polling), leastactive(invoking least active service) | above 1.0.16 |
 | async | default.async | boolean | N | false | performance optimization | Whether invoke asynchronously | above 2.0.0 |
 | connections | default.connections | int | N | 100 | performance optimization | The maximum number of connections of per service provider. Only short link protocol such as rmi,http,hessian etc. supports. Long link protocol such as dubbo doesn't support | above 1.0.16 |

@@ -366,4 +366,3 @@ redis=org.apache.dubbo.metadata.store.redis.RedisMetadataReportFactory
 只要将上面的修改和project打包成jar包，然后配置元数据中心的url：redis://10.20.153.10:6379。
 
 至此，一个自定义的元数据存储就可以运行了。
-ookeeper.md)

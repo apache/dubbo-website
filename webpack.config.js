@@ -31,8 +31,32 @@ module.exports = {
         test: /\.(s)?css$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
-          use: ['css-loader', 'sass-loader'],
+          use: [
+            'css-loader',
+            {
+              loader: 'resolve-url-loader',
+              options: {
+                keepQuery: true,
+              },
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                sourceMap: true, // 结合resolve-url-loader使用必填，详见https://www.npmjs.com/package/resolve-url-loader
+                sourceMapContents: true,
+              },
+            },
+          ],
         }),
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf|svg)((\?|#).*)?$/,
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+          },
+        }],
       },
       {
         test: /\.json?$/,

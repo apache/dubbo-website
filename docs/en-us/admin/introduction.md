@@ -1,14 +1,14 @@
-# Dubbo OPS introduction
+# Dubbo Admin introduction
 Now version 0.1 has been released, frontend uses Vue and Vuetify as javascript framework and UI framework, backend uses spring framework, you can deploy the whole project with maven or deploy frontend and backend separately.
 
 ### Deploy the whole project through maven
 
 * install
 ```sh
-git clone https://github.com/apache/incubator-dubbo-ops.git
-cd incubator-dubbo-ops
+git clone https://github.com/apache/incubator-dubbo-admin.git
+cd incubator-dubbo-admin
 mvn clean package
-cd dubbo-distribution/target
+cd dubbo-admin-distribution/target
 java -jar dubbo-admin-0.1.jar
 ```
 * visit  
@@ -59,7 +59,7 @@ the addresses in configuration center have higher priority than those in `applic
 visit documents on github:
 
 ```sh
-https://github.com/apache/incubator-dubbo-ops
+https://github.com/apache/incubator-dubbo-admin
 ```
 
 [^1]: there's no login module in the current version.

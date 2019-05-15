@@ -53,11 +53,21 @@
 * 注意：一定要保证 github 的 2FA 为 "enable" 状态。当你将 2FA 设置为 "off" 时候，将会被对应的 apache committer 写权限组除名，直到你再次设置成功为止。
   
 ## 五、其他
-   ### The Apache Way
-   详情请参考 [wiki](http://apache.org/foundation/governance/)
 
-   社区重于代码，如果某问题或者方案没有在社区(邮件列表)讨论过，就当没有发生过
-   ### 小福利
-   Jetbrains 给 apache 提交者一个小福利，就是可以免费使用 idea 的全产品系列。具体注册地址为：https://www.jetbrains.com/shop/eform/apache?product=ALL
-   ### 相关 wiki
+### The Apache Way
+详情请参考 [wiki](http://apache.org/foundation/governance/)
+
+社区重于代码，如果某问题或者方案没有在社区(邮件列表)讨论过，就当没有发生过
+
+### 添加你的名字
+
+请访问孵化器[主页](https://incubator.apache.org/projects/dubbo.html)将你的名字添加到上面. 具体可以参考这个[文档](http://dubbo.apache.org/zh-cn/docs/developers/committer-guide/apache-dubbo-page_dev.html).
+
+请访问Dubbo[官方网站](http://dubbo.apache.org/zh-cn/docs/developers/developers_dev.html)将你的名字添加到上面.
+
+### 小福利
+
+Jetbrains 给 apache 提交者一个小福利，就是可以免费使用 idea 的全产品系列。具体注册地址为：https://www.jetbrains.com/shop/eform/apache?product=ALL
+   
+### 相关 wiki
 https://www.apache.org/dev/new-committers-guide.html
