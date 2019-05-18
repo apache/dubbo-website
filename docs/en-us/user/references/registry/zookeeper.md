@@ -39,7 +39,7 @@ Dubbo supports two zookeeper clients: zkclient and curator:
 
 Since `2.2.0` dubbo uses zkclient by default, in order to improve the robustness. [zkclient](https://github.com/sgroschupf/zkclient) is a zookeeper client implementation open-sourced by Datameer.
 
-**Note: The implementation of zkclient has been removed in the 2.7.x version. If you want to use the zkclient client, you need to expand it yourself.**
+**Note: The implementation of zkclient has been removed in the 2.7.x version. If you want to use the zkclient client, you need to extend it yourself.**
 
 Default configuration:
 
