@@ -333,6 +333,18 @@ Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the defau
     `diff -r rc_dir tag_dir`
   - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
+
+### check third party dependencies
+
+According to ASF policy, any [Category X](https://www.apache.org/legal/resolved.html#what-can-we-not-include-in-an-asf-project-category-x) dependency can not be included in ASF product, this includes common LGPL/GPL licensed dependencies. Even transitive dependencies are not allowed. Therefore we need to run the following command to ensure no such dependencies are included.
+
+```sh
+mvn license:add-third-party -Dlicense.useMissingFile
+find . -name THIRD-PARTY.txt | xargs grep -E 'GPL|General Public License' | grep -v Apache | grep -v MIT | grep -v CDDL
+```
+
+If one dependency is dual/multiple licensed, just choose the most permissive one.
+
 ### Check binary distribution file content
 
 Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:

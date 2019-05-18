@@ -8,7 +8,7 @@ Now version 0.1 has been released, frontend uses Vue and Vuetify as javascript f
 git clone https://github.com/apache/incubator-dubbo-admin.git
 cd incubator-dubbo-admin
 mvn clean package
-cd dubbo-distribution/target
+cd dubbo-admin-distribution/target
 java -jar dubbo-admin-0.1.jar
 ```
 * visit  

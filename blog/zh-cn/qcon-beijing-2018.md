@@ -1,3 +1,9 @@
+---
+title: Dubbo路线图在QCon Beijing 2018上公布
+keywords: Dubbo, roadmap, QCon Beijing
+description: 本文将向你介绍在QCon Beijing 2018上公布Dubbo路线图。
+---
+
 Dubbo路线图在QCon Beijing 2018上公布
 ---
 

@@ -65,7 +65,7 @@ class Home extends Language {
             <img src={`${window.rootPath}/img/dubbo.png`} />
             <div className="product-name">
               <h2>{dataSource.brand.brandName}</h2>
-              <img src={`${window.rootPath}/img/incubating.svg`} />
+              {/* <img src={`${window.rootPath}/img/incubating.svg`} /> */}
             </div>
             <p className="product-desc">{dataSource.brand.briefIntroduction}</p>
             <div className="button-area">

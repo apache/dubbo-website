@@ -52,7 +52,7 @@
 
 
 
-在 Dubbo 官方用户手册的[“属性配置”](http://dubbo.io/books/dubbo-user-book/configuration/properties.html)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
+在 Dubbo 官方用户手册的[“属性配置”](/docs/zh-cn/user/configuration/configuration-load-process.md)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
 
 
 
@@ -67,7 +67,7 @@
 >
 >如果 XML 有多行同名标签配置，可用 id 号区分，如果没有 id 号将对所有同名标签生效
 >
->* 比如：`dubbo.protocol.rmi.port=1234`等价于`<dubbo:protocol id="rmi" name="rmi" port="1099" />`[2](http://dubbo.io/books/dubbo-user-book/configuration/properties.html#fn_2)
+>* 比如：`dubbo.protocol.rmi.port=1234`等价于`<dubbo:protocol id="rmi" name="rmi" port="1099" />`
 >* 比如：`dubbo.registry.china.address=10.20.153.10:9090`等价于`<dubbo:registry id="china"address="10.20.153.10:9090" />`
 >
 >下面是 dubbo.properties 的一个典型配置：
