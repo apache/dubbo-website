@@ -36,6 +36,8 @@
 
 Dubbo 支持 zkclient 和 curator 两种 Zookeeper 客户端实现：
 
+**注意:在2.7.x的版本中已经移除了zkclient的实现,如果要使用zkclient客户端,需要自行拓展**
+
 ### 使用 zkclient 客户端
 
 从 `2.2.0` 版本开始缺省为 zkclient 实现，以提升 zookeeper 客户端的健状性。[zkclient](https://github.com/sgroschupf/zkclient) 是 Datameer 开源的一个 Zookeeper 客户端实现。
