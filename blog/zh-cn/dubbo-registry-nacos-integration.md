@@ -6,7 +6,7 @@ Nacos 作为 Dubbo 生态系统中重要的注册中心实现，其中 [`dubbo-r
 
 ## 预备工作
 
-当您将 [`dubbo-registry-nacos`](hhttps://github.com/apache/incubator-dubbo/tree/master/dubbo-registry/dubbo-registry-nacos) 整合到您的 Dubbo 工程之前，请确保后台已经启动 Nacos 服务。如果您尚且不熟悉 Nacos 的基本使用的话，可先行参考 [Nacos 快速入门](https://nacos.io/en-us/docs/quick-start.html)：https://nacos.io/en-us/docs/quick-start.html。建议使用 Nacos `0.6.1` 以上的版本。
+当您将 [`dubbo-registry-nacos`](https://github.com/apache/incubator-dubbo/tree/master/dubbo-registry/dubbo-registry-nacos) 整合到您的 Dubbo 工程之前，请确保后台已经启动 Nacos 服务。如果您尚且不熟悉 Nacos 的基本使用的话，可先行参考 [Nacos 快速入门](https://nacos.io/en-us/docs/quick-start.html)：https://nacos.io/en-us/docs/quick-start.html。建议使用 Nacos `0.6.1` 以上的版本。
 
 
 
