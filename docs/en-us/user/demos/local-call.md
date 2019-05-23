@@ -36,7 +36,7 @@ or
 <dubbo:service injvm="true" .../>
 ```
 
-Note: Dubbo is exposed locally from `2.2.0` by default. It can be referenced locally without any configuration. If you don't want the service to be exposed remotely, you only need to set the protocol to injvm in the provider.
+Note: Dubbo services are exposed locally from `2.2.0` by default. It can be referenced locally without any configuration. If you don't want the service to be exposed remotely, you only need to set the protocol to injvm in the provider.
 
 ## Automatically exposed, local service references
 

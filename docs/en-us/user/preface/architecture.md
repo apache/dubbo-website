@@ -37,7 +37,7 @@ Dubbo has the following features: Connectivity, Robustness, Scalability and Upgr
 ## Robustness
 
 * `Monitor`'s downtime doesn't affect the usage, only lose some sampling data
-* When the DB server goes down, `Register` can return service `Provider`s list to `Consumer` by checking its cache, but new `Provider` cannot regiter any services
+* When the DB server goes down, `Register` can return service `Provider`s list to `Consumer` by checking its cache, but new `Provider` cannot register any services
 * `Register` is a peer cluster, it will automatically switch to another when any instance goes down
 * Even all `Register`'s instances go down, `Provider` and `Consumer` can still conmunicate by checking their local cache
 * Service `Provider`s are stateless, one instance's downtime doesn't affect the usage

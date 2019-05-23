@@ -1,3 +1,9 @@
+---
+title: 下载中心
+keywords: Dubbo, Downloads, Version
+description: 本文将向你介绍如何点击了解各版本详情和升级注意事项。
+---
+
 # 下载中心
 
 ## 验证  

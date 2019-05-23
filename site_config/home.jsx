@@ -4,7 +4,7 @@ export default {
   'zh-cn': {
     brand: {
       brandName: 'Apache Dubbo',
-      briefIntroduction: 'Apache Dubbo™ (incubating)是一款高性能Java RPC框架。',
+      briefIntroduction: 'Apache Dubbo™ 是一款高性能Java RPC框架。',
       getStartedButton: {
         text: '快速开始',
         link: '/zh-cn/docs/user/quick-start.html',
@@ -16,7 +16,7 @@ export default {
     },
     introduction: {
       title: '高性能Java RPC框架',
-      desc: 'Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。',
+      desc: 'Apache Dubbo |ˈdʌbəʊ| 是一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。',
       img: '/img/architecture.png',
     },
     features: {
@@ -92,7 +92,7 @@ export default {
   'en-us': {
     brand: {
       brandName: 'Apache Dubbo',
-      briefIntroduction: 'Apache Dubbo™ (incubating) is a high-performance, java based open source RPC framework.',
+      briefIntroduction: 'Apache Dubbo™ is a high-performance, java based open source RPC framework.',
       getStartedButton: {
         text: 'GET STARTED',
         link: '/en-us/docs/user/quick-start.html',
@@ -104,7 +104,7 @@ export default {
     },
     introduction: {
       title: 'A high performance Java RPC framework',
-      desc: 'Apache Dubbo (incubating) |ˈdʌbəʊ| is a high-performance, light weight, java based RPC framework. Dubbo offers three key functionalities, which include interface based remote call, fault tolerance & load balancing, and automatic service registration & discovery.',
+      desc: 'Apache Dubbo |ˈdʌbəʊ| is a high-performance, light weight, java based RPC framework. Dubbo offers three key functionalities, which include interface based remote call, fault tolerance & load balancing, and automatic service registration & discovery.',
       img: '/img/architecture.png',
     },
     features: {
