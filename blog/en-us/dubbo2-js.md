@@ -1,6 +1,6 @@
 ---
 title: Implementation of cross-language calls by Dubbo2.js
-keywords: Dubbo, 跨语言, Node, NodeJS, js
+keywords: Dubbo, Cross-language, Node, NodeJS, js
 description: This article introduces how to use Dubbo.js to implement cross-language calls.
 ---
 
