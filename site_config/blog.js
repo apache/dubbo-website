@@ -506,6 +506,13 @@ export default {
                 desc: '主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。',
                 link: '/zh-cn/blog/dubbo-basic-usage-dubbo-provider-configuration.html',
             },
+              {
+                title: '谷歌编程之夏会议上2018个项目被宣布',
+                author: '@Jlele Cao',
+                dateStr: 'April 25th，2018',
+                desc: 'Raghu Reddy 的项目"Apache Dubbo 扩展串行协议支持" 被接受! 祝贺他!',
+                link: '/zh-cn/blog/gsoc-2018.html',
+            },
             {
                 title: 'Spring Boot Dubbo应用启停源码分析',
                 author: '@Huxing Zhang',
