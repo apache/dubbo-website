@@ -164,6 +164,13 @@ export default {
         postsTitle: '所有文章',
         list: [
             {
+                title: '研究 Dubbo 网卡地址注册时的一点思考',
+                author: '@lexburner',
+                dateStr: 'Apr 30th, 2019',
+                desc: '研究 Dubbo 网卡地址注册时的一点思考',
+                link: '/zh-cn/blog/dubbo-network-interfaces.html',
+            },
+            {
                 title: 'Dubbo 本地存根和本地伪装',
                 author: '@beiwei30',
                 dateStr: 'Apr 9th, 2019',
