@@ -1,6 +1,7 @@
 ---
 title: 如何准备Apache Release
 keywords: Dubbo, Apache, Release
+description: 本文介绍了Apache如何发布内容和流程
 ---
 
 # 如何准备Apache Release

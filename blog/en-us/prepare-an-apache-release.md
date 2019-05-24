@@ -1,7 +1,9 @@
 ---
 title: Understanding the Apache Release Cycle
 keywords: Dubbo, Apache, Release
+description: This article introduces how to the Apache publish content and process
 ---
+# How to prepare an the Apache Release
 
 ## Understanding the Apache Release Cycle
 
