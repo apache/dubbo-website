@@ -164,6 +164,13 @@ export default {
         postsTitle: '所有文章',
         list: [
             {
+                title: '在DockerHub发布Dubbo Admin镜像',
+                author: '@htynkn',
+                dateStr: 'May 23th, 2019',
+                desc: '介绍如何在DockerHub上发布Dubbo Admin镜像',
+                link: '/zh-cn/blog/build-new-docker-image-in-dockerhub.html',
+            },
+            {
                 title: '研究 Dubbo 网卡地址注册时的一点思考',
                 author: '@lexburner',
                 dateStr: 'Apr 30th, 2019',
