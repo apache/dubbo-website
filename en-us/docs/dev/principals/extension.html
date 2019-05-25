@@ -34,39 +34,39 @@
 <p><img src="../sources/images/design-step2.png" alt="design-step-2"></p>
 <h2>Step 3, the entire pipeline design, logic framework itself, are implemented using cross section intercept</h2>
 <p>Now a lot of logic, are placed in the base class implementation, then by the method of template back to the realization of the tone categories, including: local, mock, generic, echo, token, accesslog, monitor, count, limit, etc., can use the Filter to realize all split, each function is called a ring on the chain.Such as: (the base class template method)</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> AbstractInvoker implements Invoker {
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> AbstractInvoker implements Invoker {  
+  
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{  
         <span class="hljs-comment">// Pseudo code  </span>
-        active ++;
-        <span class="hljs-keyword">if</span> (active &gt; max)
-            wait();
-
-        doInvoke(inv);
-
-        active --;
-        notify();
-    }
-
-    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> Result <span class="hljs-title">doInvoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException
-
-}
+        active ++;  
+        <span class="hljs-keyword">if</span> (active &gt; max)  
+            wait();  
+          
+        doInvoke(inv);  
+          
+        active --;  
+        notify();  
+    }  
+      
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> Result <span class="hljs-title">doInvoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException  
+  
+}  
 </span></code></pre>
 <p>To: (chain filter)</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> LimitFilter implements Filter {
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invoker chain, Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> LimitFilter implements Filter {  
+  
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invoker chain, Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{  
          <span class="hljs-comment">// Pseudo code  </span>
-        active ++;
-        <span class="hljs-keyword">if</span> (active &gt; max)
-            wait();
-
-        chain.invoke(inv);
-
-        active --;
-        notify();
-    }
-
+        active ++;  
+        <span class="hljs-keyword">if</span> (active &gt; max)  
+            wait();  
+          
+        chain.invoke(inv);  
+          
+        active --;  
+        notify();  
+    }  
+  
 }
 </code></pre>
 <h2>Step 4, a minimum concept, consistent conceptual model</h2>
@@ -75,16 +75,16 @@
 <pre><code class="language-java"><span class="hljs-function">Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation invocation)</span> <span class="hljs-keyword">throws</span> RpcException</span>;
 </code></pre>
 <p>The Exporter method signature as follows:</p>
-<pre><code class="language-java"><span class="hljs-function">Object <span class="hljs-title">invoke</span><span class="hljs-params">(Method method, Object[] args)</span> <span class="hljs-keyword">throws</span> Throwable</span>;
+<pre><code class="language-java"><span class="hljs-function">Object <span class="hljs-title">invoke</span><span class="hljs-params">(Method method, Object[] args)</span> <span class="hljs-keyword">throws</span> Throwable</span>;  
 </code></pre>
 <p>But they are the same, only is a on the client side, one on the server side, different model classes are applied.</p>
 <p>For example, the URL string, parse and assembled, not a URL model classes, and the Parameters of the URL, but sometimes the Map, and sometimes the Parameters class wrapping,</p>
-<pre><code class="language-java">export(String url)
-createExporter(String host, <span class="hljs-keyword">int</span> port, Parameters params);
+<pre><code class="language-java">export(String url)  
+createExporter(String host, <span class="hljs-keyword">int</span> port, Parameters params);  
 </code></pre>
 <p>Use consistent model:</p>
-<pre><code class="language-java">export(URL url)
-createExporter(URL url);
+<pre><code class="language-java">export(URL url)  
+createExporter(URL url);  
 </code></pre>
 <p>For example, the existing: Invoker, Exporter, InvocationHandler, FilterChainAre actually invoke behavior at different stages, can abstract away completely, unified for the Invoker, reduce the concept.</p>
 <h2>Step 5, hierarchical, modular extensions, rather than generic type extension</h2>

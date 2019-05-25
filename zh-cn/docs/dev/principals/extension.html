@@ -34,39 +34,39 @@
 <p><img src="../sources/images/design-step2.png" alt="design-step-2"></p>
 <h2>第三步，全管道式设计，框架自身逻辑，均使用截面拦截实现</h2>
 <p>现在很多的逻辑，都是放在基类中实现，然后通过模板方法回调子类的实现，包括：local, mock, generic, echo, token, accesslog, monitor, count, limit 等等，可以全部拆分使用 Filter 实现，每个功能都是调用链上的一环。 比如：(基类模板方法)</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> AbstractInvoker implements Invoker {
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> AbstractInvoker implements Invoker {  
+  
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{  
         <span class="hljs-comment">// 伪代码  </span>
-        active ++;
-        <span class="hljs-keyword">if</span> (active &gt; max)
-            wait();
-
-        doInvoke(inv);
-
-        active --;
-        notify();
-    }
-
-    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> Result <span class="hljs-title">doInvoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException
-
-}
+        active ++;  
+        <span class="hljs-keyword">if</span> (active &gt; max)  
+            wait();  
+          
+        doInvoke(inv);  
+          
+        active --;  
+        notify();  
+    }  
+      
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> Result <span class="hljs-title">doInvoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException  
+  
+}  
 </span></code></pre>
 <p>改成：(链式过滤器)</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> LimitFilter implements Filter {
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invoker chain, Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> LimitFilter implements Filter {  
+  
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invoker chain, Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{  
          <span class="hljs-comment">// 伪代码  </span>
-        active ++;
-        <span class="hljs-keyword">if</span> (active &gt; max)
-            wait();
-
-        chain.invoke(inv);
-
-        active --;
-        notify();
-    }
-
+        active ++;  
+        <span class="hljs-keyword">if</span> (active &gt; max)  
+            wait();  
+          
+        chain.invoke(inv);  
+          
+        active --;  
+        notify();  
+    }  
+  
 }
 </code></pre>
 <h2>第四步，最少概念，一致性概念模型</h2>
@@ -75,16 +75,16 @@
 <pre><code class="language-java"><span class="hljs-function">Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation invocation)</span> <span class="hljs-keyword">throws</span> RpcException</span>;
 </code></pre>
 <p>而 Exporter 的方法签名为:</p>
-<pre><code class="language-java"><span class="hljs-function">Object <span class="hljs-title">invoke</span><span class="hljs-params">(Method method, Object[] args)</span> <span class="hljs-keyword">throws</span> Throwable</span>;
+<pre><code class="language-java"><span class="hljs-function">Object <span class="hljs-title">invoke</span><span class="hljs-params">(Method method, Object[] args)</span> <span class="hljs-keyword">throws</span> Throwable</span>;  
 </code></pre>
 <p>但它们的作用是一样的，只是一个在客户端，一个在服务器端，却采用了不一样的模型类。</p>
 <p>再比如，URL 以字符串传递，不停的解析和拼装，没有一个 URL 模型类， 而 URL 的参数，却时而 Map, 时而 Parameters 类包装，</p>
-<pre><code class="language-java">export(String url)
-createExporter(String host, <span class="hljs-keyword">int</span> port, Parameters params);
+<pre><code class="language-java">export(String url)  
+createExporter(String host, <span class="hljs-keyword">int</span> port, Parameters params);  
 </code></pre>
 <p>使用一致模型：</p>
-<pre><code class="language-java">export(URL url)
-createExporter(URL url);
+<pre><code class="language-java">export(URL url)  
+createExporter(URL url);  
 </code></pre>
 <p>再比如，现有的：Invoker, Exporter, InvocationHandler, FilterChain
 其实都是 invoke 行为的不同阶段，完全可以抽象掉，统一为 Invoker，减少概念。</p>

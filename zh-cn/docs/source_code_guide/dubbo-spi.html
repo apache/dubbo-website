@@ -24,7 +24,7 @@
 </code></pre>
 <p>接下来定义两个实现类，分别为 OptimusPrime 和 Bumblebee。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OptimusPrime</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Robot</span> </span>{
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">sayHello</span><span class="hljs-params">()</span> </span>{
         System.out.println(<span class="hljs-string">"Hello, I am Optimus Prime."</span>);
@@ -67,7 +67,7 @@ bumblebee = org.apache.spi.Bumblebee
 
     <span class="hljs-meta">@Test</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">sayHello</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Exception </span>{
-        ExtensionLoader&lt;Robot&gt; extensionLoader =
+        ExtensionLoader&lt;Robot&gt; extensionLoader = 
             ExtensionLoader.getExtensionLoader(Robot.class);
         Robot optimusPrime = extensionLoader.getExtension(<span class="hljs-string">"optimusPrime"</span>);
         optimusPrime.sayHello();
@@ -224,7 +224,7 @@ bumblebee = org.apache.spi.Bumblebee
 }
 </code></pre>
 <p>loadDirectory 方法先通过 classLoader 获取所有资源链接，然后再通过 loadResource 方法加载资源。我们继续跟下去，看一下 loadResource 方法的实现。</p>
-<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadResource</span><span class="hljs-params">(Map&lt;String, Class&lt;?&gt;&gt; extensionClasses,
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadResource</span><span class="hljs-params">(Map&lt;String, Class&lt;?&gt;&gt; extensionClasses, 
 	ClassLoader classLoader, java.net.URL resourceURL)</span> </span>{
     <span class="hljs-keyword">try</span> {
         BufferedReader reader = <span class="hljs-keyword">new</span> BufferedReader(
@@ -251,7 +251,7 @@ bumblebee = org.apache.spi.Bumblebee
                         }
                         <span class="hljs-keyword">if</span> (line.length() &gt; <span class="hljs-number">0</span>) {
                             <span class="hljs-comment">// 加载类，并通过 loadClass 方法对类进行缓存</span>
-                            loadClass(extensionClasses, resourceURL,
+                            loadClass(extensionClasses, resourceURL, 
                                       Class.forName(line, <span class="hljs-keyword">true</span>, classLoader), name);
                         }
                     } <span class="hljs-keyword">catch</span> (Throwable t) {
@@ -268,9 +268,9 @@ bumblebee = org.apache.spi.Bumblebee
 }
 </code></pre>
 <p>loadResource 方法用于读取和解析配置文件，并通过反射加载类，最后调用 loadClass 方法进行其他操作。loadClass 方法用于主要用于操作缓存，该方法的逻辑如下：</p>
-<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadClass</span><span class="hljs-params">(Map&lt;String, Class&lt;?&gt;&gt; extensionClasses, java.net.URL resourceURL,
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadClass</span><span class="hljs-params">(Map&lt;String, Class&lt;?&gt;&gt; extensionClasses, java.net.URL resourceURL, 
     Class&lt;?&gt; clazz, String name)</span> <span class="hljs-keyword">throws</span> NoSuchMethodException </span>{
-
+    
     <span class="hljs-keyword">if</span> (!type.isAssignableFrom(clazz)) {
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"..."</span>);
     }
@@ -283,7 +283,7 @@ bumblebee = org.apache.spi.Bumblebee
         } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!cachedAdaptiveClass.equals(clazz)) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"..."</span>);
         }
-
+        
     <span class="hljs-comment">// 检测 clazz 是否是 Wrapper 类型</span>
     } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (isWrapperClass(clazz)) {
         Set&lt;Class&lt;?&gt;&gt; wrappers = cachedWrapperClasses;
@@ -293,7 +293,7 @@ bumblebee = org.apache.spi.Bumblebee
         }
         <span class="hljs-comment">// 存储 clazz 到 cachedWrapperClasses 缓存中</span>
         wrappers.add(clazz);
-
+        
     <span class="hljs-comment">// 程序进入此分支，表明 clazz 是一个普通的拓展类</span>
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-comment">// 检测 clazz 是否有默认的构造方法，如果没有，则抛出异常</span>
@@ -348,8 +348,8 @@ bumblebee = org.apache.spi.Bumblebee
                     Class&lt;?&gt; pt = method.getParameterTypes()[<span class="hljs-number">0</span>];
                     <span class="hljs-keyword">try</span> {
                         <span class="hljs-comment">// 获取属性名，比如 setName 方法对应属性名 name</span>
-                        String property = method.getName().length() &gt; <span class="hljs-number">3</span> ?
-                            method.getName().substring(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>).toLowerCase() +
+                        String property = method.getName().length() &gt; <span class="hljs-number">3</span> ? 
+                            method.getName().substring(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>).toLowerCase() + 
                             	method.getName().substring(<span class="hljs-number">4</span>) : <span class="hljs-string">""</span>;
                         <span class="hljs-comment">// 从 ObjectFactory 中获取依赖对象</span>
                         Object object = objectFactory.getExtension(pt, property);

@@ -72,7 +72,7 @@
                 doExport();
             }
         }, delay, TimeUnit.MILLISECONDS);
-
+        
     <span class="hljs-comment">// 立即导出服务</span>
     } <span class="hljs-keyword">else</span> {
         doExport();
@@ -132,7 +132,7 @@
             <span class="hljs-comment">// 设置 generic = "true"</span>
             generic = Boolean.TRUE.toString();
         }
-
+        
     <span class="hljs-comment">// ref 非 GenericService 类型</span>
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-keyword">try</span> {
@@ -236,7 +236,7 @@
                 appendParameters(map, application);
                 <span class="hljs-comment">// 添加 RegistryConfig 字段信息到 map 中</span>
                 appendParameters(map, config);
-
+                
                 <span class="hljs-comment">// 添加 path、pid，protocol 等信息到 map 中</span>
                 map.put(<span class="hljs-string">"path"</span>, RegistryService.class.getName());
                 map.put(<span class="hljs-string">"dubbo"</span>, Version.getProtocolVersion());
@@ -359,7 +359,7 @@
     Integer port = <span class="hljs-keyword">this</span>.findConfigedPorts(protocolConfig, name, map);
     <span class="hljs-comment">// 组装 URL</span>
     URL url = <span class="hljs-keyword">new</span> URL(name, host, port, (contextPath == <span class="hljs-keyword">null</span> || contextPath.length() == <span class="hljs-number">0</span> ? <span class="hljs-string">""</span> : contextPath + <span class="hljs-string">"/"</span>) + path, map);
-
+    
     <span class="hljs-comment">// 省略无关代码</span>
 }
 </code></pre>
@@ -384,7 +384,7 @@
                     map.put(method.getName() + <span class="hljs-string">".retries"</span>, <span class="hljs-string">"0"</span>);
                 }
             }
-
+            
             <span class="hljs-comment">// 获取 ArgumentConfig 列表</span>
             List&lt;ArgumentConfig&gt; arguments = method.getArguments();
             <span class="hljs-keyword">if</span> (arguments != <span class="hljs-keyword">null</span> &amp;&amp; !arguments.isEmpty()) {
@@ -466,9 +466,9 @@
 <h3>2.2 导出 Dubbo 服务</h3>
 <p>前置工作做完，接下来就可以进行服务导出了。服务导出分为导出到本地 (JVM)，和导出到远程。在深入分析服务导出的源码前，我们先来从宏观层面上看一下服务导出逻辑。如下：</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">doExportUrlsFor1Protocol</span><span class="hljs-params">(ProtocolConfig protocolConfig, List&lt;URL&gt; registryURLs)</span> </span>{
-
+    
     <span class="hljs-comment">// 省略无关代码</span>
-
+    
     <span class="hljs-keyword">if</span> (ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
             .hasExtension(url.getProtocol())) {
         <span class="hljs-comment">// 加载 ConfiguratorFactory，并生成 Configurator 实例，然后通过实例配置 url</span>
@@ -510,7 +510,7 @@
                     Exporter&lt;?&gt; exporter = protocol.export(wrapperInvoker);
                     exporters.add(exporter);
                 }
-
+                
             <span class="hljs-comment">// 不存在注册中心，仅导出服务</span>
             } <span class="hljs-keyword">else</span> {
                 Invoker&lt;?&gt; invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
@@ -553,7 +553,7 @@
 }
 </code></pre>
 <p>如上，JavassistProxyFactory 创建了一个继承自 AbstractProxyInvoker 类的匿名对象，并覆写了抽象方法 doInvoke。覆写后的 doInvoke 逻辑比较简单，仅是将调用请求转发给了 Wrapper 类的 invokeMethod 方法。Wrapper 用于“包裹”目标类，Wrapper 是一个抽象类，仅可通过 getWrapper(Class) 方法创建子类。在创建 Wrapper 子类的过程中，子类代码生成逻辑会对 getWrapper 方法传入的 Class 对象进行解析，拿到诸如类方法，类成员变量等信息。以及生成 invokeMethod 方法代码和其他一些方法代码。代码生成完毕后，通过 Javassist 生成 Class 对象，最后再通过反射创建 Wrapper 实例。相关的代码如下：</p>
-<pre><code class="language-java"> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Wrapper <span class="hljs-title">getWrapper</span><span class="hljs-params">(Class&lt;?&gt; c)</span> </span>{
+<pre><code class="language-java"> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Wrapper <span class="hljs-title">getWrapper</span><span class="hljs-params">(Class&lt;?&gt; c)</span> </span>{	
     <span class="hljs-keyword">while</span> (ClassGenerator.isDynamicClass(c))
         c = c.getSuperclass();
 
@@ -788,7 +788,7 @@
     <span class="hljs-keyword">try</span> {
         <span class="hljs-comment">// 生成类</span>
         Class&lt;?&gt; wc = cc.toClass();
-
+        
         <span class="hljs-comment">// 设置字段值</span>
         wc.getField(<span class="hljs-string">"pts"</span>).set(<span class="hljs-keyword">null</span>, pts);
         wc.getField(<span class="hljs-string">"pns"</span>).set(<span class="hljs-keyword">null</span>, pts.keySet().toArray(<span class="hljs-keyword">new</span> String[<span class="hljs-number">0</span>]));
@@ -851,7 +851,7 @@
 
     <span class="hljs-comment">// 根据 URL 加载 Registry 实现类，比如 ZookeeperRegistry</span>
     <span class="hljs-keyword">final</span> Registry registry = getRegistry(originInvoker);
-
+    
     <span class="hljs-comment">// 获取已注册的服务提供者 URL，比如：</span>
     <span class="hljs-comment">// dubbo://172.17.48.52:20880/com.alibaba.dubbo.demo.DemoService?anyhost=true&amp;application=demo-provider&amp;dubbo=2.0.2&amp;generic=false&amp;interface=com.alibaba.dubbo.demo.DemoService&amp;methods=sayHello</span>
     <span class="hljs-keyword">final</span> URL registeredProviderUrl = getRegisteredProviderUrl(originInvoker);
@@ -901,7 +901,7 @@
                 <span class="hljs-keyword">final</span> Invoker&lt;?&gt; invokerDelegete = <span class="hljs-keyword">new</span> InvokerDelegete&lt;T&gt;(originInvoker, getProviderUrl(originInvoker));
                 <span class="hljs-comment">// 调用 protocol 的 export 方法导出服务</span>
                 exporter = <span class="hljs-keyword">new</span> ExporterChangeableWrapper&lt;T&gt;((Exporter&lt;T&gt;) protocol.export(invokerDelegete), originInvoker);
-
+                
                 <span class="hljs-comment">// 写缓存</span>
                 bounds.put(key, exporter);
             }
@@ -980,7 +980,7 @@
     } <span class="hljs-keyword">catch</span> (RemotingException e) {
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(<span class="hljs-string">"Fail to start server..."</span>);
     }
-
+                                   
 	<span class="hljs-comment">// 获取 client 参数，可指定 netty，mina</span>
     str = url.getParameter(Constants.CLIENT_KEY);
     <span class="hljs-keyword">if</span> (str != <span class="hljs-keyword">null</span> &amp;&amp; str.length() &gt; <span class="hljs-number">0</span>) {
@@ -1079,7 +1079,7 @@
         DataStore dataStore = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
         executor = (ExecutorService) dataStore.get(Constants.EXECUTOR_SERVICE_COMPONENT_KEY, Integer.toString(url.getPort()));
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title">doOpen</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Throwable</span>;
 
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title">doClose</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Throwable</span>;
@@ -1092,7 +1092,7 @@
     ExecutorService boss = Executors.newCachedThreadPool(<span class="hljs-keyword">new</span> NamedThreadFactory(<span class="hljs-string">"NettyServerBoss"</span>, <span class="hljs-keyword">true</span>));
     ExecutorService worker = Executors.newCachedThreadPool(<span class="hljs-keyword">new</span> NamedThreadFactory(<span class="hljs-string">"NettyServerWorker"</span>, <span class="hljs-keyword">true</span>));
     ChannelFactory channelFactory = <span class="hljs-keyword">new</span> NioServerSocketChannelFactory(boss, worker, getUrl().getPositiveParameter(Constants.IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS));
-
+    
     <span class="hljs-comment">// 创建 ServerBootstrap</span>
     bootstrap = <span class="hljs-keyword">new</span> ServerBootstrap(channelFactory);
 
@@ -1122,18 +1122,18 @@
 <p>本节我们来分析服务注册过程，服务注册操作对于 Dubbo 来说不是必需的，通过服务直连的方式就可以绕过注册中心。但通常我们不会这么做，直连方式不利于服务治理，仅推荐在测试服务时使用。对于 Dubbo 来说，注册中心虽不是必需，但却是必要的。因此，关于注册中心以及服务注册相关逻辑，我们也需要搞懂。</p>
 <p>本节内容以 Zookeeper 注册中心作为分析目标，其他类型注册中心大家可自行分析。下面从服务注册的入口方法开始分析，我们把目光再次移到 RegistryProtocol 的 export 方法上。如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> &lt;T&gt; <span class="hljs-function">Exporter&lt;T&gt; <span class="hljs-title">export</span><span class="hljs-params">(<span class="hljs-keyword">final</span> Invoker&lt;T&gt; originInvoker)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
-
+    
     <span class="hljs-comment">// ${导出服务}</span>
-
+    
     <span class="hljs-comment">// 省略其他代码</span>
-
+    
     <span class="hljs-keyword">boolean</span> register = registeredProviderUrl.getParameter(<span class="hljs-string">"register"</span>, <span class="hljs-keyword">true</span>);
     <span class="hljs-keyword">if</span> (register) {
         <span class="hljs-comment">// 注册服务</span>
         register(registryUrl, registeredProviderUrl);
         ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(<span class="hljs-keyword">true</span>);
     }
-
+    
     <span class="hljs-keyword">final</span> URL overrideSubscribeUrl = getSubscribedOverrideUrl(registeredProviderUrl);
     <span class="hljs-keyword">final</span> OverrideListener overrideSubscribeListener = <span class="hljs-keyword">new</span> OverrideListener(overrideSubscribeUrl, originInvoker);
     overrideListeners.put(overrideSubscribeUrl, overrideSubscribeListener);
@@ -1166,13 +1166,13 @@
         <span class="hljs-keyword">if</span> (registry != <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">return</span> registry;
         }
-
+        
         <span class="hljs-comment">// 缓存未命中，创建 Registry 实例</span>
         registry = createRegistry(url);
         <span class="hljs-keyword">if</span> (registry == <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Can not create registry..."</span>);
         }
-
+        
         <span class="hljs-comment">// 写入缓存</span>
         REGISTRIES.put(key, registry);
         <span class="hljs-keyword">return</span> registry;
@@ -1206,7 +1206,7 @@
     <span class="hljs-keyword">if</span> (url.isAnyHost()) {
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"registry address == null"</span>);
     }
-
+    
     <span class="hljs-comment">// 获取组名，默认为 dubbo</span>
     String group = url.getParameter(Constants.GROUP_KEY, DEFAULT_ROOT);
     <span class="hljs-keyword">if</span> (!group.startsWith(Constants.PATH_SEPARATOR)) {
@@ -1242,7 +1242,7 @@
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CuratorZookeeperClient</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractZookeeperClient</span>&lt;<span class="hljs-title">CuratorWatcher</span>&gt; </span>{
 
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> CuratorFramework client;
-
+    
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CuratorZookeeperClient</span><span class="hljs-params">(URL url)</span> </span>{
         <span class="hljs-keyword">super</span>(url);
         <span class="hljs-keyword">try</span> {
@@ -1270,7 +1270,7 @@
                     }
                 }
             });
-
+            
             <span class="hljs-comment">// 启动客户端</span>
             client.start();
         } <span class="hljs-keyword">catch</span> (Exception e) {
@@ -1342,7 +1342,7 @@
         <span class="hljs-comment">// 递归创建上一级路径</span>
         create(path.substring(<span class="hljs-number">0</span>, i), <span class="hljs-keyword">false</span>);
     }
-
+    
     <span class="hljs-comment">// 根据 ephemeral 的值创建临时或持久节点</span>
     <span class="hljs-keyword">if</span> (ephemeral) {
         createEphemeral(path);

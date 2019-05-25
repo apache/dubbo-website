@@ -21,28 +21,28 @@
 <span class="hljs-keyword">import</span> org.apache.dubbo.rpc.config.ServiceConfig;
 <span class="hljs-keyword">import</span> com.xxx.XxxService;
 <span class="hljs-keyword">import</span> com.xxx.XxxServiceImpl;
-
+ 
 <span class="hljs-comment">// 服务实现</span>
 XxxService xxxService = <span class="hljs-keyword">new</span> XxxServiceImpl();
-
+ 
 <span class="hljs-comment">// 当前应用配置</span>
 ApplicationConfig application = <span class="hljs-keyword">new</span> ApplicationConfig();
 application.setName(<span class="hljs-string">"xxx"</span>);
-
+ 
 <span class="hljs-comment">// 连接注册中心配置</span>
 RegistryConfig registry = <span class="hljs-keyword">new</span> RegistryConfig();
 registry.setAddress(<span class="hljs-string">"10.20.130.230:9090"</span>);
 registry.setUsername(<span class="hljs-string">"aaa"</span>);
 registry.setPassword(<span class="hljs-string">"bbb"</span>);
-
+ 
 <span class="hljs-comment">// 服务提供者协议配置</span>
 ProtocolConfig protocol = <span class="hljs-keyword">new</span> ProtocolConfig();
 protocol.setName(<span class="hljs-string">"dubbo"</span>);
 protocol.setPort(<span class="hljs-number">12345</span>);
 protocol.setThreads(<span class="hljs-number">200</span>);
-
+ 
 <span class="hljs-comment">// 注意：ServiceConfig为重对象，内部封装了与注册中心的连接，以及开启服务端口</span>
-
+ 
 <span class="hljs-comment">// 服务提供者暴露服务配置</span>
 ServiceConfig&lt;XxxService&gt; service = <span class="hljs-keyword">new</span> ServiceConfig&lt;XxxService&gt;(); <span class="hljs-comment">// 此实例很重，封装了与注册中心的连接，请自行缓存，否则可能造成内存和连接泄漏</span>
 service.setApplication(application);
@@ -51,7 +51,7 @@ service.setProtocol(protocol); <span class="hljs-comment">// 多个协议可以�
 service.setInterface(XxxService.class);
 service.setRef(xxxService);
 service.setVersion(<span class="hljs-string">"1.0.0"</span>);
-
+ 
 <span class="hljs-comment">// 暴露及注册服务</span>
 service.export();
 </code></pre>
@@ -61,26 +61,26 @@ service.export();
 <span class="hljs-keyword">import</span> org.apache.dubbo.rpc.config.ConsumerConfig;
 <span class="hljs-keyword">import</span> org.apache.dubbo.rpc.config.ReferenceConfig;
 <span class="hljs-keyword">import</span> com.xxx.XxxService;
-
+ 
 <span class="hljs-comment">// 当前应用配置</span>
 ApplicationConfig application = <span class="hljs-keyword">new</span> ApplicationConfig();
 application.setName(<span class="hljs-string">"yyy"</span>);
-
+ 
 <span class="hljs-comment">// 连接注册中心配置</span>
 RegistryConfig registry = <span class="hljs-keyword">new</span> RegistryConfig();
 registry.setAddress(<span class="hljs-string">"10.20.130.230:9090"</span>);
 registry.setUsername(<span class="hljs-string">"aaa"</span>);
 registry.setPassword(<span class="hljs-string">"bbb"</span>);
-
+ 
 <span class="hljs-comment">// 注意：ReferenceConfig为重对象，内部封装了与注册中心的连接，以及与服务提供方的连接</span>
-
+ 
 <span class="hljs-comment">// 引用远程服务</span>
 ReferenceConfig&lt;XxxService&gt; reference = <span class="hljs-keyword">new</span> ReferenceConfig&lt;XxxService&gt;(); <span class="hljs-comment">// 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏</span>
 reference.setApplication(application);
 reference.setRegistry(registry); <span class="hljs-comment">// 多个注册中心可以用setRegistries()</span>
 reference.setInterface(XxxService.class);
 reference.setVersion(<span class="hljs-string">"1.0.0"</span>);
-
+ 
 <span class="hljs-comment">// 和本地bean一样使用xxxService</span>
 XxxService xxxService = reference.get(); <span class="hljs-comment">// 注意：此代理对象内部封装了所有通讯细节，对象较重，请缓存复用</span>
 </code></pre>
@@ -88,7 +88,7 @@ XxxService xxxService = reference.get(); <span class="hljs-comment">// 注意：
 <p>下面只列出不同的地方，其它参见上面的写法</p>
 <h3>方法级设置</h3>
 <pre><code class="language-java">...
-
+ 
 <span class="hljs-comment">// 方法级配置</span>
 List&lt;MethodConfig&gt; methods = <span class="hljs-keyword">new</span> ArrayList&lt;MethodConfig&gt;();
 MethodConfig method = <span class="hljs-keyword">new</span> MethodConfig();
@@ -96,24 +96,24 @@ method.setName(<span class="hljs-string">"createXxx"</span>);
 method.setTimeout(<span class="hljs-number">10000</span>);
 method.setRetries(<span class="hljs-number">0</span>);
 methods.add(method);
-
+ 
 <span class="hljs-comment">// 引用远程服务</span>
 ReferenceConfig&lt;XxxService&gt; reference = <span class="hljs-keyword">new</span> ReferenceConfig&lt;XxxService&gt;(); <span class="hljs-comment">// 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏</span>
 ...
 reference.setMethods(methods); <span class="hljs-comment">// 设置方法级配置</span>
-
+ 
 ...
 </code></pre>
 <h3>点对点直连</h3>
 <pre><code class="language-java">
 ...
-
+ 
 ReferenceConfig&lt;XxxService&gt; reference = <span class="hljs-keyword">new</span> ReferenceConfig&lt;XxxService&gt;(); <span class="hljs-comment">// 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏</span>
 <span class="hljs-comment">// 如果点对点直连，可以用reference.setUrl()指定目标地址，设置url后将绕过注册中心，</span>
 <span class="hljs-comment">// 其中，协议对应provider.setProtocol()的值，端口对应provider.setPort()的值，</span>
 <span class="hljs-comment">// 路径对应service.setPath()的值，如果未设置path，缺省path为接口名</span>
-reference.setUrl(<span class="hljs-string">"dubbo://10.20.130.230:20880/com.xxx.XxxService"</span>);
-
+reference.setUrl(<span class="hljs-string">"dubbo://10.20.130.230:20880/com.xxx.XxxService"</span>); 
+ 
 ...
 </code></pre>
 <hr class="footnotes-sep">

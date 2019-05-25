@@ -17,33 +17,33 @@
 <h4>服务接口示例</h4>
 <h6>CallbackService.java</h6>
 <pre><code class="language-java"><span class="hljs-keyword">package</span> com.callback;
-
+ 
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">CallbackService</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">addListener</span><span class="hljs-params">(String key, CallbackListener listener)</span></span>;
 }
 </code></pre>
 <h6>CallbackListener.java</h6>
 <pre><code class="language-java"><span class="hljs-keyword">package</span> com.callback;
-
+ 
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">CallbackListener</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">changed</span><span class="hljs-params">(String msg)</span></span>;
 }
 </code></pre>
 <h4>服务提供者接口实现示例</h4>
 <pre><code class="language-java"><span class="hljs-keyword">package</span> com.callback.impl;
-
+ 
 <span class="hljs-keyword">import</span> java.text.SimpleDateFormat;
 <span class="hljs-keyword">import</span> java.util.Date;
 <span class="hljs-keyword">import</span> java.util.Map;
 <span class="hljs-keyword">import</span> java.util.concurrent.ConcurrentHashMap;
-
+ 
 <span class="hljs-keyword">import</span> com.callback.CallbackListener;
 <span class="hljs-keyword">import</span> com.callback.CallbackService;
-
+ 
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CallbackServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CallbackService</span> </span>{
-
+     
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, CallbackListener&gt; listeners = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;String, CallbackListener&gt;();
-
+  
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CallbackServiceImpl</span><span class="hljs-params">()</span> </span>{
         Thread t = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() {
             <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
@@ -66,12 +66,12 @@
         t.setDaemon(<span class="hljs-keyword">true</span>);
         t.start();
     }
-
+  
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addListener</span><span class="hljs-params">(String key, CallbackListener listener)</span> </span>{
         listeners.put(key, listener);
         listener.changed(getChanged(key)); <span class="hljs-comment">// 发送变更通知</span>
     }
-
+     
     <span class="hljs-function"><span class="hljs-keyword">private</span> String <span class="hljs-title">getChanged</span><span class="hljs-params">(String key)</span> </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">"Changed: "</span> + <span class="hljs-keyword">new</span> SimpleDateFormat(<span class="hljs-string">"yyyy-MM-dd HH:mm:ss"</span>).format(<span class="hljs-keyword">new</span> Date());
     }
@@ -93,9 +93,9 @@
 <h4>服务消费者调用示例</h4>
 <pre><code class="language-java">ClassPathXmlApplicationContext context = <span class="hljs-keyword">new</span> ClassPathXmlApplicationContext(<span class="hljs-string">"classpath:consumer.xml"</span>);
 context.start();
-
+ 
 CallbackService callbackService = (CallbackService) context.getBean(<span class="hljs-string">"callbackService"</span>);
-
+ 
 callbackService.addListener(<span class="hljs-string">"foo.bar"</span>, <span class="hljs-keyword">new</span> CallbackListener(){
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">changed</span><span class="hljs-params">(String msg)</span> </span>{
         System.out.println(<span class="hljs-string">"callback1:"</span> + msg);

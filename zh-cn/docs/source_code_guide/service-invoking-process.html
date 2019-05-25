@@ -87,12 +87,12 @@
     <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">invoke</span><span class="hljs-params">(Object proxy, Method method, Object[] args)</span> <span class="hljs-keyword">throws</span> Throwable </span>{
         String methodName = method.getName();
         Class&lt;?&gt;[] parameterTypes = method.getParameterTypes();
-
+        
         <span class="hljs-comment">// 拦截定义在 Object 类中的方法（未被子类重写），比如 wait/notify</span>
         <span class="hljs-keyword">if</span> (method.getDeclaringClass() == Object.class) {
             <span class="hljs-keyword">return</span> method.invoke(invoker, args);
         }
-
+        
         <span class="hljs-comment">// 如果 toString、hashCode 和 equals 等方法被子类重写了，这里也直接调用</span>
         <span class="hljs-keyword">if</span> (<span class="hljs-string">"toString"</span>.equals(methodName) &amp;&amp; parameterTypes.length == <span class="hljs-number">0</span>) {
             <span class="hljs-keyword">return</span> invoker.toString();
@@ -103,7 +103,7 @@
         <span class="hljs-keyword">if</span> (<span class="hljs-string">"equals"</span>.equals(methodName) &amp;&amp; parameterTypes.length == <span class="hljs-number">1</span>) {
             <span class="hljs-keyword">return</span> invoker.equals(args[<span class="hljs-number">0</span>]);
         }
-
+        
         <span class="hljs-comment">// 将 method 和 args 封装到 RpcInvocation 中，并执行后续的调用</span>
         <span class="hljs-keyword">return</span> invoker.invoke(<span class="hljs-keyword">new</span> RpcInvocation(method, args)).recreate();
     }
@@ -111,9 +111,9 @@
 </code></pre>
 <p>InvokerInvocationHandler 中的 invoker 成员变量类型为 MockClusterInvoker，MockClusterInvoker 内部封装了服务降级逻辑。下面简单看一下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MockClusterInvoker</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title">Invoker</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
-
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Invoker&lt;T&gt; invoker;
-
+    
     <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation invocation)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
         Result result = <span class="hljs-keyword">null</span>;
 
@@ -142,13 +142,13 @@
         }
         <span class="hljs-keyword">return</span> result;
     }
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 }
 </code></pre>
 <p>服务降级不是本文重点，因此这里就不分析 doMockInvoke 方法了。考虑到前文已经详细分析过 FailoverClusterInvoker，因此本节略过 FailoverClusterInvoker，直接分析 DubboInvoker。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractInvoker</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title">Invoker</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
-
+    
     <span class="hljs-function"><span class="hljs-keyword">public</span> Result <span class="hljs-title">invoke</span><span class="hljs-params">(Invocation inv)</span> <span class="hljs-keyword">throws</span> RpcException </span>{
         <span class="hljs-keyword">if</span> (destroyed.get()) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(<span class="hljs-string">"Rpc invoker for service ..."</span>);
@@ -184,15 +184,15 @@
     }
 
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> Result <span class="hljs-title">doInvoke</span><span class="hljs-params">(Invocation invocation)</span> <span class="hljs-keyword">throws</span> Throwable</span>;
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 }
 </code></pre>
 <p>上面的代码来自 AbstractInvoker 类，其中大部分代码用于添加信息到 RpcInvocation#attachment 变量中，添加完毕后，调用 doInvoke 执行后续的调用。doInvoke 是一个抽象方法，需要由子类实现，下面到 DubboInvoker 中看一下。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboInvoker</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractInvoker</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
-
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ExchangeClient[] clients;
-
+    
     <span class="hljs-function"><span class="hljs-keyword">protected</span> Result <span class="hljs-title">doInvoke</span><span class="hljs-params">(<span class="hljs-keyword">final</span> Invocation invocation)</span> <span class="hljs-keyword">throws</span> Throwable </span>{
         RpcInvocation inv = (RpcInvocation) invocation;
         <span class="hljs-keyword">final</span> String methodName = RpcUtils.getMethodName(invocation);
@@ -223,7 +223,7 @@
                 RpcContext.getContext().setFuture(<span class="hljs-keyword">null</span>);
                 <span class="hljs-comment">// 返回一个空的 RpcResult</span>
                 <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RpcResult();
-            }
+            } 
 
             <span class="hljs-comment">// 异步有返回值</span>
             <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (isAsync) {
@@ -233,7 +233,7 @@
                 RpcContext.getContext().setFuture(<span class="hljs-keyword">new</span> FutureAdapter&lt;Object&gt;(future));
                 <span class="hljs-comment">// 暂时返回一个空结果</span>
                 <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RpcResult();
-            }
+            } 
 
             <span class="hljs-comment">// 同步调用</span>
             <span class="hljs-keyword">else</span> {
@@ -247,19 +247,19 @@
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(..., <span class="hljs-string">"Failed to invoke remote method: ..."</span>);
         }
     }
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 }
 </code></pre>
 <p>上面的代码包含了 Dubbo 对同步和异步调用的处理逻辑，搞懂了上面的代码，会对 Dubbo 的同步和异步调用方式有更深入的了解。Dubbo 实现同步和异步调用比较关键的一点就在于由谁调用 ResponseFuture 的 get 方法。同步调用模式下，由框架自身调用 ResponseFuture 的 get 方法。异步调用模式下，则由用户调用该方法。ResponseFuture 是一个接口，下面我们来看一下它的默认实现类 DefaultFuture 的源码。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultFuture</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ResponseFuture</span> </span>{
-
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Map&lt;Long, Channel&gt; CHANNELS =
+    
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Map&lt;Long, Channel&gt; CHANNELS = 
         <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;Long, Channel&gt;();
 
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Map&lt;Long, DefaultFuture&gt; FUTURES =
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Map&lt;Long, DefaultFuture&gt; FUTURES = 
         <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;Long, DefaultFuture&gt;();
-
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">long</span> id;
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Channel channel;
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Request request;
@@ -267,11 +267,11 @@
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Lock lock = <span class="hljs-keyword">new</span> ReentrantLock();
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition done = lock.newCondition();
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> Response response;
-
+    
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">DefaultFuture</span><span class="hljs-params">(Channel channel, Request request, <span class="hljs-keyword">int</span> timeout)</span> </span>{
         <span class="hljs-keyword">this</span>.channel = channel;
         <span class="hljs-keyword">this</span>.request = request;
-
+        
         <span class="hljs-comment">// 获取请求 id，这个 id 很重要，后面还会见到</span>
         <span class="hljs-keyword">this</span>.id = request.getId();
         <span class="hljs-keyword">this</span>.timeout = timeout &gt; <span class="hljs-number">0</span> ? timeout : channel.getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
@@ -279,7 +279,7 @@
         FUTURES.put(id, <span class="hljs-keyword">this</span>);
         CHANNELS.put(id, channel);
     }
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">get</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> RemotingException </span>{
         <span class="hljs-keyword">return</span> get(timeout);
@@ -290,7 +290,7 @@
         <span class="hljs-keyword">if</span> (timeout &lt;= <span class="hljs-number">0</span>) {
             timeout = Constants.DEFAULT_TIMEOUT;
         }
-
+        
         <span class="hljs-comment">// 检测服务提供方是否成功返回了调用结果</span>
         <span class="hljs-keyword">if</span> (!isDone()) {
             <span class="hljs-keyword">long</span> start = System.currentTimeMillis();
@@ -310,41 +310,41 @@
             } <span class="hljs-keyword">finally</span> {
                 lock.unlock();
             }
-
+            
             <span class="hljs-comment">// 如果调用结果仍未返回，则抛出超时异常</span>
             <span class="hljs-keyword">if</span> (!isDone()) {
                 <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> TimeoutException(sent &gt; <span class="hljs-number">0</span>, channel, getTimeoutMessage(<span class="hljs-keyword">false</span>));
             }
         }
-
+        
         <span class="hljs-comment">// 返回调用结果</span>
         <span class="hljs-keyword">return</span> returnFromResponse();
     }
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">isDone</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-comment">// 通过检测 response 字段为空与否，判断是否收到了调用结果</span>
         <span class="hljs-keyword">return</span> response != <span class="hljs-keyword">null</span>;
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">private</span> Object <span class="hljs-title">returnFromResponse</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> RemotingException </span>{
         Response res = response;
         <span class="hljs-keyword">if</span> (res == <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"response cannot be null"</span>);
         }
-
+        
         <span class="hljs-comment">// 如果调用结果的状态为 Response.OK，则表示调用过程正常，服务提供方成功返回了调用结果</span>
         <span class="hljs-keyword">if</span> (res.getStatus() == Response.OK) {
             <span class="hljs-keyword">return</span> res.getResult();
         }
-
+        
         <span class="hljs-comment">// 抛出异常</span>
         <span class="hljs-keyword">if</span> (res.getStatus() == Response.CLIENT_TIMEOUT || res.getStatus() == Response.SERVER_TIMEOUT) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> TimeoutException(res.getStatus() == Response.SERVER_TIMEOUT, channel, res.getErrorMessage());
         }
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RemotingException(channel, res.getErrorMessage());
     }
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 }
 </code></pre>
@@ -365,7 +365,7 @@
         <span class="hljs-comment">// 引用计数自增</span>
         referenceCount.incrementAndGet();
         <span class="hljs-keyword">this</span>.url = client.getUrl();
-
+        
         <span class="hljs-comment">// ...</span>
     }
 
@@ -386,7 +386,7 @@
         <span class="hljs-comment">// referenceCount 自增</span>
         referenceCount.incrementAndGet();
     }
-
+    
         <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">close</span><span class="hljs-params">(<span class="hljs-keyword">int</span> timeout)</span> </span>{
         <span class="hljs-comment">// referenceCount 自减</span>
@@ -399,7 +399,7 @@
             client = replaceWithLazyClient();
         }
     }
-
+    
     <span class="hljs-comment">// 省略部分方法</span>
 }
 </code></pre>
@@ -418,10 +418,10 @@
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"client == null"</span>);
         }
         <span class="hljs-keyword">this</span>.client = client;
-
+        
         <span class="hljs-comment">// 创建 HeaderExchangeChannel 对象</span>
         <span class="hljs-keyword">this</span>.channel = <span class="hljs-keyword">new</span> HeaderExchangeChannel(client);
-
+        
         <span class="hljs-comment">// 以下代码均与心跳检测逻辑有关</span>
         String dubbo = client.getUrl().getParameter(Constants.DUBBO_VERSION_KEY);
         <span class="hljs-keyword">this</span>.heartbeat = client.getUrl().getParameter(Constants.HEARTBEAT_KEY, dubbo != <span class="hljs-keyword">null</span> &amp;&amp; dubbo.startsWith(<span class="hljs-string">"1.0."</span>) ? Constants.DEFAULT_HEARTBEAT : <span class="hljs-number">0</span>);
@@ -452,7 +452,7 @@
         doClose();
         channel.close();
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">doClose</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-comment">// 停止心跳检测定时器</span>
         stopHeartbeatTimer();
@@ -485,24 +485,24 @@
         }
         heartbeatTimer = <span class="hljs-keyword">null</span>;
     }
-
+    
     <span class="hljs-comment">// 省略部分方法</span>
 }
 </code></pre>
 <p>HeaderExchangeClient 中很多方法只有一行代码，即调用 HeaderExchangeChannel 对象的同签名方法。那 HeaderExchangeClient 有什么用处呢？答案是封装了一些关于心跳检测的逻辑。心跳检测并非本文所关注的点，因此就不多说了，继续向下看。</p>
 <pre><code class="language-java">final class HeaderExchangeChannel implements ExchangeChannel {
-
+    
     private final Channel channel;
-
+    
     HeaderExchangeChannel(Channel channel) {
         if (channel == null) {
             throw new IllegalArgumentException("channel == null");
         }
-
+        
         // 这里的 channel 指向的是 NettyClient
         this.channel = channel;
     }
-
+    
     @Override
     public ResponseFuture request(Object request) throws RemotingException {
         return request(request, channel.getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT));
@@ -520,7 +520,7 @@
         req.setTwoWay(true);
         // 这里的 request 变量类型为 RpcInvocation
         req.setData(request);
-
+                                        
         // 创建 DefaultFuture 对象
         DefaultFuture future = new DefaultFuture(channel, req, timeout);
         try {
@@ -537,43 +537,43 @@
 </code></pre>
 <p>到这里大家终于看到了 Request 语义了，上面的方法首先定义了一个 Request 对象，然后再将该对象传给 NettyClient 的 send 方法，进行后续的调用。需要说明的是，NettyClient 中并未实现 send 方法，该方法继承自父类 AbstractPeer，下面直接分析 AbstractPeer 的代码。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractPeer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Endpoint</span>, <span class="hljs-title">ChannelHandler</span> </span>{
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">send</span><span class="hljs-params">(Object message)</span> <span class="hljs-keyword">throws</span> RemotingException </span>{
         <span class="hljs-comment">// 该方法由 AbstractClient 类实现</span>
         send(message, url.getParameter(Constants.SENT_KEY, <span class="hljs-keyword">false</span>));
     }
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 }
 
 <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractClient</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractEndpoint</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Client</span> </span>{
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">send</span><span class="hljs-params">(Object message, <span class="hljs-keyword">boolean</span> sent)</span> <span class="hljs-keyword">throws</span> RemotingException </span>{
         <span class="hljs-keyword">if</span> (send_reconnect &amp;&amp; !isConnected()) {
             connect();
         }
-
+        
         <span class="hljs-comment">// 获取 Channel，getChannel 是一个抽象方法，具体由子类实现</span>
         Channel channel = getChannel();
         <span class="hljs-keyword">if</span> (channel == <span class="hljs-keyword">null</span> || !channel.isConnected()) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RemotingException(<span class="hljs-keyword">this</span>, <span class="hljs-string">"message can not send ..."</span>);
         }
-
+        
         <span class="hljs-comment">// 继续向下调用</span>
         channel.send(message, sent);
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> Channel <span class="hljs-title">getChannel</span><span class="hljs-params">()</span></span>;
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 }
 </code></pre>
 <p>默认情况下，Dubbo 使用 Netty 作为底层的通信框架，因此下面我们到 NettyClient 类中看一下 getChannel 方法的实现逻辑。</p>
 <pre><code class="language-java">
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NettyClient</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractClient</span> </span>{
-
+    
     <span class="hljs-comment">// 这里的 Channel 全限定名称为 org.jboss.netty.channel.Channel</span>
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> Channel channel;
 
@@ -589,11 +589,11 @@
 
 <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NettyChannel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractChannel</span> </span>{
 
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> ConcurrentMap&lt;org.jboss.netty.channel.Channel, NettyChannel&gt; channelMap =
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> ConcurrentMap&lt;org.jboss.netty.channel.Channel, NettyChannel&gt; channelMap = 
         <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;org.jboss.netty.channel.Channel, NettyChannel&gt;();
 
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> org.jboss.netty.channel.Channel channel;
-
+    
     <span class="hljs-comment">/** 私有构造方法 */</span>
     <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">NettyChannel</span><span class="hljs-params">(org.jboss.netty.channel.Channel channel, URL url, ChannelHandler handler)</span> </span>{
         <span class="hljs-keyword">super</span>(url, handler);
@@ -607,7 +607,7 @@
         <span class="hljs-keyword">if</span> (ch == <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
         }
-
+        
         <span class="hljs-comment">// 尝试从集合中获取 NettyChannel 实例</span>
         NettyChannel ret = channelMap.get(ch);
         <span class="hljs-keyword">if</span> (ret == <span class="hljs-keyword">null</span>) {
@@ -634,7 +634,7 @@
     <span class="hljs-keyword">try</span> {
         <span class="hljs-comment">// 发送消息(包含请求和响应消息)</span>
         ChannelFuture future = channel.write(message);
-
+        
         <span class="hljs-comment">// sent 的值源于 &lt;dubbo:method sent="true/false" /&gt; 中 sent 的配置值，有两种配置值：</span>
         <span class="hljs-comment">//   1. true: 等待消息发出，消息发送失败将抛出异常</span>
         <span class="hljs-comment">//   2. false: 不等待消息发出，将消息放入 IO 队列，即刻返回</span>
@@ -665,8 +665,8 @@
       —&gt; AbstractClusterInvoker#invoke(Invocation)
         —&gt; FailoverClusterInvoker#doInvoke(Invocation, List&lt;Invoker&lt;T&gt;&gt;, LoadBalance)
           —&gt; Filter#invoke(Invoker, Invocation)  // 包含多个 Filter 调用
-            —&gt; ListenerInvokerWrapper#invoke(Invocation)
-              —&gt; AbstractInvoker#invoke(Invocation)
+            —&gt; ListenerInvokerWrapper#invoke(Invocation) 
+              —&gt; AbstractInvoker#invoke(Invocation) 
                 —&gt; DubboInvoker#doInvoke(Invocation)
                   —&gt; ReferenceCountExchangeClient#request(Object, int)
                     —&gt; HeaderExchangeClient#request(Object, int)
@@ -785,7 +785,7 @@
         <span class="hljs-keyword">if</span> (req.isTwoWay()) {
             header[<span class="hljs-number">2</span>] |= FLAG_TWOWAY;
         }
-
+        
         <span class="hljs-comment">// 设置事件标识</span>
         <span class="hljs-keyword">if</span> (req.isEvent()) {
             header[<span class="hljs-number">2</span>] |= FLAG_EVENT;
@@ -814,7 +814,7 @@
         }
         bos.flush();
         bos.close();
-
+        
         <span class="hljs-comment">// 获取写入的字节数，也就是消息体长度</span>
         <span class="hljs-keyword">int</span> len = bos.writtenBytes();
         checkPayload(channel, len);
@@ -829,13 +829,13 @@
         <span class="hljs-comment">// 设置新的 writerIndex，writerIndex = 原写下标 + 消息头长度 + 消息体长度</span>
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
     }
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 }
 </code></pre>
 <p>以上就是请求对象的编码过程，该过程首先会通过位运算将消息头写入到 header 数组中。然后对 Request 对象的 data 字段执行序列化操作，序列化后的数据最终会存储到 ChannelBuffer 中。序列化操作执行完后，可得到数据序列化后的长度 len，紧接着将 len 写入到 header 指定位置处。最后再将消息头字节数组 header 写入到 ChannelBuffer 中，整个编码过程就结束了。本节的最后，我们再来看一下 Request 对象的 data 字段序列化过程，也就是 encodeRequestData 方法的逻辑，如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboCodec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ExchangeCodec</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Codec2</span> </span>{
-
+    
 	<span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">encodeRequestData</span><span class="hljs-params">(Channel channel, ObjectOutput out, Object data, String version)</span> <span class="hljs-keyword">throws</span> IOException </span>{
         RpcInvocation inv = (RpcInvocation) data;
 
@@ -854,7 +854,7 @@
                 <span class="hljs-comment">// 对运行时参数进行序列化</span>
                 out.writeObject(encodeInvocationArgument(channel, inv, i));
             }
-
+        
         <span class="hljs-comment">// 序列化 attachments</span>
         out.writeObject(inv.getAttachments());
     }
@@ -866,7 +866,7 @@
 <h4>2.3.1 请求解码</h4>
 <p>这里直接分析请求数据的解码逻辑，忽略中间过程，如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExchangeCodec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TelnetCodec</span> </span>{
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">decode</span><span class="hljs-params">(Channel channel, ChannelBuffer buffer)</span> <span class="hljs-keyword">throws</span> IOException </span>{
         <span class="hljs-keyword">int</span> readable = buffer.readableBytes();
@@ -899,7 +899,7 @@
             <span class="hljs-comment">// 调用 TelnetCodec 的 decode 方法对数据包进行解码</span>
             <span class="hljs-keyword">return</span> <span class="hljs-keyword">super</span>.decode(channel, buffer, readable, header);
         }
-
+        
         <span class="hljs-comment">// 检测可读数据量是否少于消息头长度，若小于则立即返回 DecodeResult.NEED_MORE_INPUT</span>
         <span class="hljs-keyword">if</span> (readable &lt; HEADER_LENGTH) {
             <span class="hljs-keyword">return</span> DecodeResult.NEED_MORE_INPUT;
@@ -915,7 +915,7 @@
         <span class="hljs-keyword">if</span> (readable &lt; tt) {
             <span class="hljs-keyword">return</span> DecodeResult.NEED_MORE_INPUT;
         }
-
+        
         ChannelBufferInputStream is = <span class="hljs-keyword">new</span> ChannelBufferInputStream(buffer, len);
 
         <span class="hljs-keyword">try</span> {
@@ -953,7 +953,7 @@
             req.setVersion(Version.getProtocolVersion());
             <span class="hljs-comment">// 通过逻辑与运算得到通信方式，并设置到 Request 对象中</span>
             req.setTwoWay((flag &amp; FLAG_TWOWAY) != <span class="hljs-number">0</span>);
-
+            
             <span class="hljs-comment">// 通过位运算检测数据包是否为事件类型</span>
             <span class="hljs-keyword">if</span> ((flag &amp; FLAG_EVENT) != <span class="hljs-number">0</span>) {
                 <span class="hljs-comment">// 设置心跳事件到 Request 对象中</span>
@@ -984,7 +984,7 @@
                     }
                     data = inv;
                 }
-
+                
                 <span class="hljs-comment">// 设置 data 到 Request 对象中</span>
                 req.setData(data);
             } <span class="hljs-keyword">catch</span> (Throwable t) {
@@ -1000,7 +1000,7 @@
 </code></pre>
 <p>如上，decodeBody 对部分字段进行了解码，并将解码得到的字段封装到 Request 中。随后会调用 DecodeableRpcInvocation 的 decode 方法进行后续的解码工作。此工作完成后，可将调用方法名、attachment、以及调用参数解析出来。下面我们来看一下 DecodeableRpcInvocation 的 decode 方法逻辑。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DecodeableRpcInvocation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">RpcInvocation</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Codec</span>, <span class="hljs-title">Decodeable</span> </span>{
-
+    
 	<span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">decode</span><span class="hljs-params">(Channel channel, InputStream input)</span> <span class="hljs-keyword">throws</span> IOException </span>{
         ObjectInput in = CodecSupport.getSerialization(channel.getUrl(), serializationType)
@@ -1040,7 +1040,7 @@
                     }
                 }
             }
-
+            
             <span class="hljs-comment">// 设置参数类型数组</span>
             setParameterTypes(pts);
 
@@ -1055,7 +1055,7 @@
                 attachment.putAll(map);
                 setAttachments(attachment);
             }
-
+            
             <span class="hljs-comment">// 对 callback 类型的参数进行处理</span>
             <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; args.length; i++) {
                 args[i] = decodeInvocationArgument(channel, <span class="hljs-keyword">this</span>, pts, i, args[i]);
@@ -1089,13 +1089,13 @@
 <p>考虑到篇幅，以及很多中间调用的逻辑并非十分重要，所以这里就不对调用栈中的每个方法都进行分析了。这里我们直接分析调用栈中的分析第一个和最后一个调用方法逻辑。如下：</p>
 <pre><code class="language-java"><span class="hljs-meta">@Sharable</span>
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NettyHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelHandler</span> </span>{
-
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, Channel&gt; channels = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;String, Channel&gt;();
 
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> URL url;
 
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ChannelHandler handler;
-
+    
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">NettyHandler</span><span class="hljs-params">(URL url, ChannelHandler handler)</span> </span>{
         <span class="hljs-keyword">if</span> (url == <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"url == null"</span>);
@@ -1104,11 +1104,11 @@
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"handler == null"</span>);
         }
         <span class="hljs-keyword">this</span>.url = url;
-
+        
         <span class="hljs-comment">// 这里的 handler 类型为 NettyServer</span>
         <span class="hljs-keyword">this</span>.handler = handler;
     }
-
+    
 	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">messageReceived</span><span class="hljs-params">(ChannelHandlerContext ctx, MessageEvent e)</span> <span class="hljs-keyword">throws</span> Exception </span>{
         <span class="hljs-comment">// 获取 NettyChannel</span>
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.getChannel(), url, handler);
@@ -1201,7 +1201,7 @@
                 <span class="hljs-comment">// 如果通信方式为双向通信，此时将 Server side ... threadpool is exhausted </span>
                 <span class="hljs-comment">// 错误信息封装到 Response 中，并返回给服务消费方。</span>
                 <span class="hljs-keyword">if</span>(request.isTwoWay()){
-                    String msg = <span class="hljs-string">"Server side("</span> + url.getIp() + <span class="hljs-string">","</span> + url.getPort()
+                    String msg = <span class="hljs-string">"Server side("</span> + url.getIp() + <span class="hljs-string">","</span> + url.getPort() 
                         + <span class="hljs-string">") threadpool is exhausted ,detail msg:"</span> + t.getMessage();
                     Response response = <span class="hljs-keyword">new</span> Response(request.getId(), request.getVersion());
                     response.setStatus(Response.SERVER_THREADPOOL_EXHAUSTED_ERROR);
@@ -1231,13 +1231,13 @@
 <h5>2.3.2.2 调用服务</h5>
 <p>本小节，我们从 ChannelEventRunnable 开始分析，该类的主要代码如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChannelEventRunnable</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Runnable</span> </span>{
-
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ChannelHandler handler;
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Channel channel;
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ChannelState state;
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Throwable exception;
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Object message;
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-comment">// 检测通道状态，对于请求或响应消息，此时 state = RECEIVED</span>
@@ -1248,8 +1248,8 @@
             } <span class="hljs-keyword">catch</span> (Exception e) {
                 logger.warn(<span class="hljs-string">"... operation error, channel is ... message is ..."</span>);
             }
-        }
-
+        } 
+        
         <span class="hljs-comment">// 其他消息类型通过 switch 进行处理</span>
         <span class="hljs-keyword">else</span> {
             <span class="hljs-keyword">switch</span> (state) {
@@ -1341,7 +1341,7 @@
                 <span class="hljs-keyword">if</span> (request.isEvent()) {
                     <span class="hljs-comment">// 处理事件</span>
                     handlerEvent(channel, request);
-                }
+                } 
                 <span class="hljs-comment">// 处理普通的请求</span>
                 <span class="hljs-keyword">else</span> {
                     <span class="hljs-comment">// 双向通信</span>
@@ -1350,13 +1350,13 @@
                         Response response = handleRequest(exchangeChannel, request);
                         <span class="hljs-comment">// 将调用结果返回给服务消费端</span>
                         channel.send(response);
-                    }
+                    } 
                     <span class="hljs-comment">// 如果是单向通信，仅向后调用指定服务即可，无需返回调用结果</span>
                     <span class="hljs-keyword">else</span> {
                         handler.received(exchangeChannel, request.getData());
                     }
                 }
-            }
+            }      
             <span class="hljs-comment">// 处理响应对象，服务消费方会执行此处逻辑，后面分析</span>
             <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (message <span class="hljs-keyword">instanceof</span> Response) {
                 handleResponse(channel, (Response) message);
@@ -1389,7 +1389,7 @@
 
             <span class="hljs-keyword">return</span> res;
         }
-
+        
         <span class="hljs-comment">// 获取 data 字段值，也就是 RpcInvocation 对象</span>
         Object msg = req.getData();
         <span class="hljs-keyword">try</span> {
@@ -1412,7 +1412,7 @@
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboProtocol</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractProtocol</span> </span>{
 
     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String NAME = <span class="hljs-string">"dubbo"</span>;
-
+    
     <span class="hljs-keyword">private</span> ExchangeHandler requestHandler = <span class="hljs-keyword">new</span> ExchangeHandlerAdapter() {
 
         <span class="hljs-meta">@Override</span>
@@ -1430,16 +1430,16 @@
             }
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RemotingException(channel, <span class="hljs-string">"Unsupported request: ..."</span>);
         }
-
+        
         <span class="hljs-comment">// 忽略其他方法</span>
     }
-
+    
     Invoker&lt;?&gt; getInvoker(Channel channel, Invocation inv) <span class="hljs-keyword">throws</span> RemotingException {
         <span class="hljs-comment">// 忽略回调和本地存根相关逻辑</span>
         <span class="hljs-comment">// ...</span>
-
+        
         <span class="hljs-keyword">int</span> port = channel.getLocalAddress().getPort();
-
+        
         <span class="hljs-comment">// 计算 service key，格式为 groupName/serviceName:serviceVersion:port。比如：</span>
         <span class="hljs-comment">//   dubbo/com.alibaba.dubbo.demo.DemoService:1.0.0:20880</span>
         String serviceKey = serviceKey(port, path, inv.getAttachments().get(Constants.VERSION_KEY), inv.getAttachments().get(Constants.GROUP_KEY));
@@ -1454,7 +1454,7 @@
         <span class="hljs-comment">// 获取 Invoker 对象，并返回</span>
         <span class="hljs-keyword">return</span> exporter.getInvoker();
     }
-
+    
     <span class="hljs-comment">// 忽略其他方法</span>
 }
 </code></pre>
@@ -1472,13 +1472,13 @@
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(<span class="hljs-string">"Failed to invoke remote proxy method ..."</span>);
         }
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> Object <span class="hljs-title">doInvoke</span><span class="hljs-params">(T proxy, String methodName, Class&lt;?&gt;[] parameterTypes, Object[] arguments)</span> <span class="hljs-keyword">throws</span> Throwable</span>;
 }
 </code></pre>
 <p>如上，doInvoke 是一个抽象方法，这个需要由具体的 Invoker 实例实现。Invoker 实例是在运行时通过 JavassistProxyFactory 创建的，创建逻辑如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">JavassistProxyFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractProxyFactory</span> </span>{
-
+    
     <span class="hljs-comment">// 省略其他方法</span>
 
     <span class="hljs-meta">@Override</span>
@@ -1554,7 +1554,7 @@
             <span class="hljs-keyword">super</span>.encode(channel, buffer, msg);
         }
     }
-
+    
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">encodeResponse</span><span class="hljs-params">(Channel channel, ChannelBuffer buffer, Response res)</span> <span class="hljs-keyword">throws</span> IOException </span>{
         <span class="hljs-keyword">int</span> savedWriteIndex = buffer.writerIndex();
         <span class="hljs-keyword">try</span> {
@@ -1577,7 +1577,7 @@
             buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
             ChannelBufferOutputStream bos = <span class="hljs-keyword">new</span> ChannelBufferOutputStream(buffer);
             ObjectOutput out = serialization.serialize(channel.getUrl(), bos);
-
+           
             <span class="hljs-keyword">if</span> (status == Response.OK) {
                 <span class="hljs-keyword">if</span> (res.isHeartbeat()) {
                     <span class="hljs-comment">// 对心跳响应结果进行序列化，已废弃</span>
@@ -1586,7 +1586,7 @@
                     <span class="hljs-comment">// 对调用结果进行序列化</span>
                     encodeResponseData(channel, out, res.getResult(), res.getVersion());
                 }
-            } <span class="hljs-keyword">else</span> {
+            } <span class="hljs-keyword">else</span> { 
                 <span class="hljs-comment">// 对错误信息进行序列化</span>
                 out.writeUTF(res.getErrorMessage())
             };
@@ -1600,13 +1600,13 @@
             <span class="hljs-comment">// 获取写入的字节数，也就是消息体长度</span>
             <span class="hljs-keyword">int</span> len = bos.writtenBytes();
             checkPayload(channel, len);
-
+            
             <span class="hljs-comment">// 将消息体长度写入到消息头中</span>
             Bytes.int2bytes(len, header, <span class="hljs-number">12</span>);
             <span class="hljs-comment">// 将 buffer 指针移动到 savedWriteIndex，为写消息头做准备</span>
             buffer.writerIndex(savedWriteIndex);
             <span class="hljs-comment">// 从 savedWriteIndex 下标处写入消息头</span>
-            buffer.writeBytes(header);
+            buffer.writeBytes(header); 
             <span class="hljs-comment">// 设置新的 writerIndex，writerIndex = 原写下标 + 消息头长度 + 消息体长度</span>
             buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
         } <span class="hljs-keyword">catch</span> (Throwable t) {
@@ -1616,13 +1616,13 @@
 }
 
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DubboCodec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ExchangeCodec</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Codec2</span> </span>{
-
+    
 	<span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">encodeResponseData</span><span class="hljs-params">(Channel channel, ObjectOutput out, Object data, String version)</span> <span class="hljs-keyword">throws</span> IOException </span>{
         Result result = (Result) data;
         <span class="hljs-comment">// 检测当前协议版本是否支持带有 attachment 集合的 Response 对象</span>
         <span class="hljs-keyword">boolean</span> attach = Version.isSupportResponseAttachment(version);
         Throwable th = result.getException();
-
+        
         <span class="hljs-comment">// 异常信息为空</span>
         <span class="hljs-keyword">if</span> (th == <span class="hljs-keyword">null</span>) {
             Object ret = result.getValue();
@@ -1630,7 +1630,7 @@
             <span class="hljs-keyword">if</span> (ret == <span class="hljs-keyword">null</span>) {
                 <span class="hljs-comment">// 序列化响应类型</span>
                 out.writeByte(attach ? RESPONSE_NULL_VALUE_WITH_ATTACHMENTS : RESPONSE_NULL_VALUE);
-            }
+            } 
             <span class="hljs-comment">// 调用结果非空</span>
             <span class="hljs-keyword">else</span> {
                 <span class="hljs-comment">// 序列化响应类型</span>
@@ -1638,7 +1638,7 @@
                 <span class="hljs-comment">// 序列化调用结果</span>
                 out.writeObject(ret);
             }
-        }
+        } 
         <span class="hljs-comment">// 异常信息非空</span>
         <span class="hljs-keyword">else</span> {
             <span class="hljs-comment">// 序列化响应类型</span>
@@ -1682,7 +1682,7 @@
             <span class="hljs-keyword">byte</span> status = header[<span class="hljs-number">3</span>];
             <span class="hljs-comment">// 设置响应状态</span>
             res.setStatus(status);
-
+            
             <span class="hljs-comment">// 如果响应状态为 OK，表明调用过程正常</span>
             <span class="hljs-keyword">if</span> (status == Response.OK) {
                 <span class="hljs-keyword">try</span> {
@@ -1712,7 +1712,7 @@
                         }
                         data = result;
                     }
-
+                    
                     <span class="hljs-comment">// 设置 DecodeableRpcResult 对象到 Response 对象中</span>
                     res.setResult(data);
                 } <span class="hljs-keyword">catch</span> (Throwable t) {
@@ -1720,7 +1720,7 @@
                     res.setStatus(Response.CLIENT_ERROR);
                     res.setErrorMessage(StringUtils.toString(t));
                 }
-            }
+            } 
             <span class="hljs-comment">// 响应状态非 OK，表明调用过程出现了异常</span>
             <span class="hljs-keyword">else</span> {
                 <span class="hljs-comment">// 反序列化异常信息，并设置到 Response 对象中</span>
@@ -1735,9 +1735,9 @@
 </code></pre>
 <p>以上就是响应数据的解码过程，上面逻辑看起来是不是似曾相识。对的，我们在前面章节分析过 DubboCodec 的 decodeBody 方法中关于请求数据的解码过程，该过程和响应数据的解码过程很相似。下面，我们继续分析调用结果的反序列化过程，如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DecodeableRpcResult</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">RpcResult</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Codec</span>, <span class="hljs-title">Decodeable</span> </span>{
-
+    
     <span class="hljs-keyword">private</span> Invocation invocation;
-
+	
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">decode</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Exception </span>{
         <span class="hljs-keyword">if</span> (!hasDecoded &amp;&amp; channel != <span class="hljs-keyword">null</span> &amp;&amp; inputStream != <span class="hljs-keyword">null</span>) {
@@ -1754,12 +1754,12 @@
             }
         }
     }
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">decode</span><span class="hljs-params">(Channel channel, InputStream input)</span> <span class="hljs-keyword">throws</span> IOException </span>{
         ObjectInput in = CodecSupport.getSerialization(channel.getUrl(), serializationType)
                 .deserialize(channel.getUrl(), input);
-
+        
         <span class="hljs-comment">// 反序列化响应类型</span>
         <span class="hljs-keyword">byte</span> flag = in.readByte();
         <span class="hljs-keyword">switch</span> (flag) {
@@ -1771,7 +1771,7 @@
             <span class="hljs-keyword">case</span> DubboCodec.RESPONSE_WITH_EXCEPTION:
                 <span class="hljs-comment">// ...</span>
                 <span class="hljs-keyword">break</span>;
-
+                
             <span class="hljs-comment">// 返回值为空，且携带了 attachments 集合</span>
             <span class="hljs-keyword">case</span> DubboCodec.RESPONSE_NULL_VALUE_WITH_ATTACHMENTS:
                 <span class="hljs-keyword">try</span> {
@@ -1781,7 +1781,7 @@
                     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(StringUtils.toString(<span class="hljs-string">"Read response data failed."</span>, e));
                 }
                 <span class="hljs-keyword">break</span>;
-
+                
             <span class="hljs-comment">// 返回值不为空，且携带了 attachments 集合</span>
             <span class="hljs-keyword">case</span> DubboCodec.RESPONSE_VALUE_WITH_ATTACHMENTS:
                 <span class="hljs-keyword">try</span> {
@@ -1797,7 +1797,7 @@
                     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(StringUtils.toString(<span class="hljs-string">"Read response data failed."</span>, e));
                 }
                 <span class="hljs-keyword">break</span>;
-
+                
             <span class="hljs-comment">// 异常对象不为空，且携带了 attachments 集合</span>
             <span class="hljs-keyword">case</span> DubboCodec.RESPONSE_WITH_EXCEPTION_WITH_ATTACHMENTS:
                 <span class="hljs-keyword">try</span> {
@@ -1827,7 +1827,7 @@
 <h4>2.5.2 向用户线程传递调用结果</h4>
 <p>响应数据解码完成后，Dubbo 会将响应对象派发到线程池上。要注意的是，线程池中的线程并非用户的调用线程，所以要想办法将响应对象从线程池线程传递到用户线程上。我们在 2.1 节分析过用户线程在发送完请求后的动作，即调用 DefaultFuture 的 get 方法等待响应对象的到来。当响应对象到来后，用户线程会被唤醒，并通过<strong>调用编号</strong>获取属于自己的响应对象。下面我们来看一下整个过程对应的代码。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HeaderExchangeHandler</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ChannelHandlerDelegate</span> </span>{
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">received</span><span class="hljs-params">(Channel channel, Object message)</span> <span class="hljs-keyword">throws</span> RemotingException </span>{
         channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());
@@ -1856,12 +1856,12 @@
     }
 }
 
-<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultFuture</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ResponseFuture</span> </span>{
-
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultFuture</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ResponseFuture</span> </span>{  
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Lock lock = <span class="hljs-keyword">new</span> ReentrantLock();
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition done = lock.newCondition();
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> Response response;
-
+    
 	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">received</span><span class="hljs-params">(Channel channel, Response response)</span> </span>{
         <span class="hljs-keyword">try</span> {
             <span class="hljs-comment">// 根据调用编号从 FUTURES 集合中查找指定的 DefaultFuture 对象</span>

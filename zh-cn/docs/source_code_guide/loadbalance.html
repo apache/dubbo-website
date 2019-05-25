@@ -24,7 +24,7 @@
     <span class="hljs-comment">// 如果 invokers 列表中仅有一个 Invoker，直接返回即可，无需进行负载均衡</span>
     <span class="hljs-keyword">if</span> (invokers.size() == <span class="hljs-number">1</span>)
         <span class="hljs-keyword">return</span> invokers.get(<span class="hljs-number">0</span>);
-
+    
     <span class="hljs-comment">// 调用 doSelect 方法进行负载均衡，该方法为抽象方法，由子类实现</span>
     <span class="hljs-keyword">return</span> doSelect(invokers, url, invocation);
 }
@@ -90,7 +90,7 @@
                 sameWeight = <span class="hljs-keyword">false</span>;
             }
         }
-
+        
         <span class="hljs-comment">// 下面的 if 分支主要用于获取随机数，并计算随机数落在哪个区间上</span>
         <span class="hljs-keyword">if</span> (totalWeight &gt; <span class="hljs-number">0</span> &amp;&amp; !sameWeight) {
             <span class="hljs-comment">// 随机获取一个 [0, totalWeight) 区间内的数字</span>
@@ -110,7 +110,7 @@
                 }
             }
         }
-
+        
         <span class="hljs-comment">// 如果所有服务提供者权重值相同，此时直接随机返回一个即可</span>
         <span class="hljs-keyword">return</span> invokers.get(random.nextInt(length));
     }
@@ -132,7 +132,7 @@
         <span class="hljs-comment">// 最小的活跃数</span>
         <span class="hljs-keyword">int</span> leastActive = -<span class="hljs-number">1</span>;
         <span class="hljs-comment">// 具有相同“最小活跃数”的服务者提供者（以下用 Invoker 代称）数量</span>
-        <span class="hljs-keyword">int</span> leastCount = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">int</span> leastCount = <span class="hljs-number">0</span>; 
         <span class="hljs-comment">// leastIndexs 用于记录具有相同“最小活跃数”的 Invoker 在 invokers 列表中的下标信息</span>
         <span class="hljs-keyword">int</span>[] leastIndexs = <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[length];
         <span class="hljs-keyword">int</span> totalWeight = <span class="hljs-number">0</span>;
@@ -174,7 +174,7 @@
                 }
             }
         }
-
+        
         <span class="hljs-comment">// 当只有一个 Invoker 具有最小活跃数，此时直接返回该 Invoker 即可</span>
         <span class="hljs-keyword">if</span> (leastCount == <span class="hljs-number">1</span>) {
             <span class="hljs-keyword">return</span> invokers.get(leastIndexs[<span class="hljs-number">0</span>]);
@@ -241,7 +241,7 @@
 <p>到这里背景知识就普及完了，接下来开始分析源码。我们先从 ConsistentHashLoadBalance 的 doSelect 方法开始看起，如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsistentHashLoadBalance</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractLoadBalance</span> </span>{
 
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ConcurrentMap&lt;String, ConsistentHashSelector&lt;?&gt;&gt; selectors =
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ConcurrentMap&lt;String, ConsistentHashSelector&lt;?&gt;&gt; selectors = 
         <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;String, ConsistentHashSelector&lt;?&gt;&gt;();
 
     <span class="hljs-meta">@Override</span>
@@ -263,7 +263,7 @@
         <span class="hljs-comment">// 调用 ConsistentHashSelector 的 select 方法选择 Invoker</span>
         <span class="hljs-keyword">return</span> selector.select(invocation);
     }
-
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsistentHashSelector</span>&lt;<span class="hljs-title">T</span>&gt; </span>{...}
 }
 </code></pre>
@@ -345,7 +345,7 @@
 
     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String NAME = <span class="hljs-string">"roundrobin"</span>;
 
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ConcurrentMap&lt;String, AtomicPositiveInteger&gt; sequences =
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ConcurrentMap&lt;String, AtomicPositiveInteger&gt; sequences = 
         <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;String, AtomicPositiveInteger&gt;();
 
     <span class="hljs-meta">@Override</span>
@@ -399,12 +399,12 @@
                     <span class="hljs-keyword">final</span> Invoker&lt;T&gt; k = each.getKey();
                     <span class="hljs-comment">// 获取权重包装类 IntegerWrapper</span>
                     <span class="hljs-keyword">final</span> IntegerWrapper v = each.getValue();
-
+                    
                     <span class="hljs-comment">// 如果 mod = 0，且权重大于0，此时返回相应的 Invoker</span>
                     <span class="hljs-keyword">if</span> (mod == <span class="hljs-number">0</span> &amp;&amp; v.getValue() &gt; <span class="hljs-number">0</span>) {
                         <span class="hljs-keyword">return</span> k;
                     }
-
+                    
                     <span class="hljs-comment">// mod != 0，且权重大于0，此时对权重和 mod 分别进行自减操作</span>
                     <span class="hljs-keyword">if</span> (v.getValue() &gt; <span class="hljs-number">0</span>) {
                         v.decrement();
@@ -413,7 +413,7 @@
                 }
             }
         }
-
+        
         <span class="hljs-comment">// 服务提供者之间的权重相等，此时通过轮询选择 Invoker</span>
         <span class="hljs-keyword">return</span> invokers.get(currentSequence % length);
     }
@@ -425,7 +425,7 @@
         <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">decrement</span><span class="hljs-params">()</span> </span>{
             <span class="hljs-keyword">this</span>.value--;
         }
-
+        
         <span class="hljs-comment">// 省略部分代码</span>
     }
 }
@@ -456,7 +456,7 @@
         <span class="hljs-keyword">int</span> maxWeight = <span class="hljs-number">0</span>;
         <span class="hljs-keyword">int</span> minWeight = Integer.MAX_VALUE;
         <span class="hljs-keyword">final</span> List&lt;Invoker&lt;T&gt;&gt; invokerToWeightList = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
-
+        
         <span class="hljs-comment">// 查找最大和最小权重</span>
         <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
             <span class="hljs-keyword">int</span> weight = getWeight(invokers.get(i), invocation);
@@ -466,7 +466,7 @@
                 invokerToWeightList.add(invokers.get(i));
             }
         }
-
+        
         <span class="hljs-comment">// 获取当前服务对应的调用序列对象 AtomicPositiveInteger</span>
         AtomicPositiveInteger sequence = sequences.get(key);
         <span class="hljs-keyword">if</span> (sequence == <span class="hljs-keyword">null</span>) {
@@ -474,7 +474,7 @@
             sequences.putIfAbsent(key, <span class="hljs-keyword">new</span> AtomicPositiveInteger());
             sequence = sequences.get(key);
         }
-
+        
         <span class="hljs-comment">// 获取下标序列对象 AtomicPositiveInteger</span>
         AtomicPositiveInteger indexSeq = indexSeqs.get(key);
         <span class="hljs-keyword">if</span> (indexSeq == <span class="hljs-keyword">null</span>) {
@@ -493,14 +493,14 @@
                 <span class="hljs-keyword">if</span> (index == <span class="hljs-number">0</span>) {
                     currentWeight = sequence.incrementAndGet() % maxWeight;
                 }
-
+                
                 <span class="hljs-comment">// 检测 Invoker 的权重是否大于 currentWeight，大于则返回</span>
                 <span class="hljs-keyword">if</span> (getWeight(invokerToWeightList.get(index), invocation) &gt; currentWeight) {
                     <span class="hljs-keyword">return</span> invokerToWeightList.get(index);
                 }
             }
         }
-
+        
         <span class="hljs-comment">// 所有 Invoker 权重相等，此时进行普通的轮询即可</span>
         <span class="hljs-keyword">return</span> invokers.get(sequence.incrementAndGet() % length);
     }
@@ -573,9 +573,9 @@
 <p>以上就是平滑加权轮询的计算过程，接下来，我们来看看 Dubbo-2.6.5 是如何实现上面的计算过程的。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RoundRobinLoadBalance</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractLoadBalance</span> </span>{
     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String NAME = <span class="hljs-string">"roundrobin"</span>;
-
+    
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> RECYCLE_PERIOD = <span class="hljs-number">60000</span>;
-
+    
     <span class="hljs-keyword">protected</span> <span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WeightedRoundRobin</span> </span>{
         <span class="hljs-comment">// 服务提供者权重</span>
         <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> weight;
@@ -583,7 +583,7 @@
         <span class="hljs-keyword">private</span> AtomicLong current = <span class="hljs-keyword">new</span> AtomicLong(<span class="hljs-number">0</span>);
         <span class="hljs-comment">// 最后一次更新时间</span>
         <span class="hljs-keyword">private</span> <span class="hljs-keyword">long</span> lastUpdate;
-
+        
         <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setWeight</span><span class="hljs-params">(<span class="hljs-keyword">int</span> weight)</span> </span>{
             <span class="hljs-keyword">this</span>.weight = weight;
             <span class="hljs-comment">// 初始情况下，current = 0</span>
@@ -613,10 +613,10 @@
     <span class="hljs-comment">// 最外层为服务类名 + 方法名，第二层为 url 到 WeightedRoundRobin 的映射关系。</span>
     <span class="hljs-comment">// 这里我们可以将 url 看成是服务提供者的 id</span>
     <span class="hljs-keyword">private</span> ConcurrentMap&lt;String, ConcurrentMap&lt;String, WeightedRoundRobin&gt;&gt; methodWeightMap = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;String, ConcurrentMap&lt;String, WeightedRoundRobin&gt;&gt;();
-
+    
     <span class="hljs-comment">// 原子更新锁</span>
     <span class="hljs-keyword">private</span> AtomicBoolean updateLock = <span class="hljs-keyword">new</span> AtomicBoolean();
-
+    
     <span class="hljs-meta">@Override</span>
     <span class="hljs-keyword">protected</span> &lt;T&gt; <span class="hljs-function">Invoker&lt;T&gt; <span class="hljs-title">doSelect</span><span class="hljs-params">(List&lt;Invoker&lt;T&gt;&gt; invokers, URL url, Invocation invocation)</span> </span>{
         String key = invokers.get(<span class="hljs-number">0</span>).getUrl().getServiceKey() + <span class="hljs-string">"."</span> + invocation.getMethodName();
@@ -628,7 +628,7 @@
         }
         <span class="hljs-keyword">int</span> totalWeight = <span class="hljs-number">0</span>;
         <span class="hljs-keyword">long</span> maxCurrent = Long.MIN_VALUE;
-
+        
         <span class="hljs-comment">// 获取当前时间</span>
         <span class="hljs-keyword">long</span> now = System.currentTimeMillis();
         Invoker&lt;T&gt; selectedInvoker = <span class="hljs-keyword">null</span>;
@@ -651,7 +651,7 @@
             <span class="hljs-keyword">if</span> (weight &lt; <span class="hljs-number">0</span>) {
                 weight = <span class="hljs-number">0</span>;
             }
-
+            
             <span class="hljs-comment">// 检测当前 Invoker 是否有对应的 WeightedRoundRobin，没有则创建</span>
             <span class="hljs-keyword">if</span> (weightedRoundRobin == <span class="hljs-keyword">null</span>) {
                 weightedRoundRobin = <span class="hljs-keyword">new</span> WeightedRoundRobin();
@@ -665,7 +665,7 @@
             <span class="hljs-keyword">if</span> (weight != weightedRoundRobin.getWeight()) {
                 weightedRoundRobin.setWeight(weight);
             }
-
+            
             <span class="hljs-comment">// 让 current 加上自身权重，等价于 current += weight</span>
             <span class="hljs-keyword">long</span> cur = weightedRoundRobin.increaseCurrent();
             <span class="hljs-comment">// 设置 lastUpdate，表示近期更新过</span>
@@ -678,7 +678,7 @@
                 <span class="hljs-comment">// 将 Invoker 对应的 weightedRoundRobin 赋值给 selectedWRR，留作后用</span>
                 selectedWRR = weightedRoundRobin;
             }
-
+            
             <span class="hljs-comment">// 计算权重总和</span>
             totalWeight += weight;
         }
@@ -692,7 +692,7 @@
                     ConcurrentMap&lt;String, WeightedRoundRobin&gt; newMap = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;String, WeightedRoundRobin&gt;();
                     <span class="hljs-comment">// 拷贝</span>
                     newMap.putAll(map);
-
+                    
                     <span class="hljs-comment">// 遍历修改，即移除过期记录</span>
                     Iterator&lt;Entry&lt;String, WeightedRoundRobin&gt;&gt; it = newMap.entrySet().iterator();
                     <span class="hljs-keyword">while</span> (it.hasNext()) {
@@ -701,7 +701,7 @@
                             it.remove();
                         }
                     }
-
+                    
                     <span class="hljs-comment">// 更新引用</span>
                     methodWeightMap.put(key, newMap);
                 } <span class="hljs-keyword">finally</span> {
@@ -716,7 +716,7 @@
             <span class="hljs-comment">// 返回具有最大 current 的 Invoker</span>
             <span class="hljs-keyword">return</span> selectedInvoker;
         }
-
+        
         <span class="hljs-comment">// should not happen here</span>
         <span class="hljs-keyword">return</span> invokers.get(<span class="hljs-number">0</span>);
     }
