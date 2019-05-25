@@ -13,7 +13,6 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | jfclere         | Jean-Frederic Clere | retired          | Mentor    |          |
 | huxing          | Huxing Zhang        | Alibaba          | PMC      | +8       |
 | vongosling      | Von Gosling         | Alibaba          | PMC      | +8       |
-| leonleeldc      | Dingcheng Li        | Alibaba          | PMC      | +8       |
 | iluo            | Ian Luo             | Alibaba          | PMC      | +8       |
 | liujun          | Jun Liu             | Alibaba          | PMC      | +8       |
 | zhangliang      | Liang Zhang         | Jingdong         | PMC      | +8       |
@@ -22,11 +21,12 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | wangxin         | Xin Wang            | Weidian          | PMC      | +8       |
 | yuyijq          | Zhaohui Yu          | Qunar            | PMC      | +8       |
 | yiji            | Shang Zonghai       | Youzan           | PMC      | +8       |
-| jerrick         | Yong Zhu            | Alibaba          | PMC      | +8       |
 | carryxyh        | Yuhang Xiu          | Netease          | PMC      | +8       |
 | hyunkun         | YunKun Huang        | Meituan-Dianping | PMC      | +8       |
 | min             | Minxuan Zhuang      | Alibaba          | PMC      | +8       |
 | kimmking        | Kimm King           | Rongguan         | PMC      | +8       |
+| leonleeldc      | Dingcheng Li        | Alibaba          | Committer | +8       |
+| jerrick         | Yong Zhu            | Alibaba          | Committer | +8       |
 | mjk             | Jinkai Ma           | Handuyishe       | Committer | +8       |
 | yizhenqiang     | Zhenqiang Yi        | Didi             | Committer | +8       |
 | victory         | Victory Cao         | Alibaba          | Committer | +8       |
