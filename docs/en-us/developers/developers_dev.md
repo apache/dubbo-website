@@ -19,14 +19,14 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | liujieqin       | Liujie Qin          | Alibaba          | PMC      | +8       |
 | mercyblitz      | Mercy Ma            | Alibaba          | PMC      | +8       |
 | wangxin         | Xin Wang            | Weidian          | PMC      | +8       |
-| yuyijq          | Zhaohui Yu          | Qunar            | PMC      | +8       |
 | yiji            | Shang Zonghai       | Youzan           | PMC      | +8       |
+| jerrick         | Yong Zhu            | Alibaba          | PMC      | +8       |
 | carryxyh        | Yuhang Xiu          | Netease          | PMC      | +8       |
 | hyunkun         | YunKun Huang        | Meituan-Dianping | PMC      | +8       |
 | min             | Minxuan Zhuang      | Alibaba          | PMC      | +8       |
 | kimmking        | Kimm King           | Rongguan         | PMC      | +8       |
 | leonleeldc      | Dingcheng Li        | Alibaba          | Committer | +8       |
-| jerrick         | Yong Zhu            | Alibaba          | Committer | +8       |
+| yuyijq          | Zhaohui Yu          | Qunar            | Committer | +8       |
 | mjk             | Jinkai Ma           | Handuyishe       | Committer | +8       |
 | yizhenqiang     | Zhenqiang Yi        | Didi             | Committer | +8       |
 | victory         | Victory Cao         | Alibaba          | Committer | +8       |
