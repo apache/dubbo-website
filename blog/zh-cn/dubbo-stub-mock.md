@@ -305,8 +305,8 @@ Caused by: org.apache.dubbo.remoting.TimeoutException: Waiting server-side respo
 
 
 
-[^stub-samples]: https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-stub
-[^mock-samples]:  https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-mock
+[^stub-samples]: https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-stub
+[^mock-samples]:  https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-mock
 [^mock]: http://dubbo.apache.org/zh-cn/docs/user/demos/local-mock.html
 
 

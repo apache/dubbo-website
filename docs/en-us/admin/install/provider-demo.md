@@ -3,8 +3,8 @@
 install:
 
 ```sh
-git clone https://github.com/apache/incubator-dubbo.git
-cd incubator-dubbo
+git clone https://github.com/apache/dubbo.git
+cd dubbo
 run org.apache.dubbo.demo.provider.Provider under dubbo-demo-provider module
 add -Djava.net.preferIPv4Stack=true if your IDE is Intellij Idea
 ```

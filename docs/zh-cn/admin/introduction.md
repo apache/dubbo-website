@@ -5,8 +5,8 @@
 
 * 安装
 ```sh
-git clone https://github.com/apache/incubator-dubbo-admin.git
-cd incubator-dubbo-admin
+git clone https://github.com/apache/dubbo-admin.git
+cd dubbo-admin
 mvn clean package
 cd dubbo-admin-distribution/target
 java -jar dubbo-admin-0.1.jar
@@ -59,7 +59,7 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 其他配置请访问github中的文档:
 
 ```sh
-https://github.com/apache/incubator-dubbo-admin
+https://github.com/apache/dubbo-admin
 ```
 
 [^1]: 当前版本中未实现登录功能，会在后续版本加上 

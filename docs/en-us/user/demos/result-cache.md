@@ -25,4 +25,4 @@ or：
 ```
 
 [^1]: Support since `2.1.0` 
-[^2]: [Sample](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-cache)
+[^2]: [Sample](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-cache)

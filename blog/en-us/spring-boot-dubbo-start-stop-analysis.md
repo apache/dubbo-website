@@ -1,21 +1,21 @@
 ---
 title: Source code analysis of spring-boot+Dubbo App start and stop
 keywords: Dubbo, Spring Boot, source code analysis
-description: This article introduces the implementation details of app start and stop in `incubator-dubbo-spring-boot-project`.
+description: This article introduces the implementation details of app start and stop in `dubbo-spring-boot-project`.
 ---
 
 # Source code analysis of spring-boot+Dubbo App start and stop
 
 ## Introduction
 
-[Dubbo Spring Boot](https://github.com/apache/incubator-dubbo-spring-boot-project) project is dedicated to simplifying the development of the Dubbo RPC framework in the Spring Boot application. It also integrates the feature of Spring Boot:
+[Dubbo Spring Boot](https://github.com/apache/dubbo-spring-boot-project) project is dedicated to simplifying the development of the Dubbo RPC framework in the Spring Boot application. It also integrates the feature of Spring Boot:
 
-- [Autoconfigure](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (ex: Annotation driver, Autoconfigure, etc.)
-- [Production-Ready](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (ex: Security, Healthy check, Externalize configuration, etc.)
+- [Autoconfigure](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (ex: Annotation driver, Autoconfigure, etc.)
+- [Production-Ready](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (ex: Security, Healthy check, Externalize configuration, etc.)
 
 ## The analysis of DubboConsumer startup
 
-Have you ever thought about this : since the `DubboConsumerDemo` application in `incubator-dubbo-spring-boot-project` has only one line of code, why not just exit directly when the `main` method is executed?
+Have you ever thought about this : since the `DubboConsumerDemo` application in `dubbo-spring-boot-project` has only one line of code, why not just exit directly when the `main` method is executed?
 
 ```java
 @SpringBootApplication(scanBasePackages = "com.alibaba.boot.dubbo.demo.consumer.controller")

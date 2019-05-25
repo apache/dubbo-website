@@ -55,4 +55,4 @@ DockerHub对于组织账号的管理是基于组的，也就是一个组织账�
 
 [^apache-repo]: https://hub.docker.com/r/apache
 [^request-ticket]: https://issues.apache.org/jira/browse/INFRA-18167
-[^docker-file]: https://github.com/apache/incubator-dubbo-admin/blob/develop/docker/0.1.0/Dockerfile
+[^docker-file]: https://github.com/apache/dubbo-admin/blob/develop/docker/0.1.0/Dockerfile

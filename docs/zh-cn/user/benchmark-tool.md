@@ -1,8 +1,8 @@
 # 基准测试工具包
 
-* 下载源码： git clone https://github.com/apache/incubator-dubbo.git  
-* 编译benchmark: cd incubator-dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install  
-* 解压 benchmark压缩包： incubator-dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz 
+* 下载源码： git clone https://github.com/apache/dubbo.git  
+* 编译benchmark: cd dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install  
+* 解压 benchmark压缩包： dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz 
 
 阅读ReadMe.txt（内容如下，请以压缩包内的为准）
 

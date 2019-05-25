@@ -30,7 +30,7 @@ Dubbo使用微内核+插件的设计模式。内核只负责组装插件，Dubbo
 ### 通知社区
 
 1. 提交您的代码到[github](https://github.com)。
-2. 加入邮件列表（建议）。点击[这里](https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide)查看如何加入邮件列表。
+2. 加入邮件列表（建议）。点击[这里](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide)查看如何加入邮件列表。
 3. 发送一封邮件到dev@incubator.dubbo.apache.org通知社区。
 4. 通常，发送邮件之后，社区会对您的扩展进行讨论，dubbo组的管理员会联系您转移您的项目到dubbo生态系统。
 

@@ -1,8 +1,8 @@
 # Software donation guide
 
-Before you go through this guide, make sure you have confirmed with PPMC that a SGA is actually needed.
+Before you go through this guide, make sure you have confirmed with PMC that a SGA is actually needed.
 
-If you are donating significant amount of code or documentation to Apache Dubbo (incubating), you will be required to sign a [Software Grant](https://www.apache.org/licenses/#grants) before your code/doc could be merged.
+If you are donating significant amount of code or documentation to Apache Dubbo , you will be required to sign a [Software Grant](https://www.apache.org/licenses/#grants) before your code/doc could be merged.
 
 #### Steps
 

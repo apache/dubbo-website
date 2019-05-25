@@ -26,7 +26,7 @@ Usually, implement special extension, just need reference the [Developer Guide](
 
 ## Notify the Community
 1. Commit your code to [GitHub](https://github.com).
-2. Join the mail list (recommended). [HowTo](https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide)
+2. Join the mail list (recommended). [HowTo](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide)
 2. Send email to dev@incubator.dubbo.apache.org to notify the community
 3. Usually, after sending email, community will discuss your extension, and Administrators of dubbo group will contact you for transfer project to dubbo ecosystem.
 

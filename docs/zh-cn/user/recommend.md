@@ -98,7 +98,7 @@ Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一
 
 2. 使用 Dubbo Admin 监控注册中心上的服务提供方
 
-    使用 [Dubbo Admin](https://github.com/apache/incubator-dubbo-admin) 监控服务在注册中心上的状态，确保注册中心上有该服务的存在。
+    使用 [Dubbo Admin](https://github.com/apache/dubbo-admin) 监控服务在注册中心上的状态，确保注册中心上有该服务的存在。
 
 3. 服务提供方可使用 Dubbo Qos 的 telnet 或 shell 监控项
 

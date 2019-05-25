@@ -1,12 +1,12 @@
 # 邮件列表订阅向导
 
-Apache incubator的Dubbo开发者邮件列表（dev@dubbo.incubator.apache.org）已经建立，请随时订阅并参考[^1]获取更多细节。
+Apache incubator的Dubbo开发者邮件列表（dev@dubbo.apache.org）已经建立，请随时订阅并参考[^1]获取更多细节。
 
 你也可以直接查看[历史邮件](https://lists.apache.org/list.html?dev@dubbo.apache.org)
 
 下面是一个关于Dubbo邮件列表订阅的简短指南：
 
-1. 发一封邮件到dev-subscribe@dubbo.incubator.apache.org，其内容和标题均可为空。随后，您会收到一封邮件，其内容如下：
+1. 发一封邮件到dev-subscribe@dubbo.apache.org，其内容和标题均可为空。随后，您会收到一封邮件，其内容如下：
 
 ```
 from: dev-help@dubbo.apache.org
@@ -71,10 +71,10 @@ subscription address.
 ...
 ```
 
-3. 到此，邮件列表订阅完毕，从现在开始，您将收到很多发送到该邮件列表的邮件，如果您有更多的问题，只需发送邮件到dev@dubbo.incubator.apache.org，就会有人回答您的问题。
+3. 到此，邮件列表订阅完毕，从现在开始，您将收到很多发送到该邮件列表的邮件，如果您有更多的问题，只需发送邮件到dev@dubbo.apache.org，就会有人回答您的问题。
 
-4. 如果您想取消订阅，只需发送一封邮件到dev-unsubscribe@dubbo.incubator.apache.org，收到回复后，请按其指定步骤执行。
+4. 如果您想取消订阅，只需发送一封邮件到dev-unsubscribe@dubbo.apache.org，收到回复后，请按其指定步骤执行。
 
-> 请注意：dev@dubbo.apache.org和dev@dubbo.incubator.apache.org都是有效的, 您可以订阅它们中的任何一个。
+> 请注意：dev@dubbo.apache.org和dev@dubbo.apache.org都是有效的, 您可以订阅它们中的任何一个。
 
 [^1] http://apache.org/foundation/mailinglists.html#subscribing

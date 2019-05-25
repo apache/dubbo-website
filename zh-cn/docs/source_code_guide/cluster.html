@@ -76,7 +76,7 @@
                 .getMethodParameter(RpcUtils.getMethodName(invocation), Constants.LOADBALANCE_KEY, Constants.DEFAULT_LOADBALANCE));
     }
     RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
-    
+
     <span class="hljs-comment">// 调用 doInvoke 进行后续操作</span>
     <span class="hljs-keyword">return</span> doInvoke(invocation, invokers, loadbalance);
 }
@@ -143,7 +143,7 @@
                 providers.add(invoker.getUrl().getAddress());
             }
         }
-        
+
         <span class="hljs-comment">// 若重试失败，则抛出异常</span>
         <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(..., <span class="hljs-string">"Failed to invoke the method ..."</span>);
     }
@@ -165,7 +165,7 @@
         <span class="hljs-keyword">if</span> (stickyInvoker != <span class="hljs-keyword">null</span> &amp;&amp; !invokers.contains(stickyInvoker)) {
             stickyInvoker = <span class="hljs-keyword">null</span>;
         }
-        
+
         <span class="hljs-comment">// 在 sticky 为 true，且 stickyInvoker != null 的情况下。如果 selected 包含 </span>
         <span class="hljs-comment">// stickyInvoker，表明 stickyInvoker 对应的服务提供者可能因网络原因未能成功提供服务。</span>
         <span class="hljs-comment">// 但是该提供者并没挂，此时 invokers 列表中仍存在该服务提供者对应的 Invoker。</span>
@@ -177,7 +177,7 @@
             }
         }
     }
-    
+
     <span class="hljs-comment">// 如果线程走到当前代码处，说明前面的 stickyInvoker 为空，或者不可用。</span>
     <span class="hljs-comment">// 此时继续调用 doSelect 选择 Invoker</span>
     Invoker&lt;T&gt; invoker = doSelect(loadbalance, invocation, invokers, selected);
@@ -200,7 +200,7 @@
         <span class="hljs-comment">// 如果 loadbalance 为空，这里通过 SPI 加载 Loadbalance，默认为 RandomLoadBalance</span>
         loadbalance = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(Constants.DEFAULT_LOADBALANCE);
     }
-    
+
     <span class="hljs-comment">// 通过负载均衡组件选择 Invoker</span>
     Invoker&lt;T&gt; invoker = loadbalance.select(invokers, getUrl(), invocation);
 
@@ -250,7 +250,7 @@
                 }
             }
         }
-        
+
         <span class="hljs-comment">// reselectInvokers 不为空，此时通过负载均衡组件进行选择</span>
         <span class="hljs-keyword">if</span> (!reselectInvokers.isEmpty()) {
             <span class="hljs-keyword">return</span> loadbalance.select(reselectInvokers, getUrl(), invocation);
@@ -313,7 +313,7 @@
         } <span class="hljs-keyword">catch</span> (Throwable e) {
             <span class="hljs-comment">// 如果调用过程中发生异常，此时仅打印错误日志，不抛出异常</span>
             logger.error(<span class="hljs-string">"Failback to invoke method ..."</span>);
-            
+
             <span class="hljs-comment">// 记录调用信息</span>
             addFailed(invocation, <span class="hljs-keyword">this</span>);
             <span class="hljs-comment">// 返回一个空结果给服务消费者</span>
@@ -342,7 +342,7 @@
                 }
             }
         }
-        
+
         <span class="hljs-comment">// 添加 invocation 和 invoker 到 failed 中</span>
         failed.put(invocation, router);
     }
@@ -351,7 +351,7 @@
         <span class="hljs-keyword">if</span> (failed.size() == <span class="hljs-number">0</span>) {
             <span class="hljs-keyword">return</span>;
         }
-        
+
         <span class="hljs-comment">// 遍历 failed，对失败的调用进行重试</span>
         <span class="hljs-keyword">for</span> (Map.Entry&lt;Invocation, AbstractClusterInvoker&lt;?&gt;&gt; entry : <span class="hljs-keyword">new</span> HashMap&lt;Invocation, AbstractClusterInvoker&lt;?&gt;&gt;(failed).entrySet()) {
             Invocation invocation = entry.getKey();
@@ -420,7 +420,7 @@
 <h4>3.2.5 ForkingClusterInvoker</h4>
 <p>ForkingClusterInvoker 会在运行时通过线程池创建多个线程，并发调用多个服务提供者。只要有一个服务提供者成功返回了结果，doInvoke 方法就会立即结束运行。ForkingClusterInvoker 的应用场景是在一些对实时性要求比较高<strong>读操作</strong>（注意是读操作，并行写操作可能不安全）下使用，但这将会耗费更多的资源。下面来看该类的实现。</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ForkingClusterInvoker</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractClusterInvoker</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
-    
+
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ExecutorService executor = Executors.newCachedThreadPool(
             <span class="hljs-keyword">new</span> NamedInternalThreadFactory(<span class="hljs-string">"forking-cluster-timer"</span>, <span class="hljs-keyword">true</span>));
 
@@ -447,9 +447,9 @@
                     }
                 }
             }
-            
+
             <span class="hljs-comment">// ----------------------✨ 分割线1 ✨---------------------- //</span>
-            
+
             RpcContext.getContext().setInvokers((List) selected);
             <span class="hljs-keyword">final</span> AtomicInteger count = <span class="hljs-keyword">new</span> AtomicInteger();
             <span class="hljs-keyword">final</span> BlockingQueue&lt;Object&gt; ref = <span class="hljs-keyword">new</span> LinkedBlockingQueue&lt;Object&gt;();
@@ -476,19 +476,19 @@
                     }
                 });
             }
-            
+
             <span class="hljs-comment">// ----------------------✨ 分割线2 ✨---------------------- //</span>
-            
+
             <span class="hljs-keyword">try</span> {
                 <span class="hljs-comment">// 从阻塞队列中取出远程调用结果</span>
                 Object ret = ref.poll(timeout, TimeUnit.MILLISECONDS);
-                
+
                 <span class="hljs-comment">// 如果结果类型为 Throwable，则抛出异常</span>
                 <span class="hljs-keyword">if</span> (ret <span class="hljs-keyword">instanceof</span> Throwable) {
                     Throwable e = (Throwable) ret;
                     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RpcException(..., <span class="hljs-string">"Failed to forking invoke provider ..."</span>);
                 }
-                
+
                 <span class="hljs-comment">// 返回结果</span>
                 <span class="hljs-keyword">return</span> (Result) ret;
             } <span class="hljs-keyword">catch</span> (InterruptedException e) {
@@ -526,7 +526,7 @@
                 logger.warn(e.getMessage(), e);
             }
         }
-        
+
         <span class="hljs-comment">// exception 不为空，则抛出异常</span>
         <span class="hljs-keyword">if</span> (exception != <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">throw</span> exception;
@@ -539,7 +539,7 @@
 <h2>4.总结</h2>
 <p>本篇文章详细分析了集群容错的几种实现方式。集群容错对于 Dubbo 框架来说，是很重要的逻辑。集群模块处于服务提供者和消费者之间，对于服务消费者来说，集群可向其屏蔽服务提供者集群的情况，使其能够专心进行远程调用。除此之外，通过集群模块，我们还可以对服务之间的调用链路进行编排优化，治理服务。总的来说，对于 Dubbo 而言，集群容错相关逻辑是非常重要的。想要对 Dubbo 有比较深的理解，集群容错是必须要掌握的。</p>
 <p>关于集群模块就先分析到这，感谢阅读。</p>
-</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website/issues/new" target="_self">报告文档问题</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website" target="_self">编辑此文档</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd><dd><a href="https://github.com/apache/dubbo-website/issues/new" target="_self">报告文档问题</a></dd><dd><a href="https://github.com/apache/dubbo-website" target="_self">编辑此文档</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
 	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
 	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
 	<script>

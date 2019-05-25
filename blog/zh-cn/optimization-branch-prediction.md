@@ -18,7 +18,7 @@ https://stackoverflow.com/questions/11227809/why-is-it-faster-to-process-a-sorte
 ## Dubbo里ChannelEventRunnable的switch判断
 
 在`ChannelEventRunnable`里有一个switch来判断channel state，然后做对应的逻辑：[查看](
-https://github.com/hengyunabc/incubator-dubbo/blob/dubbo-2.6.1/dubbo-remoting/dubbo-remoting-api/src/main/java/com/alibaba/dubbo/remoting/transport/dispatcher/ChannelEventRunnable.java#L54)
+https://github.com/hengyunabc/dubbo/blob/dubbo-2.6.1/dubbo-remoting/dubbo-remoting-api/src/main/java/com/alibaba/dubbo/remoting/transport/dispatcher/ChannelEventRunnable.java#L54)
 
 一个channel建立起来之后，超过99.9%情况它的state都是`ChannelState.RECEIVED`，那么可以考虑把这个判断提前。
 
