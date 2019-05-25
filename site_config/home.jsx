@@ -11,7 +11,7 @@ export default {
       },
       viewOnGithubButton: {
         text: 'GITHUB',
-        link: 'https://github.com/apache/incubator-dubbo',
+        link: 'https://github.com/apache/dubbo',
       }
     },
     introduction: {
@@ -65,7 +65,7 @@ export default {
     },
     users: {
       title: '谁在使用Dubbo',
-      desc: <span>请在 <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/incubator-dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> 上提供信息来帮助Dubbo做的更好。</span>,
+      desc: <span>请在 <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> 上提供信息来帮助Dubbo做的更好。</span>,
       list: [
         '/img/users_alibaba.png',
         '/img/users_kingdee.png',
@@ -99,7 +99,7 @@ export default {
       },
       viewOnGithubButton: {
         text: 'GITHUB',
-        link: 'https://github.com/apache/incubator-dubbo',
+        link: 'https://github.com/apache/dubbo',
       }
     },
     introduction: {
@@ -153,7 +153,7 @@ export default {
     },
     users: {
       title: 'Who is using Dubbo',
-      desc: <span>Providing your info on <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/incubator-dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> to help improving dubbo better</span>,
+      desc: <span>Providing your info on <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> to help improving dubbo better</span>,
       list: [
         '/img/users_alibaba.png',
         '/img/users_kingdee.png',

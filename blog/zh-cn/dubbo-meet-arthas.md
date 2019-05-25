@@ -9,8 +9,8 @@ description: 使用Alibaba开源的应用诊断利器Arthas来排查Dubbo应用�
 
 Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用户。
 
-* Github: https://github.com/apache/incubator-dubbo
-* 文档：http://dubbo.incubator.apache.org/zh-cn/
+* Github: https://github.com/apache/dubbo
+* 文档：http://dubbo.apache.org/zh-cn/
 
 Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。
 

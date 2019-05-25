@@ -5,7 +5,7 @@ Each incubation project has an information page under this website.
 Dubbo's information page address is https://incubator.apache.org/projects/dubbo.html.
 
 When the project has undergone major changes, such as the addition of a new committer, 
-the election of a new PPMC, or a new version of Release, etc., these updates need to be maintained on this page.
+the election of a new PMC, or a new version of Release, etc., these updates need to be maintained on this page.
 The project address for this official website is 
 https://svn.apache.org/repos/asf/incubator/public/trunk.
 

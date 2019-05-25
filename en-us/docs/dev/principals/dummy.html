@@ -19,47 +19,47 @@
 <p>Recently I was feeling stupid because I solved too many stupid problems. The service framework is becoming more widely used. Every day, I have to help the endpoint user to resolve problems. Gradually, it is found that most of the problems are configuration errors, or duplicated files or classes, or network failure. So I prepare to add some &quot;fool-proof&quot; design to the further version. It may be very simple, but it is still a little help for troubleshooting speed. I hope that I can throw a brick to attract jade, and everyone can help to come up with more preventive measures to share.</p>
 <h2>Check for duplicated jars</h2>
 <p>The most annoying problem is that, if we have several jars with different version number at the same time, there will be a problem. Imagine that, a new version of the Class A may invoke a old version of the Class B, it's related to the JVM loading order. The problem may encounter occasionally and hard to resolve. So the first, let's try to avoid it. For each jar package, pick a class that will be loaded, check it for duplication for example:</p>
-<pre><code class="language-java"><span class="hljs-keyword">static</span> {  
-    Duplicate.checkDuplicate(Xxx.class);  
-}  
+<pre><code class="language-java"><span class="hljs-keyword">static</span> {
+    Duplicate.checkDuplicate(Xxx.class);
+}
 </code></pre>
 <p>Utility class for check duplication：</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Duplicate</span> </span>{  
-  
-    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">Duplicate</span><span class="hljs-params">()</span> </span>{}  
-  
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">checkDuplicate</span><span class="hljs-params">(Class cls)</span> </span>{  
-        checkDuplicate(cls.getName().replace(<span class="hljs-string">'.'</span>, <span class="hljs-string">'/'</span>) + <span class="hljs-string">".class"</span>);  
-    }  
-  
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">checkDuplicate</span><span class="hljs-params">(String path)</span> </span>{  
-        <span class="hljs-keyword">try</span> {  
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Duplicate</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">Duplicate</span><span class="hljs-params">()</span> </span>{}
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">checkDuplicate</span><span class="hljs-params">(Class cls)</span> </span>{
+        checkDuplicate(cls.getName().replace(<span class="hljs-string">'.'</span>, <span class="hljs-string">'/'</span>) + <span class="hljs-string">".class"</span>);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">checkDuplicate</span><span class="hljs-params">(String path)</span> </span>{
+        <span class="hljs-keyword">try</span> {
             <span class="hljs-comment">// search from ClassPath</span>
-            Enumeration urls = Thread.currentThread().getContextClassLoader().getResources(path);  
-            Set files = <span class="hljs-keyword">new</span> HashSet();  
-            <span class="hljs-keyword">while</span> (urls.hasMoreElements()) {  
-                URL url = urls.nextElement();  
-                <span class="hljs-keyword">if</span> (url != <span class="hljs-keyword">null</span>) {  
-                    String file = url.getFile();  
-                    <span class="hljs-keyword">if</span> (file != <span class="hljs-keyword">null</span> &amp;amp;&amp;amp; file.length() &amp;gt; <span class="hljs-number">0</span>) {  
-                        files.add(file);  
-                    }  
-                }  
-            }  
+            Enumeration urls = Thread.currentThread().getContextClassLoader().getResources(path);
+            Set files = <span class="hljs-keyword">new</span> HashSet();
+            <span class="hljs-keyword">while</span> (urls.hasMoreElements()) {
+                URL url = urls.nextElement();
+                <span class="hljs-keyword">if</span> (url != <span class="hljs-keyword">null</span>) {
+                    String file = url.getFile();
+                    <span class="hljs-keyword">if</span> (file != <span class="hljs-keyword">null</span> &amp;amp;&amp;amp; file.length() &amp;gt; <span class="hljs-number">0</span>) {
+                        files.add(file);
+                    }
+                }
+            }
             <span class="hljs-comment">// if there are more than one indicates duplication</span>
-            <span class="hljs-keyword">if</span> (files.size() &amp;gt; <span class="hljs-number">1</span>) {  
-                logger.error(<span class="hljs-string">"Duplicate class "</span> + path + <span class="hljs-string">" in "</span> + files.size() + <span class="hljs-string">" jar "</span> + files);  
-            }  
+            <span class="hljs-keyword">if</span> (files.size() &amp;gt; <span class="hljs-number">1</span>) {
+                logger.error(<span class="hljs-string">"Duplicate class "</span> + path + <span class="hljs-string">" in "</span> + files.size() + <span class="hljs-string">" jar "</span> + files);
+            }
         } <span class="hljs-keyword">catch</span> (Throwable e) { <span class="hljs-comment">// safe guard</span>
-            logger.error(e.getMessage(), e);  
-        }  
-    }  
-  
-}  
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+}
 </code></pre>
 <h2>Check for duplicate configuration files</h2>
 <p>It is also a frequently encountered problem that the configuration file is loaded incorrectly. Users often complain that they have the right configuration but program says something is wrong. After some troubleshooting, found that the configuration file is not even loaded. Many products put a default configuration file under classpath, if there are several, usually the first one loaded by JVM is effective. In order not to be bothered by such problem, just like checking duplicate jars, add this:</p>
-<pre><code class="language-java">Duplicate.checkDuplicate(<span class="hljs-string">"xxx.properties"</span>); 
+<pre><code class="language-java">Duplicate.checkDuplicate(<span class="hljs-string">"xxx.properties"</span>);
 </code></pre>
 <h2>Check for optional configuration</h2>
 <p>The required configuration is estimated to be checked by everyone, because without it the program may not even start. However, for some optional parameters, some checks should also be made. For example, the service framework allows the service consumers and service providers to be associated with the registry, and allows direct configuring the service provider address to point-to-point direct connect. At this time, the registry address is optional, but if there is no point-to-point direct connect configured, the registry center address must be matched, and this time you have to check accordingly.</p>
@@ -67,129 +67,129 @@
 <p>It's hard to troubleshooting problem with a simple error message which has no detail information. For example, the last time I encountered a &quot;Failed to get session&quot; exception, just the few words. I'm wondering which session is wrong? What is the reason Failed? It makes me crazy, the problem happens in an production environment and it's hard to reproduce. The exception should have some basic context information, such as author info, operation system, failed reason. The best exception information should be given a solution, such as the above: &quot;From 10.20.16.3 to 10.20.130.20:20880 The network is unreachable. Please use telnet 10.20.130.20 20880 to test the network at 10.20.16.3. If it is called across data center, it may be blocked by the firewall. Please contact SA to grant access permission.&quot; etc. The above can even judge whether it is cross data center based on IP address. Another example is the spring-web context loading, If spring is not started when getBean, spring will report an error. The error message says: &quot;Please add: <code>&lt;listener&gt;...&lt;init-param&gt;...</code>&quot;, just copy and paste.  We should learn from it. You can deliberately make a common mistake and see if you can solve the problem yourself by the error message. Or we can write some solution of common problems in error message.</p>
 <h2>And also the environment information</h2>
 <p>Every time an application error occurs, the developer or QA will send the error message and ask the reason. At this time, I will ask some question again, which version is used? Is it a production environment or a development environment? Which registry center? Which project is it? Which machine? And which service? The problem is, some developers or QA can't tell the difference, it waste me a lot of time. So, it is best to log some environment information, we can make a wrapper. Decorate the Logger interface such as:</p>
-<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">error</span><span class="hljs-params">(String msg, Throwable e)</span> </span>{  
-    delegate.error(msg + <span class="hljs-string">" on server "</span> + InetAddress.getLocalHost() + <span class="hljs-string">" using version "</span> + Version.getVersion(), e);  
-}  
+<pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">error</span><span class="hljs-params">(String msg, Throwable e)</span> </span>{
+    delegate.error(msg + <span class="hljs-string">" on server "</span> + InetAddress.getLocalHost() + <span class="hljs-string">" using version "</span> + Version.getVersion(), e);
+}
 </code></pre>
 <p>Utility class for retrieve version：</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Version</span> </span>{  
-  
-    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">Version</span><span class="hljs-params">()</span> </span>{}  
-  
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Logger logger = LoggerFactory.getLogger(Version.class);  
-  
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Pattern VERSION_PATTERN = Pattern.compile(<span class="hljs-string">"([0-9][0-9\\.\\-]*)\\.jar"</span>);  
-  
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String VERSION = getVersion(Version.class, <span class="hljs-string">"2.0.0"</span>);  
-  
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title">getVersion</span><span class="hljs-params">()</span></span>{  
-        <span class="hljs-keyword">return</span> VERSION;  
-    }  
-  
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title">getVersion</span><span class="hljs-params">(Class cls, String defaultVersion)</span> </span>{  
-        <span class="hljs-keyword">try</span> {  
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Version</span> </span>{
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">Version</span><span class="hljs-params">()</span> </span>{}
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Logger logger = LoggerFactory.getLogger(Version.class);
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Pattern VERSION_PATTERN = Pattern.compile(<span class="hljs-string">"([0-9][0-9\\.\\-]*)\\.jar"</span>);
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String VERSION = getVersion(Version.class, <span class="hljs-string">"2.0.0"</span>);
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title">getVersion</span><span class="hljs-params">()</span></span>{
+        <span class="hljs-keyword">return</span> VERSION;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title">getVersion</span><span class="hljs-params">(Class cls, String defaultVersion)</span> </span>{
+        <span class="hljs-keyword">try</span> {
             <span class="hljs-comment">// search version number from MANIFEST.MF </span>
-            String version = cls.getPackage().getImplementationVersion();  
-            <span class="hljs-keyword">if</span> (version == <span class="hljs-keyword">null</span> || version.length() == <span class="hljs-number">0</span>) {  
-                version = cls.getPackage().getSpecificationVersion();  
-            }  
-            <span class="hljs-keyword">if</span> (version == <span class="hljs-keyword">null</span> || version.length() == <span class="hljs-number">0</span>) {  
+            String version = cls.getPackage().getImplementationVersion();
+            <span class="hljs-keyword">if</span> (version == <span class="hljs-keyword">null</span> || version.length() == <span class="hljs-number">0</span>) {
+                version = cls.getPackage().getSpecificationVersion();
+            }
+            <span class="hljs-keyword">if</span> (version == <span class="hljs-keyword">null</span> || version.length() == <span class="hljs-number">0</span>) {
                 <span class="hljs-comment">// if not found, extract from jar name</span>
-                String file = cls.getProtectionDomain().getCodeSource().getLocation().getFile();  
-                <span class="hljs-keyword">if</span> (file != <span class="hljs-keyword">null</span> &amp;amp;&amp;amp; file.length() &amp;gt; <span class="hljs-number">0</span> &amp;amp;&amp;amp; file.endsWith(<span class="hljs-string">".jar"</span>)) {  
-                    Matcher matcher = VERSION_PATTERN.matcher(file);  
-                    <span class="hljs-keyword">while</span> (matcher.find() &amp;amp;&amp;amp; matcher.groupCount() &amp;gt; <span class="hljs-number">0</span>) {  
-                        version = matcher.group(<span class="hljs-number">1</span>);  
-                    }  
-                }  
-            }  
+                String file = cls.getProtectionDomain().getCodeSource().getLocation().getFile();
+                <span class="hljs-keyword">if</span> (file != <span class="hljs-keyword">null</span> &amp;amp;&amp;amp; file.length() &amp;gt; <span class="hljs-number">0</span> &amp;amp;&amp;amp; file.endsWith(<span class="hljs-string">".jar"</span>)) {
+                    Matcher matcher = VERSION_PATTERN.matcher(file);
+                    <span class="hljs-keyword">while</span> (matcher.find() &amp;amp;&amp;amp; matcher.groupCount() &amp;gt; <span class="hljs-number">0</span>) {
+                        version = matcher.group(<span class="hljs-number">1</span>);
+                    }
+                }
+            }
             <span class="hljs-comment">// return version, return default if null</span>
-            <span class="hljs-keyword">return</span> version == <span class="hljs-keyword">null</span> || version.length() == <span class="hljs-number">0</span> ? defaultVersion : version;  
-        } <span class="hljs-keyword">catch</span> (Throwable e) { 
+            <span class="hljs-keyword">return</span> version == <span class="hljs-keyword">null</span> || version.length() == <span class="hljs-number">0</span> ? defaultVersion : version;
+        } <span class="hljs-keyword">catch</span> (Throwable e) {
             <span class="hljs-comment">// ignore exception, return default version</span>
-            logger.error(e.getMessage(), e);  
-            <span class="hljs-keyword">return</span> defaultVersion;  
-        }  
-    }  
-  
+            logger.error(e.getMessage(), e);
+            <span class="hljs-keyword">return</span> defaultVersion;
+        }
+    }
+
 }
 </code></pre>
 <h2>Dump before kill</h2>
 <p>Every time there is a problem with the production environment, everyone panics. Usually the most direct way is to rollback and restart, to reduce the downtime. So that the scene is destroyed, and it's hard to check the problem afterwards. Some problem is hard to reproduce in development environment and may happen under hard pressure. It is unlikely let the developer or Appops manually backup all the data before. Therefore, it is best to call dump before the kill script to backup automatically and avoid  mistake. Dump script for example:</p>
-<pre><code class="language-sh">JAVA_HOME=/usr/java  
-OUTPUT_HOME=~/output  
-DEPLOY_HOME=`dirname <span class="hljs-variable">$0</span>`  
-HOST_NAME=`hostname`  
-  
-DUMP_PIDS=`ps  --no-heading -C java -f --width 1000 | grep <span class="hljs-string">"<span class="hljs-variable">$DEPLOY_HOME</span>"</span> |awk <span class="hljs-string">'{print $2}'</span>`  
-<span class="hljs-keyword">if</span> [ -z <span class="hljs-string">"<span class="hljs-variable">$DUMP_PIDS</span>"</span> ]; <span class="hljs-keyword">then</span>  
-    <span class="hljs-built_in">echo</span> <span class="hljs-string">"The server <span class="hljs-variable">$HOST_NAME</span> is not started!"</span>  
-    <span class="hljs-built_in">exit</span> 1;  
-<span class="hljs-keyword">fi</span>  
-  
-DUMP_ROOT=<span class="hljs-variable">$OUTPUT_HOME</span>/dump  
-<span class="hljs-keyword">if</span> [ ! -d <span class="hljs-variable">$DUMP_ROOT</span> ]; <span class="hljs-keyword">then</span>  
-    mkdir <span class="hljs-variable">$DUMP_ROOT</span>  
-<span class="hljs-keyword">fi</span>  
-  
-DUMP_DATE=`date +%Y%m%d%H%M%S`  
-DUMP_DIR=<span class="hljs-variable">$DUMP_ROOT</span>/dump-<span class="hljs-variable">$DUMP_DATE</span>  
-<span class="hljs-keyword">if</span> [ ! -d <span class="hljs-variable">$DUMP_DIR</span> ]; <span class="hljs-keyword">then</span>  
-    mkdir <span class="hljs-variable">$DUMP_DIR</span>  
-<span class="hljs-keyword">fi</span>  
-  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">"Dumping the server <span class="hljs-variable">$HOST_NAME</span> ...\c"</span>  
-<span class="hljs-keyword">for</span> PID <span class="hljs-keyword">in</span> <span class="hljs-variable">$DUMP_PIDS</span> ; <span class="hljs-keyword">do</span>  
-    <span class="hljs-variable">$JAVA_HOME</span>/bin/jstack <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jstack-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-variable">$JAVA_HOME</span>/bin/jinfo <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jinfo-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-variable">$JAVA_HOME</span>/bin/jstat -gcutil <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jstat-gcutil-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-variable">$JAVA_HOME</span>/bin/jstat -gccapacity <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jstat-gccapacity-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-variable">$JAVA_HOME</span>/bin/jmap <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jmap-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-variable">$JAVA_HOME</span>/bin/jmap -heap <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jmap-heap-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-variable">$JAVA_HOME</span>/bin/jmap -histo <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jmap-histo-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-keyword">if</span> [ -r /usr/sbin/lsof ]; <span class="hljs-keyword">then</span>  
-    /usr/sbin/lsof -p <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/lsof-<span class="hljs-variable">$PID</span>.dump  
-    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-    <span class="hljs-keyword">fi</span>  
-<span class="hljs-keyword">done</span>  
-<span class="hljs-keyword">if</span> [ -r /usr/bin/sar ]; <span class="hljs-keyword">then</span>  
-/usr/bin/sar &gt; <span class="hljs-variable">$DUMP_DIR</span>/sar.dump  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-<span class="hljs-keyword">fi</span>  
-<span class="hljs-keyword">if</span> [ -r /usr/bin/uptime ]; <span class="hljs-keyword">then</span>  
-/usr/bin/uptime &gt; <span class="hljs-variable">$DUMP_DIR</span>/uptime.dump  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-<span class="hljs-keyword">fi</span>  
-<span class="hljs-keyword">if</span> [ -r /usr/bin/free ]; <span class="hljs-keyword">then</span>  
-/usr/bin/free -t &gt; <span class="hljs-variable">$DUMP_DIR</span>/free.dump  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-<span class="hljs-keyword">fi</span>  
-<span class="hljs-keyword">if</span> [ -r /usr/bin/vmstat ]; <span class="hljs-keyword">then</span>  
-/usr/bin/vmstat &gt; <span class="hljs-variable">$DUMP_DIR</span>/vmstat.dump  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-<span class="hljs-keyword">fi</span>  
-<span class="hljs-keyword">if</span> [ -r /usr/bin/mpstat ]; <span class="hljs-keyword">then</span>  
-/usr/bin/mpstat &gt; <span class="hljs-variable">$DUMP_DIR</span>/mpstat.dump  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-<span class="hljs-keyword">fi</span>  
-<span class="hljs-keyword">if</span> [ -r /usr/bin/iostat ]; <span class="hljs-keyword">then</span>  
-/usr/bin/iostat &gt; <span class="hljs-variable">$DUMP_DIR</span>/iostat.dump  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-<span class="hljs-keyword">fi</span>  
-<span class="hljs-keyword">if</span> [ -r /bin/netstat ]; <span class="hljs-keyword">then</span>  
-/bin/netstat &gt; <span class="hljs-variable">$DUMP_DIR</span>/netstat.dump  
-<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>  
-<span class="hljs-keyword">fi</span>  
+<pre><code class="language-sh">JAVA_HOME=/usr/java
+OUTPUT_HOME=~/output
+DEPLOY_HOME=`dirname <span class="hljs-variable">$0</span>`
+HOST_NAME=`hostname`
+
+DUMP_PIDS=`ps  --no-heading -C java -f --width 1000 | grep <span class="hljs-string">"<span class="hljs-variable">$DEPLOY_HOME</span>"</span> |awk <span class="hljs-string">'{print $2}'</span>`
+<span class="hljs-keyword">if</span> [ -z <span class="hljs-string">"<span class="hljs-variable">$DUMP_PIDS</span>"</span> ]; <span class="hljs-keyword">then</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">"The server <span class="hljs-variable">$HOST_NAME</span> is not started!"</span>
+    <span class="hljs-built_in">exit</span> 1;
+<span class="hljs-keyword">fi</span>
+
+DUMP_ROOT=<span class="hljs-variable">$OUTPUT_HOME</span>/dump
+<span class="hljs-keyword">if</span> [ ! -d <span class="hljs-variable">$DUMP_ROOT</span> ]; <span class="hljs-keyword">then</span>
+    mkdir <span class="hljs-variable">$DUMP_ROOT</span>
+<span class="hljs-keyword">fi</span>
+
+DUMP_DATE=`date +%Y%m%d%H%M%S`
+DUMP_DIR=<span class="hljs-variable">$DUMP_ROOT</span>/dump-<span class="hljs-variable">$DUMP_DATE</span>
+<span class="hljs-keyword">if</span> [ ! -d <span class="hljs-variable">$DUMP_DIR</span> ]; <span class="hljs-keyword">then</span>
+    mkdir <span class="hljs-variable">$DUMP_DIR</span>
+<span class="hljs-keyword">fi</span>
+
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">"Dumping the server <span class="hljs-variable">$HOST_NAME</span> ...\c"</span>
+<span class="hljs-keyword">for</span> PID <span class="hljs-keyword">in</span> <span class="hljs-variable">$DUMP_PIDS</span> ; <span class="hljs-keyword">do</span>
+    <span class="hljs-variable">$JAVA_HOME</span>/bin/jstack <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jstack-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-variable">$JAVA_HOME</span>/bin/jinfo <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jinfo-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-variable">$JAVA_HOME</span>/bin/jstat -gcutil <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jstat-gcutil-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-variable">$JAVA_HOME</span>/bin/jstat -gccapacity <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jstat-gccapacity-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-variable">$JAVA_HOME</span>/bin/jmap <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jmap-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-variable">$JAVA_HOME</span>/bin/jmap -heap <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jmap-heap-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-variable">$JAVA_HOME</span>/bin/jmap -histo <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/jmap-histo-<span class="hljs-variable">$PID</span>.dump 2&gt;&amp;1
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-keyword">if</span> [ -r /usr/sbin/lsof ]; <span class="hljs-keyword">then</span>
+    /usr/sbin/lsof -p <span class="hljs-variable">$PID</span> &gt; <span class="hljs-variable">$DUMP_DIR</span>/lsof-<span class="hljs-variable">$PID</span>.dump
+    <span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+    <span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">done</span>
+<span class="hljs-keyword">if</span> [ -r /usr/bin/sar ]; <span class="hljs-keyword">then</span>
+/usr/bin/sar &gt; <span class="hljs-variable">$DUMP_DIR</span>/sar.dump
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+<span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">if</span> [ -r /usr/bin/uptime ]; <span class="hljs-keyword">then</span>
+/usr/bin/uptime &gt; <span class="hljs-variable">$DUMP_DIR</span>/uptime.dump
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+<span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">if</span> [ -r /usr/bin/free ]; <span class="hljs-keyword">then</span>
+/usr/bin/free -t &gt; <span class="hljs-variable">$DUMP_DIR</span>/free.dump
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+<span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">if</span> [ -r /usr/bin/vmstat ]; <span class="hljs-keyword">then</span>
+/usr/bin/vmstat &gt; <span class="hljs-variable">$DUMP_DIR</span>/vmstat.dump
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+<span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">if</span> [ -r /usr/bin/mpstat ]; <span class="hljs-keyword">then</span>
+/usr/bin/mpstat &gt; <span class="hljs-variable">$DUMP_DIR</span>/mpstat.dump
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+<span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">if</span> [ -r /usr/bin/iostat ]; <span class="hljs-keyword">then</span>
+/usr/bin/iostat &gt; <span class="hljs-variable">$DUMP_DIR</span>/iostat.dump
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+<span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">if</span> [ -r /bin/netstat ]; <span class="hljs-keyword">then</span>
+/bin/netstat &gt; <span class="hljs-variable">$DUMP_DIR</span>/netstat.dump
+<span class="hljs-built_in">echo</span> -e <span class="hljs-string">".\c"</span>
+<span class="hljs-keyword">fi</span>
 <span class="hljs-built_in">echo</span> <span class="hljs-string">"OK!"</span>
 </code></pre>
-</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">Foundation</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">License</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">Events</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">Sponsorship</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">Thanks</a></dd></dl></div><div class="col col-4"><dl><dt>Documentation</dt><dd><a href="/en-us/docs/user/quick-start.html" target="_self">Quick start</a></dd><dd><a href="/en-us/docs/dev/build.html" target="_self">Developer guide</a></dd><dd><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self">Admin manual</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website/issues/new" target="_self">Report a Doc Issue</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website" target="_self">Edit This Page on GitHub</a></dd></dl></div><div class="col col-4"><dl><dt>Resources</dt><dd><a href="/en-us/blog/index.html" target="_self">Blog</a></dd><dd><a href="/en-us/community/index.html" target="_self">Community</a></dd><dd><a href="https://www.apache.org/security/" target="_self">Security</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">Foundation</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">License</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">Events</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">Sponsorship</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">Thanks</a></dd></dl></div><div class="col col-4"><dl><dt>Documentation</dt><dd><a href="/en-us/docs/user/quick-start.html" target="_self">Quick start</a></dd><dd><a href="/en-us/docs/dev/build.html" target="_self">Developer guide</a></dd><dd><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self">Admin manual</a></dd><dd><a href="https://github.com/apache/dubbo-website/issues/new" target="_self">Report a Doc Issue</a></dd><dd><a href="https://github.com/apache/dubbo-website" target="_self">Edit This Page on GitHub</a></dd></dl></div><div class="col col-4"><dl><dt>Resources</dt><dd><a href="/en-us/blog/index.html" target="_self">Blog</a></dd><dd><a href="/en-us/community/index.html" target="_self">Community</a></dd><dd><a href="https://www.apache.org/security/" target="_self">Security</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
 	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
 	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
 	<script>

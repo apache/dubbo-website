@@ -146,14 +146,14 @@
 </code></pre>
 <p>Any client can POST a JSON string containing the user's information to the above URL to complete the user registration.</p>
 <p>First, implement the interface of the service:</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserService</span> </span>{    
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserService</span> </span>{
    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">registerUser</span><span class="hljs-params">(User user)</span></span>;
 }
 </code></pre>
 <p>Then, implement the service:</p>
 <pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span> </span>{
-       
+
     <span class="hljs-meta">@POST</span>
     <span class="hljs-meta">@Path</span>(<span class="hljs-string">"register"</span>)
     <span class="hljs-meta">@Consumes</span>({MediaType.APPLICATION_JSON})
@@ -216,7 +216,7 @@ http://localhost:8080/users/1003
 <p>The development of REST services based on Dubbo is mainly configured through JAX-RS annotations. In the above example, we put the annotation in the implementation class of the service. But in fact, we can completely put the annotation in the interface of the service. These two methods are completely equivalent, for example:</p>
 <pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserService</span> </span>{
-    
+
     <span class="hljs-meta">@GET</span>
     <span class="hljs-meta">@Path</span>(<span class="hljs-string">"{id : \\d+}"</span>)
     <span class="hljs-meta">@Produces</span>({MediaType.APPLICATION_JSON})
@@ -276,18 +276,18 @@ http://localhost:8080/users/1003
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RegistrationResult</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Serializable</span> </span>{
 
     <span class="hljs-keyword">private</span> Long id;
-    
+
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">RegistrationResult</span><span class="hljs-params">()</span> </span>{
     }
-    
+
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">RegistrationResult</span><span class="hljs-params">(Long id)</span> </span>{
         <span class="hljs-keyword">this</span>.id = id;
     }
-    
+
     <span class="hljs-function"><span class="hljs-keyword">public</span> Long <span class="hljs-title">getId</span><span class="hljs-params">()</span> </span>{
         <span class="hljs-keyword">return</span> id;
     }
-    
+
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setId</span><span class="hljs-params">(Long id)</span> </span>{
         <span class="hljs-keyword">this</span>.id = id;
     }
@@ -300,7 +300,7 @@ http://localhost:8080/users/1003
 <pre><code class="language-javascript">{<span class="hljs-string">"id"</span>: <span class="hljs-number">1001</span>}
 </code></pre>
 <p>If you do not add a wrapper, the JSON return value will be directly</p>
-<pre><code>1001 	
+<pre><code>1001
 </code></pre>
 <p>In XML, the return value after adding wrapper will be:</p>
 <pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">registrationResult</span>&gt;</span>
@@ -323,7 +323,7 @@ While in XML, after adding wrapper, the return value will be</p>
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Serializable</span> </span>{
 
     <span class="hljs-meta">@XmlElement</span>(name=<span class="hljs-string">"username"</span>)
-    <span class="hljs-keyword">private</span> String name;  
+    <span class="hljs-keyword">private</span> String name;
 }
 </code></pre>
 <p>Customizing the object properties to map to the names of the JSON field:</p>
@@ -391,7 +391,7 @@ instead of deploying to a Java application server, we recommend the following co
 <p>The first one is using @Context annotation from JAX-RS:</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> User <span class="hljs-title">getUser</span><span class="hljs-params">(@PathParam(<span class="hljs-string">"id"</span>)</span> Long id, @Context HttpServletRequest request) </span>{
     System.out.println(<span class="hljs-string">"Client address is "</span> + request.getRemoteAddr());
-} 
+}
 </code></pre>
 <p>After decorating a parameter of <code>getUser()</code> with Context, we can inject the current HttpServletRequest and then call the servlet api to get the IP.</p>
 <blockquote>
@@ -400,7 +400,7 @@ instead of deploying to a Java application server, we recommend the following co
 <p>The second method is to use RpcContext, which is commonly seen in dubbo:</p>
 <pre><code class="language-java"><span class="hljs-function"><span class="hljs-keyword">public</span> User <span class="hljs-title">getUser</span><span class="hljs-params">(@PathParam(<span class="hljs-string">"id"</span>)</span> Long id) </span>{
     System.out.println(<span class="hljs-string">"Client address is "</span> + RpcContext.getContext().getRemoteAddressString());
-} 
+}
 </code></pre>
 <blockquote>
 <p>Notice: Similarly, this method only works in the jetty, tomcat, servlet or tjws server. In dubbo, the usage of RpcContext is rather invasive. We are likely to refactor it in the future.</p>
@@ -444,13 +444,13 @@ implemented the servlet container.</p>
 <p>Let's have a look at the previous code:</p>
 <pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span> </span>{
-       
+
     <span class="hljs-meta">@POST</span>
     <span class="hljs-meta">@Path</span>(<span class="hljs-string">"register"</span>)
     <span class="hljs-meta">@Consumes</span>({MediaType.APPLICATION_JSON})
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerUser</span><span class="hljs-params">(User user)</span> </span>{
         <span class="hljs-comment">// save the user...</span>
-    }	
+    }
 }
 </code></pre>
 <p>Now the complete path would be:</p>
@@ -514,14 +514,14 @@ However, dubbo/spring itself supports the use of annotation for configuration, s
 
     <span class="hljs-meta">@Autowired</span>
     <span class="hljs-keyword">private</span> UserRepository userRepository;
-       
+
     <span class="hljs-meta">@POST</span>
     <span class="hljs-meta">@Path</span>(<span class="hljs-string">"register"</span>)
     <span class="hljs-meta">@Consumes</span>({MediaType.APPLICATION_JSON})
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerUser</span><span class="hljs-params">(User user)</span> </span>{
         <span class="hljs-comment">// save the user</span>
         userRepository.save(user);
-    }	
+    }
 }
 </code></pre>
 <p>Annotation-based configuration is more concise and precise, and often easier to maintain (modern IDE can support such things as class name refactoring in XML, and therefore the maintenance of XML is good for specific use cases here). XML is less intrusive to code, especially for dynamically modifying configurations, especially when you want to modify the timeout for connection of a single service configuration, the maximum number of connections per client, cluster policy, weights, and so on. In addition, for complex applications or modules, XML provides a central point to cover all the components and configurations. It is at a glance, and generally more convenient for long term maintenance of the project.</p>
@@ -540,7 +540,7 @@ However, dubbo/spring itself supports the use of annotation for configuration, s
 </code></pre>
 <p>Interceptor is mainly used to access and modify the input and output byte streams, for example, manually adding GZIP compression:</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GZIPWriterInterceptor</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">WriterInterceptor</span> </span>{
- 
+
     <span class="hljs-meta">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">aroundWriteTo</span><span class="hljs-params">(WriterInterceptorContext context)</span>
                     <span class="hljs-keyword">throws</span> IOException, WebApplicationException </span>{
@@ -561,7 +561,7 @@ However, dubbo/spring itself supports the use of annotation for configuration, s
 <p>If the REST consumer is also a Dubbo system (see discussion below), you can also configure the Interceptor and Filter for the consumer in a similar way.</p>
 <p>However, it should be noted that the consumer-side Filter and the provider-side Filter in JAX-RS are two different interfaces. For example, in the previous example, the server is the ContainerResponseFilter interface, and the consumer side corresponds to the ClientResponseFilter:</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LoggingFilter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ClientResponseFilter</span> </span>{
- 
+
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">filter</span><span class="hljs-params">(ClientRequestContext reqCtx, ClientResponseContext resCtx)</span> <span class="hljs-keyword">throws</span> IOException </span>{
         System.out.println(<span class="hljs-string">"status: "</span> + resCtx.getStatus());
 	    System.out.println(<span class="hljs-string">"date: "</span> + resCtx.getDate());
@@ -576,14 +576,14 @@ However, dubbo/spring itself supports the use of annotation for configuration, s
 	        System.out.print(<span class="hljs-string">"\n"</span>);
 	    }
 	    System.out.println(<span class="hljs-string">"media-type: "</span> + resCtx.getMediaType().getType());
-    } 
+    }
 }
 </code></pre>
 <h3>Adding custom Exception handler</h3>
 <p>Dubbo RESTful Remoting also supports JAX-RS standard ExceptionMapper, which can be used to customize the HTTP response after a particular exception occurs.</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomExceptionMapper</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExceptionMapper</span>&lt;<span class="hljs-title">NotFoundException</span>&gt; </span>{
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">toResponse</span><span class="hljs-params">(NotFoundException e)</span> </span>{     
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">toResponse</span><span class="hljs-params">(NotFoundException e)</span> </span>{
         <span class="hljs-keyword">return</span> Response.status(Response.Status.NOT_FOUND).entity(<span class="hljs-string">"Oops! the requested resource is not found!"</span>).type(<span class="hljs-string">"text/plain"</span>).build();
     }
 }
@@ -609,7 +609,7 @@ However, dubbo/spring itself supports the use of annotation for configuration, s
 <span class="hljs-tag">&lt;/<span class="hljs-name">root</span>&gt;</span>
 </code></pre>
 <p>Then there will be something like the following output in the log:</p>
-<pre><code>The HTTP headers are: 
+<pre><code>The HTTP headers are:
 accept: application/json;charset=UTF-8
 accept-encoding: gzip, deflate
 connection: Keep-Alive
@@ -618,7 +618,7 @@ content-type: application/json
 host: 192.168.1.100:8888
 user-agent: Apache-HttpClient/4.2.1 (java 1.5)
 </code></pre>
-<pre><code>The contents of request body is: 
+<pre><code>The contents of request body is:
 {&quot;id&quot;:1,&quot;name&quot;:&quot;dang&quot;}
 </code></pre>
 <p>After the HTTP log output is turned on, in addition to the performance overhead of the normal log output, additional overhead is generated in, for example, HTTP request parsing, because an additional memory buffer needs to be allocated to prepare the data for the log output.</p>
@@ -626,7 +626,7 @@ user-agent: Apache-HttpClient/4.2.1 (java 1.5)
 <p>Dubbo RESTful Remoting supports the use of the Java standard bean validation annotation(JSR 303) for input validation <a href="http://beanvalidation.org/">http://beanvalidation.org/</a>.</p>
 <p>In order to be consistent with other Dubbo remote invocation protocols, the annotations that are checked for rest must be placed on the interface of the service, for example:</p>
 <pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserService</span> </span>{
-   
+
     <span class="hljs-function">User <span class="hljs-title">getUser</span><span class="hljs-params">(@Min(value=<span class="hljs-number">1</span>L, message=<span class="hljs-string">"User ID must be greater than 1"</span>)</span> Long id)</span>;
 }
 </code></pre>
@@ -705,7 +705,7 @@ Response response = target.request().post(Entity.entity(user, MediaType.APPLICAT
 <p>As mentioned earlier, in this scenario, JAX-RS annotations must be added to the service interface, so that the corresponding REST configuration information can be shared on the consumer side of Dubbo and remotely called accordingly:</p>
 <pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserService</span> </span>{
-    
+
     <span class="hljs-meta">@GET</span>
     <span class="hljs-meta">@Path</span>(<span class="hljs-string">"{id : \\d+}"</span>)
     <span class="hljs-meta">@Produces</span>({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -730,7 +730,7 @@ http://api.foo.com/services/users/1002
 <p>We can write service interfaces and parameter classes based on this information:</p>
 <pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserService</span> </span>{
-    
+
     <span class="hljs-meta">@GET</span>
     <span class="hljs-meta">@Path</span>(<span class="hljs-string">"{id : \\d+}"</span>)
     <span class="hljs-meta">@Produces</span>({MediaType.APPLICATION_JSON})
@@ -962,7 +962,7 @@ Excute a five-minute performance test. (Reference to Dubbo's own test considerat
 <li>Gzip</li>
 <li>Payload maxsize</li>
 </ul>
-</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">Foundation</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">License</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">Events</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">Sponsorship</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">Thanks</a></dd></dl></div><div class="col col-4"><dl><dt>Documentation</dt><dd><a href="/en-us/docs/user/quick-start.html" target="_self">Quick start</a></dd><dd><a href="/en-us/docs/dev/build.html" target="_self">Developer guide</a></dd><dd><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self">Admin manual</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website/issues/new" target="_self">Report a Doc Issue</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website" target="_self">Edit This Page on GitHub</a></dd></dl></div><div class="col col-4"><dl><dt>Resources</dt><dd><a href="/en-us/blog/index.html" target="_self">Blog</a></dd><dd><a href="/en-us/community/index.html" target="_self">Community</a></dd><dd><a href="https://www.apache.org/security/" target="_self">Security</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">Foundation</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">License</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">Events</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">Sponsorship</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">Thanks</a></dd></dl></div><div class="col col-4"><dl><dt>Documentation</dt><dd><a href="/en-us/docs/user/quick-start.html" target="_self">Quick start</a></dd><dd><a href="/en-us/docs/dev/build.html" target="_self">Developer guide</a></dd><dd><a href="/en-us/docs/admin/ops/dubbo-ops.html" target="_self">Admin manual</a></dd><dd><a href="https://github.com/apache/dubbo-website/issues/new" target="_self">Report a Doc Issue</a></dd><dd><a href="https://github.com/apache/dubbo-website" target="_self">Edit This Page on GitHub</a></dd></dl></div><div class="col col-4"><dl><dt>Resources</dt><dd><a href="/en-us/blog/index.html" target="_self">Blog</a></dd><dd><a href="/en-us/community/index.html" target="_self">Community</a></dd><dd><a href="https://www.apache.org/security/" target="_self">Security</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
 	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
 	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
 	<script>

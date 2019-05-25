@@ -1,8 +1,8 @@
 # Beanchmark testing tool installer
 
-* download： git clone https://github.com/apache/incubator-dubbo.git  
-* compile benchmark: cd incubator-dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install  
-* uncompress benchmark： incubator-dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz 
+* download： git clone https://github.com/apache/dubbo.git  
+* compile benchmark: cd dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install  
+* uncompress benchmark： dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz 
 
 Read ReadMe.txt (the contents are as follows, in the compressed package.)
 

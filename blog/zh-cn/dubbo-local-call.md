@@ -40,7 +40,7 @@
 
 
 
-这里同时配置了同一服务 *DemoService* 的提供者以及消费者。在这种情况下，该应用中的 *DemoService* 的消费方会优先使用 *injvm* 协议进行本地调用。上述的例子可以在 dubbo-samples 工程中找到源码：https://github.com/apache/incubator-dubbo-samples/blob/master/dubbo-samples-local
+这里同时配置了同一服务 *DemoService* 的提供者以及消费者。在这种情况下，该应用中的 *DemoService* 的消费方会优先使用 *injvm* 协议进行本地调用。上述的例子可以在 dubbo-samples 工程中找到源码：https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-local
 
 
 

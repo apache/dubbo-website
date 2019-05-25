@@ -5,12 +5,12 @@
 通过以下的这个命令签出最新的项目源码 [^1]：
 
 ```sh
-git clone https://github.com/apache/incubator-dubbo.git dubbo
+git clone https://github.com/apache/dubbo.git dubbo
 ```
 
 ## 分支
 
-我们使用 master 作为主干版本的开发，使用分支作为维护版本。可以通过 https://github.com/apache/incubator-dubbo/tags 来查看所有版本的标签。
+我们使用 master 作为主干版本的开发，使用分支作为维护版本。可以通过 https://github.com/apache/dubbo/tags 来查看所有版本的标签。
 
 ## 构建
 
@@ -74,6 +74,6 @@ mvn eclipse:eclipse
 mvn eclipse:configure-workspace -Declipse.workspace=/path/to/the/workspace/
 ```
 
-[^1]: 也可以直接在 https://github.com/apache/incubator-dubbo 上浏览源代码
+[^1]: 也可以直接在 https://github.com/apache/dubbo 上浏览源代码
 [^2]: UNIX 下的路径是 ${HOME}/.m2/repository, Windows 下的路径是 C:\Documents and Settings\<user>\.m2\repository
 

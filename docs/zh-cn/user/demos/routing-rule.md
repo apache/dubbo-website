@@ -13,7 +13,7 @@
 
 ## 条件路由
 
-您可以随时在服务治理控制台[Dubbo-Admin](https://github.com/apache/incubator-dubbo-admin)写入路由规则
+您可以随时在服务治理控制台[Dubbo-Admin](https://github.com/apache/dubbo-admin)写入路由规则
 
 ### 简介
 

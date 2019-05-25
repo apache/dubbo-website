@@ -55,5 +55,5 @@ PORT_TO_REGISTRY或IP_TO_REGISTRY不会用作默认PORT_TO_BIND或IP_TO_BIND，�
 
 ## 参考 ##
 
- 1. [[Proposal]support hostname or domain in service discovery.](https://github.com/apache/incubator-dubbo/issues/2043)
+ 1. [[Proposal]support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
  2. [dubbo通过环境变量设置host](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-docker)

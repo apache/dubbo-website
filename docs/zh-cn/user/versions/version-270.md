@@ -87,7 +87,7 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 
 #### 使用外部化配置
 
-需要在项目启动前，使用[最新版本Dubbo-OPS](https://github.com/apache/incubator-dubbo-ops)完成外部化配置迁移，理论上配置中心支持所有本地dubbo.properties所支持的配置项。
+需要在项目启动前，使用[最新版本Dubbo-OPS](https://github.com/apache/dubbo-ops)完成外部化配置迁移，理论上配置中心支持所有本地dubbo.properties所支持的配置项。
 
 以XML开发形式为例，假设我们本地有如下配置：
 
@@ -191,7 +191,7 @@ dubbo.protocol.port=20880
 
 关于治理规则更多详细说明，请参考[路由规则](/docs/zh-cn/user/demos/routing-rule.md)和[覆盖规则](/docs/zh-cn/user/demos/config-rule.md)用户文档。
 
-也可继续了解[使用示例](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-governance)。
+也可继续了解[使用示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-governance)。
 
 
 

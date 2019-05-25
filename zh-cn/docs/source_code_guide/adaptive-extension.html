@@ -24,17 +24,17 @@
         <span class="hljs-keyword">if</span> (url == <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"url == null"</span>);
         }
-        
+
     	<span class="hljs-comment">// 1.从 URL 中获取 WheelMaker 名称</span>
         String wheelMakerName = url.getParameter(<span class="hljs-string">"Wheel.maker"</span>);
         <span class="hljs-keyword">if</span> (wheelMakerName == <span class="hljs-keyword">null</span>) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"wheelMakerName == null"</span>);
         }
-        
+
         <span class="hljs-comment">// 2.通过 SPI 加载具体的 WheelMaker</span>
         WheelMaker wheelMaker = ExtensionLoader
             .getExtensionLoader(WheelMaker.class).getExtension(wheelMakerName);
-        
+
         <span class="hljs-comment">// 3.调用目标方法</span>
         <span class="hljs-keyword">return</span> wheelMaker.makeWheel(URL url);
     }
@@ -53,12 +53,12 @@
 
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RaceCarMaker</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CarMaker</span> </span>{
     WheelMaker wheelMaker;
- 
+
     <span class="hljs-comment">// 通过 setter 注入 AdaptiveWheelMaker</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">setWheelMaker</span><span class="hljs-params">(WheelMaker wheelMaker)</span> </span>{
         <span class="hljs-keyword">this</span>.wheelMaker = wheelMaker;
     }
- 
+
     <span class="hljs-function"><span class="hljs-keyword">public</span> Car <span class="hljs-title">makeCar</span><span class="hljs-params">(URL url)</span> </span>{
         Wheel wheel = wheelMaker.makeWheel(url);
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RaceCar(wheel, ...);
@@ -205,7 +205,7 @@ codeBuilder.append(<span class="hljs-string">"\n}"</span>);
 <h5>2.2.3.1 无 Adaptive 注解方法代码生成逻辑</h5>
 <p>对于接口方法，我们可以按照需求标注  Adaptive 注解。以 Protocol 接口为例，该接口的 destroy 和 getDefaultPort 未标注 Adaptive 注解，其他方法均标注了 Adaptive 注解。Dubbo 不会为没有标注 Adaptive 注解的方法生成代理逻辑，对于该种类型的方法，仅会生成一句抛出异常的代码。生成逻辑如下：</p>
 <pre><code class="language-java"><span class="hljs-keyword">for</span> (Method method : methods) {
-    
+
     <span class="hljs-comment">// 省略无关逻辑</span>
 
     Adaptive adaptiveAnnotation = method.getAnnotation(Adaptive.class);
@@ -221,7 +221,7 @@ codeBuilder.append(<span class="hljs-string">"\n}"</span>);
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-comment">// 省略无关逻辑</span>
     }
-    
+
     <span class="hljs-comment">// 省略无关逻辑</span>
 }
 </code></pre>
@@ -253,7 +253,7 @@ codeBuilder.append(<span class="hljs-string">"\n}"</span>);
                 <span class="hljs-keyword">break</span>;
             }
         }
-        
+
         <span class="hljs-comment">// urlTypeIndex != -1，表示参数列表中存在 URL 参数</span>
         <span class="hljs-keyword">if</span> (urlTypeIndex != -<span class="hljs-number">1</span>) {
             <span class="hljs-comment">// 为 URL 类型参数生成判空代码，格式如下：</span>
@@ -266,7 +266,7 @@ codeBuilder.append(<span class="hljs-string">"\n}"</span>);
             <span class="hljs-comment">// 为 URL 类型参数生成赋值代码，形如 URL url = arg1</span>
             s = String.format(<span class="hljs-string">"\n%s url = arg%d;"</span>, URL.class.getName(), urlTypeIndex);
             code.append(s);
-            
+
         <span class="hljs-comment">// 参数列表中不存在 URL 类型参数</span>
         } <span class="hljs-keyword">else</span> {
             String attribMethod = <span class="hljs-keyword">null</span>;
@@ -291,7 +291,7 @@ codeBuilder.append(<span class="hljs-string">"\n}"</span>);
                         &amp;&amp; m.getReturnType() == URL.class) {
                         urlTypeIndex = i;
                         attribMethod = name;
-                        
+
                         <span class="hljs-comment">// 结束 for (int i = 0; i &lt; pts.length; ++i) 循环</span>
                         <span class="hljs-keyword">break</span> LBL_PTS;
                     }
@@ -322,23 +322,23 @@ codeBuilder.append(<span class="hljs-string">"\n}"</span>);
             s = String.format(<span class="hljs-string">"%s url = arg%d.%s();"</span>, URL.class.getName(), urlTypeIndex, attribMethod);
             code.append(s);
         }
-        
+
         <span class="hljs-comment">// 省略无关代码</span>
     }
-    
+
     <span class="hljs-comment">// 省略无关代码</span>
 }
 </code></pre>
 <p>上面代码有点多，需要耐心看一下。这段代码主要目的是为了获取 URL 数据，并为之生成判空和赋值代码。以 Protocol 的 refer 和 export 方法为例，上面的代码为它们生成如下内容（代码已格式化）：</p>
 <pre><code class="language-java">refer:
-<span class="hljs-keyword">if</span> (arg1 == <span class="hljs-keyword">null</span>) 
+<span class="hljs-keyword">if</span> (arg1 == <span class="hljs-keyword">null</span>)
     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"url == null"</span>);
 com.alibaba.dubbo.common.URL url = arg1;
 
 export:
-<span class="hljs-keyword">if</span> (arg0 == <span class="hljs-keyword">null</span>) 
+<span class="hljs-keyword">if</span> (arg0 == <span class="hljs-keyword">null</span>)
     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"com.alibaba.dubbo.rpc.Invoker argument == null"</span>);
-<span class="hljs-keyword">if</span> (arg0.getUrl() == <span class="hljs-keyword">null</span>) 
+<span class="hljs-keyword">if</span> (arg0.getUrl() == <span class="hljs-keyword">null</span>)
     <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"com.alibaba.dubbo.rpc.Invoker argument getUrl() == null"</span>);
 com.alibaba.dubbo.common.URL url = arg0.getUrl();
 </code></pre>
@@ -355,7 +355,7 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
         <span class="hljs-comment">// ${无 Adaptive 注解方法代码生成逻辑}</span>
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-comment">// ${获取 URL 数据}</span>
-        
+
         String[] value = adaptiveAnnotation.value();
         <span class="hljs-comment">// value 为空数组</span>
         <span class="hljs-keyword">if</span> (value.length == <span class="hljs-number">0</span>) {
@@ -379,10 +379,10 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
             }
             value = <span class="hljs-keyword">new</span> String[]{sb.toString()};
         }
-        
+
         <span class="hljs-comment">// 省略无关代码</span>
     }
-    
+
     <span class="hljs-comment">// 省略无关逻辑</span>
 }
 </code></pre>
@@ -399,9 +399,9 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
         <span class="hljs-comment">// ${无 Adaptive 注解方法代码生成逻辑}</span>
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-comment">// ${获取 URL 数据}</span>
-        
+
         <span class="hljs-comment">// ${获取 Adaptive 注解值}</span>
-        
+
         <span class="hljs-keyword">boolean</span> hasInvocation = <span class="hljs-keyword">false</span>;
         <span class="hljs-comment">// 遍历参数类型列表</span>
         <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; pts.length; ++i) {
@@ -414,14 +414,14 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
                 <span class="hljs-comment">//    String methodName = argN.getMethodName();</span>
                 s = String.format(<span class="hljs-string">"\nString methodName = arg%d.getMethodName();"</span>, i);
                 code.append(s);
-                
+
                 <span class="hljs-comment">// 设置 hasInvocation 为 true</span>
                 hasInvocation = <span class="hljs-keyword">true</span>;
                 <span class="hljs-keyword">break</span>;
             }
         }
     }
-    
+
     <span class="hljs-comment">// 省略无关逻辑</span>
 }
 </code></pre>
@@ -447,16 +447,16 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
         <span class="hljs-comment">// $无 Adaptive 注解方法代码生成逻辑}</span>
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-comment">// ${获取 URL 数据}</span>
-        
+
         <span class="hljs-comment">// ${获取 Adaptive 注解值}</span>
-        
+
         <span class="hljs-comment">// ${检测 Invocation 参数}</span>
-        
+
         <span class="hljs-comment">// 设置默认拓展名，cachedDefaultName 源于 SPI 注解值，默认情况下，</span>
         <span class="hljs-comment">// SPI 注解值为空串，此时 cachedDefaultName = null</span>
         String defaultExtName = cachedDefaultName;
         String getNameCode = <span class="hljs-keyword">null</span>;
-        
+
         <span class="hljs-comment">// 遍历 value，这里的 value 是 Adaptive 的注解值，2.2.3.3 节分析过 value 变量的获取过程。</span>
         <span class="hljs-comment">// 此处循环目的是生成从 URL 中获取拓展名的代码，生成的代码会赋值给 getNameCode 变量。注意这</span>
         <span class="hljs-comment">// 个循环的遍历顺序是由后向前遍历的。</span>
@@ -483,7 +483,7 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
                     	<span class="hljs-comment">// 生成的代码功能等价于下面的代码：</span>
                         <span class="hljs-comment">//   ( url.getProtocol() == null ? defaultExtName : url.getProtocol() )</span>
                         getNameCode = String.format(<span class="hljs-string">"( url.getProtocol() == null ? \"%s\" : url.getProtocol() )"</span>, defaultExtName);
-                    
+
                 <span class="hljs-comment">// 默认拓展名为空</span>
                 } <span class="hljs-keyword">else</span> {
                     <span class="hljs-keyword">if</span> (!<span class="hljs-string">"protocol"</span>.equals(value[i]))
@@ -525,7 +525,7 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
                                  type.getName(), Arrays.toString(value));
         code.append(s);
     }
-    
+
     <span class="hljs-comment">// 省略无关逻辑</span>
 }
 </code></pre>
@@ -533,7 +533,7 @@ com.alibaba.dubbo.common.URL url = arg0.getUrl();
 <pre><code class="language-java"><span class="hljs-meta">@SPI</span>(<span class="hljs-string">"netty"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Transporter</span> </span>{
 	<span class="hljs-comment">// @Adaptive({server, transporter})</span>
-    <span class="hljs-meta">@Adaptive</span>({Constants.SERVER_KEY, Constants.TRANSPORTER_KEY}) 
+    <span class="hljs-meta">@Adaptive</span>({Constants.SERVER_KEY, Constants.TRANSPORTER_KEY})
     <span class="hljs-function">Server <span class="hljs-title">bind</span><span class="hljs-params">(URL url, ChannelHandler handler)</span> <span class="hljs-keyword">throws</span> RemotingException</span>;
 
     <span class="hljs-comment">// @Adaptive({client, transporter})</span>
@@ -574,13 +574,13 @@ String[] value = [<span class="hljs-string">"client"</span>, <span class="hljs-s
         <span class="hljs-comment">// $无 Adaptive 注解方法代码生成逻辑}</span>
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-comment">// ${获取 URL 数据}</span>
-        
+
         <span class="hljs-comment">// ${获取 Adaptive 注解值}</span>
-        
+
         <span class="hljs-comment">// ${检测 Invocation 参数}</span>
-        
+
         <span class="hljs-comment">// ${生成拓展名获取逻辑}</span>
-        
+
         <span class="hljs-comment">// 生成拓展获取代码，格式如下：</span>
         <span class="hljs-comment">// type全限定名 extension = (type全限定名)ExtensionLoader全限定名</span>
         <span class="hljs-comment">//     .getExtensionLoader(type全限定名.class).getExtension(extName);</span>
@@ -603,9 +603,9 @@ String[] value = [<span class="hljs-string">"client"</span>, <span class="hljs-s
                 code.append(<span class="hljs-string">", "</span>);
             code.append(<span class="hljs-string">"arg"</span>).append(i);
         }
-        code.append(<span class="hljs-string">");"</span>);   
+        code.append(<span class="hljs-string">");"</span>);
     }
-    
+
     <span class="hljs-comment">// 省略无关逻辑</span>
 }
 </code></pre>
@@ -627,17 +627,17 @@ String[] value = [<span class="hljs-string">"client"</span>, <span class="hljs-s
         <span class="hljs-comment">// $无 Adaptive 注解方法代码生成逻辑}</span>
     } <span class="hljs-keyword">else</span> {
         <span class="hljs-comment">// ${获取 URL 数据}</span>
-        
+
         <span class="hljs-comment">// ${获取 Adaptive 注解值}</span>
-        
+
         <span class="hljs-comment">// ${检测 Invocation 参数}</span>
-        
+
         <span class="hljs-comment">// ${生成拓展名获取逻辑}</span>
-        
+
         <span class="hljs-comment">// ${生成拓展加载与目标方法调用逻辑}</span>
     }
 }
-    
+
 <span class="hljs-comment">// public + 返回值全限定名 + 方法名 + (</span>
 codeBuilder.append(<span class="hljs-string">"\npublic "</span>)
     .append(rt.getCanonicalName())
@@ -677,7 +677,7 @@ codeBuilder.append(<span class="hljs-string">"\n}"</span>);
 </code></pre>
 <h2>3.总结</h2>
 <p>到此，关于自适应拓展的原理，实现就分析完了。总的来说自适应拓展整个逻辑还是很复杂的，并不是很容易弄懂。因此，大家在阅读该部分源码时，耐心一些。同时多进行调试，也可以通过生成好的代码思考代码的生成逻辑。好了，本篇文章就分析到这里。</p>
-</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website/issues/new" target="_self">报告文档问题</a></dd><dd><a href="https://github.com/apache/incubator-dubbo-website" target="_self">编辑此文档</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
+</div></section><footer class="footer-container"><div class="footer-body"><img src="/img/dubbo_gray.png"/><img class="apache" src="/img/apache_logo.png"/><div class="cols-container"><div class="col col-12"><h3></h3><p></p></div><div class="col col-4"><dl><dt>ASF</dt><dd><a href="http://www.apache.org" target="_self">基金会</a></dd><dd><a href="http://www.apache.org/licenses/" target="_self">证书</a></dd><dd><a href="http://www.apache.org/events/current-event" target="_self">事件</a></dd><dd><a href="http://www.apache.org/foundation/sponsorship.html" target="_self">赞助</a></dd><dd><a href="http://www.apache.org/foundation/thanks.html" target="_self">致谢</a></dd></dl></div><div class="col col-4"><dl><dt>文档</dt><dd><a href="/zh-cn/docs/user/quick-start.html" target="_self">快速开始</a></dd><dd><a href="/zh-cn/docs/dev/build.html" target="_self">开发者指南</a></dd><dd><a href="/zh-cn/docs/admin/ops/dubbo-ops.html" target="_self">运维管理</a></dd><dd><a href="https://github.com/apache/dubbo-website/issues/new" target="_self">报告文档问题</a></dd><dd><a href="https://github.com/apache/dubbo-website" target="_self">编辑此文档</a></dd></dl></div><div class="col col-4"><dl><dt>资源</dt><dd><a href="/zh-cn/blog/index.html" target="_self">博客</a></dd><dd><a href="/zh-cn/community/index.html" target="_self">社区</a></dd><dd><a href="https://www.apache.org/security" target="_self">安全</a></dd></dl></div></div><div class="copyright"><span>Copyright © 2018-2019 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation.</span></div></div></footer></div></div>
 	<script src="https://f.alicdn.com/react/15.4.1/react-with-addons.min.js"></script>
 	<script src="https://f.alicdn.com/react/15.4.1/react-dom.min.js"></script>
 	<script>

@@ -1,12 +1,12 @@
 # Mailing list subscription guide
 
-The Dubbo developer mailing list (dev@dubbo.incubator.apache.org) for Apache Incubator has been established, please feel free to subscribe and refer to [^1] for more details.
+The Dubbo developer mailing list (dev@dubbo.apache.org) for Apache Incubator has been established, please feel free to subscribe and refer to [^1] for more details.
 
 You can also view [the archive of the mailing list](https://lists.apache.org/list.html?dev@dubbo.apache.org)
 
 Here is a brief guide specific to Dubbo:
 
-1. Send an email to dev-subscribe@dubbo.incubator.apache.org, you can have empty subject and empty content. You will receive an email with the following content:
+1. Send an email to dev-subscribe@dubbo.apache.org, you can have empty subject and empty content. You will receive an email with the following content:
 
 ```
 from: dev-help@dubbo.apache.org
@@ -71,10 +71,10 @@ subscription address.
 ...
 ```
 
-3. After that, you will receive any email that is posted to this mailing list. If you have any further questions, just send email to dev@dubbo.incubator.apache.org and hopefully someone will answer your questions.
+3. After that, you will receive any email that is posted to this mailing list. If you have any further questions, just send email to dev@dubbo.apache.org and hopefully someone will answer your questions.
 
-4. If you want to unsubscribe, just send an email to dev-unsubscribe@dubbo.incubator.apache.org, and follow the steps once you get an reply.
+4. If you want to unsubscribe, just send an email to dev-unsubscribe@dubbo.apache.org, and follow the steps once you get an reply.
 
-> Note that both dev@dubbo.apache.org and dev@dubbo.incubator.apache.org should work, you can pick any of it.
+> Note that both dev@dubbo.apache.org and dev@dubbo.apache.org should work, you can pick any of it.
 
 [^1] http://apache.org/foundation/mailinglists.html#subscribing

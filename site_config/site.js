@@ -83,11 +83,11 @@ export default {
         },
         {
           text: 'Report a Doc Issue',
-          link: 'https://github.com/apache/incubator-dubbo-website/issues/new',
+          link: 'https://github.com/apache/dubbo-website/issues/new',
         },
         {
           text: 'Edit This Page on GitHub',
-          link: 'https://github.com/apache/incubator-dubbo-website',
+          link: 'https://github.com/apache/dubbo-website',
         },
       ],
     },
@@ -189,11 +189,11 @@ export default {
         },
         {
           text: '报告文档问题',
-          link: 'https://github.com/apache/incubator-dubbo-website/issues/new',
+          link: 'https://github.com/apache/dubbo-website/issues/new',
         },
         {
           text: '编辑此文档',
-          link: 'https://github.com/apache/incubator-dubbo-website',
+          link: 'https://github.com/apache/dubbo-website',
         },
       ]
     },

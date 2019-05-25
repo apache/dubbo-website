@@ -92,7 +92,7 @@ export default {
         {
           img: '/img/issue.png',
           title: 'Issue',
-          content: <span>Reporting issues via <a href="https://github.com/apache/incubator-dubbo/issues">Github issues</a>.</span>,
+          content: <span>Reporting issues via <a href="https://github.com/apache/dubbo/issues">Github issues</a>.</span>,
         },
         {
           img: '/img/documents.png',
@@ -102,7 +102,7 @@ export default {
         {
           img: '/img/pullrequest.png',
           title: 'Pull Request',
-          content: <span>Send your awesome enhancement via <a href="https://github.com/apache/incubator-dubbo/pulls">Pull requests.</a></span>,
+          content: <span>Send your awesome enhancement via <a href="https://github.com/apache/dubbo/pulls">Pull requests.</a></span>,
         },
       ],
     },
@@ -126,7 +126,7 @@ export default {
           tags: [
             {
               text: 'Java',
-              link: 'https://github.com/apache/incubator-dubbo',
+              link: 'https://github.com/apache/dubbo',
               bgColor: '#7A63FC',
             },
             {
@@ -167,7 +167,7 @@ export default {
             },
             {
               text: 'Spring Boot',
-              link: 'https://github.com/apache/incubator-dubbo-spring-boot-project',
+              link: 'https://github.com/apache/dubbo-spring-boot-project',
               bgColor: '#00D0D9',
             },
           ],
@@ -321,17 +321,17 @@ export default {
             },
             {
               text: 'JsonRPC',
-              link: 'https://github.com/apache/incubator-dubbo-rpc-jsonrpc',
+              link: 'https://github.com/apache/dubbo-rpc-jsonrpc',
               bgColor: '#00D0D9',
             },
             {
               text: 'XmlRPC',
-              link: 'https://github.com/dubbo/incubator-dubbo-rpc-xmlrpc',
+              link: 'https://github.com/dubbo/dubbo-rpc-xmlrpc',
               bgColor: '#00D0D9',
             },
             {
               text: 'JmsRpc',
-              link: 'https://github.com/dubbo/incubator-dubbo-rpc-jms',
+              link: 'https://github.com/dubbo/dubbo-rpc-jms',
               bgColor: '#00D0D9',
             },
           ],
@@ -519,7 +519,7 @@ export default {
         {
           img: '/img/issue.png',
           title: '报告缺陷',
-          content: <span>通过<a href="https://github.com/apache/incubator-dubbo/issues"> Github issues </a>报告缺陷。</span>,
+          content: <span>通过<a href="https://github.com/apache/dubbo/issues"> Github issues </a>报告缺陷。</span>,
         },
         {
           img: '/img/documents.png',
@@ -529,7 +529,7 @@ export default {
         {
           img: '/img/pullrequest.png',
           title: 'Pull Request',
-          content: <span>提交 <a href="https://github.com/apache/incubator-dubbo/pulls"> Pull requests </a>来修复问题。</span>,
+          content: <span>提交 <a href="https://github.com/apache/dubbo/pulls"> Pull requests </a>来修复问题。</span>,
         },
       ],
     },
@@ -553,7 +553,7 @@ export default {
           tags: [
             {
               text: 'Java',
-              link: 'https://github.com/apache/incubator-dubbo',
+              link: 'https://github.com/apache/dubbo',
               bgColor: '#7A63FC',
             },
             {
@@ -594,7 +594,7 @@ export default {
             },
             {
               text: 'Spring Boot',
-              link: 'https://github.com/apache/incubator-dubbo-spring-boot-project',
+              link: 'https://github.com/apache/dubbo-spring-boot-project',
               bgColor: '#00D0D9',
             },
           ],
@@ -748,17 +748,17 @@ export default {
             },
             {
               text: 'JsonRPC',
-              link: 'https://github.com/apache/incubator-dubbo-rpc-jsonrpc',
+              link: 'https://github.com/apache/dubbo-rpc-jsonrpc',
               bgColor: '#00D0D9',
             },
             {
               text: 'XmlRPC',
-              link: 'https://github.com/dubbo/incubator-dubbo-rpc-xmlrpc',
+              link: 'https://github.com/dubbo/dubbo-rpc-xmlrpc',
               bgColor: '#00D0D9',
             },
             {
                 text: 'JmsRpc',
-                link: 'https://github.com/dubbo/incubator-dubbo-rpc-jms',
+                link: 'https://github.com/dubbo/dubbo-rpc-jms',
                 bgColor: '#00D0D9',
             },
           ]
