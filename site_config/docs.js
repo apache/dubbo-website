@@ -365,6 +365,10 @@ export default {
                                 link: '/en-us/docs/user/references/registry/zookeeper.html',
                             },
                             {
+                                title: 'Nacos registry',
+                                link: '/en-us/docs/user/references/registry/nacos.html',
+                            },
+                            {
                                 title: 'Redis registry',
                                 link: '/en-us/docs/user/references/registry/redis.html',
                             },
@@ -967,6 +971,10 @@ export default {
                             {
                                 title: 'Zookeeper 注册中心',
                                 link: '/zh-cn/docs/user/references/registry/zookeeper.html',
+                            },
+                            {
+                                title: 'Nacos 注册中心',
+                                link: '/zh-cn/docs/user/references/registry/nacos.html',
                             },
                             {
                                 title: 'Redis 注册中心',
