@@ -401,6 +401,27 @@ export default {
                     {
                         title: 'Test coverage report',
                         link: '/en-us/docs/user/coveragence.html'
+                    },
+                    {
+                        title: 'Erlang languages',
+                        children: [
+                            {
+                                title: 'Quick start',
+                                link: '/en-us/docs/user/languages/erlang/start.html'
+                            },
+                            {
+                                title: 'Reference configuration',
+                                link: '/en-us/docs/user/languages/erlang/reference.html'
+                            },
+                            {
+                                title: 'Service configuration',
+                                link: '/en-us/docs/user/languages/erlang/service.html'
+                            },
+                            {
+                                title: 'Serialization configuration',
+                                link: '/en-us/docs/user/languages/erlang/serialization.html'
+                            }
+                        ]
                     }
                 ],
             },
@@ -1034,6 +1055,27 @@ export default {
                             {
                                 title: '2.7.x升级步骤及注意事项',
                                 link: '/zh-cn/docs/user/versions/version-270.html'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Erlang 语言',
+                        children: [
+                            {
+                                title: '快速启动',
+                                link: '/zh-cn/docs/user/languages/erlang/start.html'
+                            },
+                            {
+                                title: '消费者配置',
+                                link: '/zh-cn/docs/user/languages/erlang/reference.html'
+                            },
+                            {
+                                title: '生产者配置',
+                                link: '/zh-cn/docs/user/languages/erlang/service.html'
+                            },
+                            {
+                                title: '序列化配置',
+                                link: '/zh-cn/docs/user/languages/erlang/serialization.html'
                             }
                         ]
                     }
