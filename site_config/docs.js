@@ -1070,7 +1070,7 @@ export default {
                                 link: '/zh-cn/docs/user/languages/erlang/reference.html'
                             },
                             {
-                                title: '生产者配置',
+                                title: '提供者配置',
                                 link: '/zh-cn/docs/user/languages/erlang/service.html'
                             },
                             {
