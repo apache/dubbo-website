@@ -10,15 +10,15 @@ Dubbo是在非限制性的Apache 2.0许可下发布的，遵循标准的Github�
 #### 邮件列表
 
 
-邮件列表是讨论几乎所有与Dubbo有关事情的推荐方式。有关如何订阅的详细文档，请参阅[指南](https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide)。
+邮件列表是讨论几乎所有与Dubbo有关事情的推荐方式。有关如何订阅的详细文档，请参阅[指南](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide)。
 
-- [dev@dubbo.incubator.apache.org](mailto:dev-subscribe@dubbo.incubator.apache.org): 开发邮件列表，如果您在使用或开发Dubbo时遇到任何问题，您可以在此提出问题。
-- [commits@dubbo.incubator.apache.org](mailto:commits-subscribe@dubbo.incubator.apache.org): 所有提交将被发送到这个邮件列表。如果您对Dubbo的发展感兴趣，您可以订阅它。
-- [notification@dubbo.incubator.apache.org](mailto:notification-subscribe@dubbo.incubator.apache.org): 所有Github  [issue](https://github.com/apache/incubator-dubbo/issues)和[pull request](https://github.com/apache/incubator-dubbo/pulls)的更新都会被发送到这个邮件列表。
+- [dev@dubbo.apache.org](mailto:dev-subscribe@dubbo.apache.org): 开发邮件列表，如果您在使用或开发Dubbo时遇到任何问题，您可以在此提出问题。
+- [commits@dubbo.apache.org](mailto:commits-subscribe@dubbo.apache.org): 所有提交将被发送到这个邮件列表。如果您对Dubbo的发展感兴趣，您可以订阅它。
+- [notification@dubbo.apache.org](mailto:notification-subscribe@dubbo.apache.org): 所有Github  [issue](https://github.com/apache/dubbo/issues)和[pull request](https://github.com/apache/dubbo/pulls)的更新都会被发送到这个邮件列表。
 
 ### 报告问题
 
-在报告任何问题时请遵循[模版](https://github.com/apache/incubator-dubbo/issues/new?template=dubbo-issue-report-template.md)。
+在报告任何问题时请遵循[模版](https://github.com/apache/dubbo/issues/new?template=dubbo-issue-report-template.md)。
 
 ### 代码约定
 我们的代码风格几乎和标准Java约定一致（流行IDE的默认设置满足这一点），主要有以下附加限制：
@@ -48,24 +48,24 @@ Dubbo是在非限制性的Apache 2.0许可下发布的，遵循标准的Github�
 * 提交您的更改。
 * 确保提交消息的格式正确。
 * 将新分支推送到您克隆的代码库中。
-* 执行检查表 [pull request模版](https://github.com/apache/incubator-dubbo/blob/master/PULL_REQUEST_TEMPLATE.md)。
+* 执行检查表 [pull request模版](https://github.com/apache/dubbo/blob/master/PULL_REQUEST_TEMPLATE.md)。
 * 在提交pull requsest请求前, 请将您克隆的代码和远程代码库同步，这样您的pull request会简单清晰。具体操作如下：
 ```
-git remote add upstream git@github.com:apache/incubator-dubbo.git
+git remote add upstream git@github.com:apache/dubbo.git
 git fetch upstream
 git rebase upstream/master
 git checkout -b your_awesome_patch
 ... add some work
 git push origin your_awesome_patch
 ```
-* 提交pull request请求到apache/incubator-dubbo并等待回复。
+* 提交pull request请求到apache/dubbo并等待回复。
 
 谢谢您的贡献！
 
 ### 代码风格
 
 
-我们提供了IntelliJ idea的模版文件[dubbo_codestyle_for_idea.xml](https://github.com/apache/incubator-dubbo/tree/master/codestyle/dubbo_codestyle_for_idea.xml)，您可以将它导入到IDE。
+我们提供了IntelliJ idea的模版文件[dubbo_codestyle_for_idea.xml](https://github.com/apache/dubbo/tree/master/codestyle/dubbo_codestyle_for_idea.xml)，您可以将它导入到IDE。
 
 如果使用Eclipse，可以通过参考该文件手动配置。
 

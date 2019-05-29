@@ -34,7 +34,7 @@ Nowadays, Internet architecture tends to be micro-service way. The discussions a
 
   ### We support some common protocols
 
-  Most of the service management frameworks support multiple protocols, dubbo as well. Besides its own protocol, the common protocols such as Dangdangwang's [Rest](https://dangdangdotcom.github.io/dubbox/rest.html) protocol and Qianmiwang's [json-rpc](https://github.com/apache/incubator-dubbo-rpc-jsonrpc) protocol are also supported.       
+  Most of the service management frameworks support multiple protocols, dubbo as well. Besides its own protocol, the common protocols such as Dangdangwang's [Rest](https://dangdangdotcom.github.io/dubbox/rest.html) protocol and Qianmiwang's [json-rpc](https://github.com/apache/dubbo-rpc-jsonrpc) protocol are also supported.       
 
   The developers getting used to traditional RPC interfaces might feel uncomfortable while working on restful RPC interfaces. On the one hand, this is not good for rebuilding new interfaces. On the other hand, restful style might make these interfaces incompatible with the other protocols used by old interfaces. Of course, if there is no old system problems, using Rest protocol is the easiest implementation of cross-language calls, since most of the languages support it.
 

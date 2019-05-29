@@ -1,21 +1,21 @@
 ---
 title: Spring Boot Dubbo应用启停源码分析
 keywords: Dubbo, Spring Boot, 源码分析
-description: 本文分析 `incubator-dubbo-spring-boot-project` 中 Dubbo 启停源码的实现原理。
+description: 本文分析 `dubbo-spring-boot-project` 中 Dubbo 启停源码的实现原理。
 ---
 
 # Spring Boot Dubbo应用启停源码分析
 
 ## 背景介绍
 
-[Dubbo Spring Boot](https://github.com/apache/incubator-dubbo-spring-boot-project) 工程致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发。同时也整合了 Spring Boot 特性：
+[Dubbo Spring Boot](https://github.com/apache/dubbo-spring-boot-project) 工程致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发。同时也整合了 Spring Boot 特性：
 
-- [自动装配](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (比如： 注解驱动, 自动装配等).
-- [Production-Ready](https://github.com/apache/incubator-dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (比如： 安全, 健康检查, 外部化配置等).
+- [自动装配](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (比如： 注解驱动, 自动装配等).
+- [Production-Ready](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (比如： 安全, 健康检查, 外部化配置等).
 
 ## DubboConsumer启动分析
 
-你有没有想过一个问题？`incubator-dubbo-spring-boot-project`中的`DubboConsumerDemo`应用就一行代码，`main`方法执行完之后，为什么不会直接退出呢？
+你有没有想过一个问题？`dubbo-spring-boot-project`中的`DubboConsumerDemo`应用就一行代码，`main`方法执行完之后，为什么不会直接退出呢？
 
 ```java
 @SpringBootApplication(scanBasePackages = "com.alibaba.boot.dubbo.demo.consumer.controller")

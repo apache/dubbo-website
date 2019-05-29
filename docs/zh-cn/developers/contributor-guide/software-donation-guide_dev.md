@@ -1,8 +1,8 @@
 # 软件捐献向导
 
-在您阅读这篇指南之前，请确保您已经向PPMC确认了实际需要的SGA。
+在您阅读这篇指南之前，请确保您已经向PMC确认了实际需要的SGA。
 
-如果您向Apache Dubbo（incubating）捐赠了大量的代码或文档，则需要在合并代码或者文档之前签署[软件授权书](https://www.apache.org/licenses/#grants)。
+如果您向Apache Dubbo 捐赠了大量的代码或文档，则需要在合并代码或者文档之前签署[软件授权书](https://www.apache.org/licenses/#grants)。
 
 ### 操作步骤
 

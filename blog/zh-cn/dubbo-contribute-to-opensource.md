@@ -1,13 +1,13 @@
 ---
 title: 以Dubbo为例，聊聊如何向开源项目做贡献
 keywords: Dubbo, opensource
-description: 本文将会以 incubator-dubbo 项目为例向你阐释，给开源项目做贡献并不是一件难事
+description: 本文将会以 dubbo 项目为例向你阐释，给开源项目做贡献并不是一件难事
 ---
 
 # 以Dubbo为例，聊聊如何向开源项目做贡献
 
 
-Github 上有众多优秀的开源项目，大多数 IT 从业者将其当做了予取予求的工具库，遇到什么需求，先去 Github 搜一把，但有没有想过有一天自己也可以给开源事业做一些贡献呢？本文将会以 incubator-dubbo 项目为例，向你阐释，给开源项目做贡献并不是一件难事。
+Github 上有众多优秀的开源项目，大多数 IT 从业者将其当做了予取予求的工具库，遇到什么需求，先去 Github 搜一把，但有没有想过有一天自己也可以给开源事业做一些贡献呢？本文将会以 dubbo 项目为例，向你阐释，给开源项目做贡献并不是一件难事。
 
 ## 1 为何要给开源贡献力量
 
@@ -59,7 +59,7 @@ fork 将会复制一份当前主分支的代码进入到你的仓库中，之后
 
 ```shell
 # 设置源仓库
-git remote add upstream https://github.com/apache/incubator-dubbo.git
+git remote add upstream https://github.com/apache/dubbo.git
 # 拉取源仓库的更新
 git fetch upstream
 # 将自己仓库的主分支合并源仓库的更新
@@ -71,7 +71,7 @@ git merge upstream/master
 
 ![pull request](http://ov0zuistv.bkt.clouddn.com/image-20180827150703869.png)
 
-pull request 经常被缩写为 PR，指的是一次向源仓库请求合并的行为，如上是我 fork 了 incubator-dubbo 的仓库之后才存在的操作按钮。
+pull request 经常被缩写为 PR，指的是一次向源仓库请求合并的行为，如上是我 fork 了 dubbo 的仓库之后才存在的操作按钮。
 
 **源仓库视角的 pull request**
 
@@ -89,11 +89,11 @@ pull request 经常被缩写为 PR，指的是一次向源仓库请求合并的�
 
 ### 2.3 Mailing list
 
-每个开源项目都会有自己的贡献规范，可以参考首页的 Contributing，来获取具体的信息。incubator-dubbo 作为一个孵化中的 apache 项目，遵守了 apache 的传统，在 [Contributing](https://github.com/apache/incubator-dubbo/blob/master/CONTRIBUTING.md) 中描述道：当你有新特性想要贡献给 Dubbo 时，官方推荐使用 Mailing list 的方式描述一遍你想要做的改动。
+每个开源项目都会有自己的贡献规范，可以参考首页的 Contributing，来获取具体的信息。dubbo 作为一个孵化中的 apache 项目，遵守了 apache 的传统，在 [Contributing](https://github.com/apache/dubbo/blob/master/CONTRIBUTING.md) 中描述道：当你有新特性想要贡献给 Dubbo 时，官方推荐使用 Mailing list 的方式描述一遍你想要做的改动。
 
-Mailing list 简单来说，就是一个邮件通知机制，所有的 Dubbo 开发者都会订阅该邮箱：dev@dubbo.incubator.apache.org。有任何新特性的改动，或者什么建议想要通知其他开发者，都可以通过向该邮箱发送邮件来达到这个目的，相同地，你也会收到其转发的其他开发者的邮件。
+Mailing list 简单来说，就是一个邮件通知机制，所有的 Dubbo 开发者都会订阅该邮箱：dev@dubbo.apache.org。有任何新特性的改动，或者什么建议想要通知其他开发者，都可以通过向该邮箱发送邮件来达到这个目的，相同地，你也会收到其转发的其他开发者的邮件。
 
-或者你是一个 Dubbo 的使用者，你想要得知开发者的改造方向，也可以订阅，这个[指南](https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide)可以帮助你订阅 Dubbo 的 Mailing list。
+或者你是一个 Dubbo 的使用者，你想要得知开发者的改造方向，也可以订阅，这个[指南](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide)可以帮助你订阅 Dubbo 的 Mailing list。
 
 > 作为一个 modern developer，你可能觉得 mailing list 的交流方式存在滞后性，这样的沟通方式不是特别的高效，但它作为 apache 项目的推荐交流方式存在其特殊的原因，在此不多赘述。总之遵循一个原则：bug fix或者讨论，可以在 github issue 中进行，影响较大的特性和讨论则推荐在 mailing list 中展开。
 
@@ -103,7 +103,7 @@ Mailing list 简单来说，就是一个邮件通知机制，所有的 Dubbo 开
 
 ### 3.1 撰写文档
 
- [Dubbo文档](http://dubbo.apache.org/zh-cn/)是其开源组成成分的重要一环，其内容源文件位于：[https://github.com/apache/incubator-dubbo-website](https://github.com/apache/incubator-dubbo-website)。同样也是一个 Git 仓库，任何你想要对 dubbo 知识点的补充，都可以在这儿提交 pull request，只需要一些 markdown 的语法知识，和一些可有可无的 npm 语法即可。如果你觉得贡献代码对于现在的自己仍然有点难度，不妨从贡献文档开始接触开源。
+ [Dubbo文档](http://dubbo.apache.org/zh-cn/)是其开源组成成分的重要一环，其内容源文件位于：[https://github.com/apache/dubbo-website](https://github.com/apache/dubbo-website)。同样也是一个 Git 仓库，任何你想要对 dubbo 知识点的补充，都可以在这儿提交 pull request，只需要一些 markdown 的语法知识，和一些可有可无的 npm 语法即可。如果你觉得贡献代码对于现在的自己仍然有点难度，不妨从贡献文档开始接触开源。
 
 ### 3.2 ISSUE
 

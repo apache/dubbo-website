@@ -13,4 +13,4 @@
   * TDD（optional）：When you start a new issue, you can try to write test case at first 
 ### 3.The specified value of the test coverage
   * In the stage, the test coverage specified value of delta changed codes is ：>=60%. The higher, the better.
-  * We can see the coverage report in this page: https://codecov.io/gh/apache/incubator-dubbo
+  * We can see the coverage report in this page: https://codecov.io/gh/apache/dubbo

@@ -5,8 +5,8 @@ Now version 0.1 has been released, frontend uses Vue and Vuetify as javascript f
 
 * install
 ```sh
-git clone https://github.com/apache/incubator-dubbo-admin.git
-cd incubator-dubbo-admin
+git clone https://github.com/apache/dubbo-admin.git
+cd dubbo-admin
 mvn clean package
 cd dubbo-admin-distribution/target
 java -jar dubbo-admin-0.1.jar
@@ -59,7 +59,7 @@ the addresses in configuration center have higher priority than those in `applic
 visit documents on github:
 
 ```sh
-https://github.com/apache/incubator-dubbo-admin
+https://github.com/apache/dubbo-admin
 ```
 
 [^1]: there's no login module in the current version.

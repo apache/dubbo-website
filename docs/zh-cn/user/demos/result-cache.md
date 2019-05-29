@@ -25,4 +25,4 @@
 ```
 
 [^1]: `2.1.0` 以上版本支持
-[^2]: [示例代码](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-cache)
+[^2]: [示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-cache)

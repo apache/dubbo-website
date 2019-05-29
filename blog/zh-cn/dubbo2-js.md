@@ -41,7 +41,7 @@ description: 本文介绍了如何使用 dubbo2.js 进行跨语言的 dubbo 调�
 
 ### 通用协议的支持
 
-事实上，大多数服务治理框架都支持多种协议，dubbo 框架除默认的 dubbo 协议之外，还有当当网扩展的 [rest](https://dangdangdotcom.github.io/dubbox/rest.html) 协议和千米网扩展的 [json-rpc](https://github.com/apache/incubator-dubbo-rpc-jsonrpc) 协议可供选择。这两者都是通用的跨语言协议。
+事实上，大多数服务治理框架都支持多种协议，dubbo 框架除默认的 dubbo 协议之外，还有当当网扩展的 [rest](https://dangdangdotcom.github.io/dubbox/rest.html) 协议和千米网扩展的 [json-rpc](https://github.com/apache/dubbo-rpc-jsonrpc) 协议可供选择。这两者都是通用的跨语言协议。
 
 rest 协议为满足 JAX-RS 2.0 标准规范，在开发过程中引入了 @Path，@POST，@GET 等注解，习惯于编写传统 rpc 接口的人可能不太习惯 rest 风格的 rpc 接口。一方面这样会影响开发体验，另一方面，独树一帜的接口风格使得它与其他协议不太兼容，旧接口的共生和迁移都无法实现。如果没有遗留系统，rest 协议无疑是跨语言方案最简易的实现，绝大多数语言支持 rest 协议。
 

@@ -3,7 +3,7 @@
 Apache有一个官方的网站，用来维护所有的孵化项目的信息。每一个孵化项目在这个网站下都有一个信息页。
 Dubbo的信息页地址是https://incubator.apache.org/projects/dubbo.html。
 
-当项目发生比较大的变化，比如新的committer的加入，新的PPMC的当选，或是新版本的Release等，都需要将这些更新信息维护到这个页面。
+当项目发生比较大的变化，比如新的committer的加入，新的PMC的当选，或是新版本的Release等，都需要将这些更新信息维护到这个页面。
 这个官方网站的项目地址是https://svn.apache.org/repos/asf/incubator/public/trunk。
 
 维护这个页面的方法如下：

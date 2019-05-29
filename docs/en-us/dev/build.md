@@ -5,12 +5,12 @@
 checkout the lastest project source code with commands blow:
 
 ```sh
-git clone https://github.com/apache/incubator-dubbo.git dubbo
+git clone https://github.com/apache/dubbo.git dubbo
 ```
 
 ## Branches
 
-We use `master` as the major branch for new feature development, and use other branches for maintenance. Tags for all versions can be checked via https://github.com/apache/incubator-dubbo/tags.
+We use `master` as the major branch for new feature development, and use other branches for maintenance. Tags for all versions can be checked via https://github.com/apache/dubbo/tags.
 
 ## Building
 
@@ -74,6 +74,6 @@ Use the following maven command as well:
 mvn eclipse:configure-workspace -Declipse.workspace=/path/to/the/workspace/
 ```
 
-1: view the source code through https://github.com/apache/incubator-dubbo 
+1: view the source code through https://github.com/apache/dubbo 
 2: path under UNIX is ${HOME}/.m2/repository, path under Windows is C:\Documents and Settings\<user>\.m2\repository
 

@@ -24,7 +24,7 @@
 
 ## 使用
 
-可以参考 [dubbo 项目中的示例代码](https://github.com/apache/incubator-dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol/thrift)
+可以参考 [dubbo 项目中的示例代码](https://github.com/apache/dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol/thrift)
 
 ## 常见问题
 

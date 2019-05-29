@@ -17,6 +17,15 @@ Please also make sure your node version is 8.x, versions higher than 8.x is not 
 4. Run `docsite build` to build source code.
 5. Verify your change locally: `python -m SimpleHTTPServer 8000`, when your python version is 3 use :`python3 -m http.server 8000` instead.
 
+If you have higher version of node installed, you may consider `nvm` to allow different versions of `node` coexisting on your machine.
+
+1. Follow the [instructions](http://nvm.sh) to install nvm
+2. Run `nvm install v8.16.0` to install node v8
+3. Run `nvm use v8.16.0` to switch the working environment to node v8
+4. Run `npm install docsite -g`
+
+then you are all set to run and build the website. Follow the build instruction above for the details.
+
 ## How to send a PR
 
 1. Do not use `git add .` to commit all the changes.

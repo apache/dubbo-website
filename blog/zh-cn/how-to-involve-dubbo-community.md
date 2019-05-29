@@ -10,7 +10,7 @@ description: 本文介绍了如何以Apache Way的方式参与Dubbo社区并做�
 
 ## 前言
 
-本文首次分享是在Apache Dubbo(incubating)成都meetup上，这个话题是第一次在meetup上讲，不是我们没有更好的话题，相反，我们认为这个话题非常重要，甚至建议这个话题以后每次meetup都要讲。
+本文首次分享是在Apache Dubbo成都meetup上，这个话题是第一次在meetup上讲，不是我们没有更好的话题，相反，我们认为这个话题非常重要，甚至建议这个话题以后每次meetup都要讲。
 
 Dubbo的发展历史大家应该并不陌生了，这里我还是简单回顾一下。Dubbo于2011年在github开源，后面几年由于一些原因停止了维护，直接去年7月份阿里重启维护，并于2018年2月16日捐献给Apache。
 
@@ -79,16 +79,16 @@ Dubbo正在成为Apache顶级项目的路上——Apache孵化项目中。
 
 要参与Dubbo社区，就要先大概了解一下目前社区的工作方式。总结一句话就是4个角色、3个途径以及2个代码组；
 
-1. 4个角色前面也提到过了，分别是User、Contributor、Committer、PPMC；这里特别要强调用的是，角色之间不是孤立的，比如提功能建议的也可以是Committer或Contributor等；PPMC有投票权，但其他人一样也可以投票，这本身就是一种参与、一种贡献；
+1. 4个角色前面也提到过了，分别是User、Contributor、Committer、PMC；这里特别要强调用的是，角色之间不是孤立的，比如提功能建议的也可以是Committer或Contributor等；PMC有投票权，但其他人一样也可以投票，这本身就是一种参与、一种贡献；
 2. 3个途径，分别是Dubbo官网、github、dev邮件列表；目前比较活跃的是github issue/PR；我们鼓励按`The Apache Way`的方式，使用邮件列表交流，让导师看到我们的贡献；
-3. 2个代码组，一个是 `github.com/apache/incubator-dubbo*` ，这里是dubbo孵化的项目，目前主要包含dubbo-rpc、dubbo-spring-boot-start、dubbo-ops三个部分；另外一个就是 `github.com/dubbo`，这个是dubbo作为微服务解决方案的所有相关的生态部分，包括dubbo-rpc的扩展、dubbo与其他产品集成、dubbo多语言客户端实现以及一些工具和套件等；
+3. 2个代码组，一个是 `github.com/apache/dubbo*` ，这里是dubbo孵化的项目，目前主要包含dubbo-rpc、dubbo-spring-boot-start、dubbo-ops三个部分；另外一个就是 `github.com/dubbo`，这个是dubbo作为微服务解决方案的所有相关的生态部分，包括dubbo-rpc的扩展、dubbo与其他产品集成、dubbo多语言客户端实现以及一些工具和套件等；
 
 ![img](../../img/blog/involve-dubbo/dubbo-project.png)
 
 所以，对于想参与Dubbo社区、想为Dubbo这个微服务解决方案自己一份力量的人来说，以下就是你们现在就可以开始做的：
 
-1. 开发邮件组可以订阅起来，可以参考这里：https://github.com/apache/incubator-dubbo/wiki/Mailing-list-subscription-guide
-2. github.com/apache/incubator-dubbo star起来，fork起来
+1. 开发邮件组可以订阅起来，可以参考这里：https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide
+2. github.com/apache/dubbo star起来，fork起来
 3. 学习中英文文档，进行修正或优化，提PR；有疑问的地方，可以email到邮件组或提issue；官方开发者的回复总比google或stackoverflow里找到的答案要强的多吧？
 4. 如果你正在使用dubbo，可以将经验总结出来，写篇blog，分享给社区；真实的案例总是最具有说服力；
 5. 如果你有时间，可以参与issue和PR的解决，回条用户的问题、PR的review；`Good first issue`以及`Help wanted`的issue，总有一个是适合你的；

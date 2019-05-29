@@ -35,7 +35,7 @@ class Home extends Language {
       }
     });
     // 写死协议，因github会做协议跳转，这种跳转会被Safari拦截
-    fetch('https://api.github.com/repos/apache/incubator-dubbo')
+    fetch('https://api.github.com/repos/apache/dubbo')
       .then(res => res.json())
       .then((data) => {
         this.setState({
@@ -73,13 +73,13 @@ class Home extends Language {
               <Button type="normal" link={getLink(dataSource.brand.viewOnGithubButton.link)}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
             <div className="github-buttons">
-                <a href="https://github.com/apache/incubator-dubbo" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/apache/dubbo" target="_blank" rel="noopener noreferrer">
                   <div className="star">
                     <img src="https://img.alicdn.com/tfs/TB1FlB1JwHqK1RjSZFPXXcwapXa-32-32.png" />
                     <span className="count">{starCount}</span>
                   </div>
                 </a>
-                <a href="https://github.com/apache/incubator-dubbo/fork" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/apache/dubbo/fork" target="_blank" rel="noopener noreferrer">
                 <div className="fork">
                   <img src="https://img.alicdn.com/tfs/TB1zbxSJwDqK1RjSZSyXXaxEVXa-32-32.png" />
                   <span className="count">{forkCount}</span>
