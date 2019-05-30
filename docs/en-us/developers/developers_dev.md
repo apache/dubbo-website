@@ -42,6 +42,7 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | LiZhenNet       | Zhen Li             | Keep             | Committer | +8       |
 | lexburner       | Jingfeng Xu         | Alibaba          | Committer | +8       |
 | khanimteyaz     | Imteyaz Khan        |                  | Committer |          |
+| xxz             | Xiaoxiang Zhai      | Souche           | Committer | +8       |
 
 ### Contributors
 
