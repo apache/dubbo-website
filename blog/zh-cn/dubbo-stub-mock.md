@@ -195,7 +195,7 @@ public class DemoServiceMock implements DemoService {
 
 
 ```xml
-<dubbo:reference id="demoService" check="false" interface="org.apache.dubbo.samples.mock.api.DemoService" stub="org.apache.dubbo.samples.mock.impl.DemoMock"/>
+<dubbo:reference id="demoService" check="false" interface="org.apache.dubbo.samples.mock.api.DemoService" mock="org.apache.dubbo.samples.mock.impl.DemoMock"/>
 ```
 
 
