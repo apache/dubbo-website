@@ -73,7 +73,7 @@ class Home extends Language {
               <Button type="normal" link={getLink(dataSource.brand.viewOnGithubButton.link)}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
             <div className="github-buttons">
-                <a href="https://github.com/apache/dubbo" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/apache/dubbo/star" target="_blank" rel="noopener noreferrer">
                   <div className="star">
                     <img src="https://img.alicdn.com/tfs/TB1FlB1JwHqK1RjSZFPXXcwapXa-32-32.png" />
                     <span className="count">{starCount}</span>
