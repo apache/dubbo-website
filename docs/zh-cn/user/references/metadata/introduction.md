@@ -11,7 +11,7 @@ dubbo consumer中的配置项也有[20+个配置项](http://dubbo.apache.org/en-
 需要将注册中心原来的数据信息和元数据信息保存到独立的key-value的存储中，这个key-value可以是DB，redis或者其他持久化存储。核心代码中支持了zookeeper，redis(推荐)的默认支持。
 
 provider存储内容的格式，参见：org.apache.dubbo.metadata.definition.model.FullServiceDefinition。是该类型gson化之后的存储。
-Consumer存储内容，为Map格式。从Consumer端注册到注册中心的URL中的获取参数信息。即通过URL.getParameterMap()获取到的Map，进行gson话之后进行存储。
+Consumer存储内容，为Map格式。从Consumer端注册到注册中心的URL中的获取参数信息。即通过URL.getParameterMap()获取到的Map，进行gson化之后进行存储。
 
 详细的内容，可以参考下面的sample输出。
 
