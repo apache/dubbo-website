@@ -155,15 +155,15 @@ $ mvn deploy
 
 上述命令将snapshot包推送到maven中央仓库
 
-### 用maven-release-plugin发布
+### ~~用maven-release-plugin发布~~ (`废弃`，参考后一步)
 
-先用dryRun验证是否ok
+~~先用dryRun验证是否ok~~
 
 ```shell
 $ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID-DdryRun=true
 ```
 
-验证通过后，执行release:prepare
+~~验证通过后，执行release:prepare~~
 
 ```shell
 $ mvn release:clean
@@ -181,7 +181,7 @@ $ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodule
 
 > 如果指定了`-DpushChanges=true`, 则本地提交会自动推送到远端的GitHub仓库。根据经验，建议不要指定为true，请设置为false，待本地检查通过之后再手动提交
 
-执行release:perform，做staging发布
+~~执行release:perform，做staging发布~~
 
 ```shell
 $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
@@ -189,9 +189,22 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 
 此时插件会自动下载远端的tag对应的源码，编译后，将所有Artifacts发布到配置的远程[maven仓库](http://repository.apache.org)，处于staging状态。
 
+### 使用mvn deploy进行deploy
+
+> 要求：maven 3.5+ 
+
+修改pom文件中的版本号，从2.7.x-SNAPSHOT改为2.7.x， 目前有3个地方需要修改。建议全文搜索。
+
+```shell
+$ mvn clean install -Prelease
+$ mvn deploy -Prelease -DskipTests
+```
+
+所有被deploy到远程[maven仓库](http://repository.apache.org)的Artifacts都会处于staging状态
+
 #### 注意点
 
-- 在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，可以重新开始执行。  
+- 在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，可以重新开始执行。
 - deploy执行到maven仓库的时候，请确认下包的总量是否正确。多次出现了包丢失的情况，特别是dubbo-parent包。
 
 
@@ -202,18 +215,18 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 2. 将dubbo checkout到本地目录
 
    ```shell
-   $ svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo
-   # 假定本地目录为 ~/apache/incubator/dubbo
+   $ svn checkout https://dist.apache.org/repos/dist/dev/dubbo
+   # 假定本地目录为 ~/apache/dubbo
    ```
 
 3. 当前发布版本为${release_version}，新建目录
 
    ```shell
-   $ cd ~/apache/incubator/dubbo # dubbo svn根目录
+   $ cd ~/apache/dubbo # dubbo svn根目录
    $ mkdir ${release_version}
    ```
 
-4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
+4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
 
    ```sh
    $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
@@ -260,7 +273,7 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 首先，从一下地址下载要发布的Release Candidate到本地环境：
 
 <pre>
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/
+https://dist.apache.org/repos/dist/dev/dubbo/${release_version}/
 </pre>
 
 然后，开始验证环节，验证包含但不限于以下内容和形式
@@ -279,7 +292,7 @@ $ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
 如果是第一次检查，需要首先导入公钥。 
 
 ```sh
- $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
+ $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS >> KEYS # download public keys to local directory
  $ gpg --import KEYS # import keys
  $ gpg —edit-key liujun
    > trust # type trust command
@@ -295,9 +308,7 @@ gpg --verify apache-dubbo-2.6.3-bin-release.zip.asc apache-dubbo-2.6.3-bin-relea
 ### 检查源码包的文件内容
 
 解压缩`apache-dubbo-${release_version}-source-release.zip`，进行如下检查:
-
-- Directory with 'incubating' in name
-  `apache-dubbo-${release_version}-source-release`  
+  
 - DISCLAIMER exists
 - LICENSE and NOTICE exists and contents are good
 - All files and no binary files exist
@@ -331,33 +342,31 @@ find . -name THIRD-PARTY.txt | xargs grep -E 'GPL|General Public License' | grep
 解压缩`apache-dubbo-${release_version}-bin-release.zip`，进行如下检查:
 
 * Check signatures are good
-* 'incubating' in name
 * LICENSE and NOTICE exists and contents are good
 
 注意，如果二进制包里面引入了第三方依赖，则需要更新LICENSE，加入第三方依赖的LICENSE，如果第三方依赖的LICENSE是Apache 2.0，并且对应的项目中包含了NOTICE，还需要更新NOTICE文件
 
 ## 进入投票
 
-投票分两个阶段：
+dubbo毕业之后，投票分只需要一次：
 
 1. Dubbo社区投票，发起投票邮件到dev@dubbo.apache.org。在社区开发者Review，经过至少72小时并统计到3个同意发版的binding票后（只有PMC的票才是binding），即可进入下一阶段的投票。
-2. Apache社区投票，发起投票邮件到general@incubator.apache.org。经过至少72小时并统计到3个同意发版的binding票后（只有IPMC Member的票才是binding），即可进行正式发布。
 
 Dubbo社区投票邮件模板：
 
 ```text
 Hello Dubbo Community,
 
-This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
+This is a call for vote to release Apache Dubbo version 2.7.2.
 
 The release candidates:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
+https://dist.apache.org/repos/dist/dev/dubbo/2.7.2/
 
 The staging repo:
 https://repository.apache.org/content/repositories/orgapachedubbo-1005
 
 Git tag for the release:
-https://github.com/apache/dubbo/tree/dubbo-2.6.2
+https://github.com/apache/dubbo/tree/dubbo-2.7.2
 
 Hash for the release tag:
 afab04c53edab38d52275d2a198ea1aff7a4f41e
@@ -366,7 +375,7 @@ Release Notes:
 https://github.com/apache/dubbo/releases/tag/untagged-4775c0a22c60fca55118
 
 The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+https://dist.apache.org/repos/dist/dev/dubbo/KEYS
 
 The vote will be open for at least 72 hours or until necessary number of votes are reached.
 
@@ -377,65 +386,9 @@ Please vote accordingly:
 [ ] -1 disapprove with the reason
 
 Thanks,
-The Apache Dubbo (Incubating) Team
+The Apache Dubbo Team
 ```
 
-Apache社区投票邮件模板：
-
-```text
-Hello all,
-
-This is a call for vote to release Apache Dubbo (Incubating) version 2.6.4.
-
-The Apache Dubbo community has voted on and approved a proposal to release
-Apache Dubbo (Incubating) version 2.6.4.
-
-We now kindly request the Incubator PMC members review and vote on this
-incubator release.
-
-Apache Dubbo™  is a high-performance, java based, open source
-RPC framework. Dubbo offers three key functionalities, which include
-interface based remote call, fault tolerance & load balancing, and
-automatic service registration & discovery.
-
-Dubbo community vote and result thread:
-https://lists.apache.org/thread.html/8d5c39eece6288beed2e22ca976350728c571d2a9cef1c9a9e56a409@%3Cdev.dubbo.apache.org%3E
-A minor issue also can be found in the above thread.
-
-The release candidates (RC1):
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4
-
-The staging repo:
-https://repository.apache.org/content/repositories/orgapachedubbo-1005
-
-Git tag for the release (RC1):
-https://github.com/apache/dubbo/tree/dubbo-2.6.4
-
-Hash for the release tag:
-88037747a3b69d3225c73f6fbcda36ebd8435887
-
-Release Notes:
-*https://github.com/apache/dubbo/blob/dubbo-2.6.4/CHANGES.md
-<https://github.com/apache/dubbo/blob/dubbo-2.6.4/CHANGES.md>*
-
-The artifacts have been signed with Key : 7955FB6D1DD21CF7, which can be
-found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
-
-Look at here for how to verify this release candidate:
-https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/prepare-an-apache-release.md#prepare-apache-release
-
-The vote will be open for at least 72 hours or until necessary number of
-votes are reached.
-
-Please vote accordingly:
-[ ] +1 approve
-[ ] +0 no opinion
-[ ] -1 disapprove with the reason
-
-Thanks,
-The Apache Dubbo (Incubating) Team
-```
 
 宣布投票结果模板：
 ```text
@@ -447,22 +400,22 @@ We’ve received 3 +1 binding votes and one +1 non-binding vote:
 
 +1 non-binding, Jerrick
 
-I will create a new vote thread in Apache community now.
+I will start to release today.
 
 Best regards,
-The Apache Dubbo (Incubating) Team
+The Apache Dubbo Team
 ```
 
 ## 正式发布
 
-1. 将[dev](https://dist.apache.org/repos/dist/dev/incubator/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下，KEYS有更新的，也需要同步更新。
-2. 删除[dev](https://dist.apache.org/repos/dist/dev/incubator/dubbo)目录下的发布包
-3. 删除[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下上一个版本的发布包，这些包会被自动保存在[这里](https://archive.apache.org/dist/incubator/dubbo)
+1. 将[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/dubbo)目录下，KEYS有更新的，也需要同步更新。
+2. 删除[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包
+3. 删除[release](https://dist.apache.org/repos/dist/release/dubbo)目录下上一个版本的发布包，这些包会被自动保存在[这里](https://archive.apache.org/dist/dubbo)
 4. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
 5. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
-6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似[这样](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md)
+6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似[这样](https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md)
 7. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
-8. 发邮件到 `dev@dubbo.apache.org` 和 `general@incubator.apache.org`
+8. 发邮件到 `dev@dubbo.apache.org`
 宣布release邮件模板： 
 
 ```text
@@ -486,13 +439,6 @@ hesitate to let us know by sending feedback to this mailing list or filing
 an issue on GitHub[4].
 
 
-
-=====
-*Disclaimer*
-
-Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
-
-
 [1] http://dubbo.apache.org/en-us/blog/download.html
 [2] http://central.maven.org/maven2/com/alibaba/dubbo
 [3] https://github.com/apache/dubbo/releases
@@ -511,7 +457,7 @@ Apache Dubbo is an effort undergoing incubation at The Apache Software Foundatio
 
 #### gpg: signing failed: Inappropriate ioctl for device
 
-If you've encoutered this error, try the following commands:
+If you've encountered this error, try the following commands:
 
 ```
 export GPG_TTY=$(tty)
