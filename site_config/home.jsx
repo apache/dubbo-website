@@ -83,7 +83,7 @@ export default {
         '/img/users_icbc.png',
         '/img/users_handu.png',
         '/img/users_rograndec.png',
-		'/img/user_chuangjinzhitou.png'
+	'/img/user_chuangjinzhitou.png'
         // '/img/users_other1.png',
         // '/img/users_other2.png'
       ],
@@ -171,6 +171,7 @@ export default {
         '/img/users_icbc.png',
         '/img/users_handu.png',
         '/img/users_rograndec.png',
+	'/img/user_chuangjinzhitou.png'
         // '/img/users_other1.png',
         // '/img/users_other2.png'
       ],
