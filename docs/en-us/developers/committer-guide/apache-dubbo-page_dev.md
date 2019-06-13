@@ -5,7 +5,7 @@ Each incubation project has an information page under this website.
 Dubbo's information page address is https://incubator.apache.org/projects/dubbo.html.
 
 When the project has undergone major changes, such as the addition of a new committer, 
-the election of a new PMC, or a new version of Release, etc., these updates need to be maintained on this page.
+the election of a new PMC, or a new version of Release, etc, these updates need to be maintained on this page.
 The project address for this official website is 
 https://svn.apache.org/repos/asf/incubator/public/trunk.
 
@@ -14,7 +14,7 @@ Here's how to maintain this page:
 1. Install the SVN. If it is a Mac OS X system or a Linux system, it comes with SVN. If it is a Windows system, 
 please install SVN first.
 
-2. Check out the https://svn.apache.org/repos/asf/incubator/public/trunk project with SVN.
+2. Check out the [project](https://svn.apache.org/repos/asf/incubator/public/trunk) with SVN.
 
 3. Modify the content/projects/dubbo.xml file and save it.
 
@@ -29,4 +29,5 @@ This process will ask for the Apache id and password.
 References:
 
 1.http://incubator.apache.org/guides/website.html
+
 2.https://svn.apache.org/repos/asf/incubator/public/trunk/README.txt
