@@ -1,4 +1,4 @@
-# Dubbo Official WebSite
+# Dubbo Official Website
 
 This project keeps all sources used for building up dubbo official website which's served at http://dubbo.io or http://dubbo.apache.org.
 
@@ -24,7 +24,7 @@ If you have higher version of node installed, you may consider `nvm` to allow di
 3. Run `nvm use v8.16.0` to switch the working environment to node v8
 4. Run `npm install docsite -g`
 
-then you are all set to run and build the website. Follow the build instruction above for the details.
+Then you are all set to run and build the website. Follow the build instruction above for the details.
 
 ## How to send a PR
 
@@ -32,7 +32,7 @@ then you are all set to run and build the website. Follow the build instruction 
 2. Just push your changed files, such as:
     * `*.md`
 	* blog.js or docs.js or site.js
-3. Send a PR to asf-site branch.
+3. Send a PR to **master** branch.
 
 ## SEO
 
