@@ -6,7 +6,7 @@
     * [1.4 Usage](./preface/usage.md)
 * [2 Quick start](./quick-start.md)
 * [3 Dependencies](./dependencies.md)
-* [4 maturality](./maturity.md)
+* [4 Maturity](./maturity.md)
 * [5 Configuration](./configuration/index.md)
     * [5.1 XML configuration](./configuration/xml.md)
     * [5.2 Properties configuration](./configuration/properties.md)
