@@ -18,7 +18,7 @@ http://localhost:8080/users/register
 首先，开发服务的接口：
 
 ```java
-public class UserService {    
+public interface UserService {    
    void registerUser(User user);
 }
 ```
@@ -26,11 +26,11 @@ public class UserService {
 然后，开发服务的实现：
 
 ```java
-@Path("users")
+@Path("/users")
 public class UserServiceImpl implements UserService {
        
     @POST
-    @Path("register")
+    @Path("/register")
     @Consumes({MediaType.APPLICATION_JSON})
     public void registerUser(User user) {
         // save the user...
@@ -39,9 +39,9 @@ public class UserServiceImpl implements UserService {
 ```
 上面的实现非常简单，但是由于该 REST 服务是要发布到指定 URL 上，供任意语言的客户端甚至浏览器来访问，所以这里额外添加了几个 JAX-RS 的标准 annotation 来做相关的配置。
 
-@Path("users")：指定访问UserService的URL相对路径是/users，即http://localhost:8080/users
+@Path("/users")：指定访问UserService的URL相对路径是/users，即http://localhost:8080/users
 
-@Path("register")：指定访问registerUser()方法的URL相对路径是/register，再结合上一个@Path为UserService指定的路径，则调用UserService.register()的完整路径为http://localhost:8080/users/register
+@Path("/register")：指定访问registerUser()方法的URL相对路径是/register，再结合上一个@Path为UserService指定的路径，则调用UserService.register()的完整路径为http://localhost:8080/users/register
 
 @POST：指定访问registerUser()用HTTP POST方法
 
@@ -88,7 +88,7 @@ JAX-RS本身可以支持所有这些形式。但是上面那种在URL路径中�
 
 ```java
 @GET
-@Path("{id : \\d+}")
+@Path("/{id : \\d+}")
 @Produces({MediaType.APPLICATION_JSON})
 public User getUser(@PathParam("id") Long id) {
     // ...
@@ -97,7 +97,7 @@ public User getUser(@PathParam("id") Long id) {
 
 @GET：指定用HTTP GET方法访问
 
-@Path("{id : \\d+}")：根据上面的功能需求，访问getUser()的URL应当是“http://localhost:8080/users/ + 任意数字"，并且这个数字要被做为参数传入getUser()方法。 这里的annotation配置中，@Path中间的{id: xxx}指定URL相对路径中包含了名为id参数，而它的值也将被自动传递给下面用@PathParam("id")修饰的方法参数id。{id:后面紧跟的\\d+是一个正则表达式，指定了id参数必须是数字。
+@Path("/{id : \\d+}")：根据上面的功能需求，访问getUser()的URL应当是“http://localhost:8080/users/ + 任意数字"，并且这个数字要被做为参数传入getUser()方法。 这里的annotation配置中，@Path中间的{id: xxx}指定URL相对路径中包含了名为id参数，而它的值也将被自动传递给下面用@PathParam("id")修饰的方法参数id。{id:后面紧跟的\\d+是一个正则表达式，指定了id参数必须是数字。
 
 @Produces({MediaType.APPLICATION_JSON})：指定getUser()输出JSON格式的数据。框架会自动将User对象序列化为JSON数据。
 
@@ -106,11 +106,11 @@ public User getUser(@PathParam("id") Long id) {
 在Dubbo中开发REST服务主要都是通过JAX-RS的annotation来完成配置的，在上面的示例中，我们都是将annotation放在服务的实现类中。但其实，我们完全也可以将annotation放到服务的接口上，这两种方式是完全等价的，例如：
 
 ```java
-@Path("users")
+@Path("/users")
 public interface UserService {
     
     @GET
-    @Path("{id : \\d+}")
+    @Path("/{id : \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     User getUser(@PathParam("id") Long id);
 }
@@ -143,7 +143,7 @@ User getUser(@PathParam("id") Long id);
 如果所有方法都支持同样类型的输入输出数据格式，则我们无需在每个方法上做配置，只需要在服务类上添加annotation即可：
 
 ```java
-@Path("users")
+@Path("/users")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 public class UserServiceImpl implements UserService {
@@ -431,11 +431,11 @@ dubbo中的rest协议默认将采用80端口，如果想修改端口，直接配
 以前面代码为例：
 
 ```java
-@Path("users")
+@Path("/users")
 public class UserServiceImpl implements UserService {
        
     @POST
-    @Path("register")
+    @Path("/register")
     @Consumes({MediaType.APPLICATION_JSON})
     public void registerUser(User user) {
         // save the user...
@@ -525,14 +525,14 @@ Dubbo中的rest服务默认都是采用http长连接来访问，如果想切换�
 
 ```java
 @Service(protocol = "rest")
-@Path("users")
+@Path("/users")
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
        
     @POST
-    @Path("register")
+    @Path("/register")
     @Consumes({MediaType.APPLICATION_JSON})
     public void registerUser(User user) {
         // save the user
