@@ -131,19 +131,29 @@ export default {
             },
             {
               text: 'Node.js',
-              link: 'https://github.com/dubbo/dubbo2.js',
+              link: 'https://github.com/apache/dubbo-js',
               bgColor: '#00D0D9',
             },
             {
               text: 'Python',
-              link: 'https://github.com/dubbo/dubbo-client-py',
+              link: 'https://github.com/apache/dubbo-python',
               bgColor: '#00D0D9',
             },
             {
               text: 'PHP',
-              link: 'https://github.com/dubbo/dubbo-php-framework',
+              link: 'https://github.com/apache/dubbo-php-framework',
               bgColor: '#00D0D9',
             },
+            {
+              text: 'Go',
+              link: 'https://github.com/apache/dubbo-go',
+              bgColor: '#00D0D9',
+            },
+            {
+              text: 'Erlang',
+              link: 'https://github.com/apache/dubbo-erlang',
+              bgColor: '#00D0D9',
+            }
           ],
         },
         {
@@ -558,19 +568,29 @@ export default {
             },
             {
               text: 'Node.js',
-              link: 'https://github.com/dubbo/dubbo2.js',
+              link: 'https://github.com/apache/dubbo-js',
               bgColor: '#00D0D9',
             },
             {
               text: 'Python',
-              link: 'https://github.com/dubbo/dubbo-client-py',
+              link: 'https://github.com/apache/dubbo-python',
               bgColor: '#00D0D9',
             },
             {
               text: 'PHP',
-              link: 'https://github.com/dubbo/dubbo-php-framework',
+              link: 'https://github.com/apache/dubbo-php-framework',
               bgColor: '#00D0D9',
             },
+            {
+              text: 'Go',
+              link: 'https://github.com/apache/dubbo-go',
+              bgColor: '#00D0D9',
+            },
+            {
+              text: 'Erlang',
+              link: 'https://github.com/apache/dubbo-erlang',
+              bgColor: '#00D0D9',
+            }
           ],
         },
         {
