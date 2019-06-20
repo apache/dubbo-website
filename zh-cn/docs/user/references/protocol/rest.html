@@ -21,16 +21,16 @@
 </code></pre>
 <p>而任何客户端都可以将包含用户信息的JSON字符串POST到以上URL来完成用户注册。</p>
 <p>首先，开发服务的接口：</p>
-<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserService</span> </span>{    
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserService</span> </span>{    
    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">registerUser</span><span class="hljs-params">(User user)</span></span>;
 }
 </code></pre>
 <p>然后，开发服务的实现：</p>
-<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
+<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"/users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span> </span>{
        
     <span class="hljs-meta">@POST</span>
-    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"register"</span>)
+    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"/register"</span>)
     <span class="hljs-meta">@Consumes</span>({MediaType.APPLICATION_JSON})
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerUser</span><span class="hljs-params">(User user)</span> </span>{
         <span class="hljs-comment">// save the user...</span>
@@ -38,8 +38,8 @@
 }
 </code></pre>
 <p>上面的实现非常简单，但是由于该 REST 服务是要发布到指定 URL 上，供任意语言的客户端甚至浏览器来访问，所以这里额外添加了几个 JAX-RS 的标准 annotation 来做相关的配置。</p>
-<p>@Path(&quot;users&quot;)：指定访问UserService的URL相对路径是/users，即http://localhost:8080/users</p>
-<p>@Path(&quot;register&quot;)：指定访问registerUser()方法的URL相对路径是/register，再结合上一个@Path为UserService指定的路径，则调用UserService.register()的完整路径为http://localhost:8080/users/register</p>
+<p>@Path(&quot;/users&quot;)：指定访问UserService的URL相对路径是/users，即http://localhost:8080/users</p>
+<p>@Path(&quot;/register&quot;)：指定访问registerUser()方法的URL相对路径是/register，再结合上一个@Path为UserService指定的路径，则调用UserService.register()的完整路径为http://localhost:8080/users/register</p>
 <p>@POST：指定访问registerUser()用HTTP POST方法</p>
 <p>@Consumes({MediaType.APPLICATION_JSON})：指定registerUser()接收JSON格式的数据。REST框架会自动将JSON数据反序列化为User对象</p>
 <p>最后，在spring配置文件中添加此服务，即完成所有服务开发工作：</p>
@@ -67,22 +67,22 @@ http://localhost:8080/users/1003
 </code></pre>
 <p>JAX-RS本身可以支持所有这些形式。但是上面那种在URL路径中包含查询参数的形式（<a href="http://localhost:8080/users/1001%EF%BC%89">http://localhost:8080/users/1001）</a> 更符合REST的一般习惯，所以更推荐大家来使用。下面我们就为UserService添加一个getUser()方法来实现这种形式的URL访问：</p>
 <pre><code class="language-java"><span class="hljs-meta">@GET</span>
-<span class="hljs-meta">@Path</span>(<span class="hljs-string">"{id : \\d+}"</span>)
+<span class="hljs-meta">@Path</span>(<span class="hljs-string">"/{id : \\d+}"</span>)
 <span class="hljs-meta">@Produces</span>({MediaType.APPLICATION_JSON})
 <span class="hljs-function"><span class="hljs-keyword">public</span> User <span class="hljs-title">getUser</span><span class="hljs-params">(@PathParam(<span class="hljs-string">"id"</span>)</span> Long id) </span>{
     <span class="hljs-comment">// ...</span>
 }
 </code></pre>
 <p>@GET：指定用HTTP GET方法访问</p>
-<p>@Path(&quot;{id : \d+}&quot;)：根据上面的功能需求，访问getUser()的URL应当是“<a href="http://localhost:8080/users/">http://localhost:8080/users/</a> + 任意数字&quot;，并且这个数字要被做为参数传入getUser()方法。 这里的annotation配置中，@Path中间的{id: xxx}指定URL相对路径中包含了名为id参数，而它的值也将被自动传递给下面用@PathParam(&quot;id&quot;)修饰的方法参数id。{id:后面紧跟的\d+是一个正则表达式，指定了id参数必须是数字。</p>
+<p>@Path(&quot;/{id : \d+}&quot;)：根据上面的功能需求，访问getUser()的URL应当是“<a href="http://localhost:8080/users/">http://localhost:8080/users/</a> + 任意数字&quot;，并且这个数字要被做为参数传入getUser()方法。 这里的annotation配置中，@Path中间的{id: xxx}指定URL相对路径中包含了名为id参数，而它的值也将被自动传递给下面用@PathParam(&quot;id&quot;)修饰的方法参数id。{id:后面紧跟的\d+是一个正则表达式，指定了id参数必须是数字。</p>
 <p>@Produces({MediaType.APPLICATION_JSON})：指定getUser()输出JSON格式的数据。框架会自动将User对象序列化为JSON数据。</p>
 <h3>Annotation放在接口类还是实现类</h3>
 <p>在Dubbo中开发REST服务主要都是通过JAX-RS的annotation来完成配置的，在上面的示例中，我们都是将annotation放在服务的实现类中。但其实，我们完全也可以将annotation放到服务的接口上，这两种方式是完全等价的，例如：</p>
-<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
+<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"/users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserService</span> </span>{
     
     <span class="hljs-meta">@GET</span>
-    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"{id : \\d+}"</span>)
+    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"/{id : \\d+}"</span>)
     <span class="hljs-meta">@Produces</span>({MediaType.APPLICATION_JSON})
     <span class="hljs-function">User <span class="hljs-title">getUser</span><span class="hljs-params">(@PathParam(<span class="hljs-string">"id"</span>)</span> Long id)</span>;
 }
@@ -101,7 +101,7 @@ http://localhost:8080/users/1003
 <span class="hljs-function">User <span class="hljs-title">getUser</span><span class="hljs-params">(@PathParam(<span class="hljs-string">"id"</span>)</span> Long id)</span>;
 </code></pre>
 <p>如果所有方法都支持同样类型的输入输出数据格式，则我们无需在每个方法上做配置，只需要在服务类上添加annotation即可：</p>
-<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
+<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"/users"</span>)
 <span class="hljs-meta">@Consumes</span>({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 <span class="hljs-meta">@Produces</span>({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span> </span>{
@@ -298,11 +298,11 @@ http://localhost:8080/users/1003
 <pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">dubbo:protocol</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"rest"</span> <span class="hljs-attr">port</span>=<span class="hljs-string">"8888"</span> <span class="hljs-attr">contextpath</span>=<span class="hljs-string">"services"</span>/&gt;</span>
 </code></pre>
 <p>以前面代码为例：</p>
-<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
+<pre><code class="language-java"><span class="hljs-meta">@Path</span>(<span class="hljs-string">"/users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span> </span>{
        
     <span class="hljs-meta">@POST</span>
-    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"register"</span>)
+    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"/register"</span>)
     <span class="hljs-meta">@Consumes</span>({MediaType.APPLICATION_JSON})
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerUser</span><span class="hljs-params">(User user)</span> </span>{
         <span class="hljs-comment">// save the user...</span>
@@ -359,14 +359,14 @@ http://localhost:8080/users/1003
 <h3>用Annotation取代部分Spring XML配置</h3>
 <p>以上所有的讨论都是基于dubbo在spring中的xml配置。但是，dubbo/spring本身也支持用annotation来作配置，所以我们也可以按dubbo官方文档中的步骤，把相关annotation加到REST服务的实现中，取代一些xml配置，例如：</p>
 <pre><code class="language-java"><span class="hljs-meta">@Service</span>(protocol = <span class="hljs-string">"rest"</span>)
-<span class="hljs-meta">@Path</span>(<span class="hljs-string">"users"</span>)
+<span class="hljs-meta">@Path</span>(<span class="hljs-string">"/users"</span>)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span> </span>{
 
     <span class="hljs-meta">@Autowired</span>
     <span class="hljs-keyword">private</span> UserRepository userRepository;
        
     <span class="hljs-meta">@POST</span>
-    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"register"</span>)
+    <span class="hljs-meta">@Path</span>(<span class="hljs-string">"/register"</span>)
     <span class="hljs-meta">@Consumes</span>({MediaType.APPLICATION_JSON})
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerUser</span><span class="hljs-params">(User user)</span> </span>{
         <span class="hljs-comment">// save the user</span>
