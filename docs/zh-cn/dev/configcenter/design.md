@@ -49,9 +49,10 @@ zookeeper提供了一个树状的存储模型，其实现原理如下：
     - 分组group：dubbo
     - key：governance-conditionrouter-consumer.condition-router，其中governance-conditionrouter-consumer为应用名，condition-router代表条件路由
     
+    
     > 注意:
     >
-    > Dubbo同时支持应用、服务两种粒度的服务治理规则，对于这两种粒度，其key值规则如下：
+    > Dubbo同时支持应用、服务两种粒度的服务治理规则，对于这两种粒度，其key取值规则如下：
     > * 应用粒度 {应用名 + 规则后缀}。如: `demo-application.configurators`、`demo-application.tag-router`等
     > * 服务粒度 {服务接口名:[服务版本]:[服务分组] + 规则后缀}，其中服务版本、服务分组是可选的，如果它们有配置则在key中体现，没被配置则用":"占位。如
     > `org.apache.dubbo.demo.DemoService::.configurators`、`org.apache.dubbo.demo.DemoService:1.0.0:group1.configurators`
