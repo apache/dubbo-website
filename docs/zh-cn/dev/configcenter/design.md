@@ -21,6 +21,8 @@ zookeeper提供了一个树状的存储模型，其实现原理如下：
 
 ![image-20190127225608553](/img/configcenter_zk_model.jpg)
 
+namespace, group, key等分别对应不同层级的ZNode节点，而value则作为根ZNode节点的值存储。
+
 1. 外部化配置中心 dubbo.properties
 
    ![image-20190127225608553](/img/configcenter_zk_properties.jpg)
@@ -59,15 +61,20 @@ zookeeper提供了一个树状的存储模型，其实现原理如下：
 
 ### Etcd & Consul
 
-Etcd和Consul本质上也是一个类似zookeeper的树状存储结构，实现请参考zookeeper。
+Etcd和Consul本质上也是一种类似zookeeper的树状存储结构，实现请参考zookeeper。
 
 ### Nacos
 
 Nacos作为一个专业的第三方配置中心，拥有专门为配置中心设计的存储结构，包括内置的namespace、group、dataid等概念。并且这几个概念基本上与Dubbo框架抽象的配置中心是一一对应的。
 
-与Zookeeper对比起来如下：
+与Zookeeper实现的对应关系如下：
 
 ![image-20190127225608553](/img/configcenter_nacos_model.jpg)
+
+参考上文关于zookeeper实现中描述的示例，这里的dataid可能为：
+* 外部化配置中心：dubbo.properties
+* 单个配置项：dubbo.service.shutdown.wait
+* 服务治理规则：org.apache.dubbo.demo.DemoService:1.0.0:group1.configurators
 
 ### Apollo
 
