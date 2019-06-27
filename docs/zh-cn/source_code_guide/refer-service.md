@@ -42,7 +42,7 @@ public synchronized T get() {
 
 ### 3.1 处理配置
 
-Dubbo 提供了丰富的配置，用于调整和优化框架行为，性能等。Dubbo 在引用或导出服务时，首先会对这些配置进行检查和处理，以保证配置到正确性。配置解析逻辑封装在 ReferenceConfig 的 init 方法中，下面进行分析。
+Dubbo 提供了丰富的配置，用于调整和优化框架行为，性能等。Dubbo 在引用或导出服务时，首先会对这些配置进行检查和处理，以保证配置的正确性。配置解析逻辑封装在 ReferenceConfig 的 init 方法中，下面进行分析。
 
 ```java
 private void init() {
