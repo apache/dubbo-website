@@ -13,6 +13,7 @@
   ```yaml
   # 将应用demo（key:demo）在20880端口上提供（side:provider）的所有服务（scope:application）的权重修改为1000（weight:1000）。
   ---
+  configVersion: v2.7
   scope: application
   key: demo
   enabled: true
@@ -31,6 +32,7 @@
   ```yaml
   # 所有消费（side:consumer）DemoService服务（key:org.apache.dubbo.samples.governance.api.DemoService）的应用实例（addresses:[0.0.0.0]），超时时间修改为6000ms
   ---
+  configVersion: v2.7
   scope: service
   key: org.apache.dubbo.samples.governance.api.DemoService
   enabled: true
@@ -51,6 +53,7 @@
 
 ```yaml
 ---
+configVersion: v2.7
 scope: application/service
 key: app-name/group+service+version
 enabled: true
@@ -76,7 +79,7 @@ configs:
 ```
 
 其中：
-
+-  `configVersion`表示dubbo的版本
 - `scope`表示配置作用范围，分别是应用（application）或服务（service）粒度。**必填**。
 - `key` 指定规则体作用在哪个服务或应用。**必填**。
   - scope=service时，key取值为[{group}:]{service}[:{version}]的组合
@@ -119,6 +122,7 @@ configs:
 
    ```yaml
    ---
+   configVersion: v2.7
    scope: application
    key: demo-provider
    enabled: true
@@ -134,6 +138,7 @@ configs:
 
    ```yaml
    ---
+   configVersion: v2.7
    scope: application
    key: demo-provider
    enabled: true
@@ -149,6 +154,7 @@ configs:
 
    ```yaml
    ---
+   configVersion: v2.7
    scope: application
    key: demo-consumer
    enabled: true
@@ -163,6 +169,7 @@ configs:
 
     ```yaml
    ---
+   configVersion: v2.7
    scope: service
    key: org.apache.dubbo.samples.governance.api.DemoService
    enabled: true
