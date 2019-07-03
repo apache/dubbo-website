@@ -1214,6 +1214,10 @@ export default {
                             {
                                 title: '日志适配扩展',
                                 link: '/zh-cn/docs/dev/impls/logger-adapter.html'
+                            },
+                            {
+                                title: '配置中心',
+                                link: '/zh-cn/docs/dev/impls/config-center.html'
                             }
                         ]
                     },

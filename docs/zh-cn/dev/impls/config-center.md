@@ -13,6 +13,19 @@
 
 当前，Dubbo配置中心实现了对Zookeeper、Nacos、Etcd、Consul、Apollo的对接，接下来我们具体看一下Dubbo抽象的配置中心是怎么映射到具体的第三方实现中的。
 
+## 扩展接口
+
+* `org.apache.dubbo.configcenter.DynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.DynamicConfiguration`
+
+## 已知扩展
+
+* `org.apache.dubbo.configcenter.support.zookeeper.ZookeeperDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.support.zookeeper.NacosDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.support.zookeeper.EtcdDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.support.zookeeper.ConsulDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.support.zookeeper.ApolloDynamicConfigurationFactory`
+
 ## 实现原理
 
 ### Zookeeper
