@@ -31,6 +31,7 @@
     * [5.24 缓存扩展](./impls/cache.md)
     * [5.25 验证扩展](./impls/validation.md)
     * [5.26 日志适配扩展](./impls/logger-adapter.md)
+    * [5.26 配置中心](./impls/config-center.md)
 * [6 公共契约](./contract.md)
 * [7 编码约定](./coding.md)
 * [8 设计原则](./principals/introduction.md)
