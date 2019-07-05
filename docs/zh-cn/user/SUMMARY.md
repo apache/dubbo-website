@@ -13,6 +13,7 @@
     * [5.3 Annotation 配置](./configuration/annotation.md)
     * [5.3 动态配置中心](./configuration/config-center.md)
     * [5.4 配置加载流程](./configuration/configuration-load-process.md)
+    * [5.5 自动加载环境变量](./configuration/environment-variables.md)
 * [6 示例](./demos/index.md)
     * [6.1 启动时检查](./demos/preflight-check.md)
     * [6.2 集群容错](./demos/fault-tolerent-strategy.md)
