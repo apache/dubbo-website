@@ -672,6 +672,10 @@ export default {
                             {
                                 title: '配置加载流程',
                                 link: '/zh-cn/docs/user/configuration/configuration-load-process.html'
+                            },
+                            {
+                                title: '自动加载环境变量',
+                                link: '/zh-cn/docs/user/configuration/environment-variables.html'
                             }
                         ],
                     },
