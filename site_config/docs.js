@@ -238,7 +238,7 @@ export default {
                                 link: '/en-us/docs/user/demos/netty4.html'
                             },
                             {
-                                title: 'Serialization with FST and Kyro',
+                                title: 'Serialization with FST and Kryo',
                                 link: '/en-us/docs/user/demos/serialization.html'
                             }
                         ],
