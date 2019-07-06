@@ -12,7 +12,7 @@ Java RMI (Remote Method Invocation) is a mechanism that allows users to access o
 
 ### Java RMI Work Flow
 
-Here is how a typical RMI invocation usually works：
+Here is how a typical RMI invocation usually works:
 
 1.	The server registers service from RMI and binds its address.
 2.	The client registers service from RMI and obtains target address.
@@ -336,7 +336,7 @@ Run it directly in IDE and here are the results:
 
 ### Manage service by Telnet
 
-If *qos* is actived during generation, the service can be watched and managed by *telnet* or *nc*.
+If *qos* is activated during generation, the service can be watched and managed by *telnet* or *nc*.
 
 ```bash
 $ telnet localhost 22222
