@@ -36,40 +36,58 @@
 | Redis registry             | Stable   | Support the client - based double - write clustering method with high performance | Please ensure server time synchronization, be used to check the expired dirty data of heartbeat | Can be used in the production environment |          |
 | Multicast registry         | Tested   | Decentration, no registry needs to be installed | Depending on the network topology  and routing, there is a risk across the server rooms | Can be used in a small range, in development/test  environment |          |
 | Simple registry            | Tested   | Dogfooding, the registry itself is also a standard RPC service | No cluster support, may occur single-point failure | On trial                                 |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Simple monitor system      | Stable   | Support JFreeChart statistics report     | No cluster support, may occur single-point failure, but the failure does not affect the RPC call | Can be used in the production environment |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Dubbo protocol             | Stable   | Use NIO to reuse a single long connection and use a thread pool to process requests concurrently, Reduce handshake and increase concurrency efficiency, good performance | A single connection will become a bottleneck in the transmission of large files | Can be used in the production environment | Alibaba  |
 | Rmi protocol               | Stable   | Interoperable with native RMI, based on the TCP protocol | Occasionally the connection fails, and the stub needs to be rebuilt | Can be used in the production environment | Alibaba  |
 | Hessian protocol           | Stable   | Interoperable with native Hessian, based on the HTTP protocol | Hessian.jar support is required, and the overhead of HTTP short connections is large | Can be used in the production environment |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Netty Transporter          | Stable   | The NIO framework of JBoss, has good performance | A request sends two events and needs to shield useless events | Can be used in the production environment | Alibaba  |
 | Mina Transporter           | Stable   | Classic NIO framework，stable             | The dispatch of the message queue is not timely, under great pressure, there will be FullGC | Can be used in the production environment | Alibaba  |
 | Grizzly Transporter        | Tested   | The NIO framework of Sun, applied in the GlassFish container | The thread pool is not extensible, and Filter can't intercept the next filter | On trial                                 |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Hessian Serialization      | Stable   | Good performance, multilingual support (recommended) | The compatibility of various versions of Hessian is not good, it may be in conflict with the Hessian used in the application, and the Dubbo is embedded with the source code of the hessian3.2.1 | Can be used in the production environment | Alibaba  |
 | Dubbo Serialization        | Tested   | The performance is better in a large number of POJO transmission by not transmitting the class information of POJO. | When a field is added to the parameter object, an external file declaration is required | On trial                                 |          |
 | Json Serialization         | Tested   | pure text, can be cross-language parsed, default using FastJson | Poor performance                         | On trial                                 |          |
 | Java Serialization         | Stable   | Java native support                      | Poor performance                         | Can be used in the production environment |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Javassist ProxyFactory     | Stable   | Bytecode generation instead of reflection, good performance(recommended) | Depending on the javassist.jar and taking up the JVM's Perm memory, the Perm may have to be larger:java -XX:PermSize=128m | Can be used in the production environment | Alibaba  |
 | Jdk ProxyFactory           | Stable   | JDK native support                       | Poor performance                         | Can be used in the production environment |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Failover Cluster           | Stable   | Failure automatically switches, when failure occurs, retries other servers, usually used for read operations.(recommended) | Retry will lead to longer delays         | Can be used in the production environment | Alibaba  |
 | Failfast Cluster           | Stable   | Fast failure, only one call, failure to be reported immediately, usually used for non idempotent writing. | If a server is being restarted, a call failure may occur | Can be used in the production environment | Alibaba  |
 | Failsafe Cluster           | Stable   | Failsafe, when abnormal, directly ignored, usually used to write to the audit log and other operations | Call information loss                    | Can be used in the production environment | Monitor  |
 | Failback Cluster           | Tested   | Failure auto recovery, backstage record failure request, regular retransmission, usually used for message notification operations | Unreliable, lost when restart the server | Can be used in the production environment | Registry |
 | Forking Cluster            | Tested   | Multiple servers are invoked in parallel, as long as one success is returned, often used for high real-time reading operations. | Need to waste more service resources     | Can be used in the production environment |          |
 | Broadcast Cluster          | Tested   | A broadcast calls all providers, one by one, and any error is wrongly reported, usually used to update the provider's local state | The speed is slow, and any false report is wrong. | Can be used in the production environment |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Random LoadBalance         | Stable   | Random probability, set random probability according to weight(recommended) | The probability of a collision on a cross section is high. When retrying, there may be an unequal instantaneous pressure. | Can be used in the production environment | Alibaba  |
 | RoundRobin LoadBalance     | Stable   | Round Robin, setting wheel based ratio according to the weight after the Convention | There is a slow machine accumulation request problem, and extreme circumstances may cause an avalanche | Can be used in the production environment |          |
 | LeastActive LoadBalance    | Stable   | The least active call number, the random number of the same active number, the active number is the count difference before and after the call, making the slow machine receive less request. | Do not support the weight, in the capacity planning, not to pressure a machine oriented pressure measurement by weight capacity | Can be used in the production environment |          |
 | ConsistentHash LoadBalance | Stable   | The consistency hash, the same parameters always request to the same provider, when one provider hung, originally sent to the provider's request, based on virtual nodes, spread to other providers, will not cause dramatic changes | Uneven distribution of pressure          | Can be used in the production environment |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Condition routing rule     | Stable   | Routing rules based on conditional expressions, simple and easy to use | There are some complex multi branch conditions, and the rules are difficult to describe | Can be used in the production environment | Alibaba  |
 | Script routing rules       | Tested   | Routing rules based on the script engine, powerful | No sandbox is running, scripting ability is too powerful and may be the back door | On trial                                 |          |
+
 | Feature                    | Maturity | Strength                                 | Problem                                  | Advise                                   | User     |
+| -------------------------- | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | -------- |
 | Spring Container           | Stable   | Automatically load all Spring configurations under the META-INF/spring directory |                                          | Can be used in the production environment | Alibaba  |
 | Jetty Container            | Stable   | Start an embedded Jetty for reporting state | When a large number of pages are accessed, the threads and memory of the server are affected | Can be used in the production environment | Alibaba  |
 | Log4j Container            | Stable   | Configuring the configuration of the log4j automatically, automatically subdirecting the log files by process at the startup of multiple processes | The user can't control the configuration of log4j, inflexible | Can be used in the production environment | Alibaba  |
