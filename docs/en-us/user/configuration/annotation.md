@@ -1,116 +1,94 @@
+---
+title: Annotation Configuration
+keywords: dubbo,annotation configuration
+description: Annotation Configuration
+---
+
 # Annotation Configuration
 
- Requires`2.5.7` or higher
+ Requires`2.6.3` or higher
+ click here to view the [complete sample](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-annotation)
 
 ## Provider Side
 
 ### `Service` annotation for exporting
 
 ```java
-import org.apache.dubbo.config.annotation.Service;
- 
-@Service(timeout = 5000)
-public class AnnotateServiceImpl implements AnnotateService { 
-    // ...
+@Service
+public class AnnotationServiceImpl implements AnnotationService {
+    @Override
+    public String sayHello(String name) {
+        return "annotation: hello, " + name;
+    }
 }
 ```
     
-### Use JavaConfig for common parts
+### Add application sharing configuration
+
+```properties
+# dubbo-provider.properties
+dubbo.application.name=annotation-provider
+dubbo.registry.address=zookeeper://127.0.0.1:2181
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=20880
+```
+
+### Spring scan path
 
 ```java
 @Configuration
-public class DubboConfiguration {
-
-    @Bean
-    public ApplicationConfig applicationConfig() {
-        ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setName("provider-test");
-        return applicationConfig;
-    }
-
-    @Bean
-    public RegistryConfig registryConfig() {
-        RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setAddress("zookeeper://127.0.0.1:2181");
-        registryConfig.setClient("curator");
-        return registryConfig;
-    }
+@EnableDubbo(scanBasePackages = "org.apache.dubbo.samples.simple.annotation.impl")
+@PropertySource("classpath:/spring/dubbo-provider.properties")
+static public class ProviderConfiguration {
+       
 }
 ```
-
-### Path to scan
-
-```java
-@SpringBootApplication
-@DubboComponentScan(basePackages = "org.apache.dubbo.test.service.impl")
-public class ProviderTestApp {
-    // ...
-}
-```
-
 
 ## Consumer Side
 
 ### `Reference` annotation for reference
 
 ```java
-public class AnnotationConsumeService {
+@Component("annotationAction")
+public class AnnotationAction {
 
-    @org.apache.dubbo.config.annotation.Reference
-    public AnnotateService annotateService;
+    @Reference
+    private AnnotationService annotationService;
     
-    // ...
+    public String doSayHello(String name) {
+        return annotationService.sayHello(name);
+    }
 }
-
 ```
 
-    
-### Use JavaConfig for common parts
+### Add application sharing configuration
+
+```java
+# dubbo-consumer.properties
+dubbo.application.name=annotation-consumer
+dubbo.registry.address=zookeeper://127.0.0.1:2181
+dubbo.consumer.timeout=3000
+```
+
+### Spring scan path
 
 ```java
 @Configuration
-public class DubboConfiguration {
+@EnableDubbo(scanBasePackages = "org.apache.dubbo.samples.simple.annotation.action")
+@PropertySource("classpath:/spring/dubbo-consumer.properties")
+@ComponentScan(value = {"org.apache.dubbo.samples.simple.annotation.action"})
+static public class ConsumerConfiguration {
 
-    @Bean
-    public ApplicationConfig applicationConfig() {
-        ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setName("consumer-test");
-        return applicationConfig;
-    }
-
-    @Bean
-    public ConsumerConfig consumerConfig() {
-        ConsumerConfig consumerConfig = new ConsumerConfig();
-        consumerConfig.setTimeout(3000);
-        return consumerConfig;
-    }
-
-    @Bean
-    public RegistryConfig registryConfig() {
-        RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setAddress("zookeeper://127.0.0.1:2181");
-        registryConfig.setClient("curator");
-        return registryConfig;
-    }
-}
-```
-
-### Path to scan
-
-```java
-@SpringBootApplication
-@DubboComponentScan(basePackages = "org.apache.dubbo.test.service")
-public class ConsumerTestApp {
-    // ...
 }
 ``` 
 
-## NOTES
+### Transfer service
 
-All annotations in 2.5.7 will be removed later, if you have used these annotations in your project, please upgrade to the latest version.
-
-```xml
-<dubbo:annotation package="org.apache.dubbo.test.service" /> 
+```java
+public static void main(String[] args) throws Exception {
+    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConsumerConfiguration.class);
+    context.start();
+    final AnnotationAction annotationAction = (AnnotationAction) context.getBean("annotationAction");
+    String hello = annotationAction.doSayHello("world");
+}
 ```
-
-
