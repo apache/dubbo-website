@@ -1,3 +1,9 @@
+---
+title: 注解配置
+keywords: dubbo,注解配置
+description: 注解配置
+---
+
 # 注解配置
 
 需要 `2.6.3` 及以上版本支持
@@ -38,7 +44,6 @@ static public class ProviderConfiguration {
 }
 ```
 
-
 ## 服务消费方
 
 ### `Reference`注解引用服务
@@ -56,7 +61,6 @@ public class AnnotationAction {
 }
 
 ```
-
     
 ### 增加应用共享配置
 
@@ -79,7 +83,7 @@ static public class ConsumerConfiguration {
 }
 ```
 
-### 调动服务
+### 调用服务
 
 ```java
 public static void main(String[] args) throws Exception {
@@ -89,4 +93,3 @@ public static void main(String[] args) throws Exception {
     String hello = annotationAction.doSayHello("world");
 }
 ```
-
