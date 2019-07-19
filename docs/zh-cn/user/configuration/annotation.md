@@ -83,7 +83,7 @@ static public class ConsumerConfiguration {
 }
 ```
 
-### 调动服务
+### 调用服务
 
 ```java
 public static void main(String[] args) throws Exception {
