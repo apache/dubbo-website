@@ -82,7 +82,7 @@ static public class ConsumerConfiguration {
 }
 ``` 
 
-### Transfer service
+### Invoke service
 
 ```java
 public static void main(String[] args) throws Exception {
