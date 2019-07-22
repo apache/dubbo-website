@@ -1,6 +1,6 @@
 ---
 title: dubbo:registry
-keywords: dubboregistry
+keywords: dubbo,registry
 description: dubbo:registry
 ---
 
