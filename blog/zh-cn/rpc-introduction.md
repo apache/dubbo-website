@@ -30,13 +30,13 @@ Nelson 的论文中指出实现 RPC 的程序包括 5 个部分：
 4. Server-stub
 5. Server
 
-![RPC结构](https://cdn.nlark.com/yuque/0/2019/png/338441/1564718953830-88ebb4b3-9346-4153-a497-de5fba6566b2.png)
+![RPC结构](../../img/blog/rpc/rpc-structure-1.png)
 
 这里 user 就是 client 端，当 user 想发起一个远程调用时，它实际是通过本地调用 user-stub。user-stub 负责将调用的接口、方法和参数通过约定的协议规范进行编码并通过本地的 RPCRuntime 实例传输到远端的实例。远端 RPCRuntime 实例收到请求后交给 server-stub 进行解码后发起本地端调用，调用结果再返回给 user 端。
 
 以上是粗粒度的 RPC 实现概念结构，接下来我们进一步细化它应该由哪些组件构成，如下图所示。
 
-![RPC 结构拆解](https://cdn.nlark.com/yuque/0/2019/png/338441/1564725591452-834d8ea4-2491-439c-87e2-ef9dfac1ef3e.png)
+![RPC 结构拆解](../../img/blog/rpc/rpc-structure-2.png)
 
 RPC 服务方通过 RpcServer 去导出（export）远程接口方法，而客户方通过 RpcClient 去引入（import）远程接口方法。客户方像调用本地方法一样去调用远程接口方法，RPC 框架提供接口的代理实现，实际的调用将委托给代理RpcProxy 。代理封装调用信息并将调用转交给RpcInvoker 去实际执行。在客户端的RpcInvoker 通过连接器RpcConnector 去维持与服务端的通道RpcChannel，并使用RpcProtocol 执行协议编码（encode）并将编码后的请求消息通过通道发送给服务方。
 
@@ -86,7 +86,7 @@ RPC 服务端接收器 RpcAcceptor 接收客户端的调用请求，同样使用
 
 RPC的设计由Client，Client stub，Network ，Server stub，Server构成。 其中Client就是用来调用服务的，Cient stub是用来把调用的方法和参数序列化的（因为要在网络中传输，必须要把对象转变成字节），Network用来传输这些信息到Server stub， Server stub用来把这些信息反序列化的，Server就是服务的提供者，最终调用的就是Server提供的方法。
 
-![RPC工作原理](https://cdn.nlark.com/yuque/0/2019/jpeg/338441/1564724156391-2e5310f9-d646-47ec-ae3b-d843a4e61016.jpeg)
+![RPC工作原理](../../img/blog/rpc/rpc-work-principle.png)
 
 1. Client像调用本地服务似的调用远程服务； 
 
