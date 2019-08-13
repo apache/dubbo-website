@@ -195,7 +195,7 @@ public class DemoServiceMock implements DemoService {
 
 
 ```xml
-<dubbo:reference id="demoService" check="false" interface="org.apache.dubbo.samples.mock.api.DemoService" stub="org.apache.dubbo.samples.mock.impl.DemoMock"/>
+<dubbo:reference id="demoService" check="false" interface="org.apache.dubbo.samples.mock.api.DemoService" mock="org.apache.dubbo.samples.mock.impl.DemoMock"/>
 ```
 
 
@@ -305,8 +305,8 @@ Caused by: org.apache.dubbo.remoting.TimeoutException: Waiting server-side respo
 
 
 
-[^stub-samples]: https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-stub
-[^mock-samples]:  https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-mock
+[^stub-samples]: https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-stub
+[^mock-samples]:  https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-mock
 [^mock]: http://dubbo.apache.org/zh-cn/docs/user/demos/local-mock.html
 
 

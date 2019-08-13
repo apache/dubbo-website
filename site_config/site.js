@@ -43,8 +43,8 @@ export default {
       },
     ],
     disclaimer: {
-      title: 'Disclaimer',
-      content: 'Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
+      title: '',
+      content: '',
     },
     asf: {
       title: 'ASF',
@@ -88,11 +88,11 @@ export default {
         },
         {
           text: 'Report a Doc Issue',
-          link: 'https://github.com/apache/incubator-dubbo-website/issues/new',
+          link: 'https://github.com/apache/dubbo-website/issues/new',
         },
         {
           text: 'Edit This Page on GitHub',
-          link: 'https://github.com/apache/incubator-dubbo-website',
+          link: 'https://github.com/apache/dubbo-website',
         },
       ],
     },
@@ -154,8 +154,8 @@ export default {
       },
     ],
     disclaimer: {
-      title: 'Disclaimer',
-      content: 'Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
+      title: '',
+      content: '',
     },
     asf: {
       title: 'ASF',
@@ -199,11 +199,11 @@ export default {
         },
         {
           text: '报告文档问题',
-          link: 'https://github.com/apache/incubator-dubbo-website/issues/new',
+          link: 'https://github.com/apache/dubbo-website/issues/new',
         },
         {
           text: '编辑此文档',
-          link: 'https://github.com/apache/incubator-dubbo-website',
+          link: 'https://github.com/apache/dubbo-website',
         },
       ]
     },

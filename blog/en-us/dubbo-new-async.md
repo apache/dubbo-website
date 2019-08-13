@@ -162,7 +162,7 @@ Next, let's illustrate how to implement a fully asynchronous Dubbo service call 
 
 ## example 1：CompletableFuture interface
 
-CompletableFuture interface can be used both for a synchronous call and for an asynchronous call on Consumer or Provider side. This example implements asynchronous calls between Consumer and Provider sides. Code link [dubbo-samples-async-original-future](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-original-future
+CompletableFuture interface can be used both for a synchronous call and for an asynchronous call on Consumer or Provider side. This example implements asynchronous calls between Consumer and Provider sides. Code link [dubbo-samples-async-original-future](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-original-future
 ).
 
 1. Interface definition
@@ -266,7 +266,7 @@ CompletableFuture interface can be used both for a synchronous call and for an a
    
 ## Example 2：Synchronous interface uses Annotation Processor
 
-This example demonstrates how to implement the Consumer-side asynchronous service call using the Annotation Processor based on the original synchronous interface. Code link [dubbo-samples-async-generated-future](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-generated-future).
+This example demonstrates how to implement the Consumer-side asynchronous service call using the Annotation Processor based on the original synchronous interface. Code link [dubbo-samples-async-generated-future](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-generated-future).
 
 1. Interface definition
 
@@ -399,7 +399,7 @@ This example demonstrates how to implement the Consumer-side asynchronous servic
 
 ## Example 3：Use AsyncContext
 
-This example demonstrates how to implement the Provider-side asynchronous execution through AsyncContext based on the original synchronous interface. Code link [dubbo-samples-async-provider](https://github.com/apache/incubator-dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-provider).
+This example demonstrates how to implement the Provider-side asynchronous execution through AsyncContext based on the original synchronous interface. Code link [dubbo-samples-async-provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-provider).
 
 1. Interface definition
 

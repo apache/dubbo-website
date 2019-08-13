@@ -1,3 +1,10 @@
+---
+title: Dubbo roadmap is announced in QCon Beijing 2018
+keywords: Dubbo, roadmap, QCon Beijing
+description: This article will introduce you that Dubbo roadmap is announced in QCon Beijing 2018.
+---
+
+
 Dubbo roadmap is announced in QCon Beijing 2018
 ---
 

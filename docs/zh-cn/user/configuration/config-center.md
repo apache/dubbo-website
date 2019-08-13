@@ -40,7 +40,7 @@ configCenter.setAddress("zookeeper://127.0.0.1:2181");
 dubbo.registry.address=zookeeper://127.0.0.1:2181
 dubbo.registry.simplified=true
 
-dubbo.metadataReport.address=zookeeper://127.0.0.1:2181
+dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 
 dubbo.protocol.name=dubbo
 dubbo.protocol.port=20880
@@ -54,7 +54,7 @@ dubbo.application.qos.port=33333
 外部化配置默认较本地配置有更高的优先级，因此这里配置的内容会覆盖本地配置值，关于[各配置形式间的覆盖关系](./configuration-load-process.md)有单独一章说明，你也可通过以下选项调整配置中心的优先级：
 
   ```properties
-  -Ddubbo.configCenter.highestPriority=false
+  -Ddubbo.config-center.highest-priority=false
   ```
 
 - 作用域

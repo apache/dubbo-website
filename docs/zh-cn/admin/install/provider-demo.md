@@ -3,8 +3,8 @@
 安装：
 
 ```sh
-git clone https://github.com/apache/incubator-dubbo.git
-cd incubator-dubbo
+git clone https://github.com/apache/dubbo.git
+cd dubbo
 运行 dubbo-demo-provider中的org.apache.dubbo.demo.provider.Provider
 如果使用Intellij Idea 请加上-Djava.net.preferIPv4Stack=true
 ```

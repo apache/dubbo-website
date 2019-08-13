@@ -15,7 +15,7 @@ Dubbo是Alibaba开源的，目前国内最流行的java rpc框架。
 本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。
 
 - <https://github.com/Netflix/Hystrix>
-- <https://github.com/apache/incubator-dubbo>
+- <https://github.com/apache/dubbo>
 
 ## Spring Boot应用
 
@@ -202,6 +202,6 @@ public class HystrixCommandAspect {
 ## 链接
 
 - <https://github.com/Netflix/Hystrix>
-- <https://github.com/apache/incubator-dubbo>
+- <https://github.com/apache/dubbo>
 - <http://start.dubbo.io/>
 - <https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients>

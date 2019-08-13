@@ -164,6 +164,20 @@ export default {
         postsTitle: '所有文章',
         list: [
             {
+                title: '在DockerHub发布Dubbo Admin镜像',
+                author: '@htynkn',
+                dateStr: 'May 23th, 2019',
+                desc: '介绍如何在DockerHub上发布Dubbo Admin镜像',
+                link: '/zh-cn/blog/build-new-docker-image-in-dockerhub.html',
+            },
+            {
+                title: '研究 Dubbo 网卡地址注册时的一点思考',
+                author: '@lexburner',
+                dateStr: 'Apr 30th, 2019',
+                desc: '研究 Dubbo 网卡地址注册时的一点思考',
+                link: '/zh-cn/blog/dubbo-network-interfaces.html',
+            },
+            {
                 title: 'Dubbo 本地存根和本地伪装',
                 author: '@beiwei30',
                 dateStr: 'Apr 9th, 2019',
@@ -498,6 +512,13 @@ export default {
                 dateStr: 'June 1st, 2018',
                 desc: '主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。',
                 link: '/zh-cn/blog/dubbo-basic-usage-dubbo-provider-configuration.html',
+            },
+              {
+                title: '谷歌编程之夏会议上2018个项目被宣布',
+                author: '@Jlele Cao',
+                dateStr: 'April 25th，2018',
+                desc: 'Raghu Reddy 的项目"Apache Dubbo 扩展串行协议支持" 被接受! 祝贺他!',
+                link: '/zh-cn/blog/gsoc-2018.html',
             },
             {
                 title: 'Spring Boot Dubbo应用启停源码分析',

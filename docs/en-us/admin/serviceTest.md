@@ -1,1 +1,1 @@
-please refer to this [blog](../../../blog/zh-cn/service-test.md)
+please refer to this [blog](../../../zh-cn/blog/service-test.md)

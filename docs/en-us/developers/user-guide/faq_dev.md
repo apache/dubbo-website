@@ -2,7 +2,7 @@
 
 ### Where is dubbo-admin?
 
-dubbo-admin has been moved from core repository to https://github.com/apache/incubator-dubbo-admin since 2.6.1
+dubbo-admin has been moved from core repository to https://github.com/apache/dubbo-admin since 2.6.1
 
 ### Which version should I choose?
 
@@ -14,7 +14,7 @@ Currently, dubbo keeps 3 versions evolve in parallel:
 
 * 2.5.x: requires Java 1.6, maintenance branch, only accept security vulnerability and critical bugfix, the support will end on 2019-6-15, please upgrade to 2.6.x as soon as possible.
 
-check [this](https://github.com/apache/incubator-dubbo/issues/1208) for detailed version management plan.
+check [this](https://github.com/apache/dubbo/issues/1208) for detailed version management plan.
 
 For contributors, please make sure all changes on the right branch, that is, most of the pull request should go to 2.7.x, and be backported to 2.6.x and 2.5.x if necessary. If the fix is specific to a branch, please make sure your pull request goes to the right branch.
 

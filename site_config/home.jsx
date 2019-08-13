@@ -4,19 +4,19 @@ export default {
   'zh-cn': {
     brand: {
       brandName: 'Apache Dubbo',
-      briefIntroduction: 'Apache Dubbo™ (incubating)是一款高性能Java RPC框架。',
+      briefIntroduction: 'Apache Dubbo™ 是一款高性能Java RPC框架。',
       getStartedButton: {
         text: '快速开始',
         link: '/zh-cn/docs/user/quick-start.html',
       },
       viewOnGithubButton: {
         text: 'GITHUB',
-        link: 'https://github.com/apache/incubator-dubbo',
+        link: 'https://github.com/apache/dubbo',
       }
     },
     introduction: {
       title: '高性能Java RPC框架',
-      desc: 'Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。',
+      desc: 'Apache Dubbo |ˈdʌbəʊ| 是一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。',
       img: '/img/architecture.png',
     },
     features: {
@@ -65,7 +65,7 @@ export default {
     },
     users: {
       title: '谁在使用Dubbo',
-      desc: <span>请在 <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/incubator-dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> 上提供信息来帮助Dubbo做的更好。</span>,
+      desc: <span>请在 <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> 上提供信息来帮助Dubbo做的更好。</span>,
       list: [
         '/img/users_alibaba.png',
         '/img/users_kingdee.png',
@@ -83,7 +83,7 @@ export default {
         '/img/users_icbc.png',
         '/img/users_handu.png',
         '/img/users_rograndec.png',
-		'/img/user_chuangjinzhitou.png'
+	'/img/user_chuangjinzhitou.png'
         // '/img/users_other1.png',
         // '/img/users_other2.png'
       ],
@@ -92,19 +92,19 @@ export default {
   'en-us': {
     brand: {
       brandName: 'Apache Dubbo',
-      briefIntroduction: 'Apache Dubbo™ (incubating) is a high-performance, java based open source RPC framework.',
+      briefIntroduction: 'Apache Dubbo™ is a high-performance, java based open source RPC framework.',
       getStartedButton: {
         text: 'GET STARTED',
         link: '/en-us/docs/user/quick-start.html',
       },
       viewOnGithubButton: {
         text: 'GITHUB',
-        link: 'https://github.com/apache/incubator-dubbo',
+        link: 'https://github.com/apache/dubbo',
       }
     },
     introduction: {
       title: 'A high performance Java RPC framework',
-      desc: 'Apache Dubbo (incubating) |ˈdʌbəʊ| is a high-performance, light weight, java based RPC framework. Dubbo offers three key functionalities, which include interface based remote call, fault tolerance & load balancing, and automatic service registration & discovery.',
+      desc: 'Apache Dubbo |ˈdʌbəʊ| is a high-performance, light weight, java based RPC framework. Dubbo offers three key functionalities, which include interface based remote call, fault tolerance & load balancing, and automatic service registration & discovery.',
       img: '/img/architecture.png',
     },
     features: {
@@ -153,7 +153,7 @@ export default {
     },
     users: {
       title: 'Who is using Dubbo',
-      desc: <span>Providing your info on <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/incubator-dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> to help improving dubbo better</span>,
+      desc: <span>Providing your info on <a rel="noopener noreferrer" target="_blank" href="https://github.com/apache/dubbo/issues/1012">Wanted: who&#39;s using dubbo</a> to help improving dubbo better</span>,
       list: [
         '/img/users_alibaba.png',
         '/img/users_kingdee.png',
@@ -171,6 +171,7 @@ export default {
         '/img/users_icbc.png',
         '/img/users_handu.png',
         '/img/users_rograndec.png',
+	'/img/user_chuangjinzhitou.png'
         // '/img/users_other1.png',
         // '/img/users_other2.png'
       ],

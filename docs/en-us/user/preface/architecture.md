@@ -30,14 +30,14 @@ Dubbo has the following features: Connectivity, Robustness, Scalability and Upgr
 * 'Provider' registers services to 'Register' and report time-consuming statistic(not include network overhead) to 'Monitor'
 * 'Consumer' gets a list of service provider addresses from `Registry`, call the provider directly according to the LB algorithm, report the time-consuming statistic to `Monitor`, which includes network overhead
 * The connections between `Register`, `Provider` and `Consumer` are long connections, `Moniter` is an exception
-* `Register` is aware of the existence of `Provider` through the long connection, when `Provider` gets down, `Provider` will push the event to `Consumer`
+* `Register` is aware of the existence of `Provider` through the long connection, when `Provider` gets down, `Register` will push the event to `Consumer`
 * It doesn't affect the already running instances of `Provider` and `Consumer` even all of the `Register` and `Monitor` get down, since `Consumer` got a cache of `Provider`s list
 * `Register` and `Monitor` are optional, `Consumer` can connect `Provider` directly
 
 ## Robustness
 
 * `Monitor`'s downtime doesn't affect the usage, only lose some sampling data
-* When the DB server goes down, `Register` can return service `Provider`s list to `Consumer` by checking its cache, but new `Provider` cannot regiter any services
+* When the DB server goes down, `Register` can return service `Provider`s list to `Consumer` by checking its cache, but new `Provider` cannot register any services
 * `Register` is a peer cluster, it will automatically switch to another when any instance goes down
 * Even all `Register`'s instances go down, `Provider` and `Consumer` can still conmunicate by checking their local cache
 * Service `Provider`s are stateless, one instance's downtime doesn't affect the usage

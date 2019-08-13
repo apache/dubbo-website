@@ -168,15 +168,15 @@ modifications and taggings related to ${release_version} Release Candidates are 
 
   This push the snapshot package to the maven central repository.
 
-3. Release with maven-release-plugin
+3. ~~Release with maven-release-plugin~~ (`Deprecated`，Skip this step and refer to next step)
 
-   - verify with dryRun
+   - ~~verify with dryRun~~
 
     ```shell
     $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
     ```
 
-   - After verification, run release:prepare
+   - ~~After verification, run release:prepare~~
 
     ```shell
     $ mvn release:clean
@@ -194,13 +194,26 @@ modifications and taggings related to ${release_version} Release Candidates are 
 
     If `-DpushChanges=false` is specified, you will have to manually push the commit to remote repository before go to next step.
 
-   - Run release:perform
+   - ~~Run release:perform~~
 
     ```shell
     $ mvn release:perform -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
     ```
 
     Maven will download the source code from the tag you just pushed, compile it, and deploy to remote maven repsoitry in staging state.
+
+### use `mvn deploy` to deploy
+
+> Requirement：maven 3.5+ 
+
+modify pom version from 2.7.x-SNAPSHOT to 2.7.x . You can search the full-text in the dubbo project.
+
+```shell
+$ mvn clean install -Prelease
+$ mvn deploy -Prelease -DskipTests
+```
+
+After this, maven will deploy jar to remote maven repsoitry in staging state.
 
 ### Note
 
@@ -214,18 +227,18 @@ modifications and taggings related to ${release_version} Release Candidates are 
 2. Checkout dubbo to local directory
 
    ```shell
-   $ svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo
+   $ svn checkout https://dist.apache.org/repos/dist/dev/dubbo
    ```
-   Assume that the local directory is `~/apache/incubator/dubbo`
+   Assume that the local directory is `~/apache/dubbo`
 
 3. The current release version is ${release_version}, new directory
 
    ```shell
-   $ cd ~/apache/incubator/dubbo # dubbo svn root directory
+   $ cd ~/apache/dubbo # dubbo svn root directory
    $ mkdir ${release_version}
    ```
 
-4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS) file if you are the first time to be a release manager. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
+4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/dubbo/KEYS) file if you are the first time to be a release manager. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
 
    ```shell
    $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
@@ -240,7 +253,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
    For source-release.zip
 
    ```shell
-   $ shasum -a 512 apache-dubbo-incubating-${release_version}-source-release.zip >> apache-dubbo-incubating-${release_version}-source-release.zip.sha512
+   $ shasum -a 512 apache-dubbo-${release_version}-source-release.zip >> apache-dubbo-${release_version}-source-release.zip.sha512
    ```
 
    For bin-release.zip
@@ -248,12 +261,12 @@ modifications and taggings related to ${release_version} Release Candidates are 
    Please add `-b` paramter when generating sha512 for bin-release.zip, which indicates it is a binary file. 
 
    ```shell
-   $ shasum -b -a 512 apache-dubbo-incubating-${release_version}-bin-release.zip >> apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
+   $ shasum -b -a 512 apache-dubbo-${release_version}-bin-release.zip >> apache-dubbo-${release_version}-bin-release.zip.sha512
    ```
    You should generate something like this:
 
    ```
-   b8f13d1df6d6c9a1facc72fafc00b2d22bea1e600517c507467d8fca2f776a7a3877101742da53114bfa629ca5b941eb4d9ef989de43f0833e2a794e7ccf5c8a *apache-dubbo-spring-boot-project-incubating-2.7.0-bin-release.zip
+   b8f13d1df6d6c9a1facc72fafc00b2d22bea1e600517c507467d8fca2f776a7a3877101742da53114bfa629ca5b941eb4d9ef989de43f0833e2a794e7ccf5c8a *apache-dubbo-spring-boot-project-2.7.0-bin-release.zip
    ```
 
    Note there is a `*` sign before the file name.
@@ -290,15 +303,15 @@ The verification link includes but is not limited to the following contents and 
 
   
 ```sh
-$ shasum -c apache-dubbo-incubating-${release_version}-source-release.zip.sha512
-$ shasum -c apache-dubbo-incubating-${release_version}-bin-release.zip.sha512
+$ shasum -c apache-dubbo-${release_version}-source-release.zip.sha512
+$ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
 ```
 #### check the gpg signarure
 
 If it's your first time verify a release candidte, you should import public keys first.  
 
 ```sh
- $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
+ $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS >> KEYS # download public keys to local directory
  $ gpg --import KEYS # import keys
  $ gpg —edit-key liujun
    > trust # type trust command
@@ -306,16 +319,14 @@ If it's your first time verify a release candidte, you should import public keys
 Now, you can verify signature with command
  
  ```sh
-gpg --verify apache-dubbo-incubating-2.6.3-source-release.zip.asc apache-dubbo-incubating-2.6.3-source-release.zip
-gpg --verify apache-dubbo-incubating-2.6.3-bin-release.zip.asc apache-dubbo-incubating-2.6.3-bin-release.zip
+gpg --verify apache-dubbo-2.6.3-source-release.zip.asc apache-dubbo-2.6.3-source-release.zip
+gpg --verify apache-dubbo-2.6.3-bin-release.zip.asc apache-dubbo-2.6.3-bin-release.zip
  ```
 
 ### Check source release file content
 
-Unzip apache-dubbo-incubating-${release_version}-source-release.zip to the default directory and check the following:
+Unzip apache-dubbo-${release_version}-source-release.zip to the default directory and check the following:
 
-- Directory with 'incubating' in name
-  `apache-dubbo-incubating-${release_version}-source-release`
 - DISCLAIMER exists
 - LICENSE and NOTICE exists and contents are good
 - All files and no binary files exist
@@ -347,45 +358,43 @@ If one dependency is dual/multiple licensed, just choose the most permissive one
 
 ### Check binary distribution file content
 
-Unzip apache-dubbo-incubating-${release_version}-bin-release.zip and check:
+Unzip apache-dubbo-${release_version}-bin-release.zip and check:
 
 * Check signatures are good
-* 'incubating' in name
 * LICENSE and NOTICE exists and contents are good
 
 Note that if the binary distribution contains third party files, you may need to update LICENSE file by adding the 3rd party license files. If these dependency is Apache License 2.0, and it contains NOTICE file, you may also need to update NOTICE file as well.
 
 ## Release vote
 
-The voting is divided into two phases:
+The voting just only one round:
 
-1. Dubbo community votes and sends the voting email to dev@dubbo.apache.org. After reviewing by community developers and winning 3 binding tickets that agree to release, you can go to the next stage of voting.
-2. Apache community votes and sends the voting email to general@incubator.apache.org. After reviewing by Apache IPMC(Incubator PMC) members and winning 3 binding votes that agree to release, you will be allowed to release officially.
+Dubbo community votes and sends the voting email to dev@dubbo.apache.org. After reviewing by community developers and winning 3 binding tickets that agree to release, you can go to the next stage of voting.
 
 The mail template for Apache Dubbo vote：
 
 ```tex
 Hello Dubbo Community,
 
-This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
+This is a call for vote to release Apache Dubbo version 2.7.2.
 
 The release candidates:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
+https://dist.apache.org/repos/dist/dev/dubbo/2.7.2/
 
 The staging repo:
 https://repository.apache.org/content/repositories/orgapachedubbo-1005
 
 Git tag for the release:
-https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.2
+https://github.com/apache/dubbo/tree/dubbo-2.6.2
 
 Hash for the release tag:
 afab04c53edab38d52275d2a198ea1aff7a4f41e
 
 Release Notes:
-https://github.com/apache/incubator-dubbo/releases/tag/untagged-4775c0a22c60fca55118
+https://github.com/apache/dubbo/releases/tag/untagged-4775c0a22c60fca55118
 
 The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+https://dist.apache.org/repos/dist/dev/dubbo/KEYS
 
 The vote will be open for at least 72 hours or until necessary number of votes are reached.
 
@@ -396,65 +405,10 @@ Please vote accordingly:
 [ ] -1 disapprove with the reason
 
 Thanks,
-The Apache Dubbo (Incubating) Team
+The Apache Dubbo Team
 ```
 
-The mail template for Apache Incubator vote：
 
-```text
-Hello all,
-
-This is a call for vote to release Apache Dubbo (Incubating) version 2.6.4.
-
-The Apache Dubbo community has voted on and approved a proposal to release
-Apache Dubbo (Incubating) version 2.6.4.
-
-We now kindly request the Incubator PMC members review and vote on this
-incubator release.
-
-Apache Dubbo™ (incubating) is a high-performance, java based, open source
-RPC framework. Dubbo offers three key functionalities, which include
-interface based remote call, fault tolerance & load balancing, and
-automatic service registration & discovery.
-
-Dubbo community vote and result thread:
-https://lists.apache.org/thread.html/8d5c39eece6288beed2e22ca976350728c571d2a9cef1c9a9e56a409@%3Cdev.dubbo.apache.org%3E
-A minor issue also can be found in the above thread.
-
-The release candidates (RC1):
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4
-
-The staging repo:
-https://repository.apache.org/content/repositories/orgapachedubbo-1005
-
-Git tag for the release (RC1):
-https://github.com/apache/incubator-dubbo/tree/dubbo-2.6.4
-
-Hash for the release tag:
-88037747a3b69d3225c73f6fbcda36ebd8435887
-
-Release Notes:
-*https://github.com/apache/incubator-dubbo/blob/dubbo-2.6.4/CHANGES.md
-<https://github.com/apache/incubator-dubbo/blob/dubbo-2.6.4/CHANGES.md>*
-
-The artifacts have been signed with Key : 7955FB6D1DD21CF7, which can be
-found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
-
-Look at here for how to verify this release candidate:
-https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/prepare-an-apache-release.md#prepare-apache-release
-
-The vote will be open for at least 72 hours or until necessary number of
-votes are reached.
-
-Please vote accordingly:
-[ ] +1 approve
-[ ] +0 no opinion
-[ ] -1 disapprove with the reason
-
-Thanks,
-The Apache Dubbo (Incubating) Team
-```
 
 The mail template to announce the vote result:
 
@@ -467,10 +421,10 @@ We’ve received 3 +1 binding votes and one +1 non-binding vote:
 
 +1 non-binding, Jerrick
 
-I will create a new vote thread in Apache community now.
+I will release this version today.
 
 Best regards,
-The Apache Dubbo (Incubating) Team
+The Apache Dubbo Team
 ```
 
 ## Official Release
@@ -478,22 +432,22 @@ The Apache Dubbo (Incubating) Team
 When the release vote has passed,
 
 
-1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo)
-2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/incubator/dubbo)
-3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
-5. Publish [release notes](https://github.com/apache/incubator-dubbo/releases) on Github.
-6. Update the recommend dependency on [Github](https://github.com/apache/incubator-dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
-7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-incubating-$VERSION-bin-release.zip). Please refer to the [download page](https://github.com/apache/incubator-dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
+1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/dubbo)
+2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/dubbo)
+3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/dubbo/)
+5. Publish [release notes](https://github.com/apache/dubbo/releases) on Github.
+6. Update the recommend dependency on [Github](https://github.com/apache/dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
+7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). Please refer to the [download page](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
 8. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
-9. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed. 
+9. Send mail to dev@dubbo.apache.org , notify the community that the release is completed. 
 The mail template to announce release: 
 ```text
 Hello Community,
 
-The Apache Dubbo(incubating) team is pleased to announce that the
+The Apache Dubbo team is pleased to announce that the
 2.6.6 has just been released.
 
-Apache Dubbo™ (incubating) is a high-performance, java based, open source
+Apache Dubbo™  is a high-performance, java based, open source
 RPC framework. Dubbo offers three key functionalities, which include
 interface based remote call, fault tolerance & load balancing, and
 automatic service registration & discovery.
@@ -509,16 +463,10 @@ an issue on GitHub[4].
 
 
 
-=====
-*Disclaimer*
-
-Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
-
-
 [1] http://dubbo.apache.org/en-us/blog/download.html
 [2] http://central.maven.org/maven2/com/alibaba/dubbo
-[3] https://github.com/apache/incubator-dubbo/releases
-[4] https://github.com/apache/incubator-dubbo/issues
+[3] https://github.com/apache/dubbo/releases
+[4] https://github.com/apache/dubbo/issues
 
 ```
 

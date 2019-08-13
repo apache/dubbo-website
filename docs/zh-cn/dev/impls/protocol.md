@@ -65,11 +65,11 @@ public interface Protocol {
 
 ## 已知扩展
 
-* `org.apache.dubbo.rpc.injvm.InjvmProtocol`
-* `org.apache.dubbo.rpc.dubbo.DubboProtocol`
-* `org.apache.dubbo.rpc.rmi.RmiProtocol`
-* `org.apache.dubbo.rpc.http.HttpProtocol`
-* `org.apache.dubbo.rpc.http.hessian.HessianProtocol`
+* `org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol`
+* `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol`
+* `org.apache.dubbo.rpc.protocol.rmi.RmiProtocol`
+* `org.apache.dubbo.rpc.protocol.http.HttpProtocol`
+* `org.apache.dubbo.rpc.protocol.http.hessian.HessianProtocol`
 
 ## 扩展示例
 

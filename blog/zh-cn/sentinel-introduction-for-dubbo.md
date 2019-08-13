@@ -14,7 +14,7 @@ description: 本文主要介绍了面向分布式服务架构的轻量级流量�
 
 Sentinel 意为**哨兵**，这个命名形象的诠释了 Sentinel 在分布式系统中的工作角色和重要性。以 Sentinel 在 Dubbo 生态系统中的作用为例，Dubbo 的核心模块包括注册中心、服务提供方、服务消费方（服务调用方）和监控四个模块。Sentinel 通过对服务提供方和服务消费方的限流来进一步提升服务的可用性。接下来我们看看 Sentinel 对服务提供方和服务消费方限流的技术实现方式。
 
-![Dubbo Arch](http://dubbo.incubator.apache.org/img/architecture.png)
+![Dubbo Arch](http://dubbo.apache.org/img/architecture.png)
 
 Sentinel 提供了与 Dubbo 适配的模块 – [Sentinel Dubbo Adapter](https://github.com/dubbo/dubbo-sentinel-support)，包括针对服务提供方的过滤器和服务消费方的过滤器（Filter）。使用时我们只需引入以下模块（以 Maven 为例）：
 

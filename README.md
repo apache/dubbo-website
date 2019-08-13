@@ -1,4 +1,4 @@
-# Dubbo Official WebSite
+# Dubbo Official Website
 
 This project keeps all sources used for building up dubbo official website which's served at http://dubbo.io or http://dubbo.apache.org.
 
@@ -15,7 +15,16 @@ Please also make sure your node version is 8.x, versions higher than 8.x is not 
 2. Run `npm i` in the root directory to install the dependencies.
 3. Run `docsite start` in the root directory to start a local server, you will see the website in 'http://127.0.0.1:8080'.
 4. Run `docsite build` to build source code.
-5. Verify your change locally: `python -m SimpleHTTPServer 8000`
+5. Verify your change locally: `python -m SimpleHTTPServer 8000`, when your python version is 3 use :`python3 -m http.server 8000` instead.
+
+If you have higher version of node installed, you may consider `nvm` to allow different versions of `node` coexisting on your machine.
+
+1. Follow the [instructions](http://nvm.sh) to install nvm
+2. Run `nvm install v8.16.0` to install node v8
+3. Run `nvm use v8.16.0` to switch the working environment to node v8
+4. Run `npm install docsite -g`
+
+Then you are all set to run and build the website. Follow the build instruction above for the details.
 
 ## How to send a PR
 
@@ -23,7 +32,7 @@ Please also make sure your node version is 8.x, versions higher than 8.x is not 
 2. Just push your changed files, such as:
     * `*.md`
 	* blog.js or docs.js or site.js
-3. Send a PR to asf-site branch.
+3. Send a PR to **master** branch.
 
 ## SEO
 
