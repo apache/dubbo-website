@@ -626,7 +626,7 @@ export default {
               },
               {
                 name: 'Etcd',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
+                img: '/img/ecology/etcd.svg',
                 desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
                 tags: [
                   {
@@ -733,8 +733,8 @@ export default {
               },
               {
                 name: 'Apollo',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
+                img: '/img/ecology/apollo.svg',
+                desc: 'Apollo is a reliable open-source configuration management system',
                 tags: [
                   {
                     text: 'Registry',
@@ -745,8 +745,8 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
+                website: 'https://github.com/ctripcorp/apollo',
+                repository: 'https://github.com/ctripcorp/apollo',
               },
             ],
           },
@@ -777,8 +777,8 @@ export default {
             children: [
               {
                 name: 'Sentinel',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
+                img: '/img/ecology/sentinel.svg',
+                desc: 'A lightweight powerful flow control component enabling reliability and monitoring for microservices',
                 tags: [
                   {
                     text: 'Registry',
@@ -789,8 +789,8 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
+                website: 'https://github.com/alibaba/Sentinel',
+                repository: 'https://github.com/alibaba/Sentinel',
               },
               {
                 name: 'Hystrix',
@@ -989,9 +989,9 @@ export default {
             title: 'Transaction',
             children: [
               {
-                name: 'Fescar',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
+                name: 'Seata',
+                img: '/img/ecology/seata.svg',
+                desc: 'Seata is an easy-to-use, high-performance, open source distributed transaction solution',
                 tags: [
                   {
                     text: 'Registry',
@@ -1002,8 +1002,8 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
+                website: 'http://seata.io/',
+                repository: 'https://github.com/seata/seata',
               },
             ],
           },
@@ -1012,8 +1012,8 @@ export default {
             children: [
               {
                 name: 'Sentinel',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
+                img: '/img/ecology/sentinel.svg',
+                desc: 'A lightweight powerful flow control component enabling reliability and monitoring for microservices',
                 tags: [
                   {
                     text: 'Registry',
@@ -1024,8 +1024,8 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
+                website: 'https://github.com/alibaba/Sentinel',
+                repository: 'https://github.com/alibaba/Sentinel',
               },
               {
                 name: 'Hystrix',
@@ -1090,7 +1090,7 @@ export default {
             children: [
               {
                 name: 'RocketMQ',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
+                img: '/img/ecology/apache-rocket-mq.svg',
                 desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
                 tags: [
                   {
@@ -1528,11 +1528,11 @@ export default {
     desc: 'Apache Dubbo生态系统包含围绕Apache Dubbo的多个工程，为构建微服务应用提供了产品级的最佳实践',
     body: [
       {
-        title: 'RPC-Core',
+        title: 'RPC核心',
         bgColor: '#834be3',
         children: [
           {
-            title: 'Cluster',
+            title: '集群',
             children: [
               {
                 name: 'Dubbo',
@@ -1622,7 +1622,7 @@ export default {
             ]
           },
           {
-            title: 'Load Balance',
+            title: '负载均衡',
             children: [
               {
                 name: 'Random',
@@ -1695,7 +1695,7 @@ export default {
             ]
           },
           {
-            title: 'Protocol',
+            title: '协议',
             children: [
               {
                 name: 'Dubbo',
@@ -1904,7 +1904,7 @@ export default {
             ],
           },
           {
-            title: 'Transport',
+            title: '传输',
             children: [
               {
                 name: 'Netty4',
@@ -1994,7 +1994,7 @@ export default {
             ],
           },
           {
-            title: 'Seriliazation',
+            title: '序列化',
             children: [
               {
                 name: 'Hessian2',
@@ -2125,11 +2125,11 @@ export default {
         ],
       },
       {
-        title: 'Service Governance',
+        title: '服务治理',
         bgColor: '#00D0D9',
         children: [
           {
-            title: 'Registry',
+            title: '注册中心',
             children: [
               {
                 name: 'Zookeeper',
@@ -2202,7 +2202,7 @@ export default {
             ],
           },
           {
-            title: 'Config',
+            title: '配置中心',
             children: [
               {
                 name: 'Zookeeper',
@@ -2275,7 +2275,7 @@ export default {
             ],
           },
           {
-            title: 'Metrics',
+            title: '指标',
             children: [
               {
                 name: 'Dubbo-metrics',
@@ -2297,7 +2297,7 @@ export default {
             ],
           },
           {
-            title: 'Circuit braker',
+            title: '断路器',
             children: [
               {
                 name: 'Sentinel',
@@ -2353,7 +2353,7 @@ export default {
             ],
           },
           {
-            title: 'Administration',
+            title: '管理控制台',
             children: [
               {
                 name: 'Dubbo admin',
@@ -2377,11 +2377,11 @@ export default {
         ],
       },
       {
-        title: 'Microservice Components',
+        title: '微服务组件',
         bgColor: '#2DACEC',
         children: [
           {
-            title: 'API Gateway',
+            title: 'API 网关',
             children: [
               {
                 name: 'Kong',
@@ -2437,12 +2437,12 @@ export default {
             ]
           },
           {
-            title: 'Tracing',
+            title: '事务',
             children: [
               {
-                name: 'Zookeeper',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
+                name: 'Seata',
+                img: '/img/ecology/seata.svg',
+                desc: 'Seata is an easy-to-use, high-performance, open source distributed transaction solution',
                 tags: [
                   {
                     text: 'Registry',
@@ -2453,86 +2453,13 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
-              },
-              {
-                name: 'Nacos',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
-                tags: [
-                  {
-                    text: 'Registry',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Config',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
-              },
-              {
-                name: 'Etcd',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
-                tags: [
-                  {
-                    text: 'Registry',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Config',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
-              },
-              {
-                name: 'Apollo',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
-                tags: [
-                  {
-                    text: 'Registry',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Config',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
+                website: 'http://seata.io/',
+                repository: 'https://github.com/seata/seata',
               },
             ],
           },
           {
-            title: 'Transaction',
-            children: [
-              {
-                name: 'Fescar',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
-                tags: [
-                  {
-                    text: 'Registry',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Config',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
-              },
-            ],
-          },
-          {
-            title: 'Reliability',
+            title: '可靠性',
             children: [
               {
                 name: 'Sentinel',
@@ -2588,7 +2515,7 @@ export default {
             ]
           },
           {
-            title: 'Authorization',
+            title: '授权',
             children: [
               {
                 name: 'OAuth',
@@ -2610,7 +2537,7 @@ export default {
             ],
           },
           {
-            title: 'Event',
+            title: '事件',
             children: [
               {
                 name: 'RocketMQ',
@@ -2632,7 +2559,7 @@ export default {
             ],
           },
           {
-            title: 'Scheduling',
+            title: '调度',
             children: [
               {
                 name: 'BBB',
@@ -2700,7 +2627,7 @@ export default {
         ],
       },
       {
-        title: 'Devloper Experience',
+        title: '开发者体验',
         bgColor: '#EA73D7',
         children: [
           {
@@ -2726,7 +2653,7 @@ export default {
             ]
           },
           {
-            title: 'Multi-language SDK',
+            title: '多语言SDK',
             children: [
               {
                 name: 'Java',
@@ -2889,10 +2816,10 @@ export default {
             ],
           },
           {
-            title: 'Developer Experience',
+            title: '开发者体验',
             children: [
               {
-                name: 'IDEA Plugin',
+                name: 'IDEA 插件',
                 img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
                 desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
                 tags: [
@@ -2909,7 +2836,7 @@ export default {
                 repository: 'https://openapm.io/landscape/agent/pcp',
               },
               {
-                name: 'JMeter Plugin',
+                name: 'JMeter 插件',
                 img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
                 desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
                 tags: [
@@ -2930,11 +2857,11 @@ export default {
         ],
       },
       {
-        title: 'Observability',
+        title: '可观察性',
         bgColor: '#00D0D9',
         children: [
           {
-            title: 'Monitoring',
+            title: '监控',
             children: [
               {
                 name: 'Prometheus',
@@ -2956,7 +2883,7 @@ export default {
             ],
           },
           {
-            title: 'Tracing',
+            title: '追踪',
             children: [
               {
                 name: 'OpenTracing',
@@ -2978,7 +2905,7 @@ export default {
             ],
           },
           {
-            title: 'Logging',
+            title: '日志',
             children: [
               {
                 name: 'ElasticSearch',
@@ -3000,7 +2927,7 @@ export default {
             ],
           },
           {
-            title: 'Diagostics',
+            title: '诊断',
             children: [
               {
                 name: 'Arthas',
@@ -3022,7 +2949,7 @@ export default {
             ],
           },
           {
-            title: 'Chaos Engineering',
+            title: '混沌工程',
             children: [
               {
                 name: 'Temp',
