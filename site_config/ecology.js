@@ -102,8 +102,8 @@ export default {
             children: [
               {
                 name: 'Random',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
+                img: '/img/ecology/dubbo.svg',
+                desc: 'Ramdom, set random probabilities by weight.',
                 tags: [
                   {
                     text: 'Registry',
@@ -114,13 +114,13 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
+                website: 'http://dubbo.apache.org/en-us/docs/user/demos/loadbalance.html',
+                repository: 'https://github.com/apache/dubbo',
               },
               {
                 name: 'Round Robin',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
-                desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
+                img: '/img/ecology/dubbo.svg',
+                desc: 'RoundRobin, use the weight\' s common advisor to determine round robin ratio',
                 tags: [
                   {
                     text: 'Registry',
@@ -131,12 +131,12 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://openapm.io/landscape/agent/pcp',
-                repository: 'https://openapm.io/landscape/agent/pcp',
-              },
-              {
+		website: 'http://dubbo.apache.org/en-us/docs/user/demos/loadbalance.html',
+		repository: 'https://github.com/apache/dubbo',
+             },
+	     {
                 name: 'Least Active',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
+                img: '/img/ecology/dubbo.svg',
                 desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
                 tags: [
                   {
@@ -153,7 +153,7 @@ export default {
               },
               {
                 name: 'Consitent Hash',
-                img: 'https://img.alicdn.com/tfs/TB16l_dKmzqK1RjSZPxXXc4tVXa-748-707.png',
+                img: '/img/ecology/dubbo.svg',
                 desc: 'Distributed reliable key-value store for the most critical data of a distributed system',
                 tags: [
                   {
