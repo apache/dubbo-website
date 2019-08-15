@@ -1086,10 +1086,6 @@ export default {
             ],
           },
           {
-            title: 'Scheduling',
-            children: [],
-          },
-          {
             title: 'OpenAPI',
             children: [
               {
@@ -1110,10 +1106,6 @@ export default {
                 repository: 'https://github.com/apache/dubbo-admin',
               },
             ],
-          },
-          {
-            title: 'Function',
-            children: [],
           },
         ],
       },
@@ -2053,8 +2045,8 @@ export default {
                     bgColor: '#00D0D9',
                   },
                 ],
-                website: 'https://github.com/RuedigerMoeller/fast-序列化',
-                repository: 'https://github.com/RuedigerMoeller/fast-序列化',
+                website: 'https://github.com/RuedigerMoeller/fast-serialization',
+                repository: 'https://github.com/RuedigerMoeller/fast-serialization',
               },
               {
                 name: 'Kryo',
@@ -2334,7 +2326,7 @@ export default {
         bgColor: '#2DACEC',
         children: [
           {
-            title: 'API Gateway (TODO)',
+            title: 'API 网关 (TODO)',
             children: [
               {
                 name: 'Kong',
@@ -2602,10 +2594,6 @@ export default {
             ],
           },
           {
-            title: 'Scheduling',
-            children: [],
-          },
-          {
             title: 'OpenAPI',
             children: [
               {
@@ -2626,10 +2614,6 @@ export default {
                 repository: 'https://github.com/apache/dubbo-admin',
               },
             ],
-          },
-          {
-            title: 'Function',
-            children: [],
           },
         ],
       },
