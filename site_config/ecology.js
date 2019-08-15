@@ -1499,10 +1499,6 @@ export default {
               },
             ],
           },
-          {
-            title: 'Chaos Engineering',
-            children: [],
-          },
         ],
       },
     ],
@@ -3006,10 +3002,6 @@ export default {
                 repository: 'https://github.com/alibaba/arthas',
               },
             ],
-          },
-          {
-            title: '混沌工程',
-            children: [],
           },
         ],
       },
