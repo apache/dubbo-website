@@ -144,6 +144,13 @@ export default {
                 link: '/en-us/blog/dubbo-annotation.html',
             },
             {
+                Title: 'Dubbo annotation driver',
+                Author: '@mercyblitz',
+                dateStr: 'Jan 2nd, 2019',
+                Desc: 'This article introduces the Dubbo programming model: registering drivers, including design thinking and how to use it',
+                Link: '/en-us/blog/dubbo-annotation-driven.html',
+            },
+            {
                 title: 'Using Zookeeper in Dubbo',
                 author: '@Mani',
                 dateStr: 'August 7th，2018',
