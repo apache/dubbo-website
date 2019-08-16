@@ -254,24 +254,6 @@ export default {
                 repository: 'https://github.com/apache/dubbo',
               },
               {
-                name: 'JMS (under development)',
-                img: '/img/ecology/dubbo.svg',
-                hiddenImg: true,
-                desc: 'jms support for apache dubbo',
-                tags: [
-                  {
-                    text: 'RPC Core',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Protocol',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://github.com/thubbo/jms-for-apache-dubbo',
-                repository: 'https://github.com/thubbo/jms-for-apache-dubbo',
-              },
-              {
                 name: 'JSONRPC',
                 img: '/img/ecology/dubbo.svg',
                 hiddenImg: true,
@@ -1778,24 +1760,6 @@ export default {
                 ],
                 website: 'http://dubbo.apache.org/zh-cn/docs/user/references/protocol/http.html',
                 repository: 'https://github.com/apache/dubbo',
-              },
-              {
-                name: 'JMS (under development)',
-                img: '/img/ecology/dubbo.svg',
-                hiddenImg: true,
-                desc: 'jms 协议',
-                tags: [
-                  {
-                    text: 'RPC 核心',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: '协议',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://github.com/thubbo/jms-for-apache-dubbo',
-                repository: 'https://github.com/thubbo/jms-for-apache-dubbo',
               },
               {
                 name: 'JSONRPC',

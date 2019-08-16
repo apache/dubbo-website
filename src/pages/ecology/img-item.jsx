@@ -31,7 +31,7 @@ class ImgItem extends React.Component {
     return (
       <div className="img-item" onClick={this.showModal}>
         <Tooltip title={name}>{
-          hiddenImg ? <p className="hidden-img-title">{name}</p> : <img src={getLink(img)} alt={name} />
+          hiddenImg ? <h3 className="hidden-img-title">{name != null && name.length > 5 ? name.slice(0, 4) : name }</h3> : <img src={getLink(img)} alt={name} />
         }
         </Tooltip>
         <Modal
