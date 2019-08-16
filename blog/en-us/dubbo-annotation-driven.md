@@ -1,9 +1,9 @@
-#Annotation-Driven
+# Annotation-Driven
 
 
 
 
-##Annotation-Driven
+## Annotation-Driven
 
 
 
@@ -33,10 +33,10 @@
 
 
 
-In Dubbo 2.5.7version before, Dubbo provides two core notes `@Service`and `@Reference`, Dubbo Dubbo and service delivery service references are used.
+In Dubbo version 2.5.7 before, Dubbo provides two core notes `@Service`and `@Reference`, Dubbo and service delivery service references are used.
 
 
-Among them, `@Service` as an XML element <dubbo:service>replacement annotated with Spring Framework @org.springframework.stereotype.Serviceis similar to the service provider Dubbo service exposure. Corresponding to `@Reference` it is an alternative <dubbo:referenceelement, similar to Spring `@Autowired`.
+Among them, `@Service` as an XML element <dubbo:service> replacement annotated with Spring Framework @org.springframework.stereotype.Serviceis similar to the service provider Dubbo service exposure. Corresponding to `@Reference` it is an alternative <dubbo:referenceelement, similar to Spring `@Autowired`.
 
 
 
@@ -65,12 +65,12 @@ Among them, `@Service` as an XML element <dubbo:service>replacement annotated wi
 
 
 
-Meanwhile, the use of `<dubbo:annotation>`Dubbo scanned after `@Service`a problem in terms Spring agents, such as the issue GitHub [https://github.com/alibaba/dubbo/issues/794:](https://github.com/alibaba/dubbo/issues/794%EF%BC%9A)
+Meanwhile, the use of `<dubbo:annotation>` Dubbo scanned after `@Service`a problem in terms Spring agents, such as the issue GitHub [https://github.com/alibaba/dubbo/issues/794:](https://github.com/alibaba/dubbo/issues/794%EF%BC%9A)
 
 
 > About the dubbo @Service annotation when generating the ServiceBean, the interface gets the bug of the spring proxy object.
 >
-> >In the project, I used it.
+> >In the project, I use this form to expose the service..
 > >
 > >```java
 > >@Service
@@ -79,11 +79,11 @@ Meanwhile, the use of `<dubbo:annotation>`Dubbo scanned after `@Service`a prob
 > >public class SUserJpushServiceImp
 > >```
 > >
-> >In the form of to expose the service. But when publishing services, interface class is by
+> >But when the service is published, the interface class is obtained in this form.
 > >``
 > >serviceConfig.setInterface(bean.getClass().getInterfaces()[0]);
 > >``
-> >obtaining a form, just, I have used the service @Transactional annotation, the object is a proxy. So the interface obtained is Spring's proxy interface...
+> >Just, my service uses the @Transactional annotation, and the object is delegated. So the interface obtained is Spring's proxy interface....
 
 
 
