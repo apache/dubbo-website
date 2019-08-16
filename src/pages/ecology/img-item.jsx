@@ -27,11 +27,12 @@ class ImgItem extends React.Component {
 
   render() {
     const { dataSource } = this.props;
-    const { name = '', img = '', desc = '', tags = [], website = '', repository = '' } = dataSource;
+    const { name = '', img = '', desc = '', tags = [], website = '', repository = '', hiddenImg = false } = dataSource;
     return (
       <div className="img-item" onClick={this.showModal}>
-        <Tooltip title={name}>
-          <img src={getLink(img)} alt={name} />
+        <Tooltip title={name}>{
+          hiddenImg ? <p className="hidden-img-title">{name}</p> : <img src={getLink(img)} alt={name} />
+        }
         </Tooltip>
         <Modal
           visible={this.state.visible}

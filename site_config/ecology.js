@@ -13,6 +13,7 @@ export default {
               {
                 name: 'Failover',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Cluster and fault tolerance strategy of Apache Dubbo : failover',
                 tags: [
                   {
@@ -30,6 +31,7 @@ export default {
               {
                 name: 'Failfast',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Cluster and fault tolerance strategy of Apache Dubbo : failfast',
                 tags: [
                   {
@@ -47,6 +49,7 @@ export default {
               {
                 name: 'Failsafe',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Cluster and fault tolerance strategy of Apache Dubbo : failsafe',
                 tags: [
                   {
@@ -64,6 +67,7 @@ export default {
               {
                 name: 'Failback',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Cluster and fault tolerance strategy of Apache Dubbo : failback',
                 tags: [
                   {
@@ -81,6 +85,7 @@ export default {
               {
                 name: 'Forking',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Cluster and fault tolerance strategy of Apache Dubbo : forking',
                 tags: [
                   {
@@ -103,6 +108,7 @@ export default {
               {
                 name: 'Random',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Load Balance strategy  of Apache Dubbo : Ramdom, set random probabilities by weight.',
                 tags: [
                   {
@@ -120,6 +126,7 @@ export default {
               {
                 name: 'Round Robin',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Load Balance strategy  of Apache Dubbo : RoundRobin, use the weight\'s common advisor to determine round robin ratio.',
                 tags: [
                   {
@@ -137,6 +144,7 @@ export default {
             {
                 name: 'Least Active',
                 img: '/img/ecology/dubbo.svg',
+              hiddenImg: true,
                 desc: 'Load Balance strategy  of Apache Dubbo : LeastActive, a random mechanism based on actives, actives means the num of requests a consumer have sent but not return yet。',
                 tags: [
                   {
@@ -154,6 +162,7 @@ export default {
               {
                 name: 'Consitent Hash',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Load Balance strategy  of Apache Dubbo : ConsistentHash, the same parameters of the request is always sent to the same provider.',
                 tags: [
                   {
@@ -176,6 +185,7 @@ export default {
               {
                 name: 'Dubbo',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo protocol which is the default protocol of Dubbo RPC Framework',
                 tags: [
                   {
@@ -193,6 +203,7 @@ export default {
               {
                 name: 'REST',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'REST Protocol',
                 tags: [
                   {
@@ -227,6 +238,7 @@ export default {
               {
                 name: 'HTTP',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'HTTP Protocol',
                 tags: [
                   {
@@ -244,6 +256,7 @@ export default {
               {
                 name: 'JMS (under development)',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'jms support for apache dubbo',
                 tags: [
                   {
@@ -261,6 +274,7 @@ export default {
               {
                 name: 'JSONRPC',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'dubbo rpc jsonrpc',
                 tags: [
                   {
@@ -278,6 +292,7 @@ export default {
               {
                 name: 'WebService',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'WebService Protocol',
                 tags: [
                   {
@@ -295,6 +310,7 @@ export default {
               {
                 name: 'RMI',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'RMI Protocol',
                 tags: [
                   {
@@ -436,6 +452,7 @@ export default {
               {
                 name: 'P2P',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Extension of Apache Dubbo for peer to peer network grouping.',
                 tags: [
                   {
@@ -872,7 +889,7 @@ export default {
                 repository: 'https://github.com/alibaba/nacos',
               },
               {
-                name: 'Dubbo proxy (under development)',
+                name: 'Dubbo proxy',
                 img: '/img/ecology/dubbo.svg',
                 desc: 'Dubbo Proxy, a gateway of Apache Dubbo',
                 tags: [
@@ -1119,6 +1136,7 @@ export default {
               {
                 name: 'Initializr',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'A quickstart generator for Dubbo + Spring projects ',
                 tags: [
                   {
@@ -1248,6 +1266,7 @@ export default {
               {
                 name: 'XML',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo XML Configuration',
                 tags: [
                   {
@@ -1265,6 +1284,7 @@ export default {
               {
                 name: 'Annotation',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo Annotation Configuration',
                 tags: [
                   {
@@ -1282,6 +1302,7 @@ export default {
               {
                 name: 'Java',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Java API of Dubbo Configuration',
                 tags: [
                   {
@@ -1299,6 +1320,7 @@ export default {
               {
                 name: 'Spring Boot',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo Sprng Boot Configuration',
                 tags: [
                   {
@@ -1516,8 +1538,9 @@ export default {
             children: [
               {
                 name: 'Failover',
-                img: '/img/ecology/dubbo.svg',
                 desc: 'Apache Dubbo 的集群容错策略: failover',
+                img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 tags: [
                   {
                     text: 'RPC 核心',
@@ -1533,8 +1556,9 @@ export default {
               },
               {
                 name: 'Failfast',
-                img: '/img/ecology/dubbo.svg',
                 desc: 'Apache Dubbo 的集群容错策略: Failfast',
+                img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 tags: [
                   {
                     text: 'RPC 核心',
@@ -1551,6 +1575,7 @@ export default {
               {
                 name: 'Failsafe',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo 的集群容错策略: Failsafe',
                 tags: [
                   {
@@ -1568,6 +1593,7 @@ export default {
               {
                 name: 'Failback',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo 的集群容错策略: Failback',
                 tags: [
                   {
@@ -1585,6 +1611,7 @@ export default {
               {
                 name: 'Forking',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo 的集群容错策略: Forking',
                 tags: [
                   {
@@ -1607,6 +1634,7 @@ export default {
               {
                 name: 'Random',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo 的负载均衡策略: 随机，按权重设置随机概率。',
                 tags: [
                   {
@@ -1622,8 +1650,9 @@ export default {
                 repository: 'https://github.com/apache/dubbo',
               },
               {
-                name: 'Round Robin',
+                name: 'RoundRobin',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo 的负载均衡策略: 轮询，按公约后的权重设置轮询比率。',
                 tags: [
                   {
@@ -1639,8 +1668,9 @@ export default {
                 repository: 'https://github.com/apache/dubbo',
               },
               {
-                name: 'Least Active',
+                name: 'LeastActive',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo 的负载均衡策略: 最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差。',
                 tags: [
                   {
@@ -1656,8 +1686,9 @@ export default {
                 repository: 'https://github.com/apache/dubbo',
               },
               {
-                name: 'Consitent Hash',
+                name: 'ConsistentHash',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo 的负载均衡策略: 一致性 Hash，相同参数的请求总是发到同一提供者',
                 tags: [
                   {
@@ -1680,6 +1711,7 @@ export default {
               {
                 name: 'Dubbo',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo 是Dubbo RPC 框架的默认协议',
                 tags: [
                   {
@@ -1697,6 +1729,7 @@ export default {
               {
                 name: 'REST',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'REST 协议',
                 tags: [
                   {
@@ -1731,6 +1764,7 @@ export default {
               {
                 name: 'HTTP',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'HTTP 协议',
                 tags: [
                   {
@@ -1748,6 +1782,7 @@ export default {
               {
                 name: 'JMS (under development)',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'jms 协议',
                 tags: [
                   {
@@ -1765,6 +1800,7 @@ export default {
               {
                 name: 'JSONRPC',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'dubbo rpc jsonrpc',
                 tags: [
                   {
@@ -1782,6 +1818,7 @@ export default {
               {
                 name: 'WebService',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'WebService 协议',
                 tags: [
                   {
@@ -1799,6 +1836,7 @@ export default {
               {
                 name: 'RMI',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'RMI 协议',
                 tags: [
                   {
@@ -1940,6 +1978,7 @@ export default {
               {
                 name: 'P2P',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Apache Dubbo的点对点网络通讯功能的扩展',
                 tags: [
                   {
@@ -2376,7 +2415,7 @@ export default {
                 repository: 'https://github.com/alibaba/nacos',
               },
               {
-                name: 'Dubbo proxy (under development)',
+                name: 'Dubbo proxy',
                 img: '/img/ecology/dubbo.svg',
                 desc: 'Apache Dubbo的网关实现',
                 tags: [
@@ -2623,6 +2662,7 @@ export default {
               {
                 name: 'Initializr',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: '一个 Dubbo + Spring 项目的快速代码生成器 ',
                 tags: [
                   {
@@ -2752,6 +2792,7 @@ export default {
               {
                 name: 'XML',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo XML 配置',
                 tags: [
                   {
@@ -2769,6 +2810,7 @@ export default {
               {
                 name: 'Annotation',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo Annotation 配置',
                 tags: [
                   {
@@ -2786,6 +2828,7 @@ export default {
               {
                 name: 'Java',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo 配置的Java API',
                 tags: [
                   {
@@ -2803,6 +2846,7 @@ export default {
               {
                 name: 'Spring Boot',
                 img: '/img/ecology/dubbo.svg',
+                hiddenImg: true,
                 desc: 'Dubbo Sprng Boot 配置',
                 tags: [
                   {
