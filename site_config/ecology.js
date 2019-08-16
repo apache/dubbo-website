@@ -1503,6 +1503,28 @@ export default {
               },
             ],
           },
+          {
+            title: 'Chaos Engineering',
+            children: [
+              {
+                name: 'Chaosblade',
+                img: '/img/ecology/chaosblade.png',
+                desc: 'An easy to use and powerful chaos engineering experiment toolkit.',
+                tags: [
+                  {
+                    text: 'Observability',
+                    bgColor: '#835BE3',
+                  },
+                  {
+                    text: 'Chaos Engineering',
+                    bgColor: '#00D0D9',
+                  },
+                ],
+                website: 'https://github.com/chaosblade-io/chaosblade',
+                repository: 'https://github.com/chaosblade-io/chaosblade',
+              },
+            ],
+          },
         ],
       },
     ],
@@ -3008,6 +3030,28 @@ export default {
                 ],
                 website: 'https://alibaba.github.io/arthas/',
                 repository: 'https://github.com/alibaba/arthas',
+              },
+            ],
+          },
+          {
+            title: '混沌工程',
+            children: [
+              {
+                name: 'Chaosblade',
+                img: '/img/ecology/chaosblade.png',
+                desc: '阿里巴巴开源的一款简单易用、功能强大的混沌实验注入工具',
+                tags: [
+                  {
+                    text: '可观测性',
+                    bgColor: '#835BE3',
+                  },
+                  {
+                    text: '混沌工程',
+                    bgColor: '#00D0D9',
+                  },
+                ],
+                website: 'https://github.com/chaosblade-io/chaosblade',
+                repository: 'https://github.com/chaosblade-io/chaosblade',
               },
             ],
           },
