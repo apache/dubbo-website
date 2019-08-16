@@ -32,6 +32,11 @@ export default {
         link: '/en-us/community/index.html',
       },
       {
+        key: 'ecology',
+        text: 'ECOSYSTEM',
+        link: '/en-us/ecology/index.html',
+      },
+      {
         key: 'download',
         text: 'DOWNLOAD',
         link: '/en-us/blog/download.html',
@@ -136,6 +141,11 @@ export default {
         key: 'community',
         text: '社区',
         link: '/zh-cn/community/index.html',
+      },
+      {
+        key: 'ecology',
+        text: '生态系统',
+        link: '/zh-cn/ecology/index.html',
       },
       {
         key: 'download',
