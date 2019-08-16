@@ -91,7 +91,7 @@ Many enthusiastic partners not only discovered this legacy, but also proposed so
 
 
 
-> Note: `<dubbo:annotation>` the Spring AOP issue will be `2.5.9`fixed in: [https://github.com/alibaba/dubbo/issues/1125](https://github.com/alibaba/dubbo/issues/1125)
+> Note: `<dubbo:annotation>` the Spring AOP issue should be `2.5.9` fixed in: [https://github.com/alibaba/dubbo/issues/1125](https://github.com/alibaba/dubbo/issues/1125)
 
 
 
