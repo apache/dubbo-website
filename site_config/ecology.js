@@ -525,6 +525,7 @@ export default {
               {
                 name: 'Fst',
                 img: '/img/ecology/java.png',
+                hiddenImg: true,
                 desc: 'FST: fast java serialization drop in-replacement',
                 tags: [
                   {
@@ -903,11 +904,11 @@ export default {
                 desc: 'A lightweight powerful flow control component enabling reliability and monitoring for microservices',
                 tags: [
                   {
-                    text: 'Registry',
+                    text: 'Microservice Components',
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Config',
+                    text: 'Reliability',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -920,11 +921,11 @@ export default {
                 desc: 'Hystrix: Latency and Fault Tolerance for Distributed Systems',
                 tags: [
                   {
-                    text: 'Registry',
+                    text: 'Microservice Components',
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Config',
+                    text: 'Reliability',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -937,11 +938,11 @@ export default {
                 desc: 'Resilience4j is a fault tolerance library designed for Java8 and functional programming',
                 tags: [
                   {
-                    text: 'Registry',
+                    text: 'Microservice Components',
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Config',
+                    text: 'Reliability',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -959,11 +960,11 @@ export default {
                 desc: 'An open protocol to allow secure authorization in a simple and standard method from web, mobile and desktop applications.',
                 tags: [
                   {
-                    text: 'Registry',
+                    text: 'Microservice Components',
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Config',
+                    text: 'Authorization',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -981,11 +982,11 @@ export default {
                 desc: 'Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalability.',
                 tags: [
                   {
-                    text: 'Registry',
+                    text: 'Microservice Components',
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Config',
+                    text: 'Event',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -1003,7 +1004,7 @@ export default {
                 desc: 'Simplify API development for users, teams, and enterprises with the Swagger open source and professional toolset. ',
                 tags: [
                   {
-                    text: 'Registry',
+                    text: 'Microservice Components',
                     bgColor: '#835BE3',
                   },
                   {
@@ -1013,6 +1014,29 @@ export default {
                 ],
                 website: 'https://swagger.io/',
                 repository: 'https://github.com/apache/dubbo-admin',
+              },
+            ],
+          },
+          {
+            title: 'Scheduling',
+            children: [
+              {
+                name: 'SchedulerX',
+                img: '/img/ecology/java.png',
+                hiddenImg: true,
+                desc: 'A distributed task scheduling componenent',
+                tags: [
+                  {
+                    text: 'Microservice Components',
+                    bgColor: '#835BE3',
+                  },
+                  {
+                    text: 'Scheduling',
+                    bgColor: '#00D0D9',
+                  },
+                ],
+                website: 'https://www.aliyun.com/aliware/schedulerx',
+                repository: 'https://www.aliyun.com/aliware/schedulerx',
               },
             ],
           },
@@ -1965,6 +1989,7 @@ export default {
               {
                 name: 'Fst',
                 img: '/img/ecology/java.png',
+                hiddenImg: true,
                 desc: 'FST: 一个快速的Java序列化工具',
                 tags: [
                   {
@@ -2453,6 +2478,29 @@ export default {
                 ],
                 website: 'https://swagger.io/',
                 repository: 'https://github.com/apache/dubbo-admin',
+              },
+            ],
+          },
+          {
+            title: '调度',
+            children: [
+              {
+                name: 'SchedulerX',
+                img: '/img/ecology/java.png',
+                hiddenImg: true,
+                desc: '分布式调度系统',
+                tags: [
+                  {
+                    text: '微服务组件',
+                    bgColor: '#835BE3',
+                  },
+                  {
+                    text: '调度',
+                    bgColor: '#00D0D9',
+                  },
+                ],
+                website: 'https://www.aliyun.com/aliware/schedulerx',
+                repository: 'https://www.aliyun.com/aliware/schedulerx',
               },
             ],
           },
