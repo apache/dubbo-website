@@ -733,7 +733,7 @@ export default {
             ],
           },
           {
-            title: 'Circuit braker',
+            title: 'Circuit breaker',
             children: [
               {
                 name: 'Sentinel',
@@ -745,7 +745,7 @@ export default {
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Circuit braker',
+                    text: 'Circuit breaker',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -762,7 +762,7 @@ export default {
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Circuit braker',
+                    text: 'Circuit breaker',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -779,7 +779,7 @@ export default {
                     bgColor: '#835BE3',
                   },
                   {
-                    text: 'Circuit braker',
+                    text: 'Circuit breaker',
                     bgColor: '#00D0D9',
                   },
                 ],
@@ -854,23 +854,6 @@ export default {
                 repository: 'https://github.com/Netflix/zuul',
               },
               {
-                name: 'Nacos',
-                img: '/img/ecology/nacos.svg',
-                desc: 'an easy-to-use dynamic service discovery, configuration and service management platform for building cloud native applications.',
-                tags: [
-                  {
-                    text: 'Microservice Components',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'API Gateway',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://nacos.io/',
-                repository: 'https://github.com/alibaba/nacos',
-              },
-              {
                 name: 'Dubbo proxy',
                 img: '/img/ecology/dubbo.svg',
                 desc: 'Dubbo Proxy, a gateway of Apache Dubbo',
@@ -888,79 +871,6 @@ export default {
                 repository: 'https://github.com/apache/dubbo-proxy',
               },
             ]
-          },
-          {
-            title: 'Tracing',
-            children: [
-              {
-                name: 'OpenTracing (TODO)',
-                img: '/img/ecology/opentracing.png',
-                desc: 'Consistent, expressive, vendor-neutral APIs for distributed tracing and context propagation',
-                tags: [
-                  {
-                    text: 'Microservice Components',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Tracing',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://opentracing.io/',
-                repository: 'https://github.com/opentracing',
-              },
-              {
-                name: 'SkyWalking',
-                img: '/img/ecology/sky-walking.svg',
-                desc: 'APM, Application Performance Monitoring System',
-                tags: [
-                  {
-                    text: 'Registry',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Config',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://skywalking.apache.org/',
-                repository: 'https://github.com/apache/skywalking',
-              },
-              {
-                name: 'Zipkin',
-                img: '/img/ecology/zipkin.svg',
-                desc: 'Zipkin is a distributed tracing system',
-                tags: [
-                  {
-                    text: 'Registry',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Config',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://zipkin.io/',
-                repository: 'https://github.com/openzipkin/zipkin',
-              },
-              {
-                name: 'Pinpoint',
-                img: '/img/ecology/pinpoint.svg',
-                desc: 'APM, (Application Performance Management) tool for large-scale distributed systems written in Java',
-                tags: [
-                  {
-                    text: 'Registry',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Config',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://naver.github.io/pinpoint/',
-                repository: 'https://github.com/naver/pinpoint',
-              },
-            ],
           },
           {
             title: 'Transaction',
@@ -2384,23 +2294,6 @@ export default {
                 repository: 'https://github.com/Netflix/zuul',
               },
               {
-                name: 'Nacos',
-                img: '/img/ecology/nacos.svg',
-                desc: '一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。',
-                tags: [
-                  {
-                    text: '微服务组件',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'API 网关',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://nacos.io/',
-                repository: 'https://github.com/alibaba/nacos',
-              },
-              {
                 name: 'Dubbo proxy',
                 img: '/img/ecology/dubbo.svg',
                 desc: 'Apache Dubbo的网关实现',
@@ -2418,79 +2311,6 @@ export default {
                 repository: 'https://github.com/apache/dubbo-proxy',
               },
             ]
-          },
-          {
-            title: '追踪',
-            children: [
-              {
-                name: 'OpenTracing (TODO)',
-                img: '/img/ecology/opentracing.png',
-                desc: '于分布式跟踪和上下文传播的一致、表达性强、与供应商无关的API',
-                tags: [
-                  {
-                    text: '微服务组件',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: '追踪',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://opentracing.io/',
-                repository: 'https://github.com/opentracing',
-              },
-              {
-                name: 'SkyWalking',
-                img: '/img/ecology/sky-walking.svg',
-                desc: '分布式系统的应用程序性能监视工具',
-                tags: [
-                  {
-                    text: '微服务组件',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: '追踪',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://skywalking.apache.org/',
-                repository: 'https://github.com/apache/skywalking',
-              },
-              {
-                name: 'Zipkin',
-                img: '/img/ecology/zipkin.svg',
-                desc: 'Zipkin是一个分布式监控系统',
-                tags: [
-                  {
-                    text: '微服务组件',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: '追踪',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://zipkin.io/',
-                repository: 'https://github.com/openzipkin/zipkin',
-              },
-              {
-                name: 'Pinpoint',
-                img: '/img/ecology/pinpoint.svg',
-                desc: 'Java编写大规模分布式系统的APM（应用性能管理）工具',
-                tags: [
-                  {
-                    text: '微服务组件',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: '追踪',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://naver.github.io/pinpoint/',
-                repository: 'https://github.com/naver/pinpoint',
-              },
-            ],
           },
           {
             title: '事务',
