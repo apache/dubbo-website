@@ -1019,26 +1019,7 @@ export default {
           },
           {
             title: 'Scheduling',
-            children: [
-              {
-                name: 'SchedulerX',
-                img: '/img/ecology/java.png',
-                hiddenImg: true,
-                desc: 'A distributed task scheduling componenent',
-                tags: [
-                  {
-                    text: 'Microservice Components',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: 'Scheduling',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://www.aliyun.com/aliware/schedulerx',
-                repository: 'https://www.aliyun.com/aliware/schedulerx',
-              },
-            ],
+            children: [],
           },
         ],
       },
@@ -2483,26 +2464,7 @@ export default {
           },
           {
             title: '调度',
-            children: [
-              {
-                name: 'SchedulerX',
-                img: '/img/ecology/java.png',
-                hiddenImg: true,
-                desc: '分布式调度系统',
-                tags: [
-                  {
-                    text: '微服务组件',
-                    bgColor: '#835BE3',
-                  },
-                  {
-                    text: '调度',
-                    bgColor: '#00D0D9',
-                  },
-                ],
-                website: 'https://www.aliyun.com/aliware/schedulerx',
-                repository: 'https://www.aliyun.com/aliware/schedulerx',
-              },
-            ],
+            children: [],
           },
         ],
       },
