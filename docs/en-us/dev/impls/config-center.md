@@ -12,7 +12,7 @@ Divided by application scenarios, CC mainly undertake the following responsibili
 
 Dubbo CC also introduced concepts of `namespace` and `group` to better manage Key-Value pairs by group, those concepts are already built-in in many professional third-party configuration centers. In most cases, `namespace` is used to isolate different tetants, while `group` is used to divid the key set from one tetant into groups.
 
-Dubbo CC has currently supported Zookeeper, Nacos, Etcd, Consul, Apollo, next we will see how Dubbo CC is mapped to a specific third-party implemention.
+Dubbo CC has currently supported Zookeeper, Nacos, Etcd, Consul, Apollo, next we will see how Dubbo CC is mapped to a specific third-party implementation.
 
 ## Extension Interface
 
@@ -27,11 +27,11 @@ Dubbo CC has currently supported Zookeeper, Nacos, Etcd, Consul, Apollo, next we
 * `org.apache.dubbo.configcenter.support.zookeeper.ConsulDynamicConfigurationFactory`
 * `org.apache.dubbo.configcenter.support.zookeeper.ApolloDynamicConfigurationFactory`
 
-## Implmention
+## Implementation
 
 ### Zookeeper
 
-Zookeeper provided a tree-structure storage model, the implemention is as follows:
+Zookeeper provided a tree-structure storage model, the implementation is as follows:
 
 ![image-20190127225608553](/img/configcenter_zk_model.jpg)
 
