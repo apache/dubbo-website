@@ -8,7 +8,7 @@ description: Implementation background and practice of Dubbo client asynchronous
 
 ## Preface
 
-![image | left](../../img/blog/dubboasyn_client/1.png  "")
+![image | left](../../img/blog/dubboasyn_client/1_en.png  "")
 
 Let's start with a brief introduction about the stages of a complete Dubbo invocation.  
 1. Biz~ represents business thread, that is, the thread where the business logic is located. Biz~ thread pool may be created and maintained by business itself, most of which may be managed by system framework itself (for example, a web system runs under Tomcat container, Biz~ thread is maintained by Tomcat); IO~ stands for network data processing thread, which is created and maintained by IO framework (such as Netty, Grizzly). Dubbo Remoting's default Netty implementation is NioEventloopLoopGroup. In addition, according to the binding relationship between Channel and IO thread, IO~ can also be regarded as an acceptable Channel for event messages. Asynchronous processing stages such as Biz and IO are abstractly described in JDK8 as completionstages.  
