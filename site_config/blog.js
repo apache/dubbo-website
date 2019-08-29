@@ -4,6 +4,13 @@ export default {
         postsTitle: 'All posts',
         list: [
             {
+                title: 'Dubbo Admin service test',
+                author: '@nzomkxia',
+                dateStr: 'August 26th, 2019',
+                desc: 'This article introduces how to make service test with Dubbo',
+                link: '/en-us/blog/service-test.html',
+            },
+            {
                 title: 'How to use Fescar to ensure consistency between Dubbo Microservices',
                 author: '@slievrly',
                 dateStr: 'Jan 17th, 2019',
@@ -163,6 +170,13 @@ export default {
         barText: '博客',
         postsTitle: '所有文章',
         list: [
+            {
+                title: '浅谈 RPC',
+                author: '@caojiele',
+                dateStr: 'August 1th, 2019',
+                desc: '介绍 RPC 基本原理和实现方式',
+                link: '/zh-cn/blog/rpc-introduction.html',
+            },
             {
                 title: '在DockerHub发布Dubbo Admin镜像',
                 author: '@htynkn',

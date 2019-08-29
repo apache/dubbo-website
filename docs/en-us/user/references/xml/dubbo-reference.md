@@ -1,3 +1,9 @@
+---
+title: dubbo:reference
+keywords: dubbo,reference
+description: dubbo:reference
+---
+
 # dubbo:reference
 
 The configuration of service consumer. The corresponding class is`org.apache.dubbo.config.ReferenceConfig`
