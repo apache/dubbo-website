@@ -20,7 +20,7 @@ http://localhost:8080
 * frontend deploy  
 ```sh
 cd dubbo-admin-ui 
-npm run install 
+npm install 
 npm run dev 
 ```
 * backend deploy  

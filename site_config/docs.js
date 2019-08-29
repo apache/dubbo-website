@@ -554,6 +554,10 @@ export default {
                             {
                                 title: 'LoggerAdapter',
                                 link: '/en-us/docs/dev/impls/logger-adapter.html'
+                            },
+                            {
+                                title: 'ConfigCenter',
+                                link: '/en-us/docs/dev/impls/config-center.html'
                             }
                         ]
                     },

@@ -20,7 +20,7 @@ http://localhost:8080
 * 前端  
 ```sh
 cd dubbo-admin-ui 
-npm run install 
+npm install 
 npm run dev 
 ```
 * 后端  

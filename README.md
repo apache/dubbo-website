@@ -1,6 +1,6 @@
 # Dubbo Official Website
 
-This project keeps all sources used for building up dubbo official website which's served at http://dubbo.io or http://dubbo.apache.org.
+This project keeps all sources used for building up dubbo official website which's served at https://dubbo.apache.org.
 
 
 ## Prerequisite
