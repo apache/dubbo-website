@@ -55,10 +55,6 @@ export default {
                             {
                                 title: 'Annotation configuration',
                                 link: '/en-us/docs/user/configuration/annotation.html'
-                            },
-                            {
-                                title: 'Configuration Center',
-                                link: '/zh-cn/docs/user/configuration/config-center.html'
                             }
                         ],
                     },
@@ -558,6 +554,10 @@ export default {
                             {
                                 title: 'LoggerAdapter',
                                 link: '/en-us/docs/dev/impls/logger-adapter.html'
+                            },
+                            {
+                                title: 'ConfigCenter',
+                                link: '/en-us/docs/dev/impls/config-center.html'
                             }
                         ]
                     },
