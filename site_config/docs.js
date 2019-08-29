@@ -55,6 +55,10 @@ export default {
                             {
                                 title: 'Annotation configuration',
                                 link: '/en-us/docs/user/configuration/annotation.html'
+                            },
+                            {
+                                title: 'Configuration Center',
+                                link: '/zh-cn/docs/user/configuration/config-center.html'
                             }
                         ],
                     },
