@@ -1,13 +1,13 @@
 # Asynchronous Execution
 
-The Provider-Asynchronous-Execution switches the blocked service from the internal thread pool of Dubbo to the service custom thread to avoid over-occupation of the Dubbo thread pool, which helps to avoid mutual influence between different services.Asynchronous-Execution is not conducive to saving resources or improving RPC responsiveness, because if business execution needs to be blocked, there is always a thread to be responsible for execution.
+The asynchronous execute on provider switches the blocked service from the internal thread pool of Dubbo to the service custom thread to avoid over-occupation of the Dubbo thread pool, which helps to avoid mutual influence between different services.Asynchronous-Execution is not conducive to saving resources or improving RPC responsiveness, because if business execution needs to be blocked, there is always a thread to be responsible for execution.
 
-> Note: Provider-Asynchronous-Execution and Consumer-Asynchronous-Execution are independent of each other. You can configure ends of any orthogonal combination.
+> Note: Asynchronous execute on provider and asynchronous execute on consumer are independent of each other. You can configure ends of any orthogonal combination.
 >
-> - Consumer-Synchronous-Execution - Provider-Synchronous-Execution
-> - Consumer-Asynchronous-Executio - Provider-Synchronous-Execution
-> - Consumer-Synchronous-Execution - Provider-Asynchronous-Executio
-> - Consumer-Asynchronous-Executio - Provider-Asynchronous-Executio
+> - Synchronous Execution On Consumer - Synchronous Execution On Provider
+> - Asynchronous Executio On Consumer - Synchronous Execution On Provider
+> - Synchronous Execution On Consumer - Asynchronous Executio On Provider
+> - Asynchronous Execution On Consumer - Asynchronous Executio On Provider
 
 
 
