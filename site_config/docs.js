@@ -146,6 +146,10 @@ export default {
                                 link: '/en-us/docs/user/demos/async-call.html',
                             },
                             {
+                                title: 'Asynchronous execute on provider',
+                                link: '/en-us/docs/user/demos/async-execute-on-provider.html',
+                            },
+                            {
                                 title: 'Local call',
                                 link: '/en-us/docs/user/demos/local-call.html',
                             },
