@@ -666,6 +666,10 @@ export default {
                                 link: '/zh-cn/docs/user/configuration/xml.html',
                             },
                             {
+                                title: '属性配置',
+                                link: '/zh-cn/docs/user/configuration/properties.html',
+                            },
+                            {
                                 title: 'API配置',
                                 link: '/zh-cn/docs/user/configuration/api.html'
                             },
