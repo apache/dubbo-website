@@ -55,6 +55,10 @@ export default {
                             {
                                 title: 'Annotation configuration',
                                 link: '/en-us/docs/user/configuration/annotation.html'
+                            },
+                            {
+                                title: 'Configuration Loading Process',
+                                link: '/en-us/docs/user/configuration/configuration-load-process.html'
                             }
                         ],
                     },
