@@ -18,7 +18,7 @@ In the jar file containing extension class [^1], places a config file `META-INF/
 
 ### Example:
 
-To extend Dubbo Protocol, placee a text file in the extension jar file: `META-INF/dubbo/org.apache.dubbo.rpc.Protocol`, content:
+To extend Dubbo Protocol, place a text file in the extension jar file: `META-INF/dubbo/org.apache.dubbo.rpc.Protocol`, content:
 
 ```properties
 xxx=com.alibaba.xxx.XxxProtocol

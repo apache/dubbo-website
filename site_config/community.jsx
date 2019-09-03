@@ -311,7 +311,7 @@ export default {
             },
             {
               text: 'Native Thrift',
-              link: 'https://github.com/dubbo/dubbo-rpc-native-thrift',
+              link: 'https://github.com/apache/dubbo/dubbo-rpc/dubbo-rpc-native-thrift',
               bgColor: '#00D0D9',
             },
             {
@@ -418,12 +418,12 @@ export default {
             },
             {
               text: 'Native Hessian',
-              link: 'https://github.com/dubbo/dubbo-serialization-native-hessian',
+              link: 'https://github.com/apache/dubbo/tree/master/dubbo-serialization/dubbo-serialization-native-hession',
               bgColor: '#00D0D9',
             },
             {
               text: 'Avro',
-              link: 'https://github.com/dubbo/dubbo-serialization-avro',
+              link: 'https://github.com/apache/dubbo/tree/master/dubbo-serialization/dubbo-serialization-avro',
               bgColor: '#00D0D9',
             },
           ],
@@ -855,12 +855,12 @@ export default {
             },
             {
               text: 'Native Hessian',
-              link: 'https://github.com/dubbo/dubbo-serialization-native-hessian',
+              link: 'https://github.com/apache/dubbo/tree/master/dubbo-serialization/dubbo-serialization-native-hession',
               bgColor: '#00D0D9',
             },
             {
               text: 'Avro',
-              link: 'https://github.com/dubbo/dubbo-serialization-avro',
+              link: 'https://github.com/apache/dubbo/tree/master/dubbo-serialization/dubbo-serialization-avro',
               bgColor: '#00D0D9',
             },
           ],
