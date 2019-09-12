@@ -58,11 +58,11 @@ dubbo.metadata-report.cycle-report=false   ##非必须,default值true
 ```
 > **完整的sample，查看[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)**
 
-## 方式一：配置中心配置
+## 方式一：在配置中心配置
 
 参考sample：dubbo-samples-metadata-report/dubbo-samples-metadata-report-configcenter 工程。
 
-##### 在配置中心配置
+##### 配置中心配置
 
 配置中心的配置，可以参考configcenter的文档。配置的内容如下：
 ```.properties
@@ -73,7 +73,7 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181 ###元数据存储的�
 在sample中，使用了Zookeeper作为配置中心。启动本地zookeeper服务之后，直接运行：org.apache.dubbo.samples.metadatareport.configcenter.ZKTools 就可以完成写入。
 如果配置中心使用了nacos，apollo，这些产品本身支持ops配置。
 
-##### 应用中配置
+##### 应用配置
 
 ```
 ###dubbo.properties
@@ -81,9 +81,9 @@ dubbo.config-center.address=zookeeper://127.0.0.1:2181
 ... 
 ```
 
-完成上述两部之后，注册中心地址、元数据地址将从配置中心进行获取。现在可以依次运行Provider类和Consumer类，会在console中得到对应的输出或者直接通过zookeeper的cli查看。
+完成上述两步之后，注册中心地址、元数据地址将从配置中心进行获取。现在可以依次运行Provider类和Consumer类，会在console中得到对应的输出或者直接通过zookeeper的cli查看。
 
-##### provider
+##### Provider配置
 
 provider端存储的元数据内容如下：
 ```json
@@ -131,7 +131,7 @@ provider端存储的元数据内容如下：
 ```
 provider存储的内容包括了provider服务往注册中心填写的全部参数，以及服务的方法信息（方法名，入参出参的格式）。
 
-##### consumer端存储的内容：
+##### Consumer配置：
 ```
 {
  "valid": "true",
@@ -151,7 +151,7 @@ consumer端存储了consumer往注册中心填写的全部参数。
 
 
 
-上面的例子中，主要是将元数据地址放在配置中心。在元数据存储下来的provider服务信息和consumer端服务信息的展示。
+上面的例子，主要是将元数据地址放在配置中心，在元数据区存储下来的provider端服务信息和consumer端服务信息的展示。
 接下来的两个例子，主要讲解在工程中配置：xml方式，annotation方式。
 
 ## 方式二：配置在项目中-properties方式引入配置
