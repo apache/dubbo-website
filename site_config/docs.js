@@ -55,6 +55,10 @@ export default {
                             {
                                 title: 'Annotation configuration',
                                 link: '/en-us/docs/user/configuration/annotation.html'
+                            },
+                            {
+                                title: 'Configuration Loading Process',
+                                link: '/en-us/docs/user/configuration/configuration-load-process.html'
                             }
                         ],
                     },
@@ -306,6 +310,10 @@ export default {
                                 title: 'dubbo:parameter',
                                 link: '/en-us/docs/user/references/xml/dubbo-parameter.html',
                             },
+                            {
+                                title: 'dubbo:config-center',
+                                link: '/en-us/docs/user/references/xml/dubbo-config-center.html',
+                            }
                         ]
                     },
                     {

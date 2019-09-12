@@ -9,6 +9,13 @@ export default {
                 dateStr: 'August 26th, 2019',
                 desc: 'This article introduces how to make service test with Dubbo',
                 link: '/en-us/blog/service-test.html',
+            }，
+            {
+                title: 'Implementation background and practice of Dubbo client asynchronous interface',
+                author: '@JeffLv',
+                dateStr: 'Feb 20th, 2019',
+                desc: 'Implementation background and practice of Dubbo client asynchronous interface',
+                link: '/en-us/blog/dubboAsync_client.html',
             },
             {
                 title: 'How to use Fescar to ensure consistency between Dubbo Microservices',
