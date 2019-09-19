@@ -92,7 +92,6 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 
 
 <h4 id="1.2">使用外部化配置</h4>
-
 需要在项目启动前，使用[最新版本Dubbo-OPS](https://github.com/apache/dubbo-ops)完成外部化配置迁移，理论上配置中心支持所有本地dubbo.properties所支持的配置项。
 
 以XML开发形式为例，假设我们本地有如下配置：
@@ -217,7 +216,6 @@ dubbo.protocol.port=20880
 
 
 <h4 id="1.1">包名改造</h4>
-
 1. Maven坐标
 
 **groupId 由 `com.alibaba` 改为 `org.apache.dubbo`**
@@ -251,8 +249,8 @@ Maven坐标升级比较直观，只需要修改相应的pom文件就可以了；
 | ServiceConfig     | Service配置采集和暴露编程接口 |
 | ApplicationConfig | Application配置采集API        |
 | RegistryConfig    | 注册中心配置采集API           |
-| ConsumerConfig    | 提供端默认配置采集API         |
-| ProviderConfig    | 消费端默认配置采集API         |
+| ConsumerConfig    | 消费端默认配置采集API         |
+| ProviderConfig    | 提供端默认配置采集API         |
 | ProtocolConfig    | RPC协议配置采集API            |
 | ArcumentConfig    | 服务参数级配置采集API         |
 | MethodConfig      | 服务方法级配置采集API         |
