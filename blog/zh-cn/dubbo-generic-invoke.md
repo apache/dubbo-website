@@ -43,7 +43,7 @@ System.out.println(name);
 ## 通过 API 编程进行泛化调用
 
 ```
-ApplicationConfig application = new ApplicationConfig()ApplicationConfig application = new ApplicationConfig();
+ApplicationConfig application = new ApplicationConfig();
 application.setName("api-generic-consumer");
 
 RegistryConfig registry = new RegistryConfig();
