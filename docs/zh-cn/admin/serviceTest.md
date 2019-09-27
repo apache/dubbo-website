@@ -1,1 +1,1 @@
-请参考这篇[博客](../../../blog/zh-cn/service-test.md)
+请参考这篇[博客](../../../zh-cn/blog/service-test.md)
