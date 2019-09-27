@@ -9,7 +9,7 @@ export default {
                 dateStr: 'August 26th, 2019',
                 desc: 'This article introduces how to make service test with Dubbo',
                 link: '/en-us/blog/service-test.html',
-            }，
+            },
             {
                 title: 'Implementation background and practice of Dubbo client asynchronous interface',
                 author: '@JeffLv',
