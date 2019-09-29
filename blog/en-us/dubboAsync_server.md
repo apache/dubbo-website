@@ -63,7 +63,7 @@ __In the default Dubbo thread strategy, there are worker thread pools to execute
 
 ## The sample
 
-Use an example to experience the Dubbo server-side asynchronous interface. For Demo code, visit github[https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)。
+Use an example to experience the Dubbo server-side asynchronous interface. For Demo code, visit [https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)。
 
 ```java
 public class AsyncServiceImpl implements AsyncService {
@@ -95,4 +95,4 @@ public class AsyncServiceImpl implements AsyncService {
 * To use server-side asynchrony, it is recommended that the server-side thread strategy adopt the Same_thread pattern + Coroutine Library.
 
 ## Conclusions
-When Dubbo supports business applications, it encounters a variety of requirements scenarios, and server-side asynchrony provides users with a solution to ThreadPool Full. In the case of ThreadPool Full, if the current system bottleneck is CPU, this solution is not recommended. If the system load is not high, increasing the number of worker threads or using server asynchrony can be considered.
+When Dubbo supports business applications, it encounters a variety of requirements scenarios, and server-side asynchrony provides users with a solution to deal with ThreadPool Full. In the case of ThreadPool Full, if the current system bottleneck is CPU, this solution is not recommended. If the system load is not high, increasing the number of worker threads or using server asynchrony can be considered.
