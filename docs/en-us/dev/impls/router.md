@@ -24,7 +24,7 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxRouterFactory.java (LoadBalance implementation)
+                |-XxxRouterFactory.java (RouterFactory implementation)
     |-resources
         |-META-INF
             |-dubbo

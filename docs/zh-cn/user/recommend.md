@@ -19,10 +19,10 @@ Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一
 
 ```xml
 <dubbo:service interface="com.alibaba.hello.api.HelloService" version="1.0.0" ref="helloService"
-    timeout="300" retry="2" loadbalance="random" actives="0" />
+    timeout="300" retries="2" loadbalance="random" actives="0" />
  
 <dubbo:service interface="com.alibaba.hello.api.WorldService" version="1.0.0" ref="helloService"
-    timeout="300" retry="2" loadbalance="random" actives="0" >
+    timeout="300" retries="2" loadbalance="random" actives="0" >
     <dubbo:method name="findAllPerson" timeout="10000" retries="9" loadbalance="leastactive" actives="5" />
 <dubbo:service/>
 ```
@@ -123,7 +123,7 @@ Dubbo 中所有的配置项都可以配置在 Spring 配置文件中，并且可
     ```
     
 2. 注册中心地址 `dubbo.registry.address`
-    
+   
     ```xml
     <dubbo:registry address="11.22.33.44:9090" >
     ```

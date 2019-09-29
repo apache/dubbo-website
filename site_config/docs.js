@@ -55,6 +55,10 @@ export default {
                             {
                                 title: 'Annotation configuration',
                                 link: '/en-us/docs/user/configuration/annotation.html'
+                            },
+                            {
+                                title: 'Configuration Loading Process',
+                                link: '/en-us/docs/user/configuration/configuration-load-process.html'
                             }
                         ],
                     },
@@ -144,6 +148,10 @@ export default {
                             {
                                 title: 'Asynchronous call',
                                 link: '/en-us/docs/user/demos/async-call.html',
+                            },
+                            {
+                                title: 'Asynchronous execute on provider',
+                                link: '/en-us/docs/user/demos/async-execute-on-provider.html',
                             },
                             {
                                 title: 'Local call',
@@ -302,6 +310,10 @@ export default {
                                 title: 'dubbo:parameter',
                                 link: '/en-us/docs/user/references/xml/dubbo-parameter.html',
                             },
+                            {
+                                title: 'dubbo:config-center',
+                                link: '/en-us/docs/user/references/xml/dubbo-config-center.html',
+                            }
                         ]
                     },
                     {
@@ -660,6 +672,10 @@ export default {
                             {
                                 title: 'XML配置',
                                 link: '/zh-cn/docs/user/configuration/xml.html',
+                            },
+                            {
+                                title: '属性配置',
+                                link: '/zh-cn/docs/user/configuration/properties.html',
                             },
                             {
                                 title: 'API配置',
