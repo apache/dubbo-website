@@ -194,7 +194,7 @@ dubbo.protocol.port=20880
 
 
 
-关于治理规则更多详细说明，请参考[路由规则](/docs/zh-cn/user/demos/routing-rule.md)和[覆盖规则](/docs/zh-cn/user/demos/config-rule.md)用户文档。
+关于治理规则更多详细说明，请参考[路由规则](/zh-cn/docs/user/demos/routing-rule.html)和[覆盖规则](/zh-cn/docs/user/demos/config-rule.html)用户文档。
 
 也可继续了解[使用示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-governance)。
 
