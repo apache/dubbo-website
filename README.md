@@ -1,5 +1,7 @@
 # Dubbo Official Website
 
+[![CI Status](https://github.com/apache/dubbo-website/workflows/CI/badge.svg?branch=master)](https://github.com/apache/dubbo-website/actions)
+
 This project keeps all sources used for building up dubbo official website which's served at https://dubbo.apache.org.
 
 
