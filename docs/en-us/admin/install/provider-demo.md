@@ -4,14 +4,15 @@ install:
 
 ```sh
 $ git clone https://github.com/apache/dubbo.git
-$ cd dubbo
-# run org.apache.dubbo.demo.provider.Provider under dubbo-demo-provider module
+$ cd dubbo/dubbo-demo/dubbo-demo-xml
+# run org.apache.dubbo.demo.provider.Application under dubbo-demo-xml-provider module
 # add -Djava.net.preferIPv4Stack=true if your IDE is Intellij Idea
 ```
 
 configuration:
 
 ```sh
-# resource/META-INFO.spring/dubbo-demo-provider.xml
-# change dubbo:registry to a real registry server address, zookeeper is recommended
+# resources/spring/dubbo-provider.xml
+# change dubbo:registry to a real registry server address, zookeeper is recommended, for example:
+# <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
 ```
