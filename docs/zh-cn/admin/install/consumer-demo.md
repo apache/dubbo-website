@@ -5,8 +5,8 @@
 
 ```sh
 git clone https://github.com/apache/dubbo.git
-cd dubbo
-运行 dubbo-demo-consumer中的org.apache.dubbo.demo.consumer.Consumer
+cd dubbo/dubbo-demo/dubbo-demo-xml
+运行 dubbo-demo-xml-consumer中的org.apache.dubbo.demo.consumer.Application
 请确保先启动Provider
 如果使用Intellij Idea 请加上-Djava.net.preferIPv4Stack=true
 ```
@@ -14,7 +14,8 @@ cd dubbo
 配置:
 
 ```sh
-resource/META-INFO.spring/dubbo-demo-consumer.xml
-修改其中的dubbo:registry，替换成Provider提供的注册中心地址
+resources/spring/dubbo-consumer.xml
+修改其中的dubbo:registry，替换成Provider提供的注册中心地址, 如：
+<dubbo:registry address="zookeeper://127.0.0.1:2181"/>
 ```
 
