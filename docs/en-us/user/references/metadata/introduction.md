@@ -1,5 +1,5 @@
 # Background
-There are close to [30 configurations](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-service.html) in dubbo provider. Excluding registry center governance requirements, a large portion of configurations are used by the provider itself and do not need to be delivered to the consumer. This part of the data does not need to be written to the registry, but only needs to be persisted as key-value.
+There are close to [30 configurations](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-service.html) in dubbo provider. Excluding registry center governance requirements, a large part of configurations are used by the provider itself and do not need to be delivered to the consumer. This part of the data does not need to be written to the registry, but only needs to be persisted as key-value.
 There are also [20+ configurations](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-reference.html) in dubbo consumer. In the registry center, only a few configurations such as application, version, group, ip, dubbo version are needed in the list of service consumers. Other configurations can also be persisted in key-value form.
 This data is registered into the registry in the service dimension, which leads to the expansion of data volume, and then causes the increased network overhead of the registry (such as zookeeper) and decreased performance.
   
@@ -12,7 +12,7 @@ In addition to the storage of the above configuration items, Dubbo service metad
 The original data and metadata information in the registry center need to be stored in a separate key-value store, which can be DB, redis or other persistent storage. The core code supports zookeeper, redis(recommended) by default.
 
 The format of provider storage content is the storage after gsonization of org.apache.dubbo.metadata.definition.model.FullServiceDefinition.
-Consumer stores content in Map. Get parameter information from the URL written to the registry from the Consumer side. That is, get the Map with URL.getParameterMap() and store it after gsonization.
+Consumer gets parameter information from the URL that it wrote to the registry and stores it in Map. That is, get the Map with URL.getParameterMap() and store it after gsonization.
 
 For more details, you can refer to the sample below.
 
@@ -59,7 +59,7 @@ If redis is needed, the corresponding redis dependencies can be introduced:
 ```
 > **Complete sample，refer to[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)**
 
-## Method 1: Configuration in Configcenter
+## Method 1: Config in Configcenter
 
 Refer to the sample: dubbo-samples-metadata-report/dubbo-samples-metadata-report-configcenter.
 
@@ -155,7 +155,7 @@ The Consumer side stores all the parameters that the Consumer fills in to the re
 The above example is mainly a presentation of the provider side service information and consumer side service information stored in the metadata area by placing the metadata address in the Configcenter.
 The next two examples focus on configuring in a project: the XML mode and the annotation mode .
 
-## Method 2: Configuration in project in -properties way
+## Method 2: Config project in properties way
 
 Refer to the sample: dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-xml.
 
@@ -222,7 +222,7 @@ After setting this configuration, have not to focus on others. You can also view
 
 
 
-## Method 3: Configuration in project in -annotation way
+## Method 3: Config project in annotation way
 
 Refer to the sample: dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-annotaion.
 
