@@ -11,8 +11,8 @@ In addition to the storage of the above configuration items, Dubbo service metad
 
 The original data and metadata information in the registry center need to be stored in a separate key-value store, which can be DB, redis or other persistent storage. The core code supports zookeeper, redis(recommended) by default.
 
-The format of provider storage content is the storage after gsonization of org.apache.dubbo.metadata.definition.model.FullServiceDefinition.
-Consumer gets parameter information from the URL that it wrote to the registry and stores it in Map. That is, get the Map with URL.getParameterMap() and store it after gsonization.
+The format of provider storage content is the storage after gson's serialization of org.apache.dubbo.metadata.definition.model.FullServiceDefinition.
+Consumer gets parameter information from the URL that it wrote to the registry and stores it in Map. That is, get the Map with URL.getParameterMap() and store it after gson's serialization.
 
 For more details, you can refer to the sample below.
 
