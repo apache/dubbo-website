@@ -391,6 +391,23 @@ export default {
                         ]
                     },
                     {
+                        title: 'Metadata center reference',
+                        children: [
+                            {
+                                title: 'Introduction',
+                                link: '/en-us/docs/user/references/metadata/introduction.html',
+                            },
+                            {
+                                title: 'Redis',
+                                link: '/en-us/docs/user/references/metadata/metadata-redis.html',
+                            },
+                            {
+                                title: 'Zookeeper',
+                                link: '/en-us/docs/user/references/metadata/metadata-zookeeper.html',
+                            },
+                        ]
+                    },
+                    {
                         title: 'Telnet command',
                         link: '/en-us/docs/user/references/telnet.html'
                     },
