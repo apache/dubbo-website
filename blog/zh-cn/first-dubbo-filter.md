@@ -4,7 +4,7 @@
 在Dubbo的整体设计中，Filter是一个很重要的概念，包括Dubbo本身的大多数功能，都是基于此扩展点实现的，在每次的调用过程中，Filter的拦截都会被执行。
 
 #### Dubbo Filter的加载机制
-Dubbo中已经实现的Filter大概有二十几个，它们的入口都是ProtocolFilterWrapper，ProtocolFilterWrapper对Protocol做了Wrapper，会在加载扩展的时候被加载进来，下面我们来看下然后我们看一下这个Filter链是如何构造的。
+Dubbo中已经实现的Filter大概有二十几个，它们的入口都是ProtocolFilterWrapper，ProtocolFilterWrapper对Protocol做了Wrapper，会在加载扩展的时候被加载进来，下面我们来看下这个Filter链是如何构造的。
 
 ```java
 //ProtocolFilterWrapper.java
