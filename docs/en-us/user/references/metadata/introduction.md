@@ -1,79 +1,80 @@
-# 背景
-dubbo provider中的服务配置项有接近[30个配置项](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-service.html)。 排除注册中心服务治理需要之外，很大一部分配置项是provider自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以key-value形式持久化存储。
-dubbo consumer中的配置项也有[20+个配置项](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-reference.html)。在注册中心之中，服务消费者列表中只需要关注application，version，group，ip，dubbo版本等少量配置，其他配置也可以以key-value形式持久化存储。
-这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心(如zookeeper)的网络开销增大，性能降低。  
-除了上述配置项的存储之外，dubbo服务元数据信息也需要被存储下来。元数据信息包括服务接口，及接口的方法信息。这些信息将被用于服务mock，服务测试。
+# Background
+There are close to [30 configurations](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-service.html) in dubbo provider. Excluding registry center governance requirements, a large part of configurations are used by the provider itself and do not need to be delivered to the consumer. This part of the data does not need to be written to the registry, but only needs to be persisted as key-value.
+There are also [20+ configurations](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-reference.html) in dubbo consumer. In the registry center, only a few configurations such as application, version, group, ip, dubbo version are needed in the list of service consumers. Other configurations can also be persisted in key-value form.
+This data is registered into the registry in the service dimension, which leads to the expansion of data volume, and then causes the increased network overhead of the registry (such as zookeeper) and decreased performance.
+  
+In addition to the storage of the above configuration items, Dubbo service metadata information also needs to be stored. Metadata information includes service interface and method information of interface. This information will be used for service mock, service test.  
 
 
 
-# 目标
+# Goal
 
-需要将注册中心原来的数据信息和元数据信息保存到独立的key-value的存储中，这个key-value可以是DB，redis或者其他持久化存储。核心代码中支持了zookeeper，redis(推荐)的默认支持。
+The original data and metadata information in the registry center need to be stored in a separate key-value store, which can be DB, redis or other persistent storage. The core code supports zookeeper, redis(recommended) by default.
 
-provider存储内容的格式，参见：org.apache.dubbo.metadata.definition.model.FullServiceDefinition。是该类型gson化之后的存储。
-Consumer存储内容，为Map格式。从Consumer端注册到注册中心的URL中的获取参数信息。即通过URL.getParameterMap()获取到的Map，进行gson化之后进行存储。
+The format of provider storage content is the storage after gson's serialization of org.apache.dubbo.metadata.definition.model.FullServiceDefinition.
+Consumer gets parameter information from the URL that it wrote to the registry and stores it in Map. That is, get the Map with URL.getParameterMap() and store it after gson's serialization.
 
-详细的内容，可以参考下面的sample输出。
+For more details, you can refer to the sample below.
 
 
 
-# 配置
+# Configuration
 
-默认的元数据存储，额外支持以下几个特性：
-* 失败重试
-* 每天定时重刷
+The default metadata storage supports the following additional features:  
+* Failed retry
+* Refresh regularly
 
-#### 失败重试
-失败重试可以通过retrytimes （重试次数,默认100），retryperiod（重试周期，默认3000ms）进行设置。 
+#### Failed retry
+Failed retries can be configured by retrytimes (retry times, default 100), retryperiod (retry cycle, default 3000ms).  
 
-#### 定时刷新
-默认开启，可以通过设置cycleReport=false进行关闭。
+#### Refresh regularly
+It's opening by default and can be turned off by setting cycleReport=false.  
 
-#### 完整的配置项：
+#### Complete configurations:
 
 ```
 dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
-dubbo.metadata-report.username=xxx        ##非必须
-dubbo.metadata-report.password=xxx        ##非必须
-dubbo.metadata-report.retry-times=30       ##非必须,default值100
-dubbo.metadata-report.retry-period=5000    ##非必须,default值3000
-dubbo.metadata-report.cycle-report=false   ##非必须,default值true
+dubbo.metadata-report.username=xxx        ##Not necessary
+dubbo.metadata-report.password=xxx        ##Not necessary
+dubbo.metadata-report.retry-times=30       ##Not necessary,default 100
+dubbo.metadata-report.retry-period=5000    ##Not necessary,default 3000
+dubbo.metadata-report.cycle-report=false   ##Not necessary,default true
 ```
-> 如果元数据地址(dubbo.metadata-report.address)也不进行配置，整个元数据的写入不会生效，但是不影响程序运行。
+> If the metadata address (dubbo.metadata-report.address) is not configured, the writing of the entire metadata will not take effect, but it will not affect the running of the program.
 
 
-接下来看几个sample的配置。无论哪种配置方式，都需要引入maven依赖：
+Let's look at a few sample configurations. Regardless of the configuration, some maven dependencies need to be introduced:  
 ```
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-metadata-report-zookeeper</artifactId>
 </dependency>
 ```
-如果需要使用redis，可以引入对应的redis的依赖：
+If redis is needed, the corresponding redis dependencies can be introduced:  
 ```
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-metadata-report-redis</artifactId>
 </dependency>
 ```
-> **完整的sample，查看[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)**
+> **Complete sample，refer to[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)**
 
-## 方式一：在配置中心配置
+## Method 1: Config in Configcenter
 
-参考sample：dubbo-samples-metadata-report/dubbo-samples-metadata-report-configcenter 工程。
+Refer to the sample: dubbo-samples-metadata-report/dubbo-samples-metadata-report-configcenter.
 
-##### 配置中心配置
+##### Configcenter Configuration
 
-配置中心的配置，可以参考configcenter的文档。配置的内容如下：
+Configurations of Configcenter，can refer to the document of Configcenter. As follows:  
 ```.properties
 dubbo.registry.address=zookeeper://127.0.0.1:2181
-### 注意驼峰式风格
-dubbo.metadata-report.address=zookeeper://127.0.0.1:2181 ###元数据存储的地址
+### Notice the hump style
+dubbo.metadata-report.address=zookeeper://127.0.0.1:2181 ###Address of metadata storage
 ```
-在sample中，使用了Zookeeper作为配置中心。启动本地zookeeper服务之后，直接运行：org.apache.dubbo.samples.metadatareport.configcenter.ZKTools 就可以完成写入。
-如果配置中心使用了nacos，apollo，这些产品本身支持ops配置。
+In the sample, Zookeeper is used as the Configcenter. Run directly: org.Apache.Dubbo.Samples.Metadatareport.Configcenter.ZKTools after starting a local zookeeper service, then writing finished.
+You can also use Nacos, Apollo as the Configcenter. These products themselves support ops configuration.
 
-##### 应用配置
+##### Application Configuration
 
 ```
 ###dubbo.properties
@@ -81,11 +82,11 @@ dubbo.config-center.address=zookeeper://127.0.0.1:2181
 ... 
 ```
 
-完成上述两步之后，注册中心地址、元数据地址将从配置中心进行获取。现在可以依次运行Provider类和Consumer类，会在console中得到对应的输出或者直接通过zookeeper的cli查看。
+After completing the above two steps, the registry address and metadata address are retrieved from the Configcenter. You can now run the Provider and the Consumer in turn and get the corresponding output in console or view it directly through the client of zookeeper.
 
-##### Provider配置
+##### Provider Configuration
 
-provider端存储的元数据内容如下：
+The metadata stored on the Provider side is as follows:
 ```json
 {
  "parameters": {
@@ -129,9 +130,9 @@ provider端存储的元数据内容如下：
 }
 
 ```
-provider存储的内容包括了provider服务往注册中心填写的全部参数，以及服务的方法信息（方法名，入参出参的格式）。
+The Provider side stores all the parameters that the Provider service fills in to the registry, as well as the method information of the service (method name, input and output format).
 
-##### Consumer配置：
+##### Consumer Configuration
 ```
 {
  "valid": "true",
@@ -147,25 +148,25 @@ provider存储的内容包括了provider服务往注册中心填写的全部参�
 }
 ```
 
-consumer端存储了consumer往注册中心填写的全部参数。
+The Consumer side stores all the parameters that the Consumer fills in to the registry.
 
 
 
-上面的例子，主要是将元数据地址放在配置中心，在元数据区存储下来的provider端服务信息和consumer端服务信息的展示。
-接下来的两个例子，主要讲解在工程中配置：xml方式，annotation方式。
+The above example is mainly a presentation of the provider side service information and consumer side service information stored in the metadata area by placing the metadata address in the Configcenter.
+The next two examples focus on configuring in a project: the XML mode and the annotation mode .
 
-## 方式二：配置在项目中-properties方式引入配置
+## Method 2: Config project in properties way
 
-参考sample：dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-xml工程。
+Refer to the sample: dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-xml.
 
 ##### dubbo.properties
 ```
 dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 ```
 
-配置完成这个之后，其余的不用特别关注。也可以直接查看对应的provider和consumer端的服务信息。
+After setting this configuration, have not to focus on others. You can also view the service information of the corresponding provider and consumer directly.
 
-##### provider存储的某个服务的内容：
+##### Provider stores:
 ```
 {
  "parameters": {
@@ -205,7 +206,7 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 
 ```
 
-##### consumer端存储的内容：
+##### Consumer stores:
 
 ```
 {
@@ -221,11 +222,11 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 
 
 
-## 方式三：配置在项目中-annotation方式引入配置
+## Method 3: Config project in annotation way
 
-参考sample：dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-annotaion工程。
+Refer to the sample: dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-annotaion.
 
-##### @Bean 引入bean
+##### @Bean introduce Bean
 ```
 @Bean
 public MetadataReportConfig metadataReportConfig() {
@@ -235,9 +236,9 @@ public MetadataReportConfig metadataReportConfig() {
 }
 
 ```
-引入Bean之后，其余的地方也不需要特别配置。直接查看对应的服务信息：
+After introducing Bean, also have not to set others. View corresponding service information directly: 
 
-##### provider存储的某个服务的内容：
+##### Provider stores: 
 
 ```
 {
@@ -280,7 +281,7 @@ public MetadataReportConfig metadataReportConfig() {
 }
 ```
 
-##### consumer端存储的内容：
+##### Consumer stores: 
 ```
 {
  "valid": "true",
@@ -295,10 +296,10 @@ public MetadataReportConfig metadataReportConfig() {
 }
 ```
 
-# 扩展 
-## SPI定义
+# Extension
+## SPI Definition
 
-参考：org.apache.dubbo.metadata.store.MetadataReportFactory ， org.apache.dubbo.metadata.store.MetadataReport
+Refer to: org.apache.dubbo.metadata.store.MetadataReportFactory, org.apache.dubbo.metadata.store.MetadataReport
 
 ```
 @SPI("redis")
@@ -310,13 +311,13 @@ public interface MetadataReportFactory {
 
 
 
-## 自定义元数据的存储
+## Custom metadata storage
 
-下面以Redis存储为例进行说明。
+Let's take Redis storage as an example to illustrate.
 
-新建一个project，需要支持以下修改：
+Create a new project supporting the following modifications:
 
-#### 扩展AbstractMetadataReport
+#### Extend AbstractMetadataReport
 
 ```
 public class RedisMetadataReport extends AbstractMetadataReport {
@@ -346,7 +347,7 @@ public class RedisMetadataReport extends AbstractMetadataReport {
 }
 ```
 
-#### 扩展AbstractMetadataReportFactory
+#### Extend AbstractMetadataReportFactory
 
 ```
 public class RedisMetadataReportFactory extends AbstractMetadataReportFactory {
@@ -357,12 +358,12 @@ public class RedisMetadataReportFactory extends AbstractMetadataReportFactory {
 }
 ```
 
-#### 增加META-INF/dubbo/internal/org.apache.dubbo.metadata.store.MetadataReportFactory
+#### New META-INF/dubbo/internal/org.apache.dubbo.metadata.store.MetadataReportFactory
 
 ```
 redis=org.apache.dubbo.metadata.store.redis.RedisMetadataReportFactory
 ```
 
-只要将上面的修改和project打包成jar包，然后配置元数据中心的url：redis://10.20.153.10:6379。
+As long as the above modifications along with the project are packaged into a jar, then config metadata center url: redis://10.20.153.10:6379.
 
-至此，一个自定义的元数据存储就可以运行了。
+Up to now, a custom metadata store is ready to run.

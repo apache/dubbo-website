@@ -55,6 +55,10 @@ export default {
                             {
                                 title: 'Annotation configuration',
                                 link: '/en-us/docs/user/configuration/annotation.html'
+                            },
+                            {
+                                title: 'Configuration Loading Process',
+                                link: '/en-us/docs/user/configuration/configuration-load-process.html'
                             }
                         ],
                     },
@@ -144,6 +148,10 @@ export default {
                             {
                                 title: 'Asynchronous call',
                                 link: '/en-us/docs/user/demos/async-call.html',
+                            },
+                            {
+                                title: 'Asynchronous execute on provider',
+                                link: '/en-us/docs/user/demos/async-execute-on-provider.html',
                             },
                             {
                                 title: 'Local call',
@@ -302,6 +310,10 @@ export default {
                                 title: 'dubbo:parameter',
                                 link: '/en-us/docs/user/references/xml/dubbo-parameter.html',
                             },
+                            {
+                                title: 'dubbo:config-center',
+                                link: '/en-us/docs/user/references/xml/dubbo-config-center.html',
+                            }
                         ]
                     },
                     {
@@ -375,6 +387,23 @@ export default {
                             {
                                 title: 'Simple registry',
                                 link: '/en-us/docs/user/references/registry/simple.html',
+                            },
+                        ]
+                    },
+                    {
+                        title: 'Metadata center reference',
+                        children: [
+                            {
+                                title: 'Introduction',
+                                link: '/en-us/docs/user/references/metadata/introduction.html',
+                            },
+                            {
+                                title: 'Redis',
+                                link: '/en-us/docs/user/references/metadata/metadata-redis.html',
+                            },
+                            {
+                                title: 'Zookeeper',
+                                link: '/en-us/docs/user/references/metadata/metadata-zookeeper.html',
                             },
                         ]
                     },
@@ -554,6 +583,10 @@ export default {
                             {
                                 title: 'LoggerAdapter',
                                 link: '/en-us/docs/dev/impls/logger-adapter.html'
+                            },
+                            {
+                                title: 'ConfigCenter',
+                                link: '/en-us/docs/dev/impls/config-center.html'
                             }
                         ]
                     },
@@ -656,6 +689,10 @@ export default {
                             {
                                 title: 'XML配置',
                                 link: '/zh-cn/docs/user/configuration/xml.html',
+                            },
+                            {
+                                title: '属性配置',
+                                link: '/zh-cn/docs/user/configuration/properties.html',
                             },
                             {
                                 title: 'API配置',

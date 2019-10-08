@@ -9,7 +9,7 @@
 - 存储单个配置项，如各种开关项、常量值等。
 - 存储服务治理规则，此时key通常按照"服务名+规则类型"的格式来组织，而value则为具体的治理规则。
 
-为了进一步实现对key-value的分组管理，Dubbo的配置中心还加入了namespace、group的概念，这些概念在很多专业的第三方配置中心中都有体现，通常情况下，namespace用来隔离不同的租户，group用来对统一租户的key集合做分组。
+为了进一步实现对key-value的分组管理，Dubbo的配置中心还加入了namespace、group的概念，这些概念在很多专业的第三方配置中心中都有体现，通常情况下，namespace用来隔离不同的租户，group用来对同一租户的key集合做分组。
 
 当前，Dubbo配置中心实现了对Zookeeper、Nacos、Etcd、Consul、Apollo的对接，接下来我们具体看一下Dubbo抽象的配置中心是怎么映射到具体的第三方实现中的。
 
@@ -42,7 +42,7 @@ namespace, group, key等分别对应不同层级的ZNode节点，而value则作�
    
    上图展示了两个不同作用域的dubbo.properties文件在zookeeper中的存储结构：
    - 命名空间namespace都为：dubbo
-   - 分组group：全局级别为dubbo，所有应用共享；应用级别为应用名demo-provider，只对改应用生效
+   - 分组group：全局级别为dubbo，所有应用共享；应用级别为应用名demo-provider，只对该应用生效
    - key：dubbo.properties
    
 2. 单个配置项
@@ -52,7 +52,8 @@ namespace, group, key等分别对应不同层级的ZNode节点，而value则作�
    设置优雅停机事件为15000：
    - 命名空间namespace：dubbo
    - 分组group：dubbo
-   - key：dubbo.service.shutdown.wait=15000
+   - key：dubbo.service.shutdown.wait
+   - value：15000
      
 3. 服务治理规则
 

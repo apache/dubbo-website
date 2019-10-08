@@ -24,7 +24,7 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxRouterFactory.java (实现LoadBalance接口)
+                |-XxxRouterFactory.java (实现RouterFactory接口)
     |-resources
         |-META-INF
             |-dubbo
