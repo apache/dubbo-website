@@ -192,4 +192,4 @@ public class XxxFilter implements Filter {
 
 使用 xml 的配置方式会更加灵活，粒度更细。
 
-在before和after中，可以实现自己的业务逻辑来赋予改filter一定的功能。编写和配置完成后，该filter就会被Dubbo框架激活并且在调用链中执行。
+在before和after中，可以实现自己的业务逻辑来赋予该filter一定的功能。编写和配置完成后，该filter就会被Dubbo框架激活并且在调用链中执行。
