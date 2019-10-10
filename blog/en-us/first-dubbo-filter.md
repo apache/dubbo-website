@@ -118,9 +118,9 @@ and some need to be activated by the configuration file. The loading order of al
 default Filter first, and then to process the Filter defined by the user. With the "-" configuration, Dubbo's defualt Filter 
 can be replaced, with this configuration, the user can flexibly replace or modify the Filter's load order.
 
-#### Native Filter of Dubbo
-Dubbo has lots of native Filter. RpcContext, accesslog and other functions can be implemented by Dubbo. 
-Now let's see the ConsumerContextFilter used by the Consumer side for context delivery:
+#### Built-in Filter of Dubbo
+Dubbo has lots of built-in Filter. RpcContext, accesslog and other functions can be implemented by Dubbo. 
+Now let's see the ConsumerContextFilter which used by the Consumer side for context delivery:
 
 ```java
 public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
@@ -148,7 +148,7 @@ and delivered.
 
 #### Implement A Dubbo Filter
 Because of Dubbo's flexible design and good scalability, we can implement business logic 
-in the call chain by implementing our own Dubbo Filter, such as  time-consuming statistics, monitor information statistics, etc.
+in the call chain by implementing our own Dubbo Filter, such as time-consuming statistics, monitor information statistics, etc.
 Now, let's implement a simple Filter:
 
 Maven project structure:
