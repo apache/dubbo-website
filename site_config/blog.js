@@ -172,6 +172,13 @@ export default {
                 link: '/en-us/blog/dubbo-zk.html',
             },
             {
+                title: 'Your First Dubbo filter',
+                author: '@nzomkxia',
+                dateStr: 'July 1st, 2018',
+                desc: 'This blog introduces the filter mechanism in Dubbo, and how to inplement a Dubbo Filter',
+                link: '/en-us/blog/first-dubbo-filter.html',
+            },
+            {
                 title: 'Your First Dubbo Demo',
                 author: '@Yang Xinru',
                 dateStr: 'August 7th，2018',
@@ -531,7 +538,7 @@ export default {
                 title: '第一个Dubbo filter',
                 author: '@nzomkxia',
                 dateStr: 'July 1st, 2018',
-                desc: '介绍了Dubbo中的filter机制，并且详细介绍了如果实现一个自己的Dubbo filter',
+                desc: '介绍了Dubbo中的filter机制，并且详细介绍了如何实现一个自己的Dubbo filter',
                 link: '/zh-cn/blog/first-dubbo-filter.html',
             },
             {
