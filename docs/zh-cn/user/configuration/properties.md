@@ -28,7 +28,7 @@ dubbo.registry.address=10.20.153.10:9090
 
 优先级从高到低：
 
-* JVM -D参数，当你部署或者启动应用时，它可以轻易地重写配置，比如，改变buddo协议端口；
+* JVM -D参数，当你部署或者启动应用时，它可以轻易地重写配置，比如，改变dubbo协议端口；
 * XML, XML中的当前配置会重写dubbo.properties中的；
 * Properties，默认配置，仅仅作用于以上两者没有配置时。
 
