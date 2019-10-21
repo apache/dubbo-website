@@ -448,7 +448,7 @@ export default {
                 author: '@徐靖峰',
                 dateStr: 'August 28th, 2018',
                 desc: '开源从来不是高级开发者的专属词汇',
-                link: '/zh-cn/blog/dubbo-contribue-to-opensource.html',
+                link: '/zh-cn/blog/dubbo-contribute-to-opensource.html',
             },
             {
                 title: 'Spring应用快速集成Dubbo + Hystrix',

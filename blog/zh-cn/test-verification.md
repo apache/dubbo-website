@@ -6,7 +6,7 @@
 为方便开发测试，经常会在线下共用一个所有服务可用的注册中心，这时，如果一个正在开发中的服务提供者注册，可能会影响消费者不能正常运行。
 
 可以让服务提供者开发方，只订阅服务(开发的服务可能依赖其它服务)，而不注册正在开发的服务，通过直连测试正在开发的服务。     
-![subscribe-only.jpg](https://cdn.nlark.com/lark/0/2018/jpeg/6752/1535447102196-eabbff47-287d-4f85-8fea-05b4f4921d75.jpeg) 
+![subscribe-only](../../img/blog/subscribe-only.jpg)
 禁用注册配置
 
     <dubbo:registry address="10.20.153.10:9090" register="false" />
@@ -16,7 +16,7 @@
 
 ### 指定IP调用  
 在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者，这时候可能需要点对点直连，点对点直联方式，将以服务接口为单位，忽略注册中心的提供者列表，A 接口配置点对点，不影响 B 接口从注册中心获取列表  
-![dubbo-directly.jpg](https://cdn.nlark.com/lark/0/2018/jpeg/6752/1535447028864-8b952768-6fce-4c3c-b7a4-2003f3291d8e.jpeg) 
+![subscribe-only](../../img/blog/dubbo-directly.jpg)
 
 可以通过以下几种配置来指定IP调用   
 
