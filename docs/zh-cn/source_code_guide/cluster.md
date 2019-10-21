@@ -327,7 +327,7 @@ reselect 方法总结下来其实只做了两件事情，第一是查找可用�
 
 #### 3.2.2 FailbackClusterInvoker
 
-FailbackClusterInvoker 会在调用失败后，返回一个空结果给服务提供者。并通过定时任务对失败的调用进行重传，适合执行消息通知等操作。下面来看一下它的实现逻辑。
+FailbackClusterInvoker 会在调用失败后，返回一个空结果给服务消费者。并通过定时任务对失败的调用进行重传，适合执行消息通知等操作。下面来看一下它的实现逻辑。
 
 ```java
 public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
