@@ -98,6 +98,19 @@ $ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4
 
 > PS: 最新版本经过实测，本地没有gpg.conf这个文件，因此如果在执行过程中遇到签名失败，可以参考这个文章：https://blog.csdn.net/wenbo20182/article/details/72850810 或 https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors
 
+由于公钥服务器没有检查机制，任何人都可以用你的名义上传公钥，所以没有办法保证服务器上的公钥的可靠性。
+通常，你可以在网站上公布一个公钥指纹，让其他人核对下载到的公钥是否为真。
+```sh
+# fingerprint参数生成公钥指纹：
+$ gpg --fingerprint liujun
+pub   rsa4096 2019-10-17 [SC]
+      1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0
+uid           [ultimate] liujun (CODE SIGNING KEY) <liujun@apache.org>
+sub   rsa4096 2019-10-17 [E]
+```
+登录 https://id.apache.org, 将上面的 fingerprint （即 1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0）
+粘贴到自己的用户信息中 OpenPGP Public Key Primary Fingerprint
+ 
 ### 设置Apache中央仓库
 
 Dubbo项目的父pom为Apache pom(2.7.0以上版本需要，2.6.x发布版本不需要此操作)
