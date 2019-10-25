@@ -24,7 +24,7 @@ dubbo.registry.address=10.20.153.10:9090
 ```
 
 ## 重写与优先级
-![properties-override](https://github.com/apache/dubbo-website/blob/master/docs/en-us/user/sources/images/dubbo-properties-override.jpg)
+![properties-override](../sources/images/dubbo-properties-override.jpg)
 
 优先级从高到低：
 
