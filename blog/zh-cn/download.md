@@ -1,4 +1,4 @@
----
+~~~~---
 title: 下载中心
 keywords: Dubbo, Downloads, Version
 description: 本文将向你介绍如何点击了解各版本详情和升级注意事项。
@@ -16,6 +16,24 @@ description: 本文将向你介绍如何点击了解各版本详情和升级注�
 
 > GitHub: https://github.com/apache/incubator-dubbo \
 > 发布说明：https://github.com/apache/incubator-dubbo/releases
+
+### 2.7.4.1 (2019-10-27)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.4.1/apache-dubbo-2.7.4.1-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.4.1/apache-dubbo-2.7.4.1-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.4.1/apache-dubbo-2.7.4.1-src.zip.sha512)
+
+### 2.7.4 (2019-10-19)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.4/apache-dubbo-2.7.4-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.4/apache-dubbo-2.7.4-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.4/apache-dubbo-2.7.4-src.zip.sha512)
+
+### 2.7.3 (2019-07-19)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.3/apache-dubbo-2.7.3-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.3/apache-dubbo-2.7.3-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.3/apache-dubbo-2.7.3-src.zip.sha512)
 
 ### 2.7.2 (2019-06-06)
 
