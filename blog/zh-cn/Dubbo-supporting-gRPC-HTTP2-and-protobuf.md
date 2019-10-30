@@ -28,7 +28,7 @@
 1. HTTP 的语义和可扩展性能很好的满足 RPC 调用需求。
 2. 通用性，HTTP 协议几乎被网络上的所有设备所支持，具有很好的协议穿透性。
 
-![image-20191029113404906](/img/blog/grpc/http1.png)
+![image-20191029113404906](../../img/blog/grpc/http1.png)
 
 具体来说，HTTP/1 的优势和限制是：
 
@@ -46,7 +46,7 @@
 
 HTTP/2 保留了 HTTP/1 的所有语义，在保持兼容的同时，在通信模型和传输效率上做了很大的改进。
 
-![image-20191029113416731](/img/blog/grpc/http2.png)
+![image-20191029113416731](../../img/blog/grpc/http2.png)
 
 * 支持单条链路上的 Multiplexing，相比于 Request - Response 独占链路，基于 Frame 实现更高效利用链路
 
@@ -239,7 +239,7 @@ pluginArtifact 指定了 Dubbo 定制版本的 Java Protobuf Compiler 插件，�
    ```
 
    生成的 Stub 和消息类 如下：
-   ![image-20191026130516896](/img/blog/grpc/compiler-classes.png)
+   ![image-20191026130516896](../../img/blog/grpc/compiler-classes.png)
 
    重点关注 GreeterGrpc ，包含了所有 gRPC 标准的 stub 类/方法，同时增加了 Dubbo 特定的接口，之后 Provider 端的服务暴露和 Consumer 端的服务调用都将依赖这个接口。
 
@@ -596,7 +596,7 @@ message HelloReply {
 
    生成的 Java 类如下：
 
-   ![image-20191028201240976](/img/blog/grpc/compiler-protobuf.png)
+   ![image-20191028201240976](../../img/blog/grpc/compiler-protobuf.png)
 
    DemoServiceDubbo 为 Dubbo 定制的 stub
 
