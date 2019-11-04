@@ -141,7 +141,7 @@ Dubbo 使用 Zookeeper 用于服务的注册发现和配置管理，在 Zookeepe
 
 ![dubbo-in-zk](../../img/blog/dubbo-in-zk.jpg)
 
-首先，所有 Dubbo 相关的数据都组织在 `/duboo` 的根节点下。
+首先，所有 Dubbo 相关的数据都组织在 `/dubbo` 的根节点下。
 
 二级目录是服务名，如 `com.foo.BarService`。
 
