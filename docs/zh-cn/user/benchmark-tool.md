@@ -21,7 +21,7 @@
     ```
 * 将自己的benchmark工程打成jar包,如demo.benchmark.jar
 * 将demo.benchmark.jar 和服务的api包放到dubbo.benchmark/lib目录下
-* 配置duubo.properties
+* 配置dubbo.properties
 * 运行run.bat(windows)或run.sh(linux)
 
 如想测试dubbo的不同版本，直接替换lib下的dubbo的jar包即可。 
