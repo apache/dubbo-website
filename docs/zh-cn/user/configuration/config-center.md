@@ -94,7 +94,7 @@ Apollo中的一个核心概念是命名空间 - namespace（和上面zookeeper�
 
 默认情况下，Dubbo会从名叫`dubbo-properties`（由于 Apollo 不支持特殊后缀 `.properties` ）的命名空间中读取全局配置（`<dubbo:config-center namespace="your namespace">`）
 
-![image-20190128095444169](/img/apollo-configcenter-dubbo.jpg)
+![image-20190128095444169](/img/apollo-configcenter-dubbo.png)
 
 
 > 这里相当于是把 `dubbo.properties` 配置文件的内容存储在了 Apollo 中，应用通过关联共享的 `dubbo-properties` namespace 继承公共配置,
