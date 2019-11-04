@@ -92,20 +92,13 @@ dubbo.application.qos.port=33333
 
 Apollo中的一个核心概念是命名空间 - namespace（和上面zookeeper的namespace概念不同），在这里全局和应用级别配置就是通过命名空间来区分的。
 
-默认情况下，Dubbo会从名叫`dubbo`的命名空间中读取全局配置（`<dubbo:config-center namespace="your namespace">`）
+默认情况下，Dubbo会从名叫`dubbo-properties`（由于 Apollo 不支持特殊后缀 `.properties` ）的命名空间中读取全局配置（`<dubbo:config-center namespace="your namespace">`）
 
 ![image-20190128095444169](/img/apollo-configcenter-dubbo.jpg)
 
-而应用自有的配置，会从`application`命名空间读取
 
-![image-20190128095659517](/img/apollo-configcenter-application.jpg)
-
-
-
-> 注意：当前dubbo.properties是作为一个key存储在Apollo namespace中，为更好的适应Apollo的设计理念，在接下来的版本中可能会调整为
->
-> ![image-20190128100058755](/img/apollo-configcenter-enhance.jpg)
-
+> 这里相当于是把 `dubbo.properties` 配置文件的内容存储在了 Apollo 中，应用通过关联共享的 `dubbo-properties` namespace 继承公共配置,
+> 应用也可以按照 Apollo 的做法来覆盖个别配置项。
 
 
 #### 自己加载外部化配置
