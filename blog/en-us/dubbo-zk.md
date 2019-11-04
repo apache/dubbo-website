@@ -139,7 +139,7 @@ Zookeeper is used for service registration discovery and configuration managemen
 
 ![dubbo-in-zk](../../img/blog/dubbo-in-zk.jpg)
 
-First, all data related to Dubbo is organized under the root node of `/duboo`.
+First, all data related to Dubbo is organized under the root node of `/dubbo`.
 
 The secondary directory is the service name like `com.foo.BarService`.
 
