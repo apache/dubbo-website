@@ -59,6 +59,14 @@ description: 本文将向你介绍如何点击了解各版本详情和升级注�
 [asc](https://archive.apache.org/dist/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-bin-release.zip.asc) |
 [sha512](https://archive.apache.org/dist/incubator/dubbo/2.7.0/apache-dubbo-incubating-2.7.0-bin-release.zip.sha512)
 
+### 2.6.7 (2019-07-15)
+
+* [source](https://www.apache.org/dist/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip.sha512)
+* [binary](https://www.apache.org/dist/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip.sha512)
 
 ### 2.6.6 (2019-03-07)
 
