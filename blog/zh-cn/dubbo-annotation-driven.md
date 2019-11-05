@@ -320,7 +320,7 @@ public class AnnotationDemoService implements DemoService {
 
 
 
-将 `AnnotationDemoService` 暴露成Dubbo 服务，需要依赖 Spring Bean：`AplicationConfig`、`ProtocolConfig` 以及 `RegistryConfig`  。这三个 Spring Bean 过去可通过 XML 文件方式组装 Spring Bean：
+将 `AnnotationDemoService` 暴露成Dubbo 服务，需要依赖 Spring Bean：`ApplicationConfig`、`ProtocolConfig` 以及 `RegistryConfig`  。这三个 Spring Bean 过去可通过 XML 文件方式组装 Spring Bean：
 
 ```xml
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

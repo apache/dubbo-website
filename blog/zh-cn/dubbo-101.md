@@ -150,7 +150,7 @@ public class Application {
 **说明**：
 
 1. 创建一个 *ServiceConfig* 的实例，泛型参数信息是服务接口类型，即 *GreetingsService*。
-2. 生成一个 *AplicatonConfig* 的实例，并将其装配进 *ServiceConfig*。
+2. 生成一个 *ApplicationConfig* 的实例，并将其装配进 *ServiceConfig*。
 3. 生成一个 *RegistryConfig* 实例，并将其装配进 *ServiceConfig*，这里使用的是组播方式，参数是 `multicast://224.5.6.7:1234`。合法的组播地址范围为：*224.0.0.0 - 239.255.255.255*
 4. 将服务契约 *GreetingsService* 装配进 *ServiceConfig*。
 5. 将服务提供者提供的实现 *GreetingsServiceImpl* 的实例装配进 *ServiceConfig*。
@@ -176,7 +176,7 @@ public class Application {
 **说明**：
 
 1. 创建一个 *ReferenceConfig* 的实例，同样，泛型参数信息是服务接口类型，即 *GreetingService*。
-2. 生成一个 *AplicatonConfig* 的实例，并将其装配进 *ReferenceConfig*。
+2. 生成一个 *ApplicationConfig* 的实例，并将其装配进 *ReferenceConfig*。
 3. 生成一个 *RegistryConfig* 实例，并将其装配进 *ReferenceConfig*，注意这里的组播地址信息需要与服务提供方的相同。
 4. 将服务契约 *GreetingsService* 装配进 *ReferenceConfig*。
 5. 从 *ReferenceConfig* 中获取到 *GreetingService* 的代理。

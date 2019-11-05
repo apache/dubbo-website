@@ -181,7 +181,7 @@ public class Application {
 **Notes**：
 
 1. Create an instance of *ReferenceConfig* with service interface type as generics parameters, which is *GreetingsService* in this example.
-2. Create an instance of *AplicatonConfig*, and assemble it into *ReferenceConfig*.
+2. Create an instance of *ApplicationConfig*, and assemble it into *ReferenceConfig*.
 3. Generate an instance *RegistryConfig*, and assemble it into *ReferenceConfig*. Note that the address information here should be the same as the one of the service provider.
 4. Assemble the service contract *GreetingsService* into *ReferenceConfig*.
 5. Obtain the agency of *GreetingsService* from *ReferenceConfig*.
