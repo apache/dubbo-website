@@ -26,7 +26,7 @@ Read ReadMe.txt (the contents are as follows, in the compressed package.)
 
 * Put the demo.benchmark.jar and service API jar into directory dubbo.benchmark/lib
 
-* Configuring duubo.properties
+* Configuring dubbo.properties
 
 * Run run.bat(windows) or run.sh(linux)
 
