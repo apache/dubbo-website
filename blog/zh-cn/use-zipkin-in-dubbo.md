@@ -530,7 +530,7 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
 
 完成之后的工程的目录结构如下：
 
-![zipkin dubob project structure](../../img/blog/zipkin-dubbo-project.png)
+![zipkin dubbo project structure](../../img/blog/zipkin-dubbo-project.png)
 
 ### 运行
 

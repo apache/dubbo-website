@@ -258,7 +258,7 @@ for (int i = 0; i < leastCount; i++) {
 int offsetWeight = random.nextInt(totalWeight) + 1;
 ```
 
-以上就是 Dubob 2.6.5 对 LeastActiveLoadBalance 的更新，内容不是很多，先分析到这。接下来分析基于一致性 hash 思想的 ConsistentHashLoadBalance。
+以上就是 Dubbo 2.6.5 对 LeastActiveLoadBalance 的更新，内容不是很多，先分析到这。接下来分析基于一致性 hash 思想的 ConsistentHashLoadBalance。
 
 ### 2.3 ConsistentHashLoadBalance
 
