@@ -60,8 +60,9 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 
 ### `invoke`
 
-0. `invoke XxxService.xxxMethod({"prop": "value"})`: invoke particular method for the given service
-0. `invoke xxxMethod({"prop": "value"})`: invoke particular method for the default service
+0. `invoke XxxService.xxxMethod(1234, "abcd", {"prop" : "value"})`: invoke particular method for the given service
+0. `invoke com.xxx.XxxService.XxxService.xxxMethod(1234, "abcd", {"prop" : "value"})`: invoke particular method for the given service
+0. `invoke xxxMethod(1234, "abcd", {"prop" : "value"})`: invoke particular method for the default service
 
 ### `select` [^2]
 

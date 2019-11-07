@@ -62,8 +62,9 @@ status命令所检查的资源也可以扩展，参见：[扩展参考手册](..
 
 ### `invoke`
 
-0. `invoke XxxService.xxxMethod({"prop": "value"})`: 调用服务的方法
-0. `invoke xxxMethod({"prop": "value"})`: 调用服务的方法(自动查找包含此方法的服务)
+0. `invoke XxxService.xxxMethod(1234, "abcd", {"prop" : "value"})`: 调用服务的方法
+0. `invoke com.xxx.XxxService.XxxService.xxxMethod(1234, "abcd", {"prop" : "value"})`: 调用全路径服务的方法
+0. `invoke xxxMethod(1234, "abcd", {"prop" : "value"})`: 调用服务的方法(自动查找包含此方法的服务)
 
 ### `select` [^2]
 
