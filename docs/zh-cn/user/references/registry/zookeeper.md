@@ -17,7 +17,7 @@
 * 当会话过期时，能自动恢复注册数据，以及订阅请求
 * 当设置 `<dubbo:registry check="false" />` 时，记录失败注册和订阅请求，后台定时重试
 * 可通过 `<dubbo:registry username="admin" password="1234" />` 设置 zookeeper 登录信息
-* 可通过 `<dubbo:registry group="dubbo" />` 设置 zookeeper 的根节点，不设置将使用无根树
+* 可通过 `<dubbo:registry group="dubbo" />` 设置 zookeeper 的根节点，不配置将使用默认的根节点。
 * 支持 `*` 号通配符 `<dubbo:reference group="*" version="*" />`，可订阅服务的所有分组和所有版本的提供者
 
 ## 使用
@@ -137,7 +137,7 @@ Zookeeper 集群配置：
 
 ## zookeeper 安装
 
-安装方式参见: [Zookeeper安装手册](../../../admin/install/zookeeper.md)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../preface/usage.md) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.addrss` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
+安装方式参见: [Zookeeper安装手册](../../../admin/install/zookeeper.md)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../preface/usage.md) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
 
 
 ## 可靠性声明
