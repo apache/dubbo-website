@@ -109,6 +109,18 @@ Mainly including the related preparation of signature utilities and Maven reposi
     $ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4 
     
     ```
+   
+   - config your fingerprint.
+   ```sh
+   ### Show fingerprint info：
+   $ gpg --fingerprint liujun
+   pub   rsa4096 2019-10-17 [SC]
+         1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0
+   uid           [ultimate] liujun (CODE SIGNING KEY) <liujun@apache.org>
+   sub   rsa4096 2019-10-17 [E]
+   ```
+    Save the fingerprint, as above `1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0`, 
+    to the field `OpenPGP Public Key Primary Fingerprint` in you profile page at https://id.apache.org.
 
 3. Set up Apache central repository.
 
