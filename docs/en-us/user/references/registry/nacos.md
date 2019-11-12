@@ -62,7 +62,7 @@ When you add `dubbo-registry-nacos` to your project, you don't need to explicitl
 
 ### Configure Registry Center
 
-Assuming your Dubbo app uses the Spring Framework assembly, there are two configuration options available: [Dubbo Spring Externalization Configuration](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5% A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/) and the Spring XML configuration file.
+Assuming your Dubbo app uses the Spring Framework assembly, there are two configuration options available: [Dubbo Spring Externalization Configuration](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/) and the Spring XML configuration file.
 
 
 ### [Dubbo Spring Externalization Configuration](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/)
