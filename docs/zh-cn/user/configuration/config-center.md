@@ -71,8 +71,6 @@ dubbo.application.qos.port=33333
 <dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 ```
 
-
-
 默认所有的配置都存储在`/dubbo/config`节点，具体节点结构图如下：
 
 ![image-20190127225608553](/img/zk-configcenter.jpg)
@@ -92,13 +90,19 @@ dubbo.application.qos.port=33333
 
 Apollo中的一个核心概念是命名空间 - namespace（和上面zookeeper的namespace概念不同），在这里全局和应用级别配置就是通过命名空间来区分的。
 
-默认情况下，Dubbo会从名叫`dubbo-properties`（由于 Apollo 不支持特殊后缀 `.properties` ）的命名空间中读取全局配置（`<dubbo:config-center namespace="your namespace">`）
+默认情况下，Dubbo会从名叫`dubbo`（由于 Apollo 不支持特殊后缀 `.properties` ）的命名空间中读取全局配置（`<dubbo:config-center namespace="your namespace">`）
 
 ![image-20190128095444169](/img/apollo-configcenter-dubbo.png)
 
+由于 Apollo 也默认将会在 `dubbo` namespace 中存储服务治理规则（如路由规则），建议通过单独配置 `group` 将服务治理和配置文件托管分离开，以 XML 配置方式为例：
+```xml
+<dubbo namespace="governance" group ="dubbo"/>
+```
+这里，服务治理规则将存储在 governance namespace，而配置文件将存储在 dubbo namespace，如下图所示：
+![image-20190128095444169](/img/apollo-configcenter-governance-dubbo.png)
 
-> 这里相当于是把 `dubbo.properties` 配置文件的内容存储在了 Apollo 中，应用通过关联共享的 `dubbo-properties` namespace 继承公共配置,
-> 应用也可以按照 Apollo 的做法来覆盖个别配置项。
+> 关于文件配置托管，相当于是把 `dubbo.properties` 配置文件的内容存储在了 Apollo 中，应用通过关联共享的 `dubbo` namespace 继承公共配置,
+>  应用也可以按照 Apollo 的做法来覆盖个别配置项。
 
 
 #### 自己加载外部化配置
