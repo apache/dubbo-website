@@ -1,21 +1,21 @@
-# Reporting Security Issues
+# 报告安全问题
 
-The Apache Software Foundation takes a rigorous standpoint in annihilating the security issues in its software projects. Apache Dubbo is highly sensitive and forthcoming to issues pertaining to its features and functionality.
+Apache Software Foundation在消除其软件项目中的安全性问题方面采取严格的立场。Apache Dubbo对与其功能和特性有关的问题非常敏感并很快提出。
 
-## REPORTING VULNERABILITY
+## 报告漏洞
 
-If you have apprehensions regarding Dubbo's security or you discover vulnerability or potential threat, don’t hesitate to get in touch with the Apache Dubbo Security Team by dropping a mail at security@dubbo.apache.org. In the mail, specify the description of the issue or potential threat. You are also urged to recommend the way to reproduce and replicate the issue. The Dubbo community will get back to you after assessing and analysing the findings.
+如果您对Dubbo的安全性有担心，或者发现漏洞或潜在威胁，请发送电子邮件至security@dubbo.apache.org与Apache Dubbo安全团队联系。在邮件中，指定问题或潜在威胁的描述。还敦促您推荐重现和复制问题的方法。Dubbo社区会在评估和分析调查结果之后与您联系。
 
-PLEASE PAY ATTENTION to report the security issue on the security email before disclosing it on public domain.
+请先注意在安全电子邮件中报告安全问题，然后再在公共领域公开该问题。
 
 
-## VULNERABILITY HANDLING
+## 漏洞处理
 
-An overview of the vulnerability handling process is:
+漏洞处理过程的概述是：
 
-* The reporter reports the vulnerability privately to Apache.
-* The appropriate project's security team works privately with the reporter to resolve the vulnerability.
-* A new release of the Apache product concerned is made that includes the fix.
-* The vulnerability is publically announced.
+* 报告者将漏洞秘密报告给Apache。
+* 相应项目的安全团队与报告者私下合作来解决漏洞。
+* 制作了包含该修复程序的有关Apache产品的新版本。
+* 该漏洞已公开宣布。
 
-A more detailed description of the process can be found [here](https://www.apache.org/security/committers.html)
+有关此过程的详细说明，请参见[此处](https://www.apache.org/security/committers.html)
