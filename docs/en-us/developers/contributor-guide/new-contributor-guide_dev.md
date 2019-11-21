@@ -6,6 +6,8 @@ This is a guide for new comers who wants to contribute to Dubbo.
 
 The mailing list is the recommended way for discussing almost anything that related to Dubbo. Please refer to this [issue](https://github.com/apache/dubbo/issues/1393) for detailed documentation on how to subscribe.
 
+To subscribe to the following mailing list, please refer to [Mailing list subscription guide](/en-us/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html)
+
 * dev@dubbo.apache.org: the develop mailing list, you can ask question here if you have encountered any problem when using or developing Dubbo.
 * commits@dubbo.apache.org: all the commits will be sent to this mailing list. You can subscribe to it if you are interested in Dubbo's development.
 * issues@dubbo.apache.org: all the JIRA [issues](https://issues.apache.org/jira/projects/DUBBO/issues) and updates will be sent to this mailing list. The Dubbo community has decided to use github issues rather than JIRA issues, therefore it is expected that most of the issues will be tracked by github issues. The JIRA issues are used to track ASF related issues.
@@ -13,7 +15,7 @@ The mailing list is the recommended way for discussing almost anything that rela
 
 ### Reporting issue
 
-You can always reporting an issue to Dubbo via Github [Issues](https://github.com/apache/dubbo/issues). 
+You can always reporting an issue to Dubbo via Github [Issues](https://github.com/apache/dubbo/issues).
 
 If you are reporting bugs, please refer to the issue report [template](https://github.com/apache/dubbo/issues/new?template=dubbo-issue-report-template.md).
 
@@ -39,7 +41,7 @@ Please check the [CONTRIBUTING.md](https://github.com/apache/dubbo/blob/master/C
 
 ### Participate in the release vote
 
-Participate in the release vote is an important way to contribute to Dubbo. The Dubbo community welcomes everyone to partipate, you can check the release vote using this [check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist). 
+Participate in the release vote is an important way to contribute to Dubbo. The Dubbo community welcomes everyone to partipate, you can check the release vote using this [check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist).
 If you have any question regarding the check list, please feel free to ask on dev@dubbo.apache.org.
 
 

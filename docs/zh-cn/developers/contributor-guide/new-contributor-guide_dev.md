@@ -6,6 +6,8 @@
 
 邮件列表是Dubbo官方推荐的讨论方式，所有与Dubbo相关的内容都可以在这里讨论，请点击 [issue](https://github.com/apache/dubbo/issues/1393) 了解更多关于邮件列表订阅的内容
 
+如需订阅如下邮件列表，请参考 [邮件列表订阅向导](/zh-cn/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html)
+
 * dev@dubbo.apache.org：开发邮件列表，您在使用或者开发Dubbo的过程中遇到的任何问题，都可以在这里进行提问。
 * commits@dubbo.apache.org：所有的提交内容都会推送到这个邮件列表，如果您对Dubbo的进展感兴趣，可以订阅这个邮件列表。
 * issues@dubbo.apache.org：所有的 JIRA [issues](https://issues.apache.org/jira/projects/DUBBO/issues) 和修改信息都会推送到这个邮件列表。Dubbo社区已经决定使用github issues代替JIRA issues，因此大部分issues将由github issues进行跟踪。JIRA issues用于跟踪ASF相关问题。
