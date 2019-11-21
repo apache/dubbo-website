@@ -7,7 +7,7 @@
 Description on registration procedure:
 
 * When service provider boots up: write service URL address under directory `/dubbo/com.foo.BarService/providers`
-* When service consumer boots up: subscribe to `/dubbo/com.foo.BarService/providers` for provider's URL addresses. At the same time, write consumer's URL address under `/dubbo/com.foo.BarService/providers`.
+* When service consumer boots up: subscribe to `/dubbo/com.foo.BarService/providers` for provider's URL addresses. At the same time, write consumer's URL address under `/dubbo/com.foo.BarService/consumers`.
 * When monitor center boots up: subscribe to `/dubbo/com.foo.BarService` for the URL addresses from all providers and consumers.
 
 The following abilities are supported:
