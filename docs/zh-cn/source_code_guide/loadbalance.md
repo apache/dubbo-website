@@ -240,7 +240,7 @@ offsetWeight -= getWeight(invokers.get(leastIndex), invocation);
 int afterWarmup = getWeight(invoker, invocation);
 ```
 
-另外，2.6.4 版本中的 LeastActiveLoadBalance 还要一个缺陷，即当一组 Invoker 具有相同的最小活跃数，且其中一个 Invoker 的权重值为1，此时这个 Invoker 无法被选中。缺陷代码如下：
+另外，2.6.4 版本中的 LeastActiveLoadBalance 还有一个缺陷，即当一组 Invoker 具有相同的最小活跃数，且其中一个 Invoker 的权重值为1，此时这个 Invoker 无法被选中。缺陷代码如下：
 
 ```java
 int offsetWeight = random.nextInt(totalWeight);
