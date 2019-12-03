@@ -124,7 +124,7 @@ public class RaceCarMaker implements CarMaker {
 
 ### 扩展点自适应
 
-`ExtensionLoader` 注入的依赖扩展点是一个 `Adaptive` 实例，直到扩展点方法执行时才决定调用是一个扩展点实现。
+`ExtensionLoader` 注入的依赖扩展点是一个 `Adaptive` 实例，直到扩展点方法执行时才决定调用是哪一个扩展点实现。
 
 Dubbo 使用 URL 对象（包含了Key-Value）传递配置信息。
 
