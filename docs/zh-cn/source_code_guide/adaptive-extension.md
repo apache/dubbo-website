@@ -35,7 +35,7 @@ public class AdaptiveWheelMaker implements WheelMaker {
             .getExtensionLoader(WheelMaker.class).getExtension(wheelMakerName);
         
         // 3.调用目标方法
-        return wheelMaker.makeWheel(URL url);
+        return wheelMaker.makeWheel(url);
     }
 }
 ```
