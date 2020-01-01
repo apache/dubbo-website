@@ -217,7 +217,7 @@ Spring Cloud Config, Apollo, Nacos 等分布式配置中心组件都对上述功
 
 标签路由提供了这样一个能力，当调用链路为 A -> B -> C -> D 时，用户给请求打标，最典型的打标方式可以借助 attachment（他可以在分布式调用中传递下去），调用会优先请求那些匹配的服务端，如 A -> B，C -> D，由于集群中未部署 C 节点，则会降级到普通节点。
 
-打标方式会收到集成系统差异的影响，从而导致很大的差异，所以 Dubbo 只提供了 `RpcContext.getContext().setAttachment()` 这样的基础接口，用户可以使用 SPI 扩展，或者 server filter 的扩展，对测试流量进行打标，引导进入隔离环境/灰度环境。
+打标方式会受到集成系统差异的影响，从而导致很大的差异，所以 Dubbo 只提供了 `RpcContext.getContext().setAttachment()` 这样的基础接口，用户可以使用 SPI 扩展，或者 server filter 的扩展，对测试流量进行打标，引导进入隔离环境/灰度环境。
 
 新版的 Dubbo Admin 提供了标签路由的配置项：
 
