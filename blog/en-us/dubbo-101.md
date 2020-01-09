@@ -191,18 +191,18 @@ public class Application {
 
 ### Run
 
-The complete example can be found at https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running.
+The complete example can be found at https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running.
 
 #### Build Example
 
 Synchronize the example codes and build by the following command lines:
 
-1. Synchronize the example codes: git clone https://github.com/dubbo/dubbo-samples.git
+1. Synchronize the example codes: git clone https://github.com/apache/dubbo-samples.git
 2. Build：mvn clean package
 
 ```bash
-$ git clone https://github.com/dubbo/dubbo-samples.git
-$ cd dubbo-samples/dubbo-samples-api/
+$ git clone https://github.com/apache/dubbo-samples.git
+$ cd dubbo-samples/java/dubbo-samples-api/
 $ mvn clean package
 INFO] Scanning for projects...
 [INFO]
