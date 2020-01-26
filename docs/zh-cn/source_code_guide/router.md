@@ -201,7 +201,7 @@ private static Map<String, MatchPair> parseRule(String rule)
 
 ### 2.2 服务路由
 
-服务路由的入口方法是 ConditionRouter 的 router 方法，该方法定义在 Router 接口中。实现代码如下：
+服务路由的入口方法是 ConditionRouter 的 route 方法，该方法定义在 Router 接口中。实现代码如下：
 
 ```java
 public <T> List<Invoker<T>> route(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
@@ -251,7 +251,7 @@ public <T> List<Invoker<T>> route(List<Invoker<T>> invokers, URL url, Invocation
 }
 ```
 
-router 方法先是调用 matchWhen 对服务消费者进行匹配，如果匹配失败，直接返回 Invoker 列表。如果匹配成功，再对服务提供者进行匹配，匹配逻辑封装在了 matchThen 方法中。下面来看一下这两个方法的逻辑：
+route 方法先是调用 matchWhen 对服务消费者进行匹配，如果匹配失败，直接返回 Invoker 列表。如果匹配成功，再对服务提供者进行匹配，匹配逻辑封装在了 matchThen 方法中。下面来看一下这两个方法的逻辑：
 
 ```java
 boolean matchWhen(URL url, Invocation invocation) {
