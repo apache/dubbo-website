@@ -43,6 +43,7 @@ This page shows Dubbo developers. Please file PR to add or change items.
 | lexburner       | Jingfeng Xu         | Alibaba          | Committer | +8       |
 | khanimteyaz     | Imteyaz Khan        |                  | Committer |          |
 | xxz             | Xiaoxiang Zhai      | Souche           | Committer | +8       |
+| codingsinger    | Zechao Zheng        | iQIYI            | Committer | +8       |
 
 ### Contributors
 
