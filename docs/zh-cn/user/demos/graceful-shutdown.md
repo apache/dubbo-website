@@ -23,7 +23,7 @@ Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用�
 dubbo.service.shutdown.wait=15000
 ```
 
-如果 ShutdownHook 不能生效，可以自行调用，**使用tomcat等容器部署的場景，建议通过扩展ContextListener等自行调用以下代码实现优雅停机**：
+如果 ShutdownHook 不能生效，可以自行调用，**使用tomcat等容器部署的场景，建议通过扩展ContextListener等自行调用以下代码实现优雅停机**：
 
 ```java
 DubboShutdownHook.destroyAll();
