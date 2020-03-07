@@ -199,9 +199,16 @@ export default {
         postsTitle: '所有文章',
         list: [
             {
+                title: 'Dubbo一致性Hash负载均衡实现剖析',
+                author: '@sofkyle',
+                dateStr: 'January 7th, 2020',
+                desc: '本文以一般的一致性Hash实现作为引子，详细剖析了Dubbo一致性Hash负载均衡算法的实现',
+                link: '/zh-cn/blog/dubbo-consistent-hash-implementation.html',
+            },
+            {
                 title: '浅谈 RPC',
                 author: '@caojiele',
-                dateStr: 'August 1th, 2019',
+                dateStr: 'August 1st, 2019',
                 desc: '介绍 RPC 基本原理和实现方式',
                 link: '/zh-cn/blog/rpc-introduction.html',
             },
