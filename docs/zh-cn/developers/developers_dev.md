@@ -44,6 +44,7 @@
 | khanimteyaz     | Imteyaz Khan        |                  | Committer |          |
 | xxz             | Xiaoxiang Zhai      | Souche           | Committer | +8       |
 | codingsinger    | Zechao Zheng        | iQIYI            | Committer | +8       |
+| zouyx           | Yixian Zou          | Shein            | Committer | +8       |
 
 ### 贡献者
 
