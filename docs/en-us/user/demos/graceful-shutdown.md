@@ -26,5 +26,5 @@ dubbo.service.shutdown.wait=15000
 If ShutdownHook does not take effect, you can call it yourself, **in tomcat, it is recommended by extending the ContextListener and call the following code for graceful shutdown**：
 
 ```java
-ProtocolConfig.destroyAll();
+DubboShutdownHook.destroyAll();
 ```

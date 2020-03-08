@@ -58,7 +58,7 @@
 #### 各字段含义
 
 - `scope`表示路由规则的作用粒度，scope的取值会决定key的取值。**必填**。
-  - service 务粒度
+  - service 服务粒度
   - application 应用粒度
 - `Key`明确规则体作用在哪个服务或应用。**必填**。
   - scope=service时，key取值为[{group}:]{service}[:{version}]的组合

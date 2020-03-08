@@ -50,7 +50,7 @@ These dependencies  needs to be added to project manually，when you need them.
 * slf4j: 1.7.25
 * log4j: 1.2.16
 
-[^1]: In theory, Dubbo only depend on JDK, not depend on any 3rd party libs, you can finish logic by useing  JDK.
+[^1]: In theory, Dubbo only depend on JDK, not depend on any 3rd party libs, you can finish logic by using  JDK.
 [^2]: Log output jar
 [^3]: Bytecode generation
 [^4]: Configuration parsing
