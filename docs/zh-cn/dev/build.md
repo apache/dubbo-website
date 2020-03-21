@@ -41,11 +41,12 @@ mvn install -Dmaven.test.skip
 
 ## 构建源代码 jar 包
 
-通过以下命令以构建 Dubbo 的源代码 jar 包，方便用来调试 Dubbo 源代码
+通过以下命令以构建 Dubbo 的源代码 jar 包
 
 ```sh
 mvn clean source:jar install -Dmaven.test.skip
 ```
+并且修改你的样例项目中的dubbo依赖为本地仓库的SANPSHOT版本，然后使用远程debug来调试dubbo。
 
 ## IDE 支持
 

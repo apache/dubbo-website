@@ -41,11 +41,13 @@ mvn install -Dmaven.test.skip
 
 ## Building jar package of source code 
 
-build Dubbo source code jar package with below command, which can debug Dubbo source code. 
+build Dubbo source code jar package with below command.
 
 ```sh
 mvn clean source:jar install -Dmaven.test.skip
 ```
+and modify the dubbo dependency in your sample project to the SANPSHOT version of the local repository, and then use remote debugger to debug dubbo.
+
 
 ## IDE support
 
