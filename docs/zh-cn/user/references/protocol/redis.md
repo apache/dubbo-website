@@ -30,7 +30,7 @@ registry.register(URL.valueOf("redis://10.20.153.11/com.foo.BarService?category=
 <dubbo:reference id="store" interface="com.foo.StoreService" url="redis://10.20.153.10:6379" />
 ```
 
-方法名建议和 redis 的标准方法名相同，即：get(key), set(key, value), delet(key)。
+方法名建议和 redis 的标准方法名相同，即：get(key), set(key, value), delete(key)。
 
 如果方法名和 redis 的标准方法名不相同，则需要配置映射关系 [^4]：
 
