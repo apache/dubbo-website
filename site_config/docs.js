@@ -651,6 +651,10 @@ export default {
                 title: '用户文档',
                 children: [
                     {
+                        title: 'Dubbo 版本及新特性速览',
+                        link: '/zh-cn/docs/user/new-features-in-a-glance.html'
+                    },
+                    {
                         title: '入门',
                         children: [
                             {
@@ -907,6 +911,22 @@ export default {
                                 title: '简化注册中心URL',
                                 link: '/zh-cn/docs/user/demos/simplify-registry-data.html',
                             },
+                            {
+                                title: '启动TLS',
+                                link: '/zh-cn/docs/user/demos/tls.html'
+                            },
+                            {
+                                title: '服务鉴权',
+                                link: '/zh-cn/docs/user/demos/auth.html'
+                            },
+                            {
+                                title: 'IDL 定义服务',
+                                link: '/zh-cn/docs/user/demos/protobuf-idl.html'
+                            },
+                            {
+                                title: '消费端线程池',
+                                link: '/zh-cn/docs/user/demos/consumer-threadpool.html'
+                            }
                         ],
                     },
                     {
@@ -1017,6 +1037,10 @@ export default {
                                 title: 'rest://',
                                 link: '/zh-cn/docs/user/references/protocol/rest.html',
                             },
+                            {
+                                title: 'grpc://',
+                                link: '/zh-cn/docs/user/references/protocol/gRPC.html',
+                            }
                         ]
                     },
                     {
