@@ -651,6 +651,10 @@ export default {
                 title: '用户文档',
                 children: [
                     {
+                        title: 'Dubbo 版本发布及新特性速览',
+                        link: '/zh-cn/docs/user/new-features-in-a-glance.html'
+                    },
+                    {
                         title: '入门',
                         children: [
                             {
