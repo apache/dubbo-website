@@ -1,5 +1,7 @@
 # Dubbo 版本发布及新特性速览
 
+[TOC]
+
 ## 版本速览
 Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
 * 2.6.x 主要以 bugfix 和少量 enhancements 为主，因此能完全保证稳定性
@@ -29,17 +31,17 @@ Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
 ## 值得关注的新特性
 * Dubbo 云原生计划（敬请期待...）
 * Kubernetes Native Service Discovery（敬请期待...）
-* [gRPC (HTTP/2) 协议]()
-* [使用 Protobuf 定义 Dubbo 服务]()
-* [TLS 安全传输]()
+* [gRPC (HTTP/2) 协议](./references/protocol/gRPC.md)
+* [使用 Protobuf 定义 Dubbo 服务](./demos/protobuf-idl.md)
+* [TLS 安全传输](./demos/tls.md)
 * [实例级服务发现]()
-* [服务鉴权]()
-* [性能优化]()
-    * [调用链路提升 30%]()
-    * [消费端线程模型]()
+* [服务鉴权](./demos/auth.md)
+* 性能优化
+    * [调用链路提升 30%](../../../blog/zh-cn/2.7.5-release.md)
+    * [消费端线程模型](./demos/consumer-threadpool.md)
     * [地址推送链路]()
     
 ## 热门文章列表
-[从 2019 到 2020，Apache Dubbo 年度总结]()  
-[Dubbo 2.7.5 里程碑版本发布]()  
-[Dubbo 在协议与多语言方向的探索：支持 gRPC、Protobuf]()  
+[从 2019 到 2020，Apache Dubbo 年度总结](../../../blog/zh-cn/apche-dubbo-2019-2020.md)  
+[Dubbo 2.7.5 里程碑版本发布](../../../blog/zh-cn/2.7.5-release.md)  
+[Dubbo 在协议与多语言方向的探索：支持 gRPC、Protobuf](../../../blog/zh-cn/Dubbo-supporting-gRPC-HTTP2-and-protobuf.md)  

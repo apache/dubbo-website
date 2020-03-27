@@ -30,7 +30,7 @@ public void doSayHello(String name) {
 
 下图是 Dubbo 的基本工作原理图，服务提供者与服务消费者之间通过注册中心协调地址，通过约定的协议实现数据交换。
 
-![Dubbo basic work flow](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906447368-05b37628-dc5c-46c3-bb90-acaf8992ab4d.png) 
+![Dubbo basic work flow](img/architecture.png) 
 
 
 ## 同构/异构微服务体系面临的问题
@@ -43,7 +43,7 @@ public void doSayHello(String name) {
 
 我们很容易想到的一个挑战是：**不同的体系间通常是使用不同的 RPC 通信协议、部署独立的注册中心集群，面对这种多协议、多注册中心集群的场景，要如何实现相互之间透明的地址发现和透明的 RPC 调用？**如果我们什么都不做，那么每个微服务体系就只能感知到自己体系内的服务状态，流量也在各自的体系内封闭。而要做到从体系 A 平滑的迁移到体系 B，或者想长期的保持公司内部多个体系的共存，则解决不同体系间的互联互通，实现流量的透明调度将是非常重要的环节。
 
-![2](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906499693-12748445-50d2-4daf-b1ed-bcee8f54bec0.png) 
+![2](../../img/docs/microservices.png) 
 
 
 **2. Dubbo 体系内部**
@@ -62,7 +62,7 @@ public void doSayHello(String name) {
 
 ### 多协议
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906535126-056436a1-e430-4363-bdeb-839975ec3c2e.png) 
+![undefined](../../img/docs/multiregistries.png) 
 
 以上是使用 Dubbo 开发的一套微服务，服务间通信使用到了不同的协议，根据我们的调研发现，公司内部启用多协议其实是非常普遍需求，具体场景在此我们暂不做解释。
 
@@ -116,9 +116,7 @@ Dubbo 目前所支持的协议包括 Dubbo、REST、Thrift、gRPC、JsonRPC、He
 
 关于对 gRPC (HTTP/2) 协议的支持，请参阅上期文档
 
-https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
-
-![3](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906585703-6054a76a-3faa-432a-a96e-6dcf0e042b1e.png) 
+![3](../../img/docs/dubbo-screen.png) 
 
 #### 多协议能解决的问题
 
@@ -145,7 +143,7 @@ https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
 
 下面我们具体看一下，Dubbo 为多注册中心集群场景提供的解决方案。
 
-![4](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906622714-3a295590-3b2c-4261-b8a8-5d5ac01a045a.png) 
+![4](../../img/docs/multisubscribe.png) 
 
 上图有两个业务集群，分别部署在北京和上海，每个业务集群有自己独立的注册中心集群，要解决两个业务集群间服务的透明 RPC 通信问题。
 
@@ -178,7 +176,7 @@ https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
 
 虽然我们会做多注册中心集群部署，但通常情况下，我们部署的都是相同的注册中心产品，如都是 Zookeeper、Nacos；而对于注册中心迁移的场景，则要求 Dubbo 能提供对更多的注册中心产品的支持，或者最重要的要有很好的扩展能力。Dubbo 官方目前支持的注册中心实现有：
 
-![5](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906658611-6399522a-460e-4339-93a6-c47aeacf4c57.png) 
+![5](../../img/docs/dubbo-screen2.png) 
 
 这里需要特别提到的一点是，当前 Dubbo 的服务注册/发现模型是以接口为粒度的，而从 2.7.5 版本开始，Dubbo 新引入了应用粒度的服务注册/发现模型。这一方面有助于优化 Dubbo 当前服务发现机制、提升服务容量，另一方面对于联通以 SpringCloud 为代表的微服务体系也非常重要（关于这点在下一章中有进一步提及）。更多关于《应用粒度服务发现：服务自省》的介绍，我们将在接下来的文章或文档中予以补充，请持续关注。
 
@@ -186,7 +184,7 @@ https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
 
 在引入多注册中心集群后，Dubbo 在流量选址时的多了一层注册中心集群间的负载均衡：
 
-![6](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906692823-0f3ce350-3322-466e-b21a-6af7e62f24a2.png) 
+![6](../../img/docs/cluster-lb.png) 
 
 在 Cluster Invoker 这一级，我们支持的选址策略有（2.7.5+ 版本，具体使用请参见文档）：
 
@@ -232,7 +230,7 @@ https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
 
 上文我们提到了在组织内存在异构微服务体系的各种合理可能性，现在我们来具体看一下异构微服务体系的实际场景，以及使用 Dubbo 实现互联互通的解决方法。首先我们先通过一张图来看一下，联通异构的微服务体系具体是一个什么样的场景。
 
-![7](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906721189-79f34238-5e24-4ac0-9c8f-80694c7ff0e3.png) 
+![7](../../img/docs/heterogeneous.png) 
 
 如上图所示，我们有部分微服务可以是基于 SpringCloud、gRPC、K8S 或者是自建体系构建的，他们各自之间默认是相互隔离无法联通的。当我们再构建一套基于 Dubbo 的微服务体系时，则利用 Dubbo 的多协议、多服务发现模型，我们就可以做到和各个微服务体系间的两两之间的互联互通。进一步的，如图中橙色箭头所示，依赖 Dubbo 体系作为桥接层，我们还可以实现两个异构微服务体系间的打通。
 
@@ -242,13 +240,13 @@ https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
 
 绝大多数开发者对 Dubbo 有这么一个固有认知：使用 Dubbo 开发微服务系统，则就要用 Dubbo 协议来作为服务间的通信协议才是最优方案。实际上，我们完全没有必要只束缚在 Dubbo RPC 协议上。Dubbo 作为微服务开发框架和 Dubbo 作为 RPC 协议这是两个概念，其实是完全可以分开来看待的，比如我们用 Dubbo 框架开发的业务系统，选用 rest、gRPC 通信是完全没有问题的（参加 Dubbo 支持的协议列表），具体用什么协议根据业务特点和技术规划才是最适合的。
 
-![8](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906738929-4aa42141-bd4a-4881-b887-352376db4a5d.png) 
+![8](../../img/docs/grpcrest.png) 
 
 当前在云原生、Mesh 的大背景下， HTTP1/2、gRPC 协议开始受到越来越多的关注，一方面原因自然是因为它们在标准化方面做的更好，得到的更多的网络设备和基础设施的支持，具备更好的通用性和穿透性。对于很多有云原生迁移意愿的企业来说，往此类协议迁移无疑将对之后的架构升级有更多的帮助。
 
 下图演示了在 Dubbo 体系内，从 Dubbo 协议向 gRPC 协议迁移的一个中间状态。
 
-![9](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906767440-5d19b688-325f-4ec2-985d-b51a6bec6426.png) 
+![9](../../img/docs/migrate.png) 
 
 * 最左边的代表尚未迁移的老应用，这类应用在迁移过程中仍然要消费和提供 Dubbo 协议的服务。
 * 中间的代表处于迁移中的应用，他们中间可能有些是服务提供者，既要为左边的老系统提供提供 Dubbo 协议服务；又要为右边的新系统提供 gRPC 服务；因此他们都是双协议暴露服务。
@@ -259,7 +257,7 @@ https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
 
 如前文所述，由于 SpringCloud 和 Dubbo 间服务发现模型的问题，要两个体系间的地址互通需要 Dubbo 侧作相应的适配，关于这部分内容将在接下来的 2.7.5 版本《服务自省》部分发布，在此我们暂且认为已经打通。
 
-![10](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/54037/1575906780841-4bcbd7de-d348-4c5e-a40a-24764dfdb906.png) 
+![10](../../img/docs/migrate-final.png) 
 
 Dubbo 体系内的部分应用作为透明的联通两个体系的关键节点，部分服务提供者应用要双协议发布、部分消费者应用要做到选定协议消费。由于老的 Spring Cloud 体系不允许做任何改动，因此联通两套体系的关键是 REST 协议，对 Dubbo 侧的应用来说：
 
