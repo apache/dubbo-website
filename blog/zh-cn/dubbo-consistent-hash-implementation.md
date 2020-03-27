@@ -102,7 +102,7 @@ Dubbo实现的是客户端负载均衡。关于服务接口代理类的实现，
 
 > 服务引入：http://dubbo.apache.org/zh-cn/docs/source_code_guide/refer-service.html。  
 
-在接口代理类生成、并且装配好后，服务的调用基本是这样一个流程：proxy -> MockClusterInvoker -> 集群策略（如：FailoverClusterInvoker） -> 根据选定的负载均衡策略确定选定的远程调用对象Invoker。  
+在接口代理类生成、并且装配好后，服务的调用基本是这样一个流程：proxy -> MockClusterInvoker -> 集群策略（如：FailoverClusterInvoker） -> 初始化负载均衡策略 -> 根据选定的负载均衡策略确定Invoker。    
 
 **负载均衡策略的初始化**是在AbstractClusterInvoker中的initLoadBalance方法中初始化的：
 
@@ -126,3 +126,159 @@ protected LoadBalance initLoadBalance(List<Invoker<T>> invokers, Invocation invo
 
 
 所有的负载均衡策略都会继承LoadBalance接口。在各种集群策略中，最终都会调用AbstractClusterInvoker的select方法，而AbstractClusterInvoker会在doSelect中，**调用LoadBalance的select方法，这里即开始了负载均衡策略的执行。**
+
+
+
+### 三、Dubbo一致性Hash负载均衡的实现
+
+需要说明的一点是，我所说的**负载均衡策略的执行**，即是在所有的Provider中选出一个，作为当前Consumer的远程调用对象。在代码中，Provider被封装成了Invoker实体，所以直接说来，负载均衡策略的执行就是在Invoker列表中选出一个Invoker。  
+
+所以，对比普通一致性Hash的实现，Dubbo的一致性Hash算法也可以分为两步：  
+
+**1、映射Provider至Hash值区间中（实际中映射的是Invoker）；**  
+
+**2、映射请求，然后找到大于请求Hash值的第一个Invoker。**  
+
+
+
+#### **a、映射Invoker**
+
+Dubbo中所有的负载均衡实现类都继承了AbstractLoadBalance，调用LoadBalance的select方法时，实际上调用的是AbstractLoadBalance的实现：
+
+```java
+@Override
+public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+    if (CollectionUtils.isEmpty(invokers)) {
+        return null;
+    }
+    if (invokers.size() == 1) {
+        return invokers.get(0);
+    }
+    // doSelect这里进入具体负载均衡算法的执行逻辑
+    return doSelect(invokers, url, invocation);
+}
+```
+
+可以看到这里调用了doSelect，Dubbo一致性Hash的具体实现类名字是**ConsistentHashLoadBalance**，让我们来看看它的doSelect方法干了啥：
+
+```java
+@Override
+protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+    String methodName = RpcUtils.getMethodName(invocation);
+    // key格式：接口名.方法名
+    String key = invokers.get(0).getUrl().getServiceKey() + "." + methodName;
+    // identityHashCode 用来识别invokers是否发生过变更
+    int identityHashCode = System.identityHashCode(invokers);
+    ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(key);
+    if (selector == null || selector.identityHashCode != identityHashCode) {
+        // 若不存在"接口.方法名"对应的选择器，或是Invoker列表已经发生了变更，则初始化一个选择器
+        selectors.put(key, new ConsistentHashSelector<T>(invokers, methodName, identityHashCode));
+        selector = (ConsistentHashSelector<T>) selectors.get(key);
+    }
+    return selector.select(invocation);
+}
+```
+
+这里有个很重要的概念：**选择器——selector**。这是Dubbo一致性Hash实现中，承载着整个映射关系的数据结构。它里面主要有这么几个参数：
+
+```java
+/**
+ * 存储Hash值与节点映射关系的TreeMap
+ */
+private final TreeMap<Long, Invoker<T>> virtualInvokers;
+
+/**
+ * 节点数目
+ */
+private final int replicaNumber;
+
+/**
+ * 用来识别Invoker列表是否发生变更的Hash码
+ */
+private final int identityHashCode;
+
+/**
+ * 请求中用来作Hash映射的参数的索引
+ */
+private final int[] argumentIndex;
+```
+
+在新建ConsistentHashSelector对象的时候，就会遍历所有Invoker对象，然后计算出其地址（ip+port）对应的md5码，并按照配置的节点数目replicaNumber的值来初始化服务节点和所有虚拟节点：
+
+```java
+ConsistentHashSelector(List<Invoker<T>> invokers, String methodName, int identityHashCode) {
+    this.virtualInvokers = new TreeMap<Long, Invoker<T>>();
+    this.identityHashCode = identityHashCode;
+    URL url = invokers.get(0).getUrl();
+    // 获取配置的节点数目
+    this.replicaNumber = url.getMethodParameter(methodName, HASH_NODES, 160);
+    // 获取配置的用作Hash映射的参数的索引
+    String[] index = COMMA_SPLIT_PATTERN.split(url.getMethodParameter(methodName, HASH_ARGUMENTS, "0"));
+    argumentIndex = new int[index.length];
+    for (int i = 0; i < index.length; i++) {
+        argumentIndex[i] = Integer.parseInt(index[i]);
+    }
+    // 遍历所有Invoker对象
+    for (Invoker<T> invoker : invokers) {
+        // 获取Provider的ip+port
+        String address = invoker.getUrl().getAddress();
+        for (int i = 0; i < replicaNumber / 4; i++) {
+            byte[] digest = md5(address + i);
+            for (int h = 0; h < 4; h++) {
+                long m = hash(digest, h);
+                virtualInvokers.put(m, invoker);
+            }
+        }
+    }
+}
+```
+
+这里值得注意的是：以replicaNumber取默认值160为例，假设当前遍历到的Invoker地址为127.0.0.1:20880，它会依次获得“127.0.0.1:208800”、“127.0.0.1:208801”、......、“127.0.0.1:2088040”的md5摘要，在每次获得摘要之后，还会对该摘要进行四次数位级别的散列。大致可以猜到其目的应该是为了加强散列效果。（希望有人能告诉我相关的理论依据。）  
+
+代码中**virtualInvokers.put(m, invoker)**即是存储当前计算出的Hash值与Invoker的映射关系。  
+
+这段代码简单说来，就是为每个Invoker都创建replicaNumber个节点，Hash值与Invoker的映射关系即象征着一个节点，这个关系存储在TreeMap中。  
+
+
+
+#### **b、映射请求**
+
+让我们重新回到ConsistentHashLoadBalance的**doSelect**方法，若没有找到selector则会新建selector，找到selector后便会调用selector的select方法：
+
+```java
+public Invoker<T> select(Invocation invocation) {
+    // 根据invocation的【参数值】来确定key，默认使用第一个参数来做hash计算
+    String key = toKey(invocation.getArguments());
+    //  获取【参数值】的md5编码
+    byte[] digest = md5(key);
+    return selectForKey(hash(digest, 0));
+}
+
+// 根据参数索引获取参数，并将所有参数拼接成字符串
+private String toKey(Object[] args) {
+    StringBuilder buf = new StringBuilder();
+    for (int i : argumentIndex) {
+        if (i >= 0 && i < args.length) {
+            buf.append(args[i]);
+        }
+    }
+    return buf.toString();
+}
+
+// 根据参数字符串的md5编码找出Invoker
+private Invoker<T> selectForKey(long hash) {
+    Map.Entry<Long, Invoker<T>> entry = virtualInvokers.ceilingEntry(hash);
+    if (entry == null) {
+        entry = virtualInvokers.firstEntry();
+    }
+    return entry.getValue();
+}
+```
+
+argumentIndex是在初始化Selector的时候一起赋值的，代表着需要用哪几个请求参数作Hash映射获取Invoker。比如：有方法methodA(Integer a, Integer b, Integer c)，如果argumentIndex的值为{0,2}，那么即用a和c拼接的字符串来计算Hash值。  
+
+我们已经知道virtualInvokers是一个TreeMap，TreeMap的底层实现是红黑树。对于TreeMap的方法ceilingEntry(hash)，它的作用是用来**获取比传入值大的第一个元素**。可以看到，这一点与一般的一致性Hash算法的处理逻辑完全是相同的。  
+
+但这里的回环逻辑有点不同。对于取模运算来讲，大于最大值后，会自动回环从0开始，而这里的逻辑是：当没有比传入ceilingEntry()方法中的值大的元素的时候，virtualInvokers.ceilingEntry(hash)必然会得到null，于是，就用virtualInvokers.firstEntry()来获取整个TreeMap的第一个元素。  
+
+从selectForKey中获取到Invoker后，负载均衡策略也就算是执行完毕了。后续获取远程调用客户端等调用流程不再赘述。
