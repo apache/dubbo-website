@@ -110,7 +110,7 @@ public class DemoClientAction {
     }
  
     public void start() {
-        String hello = demoService.sayHello("world" + i);
+        String hello = demoService.sayHello("world");
     }
 }
 ```

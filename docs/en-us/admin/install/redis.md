@@ -4,7 +4,7 @@
 
 Redis [^1] introductions, please refer to: [Redis application center manual](http://dubbo.apache.org/books/dubbo-user-book-en/references/registry/redis.html)。
 
-you need an origin Redis server only, and change the value from `dubbo.registry.addrss` to `redis://127.0.0.1:6379` in `conf/dubbo.properties` of [quick start](http://dubbo.apache.org/books/dubbo-user-book-en/quick-start.html)
+you need an origin Redis server only, and change the value from `dubbo.registry.address` to `redis://127.0.0.1:6379` in `conf/dubbo.properties` of [quick start](http://dubbo.apache.org/books/dubbo-user-book-en/quick-start.html)
 
 Redis configuration center cluster [^2] write multiple server in client side and read from a single server.
 

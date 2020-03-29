@@ -4,7 +4,7 @@
 
 Redis [^1] 使用方式参见: [Redis 注册中心参考手册](http://dubbo.apache.org/books/dubbo-user-book/references/registry/redis.html)。
 
-只需搭一个原生的 Redis 服务器，并将[快速启动](http://dubbo.apache.org/books/dubbo-user-book/quick-start.html)中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.addrss` 的值改为 `redis://127.0.0.1:6379` 即可使用。
+只需搭一个原生的 Redis 服务器，并将[快速启动](http://dubbo.apache.org/books/dubbo-user-book/quick-start.html)中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `redis://127.0.0.1:6379` 即可使用。
 
 Redis 注册中心集群 [^2] 采用在客户端同时写入多个服务器，读取单个服务器的策略实现。
 
