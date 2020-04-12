@@ -64,6 +64,10 @@ The built-in telnet commands are listed below. Furthermore, it is possible to ex
 0. `invoke com.xxx.XxxService.XxxService.xxxMethod(1234, "abcd", {"prop" : "value"})`: invoke particular method for the given service
 0. `invoke xxxMethod(1234, "abcd", {"prop" : "value"})`: invoke particular method for the default service
 
+0. `invoke xxxMethod({"name":"zhangsan","age":12,"class":"org.apache.dubbo.qos.legacy.service.Person"})` :When there is parameter overload, or the type conversion fails, you can specify the class to be converted by adding the class attribute
+0. When the parameter is Map<Integer, T> and the key type is Integer, it is recommended to specify the type. E.g:`invoke com.xxx.xxxApiService({"3":0.123, "class":"java.util.HashMap"})`
+
+
 ### `select` [^2]
 
 0. `select 1`: used when the invoke command matches multiple methods, select the method to be called according to the prompt list
