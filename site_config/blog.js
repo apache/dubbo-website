@@ -231,7 +231,7 @@ export default {
                 author: '@Chickenlj',
                 dateStr: 'March 27, 2020',
                 desc: 'Dubbo 在跨语言和协议穿透性方向上的探索：支持 HTTP/2 gRPC 和 Protobuf。',
-                link: '/zh-cn/blog/grpc-http2-protobuf.html',
+                link: '/zh-cn/blog/Dubbo-supporting-gRPC-HTTP2-and-protobuf.html',
             },
             {
                 title: '使用 Dubbo 连接异构微服务体系',
