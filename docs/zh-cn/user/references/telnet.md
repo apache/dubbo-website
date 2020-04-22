@@ -65,6 +65,8 @@ status命令所检查的资源也可以扩展，参见：[扩展参考手册](..
 0. `invoke XxxService.xxxMethod(1234, "abcd", {"prop" : "value"})`: 调用服务的方法
 0. `invoke com.xxx.XxxService.XxxService.xxxMethod(1234, "abcd", {"prop" : "value"})`: 调用全路径服务的方法
 0. `invoke xxxMethod(1234, "abcd", {"prop" : "value"})`: 调用服务的方法(自动查找包含此方法的服务)
+0. `invoke xxxMethod({"name":"zhangsan","age":12,"class":"org.apache.dubbo.qos.legacy.service.Person"})` :当有参数重载，或者类型转换失败的时候，可以通过增加class属性指定需要转换类
+0. 当参数为Map<Integer,T>，key的类型为Integer时，建议指定类型。例如`invoke com.xxx.xxxApiService({"3":0.123, "class":"java.util.HashMap"})`
 
 ### `select` [^2]
 
