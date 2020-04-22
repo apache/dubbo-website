@@ -11,12 +11,13 @@ Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
 
 |      | 版本    | 重要功能                                                     | 升级建议                      |
 | ---- | ------- | ------------------------------------------------------------ | ------------------------------- |
-| 1    | 2.7.5   | 服务自省<br />HTTP/2（gRPC） <br />Protobuf <br />TLS<br />性能优化<br /><br />https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5 | 不建议大规模生产使用            |
-| 2    | 2.7.4.1 | [bugfixes and enhancements of 2.7.3](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.4.1) | **推荐生产使用**                |
-| 3    | 2.7.3   | [bigfixes of and enhancements of 2.7.2](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.3) | **推荐生产使用**                |
-| 4    | 2.7.2   | [bigfixes of and enhancements of 2.7.1](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.2)      | 不建议大规模生产使用            |
-| 5    | 2.7.1   | [bigfixes of and enhancements of 2.7.0](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.1)      | 不建议大规模生产使用            |
-| 6    | 2.7.0   | 异步编程模型 - 消费端/提供端异步<br />服务治理规则增强<br />简化的注册模型<br />配置中心、元数据中心<br />package 重构<br /><br />https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0 | beta 版本，2.6.x 重构后首个版本 |
+| 1    | 2.7.6   | bugfix of 2.7.5<br /> 服务鉴权 | **推荐生产使用**            |
+| 2    | 2.7.5   | 服务自省<br />HTTP/2（gRPC） <br />Protobuf <br />TLS<br />性能优化<br /><br />https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5 | 不建议大规模生产使用            |
+| 3    | 2.7.4.1 | [bugfixes and enhancements of 2.7.3](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.4.1) | **推荐生产使用**                |
+| 4    | 2.7.3   | [bigfixes of and enhancements of 2.7.2](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.3) | **推荐生产使用**                |
+| 5    | 2.7.2   | [bigfixes of and enhancements of 2.7.1](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.2)      | 不建议大规模生产使用            |
+| 6    | 2.7.1   | [bigfixes of and enhancements of 2.7.0](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.1)      | 不建议大规模生产使用            |
+| 7    | 2.7.0   | 异步编程模型 - 消费端/提供端异步<br />服务治理规则增强<br />简化的注册模型<br />配置中心、元数据中心<br />package 重构<br /><br />https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0 | beta 版本，2.6.x 重构后首个版本 |
 
 
 ### 2.6.x 及之前版本
@@ -42,6 +43,6 @@ Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
     * [地址推送链路]()
     
 ## 热门文章列表
-[从 2019 到 2020，Apache Dubbo 年度总结](../../../zh-cn/blog/apche-dubbo-2019-2020.md)  
-[Dubbo 2.7.5 里程碑版本发布](../../../zh-cn/blog/2.7.5-release.md)  
-[Dubbo 在协议与多语言方向的探索：支持 gRPC、Protobuf](../../../zh-cn/blog/Dubbo-supporting-gRPC-HTTP2-and-protobuf.md)
+[从 2019 到 2020，Apache Dubbo 年度总结](../../../blog/zh-cn/apche-dubbo-2019-2020.md)  
+[Dubbo 2.7.5 里程碑版本发布](../../../blog/zh-cn/2.7.5-release.md)  
+[Dubbo 在协议与多语言方向的探索：支持 gRPC、Protobuf](../../../blog/zh-cn/Dubbo-supporting-gRPC-HTTP2-and-protobuf.md)
