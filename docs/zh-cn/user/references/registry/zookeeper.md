@@ -1,6 +1,6 @@
 # zookeeper 注册中心
 
-[Zookeeper](http://zookeeper.apache.org) 是 Apacahe Hadoop 的子项目，是一个树型的目录服务，支持变更推送，适合作为 Dubbo 服务的注册中心，工业强度较高，可用于生产环境，并推荐使用 [^1]。
+[Zookeeper](http://zookeeper.apache.org) 是 Apache Hadoop 的子项目，是一个树型的目录服务，支持变更推送，适合作为 Dubbo 服务的注册中心，工业强度较高，可用于生产环境，并推荐使用 [^1]。
 
 ![/user-guide/images/zookeeper.jpg](../../sources/images/zookeeper.jpg)
 
