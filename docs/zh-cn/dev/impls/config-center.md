@@ -21,10 +21,11 @@
 ## 已知扩展
 
 * `org.apache.dubbo.configcenter.support.zookeeper.ZookeeperDynamicConfigurationFactory`
-* `org.apache.dubbo.configcenter.support.zookeeper.NacosDynamicConfigurationFactory`
-* `org.apache.dubbo.configcenter.support.zookeeper.EtcdDynamicConfigurationFactory`
-* `org.apache.dubbo.configcenter.support.zookeeper.ConsulDynamicConfigurationFactory`
-* `org.apache.dubbo.configcenter.support.zookeeper.ApolloDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.support.nacos.NacosDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.support.etcd.EtcdDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.consul.ConsulDynamicConfigurationFactory`
+* `org.apache.dubbo.configcenter.support.apollo.ApolloDynamicConfigurationFactory`
+* `org.apache.dubbo.common.config.configcenter.file.FileSystemDynamicConfigurationFactory`
 
 ## 实现原理
 
