@@ -12,7 +12,7 @@ https://github.com/apache/dubbo/issues/2013
 
 **老的线程池模型**
 
-![消费端线程池.png](./img/docs/consumer-threadpool0.png)
+![消费端线程池.png](/img/docs/consumer-threadpool0.png)
 
 我们重点关注 Consumer 部分：
 
@@ -25,7 +25,7 @@ https://github.com/apache/dubbo/issues/2013
 
 **2.7.5 版本引入的线程池模型**
 
-![消费端线程池新.png](./img/consumer-threadpool1.png)
+![消费端线程池新.png](/img/consumer-threadpool1.png)
 
 1. 业务线程发出请求，拿到一个 Future 实例。
 2. 在调用 future.get() 之前，先调用 ThreadlessExecutor.wait()，wait 会使业务线程在一个阻塞队列上等待，直到队列中被加入元素。
