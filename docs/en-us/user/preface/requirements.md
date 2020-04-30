@@ -2,7 +2,7 @@
 
 ![image](../sources/images/dubbo-service-governance.jpg)
 
-Before the advent of large-scare services, an application might just exposes or references remote service by using RMI or Hessian, the call is done by configuring service URL, and load balance is done through hardwares, like F5.
+Before the advent of large-scale services, an application might just exposes or references remote service by using RMI or Hessian, the call is done by configuring service URL, and load balance is done through hardwares, like F5.
 
 **When there are more and more services, it becomes very difficult to configure the service URL, the single point pressure of F5 hardware load balancer is also increasing.** At this point, a service registry is needed to dynamically register and discover services to make the service's location transparent. By obtaining the list of service provider addresses in the consumer side, the soft load balancing and Failover can be realized, this reduces the dependence on the F5 hardware load balacer and some of the costs.
 
