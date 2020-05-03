@@ -1,6 +1,6 @@
 # redis://
 
-RPC protocol based on memcached implementation.
+RPC protocol based on redis implementation.
 
 ## Register redis service address
 
