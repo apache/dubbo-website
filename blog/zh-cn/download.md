@@ -17,6 +17,12 @@ description: 本文将向你介绍如何点击了解各版本详情和升级注�
 > GitHub: https://github.com/apache/incubator-dubbo \
 > 发布说明：https://github.com/apache/incubator-dubbo/releases
 
+### 2.7.7 (2020-05-18)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.7/apache-dubbo-2.7.7-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.7/apache-dubbo-2.7.7-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.7/apache-dubbo-2.7.7-src.zip.sha512)
+
 ### 2.7.5 (2019-12-29)
 
 * [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.5/apache-dubbo-2.7.5-src.zip) |
