@@ -89,7 +89,7 @@ provider.xml：
 ```
 
 The demo uses multicast as the registry since it is simple and does not require to extra installation.
-If you prefer a registiry like zookeeper, please check out examples [here](https://github.com/dubbo/dubbo-samples).
+If you prefer a registry like zookeeper, please check out examples [here](https://github.com/dubbo/dubbo-samples).
 
 ### Configure the logging system
 
