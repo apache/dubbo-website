@@ -152,7 +152,7 @@ The Dubbo framework defines a proprietary RPC protocol in which the specific con
       - Exception: RESPONSE_WITH_EXCEPTION  0
     - Return value: response bytes returned from the server
 
-**Note: ** For the variable part, when uses json serialization in current version of Dubbo framework, an additional line break is added as a separator between each part of the content. Please add a new line break after each part of the variable part, such as:
+**Note:** For the variable part, when uses json serialization in current version of Dubbo framework, an additional line break is added as a separator between each part of the content. Please add a new line break after each part of the variable part, such as:
 
 ```
 Dubbo version bytes (line break)

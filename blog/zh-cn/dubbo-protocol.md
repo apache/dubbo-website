@@ -162,7 +162,7 @@ Dubbo 框架定义了私有的RPC协议，其中请求和响应协议的具体�
       - 异常：RESPONSE_WITH_EXCEPTION  0
     - 返回值：从服务端返回的响应bytes
 
-**注意：**对于(Variable Part)变长部分，当前版本的Dubbo 框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请在Variable Part的每个part后额外增加换行符， 如：
+**注意：** 对于(Variable Part)变长部分，当前版本的Dubbo 框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请在Variable Part的每个part后额外增加换行符， 如：
 
 ```
 Dubbo version bytes (换行符)
