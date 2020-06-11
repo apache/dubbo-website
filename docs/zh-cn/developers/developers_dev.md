@@ -45,6 +45,7 @@
 | xxz             | Xiaoxiang Zhai      | Souche           | Committer | +8       |
 | codingsinger    | Zechao Zheng        | iQIYI            | Committer | +8       |
 | zouyx           | Yixian Zou          | Shein            | Committer | +8       |
+| baze            | Chao Jiang          | Biosan           | Committer | +8       |
 
 ### 贡献者
 

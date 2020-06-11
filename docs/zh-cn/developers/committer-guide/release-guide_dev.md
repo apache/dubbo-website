@@ -443,7 +443,7 @@ interface based remote call, fault tolerance & load balancing, and
 automatic service registration & discovery.
 
 Both the source release[1] and the maven binary release[2] are available
-now, you can also find the detailed release notes in here[3].
+now, you can also find the detailed release notes here[3].
 
 
 If you have any usage questions, or have problems when upgrading or find
@@ -453,7 +453,7 @@ an issue on GitHub[4].
 
 
 [1] http://dubbo.apache.org/en-us/blog/download.html
-[2] http://central.maven.org/maven2/com/alibaba/dubbo
+[2] https://repo1.maven.org/maven2/org/apache/dubbo/dubbo
 [3] https://github.com/apache/dubbo/releases
 [4] https://github.com/apache/dubbo/issues
 

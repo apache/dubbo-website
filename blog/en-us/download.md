@@ -16,6 +16,12 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 > GitHub: https://github.com/apache/dubbo \
 > Release Notes: https://github.com/apache/dubbo/releases
 
+### 2.7.7 (2020-05-18)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.7/apache-dubbo-2.7.7-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.7/apache-dubbo-2.7.7-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.7/apache-dubbo-2.7.7-src.zip.sha512)
+
 ### 2.7.5 (2019-12-29)
 
 * [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.5/apache-dubbo-2.7.5-src.zip) |
