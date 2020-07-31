@@ -19,7 +19,7 @@ All dependencies here are selected for the default configuration of the Dubbo, w
 * spring-context.jar [^4]: If you are using `ServiceConfig` and `ReferenceConfig` API calls, is not required.
 * netty.jar [^5]: if `<dubbo:protocol server="mina"/>` or `<dubbo:protocol server="grizzly"/>`，Then change to mina.jar or grizzly.jar. If `<protocol name="rmi"/>`， is not required.    
 
-## Optinal dependencies
+## Optional dependencies
 These dependencies  needs to be added to project manually，when you need them.
 
 * netty-all 4.0.35.Final 
