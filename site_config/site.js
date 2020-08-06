@@ -126,6 +126,7 @@ export default {
       {
         key: 'docs',
         text: '文档',
+        target: '_blank',
         link: '/documentations/2.7/zh-cn/site/user/quick-start/',
       },
       {
