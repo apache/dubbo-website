@@ -52,7 +52,7 @@
 
 
 
-在 Dubbo 官方用户手册的[“属性配置”](/docs/zh-cn/user/configuration/configuration-load-process.md)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
+在 Dubbo 官方用户手册的[“属性配置”](/docs/3.0/zh-cn/docs/user/configuration/configuration-load-process.md)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
 
 
 

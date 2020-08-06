@@ -189,7 +189,7 @@ class Header extends React.Component {
                   })}
                   key={item.key}
                 >
-                  <a href={`${window.rootPath}${item.link}`}>{item.text}</a>
+                  <a target={item.target || '_self'} href={`${window.rootPath}${item.link}`}>{item.text}</a>
                 </li>))}
             </ul>
           </div>

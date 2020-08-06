@@ -96,7 +96,7 @@ Dubbo 协议实际上就是一种变长协议，后面的章节会详细介绍�
 
 Dubbo 框架定义了私有的RPC协议，其中请求和响应协议的具体内容我们使用表格来展示。
 
-![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo_protocol_header.png)
+![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/3.0/zh-cn/docs/dev/sources/images/dubbo_protocol_header.png)
 
 ### 协议详情
 

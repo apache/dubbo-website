@@ -14,7 +14,8 @@ export default {
       {
         key: 'docs',
         text: 'DOCS',
-        link: '/en-us/docs/user/quick-start.html',
+        target: '_blank',
+        link: '/documentations/2.7/en-us/site/',
       },
       {
         key: 'developers',
@@ -76,7 +77,7 @@ export default {
       list: [
         {
           text: 'Quick start',
-          link: '/en-us/docs/user/quick-start.html',
+          link: '/documentations/2.7/en-us/site/',
         },
         {
           text: 'Developer guide',
@@ -125,7 +126,7 @@ export default {
       {
         key: 'docs',
         text: '文档',
-        link: '/zh-cn/docs/user/quick-start.html',
+        link: '/documentations/2.7/zh-cn/site/user/quick-start/',
       },
       {
         key: 'developers',
@@ -187,7 +188,7 @@ export default {
       list: [
         {
           text: '快速开始',
-          link: '/zh-cn/docs/user/quick-start.html',
+          link: '/documentations/2.7/zh-cn/site/user/quick-start/',
         },
         {
           text: '开发者指南',

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../../../img/favicon.ico">
+  <title>在Dubbo中使用高效的Java序列化（Kryo和FST） - Dubbo</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "\u5728Dubbo\u4e2d\u4f7f\u7528\u9ad8\u6548\u7684Java\u5e8f\u5217\u5316\uff08Kryo\u548cFST\uff09";
+    var mkdocs_page_input_path = "user/demos/serialization.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../../.." class="icon icon-home"> Dubbo</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">用户手册</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <span class="caption-text">入门</span>
+    <ul class="subnav">
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/preface/background.md">背景</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/preface/background.md">需求</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/preface/architecture.md">架构</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/preface/usage.md">用法</a>
+                </li>
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../../zh-cn/user/quick-start.md">快速启动</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../../zh-cn/user/dependencies.md">依赖</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../../zh-cn/user/maturity.md">成熟度</a>
+                </li>
+                <li class="">
+                    
+    <span class="caption-text">配置</span>
+    <ul class="subnav">
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/configuration/xml.md">XML 配置</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/configuration/api.md">API 配置</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/configuration/annotation.md">Annotation 配置</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/configuration/annotation.md">动态配置中心</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/configuration/configuration-load-process.md">配置加载流程</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/configuration/environment-variables.md">自动加载环境变量</a>
+                </li>
+    </ul>
+                </li>
+                <li class="">
+                    
+    <span class="caption-text">示例</span>
+    <ul class="subnav">
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/preflight-check.md">启动时检查</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/fault-tolerent-strategy.md">集群容错</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/loadbalance.md">负载均衡</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/thread-model.md">线程模型</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/explicit-target.md">直连提供者</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/subscribe-only.md">只订阅</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/registry-only.md">只注册</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/static-service.md">静态服务</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/multi-protocols.md">多协议</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/multi-registry.md">多注册中心</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/service-group.md">服务分组</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/multi-versions.md">多版本</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/group-merger.md">分组聚合</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/parameter-validation.md">参数验证</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/result-cache.md">结果缓存</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/generic-reference.md">泛化引用</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/generic-service.md">泛化实现</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/echo-service.md">回声测试</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/context.md">上下文信息</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/attachment.md">隐式参数</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/async-call.md">异步调用</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/async-execute-on-provider.md">服务端异步</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/local-call.md">本地调用</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/callback-parameter.md">参数回调</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/events-notify.md">事件通知</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/local-stub.md">本地存根</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/local-mock.md">本地伪装</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/delay-publish.md">延迟暴露</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/concurrency-control.md">并发控制</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/config-connection.md">连接控制</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/lazy-connect.md">延迟连接</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/stickiness.md">粘滞连接</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/token-authorization.md">令牌验证</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/routing-rule.md">路由规则</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/config-rule.md">配置规则</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/service-downgrade.md">服务降级</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/graceful-shutdown.md">优雅停机</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/hostname-binding.md">主机绑定</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/logger-strategy.md">日志适配</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/accesslog.md">访问日志</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/service-container.md">服务容器</a>
+                </li>
+                <li class="toctree-l3">
+                    
+    <a class="" href="../../../zh-cn/user/demos/reference-config-cache.md">Reference Config 缓存</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../..">Dubbo</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>在Dubbo中使用高效的Java序列化（Kryo和FST）</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="dubbojavakryofst">在Dubbo中使用高效的Java序列化（Kryo和FST）</h1>
+<h2 id="kryofst">启用Kryo和FST</h2>
+<p>使用Kryo和FST非常简单，只需要在dubbo RPC的XML配置中添加一个属性即可：</p>
+<pre><code class="xml">&lt;dubbo:protocol name=&quot;dubbo&quot; serialization=&quot;kryo&quot;/&gt;
+</code></pre>
+
+<pre><code class="xml">&lt;dubbo:protocol name=&quot;dubbo&quot; serialization=&quot;fst&quot;/&gt;
+</code></pre>
+
+<h2 id="_1">注册被序列化类</h2>
+<p>要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，例如，我们可以实现如下回调接口：</p>
+<pre><code class="java">public class SerializationOptimizerImpl implements SerializationOptimizer {
+
+    public Collection&lt;Class&gt; getSerializableClasses() {
+        List&lt;Class&gt; classes = new LinkedList&lt;Class&gt;();
+        classes.add(BidRequest.class);
+        classes.add(BidResponse.class);
+        classes.add(Device.class);
+        classes.add(Geo.class);
+        classes.add(Impression.class);
+        classes.add(SeatBid.class);
+        return classes;
+    }
+}
+</code></pre>
+
+<p>然后在XML配置中添加：</p>
+<pre><code class="xml">&lt;dubbo:protocol name=&quot;dubbo&quot; serialization=&quot;kryo&quot; optimizer=&quot;org.apache.dubbo.demo.SerializationOptimizerImpl&quot;/&gt;
+</code></pre>
+
+<p>在注册这些类后，序列化的性能可能被大大提升，特别针对小数量的嵌套对象的时候。</p>
+<p>当然，在对一个类做序列化的时候，可能还级联引用到很多类，比如Java集合类。针对这种情况，我们已经自动将JDK中的常用类进行了注册，所以你不需要重复注册它们（当然你重复注册了也没有任何影响），包括：</p>
+<pre><code>GregorianCalendar
+InvocationHandler
+BigDecimal
+BigInteger
+Pattern
+BitSet
+URI
+UUID
+HashMap
+ArrayList
+LinkedList
+HashSet
+TreeSet
+Hashtable
+Date
+Calendar
+ConcurrentHashMap
+SimpleDateFormat
+Vector
+BitSet
+StringBuffer
+StringBuilder
+Object
+Object[]
+String[]
+byte[]
+char[]
+int[]
+float[]
+double[]
+</code></pre>
+
+<p>由于注册被序列化的类仅仅是出于性能优化的目的，所以即使你忘记注册某些类也没有关系。事实上，即使不注册任何类，Kryo和FST的性能依然普遍优于hessian和dubbo序列化。</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../search/main.js" defer></script>
+
+</body>
+</html>

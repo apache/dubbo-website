@@ -86,7 +86,7 @@ The Dubbo protocol is actually a variable length protocol, which is covered in m
 ### Overview to the Dubbo protocol
 The Dubbo framework defines a proprietary RPC protocol in which the specific content of the request and response protocols is presented using a table.
 
-![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo_protocol_header.png)
+![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/3.0/en-us/docs/dev/sources/images/dubbo_protocol_header.png)
 
 ### Dubbo protocol details
 
