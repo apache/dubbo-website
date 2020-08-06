@@ -6,21 +6,20 @@
 
 回顾 Dubbo 社区过去一年的发展，其中一个重要的节点就是 2019 年 5 月从 Apache 孵化毕业。成为第二个由 Alibaba 捐献后从 Apache 毕业的项目，我有幸参与到了从重启开源、进入 Apache 孵化到毕业的整个过程，社区在此过程中做了大量的工作，包括邮件列表建设、代码规范检查、文档和代码国际化、issue/pr 处理等，这些一方面是 Apache 社区要求的工作，同时也为推动 Dubbo 的发展起到了正面的作用。
 
-在从 Apache 毕业之后，Dubbo 相关的项目也进行了迁移，都迁移到了 github.com/apache 组织之下：
-https://github.com/apache?utf8=✓&q=dubbo&type=&language=
+在从 Apache 毕业之后，Dubbo 相关的项目也进行了迁移，都迁移到了 [Apache](https://github.com/apache?utf8=✓&q=dubbo&type=&language=) 组织之下：
 
 Dubbo 社区的项目总共有 24 个之多，维护如此多的项目，并不是单纯靠几个活跃的开发者就能做到的，而是靠整个社区努力的结果。我总结了过去一年提名的所有 Committer/PMC，总过有 27 人获得提名（23 名 committer、4 名 PMC），通过下方的饼状图可以看出，只有不到 20% 的贡献者是来自于 Alibaba，而 80% 以上是来自各个不同组织的开发者或爱好者。这样的 Committer 分布，是加入 Apache 带给 Dubbo 社区的一个最重要的变化之一：Dubbo 项目是属于整个社区的，反映的是不同组织不同开发者的共同诉求，它的发展不是由一个公司控制或决定的，而是由社区共同讨论后决定的。如果你对参与到 Dubbo 社区感兴趣，都可以参与到 Dubbo 发展的讨论、决策和 coding 中来，也非常期待各位能成为下一个 Committer。
 
-![undefined](../../img/docs/community-distribution.png) 
+![community distribution](../../img/docs/community-distribution.png) 
 
 
-过去一年 Dubbo 社区组织了超过 10 场的线下 meetup 活动，覆盖了国内基本所有的开发者聚集的城市，与广大 Dubbo 开发者和使用者保持了密切交流。通过这些线下或线上的直播活动，分享了超过 100 个 topic 的演讲，深度讲解了 Dubbo 社区最新动态、功能模块开发和近期规划等。并且在所有的这些主题演讲中，绝大多数都是通过社区采集的方式，最终由 Dubbo 的深度企业分享的实践主题，其中典型的嗲表包括携程、工商银行、考拉、信用算力等。
+过去一年 Dubbo 社区组织了超过 10 场的线下 meetup 活动，覆盖了国内基本所有的开发者聚集的城市，与广大 Dubbo 开发者和使用者保持了密切交流。通过这些线下或线上的直播活动，分享了超过 100 个 topic 的演讲，深度讲解了 Dubbo 社区最新动态、功能模块开发和近期规划等。并且在所有的这些主题演讲中，绝大多数都是通过社区采集的方式，最终由 Dubbo 的深度企业分享的实践主题，其中典型的代表包括携程、工商银行、考拉、信用算力等。
 
-![undefined](../../img/docs/community-distribution.png) 
+![community meetup](../../img/docs/community-meetup.png) 
 
 从 Github 上来看，Dubbo 在过去一年也受到了非常高的关注度，一个重要的里程碑是 Star 数突破 3w，相比重启开源时增长了近 5 倍；贡献者由最初的几十个增长到现在的 282 个，而这其中有六七十个已经被提名为 committer，不论是贡献者数量还是 committer 比例都得到很大的提升；另一个数据是发布的版本，总共发布了 64 个版本，大家如果要了解每个版本的具体信息，也可以从这里点进去查看。
 
-![undefined](../../img/docs/community-github.png) 
+![community github](../../img/docs/community-github.png) 
 
 当前社区维护的大版本主要有 3 个，分别是 2.5.x 2.6.x 和 2.7.x。
 
@@ -32,11 +31,9 @@ Dubbo 社区的项目总共有 24 个之多，维护如此多的项目，并不�
 
 关于 2.6 和 2.7 版本的用户分布情况，目前并没有官方的统计数据，但是根据我们从 issue 分布及一些深度用户的跟踪情况来看，这两个版本的使用分布大概是 40% - 60% 的状态。同时我们还观察到一个趋势，即很大一部分 2.6 的用户都已经开始调研升级到 2.7 版本或在升级的过程中，毕竟一个框架是否能很好的满足业务开发诉求，一个重要的因素是其是否不断的有功能的加入，是否能跟进新的技术趋势，2.6 版本已很难满足这些诉求。
 
-对于很多开发者来说，要升级到 2.7 版本，当前最大的顾虑即是其稳定性。因为 2.7 每个版本都会增加很多新内容且迭代速度较快，要保证每个发布版本的稳定性对社区来说也是一个充满挑战的事情。为了方便用户更好的完成升级评估，我们近期在 github 上列出了单独列了一个 issue 来统计现在包括未来版本的稳定性：
+对于很多开发者来说，要升级到 2.7 版本，当前最大的顾虑即是其稳定性。因为 2.7 每个版本都会增加很多新内容且迭代速度较快，要保证每个发布版本的稳定性对社区来说也是一个充满挑战的事情。为了方便用户更好的完成升级评估，我们近期在 github 上列出了单独列了一个 issue 来统计现在包括未来版本的稳定性：[Dubbo 各版本总结与升级建议 #5669](https://github.com/apache/dubbo/issues/5669)
 
-https://github.com/apache/dubbo/issues/5669
-
-| **版本** | **重要功能** | **升级建议**                                                 |                                 |
+|          | **版本** | **重要功能** | **升级建议**                                                 |
 | -------- | ------------ | ------------------------------------------------------------ | ------------------------------- |
 | 1        | 2.7.5        | 服务自省 HTTP/2（gRPC） Protobuf TLS 性能优化   https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5 | 不建议大规模生产使用            |
 | 2        | 2.7.4.1      | [bugfixes and enhancements of 2.7.3](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.4.1) | **推荐生产使用**                |
@@ -94,17 +91,15 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 为此 2.7.5 版本引入了对 IDL + Protobuf 的支持，以解决跨语言的服务定义问题，具体可参见示例：
 
-https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-protobuf
+[dubbo-samples-protobuf](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-protobuf)
 
-![undefined](../../img/docs/service-idl.png) 
+![service idl](../../img/docs/service-idl.png) 
 
 对 Reactive-style API 的支持则和上面 CompletableFuture 有些类似，允许用户定义 RxJava、Reactor API 的服务接口
 
-![undefined](../../img/docs/idl-dubbo-compiler.png) 
+![idl dubbo compiler](../../img/docs/idl-dubbo-compiler.png) 
 
-但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”Dubbo 对 gRPC 的支持” 一节的讲解。
-
-https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-grpc/dubbo-samples-rxjava
+但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
 
 ### 性能优化
 
@@ -116,18 +111,18 @@ https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-grpc/dubb
 
    全异步化改造，很关键的一点是 Filter 链路的异步化，之前的 Filter 只有一个同步的 invoke 方法，现在为了支持异步回调，增加了 Listener 回调监听器，从而可以实现对异步调用结果的监听与拦截。
 
-![undefined](../../img/docs/filter.png) 
+![filter](../../img/docs/filter.png) 
    
-   关于消费端线程模型的优化，对于网关类应用，需要消费大量服务的应用，都会在系统稳定性和性能表现上有很大提升，其优化后的总体工作原理图所下所示，具体解析可以参见之前发布的文章：
+   关于消费端线程模型的优化，对于网关类应用，需要消费大量服务的应用，都会在系统稳定性和性能表现上有很大提升，其优化后的总体工作原理图所下所示，具体解析可以参见之前发布的文章：[《消费端线程池模型》](http://dubbo.apache.org/zh-cn/docs/user/demos/consumer-threadpool.html)
    
    
    老线程模型工作原理：
 
-  ![undefined](../../img/docs/consumer-threadpool0.png) 
+  ![consumer threadpool](../../img/docs/consumer-threadpool0.png) 
 
    新线程模型工作原理：
 
-   ![undefined](../../img/docs/consumer-threadpool1.png) 
+   ![consumer threadpool new](../../img/docs/consumer-threadpool1.png) 
    
 
 2. RPC 调用链路
@@ -155,15 +150,15 @@ https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-grpc/dubb
 
 我们针对这三部分逐步展开讲解。以下是 2.7 版本路由规则的几个例子。
 
-![undefined](../../img/docs/route-app.png) 
+![route app](../../img/docs/route-app.png) 
 
-![undefined](../../img/docs/route-service.png) 
+![route service](../../img/docs/route-service.png) 
 
 其中，最明显的一个变化是路由规则都以 YAML 进行了重写，并且后续所有的路由规则都计划以 YAML 为基本描述语言；相比于之前路由规则直接存储于注册中心，在 2.7 版本中增加了配置中心后，新版本的路由规则默认将存储在于独立的配置中心，配置格式推送机制都得到了优化；另外，2.7 版本中还增加了应用粒度的路由规则，方便从整个应用的角度去设置流量规则。
 
 新增加的跨注册中心的路由机制，可以实现调用流量在多个注册中心间的负载均衡，对于需要做异地容灾、同机房优先或者注册中心迁移的场景比较有用处。
 
-![undefined](../../img/docs/cluster-lb.png) 
+![cluster load balance](../../img/docs/cluster-lb.png) 
 
 当前支持的注册中心集群负载均衡策略有：
 
@@ -176,7 +171,7 @@ https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-grpc/dubb
 
 新增的配置中心主要有两个用途：存储/推送配置规则、应用配置托管，接下来着重讲解应用配置托管相关功能，看其对 Dubbo 的开发与运维配置的影响。Dubbo 当前支持 JVM 动态参数、配置中心、API、本地配置文件等几种配置源，他们之间按照优先级从高到低的顺序实现配置覆盖，如下图所示：
 
-![undefined](../../img/docs/config.png) 
+![config](../../img/docs/config.png) 
 
 配置中心相当于是共享版本的 `dubbo.properties` 的远程托管，其中，key 值有特定的命名规范：
 
@@ -198,11 +193,9 @@ dubbo.{config-type}s.{config-id}.{config-item} {config-item-value}
 
 gRPC 在 HTTP/2 上构建了 Stream 的 RPC 语义，支持 Request - Response、Stream - Response、Request - Stream、Bi-Stream 等多种语义，能满足不同的业务调用场景。
 
-![undefined](../../img/docs/service-idl2.png) 
+![service idl2](../../img/docs/service-idl2.png) 
 
-在 Dubbo 的设计中，所有的 RPC 协议都处于一个平等的地位，无论是自有的 Dubbo 协议，还是扩展的其他三方协议如 Thrift、Hessian、gRPC 等，得益于这样的设计，我们可以扩展任何新协议支持。关于如何扩展 RPC 协议及其应用场景，请参见之前发布的《使用 Dubbo 连接异构微服务体系》文章。
-
-https://mp.weixin.qq.com/s/-fvDeGlCLjz0n60naZJnQg
+在 Dubbo 的设计中，所有的 RPC 协议都处于一个平等的地位，无论是自有的 Dubbo 协议，还是扩展的其他三方协议如 Thrift、Hessian、gRPC 等，得益于这样的设计，我们可以扩展任何新协议支持。关于如何扩展 RPC 协议及其应用场景，请参见之前发布的[《使用 Dubbo 连接异构微服务体系》](https://mp.weixin.qq.com/s/-fvDeGlCLjz0n60naZJnQg)文章。
 
 Protobuf 序列化协议支持更多的是考虑其在跨语言、安全性和性能方面。
 
@@ -221,18 +214,16 @@ Protobuf 序列化协议支持更多的是考虑其在跨语言、安全性和�
 
 以当前正在开发的服务鉴权功能为例，这是社区中很多 Dubbo 使用者在实际使用中遇到的需求：虽然 Dubbo 服务主要是在内部运转，但有些服务仍期望只对部分场景或用户开放，比如某些涉及到敏感数据操作的服务，这就需要有鉴权能力的支持。
 
-以下 issue 中有关于 Dubbo 当前正在开发中的鉴权功能的详细讨论，总体来说 Dubbo 提供的鉴权功能约束了 Dubbo 侧鉴权的基本流程，这是一套通用鉴权的方案，在 token 计算、校验等环节都被设计为可扩展的，因此可以方便的对接到各种认证及权限管理系统。
+[Dubbo调用鉴权认证方案 #5461](https://github.com/apache/dubbo/issues/5461) 中有关于 Dubbo 当前正在开发中的鉴权功能的详细讨论，总体来说 Dubbo 提供的鉴权功能约束了 Dubbo 侧鉴权的基本流程，这是一套通用鉴权的方案，在 token 计算、校验等环节都被设计为可扩展的，因此可以方便的对接到各种认证及权限管理系统。
 
-https://github.com/apache/dubbo/issues/5461
-
-非常感谢社区的活跃开发者，现就职于爱奇艺的 https://github.com/CodingSinger，其是鉴权模块的发起者和主要开发贡献者。
+非常感谢社区的活跃开发者，现就职于爱奇艺的 [CodingSinger](https://github.com/CodingSinger)，其是鉴权模块的发起者和主要开发贡献者。
 
 
 ### 协议 - 3.0
 
 以下是 Dubbo 2.0 协议，我们之前已经在多个场合做过详细的讲解
 
-![undefined](img/blog/grpc/dubbo-ptotocol.png) 
+![Dubbo Protocol 2.0](../../img/blog/grpc/dubbo-ptotocol.png) 
 
 Dubbo 2.0 协议在云原生、mesh 等场景下暴露出一些问题，如：
 
@@ -281,7 +272,7 @@ Dubbo 最大的优势之一在于其易用性，其面向接口（RPC 方法）�
 
 以下是应用粒度服务注册（服务自省）的基本工作原理，请持续关注后续对这部分的具体解析和开发进展。
 
-![undefined](../../img/docs/servicediscovery-new.png) 
+![service discovery new](../../img/docs/servicediscovery-new.png) 
 
 ### 云原生
 
