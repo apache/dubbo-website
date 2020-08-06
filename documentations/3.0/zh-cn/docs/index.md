@@ -1,7 +1,17 @@
 # Dubbo Overview
-Apache Dubbo is a high-performance, open source RPC framework. 
+The core mission of Dubbo 3.0 is to embrace Cloud Native, makes Dubbo easy to use in building Cloud Native services.
+Dubbo 3.0 will provide the following features:
 
-[Dubbo 3.0](/documentations/3.0/zh-cn/site/), the Cloud Native version of Dubbo, is under development. If you have any ideas or suggestions on Dubbo 3.0, please join us on Github.
+* Optimized Service Discovery Model
+    * Being able to support larger-scale cluster with millions of instances
+    * Interact with other Microservices stacks, e.g., SpringCloud, ...
+* The next generation RPC protocol based on HTTP/2
+    * Reactive Stream
+    * Backpressure
+    * HTTP/2
+* Routing Rule
+* Support Kubernetes Native Service
+* Work seamlessly with Service Mesh architecture
 
 ## Basic Architecture
 ![arch](./user/sources/images/arch.png)
