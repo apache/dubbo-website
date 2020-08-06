@@ -56,7 +56,7 @@ public class XxxCacheFactory implements CacheFactory {
 }
 ```
 
-XxxCacheFactory.java：
+XxxCache.java：
 
 ```java
 package com.xxx;
