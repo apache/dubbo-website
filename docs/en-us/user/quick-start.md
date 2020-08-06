@@ -248,5 +248,5 @@ You can find the complete example code in the Github repository.
 * [Consumer demo](../admin/install/consumer-demo.md)
 
 [^1]: The interface needs to be packaged separately, shared by the service provider and the consumer
-[^2]: Hidden realization of service consumer
+[^2]: Hidden realization for service consumer
 [^3]: IoC injection can also be used
