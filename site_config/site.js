@@ -14,8 +14,9 @@ export default {
       {
         key: 'docs',
         text: 'DOCS',
-        target: '_blank',
-        link: '/documentations/2.7/en-us/site/',
+        // target: '_blank',
+        // link: '/documentations/2.7/en-us/site/',
+        link: '/en-us/docs/user/quick-start.html',
       },
       {
         key: 'developers',
@@ -77,7 +78,8 @@ export default {
       list: [
         {
           text: 'Quick start',
-          link: '/documentations/2.7/en-us/site/',
+          // link: '/documentations/2.7/en-us/site/',
+          link: '/en-us/docs/user/quick-start.html',
         },
         {
           text: 'Developer guide',
@@ -126,8 +128,9 @@ export default {
       {
         key: 'docs',
         text: '文档',
-        target: '_blank',
-        link: '/documentations/2.7/zh-cn/site/user/quick-start/',
+        // target: '_blank',
+        // link: '/documentations/2.7/zh-cn/site/user/quick-start/',
+        link: '/zh-cn/docs/user/quick-start.html',
       },
       {
         key: 'developers',
@@ -189,7 +192,8 @@ export default {
       list: [
         {
           text: '快速开始',
-          link: '/documentations/2.7/zh-cn/site/user/quick-start/',
+          // link: '/documentations/2.7/zh-cn/site/user/quick-start/',
+          link: '/zh-cn/docs/user/quick-start.html',
         },
         {
           text: '开发者指南',
