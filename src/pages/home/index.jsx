@@ -86,9 +86,9 @@ class Home extends Language {
                 </div>
               </a>
             </div>
-              <div className="button-area">
-                <Button type="primary" link={getLink(dataSource.brand.Dubbo3Button.link)}>{dataSource.brand.Dubbo3Button.text}</Button>
-              </div>
+              {/*<div className="button-area">*/}
+              {/*  <Button type="primary" link={getLink(dataSource.brand.Dubbo3Button.link)}>{dataSource.brand.Dubbo3Button.text}</Button>*/}
+              {/*</div>*/}
           </div>
           <div className="animation animation1" />
           <div className="animation animation2" />
