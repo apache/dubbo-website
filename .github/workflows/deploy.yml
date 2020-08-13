@@ -6,6 +6,24 @@ on:
     - master
 
 jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: |
+          pip install \
+            mkdocs-material \
+            mkdocs-minify-plugin>=0.3 \
+            mkdocs-redirects>=1.0
+      - run: mkdocs build -f mkdocs-en.yml -d ./output/en-us
+        cp -R images ./output/en-us
+        mkdocs build -f mkdocs_zh.yml -d ./output/zh_cn
+        cp -R images $(OUTDIR)/zh_cn
+
+jobs:
   Build-Deploy:
     runs-on: ubuntu-18.04
     steps:
