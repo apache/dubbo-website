@@ -18,7 +18,7 @@ Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤�
 
 ### 增加 Maven 依赖
 
-首先，您需要 `dubbo-registry-nacos` 的 Maven 依赖添加到您的项目中 `pom.xml` 文件中，并且强烈地推荐您使用 Dubbo `2.6.5`：
+首先，您需要将 `dubbo-registry-nacos` 的 Maven 依赖添加到您的项目 `pom.xml` 文件中，并且强烈地推荐您使用 Dubbo `2.6.5`：
 
 ```xml
 <dependencies>
@@ -60,13 +60,13 @@ Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤�
 
 
 
-当项目中添加  `dubbo-registry-nacos` 后，您无需显示地编程实现服务发现和注册逻辑，实际实现由该三方包提供，接下来配置 Naocs 注册中心。
+当项目中添加  `dubbo-registry-nacos` 后，您无需显式地编程实现服务发现和注册逻辑，实际实现由该三方包提供，接下来配置 Naocs 注册中心。
 
 
 
 ### 配置注册中心
 
-假设您 Dubbo 应用使用 Spring Framework 装配，将有两种配置方法可选，分别为：[Dubbo Spring 外部化配置](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/)以及 Spring XML 配置文件以及 ，推荐前者。
+假设您 Dubbo 应用使用 Spring Framework 装配，将有两种配置方法可选，分别为：[Dubbo Spring 外部化配置](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/)以及 Spring XML 配置文件，推荐前者。
 
 
 ### [Dubbo Spring 外部化配置](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/)
