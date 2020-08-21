@@ -8,11 +8,11 @@
 
 ## 依赖
 ```xml
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-registry-kubernetes</artifactId>
-            <version>${dubbo.version}</version>
-        </dependency>
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-registry-kubernetes</artifactId>
+    <version>${dubbo.version}</version>
+</dependency>
 ```
 
 由于 Kubernetes 不提供作为元数据中心的配置，
@@ -102,11 +102,11 @@
     记录输出内容中 <authentication_token> 部分。
     
     ```bash
-    Name:         dubbo-sa-token-2g5c6
+    Name: dubbo-sa-token-2g5c6
     Namespace:    dubbo-demo
     Labels:       <none>
     Annotations:  kubernetes.io/service-account.name: dubbo-sa
-                  kubernetes.io/service-account.uid: 963e68f3-738d-4f10-bf32-92a3fbf44774
+  kubernetes.io/service-account.uid: 963e68f3-738d-4f10-bf32-92a3fbf44774
     
     Type:  kubernetes.io/service-account-token
     

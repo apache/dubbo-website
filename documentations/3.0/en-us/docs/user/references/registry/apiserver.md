@@ -9,11 +9,11 @@ This is the way of Service Discovery on Kubernetes native Service.
 
 ## Dependency
 ```xml
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-registry-kubernetes</artifactId>
-            <version>${dubbo.version}</version>
-        </dependency>
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-registry-kubernetes</artifactId>
+    <version>${dubbo.version}</version>
+</dependency>
 ```
 
 Since Kubernetes does not provide the ability as a config center, 
@@ -110,11 +110,11 @@ the service name mapping of Service Introspection.
     Record the <authentication_token> section in the result.
 
     ```bash
-    Name:         dubbo-sa-token-2g5c6
+    Name: dubbo-sa-token-2g5c6
     Namespace:    dubbo-demo
     Labels:       <none>
     Annotations:  kubernetes.io/service-account.name: dubbo-sa
-                  kubernetes.io/service-account.uid: 963e68f3-738d-4f10-bf32-92a3fbf44774
+  kubernetes.io/service-account.uid: 963e68f3-738d-4f10-bf32-92a3fbf44774
     
     Type:  kubernetes.io/service-account-token
     
