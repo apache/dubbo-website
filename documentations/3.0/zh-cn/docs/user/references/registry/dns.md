@@ -1,6 +1,8 @@
 # DNS 注册中心
 
-DNS 注册中心依赖 DNS 进行服务发现，通过 DNS 的解析对服务端节点基于服务自省模型进行应用级服务发现。目前 DNS 注册中心是针对 Kubernetes Headless Service 进行开发，理论上支持所有 DNS 服务。
+DNS 注册中心依赖 DNS 进行服务发现，
+通过 DNS 的解析对服务端节点基于服务自省模型进行应用级服务发现。
+目前 DNS 注册中心是针对 Kubernetes Headless Service 进行开发，理论上支持所有 DNS 服务。
 
 ## 依赖
 
@@ -27,10 +29,10 @@ dubbo.config-center.address=${your config-center address here}
 
 配置项说明：
 
-- dubbo.application.metadataServicePort 服务自省模型端口，使用 DNS 注册中心的所有应用均需要配置，且端口号必须一致
-- dubbo.registry.address 注册中心地址信息，具体参数见后文
-- dubbo.metadata-report.address 元数据中心地址，用于上传元数据信息
-- dubbo.config-center.address 配置中心地址，用于上传服务配置信息
+- `dubbo.application.metadataServicePort` 服务自省模型端口，使用 DNS 注册中心的所有应用均需要配置，且端口号必须一致
+- `dubbo.registry.address` 注册中心地址信息，具体参数见后文
+- `dubbo.metadata-report.address` 元数据中心地址，用于上传元数据信息
+- `dubbo.config-center.address` 配置中心地址，用于上传服务配置信息
 
 
 注册中心配置说明：

@@ -1,6 +1,10 @@
 # DNS Registry
 
-DNS registry relies on DNS for service discovery, and uses DNS resolution to perform application-level service discovery for provider nodes based on the Service Discovery Model. Current DNS registry is developed for Kubernetes Headless Service, which theoretically supports all DNS services.
+DNS registry relies on DNS for service discovery, 
+and uses DNS resolution to perform application-level service discovery 
+for provider nodes based on the Service Discovery Model. 
+Current DNS registry is developed for Kubernetes Headless Service, 
+which theoretically supports all DNS services.
 
 ## Dependency
 
@@ -11,7 +15,9 @@ DNS registry relies on DNS for service discovery, and uses DNS resolution to per
     <version>${dubbo.version}</version>
 </dependency>
 ```
-Since Kubernetes does not provide the alility as a config center, it is necessary to introduce a config center to support the service name mapping of Service Introspection.
+Since Kubernetes does not provide the alility as a config center, 
+it is necessary to introduce a config center to support 
+the service name mapping of Service Introspection.
 
 ## Configuration
 
@@ -26,10 +32,10 @@ dubbo.config-center.address=${your config-center address here}
 
 Configuration description：
 
-- dubbo.application.metadataServicePort: Service Discovery MetadataService provider port, all applications using the DNS registry need to be configured, and the port number must be consistent
-- dubbo.registry.address: Registry address, see the following text for specific parameters
-- dubbo.metadata-report.address: Metadata report center address, used to upload metadata information
-- dubbo.config-center.address: Configuration center address, used to upload service configuration information
+- `dubbo.application.metadataServicePort`: Service Discovery MetadataService provider port, all applications using the DNS registry need to be configured, and the port number must be consistent
+- `dubbo.registry.address`: Registry address, see the following text for specific parameters
+- `dubbo.metadata-report.address`: Metadata report center address, used to upload metadata information
+- `dubbo.config-center.address`: Configuration center address, used to upload service configuration information
 
 
 Properties for registry description：

@@ -1,6 +1,10 @@
 # Kubernetes API Server 注册中心
 
-[Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/) 是 Kubernetes 平台对微服务模型的抽象，部署在 Kubernetes 平台之上的 POD 实例可被自动归类到虚拟的 Service 下，这样，部署在 Kubernetes 平台上的微服务消费者可实现对 Service Name 的直接依赖或调用，由 Kubernetes 平台实现流量从 Service 到 POD 节点的分发。
+[Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/) 
+是 Kubernetes 平台对微服务模型的抽象，
+部署在 Kubernetes 平台之上的 POD 实例可被自动归类到虚拟的 Service 下。
+这样，部署在 Kubernetes 平台上的微服务消费者可实现对 Service Name 的直接依赖或调用，
+由 Kubernetes 平台实现流量从 Service 到 POD 节点的分发。
 
 ## 依赖
 ```xml
@@ -11,7 +15,8 @@
         </dependency>
 ```
 
-由于 Kubernetes 不提供作为元数据中心的配置，所以需要另外引入元数据中心以支持服务自省的服务发现功能。
+由于 Kubernetes 不提供作为元数据中心的配置，
+所以需要另外引入元数据中心以支持服务自省的服务发现功能。
 
 ## 配置
 
@@ -27,7 +32,8 @@
     https://<API Server ip>:<API Server port>
     ```
 
-    注：配置文件中无需配置网络协议信息，默认使用 HTTPS 协议，如需使用 HTTP 协议可通过参数进行配置。
+    注：配置文件中无需配置网络协议信息，默认使用 HTTPS 协议，
+    如需使用 HTTP 协议可通过参数进行配置。
 
 2. 获取 API Server 证书信息
 

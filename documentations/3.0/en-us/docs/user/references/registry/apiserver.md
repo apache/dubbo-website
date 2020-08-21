@@ -1,6 +1,11 @@
 # Kubernetes API Server Registry
 
-[Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/) is an abstraction of the microservice model of Kubernetes. Pods deployed on Kubernetes will be automatically classified to Service. In this way, the microservice consumers deployed on Kubernetes can discover pods by Service Name, and then call them directly. This is the way of Service Discovery on Kubernetes native Service.
+[Kubernetes Service](https://kubernetes.io/docs/concepts/services-networking/service/) 
+is an abstraction of the microservice model of Kubernetes. 
+Pods deployed on Kubernetes will be automatically classified to Service. 
+In this way, the microservice consumers deployed on Kubernetes 
+can discover pods by Service Name, and then call them directly. 
+This is the way of Service Discovery on Kubernetes native Service.
 
 ## Dependency
 ```xml
@@ -11,7 +16,9 @@
         </dependency>
 ```
 
-Since Kubernetes does not provide the alility as a config center, it is necessary to introduce a config center to support the service name mapping of Service Introspection.
+Since Kubernetes does not provide the ability as a config center, 
+it is necessary to introduce a config center to support 
+the service name mapping of Service Introspection.
 
 ## Configuration
 
@@ -29,7 +36,9 @@ Since Kubernetes does not provide the alility as a config center, it is necessar
     https://<API Server ip>:<API Server port>
     ```
     
-    Notice: Protocol is needless to specify, dubbo will use `https` protocol as default. You can specify it with `useHttps` property in url parameters.
+    Notice: Protocol is needless to specify, 
+    dubbo will use `https` protocol as default. 
+    You can specify it with `useHttps` property in url parameters.
 
 2. Get API Server CA cert
 
@@ -42,7 +51,8 @@ Since Kubernetes does not provide the alility as a config center, it is necessar
 
 3. Create ServiceAccount and Get Oauth Token
 
-    The following permissions should be granted to ServiceAccount for Dubbo Kubernetes API server registry:
+    The following permissions should be granted to ServiceAccount for 
+    Dubbo Kubernetes API server registry:
 
    - Read and Write permissions to Pods
    - Read permission to Services
