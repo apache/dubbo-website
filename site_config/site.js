@@ -43,11 +43,6 @@ export default {
         text: 'DOWNLOAD',
         link: '/en-us/blog/download.html',
       },
-      {
-        key: 'SUMMIT',
-        text: 'MICROSERVICES SUMMIT',
-        link: 'https://developer.aliyun.com/topic/microservices2020#/',
-      },
     ],
     disclaimer: {
       title: '',
@@ -161,11 +156,6 @@ export default {
         key: 'download',
         text: '下载',
         link: '/zh-cn/blog/download.html',
-      },
-      {
-        key: 'SUMMIT',
-        text: '云原生微服务大会',
-        link: 'https://developer.aliyun.com/topic/microservices2020#/',
       },
     ],
     disclaimer: {
