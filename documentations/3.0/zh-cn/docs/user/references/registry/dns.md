@@ -14,7 +14,7 @@ DNS 注册中心依赖 DNS 进行服务发现，
 </dependency>
 ```
 
-由于 DNS 不提供作为元数据中心的配置，所以需要另外引入元数据中心以支持服务自省的服务发现功能。
+由于 DNS 不提供作为元数据中心的配置，如果使用自动服务名与接口的映射，需要另外引入元数据中心以支持服务自省的服务发现功能。
 
 ## 配置
 
@@ -23,16 +23,12 @@ DNS 注册中心依赖 DNS 进行服务发现，
 ```bash
 dubbo.application.metadataServicePort=20885
 dubbo.registry.address=dns://${your kube dns ip here}:53?registry-type=service&duplicate=false&addressSuffix=.dubbo-demo.svc.cluster.local.
-dubbo.metadata-report.address=${your metadata-report address here, can be the same with config-center}
-dubbo.config-center.address=${your config-center address here}
 ```
 
 配置项说明：
 
 - `dubbo.application.metadataServicePort` 服务自省模型端口，使用 DNS 注册中心的所有应用均需要配置，且端口号必须一致
 - `dubbo.registry.address` 注册中心地址信息，具体参数见后文
-- `dubbo.metadata-report.address` 元数据中心地址，用于上传元数据信息
-- `dubbo.config-center.address` 配置中心地址，用于上传服务配置信息
 
 
 注册中心配置说明：

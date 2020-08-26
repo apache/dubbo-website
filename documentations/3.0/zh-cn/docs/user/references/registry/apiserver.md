@@ -16,7 +16,7 @@
 ```
 
 由于 Kubernetes 不提供作为元数据中心的配置，
-所以需要另外引入元数据中心以支持服务自省的服务发现功能。
+如果使用自动服务名与接口的映射，需要另外引入元数据中心以支持服务自省的服务发现功能。
 
 ## 配置
 
@@ -123,8 +123,6 @@
     
     ```bash
     dubbo.registry.address=kubernetes://${your kubernetes api server ip here}:${your kubernetes api server port here}?registry-type=service&duplicate=false&namespace=dubbo-demo&useHttps=true&caCertData=${your API Server CA Token here, Base64 encoded}&oauthToken=${your ServiceAccount token here}
-    dubbo.metadata-report.address=${your metadata-report address here, can be the same with config-center}
-    dubbo.config-center.address=${your config-center address here}
     ```
 
 

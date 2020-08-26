@@ -17,8 +17,8 @@ This is the way of Service Discovery on Kubernetes native Service.
 ```
 
 Since Kubernetes does not provide the ability as a config center, 
-it is necessary to introduce a config center to support 
-the service name mapping of Service Introspection.
+it is necessary to introduce a config center if you use 
+the service name mapping function of Service Introspection.
 
 ## Configuration
 
@@ -114,7 +114,7 @@ the service name mapping of Service Introspection.
     Namespace:    dubbo-demo
     Labels:       <none>
     Annotations:  kubernetes.io/service-account.name: dubbo-sa
-  kubernetes.io/service-account.uid: 963e68f3-738d-4f10-bf32-92a3fbf44774
+    kubernetes.io/service-account.uid: 963e68f3-738d-4f10-bf32-92a3fbf44774
     
     Type:  kubernetes.io/service-account-token
     
@@ -131,8 +131,6 @@ the service name mapping of Service Introspection.
 
     ```bash
     dubbo.registry.address=kubernetes://${your kubernetes api server ip here}:${your kubernetes api server port here}?registry-type=service&duplicate=false&namespace=dubbo-demo&useHttps=true&caCertData=${your API Server CA Token here, Base64 encoded}&oauthToken=${your ServiceAccount token here}
-    dubbo.metadata-report.address=${your metadata-report address here, can be the same with config-center}
-    dubbo.config-center.address=${your config-center address here}
     ```
 
 ## Note
