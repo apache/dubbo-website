@@ -220,13 +220,6 @@ export default {
                 link: '/zh-cn/blog/2.7.5-release.html',
             },
             {
-                title: '2.7.5 里程碑版本正式发布：支持 gRPC、性能提升 30%',
-                author: '@Chickenlj',
-                dateStr: 'March 27, 2020',
-                desc: '详细讲解 2.7.5 版本包含的新功能，包括 gRPC、protobuf、http/2、性能优化、实例级服务注册等',
-                link: '/zh-cn/blog/2.7.5-release.html',
-            },
-            {
                 title: 'Dubbo 在跨语言和协议穿透性方向上的探索：支持 HTTP/2 gRPC 和 Protobuf',
                 author: '@Chickenlj',
                 dateStr: 'March 27, 2020',

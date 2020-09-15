@@ -14,6 +14,8 @@ export default {
       {
         key: 'docs',
         text: 'DOCS',
+        // target: '_blank',
+        // link: '/documentations/2.7/en-us/site/',
         link: '/en-us/docs/user/quick-start.html',
       },
       {
@@ -76,6 +78,7 @@ export default {
       list: [
         {
           text: 'Quick start',
+          // link: '/documentations/2.7/en-us/site/',
           link: '/en-us/docs/user/quick-start.html',
         },
         {
@@ -125,6 +128,8 @@ export default {
       {
         key: 'docs',
         text: '文档',
+        // target: '_blank',
+        // link: '/documentations/2.7/zh-cn/site/user/quick-start/',
         link: '/zh-cn/docs/user/quick-start.html',
       },
       {
@@ -187,6 +192,7 @@ export default {
       list: [
         {
           text: '快速开始',
+          // link: '/documentations/2.7/zh-cn/site/user/quick-start/',
           link: '/zh-cn/docs/user/quick-start.html',
         },
         {

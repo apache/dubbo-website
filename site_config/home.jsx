@@ -12,6 +12,10 @@ export default {
       viewOnGithubButton: {
         text: 'GITHUB',
         link: 'https://github.com/apache/dubbo',
+      },
+      Dubbo3Button: {
+        text: 'Dubbo 3.0 即将发布，敬请期待...',
+        link: '/documentations/3.0/zh-cn/site/',
       }
     },
     introduction: {
@@ -100,6 +104,10 @@ export default {
       viewOnGithubButton: {
         text: 'GITHUB',
         link: 'https://github.com/apache/dubbo',
+      },
+      Dubbo3Button: {
+        text: 'Dubbo 3.0 will be available soon...',
+        link: '/documentations/3.0/en-us/site/',
       }
     },
     introduction: {

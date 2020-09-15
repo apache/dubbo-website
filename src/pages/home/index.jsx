@@ -73,19 +73,22 @@ class Home extends Language {
               <Button type="normal" link={getLink(dataSource.brand.viewOnGithubButton.link)}>{dataSource.brand.viewOnGithubButton.text}</Button>
             </div>
             <div className="github-buttons">
-                <a href="https://github.com/apache/dubbo" target="_blank" rel="noopener noreferrer">
-                  <div className="star">
-                    <img src="https://img.alicdn.com/tfs/TB1FlB1JwHqK1RjSZFPXXcwapXa-32-32.png" />
-                    <span className="count">{starCount}</span>
-                  </div>
-                </a>
-                <a href="https://github.com/apache/dubbo/fork" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/apache/dubbo" target="_blank" rel="noopener noreferrer">
+                <div className="star">
+                  <img src="https://img.alicdn.com/tfs/TB1FlB1JwHqK1RjSZFPXXcwapXa-32-32.png" />
+                  <span className="count">{starCount}</span>
+                </div>
+              </a>
+              <a href="https://github.com/apache/dubbo/fork" target="_blank" rel="noopener noreferrer">
                 <div className="fork">
                   <img src="https://img.alicdn.com/tfs/TB1zbxSJwDqK1RjSZSyXXaxEVXa-32-32.png" />
                   <span className="count">{forkCount}</span>
                 </div>
-                </a>
-              </div>
+              </a>
+            </div>
+              {/*<div className="button-area">*/}
+              {/*  <Button type="primary" link={getLink(dataSource.brand.Dubbo3Button.link)}>{dataSource.brand.Dubbo3Button.text}</Button>*/}
+              {/*</div>*/}
           </div>
           <div className="animation animation1" />
           <div className="animation animation2" />

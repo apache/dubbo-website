@@ -1,0 +1,2 @@
+> ![warning](../sources/images/check.gif)To complete run, please see:[Quickstart](quickstart.md), here just lists the configuration of various scenarios
+> ![warning](../sources/images/check.gif)The following examples are all based on Spring configuration:[Xml configuration](../configuration/xml.md) for reference, if you do not want to use Spring, but want to be use it via the directly API, please see:[API configuration](../configuration/api.md)

@@ -4,15 +4,13 @@
 
 ## 消费端线程池模型优化
 
-对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见以下 issue ：
-
-https://github.com/apache/dubbo/issues/2013
+对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 [Need a limited Threadpool in consumer side #2013](https://github.com/apache/dubbo/issues/2013)
 
 改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。
 
 **老的线程池模型**
 
-![消费端线程池.png](/img/docs/consumer-threadpool0.png)
+![消费端线程池.png](../../../../img/docs/consumer-threadpool0.png)
 
 我们重点关注 Consumer 部分：
 
@@ -25,7 +23,7 @@ https://github.com/apache/dubbo/issues/2013
 
 **2.7.5 版本引入的线程池模型**
 
-![消费端线程池新.png](/img/consumer-threadpool1.png)
+![消费端线程池新.png](../../../../img/docs/consumer-threadpool1.png)
 
 1. 业务线程发出请求，拿到一个 Future 实例。
 2. 在调用 future.get() 之前，先调用 ThreadlessExecutor.wait()，wait 会使业务线程在一个阻塞队列上等待，直到队列中被加入元素。

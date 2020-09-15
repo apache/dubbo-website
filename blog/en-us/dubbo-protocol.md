@@ -86,7 +86,7 @@ The Dubbo protocol is actually a variable length protocol, which is covered in m
 ### Overview to the Dubbo protocol
 The Dubbo framework defines a proprietary RPC protocol in which the specific content of the request and response protocols is presented using a table.
 
-![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo_protocol_header.png)
+![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/3.0/en-us/docs/dev/sources/images/dubbo_protocol_header.png)
 
 ### Dubbo protocol details
 
@@ -152,7 +152,7 @@ The Dubbo framework defines a proprietary RPC protocol in which the specific con
       - Exception: RESPONSE_WITH_EXCEPTION  0
     - Return value: response bytes returned from the server
 
-**Note: ** For the variable part, when uses json serialization in current version of Dubbo framework, an additional line break is added as a separator between each part of the content. Please add a new line break after each part of the variable part, such as:
+**Note:** For the variable part, when uses json serialization in current version of Dubbo framework, an additional line break is added as a separator between each part of the content. Please add a new line break after each part of the variable part, such as:
 
 ```
 Dubbo version bytes (line break)

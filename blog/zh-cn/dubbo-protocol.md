@@ -96,7 +96,7 @@ Dubbo 协议实际上就是一种变长协议，后面的章节会详细介绍�
 
 Dubbo 框架定义了私有的RPC协议，其中请求和响应协议的具体内容我们使用表格来展示。
 
-![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo_protocol_header.png)
+![/dev-guide/images/dubbo_protocol_header.jpg](http://dubbo.apache.org/docs/3.0/zh-cn/docs/dev/sources/images/dubbo_protocol_header.png)
 
 ### 协议详情
 
@@ -162,7 +162,7 @@ Dubbo 框架定义了私有的RPC协议，其中请求和响应协议的具体�
       - 异常：RESPONSE_WITH_EXCEPTION  0
     - 返回值：从服务端返回的响应bytes
 
-**注意：**对于(Variable Part)变长部分，当前版本的Dubbo 框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请在Variable Part的每个part后额外增加换行符， 如：
+**注意：** 对于(Variable Part)变长部分，当前版本的Dubbo 框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请在Variable Part的每个part后额外增加换行符， 如：
 
 ```
 Dubbo version bytes (换行符)
