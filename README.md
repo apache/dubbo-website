@@ -51,7 +51,7 @@ description: some description
 Refer to [this blog](blog/zh-cn/how-to-involve-dubbo-community.md)
 
 
-## Steps for adding new document
+## Steps for adding a new document
 
 ### Add a new blog
 
