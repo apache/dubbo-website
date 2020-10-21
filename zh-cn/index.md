@@ -1,4 +1,4 @@
 ---
-template: home_zh.html
+template: overrides/home_zh.html
 title: Apache Dubbo
 ---
