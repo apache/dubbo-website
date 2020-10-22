@@ -82,9 +82,9 @@ If not discussed in the community (mailing list), just as it did not happen.
 
 ### Add your name
 
-Please update Dubbo incubator status [page](https://incubator.apache.org/projects/dubbo.html) to add your name. See this [guide](http://dubbo.apache.org/en-us/docs/developers/committer-guide/apache-dubbo-page_dev.html) for instructions.
+Please update Dubbo incubator status [page](https://incubator.apache.org/projects/dubbo.html) to add your name. See this [guide](./apache-dubbo-page_dev.md) for instructions.
 
-Please update Dubbo offiical [website](http://dubbo.apache.org/en-us/docs/developers/developers_dev.html) to update your name.
+Please update Dubbo offiical [website](../docs/2.7/developers/developers_dev.md) to update your name.
 
 
 ### A small benefit

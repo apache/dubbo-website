@@ -80,4 +80,4 @@ When testing, the service needs to be temporarily register to two registries, wh
 </beans>
 ```
 
-[^1]: custom registry, see：[registry extension](http://dubbo.apache.org/en-us/docs/dev/impls/registry.html)
+[^1]: custom registry, see：[registry extension](../../dev/impls/registry.md)

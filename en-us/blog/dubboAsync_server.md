@@ -7,7 +7,7 @@ description: Implementation background and practice of Dubbo server asynchronous
 # Implementation background and practice of Dubbo server asynchronous interface
 
 ## Preface
-It is suggested to make an understanding of the thread phase involved in the process of Dubbo first, please refer to [Implementation background and practice of Dubbo client asynchronous interface](http://dubbo.apache.org/en-us/blog/dubboAsync_client.html) for details.
+It is suggested to make an understanding of the thread phase involved in the process of Dubbo first, please refer to [Implementation background and practice of Dubbo client asynchronous interface](./dubboAsync_client.md) for details.
 
 ## Implementation background
 It is necessary to introduce the server-side thread strategy in more detail to deepen the user's judgment basis for selecting server-side asynchrony. It is also necessary to introduce coroutines, the "secret weapon" often used in server-side asynchrony.

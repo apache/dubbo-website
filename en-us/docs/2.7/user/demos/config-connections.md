@@ -25,6 +25,6 @@ OR
 ```
 **NOTE:** If used default protocol(`dubbo` protocol), and the value of  `connections` attribute is great than 0,then each service reference will has itself connection,else all service which belong to same remote server will share only one connection. In this framework,we called `private` connection or `share` connection.
 
-If `<dubbo:service>` and `<dubbo:reference>` are both configured accepts/connections,`<dubbo:reference>` is preferred,Ref to [Configuration coverage strategy](http://dubbo.apache.org/en-us/docs/user/configuration/xml.html).
+If `<dubbo:service>` and `<dubbo:reference>` are both configured accepts/connections,`<dubbo:reference>` is preferred,Ref to [Configuration coverage strategy](../configuration/xml.md).
 
 * : Because connection is connect on Server,so configure at Provider.
