@@ -80,5 +80,5 @@ Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分�
 </beans>
 ```
 
-[^1]: 可以自行扩展注册中心，参见：[注册中心扩展](http://dubbo.apache.org/zh-cn/docs/dev/impls/registry.html)
+[^1]: 可以自行扩展注册中心，参见：[注册中心扩展](../../dev/impls/registry.md)
 

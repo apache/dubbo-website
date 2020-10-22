@@ -1,5 +1,5 @@
 # GoogleProtobuf对象泛化调用
-泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参考 [泛化调用](http://dubbo.apache.org/zh-cn/docs/user/demos/group-merger.html)。
+泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参考 [泛化调用](./group-merger.md)。
 一般泛化调用只能用于生成的服务参数为POJO的情况，而GoogleProtobuf的对象是基于Builder生成的非正常POJO，可以通过protobuf-json泛化调用。  
 GoogleProtobuf序列化相关的Demo可以参考[protobuf-demo](https://github.com/vio-lin/dubbo-samples/tree/protobuf-demo)
 # 通过Spring对Goolgle Protobuf对象泛化调用

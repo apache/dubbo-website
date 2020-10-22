@@ -8,7 +8,7 @@
 * `threadlocal` 当前线程缓存，比如一个页面渲染，用到很多 portal，每个 portal 都要去查用户信息，通过线程缓存，可以减少这种多余访问。
 * `jcache` 与 [JSR107](http://jcp.org/en/jsr/detail?id=107%27) 集成，可以桥接各种缓存实现。
 
-缓存类型可扩展，参见：[缓存扩展](http://dubbo.apache.org/zh-cn/docs/dev/impls/cache.html)
+缓存类型可扩展，参见：[缓存扩展](../../dev/impls/cache.md)
 
 ## 配置
 

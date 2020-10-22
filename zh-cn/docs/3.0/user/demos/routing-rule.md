@@ -246,5 +246,5 @@ RpcContext.getContext().setAttachment(Constants.REQUEST_TAG_KEY,"tag1");
 
 
 [^1]: `2.2.0` 以上版本支持
-[^2]: 路由规则扩展点：[路由扩展](http://dubbo.apache.org/zh-cn/docs/dev/impls/router.html)
+[^2]: 路由规则扩展点：[路由扩展](../../dev/impls/router.md)
 [^3]: 注意：一个服务只能有一条白名单规则，否则两条规则交叉，就都被筛选掉了

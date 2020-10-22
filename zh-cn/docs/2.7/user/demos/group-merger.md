@@ -51,4 +51,4 @@
 ```
 
 [^1]: 从 `2.1.0` 版本开始支持
-[^2]: 参见：[合并结果扩展](http://dubbo.apache.org/zh-cn/docs/dev/impls/merger.html)
+[^2]: 参见：[合并结果扩展](../../dev/impls/merger.md)

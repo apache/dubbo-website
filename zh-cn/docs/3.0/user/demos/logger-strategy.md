@@ -20,4 +20,4 @@
       <dubbo:application logger="log4j" />
     ```
 
-[1]: 自定义扩展可以参考 [日志适配扩展](http://dubbo.apache.org/zh-cn/docs/dev/impls/logger-adapter.html)
+[1]: 自定义扩展可以参考 [日志适配扩展](../../dev/impls/logger-adapter.md)
