@@ -1,16 +1,16 @@
 ---
-title: 第二届Dubbo开发者沙龙在上海成功举办
-keywords: Dubbo, 上海, meetup
-description: 第二届Dubbo开发者沙龙在上海成功举办。
+title: The second Dubbo Shanghai meetup has been held successfully
+keywords: Dubbo, Shanghai, meetup
+description: The second Dubbo Shanghai meetup has been held successfully.
 ---
 
-# 第二届Dubbo开发者沙龙在上海成功举办
+The second Dubbo Shanghai meetup has been held successfully
+---
 
+The sencond Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.
 
-第二届Dubbo开发者沙龙在上海成功举办，超过700位开发者报名，现场参与人数300+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数10000+
-
-分享嘉宾及PPT:
-  * 朱勇: Dubbo开源现状与未来规划 (中文) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-status-and-roadmap.pdf)
-  * 小马哥: Dubbo Cloud Native 之路的实践与思考 (中文) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-cloud-native-practices-and-thoughts.pdf)
-  * 郭平: Nacos - 贡献Dubbo生态，阿里巴巴注册中心和配置中心开源计划 (中文) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/nacos-open-source-initiative.pdf)
-  * 潘志伟: Dubbo在互金行业的应用场景 (中文) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-practices-on-internet-finance-industries.pdf) 
+Please enjoy the slides of the topics:
+  * Jerrick Zhu: Dubbo Status and Roadmap (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-status-and-roadmap.pdf)
+  * Mercy Ma: Dubbo Cloud Native Practices and Thoughts (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-cloud-native-practices-and-thoughts.pdf)
+  * Ping Guo: Nacos Open Source Initiative (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/nacos-open-source-initiative.pdf)
+  * Zhiwei Pan: Dubbo Practices on Internet Finance Industries (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-practices-on-internet-finance-industries.pdf) 

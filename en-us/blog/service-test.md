@@ -1,18 +1,28 @@
-# Dubbo Admin服务测试功能  
-基于Dubbo2.7的元数据，Dubbo Admin实现了服务测试功能，可以通过泛化调用，在控制台上调用真实的服务提供者
+---
+title: Dubbo Admin service test
+keywords: Dubbo, test
+description: This article introduces how to make service test with Dubbo.
+---
 
-## 使用方式
-* 部署服务提供者： 可以在[这里](https://github.com/nzomkxia/dubbo-demo)下载demo，此工程基于spring boot，方便在IDE或者命令行启动，对于服务测试来说，只需要启动`dubbo-basic-provider`即可。
-* 服务查询： 完成服务端部署后，可以到Dubbo Admin的`服务测试`页面上查询对应的服务: 
-![testSearch](../../img/blog/admin/testSearch.jpg)  
-这里的信息和元数据类似，包含方法名，参数类型和返回值信息，点击右边的标签就可以进入服务测试页面  
-* 服务测试：
-![testSuccess](../../img/blog/admin/testSuccess.jpg)  
-服务测试页面包含了两个json编辑器，参数类型的信息都是以json格式保存，这里需要填入对应的参数值(本例中数类型时`String`)，填写完成后点击`执行`即可对服务端发起调用，调用结果展示在右边的编辑器中，如果调用失败，会显示详细的失败原因，下面来看一下调用失败的例子：  
-![testFail](../../img/blog/admin/testFail.jpg)
-本例中，先关掉Dubbo服务提供者的进程，再执行服务测试，可以看到返回的结果是`找不到服务提供者`的异常。和普通调用一样，业务和框架的异常都会返回在结果中，方便业务排查。
-* 复合类型参数   
-考虑`UserService`中的以下方法和类型： 
+# Dubbo Admin service test
+Based on the metadata of Dubbo2.7, Dubbo Admin implements the service test function, which can call the real service provider on the console through generalized call.
+
+## Usage
+* Deploy the provider: You can download the demo [here](https://github.com/nzomkxia/dubbo-demo). This project is based on Spring Boot, which is convenient to start in the IDE or command line. For service testing, you only need to start  `dubbo-basic-provider`.
+
+* Service-seeking: After completing the server deployment, you can query the corresponding service on the Dubbo Admin's `service test` page: 
+  ![testSearch](../../img/blog/admin/testSearch.jpg)  
+  the information here is similar to the metadata, including the method name, parameter type and return value. Click the label on the right to enter the `service test` page.
+
+* Service test：
+  ![testSuccess](../../img/blog/admin/testSuccess.jpg)  
+  `service test` page contains two json editor, the parameter's informations are all stored in a json format, where you need to fill in the corresponding parameter values (in this case, the number type is String ), after filling, click `execute` to initiate the call to the server, and the result of the call is displayed in the editor on the right. If the call fails, the detailed cause of the failure is displayed. Let's look at the example of the call failure.   
+  ![testFail](../../img/blog/admin/testFail.jpg)
+
+  In this case, the Dubbo service provider's process is shut down before the service test is executed, you can see that the returned result is an `No provider availble` exception. As with normal calls, business and framework exceptions are returned in the results, for easy business troubleshooting.
+
+* Complex type parameters    
+Consider the following methods and types in `UserService`:
 ```java
 //org.apache.dubbo.demo.api.UserService
 Result getUser(String name, UserInfoDO userInfoDO);
@@ -64,14 +74,16 @@ public class LocationDO {
     }
 }
 ```
-参数是比较复杂的符合类型参数，服务测试的时候，会逐层展开填写每一个field的值，如下图所示：  
+The parameters are complex complex type. When the service is tested, the value of each field will be filled out layer by layer, As shown below:  
 ![complex](../../img/blog/admin/complex.jpg)
-同样可以调用成功并且返回结果
+It can also make successful call and the result is returned.
 
-## 原理：数据来源 
-服务测试中，最重要的就是完整的方法签名信息，和参数的类型信息，有了这些信息才能够一步步填入每个参数的值，拼装出完整的服务消费者。在Dubbo2.7中，新增了元数据中心，Dubbo Admin的方法签名和参数类型信息就是从这里来的：  
+## Principle：Data source 
+
+In the service test, the most important thing is the complete method signature, and the type information of the parameters, with which the values of each parameter can be filled step by step to assemble the complete service consumer. In Dubbo 2.7, the metadata center has been added. The method signature and parameter type information of Dubbo Admin is from here:   
 ![medatada](../../img/blog/admin/metadata.png)
-如图所示，服务端在运行的时候会将服务的元数据信息注册到元数据中心，格式如下： 
+As shown, the server will register the metadata information of the service to the metadata center when it runs,the format is as follows: 
+
 ```json
 {
     ...
@@ -147,11 +159,12 @@ public class LocationDO {
     ]
 }
 ```
-与服务测试相关的就是`methods`和`types`所包含的方法和类型信息，Dubbo Admin根据这些信息，将参数渲染到服务测试页面的Json Editor中，由用户来输入每个参数，每个成员变量的值。
+Related to service testing is the method and type information contained in `methods` and `types`. Based on this information, Dubbo Admin renders the parameters into the Json Editor of the service test page, where the user enters the values of each parameter and each member variable.
 
+## Principle: Generalized calls
 
-## 原理： 泛化调用  
-有了参数类型，下一个问题就是怎么能够调用到服务端，在传统的Dubbo RPC调用中，客户端需要依赖服务端的API jar包(参考前文demo中的[dubbo-basic-consumer](https://github.com/nzomkxia/dubbo-demo/tree/master/dubbo-basic-consumer))，这对于Dubbo Admin来说不太可能，因为服务的上下线是动态的，Dubbo Admin无法动态增加jar包依赖，因此需要用到Dubbo中的**泛化调用**，指的是在没有服务端API接口的情况下，客户端直接通过 `GenericService` 接口来发起服务调用，返回值中的数据对象都用Map来表示。泛化调用在服务端不需要做特殊处理，只需要客户端发起即可。
+With the parameter type, the next question is how to call to the server. In the traditional Dubbo RPC call, the client needs to rely on the server's API jar package ( refer to the [dubbo-basic-consumer](https://github.com/nzomkxia/dubbo-demo/tree/master/dubbo-basic-consumer) in the previous demo ), which is unlikely for Dubbo Admin, because the up and down of services are dynamic, Dubbo Admin can not dynamically increase the jar package dependencies, so you need to use the **generalization call** in Dubbo , which means that in the absence of the server API interface, the client initiates a service call through the  `GenericService` interface, and the data objects in return values are represented by maps. The generalization call doesn't require special processing on the server side, only need to be initiated by the client side.
 
-## 总结和展望  
-本文简单介绍了服务测试的用法和原理，后续会进一步针对该功能进行增强，比如处理抽象类的参数类型，支持从json文件导入参数值，支持对参数值的保存等等，方便对服务接口进行回归测试。
+## Summary and outlook  
+
+This article briefly introduces the usage and principle of service testing, and will further enhance this function in the future, such as processing the parameter types of abstract classes, importing parameter values from json files, supporting the saving of parameter values, etc., to facilitate regression testing of the service interface.

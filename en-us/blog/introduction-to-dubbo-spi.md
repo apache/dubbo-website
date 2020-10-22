@@ -1,44 +1,43 @@
 ---
-title: Dubbo可扩展机制实战
+title: Dubbo Extension Mechanism in Action
 keywords: Dubbo, SPI
-description: 本文介绍了Dubbo框架的核心，SPI扩展机制。
+description: This article introduces Dubbo's SPI mechanism.
 ---
 
-# Dubbo可扩展机制实战
+# Dubbo Extension Mechanism in Action
 
-## 1. Dubbo的扩展机制
-在Dubbo的官网上，Dubbo描述自己是一个高性能的RPC框架。今天我想聊聊Dubbo的另一个很棒的特性, 就是它的可扩展性。
-如同罗马不是一天建成的，任何系统都一定是从小系统不断发展成为大系统的，想要从一开始就把系统设计的足够完善是不可能的，相反的，我们应该关注当下的需求，然后再不断地对系统进行迭代。在代码层面，要求我们适当的对关注点进行抽象和隔离，在软件不断添加功能和特性时，依然能保持良好的结构和可维护性，同时允许第三方开发者对其功能进行扩展。在某些时候，软件设计者对扩展性的追求甚至超过了性能。
+## 1. Extension Mechanism of Dubbo
 
-在谈到软件设计时，可扩展性一直被谈起，那到底什么才是可扩展性，什么样的框架才算有良好的可扩展性呢？它必须要做到以下两点:
-1. 作为框架的维护者，在添加一个新功能时，只需要添加一些新代码，而不用大量的修改现有的代码，即符合开闭原则。
-2. 作为框架的使用者，在添加一个新功能时，不需要去修改框架的源码，在自己的工程中添加代码即可。
+Dubbo is claimed as a high-performance RPC framework on its official website. Today, I want to talk about another great specialty of Dubbo --- its scalability.  As quote: Rome wasn’t built in a day. Any successful system always starts as a prototype. It is impossible to design a perfect system at the beginning. Instead, we should focus on true demand and keep improving the system. On the coding side, it requires us to pay attention on abstraction layers and high-level isolation. In that case, the system could keep a healthy structure and easy to maintain while new features or third-party extensions are added. Under some circumstances, a designer should pursue more of scalability than the system’s current performance. 
+When talking about software design, people always mention scalability. A framework with good scalability requires the following:
+1.The framework should follow opening/closed principle: software entities should be open for extension, but closed for modification; This means a framework should allow the maintainer to add new functions with as few modifications as possible. 
+2.The framework should allow the user to add new functions by adding code on his project without modifying the framework's original source code base. 
+With microkernel architecture and extension mechanism, Dubbo satisfies such requirements and achieves good scalability. In the following chapters, we will discuss Dubbo's extension mechanism in detail. 
 
-Dubbo很好的做到了上面两点。这要得益于Dubbo的微内核+插件的机制。接下来的章节中我们会慢慢揭开Dubbo扩展机制的神秘面纱。
+## 2.Extension Solutions
 
-## 2. 可扩展的几种解决方案
-通常可扩展的实现有下面几种:
-* Factory模式
-* IoC容器
-* OSGI容器
+Creating Extensible applications usually considers:
+* Factory method pattern
+* IoC container
+* OSGi (Open Services Gateway initiative)
 
-Dubbo作为一个框架，不希望强依赖其他的IoC容器，比如Spring，Guice。OSGI也是一个很重的实现，不适合Dubbo。最终Dubbo的实现参考了Java原生的SPI机制，但对其进行了一些扩展，以满足Dubbo的需求。
+As a framework, Dubbo does not wish to rely on other IoC containers such as Spring, Guice. OSGi is too complicated to fit Dubbo. In the end, Dubbo SPI is inherited from standard JDK SPI and makes it more powerful.
 
-## 3. Java SPI机制
-既然Dubbo的扩展机制是基于Java原生的SPI机制，那么我们就先来了解下Java SPI吧。了解了Java的SPI，也就是对Dubbo的扩展机制有一个基本的了解。如果对Java SPI比较了解的同学，可以跳过。
+## 3.Java SPI Mechanism
 
-Java SPI(Service Provider Interface)是JDK内置的一种动态加载扩展点的实现。在ClassPath的`META-INF/services`目录下放置一个与接口同名的文本文件，文件的内容为接口的实现类，多个实现类用换行符分隔。JDK中使用`java.util.ServiceLoader`来加载具体的实现。
-让我们通过一个简单的例子，来看看Java SPI是如何工作的。
+We will first discuss Java SPI mechanism, which is a basis for understanding Dubbo’s extension mechanism. If you are familiar with Java SPI, you can skip this part.
 
-1. 定义一个接口IRepository用于实现数据储存
+Java SPI (Service Provider Interface) is a feature for discovering and loading implementations matching a given interface provided in JDK. We can create a text file with the same name as the interface under resource directory `META-INF/services`. The content of the file is the fully qualified class name of the SPI implementation, in which each component is separated by a line breaker. JDK uses `java.util.ServiceLoader` to load implementations of a service. Let us use a simple example to show how Java SPI works. 
+
+1. Define an interface IRepository to store data.
+
 ```java
 public interface IRepository {
     void save(String data);
 }
 ```
 
-2. 提供IRepository的实现
-    IRepository有两个实现。MysqlRepository和MongoRepository。
+2. Create 2 implementations for IRepository: MysqlRepository and MongoRepository
 
 ```java
 public class MysqlRepository implements IRepository {
@@ -56,15 +55,16 @@ public class MongoRepository implements IRepository {
 }
 ```
 
-3. 添加配置文件
-    在`META-INF/services`目录添加一个文件，文件名和接口全名称相同，所以文件是`META-INF/services/com.demo.IRepository`。文件内容为:
+3. Create a configuration file under `META-INF/services`. 
+
+The file name is `META-INF/services/com.demo.IRepository`, the content of file is:
 
 ```text
 com.demo.MongoRepository
 com.demo.MysqlRepository
 ```
 
-4. 通过ServiceLoader加载IRepository实现
+4.  Load IRepository using ServiceLoader
 
 ```java
 ServiceLoader<IRepository> serviceLoader = ServiceLoader.load(IRepository.class);
@@ -75,74 +75,82 @@ while (it != null && it.hasNext()){
     demoService.save("tom");
 }
 ```
-在上面的例子中，我们定义了一个扩展点和它的两个实现。在ClassPath中添加了扩展的配置文件，最后使用ServiceLoader来加载所有的扩展点。
-最终的输出结果为：
+In the above example, we created an extension and two of its applications. We created the configuration file in ClassPath and loaded the extensions using ServiceLoader. The final output is: 
 class:testDubbo.MongoRepository
 Save tom to Mongo
 class:testDubbo.MysqlRepository
 Save tom to Mysql
 
-## 4. Dubbo的SPI机制
+## 4. Dubbo SPI Mechanism
 
-Java SPI的使用很简单。也做到了基本的加载扩展点的功能。但Java SPI有以下的不足:
-* 需要遍历所有的实现，并实例化，然后我们在循环中才能找到我们需要的实现。
-* 配置文件中只是简单的列出了所有的扩展实现，而没有给他们命名。导致在程序中很难去准确的引用它们。
-* 扩展如果依赖其他的扩展，做不到自动注入和装配
-* 不提供类似于Spring的IOC和AOP功能
-* 扩展很难和其他的框架集成，比如扩展里面依赖了一个Spring bean，原生的Java SPI不支持
+Java SPI is simple to use. It also supports basic extension point functions, however, it has some disadvantages:
+* It will load and instantiate all implementations at once to find the requested implementation.
+* The configuration file only includes the extension implementation but does not name them, which makes it hard to reference them in applications.
+* If extensions depend on other extensions, Java SPI cannot automatically load the dependency SPI.
+* It does not provide functions such as IOC or AOP in Spring.
+* It is hard to assemble extensions with other frameworks. For example, if the extension depends on Spring bean, the original Java SPI will not support it.
 
-所以Java SPI应付一些简单的场景是可以的，但对于Dubbo，它的功能还是比较弱的。Dubbo对原生SPI机制进行了一些扩展。接下来，我们就更深入地了解下Dubbo的SPI机制。
+Therefore, Java SPI is good for some simple scenarios, but does not fit for Dubbo. Dubbo makes some extensions on the original SPI mechanism. We will discuss more about the Dubbo SPI mechanism in the following sections.
 
-## 5. Dubbo扩展点机制基本概念
-在深入学习Dubbo的扩展机制之前，我们先明确Dubbo SPI中的一些基本概念。在接下来的内容中，我们会多次用到这些术语。
+## 5. Basic Concepts for Dubbo Extension Point Mechanism
 
-### 5.1 扩展点(Extension Point)
-是一个Java的接口。
+Before diving into Dubbo's extension mechanism，Let us first declare some basic concepts in Dubbo SPI. Those terms will appear multiple times in the following section.
 
-### 5.2 扩展(Extension)
-扩展点的实现类。
+### 5.1 Extension Point
 
-### 5.3 扩展实例(Extension Instance)
-扩展点实现类的实例。
+an interface of java.
 
-### 5.4 扩展自适应实例(Extension Adaptive Instance)
-第一次接触这个概念时，可能不太好理解(我第一次也是这样的...)。如果称它为扩展代理类，可能更好理解些。扩展的自适应实例其实就是一个Extension的代理，它实现了扩展点接口。在调用扩展点的接口方法时，会根据实际的参数来决定要使用哪个扩展。比如一个IRepository的扩展点，有一个save方法。有两个实现MysqlRepository和MongoRepository。IRepository的自适应实例在调用接口方法的时候，会根据save方法中的参数，来决定要调用哪个IRepository的实现。如果方法参数中有repository=mysql，那么就调用MysqlRepository的save方法。如果repository=mongo，就调用MongoRepository的save方法。和面向对象的延迟绑定很类似。为什么Dubbo会引入扩展自适应实例的概念呢？
-* Dubbo中的配置有两种，一种是固定的系统级别的配置，在Dubbo启动之后就不会再改了。还有一种是运行时的配置，可能对于每一次的RPC，这些配置都不同。比如在xml文件中配置了超时时间是10秒钟，这个配置在Dubbo启动之后，就不会改变了。但针对某一次的RPC调用，可以设置它的超时时间是30秒钟，以覆盖系统级别的配置。对于Dubbo而言，每一次的RPC调用的参数都是未知的。只有在运行时，根据这些参数才能做出正确的决定。
-* 很多时候，我们的类都是一个单例的，比如Spring的bean，在Spring bean都实例化时，如果它依赖某个扩展点，但是在bean实例化时，是不知道究竟该使用哪个具体的扩展实现的。这时候就需要一个代理模式了，它实现了扩展点接口，方法内部可以根据运行时参数，动态的选择合适的扩展实现。而这个代理就是自适应实例。
-    自适应扩展实例在Dubbo中的使用非常广泛，Dubbo中，每一个扩展都会有一个自适应类，如果我们没有提供，Dubbo会使用字节码工具为我们自动生成一个。所以我们基本感觉不到自适应类的存在。后面会有例子说明自适应类是怎么工作的。
+### 5.2 Extension
+
+an implementation class of the Extension Point
+
+### 5.3 Extension Instance
+
+instance of an extension point implementation class
+
+### 5.4 Extension Adaptive Instance
+
+Maybe it is a little difficult to understand this concept when hearing about it the first time. It may help you understand it better by calling it an extension proxy class. The extension adaptive instance is actually an extension proxy, which implements the method of extension point interface. When calling the interface method of the extension point, it will decide which extension to use according to the actual parameters. For example, the extension point of an IRepository has one save method, and two implementations MysqlRepository and MongoRepository. When calling the method of the interface, the adaptive instance of IRepository will determine which IRepository implementation to call according to the parameters in the save method. If the parameter repository=mysql in the method, then we can call the save method of MysqlRepository. If repository=mongo, then we can call the save method of MongoRepository, which is similar to late binding in Object-oriented languages. However, why does Dubbo introduce the concept of extended adaptive instances?
+* There are two configurations in Dubbo, one is a fixed system-level configuration and it will not be changed after Dubbo launches. Another is the run-time configuration that may be different for each RPC. For instance, the timeout is configured as 10 seconds in the xml file, which will not change after Dubbo launches. However, for a certain PRC call, we can set its timeout to 30 seconds so as to override the system-level configuration. For Dubbo, the parameters called in each RPC is unknown and only at run-time can you make the right decision according to revealed parameters.
+* Our class is usually singleton-scaled, such as beans of Spring IoC Container. When instantiating beans, if it depends on some specific extension point, it will know which extension to use, otherwise, the bean will not know how to choose extensions. At this time, a proxy mode is needed, which implements the interface  of an extension point. The method can dynamically select the appropriate extension according to the run-time parameters, and this proxy is an adaptive instance. Adaptive extension instance is widely used in Dubbo, in Dubbo, each extension will have an adaptive class, and if we do not provide it, Dubbo will automatically generate one for us by using the bytecode encoder. Therefore, we basically don't recognize the existence of adaptive classes. We will explain how the adaptive class works in later chapters.
 
 ### 5.5 @SPI
-@SPI注解作用于扩展点的接口上，表明该接口是一个扩展点。可以被Dubbo的ExtentionLoader加载。如果没有此ExtensionLoader调用会异常。
+
+@SPI annotation works on the interface of the extension point, which indicates that the interface is an extension point, and can be loaded by Dubbo ExtentionLoader. If there is no such ExtentionLoader, the call will throw an exception.
 
 ### 5.6 @Adaptive
-@Adaptive注解用在扩展接口的方法上。表示该方法是一个自适应方法。Dubbo在为扩展点生成自适应实例时，如果方法有@Adaptive注解，会为该方法生成对应的代码。方法内部会根据方法的参数，来决定使用哪个扩展。
-@Adaptive注解用在类上代表实现一个装饰类，类似于设计模式中的装饰模式，它主要作用是返回指定类，目前在整个系统中AdaptiveCompiler、AdaptiveExtensionFactory这两个类拥有该注解。
 
+@Adaptive annotation is used on the method that extends the interface, which indicates an adaptive method. When Dubbo generates an adaptive instance for an extension point, if the function has @Adaptive annotation, then Dubbo will generate the corresponding code for the method. The method determines which extension to use according to the parameters. When @Adaptive annotation is used on the class to implement a Decorator class, it is similar to the Decorator pattern, whose major function is to return a specified class. Currently in Dubbo, both AdaptiveCompiler and AdaptiveExtensionFactory have @Adaptive annotation. 
 
 ### 5.7 ExtentionLoader
-类似于Java SPI的ServiceLoader，负责扩展的加载和生命周期维护。
 
-### 5.8 扩展别名
-和Java SPI不同，Dubbo中的扩展都有一个别名，用于在应用中引用它们。比如
+Similar to the Java SPI ServiceLoader, it is responsible for loading extensions and life-cycle maintenance.
+
+### 5.8 Extension Alias
+
+Different from Java, each extension in Dubbo has an alias, which is used to reference them in the application, such as 
 
 ```bash
 random=com.alibaba.dubbo.rpc.cluster.loadbalance.RandomLoadBalance
 roundrobin=com.alibaba.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance
 ```
-其中的random，roundrobin就是对应扩展的别名。这样我们在配置文件中使用random或roundrobin就可以了。
+where random, roundrobin are alias of the corresponding extensions, and we can directly use them in the configuration file. 
 
-### 5.9 一些路径
-和Java SPI从`/META-INF/services`目录加载扩展配置类似，Dubbo也会从以下路径去加载扩展配置文件:
+### 5.9 Paths
+
+Similar to the way Java SPI loading the extension configuration from the `META-INF/services` directory, Dubbo will also load the extension configuration file from the following path:
 * `META-INF/dubbo/internal`
 * `META-INF/dubbo`
 * `META-INF/services`
 
-## 6. Dubbo的LoadBalance扩展点解读
-在了解了Dubbo的一些基本概念后，让我们一起来看一个Dubbo中实际的扩展点，对这些概念有一个更直观的认识。
+## 6. Interpretation for Dubbo's LoadBalance Extension Point
 
-我们选择的是Dubbo中的LoadBalance扩展点。Dubbo中的一个服务，通常有多个Provider，consumer调用服务时，需要在多个Provider中选择一个。这就是一个LoadBalance。我们一起来看看在Dubbo中，LoadBalance是如何成为一个扩展点的。
+Now that we know some basic idea about Dubbo, let us check a practical extension point in Dubbo to get some intuition.
+ 
+We take the Dubbo’s LoadBalance extension point as an example. A service in Dubbo usually has multiple providers. When a consumer calls the service, he needs to choose one of the providers. This is an example of LoadBalance. Now, let us figure out how LoadBalance becomes an extension point in Dubbo.
 
-### 6.1 LoadBalance接口
+
+### 6.1 LoadBalance Interfance
 
 ```java
 @SPI(RandomLoadBalance.NAME)
@@ -152,10 +160,9 @@ public interface LoadBalance {
     <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
 }
 ```
-LoadBalance接口只有一个select方法。select方法从多个invoker中选择其中一个。上面代码中和Dubbo SPI相关的元素有:
-* @SPI([RandomLoadBalance.NAME](http://RandomLoadBalance.NAME))
-    @SPI作用于LoadBalance接口，表示接口LoadBalance是一个扩展点。如果没有@SPI注解，试图去加载扩展时，会抛出异常。@SPI注解有一个参数，该参数表示该扩展点的默认实现的别名。如果没有显示的指定扩展，就使用默认实现。`RandomLoadBalance.NAME`是一个常量，值是"random"，是一个随机负载均衡的实现。
-    random的定义在配置文件`META-INF/dubbo/internal/com.alibaba.dubbo.rpc.cluster.LoadBalance`中:
+LoadBalance interface has only one select method. Select method chose one invoker among multiple invokers. In the code above, the elements related to Dubbo SPI are:
+* @SPI([RandomLoadBalance.NAME](http://RandomLoadBalance.NAME)) @SPI is used for LoadBalance interface, which indicates that the LoadBalance interface is an extension point. Without the @SPI annotation, if we try to load the extension, it will throw an exception. @SPI annotation has one parameter, and this parameter represents the Alias of the default implementation of the extension point. If there has no explicitly specified extension, the default implementation will be used.
+`RandomLoadBalance.NAME` is a constant with value “random” and is a random load balancing implementation. The definition of random is in the configuration file `META-INF/dubbo/internal/com.alibaba.dubbo.rpc.cluster.LoadBalance`:
 
 ```bash
 random=com.alibaba.dubbo.rpc.cluster.loadbalance.RandomLoadBalance
@@ -163,28 +170,29 @@ roundrobin=com.alibaba.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance
 leastactive=com.alibaba.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance
 consistenthash=com.alibaba.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance
 ```
-可以看到文件中定义了4个LoadBalance的扩展实现。由于负载均衡的实现不是本次的内容，这里就不过多说明。只用知道Dubbo提供了4种负载均衡的实现，我们可以通过xml文件，properties文件，JVM参数显式的指定一个实现。如果没有，默认使用随机。
+There are four extension implementations of LoadBalance defined in the configuration file. The implementation of load balancing will not be covered in this article. The only thing we need to know is that Dubbo provides four kinds of load balancing implementations. We can explicitly specify an implementation by using xml file, properties file or JVM parameter. If there has no explicitly specified implementation, Dubbo will use random as default.
 
 
 ![dubbo-loadbalance | left](https://raw.githubusercontent.com/vangoleo/wiki/master/dubbo/dubbo_loadbalance.png "")
 
-* @Adaptive("loadbalance")
-    @Adaptive注解修饰select方法，表明方法select方法是一个可自适应的方法。Dubbo会自动生成该方法对应的代码。当调用select方法时，会根据具体的方法参数来决定调用哪个扩展实现的select方法。@Adaptive注解的参数`loadbalance`表示方法参数中的loadbalance的值作为实际要调用的扩展实例。
-    但奇怪的是，我们发现select的方法中并没有loadbalance参数，那怎么获取loadbalance的值呢？select方法中还有一个URL类型的参数，Dubbo就是从URL中获取loadbalance的值的。这里涉及到Dubbo的URL总线模式，简单说，URL中包含了RPC调用中的所有参数。URL类中有一个`Map<String, String> parameters`字段，parameters中就包含了loadbalance。
+* @Adaptive("loadbalance")  Applying @Adaptive annotation on select method indicates that select method is an adaptive method. Dubbo will automatically generate the corresponding code for the method. When select method is called, it will decide which extension to apply based on the method parameters. @Adaptive parameter `loadbalance` indicates that the value of loadbalance in method is the extension implementation that will be actually called. However, we cannot find loadbalance parameter in select method, then how can we obtain the value of loadbalance? There is another URL-type parameter in select method, and Dubbo obtains the value of loadbalance from that URL. Here we need to use Dubbo’s URL bus pattern, in one word, URL contains all the parameters in RPC. There is a member variable `Map<String, String>parameters` in the URL class, which contains loadbalance as a parameter
 
-### 6.2 获取LoadBalance扩展
-Dubbo中获取LoadBalance的代码如下:
+### 6.2 Obtain LoadBalance extension
+
+The code of LoadBalance in Dubbo is as follows:
 
 ```java
 LoadBalance lb = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(loadbalanceName);
 ```
-使用ExtensionLoader.getExtensionLoader(LoadBalance.class)方法获取一个ExtensionLoader的实例，然后调用getExtension，传入一个扩展的别名来获取对应的扩展实例。
+Using ExtensionLoader.getExtensionLoader(LoadBalance.class) method to obtain an implementation of ExtensionLoader, then we call getExtension and pass an extension alias to obtain the corresponding extension implementation.
 
-## 7. 自定义一个LoadBalance扩展
-本节中，我们通过一个简单的例子，来自己实现一个LoadBalance，并把它集成到Dubbo中。我会列出一些关键的步骤和代码，也可以从这个地址([https://github.com/vangoleo/dubbo-spi-demo](https://github.com/vangoleo/dubbo-spi-demo))下载完整的demo。
+## 7. Customize a LoadBalance Extension
 
-### 7.1 实现LoadBalance接口
-首先，编写一个自己实现的LoadBalance，因为是为了演示Dubbo的扩展机制，而不是LoadBalance的实现，所以这里LoadBalance的实现非常简单，选择第一个invoker，并在控制台输出一条日志。
+In this session, we will use a simple example to implement a LoadBalance and integrate it into Dubbo. I will show some important steps and codes, and the complete demo can be downloaded from the following address([https://github.com/vangoleo/dubbo-spi-demo](https://github.com/vangoleo/dubbo-spi-demo)).
+
+### 7.1 implement LoadBalance Interface
+
+First, we build a LoadBalance instance. Since we just need the instance to demonstrate Dubbo extension mechanism, it will be very simple. We choose the first invoker and print a log sentence in the console. 
 
 ```java
 package com.dubbo.spi.demo.consumer;
@@ -197,35 +205,38 @@ public class DemoLoadBalance implements LoadBalance {
 }
 ```
 
-### 7.2 添加扩展配置文件
-添加文件:`META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.LoadBalance`。文件内容如下:
+### 7.2 Add extension configuration file
+
+Add file:`META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.LoadBalance`. The content of file is:
 
 ```bash
 demo=com.dubbo.spi.demo.consumer.DemoLoadBalance
 ```
 
-### 7.3 配置使用自定义LoadBalance
-通过上面的两步，已经添加了一个名字为demo的LoadBalance实现，并在配置文件中进行了相应的配置。接下来，需要显式的告诉Dubbo使用demo的负载均衡实现。如果是通过spring的方式使用Dubbo，可以在xml文件中进行设置。
+### 7.3 Configure customized LoadBalance
+
+Through the above 2 steps, we have already added a LoadBalance implementation named demo, and set up the configuration file. In the next step, we need to explicitly tell Dubbo to implement the demo while doing load balancing. If we use Dubbo through spring, we could set it up in the xml file. 
 
 ```xml
 <dubbo:reference id="helloService" interface="com.dubbo.spi.demo.api.IHelloService" loadbalance="demo" />
 ```
-在consumer端的[dubbo:reference](dubbo:reference)中配置<loadbalance="demo">
+Configure <loadbalance="demo"> in [dubbo:reference](dubbo:reference) at consumer part.
 
-### 7.4 启动Dubbo
-启动Dubbo，调用一次IHelloService，可以看到控制台会输出一条`DemoLoadBalance: Select the first invoker...`日志。说明Dubbo的确是使用了我们自定义的LoadBalance。
+### 7.4 launch Dubbo
 
-
-## 总结 
-到此，我们从Java SPI开始，了解了Dubbo SPI 的基本概念，并结合了Dubbo中的LoadBalance加深了理解。最后，我们还实践了一下，创建了一个自定义LoadBalance，并集成到Dubbo中。相信通过这里理论和实践的结合，大家对Dubbo的可扩展有更深入的理解。
-总结一下，Dubbo SPI有以下的特点:
-* 对Dubbo进行扩展，不需要改动Dubbo的源码
-* 自定义的Dubbo的扩展点实现，是一个普通的Java类，Dubbo没有引入任何Dubbo特有的元素，对代码侵入性几乎为零。
-* 将扩展注册到Dubbo中，只需要在ClassPath中添加配置文件。使用简单。而且不会对现有代码造成影响。符合开闭原则。
-* dubbo的扩展机制设计默认值：@SPI("dubbo") 代表默认的spi对象
-* Dubbo的扩展机制支持IoC,AoP等高级功能
-* Dubbo的扩展机制能很好的支持第三方IoC容器，默认支持Spring Bean，可自己扩展来支持其他容器，比如Google的Guice。
-* 切换扩展点的实现，只需要在配置文件中修改具体的实现，不需要改代码。使用方便。
+Launch Dubbo and call IHelloService, the console will output log: `DemoLoadBalance: Select the first invoker...`, which means Dubbo does use our customized LoadBalance.
 
 
-下一篇，我们将会一起深入Dubbo的源码，更深入的了解Dubbo的可扩展机制。
+## Summary 
+
+So far, we learnt the basic concepts of Dubbo SPI beginning with Java SPI, and we used LoadBalance in Dubbo as an example to help us understand better. Finally, we practiced and created a customized LoadBalance and integrated it to Dubbo. We believe that combining concepts and practice, everyone can get a better idea of Dubbo’s scalability. To summarize, Dubbo SPI has the following features:
+* Build extensions on Dubbo does not require modifications on the original source code base.
+* The customized Dubbo extension point implementation is a normal Java class. Dubbo does not introduce any specialized elements, and have almost zero code intrusion.
+*Extension registration on Dubbo requires only configuration file under the ClassPath directory. It is simple to use and has no effect on the existing code. This meets opening/closed principle.
+* Dubbo's extension mechanism default: @SPI("dubbo") represents the default SPI object.
+* Dubbo's extension mechanism supports the advanced features such as IoC and AoP, etc.
+* Dubbo's extension mechanism supports third-party IoC containers. It supports Spring beans by default and can be extended to other containers, such as Google/Guice.
+* It is easy to switch the implementation of the extension point because it requires only modifications on the specific implementation in the configuration file without changing the code.
+
+
+In the next article, we will go deep and check Dubbo's source code to learn more about Dubbo's extensibility mechanism.

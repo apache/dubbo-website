@@ -1,21 +1,21 @@
 ---
-title: Spring Boot Dubbo应用启停源码分析
-keywords: Dubbo, Spring Boot, 源码分析
-description: 本文分析 `dubbo-spring-boot-project` 中 Dubbo 启停源码的实现原理。
+title: Source code analysis of spring-boot+Dubbo App start and stop
+keywords: Dubbo, Spring Boot, source code analysis
+description: This article introduces the implementation details of app start and stop in `dubbo-spring-boot-project`.
 ---
 
-# Spring Boot Dubbo应用启停源码分析
+# Source code analysis of spring-boot+Dubbo App start and stop
 
-## 背景介绍
+## Introduction
 
-[Dubbo Spring Boot](https://github.com/apache/dubbo-spring-boot-project) 工程致力于简化 Dubbo RPC 框架在Spring Boot应用场景的开发。同时也整合了 Spring Boot 特性：
+[Dubbo Spring Boot](https://github.com/apache/dubbo-spring-boot-project) project is dedicated to simplifying the development of the Dubbo RPC framework in the Spring Boot application. It also integrates the feature of Spring Boot:
 
-- [自动装配](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (比如： 注解驱动, 自动装配等).
-- [Production-Ready](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (比如： 安全, 健康检查, 外部化配置等).
+- [Autoconfigure](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-autoconfigure) (ex: Annotation driver, Autoconfigure, etc.)
+- [Production-Ready](https://github.com/apache/dubbo-spring-boot-project/blob/master/dubbo-spring-boot-actuator) (ex: Security, Healthy check, Externalize configuration, etc.)
 
-## DubboConsumer启动分析
+## The analysis of DubboConsumer startup
 
-你有没有想过一个问题？`dubbo-spring-boot-project`中的`DubboConsumerDemo`应用就一行代码，`main`方法执行完之后，为什么不会直接退出呢？
+Have you ever thought about this : since the `DubboConsumerDemo` application in `dubbo-spring-boot-project` has only one line of code, why not just exit directly when the `main` method is executed?
 
 ```java
 @SpringBootApplication(scanBasePackages = "com.alibaba.boot.dubbo.demo.consumer.controller")
@@ -28,21 +28,16 @@ public class DubboConsumerDemo {
 }
 ```
 
-其实要回答这样一个问题，我们首先需要把这个问题进行一个抽象，即一个JVM进程，在什么情况下会退出？
+In fact, to answer this question, we need to abstract it first, that is, under what circumstances will a JVM process exit?
 
-以Java 8为例，通过查阅JVM语言规范[1]，在12.8章节中有清晰的描述：
+Take Java 8 as an example. By referring to the JVM language specification[1], there is a clear description in Section 12.8:
 
-A program terminates all its activity and *exits* when one of two things happens:
+> A program terminates all its activity and *exits* when one of two things happens:
+>
+> - All the threads that are not daemon threads terminate.
+> - Some thread invokes the `exit` method of class `Runtime` or class `System`, and the `exit` operation is not forbidden by the security manager.
 
-- All the threads that are not daemon threads terminate.
-- Some thread invokes the `exit` method of class `Runtime` or class `System`, and the `exit` operation is not forbidden by the security manager.
-
-也就是说，导致JVM的退出只有2种情况：
-
-1. 所有的非daemon进程完全终止
-2. 某个线程调用了`System.exit()`或`Runtime.exit()`
-
-因此针对上面的情况，我们判断，一定是有某个非daemon线程没有退出导致。我们知道，通过jstack可以看到所有的线程信息，包括他们是否是daemon线程，可以通过jstack找出那些是非deamon的线程。
+Therefore, in view of the above situation, we judge that there must be some non-daemon thread not exiting. All thread information can be seen by `jstack`, including whether they are daemon threads, and `jstack` can be used to find out which threads are non-daemon.
 
 ```sh
 ➜  jstack 57785 | grep tid | grep -v "daemon"
@@ -65,36 +60,36 @@ A program terminates all its activity and *exits* when one of two things happens
 
 ```
 
-> 此处通过grep tid 找出所有的线程摘要，通过grep -v找出不包含daemon关键字的行
+> We can find all the thread digests by `grep tid` here, and find the line that doesn't contain the daemon keyword by `grep -v` command.
 
-通过上面的结果，我们发现了一些信息：
+We can get some information from the above results:
 
-* 有两个线程`container-0`, `container-1`非常可疑，他们是非daemon线程，处于wait状态
-* 有一些GC相关的线程，和VM打头的线程，也是非daemon线程，但他们很有可能是JVM自己的线程，在此暂时忽略。
+- There are two "suspicious" threads : `container-0`, `container-1`. They are non-daemon thread in wait state.
+- There are alse some threads about GC, and threads that start with `VM`. They are also some non-daemon threads, but they are most likely the JVM's own threads, which we can ignore for now.
 
-综上，我们可以推断，很可能是因为`container-0`和`container-1`导致JVM没有退出。现在我们通过源码，搜索一下到底是谁创建的这两个线程。
+In summary, we can infer that it is likely that the `container-0` and `container-1` cause the JVM to not exit. Now let's search through the source code to find out who created the two threads.
 
-通过对spring-boot的源码分析，我们在`org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer`的`startDaemonAwaitThread`找到了如下代码
+By the source code analysis of Spring-boot, we can find these code in the `startDaemonAwaitThread` method of `org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer`.
 
 ```java
-	private void startDaemonAwaitThread() {
-		Thread awaitThread = new Thread("container-" + (containerCounter.get())) {
+    private void startDaemonAwaitThread() {
+        Thread awaitThread = new Thread("container-" + (containerCounter.get())) {
 
-			@Override
-			public void run() {
-				TomcatEmbeddedServletContainer.this.tomcat.getServer().await();
-			}
+            @Override
+            public void run() {
+                TomcatEmbeddedServletContainer.this.tomcat.getServer().await();
+            }
 
-		};
-		awaitThread.setContextClassLoader(getClass().getClassLoader());
-		awaitThread.setDaemon(false);
-		awaitThread.start();
-	}
+        };
+        awaitThread.setContextClassLoader(getClass().getClassLoader());
+        awaitThread.setDaemon(false);
+        awaitThread.start();
+    }
 ```
 
-在这个方法加个断点，看下调用堆栈：
+Let's add a breakpoint in this method, and focus on the call stack:
 
-```
+```plain
 initialize:115, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
 <init>:84, TomcatEmbeddedServletContainer (org.springframework.boot.context.embedded.tomcat)
 getTomcatEmbeddedServletContainer:554, TomcatEmbeddedServletContainerFactory (org.springframework.boot.context.embedded.tomcat)
@@ -111,13 +106,13 @@ run:1107, SpringApplication (org.springframework.boot)
 main:35, DubboConsumerDemo (com.alibaba.boot.dubbo.demo.consumer.bootstrap)
 ```
 
-可以看到，spring-boot应用在启动的过程中，由于默认启动了Tomcat暴露HTTP服务，所以执行到了上述方法，而Tomcat启动的所有的线程，默认都是daemon线程，例如监听请求的Acceptor，工作线程池等等，如果这里不加控制的话，启动完成之后JVM也会退出。因此需要显式地启动一个线程，在某个条件下进行持续等待，从而避免线程退出。
+It can be seen that during the startup process of the Spring-boot application, the above method is executed since the execution of Tomcat exposes the HTTP service by default. Also, all threads started by Tomcat are daemon threads by default, such as the Acceptor of the listening request, threads in working threads, etc. Thus the JVM will also exit after the startup is complete in there is no extra control here. Therefore, it is necessary to explicitly start a thread and continue to wait under certain conditions, thereby avoid thread exit.
 
-下面我们在深挖一下，在Tomcat的`this.tomcat.getServer().await()`这个方法中，线程是如何实现不退出的。这里为了阅读方便，去掉了不相关的代码。
+Let's dig deeper to find out how the thread stay alive in Tomcat's `this.tomcat.getServer().await()` method.
 
 ```java
 public void await() {
-    	// ...
+        // ...
         if( port==-1 ) {
             try {
                 awaitThread = Thread.currentThread();
@@ -133,25 +128,25 @@ public void await() {
             }
             return;
         }
-		// ...
+        // ...
     }
 ```
 
-在await方法中，实际上当前线程在一个while循环中每10秒检查一次 `stopAwait`这个变量，它是一个`volatile`类型变量，用于确保被另一个线程修改后，当前线程能够立即看到这个变化。如果没有变化，就会一直处于while循环中。这就是该线程不退出的原因，也就是整个spring-boot应用不退出的原因。
+In the await method, the current thread checks the variable `stopAwait` every 10 seconds in a while loop. It is a `volatile` variable that is used to ensure that the current thread can see the change immediately after the variable being modified by another thread. If there is no change, it will stay in the loop. This is the reason why the thread does not exit, which is also the reason that the entire Spring-boot application doesn't exit.
 
-因为Springboot应用同时启动了8080和8081(management port)两个端口，实际是启动了两个Tomcat，因此会有两个线程`container-0`和`container-1`。
+Since Spring-boot application enables port 8080 and 8081(management port) at the same time, there are actually two Tomcats. So there are two threads named `container-0` and `container-1`.
 
-接下来，我们再看看，这个Spring-boot应用又是如何退出的呢？
+Next, let's see how this Spring-boot application exits.
 
-## DubboConsumer退出分析
+## The analysis of DubboConsumer exit
 
-在前面的描述中提到，有一个线程持续的在检查`stopAwait`这个变量，那么我们自然想到，在Stop的时候，应该会有一个线程去修改`stopAwait`，打破这个while循环，那又是谁在修改这个变量呢？
+As mentioned in the previous description, there is a thread that checks the variable `stopAwait` continuously. So there must be a thread to modify `stopAwait` at Stop, thus break the while loop. But who is modifying this variable?
 
-通过对源码分析，可以看到只有一个方法修改了`stopAwait`,即`org.apache.catalina.core.StandardServer#stopAwait`，我们在此处加个断点，看看是谁在调用。
+By analyzing the source code, we can see that there is only one method that modifies `stopAwait` : `org.apache.catalina.core.StandardServer#stopAwait`. To figure out who is calling this method, we add a breakpoint here.
 
-> 注意，当我们在Intellij IDEA的Debug模式，加上一个断点后，需要在命令行下使用`kill -s INT $PID`或者`kill -s TERM $PID`才能触发断点，点击IDE上的Stop按钮，不会触发断点。这是IDEA的bug
+> Note that after adding a breakpoint in Intellij IDEA's Debug mode, we also need to type `kill -s INT $PID` or `kill -s TERM $PID` in command line to trigger the breakpoint. Due to buggy IDEA, a single click to the stop button won't trigger the breakpoint.
 
-可以看到有一个名为`Thread-3`的线程调用了该方法：
+You can see the method is called by a thread called `Thread-3`:
 
 ```java
 stopAwait:390, StandardServer (org.apache.catalina.core)
@@ -166,50 +161,50 @@ doClose:1014, AbstractApplicationContext (org.springframework.context.support)
 run:929, AbstractApplicationContext$2 (org.springframework.context.support)
 ```
 
-通过源码分析，原来是通过Spring注册的`ShutdownHook`来执行的
+Through source code analysis, it was executed by Spring's registered `ShutdownHook`.
 
 ```java
-	@Override
-	public void registerShutdownHook() {
-		if (this.shutdownHook == null) {
-			// No shutdown hook registered yet.
-			this.shutdownHook = new Thread() {
-				@Override
-				public void run() {
-					synchronized (startupShutdownMonitor) {
-						doClose();
-					}
-				}
-			};
-			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
-		}
-	}
+    @Override
+    public void registerShutdownHook() {
+        if (this.shutdownHook == null) {
+            // No shutdown hook registered yet.
+            this.shutdownHook = new Thread() {
+                @Override
+                public void run() {
+                    synchronized (startupShutdownMonitor) {
+                        doClose();
+                    }
+                }
+            };
+            Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+        }
+    }
 ```
 
-通过查阅Java的API文档[2], 我们可以知道ShutdownHook将在下面两种情况下执行
+By reffering the Java API documentation[2], we found that ShutdownHook will be executed under the following two cases.
 
 > The Java virtual machine *shuts down* in response to two kinds of events:
 >
 > - The program *exits* normally, when the last non-daemon thread exits or when the `exit` (equivalently, [`System.exit`](https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#exit-int-)) method is invoked, or
 > - The virtual machine is *terminated* in response to a user interrupt, such as typing `^C`, or a system-wide event, such as user logoff or system shutdown.
 
-1. 调用了System.exit()方法
-2. 响应外部的信号，例如Ctrl+C（其实发送的是SIGINT信号），或者是`SIGTERM`信号（默认`kill $PID`发送的是`SIGTERM`信号）
+1. So it's either a call of `System.exit()`
+2. Respond to external signals, such as Ctrl+C(actually sent as SIGINT signal), or `SIGTERM` signal (`kill $PID` will send `SIGTERM` signal by default)
 
-因此，正常的应用在停止过程中(`kill -9 $PID`除外)，都会执行上述ShutdownHook，它的作用不仅仅是关闭tomcat，还有进行其他的清理工作，在此不再赘述。
+Therefore, the normal application will execute the above ShutdownHook during the stop process (except `kill -9 $PID`). Its function is not only to close the Tomcat, but also to perform other cleanup work. It is unnecessary to go into details.
 
-## 总结
+## Summary
 
-1. 在`DubboConsumer`启动的过程中，通过启动一个独立的非daemon线程循环检查变量的状态，确保进程不退出
-2. 在`DubboConsumer`停止的过程中，通过执行spring容器的shutdownhook，修改了变量的状态，使得程序正常退出
+1. During the startup of `DubboConsumer`, an independent non-daemon thread is launched to query the status of the variable continuously, thus the process can't exit.
+2. To stop the `DubboConsumer`, one should call ShutdownHook to change the variable to let the thread break the loop.
 
-## 问题
+## Problems
 
-在DubboProvider的例子中，我们看到Provider并没有启动Tomcat提供HTTP服务，那又是如何实现不退出的呢？我们将在下一篇文章中回答这个问题。
+In the example of DubboProvider, we see that Provider doesn't start Tomcat to provide HTTP service, then how does the program stays alive without exiting? We will answer this question in the next article.
 
-### 彩蛋
+### Notice
 
-在`Intellij IDEA`中运行了如下的单元测试，创建一个线程执行睡眠1000秒的操作，我们惊奇的发现，代码并没有线程执行完就退出了，这又是为什么呢？（被创建的线程是非daemon线程）
+By running the following unit test which create a thread in `Intellij IDEA` , we are surprised to find that the program exits with less than 1000s. Why?(The thread being created is a non-daemon thread)
 
 ```java
     @Test

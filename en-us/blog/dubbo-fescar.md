@@ -1,21 +1,21 @@
 ---
-title: 如何使用Fescar保证Dubbo微服务间的一致性
-keywords: Dubbo,Fescar,一致性
-description: 本文主要介绍如何使用Fescar保证Dubbo微服务间的一致性
+title: How to use Fescar to ensure consistency between Dubbo Microservices
+keywords: Dubbo,Fescar,Consistency
+description: This article will introduce you how to use Fescar to ensure consistency between Dubbo Microservices.
 ---
-# 如何使用Fescar保证Dubbo微服务间的一致性
+# How to use Fescar to ensure consistency between Dubbo Microservices
 
 
 
-## 案例
+## Use case
 
-用户采购商品业务，整个业务包含3个微服务:
+A business logic for user purchasing commodities. The whole business logic is powered by 3 microservices:
 
-- 库存服务: 扣减给定商品的库存数量。
-- 订单服务: 根据采购请求生成订单。
-- 账户服务: 用户账户金额扣减。
+- Storage service: deduct storage count on given commodity.
+- Order service: create order according to purchase request.
+- Account service: debit the balance of user's account.
 
-### 业务结构图
+### Architecture
 
 ![Architecture](../../img/blog/fescar/fescar-1.png) 
 
@@ -56,7 +56,7 @@ public interface AccountService {
 }
 ```
 
-### 主要的业务逻辑：
+### Main business logic
 
 ```java
 public class BusinessServiceImpl implements BusinessService {
@@ -116,11 +116,11 @@ public class OrderServiceImpl implements OrderService {
 }
 ```
 
-## Fescar 分布式事务解决方案
+## Distributed Transaction Solution with Fescar
 
 ![undefined](../../img/blog/fescar/fescar-2.png) 
 
-此处仅仅需要一行注解 `@GlobalTransactional` 写在业务发起方的方法上: 
+We just need an annotation `@GlobalTransactional` on business method: 
 
 ```java
 
@@ -130,15 +130,15 @@ public class OrderServiceImpl implements OrderService {
     }
 ```
 
-##  Dubbo 与 Fescar 结合的例子
+## Example powered by Dubbo + Fescar
 
-### Step 1: 安装数据库
+### Step 1: Setup database
 
-- 要求: MySQL (InnoDB 存储引擎)。
+- Requirement: MySQL with InnoDB engine.
 
-**提示:** 事实上例子中3个微服务需要3个独立的数据库，但为了方便我们使用同一物理库并配置3个逻辑连接串。 
+**Note:** In fact, there should be 3 database for the 3 services in the example use case. However, we can just create one database and configure 3 data sources for simple. 
 
-更改以下xml文件中的数据库url、username和password
+Modify Spring XML with the database URL/username/password you just created.
 
 dubbo-account-service.xml
 dubbo-order-service.xml
@@ -149,12 +149,12 @@ dubbo-storage-service.xml
     <property name="username" value="xxx" />
     <property name="password" value="xxx" />
 ```
-### Step 2: 为 Fescar 创建 undo_log 表
+### Step 2: Create undo_log table for Fescar
 
-`UNDO_LOG` 此表用于 Fescar 的AT模式。
+`UNDO_LOG` table is required by Fescar AT mode.
 
 ```sql
--- 注意当 Fescar 版本升级至 0.3.0+ 将由之前的普通索引变更为唯一索引。
+-- Note that when Fescar version is upgraded to 0.3.0+, it is changed from the previous normal index to the unique index.
 CREATE TABLE `undo_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `branch_id` bigint(20) NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE `undo_log` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 ```
 
-### Step 3: 创建相关业务表
+### Step 3: Create tables for example business
 
 ```sql
 
@@ -202,10 +202,10 @@ CREATE TABLE `account_tbl` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
-### Step 4: 启动 Fescar-Server 服务
+### Step 4: Start Fescar-Server
 
-- 下载Server [package](https://github.com/alibaba/fescar/releases), 并解压。
-- 运行bin目录下的启动脚本。
+- Download server [package](https://github.com/alibaba/fescar/releases), unzip it.
+- Start Fescar-Server
 
 ```shell
 sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA
@@ -215,13 +215,13 @@ e.g.
 sh fescar-server.sh 8091 /home/admin/fescar/data/
 ```
 
-### Step 5: 运行例子
+### Step 5: Run example
 
-- 启动账户服务 ([DubboAccountServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboAccountServiceStarter.java))。
-- 启动库存服务 ([DubboStorageServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboStorageServiceStarter.java))。
-- 启动订单服务 ([DubboOrderServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboOrderServiceStarter.java))。
-- 运行BusinessService入口 ([DubboBusinessTester](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboBusinessTester.java))。
+- Start AccountService ([DubboAccountServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboAccountServiceStarter.java)).
+- Start StorageService ([DubboStorageServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboStorageServiceStarter.java)).
+- Start OrderService ([DubboOrderServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboOrderServiceStarter.java)).
+- Run BusinessService for test ([DubboBusinessTester](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboBusinessTester.java)).
 
-### 相关项目
+### Related projects
 * fescar:          https://github.com/alibaba/fescar/
 * fescar-samples : https://github.com/fescar-group/fescar-samples  

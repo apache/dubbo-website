@@ -1,26 +1,25 @@
 ---
-title: Dubbo基础用法之Provider配置
+title: Dubbo Basic Usage -- Dubbo Provider Configuration
 keywords: Dubbo, Provider, Configuration
-description: 主要讲述如何配置dubbo，按照配置方式上可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
+description: This article will introduce you how to config Dubbo, by XML, property files, annotations or Java code.
 ---
 
-# Dubbo基本用法之Provider配置
+Dubbo Basic Usage -- Dubbo Provider Configuration
+---
 
+# Dubbo Basic Usage
 
-## Dubbo基本用法
+This chapter mainly talking about how to configure dubbo. According to the configuration mode, it can be divided into the following mode: XML Configuration, Properties Configuration, Annotation Configuration, API Invocation Mode Configuration. And according to the function, we can divide them into Dubbo Provider and Dubbo Consumer. In the following sections, we would explain Dubbo Provider and Dubbo Consumer respectively.    
 
-本章节主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
-按照功能角度进行划分，可以分为Dubbo Provider和Dubbo Consumer。接下来章节中，分别对dubbo provider和Dubbo consumer进行讲解。
+## Dubbo Provider Configuration
 
-### Dubbo Provider配置
+### Provider Configuration in Detail
 
-#### Provider 配置详解
+The configuration mode of Dubbo Provider has 4 different ways: XML Configuration, Properties Configuration, API Invocation Mode Configuration and Annotation Configuration.    
 
-配置Dubbo Provider有4种方式：XML配置，properties方式配置，API调用方式配置，注解方式配置。
+#### XML Configuration
 
-##### XML配置
-
-###### 最简单的配置的样例：
+###### The simplest configuration example：
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -34,7 +33,7 @@ description: 主要讲述如何配置dubbo，按照配置方式上可以分为�
     <dubbo:reference id="demoServiceRemote" interface="com.alibaba.dubbo.demo.DemoService" />  
 </beans>
 ```
-上面样例中，注意下dubbo schema的写法：  
+In the example above，note the way to write dubbo schema：  
 ```
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
@@ -43,117 +42,119 @@ description: 主要讲述如何配置dubbo，按照配置方式上可以分为�
        http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 ```
 
-###### 支持的配置标签
+###### Supported Configuration Tags
 
-| 标签 | 用途 | 解释 |
+| Tags | Application | Describe |
 | -------- | ----- | :---- |
-| &lt;dubbo:service/&gt; | 服务配置 | 用于暴露一个服务，定义服务的元信息，一个服务可以用多个协议暴露，一个服务也可以注册到多个注册中心 |
-| &lt;dubbo:reference/&gt; | 引用配置 | 用于创建一个远程服务代理，一个引用可以指向多个注册中心 |
-| &lt;dubbo:protocol/&gt; | 协议配置 | 用于配置提供服务的协议信息，协议由提供方指定，消费方被动接受 |
-| &lt;dubbo:application/&gt; | 应用配置 | 用于配置当前应用信息，不管该应用是提供者还是消费者 |
-| &lt;dubbo:module/&gt; | 模块配置 | 用于配置当前模块信息，可选 |
-| &lt;dubbo:registry/&gt; | 注册中心配置 | 用于配置连接注册中心相关信息 |
-| &lt;dubbo:monitor/&gt; | 监控中心配置 | 用于配置连接监控中心相关信息，可选 |
-| &lt;dubbo:provider/&gt; | 提供方配置 | 当 ProtocolConfig 和 ServiceConfig 某属性没有配置时，采用此缺省值，可选 |
-| &lt;dubbo:consumer/&gt; | 消费方配置 | 当 ReferenceConfig 某属性没有配置时，采用此缺省值，可选 |
-| &lt;dubbo:method/&gt; | 方法配置 | 用于 ServiceConfig 和 ReferenceConfig 指定方法级的配置信息 |
-| &lt;dubbo:argument/&gt; | 参数配置 | 用于指定方法参数配置 |
+| &lt;dubbo:service/&gt; | Service Configuration | Expose a service, define the meta information of the service. One service can use multiple protocols to expose and can be registered to multiple registry centers |
+| &lt;dubbo:reference/&gt; | Reference Configuration | Create a remote service agent, one reference can point to multiple registry centers |
+| &lt;dubbo:protocol/&gt; | Protocol Configuration | Configure protocol information for providing services, protocol is specified by the provider and accepted passively by the consumer |
+| &lt;dubbo:application/&gt; | Application Configuration | Configure current application information, regardless of whether the application is provider or consumer |
+| &lt;dubbo:module/&gt; | Module Configuration | Configure current module information. Optional |
+| &lt;dubbo:registry/&gt; | Registry Center Configuration | Configure information related to connect registry centers |
+| &lt;dubbo:monitor/&gt; | Monitoring Center Configuration | Configure information related to connect monitor centers. Optional |
+| &lt;dubbo:provider/&gt; | Provider Configuration | When some properties ProtocolConfig or ServiceConfig are not configured, use this default value. Optional |
+| &lt;dubbo:consumer/&gt; | Consumer Configuration | When some properties of ReferenceConfig are not configured, use this default value. Optional |
+| &lt;dubbo:method/&gt; | Method Configuration | Configure specific method level information of ServiceConfig and ReferenceConfig  |
+| &lt;dubbo:argument/&gt; | Parameter Configuration | Configure parameters of specific method |
 
 ![undefined](https://cdn.yuque.com/lark/0/2018/png/15841/1527849348155-8423d401-9ea4-4dc6-8720-d9e3d90963b6.png) 
 
- <center>配置之间关系图</center>
+ <center>Configuration Diagram</center>
 
-###### 配置项详解
+###### Configuration item in detail
 
 * &lt;dubbo:application name="hello-world-app" /&gt;   
-用于指定应用名，这里需要保证应用名唯一，这个应用名在后续的console admin中可以在列表中显示，方便管理。
+Apply to specific application name, note that you need to make sure that the application name is unique. The application name can be displayed in the following console admin for easy management.
 
 * &lt;dubbo:registry address="multicast://224.5.6.7:1234" /&gt;   
-注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地址，也可以eureka地址。上面这个是广播地址，在本地服务调用的测试过程中非常方便。
+Configure registry center, related to the specific mechanism of service discovery. It can be zookeeper address or eureka address. The address above is the broadcast address, which is very convenient in the test process of the local service invocation.
 
 * &lt;dubbo:protocol name="dubbo" port="20880" /&gt;   
-这里是传输的协议和默认端口，一般不需要更改。
+Here is the transport protocol and the default port, generally no changes are required.
 
-> 接下来重点讲解下&lt;dubbo:service/&gt;的配置。
+> Next, we will focus on the configuration of &lt;dubbo:service/&gt;
 
-* &lt;dubbo:service/&gt;支持的主要属性列表：
+* &lt;dubbo:service/&gt;mainly supports the following properties：
 
-| 属性名 | 说明 | 
+| Properties Name | Description | 
 | -------- | ----- |
-| version | 版本号 | 
-| scope | 服务可见性, 值为：local 或者 remote，默认为remote | 
-| actives | 最大的激活的请求数 | 
-| async | 方法调用是否异步，默认为false | 
-| cache | 服务缓存，可选值：lru/threadlocal/jcache | 
-| callbacks | callback实例的限制 | 
-| generic | 泛化调用，可以绕过 | 
-| class | Service的实现的类名 | 
-| connections | 这个服务里的连接数 | 
-| delay | 发布服务延迟的毫秒数 | 
-| executes | 服务执行的请求上限 | 
-| retries | 超时重试次数 | 
-| timeout | 调用超时时间 | 
+| version | Version number | 
+| scope | Service visibility, value can be local or remote，remote by default | 
+| actives | Maximum number of activated requests | 
+| async | Whether the method called asynchronously，false by default | 
+| cache | Service cache，optional value：lru/threadlocal/jcache | 
+| callbacks | Limitation of callback instance | 
+| generic | Generalized calls which can be bypassed | 
+| class | The implementation of the service's class name  | 
+| connections | The number of connections in the service | 
+| delay | The number of milliseconds delay for publicating the service | 
+| executes | Upper bound of service execution requests | 
+| retries | Timeout retry times | 
+| timeout | Invocation timeout time | 
 
-其他配置属性请参考xsd：http://dubbo.apache.org/schema/dubbo/dubbo.xsd
+For other configuration properties, please refer to xsd：http://dubbo.apache.org/schema/dubbo/dubbo.xsd
 
-* &lt;dubbo:method/&gt;作为&lt;dubbo:service/&gt;的子元素，它可以针对方法进行配置。比较常用的属性有：  
+* &lt;dubbo:method/&gt; as the sub-element of &lt;dubbo:service/&gt; can be configured corresponding to method. Properties that are commonly used are：  
 
-| 属性名 | 说明 | 
+| Properties Name | Description | 
 | -------- | ----- |
-| executes | 服务执行的请求上限 | 
-| retries | 超时重试次数 | 
-| timeout | 调用超时时间 | 
+| executes | Upper bound of service execution requests | 
+| retries | Timeout retry times | 
+| timeout | Invocation timeout time | 
 
-其他属性，可以参考上面的xsd。
+For other properties，you can refer to xsd above。
 
-###### 配置的覆盖关系  
+###### Configuration Override Relationship  
 ![undefined](https://cdn.yuque.com/lark/0/2018/png/15841/1527849374313-94a5ea24-0e72-4d83-871b-e0e95eab646a.png) 
 
-<center>配置的覆盖关系图</center>
+<center>Configuration Coverage Relationship Diagram</center>
 
-这里的覆盖关系包含了Provider和Consumer两端的配置，如果对consumer有疑问，可以参考后一章节的consumer章节之后再来理解。
+The Override relationship here includes the configuration of both provider end and consumer end. If you have any questions about consumer, you can refer to the next chapter, consumer chapter, to understand.
 
-#### dubbo.properties方式配置  
+#### dubbo.properties Configuration  
 
-> 如果公共配置很简单，没有多注册中心，多协议等情况，或者想多个 Spring 容器想共享配置，可以使用 dubbo.properties 作为缺省配置。
+> If the public configuration is very simple, no multiple registry centers, no multiple protocols, etc., or if you want multiple Spring containers to share the configuration, you can use dubbo.properties as the default configurations.
 
-Dubbo 将自动加载 classpath 根目录下的 dubbo.properties，可以通过JVM启动参数 -Ddubbo.properties.file=xxx.properties 改变缺省配置位置。
+Dubbo would load dubbo.properties under the classpath root directory automaticaly，you can change the default configuration location by JVM startup parameter -Ddubbo.properties.file=xxx.properties.
 
-###### dubbo.properties配置样例
+###### dubbo.properties Configuration example
 ```
-# 应用名
+# application name
 dubbo.application.name=dubbodemo-provider
-# 注册中心地址
+# registry center address
 dubbo.registry.address=zookeeper://localhost:2181
-# 广播的注册中心样例
+# Example of broadcasting registry center
 #dubbo.registry.address=multicast://224.5.6.7:1234
-# 调用协议地址
+# address for calling protocol
 dubbo.protocol.name=dubbo
 dubbo.protocol.port=28080
 ```
-###### 映射规则   
-将 XML 配置的标签名，加属性名，用点分隔，多个属性拆成多行  
-* 比如：dubbo.application.name=foo等价于<dubbo:application name="foo" />
-* 比如：dubbo.registry.address=10.20.153.10:9090等价于<dubbo:registry address="10.20.153.10:9090" />
 
-如果 XML 有多行同名标签配置，可用 id 号区分，如果没有 id 号将对所有同名标签生效  
-* 比如：dubbo.protocol.rmi.port=1234等价于<dubbo:protocol id="rmi" name="rmi" port="1234" /> 
-* 比如：dubbo.registry.china.address=10.20.153.10:9090等价于<dubbo:registry id="china" address="10.20.153.10:9090" />
 
-###### 覆盖策略  
-![undefined](https://cdn.yuque.com/lark/0/2018/png/15841/1527849393591-2c3de248-1b3d-47d3-bd10-8b415e9fcd39.png) 
+###### Mapping Rule
+Split the tag name and properties in XML configuration with dots, and multiple properties should be split into multiple lines
+* For example: dubbo.application.name=foo equivalents to <dubbo:application name="foo" />
+* For example: dubbo.registry.address=10.20.153.10:9090 equivalents to <dubbo:registry address="10.20.153.10:9090" />
 
-* JVM 启动 -D 参数优先，这样可以使用户在部署和启动时进行参数重写，比如在启动时需改变协议的端口。
-* XML 次之，如果在 XML 中有配置，则 dubbo.properties 中的相应配置项无效。
-* Properties 最后，相当于缺省值，只有 XML 没有配置时，dubbo.properties 的相应配置项才会生效，通常用于共享公共配置，比如应用名。
+If there are multiple configurations having the same tag name, they can be distinguished by id, and if there is no id, the configurations will be applied to all tags with the same name.
+* For example: dubbo.protocol.rmi.port=1234 equivalents to <dubbo:protocol id="rmi" name="rmi" port="1234" /> 
+* For example: dubbo.registry.china.address=10.20.153.10:9090 equivalents to <dubbo:registry id="china" address="10.20.153.10:9090" />
 
-> 注意：
-1. 如果 classpath 根目录下存在多个 dubbo.properties，比如多个 jar 包中有 dubbo.properties，Dubbo 会任意加载，并打印 Error 日志，后续可能改为抛异常。 ↩
-2. 协议的 id 没配时，缺省使用协议名作为 id 
+###### Coverage Strategy
+![undefined](https://cdn.yuque.com/lark/0/2018/png/15841/1527849393591-2c3de248-1b3d-47d3-bd10-8b415e9fcd39.png)
 
-##### 注解配置
+* When JVM starts, -D parameter has priority, so that users can rewrite the parameters when deploy and start, for example, the protocol port should be changed when start.
+* Then comes to XML, the configurations in dubbo.properties are invalid, if they are configured in XML.
+* Properties are the last, which can be considered as default value. Only when there is no configuration in XML, the corresponding configuarations in dubbo.properties will become effective, which usually applies to shared public configuration, like application name.
 
-###### Service注解暴露服务  
+> Note:
+1. If there are multiple dubbo.properties in the classpath root directory, for example, if dubbo.properties exist in multiple JAR files, Dubbo will load anyone arbitrarily and print the Error logs, which may change to throwing exceptions later.↩
+2. When the protocol's id is not configured, protocol name will be used as id as default.
+
+#### Annotation
+
+###### Service Annotation Exposure Service
 ```
 import com.alibaba.dubbo.config.annotation.Service;
 
@@ -162,8 +163,7 @@ public class AnnotateServiceImpl implements AnnotateService {
     // ...
 }
 ```
-###### javaconfig形式配置公共模块
-
+###### Javaconfig Configuration Public Module
 ```
 @Configuration
 public class DubboConfiguration {
@@ -185,9 +185,9 @@ public class DubboConfiguration {
 }
 ```
 
-这种方式的配置和前面用xml配置的方式是一样的效果。
+The result of configuration using this method is the same as that of using xml.
 
-###### 指定dubbo扫描路径  
+###### Specify the Dubbo Scan Path
 ```
 @SpringBootApplication
 @DubboComponentScan(basePackages = "com.alibaba.dubbo.test.service.impl")
@@ -195,13 +195,12 @@ public class ProviderTestApp {
     // ...
 }
 ```
-或者使用spring bean xml配置方式：
+or use the spring bean xml configuration:
 ```
 <dubbo:annotation package="com.chanshuyi.service.impl" />
 ```
 
-##### 代码配置
-
+#### API Trigger Directly
 ```
 import com.alibaba.dubbo.rpc.config.ApplicationConfig;
 import com.alibaba.dubbo.rpc.config.RegistryConfig;
@@ -210,60 +209,61 @@ import com.alibaba.dubbo.rpc.config.ServiceConfig;
 import com.xxx.XxxService;
 import com.xxx.XxxServiceImpl;
 
-// 服务实现
+// Service implementation
 XxxService xxxService = new XxxServiceImpl();
 
-// 当前应用配置
+// current application configuration
 ApplicationConfig application = new ApplicationConfig();
 application.setName("xxx");
 
-// 连接注册中心配置
+// connect to registry center configuration
 RegistryConfig registry = new RegistryConfig();
 registry.setAddress("10.20.130.230:9090");
 registry.setUsername("aaa");
 registry.setPassword("bbb");
 
-// 服务提供者协议配置
+// service provider's protocol configuration
 ProtocolConfig protocol = new ProtocolConfig();
 protocol.setName("dubbo");
 protocol.setPort(12345);
 protocol.setThreads(200);
 
-// 注意：ServiceConfig为重对象，内部封装了与注册中心的连接，以及开启服务端口
+// Note: ServiceConfig is a heavy object, which encapsulated the connection with registry center internally, and open the service port
 
-// 服务提供者暴露服务配置
-ServiceConfig<XxxService> service = new ServiceConfig<XxxService>(); // 此实例很重，封装了与注册中心的连接，请自行缓存，否则可能造成内存和连接泄漏
+// Service provider exposes service configuration
+ServiceConfig<XxxService> service = new ServiceConfig<XxxService>(); // This instance is very heavy, which encapsulated the connection with registry center, please cache it by yourself, it might cause memory and connection leakage otherwise.
 service.setApplication(application);
-service.setRegistry(registry); // 多个注册中心可以用setRegistries()
-service.setProtocol(protocol); // 多个协议可以用setProtocols()
+service.setRegistry(registry); // multiple registry centers can use setRegistries()
+service.setProtocol(protocol); // multiple protocols can use setProtocols()
 service.setInterface(XxxService.class);
 service.setRef(xxxService);
 service.setVersion("1.0.0");
 
-// 暴露及注册服务
+// exposure and register service
 service.export();
 ```
 
-一般在spring应用中，不推荐使用这种方式。 具体的含义这里不做解释，可以通过github查看源码。
+Generally, this method is not recommended in spring applications. The reason can be checked by reading the source code on github, which would not be explained here.
 
-### Provider 接口和实现
+### Provider Interface and Implement
+The above chapters are described mainly from a configuration perspective, and lets explain the complete use of Dubbo provider by going through a complete example.
 
-上面章节更多从配置角度出发，接下来通过一个完整的例子，来讲解下dubbo provider的完整使用。
+There is only one service UserReadService, and one method getUserById in this example.
+This service need to be exposed to a remote service by Dubbo. Detail steps are shown below:
 
-这个例子中只有一个服务UserReadService，有一个方法 getUserById。 需要将这个服务通过Dubbo暴露给远程的服务。具体的步骤如下：
-
-1.创建工程
-如果本来已经有工程，可以忽略。创建一个spring boot工程，可以通过 https://start.spring.io/ 创建。
-2.定义接口
-定义接口：UserReadService
+1. Create Project
+Skip this step if there is already a project. Create a Spring Boot project, which can be created through https://start.spring.io/.
+2. Define Interface
+Define interface: UserReadService
 ```
 public interface UserReadService{
-public User getUserById(Long userId);
+    public User getUserById(Long userId);
 }
 ```
-这个接口一般来说会放到独立的jar包里，作为client包。 其他应用要消费这个服务的时候，一般来说需要应用引用这个client包。(除了泛化调用)
-3.实现接口
-实现UserReadService, 当前实现部署在Provider的应用中。
+Generally, this interface should be placed in an independent JAR file as a client package.
+Generally, the other services need to refer this client package if they want to consume this service(except for generalized call).
+3. Implement Interface
+Implement UserReadService, and deploy current implementation in the Provider's application.
 ```
 public UserReadServiceImpl implements UserReadService{
     public User getUserById(Long userId){
@@ -271,7 +271,7 @@ public UserReadServiceImpl implements UserReadService{
     }
 }
 ```
-4.Dubbo配置
+4. Dubbo Configuration
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -285,4 +285,4 @@ public UserReadServiceImpl implements UserReadService{
     <dubbo:service interface="com.package.UserReadService" ref="userReadService" />  
 </beans>
 ```
-Dubbo配置的其他方式可以参考上一章节的相关配置，或者使用集成dubbo spring boot starter方式。
+For the other modes of Dubbo configuration, please refer to the related configurations in the previous chapter, or use the integrated Dubbo Spring Boot starter method.

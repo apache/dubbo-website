@@ -1,277 +1,297 @@
 ---
-title: 如何准备Apache Release
+title: Understanding the Apache Release Cycle
 keywords: Dubbo, Apache, Release
-description: 本文介绍了Apache如何发布内容和流程
+description: This article introduces how to the Apache publish content and process
 ---
+# How to prepare an the Apache Release
 
-# 如何准备Apache Release
+## Understanding the Apache Release Cycle
 
-## 理解Apache发布的内容和流程
+In general, Source Release is the key and the required content of Apache. But Binary Release is optional, Dubbo can choose whether to release binary packages to the Apache repository or to the Maven central repository.
 
-总的来说，Source Release是Apache关注的重点，也是发布的必须内容；而Binary Release是可选项，Dubbo可以选择是否发布二进制包到Apache仓库或者发布到Maven中央仓库。
-
-请参考以下链接，找到更多关于ASF的发布指南:
+Please refer to the following links for more information on ASF's release guide:
 
 - [Apache Release Guide](http://www.apache.org/dev/release-publishing)
 - [Apache Release Policy](http://www.apache.org/dev/release.html)
 - [Maven Release Info](http://www.apache.org/dev/publishing-maven-artifacts.html)
 
-## 本地构建环境准备
+## Preparation of Local Building Environment 
 
-主要包括签名工具、Maven仓库认证相关准备
+Mainly including the related preparation of signature utilities and Maven repository certification
 
-### 安装GPG
+1. Install GPG,refer to https://www.gnupg.org/download/index.html
 
-详细文档请参见[这里](https://www.gnupg.org/download/index.html), Mac OS下配置如下
+   - For example, in Mac OS
 
-```sh
-$ brew install gpg
-$ gpg --version #检查版本，应该为2.x
-```
+    ```sh
+    $ brew install gpg
+    $ gpg --version #check version,should be 2.x
+    ```
 
-### 用gpg生成key
+2. Generate the key with GPG
 
-根据提示，生成key
+   - Generate the key according to the prompt
 
- ```shell
- $ gpg --full-gen-key
- gpg (GnuPG) 2.0.12; Copyright (C) 2009 Free Software Foundation, Inc.
- This is free software: you are free to change and redistribute it.
- There is NO WARRANTY, to the extent permitted by law.
- 
- Please select what kind of key you want:
-   (1) RSA and RSA (default)
-   (2) DSA and Elgamal
-   (3) DSA (sign only)
-   (4) RSA (sign only)
- Your selection? 1
- RSA keys may be between 1024 and 4096 bits long.
- What keysize do you want? (2048) 4096
- Requested keysize is 4096 bits
- Please specify how long the key should be valid.
-         0 = key does not expire
-      <n>  = key expires in n days
-      <n>w = key expires in n weeks
-      <n>m = key expires in n months
-      <n>y = key expires in n years
- Key is valid for? (0) 
- Key does not expire at all
- Is this correct? (y/N) y
- 
- GnuPG needs to construct a user ID to identify your key.
- 
- Real name: Robert Burrell Donkin
- Email address: rdonkin@apache.org
- Comment: CODE SIGNING KEY
- You selected this USER-ID:
-    "Robert Burrell Donkin (CODE SIGNING KEY) <rdonkin@apache.org>"
- 
- Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
- You need a Passphrase to protect your secret key. # 填入密码，以后打包过程中会经常用到
- ```
+    ```shell
+    $ gpg2 --full-gen-key
+    gpg (GnuPG) 2.0.12; Copyright (C) 2009 Free Software Foundation, Inc.
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.
+    
+    Please select what kind of key you want:
+      (1) RSA and RSA (default)
+      (2) DSA and Elgamal
+      (3) DSA (sign only)
+      (4) RSA (sign only)
+    Your selection? 1
+    RSA keys may be between 1024 and 4096 bits long.
+    What keysize do you want? (2048) 4096
+    Requested keysize is 4096 bits
+    Please specify how long the key should be valid.
+            0 = key does not expire
+         <n>  = key expires in n days
+         <n>w = key expires in n weeks
+         <n>m = key expires in n months
+         <n>y = key expires in n years
+    Key is valid for? (0) 
+    Key does not expire at all
+    Is this correct? (y/N) y
+    
+    GnuPG needs to construct a user ID to identify your key.
+    
+    Real name: Robert Burrell Donkin
+    Email address: rdonkin@apache.org
+    Comment: CODE SIGNING KEY
+    You selected this USER-ID:
+       "Robert Burrell Donkin (CODE SIGNING KEY) <rdonkin@apache.org>"
+    
+    Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+    You need a Passphrase to protect your secret key. # enter the password, which will be used frequently when packaging.
+    ```
 
-### 查看key id 
+   - View key id 
 
-```sh
-$ gpg --list-keys
-pub   rsa4096/28681CB1 2018-04-26 # 28681CB1就是key id
-uid       [ultimate] liujun (apache-dubbo) <liujun@apache.org>
-sub   rsa4096/D3D6984B 2018-04-26
+    ```sh
+    $ gpg --list-keys
+    pub   rsa4096/28681CB1 2018-04-26 # 28681CB1 is the key id
+    uid       [ultimate] liujun (apache-dubbo) <liujun@apache.org>
+    sub   rsa4096/D3D6984B 2018-04-26
+    
+    ########### Note: Different diaplay for different version.
+    $ gpg --list-keys
+    pub   rsa4096 2018-11-12 [SC]
+          63AAE9838F4A303E40BAF5FEA3A1CA7A5D4A3981     # Last 8 character(5D4A3981) as key id，it will be used when send public key to keyserver
+    uid           [ 绝对 ] Victory Cao (CODE SIGNING KEY) <victory@apache.org>
+    sub   rsa4096 2018-11-12 [E]
+        
+    
+    # send public key to keyserver via key id 
+    $ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
+    # Here pgpkeys.mit.edu is a random selection of keyserver. Any key server from the list https://sks-keyservers.net/status/ is acceptable because they are automatically synchronized.
+    ```
 
-# 通过key id发送public key到keyserver
-$ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
-# 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，为相互之间是自动同步的，选任意一个都可以。
-```
-如果有多个public key，设置默认key。修改`~/.gnupg/gpg.conf`
+   - If there are multiple public keys，you can set the default key 
 
-```sh
-# If you have more than 1 secret key in your keyring, you may want to
-# uncomment the following option and set your preferred keyid.
-default-key 28681CB1
-```
-如果有多个public key, 也可以删除无用的key：
+    ~/.gnupg/gpg.conf
+    
+    ```proper
+    # If you have more than 1 secret key in your keyring, you may want to
+    # uncomment the following option and set your preferred keyid.
+    
+    default-key 28681CB1
+    ```
+    
+   - If there are multiple public keys, you can also delete unuseful key：
+   
+    ```sh  
+    ### Delete the private key first, then delete the public key.
+    
+    $ gpg --yes --delete-secret-keys shenglicao2@gmail.com   ### indicate email address  
+    
+    $ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4 
+    
+    ```
 
-```sh  
-### 先删除私钥，再删除公钥
-$ gpg --yes --delete-secret-keys shenglicao2@gmail.com   ###老的私钥，指明邮箱即可
-$ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4
-```
+3. Set up Apache central repository.
 
-> PS: 最新版本经过实测，本地没有gpg.conf这个文件，因此如果在执行过程中遇到签名失败，可以参考这个文章：https://blog.csdn.net/wenbo20182/article/details/72850810 或 https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors
+   - The parent pom of Dubbo project is apache pom
 
-### 设置Apache中央仓库
+    ```xml
+    <parent>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>19</version>
+    </parent>
+    ```
 
-Dubbo项目的父pom为Apache pom(2.7.0以上版本需要，2.6.x发布版本不需要此操作)
+   - Add the following contents to .m2/settings.xml
 
-```xml
-<parent>
-<groupId>org.apache</groupId>
-<artifactId>apache</artifactId>
-<version>19</version>
-</parent>
-```
- 添加以下内容到.m2/settings.xml
- 所有密码请使用[maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html)加密后再填入
-```xml
-<settings>
-...
- <servers>
-   <!-- To publish a snapshot of some part of Maven -->
-   <server>
-     <id>apache.snapshots.https</id>
-     <username> <!-- YOUR APACHE LDAP USERNAME --> </username>
-     <password> <!-- YOUR APACHE LDAP PASSWORD (encrypted) --> </password>
-   </server>
-   <!-- To stage a release of some part of Maven -->
-   <server>
-     <id>apache.releases.https</id>
-     <username> <!-- YOUR APACHE LDAP USERNAME --> </username>
-     <password> <!-- YOUR APACHE LDAP PASSWORD (encrypted) --> </password>
-   </server>
-  ...
-     <!-- gpg passphrase used when generate key -->
-    <server>
-     <id>gpg.passphrase</id>
-     <passphrase><!-- yourKeyPassword --></passphrase>
-   </server>
- </servers>
-</settings>
-```
+     Enter the passwords after
+     encrypting by [maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html)
 
-
-## 打包&上传
-
-### 准备分支
-
-从主干分支拉取新分支作为发布分支，如现在要发布$`{release_version}`版本，则从2.6.x拉出新分支`${release_version}-release`，此后`${release_version}` Release Candidates涉及的修改及打标签等都在`${release_version}-release`分支进行，最终发布完成后合入主干分支。
-
-### 编译打包
-
-首先，在`${release_version}-release`分支验证maven组件打包、source源码打包、签名等是否都正常工作。**2.6.x记得要使用1.6进行编译打包**
-
-```shell
-$ mvn clean install -Prelease
-$ mvn deploy
-```
-
-上述命令将snapshot包推送到maven中央仓库
-
-### 用maven-release-plugin发布
-
-先用dryRun验证是否ok
-
-```shell
-$ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID-DdryRun=true
-```
-
-验证通过后，执行release:prepare
-
-```shell
-$ mvn release:clean
-$ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
-```
-
-> 执行release插件时，如果指定了`-DpushChanges=true`, 插件会自动提交到远端的GitHub仓库中，此时就需要输入GitHub的密码，注意不是输入web页面的登录密码，而是一个`Personal access tokens`，获取方式详见[这里](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line)
-
-> 这里有一点要注意的是tag， 在执行过程中，需要选择发布的artifactId, 下一个版本artifactId以及发布版本的tag, tag默认的是dubbo-parent-xxxx，需要改成dubbo-xxxx
-
-执行完上述步骤后，你会发现：
-1. `source-release.zip` 和 `bin-release.zip`包已经生成在`dubbo-distribution`目录下，请解压并检查文件是否完整
-2. 本地已经打出相应的tag，同时新增一个commit，名叫`[maven-release-plugin] prepare release dubbo-x.x.x`
-3. 分支版本自动升级为`${release_version+1}-SNAPSHOT`，同时新增一个commit，名叫`[[maven-release-plugin] prepare for next development iteration`
-
-> 如果指定了`-DpushChanges=true`, 则本地提交会自动推送到远端的GitHub仓库。根据经验，建议不要指定为true，请设置为false，待本地检查通过之后再手动提交
-
-执行release:perform，做staging发布
-
-```shell
-$ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-```
-
-此时插件会自动下载远端的tag对应的源码，编译后，将所有Artifacts发布到配置的远程[maven仓库](http://repository.apache.org)，处于staging状态。
-
-#### 注意点
-
-- 在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，可以重新开始执行。  
-- deploy执行到maven仓库的时候，请确认下包的总量是否正确。多次出现了包丢失的情况，特别是dubbo-parent包。
+    ```xml
+    <settings>
+    ...
+     <servers>
+       <!-- To publish a snapshot of some part of Maven -->
+       <server>
+         <id>apache.snapshots.https</id>
+         <username> <!-- YOUR APACHE LDAP USERNAME --> </username>
+         <password> <!-- YOUR APACHE LDAP PASSWORD (encrypted) --> </password>
+       </server>
+       <!-- To stage a release of some part of Maven -->
+       <server>
+         <id>apache.releases.https</id>
+         <username> <!-- YOUR APACHE LDAP USERNAME --> </username>
+         <password> <!-- YOUR APACHE LDAP PASSWORD (encrypted) --> </password>
+       </server>
+      ...
+         <!-- gpg passphrase used when generate key -->
+        <server>
+         <id>gpg.passphrase</id>
+         <passphrase><!-- yourKeyPassword --></passphrase>
+       </server>
+     </servers>
+    </settings>
+    ```
 
 
-## 准备Apache发布
+## Pack & Upload
 
-1. 准备svn本机环境（Apache使用svn托管项目的发布内容）
+1. Pull the new branch from the master branch as the release branch. If you want to release the ${release_version} version now, pull the new branch ${release_version}-release from 2.6.x. Then the 
+modifications and taggings related to ${release_version} Release Candidates are applied to ${release_version}-release branch, and is merged into the master branch after the final release. 
 
-2. 将dubbo checkout到本地目录
+2. First of all, verify that the maven component packing, source packing, signature, etc are working properly on the ${release_version}-release branch.
+
+   ```shell
+   $ mvn clean install -Papache-release
+   $ mvn deploy
+   ```
+
+  This push the snapshot package to the maven central repository.
+
+3. Release with maven-release-plugin
+
+   - verify with dryRun
+
+    ```shell
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DdryRun=true
+    ```
+
+   - After verification, run release:prepare
+
+    ```shell
+    $ mvn release:clean
+    $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
+    ```
+
+    > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not. Please refer to this [guide](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for more infomation.
+    > you need to choose the release artifactId, next artifactId and the release tag, the default tag is dubbo-parent-xxxx, you need to change it to dubbo-xxxx
+
+
+    After executing the above commands, you will find that:
+    1. source-release.zip and bin-release.zip are generated under dubbo-distribution directory, please unzip it and check the file structure
+    2. `-DpushChanges=false` tells maven not to push the commits and tags to the remote repostiroy. If not specified, the version tag will be pushed to github repository, you will see a commit called `[maven-release-plugin] prepare release dubbo-x.x.x` added.
+    3. The branch version is upgraded to ${release_version+1}-SNAPSHOT automatically. If `-DpushChanges=true` is specified, the modifications will be pushed to the remote repository, you will see a commit called `[maven-release-plugin] prepare for next development iteration` added.
+
+    If `-DpushChanges=false` is specified, you will have to manually push the commit to remote repository before go to next step.
+
+   - Run release:perform
+
+    ```shell
+    $ mvn release:perform -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
+    ```
+
+    Maven will download the source code from the tag you just pushed, compile it, and deploy to remote maven repsoitry in staging state.
+
+### Note
+
+> When you deploy the package into repository, it will be interrupted for network. So you must restart to desploy.  
+> The problem is that missing package occurred many times at deploying. So you should check the quantity of package, especially parent package.
+
+## Prepare Apache Release 
+
+1. Prepare the svn local environment (Apache hosting the release content of project by svn)
+
+2. Checkout dubbo to local directory
 
    ```shell
    $ svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo
-   # 假定本地目录为 ~/apache/incubator/dubbo
    ```
+   Assume that the local directory is `~/apache/incubator/dubbo`
 
-3. 当前发布版本为${release_version}，新建目录
+3. The current release version is ${release_version}, new directory
 
    ```shell
-   $ cd ~/apache/incubator/dubbo # dubbo svn根目录
+   $ cd ~/apache/incubator/dubbo # dubbo svn root directory
    $ mkdir ${release_version}
    ```
 
-4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
+4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS) file if you are the first time to be a release manager. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
 
-   ```sh
+   ```shell
    $ gpg -a --export your_key_id >> KEYS
    ```
 
-5. 拷贝`distribution/target`下的source相关的包到svn本地仓库`dubbo/${release_version}`
+   For more information on how to get your key id, please refer to this [guide](https://help.github.com/articles/generating-a-new-gpg-key/)
 
-6. 生成sha512签名
+5. Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version} 
 
-   针对`source-release.zip`
+6. Generate sha512 sign
+
+   For source-release.zip
 
    ```shell
    $ shasum -a 512 apache-dubbo-${release_version}-source-release.zip >> apache-dubbo-${release_version}-source-release.zip.sha512
    ```
-  
-   针对`bin-release.zip`，需要增加`-b`参数，表明是一个二进制文件
+
+   For bin-release.zip
+
+   Please add `-b` paramter when generating sha512 for bin-release.zip, which indicates it is a binary file. 
 
    ```shell
    $ shasum -b -a 512 apache-dubbo-${release_version}-bin-release.zip >> apache-dubbo-${release_version}-bin-release.zip.sha512
    ```
+   You should generate something like this:
 
+   ```
+   b8f13d1df6d6c9a1facc72fafc00b2d22bea1e600517c507467d8fca2f776a7a3877101742da53114bfa629ca5b941eb4d9ef989de43f0833e2a794e7ccf5c8a *apache-dubbo-spring-boot-project-2.7.0-bin-release.zip
+   ```
 
-7. 如果有binary release要同时发布
+   Note there is a `*` sign before the file name.
 
-   在`distribution/target`目录下，拷贝`bin-release.zip`以及`bin-release.zip.asc`到svn本地仓库`dubbo/${release_version}`，参考第6步，生成sha512签名。
+7. If the binary release is accompanied with the source release. Run the following command in the dubbo-distribution module:
 
-8. 提交到Apache svn
+   ```shell
+   $ mvn install
+   ```
+   Go to target directory, copy bin-release.zip and bin-release.zip.asc to svn local repository dubbo/${release_version}, and refer to step 6 to generate sha512 sign.
+
+8. Commit to Apache svn
 
    ```shell
    $ svn status
    $ svn commit -m 'prepare for ${release_version} RC1'
    ```
 
-## 验证Release Candidates
+## Verify Release Candidates
 
-详细的检查列表请参考官方的[check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)
+**A full check list can be found [here](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)**
 
-首先，从一下地址下载要发布的Release Candidate到本地环境：
+The verification link includes but is not limited to the following contents and forms:
 
-<pre>
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/
-</pre>
+### Check signatures and hashes are good
 
-然后，开始验证环节，验证包含但不限于以下内容和形式
+#### check the sha512 sum
 
-### 检查签名和hash等信息
-
-#### 检查sha512哈希
-
+  
 ```sh
 $ shasum -c apache-dubbo-${release_version}-source-release.zip.sha512
 $ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
 ```
+#### check the gpg signarure
 
-#### 检查gpg签名
-
-如果是第一次检查，需要首先导入公钥。 
+If it's your first time verify a release candidte, you should import public keys first.  
 
 ```sh
  $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
@@ -279,26 +299,25 @@ $ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
  $ gpg —edit-key liujun
    > trust # type trust command
  ```
-然后使用如下命令检查签名
+Now, you can verify signature with command
  
  ```sh
 gpg --verify apache-dubbo-2.6.3-source-release.zip.asc apache-dubbo-2.6.3-source-release.zip
 gpg --verify apache-dubbo-2.6.3-bin-release.zip.asc apache-dubbo-2.6.3-bin-release.zip
- ``` 
+ ```
 
+### Check source release file content
 
-### 检查源码包的文件内容
-
-解压缩`apache-dubbo-${release_version}-source-release.zip`，进行如下检查:
+Unzip apache-dubbo-${release_version}-source-release.zip to the default directory and check the following:
 
 - Directory with 'incubating' in name
-  `apache-dubbo-${release_version}-source-release`  
+  `apache-dubbo-${release_version}-source-release`
 - DISCLAIMER exists
 - LICENSE and NOTICE exists and contents are good
 - All files and no binary files exist
 - All files has standard ASF License header
 - Can compile from source
-- All unit tests can pass  
+- All unit tests can pass
   ```sh
   mvn clean test # This will run all unit tests
   # you can also open rat and style plugin to check if every file meets requirements.
@@ -306,30 +325,30 @@ gpg --verify apache-dubbo-2.6.3-bin-release.zip.asc apache-dubbo-2.6.3-bin-relea
   ```
 - Release candidates match with corresponding tags, you can find tag link and hash in vote email.
   - check the version number in pom.xml are the same
-  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files，这里需要注意换行符是否一致  
-    `diff -r a rc_dir tag_dir`
+  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files.  
+    `diff -r rc_dir tag_dir`
   - check the top n tag commits, dive into the related files and check if the source package has the same changes
 
-### 检查二进制包的文件内容C
+### Check binary distribution file content
 
-解压缩`apache-dubbo-${release_version}-bin-release.zip`，进行如下检查:
+Unzip apache-dubbo-${release_version}-bin-release.zip and check:
 
 * Check signatures are good
 * 'incubating' in name
 * LICENSE and NOTICE exists and contents are good
 
-注意，如果二进制包里面引入了第三方依赖，则需要更新LICENSE，加入第三方依赖的LICENSE，如果第三方依赖的LICENSE是Apache 2.0，并且对应的项目中包含了NOTICE，还需要更新NOTICE文件
+Note that if the binary distribution contains third party files, you may need to update LICENSE file by adding the 3rd party license files. If these dependency is Apache License 2.0, and it contains NOTICE file, you may also need to update NOTICE file as well.
 
-## 进入投票
+## Release vote
 
-投票分两个阶段：
+The voting is divided into two phases:
 
-1. Dubbo社区投票，发起投票邮件到dev@dubbo.apache.org。在社区开发者Review，经过至少72小时并统计到3个同意发版的binding票后（只有PMC的票才是binding），即可进入下一阶段的投票。
-2. Apache社区投票，发起投票邮件到general@incubator.apache.org。经过至少72小时并统计到3个同意发版的binding票后（只有IPMC Member的票才是binding），即可进行正式发布。
+1. Dubbo community votes and sends the voting email to dev@dubbo.apache.org. After reviewing by community developers and winning 3 binding tickets that agree to release, you can go to the next stage of voting.
+2. Apache community votes and sends the voting email to general@incubator.apache.org. After reviewing by Apache IPMC(Incubator PMC) members and winning 3 binding votes that agree to release, you will be allowed to release officially.
 
-Dubbo社区投票邮件模板：
+The mail template for Apache Dubbo vote：
 
-```text
+```tex
 Hello Dubbo Community,
 
 This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
@@ -361,7 +380,7 @@ Thanks,
 The Apache Dubbo (Incubating) Team
 ```
 
-Apache社区投票邮件模板：
+The mail template for Apache Incubator vote：
 
 ```text
 Hello all,
@@ -415,7 +434,8 @@ Thanks,
 The Apache Dubbo (Incubating) Team
 ```
 
-宣布投票结果模板：
+The mail template to announce the vote result:
+
 ```text
 We’ve received 3 +1 binding votes and one +1 non-binding vote:
 
@@ -431,18 +451,20 @@ Best regards,
 The Apache Dubbo (Incubating) Team
 ```
 
-## 正式发布
+## Official Release
 
-1. 将[dev](https://dist.apache.org/repos/dist/dev/incubator/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下，KEYS有更新的，也需要同步更新。
-2. 删除[dev](https://dist.apache.org/repos/dist/dev/incubator/dubbo)目录下的发布包
-3. 删除[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下上一个版本的发布包，这些包会被自动保存在[这里](https://archive.apache.org/dist/incubator/dubbo)
-4. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
-5. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
-6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似[这样](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md)
-7. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
-8. 发邮件到 `dev@dubbo.apache.org` 和 `general@incubator.apache.org`
-宣布release邮件模板： 
+When the release vote has passed,
 
+
+1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo)
+2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/incubator/dubbo)
+3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
+5. Publish [release notes](https://github.com/apache/dubbo/releases) on Github.
+6. Update the recommend dependency on [Github](https://github.com/apache/dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
+7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). Please refer to the [download page](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
+8. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
+9. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed. 
+The mail template to announce release: 
 ```text
 Hello Community,
 
@@ -479,11 +501,11 @@ Apache Dubbo is an effort undergoing incubation at The Apache Software Foundatio
 ```
 
 
-## 完成Maven Convenient Binary发布（可选）
+## Complete Maven Convenient Binary release
 
-**repository.apache.org** nexus仓库的权限已经申请，参见[jira](https://issues.apache.org/jira/browse/INFRA-16451)
+**[repository.apache.org](https://repository.apache.org/) The permissions of the nexus repository have been applied, see [jira](https://issues.apache.org/jira/browse/INFRA-16451)。**
 
-发布jar包到maven仓库，首先访问[repository.apache.org](https://repository.apache.org), 选择`staging repository`, 点击`release`按钮。等待一段时间之后，在[这里](https://repository.apache.org/content/repositories/releases/org/apache/dubbo/)确认完整性和正确性. 发布到Maven中央仓库则还需要等待一段时间。可以在[这里](https://repo.maven.apache.org/maven2/org/apache/dubbo)进行确认。
+To release the maven artifacts, go to [repository.apache.org](https://repository.apache.org), and choose the staging repository, click the release button. Wait for a moment and verify it at [here](https://repository.apache.org/content/repositories/releases/org/apache/dubbo/), make sure your artifacts are there and correct. It will take some time to sync to maven central repository. You can verify it at [here](https://repo.maven.apache.org/maven2/org/apache/dubbo)
 
 ## FAQ
 

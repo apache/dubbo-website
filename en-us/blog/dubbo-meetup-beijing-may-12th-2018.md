@@ -1,17 +1,16 @@
 ---
-title: 首届Dubbo开发者沙龙在北京成功举办
+title: The first Dubbo meetup has been held in Beijing
 keywords: Dubbo, Beijing, meetup
-description: 首届Dubbo开发者沙龙在北京成功举办
+description: The first Dubbo meetup has been held in Beijing.
 ---
 
-首届Dubbo开发者沙龙在北京成功举办
+The first Dubbo meetup has been held in Beijing
 ---
 
-首届Dubbo开发者沙龙在北京成功举办, 超过400位开发者参加。这是一个很好的开始！
+The first Dubbo meetup has successfully been held in Beijing, over 400+ people were present. What a great event! 
 
-分享嘉宾及主体如下：
-
-  * 罗毅: Dubbo 的现状现状与未来规划 [PDF](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/dubbo-present-and-future.pdf)
-  * 刘军: 第四届阿里中间件性能挑战赛 [PDF](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/introduction-to-4th-aliware-performance-challenge.pdf)
-  * 陈志轩: 通过 Dubbo 和 Spring-boot 快速构建微服务 [PDF](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/quickly-building-microservice-with-dubbo-and-springboot.pdf)
-  * 王欣: Dubbo 和微店的服务化实践历程分享 [PDF](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/dubbo-and-weidian's-practice-on-microservice-architecture.pdf) 
+Please enjoy the slides of the topics:
+  * Ian Luo: Dubbo's present and future (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/dubbo-present-and-future.pdf)
+  * Jun Liu: Introduction to the 4th Aliware Performance Challenge (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/introduction-to-4th-aliware-performance-challenge.pdf)
+  * Zhixuan Chen: Quickly building Microservice with Dubbo and Spring-boot (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/quickly-building-microservice-with-dubbo-and-springboot.pdf)
+  * Xin Wang: Dubbo and Weidian's Practice on Microservice Architecture (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/raw/master/slides/meetup/201805%40Beijing/dubbo-and-weidian's-practice-on-microservice-architecture.pdf) 

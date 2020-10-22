@@ -1,67 +1,70 @@
 ---
-title: Dubbo服务端异步接口的实现背景和实践
-keywords: Dubbo, 异步, Reactive
-description: Dubbo服务端异步接口的实现背景和实践
+title: Implementation background and practice of Dubbo server asynchronous interface
+keywords: Dubbo, Asynchrony, Reactive
+description: Implementation background and practice of Dubbo server asynchronous interface
 ---
 
-# Dubbo服务端异步接口的实现背景和实践
+# Implementation background and practice of Dubbo server asynchronous interface
 
-## 铺垫
-建议先对Dubbo的处理过程中涉及的线程阶段先做个了解，具体可参考[Dubbo客户端异步接口的实现背景和使用场景](http://dubbo.apache.org/zh-cn/blog/dubboAsync_client.html)。
+## Preface
+It is suggested to make an understanding of the thread phase involved in the process of Dubbo first, please refer to [Implementation background and practice of Dubbo client asynchronous interface](http://dubbo.apache.org/en-us/blog/dubboAsync_client.html) for details.
 
-## 实现背景
-有必要比较详细点的介绍下服务端的线程策略来加深用户在选择服务端异步的判断依据，同时有必要引出协程这一在服务端异步中常常会用到的“秘密武器”。
+## Implementation background
+It is necessary to introduce the server-side thread strategy in more detail to deepen the user's judgment basis for selecting server-side asynchrony. It is also necessary to introduce coroutines, the "secret weapon" often used in server-side asynchrony.
 
-### 服务端的线程策略
-Dubbo支持多种NIO框架来做Remoting的协议实现，无论是Netty，Mina或者Grizzly，实现都大同小异，都是基于事件驱动的方式来做网络通道建立，数据流读取的。其中以Grizzly对于[线程策略](https://javaee.github.io/grizzly/iostrategies.html)的介绍为例，通常支持以下四种。Dubbo作为一个RPC框架，默认选择的是第一种策略，原因在于业务服务是CPU密集型还是IO阻塞型，是无法断定的，第一种策略是最保险的策略。当然，对于这几种策略有了了解后，再结合业务场景做针对性的选择是最完美的。
-1. __Worker-thread策略__
+### Server-side thread strategy
+Dubbo supports a variety of NIO frameworks to implement remoting protocols. Whether Netty, Mina or Grizzly, the implementations are much the same. They are all based on event-driven methods to establish network channels and read data streams. Taking introduction to [Thread Strategy](https://javaee.github.io/grizzly/iostrategies.html) of Grizzly as an example, the following four categories are usually supported. Dubbo as an RPC framework, the default choice is the first strategy. Because it is impossible to determine whether the business services are CPU-intensive or IO blocking type. the first strategy is the most insurance strategy. Of course, after understanding these strategies, it is the most perfect choice to make targeted choices based on business scenarios.
+1. __Worker-thread Strategy__
 
-最常用最普适的策略，其中IO线程将NIO事件处理委托给工作线程。
+The most useful IOStrategy, where Selector thread delegates NIO events processing to a worker threads.
 
 
 
 ![workerthread-strategy.png | center | 371x244](../../img/blog/dubboasyn_server/1.png "")
 
 
-此策略具有很高的伸缩性。我们可以根据需要更改IO和worker线程池的大小，并且不存在在特定NIO事件处理期间可能发生的，同一Selector各个Channel之间相互干扰的风险。
+This IOStrategy is very scalable and safe. We can change the size of selector and worker thread pool as required and there is no risk that some problem, which may occur during the specific NIO event processing, will impact other Channels registered on the same Selector.
 
-缺点是有线程上下文切换的代价。
+The disadvantage is the cost of thread context switching.
 
-2. __Same-thread策略__
+2. __Same-thread Strategy__
 
-可能是最有效的策略。与第一种不同，同一线程处理当前线程中的NIO事件，避免了昂贵的线程上下文切换。
+Potentially the most efficient IOStrategy. Unlike the worker-thread IOStrategy, the same-thread IOStrategy processes NIO events in the current thread, avoiding expensive thread context switches.
 
 
 ![samethread-strategy.png | center | 389x264](../../img/blog/dubboasyn_server/2.png "")
 
 
-这个策略可以调整IO线程池大小，也是具备可伸缩性；缺点也很明显，它要求业务处理中一定不要有阻塞处理，因为它可能会阻止在同一个IO线程上发生的其他NIO事件的处理。
+This IOStrategy is still pretty scalable, because we can tune the selector thread pool size, but it does have drawbacks. Care needs to be taken that channel NIO event processing won’t block or execute any long lasting operation, because it may block the processing of other NIO events that occur on the same Selector.
 
-3. __Dynamic策略__
+3. __Dynamic Strategy__
 
-如前所述，前两种策略具有明显的优点和缺点。但是，如果策略可以尝试在运行时根据当前条件（负载，收集的统计信息等）巧妙地交换它们，何如？
+As mentioned previously worker-thread and same-thread strategies have distinct advantages and disadvantages. However, what if a strategy could try to swap them smartly during runtime depending on the current conditions (load, gathered statistics… etc)?
 
 
 ![dynamic-strategy.png | center | 361x387](../../img/blog/dubboasyn_server/3.png "")
 
 
-这种策略可能会带来很多好处，能更好地控制资源，前提是不要使条件评估逻辑过载，防止评估判断的复杂性会使这种策略效率低下。
-多说一句，希望大家对这个策略多留意一下，它可能是Dubbo服务端异步方式的最佳搭配。我也多扯个淡，这几天关注了些adaptive XX或者predictive XX，这里看到dynamic真是亲切，Dubbo作为产品级生产级的微服务解决方案，是必须既要adaptive，又要predictive，还要dynamic，哈哈。
+Potentially this IOStrategy could bring a lot of benefit and allow finer control of the resources. However, it’s important to not overload the condition evaluation logic, as its complexity will make this IOStrategy inefficient comparing to previous two strategies.
 
-4. __Leader-follower策略__
+By the way, I want you to pay more attention to this strategy, which is probably the best combination of Dubbo server asynchrony.
 
+4. __Leader-follower Strategy__
 
 
 ![leaderfollower-strategy.png | center | 443x286](../../img/blog/dubboasyn_server/4.png "")
 
-此策略类似于第一种，但它不是将NIO事件处理传递给worker线程，而是通过将控制传递给Selector给工作线程，并将实际NIO事件处理当前IO线程中。这种策略其实是把worker和IO线程阶段做了混淆，个人不建议。
-### 协程与线程
-在CPU资源的管理上，OS和JVM的最小调度单位都是线程，业务应用通过扩展实现的协程包是可以具备独立的运行单位，事实上也是基于线程来做的，核心应该是遇到IO阻塞，或者锁等待时，保存上下文，然后切换到另一个协程。至于说的协程开销低，能更高效的使用CPU，这些考虑到协程库的用户态实现和上下文设计是支持的，但也建议大家结合实际业务场景做性能测试。
+This IOStrategy is similar to worker-thread IOStrategy, but instead of passing NIO event processing to a worker thread, it changes worker thread to a selector thread by passing it the control over Selector and the actual NIO event processing takes place in the current thread. This strategy actually confuses worker and IO thread stages, which is not recommended.
 
-__在默认的Dubbo线程策略中，是有worker线程池来执行业务逻辑，但也常常会发生ThreadPool Full的问题，为了尽快释放worker线程，在业务服务的实现中会另起线程。代价是再次增加线程上下文切换，同时需要考虑链路级别的数据传送(比如tracing信息)和流控的出口控制等等。当然，如果Dubbo能够切换到Same-thread策略，再配合协程库的支持，服务端异步是一种值得推荐的使用方式。__
+### Coroutine and thread
+In terms of CPU resource management, the minimum scheduling unit of OS and JVM is thread. The coroutine library implemented by business application through extension can have independent running unit. In fact, it is also done based on thread. The principle should be to save the context and switch to another coroutine when IO blocking or lock waiting is encountered.
 
-## 示例
-通过示例来体验下Dubbo服务端异步接口。Demo代码请访问github之[https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)。
+__In the default Dubbo thread strategy, there are worker thread pools to execute the business logic, but the ThreadPool Full problem often occurs. In order to release worker threads as soon as possible, another thread will be set up in the implementation of the business service. The cost is thread context switching again, and it's necessary to consider link-level data transfer (such as tracing information) and flow-control export controls, etc. Of course, if Dubbo can switch to the Same-thread strategy, combined with the coroutine library support, server-side asynchrony is a recommended use.__
+
+## The sample
+
+Use an example to experience the Dubbo server-side asynchronous interface. For Demo code, visit [https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)。
+
 ```java
 public class AsyncServiceImpl implements AsyncService {
 
@@ -86,10 +89,10 @@ public class AsyncServiceImpl implements AsyncService {
     }
 
 ```
-## 实践建议
-* 不要迷信服务端异步。
-* 服务端异步在Event-Driven或者Reactive面前基本是伪命题.<span data-type="color" style="color:rgb(36, 41, 46)"><span data-type="background" style="background-color:rgb(255, 255, 255)">补充下原因：服务端异步初衷是说Dubbo的服务端业务线程数（默认是200个）不够，但其实在event-driven模式下，200个肯定不需要那么多，只需要cpu核数那样就可以。只要业务实现是非阻塞的纯异步方式的业务逻辑处理，用再多的线程数都是浪费资源。</span></span>
-* 要用服务端异步，建议服务端的线程策略采用same thread模式+协程包。
+## Practical suggestions
+* Don't rely too much on server-side asynchrony.
+* Server-side asynchrony is basically a false proposition in the face of event-driven or Reactive.<span data-type="color" style="color:rgb(36, 41, 46)"><span data-type="background" style="background-color:rgb(255, 255, 255)">Supplement the reason: the server asynchrony is said Dubbo server-side business threads (default is 200) is not enough, but in the Event-Driven mode, 200 threads certainly do not need that much, just as much as the number of CPU cores. As long as the business implementation is non-blocking and pure asynchronous business logic processing, it is a waste of resources to use as many threads as possible.</span></span>
+* To use server-side asynchrony, it is recommended that the server-side thread strategy adopt the Same_thread pattern + Coroutine Library.
 
-## 小结
-Dubbo在支持业务应用时，会碰到千奇百怪的需求场景，服务端异步为用户提供了一种解决ThreadPool Full的方案。当发生ThreadPool Full的情况下，如果当前系统瓶颈是CPU，不建议用这种方案；如果系统Load不高，调高worker的线程数目，或者采用服务端异步，都是可以考虑的。
+## Conclusions
+When Dubbo supports business applications, it encounters a variety of requirements scenarios, and server-side asynchrony provides users with a solution to deal with ThreadPool Full. In the case of ThreadPool Full, if the current system bottleneck is CPU, this solution is not recommended. If the system load is not high, increasing the number of worker threads or using server asynchrony can be considered.

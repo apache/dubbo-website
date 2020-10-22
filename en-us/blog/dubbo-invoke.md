@@ -1,40 +1,40 @@
 ---
-title: Dubbo 关于同步/异步调用的几种方式
+title: Dubbo: Several ways about synchronous/asynchronous invoke
 keywords: Dubbo, Invoke, Async
-description: 本文介绍了Dubbo基于异步通讯机制实现的几种同步和异步调用方式。
+description: This article introduces you how to use Dubbo synchronously or asynchronously.
 ---
 
-# Dubbo 关于同步/异步调用的几种方式
+# Dubbo: Several ways about synchronous/asynchronous invoke
 
-我们知道，Dubbo 缺省协议采用单一长连接，底层实现是 Netty 的 NIO 异步通讯机制；基于这种机制，Dubbo 实现了以下几种调用方式：
+As we all know，Dubbo adopts a single large join protocol by default and takes the NIO asynchronous communication mechanism of Netty as the low-level implementation. Based on this mechanism, Dubbo implements several invocation modes as follows:
 
-* 同步调用
-* 异步调用
-* 参数回调
-* 事件通知
+* synchronous invoke
+* asynchronous invoke
+* parameters callback
+* event notification
 
-## 同步调用
+### Synchronous invoke
 
-同步调用是一种阻塞式的调用方式，即 Consumer 端代码一直阻塞等待，直到 Provider 端返回为止；
+Synchronous invoke is a kind of blocking invocation mode, that is the Consumer keeps blocking and waiting, until the Provider returns.
 
-通常，一个典型的同步调用过程如下：
+Generally, a typical synchronous invocation process is as follows:
 
-1. Consumer 业务线程调用远程接口，向 Provider 发送请求，同时当前线程处于`阻塞`状态；
-2. Provider 接到 Consumer 的请求后，开始处理请求，将结果返回给 Consumer；
-3. Consumer 收到结果后，当前线程继续往后执行。
+1. Consumer service thread invokes the remote API and sends requests to the Provider. Meanwhile, the current service thread stays in blocking state;
+2. Provider process relative request after receiving it from Consumer. Then returns the results to Consumer;
+3. After Consumer receiving results, the current thread continues to execute.
 
-这里有 2 个问题：
+Here are two problems:
 
-1. Consumer 业务线程是怎么进入`阻塞`状态的？
-2. Consumer 收到结果后，如何唤醒业务线程往后执行的？
+1. How does Consumer service thread turn into `blocking` state?
+2. How does the service thread be awaked to execute after Consumer receiving results?
 
-其实，Dubbo 的底层 IO 操作都是异步的。Consumer 端发起调用后，得到一个 Future 对象。对于同步调用，业务线程通过`Future#get(timeout)`，阻塞等待 Provider 端将结果返回；`timeout`则是 Consumer 端定义的超时时间。当结果返回后，会设置到此 Future，并唤醒阻塞的业务线程；当超时时间到结果还未返回时，业务线程将会异常返回。
+In fact, the low-level I/O operations of Dubbo are all asynchronous. The Consumer gets a Future object after invoking the Provider. For synchronous invoke, the service thread takes advantage of `Future#get(timeout)` to block and wait for Provider returning results, with the 'timeout' indicating the timeout defined by Consumer. When the result returns, the Future will be set and the blocked service thread will be awaked. The service thread will return an exception if there is no result after timeout.
 
-## 异步调用
+### Asynchronous invoke
 
-基于 Dubbo 底层的异步 NIO 实现异步调用，对于 Provider 响应时间较长的场景是必须的，它能有效利用 Consumer 端的资源，相对于 Consumer 端使用多线程来说开销较小。
+For scenarios that Provider has a long response time, it's necessary to implement asynchronous invoke based on Dubbo's underlying asynchronous NIO. It could utilize the resource of Consumer effectively, and costs less than using multi-thread for Consumer.
 
-异步调用，对于 Provider 端不需要做特别的配置。下面的例子中，Provider 端接口定义如下：
+Asynchronous invoke does not need specific configuration for Provider. In the example，the API of Provider is defined as follow：
 
 ```java
 public interface AsyncService {
@@ -42,7 +42,7 @@ public interface AsyncService {
 }
 ```
 
-### Consumer 配置
+##### Consumer configuration
 
 ```xml
 <dubbo:reference id="asyncService" interface="com.alibaba.dubbo.samples.async.api.AsyncService">
@@ -50,50 +50,50 @@ public interface AsyncService {
 </dubbo:reference>
 ```
 
-需要异步调用的方法，均需要使用 `<dubbo:method/>`标签进行描述。
+Notice that if we need an asynchronous revoke method, we must use `<dubbo:method/>` label to describe it.
 
-### Consumer 端发起调用
+##### Consumer triggers invocation
 
 ```java
 AsyncService service = ...;
-String result = service.goodbye("samples");// 这里的返回值为空，请不要使用
+String result = service.goodbye("samples");// returns NULL and DO NOT use!
 Future<String> future = RpcContext.getContext().getFuture();
-... // 业务线程可以开始做其他事情
-result = future.get(); // 阻塞需要获取异步结果时，也可以使用 get(timeout, unit) 设置超时时间
+... // other service thread logic
+result = future.get(); // could use get(timeout, unit) to configure timeout, when it needs to get the asynchronous result
 ```
 
-Dubbo Consumer 端发起调用后，同时通过`RpcContext.getContext().getFuture()`获取跟返回结果关联的`Future`对象，然后就可以开始处理其他任务；当需要这次异步调用的结果时，可以在任意时刻通过`future.get(timeout)`来获取。
+After Dubbo Consumer triggers invocation, it uses `RpcContext.getContext().getFuture()` to get the relative `Future` object, and then it could start executing other tasks. Anytime when we need results, `future.get(timeout)` is supposed to be called.
 
-一些特殊场景下，为了尽快调用返回，可以设置是否等待消息发出：
+Under several special conditions, it could be set whether to wait for sending the request, to accelerate the return of invocation:
 
-* `sent="true"` 等待消息发出，消息发送失败将抛出异常；
-* `sent="false"` 不等待消息发出，将消息放入 IO 队列，即刻返回。
+* `sent="true"` Waiting for sending the request, and return an exception if it fails;
+* `sent="false"` Do not wait for the request, and returns immediately after putting the request to the I/O queue.
 
-默认为`false`。配置方式如下：
+We set it to `false` by default. And detailed configuration is as follows：
 
 ```xml
 <dubbo:method name="goodbye" async="true" sent="true" />
 ```
 
-如果你只是想异步，完全忽略返回值，可以配置 `return="false"`，以减少 Future 对象的创建和管理成本：
+If you only want to be asynchronous, then omit the result thoroughly, `return="false"` could be set to reduce the creation and management cost of Future:
 
 ```xml
 <dubbo:method name="goodbye" async="true" return="false"/>
 ```
 
-此时，`RpcContext.getContext().getFuture()`将返回`null`。
+At this time，`RpcContext.getContext().getFuture()` will return `null`。
 
-整个异步调用的时序图如下：
+The complete sequence diagram of asynchronous invoke is as follow:
 
-![异步调用](../../img/blog/dubbo-async.svg)
+![Asynchronous invoke](../../img/blog/dubbo-async.svg)
 
-此示例代码位于：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async
+The sample locates at：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async
 
-## 参数回调
+### Parameters callback
 
-参数回调有点类似于本地 Callback 机制，但 Callback 并不是 Dubbo 内部的类或接口，而是由 Provider 端自定义的；Dubbo 将基于长连接生成反向代理，从而实现从 Provider 端调用 Consumer 端的逻辑。
+The parameter Callback is somewhat similar to the local Callback mechanism, but Callback is not an inner class or interface of Dubbo. Instead, it is defined by the Provider. Dubbo will generate a reverse proxy based on the long connection, so as to implement the logic of calling the Consumer from the Provider.
 
-### Provider 端定义 Service 和 Callback
+##### Service and Callback definition of Provider
 
 ```java
 public interface CallbackService {
@@ -105,7 +105,7 @@ public interface CallbackListener {
 }
 ```
 
-#### Provider 端 Service 实现
+##### Service implementation of Provider
 
 ```java
 public class CallbackServiceImpl implements CallbackService {
@@ -146,7 +146,7 @@ public class CallbackServiceImpl implements CallbackService {
 }
 ```
 
-#### Provider 端暴露服务
+##### Service exposure of Provider
 
 ```xml
 <bean id="callbackService" class="com.alibaba.dubbo.samples.callback.impl.CallbackServiceImpl"/>
@@ -159,9 +159,9 @@ public class CallbackServiceImpl implements CallbackService {
 </dubbo:service>
 ```
 
-这里，Provider 需要在方法中声明哪个参数是 Callback 参数。
+Here，Provider needs to declare which parameter is the Callback parameter in the method.
 
-#### Consumer 端实现 Callback 接口
+##### Callback interface implementation of Consumer
 
 ```java
 CallbackService callbackService = ...;
@@ -172,17 +172,17 @@ callbackService.addListener("foo.bar", new CallbackListener() {
 });
 ```
 
-Callback 接口的实现类在 Consumer 端，当方法发生调用时，Consumer 端会自动 export 一个 Callback 服务。而 Provider 端在处理调用时，判断如果参数是 Callback，则生成了一个 proxy，因此服务实现类里在调用 Callback 方法的时候，会被传递到 Consumer 端执行 Callback 实现类的代码。
+The implementation class of the Callback interface is on the Consumer, which automatically exports a Callback service when the method is called. Thus during Provider processing the call, if the parameter is determined as Callback, it will generate a proxy. Therefore, when the service implementation class calling the Callback method, it will be passed to the Consumer to execute the code.
 
-上述示例代码位于：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-callback
+The sample code above is located at：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-callback
 
-这种调用方式有点像消息的发布和订阅，但又有区别。比如当 Consumer 端 完成了Callback 服务的 export 后，如果后续重启了，这时 Provider 端就会调不通；同时 Provider 端如何清理掉这个 proxy 也是一个问题。
+This invocation mode is somewhat like message publishing and subscribing, but there is a little difference. For example, when the Consumer completes the export of Callback service, if it restarts later, then the Provider will fail to adjust. Meanwhile it is also a problem for the Provider to clean up the proxy.
 
-## 事件通知
+### Event notification
 
-事件通知允许 Consumer 端在调用之前、调用之后或出现异常时，触发 `oninvoke`、`onreturn`、`onthrow` 三个事件。
+Event notification allows the Consumer triggering three events，particularly `oninvoke`, `onreturn`, `onthrow` before calling, after calling or occurring exceptions.
 
-可以通过在配置 Consumer 时，指定事件需要通知的方法，如：
+You can specify which events need to be notified during configuring Consumer, such as:
 
 ```xml
 <bean id="demoCallback" class="com.alibaba.dubbo.samples.notify.impl.NotifyImpl" />
@@ -192,13 +192,13 @@ Callback 接口的实现类在 Consumer 端，当方法发生调用时，Consume
 </dubbo:reference>
 ```
 
-其中，NotifyImpl 的代码如下：
+Among them，the code of NotifyImpl is as follow：
 
 ```java
 public class NotifyImpl implements Notify{
 
     public Map<Integer, String> ret = new HashMap<Integer, String>();
-    
+
     public void onreturn(String name, int id) {
         ret.put(id, name);
         System.out.println("onreturn: " + name);
@@ -210,12 +210,12 @@ public class NotifyImpl implements Notify{
 }
 ```
 
-这里要强调一点，自定义 Notify 接口中的三个方法的参数规则如下：
+Here we address that the parameter rules of three methods in the custom Notify interface are as follows:
 
-*  `oninvoke` 方法参数与调用方法的参数相同；
-* `onreturn`方法第一个参数为调用方法的返回值，其余为调用方法的参数；
-* `onthrow`方法第一个参数为调用异常，其余为调用方法的参数。
+* `oninvoke` method's parameters are the same as the calling method parameters;
+* `onreturn` method's first parameter is the returned value of calling method，and the others are the same as the calling method;
+* `onthrow` method's first parameter is an invoked exception，and the others are the same as the calling method.
 
-上述配置中，`sayHello`方法为同步调用，因此事件通知方法的执行也是同步执行。可以配置 `async=true`让方法调用为异步，这时事件通知的方法也是异步执行的。特别强调一下，`oninvoke`方法不管是否异步调用，都是同步执行的。
+In the above configuration, `sayHello` method is an asynchronous invocation, so the execution of event notification method is also synchronous. You can configure the `async = true` to make method invocation asynchronous, at this moment, event notification method is executed asynchronously. Especially emphasize that `oninvoke` method is executed synchronously, whether is an asynchronous call or not.
 
-事件通知的示例代码请参考：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify
+Please refer to the sample code for event notification：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify

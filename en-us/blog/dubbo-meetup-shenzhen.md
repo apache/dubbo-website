@@ -1,15 +1,15 @@
 ---
-title: 第三届Dubbo开发者沙龙在深圳成功举办
-keywords: Dubbo, 深圳, meetup
-description: 第三届Dubbo开发者沙龙在深圳成功举办。
+title: The third Dubbo meetup has been held in Shenzhen
+keywords: Dubbo, Shenzhen, meetup
+description: The third Dubbo meetup has been held in Shenzhen
 ---
 
-# 第三届Dubbo开发者沙龙在深圳成功举办
+The third Dubbo meetup has been held in Shenzhen
+---
 
+The third Dubbo meetup has successfully been held in Shenzhen, over 2000 people submitted registration, and over 700 were present, more than 17,000 watched the live online. 
 
-第三届Dubbo开发者沙龙在深圳成功举办，超过2000位开发者报名，现场参与人数700+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数17000+
-
-分享嘉宾
-  * 陈志轩: Dubbo开源现状和2.7规划
-  * 康彬: 乐信集团的微服务化之路
-  * 林佳梁: Sentinel——企业用户的全方位流量哨兵 
+Please enjoy the slides of the topics:
+  * Zhixuan Chen: Dubbo-present-and-2.7-update (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201807%40shenzhen/dubbo-present-and-2.7-update.pdf)
+  * Bin Kang: Microservice-in-lexinfintech (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201807%40shenzhen/microservice-in-lexinfintech.pdf)
+  * Jialiang lin: sentinel (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201807%40shenzhen/sentinel.pdf)

@@ -1,21 +1,20 @@
 ---
-title: 下载中心
+title: Downloads
 keywords: Dubbo, Downloads, Version
-description: 本文将向你介绍如何点击了解各版本详情和升级注意事项。
+description: This article will introduce you how to understand the details of each version and upgrade matters needing attention.
 ---
 
-# 下载中心
 
-## 验证  
+# Downloads
 
-可以按照这里的[步骤](https://www.apache.org/info/verification), 利用[KEYS](https://www.apache.org/dist/incubator/dubbo/KEYS)文件来验证下载。
+## Verification  
+
+you can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://www.apache.org/dist/dubbo/KEYS) file to verify the download files
 
 ## Apache Dubbo
 
-请点击了解各[版本详情和升级注意事项](http://dubbo.apache.org/zh-cn/docs/user/versions/index.html)
-
-> GitHub: https://github.com/apache/incubator-dubbo \
-> 发布说明：https://github.com/apache/incubator-dubbo/releases
+> GitHub: https://github.com/apache/dubbo \
+> Release Notes: https://github.com/apache/dubbo/releases
 
 ### 2.7.7 (2020-05-18)
 
@@ -61,6 +60,7 @@ description: 本文将向你介绍如何点击了解各版本详情和升级注�
 * [binary](https://archive.apache.org/dist/incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-bin.zip) |
 [asc](https://archive.apache.org/dist/incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-bin.zip.asc) |
 [sha512](https://archive.apache.org/dist/incubator/dubbo/2.7.1/apache-dubbo-incubating-2.7.1-bin.zip.sha512)
+
 
 ### 2.7.0 (2019-01-29)
 
@@ -128,7 +128,7 @@ description: 本文将向你介绍如何点击了解各版本详情和升级注�
 ## Dubbo Spring Boot Starter
 
 > GitHub: https://github.com/apache/incubator-dubbo-spring-boot-project \
-> 发布说明：https://github.com/apache/incubator-dubbo-spring-boot-project/releases
+> Release Notes: https://github.com/apache/incubator-dubbo-spring-boot-project/releases
 
 ### 2.7.1 (2019-04-09)
 
@@ -169,7 +169,7 @@ description: 本文将向你介绍如何点击了解各版本详情和升级注�
 ## Dubbo Admin
 
 > GitHub: https://github.com/apache/incubator-dubbo-admin \
-> 发布说明：https://github.com/apache/incubator-dubbo-admin/releases
+> Release Notes: https://github.com/apache/incubator-dubbo-admin/releases
 
 ### 0.1 (2019-02-15)
 
