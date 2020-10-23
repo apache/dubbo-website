@@ -6,16 +6,29 @@ This project keeps all sources used for building up dubbo official website which
 
 ## Prerequisite
 
-Dubbo website is powered by [Mkdocs-material](https://github.com/squidfunk/mkdocs-material).
-If your version of Mkdocs is less than `1.1.2`, please upgrade to `1.1.2`.
-Please also make sure you have proper python version installed locally.
+Dubbo website is powered by [Mkdocs-material](https://github.com/squidfunk/mkdocs-material).  
+If your version of Mkdocs is less than `1.1.2`, please upgrade to `1.1.2`.  
+Please also make sure you have proper python version installed locally.  
 
-## Build instruction
-1. Install Mkdocs
+## Develop instruction
+
+### Write docs or blogs
+
+1. Write docs or blog into standard Markdown files.
+2. Add files into the directory you want to publish.
+3. Update nav menus in `mkdocs_en.yml` and `mkdocs_zh.yml` accordingly.
+
+> Frequently used target directories are `en-us/docs`, `en-us/blogs`, `zh-cn/docs` and `zh-cn/blogs`
+
+### Build
+
+1. Install Mkdocs  
+
 Check [here](https://www.mkdocs.org/) for details of how to install Mkdocs.
 > As we have mkdocs-material source codes embedded inside our website, installation of Mkdocs-material is not required. 
 
-2. Build the site
+2. Build the site  
+
 Run `mkdocs build --config-file=mkdocs_en.yml` or `mkdocs build --config-file=mkdocs_zh.yml` to build .md files into static files.
 > Building is only needed when you want to check the effects of your changes locally, you do not need to build before commit,
 > commit the .md source files directly. Check [serve](https://www.mkdocs.org/) command for how to test changes quickly and on the fly.
