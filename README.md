@@ -10,18 +10,7 @@ Dubbo website is powered by [Mkdocs-material](https://github.com/squidfunk/mkdoc
 If your version of Mkdocs is less than `1.1.2`, please upgrade to `1.1.2`.  
 Please also make sure you have proper python version installed locally.  
 
-## Develop instruction
-
-### Write docs or blogs
-
-1. Write docs or blog into standard Markdown files.
-2. Add files into the directory you want to publish.
-3. Update nav menus in `mkdocs_en.yml` and `mkdocs_zh.yml` accordingly.
-
-> Frequently used target directories are `en-us/docs`, `en-us/blogs`, `zh-cn/docs` and `zh-cn/blogs`
-
-### Build
-
+## Build instruction
 1. Install Mkdocs  
 
 Check [here](https://www.mkdocs.org/) for details of how to install Mkdocs.
