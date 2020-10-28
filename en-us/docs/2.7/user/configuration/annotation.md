@@ -7,7 +7,7 @@ description: Annotation Configuration
 # Annotation Configuration
 
  Requires`2.6.3` or higher
- click here to view the [complete sample](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-annotation)
+ click here to view the [complete sample](https://github.com/apache/dubbo-samples)
 
 ## Provider Side
 
