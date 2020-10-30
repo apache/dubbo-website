@@ -61,10 +61,12 @@ Refer to [this blog](blog/zh-cn/how-to-involve-dubbo-community.md)
 4. Send the pull request contains the .md and blog.js only.
 
 
-### Add a new article for developers
+### Add a new article for developers ###
 
 1. Add new .md file under docs/en-us/developers or docs/zh-cn/developers, the file name should end up with _dev.md. Note that the suffix _dev is necessary.
 2. Update site_config/develop.js, add a new entry in either en-us or zh-cn.
 3. Run docsite start locally to verify the article can be displayed correctly.
 4. Send the pull request contains the *_dev.md and develop.js only.
+
+Developed and design by dubbo
 
