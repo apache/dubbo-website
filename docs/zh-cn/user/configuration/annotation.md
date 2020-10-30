@@ -7,7 +7,7 @@ description: 注解配置
 # 注解配置
 
 需要 `2.6.3` 及以上版本支持
-点此查看[完整示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-annotation)
+点此查看[完整示例](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-annotation)
 
 ## 服务提供方
 
