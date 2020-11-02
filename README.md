@@ -35,10 +35,7 @@ Run `mkdocs build --config-file=mkdocs_en.yml` or `mkdocs build --config-file=mk
 > commit the .md source files directly. Check [serve](https://www.mkdocs.org/) command for how to test changes quickly and on the fly.
 
 ## How to send a PR
-1. Just push your changed files, such as:
-    * `*.md`
-	* blog.js or docs.js or site.js
-2. Send a PR to **master** branch.
+1. Push your changed files and send a PR to **master** branch.
 
 ## SEO
 
