@@ -49,4 +49,4 @@ description: some description
 ---
 ```
 
-Refer to [this blog](blog/zh-cn/how-to-involve-dubbo-community.md)
+Refer to [this blog](blog/zh-cn/how-to-involve-dubbo-community/)
