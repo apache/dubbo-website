@@ -183,4 +183,4 @@ So far, a simple service Mock platform has been successfully launched!
 ## Others
 
 -	The generic invoke and generic interface implementations introduced in this article are all based on the native Dubbo protocol. Prior to version 2.6.2, other protocols such as http/hessian don't support generic invoke. Version 2.6.3 will support the generic invoke of these two protocols.
--	The relevant sample codes mentioned in this article can be found in dubbo-samples: https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-generic
+-	The relevant sample codes mentioned in this article can be found in dubbo-samples: https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-generic

@@ -185,7 +185,7 @@ public class Application {
 
 ### 运行
 
-完整的示例在 https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-api 上提供。在完整的示例中，由于配置了 *exec-maven-plugin*，可以很方便的在命令行下通过 maven 的方式执行。当然，您也可以在 IDE 里直接执行，但是需要注意的是，由于使用了组播的方式来发现服务，运行时需要指定 *-Djava.net.preferIPv4Stack=true*。 
+完整的示例在 https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api 上提供。在完整的示例中，由于配置了 *exec-maven-plugin*，可以很方便的在命令行下通过 maven 的方式执行。当然，您也可以在 IDE 里直接执行，但是需要注意的是，由于使用了组播的方式来发现服务，运行时需要指定 *-Djava.net.preferIPv4Stack=true*。 
 
 #### 构建示例
 

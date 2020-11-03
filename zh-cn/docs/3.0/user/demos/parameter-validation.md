@@ -179,5 +179,5 @@ public class ValidationConsumer {
 }
 ```
 
-[^1]: 自 `2.1.0` 版本开始支持, 如何使用可以参考 [dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-validation)
+[^1]: 自 `2.1.0` 版本开始支持, 如何使用可以参考 [dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation)
 [^2]: 验证方式可扩展，扩展方式参见开发者手册中的[验证扩展](../../dev/impls/validation.html)

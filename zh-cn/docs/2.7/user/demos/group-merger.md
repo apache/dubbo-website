@@ -2,7 +2,7 @@
 
 按组合并返回结果 [^1]，比如菜单服务，接口一样，但有多种实现，用group区分，现在消费方需从每种group中调用一次返回结果，合并结果返回，这样就可以实现聚合菜单项。  
 
-相关代码可以参考 [dubbo 项目中的示例](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-merge)
+相关代码可以参考 [dubbo 项目中的示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-merge)
 
 ## 配置
 
