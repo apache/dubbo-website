@@ -91,7 +91,7 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 为此 2.7.5 版本引入了对 IDL + Protobuf 的支持，以解决跨语言的服务定义问题，具体可参见示例：
 
-[dubbo-samples-protobuf](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-protobuf)
+[dubbo-samples-protobuf](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-protobuf)
 
 ![service idl](../../img/docs/service-idl.png) 
 
@@ -99,7 +99,7 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 ![idl dubbo compiler](../../img/docs/idl-dubbo-compiler.png) 
 
-但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
+但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
 
 ### 性能优化
 

@@ -191,7 +191,7 @@ public class Application {
 
 ### Run
 
-The complete example can be found at https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running.
+The complete example can be found at https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running.
 
 #### Build Example
 
