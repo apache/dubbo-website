@@ -8,7 +8,7 @@ description: Implementation background and practice of Dubbo client asynchronous
 
 ## Preface
 
-![image | left](../../img/blog/dubboasyn_client/1_en.png  "")
+![image](../../img/blog/dubboasyn_client/1_en.png)
 
 Let's start with a brief introduction about the stages of a complete Dubbo invocation.  
 1. Biz~ represents business thread, that is, the thread where the business logic is located. Biz~ thread pool may be created and maintained by business itself, most of which may be managed by system framework itself (for example, a web system runs under Tomcat container, Biz~ thread is maintained by Tomcat); IO~ stands for network data processing thread, which is created and maintained by IO framework (such as Netty, Grizzly). Dubbo Remoting's default Netty implementation is NioEventloopLoopGroup. In addition, according to the binding relationship between Channel and IO thread, IO~ can also be regarded as an acceptable Channel for event messages. Asynchronous processing stages such as Biz and IO are abstractly described in JDK8 as completionstages.  
@@ -70,13 +70,9 @@ In the above configuration, the `sayHello` method is called synchronously, so th
 
 ### Practical advice
 
-* <div data-type="alignment" data-value="justify" style="text-align:justify">
-  <div data-type="p">Logical Non-Strongly dependent results after RPC invocation: Asynchronous callbacks are suitable for client-side asynchronous invocation when the client <strong>is not strongly dependent on the server response</strong>.</div>
-  </div>
+* Logical Non-Strongly dependent results after RPC invocation: Asynchronous callbacks are suitable for client-side asynchronous invocation when the client <strong>is not strongly dependent on the server response</strong>.
 
-* <div data-type="alignment" data-value="justify" style="text-align:justify">
-  <div data-type="p">RX scenario: after learning about reactive programming model, I believe that as long as the programming thinking can embrace reactive and the state machine design of business model can be adjusted appropriately, asynchronous solutions can be applied in all scenarios, so as to achieve better terminal response experience. For Dubbo, the current asynchronous interface model needs to be improved like the reactive model interface in order to make the user more naturally apply the asynchronous interface. </div>
-  </div>
+* RX scenario: after learning about reactive programming model, I believe that as long as the programming thinking can embrace reactive and the state machine design of business model can be adjusted appropriately, asynchronous solutions can be applied in all scenarios, so as to achieve better terminal response experience. For Dubbo, the current asynchronous interface model needs to be improved like the reactive model interface in order to make the user more naturally apply the asynchronous interface. 
 
 
 ### Conclusions
