@@ -10,7 +10,7 @@ description: Dubbo客户端异步接口的实现背景和实践
 
 
 
-![image | left](../../img/blog/dubboasyn_client/1.png  "")
+![image](../../img/blog/dubboasyn_client/1.png)
 
 
 先简单介绍下一次完整的Dubbo调用所经历的线程阶段。几个信息这里罗列下
@@ -74,13 +74,9 @@ public class NotifyImpl implements Notify{
 
 ### 实践建议
 
-* <div data-type="alignment" data-value="justify" style="text-align:justify">
-  <div data-type="p">RPC调用后的逻辑非强依赖结果：异步回调是在客户端<strong>非强依赖服务端的结果</strong>情况下，是适用客户端的异步调用。</div>
-  </div>
+* RPC调用后的逻辑非强依赖结果：异步回调是在客户端<strong>非强依赖服务端的结果</strong>情况下，是适用客户端的异步调用。
 
-* <div data-type="alignment" data-value="justify" style="text-align:justify">
-  <div data-type="p">rx场景：自从了解到reactive的编程模型后，认为只要编程思维能够拥抱reactive，并且业务模型的状态机设计能做适当的调整，任何场景下都比较适用异步来解决，从而得到更好的终端响应体验。 对于Dubbo来说，当下的异步接口模型是需要像reactive的模型接口做改进，才能使得用户更自然地适用异步接口。</div>
-  </div>
+* rx场景：自从了解到reactive的编程模型后，认为只要编程思维能够拥抱reactive，并且业务模型的状态机设计能做适当的调整，任何场景下都比较适用异步来解决，从而得到更好的终端响应体验。 对于Dubbo来说，当下的异步接口模型是需要像reactive的模型接口做改进，才能使得用户更自然地适用异步接口。
 
 
 ### 小结
