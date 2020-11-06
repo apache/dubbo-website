@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install jq
+        run: apt-get install jq -y
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
@@ -22,7 +24,9 @@ jobs:
           mkdocs --version
           echo "removing previous static files from ./output" && rm -rf ./output
           mkdocs build -f mkdocs_en.yml -d ./output/en-us && mkdocs build -f mkdocs_zh.yml -d ./output/zh-cn
-          mkdir deploy-dist && cp -R img ./output/zh-cn/ && cp -R img ./output/en-us/ && cp -R ./output/* deploy-dist/
+          jq -e  '(.docs[] | .text) = ""' ./output/en-us/search/search_index.json > ./output/en-us/search/tmp.json && mv ./output/en-us/search/tmp.json ./output/en-us/search/search_index.json
+          jq -e  '(.docs[] | .text) = ""' ./output/zh-cn/search/search_index.json > ./output/zh-cn/search/tmp.json && mv ./output/zh-cn/search/tmp.json ./output/zh-cn/search/search_index.json
+          mkdir deploy-dist && cp -R img ./output/zh-cn/ && cp -R img ./output/en-us/ && cp -R ./output/* deploy-dist/ && cp *.html deploy-dist/ && cp .htaccess deploy-dist/
           cp -R schema deploy-dist/
       - name: Archive
         uses: actions/upload-artifact@v2
