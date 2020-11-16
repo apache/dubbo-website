@@ -1,38 +1,46 @@
-name: Website deploy
+name: Website Deploy
 
 on:
   push:
     branches:
-    - master
+      - master
+  pull_request:
+    types: [ opened, synchronize, reopened, closed ]
+    branches:
+      - master
+
 
 jobs:
-  deploy:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
+    name: Build and Deploy Job
     steps:
       - uses: actions/checkout@v2
-      - name: Install jq
-        run: sudo apt-get install jq -y
-      - uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          submodules: recursive
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Setup Docsy
+        run: git submodule update --init --recursive && sudo npm install -D --save autoprefixer && sudo npm install -D --save postcss-cli
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+          extended: true
       - name: Build
-        run: |
-          pip install \
-              mkdocs-material>=5.5.3 \
-              mkdocs-minify-plugin>=0.3 \
-              mkdocs-redirects>=1.0
-          mkdocs --version
-          echo "removing previous static files from ./output" && rm -rf ./output
-          mkdocs build -f mkdocs_en.yml -d ./output/en-us && mkdocs build -f mkdocs_zh.yml -d ./output/zh-cn
-          jq -e  '(.docs[] | .text) = ""' ./output/en-us/search/search_index.json > ./output/en-us/search/tmp.json && mv ./output/en-us/search/tmp.json ./output/en-us/search/search_index.json
-          jq -e  '(.docs[] | .text) = ""' ./output/zh-cn/search/search_index.json > ./output/zh-cn/search/tmp.json && mv ./output/zh-cn/search/tmp.json ./output/zh-cn/search/search_index.json
-          mkdir deploy-dist && cp -R img ./output/zh-cn/ && cp -R img ./output/en-us/ && cp -R ./output/* deploy-dist/ && cp *.html deploy-dist/ && cp .htaccess deploy-dist/
-          cp -R schema deploy-dist/
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v2.4.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: asf-site
-          PUBLISH_DIR: ./deploy-dist
+          HUGO_ENV: production
+        run: hugo --minify
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          keepFiles: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: asf-site
+          publish_dir: ./public
+          keep_files: true
+
+
+
