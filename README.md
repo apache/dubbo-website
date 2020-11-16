@@ -1,52 +1,53 @@
 # Dubbo Official Website
-
+ 
 [![CI Status](https://github.com/apache/dubbo-website/workflows/CI/badge.svg?branch=master)](https://github.com/apache/dubbo-website/actions)
 ![Site Deployment](https://github.com/apache/dubbo-website/workflows/Website%20deploy/badge.svg)
 
 This project keeps all sources used for building up Dubbo official website which's served at https://dubbo.apache.org.
 
-## Prerequisite
+## Overview
 
-Dubbo website is powered by [Mkdocs-material](https://github.com/squidfunk/mkdocs-material).  
-If your version of Mkdocs is less than `1.1.2`, please upgrade to `1.1.2`.  
-Please also make sure you have proper python version installed locally.  
+The Apache Dubbo docs are built using [Hugo](https://gohugo.io/) with the [Docsy](https://docsy.dev) theme.
+This project contains the hugo project, markdown files, and theme configurations.
 
-## Develop instruction
+## Pre-requisites
 
-### Write docs or blogs
+- [Hugo extended version](https://gohugo.io/getting-started/installing)
+- [Node.js](https://nodejs.org/en/)
 
-1. Write docs or blog into standard Markdown files.
-2. Add files into the directory you want to publish.
-3. Update nav menus in `mkdocs_en.yml` and `mkdocs_zh.yml` accordingly.
+## Environment setup
 
-> Frequently used target directories are `en-us/docs`, `en-us/blogs`, `zh-cn/docs` and `zh-cn/blogs`
-
-### Build
-
-1. Install Mkdocs  
-
-Check [here](https://www.mkdocs.org/) for details of how to install Mkdocs.
-> As we have mkdocs-material source codes embedded inside our website, installation of Mkdocs-material is not required. 
-
-2. Build the site  
-
-Run `mkdocs build --config-file=mkdocs_en.yml` or `mkdocs build --config-file=mkdocs_zh.yml` to build .md files into static files.
-> Building is only needed when you want to check the effects of your changes locally, you do not need to build before commit,
-> commit the .md source files directly. Check [serve](https://www.mkdocs.org/) command for how to test changes quickly and on the fly.
-
-## How to send a PR
-1. Push your changed files and send a PR to **master** branch.
-
-## SEO
-
-Make sure each .md starts with the following texts:
-
+1. Ensure pre-requisites are installed
+2. Clone this repository
+```sh
+git clone https://github.com/apache/dubbo-website.git
 ```
----
-title: title
-keywords: keywords1,keywords2,keywords3
-description: some description
----
+3. Change to root directory: 
+```sh
+cd dubbo-website
+```
+4. Add Docsy submodule: 
+```sh
+git submodule add https://github.com/google/docsy.git themes/docsy
+```
+5. Update submodules: 
+```sh
+git submodule update --init --recursive
+```
+6. Install npm packages: 
+```sh
+npm install
 ```
 
-Refer to [this blog](blog/zh-cn/how-to-involve-dubbo-community/)
+## Run local server
+1. Run 
+```sh
+hugo server --disableFastRender
+```
+2. Navigate to `http://localhost:1313`
+
+## Update docs
+1. Create new branch
+1. Commit and push changes to content
+1. Submit pull request to **master** branch
+1. Staging site will automatically get created and linked to PR to review and test

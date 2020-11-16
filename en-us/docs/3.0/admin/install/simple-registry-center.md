@@ -1,1 +1,0 @@
-# install Simple configuration center
