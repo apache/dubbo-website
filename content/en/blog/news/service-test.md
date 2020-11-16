@@ -2,6 +2,7 @@
 title: "Dubbo Admin service test"
 linkTitle: "Service test in dubbo admin"
 date: 2019-08-26
+slug: service-test
 description: >
     This article introduces how to make service test with Dubbo.
 ---

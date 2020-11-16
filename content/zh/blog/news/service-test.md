@@ -2,6 +2,7 @@
 title: "Dubbo Admin服务测试功能"
 linkTitle: "Dubbo Admin服务测试功能"
 date: 2019-08-26
+slug: service-test
 description: >
    可以通过泛化调用，在控制台上调用真实的服务提供者 
 ---
