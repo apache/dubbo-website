@@ -1,6 +1,7 @@
 ---
 title: "第一个 Dubbo 应用"
 linkTitle: "第一个 Dubbo 应用"
+slug: dubbo-101
 date: 2018-08-07
 description: >
     现代的分布式服务框架的基本概念与 RMI 是类似的，同样是使用 Java 的 Interface 作为服务契约，通过注册中心来完成服务的注册和发现，远程通讯的细节也是通过代理类来屏蔽。

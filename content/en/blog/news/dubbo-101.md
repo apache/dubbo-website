@@ -2,6 +2,7 @@
 title: "Your First Dubbo Demo"
 linkTitle: "Your First Dubbo Demo"
 date: 2018-08-07
+slug: dubbo-101
 description: > 
     Modern distributed frameworks is similiar to RMI in terms of concepts. They both use Java interface as a service contract, archive service registry and discovery by a registry center, and Shield communication details by a proxy.
 ---
