@@ -1,2 +1,0 @@
-> ![warning](../sources/images/check.gif)想完整的运行起来，请参见：[快速启动](quickstart.md)，这里只列出各种场景的配置方式。
-> ![warning](../sources/images/check.gif)以下示例全部使用基于Spring的[Xml配置](../configuration/xml.md)作为参考，如果不想使用Spring，而希望通过API的方式进行调用，请参见：[API配置](../configuration/api.md)
