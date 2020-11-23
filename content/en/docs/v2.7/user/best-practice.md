@@ -32,7 +32,7 @@ When incompatible, half of the provider is upgraded to a new version, and all th
 
 The service interface adds method or the service model adds fields. It can be backward compatible, delete methods or delete fields, and will not be compatible. The new fields of the enumerated type are not compatible, so we need to upgrade by changing the version number.
 
-The compatibility of each protocol is different, see: [Protocol introduction](../references/protocol/introduction/)
+The compatibility of each protocol is different, see: [Protocol introduction](../references/protocol/)
 
 ## Enumeration type
 
