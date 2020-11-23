@@ -110,7 +110,7 @@ public interface WheelMaker {
 public class RaceCarMaker implements CarMaker {
     WheelMaker wheelMaker;
  
-    public setWheelMaker(WheelMaker wheelMaker) {
+    public void setWheelMaker(WheelMaker wheelMaker) {
         this.wheelMaker = wheelMaker;
     }
  
@@ -159,7 +159,7 @@ public interface WheelMaker {
 public class RaceCarMaker implements CarMaker {
     WheelMaker wheelMaker;
  
-    public setWheelMaker(WheelMaker wheelMaker) {
+    public void setWheelMaker(WheelMaker wheelMaker) {
         this.wheelMaker = wheelMaker;
     }
  
