@@ -34,7 +34,7 @@ Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一
 3. `loadbalance`：负载均衡算法 [^3]，缺省是随机 `random`。还可以配置轮询 `roundrobin`、最不活跃优先 [^4] `leastactive` 和一致性哈希 `consistenthash` 等
 4. `actives`：消费者端的最大并发调用限制，即当 Consumer 对一个服务的并发调用到上限后，新调用会阻塞直到超时，在方法上配置 `dubbo:method` 则针对该方法进行并发限制，在接口上配置 `dubbo:service`，则针对该服务进行并发限制
 
-详细配置说明请参考：[Dubbo配置参考手册](../references/xml/introduction)
+详细配置说明请参考：[Dubbo配置参考手册](../references/xml/)
 
 ## 在 Provider 端配置合理的 Provider 端属性
 
@@ -112,7 +112,7 @@ Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一
 
 Dubbo 中所有的配置项都可以配置在 Spring 配置文件中，并且可以针对单个服务配置。
 
-如完全不配置则使用 Dubbo 缺省值，详情请参考 [Dubbo配置参考手册](../references/xml/introduction) 中的说明。
+如完全不配置则使用 Dubbo 缺省值，详情请参考 [Dubbo配置参考手册](../references/xml/) 中的说明。
 
 ### dubbo.properties 中属性名与 XML 的对应关系
 
@@ -168,4 +168,4 @@ Dubbo 中所有的配置项都可以配置在 Spring 配置文件中，并且可
 [^2]: 表示加上第一次调用，会调用 3 次
 [^3]: 有多个 Provider 时，如何挑选 Provider 调用
 [^4]: 指从 Consumer 端并发调用最好的 Provider，可以减少对响应慢的 Provider 的调用，因为响应慢更容易累积并发调用
-[^5]: `timeout` 可以在多处设置，配置项及覆盖规则请参考： [Dubbo 配置参考手册](../references/xml/introduction)
+[^5]: `timeout` 可以在多处设置，配置项及覆盖规则请参考： [Dubbo 配置参考手册](../references/xml/)

@@ -36,7 +36,7 @@ The consumer side properties that can be configured on provider are：
 3. `actives` Consumer side, maximum concurrent call limitation. That is , when the concurrent requests of consumer service reach maximum  configuration,the new call will wait until to catch a timeout error.
   Configurated in  `dubbo:method`(method level configuration) , then the concurrent limitation point at method.Configurated in `dubbo:service`(service level configuration),then the concurrent limitation point at service.
 
-Detailed configuration instructions see：[Dubbo configuration introduction](./references/xml/introduction.md)
+Detailed configuration instructions see：[Dubbo configuration introduction](../references/xml/)
 
 ## Configuring reasonable provider end properties on provider
 
@@ -115,7 +115,7 @@ This file caches the list of the registry and the list of service providers. Wit
 
 All of the configuration items in the dubbo can be configured in the spring configuration file,and can be configured for a single service.
 
-The Dubbo default value is used if completely not set up , please see the instructions in the article  [Dubbo configuration introduction](./references/xml/introduction.md) .
+The Dubbo default value is used if completely not set up , please see the instructions in the article  [Dubbo configuration introduction](../references/xml/) .
 
 ### The relation between attribute name of dubbo.properties and XML
 
@@ -172,4 +172,4 @@ The Dubbo default value is used if completely not set up , please see the instru
 [^2]: With the first call, the call will be called 3 times
 [^3]: How to select a service to call when there are multiple Provider services
 [^4]: It means that consumer service can call the best provider service, and reduce to call the the slow provider service.
-[^5]: `timeout` Can be set in multiple places, configuration items and overlay rules： [Dubbo Schema configuration introduction](./references/xml/introduction.md)
+[^5]: `timeout` Can be set in multiple places, configuration items and overlay rules： [Dubbo Schema configuration introduction](../references/xml/)
