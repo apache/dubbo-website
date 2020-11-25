@@ -40,7 +40,7 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxCacheFactory.java (实现StatusChecker接口)
+                |-XxxCacheFactory.java (实现CacheFactory接口)
     |-resources
         |-META-INF
             |-dubbo
