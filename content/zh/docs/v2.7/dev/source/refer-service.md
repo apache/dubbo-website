@@ -754,7 +754,7 @@ public static Proxy getProxy(ClassLoader cl, Class<?>... ics) {
         List<Method> methods = new ArrayList<Method>();
 
         for (int i = 0; i < ics.length; i++) {
-            // 检测接口访问级别是否为 protected 或 privete
+            // 检测接口访问级别是否为 protected 或 private
             if (!Modifier.isPublic(ics[i].getModifiers())) {
                 // 获取接口包名
                 String npkg = ics[i].getPackage().getName();
