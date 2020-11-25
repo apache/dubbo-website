@@ -33,13 +33,15 @@ Or
 In order to avoid multicast as much as possible, dubbo uses unicast for address information from service provider to service consumer, if there are multiple consumer processes on one single machine, consumers need to set `unicast=false`, otherwise only one consumer can be able to receive the address info:
 
 ```xml
-<dubbo:registry address="multicast://224.5.6.7:1234?unicast=false" />
+<dubbo:application name="demo-consumer">
+    <dubbo:parameter key="unicast" value="false" />
+</dubbo:application>
 ```
 
 Or
 
 ```xml
-<dubbo:registry protocol="multicast" address="224.5.6.7:1234">
+<dubbo:consumer>
     <dubbo:parameter key="unicast" value="false" />
-</dubbo:registry>
+</dubbo:consumer>
 ```
