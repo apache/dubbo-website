@@ -1,9 +1,9 @@
 ---
-title: "How to use Fescar to ensure consistency between Dubbo Microservices"
-linkTitle: "Use Fescar in Dubbo"
+title: "How to use Seata to ensure consistency between Dubbo Microservices"
+linkTitle: "Use Seata in Dubbo"
 date: 2019-01-17
 description: >
-    This article will introduce you how to use Fescar to ensure consistency between Dubbo Microservices.
+    This article will introduce you how to use Seata to ensure consistency between Dubbo Microservices.
 ---
 
 ## Use case
@@ -115,7 +115,7 @@ public class OrderServiceImpl implements OrderService {
 }
 ```
 
-## Distributed Transaction Solution with Fescar
+## Distributed Transaction Solution with Seata
 
 ![undefined](/imgs/blog/fescar/fescar-2.png) 
 
@@ -128,7 +128,7 @@ We just need an annotation `@GlobalTransactional` on business method:
     }
 ```
 
-## Example powered by Dubbo + Fescar
+## Example powered by Dubbo + Seata
 
 ### Step 1: Setup database
 
@@ -147,16 +147,17 @@ dubbo-storage-service.xml
     <property name="username" value="xxx" />
     <property name="password" value="xxx" />
 ```
-### Step 2: Create undo_log table for Fescar
+### Step 2: Create undo_log table for Seata
 
-`UNDO_LOG` table is required by Fescar AT mode.
+`UNDO_LOG` table is required by Seata AT mode.
 
 ```sql
--- Note that when Fescar version is upgraded to 0.3.0+, it is changed from the previous normal index to the unique index.
+-- Note that when Seata version is upgraded to 0.3.0+, it is changed from the previous normal index to the unique index.
 CREATE TABLE `undo_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `branch_id` bigint(20) NOT NULL,
   `xid` varchar(100) NOT NULL,
+  `context` varchar(128) NOT NULL,
   `rollback_info` longblob NOT NULL,
   `log_status` int(11) NOT NULL,
   `log_created` datetime NOT NULL,
@@ -200,26 +201,37 @@ CREATE TABLE `account_tbl` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
-### Step 4: Start Fescar-Server
+### Step 4: Start Seata-Server
 
-- Download server [package](https://github.com/alibaba/fescar/releases), unzip it.
-- Start Fescar-Server
+- Download server [package](https://github.com/seata/seata/releases), unzip it.
+- Start Seata-Server
 
 ```shell
-sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA
+Usage: sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows) [options]
+  Options:
+    --host, -h
+      The host to bind.
+      Default: 0.0.0.0
+    --port, -p
+      The port to listen.
+      Default: 8091
+    --storeMode, -m
+      log store mode : file、db
+      Default: file
+    --help
 
 e.g.
 
-sh fescar-server.sh 8091 /home/admin/fescar/data/
+sh seata-server.sh -p 8091 -h 127.0.0.1 -m file
 ```
 
 ### Step 5: Run example
 
-- Start AccountService ([DubboAccountServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboAccountServiceStarter.java)).
-- Start StorageService ([DubboStorageServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboStorageServiceStarter.java)).
-- Start OrderService ([DubboOrderServiceStarter](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboOrderServiceStarter.java)).
-- Run BusinessService for test ([DubboBusinessTester](https://github.com/fescar-group/fescar-samples/blob/master/dubbo/src/main/java/com/alibaba/fescar/samples/dubbo/starter/DubboBusinessTester.java)).
+- Start AccountService ([DubboAccountServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboAccountServiceStarter.java)).
+- Start StorageService ([DubboStorageServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboStorageServiceStarter.java)).
+- Start OrderService  ([DubboOrderServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboOrderServiceStarter.java)).
+- Run BusinessService for test ([DubboBusinessTester](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboBusinessTester.java)).
 
 ### Related projects
-* fescar:          https://github.com/alibaba/fescar/
-* fescar-samples : https://github.com/fescar-group/fescar-samples  
+* Seata:          https://github.com/alibaba/seata/
+* Seata Samples : https://github.com/seata/seata-samples 
