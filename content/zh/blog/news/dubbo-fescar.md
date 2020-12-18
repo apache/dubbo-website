@@ -233,5 +233,5 @@ sh seata-server.sh -p 8091 -h 127.0.0.1 -m file
 - 运行BusinessService入口 ([DubboBusinessTester](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboBusinessTester.java))。
 
 ### 相关项目
-* Seata:          https://github.com/alibaba/seata/
+* Seata:          https://github.com/seata/seata
 * Seata Samples : https://github.com/seata/seata-samples
