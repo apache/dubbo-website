@@ -6,7 +6,7 @@ weight: 3
 description: "Configure Dubbo with API"
 ---
 
-> All API properties have counterparts in XML, see [XML References](../../references/xml/introduction) for details. For example `ApplicationConfig.setName("xxx")` equals to  `<dubbo:application name="xxx" />`  [^1]
+> All API properties have counterparts in XML, see [XML References](../../references/xml/) for details. For example `ApplicationConfig.setName("xxx")` equals to  `<dubbo:application name="xxx" />`  [^1]
 
 
 ## Provider Side
