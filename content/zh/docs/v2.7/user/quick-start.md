@@ -89,7 +89,7 @@ public class Provider {
 
 ## 服务消费者
 
-完整安装步骤，请参见：[示例消费者安装](../admin/install/consumer-demo.md)
+完整安装步骤，请参见：[示例消费者安装](../../admin/install/consumer-demo)
 
 ### 通过 Spring 配置引用远程服务
 

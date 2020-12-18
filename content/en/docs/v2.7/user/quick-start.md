@@ -8,7 +8,7 @@ description: "Quick start to use Dubbo"
 
 The most common way to use Dubbo is to run it in Spring framework. The following content will guide you to develop a Dubbo application with Spring framework's [XML configuration](https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/xsd-configuration.html). 
 
-If you don't want to rely on Spring, you can try using [API configuration](./configuration/api.md).
+If you don't want to rely on Spring, you can try using [API configuration](../configuration/api).
 
 First let's create a root directory called dubbo-demo:
 
@@ -159,7 +159,7 @@ Finally, the project structure should look like this:
 
 ## Service consumer
 
-Complete installation steps, see：[Consumer demo installation](../admin/install/consumer-demo.md)
+Complete installation steps, see：[Consumer demo installation](../../admin/install/consumer-demo)
 
 ### Using the Spring configuration to reference a remote service 
 
@@ -249,8 +249,8 @@ Hello world
 
 You can find the complete example code in the Github repository.
 
-* [Provider demo](../admin/install/provider-demo.md)
-* [Consumer demo](../admin/install/consumer-demo.md)
+* [Provider demo](../../admin/install/provider-demo)
+* [Consumer demo](../../admin/install/consumer-demo)
 
 [^1]: The interface needs to be packaged separately, shared by the service provider and the consumer
 [^2]: Hidden realization for service consumer
