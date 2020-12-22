@@ -25,7 +25,7 @@ git clone https://github.com/apache/dubbo-website.git
 ```sh
 cd dubbo-website
 ```
-4. Add Docsy submodule: 
+4. Add Docsy submodule:
 ```sh
 git submodule add https://github.com/google/docsy.git themes/docsy
 ```
