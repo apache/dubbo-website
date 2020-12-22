@@ -11,6 +11,12 @@ dubbo 接口文档、测试工具,根据注解生成文档,并提供测试功能
 
 增加一些注解就能生成类似swagger的文档, 不会把非web的dubbo项目变为web项目.
 
+## 相关仓库
+* [dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions) 
+[\分支: 2.7.x\dubbo-api-docs](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs):
+  Dubbo-Api-Docs 相关注解,解析注解
+* [dubbo-admin](https://github.com/KeRan213539/dubbo-admin): Dubbo-Api-Docs 文档展示,测试功能
+
 ## 如何使用?
 
 1. dubbo项目的方法参数中加上 dubbo api docs 注解
@@ -82,19 +88,6 @@ dubbo 接口文档、测试工具,根据注解生成文档,并提供测试功能
 * 响应bean(接口的返回类型)支持自定义泛型, 但只支持一个泛型占位符
 * 关于Map的使用:Map的key只能用基本数据类型.如果Map的key不是基础数据类型,生成的 就不是标准json格式,会出异常
 * 接口的同步/异步取自 org.apache.dubbo.config.annotation.Service.async
-
-## 项目结构
-
-* dubbo-api-docs-annotations: 文档生成辅助注解项目
-* dubbo-api-docs-core: 负责注解解析,文档信息获取接口(dubbo接口)
-* dubbo-api-docs-examples: 使用示例
-* readmeImgs: README.md 用到的图片
-
-## 主要依赖版本
-
-* spring-boot: 2.3.4.RELEASE
-* dubbo: apache dubbo 2.7.8
-* 前端使用飞冰(iceworks 4.0)
 
 ## 页面截图
 
