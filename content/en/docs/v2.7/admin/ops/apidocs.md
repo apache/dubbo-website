@@ -77,6 +77,12 @@ Download [dubbo-admin](https://github.com/apache/dubbo-admin) [Download](https:/
     * value: parameter name
     * example: example
 
+## Involving repositorys
+* [dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions)
+  [\branch: 2.7.x\dubbo-api-docs](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs):
+  Dubbo-Api-Docs related annotation ,annotation parsing
+* [dubbo-admin](https://github.com/KeRan213539/dubbo-admin): Dubbo-Api-Docs document display, test function
+
 ### Use note
 
 * Get API list direct connection:
@@ -90,18 +96,7 @@ Download [dubbo-admin](https://github.com/apache/dubbo-admin) [Download](https:/
   the generated key is not in the standard JSON format, and an exception will occur
 * The API's synchronous / asynchronous is from org.apache.dubbo.config.annotation.Service.async
 
-## Project structure
 
-* dubbo-api-docs-annotations: Document generation annotation project
-* dubbo-api-docs-core: Responsible for annotation analysis and document information acquisition interface (Dubbo API)
-* dubbo-api-docs-examples: Use example
-* readmeImgs: Pictures used by README.md
-
-## Major dependent version
-
-* spring-boot: 2.3.4.RELEASE
-* dubbo: apache dubbo 2.7.8
-* icework in front(iceworks 4.0)
 
 ## Screenshot
 
