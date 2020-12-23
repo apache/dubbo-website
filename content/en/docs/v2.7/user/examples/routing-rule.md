@@ -73,12 +73,12 @@ Value Support：
 1. Whitelist [^3]：
   
     ```
-    host != 10.20.153.10,10.20.153.11 =>
+    register.ip != 10.20.153.10,10.20.153.11 =>
     ```
 2. Blacklist：
 
     ```
-    host = 10.20.153.10,10.20.153.11 =>
+    register.ip = 10.20.153.10,10.20.153.11 =>
     ```
 3. Service boarding application only expose part of the machine to prevent the entire cluster hanging up:
 
