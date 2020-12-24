@@ -385,6 +385,6 @@ Eventually, we give an outline of how to create a Dubbo application quickly base
 ---
 
 1. [Getting Started Using JavaTM RMI](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html)
-2. [Explicit target](/docs/v2.7/user/examples/explicit-target/)
-3. [Multicast Registry](/docs/v2.7/user/references/registry/multicast/)
-4. [Online QOS command](/docs/v2.7/user/references/qos/)   
+2. [Explicit target](http://dubbo.apache.org/docs/v2.7/user/examples/explicit-target/)
+3. [Multicast Registry](http://dubbo.apache.org/docs/v2.7/user/references/registry/multicast/)
+4. [Online QOS command](http://dubbo.apache.org/docs/v2.7/user/references/qos/)   
