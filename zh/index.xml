@@ -4,7 +4,142 @@
 &lt;p>Dubbo-Api-Docs 是一个展示dubbo接口文档,测试接口的工具. 参考了springfox的设计,通过增加一些描述接口及参数的注解,即可展示具备测试能力的接口文档.&lt;/p>
 &lt;p>Dubbo-Api-Docs 目前通过直连服务节点的方式获取该服务的接口列表. 测试接口时可以直连也可以通过注册中心.未来会增加通过注册中心获取服务列表的方式.并根据Dubbo的升级规划增加新的功能支持.也会根据社区的需求增加功能.&lt;/p>
 &lt;p>Dubbo-Api-Docs 会在服务提供者启动完毕后扫描docs相关注解并将处理结果缓存.并增加一些Dubbo-Api-Docs相关的Dubbo提供者接口. 缓存的数据在将来可能会放到Dubbo元数据中心中.&lt;/p>
-&lt;h2 id="涉及的仓库">涉及的仓库&lt;/h2>
+&lt;h2 id="当前版本-同dubbo版本号">当前版本: 同Dubbo版本号&lt;/h2>
+&lt;blockquote>
+&lt;p>由于Dubbo-Api-Docs目前还处于测试阶段,并未发包到maven中央仓库,需要自行编译.编译方式同大部分java工程编译方式,此处就不赘述了,&lt;a href="#%E6%BA%90%E7%A0%81%E4%BB%93%E5%BA%93">源码仓库&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-api-docs-annotations&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo-version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-api-docs-core&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo-version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="快速入门">快速入门&lt;/h2>
+&lt;h3 id="1dubbo提供者项目的方法参数中加上-dubbo-api-docs-注解">1.dubbo提供者项目的方法参数中加上 Dubbo-Api-Docs 注解&lt;/h3>
+&lt;ul>
+&lt;li>如果 dubbo提供者的接口和方法参数在一个单独的jar项目中,则在该项目中引入: dubbo-api-docs-annotations&lt;/li>
+&lt;li>dubbo提供者项目引入 dubbo-api-docs-core&lt;/li>
+&lt;li>在提供者项目的项目启动类(标注了@SpringBootApplication的类)或者配制类(标注了@Configuration的类)中增加注解 @EnableDubboApiDocs 以启用Dubbo Api Docs功能&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>为避免增加生产环境中的资源占用, 建议单独创建一个配制类用于启用Dubbo-Api-Docs, 并配合 @Profile(&amp;ldquo;dev&amp;rdquo;) 注解使用
+当然, Dubbo-Api-Docs 仅在项目启动时多消耗了点CPU资源, 并使用了一点点内存用于缓存, 将来会考虑将缓存中的内容放到元数据中心.&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="下面以dubbo-api-docs-exampleshttpsgithubcomapachedubbo-spi-extensionstree27xdubbo-api-docsdubbo-api-docs-examples项目中的部分服务接口为例">下面以&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs/dubbo-api-docs-examples">dubbo-api-docs-examples&lt;/a>项目中的部分服务接口为例:&lt;/h4>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">git clone -b 2.7.x https://github.com/apache/dubbo-spi-extensions.git
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入dubbo-spi-extensions/dubbo-api-docs 目录,编译源码并安装到本地仓库:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">mvn clean install -Dmaven.test.skip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">true&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入 dubbo-spi-extensions/dubbo-api-docs/dubbo-api-docs-examples 目录&lt;/p>
+&lt;p>dubbo-api-docs-examples 中有两个子模块:&lt;/p>
+&lt;ul>
+&lt;li>examples-api: 一个jar包项目,其中包含服务的接口和接口参数Bean&lt;/li>
+&lt;li>examples-provider: 提供者服务端,包含spring boot启动器和服务的实现&lt;/li>
+&lt;/ul>
+&lt;p>下面我们在这两个子模块中增加Dubbo-Api-Docs&lt;/p>
+&lt;blockquote>
+&lt;p>examples-api:&lt;/p>
+&lt;/blockquote>
+&lt;p>maven引入:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-api-docs-annotations&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.7.8-SNAPSHOT&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>org.apache.dubbo.apidocs.examples.params 中有两个Bean,我们来为它们添加docs注解&lt;/p>
+&lt;ul>
+&lt;li>QuickStartRequestBean 作为参数Bean, 添加 @RequestParam&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">QuickStartRequestBean&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">@RequestParam&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;You name&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> required &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">,&lt;/span> description &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;please enter your full name&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> example &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Zhang San&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> String name&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#268bd2">@RequestParam&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;You age&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> defaultValue &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;18&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> age&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#268bd2">@RequestParam&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Are you a main?&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> man&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#586e75">// getter/setter略...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>QuickStartRespBean 作为响应Bean,添加 @ResponseProperty&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">QuickStartRespBean&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">@ResponseProperty&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Response code&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> example &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;500&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> code&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#268bd2">@ResponseProperty&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Response message&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> String msg&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#586e75">// getter/setter略...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于我们只挑选了部分接口作为演示,到此这些接口涉及的docs注解添加完毕&lt;/p>
+&lt;blockquote>
+&lt;p>examples-provider:&lt;/p>
+&lt;/blockquote>
+&lt;p>maven引入:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-api-docs-core&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.7.8-SNAPSHOT&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们挑选一个接口作为演示:&lt;/p>
+&lt;p>org.apache.dubbo.apidocs.examples.api.impl.QuickStartDemoImpl 中的 quickStart 方法&lt;/p>
+&lt;p>QuickStartDemoImpl 实现了 api包中的 org.apache.dubbo.apidocs.examples.api.IQuickStartDemo 接口&lt;/p>
+&lt;ul>
+&lt;li>在 QuickStartDemoImpl 中:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;span style="color:#268bd2">@ApiModule&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;quick start demo&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> apiInterface &lt;span style="color:#719e07">=&lt;/span> IQuickStartDemo&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">,&lt;/span> version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;v0.1&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">QuickStartDemoImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> IQuickStartDemo &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">@ApiDoc&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;quick start demo&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;v0.1&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> description &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;this api is a quick start demo&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> responseClassDescription&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;A quick start response bean&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> QuickStartRespBean &lt;span style="color:#268bd2">quickStart&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#268bd2">@RequestParam&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;strParam&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> required &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">)&lt;/span> String strParam&lt;span style="color:#719e07">,&lt;/span> QuickStartRequestBean beanParam&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> QuickStartRespBean&lt;span style="color:#719e07">(&lt;/span>200&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> beanParam&lt;span style="color:#719e07">.&lt;/span>getName&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> beanParam&lt;span style="color:#719e07">.&lt;/span>toString&lt;span style="color:#719e07">());&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>到此docs相关注解已添加完毕,下面我们来开启 Dubbo-Api-Docs. 新增一个配制类,位置任意,只要能被spring boot扫描到就行.&lt;/p>
+&lt;p>我们在 org.apache.dubbo.apidocs.examples.cfg 包中新增一个配制类 DubboDocConfig :&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;span style="color:#268bd2">@Profile&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;dev&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#586e75">// 配合 Profile 一起使用, 在 profile 为 dev 时才会加载该配制类
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">@EnableDubboApiDocs&lt;/span> &lt;span style="color:#586e75">// 开启 Dubbo-Api-Docs
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DubboDocConfig&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>到此 Dubbo-Api-Docs 相关的东西已经添加完毕.
+&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs/dubbo-api-docs-examples">dubbo-api-docs-examples&lt;/a>
+中有更多更为详尽的例子.下文中有注解的详细说明.下面我们来看一下增加 Dubbo-Api-Docs 后的效果图.
+&lt;img src="/imgs/blog/api-docs/quickStart.png" alt="demoApi2">&lt;/p>
+&lt;h3 id="2启动提供者项目">2.启动提供者项目&lt;/h3>
+&lt;ul>
+&lt;li>示例使用nacos作为注册中心,&lt;a href="https://nacos.io">下载并启动nacos&lt;/a>&lt;/li>
+&lt;li>在上面的例子中,我们启动 examples-provider 项目中的 org.apache.dubbo.apidocs.examples.ExampleApplication.
+在examples-provider目录中:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">mvn spring-boot:run
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3下载-dubbo-admin">3.下载 dubbo-admin&lt;/h3>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-admin">dubbo-admin仓库&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-admin/releases">下载地址&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>目前dubb-admin也未发布包含Dubbo-Api-Docs的版本,需要下载源码启动&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">git clone https://github.com/apache/dubbo-admin.git
+&lt;/code>&lt;/pre>&lt;/div>&lt;/blockquote>
+&lt;h3 id="4启动访问-dubbo-admin">4.启动访问 dubbo-admin&lt;/h3>
+&lt;p>参考 dubbo-admin 里的说明启动:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">1. 在 dubbo-admin-server/src/main/resources/application.properties 中修改注册中心地址
+2. 编译 mvn clean package
+3. 启动:
+mvn --projects dubbo-admin-server spring-boot:run
+或者
+cd dubbo-admin-distribution/target; java -jar dubbo-admin-0.1.jar
+4. 浏览器访问: http://localhost:8080
+5. 默认帐号密码都是: root
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="5进入接口文档模块">5.进入&amp;quot;接口文档&amp;quot;模块&lt;/h3>
+&lt;ul>
+&lt;li>在&amp;quot;dubbo提供者IP&amp;quot;和&amp;quot;dubbo提供者端口&amp;quot;中分别输入提供者所在机器IP和端口, 点击右侧 &amp;quot; 加载接口列表&amp;quot; 按钮&lt;/li>
+&lt;li>左侧接口列表中加载出接口列表,点击任意接口,右边展示出该接口信息及参数表单.&lt;/li>
+&lt;li>填入表单内容后,点击最下方测试按钮&lt;/li>
+&lt;li>响应部分展示了响应示例及实际响应结果&lt;/li>
+&lt;/ul>
+&lt;h2 id="源码仓库">源码仓库&lt;/h2>
 &lt;p>Dubbo-Api-Docs 根据功能拆分,分别在两个仓库中:&lt;/p>
 &lt;h3 id="dubbo-spi-extensions">dubbo-spi-extensions&lt;/h3>
 &lt;blockquote>
@@ -22,45 +157,6 @@
 &lt;p>&lt;a href="https://github.com/KeRan213539/dubbo-admin">Dubbo-Admin仓库地址&lt;/a>&lt;/p>
 &lt;/blockquote>
 &lt;p>文档的展示及测试放在了 dubbo admin 项目中&lt;/p>
-&lt;h2 id="使用">使用&lt;/h2>
-&lt;h3 id="当前版本-同dubbo版本号">当前版本: 同Dubbo版本号&lt;/h3>
-&lt;blockquote>
-&lt;p>由于Dubbo-Api-Docs目前还处于测试阶段,并未发包到maven中央仓库,需要自行编译.编译方式同大部分java工程编译方式,此处就不赘述了&lt;/p>
-&lt;/blockquote>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">&amp;lt;dependency&amp;gt;
-&amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
-&amp;lt;artifactId&amp;gt;dubbo-api-docs-annotations&amp;lt;/artifactId&amp;gt;
-&amp;lt;version&amp;gt;${dubbo-version}&amp;lt;/version&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;dependency&amp;gt;
-&amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
-&amp;lt;artifactId&amp;gt;dubbo-api-docs-core&amp;lt;/artifactId&amp;gt;
-&amp;lt;version&amp;gt;${dubbo-version}&amp;lt;/version&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>dubbo提供者项目的方法参数中加上 Dubbo-Api-Docs 注解&lt;/li>
-&lt;/ol>
-&lt;ul>
-&lt;li>如果 dubbo提供者的接口和方法参数在一个单独的jar项目中,则在该项目中引入: dubbo-api-docs-annotations&lt;/li>
-&lt;li>dubbo提供者项目引入 dubbo-api-docs-core&lt;/li>
-&lt;li>在提供者项目的项目启动类(标注了@SpringBootApplication的类)或者配制类(标注了@Configuration的类)中增加注解 @EnableDubboApiDocs 以启用Dubbo Api Docs功能&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>为避免增加生产环境中的资源占用, 建议单独创建一个配制类用于启用Dubbo-Api-Docs, 并配合 @Profile(&amp;ldquo;dev&amp;rdquo;) 注解使用
-当然, Dubbo-Api-Docs 仅在项目启动时多消耗了点CPU资源, 并使用了一点点内存用于缓存, 将来会考虑将缓存中的内容放到元数据中心.
-2 . 启动提供者项目&lt;/p>
-&lt;/blockquote>
-&lt;ol start="3">
-&lt;li>下载 &lt;a href="https://github.com/apache/dubbo-admin">dubbo-admin&lt;/a> &lt;a href="https://github.com/apache/dubbo-admin/releases">下载地址&lt;/a>&lt;/li>
-&lt;/ol>
-&lt;blockquote>
-&lt;p>目前dubb-admin也未发布包含Dubbo-Api-Docs的版本,需要下载源码启动&lt;/p>
-&lt;/blockquote>
-&lt;ol start="4">
-&lt;li>启动 dubbo-admin&lt;/li>
-&lt;li>访问: http:// localhost:8080&lt;/li>
-&lt;li>进入&amp;quot;接口文档&amp;quot;模块&lt;/li>
-&lt;/ol>
 &lt;h2 id="注解说明">注解说明&lt;/h2>
 &lt;ul>
 &lt;li>@EnableDubboApiDocs: 配制注解, 启用 dubbo api docs 功能&lt;/li>
@@ -109,25 +205,23 @@
 &lt;li>接口的同步/异步取自 org.apache.dubbo.config.annotation.Service#async / org.apache.dubbo.config.annotation.DubboService#async&lt;/li>
 &lt;/ul>
 &lt;h2 id="示例说明">示例说明&lt;/h2>
-&lt;p>&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs">dubbo-spi-extensions / Dubbo-Api-Docs&lt;/a> 中的 dubbo-api-docs-examples 目录中为实例项目:&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs">dubbo-spi-extensions / Dubbo-Api-Docs&lt;/a> 中的 dubbo-api-docs-examples 目录中为示例工程:&lt;/p>
 &lt;ul>
 &lt;li>examples-api: jar包项目,包含服务提供者的接口类及参数Bean&lt;/li>
 &lt;li>examples-provider: 使用 dubbo-spring-boot-starter 的提供者项目, 注册中心使用 nacos&lt;/li>
 &lt;li>examples-provider-sca: 使用 spring-cloud-starter-dubbo 的提供者项目, 注册中心使用 nacos&lt;/li>
 &lt;/ul>
-&lt;h3 id="实例使用步骤">实例使用步骤&lt;/h3>
+&lt;h3 id="示例使用步骤">示例使用步骤&lt;/h3>
 &lt;ol>
-&lt;li>下载并启动&lt;a href="https://nacos.io">nacos&lt;/a>后&lt;/li>
+&lt;li>示例使用nacos作为注册中心,&lt;a href="https://nacos.io">下载并启动nacos&lt;/a>&lt;/li>
 &lt;li>任意启动 examples-provider 和 examples-provider-sca 中的任意一个,当然也可以两个都启动. examples-provider 使用 20881端口 examples-provider-sca 使用20882端口.两个项目都是spring boot项目,启动类在 org.apache.dubbo.apidocs.examples 包下.&lt;/li>
-&lt;li>启动 &lt;a href="https://github.com/KeRan213539/dubbo-admin">Dubbo-Admin&lt;/a>, 浏览器访问: http:// localhost:8080&lt;/li>
-&lt;li>进入 dubbo-admin 中的 &amp;ldquo;接口文档&amp;quot;模块
-5: 在&amp;quot;dubbo提供者IP&amp;quot;和&amp;quot;dubbo提供者端口&amp;quot;中分别输入提供者所在机器IP和端口, 点击右侧 &amp;quot; 加载接口列表&amp;rdquo; 按钮&lt;/li>
+&lt;li>启动 &lt;a href="https://github.com/KeRan213539/dubbo-admin">Dubbo-Admin&lt;/a>, 浏览器访问: http://localhost:8080&lt;/li>
+&lt;li>进入 dubbo-admin 中的 &amp;ldquo;接口文档&amp;quot;模块&lt;/li>
+&lt;li>在&amp;quot;dubbo提供者IP&amp;quot;和&amp;quot;dubbo提供者端口&amp;quot;中分别输入提供者所在机器IP和端口, 点击右侧 &amp;quot; 加载接口列表&amp;rdquo; 按钮&lt;/li>
 &lt;li>左侧接口列表中加载出接口列表,点击任意接口,右边展示出该接口信息及参数表单.&lt;/li>
 &lt;li>填入表单内容后,点击最下方测试按钮&lt;/li>
 &lt;li>响应部分展示了响应示例及实际响应结果&lt;/li>
-&lt;/ol>
-&lt;h2 id="页面截图">页面截图&lt;/h2>
-&lt;p>&lt;img src="/imgs/admin/dubbo_docs_zh.png" alt="页面截图">&lt;/p></description></item><item><title>Blog: 2.7.5 功能解析</title><link>/zh/blog/2020/05/18/2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/</link><pubDate>Mon, 18 May 2020 00:00:00 +0000</pubDate><guid>/zh/blog/2020/05/18/2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/</guid><description>
+&lt;/ol></description></item><item><title>Blog: 2.7.5 功能解析</title><link>/zh/blog/2020/05/18/2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/</link><pubDate>Mon, 18 May 2020 00:00:00 +0000</pubDate><guid>/zh/blog/2020/05/18/2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/</guid><description>
 &lt;p>近日，备受瞩目的 Dubbo 2.7.5 版本正式发布，在 2.7.5 版本中，Dubbo 引入了很多新的特性、对现有的很多功能做了增强、同时在性能上也有了非常大的提升，这个版本无论对 Dubbo 社区亦或是开发者来说，都将是一个里程碑式的版本。&lt;/p>
 &lt;ul>
 &lt;li>应用粒度服务注册【beta】&lt;/li>
