@@ -191,7 +191,7 @@ public class Application {
 
 ### Run
 
-The complete example can be found at https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running.
+The complete example can be found at https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api. In the complete version, it is convenient to execute by maven in command line with the configuration of *exec-maven-plugin*. Of course, it can also be executed directly in IDE. However, there is one noteworthy thing that because of using assembled way to look up service, it needs to assign *-Djava.net.preferIPv4Stack=true* when running.
 
 #### Build Example
 
@@ -385,6 +385,6 @@ Eventually, we give an outline of how to create a Dubbo application quickly base
 ---
 
 1. [Getting Started Using JavaTM RMI](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html)
-2. [Explicit target](http://dubbo.apache.org/en-us/docs/user/demos/explicit-target.html)
-3. [Multicast Registry](http://dubbo.apache.org/en-us/docs/user/references/registry/multicast.html)
-4. [Online QOS command](http://dubbo.apache.org/en-us/docs/user/references/qos.html)   
+2. [Explicit target](http://dubbo.apache.org/docs/v2.7/user/examples/explicit-target/)
+3. [Multicast Registry](http://dubbo.apache.org/docs/v2.7/user/references/registry/multicast/)
+4. [Online QOS command](http://dubbo.apache.org/docs/v2.7/user/references/qos/)   
