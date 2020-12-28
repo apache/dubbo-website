@@ -12,7 +12,7 @@ description: "Basic requirements of Dubbo"
 
 Before the advent of large-scale services, an application might just exposes or references remote service by using RMI or Hessian, the call is done by configuring service URL, and load balance is done through hardwares, like F5.
 
-**When there are more and more services, it becomes very difficult to configure the service URL, the single point pressure of F5 hardware load balancer is also increasing.** At this point, a service registry is needed to dynamically register and discover services to make the service's location transparent. By obtaining the list of service provider addresses in the consumer side, the soft load balancing and Failover can be realized, this reduces the dependence on the F5 hardware load balacer and some of the costs.
+**When there are more and more services, it becomes very difficult to configure the service URL, the single point pressure of F5 hardware load balancer is also increasing.** At this point, a service registry is needed to dynamically register and discover services to make the service's location transparent. By obtaining the list of service provider addresses in the consumer side, the soft load balancing and Failover can be realized, this reduces the dependence on the F5 hardware load balancer and some of the costs.
 
 **When things go further, the service dependencies become so complex that it can't even tell which applications to start before, even the architect can't fully describe the application architecture relationships**. At this time, automatically draw the dependency diagram of the applications is needed to help the architect to be clear of the relationship.
 
