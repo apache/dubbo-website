@@ -133,7 +133,7 @@ http://localhost:8080/users/register
 首先，开发服务的接口：
 
 ```java
-public class UserService {    
+public interface UserService {    
    void registerUser(User user);
 }
 ```
