@@ -13,8 +13,7 @@ Dubbo-Api-Docs 目前通过直连服务节点的方式获取该服务的接口�
 
 Dubbo-Api-Docs 会在服务提供者启动完毕后扫描docs相关注解并将处理结果缓存.并增加一些Dubbo-Api-Docs相关的Dubbo提供者接口. 缓存的数据在将来可能会放到Dubbo元数据中心中.
 
-## 当前版本: 同Dubbo版本号
-> 由于Dubbo-Api-Docs目前还处于测试阶段,并未发包到maven中央仓库,需要自行编译.编译方式同大部分java工程编译方式,此处就不赘述了,[源码仓库](#源码仓库)
+## 当前版本: 同Dubbo版本号(2.7.8)
 
 ```xml
 <dependency>
@@ -42,10 +41,7 @@ Dubbo-Api-Docs 会在服务提供者启动完毕后扫描docs相关注解并将�
 ```bash
 git clone -b 2.7.x https://github.com/apache/dubbo-spi-extensions.git
 ```
-进入dubbo-spi-extensions/dubbo-api-docs 目录,编译源码并安装到本地仓库:
-```bash
-mvn clean install -Dmaven.test.skip=true
-```
+
 进入 dubbo-spi-extensions/dubbo-api-docs/dubbo-api-docs-examples 目录
 
 dubbo-api-docs-examples 中有两个子模块:
@@ -61,7 +57,7 @@ maven引入:
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-api-docs-annotations</artifactId>
-    <version>2.7.8-SNAPSHOT</version>
+    <version>2.7.8</version>
 </dependency>
 ```
 org.apache.dubbo.apidocs.examples.params 中有两个Bean,我们来为它们添加docs注解
@@ -102,7 +98,7 @@ maven引入:
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-api-docs-core</artifactId>
-    <version>2.7.8-SNAPSHOT</version>
+    <version>2.7.8</version>
 </dependency>
 ```
 我们挑选一个接口作为演示:
@@ -137,6 +133,7 @@ public class DubboDocConfig {
 到此 Dubbo-Api-Docs 相关的东西已经添加完毕.
 [dubbo-api-docs-examples](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs/dubbo-api-docs-examples)
 中有更多更为详尽的例子.下文中有注解的详细说明.下面我们来看一下增加 Dubbo-Api-Docs 后的效果图.
+
 ![demoApi2](/imgs/blog/api-docs/quickStart.png)
 
 
@@ -153,10 +150,9 @@ mvn spring-boot:run
 ### 3.下载 dubbo-admin
 [dubbo-admin仓库](https://github.com/apache/dubbo-admin) 
 
-[下载地址](https://github.com/apache/dubbo-admin/releases)
-> 目前dubb-admin也未发布包含Dubbo-Api-Docs的版本,需要下载源码启动
+> dubbo-admin 需要下载 develop 分支源码启动
 > ```bash
-> git clone https://github.com/apache/dubbo-admin.git
+> git clone -b develop https://github.com/apache/dubbo-admin.git
 > ```
 
 ### 4.启动访问 dubbo-admin
