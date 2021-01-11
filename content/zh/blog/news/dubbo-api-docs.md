@@ -54,7 +54,7 @@ Dubbo-Api-Docs 目前通过直连服务节点的方式获取该服务的接口�
 
 Dubbo-Api-Docs 会在服务提供者启动完毕后扫描docs相关注解并将处理结果缓存.并增加一些Dubbo-Api-Docs相关的Dubbo提供者接口. 缓存的数据在将来可能会放到Dubbo元数据中心中.
 
-## 当前版本: 同Dubbo版本号(2.7.8)
+## 当前版本: 2.7.8.1
 
 ```xml
 <dependency>
