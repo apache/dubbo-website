@@ -282,7 +282,161 @@ group 。又或者我采集到的机器自身的数据，可以将其归类到 s
 &lt;p>&lt;img src="/imgs/blog/dubbo-go/gochina/p27.jpeg" alt="">&lt;/p>
 &lt;p>明年我们将会很快实现 dubbo router。社区在 8月份已经实现了 router 功能需要的底层的算法模块，但是当时配置中心下发相关的参数的能力还不是很强，所以没有最终完成。最近服务治理配置刚刚支持了 zookeeper 和 apollo，预计很快就可以将 router 的参数通过配置中心下发的形式支持掉。另外，还有 tracing，我们将会引入社区主流的 tracing 方案，以 opentracing 为标准，去集成 opentracing 开源生态的相关能力。第三个是 kubernetes operator，这个就是刚才说的 K8s 的服务调用，我们会基于 operator 的方案做一版新的基于 k8s 的注册中心实现。最后就是云原生生态的融入，即与 istio 的集成，dubbogo 将会成为 dubbo 在 service mesh 生态中的重要角色。&lt;/p>
 &lt;p>目前 dubbogo 项目，今年是能 run 起来，质量方面还有很多工作要做，功能基本上到明年可与 dubbo 2.7 补齐，目前已经基本够用。目前落地实践的是 3 个比较典型的公司，一个是携程，还有一个是涂鸦智能。&lt;/p>
-&lt;p>dubbogo 本身是一个 go 语言项目，也期待与其他 go 社区的指正或者需求，一起成长。&lt;/p></description></item><item><title>Blog: Dubbo Go 的前世今生</title><link>/zh/blog/2021/01/11/dubbo-go-%E7%9A%84%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E7%9A%84%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F/</guid><description>
+&lt;p>dubbogo 本身是一个 go 语言项目，也期待与其他 go 社区的指正或者需求，一起成长。&lt;/p></description></item><item><title>Blog: Dubbo Go 快速开始</title><link>/zh/blog/2021/01/11/dubbo-go-%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/</guid><description>
+&lt;h2 id="环境">环境&lt;/h2>
+&lt;ul>
+&lt;li>Go编程环境&lt;/li>
+&lt;li>启动zookeeper服务，也可以使用远程实例&lt;/li>
+&lt;/ul>
+&lt;h2 id="从服务端开始">从服务端开始&lt;/h2>
+&lt;h3 id="第一步编写-provider-结构体和提供服务的方法">第一步：编写 &lt;code>Provider&lt;/code> 结构体和提供服务的方法&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/user.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/user.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>编写需要被编码的结构体，由于使用 &lt;code>Hessian2&lt;/code> 作为编码协议，&lt;code>User&lt;/code> 需要实现 &lt;code>JavaClassName&lt;/code> 方法，它的返回值在dubbo中对应User类的类名。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+Id &lt;span style="color:#dc322f">string&lt;/span>
+Name &lt;span style="color:#dc322f">string&lt;/span>
+Age &lt;span style="color:#dc322f">int32&lt;/span>
+Time time.Time
+}
+&lt;span style="color:#268bd2">func&lt;/span> (u User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.User&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>编写业务逻辑，&lt;code>UserProvider&lt;/code> 相当于dubbo中的一个服务实现。需要实现 &lt;code>Reference&lt;/code> 方法，返回值是这个服务的唯一标识，对应dubbo的 &lt;code>beans&lt;/code> 和 &lt;code>path&lt;/code> 字段。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+}
+&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, req []&lt;span style="color:#268bd2">interface&lt;/span>{}) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;req:%#v&amp;#34;&lt;/span>, req)
+rsp &lt;span style="color:#719e07">:=&lt;/span> User{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;hellowworld&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">18&lt;/span>, time.&lt;span style="color:#268bd2">Now&lt;/span>()}
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;rsp:%#v&amp;#34;&lt;/span>, rsp)
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>rsp, &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">Reference&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>注册服务和对象&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+config.&lt;span style="color:#268bd2">SetProviderService&lt;/span>(&lt;span style="color:#b58900">new&lt;/span>(UserProvider))
+&lt;span style="color:#586e75">// ------for hessian2------
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第二步编写主程序">第二步：编写主程序&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/server.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/server.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>引入必需的dubbo-go包&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">import&lt;/span> (
+hessian &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-hessian2&amp;#34;&lt;/span>
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/protocol&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/proxy/proxy_factory&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/filter/impl&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/cluster_impl&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/loadbalance&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/zookeeper&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/protocol/dubbo&amp;#34;&lt;/span>
+)
+&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>main 函数&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+config.&lt;span style="color:#268bd2">Load&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第三步编写配置文件并配置环境变量">第三步：编写配置文件并配置环境变量&lt;/h3>
+&lt;ol>
+&lt;li>参考 &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/log.yml">log&lt;/a> 和 &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/server.yml">server&lt;/a> 编辑配置文件。&lt;/li>
+&lt;/ol>
+&lt;p>主要编辑以下部分：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>registries&lt;/code> 结点下需要配置zk的数量和地址&lt;/li>
+&lt;li>&lt;code>services&lt;/code> 结点下配置服务的具体信息，需要配置 &lt;code>interface&lt;/code> 配置，修改为对应服务的接口名，服务的key对应第一步中 &lt;code>Provider&lt;/code> 的 &lt;code>Reference&lt;/code> 返回值&lt;/li>
+&lt;/ul>
+&lt;ol>
+&lt;li>把上面的两个配置文件分别配置为环境变量&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_PROVIDER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="接着是客户端">接着是客户端&lt;/h2>
+&lt;h3 id="第一步编写客户端-provider">第一步：编写客户端 &lt;code>Provider&lt;/code>&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/user.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/user.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>参考服务端第一步的第一点。&lt;/li>
+&lt;li>与服务端不同的是，提供服务的方法作为结构体的参数，不需要编写具体业务逻辑。另外，&lt;code>Provider&lt;/code> 不对应dubbo中的接口，而是对应一个实现。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+GetUser &lt;span style="color:#268bd2">func&lt;/span>(ctx context.Context, req []&lt;span style="color:#268bd2">interface&lt;/span>{}, rsp &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#dc322f">error&lt;/span>
+}
+&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">Reference&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>注册服务和对象&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(userProvider)
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第二步编写客户端主程序">第二步：编写客户端主程序&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/client.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/client.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>引入必需的dubbo-go包&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">import&lt;/span> (
+hessian &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-hessian2&amp;#34;&lt;/span>
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/protocol&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/proxy/proxy_factory&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/filter/impl&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/cluster_impl&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/loadbalance&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/zookeeper&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/protocol/dubbo&amp;#34;&lt;/span>
+)
+&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>main 函数&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+config.&lt;span style="color:#268bd2">Load&lt;/span>()
+time.&lt;span style="color:#268bd2">Sleep&lt;/span>(&lt;span style="color:#2aa198">3e9&lt;/span>)
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;\n\n\nstart to test dubbo&amp;#34;&lt;/span>)
+user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#b58900">panic&lt;/span>(err)
+}
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v\n&amp;#34;&lt;/span>, user)
+}
+&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#b58900">println&lt;/span>(format &lt;span style="color:#dc322f">string&lt;/span>, args &lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{}) {
+fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;\033[32;40m&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>format&lt;span style="color:#719e07">+&lt;/span>&lt;span style="color:#2aa198">&amp;#34;\033[0m\n&amp;#34;&lt;/span>, args&lt;span style="color:#719e07">...&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第三步编写配置文件并配置环境变量-1">第三步：编写配置文件并配置环境变量&lt;/h3>
+&lt;ol>
+&lt;li>参考 &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/log.yml">log&lt;/a> 和 &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/client.yml">client&lt;/a> 编辑配置文件。&lt;/li>
+&lt;/ol>
+&lt;p>主要编辑以下部分：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>registries&lt;/code> 结点下需要配置zk的数量和地址&lt;/li>
+&lt;li>&lt;code>references&lt;/code> 结点下配置服务的具体信息，需要配置 &lt;code>interface&lt;/code> 配置，修改为对应服务的接口名，服务的key对应第一步中 &lt;code>Provider&lt;/code> 的 &lt;code>Reference&lt;/code> 返回值&lt;/li>
+&lt;/ul>
+&lt;ol>
+&lt;li>把上面的两个配置文件费别配置为环境变量，为防止log的环境变量和服务端的log环境变量冲突，建议所有的环境变量不要做全局配置，在当前起效即可。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_CONSUMER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Blog: Dubbo Go 的前世今生</title><link>/zh/blog/2021/01/11/dubbo-go-%E7%9A%84%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E7%9A%84%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F/</guid><description>
 &lt;p>&lt;img src="/imgs/blog/dubbo-go/dubbo-go-history.png" alt="">&lt;/p>
 &lt;p>dubbo-go 是目前 Dubbo 多语言生态最火热的项目。dubbo-go 最早的版本应该要追溯到 2016 年，由社区于雨同学编写 dubbo-go 的初版。当时很多东西没有现成的轮子，如 Go 语言没有像 netty 一样的基于事件的网络处理引擎、 hessian2 协议没有 Go 语言版本实现，加上当时 Dubbo 也没有开始重新维护。所以从协议库到网络引擎，再到上层 dubbo-go ，其实都是从零开始写的。&lt;/p>
 &lt;p>在 2018 年，携程开始做 Go 语言的一些中间件以搭建内部的 Go 语言生态，需要有一个 Go 的服务框架可以与携程的现有 dubbo soa 生态互通。所以由我负责重构了 dubbo－go 并开源出这个版本。当时调研了很多开源的 Go 语言服务框架，当时能够支持 hessian2 协议的并跟 Dubbo 可以打通的仅找到了当时于雨写的 dubbo-go 早期版本。由于携程对社区版本的 Dubbo 做了挺多的扩展，源于对扩展性的需求我们 Go 语言版本需要一个更易于扩展的版本，加上当时这个版本本身的功能也比较简单，所以我们找到了作者合作重构了一个更好的版本。经过了大半年时间，在上图第三阶段 19 年 6 月的时候，基本上已经把 dubbo-go 重构了一遍，总体的思路是参考的 Dubbo 整体的代码架构，用Go语言完全重写了一个完整的具备服务端跟消费端的 Golang rpc/ 微服务框架。&lt;/p>
@@ -601,7 +755,212 @@ impl.queue.&lt;span style="color:#268bd2">PushBack&lt;/span>(current)
 &lt;p>这种我也没实现，因为好像没什么需求。国内讨论TPS limit都是讨论单机TPS limit比较多。&lt;/p>
 &lt;p>这个同样可以通过实现&lt;code>TpsLimiter&lt;/code>接口来实现。&lt;/p>
 &lt;h3 id="leaky-bucket算法">Leaky Bucket算法&lt;/h3>
-&lt;p>这个本来可以是&lt;code>TpsLimitStrategy&lt;/code>的一种实现的。后来我觉得，它其实并没有特别大的优势——虽然号称可以做到均匀，但是其实并做不到真正的均匀。通过调整&lt;code>SlidingWindow&lt;/code>的窗口大小，是可以接近它宣称的均匀消费的效果的。比如说调整到一秒，那其实就已经很均匀了。而这并不会带来多少额外的开销。&lt;/p></description></item><item><title>Blog: Dubbo Go Getty 开发日志</title><link>/zh/blog/2021/01/11/dubbo-go-getty-%E5%BC%80%E5%8F%91%E6%97%A5%E5%BF%97/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-getty-%E5%BC%80%E5%8F%91%E6%97%A5%E5%BF%97/</guid><description>
+&lt;p>这个本来可以是&lt;code>TpsLimitStrategy&lt;/code>的一种实现的。后来我觉得，它其实并没有特别大的优势——虽然号称可以做到均匀，但是其实并做不到真正的均匀。通过调整&lt;code>SlidingWindow&lt;/code>的窗口大小，是可以接近它宣称的均匀消费的效果的。比如说调整到一秒，那其实就已经很均匀了。而这并不会带来多少额外的开销。&lt;/p></description></item><item><title>Blog: dubbo-go 中如何实现远程配置管理？</title><link>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86/</guid><description>
+&lt;p>之前在 Apache/dubbo-go（以下简称 dubbo-go ）社区中，有同学希望配置文件不仅可以放于本地，还可以放于配置管理中心里。那么，放在本地和配置管理中心究竟有哪些不一样呢？&lt;/p>
+&lt;p>放在本地，每次更新需要重启，配置文件管理困难，无法做到实时更新即刻生效。此外，本地文件还依赖人工版本控制，在微服务的场景下，大大的增加了运维的成本与难度。&lt;/p>
+&lt;p>而配置管理中心提供了统一的配置文件管理，支持文件更新、实时同步、统一版本控制、权限管理等功能。&lt;/p>
+&lt;h2 id="目标">目标&lt;/h2>
+&lt;p>基于以上几个背景，可以总结出以下&lt;strong>目标&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>与 Dubbo 现有的配置中心内的配置文件兼容，降低新增语言栈的学习成本；&lt;/li>
+&lt;li>支持多种配置文件格式；&lt;/li>
+&lt;li>支持主流配置中心，适应不一样的使用场景，实现高扩展的配置下发；&lt;/li>
+&lt;/ul>
+&lt;h2 id="配置中心">配置中心&lt;/h2>
+&lt;p>配置中心在 dubbo-go 中主要承担以下场景的职责：&lt;/p>
+&lt;ol>
+&lt;li>作为外部化配置中心，即存储 dubbo.properties 配置文件，此时，key 值通常为文件名如 dubbo.properties , value 则为配置文件内容。&lt;/li>
+&lt;li>存储单个配置项，如各种开关项、常量值等。&lt;/li>
+&lt;li>存储服务治理规则，此时 key 通常按照 “服务名 + 规则类型” 的格式来组织，而 value 则为具体的治理规则。&lt;/li>
+&lt;/ol>
+&lt;p>就目前而言，dubbo-go 首要支持的是 Dubbo 中支持的开源配置中心，包括：&lt;/p>
+&lt;ol>
+&lt;li>Apollo：携程框架部门研发的分布式配置中心，能够集中化管理应用不同环境、不同集群的配置，配置修改后能够实时推送到应用端，并且具备规范的权限、流程治理等特性，适用于微服务配置管理场景。&lt;/li>
+&lt;li>ZooKeeper：一个分布式的，开放源码的分布式应用程序协调服务，是 Google 的 Chubby 一个开源的实现，是 Hadoop 和 Hbase 的重要组件。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、域名服务、分布式同步、组服务等。&lt;/li>
+&lt;li>Nacos: Alibaba 开源的配置管理组件，提供了一组简单易用的特性集，帮助您实现动态服务发现、服务配置管理、服务及流量管理。&lt;/li>
+&lt;/ol>
+&lt;p>而考虑到某些公司内部有自身的研发的配置中心，又或者当前流行而 Dubbo 尚未支持的配置中心，如 etcd，我们的核心在于设计一套机制，允许我们，也包括用户，可以通过扩展接口新的实现，来快速接入不同的配置中心。&lt;/p>
+&lt;p>那在 dubbo-go 中究竟怎么实现呢？我们的答案是：&lt;strong>基于动态的插件机制在启动时按需加载配置中心的不同实现。&lt;/strong>&lt;/p>
+&lt;p>实现该部分功能放置于一个独立的子项目中，见： &lt;a href="https://github.com/apache/dubbo-go/tree/master/config_center">https://github.com/apache/dubbo-go/tree/master/config_center&lt;/a>&lt;/p>
+&lt;h3 id="dubbo-go-设计">dubbo-go 设计&lt;/h3>
+&lt;p>原逻辑为：启动时读取本地配置文件，将其加载进内存，通过配置文件中的配置读取注册中心的信息获取服务提供者，注册服务消费者。&lt;/p>
+&lt;p>有些读者会有点困惑，不是说好了使用配置中心的，为什么现在又要读取本地配置呢？答案就是，读取的这部分信息分成两部分：&lt;/p>
+&lt;ul>
+&lt;li>使用什么作为配置中心；&lt;/li>
+&lt;li>该配置中心的元数据，比如说使用 zookeeper 作为配置中心，那么 zookeeper 的链接信息就是元数据，毕竟我们只有在知道了链接信息之后才能连上 zookeeper；&lt;/li>
+&lt;/ul>
+&lt;p>在改造的时候，需要考虑以下的问题：&lt;/p>
+&lt;p>&lt;strong>1、如何实现支持多个配置中心？如何实现按需加载？&lt;/strong>&lt;/p>
+&lt;p>通过抽象 DynamicConfiguration 让开发者可以快速支持多个配置中心。使用者导入指定的组件包后，在启动阶段将需要的组件加载进内存中，以便给程序按需调用，如下图绿色部分。&lt;/p>
+&lt;p>&lt;strong>2、配置中心的配置加载阶段在什么时候？&lt;/strong>&lt;/p>
+&lt;p>应在读取配置文件阶段后，读取并解析本地配置文件中配置中心信息。初始化配置中心链接，读取 /dubbo/config/dubbo/dubbo.properties 与 /dubbo/config/dubbo/应用名/dubbo.properties ，并将其加载到内存之中覆盖原有配置，监听其变更，实时更新至内存，如下图蓝色部分:
+&lt;img src="/imgs/blog/dubbo-go/config-center/config-center-class.jpg" alt="">&lt;/p>
+&lt;h4 id="configcenterfactory">ConfigCenterFactory&lt;/h4>
+&lt;p>使用者加载对应配置中心模块后，在初始化阶段加入各配置中心模块往其中注册其初始化类。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#719e07">package&lt;/span> extension
+&lt;span style="color:#719e07">import&lt;/span> (
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config_center&amp;#34;&lt;/span>
+)
+&lt;span style="color:#268bd2">var&lt;/span> (
+configCenterFactories = &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">func&lt;/span>() config_center.DynamicConfigurationFactory)
+)
+&lt;span style="color:#586e75">// SetConfigCenterFactory sets the DynamicConfigurationFactory with @name
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">SetConfigCenterFactory&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>, v &lt;span style="color:#268bd2">func&lt;/span>() config_center.DynamicConfigurationFactory) {
+configCenterFactories[name] = v
+}
+&lt;span style="color:#586e75">// GetConfigCenterFactory finds the DynamicConfigurationFactory with @name
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">GetConfigCenterFactory&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>) config_center.DynamicConfigurationFactory {
+&lt;span style="color:#719e07">if&lt;/span> configCenterFactories[name] &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#b58900">panic&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;config center for &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; is not existing, make sure you have import the package.&amp;#34;&lt;/span>)
+}
+&lt;span style="color:#719e07">return&lt;/span> configCenterFactories[name]()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="dynamicconfigurationfactory">DynamicConfigurationFactory&lt;/h4>
+&lt;p>整个动态配置中心的关键点就在 DynamicConfigurationFactory 上，其中通过解析内部自定义的 URL ，获取其协议类型，反射其参数，用于创建配置中心的链接。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#719e07">package&lt;/span> config_center
+&lt;span style="color:#719e07">import&lt;/span> (
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common&amp;#34;&lt;/span>
+)
+&lt;span style="color:#586e75">// DynamicConfigurationFactory gets the DynamicConfiguration
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> DynamicConfigurationFactory &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#268bd2">GetDynamicConfiguration&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL) (DynamicConfiguration, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>如：&lt;/p>
+&lt;p>配置文件中配置：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">config_center&lt;/span>:
+&lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;span style="color:#268bd2">namespace&lt;/span>: test
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>dubbo-go 内部会解析为：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">zookeeper://127.0.0.1:2181?namespace=test
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在内部传递，用于初始化配置中心链接。&lt;/p>
+&lt;p>&lt;strong>PS:&lt;/strong> 在 dubbo-go 中到处可见这种内部协议，透彻理解这个内部协议对阅读 dubbo-go 代码很有帮助。&lt;/p>
+&lt;h4 id="dynamicconfiguration">DynamicConfiguration&lt;/h4>
+&lt;p>该接口规定了各个配置中心需要实现的功能：&lt;/p>
+&lt;ul>
+&lt;li>配置数据反序列化方式：目前只有 Properties 转换器，参见：DefaultConfigurationParser 。&lt;/li>
+&lt;li>增加监听器：用于增加监听数据变化后增加特定逻辑（受限于配置中心 client 端实现）。&lt;/li>
+&lt;li>删除监听器：删除已有监听器（受限于配置中心 client 端实现，目前所知 nacos client 没有提供该方法）。&lt;/li>
+&lt;li>获取路由配置：获取路由表配置。&lt;/li>
+&lt;li>获取应用级配置：获取应用层级配置，如：协议类型配置等。&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// DynamicConfiguration for modify listener and get properties file
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> DynamicConfiguration &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#268bd2">Parser&lt;/span>() parser.ConfigurationParser
+&lt;span style="color:#268bd2">SetParser&lt;/span>(parser.ConfigurationParser)
+&lt;span style="color:#268bd2">AddListener&lt;/span>(&lt;span style="color:#dc322f">string&lt;/span>, ConfigurationListener, &lt;span style="color:#719e07">...&lt;/span>Option)
+&lt;span style="color:#268bd2">RemoveListener&lt;/span>(&lt;span style="color:#dc322f">string&lt;/span>, ConfigurationListener, &lt;span style="color:#719e07">...&lt;/span>Option)
+&lt;span style="color:#586e75">// GetProperties get properties file
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">GetProperties&lt;/span>(&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#719e07">...&lt;/span>Option) (&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>)
+&lt;span style="color:#586e75">// GetRule get Router rule properties file
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">GetRule&lt;/span>(&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#719e07">...&lt;/span>Option) (&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>)
+&lt;span style="color:#586e75">// GetInternalProperty get value by key in Default properties file(dubbo.properties)
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">GetInternalProperty&lt;/span>(&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#719e07">...&lt;/span>Option) (&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>)
+&lt;span style="color:#586e75">// PublishConfig will publish the config with the (key, group, value) pair
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">PublishConfig&lt;/span>(&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#dc322f">string&lt;/span>) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;span style="color:#586e75">// RemoveConfig will remove the config white the (key, group) pair
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">RemoveConfig&lt;/span>(&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#dc322f">string&lt;/span>) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;span style="color:#586e75">// GetConfigKeysByGroup will return all keys with the group
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">GetConfigKeysByGroup&lt;/span>(group &lt;span style="color:#dc322f">string&lt;/span>) (&lt;span style="color:#719e07">*&lt;/span>gxset.HashSet, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="实现">实现&lt;/h3>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/config-center/design.png" alt="">&lt;/p>
+&lt;p>优先考虑与现有 Dubbo 设计兼容，从而降低使用者的学习成本，dubbo-admin 作为服务提供者实现应用级配置管理， dubbo-go 作为消费端实现配置下发管理功能。下面以 ZooKeeper 为例，对服务提供者与服务消费者进行整体流程分析。&lt;/p>
+&lt;h4 id="如何存储配置管理">如何存储配置管理&lt;/h4>
+&lt;p>dubbo-admin 配置管理中增加 global 配置，ZooKeeper 中会自动生成其对应配置节点，内容均为 dubbo-admin 中设置的配置。&lt;/p>
+&lt;ol>
+&lt;li>/dubbo/config/dubbo/dubbo.properties 对应全局配置文件。&lt;/li>
+&lt;li>/dubbo/config/dubbo/ 应用名 /dubbo.properties 对应指定应用配置文件。&lt;/li>
+&lt;/ol>
+&lt;h5 id="节点路径">节点路径&lt;/h5>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/config-center/key-struct.png" alt="">&lt;/p>
+&lt;p>上图展示了 dubbo.properties 文件在 ZooKeeper 和 Apollo 中的存储结构：&lt;/p>
+&lt;p>&lt;strong>ZooKeeper&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>命名空间 namespace 都为：Dubbo&lt;/li>
+&lt;li>分组 group ：全局级别为 dubbo , 所有应用共享；应用级别为应用名 demo-provider ，只对该应用生效&lt;/li>
+&lt;li>key : dubbo.properties&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Apollo&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>app_id : 自由指定，默认：dubbo ，最好与 zookeeper namespace 一致&lt;/li>
+&lt;li>cluster : 自由指定，最好与 zookeeper group 一致&lt;/li>
+&lt;li>命名空间 namespace : dubbo.properties&lt;/li>
+&lt;/ul>
+&lt;p>ZooKeeper 与 Apollo 最大的不一样就在于 dubbo.properties 所在的节点。&lt;/p>
+&lt;h4 id="实现配置管理中心支持">实现配置管理中心支持&lt;/h4>
+&lt;p>以 Apollo 为例，简单的介绍，如何实现支持一个新的配置管理中心。&lt;/p>
+&lt;h5 id="选择配置管理中心-client--sdk">选择配置管理中心 Client / SDK&lt;/h5>
+&lt;p>本例中使用的 Apollo Go Client 为：https://github.com/zouyx/agollo 。&lt;/p>
+&lt;p>&lt;strong>PS:&lt;/strong> 如没找到，自己实现也是可以的哦。&lt;/p>
+&lt;h5 id="节点路径-1">节点路径&lt;/h5>
+&lt;p>因为每个配置管理中心的存储结构各有特点，导致 Dubbo 在使用外部配置管理中心时，存储配置节点的结构不一样。在 dubbo-configcenter 找到希望支持的配置管理中心，而本例中 Apollo 则在 ApolloDynamicConfiguration.java 。&lt;/p>
+&lt;p>注释中表明，Apollo namespace = governance (governance .properties) 用于治理规则，namespace = dubbo (dubbo.properties) 用于配置文件。&lt;/p>
+&lt;h5 id="实现-dynamicconfiguration">实现 DynamicConfiguration&lt;/h5>
+&lt;p>新建创建客户端方法，最好客户端保持为单例。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">newApolloConfiguration&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) (&lt;span style="color:#719e07">*&lt;/span>apolloConfiguration, &lt;span style="color:#dc322f">error&lt;/span>) {
+c &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>apolloConfiguration{
+url: url,
+}
+configAddr &lt;span style="color:#719e07">:=&lt;/span> c.&lt;span style="color:#268bd2">getAddressWithProtocolPrefix&lt;/span>(url)
+configCluster &lt;span style="color:#719e07">:=&lt;/span> url.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.CONFIG_CLUSTER_KEY, &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>)
+appId &lt;span style="color:#719e07">:=&lt;/span> url.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.CONFIG_APP_ID_KEY, &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>)
+namespaces &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">getProperties&lt;/span>(url.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.CONFIG_NAMESPACE_KEY, cc.DEFAULT_GROUP))
+c.appConf = &lt;span style="color:#719e07">&amp;amp;&lt;/span>config.AppConfig{
+AppID: appId,
+Cluster: configCluster,
+NamespaceName: namespaces,
+IP: configAddr,
+}
+agollo.&lt;span style="color:#268bd2">InitCustomConfig&lt;/span>(&lt;span style="color:#268bd2">func&lt;/span>() (&lt;span style="color:#719e07">*&lt;/span>config.AppConfig, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;span style="color:#719e07">return&lt;/span> c.appConf, &lt;span style="color:#cb4b16">nil&lt;/span>
+})
+&lt;span style="color:#719e07">return&lt;/span> c, agollo.&lt;span style="color:#268bd2">Start&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下为必须实现的方法，以下方法用于获取配置中心配置。&lt;/p>
+&lt;ul>
+&lt;li>GetInternalProperty：在配置文件（Apollo 为 namespace）中，根据 key 获取对应 value；&lt;/li>
+&lt;li>GetRule：获取治理配置文件（Apollo 为 namespace）；&lt;/li>
+&lt;li>GetProperties：获取整个配置文件（Apollo 为 namespace）；&lt;/li>
+&lt;/ul>
+&lt;p>可选择实现的方法，如不实现，则不能动态更新 dubbo-go 中配置信息。&lt;/p>
+&lt;ul>
+&lt;li>RemoveListener&lt;/li>
+&lt;li>AddListener&lt;/li>
+&lt;/ul>
+&lt;p>而 Parser &amp;amp; SetParser 使用默认实现即可，默认为 Properties 转换器。&lt;/p>
+&lt;p>更多信息，参考：dubbo-go-apollo ，详情参考： &lt;a href="https://github.com/apache/dubbo-go/tree/master/config_center/apollo">https://github.com/apache/dubbo-go/tree/master/config_center/apollo&lt;/a>&lt;/p>
+&lt;h3 id="使用方法">使用方法&lt;/h3>
+&lt;p>从上面的设计里面，也能大概猜到怎么使用了：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/config-center/zookeeper-usercase.png" alt="">&lt;/p>
+&lt;p>很显然，使用配置中心并不复杂，只需要把对应的依赖引入进来。在包初始化的时候，会创建出来对应的配置中心的实现。比如说加载 ZooKeeper 或者 Apollo 作为配置中心：&lt;/p>
+&lt;p>&lt;strong>ZooKeeper&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config_center/zookeeper&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Apollo&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config_center/apollo&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然仅仅加载还不够，比如说虽然我加载了 zookeeper，但是我还需要知道怎么连上这个配置中心，即前面提到的配置中心的元数据，这部分信息是需要在本地配置出来的。比如说：&lt;/p>
+&lt;p>&lt;strong>ZooKeeper&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">config_center&lt;/span>:
+&lt;span style="color:#268bd2">protocol&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Apollo&lt;/strong>&lt;/p>
+&lt;p>如果需要使用 Apollo 作为配置中心，请提前创建 namespace: dubbo.properties，用于配置管理。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">config_center&lt;/span>:
+&lt;span style="color:#268bd2">protocol&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;apollo&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:8070&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">app_id&lt;/span>: test_app
+&lt;span style="color:#268bd2">cluster&lt;/span>: dev
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>更加具体的实现，我就不详细论述，大家可以去看源码，欢迎大家持续关注，或者贡献代码。&lt;/p>
+&lt;p>整个配置中心的功能，麻雀虽小，但五脏俱全。目前并不算是十分完善，但是整个框架层面上来说，是走在了正确的路上。从扩展性来说，是比较便利。目前支持的配置中心还不够丰富，只有 ZooKeeper 与 Apollo ，支持的配置文件格式也只有 properties ，虽然能满足基本使用场景，距离完善还有还长远的路。&lt;/p>
+&lt;p>&lt;strong>未来计划：&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Nacos（等待发布 ）&lt;/li>
+&lt;li>etcd（正在开发）&lt;/li>
+&lt;li>consul（未支持）&lt;/li>
+&lt;li>丰富的文件配置格式，如：yml , xml 等&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>本文作者：&lt;/strong> 邹毅贤，Github ID @zouyx，开源爱好者，就职于 SheIn 供应链部门，负责供应链开放平台&lt;/p></description></item><item><title>Blog: Dubbo Go Getty 开发日志</title><link>/zh/blog/2021/01/11/dubbo-go-getty-%E5%BC%80%E5%8F%91%E6%97%A5%E5%BF%97/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-getty-%E5%BC%80%E5%8F%91%E6%97%A5%E5%BF%97/</guid><description>
 &lt;h3 id="0-说明">0 说明&lt;/h3>
 &lt;p>&lt;a href="https://github.com/alexstocks/getty">getty&lt;/a>是一个go语言实现的网络层引擎，可以处理TCP/UDP/websocket三种网络协议。&lt;/p>
 &lt;p>2016年6月我在上海做一个即时通讯项目时，接口层的底层网络驱动是当时的同事&lt;a href="https://github.com/sanbit">sanbit&lt;/a>写的，原始网络层实现了TCP
@@ -756,7 +1115,108 @@ Task 派发采用 RoundRobin 方式。&lt;/p>
 &lt;ol>
 &lt;li>&lt;a href="http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch08lev1sec11.html">connect Function with UDP&lt;/a>&lt;/li>
 &lt;li>&lt;a href="http://colobu.com/2016/10/19/Go-UDP-Programming/">深入Go UDP编程&lt;/a>&lt;/li>
-&lt;/ol></description></item><item><title>Blog: 无缝衔接 gRPC 与 dubbo-go</title><link>/zh/blog/2021/01/11/%E6%97%A0%E7%BC%9D%E8%A1%94%E6%8E%A5-grpc-%E4%B8%8E-dubbo-go/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/%E6%97%A0%E7%BC%9D%E8%A1%94%E6%8E%A5-grpc-%E4%B8%8E-dubbo-go/</guid><description>
+&lt;/ol></description></item><item><title>Blog: 在dubbo-go中使用sentinel</title><link>/zh/blog/2021/01/11/%E5%9C%A8dubbo-go%E4%B8%AD%E4%BD%BF%E7%94%A8sentinel/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/%E5%9C%A8dubbo-go%E4%B8%AD%E4%BD%BF%E7%94%A8sentinel/</guid><description>
+&lt;p>时至今日，Apache/dubbo-go（以下简称 dubbo-go ）项目在功能上已经逐步对齐java版本，稳定性也在不同的生产环境得到了验证。社区便开始再服务治理、监控等方向发力。随着 1.2和1.3 版本发布， dubbo-go 新增了大量此类新feature。&lt;/p>
+&lt;p>今天我们聊一聊限流相关话题，此前dubbo-go已经支持了&lt;a href="https://github.com/apache/dubbo-go/pull/237">tps limit&lt;/a>、&lt;a href="https://github.com/apache/dubbo-go/pull/246">execute limit &lt;/a>、&lt;a href="https://github.com/apache/dubbo-go/pull/133">hystrix&lt;/a> 的内置filter，用户只要简单配置就能马上用上。但我们知道，在 java 的 dubbo 生态中，有一项限流工具被广泛使用，那就是sentinel。sentinel因为强大的动态规划配置、优秀的dashboard以及对dubbo的良好适配，成为众多使用dubbo的企业选用限流工具的不二之选。&lt;/p>
+&lt;p>就在前些日子，社区非常高兴得知 Sentinel Golang 首个版本 0.1.0 正式发布，这使得 dubbo-go也可以使用 sentinel 作为工具进行一些服务治理、监控的工作了。随着sentinel golang的健壮，我们相信用户马上可以像sentinel管理java dubbo服务那样管理dubbo-go的服务了。&lt;/p>
+&lt;p>完成sentinel golang的dubbo-adapter其实非常简单，这得益于dubbo-go早就完成了filter链的构造，用户可以自定义filter，并且灵活的安排其执行顺序。在1.3发布后，增加了filter中的context传递，构建sentinel/adapter/dubbo更为方便。&lt;/p>
+&lt;p>我们以其中的provider filter适配为例:&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/sentinel/dubbo-go-sentinel-provider-filter.png" alt="">&lt;/p>
+&lt;p>此 filter 实现了 dubbo-go的filter接口，只要用户在服务启动时将此filter加载到dubbo-go中，即可使用此filter。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/sentinel/sentinel-golang.png" alt="">&lt;/p>
+&lt;p>sentinel实现原理与其他限流、熔断库大同小异，底层是用的滑动窗口算法。与hystrix等框架相比不同点是设计理念，Sentinel 的设计理念是让您自由选择控制的角度，并进行灵活组合，从而达到想要的效果。&lt;/p>
+&lt;p>下面我整理了完整的使用流程：(注意：dubbo-go版本请使用1.3.0-rc3及其以上版本)&lt;/p>
+&lt;p>在dubbo-go中使用sentinel主要分为以下几步：&lt;/p>
+&lt;ol>
+&lt;li>初始化sentinel&lt;/li>
+&lt;li>将sentinel注入dubbo-go的filter&lt;/li>
+&lt;li>初始化dubbo-go&lt;/li>
+&lt;li>配置规划&lt;/li>
+&lt;/ol>
+&lt;h2 id="初始化sentinel">初始化sentinel&lt;/h2>
+&lt;p>示例代码：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">import&lt;/span> (
+sentinel &lt;span style="color:#2aa198">&amp;#34;github.com/alibaba/sentinel-golang/api&amp;#34;&lt;/span>
+)
+&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">initSentinel&lt;/span>() {
+err &lt;span style="color:#719e07">:=&lt;/span> sentinel.&lt;span style="color:#268bd2">InitWithLogDir&lt;/span>(confPath, logDir)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 初始化 Sentinel 失败
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="将sentinel注入dubbo-go的filter">将sentinel注入dubbo-go的filter&lt;/h2>
+&lt;p>你可以通过import包的形式执行，执行其中的init()来注入filter&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">import&lt;/span> (
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/alibaba/sentinel-golang/adapter/dubbo&amp;#34;&lt;/span>
+)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以手动执行，给你的filter取上自己想要的名字&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">import&lt;/span> (
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/extension&amp;#34;&lt;/span>
+sd &lt;span style="color:#2aa198">&amp;#34;github.com/alibaba/sentinel-golang/adapter/dubbo&amp;#34;&lt;/span>
+)
+&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(){
+extension.&lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myConsumerFilter&amp;#34;&lt;/span>,sd.&lt;span style="color:#268bd2">GetConsumerFilter&lt;/span>())
+extension.&lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myProviderFilter&amp;#34;&lt;/span>,sd.&lt;span style="color:#268bd2">GetConsumerFilter&lt;/span>())
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成以上步骤，你就可以在需要的dubbo接口配置里写入sentinel的filterName,构建起接口的filter链条。比如以下以consumer.yml配置文件为例&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yml" data-lang="yml">&lt;span style="color:#268bd2">references&lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>:
+&lt;span style="color:#268bd2">registry&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;hangzhouzk&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">protocol &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">interface &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.UserProvider&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">cluster&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">filter&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;myConsumerFilter&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">methods &lt;/span>:
+- &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;GetUser&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">retries&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="初始化dubbo-go">初始化dubbo-go&lt;/h2>
+&lt;p>到这一步，你只需要正常启动dubbo-go程序就完成了服务启动。用以下代码做一个较为完整举例&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">import&lt;/span> (
+hessian &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-hessian2&amp;#34;&lt;/span>
+sd &lt;span style="color:#2aa198">&amp;#34;github.com/alibaba/sentinel-golang/adapter/dubbo&amp;#34;&lt;/span>
+)
+&lt;span style="color:#719e07">import&lt;/span> (
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/logger&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/proxy/proxy_factory&amp;#34;&lt;/span>
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/filter/impl&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/protocol/dubbo&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/protocol&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/cluster_impl&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/loadbalance&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/zookeeper&amp;#34;&lt;/span>
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/extension&amp;#34;&lt;/span>
+)
+&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+extension.&lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myConsumerFilter&amp;#34;&lt;/span>,sd.&lt;span style="color:#268bd2">GetConsumerFilter&lt;/span>())
+extension.&lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myProviderFilter&amp;#34;&lt;/span>,sd.&lt;span style="color:#268bd2">GetConsumerFilter&lt;/span>())
+config.&lt;span style="color:#268bd2">Load&lt;/span>()
+&lt;span style="color:#586e75">// init finish, do your work
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">test&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="规划配置">规划配置&lt;/h2>
+&lt;p>sentinel以强大的规划配置吸引了很多使用者，其提供动态数据源接口进行扩展，用户可以通过动态文件或 etcd 等配置中心来动态地配置规则。但目前sentinel-golang作为破蛋版本，动态配置还在开发中&lt;/p>
+&lt;h3 id="动态数据源">动态数据源&lt;/h3>
+&lt;p>（开发中）Sentinel 提供动态数据源接口进行扩展，用户可以通过动态文件或 etcd 等配置中心来动态地配置规则。&lt;/p>
+&lt;h3 id="硬编码方式">硬编码方式&lt;/h3>
+&lt;p>Sentinel 也支持原始的硬编码方式加载规则，可以通过各个模块的 &lt;code>LoadRules(rules)&lt;/code> 方法加载规则。以下是硬编码方式对某个method在consumer端的QPS流控：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">_, err &lt;span style="color:#719e07">:=&lt;/span> flow.&lt;span style="color:#268bd2">LoadRules&lt;/span>([]&lt;span style="color:#719e07">*&lt;/span>flow.FlowRule{
+{
+ID: &lt;span style="color:#2aa198">666&lt;/span>,
+Resource: &lt;span style="color:#2aa198">&amp;#34;dubbo:consumer:com.ikurento.user.UserProvider:myGroup:1.0.0:hello()&amp;#34;&lt;/span>,
+MetricType: flow.QPS,
+Count: &lt;span style="color:#2aa198">10&lt;/span>,
+ControlBehavior: flow.Reject,
+},
+})
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 加载规则失败，进行相关处理
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="总结">总结&lt;/h1>
+&lt;p>更加具体的实现，我就不详细论述，大家可以去看源码进一步了解。&lt;/p>
+&lt;p>最后，欢迎大家持续关注，或者贡献代码，期待dubbo-go在2020年在云原生领域继续突破。&lt;/p>
+&lt;p>dubbo-go仓库地址：https://github.com/apache/dubbo-go&lt;/p></description></item><item><title>Blog: 无缝衔接 gRPC 与 dubbo-go</title><link>/zh/blog/2021/01/11/%E6%97%A0%E7%BC%9D%E8%A1%94%E6%8E%A5-grpc-%E4%B8%8E-dubbo-go/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/%E6%97%A0%E7%BC%9D%E8%A1%94%E6%8E%A5-grpc-%E4%B8%8E-dubbo-go/</guid><description>
 &lt;p>最近我们 dubbo-go 社区里面，呼声很大的一个 feature 就是对 gRPC 的支持。在某位大佬的不懈努力之下，终于弄出来了。&lt;/p>
 &lt;p>今天我就给大家分析一下大佬是怎么连接 dubbo-go 和 gRPC 。&lt;/p>
 &lt;h2 id="grpc">gRPC&lt;/h2>
@@ -7747,687 +8207,4 @@ Runtime&lt;span style="color:#719e07">.&lt;/span>getRuntime&lt;span style="color
 &lt;li>使用&lt;code>SIGKILL&lt;/code>关闭应用不会执行优雅停机；&lt;/li>
 &lt;li>优雅停机不保证会等待所有已发送/到达请求结束；&lt;/li>
 &lt;li>配置的优雅停机等待时间&lt;code>timeout&lt;/code>不是所有步骤等待时间的总和，而是每一个&lt;code>destroy&lt;/code>执行的最大时间。例如配置等待时间为5秒，则关闭Server、关闭Client等步骤会分别等待5秒。&lt;/li>
-&lt;/ul></description></item><item><title>Blog: Dubbo 关于同步/异步调用的几种方式</title><link>/zh/blog/2018/08/14/dubbo-%E5%85%B3%E4%BA%8E%E5%90%8C%E6%AD%A5/%E5%BC%82%E6%AD%A5%E8%B0%83%E7%94%A8%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/</link><pubDate>Tue, 14 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/14/dubbo-%E5%85%B3%E4%BA%8E%E5%90%8C%E6%AD%A5/%E5%BC%82%E6%AD%A5%E8%B0%83%E7%94%A8%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/</guid><description>
-&lt;p>我们知道，Dubbo 缺省协议采用单一长连接，底层实现是 Netty 的 NIO 异步通讯机制；基于这种机制，Dubbo 实现了以下几种调用方式：&lt;/p>
-&lt;ul>
-&lt;li>同步调用&lt;/li>
-&lt;li>异步调用&lt;/li>
-&lt;li>参数回调&lt;/li>
-&lt;li>事件通知&lt;/li>
-&lt;/ul>
-&lt;h2 id="同步调用">同步调用&lt;/h2>
-&lt;p>同步调用是一种阻塞式的调用方式，即 Consumer 端代码一直阻塞等待，直到 Provider 端返回为止；&lt;/p>
-&lt;p>通常，一个典型的同步调用过程如下：&lt;/p>
-&lt;ol>
-&lt;li>Consumer 业务线程调用远程接口，向 Provider 发送请求，同时当前线程处于&lt;code>阻塞&lt;/code>状态；&lt;/li>
-&lt;li>Provider 接到 Consumer 的请求后，开始处理请求，将结果返回给 Consumer；&lt;/li>
-&lt;li>Consumer 收到结果后，当前线程继续往后执行。&lt;/li>
-&lt;/ol>
-&lt;p>这里有 2 个问题：&lt;/p>
-&lt;ol>
-&lt;li>Consumer 业务线程是怎么进入&lt;code>阻塞&lt;/code>状态的？&lt;/li>
-&lt;li>Consumer 收到结果后，如何唤醒业务线程往后执行的？&lt;/li>
-&lt;/ol>
-&lt;p>其实，Dubbo 的底层 IO 操作都是异步的。Consumer 端发起调用后，得到一个 Future 对象。对于同步调用，业务线程通过&lt;code>Future#get(timeout)&lt;/code>，阻塞等待 Provider 端将结果返回；&lt;code>timeout&lt;/code>则是 Consumer 端定义的超时时间。当结果返回后，会设置到此 Future，并唤醒阻塞的业务线程；当超时时间到结果还未返回时，业务线程将会异常返回。&lt;/p>
-&lt;h2 id="异步调用">异步调用&lt;/h2>
-&lt;p>基于 Dubbo 底层的异步 NIO 实现异步调用，对于 Provider 响应时间较长的场景是必须的，它能有效利用 Consumer 端的资源，相对于 Consumer 端使用多线程来说开销较小。&lt;/p>
-&lt;p>异步调用，对于 Provider 端不需要做特别的配置。下面的例子中，Provider 端接口定义如下：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">AsyncService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-String &lt;span style="color:#268bd2">goodbye&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="consumer-配置">Consumer 配置&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;asyncService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.async.api.AsyncService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;goodbye&amp;#34;&lt;/span> async=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>需要异步调用的方法，均需要使用 &lt;code>&amp;lt;dubbo:method/&amp;gt;&lt;/code>标签进行描述。&lt;/p>
-&lt;h3 id="consumer-端发起调用">Consumer 端发起调用&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">AsyncService service &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">...;&lt;/span>
-String result &lt;span style="color:#719e07">=&lt;/span> service&lt;span style="color:#719e07">.&lt;/span>goodbye&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;samples&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>&lt;span style="color:#586e75">// 这里的返回值为空，请不要使用
-&lt;/span>&lt;span style="color:#586e75">&lt;/span>Future&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">().&lt;/span>getFuture&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">...&lt;/span> &lt;span style="color:#586e75">// 业务线程可以开始做其他事情
-&lt;/span>&lt;span style="color:#586e75">&lt;/span>result &lt;span style="color:#719e07">=&lt;/span> future&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">();&lt;/span> &lt;span style="color:#586e75">// 阻塞需要获取异步结果时，也可以使用 get(timeout, unit) 设置超时时间
-&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo Consumer 端发起调用后，同时通过&lt;code>RpcContext.getContext().getFuture()&lt;/code>获取跟返回结果关联的&lt;code>Future&lt;/code>对象，然后就可以开始处理其他任务；当需要这次异步调用的结果时，可以在任意时刻通过&lt;code>future.get(timeout)&lt;/code>来获取。&lt;/p>
-&lt;p>一些特殊场景下，为了尽快调用返回，可以设置是否等待消息发出：&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>sent=&amp;quot;true&amp;quot;&lt;/code> 等待消息发出，消息发送失败将抛出异常；&lt;/li>
-&lt;li>&lt;code>sent=&amp;quot;false&amp;quot;&lt;/code> 不等待消息发出，将消息放入 IO 队列，即刻返回。&lt;/li>
-&lt;/ul>
-&lt;p>默认为&lt;code>false&lt;/code>。配置方式如下：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;goodbye&amp;#34;&lt;/span> async=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> sent=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果你只是想异步，完全忽略返回值，可以配置 &lt;code>return=&amp;quot;false&amp;quot;&lt;/code>，以减少 Future 对象的创建和管理成本：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;goodbye&amp;#34;&lt;/span> async=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> return=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>此时，&lt;code>RpcContext.getContext().getFuture()&lt;/code>将返回&lt;code>null&lt;/code>。&lt;/p>
-&lt;p>整个异步调用的时序图如下：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/dubbo-async.svg" alt="异步调用">&lt;/p>
-&lt;p>此示例代码位于：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-async&lt;/p>
-&lt;h2 id="参数回调">参数回调&lt;/h2>
-&lt;p>参数回调有点类似于本地 Callback 机制，但 Callback 并不是 Dubbo 内部的类或接口，而是由 Provider 端自定义的；Dubbo 将基于长连接生成反向代理，从而实现从 Provider 端调用 Consumer 端的逻辑。&lt;/p>
-&lt;h3 id="provider-端定义-service-和-callback">Provider 端定义 Service 和 Callback&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">CallbackService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">addListener&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String key&lt;span style="color:#719e07">,&lt;/span> CallbackListener listener&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">CallbackListener&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">changed&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String msg&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="provider-端-service-实现">Provider 端 Service 实现&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">CallbackServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> CallbackService &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> CallbackListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> listeners &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> CallbackListener&lt;span style="color:#719e07">&amp;gt;();&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">CallbackServiceImpl&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Thread t &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Thread&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> Runnable&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">run&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">while&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Map&lt;span style="color:#719e07">.&lt;/span>Entry&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> CallbackListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> entry &lt;span style="color:#719e07">:&lt;/span> listeners&lt;span style="color:#719e07">.&lt;/span>entrySet&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-entry&lt;span style="color:#719e07">.&lt;/span>getValue&lt;span style="color:#719e07">().&lt;/span>changed&lt;span style="color:#719e07">(&lt;/span>getChanged&lt;span style="color:#719e07">(&lt;/span>entry&lt;span style="color:#719e07">.&lt;/span>getKey&lt;span style="color:#719e07">()));&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Throwable t&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-listeners&lt;span style="color:#719e07">.&lt;/span>remove&lt;span style="color:#719e07">(&lt;/span>entry&lt;span style="color:#719e07">.&lt;/span>getKey&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-Thread&lt;span style="color:#719e07">.&lt;/span>sleep&lt;span style="color:#719e07">(&lt;/span>5000&lt;span style="color:#719e07">);&lt;/span> &lt;span style="color:#586e75">// timely trigger change event
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Throwable t&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-t&lt;span style="color:#719e07">.&lt;/span>printStackTrace&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">});&lt;/span>
-t&lt;span style="color:#719e07">.&lt;/span>setDaemon&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-t&lt;span style="color:#719e07">.&lt;/span>start&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">addListener&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String key&lt;span style="color:#719e07">,&lt;/span> CallbackListener listener&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-listeners&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>key&lt;span style="color:#719e07">,&lt;/span> listener&lt;span style="color:#719e07">);&lt;/span>
-listener&lt;span style="color:#719e07">.&lt;/span>changed&lt;span style="color:#719e07">(&lt;/span>getChanged&lt;span style="color:#719e07">(&lt;/span>key&lt;span style="color:#719e07">));&lt;/span> &lt;span style="color:#586e75">// send notification for change
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> String &lt;span style="color:#268bd2">getChanged&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String key&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Changed: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SimpleDateFormat&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;yyyy-MM-dd HH:mm:ss&amp;#34;&lt;/span>&lt;span style="color:#719e07">).&lt;/span>format&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> Date&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="provider-端暴露服务">Provider 端暴露服务&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;callbackService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.callback.impl.CallbackServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.callback.api.CallbackService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;callbackService&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span> callbacks=&lt;span style="color:#2aa198">&amp;#34;1000&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;addListener&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:argument&lt;/span> index=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span> callback=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#586e75">&amp;lt;!--&amp;lt;dubbo:argument type=&amp;#34;com.demo.CallbackListener&amp;#34; callback=&amp;#34;true&amp;#34; /&amp;gt;--&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dubbo:method&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里，Provider 需要在方法中声明哪个参数是 Callback 参数。&lt;/p>
-&lt;h4 id="consumer-端实现-callback-接口">Consumer 端实现 Callback 接口&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">CallbackService callbackService &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">...;&lt;/span>
-callbackService&lt;span style="color:#719e07">.&lt;/span>addListener&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;foo.bar&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CallbackListener&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">changed&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String msg&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;callback1:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> msg&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">});&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Callback 接口的实现类在 Consumer 端，当方法发生调用时，Consumer 端会自动 export 一个 Callback 服务。而 Provider 端在处理调用时，判断如果参数是 Callback，则生成了一个 proxy，因此服务实现类里在调用 Callback 方法的时候，会被传递到 Consumer 端执行 Callback 实现类的代码。&lt;/p>
-&lt;p>上述示例代码位于：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-callback&lt;/p>
-&lt;p>这种调用方式有点像消息的发布和订阅，但又有区别。比如当 Consumer 端 完成了Callback 服务的 export 后，如果后续重启了，这时 Provider 端就会调不通；同时 Provider 端如何清理掉这个 proxy 也是一个问题。&lt;/p>
-&lt;h2 id="事件通知">事件通知&lt;/h2>
-&lt;p>事件通知允许 Consumer 端在调用之前、调用之后或出现异常时，触发 &lt;code>oninvoke&lt;/code>、&lt;code>onreturn&lt;/code>、&lt;code>onthrow&lt;/code> 三个事件。&lt;/p>
-&lt;p>可以通过在配置 Consumer 时，指定事件需要通知的方法，如：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoCallback&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.notify.impl.NotifyImpl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.notify.api.DemoService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;cn&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> onreturn=&lt;span style="color:#2aa198">&amp;#34;demoCallback.onreturn&amp;#34;&lt;/span> onthrow=&lt;span style="color:#2aa198">&amp;#34;demoCallback.onthrow&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中，NotifyImpl 的代码如下：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">NotifyImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Notify&lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>Integer&lt;span style="color:#719e07">,&lt;/span> String&lt;span style="color:#719e07">&amp;gt;&lt;/span> ret &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>Integer&lt;span style="color:#719e07">,&lt;/span> String&lt;span style="color:#719e07">&amp;gt;();&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onreturn&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-ret&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>id&lt;span style="color:#719e07">,&lt;/span> name&lt;span style="color:#719e07">);&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;onreturn: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onthrow&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Throwable ex&lt;span style="color:#719e07">,&lt;/span> String name&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;onthrow: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里要强调一点，自定义 Notify 接口中的三个方法的参数规则如下：&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>oninvoke&lt;/code> 方法参数与调用方法的参数相同；&lt;/li>
-&lt;li>&lt;code>onreturn&lt;/code>方法第一个参数为调用方法的返回值，其余为调用方法的参数；&lt;/li>
-&lt;li>&lt;code>onthrow&lt;/code>方法第一个参数为调用异常，其余为调用方法的参数。&lt;/li>
-&lt;/ul>
-&lt;p>上述配置中，&lt;code>sayHello&lt;/code>方法为同步调用，因此事件通知方法的执行也是同步执行。可以配置 &lt;code>async=true&lt;/code>让方法调用为异步，这时事件通知的方法也是异步执行的。特别强调一下，&lt;code>oninvoke&lt;/code>方法不管是否异步调用，都是同步执行的。&lt;/p>
-&lt;p>事件通知的示例代码请参考：https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify&lt;/p></description></item><item><title>Blog: Dubbo 基本用法 - Dubbo Consumer 配置</title><link>/zh/blog/2018/08/14/dubbo-%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95-dubbo-consumer-%E9%85%8D%E7%BD%AE/</link><pubDate>Tue, 14 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/14/dubbo-%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95-dubbo-consumer-%E9%85%8D%E7%BD%AE/</guid><description>
-&lt;h2 id="dubbo-consumer配置">Dubbo Consumer配置&lt;/h2>
-&lt;h3 id="consumer配置详解">Consumer配置详解&lt;/h3>
-&lt;p>配置Dubbo Consumer有3种方式：XML配置，API调用方式配置，注解方式配置。&lt;/p>
-&lt;h4 id="xml配置">XML配置&lt;/h4>
-&lt;h6 id="最简单的配置的样例">最简单的配置的样例：&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">
-&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;
-&amp;lt;beans xmlns=&amp;#34;http://www.springframework.org/schema/beans&amp;#34;
-xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;
-xmlns:dubbo=&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;
-xsi:schemaLocation=&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&amp;gt;
-&amp;lt;dubbo:application name=&amp;#34;hello-world-app&amp;#34; /&amp;gt;
-&amp;lt;dubbo:registry address=&amp;#34;multicast://224.5.6.7:1234&amp;#34; /&amp;gt;
-&amp;lt;dubbo:protocol name=&amp;#34;dubbo&amp;#34; port=&amp;#34;20880&amp;#34; /&amp;gt;
-&amp;lt;dubbo:reference id=&amp;#34;demoServiceRemote&amp;#34; interface=&amp;#34;com.alibaba.dubbo.demo.DemoService&amp;#34; /&amp;gt;
-&amp;lt;/beans&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>支持的配置标签及对应的配置项详解，参考provider中的用法。&lt;/p>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;p>接下来重点讲解下&amp;lt;dubbo:reference/&amp;gt;的配置。&lt;/p>
-&lt;/blockquote>
-&lt;ul>
-&lt;li>&amp;lt;dubbo:reference/&amp;gt;支持的主要属性列表：&lt;/li>
-&lt;/ul>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>属性名&lt;/th>
-&lt;th>说明&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>id&lt;/td>
-&lt;td>服务引用id，作为java bean id，需要唯一&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>interface&lt;/td>
-&lt;td>接口名，用于查找服务&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>version&lt;/td>
-&lt;td>版本号，与服务提供者的版本一致&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>timeout&lt;/td>
-&lt;td>服务方法调用超时时间(毫秒)&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>retries&lt;/td>
-&lt;td>远程服务调用重试次数，不包括第一次调用，不需要重试请设为0&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>connections&lt;/td>
-&lt;td>对每个提供者的最大连接数，rmi、http、hessian等短连接协议表示限制连接数，dubbo等长连接协表示建立的长连接个数&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>loadbalance&lt;/td>
-&lt;td>负载均衡策略，可选值：random,roundrobin,leastactive，分别表示：随机，轮询，最少活跃调用&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>async&lt;/td>
-&lt;td>是否异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>generic&lt;/td>
-&lt;td>泛化调用，可以绕过&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>check&lt;/td>
-&lt;td>启动时检查提供者是否存在，true报错，false忽略&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>actives&lt;/td>
-&lt;td>每服务消费者每服务每方法最大并发调用数&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>其他配置属性请参考xsd：http://dubbo.apache.org/schema/dubbo/dubbo.xsd&lt;/p>
-&lt;ul>
-&lt;li>&amp;lt;dubbo:method/&amp;gt;作为&amp;lt;dubbo:reference/&amp;gt;的子元素，它可以针对方法进行配置。比较常用的属性有：&lt;/li>
-&lt;/ul>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>属性名&lt;/th>
-&lt;th>说明&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>executes&lt;/td>
-&lt;td>服务执行的请求上限&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>retries&lt;/td>
-&lt;td>超时重试次数&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>timeout&lt;/td>
-&lt;td>调用超时时间&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>loadbalance&lt;/td>
-&lt;td>负载均衡策略，可选值：random,roundrobin,leastactive，分别表示：随机，轮询，最少活跃调用&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>async&lt;/td>
-&lt;td>是否异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>actives&lt;/td>
-&lt;td>每服务消费者最大并发调用限制&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>其他属性，可以参考上面的xsd。&lt;/p>
-&lt;h6 id="配置的覆盖关系">配置的覆盖关系&lt;/h6>
-&lt;p>&lt;img src="https://cdn.nlark.com/lark/0/2018/png/15841/1536496436861-1b63bc4e-3e59-4aa3-800e-a32cfe64950d.png" alt="undefined">&lt;/p>
-&lt;center>配置的覆盖关系图&lt;/center>
-&lt;p>其中包含了consumer端和provider的配置，注意区分。&lt;/p>
-&lt;h4 id="annotation">annotation&lt;/h4>
-&lt;h6 id="reference注解远程服务">Reference注解远程服务&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">
-public class AnnotationConsumeService {
-@com.alibaba.dubbo.config.annotation.Reference
-public AnnotateService annotateService;
-// ...
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种方式的配置和前面用xml配置的方式是一样的效果。&lt;/p>
-&lt;blockquote>
-&lt;p>指定dubbo扫描路径的方式，可以参考前一章节中provider的实现。&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="api直接触发">api直接触发&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">import com.alibaba.dubbo.rpc.config.ApplicationConfig;
-import com.alibaba.dubbo.rpc.config.RegistryConfig;
-import com.alibaba.dubbo.rpc.config.ConsumerConfig;
-import com.alibaba.dubbo.rpc.config.ReferenceConfig;
-import com.xxx.XxxService;
-// 当前应用配置
-ApplicationConfig application = new ApplicationConfig();
-application.setName(&amp;#34;yyy&amp;#34;);
-// 连接注册中心配置
-RegistryConfig registry = new RegistryConfig();
-registry.setAddress(&amp;#34;10.20.130.230:9090&amp;#34;);
-registry.setUsername(&amp;#34;aaa&amp;#34;);
-registry.setPassword(&amp;#34;bbb&amp;#34;);
-// 注意：ReferenceConfig为重对象，内部封装了与注册中心的连接，以及与服务提供方的连接
-// 引用远程服务
-ReferenceConfig&amp;lt;XxxService&amp;gt; reference = new ReferenceConfig&amp;lt;XxxService&amp;gt;(); // 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏
-reference.setApplication(application);
-reference.setRegistry(registry); // 多个注册中心可以用setRegistries()
-reference.setInterface(XxxService.class);
-reference.setVersion(&amp;#34;1.0.0&amp;#34;);
-// 和本地bean一样使用xxxService
-XxxService xxxService = reference.get();
-&lt;/code>&lt;/pre>&lt;/div>&lt;h6 id="method特殊设置">method特殊设置&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">
-// 方法级配置
-List&amp;lt;MethodConfig&amp;gt; methods = new ArrayList&amp;lt;MethodConfig&amp;gt;();
-MethodConfig method = new MethodConfig();
-method.setName(&amp;#34;createXxx&amp;#34;);
-method.setTimeout(10000);
-method.setRetries(0);
-methods.add(method);
-// 引用远程服务
-ReferenceConfig&amp;lt;XxxService&amp;gt; reference = new ReferenceConfig&amp;lt;XxxService&amp;gt;(); // 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏
-...
-reference.setMethods(methods); // 设置方法级配置
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="consumer-调用远程服务">Consumer 调用远程服务&lt;/h3>
-&lt;p>上面章节更多从配置角度出发，接下来通过一个完整的例子，来讲解下dubbo consumer的完整使用。&lt;/p>
-&lt;p>这个例子中只有一个服务UserReadService，有一个方法 getUserById。 需要将通过Dubbo调用远程的服务。具体的步骤如下：&lt;/p>
-&lt;p>1.创建一个工程
-如果本来已经有工程，可以忽略。创建一个spring boot工程，可以通过 &lt;a href="https://start.spring.io/">https://start.spring.io/&lt;/a> 创建。&lt;br>
-服务的提供方，已经在provider章节中进行了定义。
-2.调用服务&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">@RestController
-public class UserTestController{
-@Autowired
-private UserReadService userReadService;
-@RequestMapping(&amp;#34;/user/getById&amp;#34;)
-public String getUserById(Long id){
-// just test
-return userReadService.getUserById(id).toString();
-}
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>3.Dubbo配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">
-&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;
-&amp;lt;beans xmlns=&amp;#34;http://www.springframework.org/schema/beans&amp;#34;
-xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;
-xmlns:dubbo=&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;
-xsi:schemaLocation=&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&amp;gt;
-&amp;lt;dubbo:application name=&amp;#34;hello-world-app&amp;#34; /&amp;gt;
-&amp;lt;dubbo:registry address=&amp;#34;multicast://224.5.6.7:1234&amp;#34; /&amp;gt;
-&amp;lt;dubbo:protocol name=&amp;#34;dubbo&amp;#34; port=&amp;#34;20880&amp;#34; /&amp;gt;
-&amp;lt;dubbo:reference id=&amp;#34;userReadService&amp;#34; interface=&amp;#34;com.package.UserReadService&amp;#34;check=&amp;#34;false&amp;#34; /&amp;gt;
-&amp;lt;/beans&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo配置的其他方式可以参考上一章节的相关配置，或者使用集成dubbo spring boot starter方式。&lt;/p></description></item><item><title>Blog: Dubbo 基础用法 - Provider 配置</title><link>/zh/blog/2018/08/14/dubbo-%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95-provider-%E9%85%8D%E7%BD%AE/</link><pubDate>Tue, 14 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/14/dubbo-%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95-provider-%E9%85%8D%E7%BD%AE/</guid><description>
-&lt;h2 id="dubbo基本用法">Dubbo基本用法&lt;/h2>
-&lt;p>本章节主要讲述如何配置dubbo，按照配置方式上分，可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。
-按照功能角度进行划分，可以分为Dubbo Provider和Dubbo Consumer。接下来章节中，分别对dubbo provider和Dubbo consumer进行讲解。&lt;/p>
-&lt;h3 id="dubbo-provider配置">Dubbo Provider配置&lt;/h3>
-&lt;h4 id="provider-配置详解">Provider 配置详解&lt;/h4>
-&lt;p>配置Dubbo Provider有4种方式：XML配置，properties方式配置，API调用方式配置，注解方式配置。&lt;/p>
-&lt;h5 id="xml配置">XML配置&lt;/h5>
-&lt;h6 id="最简单的配置的样例">最简单的配置的样例：&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;
-&amp;lt;beans xmlns=&amp;#34;http://www.springframework.org/schema/beans&amp;#34;
-xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;
-xmlns:dubbo=&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;
-xsi:schemaLocation=&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&amp;gt;
-&amp;lt;dubbo:application name=&amp;#34;hello-world-app&amp;#34; /&amp;gt;
-&amp;lt;dubbo:registry address=&amp;#34;multicast://224.5.6.7:1234&amp;#34; /&amp;gt;
-&amp;lt;dubbo:protocol name=&amp;#34;dubbo&amp;#34; port=&amp;#34;20880&amp;#34; /&amp;gt;
-&amp;lt;dubbo:service interface=&amp;#34;com.alibaba.dubbo.demo.DemoService&amp;#34; ref=&amp;#34;demoServiceLocal&amp;#34; /&amp;gt;
-&amp;lt;dubbo:reference id=&amp;#34;demoServiceRemote&amp;#34; interface=&amp;#34;com.alibaba.dubbo.demo.DemoService&amp;#34; /&amp;gt;
-&amp;lt;/beans&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面样例中，注意下dubbo schema的写法：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">&amp;lt;beans xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;
-xmlns:dubbo=&amp;#34;http://code.alibabatech.com/schema/dubbo&amp;#34;
-xmlns=&amp;#34;http://www.springframework.org/schema/beans&amp;#34;
-xsi:schemaLocation=&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&amp;#34;&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;h6 id="支持的配置标签">支持的配置标签&lt;/h6>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>标签&lt;/th>
-&lt;th>用途&lt;/th>
-&lt;th style="text-align:left">解释&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:service/&amp;gt;&lt;/td>
-&lt;td>服务配置&lt;/td>
-&lt;td style="text-align:left">用于暴露一个服务，定义服务的元信息，一个服务可以用多个协议暴露，一个服务也可以注册到多个注册中心&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:reference/&amp;gt;&lt;/td>
-&lt;td>引用配置&lt;/td>
-&lt;td style="text-align:left">用于创建一个远程服务代理，一个引用可以指向多个注册中心&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:protocol/&amp;gt;&lt;/td>
-&lt;td>协议配置&lt;/td>
-&lt;td style="text-align:left">用于配置提供服务的协议信息，协议由提供方指定，消费方被动接受&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:application/&amp;gt;&lt;/td>
-&lt;td>应用配置&lt;/td>
-&lt;td style="text-align:left">用于配置当前应用信息，不管该应用是提供者还是消费者&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:module/&amp;gt;&lt;/td>
-&lt;td>模块配置&lt;/td>
-&lt;td style="text-align:left">用于配置当前模块信息，可选&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:registry/&amp;gt;&lt;/td>
-&lt;td>注册中心配置&lt;/td>
-&lt;td style="text-align:left">用于配置连接注册中心相关信息&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:monitor/&amp;gt;&lt;/td>
-&lt;td>监控中心配置&lt;/td>
-&lt;td style="text-align:left">用于配置连接监控中心相关信息，可选&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:provider/&amp;gt;&lt;/td>
-&lt;td>提供方配置&lt;/td>
-&lt;td style="text-align:left">当 ProtocolConfig 和 ServiceConfig 某属性没有配置时，采用此缺省值，可选&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:consumer/&amp;gt;&lt;/td>
-&lt;td>消费方配置&lt;/td>
-&lt;td style="text-align:left">当 ReferenceConfig 某属性没有配置时，采用此缺省值，可选&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:method/&amp;gt;&lt;/td>
-&lt;td>方法配置&lt;/td>
-&lt;td style="text-align:left">用于 ServiceConfig 和 ReferenceConfig 指定方法级的配置信息&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>&amp;lt;dubbo:argument/&amp;gt;&lt;/td>
-&lt;td>参数配置&lt;/td>
-&lt;td style="text-align:left">用于指定方法参数配置&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>&lt;img src="/imgs/user/dubbo-config.jpg" alt="配置之间关系图">&lt;/p>
-&lt;h6 id="配置项详解">配置项详解&lt;/h6>
-&lt;ul>
-&lt;li>
-&lt;p>&amp;lt;dubbo:application name=&amp;ldquo;hello-world-app&amp;rdquo; /&amp;gt;&lt;br>
-用于指定应用名，这里需要保证应用名唯一，这个应用名在后续的console admin中可以在列表中显示，方便管理。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&amp;lt;dubbo:registry address=&amp;ldquo;multicast://224.5.6.7:1234&amp;rdquo; /&amp;gt;&lt;br>
-注册中心配置，和服务发现的具体机制有关系。可以是zookeeper地址，也可以eureka地址。上面这个是广播地址，在本地服务调用的测试过程中非常方便。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&amp;lt;dubbo:protocol name=&amp;ldquo;dubbo&amp;rdquo; port=&amp;ldquo;20880&amp;rdquo; /&amp;gt;&lt;br>
-这里是传输的协议和默认端口，一般不需要更改。&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>接下来重点讲解下&amp;lt;dubbo:service/&amp;gt;的配置。&lt;/p>
-&lt;/blockquote>
-&lt;ul>
-&lt;li>&amp;lt;dubbo:service/&amp;gt;支持的主要属性列表：&lt;/li>
-&lt;/ul>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>属性名&lt;/th>
-&lt;th>说明&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>version&lt;/td>
-&lt;td>版本号&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>scope&lt;/td>
-&lt;td>服务可见性, 值为：local 或者 remote，默认为remote&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>actives&lt;/td>
-&lt;td>最大的激活的请求数&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>async&lt;/td>
-&lt;td>方法调用是否异步，默认为false&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>cache&lt;/td>
-&lt;td>服务缓存，可选值：lru/threadlocal/jcache&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>callbacks&lt;/td>
-&lt;td>callback实例的限制&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>generic&lt;/td>
-&lt;td>泛化调用，可以绕过&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>class&lt;/td>
-&lt;td>Service的实现的类名&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>connections&lt;/td>
-&lt;td>这个服务里的连接数&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>delay&lt;/td>
-&lt;td>发布服务延迟的毫秒数&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>executes&lt;/td>
-&lt;td>服务执行的请求上限&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>retries&lt;/td>
-&lt;td>超时重试次数&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>timeout&lt;/td>
-&lt;td>调用超时时间&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>其他配置属性请参考xsd：http://dubbo.apache.org/schema/dubbo/dubbo.xsd&lt;/p>
-&lt;ul>
-&lt;li>&amp;lt;dubbo:method/&amp;gt;作为&amp;lt;dubbo:service/&amp;gt;的子元素，它可以针对方法进行配置。比较常用的属性有：&lt;/li>
-&lt;/ul>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>属性名&lt;/th>
-&lt;th>说明&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>executes&lt;/td>
-&lt;td>服务执行的请求上限&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>retries&lt;/td>
-&lt;td>超时重试次数&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>timeout&lt;/td>
-&lt;td>调用超时时间&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>其他属性，可以参考上面的xsd。&lt;/p>
-&lt;h6 id="配置的覆盖关系">配置的覆盖关系&lt;/h6>
-&lt;p>&lt;img src="/imgs/user/dubbo-config-override.jpg" alt="配置的覆盖关系图">&lt;/p>
-&lt;p>这里的覆盖关系包含了Provider和Consumer两端的配置，如果对consumer有疑问，可以参考后一章节的consumer章节之后再来理解。&lt;/p>
-&lt;h4 id="dubboproperties方式配置">dubbo.properties方式配置&lt;/h4>
-&lt;blockquote>
-&lt;p>如果公共配置很简单，没有多注册中心，多协议等情况，或者想多个 Spring 容器想共享配置，可以使用 dubbo.properties 作为缺省配置。&lt;/p>
-&lt;/blockquote>
-&lt;p>Dubbo 将自动加载 classpath 根目录下的 dubbo.properties，可以通过JVM启动参数 -Ddubbo.properties.file=xxx.properties 改变缺省配置位置。&lt;/p>
-&lt;h6 id="dubboproperties配置样例">dubbo.properties配置样例&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"># 应用名
-dubbo.application.name=dubbodemo-provider
-# 注册中心地址
-dubbo.registry.address=zookeeper://localhost:2181
-# 广播的注册中心样例
-#dubbo.registry.address=multicast://224.5.6.7:1234
-# 调用协议地址
-dubbo.protocol.name=dubbo
-dubbo.protocol.port=28080
-&lt;/code>&lt;/pre>&lt;/div>&lt;h6 id="映射规则">映射规则&lt;/h6>
-&lt;p>将 XML 配置的标签名，加属性名，用点分隔，多个属性拆成多行&lt;/p>
-&lt;ul>
-&lt;li>比如：dubbo.application.name=foo等价于&amp;lt;dubbo:application name=&amp;ldquo;foo&amp;rdquo; /&amp;gt;&lt;/li>
-&lt;li>比如：dubbo.registry.address=10.20.153.10:9090等价于&amp;lt;dubbo:registry address=&amp;ldquo;10.20.153.10:9090&amp;rdquo; /&amp;gt;&lt;/li>
-&lt;/ul>
-&lt;p>如果 XML 有多行同名标签配置，可用 id 号区分，如果没有 id 号将对所有同名标签生效&lt;/p>
-&lt;ul>
-&lt;li>比如：dubbo.protocol.rmi.port=1234等价于&amp;lt;dubbo:protocol id=&amp;ldquo;rmi&amp;rdquo; name=&amp;ldquo;rmi&amp;rdquo; port=&amp;ldquo;1234&amp;rdquo; /&amp;gt;&lt;/li>
-&lt;li>比如：dubbo.registry.china.address=10.20.153.10:9090等价于&amp;lt;dubbo:registry id=&amp;ldquo;china&amp;rdquo; address=&amp;ldquo;10.20.153.10:9090&amp;rdquo; /&amp;gt;&lt;/li>
-&lt;/ul>
-&lt;h6 id="覆盖策略">覆盖策略&lt;/h6>
-&lt;p>&lt;img src="/imgs/user/dubbo-config.jpg" alt="覆盖策略">&lt;/p>
-&lt;ul>
-&lt;li>JVM 启动 -D 参数优先，这样可以使用户在部署和启动时进行参数重写，比如在启动时需改变协议的端口。&lt;/li>
-&lt;li>XML 次之，如果在 XML 中有配置，则 dubbo.properties 中的相应配置项无效。&lt;/li>
-&lt;li>Properties 最后，相当于缺省值，只有 XML 没有配置时，dubbo.properties 的相应配置项才会生效，通常用于共享公共配置，比如应用名。&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>注意：&lt;/p>
-&lt;/blockquote>
-&lt;ol>
-&lt;li>如果 classpath 根目录下存在多个 dubbo.properties，比如多个 jar 包中有 dubbo.properties，Dubbo 会任意加载，并打印 Error 日志，后续可能改为抛异常。 ↩&lt;/li>
-&lt;li>协议的 id 没配时，缺省使用协议名作为 id&lt;/li>
-&lt;/ol>
-&lt;h5 id="注解配置">注解配置&lt;/h5>
-&lt;h6 id="service注解暴露服务">Service注解暴露服务&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">import com.alibaba.dubbo.config.annotation.Service;
-@Service(timeout = 5000)
-public class AnnotateServiceImpl implements AnnotateService {
-// ...
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;h6 id="javaconfig形式配置公共模块">javaconfig形式配置公共模块&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">@Configuration
-public class DubboConfiguration {
-@Bean
-public ApplicationConfig applicationConfig() {
-ApplicationConfig applicationConfig = new ApplicationConfig();
-applicationConfig.setName(&amp;#34;provider-test&amp;#34;);
-return applicationConfig;
-}
-@Bean
-public RegistryConfig registryConfig() {
-RegistryConfig registryConfig = new RegistryConfig();
-registryConfig.setAddress(&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;);
-registryConfig.setClient(&amp;#34;curator&amp;#34;);
-return registryConfig;
-}
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种方式的配置和前面用xml配置的方式是一样的效果。&lt;/p>
-&lt;h6 id="指定dubbo扫描路径">指定dubbo扫描路径&lt;/h6>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">@SpringBootApplication
-@DubboComponentScan(basePackages = &amp;#34;com.alibaba.dubbo.test.service.impl&amp;#34;)
-public class ProviderTestApp {
-// ...
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者使用spring bean xml配置方式：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">&amp;lt;dubbo:annotation package=&amp;#34;com.chanshuyi.service.impl&amp;#34; /&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="代码配置">代码配置&lt;/h5>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">import com.alibaba.dubbo.rpc.config.ApplicationConfig;
-import com.alibaba.dubbo.rpc.config.RegistryConfig;
-import com.alibaba.dubbo.rpc.config.ProviderConfig;
-import com.alibaba.dubbo.rpc.config.ServiceConfig;
-import com.xxx.XxxService;
-import com.xxx.XxxServiceImpl;
-// 服务实现
-XxxService xxxService = new XxxServiceImpl();
-// 当前应用配置
-ApplicationConfig application = new ApplicationConfig();
-application.setName(&amp;#34;xxx&amp;#34;);
-// 连接注册中心配置
-RegistryConfig registry = new RegistryConfig();
-registry.setAddress(&amp;#34;10.20.130.230:9090&amp;#34;);
-registry.setUsername(&amp;#34;aaa&amp;#34;);
-registry.setPassword(&amp;#34;bbb&amp;#34;);
-// 服务提供者协议配置
-ProtocolConfig protocol = new ProtocolConfig();
-protocol.setName(&amp;#34;dubbo&amp;#34;);
-protocol.setPort(12345);
-protocol.setThreads(200);
-// 注意：ServiceConfig为重对象，内部封装了与注册中心的连接，以及开启服务端口
-// 服务提供者暴露服务配置
-ServiceConfig&amp;lt;XxxService&amp;gt; service = new ServiceConfig&amp;lt;XxxService&amp;gt;(); // 此实例很重，封装了与注册中心的连接，请自行缓存，否则可能造成内存和连接泄漏
-service.setApplication(application);
-service.setRegistry(registry); // 多个注册中心可以用setRegistries()
-service.setProtocol(protocol); // 多个协议可以用setProtocols()
-service.setInterface(XxxService.class);
-service.setRef(xxxService);
-service.setVersion(&amp;#34;1.0.0&amp;#34;);
-// 暴露及注册服务
-service.export();
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>一般在spring应用中，不推荐使用这种方式。 具体的含义这里不做解释，可以通过github查看源码。&lt;/p>
-&lt;h3 id="provider-接口和实现">Provider 接口和实现&lt;/h3>
-&lt;p>上面章节更多从配置角度出发，接下来通过一个完整的例子，来讲解下dubbo provider的完整使用。&lt;/p>
-&lt;p>这个例子中只有一个服务UserReadService，有一个方法 getUserById。 需要将这个服务通过Dubbo暴露给远程的服务。具体的步骤如下：&lt;/p>
-&lt;p>1.创建工程
-如果本来已经有工程，可以忽略。创建一个spring boot工程，可以通过 &lt;a href="https://start.spring.io/">https://start.spring.io/&lt;/a> 创建。
-2.定义接口
-定义接口：UserReadService&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">public interface UserReadService{
-public User getUserById(Long userId);
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个接口一般来说会放到独立的jar包里，作为client包。 其他应用要消费这个服务的时候，一般来说需要应用引用这个client包。(除了泛化调用)
-3.实现接口
-实现UserReadService, 当前实现部署在Provider的应用中。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">public UserReadServiceImpl implements UserReadService{
-public User getUserById(Long userId){
-return xxx;
-}
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>4.Dubbo配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;
-&amp;lt;beans xmlns=&amp;#34;http://www.springframework.org/schema/beans&amp;#34;
-xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;
-xmlns:dubbo=&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;
-xsi:schemaLocation=&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&amp;gt;
-&amp;lt;dubbo:application name=&amp;#34;hello-world-app&amp;#34; /&amp;gt;
-&amp;lt;dubbo:registry address=&amp;#34;multicast://224.5.6.7:1234&amp;#34; /&amp;gt;
-&amp;lt;dubbo:protocol name=&amp;#34;dubbo&amp;#34; port=&amp;#34;20880&amp;#34; /&amp;gt;
-&amp;lt;bean id=&amp;#34;userReadService&amp;#34; class=&amp;#34;com.package.UserReadServiceImpl&amp;#34;/&amp;gt;
-&amp;lt;dubbo:service interface=&amp;#34;com.package.UserReadService&amp;#34; ref=&amp;#34;userReadService&amp;#34; /&amp;gt;
-&amp;lt;/beans&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo配置的其他方式可以参考上一章节的相关配置，或者使用集成dubbo spring boot starter方式。&lt;/p></description></item></channel></rss>
+&lt;/ul></description></item></channel></rss>
