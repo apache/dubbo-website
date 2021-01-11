@@ -6,8 +6,49 @@ description: >
   本文将向你介绍Dubbo-Api-Docs
 ---
 # Dubbo-Api-Docs 
+## 背景
+Swagger 是一个规范和完整的前端框架,用于生成,描述,调用和可视化 RESTful 风格的 Web 服务.
+Swagger 规范也逐渐发展成为了 OpenAPI 规范.
+
+Springfox 是一个集成了Swagger,基于 Sring MVC/Spring Webflux 实现的一个 Swagger 描述文件生成框架,通过使用它定义的
+一些描述接口的注解自动生成Swagger的描述文件, 使 Swagger 能够展示并调用接口.
+
+相信很多人都听说和使用过Swagger和Springfox, 这里就不再赘述了.
+
+Dubbo-Admin中有接口测试功能,但是缺少接口描述的文档,所以该测试功能比较适合接口开发人员用于测试接口.而其他人想要使用该功能就必须
+先通过接口开发者编写的文档或者其他方式了解清楚接口信息才能使用该功能测试接口.
+Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能把接口直接给调用方,类似Swagger/Springfox的工具呢?
+之前做过一些调研,找到一些类似的工具:
+* 有些是基于Springfox做的,直接一个文本域放JSON, 与目前Admin中的测试功能大同小异
+* 有些是直接基于Swagger的Java版OpenApi规范生成工具做的,能把一些基础数据类型的简单参数作为表单项展示
+
+它们都有一个共同点: 会把你的提供者变为Web项目. 当然有些提供者是通过web容器加载启动的,甚至也有和web工程在一起的,那就无所谓了.
+但也有非web的提供者. 为了文档我得把它变为web项目吗?(还要引入一堆Web框架的依赖?比如Spring MVC)或者说生产环境打包时删除它的引用
+和代码里的相关注解? 有没有简单点的方式呢?
+
+OpenAPI中没有RPC的规范,Swagger是OpenAPI的实现,所以也不支持RPC相关调用.Springfox是通过Swagger实现的 RESTful API的工具,
+而RESTful又是基于Web的,Dubbo没法直接使用.我们最终选择了自己实现:
+* 提供一些描述接口信息的简单注解
+* 在提供者启动时解析注解并缓存解析结果
+* 在提供者增加几个Dubbo-Api-Docs使用的获取接口信息的接口
+* 在Dubbo Admin侧通过Dubbo泛化调用实现Http方式调用Dubbo接口的网关
+* 在Dubbo Admin侧实现接口信息展示和调用接口功能
+* 下列情况中的参数直接展示为表单项,其他的展示为JSON: 
+  * 方法参数为基础数据类型的
+  * 方法参数为一个Bean,Bena中属性为基础数据类型的
+* 很少的第三方依赖,甚至大部分都是你项目里本身就使用的
+* 可以通过profile决定是否加载, 打包时简单的修改profile就能区分生产和测试,甚至profile你本来就使用了
+  
+> 今天,我很高兴的宣布: Dubbo 用户也可以享受类似Swagger的体验了 -- Dubbo-Api-Docs发布了.
+> 
 ## 简介
-Dubbo-Api-Docs 是一个展示dubbo接口文档,测试接口的工具. 参考了springfox的设计,通过增加一些描述接口及参数的注解,即可展示具备测试能力的接口文档.
+Dubbo-Api-Docs 是一个展示dubbo接口文档,测试接口的工具.
+
+使用 Dubbo-Api-Docs 分为两个主要步骤:
+1. 在dubbo项目引入Dubbo-Api-Docs 相关jar包,并增加类似Swagger的注解.
+2. 在 Dubbo-Admin 中查看接口描述并测试.
+
+通过以上两个步骤即可享受类似Swagger的体验, 并且可以在生产环境中关闭Dubbo-Api-Docs的扫描.
 
 Dubbo-Api-Docs 目前通过直连服务节点的方式获取该服务的接口列表. 测试接口时可以直连也可以通过注册中心.未来会增加通过注册中心获取服务列表的方式.并根据Dubbo的升级规划增加新的功能支持.也会根据社区的需求增加功能.
 
