@@ -1,4 +1,346 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 技术分享</title><link>/zh/blog/news/</link><description>Recent content in 技术分享 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/blog/news/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Dubbo Go 中 metrics 的设计</title><link>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 技术分享</title><link>/zh/blog/news/</link><description>Recent content in 技术分享 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/blog/news/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: dubbo-go 中如何实现路由规则功能</title><link>/zh/blog/2021/01/12/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%B7%AF%E7%94%B1%E8%A7%84%E5%88%99%E5%8A%9F%E8%83%BD/</link><pubDate>Tue, 12 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/12/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%B7%AF%E7%94%B1%E8%A7%84%E5%88%99%E5%8A%9F%E8%83%BD/</guid><description>
+&lt;h2 id="lets-go">Let‘s Go!&lt;/h2>
+&lt;p>最近在 Apache/dubbo-go（以下简称 dubbo-go ）社区中，路由规则突然成了呼声最高的功能之一。那到底为什么需要路由规则？&lt;/p>
+&lt;p>先路由规则需要实现的功能：&lt;/p>
+&lt;p>路由规则（ routing rule ）是为了改变网络流量所经过的途径而修改路由信息的技术，主要通过改变路由属性（包括可达性）来实现。在发起一次 RPC 调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起 RPC 调用的备选地址。&lt;/p>
+&lt;p>试想该下场景：使用 dubbo-go 在生产环境上，排除预发布机。使用路由规则实现不是很合适吗？&lt;/p>
+&lt;p>虽然知道了路由规则需要实现什么功能，但还不足以实现一个完整的路由规则功能。除此之外，还需要知道如何方便的管理路由规则。&lt;/p>
+&lt;h2 id="目标">目标&lt;/h2>
+&lt;p>综上所述，可以总结出以下 &lt;strong>目标&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>支持方便扩展路由规则的配置；&lt;/li>
+&lt;li>可以方便的管理路由规则配置，如支持本地与远程配置中心管理；&lt;/li>
+&lt;li>与 Dubbo 现有的配置中心内的路由规则配置文件兼容，降低在新增语言栈的学习及使用成本；&lt;/li>
+&lt;/ul>
+&lt;h2 id="路由规则设计">路由规则设计&lt;/h2>
+&lt;p>在设计之初，首先要考虑的是路由规则应该放在整个服务治理周期的哪个阶段呢？&lt;/p>
+&lt;p>有些读者可能会有点困惑，我连架构图都不知道，如何考虑在哪个阶段？不怕，下图马上给你解惑。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/dubbo-go-arch-2.png" alt="">&lt;/p>
+&lt;p>可以看到图中的 Router 就是路由规则插入的位置，目前路由规则主要用于控制 Consumer 到 Provider 之间的网络流量的路由路径。&lt;/p>
+&lt;p>除此之外，还有几个问题是需要优先考虑：&lt;/p>
+&lt;p>1.需要什么功能？&lt;/p>
+&lt;ul>
+&lt;li>通过配置信息生成路由规则，包括：读取并解析本地配置文件，读取并解析配置中心的配置。以责任链模式串联起来。&lt;/li>
+&lt;li>通过路由规则，匹配本地信息与远端服务信息，过滤出可以调用的远端节点，再进行负载均衡。&lt;/li>
+&lt;/ul>
+&lt;p>2.如何设计接口？&lt;/p>
+&lt;p>通过第一点，我们能设计出以下接口来实现所需的功能。&lt;/p>
+&lt;ul>
+&lt;li>路由规则接口：用于路由规则过滤出可以调用的远端节点。&lt;/li>
+&lt;li>路由规则责任链接口：允许执行多个路由规则。&lt;/li>
+&lt;li>配置信息生成路由规则接口：解析内部配置信息（common.URL）生成对应的路由规则。&lt;/li>
+&lt;li>配置文件生成路由规则接口：解析配置文件生成对应的路由规则。&lt;/li>
+&lt;/ul>
+&lt;p>3.如何实现本地与远程路由规则配置加载？&lt;/p>
+&lt;ul>
+&lt;li>本地路由规则配置：在原配置加载阶段，新增读取路由配置文件。使用 &lt;code>FIleRouterFactory&lt;/code> 解析后，生成对应路由规则，放置到内存中备用。&lt;/li>
+&lt;li>远程路由规则配置：在 zookeeper 注册并监听静态资源目录后。读取静态资源，筛选符合路由规则配置信息，通过 &lt;code>RouterFactory&lt;/code> 生成对应路由规则，放置到内存中备用。&lt;/li>
+&lt;/ul>
+&lt;h3 id="router">Router&lt;/h3>
+&lt;p>匹配及过滤远程实例的路由规则。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// Router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Router &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// Route determine the target invoker list.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Route&lt;/span>([]protocol.Invoker, &lt;span style="color:#719e07">*&lt;/span>common.URL, protocol.Invocation) []protocol.Invoker
+&lt;span style="color:#586e75">// Priority return priority in router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 0 to ^int(0) is better
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Priority&lt;/span>() &lt;span style="color:#dc322f">int64&lt;/span>
+&lt;span style="color:#586e75">// URL return URL in router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">URL&lt;/span>() common.URL
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>目前已有实现类包括：&lt;/p>
+&lt;ul>
+&lt;li>listenableRouter&lt;/li>
+&lt;li>AppRouter&lt;/li>
+&lt;li>ConditionRouter&lt;/li>
+&lt;li>HealthCheckRouter&lt;/li>
+&lt;li>FileConditionRouter&lt;/li>
+&lt;/ul>
+&lt;h3 id="routerchain">RouterChain&lt;/h3>
+&lt;p>执行多个路由规则的责任链。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// Chain
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Chain &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// Route determine the target invokers list with chain.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Route&lt;/span>([]protocol.Invoker, &lt;span style="color:#719e07">*&lt;/span>common.URL, protocol.Invocation) []protocol.Invoker
+&lt;span style="color:#586e75">// AddRouters add routers
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">AddRouters&lt;/span>([]Router)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="filerouterfactory">FIleRouterFactory&lt;/h3>
+&lt;p>生成解析配置文件生成路由规则的工厂类。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// RouterFactory router creates factory use for parse config file
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> FileRouterFactory &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// NewFileRouter create file router with config file
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">NewFileRouter&lt;/span>([]&lt;span style="color:#dc322f">byte&lt;/span>) (Router, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="routerfactory">RouterFactory&lt;/h3>
+&lt;p>通过配置信息生成路由规则的工厂类。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// RouterFactory router create factory
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> RouterFactory &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// NewRouter creates router instance with URL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">NewRouter&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL) (Router, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="实现">实现&lt;/h2>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/router/router-design.png" alt="">&lt;/p>
+&lt;p>实现路由规则以兼容 dubbo 为首要目标，降低使用者的学习成本为辅助目标。与配置中心模块相结合，实现路由规则远程统一管理与下发。&lt;/p>
+&lt;h3 id="规则类型">规则类型&lt;/h3>
+&lt;p>下面先来介绍一下有哪些具体的路由规则实现。&lt;/p>
+&lt;h4 id="条件路由">条件路由&lt;/h4>
+&lt;p>dubbo-go 中第一个支持的路由规则，允许用户通过配置文件及配置中心管理路由规则。&lt;/p>
+&lt;p>与之相似的一个概念是 dubbo-go 里面的 group 概念，但是条件路由提供了更加细粒度的控制手段和更加丰富的表达语义。比较典型的使用场景是黑白名单设置，灰度以及测试等。&lt;/p>
+&lt;h4 id="健康检查路由">健康检查路由&lt;/h4>
+&lt;p>在 RPC 调用中，我们希望尽可能地将请求命中到那些处理能力快、处于健康状态的实例，该路由的功能就是通过某种策略断定某个实例不健康，并将其排除在候选调用列表，优先调用那些健康的实例。这里的”健康”可以是我们自己定义的状态，默认实现即当错误比例到达某一个阈值时或者请求活跃数大于上限则认为其不健康，允许用户扩展健康检测策略。&lt;/p>
+&lt;p>在我们服务治理里面，核心的问题其实就在于如何判断一个实例是否可用。无论是负载均衡、&lt;/p>
+&lt;p>熔断还是限流，都是对这个问题的解答。所以，这个 feature 是一个很好的尝试。因为我们接下来计划提供的特性，基于规则的限流以及动态限流，都是要解决 “如何断定一个实例是否可用” 这么一个问题。&lt;/p>
+&lt;p>所以欢迎大家使用这个特性，并向社区反馈各自设定的健康指标。这对我们接下来的工作会有很大的帮助。&lt;/p>
+&lt;h4 id="标签路由">标签路由&lt;/h4>
+&lt;p>以 Provider 为维度，通过将某一个或多个服务的提供者划分到同一个分组，约束流量只在指定分组中流转，从而实现流量隔离的目的，可以作为蓝绿发布、灰度发布等场景的能力基础。&lt;/p>
+&lt;ul>
+&lt;li>静态打标：根据配置文件所配置的标签，固定给 Provider 设置标签。&lt;/li>
+&lt;li>动态打标：基于健康检查路由，根据服务不同时刻，不同状态，动态在 Provider 设置适合的标签。&lt;/li>
+&lt;/ul>
+&lt;h3 id="分析">分析&lt;/h3>
+&lt;p>接着，以条件路由在 zookeeper 实现为例，对服务提供者与服务消费者进行整体流程分析。&lt;/p>
+&lt;h4 id="如何配置条件路由规则">如何配置条件路由规则&lt;/h4>
+&lt;p>配置条件路由规则既可以通过本地配置文件也能通过远程配置中心进行配置，配置生效流程都是：配置文件 =&amp;gt; dubbo 内部协议 =&amp;gt; 缓存至应用级内存 =&amp;gt; 过滤出可调用节点。&lt;/p>
+&lt;p>&lt;strong>dubbo-admin&lt;/strong> 【服务治理/条件路由】增加路由规则配置，zookeeper 中会自动生成其对应配置节点，内容均为 &lt;strong>dubbo-admin&lt;/strong> 中设置的配置。&lt;/p>
+&lt;p>&lt;strong>全局配置&lt;/strong>&lt;/p>
+&lt;p>对应应用级全局路由规则配置。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">/dubbo/config/dubbo/user-info-server（应用名）.condition-router
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>应用名：只对 user-info-server 应用生效 .condition-router: 路由类型。除此之外，还有 .tag-router 表示标签路由。&lt;/p>
+&lt;p>&lt;strong>服务配置&lt;/strong>&lt;/p>
+&lt;p>对应服务级所有路由规则配置。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">/dubbo/ com.ikurento.user.UserProvider（服务名） /routers
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务名：只对 com.ikurento.user.UserProvider 服务生效。&lt;/p>
+&lt;h3 id="实现-router">实现 Router&lt;/h3>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>ConditionRouter) &lt;span style="color:#268bd2">Route&lt;/span>(invokers []protocol.Invoker, url &lt;span style="color:#719e07">*&lt;/span>common.URL, invocation protocol.Invocation) []protocol.Invoker {
+&lt;span style="color:#719e07">if&lt;/span> !c.&lt;span style="color:#268bd2">Enabled&lt;/span>() {
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(invokers) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+isMatchWhen &lt;span style="color:#719e07">:=&lt;/span> c.&lt;span style="color:#268bd2">MatchWhen&lt;/span>(url, invocation)
+&lt;span style="color:#719e07">if&lt;/span> !isMatchWhen {
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+&lt;span style="color:#268bd2">var&lt;/span> result []protocol.Invoker
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(c.ThenCondition) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> result
+}
+&lt;span style="color:#719e07">for&lt;/span> _, invoker &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> invokers {
+invokerUrl &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">GetUrl&lt;/span>()
+isMatchThen &lt;span style="color:#719e07">:=&lt;/span> c.&lt;span style="color:#268bd2">MatchThen&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>invokerUrl, url)
+&lt;span style="color:#719e07">if&lt;/span> isMatchThen {
+result = &lt;span style="color:#b58900">append&lt;/span>(result, invoker)
+}
+}
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(result) &amp;gt; &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> result
+} &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> c.Force {
+rult, _ &lt;span style="color:#719e07">:=&lt;/span> url.&lt;span style="color:#268bd2">GetParamAndDecoded&lt;/span>(constant.RULE_KEY)
+localIP, _ &lt;span style="color:#719e07">:=&lt;/span> gxnet.&lt;span style="color:#268bd2">GetLocalIP&lt;/span>()
+logger.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;The route result is empty and force execute. consumer: %s, service: %s, route: %s&amp;#34;&lt;/span>, localIP, url.&lt;span style="color:#268bd2">Service&lt;/span>(), route)
+&lt;span style="color:#719e07">return&lt;/span> result
+}
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下为必须实现的方法，以下方法用于获取过滤服务端节点配置。&lt;/p>
+&lt;ul>
+&lt;li>Route: 根据配置，调用节点与被调用节点，过滤出可调用节点。&lt;/li>
+&lt;li>Priority: 路由规则优先级，需要是个正整数。&lt;/li>
+&lt;li>URL: 通过路由规则转换出来的 dubbo 内部协议。&lt;/li>
+&lt;/ul>
+&lt;p>更多实现参考：&lt;/p>
+&lt;p>路由规则：https://github.com/apache/dubbo-go/tree/master/cluster/router/condition&lt;/p>
+&lt;p>其中包含监听配置中心实现：https://github.com/apache/dubbo-go/blob/master/cluster/router/condition/listenable_router.go&lt;/p>
+&lt;h2 id="使用方法">使用方法&lt;/h2>
+&lt;p>经过上面设计与实现的分析，大概也能猜测到如何使用：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#719e07">import&lt;/span> (
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common&amp;#34;&lt;/span>
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/protocol&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config_center/zookeeper&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/router/condition&amp;#34;&lt;/span>
+)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>如图所示，使用路由规则并不复杂，只需要把对应的依赖引入进来。在包初始化的时候，会创建出来对应的路由规则的实现。比如说加载条件路由、健康检测路由或者标签作为路由规则：&lt;/p>
+&lt;h3 id="本地路由规则配置">本地路由规则配置&lt;/h3>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/router/condition&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>仅仅引用依赖包还不直接使用，还需要配置指定的配置文件： *&lt;strong>router_config.yml*&lt;/strong> ，内容如下:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang"># dubbo router yaml configure file
+priority: &lt;span style="color:#2aa198">1&lt;/span>
+force: &lt;span style="color:#cb4b16">true&lt;/span>
+conditions : [&lt;span style="color:#2aa198">&amp;#34;host = 1.1.1.1 =&amp;gt; host = 192.168.199.214&amp;#34;&lt;/span>]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>更多配置方式：&lt;a href="http://dubbo.apache.org/zh-cn/docs/user/demos/routing-rule.html">条件路由配置&lt;/a>&lt;/p>
+&lt;h3 id="配置中心配置">配置中心配置&lt;/h3>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config_center/zookeeper&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>目前仅支持 zookeeper 配置中心，与 dubbo-admin 结合即可使用。配置方式如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/router/dubbo-admin-1.png" alt="">&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/router/dubbo-admin-2.png" alt="">&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>更加具体的实现，我就不详细论述，大家可以去看源码，欢迎大家持续关注，或者贡献代码。&lt;/p>
+&lt;p>整个路由规则功能，已经能跟上 dubbo 2.7.x 版本，已经支持本地及远端路由规则配置管理。从扩展性来说，是比较便利。目前已经支持条件路由、标签路由与健康检测路由，虽然能满足基本使用场景，距离完善还有还长远的路。&lt;/p>
+&lt;p>未来计划：&lt;/p>
+&lt;ol>
+&lt;li>更多的配置中心支持，理论上已经支持，但还没测试。&lt;/li>
+&lt;li>service-router（未支持）&lt;/li>
+&lt;li>标签路由-配置中心（未支持）&lt;/li>
+&lt;li>目前路由与配置中心结合的代码，对新增路由规则并不友好，有一定接入成本。&lt;/li>
+&lt;/ol>
+&lt;p>欢迎大家关注或者贡献代码，https://github.com/apache/dubbo-go&lt;/p></description></item><item><title>Blog: 记一次对 dubbo-go-hessian2 的性能优化</title><link>/zh/blog/2021/01/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9-dubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</link><pubDate>Tue, 12 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9-dubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</guid><description>
+&lt;blockquote>
+&lt;p>dubbo-go-hessian2 是一个用 Go 实现的 hessian 协议 v2.0 版本的序列化库。从项目名称里可以看到主要用在 dubbo-go 这个项目里。hessian 协议作为 dubbo 的默认协议，因此对性能有比较高的要求。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="立项">立项&lt;/h2>
+&lt;p>譬如有网文 基于Go的马蜂窝旅游网分布式IM系统技术实践 把 dubbo-go 与其他 RPC 框架对比如下：&lt;/p>
+&lt;ol>
+&lt;li>Go STDPRC: Go 标准库的 RPC，性能最优，但是没有治理；&lt;/li>
+&lt;li>RPCX: 性能优势 2*GRPC + 服务治理；&lt;/li>
+&lt;li>GRPC: 跨语言，但性能没有 RPCX 好；&lt;/li>
+&lt;li>TarsGo: 跨语言，性能 5*GRPC，缺点是框架较大，整合起来费劲；&lt;/li>
+&lt;li>Dubbo-Go: 性能稍逊一筹，比较适合 Go 和 Java 间通信场景使用&lt;/li>
+&lt;/ol>
+&lt;p>有鉴于此，社区便开始组织部分人力，启动了对 dubbo-go 性能优化【同时也欢迎上文作者到钉钉群 23331795 与我们社区交流】。考察 dubbo-go 的各个组件，大家不约而同地决定首先优化比较独立的 dubbo-go-hessian2。&lt;/p>
+&lt;h2 id="起步">起步&lt;/h2>
+&lt;p>在最开始的时候，并没有太想清楚需要做什么，改哪个地方，要优化到何种程度，所以最简单的办法就是看看现状。&lt;/p>
+&lt;p>首先，写了一个简单的例子，把常见的类型到一个结构体里，然后测一下耗时。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> Mix &lt;span style="color:#268bd2">struct&lt;/span> {
+A &lt;span style="color:#dc322f">int&lt;/span>
+B &lt;span style="color:#dc322f">string&lt;/span>
+CA time.Time
+CB &lt;span style="color:#dc322f">int64&lt;/span>
+CC &lt;span style="color:#dc322f">string&lt;/span>
+CD []&lt;span style="color:#dc322f">float64&lt;/span>
+D &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">interface&lt;/span>{}
+}
+m &lt;span style="color:#719e07">:=&lt;/span> Mix{A: &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">&amp;#39;a&amp;#39;&lt;/span>), B: &lt;span style="color:#2aa198">`hello`&lt;/span>}
+m.CD = []&lt;span style="color:#dc322f">float64&lt;/span>{&lt;span style="color:#2aa198">1&lt;/span>, &lt;span style="color:#2aa198">2&lt;/span>, &lt;span style="color:#2aa198">3&lt;/span>}
+&lt;span style="color:#586e75">// 再加一层，使得数据显得复杂一些
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>m.D = &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">`floats`&lt;/span>: m.CD, &lt;span style="color:#2aa198">`A`&lt;/span>: m.A, &lt;span style="color:#2aa198">`m`&lt;/span>: m}
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>看起来这个结构体跟真实环境里可能不太一样，但是用来分析瓶颈应该是足够了。&lt;/p>
+&lt;/blockquote>
+&lt;p>然后直接靠 Go Test 写个测试用例：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">BenchmarkEncode&lt;/span>(b &lt;span style="color:#719e07">*&lt;/span>testing.B) {
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; b.N; i&lt;span style="color:#719e07">++&lt;/span> {
+_, _ = &lt;span style="color:#268bd2">encodeTarget&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>m)
+}
+}
+&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">BenchmarkDecode&lt;/span>(b &lt;span style="color:#719e07">*&lt;/span>testing.B) {
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; b.N; i&lt;span style="color:#719e07">++&lt;/span> {
+_, _ = &lt;span style="color:#268bd2">NewDecoder&lt;/span>(bytes).&lt;span style="color:#268bd2">Decode&lt;/span>()
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>go test -benchmem -run=^$ github.com/apache/dubbo-go-hessian2 -bench &amp;ldquo;^B&amp;rdquo; -vet=off -v&lt;/p>
+&lt;/blockquote>
+&lt;p>得到下面结果：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">BenchmarkEncode-8 89461 11485 ns/op 3168 B/op 122 allocs/op
+BenchmarkDecode-8 64914 19595 ns/op 7448 B/op 224 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>*&lt;strong>注：基于 MacBook Pro 2018【主频 Intel Core i7 2.6 GHz】测试。*&lt;/strong>&lt;/p>
+&lt;p>不与同类库作横向比较，仅仅从这个测试结果里的数字上无法得出任何结论。对我们来说更重要的是：它到底慢在哪里。首先想到的手段便是：借助 pprof 生成火焰图，定位 CPU 消耗。&lt;/p>
+&lt;p>pprof 工具的用法可以参考官网文档。本文测试时直接使用了 Goland 内置 &lt;code>CPU Profiler&lt;/code> 的测试工具：测试函数左边的 &lt;code>Run xx with 'CPU Profiler'&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p2.png" alt="">&lt;/p>
+&lt;p>测试跑完后， Goland 直接显示火焰图如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p3.png" alt="">&lt;/p>
+&lt;p>从这个图里可以看到，测试代码大概占用了左边的70%，右边30%是运行时的一些消耗，运行时部分一般包括 gc、schedule 两大块，一般不能直接优化。图上左边可以清晰地看到 &lt;code>encObject&lt;/code> 里 &lt;code>RegisterPOJO&lt;/code> 和 &lt;code>Encode&lt;/code> 各占了小一半。&lt;/p>
+&lt;p>完成序列化功能的 &lt;code>Encode&lt;/code> 消耗 CPU 如此之多尚可理解，而直觉上，把类对象进行解析和注册 &lt;code>RegisterPOJO&lt;/code> 是不应该成为消耗大户的。所以猜测这个地方要么注册有问题，要么有重复注册。&lt;/p>
+&lt;p>下一步分析，用了一个简单的办法：在这个函数里加日志。然后继续再跑一下 benchmark，可以看到性能瓶颈处：容器读写的地方。&lt;/p>
+&lt;p>既然知道这里做了许多重复的无用功，就很容易明确优化方法：加缓存。把已经解析过的结果缓存下来，下次需要的时候直接取出使用。改进后的代码简单如下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">if&lt;/span> goName, ok &lt;span style="color:#719e07">:=&lt;/span> pojoRegistry.j2g[o.&lt;span style="color:#268bd2">JavaClassName&lt;/span>()]; ok {
+&lt;span style="color:#719e07">return&lt;/span> pojoRegistry.registry[goName].index
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里刚开始有个疑问，为什么要分两步先取 &lt;code>JavaClassName&lt;/code> 再取 &lt;code>GoName&lt;/code> 而不直接取后者？看起来好像是多此一举了，但其实 &lt;code>JavaClassName&lt;/code> 是类直接定义的，而 &lt;code>GoName&lt;/code> 却依赖一次反射。相较之下两次转换的消耗可以忽略了。改完之后再跑一下 benchmark：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">BenchmarkEncode-8 197593 5601 ns/op 1771 B/op 51 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>非常惊讶地看到，吞吐量大概是原来的 200%。与上面的火焰图对比，可以粗略的计算，&lt;code>RegiserPOJO&lt;/code> 大概占了整体的30%，改进后应该也只有原来的 &lt;code>1 / 0.7 * 100% = 140%&lt;/code> 才对。答案也可以在火焰图里找到：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p4.png" alt="">&lt;/p>
+&lt;p>除了 &lt;code>RegisterPOJO&lt;/code> 被干掉以外，与上图对比，还有哪些区别呢？可以看到，原来占用将近 20% 的 &lt;code>GC&lt;/code> 也几乎看不到了。所以真实的 CPU 利用率也要加上这部分的增长，大约 &lt;code>1 / 0.5 * 100% = 200%&lt;/code>。&lt;/p>
+&lt;blockquote>
+&lt;p>需要提醒的是，benchmark 跑出来的结果并不算稳定，所以你自己压出来的结果跟我的可能不太一致，甚至多跑几次的结果也不完全一样。对于上面的数字你只要理解原因就好，上下浮动10%也都是正常范围。&lt;/p>
+&lt;p>反过来看，这也算是 GC 优化的一个角度。碰到 GC 占用CPU过高，除了去一个个换对象池，也可以重点看看那些被频繁调用的模块。当然更科学的方法是看 &lt;code>pprof heap&lt;/code> / &lt;code>memory profiler&lt;/code> 。&lt;/p>
+&lt;/blockquote>
+&lt;p>针对这个结果，可以看到 &lt;code>encObject&lt;/code> 以上都被切割成了不同的小格子，不再有像 &lt;code>RegisterPOJO&lt;/code> 那样的大块占用，一般情况下，优化到这里就可以了。&lt;/p>
+&lt;p>看完了 &lt;code>Encode&lt;/code> ，再来看看 &lt;code>Decode&lt;/code> ，方法类似，直接看 Goland 生成的火焰图：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p5.png" alt="">&lt;/p>
+&lt;p>这个图有点迷惑性，好像也被分成差不多的小格子了。可以点开 &lt;code>decObject&lt;/code> 这一层：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p6.png" alt="">&lt;/p>
+&lt;p>这个时候原来小的 &lt;code>...&lt;/code> 会显示具体内容，需要注意的是里面有两个 &lt;code>findField&lt;/code> ，在复杂的调用里经常会遇到这种情况：一个耗资源的函数被分到了许多函数里，导致在看火焰图时并不能直观地看到它就是瓶颈。比较常见的有序列化、日志、网络请求等每个模块都会干一点却又没有一个全局的函数只干他一件事。这个时候除了肉眼去找以外也可以借助于另外一个工具：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p7.png" alt="">&lt;/p>
+&lt;p>在这个 &lt;code>Method List&lt;/code> 里可以明显看到 &lt;code>findField&lt;/code> 已经被合并到一起了，总占用接近 CPU 的一半，看到这里你大概就知道它应该是个优化点了。&lt;/p>
+&lt;h2 id="进一步">进一步&lt;/h2>
+&lt;p>函数 &lt;code>func findField(name string, typ reflect.Type) ([]int, error)&lt;/code> 的作用是在一个类型里寻找指定属性的位置（Index，反射包里用它来表示是第几个字段）。很容易想到，对于一个结构体来说，每个字段的位置从一开始就确定了，所以用缓存一样可以解决这个问题。一个简单的优化如下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">findField&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>, typ reflect.Type) (indexes []&lt;span style="color:#dc322f">int&lt;/span>, err &lt;span style="color:#dc322f">error&lt;/span>) {
+typCache, _ &lt;span style="color:#719e07">:=&lt;/span> findFieldCache.&lt;span style="color:#268bd2">LoadOrStore&lt;/span>(typ, &lt;span style="color:#719e07">&amp;amp;&lt;/span>sync.Map{})
+indexes, _ &lt;span style="color:#719e07">:=&lt;/span> typCache.(&lt;span style="color:#719e07">*&lt;/span>sync.Map).&lt;span style="color:#268bd2">Load&lt;/span>(name)
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(indexes.([]&lt;span style="color:#dc322f">int&lt;/span>)) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+err = perrors.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;failed to find field %s&amp;#34;&lt;/span>, name)
+}
+&lt;span style="color:#719e07">return&lt;/span> indexes.([]&lt;span style="color:#dc322f">int&lt;/span>), err
+&lt;span style="color:#586e75">// ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">- BenchmarkDecode-8 57723 17987 ns/op 7448 B/op 224 allocs/op
++ BenchmarkDecode-8 82995 12272 ns/op 7224 B/op 126 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到，结果并不如预期的那样提升一倍效果。这个代码乍看起来，好像除了有一些啰嗦的断言，好像也没别的东西了，为什么只有60%的提升呢，我们还是借助下工具&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p8.png" alt="">&lt;/p>
+&lt;p>可以看到：读缓存耗费了 7% 的资源。其中，&lt;code>sync.(*Map)&lt;/code> 不便优化，但 &lt;code>newobejct&lt;/code> 是哪里来的呢？代码里可以看到，唯一定义新对象的地方就是函数第一行的 &lt;code>&amp;amp;sync.Map&lt;/code> ，我抱着试一试的心态把 &lt;code>LoadOrStore&lt;/code> 拆成了两步&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">typCache, ok &lt;span style="color:#719e07">:=&lt;/span> findFieldCache.&lt;span style="color:#268bd2">Load&lt;/span>(typ)
+&lt;span style="color:#719e07">if&lt;/span> !ok {
+typCache = &lt;span style="color:#719e07">&amp;amp;&lt;/span>sync.Map{}
+findFieldCache.&lt;span style="color:#268bd2">Store&lt;/span>(typ, typCache)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">- BenchmarkDecode-8 82995 12272 ns/op 7224 B/op 126 allocs/op
++BenchmarkDecode-8 103876 12385 ns/op 6568 B/op 112 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>看结果，着实出乎意料。想起来以前看 Java 代码时经常碰到这样的代码：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">if&lt;/span> ( logLevel &lt;span style="color:#719e07">&amp;gt;=&lt;/span> &lt;span style="color:#2aa198">`info`&lt;/span> ) {
+log.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#719e07">...&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>以前一直觉得这个 &lt;code>if&lt;/code> 真是浪费感情，现在想来，别是一番认知了。如果能提供一个 &lt;code>LoadOrStore(key, func() interface{})&lt;/code> 的方法， 会不会更好一些？&lt;/p>
+&lt;p>到这里的话，我们做了两个比较大的优化，整体性能大约提升了一倍。如果仔细看火焰图，还会发现有很多小的优化点，但是由于没有什么特别质的飞跃，这里不再赘述。有兴趣的小伙伴可以到 PR Imp: cache in reflection 里阅读相关的讨论。&lt;/p>
+&lt;h2 id="更进一步">更进一步&lt;/h2>
+&lt;p>优化到此，依然藏着一个更深层次的问题：找一个可靠的参考基准，以衡量目前的工作结果【毕竟没有对比就没有伤害】。一个很容易想到的比较对象是 Go 语言官方的 &lt;code>json&lt;/code> 标准库。&lt;/p>
+&lt;p>把 dubbo-go-hessian2 与 &lt;code>json&lt;/code> 标准库做比较如下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ go &lt;span style="color:#b58900">test&lt;/span> -benchmem -run&lt;span style="color:#719e07">=&lt;/span>^$ github.com/apache/dubbo-go-hessian2 -bench &lt;span style="color:#2aa198">&amp;#34;^B&amp;#34;&lt;/span> -vet&lt;span style="color:#719e07">=&lt;/span>off -v -count&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">5&lt;/span>
+goos: darwin
+goarch: amd64
+pkg: github.com/apache/dubbo-go-hessian2
+BenchmarkJsonEncode
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">249114&lt;/span> &lt;span style="color:#2aa198">4719&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">252224&lt;/span> &lt;span style="color:#2aa198">4862&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">240582&lt;/span> &lt;span style="color:#2aa198">4739&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">213283&lt;/span> &lt;span style="color:#2aa198">4784&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">227101&lt;/span> &lt;span style="color:#2aa198">4665&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkEncode
+BenchmarkEncode-8 &lt;span style="color:#2aa198">182184&lt;/span> &lt;span style="color:#2aa198">5615&lt;/span> ns/op &lt;span style="color:#2aa198">1771&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">183007&lt;/span> &lt;span style="color:#2aa198">5565&lt;/span> ns/op &lt;span style="color:#2aa198">1771&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">218664&lt;/span> &lt;span style="color:#2aa198">5593&lt;/span> ns/op &lt;span style="color:#2aa198">1771&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">214704&lt;/span> &lt;span style="color:#2aa198">5886&lt;/span> ns/op &lt;span style="color:#2aa198">1770&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">181861&lt;/span> &lt;span style="color:#2aa198">5605&lt;/span> ns/op &lt;span style="color:#2aa198">1770&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">123667&lt;/span> &lt;span style="color:#2aa198">8412&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">122796&lt;/span> &lt;span style="color:#2aa198">8497&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">132103&lt;/span> &lt;span style="color:#2aa198">8471&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">130687&lt;/span> &lt;span style="color:#2aa198">8492&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">127668&lt;/span> &lt;span style="color:#2aa198">8476&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkDecode
+BenchmarkDecode-8 &lt;span style="color:#2aa198">107775&lt;/span> &lt;span style="color:#2aa198">10092&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">110996&lt;/span> &lt;span style="color:#2aa198">9950&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">111036&lt;/span> &lt;span style="color:#2aa198">10760&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">113151&lt;/span> &lt;span style="color:#2aa198">10063&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">109197&lt;/span> &lt;span style="color:#2aa198">10002&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+PASS
+ok github.com/apache/dubbo-go-hessian2 28.680s
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>虽然每次的结果不稳定，但就整体而言，目前的序列化和反序列化性能大概都是JSON标准库的85%左右。这个成绩并不能说好，但短期内能花20分的精力得到一个80分的结果，应该也是可以接受的。至于剩下的20%，就不是靠改几行代码就能搞定了。内存分配是否合理、执行流程是否有冗余，都是需要一点一滴地去改进。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>最后，我们来总结一下本文主要的优化步骤：&lt;/p>
+&lt;ul>
+&lt;li>利用火焰图 快速定位消耗 CPU 较高的模块；&lt;/li>
+&lt;li>利用缓存机制，快速消除重复的计算；&lt;/li>
+&lt;li>利用 CallTree、MethodList 等多种工具分析小段代码的精确消耗；&lt;/li>
+&lt;li>遵循二八定律，以最小的成本做出一个效果显著的收益。&lt;/li>
+&lt;/ul>
+&lt;h3 id="欢迎加入-dubbo-go-社区">欢迎加入 dubbo-go 社区&lt;/h3>
+&lt;p>目前 dubbo-go 已经到了一个比较稳定成熟的状态。在接下来的版本里面，我们将集中精力在云原生上。下一个版本，我们将首先实现应用维度的服务注册，这是一个和现有注册模型完全不同的新的注册模型。也是我们朝着云原生努力的一个关键版本。&lt;/p>
+&lt;p>dubbo-go 钉钉群 &lt;strong>23331795&lt;/strong> 欢迎你的加入。&lt;/p>
+&lt;h4 id="作者信息">作者信息&lt;/h4>
+&lt;p>张慧仁，github id: micln，任职 得到APP 后端开发。&lt;/p></description></item><item><title>Blog: Dubbo Go 中 metrics 的设计</title><link>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</guid><description>
 &lt;p>最近因为要在 Apache/dubbo-go（以下简称 dubbo-go ）里面实现类似的这个 metrics 功能，于是花了很多时间去了解现在 Dubbo 里面的 metrics 是怎么实现的。该部分，实际上是被放在一个独立的项目里面，即
 metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter">https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter&lt;/a> 下 metrics 子目录。&lt;/p>
 &lt;p>总体上来说，Dubbo 的 metrics 是一个从设计到实现都非常优秀的模块，理论上来说，大部分的 Java 项目是可以直接使用 metrics 的。但也因为兼顾性能、扩展性等各种非功能特性，所以初看代码会有种无从下手的感觉。&lt;/p>
@@ -7998,256 +8340,4 @@ channel&lt;span style="color:#719e07">.&lt;/span>close&lt;span style="color:#719
 &lt;li>&lt;strong>建议改动点二：&lt;/strong>&lt;/li>
 &lt;/ul>
 &lt;p>去除处理重连和断连的定时任务，Dubbo 可以判断心跳请求是否响应失败，可以借鉴改进方案的设计，在连接级别维护一个心跳失败次数的标记，任意响应成功，清除标记；连续心跳失败 n 次，客户端发起重连。这样可以减少一个不必要的定时器，任何轮询的方式，都是不优雅的。&lt;/p>
-&lt;p>最后再聊聊可扩展性这个话题。其实我是建议把定时器交给更加底层的 Netty 去做，也就是完全使用 &lt;code>IdleStateHandler&lt;/code> ，其他通信层组件各自实现自己的空闲检测逻辑，但是 Dubbo 中 mina，grizzy 的兼容问题囿住了我的拳脚，但试问一下，如今的 2019 年，又有多少人在使用 mina 和 grizzy？因为一些不太可能用的特性，而限制了主流用法的优化，这肯定不是什么好事。抽象，功能，可扩展性并不是越多越好，开源产品的人力资源是有限的，框架使用者的理解能力也是有限的，能解决大多数人问题的设计，才是好的设计。哎，谁让我不会 mina，grizzy，还懒得去学呢[摊手]。&lt;/p></description></item><item><title>Blog: Dubbo2.7 三大新特性详解</title><link>/zh/blog/2018/08/15/dubbo2.7-%E4%B8%89%E5%A4%A7%E6%96%B0%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3/</link><pubDate>Wed, 15 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/15/dubbo2.7-%E4%B8%89%E5%A4%A7%E6%96%B0%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3/</guid><description>
-&lt;h2 id="1-背景介绍">1 背景介绍&lt;/h2>
-&lt;p>自 2017 年 7 月阿里重启 Dubbo 开源，到目前为止 github star 数，contributor 数都有了非常大的提升。2018 年 2 月 9 日阿里决定将 Dubbo 项目贡献给 Apache，经过一周的投票，顺利成为了 Apache 的孵化项目，也就是大家现在看到的 &lt;strong>Incubator Dubbo&lt;/strong>。预计在 2019 年 4 月，Dubbo 可以达成毕业，成为 Apache 的顶级项目。&lt;/p>
-&lt;h2 id="2-分支介绍">2 分支介绍&lt;/h2>
-&lt;p>&lt;img src="/imgs/blog/270/branches.png" alt="分支">&lt;/p>
-&lt;p>Dubbo 目前有如图所示的 5 个分支，其中 2.7.1-release 只是一个临时分支，忽略不计，对其他 4 个分支进行介绍。&lt;/p>
-&lt;ul>
-&lt;li>2.5.x 近期已经通过投票，Dubbo 社区即将停止对其的维护。&lt;/li>
-&lt;li>2.6.x 为长期支持的版本，也是 Dubbo 贡献给 Apache 之前的版本，其包名前缀为：com.alibaba，JDK 版本对应 1.6。&lt;/li>
-&lt;li>3.x-dev 是前瞻性的版本，对 Dubbo 进行一些高级特性的补充，如支持 rx 特性。&lt;/li>
-&lt;li>master 为长期支持的版本，版本号为 2.7.x，也是 Dubbo 贡献给 Apache 的开发版本，其包名前缀为：org.apache，JDK 版本对应 1.8。&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>如果想要研究 Dubbo 的源码，建议直接浏览 master 分支。&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="3-dubbo-27-新特性">3 Dubbo 2.7 新特性&lt;/h2>
-&lt;p>Dubbo 2.7.x 作为 Apache 的孵化版本，除了代码优化之外，还新增了许多重磅的新特性，本文将会介绍其中最典型的三个新特性：&lt;/p>
-&lt;ul>
-&lt;li>异步化改造&lt;/li>
-&lt;li>三大中心改造&lt;/li>
-&lt;li>服务治理增强&lt;/li>
-&lt;/ul>
-&lt;h2 id="4-异步化改造">4 异步化改造&lt;/h2>
-&lt;h3 id="41-几种调用方式">4.1 几种调用方式&lt;/h3>
-&lt;p>&lt;img src="/imgs/blog/270/invokes.png" alt="调用方式">&lt;/p>
-&lt;p>在远程方法调用中，大致可以分为这 4 种调用方式。oneway 指的是客户端发送消息后，不需要接受响应。对于那些不关心服务端响应的请求，比较适合使用 oneway 通信。&lt;/p>
-&lt;blockquote>
-&lt;p>注意，void hello() 方法在远程方法调用中，不属于 oneway 调用，虽然 void 方法表达了不关心返回值的语义，但在 RPC 层面，仍然需要做通信层的响应。&lt;/p>
-&lt;/blockquote>
-&lt;p>sync 是最常用的通信方式，也是默认的通信方法。&lt;/p>
-&lt;p>future 和 callback 都属于异步调用的范畴，他们的区别是：在接收响应时，future.get() 会导致线程的阻塞;callback 通常会设置一个回调线程，当接收到响应时，自动执行，不会对当前线程造成阻塞。&lt;/p>
-&lt;h3 id="42-dubbo-26-异步化">4.2 Dubbo 2.6 异步化&lt;/h3>
-&lt;p>异步化的优势在于客户端不需要启动多线程即可完成并行调用多个远程服务，相对多线程开销较小。介绍 2.7 中的异步化改造之前，先回顾一下如何在 2.6 中使用 Dubbo 异步化的能力。&lt;/p>
-&lt;ol>
-&lt;li>将同步接口声明成 &lt;code>async=true&lt;/code>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;asyncService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.api.AsyncService&amp;#34;&lt;/span> async=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">AsyncService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-String &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>通过上下文类获取 future
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">AsyncService&lt;span style="color:#719e07">.&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Han Meimei&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-Future&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> fooFuture &lt;span style="color:#719e07">=&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">().&lt;/span>getFuture&lt;span style="color:#719e07">();&lt;/span>
-fooFuture&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">();&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;/ol>
-&lt;p>可以看出，这样的使用方式，不太符合异步编程的习惯，竟然需要从一个上下文类中获取到 Future。如果同时进行多个异步调用，使用不当很容易造成上下文污染。而且，Future 并不支持 callback 的调用方式。这些弊端在 Dubbo 2.7 中得到了改进。&lt;/p>
-&lt;h3 id="43-dubbo-27-异步化">4.3 Dubbo 2.7 异步化&lt;/h3>
-&lt;ol>
-&lt;li>无需配置中特殊声明，显式声明异步接口即可
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">AsyncService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-String &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">default&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHiAsync&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> CompletableFuture&lt;span style="color:#719e07">.&lt;/span>completedFuture&lt;span style="color:#719e07">(&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">));&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>使用 callback 方式处理返回值
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span> asyncService&lt;span style="color:#719e07">.&lt;/span>sayHiAsync&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Han MeiMei&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-future&lt;span style="color:#719e07">.&lt;/span>whenComplete&lt;span style="color:#719e07">((&lt;/span>retValue&lt;span style="color:#719e07">,&lt;/span> exception&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>exception &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>retValue&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-exception&lt;span style="color:#719e07">.&lt;/span>printStackTrace&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">});&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;/ol>
-&lt;p>Dubbo 2.7 中使用了 JDK1.8 提供的 &lt;code>CompletableFuture&lt;/code> 原生接口对自身的异步化做了改进。&lt;code>CompletableFuture&lt;/code> 可以支持 future 和 callback 两种调用方式，用户可以根据自己的喜好和场景选择使用，非常灵活。&lt;/p>
-&lt;h3 id="44-异步化设计-faq">4.4 异步化设计 FAQ&lt;/h3>
-&lt;p>Q：如果 RPC 接口只定义了同步接口，有办法使用异步调用吗？&lt;/p>
-&lt;p>A：2.6 中的异步调用唯一的优势在于，不需要在接口层面做改造，又可以进行异步调用，这种方式仍然在 2.7 中保留；使用 Dubbo 官方提供的 compiler hacker，编译期自动重写同步方法，请&lt;a href="https://github.com/dubbo/dubbo-async-processor#compiler-hacker-processer">在此&lt;/a>讨论和跟进具体进展。&lt;/p>
-&lt;hr>
-&lt;p>Q：关于异步接口的设计问题，为何不提供编译插件，根据原接口，自动编译出一个 XxxAsync 接口？&lt;/p>
-&lt;p>A：Dubbo 2.7 采用过这种设计，但接口的膨胀会导致服务类的增量发布，而且接口名的变化会影响服务治理的一些相关逻辑，改为方法添加 Async 后缀相对影响范围较小。&lt;/p>
-&lt;hr>
-&lt;p>Q：Dubbo 分为了客户端异步和服务端异步，刚刚你介绍的是客户端异步，为什么不提服务端异步呢？&lt;/p>
-&lt;p>A：Dubbo 2.7 新增了服务端异步的支持，但实际上，Dubbo 的业务线程池模型，本身就可以理解为异步调用，个人认为服务端异步的特性较为鸡肋。&lt;/p>
-&lt;h2 id="5-三大中心改造">5 三大中心改造&lt;/h2>
-&lt;p>三大中心指的：注册中心，元数据中心，配置中心。&lt;/p>
-&lt;p>在 2.7 之前的版本，Dubbo 只配备了注册中心，主流使用的注册中心为 zookeeper。新增加了元数据中心和配置中心，自然是为了解决对应的痛点，下面我们来详细阐释三大中心改造的原因。&lt;/p>
-&lt;h3 id="51-元数据改造">5.1 元数据改造&lt;/h3>
-&lt;p>元数据是什么？元数据定义为描述数据的数据，在服务治理中，例如服务接口名，重试次数，版本号等等都可以理解为元数据。在 2.7 之前，元数据一股脑丢在了注册中心之中，这造成了一系列的问题：&lt;/p>
-&lt;p>&lt;strong>推送量大 -&amp;gt; 存储数据量大 -&amp;gt; 网络传输量大 -&amp;gt; 延迟严重&lt;/strong>&lt;/p>
-&lt;p>生产者端注册 30+ 参数，有接近一半是不需要作为注册中心进行传递；消费者端注册 25+ 参数，只有个别需要传递给注册中心。有了以上的理论分析，Dubbo 2.7 进行了大刀阔斧的改动，只将真正属于服务治理的数据发布到注册中心之中，大大降低了注册中心的负荷。&lt;/p>
-&lt;p>同时，将全量的元数据发布到另外的组件中：元数据中心。元数据中心目前支持 redis（推荐），zookeeper。这也为 Dubbo 2.7 全新的 Dubbo Admin 做了准备，关于新版的 Dubbo Admin，我将会后续准备一篇独立的文章进行介绍。&lt;/p>
-&lt;p>示例：使用 zookeeper 作为元数据中心&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:metadata-report&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="52-dubbo-26-元数据">5.2 Dubbo 2.6 元数据&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">dubbo://30.5.120.185:20880/com.alibaba.dubbo.demo.DemoService?
-&lt;span style="color:#268bd2">anyhost&lt;/span>&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;
-&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>demo-provider&amp;amp;
-&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.demo.DemoService&amp;amp;
-&lt;span style="color:#268bd2">methods&lt;/span>&lt;span style="color:#719e07">=&lt;/span>sayHello&amp;amp;
-bean.name&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.demo.DemoService&amp;amp;
-&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;
-&lt;span style="color:#268bd2">executes&lt;/span>&lt;span style="color:#719e07">=&lt;/span>4500&amp;amp;
-&lt;span style="color:#268bd2">generic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;
-&lt;span style="color:#268bd2">owner&lt;/span>&lt;span style="color:#719e07">=&lt;/span>kirito&amp;amp;
-&lt;span style="color:#268bd2">pid&lt;/span>&lt;span style="color:#719e07">=&lt;/span>84228&amp;amp;
-&lt;span style="color:#268bd2">retries&lt;/span>&lt;span style="color:#719e07">=&lt;/span>7&amp;amp;
-&lt;span style="color:#268bd2">side&lt;/span>&lt;span style="color:#719e07">=&lt;/span>provider&amp;amp;
-&lt;span style="color:#268bd2">timestamp&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1552965771067&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>从本地的 zookeeper 中取出一条服务数据，通过解码之后，可以看出，的确有很多参数是不必要。&lt;/p>
-&lt;h3 id="53-dubbo-27-元数据">5.3 Dubbo 2.7 元数据&lt;/h3>
-&lt;p>在 2.7 中，如果不进行额外的配置，zookeeper 中的数据格式仍然会和 Dubbo 2.6 保持一致，这主要是为了保证兼容性，让 Dubbo 2.6 的客户端可以调用 Dubbo 2.7 的服务端。如果整体迁移到 2.7，则可以为注册中心开启简化配置的参数：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">“zookeeper://127.0.0.1:2181”&lt;/span> simplified=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 将会只上传那些必要的服务治理数据，一个简化过后的数据如下所示：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">dubbo://30.5.120.185:20880/org.apache.dubbo.demo.api.DemoService?
-&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>demo-provider&amp;amp;
-&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;
-&lt;span style="color:#268bd2">release&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.7.0&amp;amp;
-&lt;span style="color:#268bd2">timestamp&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1552975501873&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>对于那些非必要的服务信息，仍然全量存储在元数据中心之中：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/270/metadata.png" alt="元数据">&lt;/p>
-&lt;blockquote>
-&lt;p>元数据中心的数据可以被用于服务测试，服务 MOCK 等功能。目前注册中心配置中 simplified 的默认值为 false，因为考虑到了迁移的兼容问题，在后续迭代中，默认值将会改为 true。&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="54-配置中心支持">5.4 配置中心支持&lt;/h3>
-&lt;p>衡量配置中心的必要性往往从三个角度出发：&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>分布式配置统一管理&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>动态变更推送&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>安全性&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;p>Spring Cloud Config, Apollo, Nacos 等分布式配置中心组件都对上述功能有不同程度的支持。在 2.7 之前的版本中，在 zookeeper 中设置了部分节点：configurators，routers，用于管理部分配置和路由信息，它们可以理解为 Dubbo 配置中心的雏形。在 2.7 中，Dubbo 正式支持了配置中心，目前支持的几种注册中心 Zookeeper，Apollo，Nacos（2.7.1-release 支持）。&lt;/p>
-&lt;p>在 Dubbo 中，配置中心主要承担了两个作用&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>外部化配置。启动配置的集中式存储&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>服务治理。服务治理规则的存储与通知&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;p>示例：使用 Zookeeper 作为配置中心&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:config-center&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>引入配置中心后，需要注意配置项的覆盖问题，优先级如图所示&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/configuration.jpg" alt="配置覆盖优先级">&lt;/p>
-&lt;h2 id="6-服务治理增强">6 服务治理增强&lt;/h2>
-&lt;p>我更倾向于将 Dubbo 当做一个服务治理框架，而不仅仅是一个 RPC 框架。在 2.7 中，Dubbo 对其服务治理能力进行了增强，增加了标签路由的能力，并抽象出了应用路由和服务路由的概念。在最后一个特性介绍中，着重对标签路由 TagRouter 进行探讨。&lt;/p>
-&lt;blockquote>
-&lt;p>在服务治理中，路由层和负载均衡层的对比。区别 1，Router：m 选 n，LoadBalance：n 选 1；区别 2，路由往往是叠加使用的，负载均衡只能配置一种。&lt;/p>
-&lt;/blockquote>
-&lt;p>在很长的一段时间内，Dubbo 社区经常有人提的一个问题是：Dubbo 如何实现流量隔离和灰度发布，直到 2.7 提供了标签路由，用户可以使用这个功能，来实现上述的需求。&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/270/tag-route.png" alt="标签路由">&lt;/p>
-&lt;p>标签路由提供了这样一个能力，当调用链路为 A -&amp;gt; B -&amp;gt; C -&amp;gt; D 时，用户给请求打标，最典型的打标方式可以借助 attachment（他可以在分布式调用中传递下去），调用会优先请求那些匹配的服务端，如 A -&amp;gt; B，C -&amp;gt; D，由于集群中未部署 C 节点，则会降级到普通节点。&lt;/p>
-&lt;p>打标方式会受到集成系统差异的影响，从而导致很大的差异，所以 Dubbo 只提供了 &lt;code>RpcContext.getContext().setAttachment()&lt;/code> 这样的基础接口，用户可以使用 SPI 扩展，或者 server filter 的扩展，对测试流量进行打标，引导进入隔离环境/灰度环境。&lt;/p>
-&lt;p>新版的 Dubbo Admin 提供了标签路由的配置项：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/270/tag-route-config.png" alt="标签路由配置">&lt;/p>
-&lt;p>Dubbo 用户可以在自己系统的基础上对标签路由进行二次扩展，或者借鉴标签路由的设计，实现自己系统的流量隔离，灰度发布。&lt;/p>
-&lt;h2 id="7-总结">7 总结&lt;/h2>
-&lt;p>本文介绍了 Dubbo 2.7 比较重要的三大新特性：异步化改造，三大中心改造，服务治理增强。Dubbo 2.7 还包含了很多功能优化、特性升级，可以在项目源码的 &lt;a href="https://github.com/apache/dubbo/blob/master/CHANGES.md">CHANGES.md&lt;/a> 中浏览全部的改动点。最后提供一份 Dubbo 2.7 的升级文档：&lt;a href="http://dubbo.apache.org/zh-cn/docs/user/versions/version-270.html">2.7迁移文档&lt;/a>，欢迎体验。&lt;/p></description></item><item><title>Blog: Dubbo 优雅停机</title><link>/zh/blog/2018/08/14/dubbo-%E4%BC%98%E9%9B%85%E5%81%9C%E6%9C%BA/</link><pubDate>Tue, 14 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/14/dubbo-%E4%BC%98%E9%9B%85%E5%81%9C%E6%9C%BA/</guid><description>
-&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>对于任何一个线上应用，如何在服务更新部署过程中保证客户端无感知是开发者必须要解决的问题，即从应用停止到重启恢复服务这个阶段不能影响正常的业务请求。理想条件下，在没有请求的时候再进行更新是最安全可靠的，然而互联网应用必须要保证可用性，因此在技术层面上优化应用更新流程来保证服务在更新时无损是必要的。&lt;/p>
-&lt;p>传统的解决方式是通过将应用更新流程划分为手工摘流量、停应用、更新重启三个步骤，由人工操作实现客户端无对更新感知。这种方式简单而有效，但是限制较多：不仅需要使用借助网关的支持来摘流量，还需要在停应用前人工判断来保证在途请求已经处理完毕。这种需要人工介入的方式运维复杂度较高，只能适用规模较小的应用，无法在大规模系统上使用。&lt;/p>
-&lt;p>因此，如果在容器/框架级别提供某种自动化机制，来自动进行摘流量并确保处理完以到达的请求，不仅能保证业务不受更新影响，还可以极大地提升更新应用时的运维效率。&lt;/p>
-&lt;p>这个机制也就是优雅停机，目前Tomcat/Undertow/Dubbo等容器/框架都有提供相关实现。下面给出正式一些的定义：优雅停机是指在停止应用时，执行的一系列保证应用正常关闭的操作。这些操作往往包括等待已有请求执行完成、关闭线程、关闭连接和释放资源等，优雅停机可以避免非正常关闭程序可能造成数据异常或丢失，应用异常等问题。优雅停机本质上是JVM即将关闭前执行的一些额外的处理代码。&lt;/p>
-&lt;h2 id="适用场景">适用场景&lt;/h2>
-&lt;ul>
-&lt;li>JVM主动关闭(&lt;code>System.exit(int)&lt;/code>；&lt;/li>
-&lt;li>JVM由于资源问题退出(&lt;code>OOM&lt;/code>)；&lt;/li>
-&lt;li>应用程序接受到&lt;code>SIGTERM&lt;/code>或&lt;code>SIGINT&lt;/code>信号。&lt;/li>
-&lt;/ul>
-&lt;h2 id="配置方式">配置方式&lt;/h2>
-&lt;h3 id="服务的优雅停机">服务的优雅停机&lt;/h3>
-&lt;p>在Dubbo中，优雅停机是默认开启的，停机等待时间为10000毫秒。可以通过配置&lt;code>dubbo.service.shutdown.wait&lt;/code>来修改等待时间。&lt;/p>
-&lt;p>例如将等待时间设置为20秒可通过增加以下配置实现：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">dubbo.service.shutdown.wait&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20000&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="容器的优雅停机">容器的优雅停机&lt;/h3>
-&lt;p>当使用&lt;code>org.apache.dubbo.container.Main&lt;/code>这种容器方式来使用 Dubbo 时，也可以通过配置&lt;code>dubbo.shutdown.hook&lt;/code>为&lt;code>true&lt;/code>来开启优雅停机。&lt;/p>
-&lt;h3 id="通过qos优雅上下线">通过QOS优雅上下线&lt;/h3>
-&lt;p>基于&lt;code>ShutdownHook&lt;/code>方式的优雅停机无法确保所有关闭流程一定执行完，所以 Dubbo 推出了多段关闭的方式来保证服务完全无损。&lt;/p>
-&lt;p>多段关闭即将停止应用分为多个步骤，通过运维自动化脚本或手工操作的方式来保证脚本每一阶段都能执行完毕。&lt;/p>
-&lt;p>在关闭应用前，首先通过 QOS 的&lt;code>offline&lt;/code>指令下线所有服务，然后等待一定时间确保已经到达请求全部处理完毕，由于服务已经在注册中心下线，当前应用不会有新的请求。这时再执行真正的关闭(&lt;code>SIGTERM&lt;/code> 或&lt;code> SIGINT&lt;/code>)流程，就能保证服务无损。&lt;/p>
-&lt;p>QOS可通过 telnet 或 HTTP 方式使用，具体方式请见&lt;a href="http://dubbo.apache.org/zh-cn/docs/user/references/qos.html">Dubbo-QOS命令使用说明&lt;/a>。&lt;/p>
-&lt;h2 id="流程">流程&lt;/h2>
-&lt;p>Provider在接收到停机指令后&lt;/p>
-&lt;ul>
-&lt;li>从注册中心上注销所有服务；&lt;/li>
-&lt;li>从配置中心取消监听动态配置；&lt;/li>
-&lt;li>向所有连接的客户端发送只读事件，停止接收新请求；&lt;/li>
-&lt;li>等待一段时间以处理已到达的请求，然后关闭请求处理线程池；&lt;/li>
-&lt;li>断开所有客户端连接。&lt;/li>
-&lt;/ul>
-&lt;p>Consumer在接收到停机指令后&lt;/p>
-&lt;ul>
-&lt;li>拒绝新到请求，直接返回调用异常；&lt;/li>
-&lt;li>等待当前已发送请求执行完毕，如果响应超时则强制关闭连接。&lt;/li>
-&lt;/ul>
-&lt;p>当使用容器方式运行 Dubbo 时，在容器准备退出前，可进行一系列的资源释放和清理工。&lt;/p>
-&lt;p>例如使用 SpringContainer时，Dubbo 的ShutdownHook线程会执行&lt;code>ApplicationContext&lt;/code>的&lt;code>stop&lt;/code>和&lt;code>close&lt;/code>方法，保证 Bean的生命周期完整。&lt;/p>
-&lt;h2 id="实现原理">实现原理&lt;/h2>
-&lt;ol>
-&lt;li>
-&lt;p>在加载类&lt;code>org.apache.dubbo.config.AbstractConfig&lt;/code>时，通过&lt;code>org.apache.dubbo.config.DubboShutdownHook&lt;/code>向JVM注册 ShutdownHook。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * Register the ShutdownHook
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">register&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>registered&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> registered&lt;span style="color:#719e07">.&lt;/span>compareAndSet&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Runtime&lt;span style="color:#719e07">.&lt;/span>getRuntime&lt;span style="color:#719e07">().&lt;/span>addShutdownHook&lt;span style="color:#719e07">(&lt;/span>getDubboShutdownHook&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>每个ShutdownHook都是一个单独的线程，由JVM在退出时触发执行&lt;code>org.apache.dubbo.config.DubboShutdownHook&lt;/code>。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * Destroy all the resources, including registries and protocols.
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doDestroy&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>destroyed&lt;span style="color:#719e07">.&lt;/span>compareAndSet&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#586e75">// destroy all the registries
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> AbstractRegistryFactory&lt;span style="color:#719e07">.&lt;/span>destroyAll&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#586e75">// destroy all the protocols
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> destroyProtocols&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>首先关闭所有注册中心，这一步包括：&lt;/p>
-&lt;ul>
-&lt;li>从注册中心注销所有已经发布的服务；&lt;/li>
-&lt;li>取消订阅当前应用所有依赖的服务；&lt;/li>
-&lt;li>断开与注册中心的连接。&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>执行所有&lt;code>Protocol&lt;/code>的&lt;code>destroy()&lt;/code>，主要包括：&lt;/p>
-&lt;ul>
-&lt;li>销毁所有&lt;code>Invoker&lt;/code>和&lt;code>Exporter&lt;/code>；&lt;/li>
-&lt;li>关闭Server，向所有已连接Client发送当前Server只读事件；&lt;/li>
-&lt;li>关闭独享/共享Client，断开连接，取消超时和重试任务；&lt;/li>
-&lt;li>释放所有相关资源。&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>执行完毕，关闭JVM。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h2 id="注意事项">注意事项&lt;/h2>
-&lt;ul>
-&lt;li>使用&lt;code>SIGKILL&lt;/code>关闭应用不会执行优雅停机；&lt;/li>
-&lt;li>优雅停机不保证会等待所有已发送/到达请求结束；&lt;/li>
-&lt;li>配置的优雅停机等待时间&lt;code>timeout&lt;/code>不是所有步骤等待时间的总和，而是每一个&lt;code>destroy&lt;/code>执行的最大时间。例如配置等待时间为5秒，则关闭Server、关闭Client等步骤会分别等待5秒。&lt;/li>
-&lt;/ul></description></item></channel></rss>
+&lt;p>最后再聊聊可扩展性这个话题。其实我是建议把定时器交给更加底层的 Netty 去做，也就是完全使用 &lt;code>IdleStateHandler&lt;/code> ，其他通信层组件各自实现自己的空闲检测逻辑，但是 Dubbo 中 mina，grizzy 的兼容问题囿住了我的拳脚，但试问一下，如今的 2019 年，又有多少人在使用 mina 和 grizzy？因为一些不太可能用的特性，而限制了主流用法的优化，这肯定不是什么好事。抽象，功能，可扩展性并不是越多越好，开源产品的人力资源是有限的，框架使用者的理解能力也是有限的，能解决大多数人问题的设计，才是好的设计。哎，谁让我不会 mina，grizzy，还懒得去学呢[摊手]。&lt;/p></description></item></channel></rss>

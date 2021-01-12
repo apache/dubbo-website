@@ -1,4 +1,434 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo</title><link>/zh/</link><description>Recent content on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Dubbo Go 中 metrics 的设计</title><link>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo</title><link>/zh/</link><description>Recent content on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: dubbo-go 1.4.0</title><link>/zh/blog/2021/01/12/dubbo-go-1.4.0/</link><pubDate>Tue, 12 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/12/dubbo-go-1.4.0/</guid><description>
+&lt;p>得益于社区活跃的支持，2020 年 3 月 25 日 我们发布了一个让人兴奋的版本——dubbo-go v1.4.0。除了继续支持已有的 Dubbo 的一些特性外， dubbo-go 开始了一些自己的创新尝试。&lt;/p>
+&lt;p>这个版本，最大的意义在于，做了一些支持云原生的准备工作。比如说，社区在探讨了很久的 k8s 落地之后，终于拿出来了使用 k8s 作为注册中心的解决方案。&lt;/p>
+&lt;p>其次一个比较大的改进是&amp;ndash;我们在可观测性上也迈出了重要的一步。在这之前，dubbo-go只提供了日志这么一个单一手段，内部的信息比较不透明，这个版本将有很大的改善。&lt;/p>
+&lt;p>最后一个令人心动的改进是，我们支持了 REST 协议。&lt;/p>
+&lt;h2 id="1-k8s-注册中心">1. K8s 注册中心&lt;/h2>
+&lt;p>dubbo-go 注册中心的本质为K/V型的数据存储。当前版本实现了以 Endpoint 为维度在 k8s API Server 进行服务注册和发现的方案【下文简称 Endpoint 方案】，架构图如下。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/1.4/k8s.png" alt="">&lt;/p>
+&lt;p>Endpoint 方案，首先将每个 dubbo-go 进程自身服务信息序列化后，通过 Kubernetes 提供的 Patch 的接口写入在自身 Pod 对象的 Annotation 中。其次，通过 Kubernetes 的 Watch 接口观察集群中本 Namespace 内带有某些固定lable [见上图] Pod 的Annotation 信息的更新，处理服务健康检查、服务上下线等情况并实时更新本地缓存。整体流程仅使用 Kubernetes 原生 API 完成将 Kubernetes 作为注册中心的功能特性。&lt;/p>
+&lt;p>这个方案非常简洁，不需要实现额外的第三方模块，也不需要对 Dubbo 业务作出改动，仅仅把 k8s 当做部署平台，依赖其容器管理能力，没有使用其 label selector 和 service 等服务治理特性。如果站在 k8s Operator 的角度来看，Operator 方案的优点即 Endpoint 方案的缺点，Endpoint 方案无法使用 k8s 的健康检查能力，亦没有使用 k8s service 的事件监听能力，每个 consumer 冗余监听一些不必要监听的事件，当 Endpoint 过多时会加大 API Server 的网络压力。&lt;/p>
+&lt;p>目前 dubbo-go 社区其实已经有了 operator 版本注册中心的技术方案， 后续版本【计划版本是 v1.6】的 dubbo-go 会给出其实现。相比当前实现，operator 方案开发和线上维护成本当然上升很多。二者如同硬币的两面，社区会让两种方式会共存，以满足不同 level 的使用者。&lt;/p>
+&lt;p>注意: 因 Pod 被调度而 IP 发生变化时，当前版本的 configuration 以及 router config 模块暂时无法动态更新。这有待于我们进一步解决。&lt;/p>
+&lt;p>参考范例&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.&lt;/p>
+&lt;h2 id="2-tracing-和-metric">2. tracing 和 metric&lt;/h2>
+&lt;p>可观测性是微服务重要的一环，也是我们1.4版本着力支持的部分。在1.4版本中，我们主要在 tracing 和 metric 两个方向提供了支持。&lt;/p>
+&lt;p>为了支持 tracing 和 metric，关键的一点是支持context在整个调用过程中传递。为此我们解决了context跨端传递的问题。目前用户可以在接口中声明 context 并且设置值，dubbo-go 在底层完成 context 内容从 client 传递到 server 的任务。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/1.4/context.png" alt="">&lt;/p>
+&lt;p>在 metric 方面，dubbo-go 开始支持 Prometheus 采集数据了。目前支持 Prometheus中 的 Histogram 和 Summary。用户也可以通过扩展 Reporter 接口来自定义数据采集。&lt;/p>
+&lt;p>在 tracing 方面，目前 dubbo-go 的设计是采用 opentracing 作为统一的 API，在该 API 的基础上，通过在 client 和 server 之中传递 context，从而将整个链路串起来。用户可以采用任何支持 opentracing API 的监控框架来作为实现，例如 zipkin，jaeger 等。&lt;/p>
+&lt;h2 id="3-rest协议支持">3. rest协议支持&lt;/h2>
+&lt;p>Dubbo 生态的应用与其他生态的应用互联互通，一直是 dubbo-go 社区追求的目标。dubbo-go v1.3 版本已经实现了 dubbo-go 与 grpc 生态应用的互联互通，若想与其他生态如 Spring 生态互联互通，借助 rest 协议无疑是一个很好的技术手段。&lt;/p>
+&lt;p>Rest 协议是一个很强大并且社区呼声很高的特性，它能够有效解决 open API，前端通信，异构系统通信等问题。比如，如果你的公司里面有一些陈年代码是通过 http 接口来提供服务的，那么使用我们的 rest 协议就可以无缝集成了。&lt;/p>
+&lt;p>通过在 dubbo-go 中发布 RESTful 的接口的应用可以调用任意的 RESTful 的接口，也可以被任何客户端以 http 的形式调用，框架图如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/1.4/rest.png" alt="">&lt;/p>
+&lt;p>在设计过程中，考虑到不同的公司内部使用的 web 框架并不相同，所以我们允许用户扩展自己 rest server （ web 框架在 dubbo-go的封装）的实现，当然，与 rest server 相关的，诸如 filter 等，都可以在自己的 rest server 实现内部扩展。&lt;/p>
+&lt;h2 id="4-路由功能增强">4. 路由功能增强&lt;/h2>
+&lt;p>路由规则在发起一次 RPC 调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起 RPC 调用的备选地址。v1.4 版本的 dubbo-go 实现了 Condition Router 和 Health Instance First Router，将在后面版本中陆续给出诸如 Tag Router 等剩余 Router 的实现。&lt;/p>
+&lt;h3 id="41-条件路由">4.1 条件路由&lt;/h3>
+&lt;p>条件路由，是 dubbo-go 中第一个支持的路由规则，允许用户通过配置文件及远端配置中心管理路由规则。&lt;/p>
+&lt;p>与之相似的一个概念是 dubbo-go 里面的 group 概念，但是条件路由提供了更加细粒度的控制手段和更加丰富的表达语义。比较典型的使用场景是黑白名单设置，灰度以及测试等。&lt;/p>
+&lt;p>参考范例&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>。&lt;/p>
+&lt;h3 id="42-健康实例优先路由">4.2 健康实例优先路由&lt;/h3>
+&lt;p>在 RPC 调用中，我们希望尽可能地将请求命中到那些处理能力快、处于健康状态的实例，该路由的功能就是通过某种策略断定某个实例不健康，并将其排除在候选调用列表，优先调用那些健康的实例。这里的&amp;quot;健康&amp;quot;可以是我们自己定义的状态，默认实现即当错误比例到达某一个阈值时或者请求活跃数大于上限则认为其不健康，允许用户扩展健康检测策略。&lt;/p>
+&lt;p>在我们服务治理里面，核心的问题其实就在于如何判断一个实例是否可用。无论是负载均衡、&lt;/p>
+&lt;p>熔断还是限流，都是对这个问题的解答。所以，这个 feature 是一个很好的尝试。因为我们接下来计划提供的特性，基于规则的限流以及动态限流，都是要解决“如何断定一个实例是否可用”这么一个问题。&lt;/p>
+&lt;p>所以欢迎大家使用这个特性，并向社区反馈各自设定的健康指标。这对我们接下来的工作会有很大的帮助。&lt;/p>
+&lt;h2 id="5-hessian-协议增强">5. hessian 协议增强&lt;/h2>
+&lt;p>相较于 dubbo 的 Java 语言以及其他多语言版本，dubbo-go 社区比较自豪的地方之一就是：无论底层网络引擎还是原生使用的 hessian2 协议，以及整体服务治理框架，都由 dubbo-go 社区从零开发并维护。v1.4 版本的 dubbo-go 对 hessian2 协议又带来了诸多新 feature。&lt;/p>
+&lt;h3 id="51-支持-dubbo-协议的-attachments">5.1 支持 dubbo 协议的 attachments&lt;/h3>
+&lt;p>在 dubbo-go中，attachments 机制用于传递业务参数之外的附加信息，是在客户端和服务端之间传递非业务参数信息的重要方式。&lt;/p>
+&lt;p>hessian 编码协议将之编码在 body 内容的后面进行传输，dubbo-go-hessian2 之前并不支持读/写 attachments，在多个使用方【如蚂蚁金服】的要求下，dubbo-go-hessian2 以兼容已有的使用方式为前提，支持了 attachments 的读/写。&lt;/p>
+&lt;p>Request 和 Response 的 struct 中定义了 attachments 的 map，当需要使用 attachments，需要由使用方构造这两种类型的参数或者返回对象。否则，将无法在hessian的传输流中获取和写入attachments。&lt;/p>
+&lt;p>另外，利用 dubbo-go 调用链中传输 context 的功能，用户已经可以在服务方法中通过 context 添加 attachments了。&lt;/p>
+&lt;h3 id="52-支持忽略非注册-pojo-的解析方式">5.2 支持忽略非注册 pojo 的解析方式&lt;/h3>
+&lt;p>由于 hessian 编码协议与 Java 的类型高度耦合，在 golang 的实现中会相对比较麻烦，需要有指明的对应类型。dubbo-go-hessian2 的实现方式是：定义 POJO 接口，要求实现 JavaClassName 方法来供程序获取 Java 对应的类名。这导致了接收到包含未注册类的请求时，将会无法解析而报错，这个问题以前是无法解决的。&lt;/p>
+&lt;p>但是，有一些使用场景如网关或者 service mesh 的 sidecar，需要在不关心 Java 类的具体定义的情况下，像 http读取 header 信息一样仅仅读取 dubbo 请求的附加信息，将 dubbo/dubbo-go 请求转发。通过该 feature，网关/sidecar 并不关注请求的具体内容，可以在解析请求的数据流时跳过无法解析的具体类型，直接读取 attachments 的内容。&lt;/p>
+&lt;p>该实现通过在 Decoder 中添加的 skip 字段，对每一个 object 做出特殊处理。&lt;/p>
+&lt;h3 id="53-支持-javamathbiginteger-和-javamathbigdecimal">5.3 支持 java.math.BigInteger 和 java.math.BigDecimal&lt;/h3>
+&lt;p>在 Java 服务中，java.math.BigInteger 和 java.math.BigDecimal 是被频繁使用的数字类型，hessian 库将它们映射为 github.com/dubbogo/gost/math/big 下的对应类型。&lt;/p>
+&lt;h3 id="54-支持-继承-和忽略冗余字段">5.4 支持 ‘继承’ 和忽略冗余字段&lt;/h3>
+&lt;p>由于 go 没有继承的概念，所以在之前的版本，Java 父类的字段不被 dubbo-go-hessian2 所支持。新版本中，dubbo-go-hessian2 将Java来自父类的字段用匿名结构体对应，如：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> Dog &lt;span style="color:#268bd2">struct&lt;/span> {
+Animal
+Gender &lt;span style="color:#dc322f">string&lt;/span>
+DogName &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`hessian:&amp;#34;-&amp;#34;`&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>同时，就像 json 编码中通过 &lt;code>immediately&lt;/code> 可以在序列化中忽略该字段，同理，通过 &lt;code>hessian:&amp;quot;-&amp;quot;&lt;/code> 用户也可以让冗余字段不参与 hessian 序列化。&lt;/p>
+&lt;p>目前，上述四个特性已被某 Go 版本的 sidecar 集成到其商业版本中提供商业服务。&lt;/p>
+&lt;h2 id="6-nacos-配置中心">6. Nacos 配置中心&lt;/h2>
+&lt;p>配置中心是现代微服务架构里面的核心组件，现在 dubbo-go 提供了对配置中心的支持。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/1.4/config-center.png" alt="">&lt;/p>
+&lt;p>Nacos 作为一个易于构建云原生应用的动态服务发现、配置管理和服务管理平台，在该版本终于作为配置中心而得到了支持。&lt;/p>
+&lt;p>参考范例&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>.&lt;/p>
+&lt;h2 id="7-接口级签名认证">7. 接口级签名认证&lt;/h2>
+&lt;p>Dubbo 鉴权认证是为了避免敏感接口被匿名用户调用而在 SDK 层面提供的额外保障。用户可以在接口级别进行定义是否允许匿名调用，并对调用方进行验签操作，对于验签不通过的消费端，禁止调用。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/1.4/acl.png" alt="">&lt;/p>
+&lt;p>如上图，总体实现基于 AK/SK 机制，应用通过 HTTPS 通信，启动时向鉴权服务拉取，定期更新。且允许用户自定义获取 AK/SK 的源，在 RPC 层面保障安全性。&lt;/p>
+&lt;h2 id="8-回顾与展望">8. 回顾与展望&lt;/h2>
+&lt;p>目前 dubbo-go 已经到了一个比较稳定成熟的状态。在接下来的版本里面，我们将集中精力在云原生上。下一个版本，我们将首先实现应用维度的服务注册，这是一个和现有注册模型完全不同的新的注册模型。也是我们朝着云原生努力的一个关键版本。&lt;/p>
+&lt;p>在可观测性上，我们计划在整个 dubbo-go 的框架内，引入更多的埋点，收集更加多的内部状态。这需要实际生产环境用户的使用反馈，从而知道该如何埋点，收集何种数据。&lt;/p>
+&lt;p>在限流和熔断上，可以进一步扩展。当下的限流算法，是一种静态的算法&amp;ndash;限流参数并没有实时根据当前服务器的状态来推断是否应该限流，它可能仅仅是用户的经验值。其缺点在于，用户难以把握应该如何配置，例如 TPS 究竟应该设置在多大。所以计划引入一种基于规则的限流和熔断。这种基于规则的限流和熔断，将允许用户设置一些系统状态的状态，如 CPU 使用率，磁盘 IO，网络 IO 等。当系统状态符合用户规则时，将触发熔断。&lt;/p>
+&lt;p>目前这些规划的 任务清单&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>，都已经放入在 dubbo-go 项目的 issue 里面，欢迎感兴趣的朋友认领参与开发。dubbo-go 社区在 &lt;strong>钉钉群 23331795&lt;/strong> 欢迎你的加入。&lt;/p>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/golang/registry/kubernetes">https://github.com/apache/dubbo-samples/tree/master/golang/registry/kubernetes&lt;/a> &lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2" role="doc-endnote">
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/tree/master/golang/router/condition">https://github.com/dubbogo/dubbo-samples/tree/master/golang/router/condition&lt;/a> &lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3" role="doc-endnote">
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/tree/master/golang/configcenter/nacos">https://github.com/dubbogo/dubbo-samples/tree/master/golang/configcenter/nacos&lt;/a> &lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4" role="doc-endnote">
+&lt;p>&lt;a href="https://github.com/apache/dubbo-go/milestone/1">https://github.com/apache/dubbo-go/milestone/1&lt;/a> &lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item><item><title>Blog: dubbo-go 中如何实现路由规则功能</title><link>/zh/blog/2021/01/12/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%B7%AF%E7%94%B1%E8%A7%84%E5%88%99%E5%8A%9F%E8%83%BD/</link><pubDate>Tue, 12 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/12/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%B7%AF%E7%94%B1%E8%A7%84%E5%88%99%E5%8A%9F%E8%83%BD/</guid><description>
+&lt;h2 id="lets-go">Let‘s Go!&lt;/h2>
+&lt;p>最近在 Apache/dubbo-go（以下简称 dubbo-go ）社区中，路由规则突然成了呼声最高的功能之一。那到底为什么需要路由规则？&lt;/p>
+&lt;p>先路由规则需要实现的功能：&lt;/p>
+&lt;p>路由规则（ routing rule ）是为了改变网络流量所经过的途径而修改路由信息的技术，主要通过改变路由属性（包括可达性）来实现。在发起一次 RPC 调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起 RPC 调用的备选地址。&lt;/p>
+&lt;p>试想该下场景：使用 dubbo-go 在生产环境上，排除预发布机。使用路由规则实现不是很合适吗？&lt;/p>
+&lt;p>虽然知道了路由规则需要实现什么功能，但还不足以实现一个完整的路由规则功能。除此之外，还需要知道如何方便的管理路由规则。&lt;/p>
+&lt;h2 id="目标">目标&lt;/h2>
+&lt;p>综上所述，可以总结出以下 &lt;strong>目标&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>支持方便扩展路由规则的配置；&lt;/li>
+&lt;li>可以方便的管理路由规则配置，如支持本地与远程配置中心管理；&lt;/li>
+&lt;li>与 Dubbo 现有的配置中心内的路由规则配置文件兼容，降低在新增语言栈的学习及使用成本；&lt;/li>
+&lt;/ul>
+&lt;h2 id="路由规则设计">路由规则设计&lt;/h2>
+&lt;p>在设计之初，首先要考虑的是路由规则应该放在整个服务治理周期的哪个阶段呢？&lt;/p>
+&lt;p>有些读者可能会有点困惑，我连架构图都不知道，如何考虑在哪个阶段？不怕，下图马上给你解惑。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/dubbo-go-arch-2.png" alt="">&lt;/p>
+&lt;p>可以看到图中的 Router 就是路由规则插入的位置，目前路由规则主要用于控制 Consumer 到 Provider 之间的网络流量的路由路径。&lt;/p>
+&lt;p>除此之外，还有几个问题是需要优先考虑：&lt;/p>
+&lt;p>1.需要什么功能？&lt;/p>
+&lt;ul>
+&lt;li>通过配置信息生成路由规则，包括：读取并解析本地配置文件，读取并解析配置中心的配置。以责任链模式串联起来。&lt;/li>
+&lt;li>通过路由规则，匹配本地信息与远端服务信息，过滤出可以调用的远端节点，再进行负载均衡。&lt;/li>
+&lt;/ul>
+&lt;p>2.如何设计接口？&lt;/p>
+&lt;p>通过第一点，我们能设计出以下接口来实现所需的功能。&lt;/p>
+&lt;ul>
+&lt;li>路由规则接口：用于路由规则过滤出可以调用的远端节点。&lt;/li>
+&lt;li>路由规则责任链接口：允许执行多个路由规则。&lt;/li>
+&lt;li>配置信息生成路由规则接口：解析内部配置信息（common.URL）生成对应的路由规则。&lt;/li>
+&lt;li>配置文件生成路由规则接口：解析配置文件生成对应的路由规则。&lt;/li>
+&lt;/ul>
+&lt;p>3.如何实现本地与远程路由规则配置加载？&lt;/p>
+&lt;ul>
+&lt;li>本地路由规则配置：在原配置加载阶段，新增读取路由配置文件。使用 &lt;code>FIleRouterFactory&lt;/code> 解析后，生成对应路由规则，放置到内存中备用。&lt;/li>
+&lt;li>远程路由规则配置：在 zookeeper 注册并监听静态资源目录后。读取静态资源，筛选符合路由规则配置信息，通过 &lt;code>RouterFactory&lt;/code> 生成对应路由规则，放置到内存中备用。&lt;/li>
+&lt;/ul>
+&lt;h3 id="router">Router&lt;/h3>
+&lt;p>匹配及过滤远程实例的路由规则。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// Router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Router &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// Route determine the target invoker list.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Route&lt;/span>([]protocol.Invoker, &lt;span style="color:#719e07">*&lt;/span>common.URL, protocol.Invocation) []protocol.Invoker
+&lt;span style="color:#586e75">// Priority return priority in router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 0 to ^int(0) is better
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Priority&lt;/span>() &lt;span style="color:#dc322f">int64&lt;/span>
+&lt;span style="color:#586e75">// URL return URL in router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">URL&lt;/span>() common.URL
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>目前已有实现类包括：&lt;/p>
+&lt;ul>
+&lt;li>listenableRouter&lt;/li>
+&lt;li>AppRouter&lt;/li>
+&lt;li>ConditionRouter&lt;/li>
+&lt;li>HealthCheckRouter&lt;/li>
+&lt;li>FileConditionRouter&lt;/li>
+&lt;/ul>
+&lt;h3 id="routerchain">RouterChain&lt;/h3>
+&lt;p>执行多个路由规则的责任链。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// Chain
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Chain &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// Route determine the target invokers list with chain.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Route&lt;/span>([]protocol.Invoker, &lt;span style="color:#719e07">*&lt;/span>common.URL, protocol.Invocation) []protocol.Invoker
+&lt;span style="color:#586e75">// AddRouters add routers
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">AddRouters&lt;/span>([]Router)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="filerouterfactory">FIleRouterFactory&lt;/h3>
+&lt;p>生成解析配置文件生成路由规则的工厂类。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// RouterFactory router creates factory use for parse config file
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> FileRouterFactory &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// NewFileRouter create file router with config file
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">NewFileRouter&lt;/span>([]&lt;span style="color:#dc322f">byte&lt;/span>) (Router, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="routerfactory">RouterFactory&lt;/h3>
+&lt;p>通过配置信息生成路由规则的工厂类。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#586e75">// RouterFactory router create factory
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> RouterFactory &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// NewRouter creates router instance with URL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">NewRouter&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL) (Router, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="实现">实现&lt;/h2>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/router/router-design.png" alt="">&lt;/p>
+&lt;p>实现路由规则以兼容 dubbo 为首要目标，降低使用者的学习成本为辅助目标。与配置中心模块相结合，实现路由规则远程统一管理与下发。&lt;/p>
+&lt;h3 id="规则类型">规则类型&lt;/h3>
+&lt;p>下面先来介绍一下有哪些具体的路由规则实现。&lt;/p>
+&lt;h4 id="条件路由">条件路由&lt;/h4>
+&lt;p>dubbo-go 中第一个支持的路由规则，允许用户通过配置文件及配置中心管理路由规则。&lt;/p>
+&lt;p>与之相似的一个概念是 dubbo-go 里面的 group 概念，但是条件路由提供了更加细粒度的控制手段和更加丰富的表达语义。比较典型的使用场景是黑白名单设置，灰度以及测试等。&lt;/p>
+&lt;h4 id="健康检查路由">健康检查路由&lt;/h4>
+&lt;p>在 RPC 调用中，我们希望尽可能地将请求命中到那些处理能力快、处于健康状态的实例，该路由的功能就是通过某种策略断定某个实例不健康，并将其排除在候选调用列表，优先调用那些健康的实例。这里的”健康”可以是我们自己定义的状态，默认实现即当错误比例到达某一个阈值时或者请求活跃数大于上限则认为其不健康，允许用户扩展健康检测策略。&lt;/p>
+&lt;p>在我们服务治理里面，核心的问题其实就在于如何判断一个实例是否可用。无论是负载均衡、&lt;/p>
+&lt;p>熔断还是限流，都是对这个问题的解答。所以，这个 feature 是一个很好的尝试。因为我们接下来计划提供的特性，基于规则的限流以及动态限流，都是要解决 “如何断定一个实例是否可用” 这么一个问题。&lt;/p>
+&lt;p>所以欢迎大家使用这个特性，并向社区反馈各自设定的健康指标。这对我们接下来的工作会有很大的帮助。&lt;/p>
+&lt;h4 id="标签路由">标签路由&lt;/h4>
+&lt;p>以 Provider 为维度，通过将某一个或多个服务的提供者划分到同一个分组，约束流量只在指定分组中流转，从而实现流量隔离的目的，可以作为蓝绿发布、灰度发布等场景的能力基础。&lt;/p>
+&lt;ul>
+&lt;li>静态打标：根据配置文件所配置的标签，固定给 Provider 设置标签。&lt;/li>
+&lt;li>动态打标：基于健康检查路由，根据服务不同时刻，不同状态，动态在 Provider 设置适合的标签。&lt;/li>
+&lt;/ul>
+&lt;h3 id="分析">分析&lt;/h3>
+&lt;p>接着，以条件路由在 zookeeper 实现为例，对服务提供者与服务消费者进行整体流程分析。&lt;/p>
+&lt;h4 id="如何配置条件路由规则">如何配置条件路由规则&lt;/h4>
+&lt;p>配置条件路由规则既可以通过本地配置文件也能通过远程配置中心进行配置，配置生效流程都是：配置文件 =&amp;gt; dubbo 内部协议 =&amp;gt; 缓存至应用级内存 =&amp;gt; 过滤出可调用节点。&lt;/p>
+&lt;p>&lt;strong>dubbo-admin&lt;/strong> 【服务治理/条件路由】增加路由规则配置，zookeeper 中会自动生成其对应配置节点，内容均为 &lt;strong>dubbo-admin&lt;/strong> 中设置的配置。&lt;/p>
+&lt;p>&lt;strong>全局配置&lt;/strong>&lt;/p>
+&lt;p>对应应用级全局路由规则配置。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">/dubbo/config/dubbo/user-info-server（应用名）.condition-router
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>应用名：只对 user-info-server 应用生效 .condition-router: 路由类型。除此之外，还有 .tag-router 表示标签路由。&lt;/p>
+&lt;p>&lt;strong>服务配置&lt;/strong>&lt;/p>
+&lt;p>对应服务级所有路由规则配置。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">/dubbo/ com.ikurento.user.UserProvider（服务名） /routers
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务名：只对 com.ikurento.user.UserProvider 服务生效。&lt;/p>
+&lt;h3 id="实现-router">实现 Router&lt;/h3>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>ConditionRouter) &lt;span style="color:#268bd2">Route&lt;/span>(invokers []protocol.Invoker, url &lt;span style="color:#719e07">*&lt;/span>common.URL, invocation protocol.Invocation) []protocol.Invoker {
+&lt;span style="color:#719e07">if&lt;/span> !c.&lt;span style="color:#268bd2">Enabled&lt;/span>() {
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(invokers) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+isMatchWhen &lt;span style="color:#719e07">:=&lt;/span> c.&lt;span style="color:#268bd2">MatchWhen&lt;/span>(url, invocation)
+&lt;span style="color:#719e07">if&lt;/span> !isMatchWhen {
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+&lt;span style="color:#268bd2">var&lt;/span> result []protocol.Invoker
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(c.ThenCondition) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> result
+}
+&lt;span style="color:#719e07">for&lt;/span> _, invoker &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> invokers {
+invokerUrl &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">GetUrl&lt;/span>()
+isMatchThen &lt;span style="color:#719e07">:=&lt;/span> c.&lt;span style="color:#268bd2">MatchThen&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>invokerUrl, url)
+&lt;span style="color:#719e07">if&lt;/span> isMatchThen {
+result = &lt;span style="color:#b58900">append&lt;/span>(result, invoker)
+}
+}
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(result) &amp;gt; &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> result
+} &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> c.Force {
+rult, _ &lt;span style="color:#719e07">:=&lt;/span> url.&lt;span style="color:#268bd2">GetParamAndDecoded&lt;/span>(constant.RULE_KEY)
+localIP, _ &lt;span style="color:#719e07">:=&lt;/span> gxnet.&lt;span style="color:#268bd2">GetLocalIP&lt;/span>()
+logger.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;The route result is empty and force execute. consumer: %s, service: %s, route: %s&amp;#34;&lt;/span>, localIP, url.&lt;span style="color:#268bd2">Service&lt;/span>(), route)
+&lt;span style="color:#719e07">return&lt;/span> result
+}
+&lt;span style="color:#719e07">return&lt;/span> invokers
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下为必须实现的方法，以下方法用于获取过滤服务端节点配置。&lt;/p>
+&lt;ul>
+&lt;li>Route: 根据配置，调用节点与被调用节点，过滤出可调用节点。&lt;/li>
+&lt;li>Priority: 路由规则优先级，需要是个正整数。&lt;/li>
+&lt;li>URL: 通过路由规则转换出来的 dubbo 内部协议。&lt;/li>
+&lt;/ul>
+&lt;p>更多实现参考：&lt;/p>
+&lt;p>路由规则：https://github.com/apache/dubbo-go/tree/master/cluster/router/condition&lt;/p>
+&lt;p>其中包含监听配置中心实现：https://github.com/apache/dubbo-go/blob/master/cluster/router/condition/listenable_router.go&lt;/p>
+&lt;h2 id="使用方法">使用方法&lt;/h2>
+&lt;p>经过上面设计与实现的分析，大概也能猜测到如何使用：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">&lt;span style="color:#719e07">import&lt;/span> (
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common&amp;#34;&lt;/span>
+&lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/protocol&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config_center/zookeeper&amp;#34;&lt;/span>
+_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/router/condition&amp;#34;&lt;/span>
+)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>如图所示，使用路由规则并不复杂，只需要把对应的依赖引入进来。在包初始化的时候，会创建出来对应的路由规则的实现。比如说加载条件路由、健康检测路由或者标签作为路由规则：&lt;/p>
+&lt;h3 id="本地路由规则配置">本地路由规则配置&lt;/h3>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/router/condition&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>仅仅引用依赖包还不直接使用，还需要配置指定的配置文件： *&lt;strong>router_config.yml*&lt;/strong> ，内容如下:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang"># dubbo router yaml configure file
+priority: &lt;span style="color:#2aa198">1&lt;/span>
+force: &lt;span style="color:#cb4b16">true&lt;/span>
+conditions : [&lt;span style="color:#2aa198">&amp;#34;host = 1.1.1.1 =&amp;gt; host = 192.168.199.214&amp;#34;&lt;/span>]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>更多配置方式：&lt;a href="http://dubbo.apache.org/zh-cn/docs/user/demos/routing-rule.html">条件路由配置&lt;/a>&lt;/p>
+&lt;h3 id="配置中心配置">配置中心配置&lt;/h3>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-golang" data-lang="golang">_ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config_center/zookeeper&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>目前仅支持 zookeeper 配置中心，与 dubbo-admin 结合即可使用。配置方式如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/router/dubbo-admin-1.png" alt="">&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/router/dubbo-admin-2.png" alt="">&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>更加具体的实现，我就不详细论述，大家可以去看源码，欢迎大家持续关注，或者贡献代码。&lt;/p>
+&lt;p>整个路由规则功能，已经能跟上 dubbo 2.7.x 版本，已经支持本地及远端路由规则配置管理。从扩展性来说，是比较便利。目前已经支持条件路由、标签路由与健康检测路由，虽然能满足基本使用场景，距离完善还有还长远的路。&lt;/p>
+&lt;p>未来计划：&lt;/p>
+&lt;ol>
+&lt;li>更多的配置中心支持，理论上已经支持，但还没测试。&lt;/li>
+&lt;li>service-router（未支持）&lt;/li>
+&lt;li>标签路由-配置中心（未支持）&lt;/li>
+&lt;li>目前路由与配置中心结合的代码，对新增路由规则并不友好，有一定接入成本。&lt;/li>
+&lt;/ol>
+&lt;p>欢迎大家关注或者贡献代码，https://github.com/apache/dubbo-go&lt;/p></description></item><item><title>Blog: 记一次对 dubbo-go-hessian2 的性能优化</title><link>/zh/blog/2021/01/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9-dubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</link><pubDate>Tue, 12 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9-dubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</guid><description>
+&lt;blockquote>
+&lt;p>dubbo-go-hessian2 是一个用 Go 实现的 hessian 协议 v2.0 版本的序列化库。从项目名称里可以看到主要用在 dubbo-go 这个项目里。hessian 协议作为 dubbo 的默认协议，因此对性能有比较高的要求。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="立项">立项&lt;/h2>
+&lt;p>譬如有网文 基于Go的马蜂窝旅游网分布式IM系统技术实践 把 dubbo-go 与其他 RPC 框架对比如下：&lt;/p>
+&lt;ol>
+&lt;li>Go STDPRC: Go 标准库的 RPC，性能最优，但是没有治理；&lt;/li>
+&lt;li>RPCX: 性能优势 2*GRPC + 服务治理；&lt;/li>
+&lt;li>GRPC: 跨语言，但性能没有 RPCX 好；&lt;/li>
+&lt;li>TarsGo: 跨语言，性能 5*GRPC，缺点是框架较大，整合起来费劲；&lt;/li>
+&lt;li>Dubbo-Go: 性能稍逊一筹，比较适合 Go 和 Java 间通信场景使用&lt;/li>
+&lt;/ol>
+&lt;p>有鉴于此，社区便开始组织部分人力，启动了对 dubbo-go 性能优化【同时也欢迎上文作者到钉钉群 23331795 与我们社区交流】。考察 dubbo-go 的各个组件，大家不约而同地决定首先优化比较独立的 dubbo-go-hessian2。&lt;/p>
+&lt;h2 id="起步">起步&lt;/h2>
+&lt;p>在最开始的时候，并没有太想清楚需要做什么，改哪个地方，要优化到何种程度，所以最简单的办法就是看看现状。&lt;/p>
+&lt;p>首先，写了一个简单的例子，把常见的类型到一个结构体里，然后测一下耗时。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> Mix &lt;span style="color:#268bd2">struct&lt;/span> {
+A &lt;span style="color:#dc322f">int&lt;/span>
+B &lt;span style="color:#dc322f">string&lt;/span>
+CA time.Time
+CB &lt;span style="color:#dc322f">int64&lt;/span>
+CC &lt;span style="color:#dc322f">string&lt;/span>
+CD []&lt;span style="color:#dc322f">float64&lt;/span>
+D &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">interface&lt;/span>{}
+}
+m &lt;span style="color:#719e07">:=&lt;/span> Mix{A: &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">&amp;#39;a&amp;#39;&lt;/span>), B: &lt;span style="color:#2aa198">`hello`&lt;/span>}
+m.CD = []&lt;span style="color:#dc322f">float64&lt;/span>{&lt;span style="color:#2aa198">1&lt;/span>, &lt;span style="color:#2aa198">2&lt;/span>, &lt;span style="color:#2aa198">3&lt;/span>}
+&lt;span style="color:#586e75">// 再加一层，使得数据显得复杂一些
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>m.D = &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">`floats`&lt;/span>: m.CD, &lt;span style="color:#2aa198">`A`&lt;/span>: m.A, &lt;span style="color:#2aa198">`m`&lt;/span>: m}
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>看起来这个结构体跟真实环境里可能不太一样，但是用来分析瓶颈应该是足够了。&lt;/p>
+&lt;/blockquote>
+&lt;p>然后直接靠 Go Test 写个测试用例：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">BenchmarkEncode&lt;/span>(b &lt;span style="color:#719e07">*&lt;/span>testing.B) {
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; b.N; i&lt;span style="color:#719e07">++&lt;/span> {
+_, _ = &lt;span style="color:#268bd2">encodeTarget&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>m)
+}
+}
+&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">BenchmarkDecode&lt;/span>(b &lt;span style="color:#719e07">*&lt;/span>testing.B) {
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; b.N; i&lt;span style="color:#719e07">++&lt;/span> {
+_, _ = &lt;span style="color:#268bd2">NewDecoder&lt;/span>(bytes).&lt;span style="color:#268bd2">Decode&lt;/span>()
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>go test -benchmem -run=^$ github.com/apache/dubbo-go-hessian2 -bench &amp;ldquo;^B&amp;rdquo; -vet=off -v&lt;/p>
+&lt;/blockquote>
+&lt;p>得到下面结果：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">BenchmarkEncode-8 89461 11485 ns/op 3168 B/op 122 allocs/op
+BenchmarkDecode-8 64914 19595 ns/op 7448 B/op 224 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>*&lt;strong>注：基于 MacBook Pro 2018【主频 Intel Core i7 2.6 GHz】测试。*&lt;/strong>&lt;/p>
+&lt;p>不与同类库作横向比较，仅仅从这个测试结果里的数字上无法得出任何结论。对我们来说更重要的是：它到底慢在哪里。首先想到的手段便是：借助 pprof 生成火焰图，定位 CPU 消耗。&lt;/p>
+&lt;p>pprof 工具的用法可以参考官网文档。本文测试时直接使用了 Goland 内置 &lt;code>CPU Profiler&lt;/code> 的测试工具：测试函数左边的 &lt;code>Run xx with 'CPU Profiler'&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p2.png" alt="">&lt;/p>
+&lt;p>测试跑完后， Goland 直接显示火焰图如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p3.png" alt="">&lt;/p>
+&lt;p>从这个图里可以看到，测试代码大概占用了左边的70%，右边30%是运行时的一些消耗，运行时部分一般包括 gc、schedule 两大块，一般不能直接优化。图上左边可以清晰地看到 &lt;code>encObject&lt;/code> 里 &lt;code>RegisterPOJO&lt;/code> 和 &lt;code>Encode&lt;/code> 各占了小一半。&lt;/p>
+&lt;p>完成序列化功能的 &lt;code>Encode&lt;/code> 消耗 CPU 如此之多尚可理解，而直觉上，把类对象进行解析和注册 &lt;code>RegisterPOJO&lt;/code> 是不应该成为消耗大户的。所以猜测这个地方要么注册有问题，要么有重复注册。&lt;/p>
+&lt;p>下一步分析，用了一个简单的办法：在这个函数里加日志。然后继续再跑一下 benchmark，可以看到性能瓶颈处：容器读写的地方。&lt;/p>
+&lt;p>既然知道这里做了许多重复的无用功，就很容易明确优化方法：加缓存。把已经解析过的结果缓存下来，下次需要的时候直接取出使用。改进后的代码简单如下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">if&lt;/span> goName, ok &lt;span style="color:#719e07">:=&lt;/span> pojoRegistry.j2g[o.&lt;span style="color:#268bd2">JavaClassName&lt;/span>()]; ok {
+&lt;span style="color:#719e07">return&lt;/span> pojoRegistry.registry[goName].index
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里刚开始有个疑问，为什么要分两步先取 &lt;code>JavaClassName&lt;/code> 再取 &lt;code>GoName&lt;/code> 而不直接取后者？看起来好像是多此一举了，但其实 &lt;code>JavaClassName&lt;/code> 是类直接定义的，而 &lt;code>GoName&lt;/code> 却依赖一次反射。相较之下两次转换的消耗可以忽略了。改完之后再跑一下 benchmark：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">BenchmarkEncode-8 197593 5601 ns/op 1771 B/op 51 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>非常惊讶地看到，吞吐量大概是原来的 200%。与上面的火焰图对比，可以粗略的计算，&lt;code>RegiserPOJO&lt;/code> 大概占了整体的30%，改进后应该也只有原来的 &lt;code>1 / 0.7 * 100% = 140%&lt;/code> 才对。答案也可以在火焰图里找到：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p4.png" alt="">&lt;/p>
+&lt;p>除了 &lt;code>RegisterPOJO&lt;/code> 被干掉以外，与上图对比，还有哪些区别呢？可以看到，原来占用将近 20% 的 &lt;code>GC&lt;/code> 也几乎看不到了。所以真实的 CPU 利用率也要加上这部分的增长，大约 &lt;code>1 / 0.5 * 100% = 200%&lt;/code>。&lt;/p>
+&lt;blockquote>
+&lt;p>需要提醒的是，benchmark 跑出来的结果并不算稳定，所以你自己压出来的结果跟我的可能不太一致，甚至多跑几次的结果也不完全一样。对于上面的数字你只要理解原因就好，上下浮动10%也都是正常范围。&lt;/p>
+&lt;p>反过来看，这也算是 GC 优化的一个角度。碰到 GC 占用CPU过高，除了去一个个换对象池，也可以重点看看那些被频繁调用的模块。当然更科学的方法是看 &lt;code>pprof heap&lt;/code> / &lt;code>memory profiler&lt;/code> 。&lt;/p>
+&lt;/blockquote>
+&lt;p>针对这个结果，可以看到 &lt;code>encObject&lt;/code> 以上都被切割成了不同的小格子，不再有像 &lt;code>RegisterPOJO&lt;/code> 那样的大块占用，一般情况下，优化到这里就可以了。&lt;/p>
+&lt;p>看完了 &lt;code>Encode&lt;/code> ，再来看看 &lt;code>Decode&lt;/code> ，方法类似，直接看 Goland 生成的火焰图：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p5.png" alt="">&lt;/p>
+&lt;p>这个图有点迷惑性，好像也被分成差不多的小格子了。可以点开 &lt;code>decObject&lt;/code> 这一层：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p6.png" alt="">&lt;/p>
+&lt;p>这个时候原来小的 &lt;code>...&lt;/code> 会显示具体内容，需要注意的是里面有两个 &lt;code>findField&lt;/code> ，在复杂的调用里经常会遇到这种情况：一个耗资源的函数被分到了许多函数里，导致在看火焰图时并不能直观地看到它就是瓶颈。比较常见的有序列化、日志、网络请求等每个模块都会干一点却又没有一个全局的函数只干他一件事。这个时候除了肉眼去找以外也可以借助于另外一个工具：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p7.png" alt="">&lt;/p>
+&lt;p>在这个 &lt;code>Method List&lt;/code> 里可以明显看到 &lt;code>findField&lt;/code> 已经被合并到一起了，总占用接近 CPU 的一半，看到这里你大概就知道它应该是个优化点了。&lt;/p>
+&lt;h2 id="进一步">进一步&lt;/h2>
+&lt;p>函数 &lt;code>func findField(name string, typ reflect.Type) ([]int, error)&lt;/code> 的作用是在一个类型里寻找指定属性的位置（Index，反射包里用它来表示是第几个字段）。很容易想到，对于一个结构体来说，每个字段的位置从一开始就确定了，所以用缓存一样可以解决这个问题。一个简单的优化如下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">findField&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>, typ reflect.Type) (indexes []&lt;span style="color:#dc322f">int&lt;/span>, err &lt;span style="color:#dc322f">error&lt;/span>) {
+typCache, _ &lt;span style="color:#719e07">:=&lt;/span> findFieldCache.&lt;span style="color:#268bd2">LoadOrStore&lt;/span>(typ, &lt;span style="color:#719e07">&amp;amp;&lt;/span>sync.Map{})
+indexes, _ &lt;span style="color:#719e07">:=&lt;/span> typCache.(&lt;span style="color:#719e07">*&lt;/span>sync.Map).&lt;span style="color:#268bd2">Load&lt;/span>(name)
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(indexes.([]&lt;span style="color:#dc322f">int&lt;/span>)) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+err = perrors.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;failed to find field %s&amp;#34;&lt;/span>, name)
+}
+&lt;span style="color:#719e07">return&lt;/span> indexes.([]&lt;span style="color:#dc322f">int&lt;/span>), err
+&lt;span style="color:#586e75">// ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">- BenchmarkDecode-8 57723 17987 ns/op 7448 B/op 224 allocs/op
++ BenchmarkDecode-8 82995 12272 ns/op 7224 B/op 126 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到，结果并不如预期的那样提升一倍效果。这个代码乍看起来，好像除了有一些啰嗦的断言，好像也没别的东西了，为什么只有60%的提升呢，我们还是借助下工具&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/hessian/p8.png" alt="">&lt;/p>
+&lt;p>可以看到：读缓存耗费了 7% 的资源。其中，&lt;code>sync.(*Map)&lt;/code> 不便优化，但 &lt;code>newobejct&lt;/code> 是哪里来的呢？代码里可以看到，唯一定义新对象的地方就是函数第一行的 &lt;code>&amp;amp;sync.Map&lt;/code> ，我抱着试一试的心态把 &lt;code>LoadOrStore&lt;/code> 拆成了两步&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">typCache, ok &lt;span style="color:#719e07">:=&lt;/span> findFieldCache.&lt;span style="color:#268bd2">Load&lt;/span>(typ)
+&lt;span style="color:#719e07">if&lt;/span> !ok {
+typCache = &lt;span style="color:#719e07">&amp;amp;&lt;/span>sync.Map{}
+findFieldCache.&lt;span style="color:#268bd2">Store&lt;/span>(typ, typCache)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">- BenchmarkDecode-8 82995 12272 ns/op 7224 B/op 126 allocs/op
++BenchmarkDecode-8 103876 12385 ns/op 6568 B/op 112 allocs/op
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>看结果，着实出乎意料。想起来以前看 Java 代码时经常碰到这样的代码：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">if&lt;/span> ( logLevel &lt;span style="color:#719e07">&amp;gt;=&lt;/span> &lt;span style="color:#2aa198">`info`&lt;/span> ) {
+log.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#719e07">...&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>以前一直觉得这个 &lt;code>if&lt;/code> 真是浪费感情，现在想来，别是一番认知了。如果能提供一个 &lt;code>LoadOrStore(key, func() interface{})&lt;/code> 的方法， 会不会更好一些？&lt;/p>
+&lt;p>到这里的话，我们做了两个比较大的优化，整体性能大约提升了一倍。如果仔细看火焰图，还会发现有很多小的优化点，但是由于没有什么特别质的飞跃，这里不再赘述。有兴趣的小伙伴可以到 PR Imp: cache in reflection 里阅读相关的讨论。&lt;/p>
+&lt;h2 id="更进一步">更进一步&lt;/h2>
+&lt;p>优化到此，依然藏着一个更深层次的问题：找一个可靠的参考基准，以衡量目前的工作结果【毕竟没有对比就没有伤害】。一个很容易想到的比较对象是 Go 语言官方的 &lt;code>json&lt;/code> 标准库。&lt;/p>
+&lt;p>把 dubbo-go-hessian2 与 &lt;code>json&lt;/code> 标准库做比较如下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ go &lt;span style="color:#b58900">test&lt;/span> -benchmem -run&lt;span style="color:#719e07">=&lt;/span>^$ github.com/apache/dubbo-go-hessian2 -bench &lt;span style="color:#2aa198">&amp;#34;^B&amp;#34;&lt;/span> -vet&lt;span style="color:#719e07">=&lt;/span>off -v -count&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">5&lt;/span>
+goos: darwin
+goarch: amd64
+pkg: github.com/apache/dubbo-go-hessian2
+BenchmarkJsonEncode
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">249114&lt;/span> &lt;span style="color:#2aa198">4719&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">252224&lt;/span> &lt;span style="color:#2aa198">4862&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">240582&lt;/span> &lt;span style="color:#2aa198">4739&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">213283&lt;/span> &lt;span style="color:#2aa198">4784&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkJsonEncode-8 &lt;span style="color:#2aa198">227101&lt;/span> &lt;span style="color:#2aa198">4665&lt;/span> ns/op &lt;span style="color:#2aa198">832&lt;/span> B/op &lt;span style="color:#2aa198">15&lt;/span> allocs/op
+BenchmarkEncode
+BenchmarkEncode-8 &lt;span style="color:#2aa198">182184&lt;/span> &lt;span style="color:#2aa198">5615&lt;/span> ns/op &lt;span style="color:#2aa198">1771&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">183007&lt;/span> &lt;span style="color:#2aa198">5565&lt;/span> ns/op &lt;span style="color:#2aa198">1771&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">218664&lt;/span> &lt;span style="color:#2aa198">5593&lt;/span> ns/op &lt;span style="color:#2aa198">1771&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">214704&lt;/span> &lt;span style="color:#2aa198">5886&lt;/span> ns/op &lt;span style="color:#2aa198">1770&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkEncode-8 &lt;span style="color:#2aa198">181861&lt;/span> &lt;span style="color:#2aa198">5605&lt;/span> ns/op &lt;span style="color:#2aa198">1770&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">123667&lt;/span> &lt;span style="color:#2aa198">8412&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">122796&lt;/span> &lt;span style="color:#2aa198">8497&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">132103&lt;/span> &lt;span style="color:#2aa198">8471&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">130687&lt;/span> &lt;span style="color:#2aa198">8492&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkJsonDecode-8 &lt;span style="color:#2aa198">127668&lt;/span> &lt;span style="color:#2aa198">8476&lt;/span> ns/op &lt;span style="color:#2aa198">1776&lt;/span> B/op &lt;span style="color:#2aa198">51&lt;/span> allocs/op
+BenchmarkDecode
+BenchmarkDecode-8 &lt;span style="color:#2aa198">107775&lt;/span> &lt;span style="color:#2aa198">10092&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">110996&lt;/span> &lt;span style="color:#2aa198">9950&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">111036&lt;/span> &lt;span style="color:#2aa198">10760&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">113151&lt;/span> &lt;span style="color:#2aa198">10063&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+BenchmarkDecode-8 &lt;span style="color:#2aa198">109197&lt;/span> &lt;span style="color:#2aa198">10002&lt;/span> ns/op &lt;span style="color:#2aa198">6424&lt;/span> B/op &lt;span style="color:#2aa198">98&lt;/span> allocs/op
+PASS
+ok github.com/apache/dubbo-go-hessian2 28.680s
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>虽然每次的结果不稳定，但就整体而言，目前的序列化和反序列化性能大概都是JSON标准库的85%左右。这个成绩并不能说好，但短期内能花20分的精力得到一个80分的结果，应该也是可以接受的。至于剩下的20%，就不是靠改几行代码就能搞定了。内存分配是否合理、执行流程是否有冗余，都是需要一点一滴地去改进。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>最后，我们来总结一下本文主要的优化步骤：&lt;/p>
+&lt;ul>
+&lt;li>利用火焰图 快速定位消耗 CPU 较高的模块；&lt;/li>
+&lt;li>利用缓存机制，快速消除重复的计算；&lt;/li>
+&lt;li>利用 CallTree、MethodList 等多种工具分析小段代码的精确消耗；&lt;/li>
+&lt;li>遵循二八定律，以最小的成本做出一个效果显著的收益。&lt;/li>
+&lt;/ul>
+&lt;h3 id="欢迎加入-dubbo-go-社区">欢迎加入 dubbo-go 社区&lt;/h3>
+&lt;p>目前 dubbo-go 已经到了一个比较稳定成熟的状态。在接下来的版本里面，我们将集中精力在云原生上。下一个版本，我们将首先实现应用维度的服务注册，这是一个和现有注册模型完全不同的新的注册模型。也是我们朝着云原生努力的一个关键版本。&lt;/p>
+&lt;p>dubbo-go 钉钉群 &lt;strong>23331795&lt;/strong> 欢迎你的加入。&lt;/p>
+&lt;h4 id="作者信息">作者信息&lt;/h4>
+&lt;p>张慧仁，github id: micln，任职 得到APP 后端开发。&lt;/p></description></item><item><title>Blog: Dubbo Go 中 metrics 的设计</title><link>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</guid><description>
 &lt;p>最近因为要在 Apache/dubbo-go（以下简称 dubbo-go ）里面实现类似的这个 metrics 功能，于是花了很多时间去了解现在 Dubbo 里面的 metrics 是怎么实现的。该部分，实际上是被放在一个独立的项目里面，即
 metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter">https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter&lt;/a> 下 metrics 子目录。&lt;/p>
 &lt;p>总体上来说，Dubbo 的 metrics 是一个从设计到实现都非常优秀的模块，理论上来说，大部分的 Java 项目是可以直接使用 metrics 的。但也因为兼顾性能、扩展性等各种非功能特性，所以初看代码会有种无从下手的感觉。&lt;/p>
@@ -7730,640 +8160,4 @@ asyncContext&lt;span style="color:#719e07">.&lt;/span>write&lt;span style="color
 &lt;h2 id="报名信息">报名信息&lt;/h2>
 &lt;p>Aliware Open Source•成都站-Apache Dubbo开发者沙龙于8月26日(周日)在成都高新区天府五街200号菁蓉国际广场8号楼2楼会议厅举办，技术GG们的思想盛宴，干货与福利一个都不会少。&lt;/p>
 &lt;p>报名链接：http://www.huodongxing.com/event/7453091088400&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/dubbo-chengdu-meetup-img.jpg" alt="img">&lt;/p></description></item><item><title>Blog: Dubbo 集群容错</title><link>/zh/blog/2018/08/22/dubbo-%E9%9B%86%E7%BE%A4%E5%AE%B9%E9%94%99/</link><pubDate>Wed, 22 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/22/dubbo-%E9%9B%86%E7%BE%A4%E5%AE%B9%E9%94%99/</guid><description>
-&lt;h3 id="design-for-failure">Design For failure&lt;/h3>
-&lt;p>在分布式系统中，集群某个某些节点出现问题是大概率事件，因此在设计分布式RPC框架的过程中，必须要把失败作为设计的一等公民来对待。一次调用失败之后，应该如何选择对失败的选择策略，这是一个见仁见智的问题，每种策略可能都有自己独特的应用场景。因此，作为框架来说，应当针对不同场景提供多种策略，供用户进行选择。&lt;/p>
-&lt;p>在Dubbo设计中，通过Cluster这个接口的抽象，把一组可供调用的Provider信息组合成为一个统一的&lt;code>Invoker&lt;/code>供调用方进行调用。经过路由规则过滤，负载均衡选址后，选中一个具体地址进行调用，如果调用失败，则会按照集群配置的容错策略进行容错处理。&lt;/p>
-&lt;p>Dubbo默认内置了若干容错策略，如果不能满足用户需求，则可以通过自定义容错策略进行配置。&lt;/p>
-&lt;h3 id="内置容错策略">内置容错策略&lt;/h3>
-&lt;p>Dubbo主要内置了如下几种策略：&lt;/p>
-&lt;ul>
-&lt;li>Failover(失败自动切换)&lt;/li>
-&lt;li>Failsafe(失败安全)&lt;/li>
-&lt;li>Failfast(快速失败)&lt;/li>
-&lt;li>Failback(失败自动恢复)&lt;/li>
-&lt;li>Forking(并行调用)&lt;/li>
-&lt;li>Broadcast(广播调用)&lt;/li>
-&lt;/ul>
-&lt;p>这些名称比较相似，概念也比较容易混淆，下面逐一进行解释。&lt;/p>
-&lt;h4 id="failover失败自动切换">Failover(失败自动切换)&lt;/h4>
-&lt;p>&lt;code>Failover&lt;/code>是高可用系统中的一个常用概念，服务器通常拥有主备两套机器配置，如果主服务器出现故障，则自动切换到备服务器中，从而保证了整体的高可用性。&lt;/p>
-&lt;p>Dubbo也借鉴了这个思想，并且把它作为Dubbo&lt;code>默认的容错策略&lt;/code>。当调用出现失败的时候，根据配置的重试次数，会自动从其他可用地址中重新选择一个可用的地址进行调用，直到调用成功，或者是达到重试的上限位置。&lt;/p>
-&lt;p>Dubbo里默认配置的重试次数是2，也就是说，算上第一次调用，最多会调用3次。&lt;/p>
-&lt;p>其配置方法，容错策略既可以在服务提供方配置，也可以服务调用方进行配置。而重试次数的配置则更为灵活，既可以在服务级别进行配置，也可以在方法级别进行配置。具体优先顺序为：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">服务调用方方法级配置 &amp;gt; 服务调用方服务级配置 &amp;gt; 服务提供方方法级配置 &amp;gt; 服务提供方服务级配置
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>以XML方式为例，具体配置方法如下：&lt;/p>
-&lt;p>服务提供方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务提供方，方法级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span>cluster=&lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务调用方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务调用方，方法级配置：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml"> &lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;3&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Failover可以自动对失败进行重试，对调用者屏蔽了失败的细节，但是Failover策略也会带来一些副作用：&lt;/p>
-&lt;ul>
-&lt;li>重试会额外增加一下开销，例如增加资源的使用，在高负载系统下，额外的重试可能让系统雪上加霜。&lt;/li>
-&lt;li>重试会增加调用的响应时间。&lt;/li>
-&lt;li>某些情况下，重试甚至会造成资源的浪费。考虑一个调用场景，A-&amp;gt;B-&amp;gt;C，如果A处设置了超时100ms，再B-&amp;gt;C的第一次调用完成时已经超过了100ms，但很不幸B-&amp;gt;C失败，这时候会进行重试，但其实这时候重试已经没有意义，因此在A看来这次调用已经超时，A可能已经开始执行其他逻辑。&lt;/li>
-&lt;/ul>
-&lt;h4 id="failsafe失败安全">Failsafe(失败安全)&lt;/h4>
-&lt;p>失败安全策略的核心是即使失败了也不会影响整个调用流程。通常情况下用于旁路系统或流程中，它的失败不影响核心业务的正确性。在实现上，当出现调用失败时，会忽略此错误，并记录一条日志，同时返回一个空结果，在上游看来调用是成功的。&lt;/p>
-&lt;p>应用场景，可以用于写入审计日志等操作。&lt;/p>
-&lt;p>具体配置方法：&lt;/p>
-&lt;p>服务提供方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务调用方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中服务调用方配置优先于服务提供方配置。&lt;/p>
-&lt;h4 id="failfast快速失败">Failfast(快速失败)&lt;/h4>
-&lt;p>某些业务场景中，某些操作可能是非幂等的，如果重复发起调用，可能会导致出现脏数据等。例如调用某个服务，其中包含一个数据库的写操作，如果写操作完成，但是在发送结果给调用方的过程中出错了，那么在调用发看来这次调用失败了，但其实数据写入已经完成。这种情况下，重试可能并不是一个好策略，这时候就需要使用到&lt;code>Failfast&lt;/code>策略，调用失败立即报错。让调用方来决定下一步的操作并保证业务的幂等性。&lt;/p>
-&lt;p>具体配置方法：&lt;/p>
-&lt;p>服务提供方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failfast&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务调用方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failfast&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中服务调用方配置优先于服务提供方配置。&lt;/p>
-&lt;h4 id="failback失败自动恢复">Failback(失败自动恢复)&lt;/h4>
-&lt;p>&lt;code>Failback&lt;/code>通常和&lt;code>Failover&lt;/code>两个概念联系在一起。在高可用系统中，当主机发生故障，通过&lt;code>Failover&lt;/code>进行主备切换后，待故障恢复后，系统应该具备自动恢复原始配置的能力。&lt;/p>
-&lt;p>Dubbo中的&lt;code>Failback&lt;/code>策略中，如果调用失败，则此次失败相当于&lt;code>Failsafe&lt;/code>，将返回一个空结果。而与&lt;code>Failsafe&lt;/code>不同的是，Failback策略会将这次调用加入内存中的失败列表中，对于这个列表中的失败调用，会在另一个线程中进行异步重试，重试如果再发生失败，则会忽略，即使重试调用成功，原来的调用方也感知不到了。因此它通常适合于，对于实时性要求不高，且不需要返回值的一些异步操作。&lt;/p>
-&lt;p>具体配置方法：&lt;/p>
-&lt;p>服务提供方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务调用方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中服务调用方配置优先于服务提供方配置。&lt;/p>
-&lt;p>按照目前的实现，Failback策略还有一些局限，例如内存中的失败调用列表没有上限，可能导致堆积，异步重试的执行间隔无法调整，默认是5秒。&lt;/p>
-&lt;h4 id="forking并行调用">Forking(并行调用)&lt;/h4>
-&lt;p>上述几种策略中，主要都是针对调用失败发生后如何进行弥补的角度去考虑的，而&lt;code>Forking&lt;/code>策略则跟上述几种策略不同，是一种典型的用成本换时间的思路。即第一次调用的时候就同时发起多个调用，只要其中一个调用成功，就认为成功。在资源充足，且对于失败的容忍度较低的场景下，可以采用此策略。&lt;/p>
-&lt;p>具体配置方法：&lt;/p>
-&lt;p>服务提供方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;forking&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务调用方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;forking&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中服务调用方配置优先于服务提供方配置。&lt;/p>
-&lt;h4 id="broadcast广播调用">Broadcast(广播调用)&lt;/h4>
-&lt;p>在某些场景下，可能需要对服务的所有提供者进行操作，此时可以使用广播调用策略。此策略会逐个调用所有提供者，只要任意有一个提供者出错，则认为此次调用出错。通常用于通知所有提供者更新缓存或日志等本地资源信息。&lt;/p>
-&lt;p>具体配置方法：&lt;/p>
-&lt;p>服务提供方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;broadcast&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务调用方，服务级配置&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;broadcast&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中服务调用方配置优先于服务提供方配置。&lt;/p>
-&lt;h4 id="各种策略对比">各种策略对比&lt;/h4>
-&lt;p>下表对各种策略做一个简单对比，&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>策略名称&lt;/th>
-&lt;th>优点&lt;/th>
-&lt;th>缺点&lt;/th>
-&lt;th>主要应用场景&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>Failover&lt;/td>
-&lt;td>对调用者屏蔽调用失败的信息&lt;/td>
-&lt;td>增加RT，额外资源开销，资源浪费&lt;/td>
-&lt;td>对调用rt不敏感的场景&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Failfast&lt;/td>
-&lt;td>业务快速感知失败状态进行自主决策&lt;/td>
-&lt;td>产生较多报错的信息&lt;/td>
-&lt;td>非幂等性操作，需要快速感知失败的场景&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Failsafe&lt;/td>
-&lt;td>即使失败了也不会影响核心流程&lt;/td>
-&lt;td>对于失败的信息不敏感，需要额外的监控&lt;/td>
-&lt;td>旁路系统，失败不影响核心流程正确性的场景&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Failback&lt;/td>
-&lt;td>失败自动异步重试&lt;/td>
-&lt;td>重试任务可能堆积&lt;/td>
-&lt;td>对于实时性要求不高，且不需要返回值的一些异步操作&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Forking&lt;/td>
-&lt;td>并行发起多个调用，降低失败概率&lt;/td>
-&lt;td>消耗额外的机器资源，需要确保操作幂等性&lt;/td>
-&lt;td>资源充足，且对于失败的容忍度较低，实时性要求高的场景&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Broadcast&lt;/td>
-&lt;td>支持对所有的服务提供者进行操作&lt;/td>
-&lt;td>资源消耗很大&lt;/td>
-&lt;td>通知所有提供者更新缓存或日志等本地资源信息&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;h3 id="自定义容错策略">自定义容错策略&lt;/h3>
-&lt;p>如果上述内置的容错策略无法满足你的需求，还可以通过扩展的方式来实现自定义容错策略。&lt;/p>
-&lt;h4 id="扩展接口">扩展接口&lt;/h4>
-&lt;p>&lt;code>com.alibaba.dubbo.rpc.cluster.Cluster&lt;/code>&lt;/p>
-&lt;h4 id="扩展配置">扩展配置&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="扩展示例">扩展示例&lt;/h4>
-&lt;p>下面通过一个例子来展示如何使用自定义的容错策略。
-Maven 项目结构：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">src
-|-main
-|-java
-|-com
-|-xxx
-|-XxxCluster.java (实现Cluster接口)
-|-resources
-|-META-INF
-|-dubbo
-|-org.apache.dubbo.rpc.cluster.Cluster (纯文本文件，内容为：xxx=com.xxx.XxxCluster)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxCluster.java：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#719e07">package&lt;/span> com.xxx&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.Cluster&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.support.AbstractClusterInvoker&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.Directory&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.LoadBalance&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invocation&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Result&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">import&lt;/span> java.util.List&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxCluster&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Cluster &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">join&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Directory&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> directory&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> RpcException &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AbstractClusterInvoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">protected&lt;/span> Result &lt;span style="color:#268bd2">doInvoke&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Invocation invocation&lt;span style="color:#719e07">,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers&lt;span style="color:#719e07">,&lt;/span> LoadBalance loadbalance&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> RpcException &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">// your custimzed fault tolarence strategy goes here
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">};&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.Cluster&lt;/code>文件的内容为&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">xxx=com.xxx.XxxCluster
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Blog: Spring应用快速集成Dubbo + Hystrix</title><link>/zh/blog/2018/08/22/spring%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E9%9B%86%E6%88%90dubbo-hystrix/</link><pubDate>Wed, 22 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/22/spring%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E9%9B%86%E6%88%90dubbo-hystrix/</guid><description>
-&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。&lt;/p>
-&lt;p>Dubbo是Alibaba开源的，目前国内最流行的java rpc框架。&lt;/p>
-&lt;p>本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="spring-boot应用">Spring Boot应用&lt;/h2>
-&lt;p>Demo地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-spring-boot-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-spring-boot-hystrix&lt;/a>&lt;/p>
-&lt;h3 id="生成dubbo集成spring-boot的应用">生成dubbo集成spring boot的应用&lt;/h3>
-&lt;p>对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： &lt;a href="http://start.dubbo.io/">http://start.dubbo.io/&lt;/a>&lt;/p>
-&lt;h3 id="配置spring-cloud-starter-netflix-hystrix">配置spring-cloud-starter-netflix-hystrix&lt;/h3>
-&lt;p>spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml"> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.cloud&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-cloud-starter-netflix-hystrix&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.4.4.RELEASE&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在Application类上增加&lt;code>@EnableHystrix&lt;/code>来启用hystrix starter：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
-&lt;span style="color:#268bd2">@EnableHystrix&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderApplication&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置provider端">配置Provider端&lt;/h3>
-&lt;p>在Dubbo的Provider上增加&lt;code>@HystrixCommand&lt;/code>配置，这样子调用就会经过Hystrix代理。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Service&lt;/span>&lt;span style="color:#719e07">(&lt;/span>version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@HystrixCommand&lt;/span>&lt;span style="color:#719e07">(&lt;/span>commandProperties &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@HystrixProperty&lt;/span>&lt;span style="color:#719e07">(&lt;/span>name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;circuitBreaker.requestVolumeThreshold&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#719e07">),&lt;/span>
-&lt;span style="color:#268bd2">@HystrixProperty&lt;/span>&lt;span style="color:#719e07">(&lt;/span>name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;execution.isolation.thread.timeoutInMilliseconds&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">})&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">// System.out.println(&amp;#34;async provider received: &amp;#34; + name);
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// return &amp;#34;annotation: hello, &amp;#34; + name;
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Exception to show hystrix enabled.&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置consumer端">配置Consumer端&lt;/h3>
-&lt;p>对于Consumer端，则可以增加一层method调用，并在method上配置&lt;code>@HystrixCommand&lt;/code>。当调用出错时，会走到&lt;code>fallbackMethod = &amp;quot;reliable&amp;quot;&lt;/code>的调用里。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#268bd2">@Reference&lt;/span>&lt;span style="color:#719e07">(&lt;/span>version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> HelloService demoService&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">@HystrixCommand&lt;/span>&lt;span style="color:#719e07">(&lt;/span>fallbackMethod &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;reliable&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">doSayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> demoService&lt;span style="color:#719e07">.&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">reliable&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hystrix fallback value&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过上面的配置，很简单地就完成了Spring Boot里Dubbo + Hystrix的集成。&lt;/p>
-&lt;h2 id="传统spring-annotation应用">传统Spring Annotation应用&lt;/h2>
-&lt;p>Demo地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-spring-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-spring-hystrix&lt;/a>&lt;/p>
-&lt;p>传统spring annotation应用的配置其实也很简单，和spring boot应用不同的是：&lt;/p>
-&lt;ol>
-&lt;li>显式配置Spring AOP支持：&lt;code>@EnableAspectJAutoProxy&lt;/code>&lt;/li>
-&lt;li>显式通过&lt;code>@Configuration&lt;/code>配置&lt;code>HystrixCommandAspect&lt;/code> Bean。&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#268bd2">@Configuration&lt;/span>
-&lt;span style="color:#268bd2">@EnableDubbo&lt;/span>&lt;span style="color:#719e07">(&lt;/span>scanBasePackages &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.annotation.action&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">@PropertySource&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;classpath:/spring/dubbo-consumer.properties&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">@ComponentScan&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.annotation.action&amp;#34;&lt;/span>&lt;span style="color:#719e07">})&lt;/span>
-&lt;span style="color:#268bd2">@EnableAspectJAutoProxy&lt;/span>
-&lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ConsumerConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Bean&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> HystrixCommandAspect &lt;span style="color:#268bd2">hystrixCommandAspect&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HystrixCommandAspect&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="hystrix集成spring-aop原理">Hystrix集成Spring AOP原理&lt;/h2>
-&lt;p>在上面的例子里可以看到，Hystrix对Spring的集成是通过Spring AOP来实现的。下面简单分析下实现。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Aspect&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HystrixCommandAspect&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Pointcut&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;@annotation(com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand)&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">hystrixCommandAnnotationPointcut&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">@Pointcut&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;@annotation(com.netflix.hystrix.contrib.javanica.annotation.HystrixCollapser)&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">hystrixCollapserAnnotationPointcut&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">@Around&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;hystrixCommandAnnotationPointcut() || hystrixCollapserAnnotationPointcut()&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">methodsAnnotatedWithHystrixCommand&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#268bd2">final&lt;/span> ProceedingJoinPoint joinPoint&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Throwable &lt;span style="color:#719e07">{&lt;/span>
-Method method &lt;span style="color:#719e07">=&lt;/span> getMethodFromTarget&lt;span style="color:#719e07">(&lt;/span>joinPoint&lt;span style="color:#719e07">);&lt;/span>
-Validate&lt;span style="color:#719e07">.&lt;/span>notNull&lt;span style="color:#719e07">(&lt;/span>method&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#2aa198">&amp;#34;failed to get method from joinPoint: %s&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> joinPoint&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>method&lt;span style="color:#719e07">.&lt;/span>isAnnotationPresent&lt;span style="color:#719e07">(&lt;/span>HystrixCommand&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> method&lt;span style="color:#719e07">.&lt;/span>isAnnotationPresent&lt;span style="color:#719e07">(&lt;/span>HystrixCollapser&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;method cannot be annotated with HystrixCommand and HystrixCollapser &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
-&lt;span style="color:#2aa198">&amp;#34;annotations at the same time&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-MetaHolderFactory metaHolderFactory &lt;span style="color:#719e07">=&lt;/span> META_HOLDER_FACTORY_MAP&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>HystrixPointcutType&lt;span style="color:#719e07">.&lt;/span>of&lt;span style="color:#719e07">(&lt;/span>method&lt;span style="color:#719e07">));&lt;/span>
-MetaHolder metaHolder &lt;span style="color:#719e07">=&lt;/span> metaHolderFactory&lt;span style="color:#719e07">.&lt;/span>create&lt;span style="color:#719e07">(&lt;/span>joinPoint&lt;span style="color:#719e07">);&lt;/span>
-HystrixInvokable invokable &lt;span style="color:#719e07">=&lt;/span> HystrixCommandFactory&lt;span style="color:#719e07">.&lt;/span>getInstance&lt;span style="color:#719e07">().&lt;/span>create&lt;span style="color:#719e07">(&lt;/span>metaHolder&lt;span style="color:#719e07">);&lt;/span>
-ExecutionType executionType &lt;span style="color:#719e07">=&lt;/span> metaHolder&lt;span style="color:#719e07">.&lt;/span>isCollapserAnnotationPresent&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">?&lt;/span>
-metaHolder&lt;span style="color:#719e07">.&lt;/span>getCollapserExecutionType&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">:&lt;/span> metaHolder&lt;span style="color:#719e07">.&lt;/span>getExecutionType&lt;span style="color:#719e07">();&lt;/span>
-Object result&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>metaHolder&lt;span style="color:#719e07">.&lt;/span>isObservable&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-result &lt;span style="color:#719e07">=&lt;/span> CommandExecutor&lt;span style="color:#719e07">.&lt;/span>execute&lt;span style="color:#719e07">(&lt;/span>invokable&lt;span style="color:#719e07">,&lt;/span> executionType&lt;span style="color:#719e07">,&lt;/span> metaHolder&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-result &lt;span style="color:#719e07">=&lt;/span> executeObservable&lt;span style="color:#719e07">(&lt;/span>invokable&lt;span style="color:#719e07">,&lt;/span> executionType&lt;span style="color:#719e07">,&lt;/span> metaHolder&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>HystrixBadRequestException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> e&lt;span style="color:#719e07">.&lt;/span>getCause&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> e&lt;span style="color:#719e07">.&lt;/span>getCause&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">:&lt;/span> e&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>HystrixRuntimeException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> hystrixRuntimeExceptionToThrowable&lt;span style="color:#719e07">(&lt;/span>metaHolder&lt;span style="color:#719e07">,&lt;/span> e&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> result&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>&lt;code>HystrixCommandAspect&lt;/code>里定义了两个注解的AspectJ Pointcut：&lt;code>@HystrixCommand&lt;/code>, &lt;code>@HystrixCollapser&lt;/code>。所有带这两个注解的spring bean都会经过AOP处理&lt;/li>
-&lt;li>在&lt;code>@Around&lt;/code> AOP处理函数里，可以看到Hystrix会创建出&lt;code>HystrixInvokable&lt;/code>，再通过&lt;code>CommandExecutor&lt;/code>来执行&lt;/li>
-&lt;/ol>
-&lt;h2 id="spring-cloud-starter-netflix-hystrix的代码分析">spring-cloud-starter-netflix-hystrix的代码分析&lt;/h2>
-&lt;ol>
-&lt;li>
-&lt;p>&lt;code>@EnableHystrix&lt;/code> 引入了&lt;code>@EnableCircuitBreaker&lt;/code>，&lt;code>@EnableCircuitBreaker&lt;/code>引入了&lt;code>EnableCircuitBreakerImportSelector&lt;/code>&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@EnableCircuitBreaker&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">@interface&lt;/span> EnableHystrix &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">@Import&lt;/span>&lt;span style="color:#719e07">(&lt;/span>EnableCircuitBreakerImportSelector&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">@interface&lt;/span> EnableCircuitBreaker &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>&lt;code>EnableCircuitBreakerImportSelector&lt;/code>继承了&lt;code>SpringFactoryImportSelector&amp;lt;EnableCircuitBreaker&amp;gt;&lt;/code>，使spring加载&lt;code>META-INF/spring.factories&lt;/code>里的&lt;code>EnableCircuitBreaker&lt;/code>声明的配置&lt;/p>
-&lt;p>在&lt;code>META-INF/spring.factories&lt;/code>里可以找到下面的配置，也就是引入了&lt;code>HystrixCircuitBreakerConfiguration&lt;/code>。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker=\
-org.springframework.cloud.netflix.hystrix.HystrixCircuitBreakerConfiguration
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>在&lt;code>HystrixCircuitBreakerConfiguration&lt;/code>里可以发现创建了&lt;code>HystrixCommandAspect&lt;/code>&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Configuration&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HystrixCircuitBreakerConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Bean&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> HystrixCommandAspect &lt;span style="color:#268bd2">hystrixCommandAspect&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HystrixCommandAspect&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;/ol>
-&lt;p>可见&lt;code>spring-cloud-starter-netflix-hystrix&lt;/code>实际上也是创建了&lt;code>HystrixCommandAspect&lt;/code>来集成Hystrix。&lt;/p>
-&lt;p>另外&lt;code>spring-cloud-starter-netflix-hystrix&lt;/code>里还有metrics, health, dashboard等集成。&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;ul>
-&lt;li>对于dubbo provider的&lt;code>@Service&lt;/code>是一个spring bean，直接在上面配置&lt;code>@HystrixCommand&lt;/code>即可&lt;/li>
-&lt;li>对于dubbo consumer的&lt;code>@Reference&lt;/code>，可以通过加一层简单的spring method包装，配置&lt;code>@HystrixCommand&lt;/code>即可&lt;/li>
-&lt;li>Hystrix本身提供&lt;code>HystrixCommandAspect&lt;/code>来集成Spring AOP，配置了&lt;code>@HystrixCommand&lt;/code>和&lt;code>@HystrixCollapser&lt;/code>的spring method都会被Hystrix处理&lt;/li>
-&lt;/ul>
-&lt;h2 id="链接">链接&lt;/h2>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
-&lt;li>&lt;a href="http://start.dubbo.io/">http://start.dubbo.io/&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients">https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Blog: Dubbo 现有心跳方案总结以及改进建议</title><link>/zh/blog/2018/08/19/dubbo-%E7%8E%B0%E6%9C%89%E5%BF%83%E8%B7%B3%E6%96%B9%E6%A1%88%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E6%94%B9%E8%BF%9B%E5%BB%BA%E8%AE%AE/</link><pubDate>Sun, 19 Aug 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/08/19/dubbo-%E7%8E%B0%E6%9C%89%E5%BF%83%E8%B7%B3%E6%96%B9%E6%A1%88%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E6%94%B9%E8%BF%9B%E5%BB%BA%E8%AE%AE/</guid><description>
-&lt;h3 id="1-前言">1 前言&lt;/h3>
-&lt;p>设计一个好的心跳机制并不是一件容易的事，就我所熟知的几个 RPC 框架，它们的心跳机制可以说大相径庭，这篇文章我将探讨一下&lt;strong>如何设计一个优雅的心跳机制，主要从 Dubbo 的现有方案以及一个改进方案来做分析&lt;/strong>。&lt;/p>
-&lt;h3 id="2-预备知识">2 预备知识&lt;/h3>
-&lt;p>因为后续我们将从源码层面来进行介绍，所以一些服务治理框架的细节还需要提前交代一下，方便大家理解。&lt;/p>
-&lt;h4 id="21-客户端如何得知请求失败了">2.1 客户端如何得知请求失败了？&lt;/h4>
-&lt;p>高性能的 RPC 框架几乎都会选择使用 Netty 来作为通信层的组件，非阻塞式通信的高效不需要我做过多的介绍。但也由于非阻塞的特性，导致其发送数据和接收数据是一个异步的过程，所以当存在服务端异常、网络问题时，客户端是接收不到响应的，那么我们如何判断一次 RPC 调用是失败的呢？&lt;/p>
-&lt;p>误区一：Dubbo 调用不是默认同步的吗？&lt;/p>
-&lt;p>Dubbo 在通信层是异步的，呈现给使用者同步的错觉是因为内部做了阻塞等待，实现了异步转同步。&lt;/p>
-&lt;p>误区二： &lt;code>Channel.writeAndFlush&lt;/code> 会返回一个 &lt;code>channelFuture&lt;/code>，我只需要判断 &lt;code>channelFuture.isSuccess&lt;/code> 就可以判断请求是否成功了。&lt;/p>
-&lt;p>注意，writeAndFlush 成功并不代表对端接受到了请求，返回值为 true 只能保证写入网络缓冲区成功，并不代表发送成功。&lt;/p>
-&lt;p>避开上述两个误区，我们再来回到本小节的标题：客户端如何得知请求失败？&lt;strong>正确的逻辑应当是以客户端接收到失败响应为判断依据&lt;/strong>。等等，前面不还在说在失败的场景中，服务端是不会返回响应的吗？没错，既然服务端不会返回，那就只能客户端自己造了。&lt;/p>
-&lt;p>一个常见的设计是：客户端发起一个 RPC 请求，会设置一个超时时间 &lt;code>client_timeout&lt;/code>，发起调用的同时，客户端会开启一个延迟 &lt;code>client_timeout&lt;/code> 的定时器&lt;/p>
-&lt;ul>
-&lt;li>接收到正常响应时，移除该定时器。&lt;/li>
-&lt;li>定时器倒计时完毕，还没有被移除，则认为请求超时，构造一个失败的响应传递给客户端。&lt;/li>
-&lt;/ul>
-&lt;p>Dubbo 中的超时判定逻辑：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> DefaultFuture &lt;span style="color:#268bd2">newFuture&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Channel channel&lt;span style="color:#719e07">,&lt;/span> Request request&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> timeout&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">final&lt;/span> DefaultFuture future &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> DefaultFuture&lt;span style="color:#719e07">(&lt;/span>channel&lt;span style="color:#719e07">,&lt;/span> request&lt;span style="color:#719e07">,&lt;/span> timeout&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#586e75">// timeout check
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> timeoutCheck&lt;span style="color:#719e07">(&lt;/span>future&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> future&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">timeoutCheck&lt;/span>&lt;span style="color:#719e07">(&lt;/span>DefaultFuture future&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-TimeoutCheckTask task &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TimeoutCheckTask&lt;span style="color:#719e07">(&lt;/span>future&lt;span style="color:#719e07">);&lt;/span>
-TIME_OUT_TIMER&lt;span style="color:#719e07">.&lt;/span>newTimeout&lt;span style="color:#719e07">(&lt;/span>task&lt;span style="color:#719e07">,&lt;/span> future&lt;span style="color:#719e07">.&lt;/span>getTimeout&lt;span style="color:#719e07">(),&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>MILLISECONDS&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TimeoutCheckTask&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> TimerTask &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> DefaultFuture future&lt;span style="color:#719e07">;&lt;/span>
-TimeoutCheckTask&lt;span style="color:#719e07">(&lt;/span>DefaultFuture future&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>future &lt;span style="color:#719e07">=&lt;/span> future&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">run&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Timeout timeout&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>future &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">||&lt;/span> future&lt;span style="color:#719e07">.&lt;/span>isDone&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#586e75">// create exception response.
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> Response timeoutResponse &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Response&lt;span style="color:#719e07">(&lt;/span>future&lt;span style="color:#719e07">.&lt;/span>getId&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#586e75">// set timeout status.
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> timeoutResponse&lt;span style="color:#719e07">.&lt;/span>setStatus&lt;span style="color:#719e07">(&lt;/span>future&lt;span style="color:#719e07">.&lt;/span>isSent&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">?&lt;/span> Response&lt;span style="color:#719e07">.&lt;/span>SERVER_TIMEOUT &lt;span style="color:#719e07">:&lt;/span> Response&lt;span style="color:#719e07">.&lt;/span>CLIENT_TIMEOUT&lt;span style="color:#719e07">);&lt;/span>
-timeoutResponse&lt;span style="color:#719e07">.&lt;/span>setErrorMessage&lt;span style="color:#719e07">(&lt;/span>future&lt;span style="color:#719e07">.&lt;/span>getTimeoutMessage&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
-&lt;span style="color:#586e75">// handle response.
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> DefaultFuture&lt;span style="color:#719e07">.&lt;/span>received&lt;span style="color:#719e07">(&lt;/span>future&lt;span style="color:#719e07">.&lt;/span>getChannel&lt;span style="color:#719e07">(),&lt;/span> timeoutResponse&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>主要逻辑涉及的类：&lt;code>DubboInvoker&lt;/code>，&lt;code>HeaderExchangeChannel&lt;/code>，&lt;code>DefaultFuture&lt;/code> ，通过上述代码，我们可以得知一个细节，无论是何种调用，都会经过这个定时器的检测，&lt;strong>超时即调用失败，一次 RPC 调用的失败，必须以客户端收到失败响应为准&lt;/strong>。&lt;/p>
-&lt;h4 id="22-心跳检测需要容错">2.2 心跳检测需要容错&lt;/h4>
-&lt;p>网络通信永远要考虑到最坏的情况，一次心跳失败，不能认定为连接不通，多次心跳失败，才能采取相应的措施。&lt;/p>
-&lt;h4 id="23-心跳检测不需要忙检测">2.3 心跳检测不需要忙检测&lt;/h4>
-&lt;p>忙检测的对立面是空闲检测，我们做心跳的初衷，是为了保证连接的可用性，以保证及时采取断连，重连等措施。如果一条通道上有频繁的 RPC 调用正在进行，我们不应该为通道增加负担去发送心跳包。&lt;strong>心跳扮演的角色应当是晴天收伞，雨天送伞。&lt;/strong>&lt;/p>
-&lt;h3 id="3-dubbo-现有方案">3 Dubbo 现有方案&lt;/h3>
-&lt;blockquote>
-&lt;p>本文的源码对应 Dubbo 2.7.x 版本，在 apache 孵化的该版本中，心跳机制得到了增强。&lt;/p>
-&lt;/blockquote>
-&lt;p>介绍完了一些基础的概念，我们再来看看 Dubbo 是如何设计应用层心跳的。Dubbo 的心跳是双向心跳，客户端会给服务端发送心跳，反之，服务端也会向客户端发送心跳。&lt;/p>
-&lt;h4 id="31-连接建立时创建定时器">3.1 连接建立时创建定时器&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HeaderExchangeClient&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ExchangeClient &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> heartbeat&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> heartbeatTimeout&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> HashedWheelTimer heartbeatTimer&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">HeaderExchangeClient&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Client client&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> needHeartbeat&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>client &lt;span style="color:#719e07">=&lt;/span> client&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>channel &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HeaderExchangeChannel&lt;span style="color:#719e07">(&lt;/span>client&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>heartbeat &lt;span style="color:#719e07">=&lt;/span> client&lt;span style="color:#719e07">.&lt;/span>getUrl&lt;span style="color:#719e07">().&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>Constants&lt;span style="color:#719e07">.&lt;/span>HEARTBEAT_KEY&lt;span style="color:#719e07">,&lt;/span> dubbo &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> dubbo&lt;span style="color:#719e07">.&lt;/span>startsWith&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;1.0.&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">?&lt;/span> Constants&lt;span style="color:#719e07">.&lt;/span>DEFAULT_HEARTBEAT &lt;span style="color:#719e07">:&lt;/span> 0&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>heartbeatTimeout &lt;span style="color:#719e07">=&lt;/span> client&lt;span style="color:#719e07">.&lt;/span>getUrl&lt;span style="color:#719e07">().&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>Constants&lt;span style="color:#719e07">.&lt;/span>HEARTBEAT_TIMEOUT_KEY&lt;span style="color:#719e07">,&lt;/span> heartbeat &lt;span style="color:#719e07">*&lt;/span> 3&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>needHeartbeat&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>1&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;span style="color:#dc322f">long&lt;/span> tickDuration &lt;span style="color:#719e07">=&lt;/span> calculateLeastDuration&lt;span style="color:#719e07">(&lt;/span>heartbeat&lt;span style="color:#719e07">);&lt;/span>
-heartbeatTimer &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashedWheelTimer&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> NamedThreadFactory&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;dubbo-client-heartbeat&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">),&lt;/span> tickDuration&lt;span style="color:#719e07">,&lt;/span>
-TimeUnit&lt;span style="color:#719e07">.&lt;/span>MILLISECONDS&lt;span style="color:#719e07">,&lt;/span> Constants&lt;span style="color:#719e07">.&lt;/span>TICKS_PER_WHEEL&lt;span style="color:#719e07">);&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>2&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">startHeartbeatTimer&lt;/span>&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&amp;lt;1&amp;gt; &lt;strong>默认开启心跳检测的定时器&lt;/strong>&lt;/p>
-&lt;p>&amp;lt;2&amp;gt; &lt;strong>创建了一个 &lt;code>HashedWheelTimer &lt;/code> 开启心跳检测&lt;/strong>，这是 Netty 所提供的一个经典的时间轮定时器实现，至于它和 jdk 的实现有何不同，不了解的同学也可以关注下，我就不拓展了。&lt;/p>
-&lt;p>不仅 &lt;code>HeaderExchangeClient&lt;/code> 客户端开起了定时器，&lt;code>HeaderExchangeServer&lt;/code> 服务端同样开起了定时器，由于服务端的逻辑和客户端几乎一致，所以后续我并不会重复粘贴服务端的代码。&lt;/p>
-&lt;blockquote>
-&lt;p>Dubbo 在早期版本版本中使用的是 schedule 方案，在 2.7.x 中替换成了 HashedWheelTimer。&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="32-开启两个定时任务">3.2 开启两个定时任务&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">startHeartbeatTimer&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">long&lt;/span> heartbeatTick &lt;span style="color:#719e07">=&lt;/span> calculateLeastDuration&lt;span style="color:#719e07">(&lt;/span>heartbeat&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#dc322f">long&lt;/span> heartbeatTimeoutTick &lt;span style="color:#719e07">=&lt;/span> calculateLeastDuration&lt;span style="color:#719e07">(&lt;/span>heartbeatTimeout&lt;span style="color:#719e07">);&lt;/span>
-HeartbeatTimerTask heartBeatTimerTask &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HeartbeatTimerTask&lt;span style="color:#719e07">(&lt;/span>cp&lt;span style="color:#719e07">,&lt;/span> heartbeatTick&lt;span style="color:#719e07">,&lt;/span> heartbeat&lt;span style="color:#719e07">);&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>1&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-ReconnectTimerTask reconnectTimerTask &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReconnectTimerTask&lt;span style="color:#719e07">(&lt;/span>cp&lt;span style="color:#719e07">,&lt;/span> heartbeatTimeoutTick&lt;span style="color:#719e07">,&lt;/span> heartbeatTimeout&lt;span style="color:#719e07">);&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>2&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-heartbeatTimer&lt;span style="color:#719e07">.&lt;/span>newTimeout&lt;span style="color:#719e07">(&lt;/span>heartBeatTimerTask&lt;span style="color:#719e07">,&lt;/span> heartbeatTick&lt;span style="color:#719e07">,&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>MILLISECONDS&lt;span style="color:#719e07">);&lt;/span>
-heartbeatTimer&lt;span style="color:#719e07">.&lt;/span>newTimeout&lt;span style="color:#719e07">(&lt;/span>reconnectTimerTask&lt;span style="color:#719e07">,&lt;/span> heartbeatTimeoutTick&lt;span style="color:#719e07">,&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>MILLISECONDS&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 在 &lt;code>startHeartbeatTimer&lt;/code> 方法中主要开启了两个定时器： &lt;code>HeartbeatTimerTask&lt;/code>，&lt;code>ReconnectTimerTask&lt;/code>&lt;/p>
-&lt;p>&amp;lt;1&amp;gt; &lt;code>HeartbeatTimerTask&lt;/code> 主要用于定时发送心跳请求&lt;/p>
-&lt;p>&amp;lt;2&amp;gt; &lt;code>ReconnectTimerTask&lt;/code> 主要用于心跳失败之后处理重连，断连的逻辑&lt;/p>
-&lt;p>至于方法中的其他代码，其实也是本文的重要分析内容，先容我卖个关子，后面再来看追溯。&lt;/p>
-&lt;h4 id="33-定时任务一发送心跳请求">3.3 定时任务一：发送心跳请求&lt;/h4>
-&lt;p>详细解析下心跳检测定时任务的逻辑 &lt;code>HeartbeatTimerTask#doTask&lt;/code>：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doTask&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Channel channel&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Long lastRead &lt;span style="color:#719e07">=&lt;/span> lastRead&lt;span style="color:#719e07">(&lt;/span>channel&lt;span style="color:#719e07">);&lt;/span>
-Long lastWrite &lt;span style="color:#719e07">=&lt;/span> lastWrite&lt;span style="color:#719e07">(&lt;/span>channel&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">((&lt;/span>lastRead &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> now&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">-&lt;/span> lastRead &lt;span style="color:#719e07">&amp;gt;&lt;/span> heartbeat&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#719e07">||&lt;/span> &lt;span style="color:#719e07">(&lt;/span>lastWrite &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> now&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">-&lt;/span> lastWrite &lt;span style="color:#719e07">&amp;gt;&lt;/span> heartbeat&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Request req &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Request&lt;span style="color:#719e07">();&lt;/span>
-req&lt;span style="color:#719e07">.&lt;/span>setVersion&lt;span style="color:#719e07">(&lt;/span>Version&lt;span style="color:#719e07">.&lt;/span>getProtocolVersion&lt;span style="color:#719e07">());&lt;/span>
-req&lt;span style="color:#719e07">.&lt;/span>setTwoWay&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-req&lt;span style="color:#719e07">.&lt;/span>setEvent&lt;span style="color:#719e07">(&lt;/span>Request&lt;span style="color:#719e07">.&lt;/span>HEARTBEAT_EVENT&lt;span style="color:#719e07">);&lt;/span>
-channel&lt;span style="color:#719e07">.&lt;/span>send&lt;span style="color:#719e07">(&lt;/span>req&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>前面已经介绍过，&lt;strong>Dubbo 采取的是双向心跳设计&lt;/strong>，即服务端会向客户端发送心跳，客户端也会向服务端发送心跳，接收的一方更新 lastRead 字段，发送的一方更新 lastWrite 字段，超过心跳间隙的时间，便发送心跳请求给对端。这里的 lastRead/lastWrite 同样会被同一个通道上的普通调用更新，通过更新这两个字段，实现了只在连接空闲时才会真正发送空闲报文的机制，符合我们一开始科普的做法。&lt;/p>
-&lt;blockquote>
-&lt;p>注意：不仅仅心跳请求会更新 lastRead 和 lastWrite，普通请求也会。这对应了我们预备知识中的空闲检测机制。&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="34-定时任务二处理重连和断连">3.4 定时任务二：处理重连和断连&lt;/h4>
-&lt;p>继续研究下重连和断连定时器都实现了什么 &lt;code>ReconnectTimerTask#doTask&lt;/code>。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doTask&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Channel channel&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Long lastRead &lt;span style="color:#719e07">=&lt;/span> lastRead&lt;span style="color:#719e07">(&lt;/span>channel&lt;span style="color:#719e07">);&lt;/span>
-Long now &lt;span style="color:#719e07">=&lt;/span> now&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>lastRead &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> now &lt;span style="color:#719e07">-&lt;/span> lastRead &lt;span style="color:#719e07">&amp;gt;&lt;/span> heartbeatTimeout&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>channel &lt;span style="color:#719e07">instanceof&lt;/span> Client&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">((&lt;/span>Client&lt;span style="color:#719e07">)&lt;/span> channel&lt;span style="color:#719e07">).&lt;/span>reconnect&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-channel&lt;span style="color:#719e07">.&lt;/span>close&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>第二个定时器则负责根据客户端、服务端类型来对连接做不同的处理，当超过设置的心跳总时间之后，客户端选择的是重新连接，服务端则是选择直接断开连接。这样的考虑是合理的，客户端调用是强依赖可用连接的，而服务端可以等待客户端重新建立连接。&lt;/p>
-&lt;blockquote>
-&lt;p>细心的朋友会发现，这个类被命名为 ReconnectTimerTask 是不太准确的，因为它处理的是重连和断连两个逻辑。&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="35-定时不精确的问题">3.5 定时不精确的问题&lt;/h4>
-&lt;p>在 Dubbo 的 issue 中曾经有人反馈过定时不精确的问题，我们来看看是怎么一回事。&lt;/p>
-&lt;p>Dubbo 中默认的心跳周期是 60s，设想如下的时序：&lt;/p>
-&lt;ul>
-&lt;li>第 0 秒，心跳检测发现连接活跃&lt;/li>
-&lt;li>第 1 秒，连接实际断开&lt;/li>
-&lt;li>第 60 秒，心跳检测发现连接不活跃&lt;/li>
-&lt;/ul>
-&lt;p>由于&lt;strong>时间窗口的问题，死链不能够被及时检测出来，最坏情况为一个心跳周期&lt;/strong>。&lt;/p>
-&lt;p>为了解决上述问题，我们再倒回去看一下上面的 &lt;code>startHeartbeatTimer()&lt;/code> 方法&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#dc322f">long&lt;/span> heartbeatTick &lt;span style="color:#719e07">=&lt;/span> calculateLeastDuration&lt;span style="color:#719e07">(&lt;/span>heartbeat&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#dc322f">long&lt;/span> heartbeatTimeoutTick &lt;span style="color:#719e07">=&lt;/span> calculateLeastDuration&lt;span style="color:#719e07">(&lt;/span>heartbeatTimeout&lt;span style="color:#719e07">);&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 &lt;code>calculateLeastDuration&lt;/code> 根据心跳时间和超时时间分别计算出了一个 tick 时间，实际上就是将两个变量除以了 3，使得他们的值缩小，并传入了 &lt;code>HashedWheelTimer&lt;/code> 的第二个参数之中&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">heartbeatTimer&lt;span style="color:#719e07">.&lt;/span>newTimeout&lt;span style="color:#719e07">(&lt;/span>heartBeatTimerTask&lt;span style="color:#719e07">,&lt;/span> heartbeatTick&lt;span style="color:#719e07">,&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>MILLISECONDS&lt;span style="color:#719e07">);&lt;/span>
-heartbeatTimer&lt;span style="color:#719e07">.&lt;/span>newTimeout&lt;span style="color:#719e07">(&lt;/span>reconnectTimerTask&lt;span style="color:#719e07">,&lt;/span> heartbeatTimeoutTick&lt;span style="color:#719e07">,&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>MILLISECONDS&lt;span style="color:#719e07">);&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>tick 的含义便是定时任务执行的频率。这样，通过减少检测间隔时间，增大了及时发现死链的概率，原先的最坏情况是 60s，如今变成了 20s。这个频率依旧可以加快，但需要考虑资源消耗的问题。&lt;/p>
-&lt;blockquote>
-&lt;p>定时不准确的问题出现在 Dubbo 的两个定时任务之中，所以都做了 tick 操作。事实上，所有的定时检测的逻辑都存在类似的问题。&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="36-dubbo-心跳总结">3.6 Dubbo 心跳总结&lt;/h4>
-&lt;p>Dubbo 对于建立的每一个连接，同时在客户端和服务端开启了 2 个定时器，一个用于定时发送心跳，一个用于定时重连、断连，执行的频率均为各自检测周期的 1/3。定时发送心跳的任务负责在连接空闲时，向对端发送心跳包。定时重连、断连的任务负责检测 lastRead 是否在超时周期内仍未被更新，如果判定为超时，客户端处理的逻辑是重连，服务端则采取断连的措施。&lt;/p>
-&lt;p>先不急着判断这个方案好不好，再来看看改进方案是怎么设计的。&lt;/p>
-&lt;h3 id="4-dubbo-改进方案">4 Dubbo 改进方案&lt;/h3>
-&lt;p>实际上我们可以更优雅地实现心跳机制，本小节开始，我将介绍一个新的心跳机制。&lt;/p>
-&lt;h4 id="41-idlestatehandler-介绍">4.1 IdleStateHandler 介绍&lt;/h4>
-&lt;p>Netty 对空闲连接的检测提供了天然的支持，使用 &lt;code>IdleStateHandler&lt;/code> 可以很方便的实现空闲检测逻辑。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">IdleStateHandler&lt;/span>&lt;span style="color:#719e07">(&lt;/span>
-&lt;span style="color:#dc322f">long&lt;/span> readerIdleTime&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> writerIdleTime&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> allIdleTime&lt;span style="color:#719e07">,&lt;/span>
-TimeUnit unit&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>readerIdleTime：读超时时间&lt;/li>
-&lt;li>writerIdleTime：写超时时间&lt;/li>
-&lt;li>allIdleTime：所有类型的超时时间&lt;/li>
-&lt;/ul>
-&lt;p>&lt;code>IdleStateHandler&lt;/code> 这个类会根据设置的超时参数，循环检测 channelRead 和 write 方法多久没有被调用。当在 pipeline 中加入 &lt;code>IdleSateHandler&lt;/code> 之后，可以在此 pipeline 的任意 Handler 的 &lt;code>userEventTriggered&lt;/code> 方法之中检测 &lt;code>IdleStateEvent&lt;/code> 事件，&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">userEventTriggered&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ChannelHandlerContext ctx&lt;span style="color:#719e07">,&lt;/span> Object evt&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Exception &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>evt &lt;span style="color:#719e07">instanceof&lt;/span> IdleStateEvent&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">//do something
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
-ctx&lt;span style="color:#719e07">.&lt;/span>fireUserEventTriggered&lt;span style="color:#719e07">(&lt;/span>evt&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>为什么需要介绍 &lt;code>IdleStateHandler&lt;/code> 呢？其实提到它的空闲检测 + 定时的时候，大家应该能够想到了，这不天然是给心跳机制服务的吗？很多服务治理框架都选择了借助 &lt;code>IdleStateHandler&lt;/code> 来实现心跳。&lt;/p>
-&lt;blockquote>
-&lt;p>IdleStateHandler 内部使用了 eventLoop.schedule(task) 的方式来实现定时任务，使用 eventLoop 线程的好处是还同时保证了&lt;strong>线程安全&lt;/strong>，这里是一个小细节。&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="42-客户端和服务端配置">4.2 客户端和服务端配置&lt;/h4>
-&lt;p>首先是将 &lt;code>IdleStateHandler&lt;/code> 加入 pipeline 中。&lt;/p>
-&lt;p>&lt;strong>客户端：&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">bootstrap&lt;span style="color:#719e07">.&lt;/span>handler&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ChannelInitializer&lt;span style="color:#719e07">&amp;lt;&lt;/span>NioSocketChannel&lt;span style="color:#719e07">&amp;gt;()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">initChannel&lt;/span>&lt;span style="color:#719e07">(&lt;/span>NioSocketChannel ch&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Exception &lt;span style="color:#719e07">{&lt;/span>
-ch&lt;span style="color:#719e07">.&lt;/span>pipeline&lt;span style="color:#719e07">().&lt;/span>addLast&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;clientIdleHandler&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IdleStateHandler&lt;span style="color:#719e07">(&lt;/span>60&lt;span style="color:#719e07">,&lt;/span> 0&lt;span style="color:#719e07">,&lt;/span> 0&lt;span style="color:#719e07">));&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">});&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>服务端：&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">serverBootstrap&lt;span style="color:#719e07">.&lt;/span>childHandler&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ChannelInitializer&lt;span style="color:#719e07">&amp;lt;&lt;/span>NioSocketChannel&lt;span style="color:#719e07">&amp;gt;()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">initChannel&lt;/span>&lt;span style="color:#719e07">(&lt;/span>NioSocketChannel ch&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Exception &lt;span style="color:#719e07">{&lt;/span>
-ch&lt;span style="color:#719e07">.&lt;/span>pipeline&lt;span style="color:#719e07">().&lt;/span>addLast&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;serverIdleHandler&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span>&lt;span style="color:#719e07">new&lt;/span> IdleStateHandler&lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">,&lt;/span> 0&lt;span style="color:#719e07">,&lt;/span> 200&lt;span style="color:#719e07">));&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>客户端配置了 read 超时为 60s，服务端配置了 write/read 超时为 200s，先在此埋下两个伏笔：&lt;/p>
-&lt;ol>
-&lt;li>为什么客户端和服务端配置的超时时间不一致？&lt;/li>
-&lt;li>为什么客户端检测的是读超时，而服务端检测的是读写超时？&lt;/li>
-&lt;/ol>
-&lt;h4 id="43-空闲超时逻辑--客户端">4.3 空闲超时逻辑 — 客户端&lt;/h4>
-&lt;p>对于空闲超时的处理逻辑，客户端和服务端是不同的。首先来看客户端&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">userEventTriggered&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ChannelHandlerContext ctx&lt;span style="color:#719e07">,&lt;/span> Object evt&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Exception &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>evt &lt;span style="color:#719e07">instanceof&lt;/span> IdleStateEvent&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">// send heartbeat
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> sendHeartBeat&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">super&lt;/span>&lt;span style="color:#719e07">.&lt;/span>userEventTriggered&lt;span style="color:#719e07">(&lt;/span>ctx&lt;span style="color:#719e07">,&lt;/span> evt&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>检测到空闲超时之后，采取的行为是向服务端发送心跳包，具体是如何发送，以及处理响应的呢？伪代码如下&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sendHeartBeat&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Invocation invocation &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Invocation&lt;span style="color:#719e07">();&lt;/span>
-invocation&lt;span style="color:#719e07">.&lt;/span>setInvocationType&lt;span style="color:#719e07">(&lt;/span>InvocationType&lt;span style="color:#719e07">.&lt;/span>HEART_BEAT&lt;span style="color:#719e07">);&lt;/span>
-channel&lt;span style="color:#719e07">.&lt;/span>writeAndFlush&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">).&lt;/span>addListener&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> CallbackFuture&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">callback&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Future future&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-RPCResult result &lt;span style="color:#719e07">=&lt;/span> future&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#586e75">//超时 或者 写失败
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>result&lt;span style="color:#719e07">.&lt;/span>isError&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-channel&lt;span style="color:#719e07">.&lt;/span>addFailedHeartBeatTimes&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>channel&lt;span style="color:#719e07">.&lt;/span>getFailedHeartBeatTimes&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">&amp;gt;=&lt;/span> channel&lt;span style="color:#719e07">.&lt;/span>getMaxHeartBeatFailedTimes&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-channel&lt;span style="color:#719e07">.&lt;/span>reconnect&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-channel&lt;span style="color:#719e07">.&lt;/span>clearHeartBeatFailedTimes&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">});&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>行为并不复杂，构造一个心跳包发送到服务端，接受响应结果&lt;/p>
-&lt;ul>
-&lt;li>响应成功，清空请求失败标记&lt;/li>
-&lt;li>响应失败，心跳失败标记+1，如果超过配置的失败次数，则重新连接&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>不仅仅是心跳，普通请求返回成功响应时也会清空标记&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="44-空闲超时逻辑--服务端">4.4 空闲超时逻辑 — 服务端&lt;/h4>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">userEventTriggered&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ChannelHandlerContext ctx&lt;span style="color:#719e07">,&lt;/span> Object evt&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Exception &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>evt &lt;span style="color:#719e07">instanceof&lt;/span> IdleStateEvent&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-channel&lt;span style="color:#719e07">.&lt;/span>close&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">super&lt;/span>&lt;span style="color:#719e07">.&lt;/span>userEventTriggered&lt;span style="color:#719e07">(&lt;/span>ctx&lt;span style="color:#719e07">,&lt;/span> evt&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务端处理空闲连接的方式非常简单粗暴，直接关闭连接。&lt;/p>
-&lt;h4 id="45-改进方案心跳总结">4.5 改进方案心跳总结&lt;/h4>
-&lt;ol>
-&lt;li>
-&lt;p>为什么客户端和服务端配置的超时时间不一致？&lt;/p>
-&lt;p>因为客户端有重试逻辑，不断发送心跳失败 n 次之后，才认为是连接断开；而服务端是直接断开，留给服务端时间得长一点。60 * 3 &amp;lt; 200 还说明了一个问题，双方都拥有断开连接的能力，但连接的创建是由客户端主动发起的，那么客户端也更有权利去主动断开连接。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>为什么客户端检测的是读超时，而服务端检测的是读写超时？&lt;/p>
-&lt;p>这其实是一个心跳的共识了，仔细思考一下，定时逻辑是由客户端发起的，所以整个链路中不通的情况只有可能是：服务端接收，服务端发送，客户端接收。也就是说，只有客户端的 pong，服务端的 ping，pong 的检测是有意义的。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;blockquote>
-&lt;p>主动追求别人的是你，主动说分手的也是你。&lt;/p>
-&lt;/blockquote>
-&lt;p>利用 &lt;code>IdleStateHandler&lt;/code> 实现心跳机制可以说是十分优雅的，借助 Netty 提供的空闲检测机制，利用客户端维护单向心跳，在收到 3 次心跳失败响应之后，客户端断开连接，交由异步线程重连，本质还是表现为客户端重连。服务端在连接空闲较长时间后，主动断开连接，以避免无谓的资源浪费。&lt;/p>
-&lt;h3 id="5-心跳设计方案对比">5 心跳设计方案对比&lt;/h3>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th style="text-align:center">&lt;/th>
-&lt;th style="text-align:center">Dubbo 现有方案&lt;/th>
-&lt;th style="text-align:center">Dubbo 改进方案&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td style="text-align:center">&lt;strong>主体设计&lt;/strong>&lt;/td>
-&lt;td style="text-align:center">开启两个定时器&lt;/td>
-&lt;td style="text-align:center">借助 IdleStateHandler，底层使用 schedule&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:center">&lt;strong>心跳方向&lt;/strong>&lt;/td>
-&lt;td style="text-align:center">双向&lt;/td>
-&lt;td style="text-align:center">单向（客户端 -&amp;gt; 服务端）&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:center">&lt;strong>心跳失败判定方式&lt;/strong>&lt;/td>
-&lt;td style="text-align:center">心跳成功更新标记，借助定时器定时扫描标记，如果超过心跳超时周期未更新标记，认为心跳失败。&lt;/td>
-&lt;td style="text-align:center">通过判断心跳响应是否失败，超过失败次数，认为心跳失败&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:center">&lt;strong>扩展性&lt;/strong>&lt;/td>
-&lt;td style="text-align:center">Dubbo 存在 mina，grizzy 等其他通信层实现，自定义定时器很容易适配多种扩展&lt;/td>
-&lt;td style="text-align:center">多通信层各自实现心跳，不做心跳的抽象&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:center">&lt;strong>设计性&lt;/strong>&lt;/td>
-&lt;td style="text-align:center">编码复杂度高，代码量大，方案复杂，不易维护&lt;/td>
-&lt;td style="text-align:center">编码量小，可维护性强&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>私下请教过&lt;strong>美团点评的长连接负责人：俞超（闪电侠）&lt;/strong>，美点使用的心跳方案和 Dubbo 改进方案几乎一致，可以说该方案是标准实现了。&lt;/p>
-&lt;h3 id="6-dubbo-实际改动点建议">6 Dubbo 实际改动点建议&lt;/h3>
-&lt;p>鉴于 Dubbo 存在一些其他通信层的实现，所以可以保留现有的定时发送心跳的逻辑。&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>建议改动点一：&lt;/strong>&lt;/li>
-&lt;/ul>
-&lt;p>双向心跳的设计是不必要的，兼容现有的逻辑，可以让客户端在连接空闲时发送单向心跳，服务端定时检测连接可用性。定时时间尽量保证：客户端超时时间 * 3 ≈ 服务端超时时间&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>建议改动点二：&lt;/strong>&lt;/li>
-&lt;/ul>
-&lt;p>去除处理重连和断连的定时任务，Dubbo 可以判断心跳请求是否响应失败，可以借鉴改进方案的设计，在连接级别维护一个心跳失败次数的标记，任意响应成功，清除标记；连续心跳失败 n 次，客户端发起重连。这样可以减少一个不必要的定时器，任何轮询的方式，都是不优雅的。&lt;/p>
-&lt;p>最后再聊聊可扩展性这个话题。其实我是建议把定时器交给更加底层的 Netty 去做，也就是完全使用 &lt;code>IdleStateHandler&lt;/code> ，其他通信层组件各自实现自己的空闲检测逻辑，但是 Dubbo 中 mina，grizzy 的兼容问题囿住了我的拳脚，但试问一下，如今的 2019 年，又有多少人在使用 mina 和 grizzy？因为一些不太可能用的特性，而限制了主流用法的优化，这肯定不是什么好事。抽象，功能，可扩展性并不是越多越好，开源产品的人力资源是有限的，框架使用者的理解能力也是有限的，能解决大多数人问题的设计，才是好的设计。哎，谁让我不会 mina，grizzy，还懒得去学呢[摊手]。&lt;/p></description></item></channel></rss>
+&lt;p>&lt;img src="/imgs/blog/dubbo-chengdu-meetup-img.jpg" alt="img">&lt;/p></description></item></channel></rss>
