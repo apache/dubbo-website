@@ -129,6 +129,10 @@ dubbo-go 主项目，我们重构的这一版主要是基于 Dubbo 的分层代�
 
 dubbo-go 社区目前属于快速健康成长状态，从捐赠给 Apache 后的不到3个月的时间里，吸引了大批量的活跃开发者和感兴趣的用户，欢迎各位同道在使用或者学习中遇到问题能够来社区讨论或者给予指正，也欢迎对 dubbo-go 有潜在需求或者对 dubbo-go 感兴趣的同道能加入到社区中。
 
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe src="https://player.bilibili.com/player.html?aid=413770787&cid=210657864&page=1&as_wide=1&high_quality=1&danmaku=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title=""></iframe>
+</div>
+
 ### 关于作者
 
 何鑫铭，目前就职于携程，基础中台研发部技术专家，dubbo-go 共同发起人、主要作者，Apache Dubbo  committer，关注互联网中台以及中间件领域。
