@@ -542,6 +542,460 @@ Jib2dvLWNvbnN1bWVyLTIuNi4wJTI2cHJvdG9jb2wlM0RkdWJibyIsInYiOiIifV0=
 &lt;p>Dubbo-Go 作为 Dubbo 生态中发展最快的成员，目前基本上保持与 Dubbo 齐头并进的态势。Dubbo-Go 社区钉钉群号为 23331795， 欢迎你的加入。&lt;/p>
 &lt;blockquote>
 &lt;p>作者信息： 郑泽超，Apache Dubbo/Dubbo-Go committer，GithubID: CodingSinger，目前就职于上海爱奇艺科技有限公司，Java/Golang 开发工程师。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: Dubbo-go 源码笔记（一）Server 端开启服务过程</title><link>/zh/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/</guid><description>
+&lt;p>当拿到一款框架之后，一种不错的源码阅读方式大致如下：从运行最基础的 helloworld demo 源码开始 —&amp;gt; 再查看配置文件 —&amp;gt; 开启各种依赖服务（比如zk、consul） —&amp;gt; 开启服务端 —&amp;gt; 再到通过 client 调用服务端 —&amp;gt; 打印完整请求日志和回包。调用成功之后，再根据框架的设计模型，从配置文件解析开始，自顶向下递阅读整个框架的调用栈。&lt;/p>
+&lt;p>对于 C/S 模式的 rpc 请求来说，整个调用栈被拆成了 client 和 server 两部分，所以可以分别从 server 端的配置文件解析阅读到 server 端的监听启动，从 client 端的配置文件解析阅读到一次 invoker Call 调用。这样一次完整请求就明晰了起来。&lt;/p>
+&lt;h2 id="运行官网提供的-helloworld-demo">运行官网提供的 helloworld-demo&lt;/h2>
+&lt;p>&lt;strong>官方 demo 相关链接&lt;/strong>：https://github.com/dubbogo/dubbo-samples/tree/master/golang/helloworld/dubbo&lt;/p>
+&lt;h3 id="1-dubbo-go-27-版本-quickstart">1. dubbo-go 2.7 版本 QuickStart&lt;/h3>
+&lt;h4 id="1开启一个-go-server-服务">1）开启一个 go-server 服务&lt;/h4>
+&lt;ul>
+&lt;li>将仓库 clone 到本地&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ git clone https://github.com/dubbogo/dubbo-samples.git
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>进入 dubbo 目录&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ &lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/golang/helloworld/dubbo
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入目录后可看到四个文件夹，分别支持 go 和 java 的 client 以及 server，我们尝试运行一个 go 的 server。进入 app 子文件夹内，可以看到里面保存了 go 文件。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ &lt;span style="color:#b58900">cd&lt;/span> go-server/app
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>sample 文件结构&lt;/li>
+&lt;/ul>
+&lt;p>可以在 go-server 里面看到三个文件夹：app、assembly、profiles。&lt;/p>
+&lt;p>其中 app 文件夹下保存 go 源码，assembly 文件夹下保存可选的针对特定环境的 build 脚本，profiles 下保存配置文件。对于 dubbo-go 框架，配置文件非常重要，没有文件将导致服务无法启动。&lt;/p>
+&lt;ul>
+&lt;li>设置指向配置文件的环境变量&lt;/li>
+&lt;/ul>
+&lt;p>由于 dubbo-go 框架依赖配置文件启动，让框架定位到配置文件的方式就是通过环境变量来找。对于 server 端需要两个必须配置的环境变量：CONF_PROVIDER_FILE_PATH、APP_LOG_CONF_FILE，分别应该指向服务端配置文件、日志配置文件。&lt;/p>
+&lt;p>在 sample 里面，我们可以使用 dev 环境，即 profiles/dev/log.yml 和 profiles/dev/server.yml 两个文件。在 app/ 下，通过命令行中指定好这两个文件：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_PROVIDER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../profiles/dev/server.yml&amp;#34;&lt;/span>
+$ &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../profiles/dev/log.yml&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>设置 go 代理并运行服务&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ go run .
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果提示 timeout，则需要设置 goproxy 代理。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">GOPROXY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;http://goproxy.io&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>再运行 go run 即可开启服务。&lt;/p>
+&lt;h4 id="2运行-zookeeper">2）运行 zookeeper&lt;/h4>
+&lt;p>安装 zookeeper，并运行 zkServer, 默认为 2181 端口。&lt;/p>
+&lt;h4 id="3运行-go-client-调用-server-服务">3）运行 go-client 调用 server 服务&lt;/h4>
+&lt;ul>
+&lt;li>进入 go-client 的源码目录&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ &lt;span style="color:#b58900">cd&lt;/span> go-client/app
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>同理，在 /app 下配置环境变量&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_CONSUMER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../profiles/dev/client.yml&amp;#34;&lt;/span>
+$ &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../profiles/dev/log.yml&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置 go 代理：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">GOPROXY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;http://goproxy.io&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>运行程序&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ go run .
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>即可在日志中找到打印出的请求结果：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">response result: &amp;amp;&lt;span style="color:#719e07">{&lt;/span>A001 Alex Stocks &lt;span style="color:#2aa198">18&lt;/span> 2020-10-28 14:52:49.131 +0800 CST&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>同样，在运行的 server 中，也可以在日志中找到打印出的请求：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">req:&lt;span style="color:#719e07">[]&lt;/span>interface &lt;span style="color:#719e07">{}{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
+rsp:main.User&lt;span style="color:#719e07">{&lt;/span>Id:&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>, Name:&lt;span style="color:#2aa198">&amp;#34;Alex Stocks&amp;#34;&lt;/span>, Age:18, Time:time.Time&lt;span style="color:#719e07">{&lt;/span>...&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>恭喜！一次基于 dubbo-go 的 rpc 调用成功。&lt;/p>
+&lt;h4 id="4常见问题">4）常见问题&lt;/h4>
+&lt;ul>
+&lt;li>当日志开始部分出现 profiderInit 和 ConsumerInit 均失败的日志，检查环境变量中配置路径是否正确，配置文件是否正确。&lt;/li>
+&lt;li>当日志中出现 register 失败的情况，一般为向注册中心注册失败，检查注册中心是否开启，检查配置文件中关于 register 的端口是否正确。&lt;/li>
+&lt;li>sample 的默认开启端口为 20000，确保启动前无占用。&lt;/li>
+&lt;/ul>
+&lt;h3 id="2-配置环境变量">2. 配置环境变量&lt;/h3>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../profiles/dev/log.yml&amp;#34;&lt;/span>
+&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_CONSUMER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../profiles/dev/client.yml&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-服务端源码">3. 服务端源码&lt;/h3>
+&lt;h4 id="1目录结构">1）目录结构&lt;/h4>
+&lt;p>dubbo-go 框架的 example 提供的目录如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p1.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>app/ 文件夹下存放源码，可以自己编写环境变量配置脚本 buliddev.sh&lt;/li>
+&lt;li>assembly/ 文件夹下存放不同平台的构建脚本&lt;/li>
+&lt;li>profiles/ 文件夹下存放不同环境的配置文件&lt;/li>
+&lt;li>target/ 文件夹下存放可执行文件&lt;/li>
+&lt;/ul>
+&lt;h3 id="2关键源码">2）关键源码&lt;/h3>
+&lt;p>源码放置在 app/ 文件夹下，主要包含 server.go 和 user.go 两个文件，顾名思义，server.go 用于使用框架开启服务以及注册传输协议；user.go 则定义了 rpc-service 结构体，以及传输协议的结构。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>user.go&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+config.&lt;span style="color:#268bd2">SetProviderService&lt;/span>(&lt;span style="color:#b58900">new&lt;/span>(UserProvider))
+&lt;span style="color:#586e75">// ------for hessian2------
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+}
+&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+Id &lt;span style="color:#dc322f">string&lt;/span>
+Name &lt;span style="color:#dc322f">string&lt;/span>
+Age &lt;span style="color:#dc322f">int32&lt;/span>
+Time time.Time
+}
+&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+}
+&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, req []&lt;span style="color:#268bd2">interface&lt;/span>{}) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到，user.go 中存在 init 函数，是服务端代码中最先被执行的部分。User 为用户自定义的传输结构体，UserProvider 为用户自定义的 rpc_service；包含一个 rpc 函数，GetUser。当然，用户可以自定义其他的 rpc 功能函数。&lt;/p>
+&lt;p>在 init 函数中，调用 config 的 SetProviderService 函数，将当前 rpc_service 注册在框架 config 上。&lt;/p>
+&lt;p>&lt;strong>可以查看 dubbo 官方文档提供的设计图：&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p2.png" alt="">&lt;/p>
+&lt;p>service 层下面就是 config 层，用户服务会逐层向下注册，最终实现服务端的暴露。&lt;/p>
+&lt;p>rpc-service 注册完毕之后，调用 hessian 接口注册传输结构体 User。&lt;/p>
+&lt;p>至此，init 函数执行完毕。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>server.go&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// they are necessary:
+&lt;/span>&lt;span style="color:#586e75">// export CONF_PROVIDER_FILE_PATH=&amp;#34;xxx&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">// export APP_LOG_CONF_FILE=&amp;#34;xxx&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+config.&lt;span style="color:#268bd2">Load&lt;/span>()
+&lt;span style="color:#268bd2">initSignal&lt;/span>()
+}
+&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">initSignal&lt;/span>() {
+signals &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">chan&lt;/span> os.Signal, &lt;span style="color:#2aa198">1&lt;/span>)
+&lt;span style="color:#719e07">...&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>之后执行 main 函数。&lt;/p>
+&lt;p>main 函数中只进行了两个操作，首先使用 hessian 注册组件将 User 结构体注册（与之前略有重复），从而可以在接下来使用 getty 打解包。&lt;/p>
+&lt;p>之后调用 config.Load 函数，该函数位于框架 config/config_loader.go 内，这个函数是整个框架服务的启动点，&lt;strong>下面会详细讲这个函数内重要的配置处理过程&lt;/strong>。执行完 Load() 函数之后，配置文件会读入框架，之后根据配置文件的内容，将注册的 service 实现到配置结构里，再调用 Export 暴露给特定的 registry，进而开启特定的 service 进行对应端口的 tcp 监听，成功启动并且暴露服务。&lt;/p>
+&lt;p>最终开启信号监听 initSignal() 优雅地结束一个服务的启动过程。&lt;/p>
+&lt;h3 id="4-客户端源码">4. 客户端源码&lt;/h3>
+&lt;p>客户端包含 client.go 和 user.go 两个文件，其中 user.go 与服务端完全一致，不再赘述。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>client.go&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// they are necessary:
+&lt;/span>&lt;span style="color:#586e75">// export CONF_CONSUMER_FILE_PATH=&amp;#34;xxx&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">// export APP_LOG_CONF_FILE=&amp;#34;xxx&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+config.&lt;span style="color:#268bd2">Load&lt;/span>()
+time.&lt;span style="color:#268bd2">Sleep&lt;/span>(&lt;span style="color:#2aa198">3e9&lt;/span>)
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;\n\n\nstart to test dubbo&amp;#34;&lt;/span>)
+user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#b58900">panic&lt;/span>(err)
+}
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v\n&amp;#34;&lt;/span>, user)
+&lt;span style="color:#268bd2">initSignal&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>main 函数和服务端也类似，首先将传输结构注册到 hessian 上，再调用 config.Load() 函数。在下文会介绍，客户端和服务端会根据配置类型执行 config.Load() 中特定的函数 loadConsumerConfig() 和 loadProviderConfig()，从而达到“开启服务”、“调用服务”的目的。&lt;/p>
+&lt;p>加载完配置之后，还是通过实现服务、增加函数 proxy、申请 registry 和 reloadInvoker 指向服务端 ip 等操作，重写了客户端实例 userProvider 的对应函数，这时再通过调用 GetUser 函数，可以直接通过 invoker，调用到已经开启的服务端，实现 rpc 过程。&lt;/p>
+&lt;p>下面会从 server 端和 client 端两个角度，详细讲解服务启动、registry 注册和调用过程。&lt;/p>
+&lt;h3 id="5-自定义配置文件非环境变量方法">5. 自定义配置文件（非环境变量）方法&lt;/h3>
+&lt;h4 id="1服务端自定义配置文件">1）服务端自定义配置文件&lt;/h4>
+&lt;ul>
+&lt;li>var providerConfigStr = &lt;code>xxxxx&lt;/code>// 配置文件内容，可以参考 log 和 client。在这里你可以定义配置文件的获取方式，比如配置中心，本地文件读取。&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>&lt;strong>log 地址&lt;/strong>：https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/log.yml&lt;/p>
+&lt;p>&lt;strong>client 地址&lt;/strong>：https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/client.yml&lt;/p>
+&lt;/blockquote>
+&lt;ul>
+&lt;li>在 &lt;code>config.Load()&lt;/code> 之前设置配置，例如：&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+providerConfig &lt;span style="color:#719e07">:=&lt;/span> config.ProviderConfig{}
+yaml.&lt;span style="color:#268bd2">Unmarshal&lt;/span>([]&lt;span style="color:#b58900">byte&lt;/span>(providerConfigStr), &lt;span style="color:#719e07">&amp;amp;&lt;/span>providerConfig)
+config.&lt;span style="color:#268bd2">SetProviderConfig&lt;/span>(providerConfig)
+defaultServerConfig &lt;span style="color:#719e07">:=&lt;/span> dubbo.&lt;span style="color:#268bd2">GetDefaultServerConfig&lt;/span>()
+dubbo.&lt;span style="color:#268bd2">SetServerConfig&lt;/span>(defaultServerConfig)
+logger.&lt;span style="color:#268bd2">SetLoggerLevel&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;warn&amp;#34;&lt;/span>) &lt;span style="color:#586e75">// info,warn
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>()
+&lt;span style="color:#719e07">select&lt;/span> {
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2客户端自定义配置文件">2）客户端自定义配置文件&lt;/h4>
+&lt;ul>
+&lt;li>var consumerConfigStr = &lt;code>xxxxx&lt;/code>// 配置文件内容，可以参考 log 和 clien。在这里你可以定义配置文件的获取方式，比如配置中心，本地文件读取。&lt;/li>
+&lt;li>在 &lt;code>config.Load()&lt;/code> 之前设置配置，例如：&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+p &lt;span style="color:#719e07">:=&lt;/span> config.ConsumerConfig{}
+yaml.&lt;span style="color:#268bd2">Unmarshal&lt;/span>([]&lt;span style="color:#b58900">byte&lt;/span>(consumerConfigStr), &lt;span style="color:#719e07">&amp;amp;&lt;/span>p)
+config.&lt;span style="color:#268bd2">SetConsumerConfig&lt;/span>(p)
+defaultClientConfig &lt;span style="color:#719e07">:=&lt;/span> dubbo.&lt;span style="color:#268bd2">GetDefaultClientConfig&lt;/span>()
+dubbo.&lt;span style="color:#268bd2">SetClientConf&lt;/span>(defaultClientConfig)
+logger.&lt;span style="color:#268bd2">SetLoggerLevel&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;warn&amp;#34;&lt;/span>) &lt;span style="color:#586e75">// info,warn
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>()
+user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+log.&lt;span style="color:#268bd2">Print&lt;/span>(err)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+log.&lt;span style="color:#268bd2">Print&lt;/span>(user)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="server-端">Server 端&lt;/h2>
+&lt;p>服务暴露过程涉及到多次原始 rpcService 的封装、暴露，网上其他文章的图感觉太过笼统，在此，简要地绘制了一个用户定义服务的数据流图：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p3.png" alt="">&lt;/p>
+&lt;h3 id="1-加载配置">1. 加载配置&lt;/h3>
+&lt;h4 id="1框架初始化">1）框架初始化&lt;/h4>
+&lt;p>在加载配置之前，框架提供了很多已定义好的协议、工厂等组件，都会在对应模块 init 函数内注册到 extension 模块上，以供接下来配置文件中进行选用。&lt;/p>
+&lt;p>其中重要的有：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>默认函数代理工厂&lt;/strong>：common/proxy/proxy_factory/default.go&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+extension.&lt;span style="color:#268bd2">SetProxyFactory&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;default&amp;#34;&lt;/span>, NewDefaultProxyFactory)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>它的作用是将原始 rpc-service 进行封装，形成 proxy_invoker，更易于实现远程 call 调用，详情可见其 invoke 函数。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>注册中心注册协议&lt;/strong>：
+registry/protocol/protocol.go&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+extension.&lt;span style="color:#268bd2">SetProtocol&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;registry&amp;#34;&lt;/span>, GetProtocol)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>它负责将 invoker 暴露给对应注册中心，比如 zk 注册中心。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>zookeeper 注册协议&lt;/strong>：registry/zookeeper/zookeeper.go&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+extension.&lt;span style="color:#268bd2">SetRegistry&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>, newZkRegistry)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>它合并了 base_resiger，负责在服务暴露过程中，将服务注册在 zookeeper 注册器上，从而为调用者提供调用方法。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>dubbo 传输协议&lt;/strong>：protocol/dubbo/dubbo.go&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+extension.&lt;span style="color:#268bd2">SetProtocol&lt;/span>(DUBBO, GetProtocol)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>它负责监听对应端口，将具体的服务暴露，并启动对应的事件 handler，将远程调用的 event 事件传递到 invoker 内部，调用本地 invoker 并获得执行结果返回。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>filter 包装调用链协议&lt;/strong>：protocol/protocolwrapper/protocol_filter_wrapper.go&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+extension.&lt;span style="color:#268bd2">SetProtocol&lt;/span>(FILTER, GetProtocol)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>它负责在服务暴露过程中，将代理 invoker 打包，通过配置好的 filter 形成调用链，并交付给 dubbo 协议进行暴露。&lt;/p>
+&lt;p>上述提前注册好的框架已实现的组件，在整个服务暴露调用链中都会用到，会根据配置取其所需。&lt;/p>
+&lt;h4 id="2配置文件">2）配置文件&lt;/h4>
+&lt;p>服务端需要的重要配置有三个字段：services、protocols、registries。&lt;/p>
+&lt;p>profiles/dev/server.yml:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">registries &lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;demoZk&amp;#34;&lt;/span>:
+&lt;span style="color:#268bd2">protocol&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">timeout &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;3s&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">services&lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>:
+&lt;span style="color:#586e75"># 可以指定多个registry，使用逗号隔开;不指定默认向所有注册中心注册&lt;/span>
+&lt;span style="color:#268bd2">registry&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;demoZk&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">protocol &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>
+&lt;span style="color:#586e75"># 相当于dubbo.xml中的interface&lt;/span>
+&lt;span style="color:#268bd2">interface &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.UserProvider&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">loadbalance&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;random&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">warmup&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;100&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">cluster&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">methods&lt;/span>:
+- &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;GetUser&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">retries&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;span style="color:#268bd2">loadbalance&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;random&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>:
+&lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 service 指定了要暴露的 rpc-service 名（&amp;ldquo;UserProvider）、暴露的协议名（&amp;ldquo;dubbo&amp;rdquo;）、注册的协议名(&amp;ldquo;demoZk&amp;rdquo;)、暴露的服务所处的 interface、负载均衡策略、集群失败策略及调用的方法等等。&lt;/p>
+&lt;p>其中，中间服务的协议名需要和 registries 下的 mapkey 对应，暴露的协议名需要和 protocols 下的 mapkey 对应。&lt;/p>
+&lt;p>可以看到上述例子中，使用了 dubbo 作为暴露协议，使用了 zookeeper 作为中间注册协议，并且给定了端口。如果 zk 需要设置用户名和密码，也可以在配置中写好。&lt;/p>
+&lt;h4 id="3配置文件的读入和检查">3）配置文件的读入和检查&lt;/h4>
+&lt;blockquote>
+&lt;p>config/config_loader.go:: Load()&lt;/p>
+&lt;/blockquote>
+&lt;p>在上述 example 的 main 函数中，有 config.Load() 函数的直接调用，该函数执行细节如下：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Load Dubbo Init
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">Load&lt;/span>() {
+&lt;span style="color:#586e75">// init router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">initRouter&lt;/span>()
+&lt;span style="color:#586e75">// init the global event dispatcher
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> extension.&lt;span style="color:#268bd2">SetAndInitGlobalDispatcher&lt;/span>(&lt;span style="color:#268bd2">GetBaseConfig&lt;/span>().EventDispatcherType)
+&lt;span style="color:#586e75">// start the metadata report if config set
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">startMetadataReport&lt;/span>(&lt;span style="color:#268bd2">GetApplicationConfig&lt;/span>().MetadataType, &lt;span style="color:#268bd2">GetBaseConfig&lt;/span>().MetadataReportConfig); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Provider starts metadata report error, and the error is {%#v}&amp;#34;&lt;/span>, err)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+&lt;span style="color:#586e75">// reference config
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">loadConsumerConfig&lt;/span>()
+&lt;span style="color:#586e75">// service config
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">loadProviderConfig&lt;/span>()
+&lt;span style="color:#586e75">// init the shutdown callback
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">GracefulShutdownInit&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在本文中，我们重点关心 loadConsumerConfig() 和 loadProviderConfig() 两个函数。&lt;/p>
+&lt;p>对于 provider 端，可以看到 loadProviderConfig() 函数代码如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p4.png" alt="">&lt;/p>
+&lt;p>前半部分是配置的读入和检查，进入 for 循环后，是单个 service 的暴露起始点。&lt;/p>
+&lt;p>前面提到，在配置文件中已经写好了要暴露的 service 的种种信息，比如服务名、interface 名、method 名等等。在图中 for 循环内，会将所有 service 的服务依次实现。&lt;/p>
+&lt;p>for 循环的第一行，根据 key 调用 GetProviderService 函数，拿到注册的 rpcService 实例，这里对应上述提到的 init 函数中，用户手动注册的自己实现的 rpc-service 实例：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p5.png" alt="">&lt;/p>
+&lt;p>这个对象也就成为了 for 循环中的 rpcService 变量，将这个对象注册通过 Implement 函数写到 sys（ServiceConfig 类型）上，设置好 sys 的 key 和协议组，最终调用了 sys 的 Export 方法。&lt;/p>
+&lt;p>此处对应流程图的部分：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p6.png" alt="">&lt;/p>
+&lt;p>至此，框架配置结构体已经拿到了所有 service 有关的配置，以及用户定义好的 rpc-service 实例，它触发了 Export 方法，旨在将自己的实例暴露出去。这是 Export 调用链的起始点。&lt;/p>
+&lt;h3 id="2-原始-service-封装入-proxy_invoker">2. 原始 service 封装入 proxy_invoker&lt;/h3>
+&lt;blockquote>
+&lt;p>config/service_config.go :: Export()&lt;/p>
+&lt;/blockquote>
+&lt;p>接下来进入 ServiceConfig.Export() 函数.&lt;/p>
+&lt;p>这个函数进行了一些细碎的操作，比如为不同的协议分配随机端口，如果指定了多个中心注册协议，则会将服务通过多个中心注册协议的 registryProtocol 暴露出去，我们只关心对于一个注册协议是如何操作的。还有一些操作比如生成调用 url 和注册 url，用于为暴露做准备。&lt;/p>
+&lt;h4 id="1首先通过配置生成对应-registryurl-和-serviceurl">1）首先通过配置生成对应 registryUrl 和 serviceUrl&lt;/h4>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p7.png" alt="">&lt;/p>
+&lt;p>registryUrl 是用来向中心注册组件发起注册请求的，对于 zookeeper 的话，会传入其 ip 和端口号，以及附加的用户名密码等信息。&lt;/p>
+&lt;p>这个 regUrl 目前只存有注册（zk）相关信息，后续会补写入 ServiceIvk，即服务调用相关信息，里面包含了方法名，参数等&amp;hellip;&lt;/p>
+&lt;h4 id="2对于一个注册协议将传入的-rpc-service-实例注册在-commonservicemap">2）对于一个注册协议，将传入的 rpc-service 实例注册在 common.ServiceMap&lt;/h4>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p8.png" alt="">&lt;/p>
+&lt;p>这个 Register 函数将服务实例注册了两次，一次是以 Interface 为 key 写入接口服务组内，一次是以 interface 和 proto 为 key 写入特定的一个唯一的服务。&lt;/p>
+&lt;p>后续会从 common.Map 里面取出来这个实例。&lt;/p>
+&lt;h4 id="3获取默认代理工厂将实例封装入代理-invoker">3）获取默认代理工厂，将实例封装入代理 invoker&lt;/h4>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// 拿到一个proxyInvoker，这个invoker的url是传入的regUrl，这个地方将上面注册的service实例封装成了invoker
+&lt;/span>&lt;span style="color:#586e75">// 这个GetProxyFactory返回的默认是common/proxy/proxy_factory/default.go
+&lt;/span>&lt;span style="color:#586e75">// 这个默认工厂调用GetInvoker获得默认的proxyInvoker，保存了当前注册url
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>invoker &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetProxyFactory&lt;/span>(providerConfig.ProxyFactory).&lt;span style="color:#268bd2">GetInvoker&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>regUrl)
+&lt;span style="color:#586e75">// 暴露出来 生成exporter,开启tcp监听
+&lt;/span>&lt;span style="color:#586e75">// 这里就该跳到registry/protocol/protocol.go registryProtocol 调用的Export，将当前proxyInvoker导出
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>exporter = c.cacheProtocol.&lt;span style="color:#268bd2">Export&lt;/span>(invoker)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这一步的 GetProxyFactory(&amp;ldquo;default&amp;rdquo;) 方法获取默认代理工厂，通过传入上述构造的 regUrl，将 url 封装入代理 invoker。&lt;/p>
+&lt;p>可以进入 common/proxy/proxy_factory/default.go::ProxyInvoker.Invoke() 函数里，看到对于 common.Map 取用为 svc 的部分，以及关于 svc 对应 Method 的实际调用 Call 的函数如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p9.png" alt="">&lt;/p>
+&lt;p>到这里，上面 GetInvoker(*regUrl) 返回的 invoker 即为 proxy_invoker，它封装好了用户定义的 rpc_service，并将具体的调用逻辑封装入了 Invoke 函数内。&lt;/p>
+&lt;blockquote>
+&lt;p>为什么使用 Proxy_invoker 来调用？&lt;/p>
+&lt;p>通过这个 proxy_invoke 调用用户的功能函数，调用方式将更加抽象化，可以在代码中看到，通过 ins 和 outs 来定义入参和出参，将整个调用逻辑抽象化为 invocation 结构体，而将具体的函数名的选择、参数向下传递和 reflect 反射过程封装在 invoke 函数内，这样的设计更有利于之后远程调用。个人认为这是 dubbo Invoke 调用链的设计思想。&lt;/p>
+&lt;p>至此，实现了图中对应的部分：&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p10.png" alt="">&lt;/p>
+&lt;h3 id="3-registry-协议在-zkregistry-上暴露上面的-proxy_invoker">3. registry 协议在 zkRegistry 上暴露上面的 proxy_invoker&lt;/h3>
+&lt;p>上面，我们执行到了 exporter = c.cacheProtocol.Export(invoker)。&lt;/p>
+&lt;p>这里的 cacheProtocol 为一层缓存设计，对应到原始的 demo 上，这里是默认实现好的 registryProtocol。&lt;/p>
+&lt;blockquote>
+&lt;p>registry/protocol/protocol.go:: Export()&lt;/p>
+&lt;/blockquote>
+&lt;p>这个函数内构造了多个 EventListener，非常有 java 的设计感。&lt;/p>
+&lt;p>我们只关心服务暴露的过程，先忽略这些监听器。&lt;/p>
+&lt;h4 id="1获取注册-url-和服务-url">1）获取注册 url 和服务 url&lt;/h4>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p11.png" alt="">&lt;/p>
+&lt;h4 id="2获取注册中心实例-zkregistry">2）获取注册中心实例 zkRegistry&lt;/h4>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p12.png" alt="">&lt;/p>
+&lt;p>一层缓存操作，如果 cache 没有需要从 common 里面重新拿 zkRegistry。&lt;/p>
+&lt;h4 id="3zkregistry-调用-registry-方法在-zookeeper-上注册-dubbopath">3）zkRegistry 调用 Registry 方法，在 zookeeper 上注册 dubboPath&lt;/h4>
+&lt;p>上述拿到了具体的 zkRegistry 实例，该实例的定义在：registry/zookeeper/registry.go。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p13.png" alt="">&lt;/p>
+&lt;p>该结构体组合了 registry.BaseRegistry 结构，base 结构定义了注册器基础的功能函数，比如 Registry、Subscribe 等，但在这些默认定义的函数内部，还是会调用 facade 层（zkRegistry 层）的具体实现函数，这一设计模型能在保证已有功能函数不需要重复定义的同时，引入外层函数的实现，类似于结构体继承却又复用了代码。这一设计模式值得学习。&lt;/p>
+&lt;p>我们查看上述 registry/protocol/protocol.go:: Export() 函数，直接调用了:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// 1. 通过zk注册器，调用Register()函数，将已有@root@rawurl注册到zk上
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> reg.&lt;span style="color:#268bd2">Register&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>registeredProviderUrl)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>将已有 RegistryUrl 注册到了 zkRegistry 上。&lt;/p>
+&lt;p>这一步调用了 baseRegistry 的 Register 函数，进而调用 zkRegister 的 DoRegister 函数，进而调用：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p14.png" alt="">&lt;/p>
+&lt;p>在这个函数里，将对应 root 创造一个新的节点。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p15.png" alt="">&lt;/p>
+&lt;p>并且写入具体 node 信息，node 为 url 经过 encode 的结果，&lt;strong>包含了服务端的调用方式。&lt;/strong>&lt;/p>
+&lt;p>这部分的代码较为复杂，具体可以看 baseRegistry 的 processURL() 函数：http://t.tb.cn/6Xje4bijnsIDNaSmyPc4Ot。&lt;/p>
+&lt;p>至此，将服务端调用 url 注册到了 zookeeper 上，而客户端如果想获取到这个 url，只需要传入特定的 dubboPath，向 zk 请求即可。目前 client 是可以获取到访问方式了，但服务端的特定服务还没有启动，还没有开启特定协议端口的监听，这也是 registry/protocol/protocol.go:: Export() 函数接下来要做的事情。&lt;/p>
+&lt;h4 id="4proxy_invoker-封装入-wrapped_invoker得到-filter-调用链">4）proxy_invoker 封装入 wrapped_invoker，得到 filter 调用链&lt;/h4>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go"> &lt;span style="color:#586e75">// invoker封装入warppedInvoker
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> wrappedInvoker &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">newWrappedInvoker&lt;/span>(invoker, providerUrl)
+&lt;span style="color:#586e75">// 经过为invoker增加filter调用链，再使用dubbo协议Export，开启service并且返回了Exporter 。
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// export_1
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> cachedExporter = extension.&lt;span style="color:#268bd2">GetProtocol&lt;/span>(protocolwrapper.FILTER).&lt;span style="color:#268bd2">Export&lt;/span>(wrappedInvoker)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>新建一个 WrappedInvoker，用于之后链式调用。&lt;/p>
+&lt;p>拿到提前实现并注册好的 ProtocolFilterWrapper，调用 Export 方法，进一步暴露。&lt;/p>
+&lt;blockquote>
+&lt;p>protocol/protocolwrapped/protocol_filter_wrapper.go:Export()&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p16.png" alt="">&lt;/p>
+&lt;blockquote>
+&lt;p>protocol/protocolwrapped/protocol_filter_wrapper.go:buildInvokerChain&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p17.png" alt="">&lt;/p>
+&lt;p>可见，根据配置的内容，通过链式调用的构造，将 proxy_invoker 层层包裹在调用链的最底部，最终返回一个调用链 invoker。&lt;/p>
+&lt;p>对应图中部分：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p18.png" alt="">&lt;/p>
+&lt;p>至此，我们已经拿到 filter 调用链，期待将这个 chain 暴露到特定端口，用于相应请求事件。&lt;/p>
+&lt;h4 id="5通过-dubbo-协议暴露-wrapped_invoker">5）通过 dubbo 协议暴露 wrapped_invoker&lt;/h4>
+&lt;blockquote>
+&lt;p>protocol/protocolwrapped/protocol_filter_wrapper.go:Export()&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// 通过dubbo协议Export dubbo_protocol调用的 export_2
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> pfw.protocol.&lt;span style="color:#268bd2">Export&lt;/span>(invoker)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>回到上述 Export 函数的最后一行，调用了 dubboProtocol 的 Export 方法，将上述 chain 真正暴露。&lt;/p>
+&lt;p>该 Export 方法的具体实现在：protocol/dubbo/dubbo_protocol.go: Export()。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p19.png" alt="">&lt;/p>
+&lt;p>这一函数做了两个事情：构造触发器、启动服务。&lt;/p>
+&lt;ul>
+&lt;li>将传入的 Invoker 调用 chain 进一步封装，封装成一个 exporter，再将这个 export 放入 map 保存。&lt;strong>注意！这里把 exporter 放入了 SetExporterMap中，在下面服务启动的时候，会以注册事件监听器的形式将这个 exporter 取出！&lt;/strong>&lt;/li>
+&lt;li>调用 dubboProtocol 的 openServer 方法，开启一个针对特定端口的监听。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p20.png" alt="">&lt;/p>
+&lt;p>如上图所示，一个 Session 被传入，开启对应端口的事件监听。&lt;/p>
+&lt;p>至此构造出了 exporter，完成图中部分：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p21.png" alt="">&lt;/p>
+&lt;h3 id="4-注册触发动作">4. 注册触发动作&lt;/h3>
+&lt;p>上述只是启动了服务，但还没有看到触发事件的细节，点进上面的 s.newSession 可以看到，dubbo 协议为一个 getty 的 session 默认使用了如下配置：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p22.png" alt="">&lt;/p>
+&lt;p>其中很重要的一个配置是 EventListener，传入的是 dubboServer 的默认 rpcHandler。&lt;/p>
+&lt;blockquote>
+&lt;p>protocol/dubbo/listener.go:OnMessage()&lt;/p>
+&lt;/blockquote>
+&lt;p>rpcHandler 有一个实现好的 OnMessage 函数，根据 getty 的 API，当 client 调用该端口时，会触发 OnMessage。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// OnMessage notified when RPC server session got any message in connection
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (h &lt;span style="color:#719e07">*&lt;/span>RpcServerHandler) &lt;span style="color:#268bd2">OnMessage&lt;/span>(session getty.Session, pkg &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这一函数实现了在 getty session 接收到 rpc 调用后的一系列处理：&lt;/p>
+&lt;ul>
+&lt;li>传入包的解析&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p23.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>根据请求包构造请求 url&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p24.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>拿到对应请求 key，找到要被调用的 exporter&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p25.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>拿到对应的 Invoker&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p26.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>构造 invocation&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p27.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>调用&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p28.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>返回&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code1/p29.png" alt="">&lt;/p>
+&lt;p>整个被调过程一气呵成。实现了从 getty.Session 的调用事件，到经过层层封装的 invoker 的调用。&lt;/p>
+&lt;p>至此，一次 rpc 调用得以正确返回。&lt;/p>
+&lt;h2 id="小结">小结&lt;/h2>
+&lt;ul>
+&lt;li>&lt;strong>关于 Invoker 的层层封装&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>能把一次调用抽象成一次 invoke；能把一个协议抽象成针对 invoke 的封装；能把针对一次 invoke 所做出的特定改变封装到 invoke 函数内部，可以降低模块之间的耦合性。层层封装逻辑更加清晰。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>关于 URL 的抽象&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>关于 dubbo 的统一化请求对象 URL 的极度抽象是之前没有见过的&amp;hellip; 个人认为这样封装能保证请求参数列表的简化和一致。但在开发的过程中，滥用极度抽象的接口可能造成&amp;hellip; debug 的困难？以及不知道哪些字段是当前已经封装好的，哪些字段是无用的。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>关于协议的理解&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>之前理解的协议还是太过具体化了，而关于 dubbo-go 对于 dubboProtocol 的协议，我认为是基于 getty 的进一步封装，它定义了客户端和服务端，对于 getty 的 session 应该有哪些特定的操作，从而保证主调和被调的协议一致性，而这种保证也是一种协议的体现，是由 dubbo 协议来规范的。&lt;/p>
+&lt;p>如果你有任何疑问，欢迎钉钉扫码加入交流群：钉钉群号 23331795！&lt;/p>
+&lt;blockquote>
+&lt;p>作者简介 &lt;strong>李志信&lt;/strong> (GitHubID LaurenceLiZhixin)，中山大学软件工程专业在校学生，擅长使用 Java/Go 语言，专注于云原生和微服务等技术方向&lt;/p>
 &lt;/blockquote></description></item><item><title>Blog: dubbo-go-hessian2 v1.6.0</title><link>/zh/blog/2021/01/14/dubbo-go-hessian2-v1.6.0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-hessian2-v1.6.0/</guid><description>
 &lt;h2 id="1-增加缓存优化">1. 增加缓存优化&lt;/h2>
 &lt;p>dubbo-go-hessian2 在解析数据的数据大量使用到了 struct 的结构信息，这部分信息可以缓存起来反复利用，使得性能提升了一倍。优化过程记录可以详细阅读&lt;a href="https://mp.weixin.qq.com/s/ouVxldQAt0_4BET7srjJ6Q">《记一次对 dubbo-go-hessian2 的性能优化》&lt;/a>.&lt;/p>
@@ -573,7 +1027,172 @@ Gender &lt;span style="color:#dc322f">string&lt;/span>
 DogName &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`hessian:&amp;#34;-&amp;#34;`&lt;/span>
 }
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>同时，就像 json 编码中通过 immediately 可以在序列化中忽略该字段，同理，通过 hessian:&amp;quot;-&amp;quot; 用户也可以让冗余字段不参与 hessian 序列化。&lt;/p>
-&lt;p>对应pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/154">#154&lt;/a>，作者 &lt;a href="https://github.com/micln">micln&lt;/a>&lt;/p></description></item><item><title>Blog: Dubbo-go应用维度注册模型</title><link>/zh/blog/2021/01/14/dubbo-go%E5%BA%94%E7%94%A8%E7%BB%B4%E5%BA%A6%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9E%8B/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go%E5%BA%94%E7%94%A8%E7%BB%B4%E5%BA%A6%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9E%8B/</guid><description>
+&lt;p>对应pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/154">#154&lt;/a>，作者 &lt;a href="https://github.com/micln">micln&lt;/a>&lt;/p></description></item><item><title>Blog: dubbo-go-hessian2 v1.7.0</title><link>/zh/blog/2021/01/14/dubbo-go-hessian2-v1.7.0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-hessian2-v1.7.0/</guid><description>
+&lt;p>Dubbo-go-hessian2 v1.7.0已发布，详见 &lt;a href="https://github.com/apache/dubbo-go-hessian2/releases/tag/v1.7.0">https://github.com/apache/dubbo-go-hessian2/releases/tag/v1.7.0&lt;/a>， 以下对这次更新内容进行详细整理。&lt;/p>
+&lt;p>另外v1.6.3 将 attachment 类型由 map[string]stiring 改为map[string]interface{} 导致版本不兼容问题，这部分已还原，后续的计划是将dubbo协议的request/response对象整体迁移到dubbogo项目中进行迭代修改， hessian2中将不再改动到request/response对象。&lt;/p>
+&lt;h2 id="1-new-features">1. New Features&lt;/h2>
+&lt;h3 id="11-add-getstacktrace-method-into-throwabler-and-its-implements-207httpsgithubcomapachedubbo-go-hessian2pull207">1.1 add GetStackTrace method into Throwabler and its implements. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/207">#207&lt;/a>&lt;/h3>
+&lt;p>go语言client请求java语言服务时，如果java语言抛出了异常，异常对应的堆栈信息是被保存在StackTraceElement中。&lt;/p>
+&lt;p>这个异常信息在日志中最好能被打印出来，以方便客户端排查问题，所以在Throwabler和对应子类中增加了StackTraceElement的获取。&lt;/p>
+&lt;p>注：其实还有一种更好的方法，所有的具体的异常类型都包含java_exception/exception.go的Throwable struct。这样只需要在Throwable中增加GetStackTrace方法就可以了。但是这种方式需要更多的测试验证，改动的逻辑相对会复杂一些。但是代码会更整洁。 这里先不用这种方法。&lt;/p>
+&lt;h3 id="12-catch-user-defined-exceptions-208httpsgithubcomapachedubbo-go-hessian2pull208">1.2 catch user defined exceptions. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/208">#208&lt;/a>&lt;/h3>
+&lt;p>golang中增加一个java中Exception对象的序列化输出方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">JavaException&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+exception &lt;span style="color:#719e07">:=&lt;/span> java_exception.&lt;span style="color:#268bd2">NewException&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;java_exception&amp;#34;&lt;/span>)
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(exception)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在output/output.go 提供调用入口:添加如下函数初始化声明&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+funcMap[&lt;span style="color:#2aa198">&amp;#34;JavaException&amp;#34;&lt;/span>] = testfuncs.JavaException
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>java代码中增加调用go方法序列化结果:&lt;/p>
+&lt;p>&lt;strong>说明&lt;/strong>: Assert.assertEquals 不能直接比较Exception对象是否相等&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;span style="color:#586e75"> * test java java.lang.Exception object and go java_exception Exception struct
+&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;span style="color:#268bd2">@Test&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">testException&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Exception exception &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Exception&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;java_exception&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+Object javaException &lt;span style="color:#719e07">=&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;JavaException&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>javaException &lt;span style="color:#719e07">instanceof&lt;/span> Exception&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>exception&lt;span style="color:#719e07">.&lt;/span>getMessage&lt;span style="color:#719e07">(),&lt;/span> &lt;span style="color:#719e07">((&lt;/span>Exception&lt;span style="color:#719e07">)&lt;/span> javaException&lt;span style="color:#719e07">).&lt;/span>getMessage&lt;span style="color:#719e07">());&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="13-support-java8-time-object-212httpsgithubcomapachedubbo-go-hessian2pull212-221httpsgithubcomapachedubbo-go-hessian2pull221">1.3 support java8 time object. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/212">#212&lt;/a>, &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/221">#221&lt;/a>&lt;/h3>
+&lt;p>golang中增加一个java8对象的序列化输出方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// test java8 java.time.Year
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">Java8TimeYear&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+year &lt;span style="color:#719e07">:=&lt;/span> java8_time.Year{Year: &lt;span style="color:#2aa198">2020&lt;/span>}
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(year)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;span style="color:#586e75">// test java8 java.time.LocalDate
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">Java8LocalDate&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+date &lt;span style="color:#719e07">:=&lt;/span> java8_time.LocalDate{Year: &lt;span style="color:#2aa198">2020&lt;/span>, Month: &lt;span style="color:#2aa198">9&lt;/span>, Day: &lt;span style="color:#2aa198">12&lt;/span>}
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(date)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在output/output.go 提供调用入口:添加函数初始化声明&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+funcMap[&lt;span style="color:#2aa198">&amp;#34;Java8TimeYear&amp;#34;&lt;/span>] = testfuncs.Java8TimeYear
+funcMap[&lt;span style="color:#2aa198">&amp;#34;Java8LocalDate&amp;#34;&lt;/span>] = testfuncs.Java8LocalDate
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>java代码中增加调用go方法序列化结果:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#586e75">/**
+&lt;/span>&lt;span style="color:#586e75"> * test java8 java.time.* object and go java8_time/* struct
+&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;span style="color:#268bd2">@Test&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">testJava8Year&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Year year &lt;span style="color:#719e07">=&lt;/span> Year&lt;span style="color:#719e07">.&lt;/span>of&lt;span style="color:#719e07">(&lt;/span>2020&lt;span style="color:#719e07">);&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>year
+&lt;span style="color:#719e07">,&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Java8TimeYear&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+LocalDate localDate &lt;span style="color:#719e07">=&lt;/span> LocalDate&lt;span style="color:#719e07">.&lt;/span>of&lt;span style="color:#719e07">(&lt;/span>2020&lt;span style="color:#719e07">,&lt;/span> 9&lt;span style="color:#719e07">,&lt;/span> 12&lt;span style="color:#719e07">);&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>localDate&lt;span style="color:#719e07">,&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Java8LocalDate&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="14-support-test-golang-encoding-data-in-java-213httpsgithubcomapachedubbo-go-hessian2pull213">1.4 support test golang encoding data in java. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/213">#213&lt;/a>&lt;/h3>
+&lt;p>为了更好的测试验证hessian库，原来已经支持在golang中测试java的序列化数据，现在增加在java中测试golang的序列化数据，实现双向测试验证。&lt;/p>
+&lt;p>golang中增加序列化输出方法:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">HelloWorldString&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hello world&amp;#34;&lt;/span>)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>将该方法注册到output/output.go中&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go"> &lt;span style="color:#586e75">// add all output func here
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+funcMap[&lt;span style="color:#2aa198">&amp;#34;HelloWorldString&amp;#34;&lt;/span>] = testfuncs.HelloWorldString
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>output/output.go 提供调用入口:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+flag.&lt;span style="color:#268bd2">Parse&lt;/span>()
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">*&lt;/span>funcName &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;func name required&amp;#34;&lt;/span>)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+f, exist &lt;span style="color:#719e07">:=&lt;/span> funcMap[&lt;span style="color:#719e07">*&lt;/span>funcName]
+&lt;span style="color:#719e07">if&lt;/span> !exist {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;func name not exist: &amp;#34;&lt;/span>, &lt;span style="color:#719e07">*&lt;/span>funcName)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+&lt;span style="color:#719e07">defer&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">recover&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;error: &amp;#34;&lt;/span>, err)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+}()
+&lt;span style="color:#719e07">if&lt;/span> _, err &lt;span style="color:#719e07">:=&lt;/span> os.Stdout.&lt;span style="color:#268bd2">Write&lt;/span>(&lt;span style="color:#268bd2">f&lt;/span>()); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;call error: &amp;#34;&lt;/span>, err)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">0&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>java代码中增加调用go方法序列化结果:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GoTestUtil&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> Object &lt;span style="color:#268bd2">readGoObject&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String func&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;read go data: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> func&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Process process &lt;span style="color:#719e07">=&lt;/span> Runtime&lt;span style="color:#719e07">.&lt;/span>getRuntime&lt;span style="color:#719e07">()&lt;/span>
+&lt;span style="color:#719e07">.&lt;/span>exec&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;go run output/output.go -func_name=&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> func&lt;span style="color:#719e07">,&lt;/span>
+&lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">,&lt;/span>
+&lt;span style="color:#719e07">new&lt;/span> File&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;..&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#dc322f">int&lt;/span> exitValue &lt;span style="color:#719e07">=&lt;/span> process&lt;span style="color:#719e07">.&lt;/span>waitFor&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>exitValue &lt;span style="color:#719e07">!=&lt;/span> 0&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>fail&lt;span style="color:#719e07">(&lt;/span>readString&lt;span style="color:#719e07">(&lt;/span>process&lt;span style="color:#719e07">.&lt;/span>getErrorStream&lt;span style="color:#719e07">()));&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+InputStream is &lt;span style="color:#719e07">=&lt;/span> process&lt;span style="color:#719e07">.&lt;/span>getInputStream&lt;span style="color:#719e07">();&lt;/span>
+Hessian2Input input &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Hessian2Input&lt;span style="color:#719e07">(&lt;/span>is&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> input&lt;span style="color:#719e07">.&lt;/span>readObject&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Exception e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+e&lt;span style="color:#719e07">.&lt;/span>printStackTrace&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> String &lt;span style="color:#268bd2">readString&lt;/span>&lt;span style="color:#719e07">(&lt;/span>InputStream in&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> IOException &lt;span style="color:#719e07">{&lt;/span>
+StringBuilder out &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder&lt;span style="color:#719e07">();&lt;/span>
+InputStreamReader reader &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> InputStreamReader&lt;span style="color:#719e07">(&lt;/span>in&lt;span style="color:#719e07">,&lt;/span> StandardCharsets&lt;span style="color:#719e07">.&lt;/span>UTF_8&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#dc322f">char&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> buffer &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> &lt;span style="color:#dc322f">char&lt;/span>&lt;span style="color:#719e07">[&lt;/span>4096&lt;span style="color:#719e07">];&lt;/span>
+&lt;span style="color:#dc322f">int&lt;/span> bytesRead&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">while&lt;/span> &lt;span style="color:#719e07">((&lt;/span>bytesRead &lt;span style="color:#719e07">=&lt;/span> reader&lt;span style="color:#719e07">.&lt;/span>read&lt;span style="color:#719e07">(&lt;/span>buffer&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#719e07">-&lt;/span>1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+out&lt;span style="color:#719e07">.&lt;/span>append&lt;span style="color:#719e07">(&lt;/span>buffer&lt;span style="color:#719e07">,&lt;/span> 0&lt;span style="color:#719e07">,&lt;/span> bytesRead&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> out&lt;span style="color:#719e07">.&lt;/span>toString&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>增加java测试代码:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Test&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">testHelloWordString&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;hello world&amp;#34;&lt;/span>
+&lt;span style="color:#719e07">,&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;HelloWorldString&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="15-support-javasqltime--javasqldate-219httpsgithubcomapachedubbo-go-hessian2pull219">1.5 support java.sql.Time &amp;amp; java.sql.Date. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/219">#219&lt;/a>&lt;/h3>
+&lt;p>增加了 java 类 java.sql.Time, java.sql.Date 支持，分别对应到hessian.Time 和 hessian.Date， 详见 &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/219/files">https://github.com/apache/dubbo-go-hessian2/pull/219/files&lt;/a>。&lt;/p>
+&lt;h2 id="2-enhancement">2. Enhancement&lt;/h2>
+&lt;h3 id="21-export-function-encnull-225httpsgithubcomapachedubbo-go-hessian2pull225">2.1 Export function EncNull. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/225">#225&lt;/a>&lt;/h3>
+&lt;p>开放 hessian.EncNull 方法，以便用户特定情况下使用。&lt;/p>
+&lt;h2 id="3-bugfixes">3. Bugfixes&lt;/h2>
+&lt;h3 id="31-fix-enum-encode-error-in-request-203httpsgithubcomapachedubbo-go-hessian2pull203">3.1 fix enum encode error in request. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/203">#203&lt;/a>&lt;/h3>
+&lt;p>原来在 dubbo request 对象中没有判断 enum 类型的情况，此pr增加了判断是不是POJOEnum类型。详见 &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/203/files">https://github.com/apache/dubbo-go-hessian2/pull/203/files&lt;/a>&lt;/p>
+&lt;h3 id="32-fix-byte-field-decoding-issue-216httpsgithubcomapachedubbo-go-hessian2pull216">3.2 fix []byte field decoding issue. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/216">#216&lt;/a>&lt;/h3>
+&lt;p>v1.7.0 之前如果 struct中包含[]byte字段时无法反序列化, 报错“error list tag: 0x29”，主要原因是被当做list进行处理，对于这种情况应该按照binary数据进行处理即可。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> Circular &lt;span style="color:#268bd2">struct&lt;/span> {
+Num &lt;span style="color:#dc322f">int&lt;/span>
+Previous &lt;span style="color:#719e07">*&lt;/span>Circular
+Next &lt;span style="color:#719e07">*&lt;/span>Circular
+ResponseDataBytes []&lt;span style="color:#dc322f">byte&lt;/span> &lt;span style="color:#586e75">// &amp;lt;----
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;span style="color:#268bd2">func&lt;/span> (Circular) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.company.Circular&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-fix-decoding-error-for-map-in-map-229httpsgithubcomapachedubbo-go-hessian2pull229">3.3 fix decoding error for map in map. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/229">#229&lt;/a>&lt;/h3>
+&lt;p>v1.7.0 之前嵌套map无法正确解析，主要原因是对应的map对象被当做一个数据类型却未被自动加到类引用列表中，而嵌套map类信息是同一类型的引用，去类引用列表找，找不到就报错了。 解决这个问题的方法就是遇到map类对象，也将其加入到类引用列表中即可。 问题详细参考 &lt;a href="https://github.com/apache/dubbo-go-hessian2/issues/119">#119&lt;/a>.&lt;/p>
+&lt;h3 id="34-fix-fields-name-mismatch-in-duration-class-234httpsgithubcomapachedubbo-go-hessian2pull234">3.4 fix fields name mismatch in Duration class. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/234">#234&lt;/a>&lt;/h3>
+&lt;p>这个 PR 解决了Duration对象中字段错误定义，原来是&amp;quot;second/nano&amp;quot;， 应该是&amp;quot;seconds/nanos&amp;quot;。&lt;/p>
+&lt;p>同时改善了测试验证数据。之前使用0作为int字段的测试数据，这是不准确的，因为int类型默认值就是0.&lt;/p></description></item><item><title>Blog: Dubbo-go应用维度注册模型</title><link>/zh/blog/2021/01/14/dubbo-go%E5%BA%94%E7%94%A8%E7%BB%B4%E5%BA%A6%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9E%8B/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go%E5%BA%94%E7%94%A8%E7%BB%B4%E5%BA%A6%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9E%8B/</guid><description>
 &lt;p>Dubbo 3.0 将至。其最重要的一点就是服务自省，其基础即是应用维度的注册模型，作为目前与 Dubbo 在功能上完全对齐的 Dubbo-go，已于 本年【2020 年】7 月份发布了其 v1.5.0 版本，实现了该模型，为年底实现与 Dubbo 3.0 对齐的新版本奠定了基础。&lt;/p>
 &lt;p>Dubbo-go 作为 Dubbo 的 Go 语言版本，因跨语言之故，二者针对同一模型的实现必然有较大差异，故本文注重讨论 Dubbo-go 社区自身对该模型的理解和实现，以及其与 Dubbo 之间的差异。&lt;/p>
 &lt;h2 id="1-引语">1 引语&lt;/h2>
@@ -1112,6 +1731,75 @@ hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="co
 &lt;p>有任何 dubbo-go 相关的问题，可以加我们的钉钉群 23331795 询问探讨，我们一定第一时间给出反馈。&lt;/p>
 &lt;blockquote>
 &lt;p>本文作者 潘天颖，Github ID @pantianying，开源爱好者，就职于涂鸦智能。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: 解构 Dubbo-go 的核心注册引擎 Nacos</title><link>/zh/blog/2021/01/14/%E8%A7%A3%E6%9E%84-dubbo-go-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B3%A8%E5%86%8C%E5%BC%95%E6%93%8E-nacos/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/%E8%A7%A3%E6%9E%84-dubbo-go-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B3%A8%E5%86%8C%E5%BC%95%E6%93%8E-nacos/</guid><description>
+&lt;p>近几年，随着Go语言社区逐渐发展和壮大，越来越多的公司开始尝试采用Go搭建微服务体系，也涌现了一批Go的微服务框架，如go-micro、go-kit、Dubbo-go等，跟微服务治理相关的组件也逐渐开始在Go生态发力，如Sentinel、Hystrix等都推出了Go语言版本，而作为微服务框架的核心引擎&amp;ndash;注册中心，也是必不可缺少的组件，市面已经有多款注册中心支持Go语言，应该如何选择呢？我们可以对目前主流的支持Go语言的注册中心做个对比。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p1.png" alt="">&lt;/p>
+&lt;p>根据上表的对比我们可以从以下几个维度得出结论：&lt;/p>
+&lt;ul>
+&lt;li>生态:各注册中心对Go语言都有支持，但是Nacos、 Consul、Etcd 社区活跃，zookeeper和Eureka社区活跃度较低；&lt;/li>
+&lt;li>易用性：Nacos、Eureka、Consul都有现成的管控平台，Etcd、zookeeper本身作为kv存储，没有相应的管控平台，Nacos支持中文界面，比较符合国人使用习惯；&lt;/li>
+&lt;li>场景支持：CP模型主要针对强一致场景，如金融类，AP模型适用于高可用场景，Nacos可以同时满足两种场景，Eureka主要满足高可用场景，Consul、Zookeepr、Etcd主要满足强一致场景，此外Nacos支持从其它注册中心同步数据，方便用户注册中心迁移；&lt;/li>
+&lt;li>功能完整性：所有注册中心都支持健康检查，Nacos、Consul支持的检查方式较多，满足不同应用场景，Zookeeper通过keep alive方式，能实时感知实例变化；Nacos、Consul和Eureka都支持负载均衡策略，Nacos通过Metadata selector支持更灵活的策略；此外，Nacos、Eureka都支持雪崩保护，避免因为过多的实例不健康对健康的实例造成雪崩效应。&lt;/li>
+&lt;/ul>
+&lt;p>综合上面各维度的对比，可以了解到Nacos作为注册中心有一定的优势，那么它对Go微服务生态的集成做得如何？接下来我们首先探索下Nacos是如何与Dubbo-go集成。&lt;/p>
+&lt;h2 id="引言">引言&lt;/h2>
+&lt;p>Dubbo-go目前是Dubbo多语言生态中最火热的一个项目，从2016年发布至今，已经走过5个年头。最近，Dubbo-go发布了v1.5版本，全面兼容Dubbo 2.7.x版本，支持了应用维度的服务注册与发现，和主流的注册模型保持一致，标志着Dubbo-go向云原生迈出了关键的一步。作为驱动服务运转的核心引擎&amp;ndash;注册中心，在切换到应用维度的注册模型后，也需要做相应的适配，本文将解析如何以Nacos为核心引擎实现应用维度的服务注册与发现，并且给出相应的实践案例。此外，本文代码基于Dubbo-go v1.5.1，Nacos-SDK-go v1.0.0和Nacos v1.3.2。&lt;/p>
+&lt;h2 id="服务注册与发现架构">服务注册与发现架构&lt;/h2>
+&lt;p>从架构中，我们可以看到，与接口级别的服务注册发现不同的是，Dubbo-go的provider启动后会调用Nacos-go-sdk的RegisterInstance接口向Nacos注册服务实例，注册的服务名即为应用名称，而不是接口名称。Conusmer启动后则会调用Subscribe接口订阅该应用的服务实例变化，并对的实例发起服务调用。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p2.png" alt="">&lt;/p>
+&lt;h2 id="服务模型">服务模型&lt;/h2>
+&lt;p>图3是我们Dubbo-go的应用维度服务发现模型，主要有服务和实例两个层级关系，服务实例的属性主要包含实例Id、主机地址、服务端口、激活状态和元数据。图4为Nacos的服务分级存储模型，包含服务、集群和实例三个层次。两者对比，多了一个集群维度的层级，而且实例属性信息能够完全匹配。所以在Dubbo-go将应用服务实例注册到Nacos时，我们只需要将集群设置为默认集群，再填充服务和实例的相关属性，即可完成服务模型上的匹配。此外Nacos可以将服务注册到不同的Namespace下，实现多租户的隔离。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p3.png" alt="">&lt;/p>
+&lt;p>!
+&lt;img src="/imgs/blog/dubbo-go/nacos/p4.png" alt="">&lt;/p>
+&lt;h2 id="服务实例心跳维持">服务实例心跳维持&lt;/h2>
+&lt;p>Dubbo-go的Provider在向Nacos注册应用服务实例信息后，需要主动上报心跳，让Nacos服务端感知实例的存活与否，以判断是否将该节点从实例列表中移除。维护心跳的工作是在Nacos-SDK-go完成的，从图5代码中可以看到，当Dubbo-go调用RegisterInstance注册一个服务实例时，SDK除了调用Nacos的Register API之外，还会调用AddBeatInfo，将服务实例信息添加到本地缓存，通过后台协程定期向Nacos发送服务实例信息，保持心跳。当服务下线时，可以通过调用DeRegisterInstance执行反注册，并移除本地的心跳保持任务，Nacos实例列表中也会将该实例移除。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p5.png" alt="">&lt;/p>
+&lt;h1 id="订阅服务实例变化">订阅服务实例变化&lt;/h1>
+&lt;p>Dubbo-go的Consumer在启动的时候会调用Nacos-SDK-go的Subscribe接口，该接口入参如图6，订阅的时候只需要传递ServiceName即应用名和回调函数SubscribeCallback，Nacos在服务实例发生变化的时候即可通过回调函数通知Dubbo-go。Nacos-SDK-go是如何感知Nacos的服务实例变化的呢？主要有两种方式：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Nacos服务端主动推送，Nacos-SDK-go在启动的时候会监听一个UDP端口，该端口在调用Nacos Register API的时候作为参数传递，Nacos会记录Ip和端口，当服务实例发生变化时，Nacos会对所有监听该服务的Ip和端口发送UDP请求，推送变化后的服务实例信息。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Nacos-SDK-go定期查询，SDK会对订阅的服务实例定时调用查询接口，如果查询有变化则通过回调接口通知Dubbo-go。作为兜底策略保证Nacos服务端推送失败后，仍能感知到变化。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p6.png" alt="">&lt;/p>
+&lt;p>此外Nacos-SDK-go还支持推空保护，当Nacos推送的实例列表为空时，不更新本地缓存，也不通知Dubbo-go变更，避免Consumer无可用实例调用，造成故障。同时，SDK还支持服务实例信息本地持久化存储，可以保证在Nacos服务故障过程中，Consumer重启也能获取到可用实例，具备容灾效果。&lt;/p>
+&lt;h1 id="范例实践">范例实践&lt;/h1>
+&lt;h2 id="环境准备">环境准备&lt;/h2>
+&lt;p>dubbo-go samples代码下载：https://github.com/apache/dubbo-samples/tree/master/golang，基于Nacos注册中心的应用级服务发现的hello world代码目录在 registry/servicediscovery/nacos。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p7.png" alt="">&lt;/p>
+&lt;p>Nacos服务端搭建，参考官方文档：https://nacos.io/zh-cn/docs/quick-start.html，或者使用官方提供的公共Nacos服务：http://console.nacos.io/nacos(账号密码:nacos，仅供测试)，或者购买阿里云服务：https://help.aliyun.com/document_detail/139460.html?spm=a2c4g.11186623.6.559.d7e264b7bLpZIs&lt;/p>
+&lt;h2 id="server端搭建">Server端搭建&lt;/h2>
+&lt;p>进入registry/servicediscovery/nacos/go-server/profiles文件，可以看到有dev、release和test三个文件夹，分别对应开发、测试和生产配置。我们使用dev配置来搭建开发环境，dev文件下有log.yml和server.yml文件，下面对server.yml配置进行修改。&lt;/p>
+&lt;p>remote配置，这里使用公共的Nacos服务，address支持配置多个地址，用逗号分割。params参数配置nacos-sdk的日志目录。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-Yaml" data-lang="Yaml">&lt;span style="color:#268bd2">remote&lt;/span>:
+&lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;console.nacos.io:80&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;5s&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">params&lt;/span>:
+&lt;span style="color:#268bd2">logDir&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;/data/nacos-sdk/log&amp;#34;&lt;/span>
+configCenter配置
+&lt;span style="color:#268bd2">config_center&lt;/span>:
+&lt;span style="color:#268bd2">protocol&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;console.nacos.io:80&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置server端环境变量&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-Bash" data-lang="Bash">&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_PROVIDER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>server端的server.yml文件路径
+&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>server端的log.yml文件路径
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入registry/servicediscovery/nacos/go-server/app，运行server.go的main方法，可以从Nacos的控制台（http://console.nacos.io/nacos/#/serviceManagement?dataId=&amp;amp;group=&amp;amp;appName=&amp;amp;namespace=）&lt;/p>
+&lt;p>看到，应用user-info-server已经注册成功。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p8.png" alt="">&lt;/p>
+&lt;h2 id="client端搭建">Client端搭建&lt;/h2>
+&lt;p>client的配置文件在registry/servicediscovery/nacos/go-server/profiles目录下，需要修改的地方跟server端一样，这里不赘述。&lt;/p>
+&lt;p>配置client端环境变量&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-Bash" data-lang="Bash">&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_CONSUMER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>client端的server.yml文件路径
+&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>client端的log.yml文件路径
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入registry/servicediscovery/nacos/go-client/app，运行client.go的main方法，看到如下日志输出，表示调用server端成功。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/nacos/p9.png" alt="">&lt;/p>
+&lt;blockquote>
+&lt;p>作者：李志鹏 Github账号：Lzp0412，Nacos-SDK-go作者，Apache/Dubbo-go Contributor。现就职于阿里云云原生应用平台，主要参与服务发现、CoreDNS、ServiceMesh相关工作，负责推动Nacos Go微服务生态建设。&lt;/p>
 &lt;/blockquote></description></item><item><title>Blog: 记一次在 mosn 对 dubbo、dubbo-go-hessian2 的性能优化</title><link>/zh/blog/2021/01/14/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%9C%A8-mosn-%E5%AF%B9-dubbodubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%9C%A8-mosn-%E5%AF%B9-dubbodubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</guid><description>
 &lt;h3 id="背景">背景&lt;/h3>
 &lt;p>蚂蚁内部对 Service Mesh 的稳定性和性能要求是比较高的，内部 mosn 广泛用于生产环境。在云上和开源社区，RPC 领域 dubbo 和 spring cloud 同样广泛用于生产环境，我们在 mosn 基础上，支持了 dubbo 和 spring cloud 流量代理。我们发现在支持 dubbo 协议过程中，经过 Mesh 流量代理后，性能有非常大的性能损耗，在大商户落地 Mesh 中也对性能有较高要求，因此本文会重点描述在基于 Go 语言库 &lt;a href="https://github.com/apache/dubbo-go-hessian2">dubbo-go-hessian2&lt;/a> 、dubbo 协议中对 &lt;a href="https://github.com/mosn/mosn">mosn&lt;/a> 所做的性能优化。&lt;/p>
@@ -7433,464 +8121,4 @@ TestBenchMarks.benchSiwtch 1000000 thrpt 100 576.745 ± 6.806 ops/s
 &lt;ul>
 &lt;li>switch对于CPU来说难以做分支预测&lt;/li>
 &lt;li>某些switch条件如果概率比较高，可以考虑单独提前if判断，充分利用CPU的分支预测机制&lt;/li>
-&lt;/ul></description></item><item><title>Blog: 当Dubbo遇上Arthas：排查问题的实践</title><link>/zh/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</guid><description>
-&lt;p>Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用户。&lt;/p>
-&lt;ul>
-&lt;li>Github: &lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
-&lt;li>文档：http://dubbo.apache.org/zh-cn/&lt;/li>
-&lt;/ul>
-&lt;p>Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。&lt;/p>
-&lt;ul>
-&lt;li>Github: &lt;a href="https://github.com/alibaba/arthas">https://github.com/alibaba/arthas&lt;/a>&lt;/li>
-&lt;li>文档：https://alibaba.github.io/arthas/&lt;/li>
-&lt;li>Arthas开源交流QQ群: 916328269&lt;/li>
-&lt;li>Arthas开源交流钉钉群: 21965291&lt;/li>
-&lt;/ul>
-&lt;p>当Dubbo遇上Arthas，会碰撞出什么样的火花呢？下面来分享Arthas排查Dubbo问题的一些经验。&lt;/p>
-&lt;h3 id="dubbo-arthas-demo">dubbo-arthas-demo&lt;/h3>
-&lt;p>下面的排查分享基于这个&lt;code>dubbo-arthas-demo&lt;/code>，非常简单的一个应用，浏览器请求从Spring MVC到Dubbo Client，再发送到Dubbo Server。&lt;/p>
-&lt;p>Demo里有两个spring boot应用，可以先启动&lt;code>server-demo&lt;/code>，再启动&lt;code>client-demo&lt;/code>。&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/hengyunabc/dubbo-arthas-demo">https://github.com/hengyunabc/dubbo-arthas-demo&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"> /user/{id} -&amp;gt; UserService -&amp;gt; UserServiceImpl
-Browser Dubbo Client Dubbo Server
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Client端：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@RestController&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserController&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Reference&lt;/span>&lt;span style="color:#719e07">(&lt;/span>version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> UserService userService&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">@GetMapping&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;/user/{id}&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUserById&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#268bd2">@PathVariable&lt;/span> Integer id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> userService&lt;span style="color:#719e07">.&lt;/span>findUser&lt;span style="color:#719e07">(&lt;/span>id&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Server端：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Service&lt;/span>&lt;span style="color:#719e07">(&lt;/span>version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUser&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>id &lt;span style="color:#719e07">&amp;lt;&lt;/span> 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;user id &amp;lt; 1, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>User user &lt;span style="color:#719e07">:&lt;/span> users&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>user&lt;span style="color:#719e07">.&lt;/span>getId&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> user&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Can not find user, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="arthas快速开始">Arthas快速开始&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/install-detail.html">https://alibaba.github.io/arthas/install-detail.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ wget https://alibaba.github.io/arthas/arthas-boot.jar
-$ java -jar arthas-boot.jar
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动后，会列出所有的java进程，选择1，然后回车，就会连接上&lt;code>ServerDemoApplication&lt;/code>&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ java -jar arthas-boot.jar
-* &lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>: &lt;span style="color:#2aa198">43523&lt;/span> ServerDemoApplication
-&lt;span style="color:#719e07">[&lt;/span>2&lt;span style="color:#719e07">]&lt;/span>: &lt;span style="color:#2aa198">22342&lt;/span>
-&lt;span style="color:#719e07">[&lt;/span>3&lt;span style="color:#719e07">]&lt;/span>: &lt;span style="color:#2aa198">44108&lt;/span> ClientDemoApplication
-&lt;span style="color:#2aa198">1&lt;/span>
-&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> arthas home: /Users/hengyunabc/.arthas/lib/3.0.5/arthas
-&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> Try to attach process &lt;span style="color:#2aa198">43523&lt;/span>
-&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> Attach process &lt;span style="color:#2aa198">43523&lt;/span> success.
-&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> arthas-client connect 127.0.0.1 &lt;span style="color:#2aa198">3658&lt;/span>
-,---. ,------. ,--------.,--. ,--. ,---. ,---.
-/ O &lt;span style="color:#cb4b16">\ &lt;/span>| .--. &lt;span style="color:#2aa198">&amp;#39;&amp;#39;&lt;/span>--. .--&lt;span style="color:#2aa198">&amp;#39;| &amp;#39;&lt;/span>--&lt;span style="color:#2aa198">&amp;#39; | / O \ &amp;#39;&lt;/span> .-&lt;span style="color:#2aa198">&amp;#39;
-&lt;/span>&lt;span style="color:#2aa198">| .-. || &amp;#39;&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;.&amp;#39;&lt;/span> | | | .--. &lt;span style="color:#719e07">||&lt;/span> .-. |&lt;span style="color:#586e75">`&lt;/span>. &lt;span style="color:#586e75">`&lt;/span>-.
-| | | &lt;span style="color:#719e07">||&lt;/span> |&lt;span style="color:#cb4b16">\ &lt;/span> &lt;span style="color:#cb4b16">\ &lt;/span> | | | | | &lt;span style="color:#719e07">||&lt;/span> | | |.-&lt;span style="color:#2aa198">&amp;#39; |
-&lt;/span>&lt;span style="color:#2aa198">`--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;`--&amp;#39;&lt;/span> &lt;span style="color:#2aa198">&amp;#39;--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39; `--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;`--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;`-----&amp;#39;&lt;/span>
-wiki: https://alibaba.github.io/arthas
-version: 3.0.5
-pid: &lt;span style="color:#2aa198">43523&lt;/span>
-time: 2018-12-05 16:23:52
-$
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo线上服务抛出异常怎么获取调用参数">Dubbo线上服务抛出异常，怎么获取调用参数？&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/watch.html">https://alibaba.github.io/arthas/watch.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>当线上服务抛出异常时，最着急的是什么参数导致了抛异常？&lt;/p>
-&lt;p>在demo里，访问 http://localhost:8080/user/0 ，&lt;code>UserServiceImpl&lt;/code>就会抛出一个异常，因为user id不合法。&lt;/p>
-&lt;p>在Arthas里执行 &lt;code>watch com.example.UserService * -e -x 2 '{params,throwExp}'&lt;/code> ，然后再次访问，就可以看到watch命令把参数和异常都打印出来了。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ watch com.example.UserService * -e -x 2 &amp;#39;{params,throwExp}&amp;#39;
-Press Ctrl+C to abort.
-Affect(class-cnt:1 , method-cnt:4) cost in 230 ms.
-ts=2018-12-05 16:26:44; [cost=3.905523ms] result=@ArrayList[
-@Object[][
-@Integer[0],
-],
-java.lang.IllegalArgumentException: user id &amp;lt; 1, id: 0
-at com.example.UserServiceImpl.findUser(UserServiceImpl.java:24)
-at com.alibaba.dubbo.common.bytecode.Wrapper1.invokeMethod(Wrapper1.java)
-at com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory$1.doInvoke(JavassistProxyFactory.java:45)
-at com.alibaba.dubbo.rpc.proxy.AbstractProxyInvoker.invoke(AbstractProxyInvoker.java:71)
-at com.alibaba.dubbo.config.invoker.DelegateProviderMetaDataInvoker.invoke(DelegateProviderMetaDataInvoker.java:48)
-at com.alibaba.dubbo.rpc.protocol.InvokerWrapper.invoke(InvokerWrapper.java:52)
-at com.alibaba.dubbo.rpc.filter.ExceptionFilter.invoke(ExceptionFilter.java:61)
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="怎样线上调试dubbo服务代码">怎样线上调试Dubbo服务代码?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/redefine.html">https://alibaba.github.io/arthas/redefine.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>在本地开发时，可能会用到热部署工具，直接改代码，不需要重启应用。但是在线上环境，有没有办法直接动态调试代码？比如增加日志。&lt;/p>
-&lt;p>在Arthas里，可以通过&lt;code>redefine&lt;/code>命令来达到线上不重启，动态更新代码的效果。&lt;/p>
-&lt;p>比如我们修改下&lt;code>UserServiceImpl&lt;/code>，用&lt;code>System.out&lt;/code>打印出具体的&lt;code>User&lt;/code>对象来：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUser&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>id &lt;span style="color:#719e07">&amp;lt;&lt;/span> 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;user id &amp;lt; 1, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>User user &lt;span style="color:#719e07">:&lt;/span> users&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>user&lt;span style="color:#719e07">.&lt;/span>getId&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>user&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> user&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Can not find user, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>本地编绎后，把&lt;code>server-demo/target/classes/com/example/UserServiceImpl.class&lt;/code>传到线上服务器，然后用&lt;code>redefine&lt;/code>命令来更新代码：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ redefine -p /tmp/UserServiceImpl.class
-redefine success, size: 1
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样子更新成功之后，访问 http://localhost:8080/user/1 ，在&lt;code>ServerDemoApplication&lt;/code>的控制台里就可以看到打印出了user信息。&lt;/p>
-&lt;h3 id="怎样动态修改dubbo的logger级别">怎样动态修改Dubbo的logger级别?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/ognl.html">https://alibaba.github.io/arthas/ognl.html&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/sc.html">https://alibaba.github.io/arthas/sc.html&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://commons.apache.org/proper/commons-ognl/language-guide.html">https://commons.apache.org/proper/commons-ognl/language-guide.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>在排查问题时，需要查看到更多的信息，如果可以把logger级别修改为&lt;code>DEBUG&lt;/code>，就非常有帮助。&lt;/p>
-&lt;p>&lt;code>ognl&lt;/code>是apache开源的一个轻量级表达式引擎。下面通过Arthas里的&lt;code>ognl&lt;/code>命令来动态修改logger级别。&lt;/p>
-&lt;p>首先获取Dubbo里&lt;code>TraceFilter&lt;/code>的一个logger对象，看下它的实现类，可以发现是log4j。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ ognl &lt;span style="color:#2aa198">&amp;#39;@com.alibaba.dubbo.rpc.protocol.dubbo.filter.TraceFilter@logger.logger&amp;#39;&lt;/span>
-@Log4jLogger&lt;span style="color:#719e07">[&lt;/span>
-&lt;span style="color:#268bd2">FQCN&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@String&lt;span style="color:#719e07">[&lt;/span>com.alibaba.dubbo.common.logger.support.FailsafeLogger&lt;span style="color:#719e07">]&lt;/span>,
-&lt;span style="color:#268bd2">logger&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@Logger&lt;span style="color:#719e07">[&lt;/span>org.apache.log4j.Logger@2f19bdcf&lt;span style="color:#719e07">]&lt;/span>,
-&lt;span style="color:#719e07">]&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>再用&lt;code>sc&lt;/code>命令来查看具体从哪个jar包里加载的：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ sc -d org.apache.log4j.Logger
-class-info org.apache.log4j.Logger
-code-source /Users/hengyunabc/.m2/repository/org/slf4j/log4j-over-slf4j/1.7.25/log4j-over-slf4j-1.7.25.jar
-name org.apache.log4j.Logger
-isInterface &lt;span style="color:#b58900">false&lt;/span>
-isAnnotation &lt;span style="color:#b58900">false&lt;/span>
-isEnum &lt;span style="color:#b58900">false&lt;/span>
-isAnonymousClass &lt;span style="color:#b58900">false&lt;/span>
-isArray &lt;span style="color:#b58900">false&lt;/span>
-isLocalClass &lt;span style="color:#b58900">false&lt;/span>
-isMemberClass &lt;span style="color:#b58900">false&lt;/span>
-isPrimitive &lt;span style="color:#b58900">false&lt;/span>
-isSynthetic &lt;span style="color:#b58900">false&lt;/span>
-simple-name Logger
-modifier public
-annotation
-interfaces
-super-class +-org.apache.log4j.Category
-+-java.lang.Object
-class-loader +-sun.misc.Launcher&lt;span style="color:#268bd2">$AppClassLoader&lt;/span>@5c647e05
-+-sun.misc.Launcher&lt;span style="color:#268bd2">$ExtClassLoader&lt;/span>@59878d35
-classLoaderHash 5c647e05
-Affect&lt;span style="color:#719e07">(&lt;/span>row-cnt:1&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">126&lt;/span> ms.
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>可以看到log4j是通过slf4j代理的。&lt;/strong>&lt;/p>
-&lt;p>那么通过&lt;code>org.slf4j.LoggerFactory&lt;/code>获取&lt;code>root&lt;/code> logger，再修改它的level：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ ognl &amp;#39;@org.slf4j.LoggerFactory@getLogger(&amp;#34;root&amp;#34;).setLevel(@ch.qos.logback.classic.Level@DEBUG)&amp;#39;
-null
-$ ognl &amp;#39;@org.slf4j.LoggerFactory@getLogger(&amp;#34;root&amp;#34;).getLevel().toString()&amp;#39;
-@String[DEBUG]
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到修改之后，&lt;code>root&lt;/code> logger的level变为&lt;code>DEBUG&lt;/code>。&lt;/p>
-&lt;h3 id="怎样减少测试小姐姐重复发请求的麻烦">怎样减少测试小姐姐重复发请求的麻烦?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/tt.html">https://alibaba.github.io/arthas/tt.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>在平时开发时，可能需要测试小姐姐发请求过来联调，但是我们在debug时，可能不小心直接跳过去了。这样子就尴尬了，需要测试小姐姐再发请求过来。&lt;/p>
-&lt;p>Arthas里提供了&lt;code>tt&lt;/code>命令，可以减少这种麻烦，可以直接重放请求。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ tt -t com.example.UserServiceImpl findUser
-Press Ctrl+C to abort.
-Affect&lt;span style="color:#719e07">(&lt;/span>class-cnt:1 , method-cnt:1&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">145&lt;/span> ms.
-INDEX TIMESTAMP COST&lt;span style="color:#719e07">(&lt;/span>ms&lt;span style="color:#719e07">)&lt;/span> IS-RET IS-EXP OBJECT CLASS METHOD
-----------------------------------------------------------------------------------------------------------------
-&lt;span style="color:#2aa198">1000&lt;/span> 2018-12-05 17:47:52 1.56523 &lt;span style="color:#b58900">true&lt;/span> &lt;span style="color:#b58900">false&lt;/span> 0x3233483 UserServiceImpl findUser
-&lt;span style="color:#2aa198">1001&lt;/span> 2018-12-05 17:48:03 0.286176 &lt;span style="color:#b58900">false&lt;/span> &lt;span style="color:#b58900">true&lt;/span> 0x3233483 UserServiceImpl findUser
-&lt;span style="color:#2aa198">1002&lt;/span> 2018-12-05 17:48:11 90.324335 &lt;span style="color:#b58900">true&lt;/span> &lt;span style="color:#b58900">false&lt;/span> 0x3233483 UserServiceImpl findUser
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面的&lt;code>tt -t&lt;/code>命令捕获到了3个请求。然后通过&lt;code>tt --play&lt;/code>可以重放请求：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ tt --play -i &lt;span style="color:#2aa198">1000&lt;/span>
-RE-INDEX &lt;span style="color:#2aa198">1000&lt;/span>
-GMT-REPLAY 2018-12-05 17:55:50
-OBJECT 0x3233483
-CLASS com.example.UserServiceImpl
-METHOD findUser
-PARAMETERS&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span> @Integer&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>
-IS-RETURN &lt;span style="color:#b58900">true&lt;/span>
-IS-EXCEPTION &lt;span style="color:#b58900">false&lt;/span>
-RETURN-OBJ @User&lt;span style="color:#719e07">[&lt;/span>
-&lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@Integer&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>,
-&lt;span style="color:#268bd2">name&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@String&lt;span style="color:#719e07">[&lt;/span>Deanna Borer&lt;span style="color:#719e07">]&lt;/span>,
-&lt;span style="color:#719e07">]&lt;/span>
-Time fragment&lt;span style="color:#719e07">[&lt;/span>1000&lt;span style="color:#719e07">]&lt;/span> successfully replayed.
-Affect&lt;span style="color:#719e07">(&lt;/span>row-cnt:1&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">4&lt;/span> ms.
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo运行时有哪些filter-耗时是多少">Dubbo运行时有哪些Filter? 耗时是多少?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/trace.html">https://alibaba.github.io/arthas/trace.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>Dubbo运行时会加载很多的Filter，那么一个请求会经过哪些Filter处理，Filter里的耗时又是多少呢？&lt;/p>
-&lt;p>通过Arthas的&lt;code>trace&lt;/code>命令，可以很方便地知道Filter的信息，可以看到详细的调用栈和耗时。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ trace com.alibaba.dubbo.rpc.Filter *
-Press Ctrl+C to abort.
-Affect&lt;span style="color:#719e07">(&lt;/span>class-cnt:19 , method-cnt:59&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">1441&lt;/span> ms.
-&lt;span style="color:#586e75">`&lt;/span>---ts&lt;span style="color:#719e07">=&lt;/span>2018-12-05 19:07:26;&lt;span style="color:#268bd2">thread_name&lt;/span>&lt;span style="color:#719e07">=&lt;/span>DubboServerHandler-30.5.125.152:20880-thread-10;&lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>3e;&lt;span style="color:#268bd2">is_daemon&lt;/span>&lt;span style="color:#719e07">=&lt;/span>true;&lt;span style="color:#268bd2">priority&lt;/span>&lt;span style="color:#719e07">=&lt;/span>5;&lt;span style="color:#268bd2">TCCL&lt;/span>&lt;span style="color:#719e07">=&lt;/span>sun.misc.Launcher&lt;span style="color:#268bd2">$AppClassLoader&lt;/span>@5c647e05
-&lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>8.435844ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.filter.EchoFilter:invoke&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>0.124572ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invocation:getMethodName&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>0.065123ms&lt;span style="color:#719e07">]&lt;/span> java.lang.String:equals&lt;span style="color:#719e07">()&lt;/span>
-&lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>7.762928ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invoker:invoke&lt;span style="color:#719e07">()&lt;/span>
-&lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>7.494124ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.filter.ClassLoaderFilter:invoke&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#268bd2">min&lt;/span>&lt;span style="color:#719e07">=&lt;/span>0.00355ms,max&lt;span style="color:#719e07">=&lt;/span>0.049922ms,total&lt;span style="color:#719e07">=&lt;/span>0.057637ms,count&lt;span style="color:#719e07">=&lt;/span>3&lt;span style="color:#719e07">]&lt;/span> java.lang.Thread:currentThread&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>0.0126ms&lt;span style="color:#719e07">]&lt;/span> java.lang.Thread:getContextClassLoader&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>0.02188ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invoker:getInterface&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>0.004115ms&lt;span style="color:#719e07">]&lt;/span> java.lang.Class:getClassLoader&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#268bd2">min&lt;/span>&lt;span style="color:#719e07">=&lt;/span>0.003906ms,max&lt;span style="color:#719e07">=&lt;/span>0.014058ms,total&lt;span style="color:#719e07">=&lt;/span>0.017964ms,count&lt;span style="color:#719e07">=&lt;/span>2&lt;span style="color:#719e07">]&lt;/span> java.lang.Thread:setContextClassLoader&lt;span style="color:#719e07">()&lt;/span>
-&lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>7.033486ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invoker:invoke&lt;span style="color:#719e07">()&lt;/span>
-&lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>6.869488ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.filter.GenericFilter:invoke&lt;span style="color:#719e07">()&lt;/span>
-+---&lt;span style="color:#719e07">[&lt;/span>0.01481ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invocation:getMethodName&lt;span style="color:#719e07">()&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo动态代理是怎样实现的">Dubbo动态代理是怎样实现的?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://alibaba.github.io/arthas/jad.html">https://alibaba.github.io/arthas/jad.html&lt;/a>&lt;/li>
-&lt;li>com.alibaba.dubbo.common.bytecode.Wrapper&lt;/li>
-&lt;/ul>
-&lt;p>通过Arthas的&lt;code>jad&lt;/code>命令，可以看到Dubbo通过javaassist动态生成的Wrappr类的代码：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">$ jad com&lt;span style="color:#719e07">.&lt;/span>alibaba&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>common&lt;span style="color:#719e07">.&lt;/span>bytecode&lt;span style="color:#719e07">.&lt;/span>Wrapper1
-ClassLoader:
-&lt;span style="color:#719e07">+-&lt;/span>sun&lt;span style="color:#719e07">.&lt;/span>misc&lt;span style="color:#719e07">.&lt;/span>Launcher$AppClassLoader&lt;span style="color:#268bd2">@5c647e05&lt;/span>
-&lt;span style="color:#719e07">+-&lt;/span>sun&lt;span style="color:#719e07">.&lt;/span>misc&lt;span style="color:#719e07">.&lt;/span>Launcher$ExtClassLoader&lt;span style="color:#268bd2">@59878d35&lt;/span>
-Location:
-&lt;span style="color:#719e07">/&lt;/span>Users&lt;span style="color:#719e07">/&lt;/span>hengyunabc&lt;span style="color:#719e07">/.&lt;/span>m2&lt;span style="color:#719e07">/&lt;/span>repository&lt;span style="color:#719e07">/&lt;/span>com&lt;span style="color:#719e07">/&lt;/span>alibaba&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">/&lt;/span>2&lt;span style="color:#719e07">.&lt;/span>5&lt;span style="color:#719e07">.&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>2&lt;span style="color:#719e07">.&lt;/span>5&lt;span style="color:#719e07">.&lt;/span>10&lt;span style="color:#719e07">.&lt;/span>jar
-&lt;span style="color:#719e07">package&lt;/span> com.alibaba.dubbo.common.bytecode&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Wrapper1&lt;/span>
-&lt;span style="color:#268bd2">extends&lt;/span> Wrapper
-&lt;span style="color:#268bd2">implements&lt;/span> ClassGenerator&lt;span style="color:#719e07">.&lt;/span>DC &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">invokeMethod&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Object object&lt;span style="color:#719e07">,&lt;/span> String string&lt;span style="color:#719e07">,&lt;/span> Class&lt;span style="color:#719e07">[]&lt;/span> arrclass&lt;span style="color:#719e07">,&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span> arrobject&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> InvocationTargetException &lt;span style="color:#719e07">{&lt;/span>
-UserServiceImpl userServiceImpl&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-userServiceImpl &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">(&lt;/span>UserServiceImpl&lt;span style="color:#719e07">)&lt;/span>object&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Throwable throwable&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException&lt;span style="color:#719e07">(&lt;/span>throwable&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;findUser&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>string&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> arrclass&lt;span style="color:#719e07">.&lt;/span>length &lt;span style="color:#719e07">==&lt;/span> 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> userServiceImpl&lt;span style="color:#719e07">.&lt;/span>findUser&lt;span style="color:#719e07">(((&lt;/span>Number&lt;span style="color:#719e07">)&lt;/span>arrobject&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]).&lt;/span>intValue&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;listUsers&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>string&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> arrclass&lt;span style="color:#719e07">.&lt;/span>length &lt;span style="color:#719e07">==&lt;/span> 0&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> userServiceImpl&lt;span style="color:#719e07">.&lt;/span>listUsers&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;findUserByName&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>string&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> arrclass&lt;span style="color:#719e07">.&lt;/span>length &lt;span style="color:#719e07">==&lt;/span> 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> userServiceImpl&lt;span style="color:#719e07">.&lt;/span>findUserByName&lt;span style="color:#719e07">((&lt;/span>String&lt;span style="color:#719e07">)&lt;/span>arrobject&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="获取spring-context">获取Spring context&lt;/h3>
-&lt;p>除了上面介绍的一些排查技巧，下面分享一个获取Spring Context，然后“为所欲为”的例子。&lt;/p>
-&lt;p>在Dubbo里有一个扩展&lt;code>com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory&lt;/code>，把Spring Context保存到了里面。
-因此，我们可以通过&lt;code>ognl&lt;/code>命令获取到。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ ognl &lt;span style="color:#2aa198">&amp;#39;#context=@com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory@contexts.iterator.next, #context.getBean(&amp;#34;userServiceImpl&amp;#34;).findUser(1)&amp;#39;&lt;/span>
-@User&lt;span style="color:#719e07">[&lt;/span>
-&lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@Integer&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>,
-&lt;span style="color:#268bd2">name&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@String&lt;span style="color:#719e07">[&lt;/span>Deanna Borer&lt;span style="color:#719e07">]&lt;/span>,
-&lt;span style="color:#719e07">]&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>&lt;code>SpringExtensionFactory@contexts.iterator.next&lt;/code> 获取到&lt;code>SpringExtensionFactory&lt;/code>里保存的spring context对象&lt;/li>
-&lt;li>&lt;code>#context.getBean(&amp;quot;userServiceImpl&amp;quot;).findUser(1)&lt;/code> 获取到&lt;code>userServiceImpl&lt;/code>再执行一次调用&lt;/li>
-&lt;/ul>
-&lt;p>只要充分发挥想像力，组合Arthas里的各种命令，可以发挥出神奇的效果。&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;p>本篇文章来自杭州Dubbo Meetup的分享《当DUBBO遇上Arthas - 排查问题的实践》，希望对大家线上排查Dubbo问题有帮助。&lt;/p>
-&lt;p>分享的PDF可以在 &lt;a href="https://github.com/alibaba/arthas/issues/327">https://github.com/alibaba/arthas/issues/327&lt;/a> 里下载。&lt;/p></description></item><item><title>Blog: 遇见Dubbo</title><link>/zh/blog/2019/01/26/%E9%81%87%E8%A7%81dubbo/</link><pubDate>Sat, 26 Jan 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/01/26/%E9%81%87%E8%A7%81dubbo/</guid><description>
-&lt;p>我是一个有Dubbo情节的程序员。&lt;/p>
-&lt;p>Dubbo以不同方式，陪伴了我时间不长的整个代码生涯。不久前，通过社区投票，我被选举为&lt;code>Committer&lt;/code>。当时我在朋友圈发了一句话，也是贯穿我从开始使用Dubbo、研究Dubbo、贡献Dubbo到最后成为&lt;code>Committer&lt;/code>的全过程，一直为我提供内心无与伦比愉悦的源泉：成长这种事，能看见脚印特别幸福。&lt;/p>
-&lt;p>今天来个回忆杀，把我和Dubbo的那些事拿出来说说。&lt;/p>
-&lt;h2 id="小白">小白&lt;/h2>
-&lt;p>我知道Dubbo，是在我大三翘课出去实习的时候，那个时候是无知的，我眼里最牛的人就是能熟练使用各种配置，精通SSH框架的人。就是在那种情况下，我外出实习，遇到了一群影响我至今的人。当时也是机缘巧合，我们进行了两个非常小的模块的服务化改造。那时的团队除了我们老大，全是一群新兵蛋子，老大指哪我们打哪。老大说，就用Dubbo吧，从那时候开始，我才知道，哦！原来还有一种东西叫做RPC，还有个阿里巴巴的RPC框架叫Dubbo。&lt;/p>
-&lt;p>苦于当时非常有限的水平和高强度的工作，我和Dubbo的缘分也就停留在一面之缘的程度——要说认识谈不上，说不认识也牵强。&lt;/p>
-&lt;h2 id="contributor">Contributor&lt;/h2>
-&lt;p>我在二维火任职的一年算是我Dubbo生涯里承上启下的一年。二维火当时自己维护了一个Dubbo的分支，有一群对Dubbo非常了解的人。那时候，工作结束搞Dubbo，周六加班研究Dubbo。看源码，看不懂就debug一下，debug也不明白就问，问人，问google，里外折腾了个遍。&lt;/p>
-&lt;p>后来毕业加入网易云音乐。大概是今年五月份的时候，我发现了一个Dubbo的小bug，并且给Dubbo提交了pull request。在第一次被merge之后，非常受鼓舞，这才有了后续的故事。后来，回看这第一次提交，真的算是我和Dubbo的一个拐点，拐弯之后，我才逐渐走上一条成为&lt;code>Committer&lt;/code>的路。&lt;/p>
-&lt;p>可能很多人看到这里要望而却步了，这也是做开源给很多人留下的固有的印象——是不是没发现BUG就不能提交pull request，不能做贡献？其实完全不是的，这里给大家敲黑板划重点：其实很多贡献者的第一次贡献，贡献的并非代码，而是文档修改或者单元测试。相比于BUG或者新的Feature，单测和文档上的修复门槛就比较低了。&lt;/p>
-&lt;p>我自己的方法论就是：&lt;strong>先尝试增加单元测试，写单测的时候顺手debug+看代码。或者多看文档，了解框架的同时，发现错别字、语意不明或者文档上的链接干脆点不开的情况，直接提交PR到对应的仓库&lt;/strong>。&lt;/p>
-&lt;p>万事开头难。第一次被merge代码，你就可以成为一个&lt;code>Contributor&lt;/code>了。&lt;code>Contributor&lt;/code>很多，但是&lt;code>Committer&lt;/code>很少，下面继续说怎么从一个&lt;code>Contributor&lt;/code>成长为独当一面的&lt;code>Committer&lt;/code>。&lt;/p>
-&lt;h2 id="committer">Committer&lt;/h2>
-&lt;p>做开源和写代码一样，都不是一朝一夕的事情，而是量变促成质变的过程。这是一个没捷径可走的过程，欲带皇冠必承其重。身后的Dubbo功底自不必多说，这个部分主要是想跟大家说一下除了钻研和热爱之外，其他需要注意的地方。&lt;/p>
-&lt;p>首先是多提交高质量PR。任何一个PR都会被review，代码中的问题，思路上的偏差，都会被指正。提交PR是一个反复琢磨的过程。PR的质量不能简单的归结于新增了多少行代码，高质量的PR一定是经过缜密思考的，为什么删除代码，新增的代码有什么意义，修改之后有什么效果等等。希望大家更加重视质量而非数量，眼光放长远，相信你的收获一定会非常大！&lt;/p>
-&lt;p>第二个就是，我们需要培养一种思维方式——Apache Way。一句话概括就是&lt;strong>社区重于代码&lt;/strong>。Apache是一个注重社区的的开源组织，其行为方式相比于目前我们的开发方式，还是有所不同，这里我举一个Apache Way的例子，用以说明传统方式相较于Apache Way的区别在哪里，这里假设我想为Dubbo开发一个功能A。&lt;/p>
-&lt;p>&lt;strong>Old Way&lt;/strong>：&lt;/p>
-&lt;ol>
-&lt;li>功能设计：做一个设计文档（根据功能大小而定），大概划定需要修改或新增的类，大体设计接口等。&lt;/li>
-&lt;li>开发代码。&lt;/li>
-&lt;li>提交PR。&lt;/li>
-&lt;li>Review &amp;amp; Merge&lt;/li>
-&lt;/ol>
-&lt;p>可以看到，我们整个过程中，真正与社区交互的只有最后一步。&lt;/p>
-&lt;p>&lt;strong>Apache Way&lt;/strong>：&lt;/p>
-&lt;ol>
-&lt;li>功能设计：发送邮件至mailing list并且提交ISSUE，与社区成员共同探讨，产出一个设计文档（根据功能大小而定），大概划定需要修改或新增的类，大体设计接口等。然后再次发送邮件并且回复ISSUE，通知社区设计文档定稿或者方案确定。&lt;/li>
-&lt;li>开发代码：发送邮件至社区，通知社区成员我即将投入开发功能A，如需帮助，可以同时说明需要协助。&lt;/li>
-&lt;li>提交PR：发送邮件并且回复ISSUE，提醒社区开发结束，贴上PR地址以通知社区review代码。&lt;/li>
-&lt;li>Review + Merge后，发送邮件并且关闭ISSUE，通知社区功能A的开发功能告一段落。&lt;/li>
-&lt;/ol>
-&lt;p>可以看到，Apache Way就是在整个开发过程中，不断地与社区交互，最大发挥社区的功能，汲取众人之力，这才是所谓&lt;strong>社区&lt;/strong>以及所谓&lt;strong>开源&lt;/strong>的含义。&lt;/p>
-&lt;h2 id="结尾">结尾&lt;/h2>
-&lt;p>Dubbo目前还在孵化阶段，整个Dubbo社区还不完善，我们也在跟着Dubbo一起成长，我们非常希望更多的Dubbo爱好者深度参与到Dubbo中，为你的代码生涯树一个里程碑。&lt;/p>
-&lt;p>相信过程，收获结果；天道酬勤，功不唐捐！&lt;/p></description></item><item><title>Blog: 如何使用Seata保证Dubbo微服务间的一致性</title><link>/zh/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</link><pubDate>Thu, 17 Jan 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</guid><description>
-&lt;h2 id="案例">案例&lt;/h2>
-&lt;p>用户采购商品业务，整个业务包含3个微服务:&lt;/p>
-&lt;ul>
-&lt;li>库存服务: 扣减给定商品的库存数量。&lt;/li>
-&lt;li>订单服务: 根据采购请求生成订单。&lt;/li>
-&lt;li>账户服务: 用户账户金额扣减。&lt;/li>
-&lt;/ul>
-&lt;h3 id="业务结构图">业务结构图&lt;/h3>
-&lt;p>&lt;img src="/imgs/blog/fescar/fescar-1.png" alt="Architecture">&lt;/p>
-&lt;h3 id="storageservice">StorageService&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">StorageService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 扣除存储数量
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deduct&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String commodityCode&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> count&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="orderservice">OrderService&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">OrderService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 创建订单
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-Order &lt;span style="color:#268bd2">create&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String userId&lt;span style="color:#719e07">,&lt;/span> String commodityCode&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> orderCount&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="accountservice">AccountService&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">AccountService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 从用户账户中借出
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">debit&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String userId&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> money&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="主要的业务逻辑">主要的业务逻辑：&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">BusinessServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> BusinessService &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> StorageService storageService&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> OrderService orderService&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 采购
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">purchase&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String userId&lt;span style="color:#719e07">,&lt;/span> String commodityCode&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> orderCount&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-storageService&lt;span style="color:#719e07">.&lt;/span>deduct&lt;span style="color:#719e07">(&lt;/span>commodityCode&lt;span style="color:#719e07">,&lt;/span> orderCount&lt;span style="color:#719e07">);&lt;/span>
-orderService&lt;span style="color:#719e07">.&lt;/span>create&lt;span style="color:#719e07">(&lt;/span>userId&lt;span style="color:#719e07">,&lt;/span> commodityCode&lt;span style="color:#719e07">,&lt;/span> orderCount&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StorageServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> StorageService &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> StorageDAO storageDAO&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deduct&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String commodityCode&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> count&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Storage storage &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Storage&lt;span style="color:#719e07">();&lt;/span>
-storage&lt;span style="color:#719e07">.&lt;/span>setCount&lt;span style="color:#719e07">(&lt;/span>count&lt;span style="color:#719e07">);&lt;/span>
-storage&lt;span style="color:#719e07">.&lt;/span>setCommodityCode&lt;span style="color:#719e07">(&lt;/span>commodityCode&lt;span style="color:#719e07">);&lt;/span>
-storageDAO&lt;span style="color:#719e07">.&lt;/span>update&lt;span style="color:#719e07">(&lt;/span>storage&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">OrderServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> OrderService &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> OrderDAO orderDAO&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> AccountService accountService&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> Order &lt;span style="color:#268bd2">create&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String userId&lt;span style="color:#719e07">,&lt;/span> String commodityCode&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> orderCount&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">int&lt;/span> orderMoney &lt;span style="color:#719e07">=&lt;/span> calculate&lt;span style="color:#719e07">(&lt;/span>commodityCode&lt;span style="color:#719e07">,&lt;/span> orderCount&lt;span style="color:#719e07">);&lt;/span>
-accountService&lt;span style="color:#719e07">.&lt;/span>debit&lt;span style="color:#719e07">(&lt;/span>userId&lt;span style="color:#719e07">,&lt;/span> orderMoney&lt;span style="color:#719e07">);&lt;/span>
-Order order &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Order&lt;span style="color:#719e07">();&lt;/span>
-order&lt;span style="color:#719e07">.&lt;/span>userId &lt;span style="color:#719e07">=&lt;/span> userId&lt;span style="color:#719e07">;&lt;/span>
-order&lt;span style="color:#719e07">.&lt;/span>commodityCode &lt;span style="color:#719e07">=&lt;/span> commodityCode&lt;span style="color:#719e07">;&lt;/span>
-order&lt;span style="color:#719e07">.&lt;/span>count &lt;span style="color:#719e07">=&lt;/span> orderCount&lt;span style="color:#719e07">;&lt;/span>
-order&lt;span style="color:#719e07">.&lt;/span>money &lt;span style="color:#719e07">=&lt;/span> orderMoney&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> orderDAO&lt;span style="color:#719e07">.&lt;/span>insert&lt;span style="color:#719e07">(&lt;/span>order&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="seata-分布式事务解决方案">Seata 分布式事务解决方案&lt;/h2>
-&lt;p>&lt;img src="/imgs/blog/fescar/fescar-2.png" alt="undefined">&lt;/p>
-&lt;p>此处仅仅需要一行注解 &lt;code>@GlobalTransactional&lt;/code> 写在业务发起方的方法上:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">
-&lt;span style="color:#268bd2">@GlobalTransactional&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">purchase&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String userId&lt;span style="color:#719e07">,&lt;/span> String commodityCode&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> orderCount&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">......&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="dubbo-与-seata-结合的例子">Dubbo 与 Seata 结合的例子&lt;/h2>
-&lt;h3 id="step-1-安装数据库">Step 1: 安装数据库&lt;/h3>
-&lt;ul>
-&lt;li>要求: MySQL (InnoDB 存储引擎)。&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>提示:&lt;/strong> 事实上例子中3个微服务需要3个独立的数据库，但为了方便我们使用同一物理库并配置3个逻辑连接串。&lt;/p>
-&lt;p>更改以下xml文件中的数据库url、username和password&lt;/p>
-&lt;p>dubbo-account-service.xml
-dubbo-order-service.xml
-dubbo-storage-service.xml&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml"> &lt;span style="color:#268bd2">&amp;lt;property&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;url&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;jdbc:mysql://x.x.x.x:3306/xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;property&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;username&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;property&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;password&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-为-seata-创建-undo_log-表">Step 2: 为 Seata 创建 undo_log 表&lt;/h3>
-&lt;p>&lt;code>UNDO_LOG&lt;/code> 此表用于 Seata 的AT模式。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#586e75">-- 注意当 Seata 版本升级至 0.3.0+ 将由之前的普通索引变更为唯一索引。
-&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>undo_log&lt;span style="color:#719e07">`&lt;/span> (
-&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">bigint&lt;/span>(&lt;span style="color:#2aa198">20&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
-&lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">bigint&lt;/span>(&lt;span style="color:#2aa198">20&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">100&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>context&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">128&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>rollback_info&lt;span style="color:#719e07">`&lt;/span> longblob &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>log_status&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>log_created&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>log_modified&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>ext&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">100&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>),
-&lt;span style="color:#719e07">UNIQUE&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> &lt;span style="color:#719e07">`&lt;/span>ux_undo_log&lt;span style="color:#719e07">`&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span>,&lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span>)
-) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB AUTO_INCREMENT&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-创建相关业务表">Step 3: 创建相关业务表&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">
-&lt;span style="color:#719e07">DROP&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>storage_tbl&lt;span style="color:#719e07">`&lt;/span>;
-&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>storage_tbl&lt;span style="color:#719e07">`&lt;/span> (
-&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
-&lt;span style="color:#719e07">`&lt;/span>commodity_code&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>&lt;span style="color:#719e07">count&lt;/span>&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
-&lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>),
-&lt;span style="color:#719e07">UNIQUE&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>commodity_code&lt;span style="color:#719e07">`&lt;/span>)
-) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
-&lt;span style="color:#719e07">DROP&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>order_tbl&lt;span style="color:#719e07">`&lt;/span>;
-&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>order_tbl&lt;span style="color:#719e07">`&lt;/span> (
-&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
-&lt;span style="color:#719e07">`&lt;/span>user_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>commodity_code&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>&lt;span style="color:#719e07">count&lt;/span>&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>money&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
-&lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>)
-) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
-&lt;span style="color:#719e07">DROP&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>account_tbl&lt;span style="color:#719e07">`&lt;/span>;
-&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>account_tbl&lt;span style="color:#719e07">`&lt;/span> (
-&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
-&lt;span style="color:#719e07">`&lt;/span>user_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
-&lt;span style="color:#719e07">`&lt;/span>money&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
-&lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>)
-) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-4-启动-seata-server-服务">Step 4: 启动 Seata-Server 服务&lt;/h3>
-&lt;ul>
-&lt;li>下载&lt;a href="https://github.com/seata/seata/releases">服务器软件包&lt;/a>，将其解压缩。&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">Usage: sh seata-server.sh&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">for&lt;/span> linux and mac&lt;span style="color:#719e07">)&lt;/span> or cmd seata-server.bat&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">for&lt;/span> windows&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">[&lt;/span>options&lt;span style="color:#719e07">]&lt;/span>
-Options:
---host, -h
-The host to bind.
-Default: 0.0.0.0
---port, -p
-The port to listen.
-Default: &lt;span style="color:#2aa198">8091&lt;/span>
---storeMode, -m
-log store mode : file、db
-Default: file
---help
-e.g.
-sh seata-server.sh -p &lt;span style="color:#2aa198">8091&lt;/span> -h 127.0.0.1 -m file
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-5-运行例子">Step 5: 运行例子&lt;/h3>
-&lt;ul>
-&lt;li>启动账户服务 (&lt;a href="https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboAccountServiceStarter.java">DubboAccountServiceStarter&lt;/a>)。&lt;/li>
-&lt;li>启动库存服务 (&lt;a href="https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboStorageServiceStarter.java">DubboStorageServiceStarter&lt;/a>)。&lt;/li>
-&lt;li>启动订单服务 (&lt;a href="https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboOrderServiceStarter.java">DubboOrderServiceStarter&lt;/a>)。&lt;/li>
-&lt;li>运行BusinessService入口 (&lt;a href="https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboBusinessTester.java">DubboBusinessTester&lt;/a>)。&lt;/li>
-&lt;/ul>
-&lt;h3 id="相关项目">相关项目&lt;/h3>
-&lt;ul>
-&lt;li>Seata: &lt;a href="https://github.com/seata/seata">https://github.com/seata/seata&lt;/a>&lt;/li>
-&lt;li>Seata Samples : &lt;a href="https://github.com/seata/seata-samples">https://github.com/seata/seata-samples&lt;/a>&lt;/li>
 &lt;/ul></description></item></channel></rss>

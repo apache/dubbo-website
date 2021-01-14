@@ -240,7 +240,172 @@ Gender &lt;span style="color:#dc322f">string&lt;/span>
 DogName &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`hessian:&amp;#34;-&amp;#34;`&lt;/span>
 }
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>同时，就像 json 编码中通过 immediately 可以在序列化中忽略该字段，同理，通过 hessian:&amp;quot;-&amp;quot; 用户也可以让冗余字段不参与 hessian 序列化。&lt;/p>
-&lt;p>对应pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/154">#154&lt;/a>，作者 &lt;a href="https://github.com/micln">micln&lt;/a>&lt;/p></description></item><item><title>Blog: dubbo-go 1.4.0</title><link>/zh/blog/2021/01/12/dubbo-go-1.4.0/</link><pubDate>Tue, 12 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/12/dubbo-go-1.4.0/</guid><description>
+&lt;p>对应pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/154">#154&lt;/a>，作者 &lt;a href="https://github.com/micln">micln&lt;/a>&lt;/p></description></item><item><title>Blog: dubbo-go-hessian2 v1.7.0</title><link>/zh/blog/2021/01/14/dubbo-go-hessian2-v1.7.0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-hessian2-v1.7.0/</guid><description>
+&lt;p>Dubbo-go-hessian2 v1.7.0已发布，详见 &lt;a href="https://github.com/apache/dubbo-go-hessian2/releases/tag/v1.7.0">https://github.com/apache/dubbo-go-hessian2/releases/tag/v1.7.0&lt;/a>， 以下对这次更新内容进行详细整理。&lt;/p>
+&lt;p>另外v1.6.3 将 attachment 类型由 map[string]stiring 改为map[string]interface{} 导致版本不兼容问题，这部分已还原，后续的计划是将dubbo协议的request/response对象整体迁移到dubbogo项目中进行迭代修改， hessian2中将不再改动到request/response对象。&lt;/p>
+&lt;h2 id="1-new-features">1. New Features&lt;/h2>
+&lt;h3 id="11-add-getstacktrace-method-into-throwabler-and-its-implements-207httpsgithubcomapachedubbo-go-hessian2pull207">1.1 add GetStackTrace method into Throwabler and its implements. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/207">#207&lt;/a>&lt;/h3>
+&lt;p>go语言client请求java语言服务时，如果java语言抛出了异常，异常对应的堆栈信息是被保存在StackTraceElement中。&lt;/p>
+&lt;p>这个异常信息在日志中最好能被打印出来，以方便客户端排查问题，所以在Throwabler和对应子类中增加了StackTraceElement的获取。&lt;/p>
+&lt;p>注：其实还有一种更好的方法，所有的具体的异常类型都包含java_exception/exception.go的Throwable struct。这样只需要在Throwable中增加GetStackTrace方法就可以了。但是这种方式需要更多的测试验证，改动的逻辑相对会复杂一些。但是代码会更整洁。 这里先不用这种方法。&lt;/p>
+&lt;h3 id="12-catch-user-defined-exceptions-208httpsgithubcomapachedubbo-go-hessian2pull208">1.2 catch user defined exceptions. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/208">#208&lt;/a>&lt;/h3>
+&lt;p>golang中增加一个java中Exception对象的序列化输出方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">JavaException&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+exception &lt;span style="color:#719e07">:=&lt;/span> java_exception.&lt;span style="color:#268bd2">NewException&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;java_exception&amp;#34;&lt;/span>)
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(exception)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在output/output.go 提供调用入口:添加如下函数初始化声明&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+funcMap[&lt;span style="color:#2aa198">&amp;#34;JavaException&amp;#34;&lt;/span>] = testfuncs.JavaException
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>java代码中增加调用go方法序列化结果:&lt;/p>
+&lt;p>&lt;strong>说明&lt;/strong>: Assert.assertEquals 不能直接比较Exception对象是否相等&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;span style="color:#586e75"> * test java java.lang.Exception object and go java_exception Exception struct
+&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;span style="color:#268bd2">@Test&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">testException&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Exception exception &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Exception&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;java_exception&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+Object javaException &lt;span style="color:#719e07">=&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;JavaException&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>javaException &lt;span style="color:#719e07">instanceof&lt;/span> Exception&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>exception&lt;span style="color:#719e07">.&lt;/span>getMessage&lt;span style="color:#719e07">(),&lt;/span> &lt;span style="color:#719e07">((&lt;/span>Exception&lt;span style="color:#719e07">)&lt;/span> javaException&lt;span style="color:#719e07">).&lt;/span>getMessage&lt;span style="color:#719e07">());&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="13-support-java8-time-object-212httpsgithubcomapachedubbo-go-hessian2pull212-221httpsgithubcomapachedubbo-go-hessian2pull221">1.3 support java8 time object. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/212">#212&lt;/a>, &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/221">#221&lt;/a>&lt;/h3>
+&lt;p>golang中增加一个java8对象的序列化输出方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// test java8 java.time.Year
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">Java8TimeYear&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+year &lt;span style="color:#719e07">:=&lt;/span> java8_time.Year{Year: &lt;span style="color:#2aa198">2020&lt;/span>}
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(year)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;span style="color:#586e75">// test java8 java.time.LocalDate
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">Java8LocalDate&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+date &lt;span style="color:#719e07">:=&lt;/span> java8_time.LocalDate{Year: &lt;span style="color:#2aa198">2020&lt;/span>, Month: &lt;span style="color:#2aa198">9&lt;/span>, Day: &lt;span style="color:#2aa198">12&lt;/span>}
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(date)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在output/output.go 提供调用入口:添加函数初始化声明&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+funcMap[&lt;span style="color:#2aa198">&amp;#34;Java8TimeYear&amp;#34;&lt;/span>] = testfuncs.Java8TimeYear
+funcMap[&lt;span style="color:#2aa198">&amp;#34;Java8LocalDate&amp;#34;&lt;/span>] = testfuncs.Java8LocalDate
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>java代码中增加调用go方法序列化结果:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#586e75">/**
+&lt;/span>&lt;span style="color:#586e75"> * test java8 java.time.* object and go java8_time/* struct
+&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;span style="color:#268bd2">@Test&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">testJava8Year&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Year year &lt;span style="color:#719e07">=&lt;/span> Year&lt;span style="color:#719e07">.&lt;/span>of&lt;span style="color:#719e07">(&lt;/span>2020&lt;span style="color:#719e07">);&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>year
+&lt;span style="color:#719e07">,&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Java8TimeYear&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+LocalDate localDate &lt;span style="color:#719e07">=&lt;/span> LocalDate&lt;span style="color:#719e07">.&lt;/span>of&lt;span style="color:#719e07">(&lt;/span>2020&lt;span style="color:#719e07">,&lt;/span> 9&lt;span style="color:#719e07">,&lt;/span> 12&lt;span style="color:#719e07">);&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>localDate&lt;span style="color:#719e07">,&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Java8LocalDate&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="14-support-test-golang-encoding-data-in-java-213httpsgithubcomapachedubbo-go-hessian2pull213">1.4 support test golang encoding data in java. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/213">#213&lt;/a>&lt;/h3>
+&lt;p>为了更好的测试验证hessian库，原来已经支持在golang中测试java的序列化数据，现在增加在java中测试golang的序列化数据，实现双向测试验证。&lt;/p>
+&lt;p>golang中增加序列化输出方法:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">HelloWorldString&lt;/span>() []&lt;span style="color:#dc322f">byte&lt;/span> {
+e &lt;span style="color:#719e07">:=&lt;/span> hessian.&lt;span style="color:#268bd2">NewEncoder&lt;/span>()
+e.&lt;span style="color:#268bd2">Encode&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hello world&amp;#34;&lt;/span>)
+&lt;span style="color:#719e07">return&lt;/span> e.&lt;span style="color:#268bd2">Buffer&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>将该方法注册到output/output.go中&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go"> &lt;span style="color:#586e75">// add all output func here
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+funcMap[&lt;span style="color:#2aa198">&amp;#34;HelloWorldString&amp;#34;&lt;/span>] = testfuncs.HelloWorldString
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>output/output.go 提供调用入口:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+flag.&lt;span style="color:#268bd2">Parse&lt;/span>()
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">*&lt;/span>funcName &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;func name required&amp;#34;&lt;/span>)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+f, exist &lt;span style="color:#719e07">:=&lt;/span> funcMap[&lt;span style="color:#719e07">*&lt;/span>funcName]
+&lt;span style="color:#719e07">if&lt;/span> !exist {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;func name not exist: &amp;#34;&lt;/span>, &lt;span style="color:#719e07">*&lt;/span>funcName)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+&lt;span style="color:#719e07">defer&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">recover&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;error: &amp;#34;&lt;/span>, err)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+}()
+&lt;span style="color:#719e07">if&lt;/span> _, err &lt;span style="color:#719e07">:=&lt;/span> os.Stdout.&lt;span style="color:#268bd2">Write&lt;/span>(&lt;span style="color:#268bd2">f&lt;/span>()); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+_, _ = fmt.&lt;span style="color:#268bd2">Fprintln&lt;/span>(os.Stderr, &lt;span style="color:#2aa198">&amp;#34;call error: &amp;#34;&lt;/span>, err)
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+}
+os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">0&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>java代码中增加调用go方法序列化结果:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GoTestUtil&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> Object &lt;span style="color:#268bd2">readGoObject&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String func&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;read go data: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> func&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Process process &lt;span style="color:#719e07">=&lt;/span> Runtime&lt;span style="color:#719e07">.&lt;/span>getRuntime&lt;span style="color:#719e07">()&lt;/span>
+&lt;span style="color:#719e07">.&lt;/span>exec&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;go run output/output.go -func_name=&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> func&lt;span style="color:#719e07">,&lt;/span>
+&lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">,&lt;/span>
+&lt;span style="color:#719e07">new&lt;/span> File&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;..&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#dc322f">int&lt;/span> exitValue &lt;span style="color:#719e07">=&lt;/span> process&lt;span style="color:#719e07">.&lt;/span>waitFor&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>exitValue &lt;span style="color:#719e07">!=&lt;/span> 0&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>fail&lt;span style="color:#719e07">(&lt;/span>readString&lt;span style="color:#719e07">(&lt;/span>process&lt;span style="color:#719e07">.&lt;/span>getErrorStream&lt;span style="color:#719e07">()));&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+InputStream is &lt;span style="color:#719e07">=&lt;/span> process&lt;span style="color:#719e07">.&lt;/span>getInputStream&lt;span style="color:#719e07">();&lt;/span>
+Hessian2Input input &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Hessian2Input&lt;span style="color:#719e07">(&lt;/span>is&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> input&lt;span style="color:#719e07">.&lt;/span>readObject&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Exception e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+e&lt;span style="color:#719e07">.&lt;/span>printStackTrace&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> String &lt;span style="color:#268bd2">readString&lt;/span>&lt;span style="color:#719e07">(&lt;/span>InputStream in&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> IOException &lt;span style="color:#719e07">{&lt;/span>
+StringBuilder out &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder&lt;span style="color:#719e07">();&lt;/span>
+InputStreamReader reader &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> InputStreamReader&lt;span style="color:#719e07">(&lt;/span>in&lt;span style="color:#719e07">,&lt;/span> StandardCharsets&lt;span style="color:#719e07">.&lt;/span>UTF_8&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#dc322f">char&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> buffer &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> &lt;span style="color:#dc322f">char&lt;/span>&lt;span style="color:#719e07">[&lt;/span>4096&lt;span style="color:#719e07">];&lt;/span>
+&lt;span style="color:#dc322f">int&lt;/span> bytesRead&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">while&lt;/span> &lt;span style="color:#719e07">((&lt;/span>bytesRead &lt;span style="color:#719e07">=&lt;/span> reader&lt;span style="color:#719e07">.&lt;/span>read&lt;span style="color:#719e07">(&lt;/span>buffer&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#719e07">-&lt;/span>1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+out&lt;span style="color:#719e07">.&lt;/span>append&lt;span style="color:#719e07">(&lt;/span>buffer&lt;span style="color:#719e07">,&lt;/span> 0&lt;span style="color:#719e07">,&lt;/span> bytesRead&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> out&lt;span style="color:#719e07">.&lt;/span>toString&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>增加java测试代码:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Test&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">testHelloWordString&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+Assert&lt;span style="color:#719e07">.&lt;/span>assertEquals&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;hello world&amp;#34;&lt;/span>
+&lt;span style="color:#719e07">,&lt;/span> GoTestUtil&lt;span style="color:#719e07">.&lt;/span>readGoObject&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;HelloWorldString&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="15-support-javasqltime--javasqldate-219httpsgithubcomapachedubbo-go-hessian2pull219">1.5 support java.sql.Time &amp;amp; java.sql.Date. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/219">#219&lt;/a>&lt;/h3>
+&lt;p>增加了 java 类 java.sql.Time, java.sql.Date 支持，分别对应到hessian.Time 和 hessian.Date， 详见 &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/219/files">https://github.com/apache/dubbo-go-hessian2/pull/219/files&lt;/a>。&lt;/p>
+&lt;h2 id="2-enhancement">2. Enhancement&lt;/h2>
+&lt;h3 id="21-export-function-encnull-225httpsgithubcomapachedubbo-go-hessian2pull225">2.1 Export function EncNull. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/225">#225&lt;/a>&lt;/h3>
+&lt;p>开放 hessian.EncNull 方法，以便用户特定情况下使用。&lt;/p>
+&lt;h2 id="3-bugfixes">3. Bugfixes&lt;/h2>
+&lt;h3 id="31-fix-enum-encode-error-in-request-203httpsgithubcomapachedubbo-go-hessian2pull203">3.1 fix enum encode error in request. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/203">#203&lt;/a>&lt;/h3>
+&lt;p>原来在 dubbo request 对象中没有判断 enum 类型的情况，此pr增加了判断是不是POJOEnum类型。详见 &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/203/files">https://github.com/apache/dubbo-go-hessian2/pull/203/files&lt;/a>&lt;/p>
+&lt;h3 id="32-fix-byte-field-decoding-issue-216httpsgithubcomapachedubbo-go-hessian2pull216">3.2 fix []byte field decoding issue. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/216">#216&lt;/a>&lt;/h3>
+&lt;p>v1.7.0 之前如果 struct中包含[]byte字段时无法反序列化, 报错“error list tag: 0x29”，主要原因是被当做list进行处理，对于这种情况应该按照binary数据进行处理即可。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> Circular &lt;span style="color:#268bd2">struct&lt;/span> {
+Num &lt;span style="color:#dc322f">int&lt;/span>
+Previous &lt;span style="color:#719e07">*&lt;/span>Circular
+Next &lt;span style="color:#719e07">*&lt;/span>Circular
+ResponseDataBytes []&lt;span style="color:#dc322f">byte&lt;/span> &lt;span style="color:#586e75">// &amp;lt;----
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;span style="color:#268bd2">func&lt;/span> (Circular) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.company.Circular&amp;#34;&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-fix-decoding-error-for-map-in-map-229httpsgithubcomapachedubbo-go-hessian2pull229">3.3 fix decoding error for map in map. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/229">#229&lt;/a>&lt;/h3>
+&lt;p>v1.7.0 之前嵌套map无法正确解析，主要原因是对应的map对象被当做一个数据类型却未被自动加到类引用列表中，而嵌套map类信息是同一类型的引用，去类引用列表找，找不到就报错了。 解决这个问题的方法就是遇到map类对象，也将其加入到类引用列表中即可。 问题详细参考 &lt;a href="https://github.com/apache/dubbo-go-hessian2/issues/119">#119&lt;/a>.&lt;/p>
+&lt;h3 id="34-fix-fields-name-mismatch-in-duration-class-234httpsgithubcomapachedubbo-go-hessian2pull234">3.4 fix fields name mismatch in Duration class. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/234">#234&lt;/a>&lt;/h3>
+&lt;p>这个 PR 解决了Duration对象中字段错误定义，原来是&amp;quot;second/nano&amp;quot;， 应该是&amp;quot;seconds/nanos&amp;quot;。&lt;/p>
+&lt;p>同时改善了测试验证数据。之前使用0作为int字段的测试数据，这是不准确的，因为int类型默认值就是0.&lt;/p></description></item><item><title>Blog: dubbo-go 1.4.0</title><link>/zh/blog/2021/01/12/dubbo-go-1.4.0/</link><pubDate>Tue, 12 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/12/dubbo-go-1.4.0/</guid><description>
 &lt;p>得益于社区活跃的支持，2020 年 3 月 25 日 我们发布了一个让人兴奋的版本——dubbo-go v1.4.0。除了继续支持已有的 Dubbo 的一些特性外， dubbo-go 开始了一些自己的创新尝试。&lt;/p>
 &lt;p>这个版本，最大的意义在于，做了一些支持云原生的准备工作。比如说，社区在探讨了很久的 k8s 落地之后，终于拿出来了使用 k8s 作为注册中心的解决方案。&lt;/p>
 &lt;p>其次一个比较大的改进是&amp;ndash;我们在可观测性上也迈出了重要的一步。在这之前，dubbo-go只提供了日志这么一个单一手段，内部的信息比较不透明，这个版本将有很大的改善。&lt;/p>
