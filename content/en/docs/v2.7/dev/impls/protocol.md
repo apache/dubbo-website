@@ -142,7 +142,9 @@ public class XxxInvoker<T> extends AbstractInvoker<T> {
     public XxxInvoker(Class<T> type, URL url) throws RemotingException{
         super(type, url);
     }
-    protected abstract Object doInvoke(Invocation invocation) throws Throwable {
+    
+    @Override
+    protected Result doInvoke(Invocation invocation) throws Throwable {
         // ...
     }
 }
