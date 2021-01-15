@@ -18,6 +18,12 @@ Pick one from service providers and fire the invocation.
 
 * `org.apache.dubbo.rpc.cluster.router.ScriptRouterFactory`
 * `org.apache.dubbo.rpc.cluster.router.FileRouterFactory`
+* `org.apache.dubbo.rpc.cluster.router.condition.config.AppRouterFactory`
+* `org.apache.dubbo.rpc.cluster.CacheableRouterFactory`
+* `org.apache.dubbo.rpc.cluster.router.condition.ConditionRouterFactory`
+* `org.apache.dubbo.rpc.cluster.router.mock.MockRouterFactory`
+* `org.apache.dubbo.rpc.cluster.router.condition.config.ServiceRouterFactory`
+* `org.apache.dubbo.rpc.cluster.router.tag.TagRouterFactory`
 
 ## Extension Guide
 
@@ -48,7 +54,7 @@ import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.RpcException;
  
 public class XxxRouterFactory implements RouterFactory {
-    public <T> List<Invoker<T>> select(List<Invoker<T>> invokers, Invocation invocation) throws RpcException {
+    public Router getRouter(URL url) {
         // ...
     }
 }
