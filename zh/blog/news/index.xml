@@ -1,4 +1,1033 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 技术分享</title><link>/zh/blog/news/</link><description>Recent content in 技术分享 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/blog/news/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: dubbo-go 中 REST 协议实现</title><link>/zh/blog/2021/01/14/dubbo-go-%E4%B8%AD-rest-%E5%8D%8F%E8%AE%AE%E5%AE%9E%E7%8E%B0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-%E4%B8%AD-rest-%E5%8D%8F%E8%AE%AE%E5%AE%9E%E7%8E%B0/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 技术分享</title><link>/zh/blog/news/</link><description>Recent content in 技术分享 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/blog/news/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: dubbo-go源码笔记（二）客户端调用过程</title><link>/zh/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/</guid><description>
+&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>有了上一篇文章&lt;a href="/zh/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/" title="">《dubbo-go 源码笔记（一）Server服务暴露过程详解》&lt;/a> 的铺垫，可以大致上类比客户端服务类似于服务端启动过程。其中最大的区别是服务端通过zk注册服务，发布自己的ivkURL并订阅事件开启监听；而服务端应该是通过zk注册组件，&lt;strong>拿到需要调用的serviceURL&lt;/strong>，&lt;strong>更新invoker&lt;/strong>并&lt;strong>重写用户的RPCService&lt;/strong>，从而实现对远程过程调用细节的封装。&lt;/p>
+&lt;h2 id="1-配置文件和客户端源码">1. 配置文件和客户端源码&lt;/h2>
+&lt;h4 id="11-client配置文件">1.1 client配置文件&lt;/h4>
+&lt;p>helloworld提供的demo：profiles/client.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">registries &lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;demoZk&amp;#34;&lt;/span>:
+&lt;span style="color:#268bd2">protocol&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">timeout &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;3s&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">username&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">password&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">references&lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>:
+&lt;span style="color:#586e75"># 可以指定多个registry，使用逗号隔开;不指定默认向所有注册中心注册&lt;/span>
+&lt;span style="color:#268bd2">registry&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;demoZk&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">protocol &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">interface &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.UserProvider&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">cluster&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">methods &lt;/span>:
+- &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;GetUser&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">retries&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到配置文件与之前讨论过的server端非常类似，其refrences部分字段就是对当前服务要主调的服务的配置，其中详细说明了调用协议、注册协议、接口id、调用方法、集群策略等，这些配置都会在之后与注册组件交互，重写ivk、调用的过程中使用到。&lt;/p>
+&lt;h4 id="12-客户端使用框架源码">1.2 客户端使用框架源码&lt;/h4>
+&lt;p>user.go&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(userProvider)
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>main.go&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+config.&lt;span style="color:#268bd2">Load&lt;/span>()
+time.&lt;span style="color:#268bd2">Sleep&lt;/span>(&lt;span style="color:#2aa198">3e9&lt;/span>)
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;\n\n\nstart to test dubbo&amp;#34;&lt;/span>)
+user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#b58900">panic&lt;/span>(err)
+}
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v\n&amp;#34;&lt;/span>, user)
+&lt;span style="color:#268bd2">initSignal&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>官网提供的helloworld demo的源码。可看到与服务端类似，在user.go内注册了rpc-service，以及需要rpc传输的结构体user。&lt;/p>
+&lt;p>在main函数中，同样调用了config.Load()函数，之后就可以直接通过实现好的rpc-service：userProvider 直接调用对应的功能函数，即可实现rpc调用。&lt;/p>
+&lt;p>可以猜到，从hessian注册结构、SetConsumerService，到调用函数.GetUser()期间，用户定义的rpc-service也就是userProvider对应的函数被重写，重写后的GetUser函数已经包含了实现了远程调用逻辑的invoker。&lt;/p>
+&lt;p>接下来，就要通过阅读源码，看看dubbo-go是如何做到的。&lt;/p>
+&lt;h2 id="2-实现远程过程调用">2. 实现远程过程调用&lt;/h2>
+&lt;h4 id="21-加载配置文件">2.1 加载配置文件&lt;/h4>
+&lt;p>config/config_loader.go :Load()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Load Dubbo Init
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">Load&lt;/span>() {
+&lt;span style="color:#586e75">// init router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">initRouter&lt;/span>()
+&lt;span style="color:#586e75">// init the global event dispatcher
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> extension.&lt;span style="color:#268bd2">SetAndInitGlobalDispatcher&lt;/span>(&lt;span style="color:#268bd2">GetBaseConfig&lt;/span>().EventDispatcherType)
+&lt;span style="color:#586e75">// start the metadata report if config set
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">startMetadataReport&lt;/span>(&lt;span style="color:#268bd2">GetApplicationConfig&lt;/span>().MetadataType, &lt;span style="color:#268bd2">GetBaseConfig&lt;/span>().MetadataReportConfig); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Provider starts metadata report error, and the error is {%#v}&amp;#34;&lt;/span>, err)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+&lt;span style="color:#586e75">// reference config
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">loadConsumerConfig&lt;/span>()
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在main函数中调用的config.Load()函数，进而调用了loadConsumerConfig，类似于之前讲到的server端配置读入函数。&lt;/p>
+&lt;p>在loadConsumerConfig函数中，进行了三步操作：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p1.png" alt="">&lt;/p>
+&lt;ol>
+&lt;li>检查配置文件并将配置写入内存&lt;/li>
+&lt;li>&lt;strong>在for循环内部&lt;/strong>，依次引用（refer）并且实例化（implement）每个被调reference。&lt;/li>
+&lt;li>等待三秒钟所有invoker就绪&lt;/li>
+&lt;/ol>
+&lt;p>其中重要的就是for循环里面的引用和实例化，两步操作，会在接下来展开讨论。&lt;/p>
+&lt;p>至此，配置已经被写入了框架。&lt;/p>
+&lt;h4 id="22-获取远程service-url实现可供调用的invoker">2.2 获取远程Service URL，实现可供调用的invoker&lt;/h4>
+&lt;p>上述的ref.Refer完成的就是这部分的操作。&lt;/p>
+&lt;p>图（一）&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p2.png" alt="">&lt;/p>
+&lt;h5 id="221-构造注册url">2.2.1 构造注册url&lt;/h5>
+&lt;p>和server端类似，存在注册url和服务url，dubbo习惯将服务url作为注册url的sub。&lt;/p>
+&lt;p>config/reference_config.go: Refer()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">/&lt;/span> Refer &lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>ReferenceConfig) &lt;span style="color:#268bd2">Refer&lt;/span>(_ &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+&lt;span style="color:#586e75">//（一）配置url参数(serviceUrl)，将会作为sub
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> cfgURL &lt;span style="color:#719e07">:=&lt;/span> common.&lt;span style="color:#268bd2">NewURLWithOptions&lt;/span>(
+common.&lt;span style="color:#268bd2">WithPath&lt;/span>(c.id),
+common.&lt;span style="color:#268bd2">WithProtocol&lt;/span>(c.Protocol),
+common.&lt;span style="color:#268bd2">WithParams&lt;/span>(c.&lt;span style="color:#268bd2">getUrlMap&lt;/span>()),
+common.&lt;span style="color:#268bd2">WithParamsValue&lt;/span>(constant.BEAN_NAME_KEY, c.id),
+)
+&lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">// （二）注册地址可以通过url格式给定，也可以通过配置格式给定
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这一步的意义就是配置-&amp;gt;提取信息生成URL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> c.Url &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {&lt;span style="color:#586e75">// 用户给定url信息，可以是点对点的地址，也可以是注册中心的地址
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. user specified URL, could be peer-to-peer address, or register center&amp;#39;s address.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> urlStrings &lt;span style="color:#719e07">:=&lt;/span> gxstrings.&lt;span style="color:#268bd2">RegSplit&lt;/span>(c.Url, &lt;span style="color:#2aa198">&amp;#34;\\s*[;]+\\s*&amp;#34;&lt;/span>)
+&lt;span style="color:#719e07">for&lt;/span> _, urlStr &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> urlStrings {
+serviceUrl, err &lt;span style="color:#719e07">:=&lt;/span> common.&lt;span style="color:#268bd2">NewURL&lt;/span>(urlStr)
+&lt;span style="color:#719e07">...&lt;/span>
+}
+} &lt;span style="color:#719e07">else&lt;/span> {&lt;span style="color:#586e75">// 配置读入注册中心的信息
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// assemble SubURL from register center&amp;#39;s configuration mode
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这是注册url，protocol = registry,包含了zk的用户名、密码、ip等等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.urls = &lt;span style="color:#268bd2">loadRegistries&lt;/span>(c.Registry, consumerConfig.Registries, common.CONSUMER)
+&lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">// set url to regUrls
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">for&lt;/span> _, regUrl &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> c.urls {
+regUrl.SubURL = cfgURL&lt;span style="color:#586e75">// regUrl的subURl存当前配置url
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+}
+&lt;span style="color:#586e75">//至此，无论通过什么形式，已经拿到了全部的regURL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// （三）获取registryProtocol实例，调用其Refer方法，传入新构建好的regURL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(c.urls) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> {
+&lt;span style="color:#586e75">// 这一步访问到registry/protocol/protocol.go registryProtocol.Refer
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这里是registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.invoker = extension.&lt;span style="color:#268bd2">GetProtocol&lt;/span>(c.urls[&lt;span style="color:#2aa198">0&lt;/span>].Protocol).&lt;span style="color:#268bd2">Refer&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>c.urls[&lt;span style="color:#2aa198">0&lt;/span>])
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 如果有多个注册中心，即有多个invoker,则采取集群策略
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> invokers &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">make&lt;/span>([]protocol.Invoker, &lt;span style="color:#2aa198">0&lt;/span>, &lt;span style="color:#b58900">len&lt;/span>(c.urls))
+&lt;span style="color:#719e07">...&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个函数中，已经处理完从Register配置到RegisterURL的转换,即图（一）中部分：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p3.png" alt="">&lt;/p>
+&lt;p>接下来，已经拿到的url将被传递给RegistryProtocol，进一步refer。&lt;/p>
+&lt;h5 id="222-registryprotocol获取到zkregistry实例进一步refer">2.2.2 registryProtocol获取到zkRegistry实例，进一步Refer&lt;/h5>
+&lt;p>registry/protocol/protocol.go: Refer&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Refer provider service from registry center
+&lt;/span>&lt;span style="color:#586e75">// 拿到的是配置文件registries的url，他能够生成一个invoker = 指向目的addr，以供客户端直接调用。
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (proto &lt;span style="color:#719e07">*&lt;/span>registryProtocol) &lt;span style="color:#268bd2">Refer&lt;/span>(url common.URL) protocol.Invoker {
+&lt;span style="color:#268bd2">var&lt;/span> registryUrl = url
+&lt;span style="color:#586e75">// 这里拿到的是referenceConfig，serviceUrl里面包含了Reference的所有信息，包含interfaceName、method等等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">var&lt;/span> serviceUrl = registryUrl.SubURL
+&lt;span style="color:#719e07">if&lt;/span> registryUrl.Protocol &lt;span style="color:#719e07">==&lt;/span> constant.REGISTRY_PROTOCOL {&lt;span style="color:#586e75">// registryUrl.Proto = &amp;#34;registry&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> protocol &lt;span style="color:#719e07">:=&lt;/span> registryUrl.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.REGISTRY_KEY, &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>)
+registryUrl.Protocol = protocol&lt;span style="color:#586e75">//替换成了具体的值，比如&amp;#34;zookeeper&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;span style="color:#586e75">// 接口对象
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">var&lt;/span> reg registry.Registry
+&lt;span style="color:#586e75">// （一）实例化接口对象，缓存策略
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> regI, loaded &lt;span style="color:#719e07">:=&lt;/span> proto.registries.&lt;span style="color:#268bd2">Load&lt;/span>(registryUrl.&lt;span style="color:#268bd2">Key&lt;/span>()); !loaded {
+&lt;span style="color:#586e75">// 缓存中不存在当前registry，新建一个reg
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> reg = &lt;span style="color:#268bd2">getRegistry&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>registryUrl)
+&lt;span style="color:#586e75">// 缓存起来
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> proto.registries.&lt;span style="color:#268bd2">Store&lt;/span>(registryUrl.&lt;span style="color:#268bd2">Key&lt;/span>(), reg)
+} &lt;span style="color:#719e07">else&lt;/span> {
+reg = regI.(registry.Registry)
+}
+&lt;span style="color:#586e75">// 到这里，获取到了reg实例 zookeeper的registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//（二）根据Register的实例zkRegistry和传入的regURL新建一个directory
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这一步存在复杂的异步逻辑，从注册中心拿到了目的service的真实addr，获取了invoker并放入directory，
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这一步将在下面详细给出步骤
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// new registry directory for store service url from registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> directory, err &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetDefaultRegistryDirectory&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>registryUrl, reg)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;consumer service %v create registry directory error, error message is %s, and will return nil invoker!&amp;#34;&lt;/span>,
+serviceUrl.&lt;span style="color:#268bd2">String&lt;/span>(), err.&lt;span style="color:#268bd2">Error&lt;/span>())
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#586e75">// （三）DoRegister 在zk上注册当前client service
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> err = reg.&lt;span style="color:#268bd2">Register&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>serviceUrl)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;consumer service %v register registry %v error, error message is %s&amp;#34;&lt;/span>,
+serviceUrl.&lt;span style="color:#268bd2">String&lt;/span>(), registryUrl.&lt;span style="color:#268bd2">String&lt;/span>(), err.&lt;span style="color:#268bd2">Error&lt;/span>())
+}
+&lt;span style="color:#586e75">// （四）new cluster invoker，将directory写入集群，获得具有集群策略的invoker
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> cluster &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetCluster&lt;/span>(serviceUrl.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.CLUSTER_KEY, constant.DEFAULT_CLUSTER))
+invoker &lt;span style="color:#719e07">:=&lt;/span> cluster.&lt;span style="color:#268bd2">Join&lt;/span>(directory)
+&lt;span style="color:#586e75">// invoker保存
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> proto.invokers = &lt;span style="color:#b58900">append&lt;/span>(proto.invokers, invoker)
+&lt;span style="color:#719e07">return&lt;/span> invoker
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可详细阅读上述注释，这个函数完成了从url到invoker的全部过程&lt;/p>
+&lt;p>（一）首先获得Registry对象，默认是之前实例化的zkRegistry，和之前server获取Registry的处理很类似。
+（二）通过构造一个新的directory，异步拿到之前在zk上注册的server端信息，生成invoker
+（三）在zk上注册当前service
+（四）集群策略，获得最终invoker&lt;/p>
+&lt;p>这一步完成了图（一）中所有余下的绝大多数操作，接下来就需要详细的查看directory的构造过程：&lt;/p>
+&lt;h5 id="223-构造directory包含较复杂的异步操作">2.2.3 构造directory（包含较复杂的异步操作）&lt;/h5>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p4.png" alt="">&lt;/p>
+&lt;p>图（二）&lt;/p>
+&lt;p>上述的 &lt;code>extension.GetDefaultRegistryDirectory(&amp;amp;registryUrl, reg)&lt;/code>函数，本质上调用了已经注册好的&lt;code>NewRegistryDirectory&lt;/code>函数:&lt;/p>
+&lt;p>registry/directory/directory.go: NewRegistryDirectory()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// NewRegistryDirectory will create a new RegistryDirectory
+&lt;/span>&lt;span style="color:#586e75">// 这个函数作为default注册在extension上面
+&lt;/span>&lt;span style="color:#586e75">// url为注册url，reg为zookeeper registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewRegistryDirectory&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL, registry registry.Registry) (cluster.Directory, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;span style="color:#719e07">if&lt;/span> url.SubURL &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>, perrors.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;url is invalid, suburl can not be nil&amp;#34;&lt;/span>)
+}
+dir &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>RegistryDirectory{
+BaseDirectory: directory.&lt;span style="color:#268bd2">NewBaseDirectory&lt;/span>(url),
+cacheInvokers: []protocol.Invoker{},
+cacheInvokersMap: &lt;span style="color:#719e07">&amp;amp;&lt;/span>sync.Map{},
+serviceType: url.SubURL.&lt;span style="color:#268bd2">Service&lt;/span>(),
+registry: registry,
+}
+dir.consumerConfigurationListener = &lt;span style="color:#268bd2">newConsumerConfigurationListener&lt;/span>(dir)
+&lt;span style="color:#719e07">go&lt;/span> dir.&lt;span style="color:#268bd2">subscribe&lt;/span>(url.SubURL)
+&lt;span style="color:#719e07">return&lt;/span> dir, &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>首先构造了一个注册directory，开启携程调用其subscribe函数，传入serviceURL。&lt;/p>
+&lt;p>这个directory目前包含了对应的zkRegistry，以及传入的URL，他cacheInvokers的部分是空的。&lt;/p>
+&lt;p>进入dir.subscribe(url.SubURL)这个异步函数：&lt;/p>
+&lt;p>registry/directory/directory.go: subscribe()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// subscribe from registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (dir &lt;span style="color:#719e07">*&lt;/span>RegistryDirectory) &lt;span style="color:#268bd2">subscribe&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) {
+&lt;span style="color:#586e75">// 增加两个监听，
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> dir.consumerConfigurationListener.&lt;span style="color:#268bd2">addNotifyListener&lt;/span>(dir)
+dir.referenceConfigurationListener = &lt;span style="color:#268bd2">newReferenceConfigurationListener&lt;/span>(dir, url)
+&lt;span style="color:#586e75">// subscribe调用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> dir.registry.&lt;span style="color:#268bd2">Subscribe&lt;/span>(url, dir)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>重点来了，他调用了zkRegistry的Subscribe方法,与此同时将自己作为ConfigListener传入&lt;/p>
+&lt;blockquote>
+&lt;p>我认为这种传入listener的设计模式非常值得学习，而且很有java的味道。&lt;/p>
+&lt;p>针对等待zk返回订阅信息这样的异步操作，需要传入一个Listener，这个Listener需要实现Notify方法，进而在作为参数传入内部之后，可以被异步地调用Notify，将内部触发的异步事件“传递出来”，再进一步处理加工。&lt;/p>
+&lt;p>层层的Listener事件链，能将传入的原始serviceURL通过zkConn发送给zk服务，获取到服务端注册好的url对应的二进制信息。&lt;/p>
+&lt;p>而Notify回调链，则将这串byte[]一步一步解析、加工；以事件的形式向外传递，最终落到directory上的时候，已经是成型的newInvokers了。&lt;/p>
+&lt;p>具体细节不再以源码形式展示，可参照上图查阅源码。&lt;/p>
+&lt;/blockquote>
+&lt;p>至此已经拿到了server端注册好的真实invoker。&lt;/p>
+&lt;p>完成了图（一）中的部分：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p5.png" alt="">&lt;/p>
+&lt;h5 id="224-构造带有集群策略的clusterinvoker">2.2.4 构造带有集群策略的clusterinvoker&lt;/h5>
+&lt;p>经过上述操作，已经拿到了server端Invokers，放入了directory的cacheinvokers数组里面缓存。&lt;/p>
+&lt;p>后续的操作对应本文2.2.2的第四步，由directory生成带有特性集群策略的invoker&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// （四）new cluster invoker，将directory写入集群，获得具有集群策略的invoker
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> cluster &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetCluster&lt;/span>(serviceUrl.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.CLUSTER_KEY, constant.DEFAULT_CLUSTER))
+invoker &lt;span style="color:#719e07">:=&lt;/span> cluster.&lt;span style="color:#268bd2">Join&lt;/span>(directory)
+&lt;span style="color:#2aa198">123&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Join函数的实现就是如下函数：&lt;/p>
+&lt;p>cluster/cluster_impl/failover_cluster_invokers.go: newFailoverClusterInvoker()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">newFailoverClusterInvoker&lt;/span>(directory cluster.Directory) protocol.Invoker {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>failoverClusterInvoker{
+baseClusterInvoker: &lt;span style="color:#268bd2">newBaseClusterInvoker&lt;/span>(directory),
+}
+}
+&lt;span style="color:#2aa198">12345&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>dubbo-go框架默认选择failover策略，既然返回了一个invoker，我们查看一下failoverClusterInvoker的Invoker方法，看他是如何将集群策略封装到Invoker函数内部的：&lt;/p>
+&lt;p>cluster/cluster_impl/failover_cluster_invokers.go: Invoker()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Invoker 函数
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (invoker &lt;span style="color:#719e07">*&lt;/span>failoverClusterInvoker) &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx context.Context, invocation protocol.Invocation) protocol.Result {
+&lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">//调用List方法拿到directory缓存的所有invokers
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> invokers &lt;span style="color:#719e07">:=&lt;/span> invoker.directory.&lt;span style="color:#268bd2">List&lt;/span>(invocation)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">checkInvokers&lt;/span>(invokers, invocation); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {&lt;span style="color:#586e75">// 检查是否可以实现调用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>protocol.RPCResult{Err: err}
+}
+&lt;span style="color:#586e75">// 获取来自用户方向传入的
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> methodName &lt;span style="color:#719e07">:=&lt;/span> invocation.&lt;span style="color:#268bd2">MethodName&lt;/span>()
+retries &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">getRetries&lt;/span>(invokers, methodName)
+loadBalance &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">getLoadBalance&lt;/span>(invokers[&lt;span style="color:#2aa198">0&lt;/span>], invocation)
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &lt;span style="color:#719e07">&amp;lt;=&lt;/span> retries; i&lt;span style="color:#719e07">++&lt;/span> {
+&lt;span style="color:#586e75">// 重要！这里是集群策略的体现，失败后重试！
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//Reselect before retry to avoid a change of candidate `invokers`.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//NOTE: if `invokers` changed, then `invoked` also lose accuracy.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> i &amp;gt; &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">checkWhetherDestroyed&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>protocol.RPCResult{Err: err}
+}
+invokers = invoker.directory.&lt;span style="color:#268bd2">List&lt;/span>(invocation)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">checkInvokers&lt;/span>(invokers, invocation); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>protocol.RPCResult{Err: err}
+}
+}
+&lt;span style="color:#586e75">// 这里是负载均衡策略的体现！选择特定ivk进行调用。
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ivk &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">doSelect&lt;/span>(loadBalance, invocation, invokers, invoked)
+&lt;span style="color:#719e07">if&lt;/span> ivk &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+invoked = &lt;span style="color:#b58900">append&lt;/span>(invoked, ivk)
+&lt;span style="color:#586e75">//DO INVOKE
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> result = ivk.&lt;span style="color:#268bd2">Invoke&lt;/span>(ctx, invocation)
+&lt;span style="color:#719e07">if&lt;/span> result.&lt;span style="color:#268bd2">Error&lt;/span>() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+providers = &lt;span style="color:#b58900">append&lt;/span>(providers, ivk.&lt;span style="color:#268bd2">GetUrl&lt;/span>().&lt;span style="color:#268bd2">Key&lt;/span>())
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+&lt;span style="color:#719e07">return&lt;/span> result
+}
+&lt;span style="color:#719e07">...&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>看了很多Invoke函数的实现，所有类似的Invoker函数都包含两个方向，一个是用户方向的invcation，一个是函数方向的底层invokers。&lt;/p>
+&lt;p>而集群策略的invoke函数本身作为接线员，把invocation一步步解析，根据调用需求和集群策略，选择特定的invoker来执行&lt;/p>
+&lt;p>proxy函数也是这样，一个是用户方向的ins[] reflect.Type, 一个是函数方向的invoker。&lt;/p>
+&lt;p>proxy函数负责将ins转换为invocation，调用对应invoker的invoker函数，实现连通。&lt;/p>
+&lt;p>而出于这样的设计，可以在一步步Invoker封装的过程中，每个Invoker只关心自己负责操作的部分，从而使整个调用栈解耦。&lt;/p>
+&lt;p>妙啊！！！&lt;/p>
+&lt;/blockquote>
+&lt;p>至此，我们理解了failoverClusterInvoker 的Invoke函数实现，也正是和这个集群策略Invoker被返回，接受来自上方的调用。&lt;/p>
+&lt;p>已完成图（一）中的：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p6.png" alt="">&lt;/p>
+&lt;h5 id="225-在zookeeper上注册当前client">2.2.5 在zookeeper上注册当前client&lt;/h5>
+&lt;p>拿到invokers后，可以回到：&lt;/p>
+&lt;p>config/refrence_config.go: Refer()函数了。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go"> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(c.urls) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> {
+&lt;span style="color:#586e75">// 这一步访问到registry/protocol/protocol.go registryProtocol.Refer
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.invoker = extension.&lt;span style="color:#268bd2">GetProtocol&lt;/span>(c.urls[&lt;span style="color:#2aa198">0&lt;/span>].Protocol).&lt;span style="color:#268bd2">Refer&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>c.urls[&lt;span style="color:#2aa198">0&lt;/span>])
+&lt;span style="color:#586e75">// （一）拿到了真实的invokers
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 如果有多个注册中心，即有多个invoker,则采取集群策略
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> invokers &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">make&lt;/span>([]protocol.Invoker, &lt;span style="color:#2aa198">0&lt;/span>, &lt;span style="color:#b58900">len&lt;/span>(c.urls))
+&lt;span style="color:#719e07">...&lt;/span>
+cluster &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetCluster&lt;/span>(hitClu)
+&lt;span style="color:#586e75">// If &amp;#39;zone-aware&amp;#39; policy select, the invoker wrap sequence would be:
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// ZoneAwareClusterInvoker(StaticDirectory) -&amp;gt;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// FailoverClusterInvoker(RegistryDirectory, routing happens here) -&amp;gt; Invoker
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.invoker = cluster.&lt;span style="color:#268bd2">Join&lt;/span>(directory.&lt;span style="color:#268bd2">NewStaticDirectory&lt;/span>(invokers))
+}
+&lt;span style="color:#586e75">// （二）create proxy，为函数配置代理
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> c.Async {
+callback &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">GetCallback&lt;/span>(c.id)
+c.pxy = extension.&lt;span style="color:#268bd2">GetProxyFactory&lt;/span>(consumerConfig.ProxyFactory).&lt;span style="color:#268bd2">GetAsyncProxy&lt;/span>(c.invoker, callback, cfgURL)
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 这里c.invoker已经是目的addr了
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.pxy = extension.&lt;span style="color:#268bd2">GetProxyFactory&lt;/span>(consumerConfig.ProxyFactory).&lt;span style="color:#268bd2">GetProxy&lt;/span>(c.invoker, cfgURL)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们有了可以打通的invokers，但还不能直接调用，因为invoker的入参是invocation，而调用函数使用的是具体的参数列表。需要通过一层proxy来规范入参和出参。&lt;/p>
+&lt;p>接下来新建一个默认proxy，放置在c.proxy内，以供后续使用&lt;/p>
+&lt;p>至此，完成了图（一）中最后的操作&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p7.png" alt="">&lt;/p>
+&lt;h3 id="23-将调用逻辑以代理函数的形式写入rpc-service">2.3 将调用逻辑以代理函数的形式写入rpc-service&lt;/h3>
+&lt;p>上面完成了config.Refer操作&lt;/p>
+&lt;p>回到config/config_loader.go: loadConsumerConfig()&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p8.png" alt="">&lt;/p>
+&lt;p>下一个重要的函数是Implement，他完的操作较为简单：旨在使用上面生成的c.proxy代理，链接用户自己定义的rpcService到clusterInvoker的信息传输。&lt;/p>
+&lt;p>函数较长，只选取了重要的部分:&lt;/p>
+&lt;p>common/proxy/proxy.go: Implement()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Implement
+&lt;/span>&lt;span style="color:#586e75">// proxy implement
+&lt;/span>&lt;span style="color:#586e75">// In consumer, RPCService like:
+&lt;/span>&lt;span style="color:#586e75">// type XxxProvider struct {
+&lt;/span>&lt;span style="color:#586e75">// Yyy func(ctx context.Context, args []interface{}, rsp *Zzz) error
+&lt;/span>&lt;span style="color:#586e75">// }
+&lt;/span>&lt;span style="color:#586e75">// Implement 实现的过程，就是proxy根据函数名和返回值，通过调用invoker 构造出拥有远程调用逻辑的代理函数
+&lt;/span>&lt;span style="color:#586e75">// 将当前rpc所有可供调用的函数注册到proxy.rpc内
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>Proxy) &lt;span style="color:#268bd2">Implement&lt;/span>(v common.RPCService) {
+&lt;span style="color:#586e75">// makeDubboCallProxy 这是一个构造代理函数，这个函数的返回值是func(in []reflect.Value) []reflect.Value 这样一个函数
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这个被返回的函数是请求实现的载体，由他来发起调用获取结果
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> makeDubboCallProxy &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>(methodName &lt;span style="color:#dc322f">string&lt;/span>, outs []reflect.Type) &lt;span style="color:#268bd2">func&lt;/span>(in []reflect.Value) []reflect.Value {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>(in []reflect.Value) []reflect.Value {
+&lt;span style="color:#586e75">// 根据methodName和outs的类型，构造这样一个函数，这个函数能将in 输入的value转换为输出的value
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这个函数具体的实现如下：
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">// 目前拿到了 methodName、所有入参的interface和value，出参数reply
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// （一）根据这些生成一个 rpcinvocation
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> inv = invocation_impl.&lt;span style="color:#268bd2">NewRPCInvocationWithOptions&lt;/span>(
+invocation_impl.&lt;span style="color:#268bd2">WithMethodName&lt;/span>(methodName),
+invocation_impl.&lt;span style="color:#268bd2">WithArguments&lt;/span>(inIArr),
+invocation_impl.&lt;span style="color:#268bd2">WithReply&lt;/span>(reply.&lt;span style="color:#268bd2">Interface&lt;/span>()),
+invocation_impl.&lt;span style="color:#268bd2">WithCallBack&lt;/span>(p.callBack),
+invocation_impl.&lt;span style="color:#268bd2">WithParameterValues&lt;/span>(inVArr))
+&lt;span style="color:#719e07">for&lt;/span> k, value &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> p.attachments {
+inv.&lt;span style="color:#268bd2">SetAttachments&lt;/span>(k, value)
+}
+&lt;span style="color:#586e75">// add user setAttachment
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> atm &lt;span style="color:#719e07">:=&lt;/span> invCtx.&lt;span style="color:#268bd2">Value&lt;/span>(constant.AttachmentKey) &lt;span style="color:#586e75">// 如果传入的ctx里面有attachment，也要写入inv
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> m, ok &lt;span style="color:#719e07">:=&lt;/span> atm.(&lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#dc322f">string&lt;/span>); ok {
+&lt;span style="color:#719e07">for&lt;/span> k, value &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> m {
+inv.&lt;span style="color:#268bd2">SetAttachments&lt;/span>(k, value)
+}
+}
+&lt;span style="color:#586e75">// 至此构造inv完毕
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// (二）触发Invoker 之前已经将cluster_invoker放入proxy，使用Invoke方法，通过getty远程过程调用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> result &lt;span style="color:#719e07">:=&lt;/span> p.invoke.&lt;span style="color:#268bd2">Invoke&lt;/span>(invCtx, inv)
+&lt;span style="color:#586e75">// 如果有attachment，则加入
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(result.&lt;span style="color:#268bd2">Attachments&lt;/span>()) &amp;gt; &lt;span style="color:#2aa198">0&lt;/span> {
+invCtx = context.&lt;span style="color:#268bd2">WithValue&lt;/span>(invCtx, constant.AttachmentKey, result.&lt;span style="color:#268bd2">Attachments&lt;/span>())
+}
+&lt;span style="color:#719e07">...&lt;/span>
+}
+}
+numField &lt;span style="color:#719e07">:=&lt;/span> valueOfElem.&lt;span style="color:#268bd2">NumField&lt;/span>()
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; numField; i&lt;span style="color:#719e07">++&lt;/span> {
+t &lt;span style="color:#719e07">:=&lt;/span> typeOf.&lt;span style="color:#268bd2">Field&lt;/span>(i)
+methodName &lt;span style="color:#719e07">:=&lt;/span> t.Tag.&lt;span style="color:#268bd2">Get&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>)
+&lt;span style="color:#719e07">if&lt;/span> methodName &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {
+methodName = t.Name
+}
+f &lt;span style="color:#719e07">:=&lt;/span> valueOfElem.&lt;span style="color:#268bd2">Field&lt;/span>(i)
+&lt;span style="color:#719e07">if&lt;/span> f.&lt;span style="color:#268bd2">Kind&lt;/span>() &lt;span style="color:#719e07">==&lt;/span> reflect.Func &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> f.&lt;span style="color:#268bd2">IsValid&lt;/span>() &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> f.&lt;span style="color:#268bd2">CanSet&lt;/span>() { &lt;span style="color:#586e75">// 针对于每个函数
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> outNum &lt;span style="color:#719e07">:=&lt;/span> t.Type.&lt;span style="color:#268bd2">NumOut&lt;/span>()
+&lt;span style="color:#586e75">// 规定函数输出只能有1/2个
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> outNum &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> outNum &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span> {
+logger.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;method %s of mtype %v has wrong number of in out parameters %d; needs exactly 1/2&amp;#34;&lt;/span>,
+t.Name, t.Type.&lt;span style="color:#268bd2">String&lt;/span>(), outNum)
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+&lt;span style="color:#586e75">// The latest return type of the method must be error.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 规定最后一个返回值一定是error
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> returnType &lt;span style="color:#719e07">:=&lt;/span> t.Type.&lt;span style="color:#268bd2">Out&lt;/span>(outNum &lt;span style="color:#719e07">-&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>); returnType &lt;span style="color:#719e07">!=&lt;/span> typError {
+logger.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;the latest return type %s of method %q is not error&amp;#34;&lt;/span>, returnType, t.Name)
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+&lt;span style="color:#586e75">// 获取到所有的出参类型，放到数组里
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">var&lt;/span> funcOuts = &lt;span style="color:#b58900">make&lt;/span>([]reflect.Type, outNum)
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; outNum; i&lt;span style="color:#719e07">++&lt;/span> {
+funcOuts[i] = t.Type.&lt;span style="color:#268bd2">Out&lt;/span>(i)
+}
+&lt;span style="color:#586e75">// do method proxy here:
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// （三）调用make函数，传入函数名和返回值，获得能调用远程的proxy，将这个proxy替换掉原来的函数位置
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> f.&lt;span style="color:#268bd2">Set&lt;/span>(reflect.&lt;span style="color:#268bd2">MakeFunc&lt;/span>(f.&lt;span style="color:#268bd2">Type&lt;/span>(), &lt;span style="color:#268bd2">makeDubboCallProxy&lt;/span>(methodName, funcOuts)))
+logger.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;set method [%s]&amp;#34;&lt;/span>, methodName)
+}
+}
+&lt;span style="color:#719e07">...&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>正如之前所说，proxy的作用是将用户定义的函数参数列表，转化为抽象的invocation传入Invoker，进行调用。&lt;/p>
+&lt;p>其中已标明有三处较为重要的地方：&lt;/p>
+&lt;ol>
+&lt;li>在代理函数中实现由参数列表生成Invocation的逻辑&lt;/li>
+&lt;li>在代理函数实现调用Invoker的逻辑&lt;/li>
+&lt;li>将代理函数替换为原始rpc-service对应函数
+至此，也就解决了一开始的问题：
+client.go: main()&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go"> config.&lt;span style="color:#268bd2">Load&lt;/span>()
+user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里直接调用用户定义的rpcService的函数GetUser，这里实际调用的是经过重写入的函数代理，所以就能实现远程调用了。&lt;/p>
+&lt;h3 id="3-从client到server的invoker嵌套链--小结">3. 从client到server的invoker嵌套链- 小结&lt;/h3>
+&lt;p>在阅读dubbo-go源码的过程中，我能发现一条清晰的invoker-proxy嵌套链，我希望通过图的形式来展现：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p9.png" alt="">&lt;/p>
+&lt;blockquote>
+&lt;p>作者简介 李志信 (GitHubID LaurenceLiZhixin)，中山大学软件工程专业在校学生，擅长使用 Java/Go 语言，专注于云原生和微服务等技术方向。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: dubbogo 3.0：牵手 gRPC 走向云原生时代</title><link>/zh/blog/2021/01/15/dubbogo-3.0%E7%89%B5%E6%89%8B-grpc-%E8%B5%B0%E5%90%91%E4%BA%91%E5%8E%9F%E7%94%9F%E6%97%B6%E4%BB%A3/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/15/dubbogo-3.0%E7%89%B5%E6%89%8B-grpc-%E8%B5%B0%E5%90%91%E4%BA%91%E5%8E%9F%E7%94%9F%E6%97%B6%E4%BB%A3/</guid><description>
+&lt;p>自从 2011 年 Dubbo 开源之后，被大量中小公司采用，一直是国内最受欢迎的 RPC 框架。2014 年，由于阿里内部组织架构调整，Dubbo 暂停维护了一段时间，之后随着 Spring Cloud 的面世，两个体系在融合中一起助推了微服务的火热。&lt;/p>
+&lt;p>不过这世界变化快，自从以 docker 为代表的的容器技术和以 K8s 为代表的容器编排技术登上舞台之后，云原生时代到来了。在云原生时代，不可变的基础设施给原有的中间件带来了不可变的中间件基础设施：gRPC 统一了底层通信层；protobuf 统一了序列化协议；以 envoy + istio 为代表的 service mesh 逐渐统一了服务的控制面与数据面。&lt;/p>
+&lt;p>dubbogo 的天然使命是：Bridging the gap between Java and Go。保持 Go 应用与 Java 应用互联互通的同时，借助 Go 语言（事实上的第一云原生语言）的优势拥抱云原生时代。dubbogo 社区 2020 年勠力打造三支箭：&lt;/p>
+&lt;ul>
+&lt;li>已经发布的对齐 dubbo 2.7 的 dubbogo v1.5 版本；&lt;/li>
+&lt;li>近期将要发布的 sidecar 形态的 dubbo-go-proxy 项目；&lt;/li>
+&lt;li>以及处于进行时的 dubbogo 3.0。&lt;/li>
+&lt;/ul>
+&lt;p>用一句话概括 dubbogo 3.0 即是：新通信协议、新序列化协议、新应用注册模型以及新的服务治理能力！本文主要着重讨论 dubbogo 3.0 的新通信协议和应用级服务注册发现模型。&lt;/p>
+&lt;h2 id="dubbogo-30-vs-grpc">dubbogo 3.0 vs gRPC&lt;/h2>
+&lt;p>知己知彼，方能进步。dubbogo 3.0 的通信层改进主要借鉴了 gRPC。&lt;/p>
+&lt;p>gRPC 协议，简单来说就是 http2 协议的基础之上，增加了特定的协议 header：“grpc-” 开头的 header 字段，采用特定的打解包工具（protobuf）对数据进行序列化，从而实现 RPC 调用。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p1.webp" alt="">&lt;/p>
+&lt;p>众所周知，gRPC 几乎没有服务治理能力，而阿里云现有 dubbo 框架兼具 RPC 和服务治理能力，整体实力不逊于 gRPC。但在“大家都用 gRPC” 这样的背景之下，dubbogo 3.0 的新通信协议就必须&lt;strong>完美兼容 gRPC&lt;/strong>，对开发者已部署的服务完全兼容，并在此基础之上延续已有 dubbo 协议和服务治理能力，进而推出一系列新策略：比如 mesh 支持、应用级服务注册等。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p2.webp" alt="">&lt;/p>
+&lt;h2 id="dubbogo-30-vs-dubbogo-15">dubbogo 3.0 vs dubbogo 1.5&lt;/h2>
+&lt;p>目前已有的 dubbo 2.7 协议已经尽可能实现了 gRPC 的支持。开发者可以通过 protoc-gen-dubbo 工具将 pb IDL 协议转换为框架支持的 stub，再借助底层 gRPC conn 的 RPC 过程，将已有的服务治理能力自上而下传递给 gRPC，因此实现了 gRPC 服务的支持。&lt;/p>
+&lt;p>dubbo-go v1.5.x 也支持 gRPC 的 Stream 调用。和 unary RPC 类似，通过产生框架支持的 stub，在底层 gRPC stream 调用的基础之上，将流式 RPC 的能力和并入框架。但由于 dubbo v2.7.x / dubbo-go v1.5.x 本身并不支持流式调用，所以没有对 gRPC stream 调用的进行上层服务治理支持。&lt;/p>
+&lt;p>开发者所面临的问题就是：我们在使用 dubbo-go2.7 进行 grpc 协议传输的时候，或多或少不是那么放心。&lt;/p>
+&lt;p>而即将推出的 dubbo-go 3.0 协议将从根源解决这个问题。&lt;/p>
+&lt;h2 id="协议兼容的三种层次">协议兼容的三种层次&lt;/h2>
+&lt;p>笔者认为，一款服务框架对于第三方协议的支持可分为三个程度：应用层次、协议层次、传输层次。&lt;/p>
+&lt;p>一款框架如果在一个协议的 sdk 之上封装接口，可以认为它处于应用层次支持，这样的框架需要遵循下层 sdk 的接口，可扩展性较差。&lt;/p>
+&lt;p>处于协议层次的框架，从配置层到服务治理层均由本框架提供，而在此之下的协议层到网络传输层均使用某个固定的通信协议，这样的框架可以解决服务治理的问题，但框架本身无法与第三方协议完全适配，如果不适配就会出现对第三方协议支持的削弱，比如上面说到的 dubbo-go 1.5 对 stream rpc 支持的缺陷。&lt;/p>
+&lt;p>如果想进一步支持更多的第三方协议，需要从传输层下手，真正了解第三方协议的具体字段、所依赖的底层协议（比如 HTTP2）的帧模型和数据流，再开发出与第三方协议完全一致的数据交互模块，作为本框架的底层。这样做的好处是最大程度赋予了协议的可扩展性，可以在兼容已有协议的基础之上，可选地增加开发者需要的字段，从而实现已有协议无法实现的功能，就比如 dubbogo 3.0 将支持的反压策略。&lt;/p>
+&lt;h2 id="基于-http2-的通信流程">基于 HTTP2 的通信流程&lt;/h2>
+&lt;p>gRPC 一次基于 HTTP2 的 unary rpc 调用传输主要流程如下：&lt;/p>
+&lt;ul>
+&lt;li>client 发送 Magic 信息：
+PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n；&lt;/li>
+&lt;li>server 收到并检查是否正确；&lt;/li>
+&lt;li>client 和 server 互相发送 setting 帧，收到后发送 ACK 确认；&lt;/li>
+&lt;li>client 发送 Header 帧，包含 gRPC 协议字段，以 End Headers 作为 Header 结束标志；&lt;/li>
+&lt;li>client 紧接着发送 Data 帧，包含 RPC 调用的 request 信息，以 End Stream 作为 Data 结束标志；&lt;/li>
+&lt;li>server 调用函数获得结果；&lt;/li>
+&lt;li>server 发送 Header 帧，包含 gRPC 协议字段，以 End Headers 作为 Header 结束标志；&lt;/li>
+&lt;li>server 紧接着发送 Data 帧，包含 RPC 调用回传的 response 信息；&lt;/li>
+&lt;li>server 紧接着再次发送 Header 帧，包含 RPC 状态和 message 信息，以 End Stream 作为本次 RPC 调用结束标志。&lt;/li>
+&lt;/ul>
+&lt;p>其中包含 gRPC 调用信息的 HTTP2 Header 帧如下图：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p3.webp" alt="">&lt;/p>
+&lt;p>另外，在 gRPC 的 stream 调用中，可在 server 端回传的过程中发送多次 Data，调用结束后再发送 Header 终止 RPC 过程，并汇报状态信息。&lt;/p>
+&lt;p>dubbogo 3.0 的通信层将在 HTTP2 通信协议之上采用同样的通信流程，以保证与 gRPC 的底层通信沟通能力。&lt;/p>
+&lt;h2 id="dubbogo-30-预期通信架构">dubbogo 3.0 预期通信架构&lt;/h2>
+&lt;p>除了通信协议采用 HTTP2 外，dubbogo 3.0 将采用基于 google protobuf 的 triple 协议【下面称为 dubbo3 协议】作为 dubbogo 3.0 的序列化协议，为 dubbo 将来支持更多的编程语言打下通信协议层面的基础。&lt;/p>
+&lt;p>目前设计的 dubbogo 3.0 传输模型如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p4.webp" alt="">&lt;/p>
+&lt;ul>
+&lt;li>为保证同时支持 unary RPC 和 stream RPC，在 server 端和 client 端增加数据流结构，以异步调用的形式完成数据传递；&lt;/li>
+&lt;li>继续支持原有的 TCP 通信能力；&lt;/li>
+&lt;li>在 HTTP2 的通信协议之上支持 dubbo3 协议，decode 过程兼容 gRPC 使用的 protobuf，保证与 gRPC 服务打通。&lt;/li>
+&lt;/ul>
+&lt;h2 id="应用级服务注册发现">应用级服务注册发现&lt;/h2>
+&lt;h4 id="1-应用级服务注册发现介绍">1. 应用级服务注册发现介绍&lt;/h4>
+&lt;p>dubbogo 3.0 使用的新一代服务注册发现体系，将摒弃旧版的“接口级注册发现”，使用“应用级别注册发现”。&lt;/p>
+&lt;p>简单地说，接口级别注册发现，在注册中心中以 RPC 服务为 key，以实例列表作为 value 来组织数据的，而我们新引入的“应用粒度的服务发现”，它以应用名（Application）作为 key，以这个应用部署的一组实例（Instance）列表作为 value。这带来两点不同：&lt;/p>
+&lt;ul>
+&lt;li>数据映射关系变了，从 RPC Service -&amp;gt; Instance 变为 Application -&amp;gt; Instance；&lt;/li>
+&lt;li>数据变少了，注册中心没有了 RPC Service 及其相关配置信息。&lt;/li>
+&lt;/ul>
+&lt;p>可以认为，基于应用粒度的模型所存储和推送的数据量是和应用、实例数成正比的，只有当我们的应用数增多或应用的实例数增长时，地址推送压力才会上涨。&lt;/p>
+&lt;p>而对于基于接口粒度的模型，数据量是和接口数量正相关的，鉴于一个应用通常发布多个接口的现状，其数量级一般是比应用粒度的数十倍。另外一个关键点在于，接口的定义更多的是业务侧的内部行为，接口粒度导致的集群规模评估的不透明，而实例、应用增长都通常是在运维侧的规划之中，可控性较好。&lt;/p>
+&lt;p>工商银行曾经对这两个模型进行生产测算：应用级服务注册模型可以让注册中心上的数据量变成原来的 1.68%，新模型可以让 zookeeper 轻松至成 10 万级别的服务量和 10 万级别的节点量。&lt;/p>
+&lt;h4 id="2-元数据中心同步机制的引入">2. 元数据中心同步机制的引入&lt;/h4>
+&lt;p>数据中心的数据量变少所造成的结果，是 RPC 服务相关的数据在注册中心消失了，只有 application - instance 这两个层级的数据。为了保证这部分缺少的 RPC 服务数据仍然能被 Consumer 端正确的感知，我们在 Consumer 和 Provider 间建立了一条单独的通信通道，目前针对元数据同步有两种具体的可选方案，分别是：&lt;/p>
+&lt;ul>
+&lt;li>内建 MetadataService；&lt;/li>
+&lt;li>独立的元数据中心，通过中细化的元数据集群协调数据。&lt;/li>
+&lt;/ul>
+&lt;h4 id="3-兼容旧版本-dubbo-go">3. 兼容旧版本 dubbo-go&lt;/h4>
+&lt;p>为了使整个开发流程对老的 dubbo-go 用户更透明，同时避免指定 provider 对可扩展性带来的影响），我们设计了一套 RPC服务到应用名的映射关系，以尝试在 consumer 自动完成 RPC 服务到 provider 应用名的转换。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p5.webp" alt="">&lt;/p>
+&lt;p>这套设计可以让 dubbogo 3.0 中同时保持对 dubbo v2.6.x、dubbo v2.7.x 和 dubbo v3.0.x 三个大版的互联互通。&lt;/p>
+&lt;h2 id="统一路由的支持">统一路由的支持&lt;/h2>
+&lt;p>路由在概念上可以理解为从已有的所有 IP 地址列表中，根据特定的路由规则，挑选出需要的 ip 地址子集。路由的过程需要根据配置好的路由规则进行筛选，最终取所有路由规则的交集获得结果。多个路由如同流水线一样，形成一条路由链，从所有的地址表中筛选出最终目的地址集合，再通过负载均衡策略选择访问的地址。&lt;/p>
+&lt;h4 id="1-路由链">1. 路由链&lt;/h4>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p6.webp" alt="">&lt;/p>
+&lt;p>可以把路由链的逻辑简单理解为 target = rn(&amp;hellip;r3(r2(r1(src))))。对于每一个 router 内部的逻辑，可以抽象为输入地址 addrs-in 与 router 中按全量地址 addrs-all 实现切分好的 n 个&lt;strong>互不相交&lt;/strong>的地址池 addrs-pool-1 &amp;hellip; addrs-pool-n 按实现定义好的规则取交集作为输出地址。以此类推，完成整个路由链的计算。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p7.webp" alt="">&lt;/p>
+&lt;h4 id="2-failover">2. failover&lt;/h4>
+&lt;p>在路由规则配置文件中可以配置 failover 字段。在寻找地址失败时可以 failover， 选择其他 subset，并且顺序执行下来，直到找到地址，否则最后报地址找不到异常。&lt;/p>
+&lt;h4 id="3-兜底路由">3. 兜底路由&lt;/h4>
+&lt;p>在的路由规则配置中，可以配置一个没有任何条件的 match, 最终的结果是至少会有一个 subset 被选到，以达到地址空保护的作用。&lt;/p>
+&lt;p>作为 2020 年 dubbogo 社区打造并将在 2021 年初亮出的的三支箭之一，dubbogo 3.0 将带来不同平常且焕然一新的开发体验，敬请广大开发者期待！&lt;/p>
+&lt;p>如果你有任何疑问，欢迎钉钉扫码加入交流群【钉钉群号 31363295】：&lt;/p>
+&lt;p>dubbogo 3.0 目前是社区和 dubbo 官方团队&amp;ndash; 阿里中间件团队共同合作开发。&lt;/p>
+&lt;p>阿里云-中间件团队招募对 dubbo3 (java &amp;amp; go)、dapr、arthas 有兴趣的开发者。可以钉钉联系 northlatitude，或者发送邮件至 &lt;a href="mailto:beiwei.ly@alibaba-inc.com">beiwei.ly@alibaba-inc.com&lt;/a>。&lt;/p>
+&lt;blockquote>
+&lt;p>作者简介&lt;/p>
+&lt;p>&lt;strong>李志信&lt;/strong> (GitHubID LaurenceLiZhixin)，阿里云云原生中间件团队开发工程师，dubbogo 社区开发者，中山大学软件工程专业在校学生，擅长使用 Go 语言，专注于云原生和微服务等技术方向。&lt;/p>
+&lt;p>&lt;strong>于雨&lt;/strong>(github @AlexStocks)，dubbo-go 项目和社区负责人，一个有十多年服务端做着基础架构研发一线工作经验的程序员，陆续参与改进过 Muduo/Pika/Dubbo/Sentinel-go 等知名项目，目前在蚂蚁金服可信原生部从事容器编排和 service mesh 工作。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: 分布式事务框架 seata-golang 通信模型详解</title><link>/zh/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</guid><description>
+&lt;h2 id="简介">简介&lt;/h2>
+&lt;p>Java 的世界里，大家广泛使用一个高性能网络通信框架 —— netty，很多 RPC 框架都是基于 netty 来实现的。在 golang 的世界里，getty 也是一个类似 netty 的高性能网络通信库。getty 最初由 dubbo-go 项目负责人于雨开发，作为底层通信库在 dubbo-go 中使用。随着 dubbo-go 捐献给 apache 基金会，在社区小伙伴的共同努力下，getty 也最终进入到 apache 这个大家庭，并改名 dubbo-getty。&lt;/p>
+&lt;p>18 年的时候，我在公司里实践微服务，当时遇到最大的问题就是分布式事务问题。同年，阿里在社区开源他们的分布式事务解决方案，我也很快关注到这个项目，起初还叫 fescar，后来更名 seata。由于我对开源技术很感兴趣，加了很多社区群，当时也很关注 dubbo-go 这个项目，在里面默默潜水。随着对 seata 的了解，逐渐萌生了做一个 go 版本的分布式事务框架的想法。&lt;/p>
+&lt;p>要做一个 golang 版的分布式事务框架，首先需要解决的一个问题就是如何实现 RPC 通信。dubbo-go 就是摆在眼前很好的一个例子，遂开始研究 dubbo-go 的底层 getty。&lt;/p>
+&lt;h2 id="如何基于-getty-实现-rpc-通信">如何基于 getty 实现 RPC 通信&lt;/h2>
+&lt;p>getty 框架的整体模型图如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/seata/p1.webp" alt="">&lt;/p>
+&lt;p>下面结合相关代码，详述 seata-golang 的 RPC 通信过程。&lt;/p>
+&lt;h3 id="1-建立连接">1. 建立连接&lt;/h3>
+&lt;p>实现 RPC 通信，首先要建立网络连接，这里先从 client.go 开始看起。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>client) &lt;span style="color:#268bd2">connect&lt;/span>() {
+&lt;span style="color:#268bd2">var&lt;/span> (
+err &lt;span style="color:#dc322f">error&lt;/span>
+ss Session
+)
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// 建立一个 session 连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ss = c.&lt;span style="color:#268bd2">dial&lt;/span>()
+&lt;span style="color:#719e07">if&lt;/span> ss &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// client has been closed
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">break&lt;/span>
+}
+err = c.&lt;span style="color:#268bd2">newSession&lt;/span>(ss)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 收发报文
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ss.(&lt;span style="color:#719e07">*&lt;/span>session).&lt;span style="color:#268bd2">run&lt;/span>()
+&lt;span style="color:#586e75">// 此处省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">break&lt;/span>
+}
+&lt;span style="color:#586e75">// don&amp;#39;t distinguish between tcp connection and websocket connection. Because
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// gorilla/websocket/conn.go:(Conn)Close also invoke net.Conn.Close()
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ss.&lt;span style="color:#268bd2">Conn&lt;/span>().&lt;span style="color:#268bd2">Close&lt;/span>()
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>connect()&lt;/code> 方法通过 &lt;code>dial()&lt;/code> 方法得到了一个 session 连接，进入 &lt;code>dial()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>client) &lt;span style="color:#268bd2">dial&lt;/span>() Session {
+&lt;span style="color:#719e07">switch&lt;/span> c.endPointType {
+&lt;span style="color:#719e07">case&lt;/span> TCP_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialTCP&lt;/span>()
+&lt;span style="color:#719e07">case&lt;/span> UDP_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialUDP&lt;/span>()
+&lt;span style="color:#719e07">case&lt;/span> WS_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialWS&lt;/span>()
+&lt;span style="color:#719e07">case&lt;/span> WSS_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialWSS&lt;/span>()
+}
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们关注的是 TCP 连接，所以继续进入 &lt;code>c.dialTCP()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>client) &lt;span style="color:#268bd2">dialTCP&lt;/span>() Session {
+&lt;span style="color:#268bd2">var&lt;/span> (
+err &lt;span style="color:#dc322f">error&lt;/span>
+conn net.Conn
+)
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> c.&lt;span style="color:#268bd2">IsClosed&lt;/span>() {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#719e07">if&lt;/span> c.sslEnabled {
+&lt;span style="color:#719e07">if&lt;/span> sslConfig, err &lt;span style="color:#719e07">:=&lt;/span> c.tlsConfigBuilder.&lt;span style="color:#268bd2">BuildTlsConfig&lt;/span>(); err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> sslConfig &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+d &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>net.Dialer{Timeout: connectTimeout}
+&lt;span style="color:#586e75">// 建立加密连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> conn, err = tls.&lt;span style="color:#268bd2">DialWithDialer&lt;/span>(d, &lt;span style="color:#2aa198">&amp;#34;tcp&amp;#34;&lt;/span>, c.addr, sslConfig)
+}
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 建立 tcp 连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> conn, err = net.&lt;span style="color:#268bd2">DialTimeout&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;tcp&amp;#34;&lt;/span>, c.addr, connectTimeout)
+}
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> gxnet.&lt;span style="color:#268bd2">IsSameAddr&lt;/span>(conn.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>(), conn.&lt;span style="color:#268bd2">LocalAddr&lt;/span>()) {
+conn.&lt;span style="color:#268bd2">Close&lt;/span>()
+err = errSelfConnect
+}
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 返回一个 TCPSession
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#268bd2">newTCPSession&lt;/span>(conn, c)
+}
+log.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;net.DialTimeout(addr:%s, timeout:%v) = error:%+v&amp;#34;&lt;/span>, c.addr, connectTimeout, perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err))
+&lt;span style="color:#719e07">&amp;lt;-&lt;/span>wheel.&lt;span style="color:#268bd2">After&lt;/span>(connectInterval)
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，我们知道了 getty 如何建立 TCP 连接，并返回 TCPSession。&lt;/p>
+&lt;h3 id="2-收发报文">2. 收发报文&lt;/h3>
+&lt;p>那它是怎么收发报文的呢，我们回到 connection 方法接着往下看，有这样一行 &lt;code>ss.(*session).run()&lt;/code>，在这行代码之后，代码都是很简单的操作，我们猜测这行代码运行的逻辑里面一定包含收发报文的逻辑，接着进入 &lt;code>ru``n()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">run&lt;/span>() {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">go&lt;/span> s.&lt;span style="color:#268bd2">handleLoop&lt;/span>()
+&lt;span style="color:#719e07">go&lt;/span> s.&lt;span style="color:#268bd2">handlePackage&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里起了两个 goroutine：&lt;code>handleLoop&lt;/code> 和 &lt;code>handlePackage&lt;/code>，看字面意思符合我们的猜想，进入 &lt;code>handleLoop()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">handleLoop&lt;/span>() {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// A select blocks until one of its cases is ready to run.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// It choose one at random if multiple are ready. Otherwise it choose default branch if none is ready.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">case&lt;/span> outPkg, ok = &lt;span style="color:#719e07">&amp;lt;-&lt;/span>s.wQ:
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+iovec = iovec[:&lt;span style="color:#2aa198">0&lt;/span>]
+&lt;span style="color:#719e07">for&lt;/span> idx &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; idx &amp;lt; maxIovecNum; idx&lt;span style="color:#719e07">++&lt;/span> {
+&lt;span style="color:#586e75">// 通过 s.writer 将 interface{} 类型的 outPkg 编码成二进制的比特
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> pkgBytes, err = s.writer.&lt;span style="color:#268bd2">Write&lt;/span>(s, outPkg)
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+iovec = &lt;span style="color:#b58900">append&lt;/span>(iovec, pkgBytes)
+&lt;span style="color:#586e75">//省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;span style="color:#586e75">// 将这些二进制比特发送出去
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> err = s.&lt;span style="color:#268bd2">WriteBytesArray&lt;/span>(iovec[:]&lt;span style="color:#719e07">...&lt;/span>)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+log.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;%s, [session.handleLoop]s.WriteBytesArray(iovec len:%d) = error:%+v&amp;#34;&lt;/span>,
+s.&lt;span style="color:#268bd2">sessionToken&lt;/span>(), &lt;span style="color:#b58900">len&lt;/span>(iovec), perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err))
+s.&lt;span style="color:#268bd2">stop&lt;/span>()
+&lt;span style="color:#586e75">// break LOOP
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> flag = &lt;span style="color:#cb4b16">false&lt;/span>
+}
+&lt;span style="color:#719e07">case&lt;/span> &lt;span style="color:#719e07">&amp;lt;-&lt;/span>wheel.&lt;span style="color:#268bd2">After&lt;/span>(s.period):
+&lt;span style="color:#719e07">if&lt;/span> flag {
+&lt;span style="color:#719e07">if&lt;/span> wsFlag {
+err &lt;span style="color:#719e07">:=&lt;/span> wsConn.&lt;span style="color:#268bd2">writePing&lt;/span>()
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+log.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;wsConn.writePing() = error:%+v&amp;#34;&lt;/span>, perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err))
+}
+}
+&lt;span style="color:#586e75">// 定时执行的逻辑，心跳等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> s.listener.&lt;span style="color:#268bd2">OnCron&lt;/span>(s)
+}
+}
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过上面的代码，我们不难发现，&lt;code>handleLoop()&lt;/code> 方法处理的是发送报文的逻辑，RPC 需要发送的消息首先由 &lt;code>s.writer&lt;/code> 编码成二进制比特，然后通过建立的 TCP 连接发送出去。这个 &lt;code>s.writer&lt;/code> 对应的 Writer 接口是 RPC 框架必须要实现的一个接口。&lt;/p>
+&lt;p>继续看 &lt;code>handlePackage()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">handlePackage&lt;/span>() {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">if&lt;/span> _, ok &lt;span style="color:#719e07">:=&lt;/span> s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyTCPConn); ok {
+&lt;span style="color:#719e07">if&lt;/span> s.reader &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+errStr &lt;span style="color:#719e07">:=&lt;/span> fmt.&lt;span style="color:#268bd2">Sprintf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;session{name:%s, conn:%#v, reader:%#v}&amp;#34;&lt;/span>, s.name, s.Connection, s.reader)
+log.&lt;span style="color:#268bd2">Error&lt;/span>(errStr)
+&lt;span style="color:#b58900">panic&lt;/span>(errStr)
+}
+err = s.&lt;span style="color:#268bd2">handleTCPPackage&lt;/span>()
+} &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> _, ok &lt;span style="color:#719e07">:=&lt;/span> s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyWSConn); ok {
+err = s.&lt;span style="color:#268bd2">handleWSPackage&lt;/span>()
+} &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> _, ok &lt;span style="color:#719e07">:=&lt;/span> s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyUDPConn); ok {
+err = s.&lt;span style="color:#268bd2">handleUDPPackage&lt;/span>()
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#b58900">panic&lt;/span>(fmt.&lt;span style="color:#268bd2">Sprintf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;unknown type session{%#v}&amp;#34;&lt;/span>, s))
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入 &lt;code>handleTCPPackage()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">handleTCPPackage&lt;/span>() &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+conn = s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyTCPConn)
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+bufLen = &lt;span style="color:#2aa198">0&lt;/span>
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// for clause for the network timeout condition check
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// s.conn.SetReadTimeout(time.Now().Add(s.rTimeout))
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 从 TCP 连接中收到报文
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> bufLen, err = conn.&lt;span style="color:#268bd2">recv&lt;/span>(buf)
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">break&lt;/span>
+}
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#586e75">// 将收到的报文二进制比特写入 pkgBuf
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> pktBuf.&lt;span style="color:#268bd2">Write&lt;/span>(buf[:bufLen])
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> pktBuf.&lt;span style="color:#268bd2">Len&lt;/span>() &lt;span style="color:#719e07">&amp;lt;=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">break&lt;/span>
+}
+&lt;span style="color:#586e75">// 通过 s.reader 将收到的报文解码成 RPC 消息
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> pkg, pkgLen, err = s.reader.&lt;span style="color:#268bd2">Read&lt;/span>(s, pktBuf.&lt;span style="color:#268bd2">Bytes&lt;/span>())
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+s.&lt;span style="color:#268bd2">UpdateActive&lt;/span>()
+&lt;span style="color:#586e75">// 将收到的消息放入 TaskQueue 供 RPC 消费端消费
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> s.&lt;span style="color:#268bd2">addTask&lt;/span>(pkg)
+pktBuf.&lt;span style="color:#268bd2">Next&lt;/span>(pkgLen)
+&lt;span style="color:#586e75">// continue to handle case 5
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;span style="color:#719e07">if&lt;/span> exit {
+&lt;span style="color:#719e07">break&lt;/span>
+}
+}
+&lt;span style="color:#719e07">return&lt;/span> perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>从上面的代码逻辑我们分析出，RPC 消费端需要将从 TCP 连接收到的二进制比特报文解码成 RPC 能消费的消息，这个工作由 s.reader 实现，所以，我们要构建 RPC 通信层也需要实现 s.reader 对应的 Reader 接口。&lt;/p>
+&lt;h3 id="3-底层处理网络报文的逻辑如何与业务逻辑解耦">3. 底层处理网络报文的逻辑如何与业务逻辑解耦&lt;/h3>
+&lt;p>我们都知道，netty 通过 boss 线程和 worker 线程实现了底层网络逻辑和业务逻辑的解耦。那么，getty 是如何实现的呢？&lt;/p>
+&lt;p>在 &lt;code>handlePackage()&lt;/code> 方法最后，我们看到，收到的消息被放入了 &lt;code>s.addTask(pkg)&lt;/code> 这个方法，接着往下分析：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">addTask&lt;/span>(pkg &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+f &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+s.listener.&lt;span style="color:#268bd2">OnMessage&lt;/span>(s, pkg)
+s.&lt;span style="color:#268bd2">incReadPkgNum&lt;/span>()
+}
+&lt;span style="color:#719e07">if&lt;/span> taskPool &lt;span style="color:#719e07">:=&lt;/span> s.&lt;span style="color:#268bd2">EndPoint&lt;/span>().&lt;span style="color:#268bd2">GetTaskPool&lt;/span>(); taskPool &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+taskPool.&lt;span style="color:#268bd2">AddTaskAlways&lt;/span>(f)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+&lt;span style="color:#268bd2">f&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>pkg&lt;/code> 参数传递到了一个匿名方法，这个方法最终放入了 &lt;code>taskPool&lt;/code>。这个方法很关键，在我后来写 seata-golang 代码的时候，就遇到了一个坑，这个坑后面分析。&lt;/p>
+&lt;p>接着我们看一下 taskPool 的定义：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// NewTaskPoolSimple build a simple task pool
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewTaskPoolSimple&lt;/span>(size &lt;span style="color:#dc322f">int&lt;/span>) GenericTaskPool {
+&lt;span style="color:#719e07">if&lt;/span> size &amp;lt; &lt;span style="color:#2aa198">1&lt;/span> {
+size = runtime.&lt;span style="color:#268bd2">NumCPU&lt;/span>() &lt;span style="color:#719e07">*&lt;/span> &lt;span style="color:#2aa198">100&lt;/span>
+}
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>taskPoolSimple{
+work: &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">chan&lt;/span> task),
+sem: &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">chan&lt;/span> &lt;span style="color:#268bd2">struct&lt;/span>{}, size),
+done: &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">chan&lt;/span> &lt;span style="color:#268bd2">struct&lt;/span>{}),
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建了一个缓冲大小为 size （默认为 &lt;code>runtime.NumCPU() * 100&lt;/code>） 的 channel &lt;code>sem&lt;/code>。再看方法 &lt;code>AddTaskAlways(t task)&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>taskPoolSimple) &lt;span style="color:#268bd2">AddTaskAlways&lt;/span>(t task) {
+&lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#719e07">case&lt;/span> &lt;span style="color:#719e07">&amp;lt;-&lt;/span>p.done:
+&lt;span style="color:#719e07">return&lt;/span>
+&lt;span style="color:#719e07">default&lt;/span>:
+}
+&lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#719e07">case&lt;/span> p.work &lt;span style="color:#719e07">&amp;lt;-&lt;/span> t:
+&lt;span style="color:#719e07">return&lt;/span>
+&lt;span style="color:#719e07">default&lt;/span>:
+}
+&lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#719e07">case&lt;/span> p.work &lt;span style="color:#719e07">&amp;lt;-&lt;/span> t:
+&lt;span style="color:#719e07">case&lt;/span> p.sem &lt;span style="color:#719e07">&amp;lt;-&lt;/span> &lt;span style="color:#268bd2">struct&lt;/span>{}{}:
+p.wg.&lt;span style="color:#268bd2">Add&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+&lt;span style="color:#719e07">go&lt;/span> p.&lt;span style="color:#268bd2">worker&lt;/span>(t)
+&lt;span style="color:#719e07">default&lt;/span>:
+&lt;span style="color:#268bd2">goSafely&lt;/span>(t)
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>加入的任务，会先由 len(p.sem) 个 goroutine 去消费，如果没有 goroutine 空闲，则会启动一个临时的 goroutine 去运行 t()。相当于有 len(p.sem) 个 goroutine 组成了 goroutine pool，pool 中的 goroutine 去处理业务逻辑，而不是由处理网络报文的 goroutine 去运行业务逻辑，从而实现了解耦。写 seata-golang 时遇到的一个坑，就是忘记设置 taskPool 造成了处理业务逻辑和处理底层网络报文逻辑的 goroutine 是同一个，我在业务逻辑中阻塞等待一个任务完成时，阻塞了整个 goroutine，使得阻塞期间收不到任何报文。&lt;/p>
+&lt;h3 id="4-具体实现">4. 具体实现&lt;/h3>
+&lt;p>下面的代码见getty.go ：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Reader is used to unmarshal a complete pkg from buffer
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Reader &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#268bd2">Read&lt;/span>(Session, []&lt;span style="color:#dc322f">byte&lt;/span>) (&lt;span style="color:#268bd2">interface&lt;/span>{}, &lt;span style="color:#dc322f">int&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;span style="color:#586e75">// Writer is used to marshal pkg and write to session
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Writer &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// if @Session is udpGettySession, the second parameter is UDPContext.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Write&lt;/span>(Session, &lt;span style="color:#268bd2">interface&lt;/span>{}) ([]&lt;span style="color:#dc322f">byte&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;span style="color:#586e75">// ReadWriter interface use for handle application packages
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> ReadWriter &lt;span style="color:#268bd2">interface&lt;/span> {
+Reader
+Writer
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// EventListener is used to process pkg that received from remote session
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> EventListener &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// invoked when session opened
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If the return error is not nil, @Session will be closed.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnOpen&lt;/span>(Session) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;span style="color:#586e75">// invoked when session closed.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnClose&lt;/span>(Session)
+&lt;span style="color:#586e75">// invoked when got error.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnError&lt;/span>(Session, &lt;span style="color:#dc322f">error&lt;/span>)
+&lt;span style="color:#586e75">// invoked periodically, its period can be set by (Session)SetCronPeriod
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnCron&lt;/span>(Session)
+&lt;span style="color:#586e75">// invoked when getty received a package. Pls attention that do not handle long time
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// logic processing in this func. You&amp;#39;d better set the package&amp;#39;s maximum length.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If the message&amp;#39;s length is greater than it, u should should return err in
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Reader{Read} and getty will close this connection soon.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If ur logic processing in this func will take a long time, u should start a goroutine
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// pool(like working thread pool in cpp) to handle the processing asynchronously. Or u
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// can do the logic processing in other asynchronous way.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// !!!In short, ur OnMessage callback func should return asap.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If this is a udp event listener, the second parameter type is UDPContext.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnMessage&lt;/span>(Session, &lt;span style="color:#268bd2">interface&lt;/span>{})
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过对整个 getty 代码的分析，我们只要实现 &lt;code>ReadWriter&lt;/code> 来对 RPC 消息编解码，再实现 &lt;code>EventListener&lt;/code> 来处理 RPC 消息的对应的具体逻辑，将 &lt;code>ReadWriter&lt;/code> 实现和 &lt;code>EventLister&lt;/code> 实现注入到 RPC 的 Client 和 Server 端，则可实现 RPC 通信。&lt;/p>
+&lt;h3 id="1编解码协议实现">1）编解码协议实现&lt;/h3>
+&lt;p>下面是 seata 协议的定义：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/seata/p2.webp" alt="">&lt;/p>
+&lt;p>在 ReadWriter 接口的实现 &lt;code>RpcPackageHandler&lt;/code> 中，调用 Codec 方法对消息体按照上面的格式编解码：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">// 消息编码为二进制比特
+func MessageEncoder(codecType byte, in interface{}) []byte {
+switch codecType {
+case SEATA:
+return SeataEncoder(in)
+default:
+log.Errorf(&amp;#34;not support codecType, %s&amp;#34;, codecType)
+return nil
+}
+}
+// 二进制比特解码为消息体
+func MessageDecoder(codecType byte, in []byte) (interface{}, int) {
+switch codecType {
+case SEATA:
+return SeataDecoder(in)
+default:
+log.Errorf(&amp;#34;not support codecType, %s&amp;#34;, codecType)
+return nil, 0
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2client-端实现">2）Client 端实现&lt;/h3>
+&lt;p>再来看 client 端 &lt;code>EventListener&lt;/code> 的实现 &lt;code>RpcRemotingClient&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnOpen&lt;/span>(session getty.Session) &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;span style="color:#719e07">go&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>()
+request &lt;span style="color:#719e07">:=&lt;/span> protocal.RegisterTMRequest{AbstractIdentifyRequest: protocal.AbstractIdentifyRequest{
+ApplicationId: client.conf.ApplicationId,
+TransactionServiceGroup: client.conf.TransactionServiceGroup,
+}}
+&lt;span style="color:#586e75">// 建立连接后向 Transaction Coordinator 发起注册 TransactionManager 的请求
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> _, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">sendAsyncRequestWithResponse&lt;/span>(session, request, RPC_REQUEST_TIMEOUT)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 将与 Transaction Coordinator 建立的连接保存在连接池供后续使用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> clientSessionManager.&lt;span style="color:#268bd2">RegisterGettySession&lt;/span>(session)
+client.GettySessionOnOpenChannel &lt;span style="color:#719e07">&amp;lt;-&lt;/span> session.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>()
+}
+}()
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#586e75">// OnError ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnError&lt;/span>(session getty.Session, err &lt;span style="color:#dc322f">error&lt;/span>) {
+clientSessionManager.&lt;span style="color:#268bd2">ReleaseGettySession&lt;/span>(session)
+}
+&lt;span style="color:#586e75">// OnClose ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnClose&lt;/span>(session getty.Session) {
+clientSessionManager.&lt;span style="color:#268bd2">ReleaseGettySession&lt;/span>(session)
+}
+&lt;span style="color:#586e75">// OnMessage ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnMessage&lt;/span>(session getty.Session, pkg &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+log.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;received message:{%v}&amp;#34;&lt;/span>, pkg)
+rpcMessage, ok &lt;span style="color:#719e07">:=&lt;/span> pkg.(protocal.RpcMessage)
+&lt;span style="color:#719e07">if&lt;/span> ok {
+heartBeat, isHeartBeat &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.HeartBeatMessage)
+&lt;span style="color:#719e07">if&lt;/span> isHeartBeat &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> heartBeat &lt;span style="color:#719e07">==&lt;/span> protocal.HeartBeatMessagePong {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;received PONG from %s&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>())
+}
+}
+&lt;span style="color:#719e07">if&lt;/span> rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST &lt;span style="color:#719e07">||&lt;/span>
+rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST_ONEWAY {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;msgId:%s, body:%v&amp;#34;&lt;/span>, rpcMessage.Id, rpcMessage.Body)
+&lt;span style="color:#586e75">// 处理事务消息，提交 or 回滚
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client.&lt;span style="color:#268bd2">onMessage&lt;/span>(rpcMessage, session.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>())
+} &lt;span style="color:#719e07">else&lt;/span> {
+resp, loaded &lt;span style="color:#719e07">:=&lt;/span> client.futures.&lt;span style="color:#268bd2">Load&lt;/span>(rpcMessage.Id)
+&lt;span style="color:#719e07">if&lt;/span> loaded {
+response &lt;span style="color:#719e07">:=&lt;/span> resp.(&lt;span style="color:#719e07">*&lt;/span>getty2.MessageFuture)
+response.Response = rpcMessage.Body
+response.Done &lt;span style="color:#719e07">&amp;lt;-&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>
+client.futures.&lt;span style="color:#268bd2">Delete&lt;/span>(rpcMessage.Id)
+}
+}
+}
+&lt;span style="color:#586e75">// OnCron ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnCron&lt;/span>(session getty.Session) {
+&lt;span style="color:#586e75">// 发送心跳
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client.&lt;span style="color:#268bd2">defaultSendRequest&lt;/span>(session, protocal.HeartBeatMessagePing)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>clientSessionManager.RegisterGettySession(session)&lt;/code> 的逻辑将在下文中分析。&lt;/p>
+&lt;h3 id="3server-端-transaction-coordinator-实现">3）Server 端 Transaction Coordinator 实现&lt;/h3>
+&lt;p>代码见 &lt;code>DefaultCoordinator&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnOpen&lt;/span>(session getty.Session) &lt;span style="color:#dc322f">error&lt;/span> {
+log.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;got getty_session:%s&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">Stat&lt;/span>())
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnError&lt;/span>(session getty.Session, err &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;span style="color:#586e75">// 释放 TCP 连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> SessionManager.&lt;span style="color:#268bd2">ReleaseGettySession&lt;/span>(session)
+session.&lt;span style="color:#268bd2">Close&lt;/span>()
+log.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;getty_session{%s} got error{%v}, will be closed.&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">Stat&lt;/span>(), err)
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnClose&lt;/span>(session getty.Session) {
+log.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;getty_session{%s} is closing......&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">Stat&lt;/span>())
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnMessage&lt;/span>(session getty.Session, pkg &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;received message:{%v}&amp;#34;&lt;/span>, pkg)
+rpcMessage, ok &lt;span style="color:#719e07">:=&lt;/span> pkg.(protocal.RpcMessage)
+&lt;span style="color:#719e07">if&lt;/span> ok {
+_, isRegTM &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.RegisterTMRequest)
+&lt;span style="color:#719e07">if&lt;/span> isRegTM {
+&lt;span style="color:#586e75">// 将 TransactionManager 信息和 TCP 连接建立映射关系
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> coordinator.&lt;span style="color:#268bd2">OnRegTmMessage&lt;/span>(rpcMessage, session)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+heartBeat, isHeartBeat &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.HeartBeatMessage)
+&lt;span style="color:#719e07">if&lt;/span> isHeartBeat &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> heartBeat &lt;span style="color:#719e07">==&lt;/span> protocal.HeartBeatMessagePing {
+coordinator.&lt;span style="color:#268bd2">OnCheckMessage&lt;/span>(rpcMessage, session)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+&lt;span style="color:#719e07">if&lt;/span> rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST &lt;span style="color:#719e07">||&lt;/span>
+rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST_ONEWAY {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;msgId:%s, body:%v&amp;#34;&lt;/span>, rpcMessage.Id, rpcMessage.Body)
+_, isRegRM &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.RegisterRMRequest)
+&lt;span style="color:#719e07">if&lt;/span> isRegRM {
+&lt;span style="color:#586e75">// 将 ResourceManager 信息和 TCP 连接建立映射关系
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> coordinator.&lt;span style="color:#268bd2">OnRegRmMessage&lt;/span>(rpcMessage, session)
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> SessionManager.&lt;span style="color:#268bd2">IsRegistered&lt;/span>(session) {
+&lt;span style="color:#719e07">defer&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">recover&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+log.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Catch Exception while do RPC, request: %v,err: %w&amp;#34;&lt;/span>, rpcMessage, err)
+}
+}()
+&lt;span style="color:#586e75">// 处理事务消息，全局事务注册、分支事务注册、分支事务提交、全局事务回滚等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> coordinator.&lt;span style="color:#268bd2">OnTrxMessage&lt;/span>(rpcMessage, session)
+} &lt;span style="color:#719e07">else&lt;/span> {
+session.&lt;span style="color:#268bd2">Close&lt;/span>()
+log.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;close a unhandled connection! [%v]&amp;#34;&lt;/span>, session)
+}
+}
+} &lt;span style="color:#719e07">else&lt;/span> {
+resp, loaded &lt;span style="color:#719e07">:=&lt;/span> coordinator.futures.&lt;span style="color:#268bd2">Load&lt;/span>(rpcMessage.Id)
+&lt;span style="color:#719e07">if&lt;/span> loaded {
+response &lt;span style="color:#719e07">:=&lt;/span> resp.(&lt;span style="color:#719e07">*&lt;/span>getty2.MessageFuture)
+response.Response = rpcMessage.Body
+response.Done &lt;span style="color:#719e07">&amp;lt;-&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>
+coordinator.futures.&lt;span style="color:#268bd2">Delete&lt;/span>(rpcMessage.Id)
+}
+}
+}
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnCron&lt;/span>(session getty.Session) {
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>coordinator.OnRegTmMessage(rpcMessage, session)&lt;/code> 注册 Transaction Manager，&lt;code>coordinator.OnRegRmMessage(rpcMessage, session)&lt;/code> 注册 Resource Manager。具体逻辑分析见下文。&lt;/p>
+&lt;p>消息进入 &lt;code>coordinator.OnTrxMessage(rpcMessage, session)&lt;/code> 方法，将按照消息的类型码路由到具体的逻辑当中：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">switch&lt;/span> msg.&lt;span style="color:#268bd2">GetTypeCode&lt;/span>() {
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalBegin:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalBeginRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalBegin&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalStatus:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalStatusRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalStatus&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalReport:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalReportRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalReport&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalCommit:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalCommitRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalCommit&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalRollback:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalRollbackRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalRollback&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeBranchRegister:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.BranchRegisterRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doBranchRegister&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeBranchStatusReport:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.BranchReportRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doBranchReport&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">default&lt;/span>:
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4session-manager-分析">4）session manager 分析&lt;/h3>
+&lt;p>Client 端同 Transaction Coordinator 建立连接起连接后，通过 &lt;code>clientSessionManager.RegisterGettySession(session)&lt;/code> 将连接保存在 &lt;code>serverSessions = sync.Map{}&lt;/code> 这个 map 中。map 的 key 为从 session 中获取的 RemoteAddress 即 Transaction Coordinator 的地址，value 为 session。这样，Client 端就可以通过 map 中的一个 session 来向 Transaction Coordinator 注册 Transaction Manager 和 Resource Manager 了。具体代码见 &lt;code>getty_client_session_manager.go&lt;/code>。&lt;/p>
+&lt;p>Transaction Manager 和 Resource Manager 注册到 Transaction Coordinator 后，一个连接既有可能用来发送 TM 消息也有可能用来发送 RM 消息。我们通过 RpcContext 来标识一个连接信息：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> RpcContext &lt;span style="color:#268bd2">struct&lt;/span> {
+Version &lt;span style="color:#dc322f">string&lt;/span>
+TransactionServiceGroup &lt;span style="color:#dc322f">string&lt;/span>
+ClientRole meta.TransactionRole
+ApplicationId &lt;span style="color:#dc322f">string&lt;/span>
+ClientId &lt;span style="color:#dc322f">string&lt;/span>
+ResourceSets &lt;span style="color:#719e07">*&lt;/span>model.Set
+Session getty.Session
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>当收到事务消息时，我们需要构造这样一个 RpcContext 供后续事务处理逻辑使用。所以，我们会构造下列 map 来缓存映射关系：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">var&lt;/span> (
+&lt;span style="color:#586e75">// session -&amp;gt; transactionRole
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// TM will register before RM, if a session is not the TM registered,
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// it will be the RM registered
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> session_transactionroles = sync.Map{}
+&lt;span style="color:#586e75">// session -&amp;gt; applicationId
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> identified_sessions = sync.Map{}
+&lt;span style="color:#586e75">// applicationId -&amp;gt; ip -&amp;gt; port -&amp;gt; session
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client_sessions = sync.Map{}
+&lt;span style="color:#586e75">// applicationId -&amp;gt; resourceIds
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client_resources = sync.Map{}
+)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，Transaction Manager 和 Resource Manager 分别通过 &lt;code>coordinator.OnRegTmMessage(rpcMessage, session)&lt;/code> 和 &lt;code>coordinator.OnRegRmMessage(rpcMessage, session)&lt;/code> 注册到 Transaction Coordinator 时，会在上述 client_sessions map 中缓存 applicationId、ip、port 与 session 的关系，在 client_resources map 中缓存 applicationId 与 resourceIds（一个应用可能存在多个 Resource Manager） 的关系。&lt;/p>
+&lt;p>在需要时，我们就可以通过上述映射关系构造一个 RpcContext。这部分的实现和 java 版 seata 有很大的不同，感兴趣的可以深入了解一下。具体代码见 &lt;code>getty_session_manager.go&lt;/code>。&lt;/p>
+&lt;p>至此，我们就分析完了 seata-golang 整个 RPC 通信模型的机制。&lt;/p>
+&lt;h3 id="seata-golang-的未来">seata-golang 的未来&lt;/h3>
+&lt;p>seata-golang 从今年 4 月份开始开发，到 8 月份基本实现和 java 版 seata 1.2 协议的互通，对 mysql 数据库实现了 AT 模式（自动协调分布式事务的提交回滚），实现了 TCC 模式，TC 端使用 mysql 存储数据，使 TC 变成一个无状态应用支持高可用部署。下图展示了 AT 模式的原理：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/seata/p3.webp" alt="">&lt;/p>
+&lt;p>后续，还有许多工作可以做，比如：对注册中心的支持、对配置中心的支持、和 java 版 seata 1.4 的协议互通、其他数据库的支持、raft transaction coordinator 的实现等，希望对分布式事务问题感兴趣的开发者可以加入进来一起来打造一个完善的 golang 的分布式事务框架。如果你有任何疑问，欢迎钉钉扫码加入交流群【钉钉群号 33069364】：&lt;/p>
+&lt;p>另外，欢迎对 dubbogo 感兴趣的朋友到 dubbogo 社区钉钉群（钉钉群号 31363295）沟通 dubbogo 技术问题。&lt;/p>
+&lt;h3 id="参考资料">参考资料&lt;/h3>
+&lt;ul>
+&lt;li>seata 官方: &lt;a href="https://seata.io">https://seata.io&lt;/a>&lt;/li>
+&lt;li>java 版 seata: &lt;a href="https://github.com/seata/seata">https://github.com/seata/seata&lt;/a>&lt;/li>
+&lt;li>seata-golang 项目地址: &lt;a href="https://github.com/opentrx/seata-golang">https://github.com/opentrx/seata-golang&lt;/a>&lt;/li>
+&lt;li>seata-golang go 夜读 b 站分享: &lt;a href="https://www.bilibili.com/video/BV1oz411e72T">https://www.bilibili.com/video/BV1oz411e72T&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>作者简介&lt;/p>
+&lt;p>&lt;strong>刘晓敏&lt;/strong> (GitHubID dk-lockdown)，目前就职于 h3c 成都分公司，擅长使用 Java/Go 语言，在云原生和微服务相关技术方向均有涉猎，目前专攻分布式事务。
+&lt;strong>于雨&lt;/strong>(（github @AlexStocks），dubbo-go 项目和社区负责人，一个有十多年服务端基础架构研发一线工作经验的程序员，陆续参与改进过 Muduo/Pika/Dubbo/Sentinel-go 等知名项目，目前在蚂蚁金服可信原生部从事容器编排和 service mesh 工作。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: dubbo-go 中 REST 协议实现</title><link>/zh/blog/2021/01/14/dubbo-go-%E4%B8%AD-rest-%E5%8D%8F%E8%AE%AE%E5%AE%9E%E7%8E%B0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-%E4%B8%AD-rest-%E5%8D%8F%E8%AE%AE%E5%AE%9E%E7%8E%B0/</guid><description>
 &lt;h2 id="什么是-rest-协议">什么是 REST 协议&lt;/h2>
 &lt;p>REST 是 &lt;strong>RE&lt;/strong>presentational &lt;strong>S&lt;/strong>tate &lt;strong>T&lt;/strong>ransfer（表述性状态转移）的简写，是一种软件架构风格。虽然 REST 架构风格不是一定要基于 HTTP 协议进行传输，但是因为 HTTP
 协议的通用性和易用性，现在越来越多的 web 服务采用基于 HTTP 协议实现 RESTful 架构。&lt;/p>
@@ -7782,273 +8811,4 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 &lt;li>服务测试：&lt;/li>
 &lt;/ul>
 &lt;p>&lt;img src="/imgs/blog/admin/test.jpg" alt="test">&lt;/p>
-&lt;p>更重要的，元数据为服务测试提供了数据基础，可以在页面上调用真实的服务提供者，方便测试，也不需要为了调用服务去搭建一套Dubbo环境以及编写消费端代码。&lt;/p></description></item><item><title>Blog: 浅谈 RPC</title><link>/zh/blog/2019/01/07/%E6%B5%85%E8%B0%88-rpc/</link><pubDate>Mon, 07 Jan 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/01/07/%E6%B5%85%E8%B0%88-rpc/</guid><description>
-&lt;p>近几年随着微服务化项目的崛起，逐渐成为许多公司中大型分布式系统架构的主流方式，而今天所说的 RPC 在这其中扮演着至关重要的角色。随着这段日子公司项目微服务化的演进，发现在日常开发中都在隐式或显式的使用 RPC，一些刚刚接触 RPC 的小伙伴会感觉无所适从，而一些入行多年的老手虽然使用 RPC 经验丰富，但有些对其原理也一知半解，缺乏对原理的深入理解，往往也会造成开发中的一些误用。&lt;/p>
-&lt;h2 id="什么是rpc">什么是RPC？&lt;/h2>
-&lt;p>RPC（Remote Procedure Call）—远程过程调用，它是一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议。也就是说两台服务器A，B，一个应用部署在A服务器上，想要调用B服务器上应用提供的方法，由于不在一个内存空间，不能直接调用，需要通过网络来表达调用的语义和传达调用的数据。&lt;/p>
-&lt;p>RPC协议假定某些传输协议的存在，如TCP或UDP，为通信程序之间携带信息数据。在OSI网络通信模型中，RPC跨越了传输层和应用层。RPC使得开发包括网络分布式多程序在内的应用程序更加容易。现在业界有很多开源的优秀 RPC 框架，例如 Spring Cloud、Dubbo、Thrift 等。&lt;/p>
-&lt;h2 id="rpc-起源">RPC 起源&lt;/h2>
-&lt;p>RPC 这个概念术语在上世纪 80 年代由 &lt;strong>Bruce Jay Nelson&lt;/strong> 提出。这里我们追溯下当初开发 RPC 的原动机是什么？在 Nelson 的论文 &amp;ldquo;Implementing Remote Procedure Calls&amp;rdquo; 中他提到了几点：&lt;/p>
-&lt;ul>
-&lt;li>简单：RPC 概念的语义十分清晰和简单，这样建立分布式计算就更容易。&lt;/li>
-&lt;li>高效：过程调用看起来十分简单而且高效。&lt;/li>
-&lt;li>通用：在单机计算中过程往往是不同算法部分间最重要的通信机制。&lt;/li>
-&lt;/ul>
-&lt;p>通俗一点说，就是一般程序员对于本地的过程调用很熟悉，那么我们把 RPC 作成和本地调用完全类似，那么就更容易被接受，使用起来毫无障碍。Nelson 的论文发表于 30 年前，其观点今天看来确实高瞻远瞩，今天我们使用的 RPC 框架基本就是按这个目标来实现的。&lt;/p>
-&lt;h2 id="rpc-结构">RPC 结构&lt;/h2>
-&lt;p>Nelson 的论文中指出实现 RPC 的程序包括 5 个部分：&lt;/p>
-&lt;ol>
-&lt;li>User&lt;/li>
-&lt;li>User-stub&lt;/li>
-&lt;li>RPCRuntime&lt;/li>
-&lt;li>Server-stub&lt;/li>
-&lt;li>Server&lt;/li>
-&lt;/ol>
-&lt;p>&lt;img src="/imgs/blog/rpc/rpc-structure-1.png" alt="RPC结构">&lt;/p>
-&lt;p>这里 user 就是 client 端，当 user 想发起一个远程调用时，它实际是通过本地调用 user-stub。user-stub 负责将调用的接口、方法和参数通过约定的协议规范进行编码并通过本地的 RPCRuntime 实例传输到远端的实例。远端 RPCRuntime 实例收到请求后交给 server-stub 进行解码后发起本地端调用，调用结果再返回给 user 端。&lt;/p>
-&lt;p>以上是粗粒度的 RPC 实现概念结构，接下来我们进一步细化它应该由哪些组件构成，如下图所示。&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/rpc/rpc-structure-2.png" alt="RPC 结构拆解">&lt;/p>
-&lt;p>RPC 服务方通过 RpcServer 去导出（export）远程接口方法，而客户方通过 RpcClient 去引入（import）远程接口方法。客户方像调用本地方法一样去调用远程接口方法，RPC 框架提供接口的代理实现，实际的调用将委托给代理RpcProxy 。代理封装调用信息并将调用转交给RpcInvoker 去实际执行。在客户端的RpcInvoker 通过连接器RpcConnector 去维持与服务端的通道RpcChannel，并使用RpcProtocol 执行协议编码（encode）并将编码后的请求消息通过通道发送给服务方。&lt;/p>
-&lt;p>RPC 服务端接收器 RpcAcceptor 接收客户端的调用请求，同样使用RpcProtocol 执行协议解码（decode）。解码后的调用信息传递给RpcProcessor 去控制处理调用过程，最后再委托调用给RpcInvoker 去实际执行并返回调用结果。如下是各个部分的详细职责：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">1. RpcServer
-负责导出（export）远程接口
-2. RpcClient
-负责导入（import）远程接口的代理实现
-3. RpcProxy
-远程接口的代理实现
-4. RpcInvoker
-客户方实现：负责编码调用信息和发送调用请求到服务方并等待调用结果返回
-服务方实现：负责调用服务端接口的具体实现并返回调用结果
-5. RpcProtocol
-负责协议编/解码
-6. RpcConnector
-负责维持客户方和服务方的连接通道和发送数据到服务方
-7. RpcAcceptor
-负责接收客户方请求并返回请求结果
-8. RpcProcessor
-负责在服务方控制调用过程，包括管理调用线程池、超时时间等
-9. RpcChannel
-数据传输通道
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="rpc-工作原理">RPC 工作原理&lt;/h2>
-&lt;p>RPC的设计由Client，Client stub，Network ，Server stub，Server构成。 其中Client就是用来调用服务的，Cient stub是用来把调用的方法和参数序列化的（因为要在网络中传输，必须要把对象转变成字节），Network用来传输这些信息到Server stub， Server stub用来把这些信息反序列化的，Server就是服务的提供者，最终调用的就是Server提供的方法。&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/rpc/rpc-work-principle.png" alt="RPC工作原理">&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>Client像调用本地服务似的调用远程服务；&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Client stub接收到调用后，将方法、参数序列化&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>客户端通过sockets将消息发送到服务端&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Server stub 收到消息后进行解码（将消息对象反序列化）&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Server stub 根据解码结果调用本地的服务&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>本地服务执行(对于服务端来说是本地执行)并将结果返回给Server stub&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Server stub将返回结果打包成消息（将结果消息对象序列化）&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>服务端通过sockets将消息发送到客户端&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Client stub接收到结果消息，并进行解码（将结果消息反序列化）&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>客户端得到最终结果。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;p>RPC 调用分以下两种：&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>同步调用：客户方等待调用执行完成并返回结果。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>异步调用：客户方调用后不用等待执行结果返回，但依然可以通过回调通知等方式获取返回结果。若客户方不关心调用返回结果，则变成单向异步调用，单向调用不用返回结果。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;p>异步和同步的区分在于是否等待服务端执行完成并返回结果。&lt;/p>
-&lt;h2 id="rpc-能干什么">RPC 能干什么？&lt;/h2>
-&lt;p>RPC 的主要功能目标是让构建分布式计算（应用）更容易，在提供强大的远程调用能力时不损失本地调用的语义简洁性。为实现该目标，RPC 框架需提供一种透明调用机制，让使用者不必显式的区分本地调用和远程调用，在之前给出的一种实现结构，基于 stub 的结构来实现。下面我们将具体细化 stub 结构的实现。&lt;/p>
-&lt;ul>
-&lt;li>可以做到分布式，现代化的微服务&lt;/li>
-&lt;li>部署灵活&lt;/li>
-&lt;li>解耦服务&lt;/li>
-&lt;li>扩展性强&lt;/li>
-&lt;/ul>
-&lt;p>RPC的目的是让你在本地调用远程的方法，而对你来说这个调用是透明的，你并不知道这个调用的方法是部署哪里。通过RPC能解耦服务，这才是使用RPC的真正目的。&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;p>这篇文章介绍了 RPC 的一些基本原理，相信到这里您已经对 RPC 有了一定理解。其实发现实现一个 RPC 不算难，难的是实现一个高性能高可靠的RPC框架。比如，既然是分布式了，那么一个服务可能有多个实例，你在调用时，要如何获取这些实例的地址呢？这时候就需要一个服务注册中心，比如在Dubbo中，就可以使用Zookeeper作为注册中心，在调用时，从Zookeeper获取服务的实例列表，再从中选择一个进行调用。那么选哪个调用好呢？这时候就需要负载均衡了，于是你又得考虑如何实现复杂均衡，比如Dubbo就提供了好几种负载均衡策略。所以请继续关注我的另外两篇文章&lt;strong>RPC与服务化的关系&lt;/strong>和&lt;strong>注册中心，配置中心， 服务发现浅谈&lt;/strong>，相信会帮助对RPC设计和实现有更多的理解。&lt;/p></description></item><item><title>Blog: Dubbo 在瓜子二手车的实践</title><link>/zh/blog/2019/01/05/dubbo-%E5%9C%A8%E7%93%9C%E5%AD%90%E4%BA%8C%E6%89%8B%E8%BD%A6%E7%9A%84%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 05 Jan 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/01/05/dubbo-%E5%9C%A8%E7%93%9C%E5%AD%90%E4%BA%8C%E6%89%8B%E8%BD%A6%E7%9A%84%E5%AE%9E%E8%B7%B5/</guid><description>
-&lt;h2 id="前言">前言&lt;/h2>
-&lt;p>  随着瓜子业务的不断发展，系统规模在逐渐扩大，目前在瓜子的私有云上已经运行着数百个dubbo应用，上千个dubbo实例。瓜子各部门业务迅速发展，版本没有来得及统一，各个部门都有自己的用法。随着第二机房的建设，dubbo版本统一的需求变得越发迫切。几个月前，公司发生了一次与dubbo相关的生产事故，成为了公司dubbo版本升级的诱因。&lt;/p>
-&lt;p>  接下来，我会从这次事故开始，讲讲我们这段时间所做的dubbo版本升级的历程以及dubbo后续多机房的方案。&lt;/p>
-&lt;h2 id="一ephermal节点未及时删除导致provider不能恢复注册的问题修复">一、Ephermal节点未及时删除导致provider不能恢复注册的问题修复&lt;/h2>
-&lt;h3 id="事故背景">事故背景&lt;/h3>
-&lt;p>  在生产环境，瓜子内部各业务线共用一套zookeeper集群作为dubbo的注册中心。2019年9月份，机房的一台交换机发生故障，导致zookeeper集群出现了几分钟的网络波动。在zookeeper集群恢复后，正常情况下dubbo的provider应该会很快重新注册到zookeeper上，但有一小部分的provider很长一段时间没有重新注册到zookeeper上，直到手动重启应用后才恢复注册。&lt;/p>
-&lt;h3 id="排查过程">排查过程&lt;/h3>
-&lt;p>  首先，我们统计了出现这种现象的dubbo服务的版本分布情况，发现在大多数的dubbo版本中都存在这种问题，且发生问题的服务比例相对较低，在github中我们也未找到相关问题的issues。因此，推断这是一个尚未修复的且在网络波动情况的场景下偶现的问题。&lt;/p>
-&lt;p>  接着，我们便将出现问题的应用日志、zookeeper日志与dubbo代码逻辑进行相互印证。在应用日志中，应用重连zookeeper成功后provider立刻进行了重新注册，之后便没有任何日志打印。而在zookeeper日志中，注册节点被删除后，并没有重新创建注册节点。对应到dubbo的代码中，只有在&lt;code>FailbackRegistry.register(url)&lt;/code>的&lt;code>doRegister(url)&lt;/code>执行成功或线程被挂起的情况下，才能与日志中的情况相吻合。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">register&lt;/span>&lt;span style="color:#719e07">(&lt;/span>URL url&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">super&lt;/span>&lt;span style="color:#719e07">.&lt;/span>register&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">);&lt;/span>
-failedRegistered&lt;span style="color:#719e07">.&lt;/span>remove&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">);&lt;/span>
-failedUnregistered&lt;span style="color:#719e07">.&lt;/span>remove&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">// Sending a registration request to the server side
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> doRegister&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Exception e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Throwable t &lt;span style="color:#719e07">=&lt;/span> e&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#586e75">// If the startup detection is opened, the Exception is thrown directly.
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> check &lt;span style="color:#719e07">=&lt;/span> getUrl&lt;span style="color:#719e07">().&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>Constants&lt;span style="color:#719e07">.&lt;/span>CHECK_KEY&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>Constants&lt;span style="color:#719e07">.&lt;/span>CHECK_KEY&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>Constants&lt;span style="color:#719e07">.&lt;/span>CONSUMER_PROTOCOL&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">.&lt;/span>getProtocol&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#dc322f">boolean&lt;/span> skipFailback &lt;span style="color:#719e07">=&lt;/span> t &lt;span style="color:#719e07">instanceof&lt;/span> SkipFailbackWrapperException&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>check &lt;span style="color:#719e07">||&lt;/span> skipFailback&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>skipFailback&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-t &lt;span style="color:#719e07">=&lt;/span> t&lt;span style="color:#719e07">.&lt;/span>getCause&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Failed to register &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> url &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; to registry &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> getUrl&lt;span style="color:#719e07">().&lt;/span>getAddress&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, cause: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> t&lt;span style="color:#719e07">.&lt;/span>getMessage&lt;span style="color:#719e07">(),&lt;/span> t&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Failed to register &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> url &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, waiting for retry, cause: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> t&lt;span style="color:#719e07">.&lt;/span>getMessage&lt;span style="color:#719e07">(),&lt;/span> t&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#586e75">// Record a failed registration request to a failed list, retry regularly
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> failedRegistered&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>  在继续排查问题前，我们先普及下这些概念：dubbo默认使用curator作为zookeeper的客户端，curator与zookeeper是通过session维持连接的。当curator重连zookeeper时，若session未过期，则继续使用原session进行连接；若session已过期，则创建新session重新连接。而ephemeral节点与session是绑定的关系，在session过期后，会删除此session下的ephemeral节点。&lt;/p>
-&lt;p>  继续对&lt;code>doRegister(url)&lt;/code>的代码进行进一步排查，我们发现在&lt;code>CuratorZookeeperClient.createEphemeral(path)&lt;/code>方法中有这么一段逻辑：在&lt;code>createEphemeral(path)&lt;/code>捕获了&lt;code>NodeExistsException&lt;/code>，创建ephemeral节点时，若此节点已存在，则认为ephemeral节点创建成功。这段逻辑初看起来并没有什么问题，且在以下两种常见的场景下表现正常：&lt;/p>
-&lt;ol>
-&lt;li>Session未过期，创建Ephemeral节点时原节点仍存在,不需要重新创建&lt;/li>
-&lt;li>Session已过期，创建Ephemeral节点时原节点已被zookeeper删除，创建成功&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">createEphemeral&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String path&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-client&lt;span style="color:#719e07">.&lt;/span>create&lt;span style="color:#719e07">().&lt;/span>withMode&lt;span style="color:#719e07">(&lt;/span>CreateMode&lt;span style="color:#719e07">.&lt;/span>EPHEMERAL&lt;span style="color:#719e07">).&lt;/span>forPath&lt;span style="color:#719e07">(&lt;/span>path&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>NodeExistsException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Exception e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException&lt;span style="color:#719e07">(&lt;/span>e&lt;span style="color:#719e07">.&lt;/span>getMessage&lt;span style="color:#719e07">(),&lt;/span> e&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>  但是实际上还有一种极端场景，&lt;strong>zookeeper的Session过期与删除Ephemeral节点不是原子性的&lt;/strong>，也就是说客户端在得到Session过期的消息时，Session对应的Ephemeral节点可能还未被zookeeper删除。此时dubbo去创建Ephemeral节点,发现原节点仍存在，故不重新创建。待Ephemeral节点被zookeeper删除后，便会出现dubbo认为重新注册成功，但实际未成功的情况，也就是我们在生产环境遇到的问题。&lt;/p>
-&lt;p>  此时，问题的根源已被定位。定位问题之后，我们与dubbo社区交流，发现考拉的同学也遇到过同样的问题，更确定了这个原因。&lt;/p>
-&lt;h3 id="问题的复现与修复">问题的复现与修复&lt;/h3>
-&lt;p>  定位到问题之后，我们便开始尝试本地复现。由于zookeeper的Session过期但Ephemeral节点未被删除的场景直接模拟比较困难，我们通过修改zookeeper源码，在Session过期与删除Ephemeral节点的逻辑中增加了一段休眠时间，间接模拟出这种极端场景，并在本地复现了此问题。&lt;/p>
-&lt;p>  在排查问题的过程中，我们发现kafka的旧版本在使用zookeeper时也遇到过类似的问题，并参考kafka关于此问题的修复方案，确定了dubbo的修复方案。在创建Ephemeral节点捕获到&lt;code>NodeExistsException&lt;/code>时进行判断，若Ephemeral节点的SessionId与当前客户端的SessionId不同，则删除并重建Ephemeral节点。在内部修复并验证通过后，我们向社区提交了issues及pr。&lt;/p>
-&lt;p>  kafka类似问题issues：https://issues.apache.org/jira/browse/KAFKA-1387&lt;/p>
-&lt;p>  dubbo注册恢复问题issues：https://github.com/apache/dubbo/issues/5125&lt;/p>
-&lt;h2 id="二瓜子的dubbo升级历程">二、瓜子的dubbo升级历程&lt;/h2>
-&lt;p>  上文中的问题修复方案已经确定，但我们显然不可能在每一个dubbo版本上都进行修复。在咨询了社区dubbo的推荐版本后，我们决定在dubbo2.7.3版本的基础上，开发内部版本修复来这个问题。并借这个机会，开始推动公司dubbo版本的统一升级工作。&lt;/p>
-&lt;h3 id="为什么要统一dubbo版本">为什么要统一dubbo版本&lt;/h3>
-&lt;ol>
-&lt;li>统一dubbo版本后，我们可以在此版本上内部紧急修复一些dubbo问题（如上文的dubbo注册故障恢复失效问题）。&lt;/li>
-&lt;li>瓜子目前正在进行第二机房的建设，部分dubbo服务也在逐渐往第二机房迁移。统一dubbo版本，也是为dubbo的多机房做铺垫。&lt;/li>
-&lt;li>有利于我们后续对dubbo服务的统一管控。&lt;/li>
-&lt;li>dubbo社区目前的发展方向与我们公司现阶段对dubbo的一些诉求相吻合，如支持gRPC、云原生等。&lt;/li>
-&lt;/ol>
-&lt;h3 id="为什么选择dubbo273">为什么选择dubbo2.7.3&lt;/h3>
-&lt;ol>
-&lt;li>在我们之前，携程与dubbo社区合作进行了携程dubbo内部版本的升级，并在社区2.7.3版本上修复了很多兼容性问题。感谢携程的同学帮我们踩坑～&lt;/li>
-&lt;li>dubbo2.7.3版本在当时虽然是最新的版本，但已经发布了2个月的时间，从社区issues反馈来看，dubbo2.7.3相对dubbo2.7之前的几个版本，在兼容性方面要好很多。&lt;/li>
-&lt;li>我们也咨询了dubbo社区的同学，推荐升级版本为2.7.3。&lt;/li>
-&lt;/ol>
-&lt;h3 id="内部版本定位">内部版本定位&lt;/h3>
-&lt;p>  基于社区dubbo2.7.3版本开发的dubbo内部版本属于过渡性质的版本，目的是为了修复线上provider不能恢复注册的问题，以及一些社区dubbo2.7.3的兼容性问题。瓜子的dubbo最终还是要跟随社区的版本，而不是开发自已的内部功能。因此我们在dubbo内部版本中修复的所有问题均与社区保持了同步，以保证后续可以兼容升级到社区dubbo的更高版本。&lt;/p>
-&lt;h3 id="兼容性验证与升级过程">兼容性验证与升级过程&lt;/h3>
-&lt;p>  我们在向dubbo社区的同学咨询了版本升级方面的相关经验后，于9月下旬开始了dubbo版本的升级工作。&lt;/p>
-&lt;ol>
-&lt;li>&lt;strong>初步兼容性验证&lt;/strong>
-首先,我们梳理了一些需要验证的兼容性case，针对公司内部使用较多的dubbo版本，与dubbo2.7.3一一进行了兼容性验证。经验证，除dubboX外，dubbo2.7.3与其他dubbo版本均兼容。dubboX由于对dubbo协议进行了更改，与dubbo2.7.3不兼容。&lt;/li>
-&lt;li>&lt;strong>生产环境兼容性验证&lt;/strong>
-在初步验证兼容性通过后，我们与业务线合作，挑选了一些重要程度较低的项目，在生产环境对dubbo2.7.3与其他版本的兼容性进行了进一步验证。并在内部版本修复了一些兼容性问题。&lt;/li>
-&lt;li>&lt;strong>推动公司dubbo版本升级&lt;/strong>
-在10月初，完成了dubbo兼容性验证后，我们开始在各个业务线推动dubbo的升级工作。截止到12月初,已经有30%的dubbo服务的完成了版本升级。按照排期，预计于2020年3月底前完成公司dubbo版本的统一升级。&lt;/li>
-&lt;/ol>
-&lt;h3 id="兼容性问题汇总">兼容性问题汇总&lt;/h3>
-&lt;p>  在推动升级dubbo2.7.3版本的过程整体上比较顺利,当然也遇到了一些兼容性问题：&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>&lt;strong>创建zookeeper节点时提示没有权限&lt;/strong>
-dubbo配置文件中已经配置了zookeeper的用户名密码，但在创建zookeeper节点时却抛出&lt;code>KeeperErrorCode = NoAuth&lt;/code>的异常，这种情况分别对应两个兼容性问题：&lt;/p>
-&lt;ul>
-&lt;li>issues:https://github.com/apache/dubbo/issues/5076
-dubbo在未配置配置中心时，默认使用注册中心作为配置中心。通过注册中心的配置信息初始化配置中心配置时，由于遗漏了用户名密码，导致此问题。&lt;/li>
-&lt;li>issues:https://github.com/apache/dubbo/issues/4991
-dubbo在建立与zookeeper的连接时会根据zookeeper的address复用之前已建立的连接。当多个注册中心使用同一个address，但权限不同时，就会出现&lt;code>NoAuth&lt;/code>的问题。
-参考社区的pr，我们在内部版本进行了修复。&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>curator版本兼容性问题&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>dubbo2.7.3与低版本的curator不兼容，因此我们默认将curator版本升级至4.2.0&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>curator-framework&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>4.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>curator-recipes&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>4.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>分布式调度框架elastic-job-lite强依赖低版本的curator,与dubbo2.7.3使用的curator版本不兼容,这给dubbo版本升级工作带来了一定阻塞。考虑到elastic-job-lite已经很久没有人进行维护，目前一些业务线计划将elastic-job-lite替换为其他的调度框架。&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>openFeign与dubbo兼容性问题&lt;/strong>
-issues: &lt;a href="https://github.com/apache/dubbo/issues/3990">https://github.com/apache/dubbo/issues/3990&lt;/a>
-dubbo的ServiceBean监听spring的ContextRefreshedEvent,进行服务暴露。openFeign提前触发了ContextRefreshedEvent，此时ServiceBean还未完成初始化，于是就导致了应用启动异常。
-参考社区的pr，我们在内部版本修复了此问题。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>RpcException兼容性问题&lt;/strong>
-dubbo低版本consumer不能识别dubbo2.7版本provider抛出的&lt;code>org.apache.dubbo.rpc.RpcException&lt;/code>。因此，在consumer全部升级到2.7之前，不建议将provider的&lt;code>com.alibaba.dubbo.rpc.RpcException&lt;/code>改为&lt;code>org.apache.dubbo.rpc.RpcException&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>qos端口占用&lt;/strong>
-dubbo2.7.3默认开启qos功能，导致一些混部在物理机的dubbo服务升级时出现qos端口占用问题。关闭qos功能后恢复。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>自定义扩展兼容性问题&lt;/strong>
-业务线对于dubbo的自定义扩展比较少，因此在自定义扩展的兼容性方面暂时还没有遇到比较难处理的问题，基本上都是变更package导致的问题，由业务线自行修复。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>skywalking agent兼容性问题&lt;/strong>
-我们项目中一般使用skywalking进行链路追踪，由于skywalking agent6.0的plugin不支持dubbo2.7，因此统一升级skywalking agent到6.1。&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="三dubbo多机房方案">三、dubbo多机房方案&lt;/h2>
-&lt;p>  瓜子目前正在进行第二机房的建设工作，dubbo多机房是第二机房建设中比较重要的一个话题。在dubbo版本统一的前提下，我们就能够更顺利的开展dubbo多机房相关的调研与开发工作。&lt;/p>
-&lt;h3 id="初步方案">初步方案&lt;/h3>
-&lt;p>  我们咨询了dubbo社区的建议，并结合瓜子云平台的现状，初步确定了dubbo多机房的方案。&lt;/p>
-&lt;ol>
-&lt;li>在每个机房内，部署一套独立的zookeeper集群。集群间信息不同步。这样就没有了zookeeper集群跨机房延迟与数据不同步的问题。&lt;/li>
-&lt;li>dubbo服务注册时，仅注册到本机房的zookeeper集群；订阅时，同时订阅两个机房的zookeeper集群。&lt;/li>
-&lt;li>实现同机房优先调用的路由逻辑。以减少跨机房调用导致的不必要网络延迟。&lt;/li>
-&lt;/ol>
-&lt;h3 id="同机房优先调用">同机房优先调用&lt;/h3>
-&lt;p>  dubbo同机房优先调用的实现比较简单，相关逻辑如下：&lt;/p>
-&lt;ol>
-&lt;li>瓜子云平台默认将机房的标志信息注入容器的环境变量中。&lt;/li>
-&lt;li>provider暴露服务时，读取环境变量中的机房标志信息，追加到待暴露服务的url中。&lt;/li>
-&lt;li>consumer调用provider时，读取环境变量中的机房标志信息，根据路由策略优先调用具有相同标志信息的provider。&lt;/li>
-&lt;/ol>
-&lt;p>  针对以上逻辑，我们简单实现了dubbo通过环境变量进行路由的功能，并向社区提交了pr。
-  dubbo通过环境变量路由pr: &lt;a href="https://github.com/apache/dubbo/pull/5348">https://github.com/apache/dubbo/pull/5348&lt;/a>&lt;/p></description></item><item><title>Blog: 第五届Dubbo开发者沙龙在杭州成功举办</title><link>/zh/blog/2018/12/10/%E7%AC%AC%E4%BA%94%E5%B1%8Adubbo%E5%BC%80%E5%8F%91%E8%80%85%E6%B2%99%E9%BE%99%E5%9C%A8%E6%9D%AD%E5%B7%9E%E6%88%90%E5%8A%9F%E4%B8%BE%E5%8A%9E/</link><pubDate>Mon, 10 Dec 2018 00:00:00 +0000</pubDate><guid>/zh/blog/2018/12/10/%E7%AC%AC%E4%BA%94%E5%B1%8Adubbo%E5%BC%80%E5%8F%91%E8%80%85%E6%B2%99%E9%BE%99%E5%9C%A8%E6%9D%AD%E5%B7%9E%E6%88%90%E5%8A%9F%E4%B8%BE%E5%8A%9E/</guid><description>
-&lt;p>第五届Dubbo开发者沙龙在杭州成功举办，&lt;/p>
-&lt;p>分享嘉宾&lt;/p>
-&lt;ul>
-&lt;li>李鼎: 如何参与Dubbo开源社区 &lt;a href="https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/how-to-involve-in-dubbo-community.pdf">slides&lt;/a>&lt;/li>
-&lt;li>曹胜利: Dubbo 2.7新特性介绍及演示 &lt;a href="https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/dubbo-2.7-introduction.pdf">slides&lt;/a>&lt;/li>
-&lt;li>陶杨: Dubbo在考拉的应用实践 &lt;a href="https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/dubbo-practice-in-netease-koala.pdf">slides&lt;/a>&lt;/li>
-&lt;li>小马哥: Dubbo+Nacos服务治理重新实现 &lt;a href="https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/nacos-support-in-dubbo.pdf">slides&lt;/a>&lt;/li>
-&lt;li>赵奕豪: Sentinel:分布式服务的流量防卫兵 &lt;a href="https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/sentinel-support-for-dubbo.pdf">slides&lt;/a>&lt;/li>
-&lt;li>陈志轩: 当Dubbo遇上Arthas:排查问题的实践 &lt;a href="https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201812%40hangzhou/troubleshooting-dubbo-with-arthas.pdf">slides&lt;/a>&lt;/li>
-&lt;/ul></description></item></channel></rss>
+&lt;p>更重要的，元数据为服务测试提供了数据基础，可以在页面上调用真实的服务提供者，方便测试，也不需要为了调用服务去搭建一套Dubbo环境以及编写消费端代码。&lt;/p></description></item></channel></rss>

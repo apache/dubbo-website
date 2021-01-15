@@ -1,4 +1,1033 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo 博客</title><link>/zh/blog/</link><description>Recent content in Apache Dubbo 博客 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: dubbo-go 1.5.0</title><link>/zh/blog/2021/01/14/dubbo-go-1.5.0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-1.5.0/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo 博客</title><link>/zh/blog/</link><description>Recent content in Apache Dubbo 博客 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="/zh/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: dubbo-go源码笔记（二）客户端调用过程</title><link>/zh/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/</guid><description>
+&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>有了上一篇文章&lt;a href="/zh/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/" title="">《dubbo-go 源码笔记（一）Server服务暴露过程详解》&lt;/a> 的铺垫，可以大致上类比客户端服务类似于服务端启动过程。其中最大的区别是服务端通过zk注册服务，发布自己的ivkURL并订阅事件开启监听；而服务端应该是通过zk注册组件，&lt;strong>拿到需要调用的serviceURL&lt;/strong>，&lt;strong>更新invoker&lt;/strong>并&lt;strong>重写用户的RPCService&lt;/strong>，从而实现对远程过程调用细节的封装。&lt;/p>
+&lt;h2 id="1-配置文件和客户端源码">1. 配置文件和客户端源码&lt;/h2>
+&lt;h4 id="11-client配置文件">1.1 client配置文件&lt;/h4>
+&lt;p>helloworld提供的demo：profiles/client.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">registries &lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;demoZk&amp;#34;&lt;/span>:
+&lt;span style="color:#268bd2">protocol&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">timeout &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;3s&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">username&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">password&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">references&lt;/span>:
+&lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>:
+&lt;span style="color:#586e75"># 可以指定多个registry，使用逗号隔开;不指定默认向所有注册中心注册&lt;/span>
+&lt;span style="color:#268bd2">registry&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;demoZk&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">protocol &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">interface &lt;/span>: &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.UserProvider&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">cluster&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">methods &lt;/span>:
+- &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;GetUser&amp;#34;&lt;/span>
+&lt;span style="color:#268bd2">retries&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到配置文件与之前讨论过的server端非常类似，其refrences部分字段就是对当前服务要主调的服务的配置，其中详细说明了调用协议、注册协议、接口id、调用方法、集群策略等，这些配置都会在之后与注册组件交互，重写ivk、调用的过程中使用到。&lt;/p>
+&lt;h4 id="12-客户端使用框架源码">1.2 客户端使用框架源码&lt;/h4>
+&lt;p>user.go&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(userProvider)
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>main.go&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+config.&lt;span style="color:#268bd2">Load&lt;/span>()
+time.&lt;span style="color:#268bd2">Sleep&lt;/span>(&lt;span style="color:#2aa198">3e9&lt;/span>)
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;\n\n\nstart to test dubbo&amp;#34;&lt;/span>)
+user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#b58900">panic&lt;/span>(err)
+}
+&lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v\n&amp;#34;&lt;/span>, user)
+&lt;span style="color:#268bd2">initSignal&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>官网提供的helloworld demo的源码。可看到与服务端类似，在user.go内注册了rpc-service，以及需要rpc传输的结构体user。&lt;/p>
+&lt;p>在main函数中，同样调用了config.Load()函数，之后就可以直接通过实现好的rpc-service：userProvider 直接调用对应的功能函数，即可实现rpc调用。&lt;/p>
+&lt;p>可以猜到，从hessian注册结构、SetConsumerService，到调用函数.GetUser()期间，用户定义的rpc-service也就是userProvider对应的函数被重写，重写后的GetUser函数已经包含了实现了远程调用逻辑的invoker。&lt;/p>
+&lt;p>接下来，就要通过阅读源码，看看dubbo-go是如何做到的。&lt;/p>
+&lt;h2 id="2-实现远程过程调用">2. 实现远程过程调用&lt;/h2>
+&lt;h4 id="21-加载配置文件">2.1 加载配置文件&lt;/h4>
+&lt;p>config/config_loader.go :Load()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Load Dubbo Init
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">Load&lt;/span>() {
+&lt;span style="color:#586e75">// init router
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">initRouter&lt;/span>()
+&lt;span style="color:#586e75">// init the global event dispatcher
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> extension.&lt;span style="color:#268bd2">SetAndInitGlobalDispatcher&lt;/span>(&lt;span style="color:#268bd2">GetBaseConfig&lt;/span>().EventDispatcherType)
+&lt;span style="color:#586e75">// start the metadata report if config set
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">startMetadataReport&lt;/span>(&lt;span style="color:#268bd2">GetApplicationConfig&lt;/span>().MetadataType, &lt;span style="color:#268bd2">GetBaseConfig&lt;/span>().MetadataReportConfig); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Provider starts metadata report error, and the error is {%#v}&amp;#34;&lt;/span>, err)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+&lt;span style="color:#586e75">// reference config
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">loadConsumerConfig&lt;/span>()
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在main函数中调用的config.Load()函数，进而调用了loadConsumerConfig，类似于之前讲到的server端配置读入函数。&lt;/p>
+&lt;p>在loadConsumerConfig函数中，进行了三步操作：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p1.png" alt="">&lt;/p>
+&lt;ol>
+&lt;li>检查配置文件并将配置写入内存&lt;/li>
+&lt;li>&lt;strong>在for循环内部&lt;/strong>，依次引用（refer）并且实例化（implement）每个被调reference。&lt;/li>
+&lt;li>等待三秒钟所有invoker就绪&lt;/li>
+&lt;/ol>
+&lt;p>其中重要的就是for循环里面的引用和实例化，两步操作，会在接下来展开讨论。&lt;/p>
+&lt;p>至此，配置已经被写入了框架。&lt;/p>
+&lt;h4 id="22-获取远程service-url实现可供调用的invoker">2.2 获取远程Service URL，实现可供调用的invoker&lt;/h4>
+&lt;p>上述的ref.Refer完成的就是这部分的操作。&lt;/p>
+&lt;p>图（一）&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p2.png" alt="">&lt;/p>
+&lt;h5 id="221-构造注册url">2.2.1 构造注册url&lt;/h5>
+&lt;p>和server端类似，存在注册url和服务url，dubbo习惯将服务url作为注册url的sub。&lt;/p>
+&lt;p>config/reference_config.go: Refer()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">/&lt;/span> Refer &lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>ReferenceConfig) &lt;span style="color:#268bd2">Refer&lt;/span>(_ &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+&lt;span style="color:#586e75">//（一）配置url参数(serviceUrl)，将会作为sub
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> cfgURL &lt;span style="color:#719e07">:=&lt;/span> common.&lt;span style="color:#268bd2">NewURLWithOptions&lt;/span>(
+common.&lt;span style="color:#268bd2">WithPath&lt;/span>(c.id),
+common.&lt;span style="color:#268bd2">WithProtocol&lt;/span>(c.Protocol),
+common.&lt;span style="color:#268bd2">WithParams&lt;/span>(c.&lt;span style="color:#268bd2">getUrlMap&lt;/span>()),
+common.&lt;span style="color:#268bd2">WithParamsValue&lt;/span>(constant.BEAN_NAME_KEY, c.id),
+)
+&lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">// （二）注册地址可以通过url格式给定，也可以通过配置格式给定
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这一步的意义就是配置-&amp;gt;提取信息生成URL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> c.Url &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {&lt;span style="color:#586e75">// 用户给定url信息，可以是点对点的地址，也可以是注册中心的地址
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. user specified URL, could be peer-to-peer address, or register center&amp;#39;s address.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> urlStrings &lt;span style="color:#719e07">:=&lt;/span> gxstrings.&lt;span style="color:#268bd2">RegSplit&lt;/span>(c.Url, &lt;span style="color:#2aa198">&amp;#34;\\s*[;]+\\s*&amp;#34;&lt;/span>)
+&lt;span style="color:#719e07">for&lt;/span> _, urlStr &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> urlStrings {
+serviceUrl, err &lt;span style="color:#719e07">:=&lt;/span> common.&lt;span style="color:#268bd2">NewURL&lt;/span>(urlStr)
+&lt;span style="color:#719e07">...&lt;/span>
+}
+} &lt;span style="color:#719e07">else&lt;/span> {&lt;span style="color:#586e75">// 配置读入注册中心的信息
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// assemble SubURL from register center&amp;#39;s configuration mode
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这是注册url，protocol = registry,包含了zk的用户名、密码、ip等等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.urls = &lt;span style="color:#268bd2">loadRegistries&lt;/span>(c.Registry, consumerConfig.Registries, common.CONSUMER)
+&lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">// set url to regUrls
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">for&lt;/span> _, regUrl &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> c.urls {
+regUrl.SubURL = cfgURL&lt;span style="color:#586e75">// regUrl的subURl存当前配置url
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+}
+&lt;span style="color:#586e75">//至此，无论通过什么形式，已经拿到了全部的regURL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// （三）获取registryProtocol实例，调用其Refer方法，传入新构建好的regURL
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(c.urls) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> {
+&lt;span style="color:#586e75">// 这一步访问到registry/protocol/protocol.go registryProtocol.Refer
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这里是registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.invoker = extension.&lt;span style="color:#268bd2">GetProtocol&lt;/span>(c.urls[&lt;span style="color:#2aa198">0&lt;/span>].Protocol).&lt;span style="color:#268bd2">Refer&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>c.urls[&lt;span style="color:#2aa198">0&lt;/span>])
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 如果有多个注册中心，即有多个invoker,则采取集群策略
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> invokers &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">make&lt;/span>([]protocol.Invoker, &lt;span style="color:#2aa198">0&lt;/span>, &lt;span style="color:#b58900">len&lt;/span>(c.urls))
+&lt;span style="color:#719e07">...&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个函数中，已经处理完从Register配置到RegisterURL的转换,即图（一）中部分：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p3.png" alt="">&lt;/p>
+&lt;p>接下来，已经拿到的url将被传递给RegistryProtocol，进一步refer。&lt;/p>
+&lt;h5 id="222-registryprotocol获取到zkregistry实例进一步refer">2.2.2 registryProtocol获取到zkRegistry实例，进一步Refer&lt;/h5>
+&lt;p>registry/protocol/protocol.go: Refer&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Refer provider service from registry center
+&lt;/span>&lt;span style="color:#586e75">// 拿到的是配置文件registries的url，他能够生成一个invoker = 指向目的addr，以供客户端直接调用。
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (proto &lt;span style="color:#719e07">*&lt;/span>registryProtocol) &lt;span style="color:#268bd2">Refer&lt;/span>(url common.URL) protocol.Invoker {
+&lt;span style="color:#268bd2">var&lt;/span> registryUrl = url
+&lt;span style="color:#586e75">// 这里拿到的是referenceConfig，serviceUrl里面包含了Reference的所有信息，包含interfaceName、method等等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">var&lt;/span> serviceUrl = registryUrl.SubURL
+&lt;span style="color:#719e07">if&lt;/span> registryUrl.Protocol &lt;span style="color:#719e07">==&lt;/span> constant.REGISTRY_PROTOCOL {&lt;span style="color:#586e75">// registryUrl.Proto = &amp;#34;registry&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> protocol &lt;span style="color:#719e07">:=&lt;/span> registryUrl.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.REGISTRY_KEY, &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>)
+registryUrl.Protocol = protocol&lt;span style="color:#586e75">//替换成了具体的值，比如&amp;#34;zookeeper&amp;#34;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;span style="color:#586e75">// 接口对象
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">var&lt;/span> reg registry.Registry
+&lt;span style="color:#586e75">// （一）实例化接口对象，缓存策略
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> regI, loaded &lt;span style="color:#719e07">:=&lt;/span> proto.registries.&lt;span style="color:#268bd2">Load&lt;/span>(registryUrl.&lt;span style="color:#268bd2">Key&lt;/span>()); !loaded {
+&lt;span style="color:#586e75">// 缓存中不存在当前registry，新建一个reg
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> reg = &lt;span style="color:#268bd2">getRegistry&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>registryUrl)
+&lt;span style="color:#586e75">// 缓存起来
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> proto.registries.&lt;span style="color:#268bd2">Store&lt;/span>(registryUrl.&lt;span style="color:#268bd2">Key&lt;/span>(), reg)
+} &lt;span style="color:#719e07">else&lt;/span> {
+reg = regI.(registry.Registry)
+}
+&lt;span style="color:#586e75">// 到这里，获取到了reg实例 zookeeper的registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//（二）根据Register的实例zkRegistry和传入的regURL新建一个directory
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这一步存在复杂的异步逻辑，从注册中心拿到了目的service的真实addr，获取了invoker并放入directory，
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这一步将在下面详细给出步骤
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// new registry directory for store service url from registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> directory, err &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetDefaultRegistryDirectory&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>registryUrl, reg)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;consumer service %v create registry directory error, error message is %s, and will return nil invoker!&amp;#34;&lt;/span>,
+serviceUrl.&lt;span style="color:#268bd2">String&lt;/span>(), err.&lt;span style="color:#268bd2">Error&lt;/span>())
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#586e75">// （三）DoRegister 在zk上注册当前client service
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> err = reg.&lt;span style="color:#268bd2">Register&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>serviceUrl)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;consumer service %v register registry %v error, error message is %s&amp;#34;&lt;/span>,
+serviceUrl.&lt;span style="color:#268bd2">String&lt;/span>(), registryUrl.&lt;span style="color:#268bd2">String&lt;/span>(), err.&lt;span style="color:#268bd2">Error&lt;/span>())
+}
+&lt;span style="color:#586e75">// （四）new cluster invoker，将directory写入集群，获得具有集群策略的invoker
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> cluster &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetCluster&lt;/span>(serviceUrl.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.CLUSTER_KEY, constant.DEFAULT_CLUSTER))
+invoker &lt;span style="color:#719e07">:=&lt;/span> cluster.&lt;span style="color:#268bd2">Join&lt;/span>(directory)
+&lt;span style="color:#586e75">// invoker保存
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> proto.invokers = &lt;span style="color:#b58900">append&lt;/span>(proto.invokers, invoker)
+&lt;span style="color:#719e07">return&lt;/span> invoker
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可详细阅读上述注释，这个函数完成了从url到invoker的全部过程&lt;/p>
+&lt;p>（一）首先获得Registry对象，默认是之前实例化的zkRegistry，和之前server获取Registry的处理很类似。
+（二）通过构造一个新的directory，异步拿到之前在zk上注册的server端信息，生成invoker
+（三）在zk上注册当前service
+（四）集群策略，获得最终invoker&lt;/p>
+&lt;p>这一步完成了图（一）中所有余下的绝大多数操作，接下来就需要详细的查看directory的构造过程：&lt;/p>
+&lt;h5 id="223-构造directory包含较复杂的异步操作">2.2.3 构造directory（包含较复杂的异步操作）&lt;/h5>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p4.png" alt="">&lt;/p>
+&lt;p>图（二）&lt;/p>
+&lt;p>上述的 &lt;code>extension.GetDefaultRegistryDirectory(&amp;amp;registryUrl, reg)&lt;/code>函数，本质上调用了已经注册好的&lt;code>NewRegistryDirectory&lt;/code>函数:&lt;/p>
+&lt;p>registry/directory/directory.go: NewRegistryDirectory()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// NewRegistryDirectory will create a new RegistryDirectory
+&lt;/span>&lt;span style="color:#586e75">// 这个函数作为default注册在extension上面
+&lt;/span>&lt;span style="color:#586e75">// url为注册url，reg为zookeeper registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewRegistryDirectory&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL, registry registry.Registry) (cluster.Directory, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;span style="color:#719e07">if&lt;/span> url.SubURL &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>, perrors.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;url is invalid, suburl can not be nil&amp;#34;&lt;/span>)
+}
+dir &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>RegistryDirectory{
+BaseDirectory: directory.&lt;span style="color:#268bd2">NewBaseDirectory&lt;/span>(url),
+cacheInvokers: []protocol.Invoker{},
+cacheInvokersMap: &lt;span style="color:#719e07">&amp;amp;&lt;/span>sync.Map{},
+serviceType: url.SubURL.&lt;span style="color:#268bd2">Service&lt;/span>(),
+registry: registry,
+}
+dir.consumerConfigurationListener = &lt;span style="color:#268bd2">newConsumerConfigurationListener&lt;/span>(dir)
+&lt;span style="color:#719e07">go&lt;/span> dir.&lt;span style="color:#268bd2">subscribe&lt;/span>(url.SubURL)
+&lt;span style="color:#719e07">return&lt;/span> dir, &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>首先构造了一个注册directory，开启携程调用其subscribe函数，传入serviceURL。&lt;/p>
+&lt;p>这个directory目前包含了对应的zkRegistry，以及传入的URL，他cacheInvokers的部分是空的。&lt;/p>
+&lt;p>进入dir.subscribe(url.SubURL)这个异步函数：&lt;/p>
+&lt;p>registry/directory/directory.go: subscribe()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// subscribe from registry
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (dir &lt;span style="color:#719e07">*&lt;/span>RegistryDirectory) &lt;span style="color:#268bd2">subscribe&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) {
+&lt;span style="color:#586e75">// 增加两个监听，
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> dir.consumerConfigurationListener.&lt;span style="color:#268bd2">addNotifyListener&lt;/span>(dir)
+dir.referenceConfigurationListener = &lt;span style="color:#268bd2">newReferenceConfigurationListener&lt;/span>(dir, url)
+&lt;span style="color:#586e75">// subscribe调用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> dir.registry.&lt;span style="color:#268bd2">Subscribe&lt;/span>(url, dir)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>重点来了，他调用了zkRegistry的Subscribe方法,与此同时将自己作为ConfigListener传入&lt;/p>
+&lt;blockquote>
+&lt;p>我认为这种传入listener的设计模式非常值得学习，而且很有java的味道。&lt;/p>
+&lt;p>针对等待zk返回订阅信息这样的异步操作，需要传入一个Listener，这个Listener需要实现Notify方法，进而在作为参数传入内部之后，可以被异步地调用Notify，将内部触发的异步事件“传递出来”，再进一步处理加工。&lt;/p>
+&lt;p>层层的Listener事件链，能将传入的原始serviceURL通过zkConn发送给zk服务，获取到服务端注册好的url对应的二进制信息。&lt;/p>
+&lt;p>而Notify回调链，则将这串byte[]一步一步解析、加工；以事件的形式向外传递，最终落到directory上的时候，已经是成型的newInvokers了。&lt;/p>
+&lt;p>具体细节不再以源码形式展示，可参照上图查阅源码。&lt;/p>
+&lt;/blockquote>
+&lt;p>至此已经拿到了server端注册好的真实invoker。&lt;/p>
+&lt;p>完成了图（一）中的部分：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p5.png" alt="">&lt;/p>
+&lt;h5 id="224-构造带有集群策略的clusterinvoker">2.2.4 构造带有集群策略的clusterinvoker&lt;/h5>
+&lt;p>经过上述操作，已经拿到了server端Invokers，放入了directory的cacheinvokers数组里面缓存。&lt;/p>
+&lt;p>后续的操作对应本文2.2.2的第四步，由directory生成带有特性集群策略的invoker&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// （四）new cluster invoker，将directory写入集群，获得具有集群策略的invoker
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> cluster &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetCluster&lt;/span>(serviceUrl.&lt;span style="color:#268bd2">GetParam&lt;/span>(constant.CLUSTER_KEY, constant.DEFAULT_CLUSTER))
+invoker &lt;span style="color:#719e07">:=&lt;/span> cluster.&lt;span style="color:#268bd2">Join&lt;/span>(directory)
+&lt;span style="color:#2aa198">123&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Join函数的实现就是如下函数：&lt;/p>
+&lt;p>cluster/cluster_impl/failover_cluster_invokers.go: newFailoverClusterInvoker()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">newFailoverClusterInvoker&lt;/span>(directory cluster.Directory) protocol.Invoker {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>failoverClusterInvoker{
+baseClusterInvoker: &lt;span style="color:#268bd2">newBaseClusterInvoker&lt;/span>(directory),
+}
+}
+&lt;span style="color:#2aa198">12345&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>dubbo-go框架默认选择failover策略，既然返回了一个invoker，我们查看一下failoverClusterInvoker的Invoker方法，看他是如何将集群策略封装到Invoker函数内部的：&lt;/p>
+&lt;p>cluster/cluster_impl/failover_cluster_invokers.go: Invoker()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Invoker 函数
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (invoker &lt;span style="color:#719e07">*&lt;/span>failoverClusterInvoker) &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx context.Context, invocation protocol.Invocation) protocol.Result {
+&lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">//调用List方法拿到directory缓存的所有invokers
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> invokers &lt;span style="color:#719e07">:=&lt;/span> invoker.directory.&lt;span style="color:#268bd2">List&lt;/span>(invocation)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">checkInvokers&lt;/span>(invokers, invocation); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {&lt;span style="color:#586e75">// 检查是否可以实现调用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>protocol.RPCResult{Err: err}
+}
+&lt;span style="color:#586e75">// 获取来自用户方向传入的
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> methodName &lt;span style="color:#719e07">:=&lt;/span> invocation.&lt;span style="color:#268bd2">MethodName&lt;/span>()
+retries &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">getRetries&lt;/span>(invokers, methodName)
+loadBalance &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">getLoadBalance&lt;/span>(invokers[&lt;span style="color:#2aa198">0&lt;/span>], invocation)
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &lt;span style="color:#719e07">&amp;lt;=&lt;/span> retries; i&lt;span style="color:#719e07">++&lt;/span> {
+&lt;span style="color:#586e75">// 重要！这里是集群策略的体现，失败后重试！
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//Reselect before retry to avoid a change of candidate `invokers`.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//NOTE: if `invokers` changed, then `invoked` also lose accuracy.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> i &amp;gt; &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">checkWhetherDestroyed&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>protocol.RPCResult{Err: err}
+}
+invokers = invoker.directory.&lt;span style="color:#268bd2">List&lt;/span>(invocation)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">checkInvokers&lt;/span>(invokers, invocation); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>protocol.RPCResult{Err: err}
+}
+}
+&lt;span style="color:#586e75">// 这里是负载均衡策略的体现！选择特定ivk进行调用。
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ivk &lt;span style="color:#719e07">:=&lt;/span> invoker.&lt;span style="color:#268bd2">doSelect&lt;/span>(loadBalance, invocation, invokers, invoked)
+&lt;span style="color:#719e07">if&lt;/span> ivk &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+invoked = &lt;span style="color:#b58900">append&lt;/span>(invoked, ivk)
+&lt;span style="color:#586e75">//DO INVOKE
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> result = ivk.&lt;span style="color:#268bd2">Invoke&lt;/span>(ctx, invocation)
+&lt;span style="color:#719e07">if&lt;/span> result.&lt;span style="color:#268bd2">Error&lt;/span>() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+providers = &lt;span style="color:#b58900">append&lt;/span>(providers, ivk.&lt;span style="color:#268bd2">GetUrl&lt;/span>().&lt;span style="color:#268bd2">Key&lt;/span>())
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+&lt;span style="color:#719e07">return&lt;/span> result
+}
+&lt;span style="color:#719e07">...&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>看了很多Invoke函数的实现，所有类似的Invoker函数都包含两个方向，一个是用户方向的invcation，一个是函数方向的底层invokers。&lt;/p>
+&lt;p>而集群策略的invoke函数本身作为接线员，把invocation一步步解析，根据调用需求和集群策略，选择特定的invoker来执行&lt;/p>
+&lt;p>proxy函数也是这样，一个是用户方向的ins[] reflect.Type, 一个是函数方向的invoker。&lt;/p>
+&lt;p>proxy函数负责将ins转换为invocation，调用对应invoker的invoker函数，实现连通。&lt;/p>
+&lt;p>而出于这样的设计，可以在一步步Invoker封装的过程中，每个Invoker只关心自己负责操作的部分，从而使整个调用栈解耦。&lt;/p>
+&lt;p>妙啊！！！&lt;/p>
+&lt;/blockquote>
+&lt;p>至此，我们理解了failoverClusterInvoker 的Invoke函数实现，也正是和这个集群策略Invoker被返回，接受来自上方的调用。&lt;/p>
+&lt;p>已完成图（一）中的：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p6.png" alt="">&lt;/p>
+&lt;h5 id="225-在zookeeper上注册当前client">2.2.5 在zookeeper上注册当前client&lt;/h5>
+&lt;p>拿到invokers后，可以回到：&lt;/p>
+&lt;p>config/refrence_config.go: Refer()函数了。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go"> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(c.urls) &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> {
+&lt;span style="color:#586e75">// 这一步访问到registry/protocol/protocol.go registryProtocol.Refer
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.invoker = extension.&lt;span style="color:#268bd2">GetProtocol&lt;/span>(c.urls[&lt;span style="color:#2aa198">0&lt;/span>].Protocol).&lt;span style="color:#268bd2">Refer&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>c.urls[&lt;span style="color:#2aa198">0&lt;/span>])
+&lt;span style="color:#586e75">// （一）拿到了真实的invokers
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 如果有多个注册中心，即有多个invoker,则采取集群策略
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> invokers &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">make&lt;/span>([]protocol.Invoker, &lt;span style="color:#2aa198">0&lt;/span>, &lt;span style="color:#b58900">len&lt;/span>(c.urls))
+&lt;span style="color:#719e07">...&lt;/span>
+cluster &lt;span style="color:#719e07">:=&lt;/span> extension.&lt;span style="color:#268bd2">GetCluster&lt;/span>(hitClu)
+&lt;span style="color:#586e75">// If &amp;#39;zone-aware&amp;#39; policy select, the invoker wrap sequence would be:
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// ZoneAwareClusterInvoker(StaticDirectory) -&amp;gt;
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// FailoverClusterInvoker(RegistryDirectory, routing happens here) -&amp;gt; Invoker
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.invoker = cluster.&lt;span style="color:#268bd2">Join&lt;/span>(directory.&lt;span style="color:#268bd2">NewStaticDirectory&lt;/span>(invokers))
+}
+&lt;span style="color:#586e75">// （二）create proxy，为函数配置代理
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> c.Async {
+callback &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">GetCallback&lt;/span>(c.id)
+c.pxy = extension.&lt;span style="color:#268bd2">GetProxyFactory&lt;/span>(consumerConfig.ProxyFactory).&lt;span style="color:#268bd2">GetAsyncProxy&lt;/span>(c.invoker, callback, cfgURL)
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 这里c.invoker已经是目的addr了
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> c.pxy = extension.&lt;span style="color:#268bd2">GetProxyFactory&lt;/span>(consumerConfig.ProxyFactory).&lt;span style="color:#268bd2">GetProxy&lt;/span>(c.invoker, cfgURL)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们有了可以打通的invokers，但还不能直接调用，因为invoker的入参是invocation，而调用函数使用的是具体的参数列表。需要通过一层proxy来规范入参和出参。&lt;/p>
+&lt;p>接下来新建一个默认proxy，放置在c.proxy内，以供后续使用&lt;/p>
+&lt;p>至此，完成了图（一）中最后的操作&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p7.png" alt="">&lt;/p>
+&lt;h3 id="23-将调用逻辑以代理函数的形式写入rpc-service">2.3 将调用逻辑以代理函数的形式写入rpc-service&lt;/h3>
+&lt;p>上面完成了config.Refer操作&lt;/p>
+&lt;p>回到config/config_loader.go: loadConsumerConfig()&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p8.png" alt="">&lt;/p>
+&lt;p>下一个重要的函数是Implement，他完的操作较为简单：旨在使用上面生成的c.proxy代理，链接用户自己定义的rpcService到clusterInvoker的信息传输。&lt;/p>
+&lt;p>函数较长，只选取了重要的部分:&lt;/p>
+&lt;p>common/proxy/proxy.go: Implement()&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Implement
+&lt;/span>&lt;span style="color:#586e75">// proxy implement
+&lt;/span>&lt;span style="color:#586e75">// In consumer, RPCService like:
+&lt;/span>&lt;span style="color:#586e75">// type XxxProvider struct {
+&lt;/span>&lt;span style="color:#586e75">// Yyy func(ctx context.Context, args []interface{}, rsp *Zzz) error
+&lt;/span>&lt;span style="color:#586e75">// }
+&lt;/span>&lt;span style="color:#586e75">// Implement 实现的过程，就是proxy根据函数名和返回值，通过调用invoker 构造出拥有远程调用逻辑的代理函数
+&lt;/span>&lt;span style="color:#586e75">// 将当前rpc所有可供调用的函数注册到proxy.rpc内
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>Proxy) &lt;span style="color:#268bd2">Implement&lt;/span>(v common.RPCService) {
+&lt;span style="color:#586e75">// makeDubboCallProxy 这是一个构造代理函数，这个函数的返回值是func(in []reflect.Value) []reflect.Value 这样一个函数
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这个被返回的函数是请求实现的载体，由他来发起调用获取结果
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> makeDubboCallProxy &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>(methodName &lt;span style="color:#dc322f">string&lt;/span>, outs []reflect.Type) &lt;span style="color:#268bd2">func&lt;/span>(in []reflect.Value) []reflect.Value {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>(in []reflect.Value) []reflect.Value {
+&lt;span style="color:#586e75">// 根据methodName和outs的类型，构造这样一个函数，这个函数能将in 输入的value转换为输出的value
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 这个函数具体的实现如下：
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;span style="color:#586e75">// 目前拿到了 methodName、所有入参的interface和value，出参数reply
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// （一）根据这些生成一个 rpcinvocation
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> inv = invocation_impl.&lt;span style="color:#268bd2">NewRPCInvocationWithOptions&lt;/span>(
+invocation_impl.&lt;span style="color:#268bd2">WithMethodName&lt;/span>(methodName),
+invocation_impl.&lt;span style="color:#268bd2">WithArguments&lt;/span>(inIArr),
+invocation_impl.&lt;span style="color:#268bd2">WithReply&lt;/span>(reply.&lt;span style="color:#268bd2">Interface&lt;/span>()),
+invocation_impl.&lt;span style="color:#268bd2">WithCallBack&lt;/span>(p.callBack),
+invocation_impl.&lt;span style="color:#268bd2">WithParameterValues&lt;/span>(inVArr))
+&lt;span style="color:#719e07">for&lt;/span> k, value &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> p.attachments {
+inv.&lt;span style="color:#268bd2">SetAttachments&lt;/span>(k, value)
+}
+&lt;span style="color:#586e75">// add user setAttachment
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> atm &lt;span style="color:#719e07">:=&lt;/span> invCtx.&lt;span style="color:#268bd2">Value&lt;/span>(constant.AttachmentKey) &lt;span style="color:#586e75">// 如果传入的ctx里面有attachment，也要写入inv
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> m, ok &lt;span style="color:#719e07">:=&lt;/span> atm.(&lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#dc322f">string&lt;/span>); ok {
+&lt;span style="color:#719e07">for&lt;/span> k, value &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">range&lt;/span> m {
+inv.&lt;span style="color:#268bd2">SetAttachments&lt;/span>(k, value)
+}
+}
+&lt;span style="color:#586e75">// 至此构造inv完毕
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// (二）触发Invoker 之前已经将cluster_invoker放入proxy，使用Invoke方法，通过getty远程过程调用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> result &lt;span style="color:#719e07">:=&lt;/span> p.invoke.&lt;span style="color:#268bd2">Invoke&lt;/span>(invCtx, inv)
+&lt;span style="color:#586e75">// 如果有attachment，则加入
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#b58900">len&lt;/span>(result.&lt;span style="color:#268bd2">Attachments&lt;/span>()) &amp;gt; &lt;span style="color:#2aa198">0&lt;/span> {
+invCtx = context.&lt;span style="color:#268bd2">WithValue&lt;/span>(invCtx, constant.AttachmentKey, result.&lt;span style="color:#268bd2">Attachments&lt;/span>())
+}
+&lt;span style="color:#719e07">...&lt;/span>
+}
+}
+numField &lt;span style="color:#719e07">:=&lt;/span> valueOfElem.&lt;span style="color:#268bd2">NumField&lt;/span>()
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; numField; i&lt;span style="color:#719e07">++&lt;/span> {
+t &lt;span style="color:#719e07">:=&lt;/span> typeOf.&lt;span style="color:#268bd2">Field&lt;/span>(i)
+methodName &lt;span style="color:#719e07">:=&lt;/span> t.Tag.&lt;span style="color:#268bd2">Get&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>)
+&lt;span style="color:#719e07">if&lt;/span> methodName &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {
+methodName = t.Name
+}
+f &lt;span style="color:#719e07">:=&lt;/span> valueOfElem.&lt;span style="color:#268bd2">Field&lt;/span>(i)
+&lt;span style="color:#719e07">if&lt;/span> f.&lt;span style="color:#268bd2">Kind&lt;/span>() &lt;span style="color:#719e07">==&lt;/span> reflect.Func &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> f.&lt;span style="color:#268bd2">IsValid&lt;/span>() &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> f.&lt;span style="color:#268bd2">CanSet&lt;/span>() { &lt;span style="color:#586e75">// 针对于每个函数
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> outNum &lt;span style="color:#719e07">:=&lt;/span> t.Type.&lt;span style="color:#268bd2">NumOut&lt;/span>()
+&lt;span style="color:#586e75">// 规定函数输出只能有1/2个
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> outNum &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> outNum &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span> {
+logger.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;method %s of mtype %v has wrong number of in out parameters %d; needs exactly 1/2&amp;#34;&lt;/span>,
+t.Name, t.Type.&lt;span style="color:#268bd2">String&lt;/span>(), outNum)
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+&lt;span style="color:#586e75">// The latest return type of the method must be error.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 规定最后一个返回值一定是error
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> returnType &lt;span style="color:#719e07">:=&lt;/span> t.Type.&lt;span style="color:#268bd2">Out&lt;/span>(outNum &lt;span style="color:#719e07">-&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>); returnType &lt;span style="color:#719e07">!=&lt;/span> typError {
+logger.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;the latest return type %s of method %q is not error&amp;#34;&lt;/span>, returnType, t.Name)
+&lt;span style="color:#719e07">continue&lt;/span>
+}
+&lt;span style="color:#586e75">// 获取到所有的出参类型，放到数组里
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">var&lt;/span> funcOuts = &lt;span style="color:#b58900">make&lt;/span>([]reflect.Type, outNum)
+&lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; outNum; i&lt;span style="color:#719e07">++&lt;/span> {
+funcOuts[i] = t.Type.&lt;span style="color:#268bd2">Out&lt;/span>(i)
+}
+&lt;span style="color:#586e75">// do method proxy here:
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// （三）调用make函数，传入函数名和返回值，获得能调用远程的proxy，将这个proxy替换掉原来的函数位置
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> f.&lt;span style="color:#268bd2">Set&lt;/span>(reflect.&lt;span style="color:#268bd2">MakeFunc&lt;/span>(f.&lt;span style="color:#268bd2">Type&lt;/span>(), &lt;span style="color:#268bd2">makeDubboCallProxy&lt;/span>(methodName, funcOuts)))
+logger.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;set method [%s]&amp;#34;&lt;/span>, methodName)
+}
+}
+&lt;span style="color:#719e07">...&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>正如之前所说，proxy的作用是将用户定义的函数参数列表，转化为抽象的invocation传入Invoker，进行调用。&lt;/p>
+&lt;p>其中已标明有三处较为重要的地方：&lt;/p>
+&lt;ol>
+&lt;li>在代理函数中实现由参数列表生成Invocation的逻辑&lt;/li>
+&lt;li>在代理函数实现调用Invoker的逻辑&lt;/li>
+&lt;li>将代理函数替换为原始rpc-service对应函数
+至此，也就解决了一开始的问题：
+client.go: main()&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go"> config.&lt;span style="color:#268bd2">Load&lt;/span>()
+user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里直接调用用户定义的rpcService的函数GetUser，这里实际调用的是经过重写入的函数代理，所以就能实现远程调用了。&lt;/p>
+&lt;h3 id="3-从client到server的invoker嵌套链--小结">3. 从client到server的invoker嵌套链- 小结&lt;/h3>
+&lt;p>在阅读dubbo-go源码的过程中，我能发现一条清晰的invoker-proxy嵌套链，我希望通过图的形式来展现：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/code2/p9.png" alt="">&lt;/p>
+&lt;blockquote>
+&lt;p>作者简介 李志信 (GitHubID LaurenceLiZhixin)，中山大学软件工程专业在校学生，擅长使用 Java/Go 语言，专注于云原生和微服务等技术方向。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: dubbogo 3.0：牵手 gRPC 走向云原生时代</title><link>/zh/blog/2021/01/15/dubbogo-3.0%E7%89%B5%E6%89%8B-grpc-%E8%B5%B0%E5%90%91%E4%BA%91%E5%8E%9F%E7%94%9F%E6%97%B6%E4%BB%A3/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/15/dubbogo-3.0%E7%89%B5%E6%89%8B-grpc-%E8%B5%B0%E5%90%91%E4%BA%91%E5%8E%9F%E7%94%9F%E6%97%B6%E4%BB%A3/</guid><description>
+&lt;p>自从 2011 年 Dubbo 开源之后，被大量中小公司采用，一直是国内最受欢迎的 RPC 框架。2014 年，由于阿里内部组织架构调整，Dubbo 暂停维护了一段时间，之后随着 Spring Cloud 的面世，两个体系在融合中一起助推了微服务的火热。&lt;/p>
+&lt;p>不过这世界变化快，自从以 docker 为代表的的容器技术和以 K8s 为代表的容器编排技术登上舞台之后，云原生时代到来了。在云原生时代，不可变的基础设施给原有的中间件带来了不可变的中间件基础设施：gRPC 统一了底层通信层；protobuf 统一了序列化协议；以 envoy + istio 为代表的 service mesh 逐渐统一了服务的控制面与数据面。&lt;/p>
+&lt;p>dubbogo 的天然使命是：Bridging the gap between Java and Go。保持 Go 应用与 Java 应用互联互通的同时，借助 Go 语言（事实上的第一云原生语言）的优势拥抱云原生时代。dubbogo 社区 2020 年勠力打造三支箭：&lt;/p>
+&lt;ul>
+&lt;li>已经发布的对齐 dubbo 2.7 的 dubbogo v1.5 版本；&lt;/li>
+&lt;li>近期将要发布的 sidecar 形态的 dubbo-go-proxy 项目；&lt;/li>
+&lt;li>以及处于进行时的 dubbogo 3.0。&lt;/li>
+&lt;/ul>
+&lt;p>用一句话概括 dubbogo 3.0 即是：新通信协议、新序列化协议、新应用注册模型以及新的服务治理能力！本文主要着重讨论 dubbogo 3.0 的新通信协议和应用级服务注册发现模型。&lt;/p>
+&lt;h2 id="dubbogo-30-vs-grpc">dubbogo 3.0 vs gRPC&lt;/h2>
+&lt;p>知己知彼，方能进步。dubbogo 3.0 的通信层改进主要借鉴了 gRPC。&lt;/p>
+&lt;p>gRPC 协议，简单来说就是 http2 协议的基础之上，增加了特定的协议 header：“grpc-” 开头的 header 字段，采用特定的打解包工具（protobuf）对数据进行序列化，从而实现 RPC 调用。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p1.webp" alt="">&lt;/p>
+&lt;p>众所周知，gRPC 几乎没有服务治理能力，而阿里云现有 dubbo 框架兼具 RPC 和服务治理能力，整体实力不逊于 gRPC。但在“大家都用 gRPC” 这样的背景之下，dubbogo 3.0 的新通信协议就必须&lt;strong>完美兼容 gRPC&lt;/strong>，对开发者已部署的服务完全兼容，并在此基础之上延续已有 dubbo 协议和服务治理能力，进而推出一系列新策略：比如 mesh 支持、应用级服务注册等。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p2.webp" alt="">&lt;/p>
+&lt;h2 id="dubbogo-30-vs-dubbogo-15">dubbogo 3.0 vs dubbogo 1.5&lt;/h2>
+&lt;p>目前已有的 dubbo 2.7 协议已经尽可能实现了 gRPC 的支持。开发者可以通过 protoc-gen-dubbo 工具将 pb IDL 协议转换为框架支持的 stub，再借助底层 gRPC conn 的 RPC 过程，将已有的服务治理能力自上而下传递给 gRPC，因此实现了 gRPC 服务的支持。&lt;/p>
+&lt;p>dubbo-go v1.5.x 也支持 gRPC 的 Stream 调用。和 unary RPC 类似，通过产生框架支持的 stub，在底层 gRPC stream 调用的基础之上，将流式 RPC 的能力和并入框架。但由于 dubbo v2.7.x / dubbo-go v1.5.x 本身并不支持流式调用，所以没有对 gRPC stream 调用的进行上层服务治理支持。&lt;/p>
+&lt;p>开发者所面临的问题就是：我们在使用 dubbo-go2.7 进行 grpc 协议传输的时候，或多或少不是那么放心。&lt;/p>
+&lt;p>而即将推出的 dubbo-go 3.0 协议将从根源解决这个问题。&lt;/p>
+&lt;h2 id="协议兼容的三种层次">协议兼容的三种层次&lt;/h2>
+&lt;p>笔者认为，一款服务框架对于第三方协议的支持可分为三个程度：应用层次、协议层次、传输层次。&lt;/p>
+&lt;p>一款框架如果在一个协议的 sdk 之上封装接口，可以认为它处于应用层次支持，这样的框架需要遵循下层 sdk 的接口，可扩展性较差。&lt;/p>
+&lt;p>处于协议层次的框架，从配置层到服务治理层均由本框架提供，而在此之下的协议层到网络传输层均使用某个固定的通信协议，这样的框架可以解决服务治理的问题，但框架本身无法与第三方协议完全适配，如果不适配就会出现对第三方协议支持的削弱，比如上面说到的 dubbo-go 1.5 对 stream rpc 支持的缺陷。&lt;/p>
+&lt;p>如果想进一步支持更多的第三方协议，需要从传输层下手，真正了解第三方协议的具体字段、所依赖的底层协议（比如 HTTP2）的帧模型和数据流，再开发出与第三方协议完全一致的数据交互模块，作为本框架的底层。这样做的好处是最大程度赋予了协议的可扩展性，可以在兼容已有协议的基础之上，可选地增加开发者需要的字段，从而实现已有协议无法实现的功能，就比如 dubbogo 3.0 将支持的反压策略。&lt;/p>
+&lt;h2 id="基于-http2-的通信流程">基于 HTTP2 的通信流程&lt;/h2>
+&lt;p>gRPC 一次基于 HTTP2 的 unary rpc 调用传输主要流程如下：&lt;/p>
+&lt;ul>
+&lt;li>client 发送 Magic 信息：
+PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n；&lt;/li>
+&lt;li>server 收到并检查是否正确；&lt;/li>
+&lt;li>client 和 server 互相发送 setting 帧，收到后发送 ACK 确认；&lt;/li>
+&lt;li>client 发送 Header 帧，包含 gRPC 协议字段，以 End Headers 作为 Header 结束标志；&lt;/li>
+&lt;li>client 紧接着发送 Data 帧，包含 RPC 调用的 request 信息，以 End Stream 作为 Data 结束标志；&lt;/li>
+&lt;li>server 调用函数获得结果；&lt;/li>
+&lt;li>server 发送 Header 帧，包含 gRPC 协议字段，以 End Headers 作为 Header 结束标志；&lt;/li>
+&lt;li>server 紧接着发送 Data 帧，包含 RPC 调用回传的 response 信息；&lt;/li>
+&lt;li>server 紧接着再次发送 Header 帧，包含 RPC 状态和 message 信息，以 End Stream 作为本次 RPC 调用结束标志。&lt;/li>
+&lt;/ul>
+&lt;p>其中包含 gRPC 调用信息的 HTTP2 Header 帧如下图：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p3.webp" alt="">&lt;/p>
+&lt;p>另外，在 gRPC 的 stream 调用中，可在 server 端回传的过程中发送多次 Data，调用结束后再发送 Header 终止 RPC 过程，并汇报状态信息。&lt;/p>
+&lt;p>dubbogo 3.0 的通信层将在 HTTP2 通信协议之上采用同样的通信流程，以保证与 gRPC 的底层通信沟通能力。&lt;/p>
+&lt;h2 id="dubbogo-30-预期通信架构">dubbogo 3.0 预期通信架构&lt;/h2>
+&lt;p>除了通信协议采用 HTTP2 外，dubbogo 3.0 将采用基于 google protobuf 的 triple 协议【下面称为 dubbo3 协议】作为 dubbogo 3.0 的序列化协议，为 dubbo 将来支持更多的编程语言打下通信协议层面的基础。&lt;/p>
+&lt;p>目前设计的 dubbogo 3.0 传输模型如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p4.webp" alt="">&lt;/p>
+&lt;ul>
+&lt;li>为保证同时支持 unary RPC 和 stream RPC，在 server 端和 client 端增加数据流结构，以异步调用的形式完成数据传递；&lt;/li>
+&lt;li>继续支持原有的 TCP 通信能力；&lt;/li>
+&lt;li>在 HTTP2 的通信协议之上支持 dubbo3 协议，decode 过程兼容 gRPC 使用的 protobuf，保证与 gRPC 服务打通。&lt;/li>
+&lt;/ul>
+&lt;h2 id="应用级服务注册发现">应用级服务注册发现&lt;/h2>
+&lt;h4 id="1-应用级服务注册发现介绍">1. 应用级服务注册发现介绍&lt;/h4>
+&lt;p>dubbogo 3.0 使用的新一代服务注册发现体系，将摒弃旧版的“接口级注册发现”，使用“应用级别注册发现”。&lt;/p>
+&lt;p>简单地说，接口级别注册发现，在注册中心中以 RPC 服务为 key，以实例列表作为 value 来组织数据的，而我们新引入的“应用粒度的服务发现”，它以应用名（Application）作为 key，以这个应用部署的一组实例（Instance）列表作为 value。这带来两点不同：&lt;/p>
+&lt;ul>
+&lt;li>数据映射关系变了，从 RPC Service -&amp;gt; Instance 变为 Application -&amp;gt; Instance；&lt;/li>
+&lt;li>数据变少了，注册中心没有了 RPC Service 及其相关配置信息。&lt;/li>
+&lt;/ul>
+&lt;p>可以认为，基于应用粒度的模型所存储和推送的数据量是和应用、实例数成正比的，只有当我们的应用数增多或应用的实例数增长时，地址推送压力才会上涨。&lt;/p>
+&lt;p>而对于基于接口粒度的模型，数据量是和接口数量正相关的，鉴于一个应用通常发布多个接口的现状，其数量级一般是比应用粒度的数十倍。另外一个关键点在于，接口的定义更多的是业务侧的内部行为，接口粒度导致的集群规模评估的不透明，而实例、应用增长都通常是在运维侧的规划之中，可控性较好。&lt;/p>
+&lt;p>工商银行曾经对这两个模型进行生产测算：应用级服务注册模型可以让注册中心上的数据量变成原来的 1.68%，新模型可以让 zookeeper 轻松至成 10 万级别的服务量和 10 万级别的节点量。&lt;/p>
+&lt;h4 id="2-元数据中心同步机制的引入">2. 元数据中心同步机制的引入&lt;/h4>
+&lt;p>数据中心的数据量变少所造成的结果，是 RPC 服务相关的数据在注册中心消失了，只有 application - instance 这两个层级的数据。为了保证这部分缺少的 RPC 服务数据仍然能被 Consumer 端正确的感知，我们在 Consumer 和 Provider 间建立了一条单独的通信通道，目前针对元数据同步有两种具体的可选方案，分别是：&lt;/p>
+&lt;ul>
+&lt;li>内建 MetadataService；&lt;/li>
+&lt;li>独立的元数据中心，通过中细化的元数据集群协调数据。&lt;/li>
+&lt;/ul>
+&lt;h4 id="3-兼容旧版本-dubbo-go">3. 兼容旧版本 dubbo-go&lt;/h4>
+&lt;p>为了使整个开发流程对老的 dubbo-go 用户更透明，同时避免指定 provider 对可扩展性带来的影响），我们设计了一套 RPC服务到应用名的映射关系，以尝试在 consumer 自动完成 RPC 服务到 provider 应用名的转换。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p5.webp" alt="">&lt;/p>
+&lt;p>这套设计可以让 dubbogo 3.0 中同时保持对 dubbo v2.6.x、dubbo v2.7.x 和 dubbo v3.0.x 三个大版的互联互通。&lt;/p>
+&lt;h2 id="统一路由的支持">统一路由的支持&lt;/h2>
+&lt;p>路由在概念上可以理解为从已有的所有 IP 地址列表中，根据特定的路由规则，挑选出需要的 ip 地址子集。路由的过程需要根据配置好的路由规则进行筛选，最终取所有路由规则的交集获得结果。多个路由如同流水线一样，形成一条路由链，从所有的地址表中筛选出最终目的地址集合，再通过负载均衡策略选择访问的地址。&lt;/p>
+&lt;h4 id="1-路由链">1. 路由链&lt;/h4>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p6.webp" alt="">&lt;/p>
+&lt;p>可以把路由链的逻辑简单理解为 target = rn(&amp;hellip;r3(r2(r1(src))))。对于每一个 router 内部的逻辑，可以抽象为输入地址 addrs-in 与 router 中按全量地址 addrs-all 实现切分好的 n 个&lt;strong>互不相交&lt;/strong>的地址池 addrs-pool-1 &amp;hellip; addrs-pool-n 按实现定义好的规则取交集作为输出地址。以此类推，完成整个路由链的计算。&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/3.0-plan/p7.webp" alt="">&lt;/p>
+&lt;h4 id="2-failover">2. failover&lt;/h4>
+&lt;p>在路由规则配置文件中可以配置 failover 字段。在寻找地址失败时可以 failover， 选择其他 subset，并且顺序执行下来，直到找到地址，否则最后报地址找不到异常。&lt;/p>
+&lt;h4 id="3-兜底路由">3. 兜底路由&lt;/h4>
+&lt;p>在的路由规则配置中，可以配置一个没有任何条件的 match, 最终的结果是至少会有一个 subset 被选到，以达到地址空保护的作用。&lt;/p>
+&lt;p>作为 2020 年 dubbogo 社区打造并将在 2021 年初亮出的的三支箭之一，dubbogo 3.0 将带来不同平常且焕然一新的开发体验，敬请广大开发者期待！&lt;/p>
+&lt;p>如果你有任何疑问，欢迎钉钉扫码加入交流群【钉钉群号 31363295】：&lt;/p>
+&lt;p>dubbogo 3.0 目前是社区和 dubbo 官方团队&amp;ndash; 阿里中间件团队共同合作开发。&lt;/p>
+&lt;p>阿里云-中间件团队招募对 dubbo3 (java &amp;amp; go)、dapr、arthas 有兴趣的开发者。可以钉钉联系 northlatitude，或者发送邮件至 &lt;a href="mailto:beiwei.ly@alibaba-inc.com">beiwei.ly@alibaba-inc.com&lt;/a>。&lt;/p>
+&lt;blockquote>
+&lt;p>作者简介&lt;/p>
+&lt;p>&lt;strong>李志信&lt;/strong> (GitHubID LaurenceLiZhixin)，阿里云云原生中间件团队开发工程师，dubbogo 社区开发者，中山大学软件工程专业在校学生，擅长使用 Go 语言，专注于云原生和微服务等技术方向。&lt;/p>
+&lt;p>&lt;strong>于雨&lt;/strong>(github @AlexStocks)，dubbo-go 项目和社区负责人，一个有十多年服务端做着基础架构研发一线工作经验的程序员，陆续参与改进过 Muduo/Pika/Dubbo/Sentinel-go 等知名项目，目前在蚂蚁金服可信原生部从事容器编排和 service mesh 工作。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: 分布式事务框架 seata-golang 通信模型详解</title><link>/zh/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</guid><description>
+&lt;h2 id="简介">简介&lt;/h2>
+&lt;p>Java 的世界里，大家广泛使用一个高性能网络通信框架 —— netty，很多 RPC 框架都是基于 netty 来实现的。在 golang 的世界里，getty 也是一个类似 netty 的高性能网络通信库。getty 最初由 dubbo-go 项目负责人于雨开发，作为底层通信库在 dubbo-go 中使用。随着 dubbo-go 捐献给 apache 基金会，在社区小伙伴的共同努力下，getty 也最终进入到 apache 这个大家庭，并改名 dubbo-getty。&lt;/p>
+&lt;p>18 年的时候，我在公司里实践微服务，当时遇到最大的问题就是分布式事务问题。同年，阿里在社区开源他们的分布式事务解决方案，我也很快关注到这个项目，起初还叫 fescar，后来更名 seata。由于我对开源技术很感兴趣，加了很多社区群，当时也很关注 dubbo-go 这个项目，在里面默默潜水。随着对 seata 的了解，逐渐萌生了做一个 go 版本的分布式事务框架的想法。&lt;/p>
+&lt;p>要做一个 golang 版的分布式事务框架，首先需要解决的一个问题就是如何实现 RPC 通信。dubbo-go 就是摆在眼前很好的一个例子，遂开始研究 dubbo-go 的底层 getty。&lt;/p>
+&lt;h2 id="如何基于-getty-实现-rpc-通信">如何基于 getty 实现 RPC 通信&lt;/h2>
+&lt;p>getty 框架的整体模型图如下：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/seata/p1.webp" alt="">&lt;/p>
+&lt;p>下面结合相关代码，详述 seata-golang 的 RPC 通信过程。&lt;/p>
+&lt;h3 id="1-建立连接">1. 建立连接&lt;/h3>
+&lt;p>实现 RPC 通信，首先要建立网络连接，这里先从 client.go 开始看起。&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>client) &lt;span style="color:#268bd2">connect&lt;/span>() {
+&lt;span style="color:#268bd2">var&lt;/span> (
+err &lt;span style="color:#dc322f">error&lt;/span>
+ss Session
+)
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// 建立一个 session 连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ss = c.&lt;span style="color:#268bd2">dial&lt;/span>()
+&lt;span style="color:#719e07">if&lt;/span> ss &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// client has been closed
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">break&lt;/span>
+}
+err = c.&lt;span style="color:#268bd2">newSession&lt;/span>(ss)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 收发报文
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ss.(&lt;span style="color:#719e07">*&lt;/span>session).&lt;span style="color:#268bd2">run&lt;/span>()
+&lt;span style="color:#586e75">// 此处省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">break&lt;/span>
+}
+&lt;span style="color:#586e75">// don&amp;#39;t distinguish between tcp connection and websocket connection. Because
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// gorilla/websocket/conn.go:(Conn)Close also invoke net.Conn.Close()
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> ss.&lt;span style="color:#268bd2">Conn&lt;/span>().&lt;span style="color:#268bd2">Close&lt;/span>()
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>connect()&lt;/code> 方法通过 &lt;code>dial()&lt;/code> 方法得到了一个 session 连接，进入 &lt;code>dial()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>client) &lt;span style="color:#268bd2">dial&lt;/span>() Session {
+&lt;span style="color:#719e07">switch&lt;/span> c.endPointType {
+&lt;span style="color:#719e07">case&lt;/span> TCP_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialTCP&lt;/span>()
+&lt;span style="color:#719e07">case&lt;/span> UDP_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialUDP&lt;/span>()
+&lt;span style="color:#719e07">case&lt;/span> WS_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialWS&lt;/span>()
+&lt;span style="color:#719e07">case&lt;/span> WSS_CLIENT:
+&lt;span style="color:#719e07">return&lt;/span> c.&lt;span style="color:#268bd2">dialWSS&lt;/span>()
+}
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们关注的是 TCP 连接，所以继续进入 &lt;code>c.dialTCP()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>client) &lt;span style="color:#268bd2">dialTCP&lt;/span>() Session {
+&lt;span style="color:#268bd2">var&lt;/span> (
+err &lt;span style="color:#dc322f">error&lt;/span>
+conn net.Conn
+)
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> c.&lt;span style="color:#268bd2">IsClosed&lt;/span>() {
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#719e07">if&lt;/span> c.sslEnabled {
+&lt;span style="color:#719e07">if&lt;/span> sslConfig, err &lt;span style="color:#719e07">:=&lt;/span> c.tlsConfigBuilder.&lt;span style="color:#268bd2">BuildTlsConfig&lt;/span>(); err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> sslConfig &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+d &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>net.Dialer{Timeout: connectTimeout}
+&lt;span style="color:#586e75">// 建立加密连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> conn, err = tls.&lt;span style="color:#268bd2">DialWithDialer&lt;/span>(d, &lt;span style="color:#2aa198">&amp;#34;tcp&amp;#34;&lt;/span>, c.addr, sslConfig)
+}
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#586e75">// 建立 tcp 连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> conn, err = net.&lt;span style="color:#268bd2">DialTimeout&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;tcp&amp;#34;&lt;/span>, c.addr, connectTimeout)
+}
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> gxnet.&lt;span style="color:#268bd2">IsSameAddr&lt;/span>(conn.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>(), conn.&lt;span style="color:#268bd2">LocalAddr&lt;/span>()) {
+conn.&lt;span style="color:#268bd2">Close&lt;/span>()
+err = errSelfConnect
+}
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 返回一个 TCPSession
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#268bd2">newTCPSession&lt;/span>(conn, c)
+}
+log.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;net.DialTimeout(addr:%s, timeout:%v) = error:%+v&amp;#34;&lt;/span>, c.addr, connectTimeout, perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err))
+&lt;span style="color:#719e07">&amp;lt;-&lt;/span>wheel.&lt;span style="color:#268bd2">After&lt;/span>(connectInterval)
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，我们知道了 getty 如何建立 TCP 连接，并返回 TCPSession。&lt;/p>
+&lt;h3 id="2-收发报文">2. 收发报文&lt;/h3>
+&lt;p>那它是怎么收发报文的呢，我们回到 connection 方法接着往下看，有这样一行 &lt;code>ss.(*session).run()&lt;/code>，在这行代码之后，代码都是很简单的操作，我们猜测这行代码运行的逻辑里面一定包含收发报文的逻辑，接着进入 &lt;code>ru``n()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">run&lt;/span>() {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">go&lt;/span> s.&lt;span style="color:#268bd2">handleLoop&lt;/span>()
+&lt;span style="color:#719e07">go&lt;/span> s.&lt;span style="color:#268bd2">handlePackage&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里起了两个 goroutine：&lt;code>handleLoop&lt;/code> 和 &lt;code>handlePackage&lt;/code>，看字面意思符合我们的猜想，进入 &lt;code>handleLoop()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">handleLoop&lt;/span>() {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// A select blocks until one of its cases is ready to run.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// It choose one at random if multiple are ready. Otherwise it choose default branch if none is ready.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">case&lt;/span> outPkg, ok = &lt;span style="color:#719e07">&amp;lt;-&lt;/span>s.wQ:
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+iovec = iovec[:&lt;span style="color:#2aa198">0&lt;/span>]
+&lt;span style="color:#719e07">for&lt;/span> idx &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; idx &amp;lt; maxIovecNum; idx&lt;span style="color:#719e07">++&lt;/span> {
+&lt;span style="color:#586e75">// 通过 s.writer 将 interface{} 类型的 outPkg 编码成二进制的比特
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> pkgBytes, err = s.writer.&lt;span style="color:#268bd2">Write&lt;/span>(s, outPkg)
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+iovec = &lt;span style="color:#b58900">append&lt;/span>(iovec, pkgBytes)
+&lt;span style="color:#586e75">//省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;span style="color:#586e75">// 将这些二进制比特发送出去
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> err = s.&lt;span style="color:#268bd2">WriteBytesArray&lt;/span>(iovec[:]&lt;span style="color:#719e07">...&lt;/span>)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+log.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;%s, [session.handleLoop]s.WriteBytesArray(iovec len:%d) = error:%+v&amp;#34;&lt;/span>,
+s.&lt;span style="color:#268bd2">sessionToken&lt;/span>(), &lt;span style="color:#b58900">len&lt;/span>(iovec), perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err))
+s.&lt;span style="color:#268bd2">stop&lt;/span>()
+&lt;span style="color:#586e75">// break LOOP
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> flag = &lt;span style="color:#cb4b16">false&lt;/span>
+}
+&lt;span style="color:#719e07">case&lt;/span> &lt;span style="color:#719e07">&amp;lt;-&lt;/span>wheel.&lt;span style="color:#268bd2">After&lt;/span>(s.period):
+&lt;span style="color:#719e07">if&lt;/span> flag {
+&lt;span style="color:#719e07">if&lt;/span> wsFlag {
+err &lt;span style="color:#719e07">:=&lt;/span> wsConn.&lt;span style="color:#268bd2">writePing&lt;/span>()
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+log.&lt;span style="color:#268bd2">Warnf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;wsConn.writePing() = error:%+v&amp;#34;&lt;/span>, perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err))
+}
+}
+&lt;span style="color:#586e75">// 定时执行的逻辑，心跳等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> s.listener.&lt;span style="color:#268bd2">OnCron&lt;/span>(s)
+}
+}
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过上面的代码，我们不难发现，&lt;code>handleLoop()&lt;/code> 方法处理的是发送报文的逻辑，RPC 需要发送的消息首先由 &lt;code>s.writer&lt;/code> 编码成二进制比特，然后通过建立的 TCP 连接发送出去。这个 &lt;code>s.writer&lt;/code> 对应的 Writer 接口是 RPC 框架必须要实现的一个接口。&lt;/p>
+&lt;p>继续看 &lt;code>handlePackage()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">handlePackage&lt;/span>() {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">if&lt;/span> _, ok &lt;span style="color:#719e07">:=&lt;/span> s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyTCPConn); ok {
+&lt;span style="color:#719e07">if&lt;/span> s.reader &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+errStr &lt;span style="color:#719e07">:=&lt;/span> fmt.&lt;span style="color:#268bd2">Sprintf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;session{name:%s, conn:%#v, reader:%#v}&amp;#34;&lt;/span>, s.name, s.Connection, s.reader)
+log.&lt;span style="color:#268bd2">Error&lt;/span>(errStr)
+&lt;span style="color:#b58900">panic&lt;/span>(errStr)
+}
+err = s.&lt;span style="color:#268bd2">handleTCPPackage&lt;/span>()
+} &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> _, ok &lt;span style="color:#719e07">:=&lt;/span> s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyWSConn); ok {
+err = s.&lt;span style="color:#268bd2">handleWSPackage&lt;/span>()
+} &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> _, ok &lt;span style="color:#719e07">:=&lt;/span> s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyUDPConn); ok {
+err = s.&lt;span style="color:#268bd2">handleUDPPackage&lt;/span>()
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#b58900">panic&lt;/span>(fmt.&lt;span style="color:#268bd2">Sprintf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;unknown type session{%#v}&amp;#34;&lt;/span>, s))
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入 &lt;code>handleTCPPackage()&lt;/code> 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">handleTCPPackage&lt;/span>() &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+conn = s.Connection.(&lt;span style="color:#719e07">*&lt;/span>gettyTCPConn)
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+bufLen = &lt;span style="color:#2aa198">0&lt;/span>
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#586e75">// for clause for the network timeout condition check
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// s.conn.SetReadTimeout(time.Now().Add(s.rTimeout))
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 从 TCP 连接中收到报文
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> bufLen, err = conn.&lt;span style="color:#268bd2">recv&lt;/span>(buf)
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#719e07">break&lt;/span>
+}
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+&lt;span style="color:#586e75">// 将收到的报文二进制比特写入 pkgBuf
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> pktBuf.&lt;span style="color:#268bd2">Write&lt;/span>(buf[:bufLen])
+&lt;span style="color:#719e07">for&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> pktBuf.&lt;span style="color:#268bd2">Len&lt;/span>() &lt;span style="color:#719e07">&amp;lt;=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span> {
+&lt;span style="color:#719e07">break&lt;/span>
+}
+&lt;span style="color:#586e75">// 通过 s.reader 将收到的报文解码成 RPC 消息
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> pkg, pkgLen, err = s.reader.&lt;span style="color:#268bd2">Read&lt;/span>(s, pktBuf.&lt;span style="color:#268bd2">Bytes&lt;/span>())
+&lt;span style="color:#586e75">// 省略部分代码
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>
+s.&lt;span style="color:#268bd2">UpdateActive&lt;/span>()
+&lt;span style="color:#586e75">// 将收到的消息放入 TaskQueue 供 RPC 消费端消费
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> s.&lt;span style="color:#268bd2">addTask&lt;/span>(pkg)
+pktBuf.&lt;span style="color:#268bd2">Next&lt;/span>(pkgLen)
+&lt;span style="color:#586e75">// continue to handle case 5
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;span style="color:#719e07">if&lt;/span> exit {
+&lt;span style="color:#719e07">break&lt;/span>
+}
+}
+&lt;span style="color:#719e07">return&lt;/span> perrors.&lt;span style="color:#268bd2">WithStack&lt;/span>(err)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>从上面的代码逻辑我们分析出，RPC 消费端需要将从 TCP 连接收到的二进制比特报文解码成 RPC 能消费的消息，这个工作由 s.reader 实现，所以，我们要构建 RPC 通信层也需要实现 s.reader 对应的 Reader 接口。&lt;/p>
+&lt;h3 id="3-底层处理网络报文的逻辑如何与业务逻辑解耦">3. 底层处理网络报文的逻辑如何与业务逻辑解耦&lt;/h3>
+&lt;p>我们都知道，netty 通过 boss 线程和 worker 线程实现了底层网络逻辑和业务逻辑的解耦。那么，getty 是如何实现的呢？&lt;/p>
+&lt;p>在 &lt;code>handlePackage()&lt;/code> 方法最后，我们看到，收到的消息被放入了 &lt;code>s.addTask(pkg)&lt;/code> 这个方法，接着往下分析：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>session) &lt;span style="color:#268bd2">addTask&lt;/span>(pkg &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+f &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+s.listener.&lt;span style="color:#268bd2">OnMessage&lt;/span>(s, pkg)
+s.&lt;span style="color:#268bd2">incReadPkgNum&lt;/span>()
+}
+&lt;span style="color:#719e07">if&lt;/span> taskPool &lt;span style="color:#719e07">:=&lt;/span> s.&lt;span style="color:#268bd2">EndPoint&lt;/span>().&lt;span style="color:#268bd2">GetTaskPool&lt;/span>(); taskPool &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+taskPool.&lt;span style="color:#268bd2">AddTaskAlways&lt;/span>(f)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+&lt;span style="color:#268bd2">f&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>pkg&lt;/code> 参数传递到了一个匿名方法，这个方法最终放入了 &lt;code>taskPool&lt;/code>。这个方法很关键，在我后来写 seata-golang 代码的时候，就遇到了一个坑，这个坑后面分析。&lt;/p>
+&lt;p>接着我们看一下 taskPool 的定义：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// NewTaskPoolSimple build a simple task pool
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewTaskPoolSimple&lt;/span>(size &lt;span style="color:#dc322f">int&lt;/span>) GenericTaskPool {
+&lt;span style="color:#719e07">if&lt;/span> size &amp;lt; &lt;span style="color:#2aa198">1&lt;/span> {
+size = runtime.&lt;span style="color:#268bd2">NumCPU&lt;/span>() &lt;span style="color:#719e07">*&lt;/span> &lt;span style="color:#2aa198">100&lt;/span>
+}
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>taskPoolSimple{
+work: &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">chan&lt;/span> task),
+sem: &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">chan&lt;/span> &lt;span style="color:#268bd2">struct&lt;/span>{}, size),
+done: &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">chan&lt;/span> &lt;span style="color:#268bd2">struct&lt;/span>{}),
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建了一个缓冲大小为 size （默认为 &lt;code>runtime.NumCPU() * 100&lt;/code>） 的 channel &lt;code>sem&lt;/code>。再看方法 &lt;code>AddTaskAlways(t task)&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>taskPoolSimple) &lt;span style="color:#268bd2">AddTaskAlways&lt;/span>(t task) {
+&lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#719e07">case&lt;/span> &lt;span style="color:#719e07">&amp;lt;-&lt;/span>p.done:
+&lt;span style="color:#719e07">return&lt;/span>
+&lt;span style="color:#719e07">default&lt;/span>:
+}
+&lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#719e07">case&lt;/span> p.work &lt;span style="color:#719e07">&amp;lt;-&lt;/span> t:
+&lt;span style="color:#719e07">return&lt;/span>
+&lt;span style="color:#719e07">default&lt;/span>:
+}
+&lt;span style="color:#719e07">select&lt;/span> {
+&lt;span style="color:#719e07">case&lt;/span> p.work &lt;span style="color:#719e07">&amp;lt;-&lt;/span> t:
+&lt;span style="color:#719e07">case&lt;/span> p.sem &lt;span style="color:#719e07">&amp;lt;-&lt;/span> &lt;span style="color:#268bd2">struct&lt;/span>{}{}:
+p.wg.&lt;span style="color:#268bd2">Add&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+&lt;span style="color:#719e07">go&lt;/span> p.&lt;span style="color:#268bd2">worker&lt;/span>(t)
+&lt;span style="color:#719e07">default&lt;/span>:
+&lt;span style="color:#268bd2">goSafely&lt;/span>(t)
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>加入的任务，会先由 len(p.sem) 个 goroutine 去消费，如果没有 goroutine 空闲，则会启动一个临时的 goroutine 去运行 t()。相当于有 len(p.sem) 个 goroutine 组成了 goroutine pool，pool 中的 goroutine 去处理业务逻辑，而不是由处理网络报文的 goroutine 去运行业务逻辑，从而实现了解耦。写 seata-golang 时遇到的一个坑，就是忘记设置 taskPool 造成了处理业务逻辑和处理底层网络报文逻辑的 goroutine 是同一个，我在业务逻辑中阻塞等待一个任务完成时，阻塞了整个 goroutine，使得阻塞期间收不到任何报文。&lt;/p>
+&lt;h3 id="4-具体实现">4. 具体实现&lt;/h3>
+&lt;p>下面的代码见getty.go ：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// Reader is used to unmarshal a complete pkg from buffer
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Reader &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#268bd2">Read&lt;/span>(Session, []&lt;span style="color:#dc322f">byte&lt;/span>) (&lt;span style="color:#268bd2">interface&lt;/span>{}, &lt;span style="color:#dc322f">int&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;span style="color:#586e75">// Writer is used to marshal pkg and write to session
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Writer &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// if @Session is udpGettySession, the second parameter is UDPContext.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Write&lt;/span>(Session, &lt;span style="color:#268bd2">interface&lt;/span>{}) ([]&lt;span style="color:#dc322f">byte&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>)
+}
+&lt;span style="color:#586e75">// ReadWriter interface use for handle application packages
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> ReadWriter &lt;span style="color:#268bd2">interface&lt;/span> {
+Reader
+Writer
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#586e75">// EventListener is used to process pkg that received from remote session
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> EventListener &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;span style="color:#586e75">// invoked when session opened
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If the return error is not nil, @Session will be closed.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnOpen&lt;/span>(Session) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;span style="color:#586e75">// invoked when session closed.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnClose&lt;/span>(Session)
+&lt;span style="color:#586e75">// invoked when got error.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnError&lt;/span>(Session, &lt;span style="color:#dc322f">error&lt;/span>)
+&lt;span style="color:#586e75">// invoked periodically, its period can be set by (Session)SetCronPeriod
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnCron&lt;/span>(Session)
+&lt;span style="color:#586e75">// invoked when getty received a package. Pls attention that do not handle long time
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// logic processing in this func. You&amp;#39;d better set the package&amp;#39;s maximum length.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If the message&amp;#39;s length is greater than it, u should should return err in
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Reader{Read} and getty will close this connection soon.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If ur logic processing in this func will take a long time, u should start a goroutine
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// pool(like working thread pool in cpp) to handle the processing asynchronously. Or u
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// can do the logic processing in other asynchronous way.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// !!!In short, ur OnMessage callback func should return asap.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// If this is a udp event listener, the second parameter type is UDPContext.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnMessage&lt;/span>(Session, &lt;span style="color:#268bd2">interface&lt;/span>{})
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过对整个 getty 代码的分析，我们只要实现 &lt;code>ReadWriter&lt;/code> 来对 RPC 消息编解码，再实现 &lt;code>EventListener&lt;/code> 来处理 RPC 消息的对应的具体逻辑，将 &lt;code>ReadWriter&lt;/code> 实现和 &lt;code>EventLister&lt;/code> 实现注入到 RPC 的 Client 和 Server 端，则可实现 RPC 通信。&lt;/p>
+&lt;h3 id="1编解码协议实现">1）编解码协议实现&lt;/h3>
+&lt;p>下面是 seata 协议的定义：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/seata/p2.webp" alt="">&lt;/p>
+&lt;p>在 ReadWriter 接口的实现 &lt;code>RpcPackageHandler&lt;/code> 中，调用 Codec 方法对消息体按照上面的格式编解码：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">// 消息编码为二进制比特
+func MessageEncoder(codecType byte, in interface{}) []byte {
+switch codecType {
+case SEATA:
+return SeataEncoder(in)
+default:
+log.Errorf(&amp;#34;not support codecType, %s&amp;#34;, codecType)
+return nil
+}
+}
+// 二进制比特解码为消息体
+func MessageDecoder(codecType byte, in []byte) (interface{}, int) {
+switch codecType {
+case SEATA:
+return SeataDecoder(in)
+default:
+log.Errorf(&amp;#34;not support codecType, %s&amp;#34;, codecType)
+return nil, 0
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2client-端实现">2）Client 端实现&lt;/h3>
+&lt;p>再来看 client 端 &lt;code>EventListener&lt;/code> 的实现 &lt;code>RpcRemotingClient&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnOpen&lt;/span>(session getty.Session) &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;span style="color:#719e07">go&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>()
+request &lt;span style="color:#719e07">:=&lt;/span> protocal.RegisterTMRequest{AbstractIdentifyRequest: protocal.AbstractIdentifyRequest{
+ApplicationId: client.conf.ApplicationId,
+TransactionServiceGroup: client.conf.TransactionServiceGroup,
+}}
+&lt;span style="color:#586e75">// 建立连接后向 Transaction Coordinator 发起注册 TransactionManager 的请求
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> _, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">sendAsyncRequestWithResponse&lt;/span>(session, request, RPC_REQUEST_TIMEOUT)
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;span style="color:#586e75">// 将与 Transaction Coordinator 建立的连接保存在连接池供后续使用
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> clientSessionManager.&lt;span style="color:#268bd2">RegisterGettySession&lt;/span>(session)
+client.GettySessionOnOpenChannel &lt;span style="color:#719e07">&amp;lt;-&lt;/span> session.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>()
+}
+}()
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#586e75">// OnError ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnError&lt;/span>(session getty.Session, err &lt;span style="color:#dc322f">error&lt;/span>) {
+clientSessionManager.&lt;span style="color:#268bd2">ReleaseGettySession&lt;/span>(session)
+}
+&lt;span style="color:#586e75">// OnClose ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnClose&lt;/span>(session getty.Session) {
+clientSessionManager.&lt;span style="color:#268bd2">ReleaseGettySession&lt;/span>(session)
+}
+&lt;span style="color:#586e75">// OnMessage ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnMessage&lt;/span>(session getty.Session, pkg &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+log.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;received message:{%v}&amp;#34;&lt;/span>, pkg)
+rpcMessage, ok &lt;span style="color:#719e07">:=&lt;/span> pkg.(protocal.RpcMessage)
+&lt;span style="color:#719e07">if&lt;/span> ok {
+heartBeat, isHeartBeat &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.HeartBeatMessage)
+&lt;span style="color:#719e07">if&lt;/span> isHeartBeat &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> heartBeat &lt;span style="color:#719e07">==&lt;/span> protocal.HeartBeatMessagePong {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;received PONG from %s&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>())
+}
+}
+&lt;span style="color:#719e07">if&lt;/span> rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST &lt;span style="color:#719e07">||&lt;/span>
+rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST_ONEWAY {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;msgId:%s, body:%v&amp;#34;&lt;/span>, rpcMessage.Id, rpcMessage.Body)
+&lt;span style="color:#586e75">// 处理事务消息，提交 or 回滚
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client.&lt;span style="color:#268bd2">onMessage&lt;/span>(rpcMessage, session.&lt;span style="color:#268bd2">RemoteAddr&lt;/span>())
+} &lt;span style="color:#719e07">else&lt;/span> {
+resp, loaded &lt;span style="color:#719e07">:=&lt;/span> client.futures.&lt;span style="color:#268bd2">Load&lt;/span>(rpcMessage.Id)
+&lt;span style="color:#719e07">if&lt;/span> loaded {
+response &lt;span style="color:#719e07">:=&lt;/span> resp.(&lt;span style="color:#719e07">*&lt;/span>getty2.MessageFuture)
+response.Response = rpcMessage.Body
+response.Done &lt;span style="color:#719e07">&amp;lt;-&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>
+client.futures.&lt;span style="color:#268bd2">Delete&lt;/span>(rpcMessage.Id)
+}
+}
+}
+&lt;span style="color:#586e75">// OnCron ...
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (client &lt;span style="color:#719e07">*&lt;/span>RpcRemoteClient) &lt;span style="color:#268bd2">OnCron&lt;/span>(session getty.Session) {
+&lt;span style="color:#586e75">// 发送心跳
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client.&lt;span style="color:#268bd2">defaultSendRequest&lt;/span>(session, protocal.HeartBeatMessagePing)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>clientSessionManager.RegisterGettySession(session)&lt;/code> 的逻辑将在下文中分析。&lt;/p>
+&lt;h3 id="3server-端-transaction-coordinator-实现">3）Server 端 Transaction Coordinator 实现&lt;/h3>
+&lt;p>代码见 &lt;code>DefaultCoordinator&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnOpen&lt;/span>(session getty.Session) &lt;span style="color:#dc322f">error&lt;/span> {
+log.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;got getty_session:%s&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">Stat&lt;/span>())
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnError&lt;/span>(session getty.Session, err &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;span style="color:#586e75">// 释放 TCP 连接
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> SessionManager.&lt;span style="color:#268bd2">ReleaseGettySession&lt;/span>(session)
+session.&lt;span style="color:#268bd2">Close&lt;/span>()
+log.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;getty_session{%s} got error{%v}, will be closed.&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">Stat&lt;/span>(), err)
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnClose&lt;/span>(session getty.Session) {
+log.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;getty_session{%s} is closing......&amp;#34;&lt;/span>, session.&lt;span style="color:#268bd2">Stat&lt;/span>())
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnMessage&lt;/span>(session getty.Session, pkg &lt;span style="color:#268bd2">interface&lt;/span>{}) {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;received message:{%v}&amp;#34;&lt;/span>, pkg)
+rpcMessage, ok &lt;span style="color:#719e07">:=&lt;/span> pkg.(protocal.RpcMessage)
+&lt;span style="color:#719e07">if&lt;/span> ok {
+_, isRegTM &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.RegisterTMRequest)
+&lt;span style="color:#719e07">if&lt;/span> isRegTM {
+&lt;span style="color:#586e75">// 将 TransactionManager 信息和 TCP 连接建立映射关系
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> coordinator.&lt;span style="color:#268bd2">OnRegTmMessage&lt;/span>(rpcMessage, session)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+heartBeat, isHeartBeat &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.HeartBeatMessage)
+&lt;span style="color:#719e07">if&lt;/span> isHeartBeat &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> heartBeat &lt;span style="color:#719e07">==&lt;/span> protocal.HeartBeatMessagePing {
+coordinator.&lt;span style="color:#268bd2">OnCheckMessage&lt;/span>(rpcMessage, session)
+&lt;span style="color:#719e07">return&lt;/span>
+}
+&lt;span style="color:#719e07">if&lt;/span> rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST &lt;span style="color:#719e07">||&lt;/span>
+rpcMessage.MessageType &lt;span style="color:#719e07">==&lt;/span> protocal.MSGTYPE_RESQUEST_ONEWAY {
+log.&lt;span style="color:#268bd2">Debugf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;msgId:%s, body:%v&amp;#34;&lt;/span>, rpcMessage.Id, rpcMessage.Body)
+_, isRegRM &lt;span style="color:#719e07">:=&lt;/span> rpcMessage.Body.(protocal.RegisterRMRequest)
+&lt;span style="color:#719e07">if&lt;/span> isRegRM {
+&lt;span style="color:#586e75">// 将 ResourceManager 信息和 TCP 连接建立映射关系
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> coordinator.&lt;span style="color:#268bd2">OnRegRmMessage&lt;/span>(rpcMessage, session)
+} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;span style="color:#719e07">if&lt;/span> SessionManager.&lt;span style="color:#268bd2">IsRegistered&lt;/span>(session) {
+&lt;span style="color:#719e07">defer&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">recover&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+log.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Catch Exception while do RPC, request: %v,err: %w&amp;#34;&lt;/span>, rpcMessage, err)
+}
+}()
+&lt;span style="color:#586e75">// 处理事务消息，全局事务注册、分支事务注册、分支事务提交、全局事务回滚等
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> coordinator.&lt;span style="color:#268bd2">OnTrxMessage&lt;/span>(rpcMessage, session)
+} &lt;span style="color:#719e07">else&lt;/span> {
+session.&lt;span style="color:#268bd2">Close&lt;/span>()
+log.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;close a unhandled connection! [%v]&amp;#34;&lt;/span>, session)
+}
+}
+} &lt;span style="color:#719e07">else&lt;/span> {
+resp, loaded &lt;span style="color:#719e07">:=&lt;/span> coordinator.futures.&lt;span style="color:#268bd2">Load&lt;/span>(rpcMessage.Id)
+&lt;span style="color:#719e07">if&lt;/span> loaded {
+response &lt;span style="color:#719e07">:=&lt;/span> resp.(&lt;span style="color:#719e07">*&lt;/span>getty2.MessageFuture)
+response.Response = rpcMessage.Body
+response.Done &lt;span style="color:#719e07">&amp;lt;-&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>
+coordinator.futures.&lt;span style="color:#268bd2">Delete&lt;/span>(rpcMessage.Id)
+}
+}
+}
+}
+&lt;span style="color:#268bd2">func&lt;/span> (coordinator &lt;span style="color:#719e07">*&lt;/span>DefaultCoordinator) &lt;span style="color:#268bd2">OnCron&lt;/span>(session getty.Session) {
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>coordinator.OnRegTmMessage(rpcMessage, session)&lt;/code> 注册 Transaction Manager，&lt;code>coordinator.OnRegRmMessage(rpcMessage, session)&lt;/code> 注册 Resource Manager。具体逻辑分析见下文。&lt;/p>
+&lt;p>消息进入 &lt;code>coordinator.OnTrxMessage(rpcMessage, session)&lt;/code> 方法，将按照消息的类型码路由到具体的逻辑当中：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#719e07">switch&lt;/span> msg.&lt;span style="color:#268bd2">GetTypeCode&lt;/span>() {
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalBegin:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalBeginRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalBegin&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalStatus:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalStatusRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalStatus&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalReport:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalReportRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalReport&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalCommit:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalCommitRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalCommit&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeGlobalRollback:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.GlobalRollbackRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doGlobalRollback&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeBranchRegister:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.BranchRegisterRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doBranchRegister&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">case&lt;/span> protocal.TypeBranchStatusReport:
+req &lt;span style="color:#719e07">:=&lt;/span> msg.(protocal.BranchReportRequest)
+resp &lt;span style="color:#719e07">:=&lt;/span> coordinator.&lt;span style="color:#268bd2">doBranchReport&lt;/span>(req, ctx)
+&lt;span style="color:#719e07">return&lt;/span> resp
+&lt;span style="color:#719e07">default&lt;/span>:
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4session-manager-分析">4）session manager 分析&lt;/h3>
+&lt;p>Client 端同 Transaction Coordinator 建立连接起连接后，通过 &lt;code>clientSessionManager.RegisterGettySession(session)&lt;/code> 将连接保存在 &lt;code>serverSessions = sync.Map{}&lt;/code> 这个 map 中。map 的 key 为从 session 中获取的 RemoteAddress 即 Transaction Coordinator 的地址，value 为 session。这样，Client 端就可以通过 map 中的一个 session 来向 Transaction Coordinator 注册 Transaction Manager 和 Resource Manager 了。具体代码见 &lt;code>getty_client_session_manager.go&lt;/code>。&lt;/p>
+&lt;p>Transaction Manager 和 Resource Manager 注册到 Transaction Coordinator 后，一个连接既有可能用来发送 TM 消息也有可能用来发送 RM 消息。我们通过 RpcContext 来标识一个连接信息：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">type&lt;/span> RpcContext &lt;span style="color:#268bd2">struct&lt;/span> {
+Version &lt;span style="color:#dc322f">string&lt;/span>
+TransactionServiceGroup &lt;span style="color:#dc322f">string&lt;/span>
+ClientRole meta.TransactionRole
+ApplicationId &lt;span style="color:#dc322f">string&lt;/span>
+ClientId &lt;span style="color:#dc322f">string&lt;/span>
+ResourceSets &lt;span style="color:#719e07">*&lt;/span>model.Set
+Session getty.Session
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>当收到事务消息时，我们需要构造这样一个 RpcContext 供后续事务处理逻辑使用。所以，我们会构造下列 map 来缓存映射关系：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#268bd2">var&lt;/span> (
+&lt;span style="color:#586e75">// session -&amp;gt; transactionRole
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// TM will register before RM, if a session is not the TM registered,
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// it will be the RM registered
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> session_transactionroles = sync.Map{}
+&lt;span style="color:#586e75">// session -&amp;gt; applicationId
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> identified_sessions = sync.Map{}
+&lt;span style="color:#586e75">// applicationId -&amp;gt; ip -&amp;gt; port -&amp;gt; session
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client_sessions = sync.Map{}
+&lt;span style="color:#586e75">// applicationId -&amp;gt; resourceIds
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> client_resources = sync.Map{}
+)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，Transaction Manager 和 Resource Manager 分别通过 &lt;code>coordinator.OnRegTmMessage(rpcMessage, session)&lt;/code> 和 &lt;code>coordinator.OnRegRmMessage(rpcMessage, session)&lt;/code> 注册到 Transaction Coordinator 时，会在上述 client_sessions map 中缓存 applicationId、ip、port 与 session 的关系，在 client_resources map 中缓存 applicationId 与 resourceIds（一个应用可能存在多个 Resource Manager） 的关系。&lt;/p>
+&lt;p>在需要时，我们就可以通过上述映射关系构造一个 RpcContext。这部分的实现和 java 版 seata 有很大的不同，感兴趣的可以深入了解一下。具体代码见 &lt;code>getty_session_manager.go&lt;/code>。&lt;/p>
+&lt;p>至此，我们就分析完了 seata-golang 整个 RPC 通信模型的机制。&lt;/p>
+&lt;h3 id="seata-golang-的未来">seata-golang 的未来&lt;/h3>
+&lt;p>seata-golang 从今年 4 月份开始开发，到 8 月份基本实现和 java 版 seata 1.2 协议的互通，对 mysql 数据库实现了 AT 模式（自动协调分布式事务的提交回滚），实现了 TCC 模式，TC 端使用 mysql 存储数据，使 TC 变成一个无状态应用支持高可用部署。下图展示了 AT 模式的原理：&lt;/p>
+&lt;p>&lt;img src="/imgs/blog/dubbo-go/seata/p3.webp" alt="">&lt;/p>
+&lt;p>后续，还有许多工作可以做，比如：对注册中心的支持、对配置中心的支持、和 java 版 seata 1.4 的协议互通、其他数据库的支持、raft transaction coordinator 的实现等，希望对分布式事务问题感兴趣的开发者可以加入进来一起来打造一个完善的 golang 的分布式事务框架。如果你有任何疑问，欢迎钉钉扫码加入交流群【钉钉群号 33069364】：&lt;/p>
+&lt;p>另外，欢迎对 dubbogo 感兴趣的朋友到 dubbogo 社区钉钉群（钉钉群号 31363295）沟通 dubbogo 技术问题。&lt;/p>
+&lt;h3 id="参考资料">参考资料&lt;/h3>
+&lt;ul>
+&lt;li>seata 官方: &lt;a href="https://seata.io">https://seata.io&lt;/a>&lt;/li>
+&lt;li>java 版 seata: &lt;a href="https://github.com/seata/seata">https://github.com/seata/seata&lt;/a>&lt;/li>
+&lt;li>seata-golang 项目地址: &lt;a href="https://github.com/opentrx/seata-golang">https://github.com/opentrx/seata-golang&lt;/a>&lt;/li>
+&lt;li>seata-golang go 夜读 b 站分享: &lt;a href="https://www.bilibili.com/video/BV1oz411e72T">https://www.bilibili.com/video/BV1oz411e72T&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>作者简介&lt;/p>
+&lt;p>&lt;strong>刘晓敏&lt;/strong> (GitHubID dk-lockdown)，目前就职于 h3c 成都分公司，擅长使用 Java/Go 语言，在云原生和微服务相关技术方向均有涉猎，目前专攻分布式事务。
+&lt;strong>于雨&lt;/strong>(（github @AlexStocks），dubbo-go 项目和社区负责人，一个有十多年服务端基础架构研发一线工作经验的程序员，陆续参与改进过 Muduo/Pika/Dubbo/Sentinel-go 等知名项目，目前在蚂蚁金服可信原生部从事容器编排和 service mesh 工作。&lt;/p>
+&lt;/blockquote></description></item><item><title>Blog: dubbo-go 1.5.0</title><link>/zh/blog/2021/01/14/dubbo-go-1.5.0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>/zh/blog/2021/01/14/dubbo-go-1.5.0/</guid><description>
 &lt;h2 id="引语">引语&lt;/h2>
 &lt;p>计算机技术浪潮每 10 年都有一次技术颠覆，相关知识体系最迟每 5 年都会革新一次，大概每两年贬值一半，在应用服务通信框架领域亦然。凡是有长期生命的通信框架，大概有 5 年的成长期和 5 年的稳定成熟期。每个时代都有其匹配的应用通信框架，在 20 年前的 2G 时代，强跨语言跨平台而弱性能的 gRPC 是不会被采用的。&lt;/p>
 &lt;p>每个通信框架，不同的人从不同角度看出不同的结论：初学者看重易用易学，性能测评者注重性能，应用架构师考虑其维护成本，老板则考虑则综合成本。一个应用通信框架的性能固然重要，其稳定性和进化能力更重要，得到有效维护的框架可在长时间单位内降低其综合成本：学习成本、维护成本、升级成本和更换成本。&lt;/p>
@@ -7667,458 +8696,4 @@ org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07
 &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">refer&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> type&lt;span style="color:#719e07">,&lt;/span> URL url&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> RpcException&lt;span style="color:#719e07">;&lt;/span>
 &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">destroy&lt;/span>&lt;span style="color:#719e07">();&lt;/span>
 &lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到Protocol接口中有4个方法，但只有export和refer两个方法使用了@Adaptive注解。Dubbo自动生成的自适应实例，只有@Adaptive修饰的方法才有具体的实现。所以，Protocol$Adaptive 类中，也只有export和refer这两个方法有具体的实现，其余方法都是抛出异常。&lt;/p></description></item><item><title>Blog: Dubbo 一致性Hash负载均衡实现剖析</title><link>/zh/blog/2019/05/01/dubbo-%E4%B8%80%E8%87%B4%E6%80%A7hash%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0%E5%89%96%E6%9E%90/</link><pubDate>Wed, 01 May 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/05/01/dubbo-%E4%B8%80%E8%87%B4%E6%80%A7hash%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0%E5%89%96%E6%9E%90/</guid><description>
-&lt;p>需要强调的是，Dubbo的Hash映射模型与大部分网上资料描述的&lt;strong>环形队列Hash映射模型&lt;/strong>是存在一些区别的。于我而言，环形队列Hash映射模型，不足以让我对一致性Hash有足够彻底的了解。直到看懂了Dubbo的一致性Hash的实现，才觉得豁然开朗。&lt;/p>
-&lt;h3 id="一环形队列hash映射模型">一、环形队列Hash映射模型&lt;/h3>
-&lt;p>这种方案，其基础还是基于取模运算。对2^32取模，那么，Hash值的区间为[0, 2^32-1]。接下来要做的，就包括两部分：&lt;/p>
-&lt;h4 id="a映射服务">&lt;strong>a、映射服务&lt;/strong>&lt;/h4>
-&lt;p>将服务地址（ip+端口）按照一定规则构造出特定的识别码（如md5码），再用识别码对2^32取模，确定服务在Hash值区间对应的位置。假设有Node1、Node2、Node3三个服务，其映射关系如下：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/consistenthash/consistent-hash-init-model.jpg" alt="Init">&lt;/p>
-&lt;h4 id="b映射请求定位服务">&lt;strong>b、映射请求、定位服务&lt;/strong>&lt;/h4>
-&lt;p>在发起请求时，我们往往会带上参数，而这些参数，就可以被我们用来确定具体调用哪一个服务。假设有请求R1、R2、R3，对它们的参数也经过计算特定识别码、取余的一系列运算之后，有如下映射关系：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/consistenthash/consistent-hash-request-model.jpg" alt="Request">&lt;/p>
-&lt;p>从图中，我们可以看到，R1请求映射在0-Node1中间，R2请求映射在Node1-Node2中间，R3请求映射在Node2-Node3中间。我们取&lt;strong>服务Hash值大于请求Hash值&lt;/strong>的&lt;strong>第一个服务&lt;/strong>作为实际的调用服务。也就是说，R1请求将调用Node1服务，R2请求将调用Node2服务，R3请求将调用Node3服务。&lt;/p>
-&lt;h4 id="c新增服务节点">&lt;strong>c、新增服务节点&lt;/strong>&lt;/h4>
-&lt;p>假设新增服务Node4，映射在Node3之前，恰巧破坏了原来的一个映射关系：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/consistenthash/consistent-hash-new-node-model.jpg" alt="New Node">&lt;/p>
-&lt;p>这样，请求R3将会实际调用服务Node4，但请求R1、R2不受影响。&lt;/p>
-&lt;h4 id="d删除服务节点">&lt;strong>d、删除服务节点&lt;/strong>&lt;/h4>
-&lt;p>假设服务Node2宕机，那么R2请求将会映射到Node3：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/consistenthash/consistent-hash-delete-node-model.jpg" alt="Delete Node">&lt;/p>
-&lt;p>原本的R1、R3请求不受影响。&lt;/p>
-&lt;blockquote>
-&lt;p>可以看出，当新增、删除服务时，受影响的请求是有限的。不至于像简单取模映射一般，服务发生变化时，需要调整全局的映射关系。&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="e平衡性与虚拟节点">&lt;strong>e、平衡性与虚拟节点&lt;/strong>&lt;/h4>
-&lt;p>在我们上面的假设中，我们假设Node1、Node2、Node3三个服务在经过Hash映射后所分布的位置恰巧把环切成了均等的三分，请求的分布也基本是平衡的。但是实际上计算服务Hash值的时候，是很难这么巧的。也许一不小心就映射成了这个样子：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/consistenthash/consistent-hash-balance-model.jpg" alt="Balance">&lt;/p>
-&lt;p>这样，就会导致大部分请求都会被映射到Node1上。因此，引出了虚拟节点。&lt;/p>
-&lt;p>所谓虚拟节点，就是除了对服务本身地址进行Hash映射外，还通过在它地址上做些处理（比如Dubbo中，在ip+port的字符串后加上计数符1、2、3&amp;hellip;&amp;hellip;，分别代表虚拟节点1、2、3），以达到同一服务映射多个节点的目的。通过引入虚拟节点，我们可以把上图中映射给Node1的请求进一步拆分：&lt;/p>
-&lt;p>&lt;img src="/imgs/blog/consistenthash/consistent-hash-virtual-node-model.jpg" alt="Virtual Node">&lt;/p>
-&lt;p>如上图所示，若有请求落在Node3-Node1&amp;rsquo;区间，该请求应该是调用Node1&amp;rsquo;服务，但是因为Node1&amp;rsquo;是Node1的虚拟节点，所以实际调用的是Node1服务。通过引入虚拟节点，请求的分布就会比较平衡了。&lt;/p>
-&lt;h3 id="二dubbo一致性hash的使用与负载均衡策略的引入阶段">&lt;strong>二、Dubbo一致性Hash的使用与负载均衡策略的引入阶段&lt;/strong>&lt;/h3>
-&lt;h4 id="a如何使用一致性hash作为dubbo的负载均衡策略">&lt;strong>a、如何使用一致性Hash作为Dubbo的负载均衡策略？&lt;/strong>&lt;/h4>
-&lt;p>dubbo:service、dubbo:reference、dubbo:provider、dubbo:consumer、dubbo:method这几个配置项都可以配置Dubbo的负载均衡策略，其中一致性Hash的属性值是：&lt;strong>consistenthash&lt;/strong>。&lt;/p>
-&lt;p>以dubbo:reference为例：&lt;/p>
-&lt;p>&lt;strong>XML配置：&lt;/strong>&lt;/p>
-&lt;blockquote>
-&lt;p>&amp;lt;dubbo:reference loadbalance=&amp;ldquo;consistenthash&amp;rdquo; /&amp;gt;&lt;/p>
-&lt;/blockquote>
-&lt;p>&lt;strong>Properties配置：&lt;/strong>&lt;/p>
-&lt;blockquote>
-&lt;p>dubbo.reference.loadbalance=consistenthash&lt;/p>
-&lt;/blockquote>
-&lt;p>&lt;strong>注解：&lt;/strong>&lt;/p>
-&lt;blockquote>
-&lt;p>@Reference(loadbalance = &amp;ldquo;consistenthash&amp;rdquo;)&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="bdubbo负载均衡策略的引入阶段">&lt;strong>b、Dubbo负载均衡策略的引入阶段&lt;/strong>&lt;/h4>
-&lt;p>Dubbo实现的是客户端负载均衡。关于服务接口代理类的实现，这里不做详细描述，可以参考官网：&lt;/p>
-&lt;blockquote>
-&lt;p>服务引入：http://dubbo.apache.org/zh-cn/docs/source_code_guide/refer-service.html。&lt;/p>
-&lt;/blockquote>
-&lt;p>在接口代理类生成、并且装配好后，服务的调用基本是这样一个流程：proxy -&amp;gt; MockClusterInvoker -&amp;gt; 集群策略（如：FailoverClusterInvoker） -&amp;gt; 初始化负载均衡策略 -&amp;gt; 根据选定的负载均衡策略确定Invoker。&lt;/p>
-&lt;p>&lt;strong>负载均衡策略的初始化&lt;/strong>是在AbstractClusterInvoker中的initLoadBalance方法中初始化的：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">protected&lt;/span> LoadBalance &lt;span style="color:#268bd2">initLoadBalance&lt;/span>&lt;span style="color:#719e07">(&lt;/span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers&lt;span style="color:#719e07">,&lt;/span> Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>CollectionUtils&lt;span style="color:#719e07">.&lt;/span>isNotEmpty&lt;span style="color:#719e07">(&lt;/span>invokers&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> ExtensionLoader&lt;span style="color:#719e07">.&lt;/span>getExtensionLoader&lt;span style="color:#719e07">(&lt;/span>LoadBalance&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">).&lt;/span>getExtension&lt;span style="color:#719e07">(&lt;/span>invokers&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">).&lt;/span>getUrl&lt;span style="color:#719e07">()&lt;/span>
-&lt;span style="color:#719e07">.&lt;/span>getMethodParameter&lt;span style="color:#719e07">(&lt;/span>RpcUtils&lt;span style="color:#719e07">.&lt;/span>getMethodName&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">),&lt;/span> LOADBALANCE_KEY&lt;span style="color:#719e07">,&lt;/span> DEFAULT_LOADBALANCE&lt;span style="color:#719e07">));&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> ExtensionLoader&lt;span style="color:#719e07">.&lt;/span>getExtensionLoader&lt;span style="color:#719e07">(&lt;/span>LoadBalance&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">).&lt;/span>getExtension&lt;span style="color:#719e07">(&lt;/span>DEFAULT_LOADBALANCE&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这部分代码逻辑分为两部分：&lt;/p>
-&lt;p>1、获取调用方法所配置的LOADBALANCE_KEY属性的值，LOADBALANCE_KEY这个常量的实际值为：loadbalance，即为我们的所配置的属性；&lt;/p>
-&lt;p>2、利用SPI机制来初始化并加载该值所代表的负载均衡策略。&lt;/p>
-&lt;p>所有的负载均衡策略都会继承LoadBalance接口。在各种集群策略中，最终都会调用AbstractClusterInvoker的select方法，而AbstractClusterInvoker会在doSelect中，&lt;strong>调用LoadBalance的select方法，这里即开始了负载均衡策略的执行。&lt;/strong>&lt;/p>
-&lt;h3 id="三dubbo一致性hash负载均衡的实现">三、Dubbo一致性Hash负载均衡的实现&lt;/h3>
-&lt;p>需要说明的一点是，我所说的&lt;strong>负载均衡策略的执行&lt;/strong>，即是在所有的Provider中选出一个，作为当前Consumer的远程调用对象。在代码中，Provider被封装成了Invoker实体，所以直接说来，负载均衡策略的执行就是在Invoker列表中选出一个Invoker。&lt;/p>
-&lt;p>所以，对比普通一致性Hash的实现，Dubbo的一致性Hash算法也可以分为两步：&lt;/p>
-&lt;p>&lt;strong>1、映射Provider至Hash值区间中（实际中映射的是Invoker）；&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>2、映射请求，然后找到大于请求Hash值的第一个Invoker。&lt;/strong>&lt;/p>
-&lt;h4 id="a映射invoker">&lt;strong>a、映射Invoker&lt;/strong>&lt;/h4>
-&lt;p>Dubbo中所有的负载均衡实现类都继承了AbstractLoadBalance，调用LoadBalance的select方法时，实际上调用的是AbstractLoadBalance的实现：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">select&lt;/span>&lt;span style="color:#719e07">(&lt;/span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers&lt;span style="color:#719e07">,&lt;/span> URL url&lt;span style="color:#719e07">,&lt;/span> Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>CollectionUtils&lt;span style="color:#719e07">.&lt;/span>isEmpty&lt;span style="color:#719e07">(&lt;/span>invokers&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>invokers&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> invokers&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#586e75">// doSelect这里进入具体负载均衡算法的执行逻辑
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> doSelect&lt;span style="color:#719e07">(&lt;/span>invokers&lt;span style="color:#719e07">,&lt;/span> url&lt;span style="color:#719e07">,&lt;/span> invocation&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到这里调用了doSelect，Dubbo一致性Hash的具体实现类名字是&lt;strong>ConsistentHashLoadBalance&lt;/strong>，让我们来看看它的doSelect方法干了啥：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">doSelect&lt;/span>&lt;span style="color:#719e07">(&lt;/span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers&lt;span style="color:#719e07">,&lt;/span> URL url&lt;span style="color:#719e07">,&lt;/span> Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-String methodName &lt;span style="color:#719e07">=&lt;/span> RpcUtils&lt;span style="color:#719e07">.&lt;/span>getMethodName&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#586e75">// key格式：接口名.方法名
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> String key &lt;span style="color:#719e07">=&lt;/span> invokers&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">).&lt;/span>getUrl&lt;span style="color:#719e07">().&lt;/span>getServiceKey&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;.&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> methodName&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#586e75">// identityHashCode 用来识别invokers是否发生过变更
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> identityHashCode &lt;span style="color:#719e07">=&lt;/span> System&lt;span style="color:#719e07">.&lt;/span>identityHashCode&lt;span style="color:#719e07">(&lt;/span>invokers&lt;span style="color:#719e07">);&lt;/span>
-ConsistentHashSelector&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> selector &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">(&lt;/span>ConsistentHashSelector&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;)&lt;/span> selectors&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>key&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>selector &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">||&lt;/span> selector&lt;span style="color:#719e07">.&lt;/span>identityHashCode &lt;span style="color:#719e07">!=&lt;/span> identityHashCode&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">// 若不存在&amp;#34;接口.方法名&amp;#34;对应的选择器，或是Invoker列表已经发生了变更，则初始化一个选择器
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> selectors&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>key&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConsistentHashSelector&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;(&lt;/span>invokers&lt;span style="color:#719e07">,&lt;/span> methodName&lt;span style="color:#719e07">,&lt;/span> identityHashCode&lt;span style="color:#719e07">));&lt;/span>
-selector &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">(&lt;/span>ConsistentHashSelector&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;)&lt;/span> selectors&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>key&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> selector&lt;span style="color:#719e07">.&lt;/span>select&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里有个很重要的概念：&lt;strong>选择器——selector&lt;/strong>。这是Dubbo一致性Hash实现中，承载着整个映射关系的数据结构。它里面主要有这么几个参数：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 存储Hash值与节点映射关系的TreeMap
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> TreeMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>Long&lt;span style="color:#719e07">,&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> virtualInvokers&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 节点数目
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> replicaNumber&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 用来识别Invoker列表是否发生变更的Hash码
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> identityHashCode&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#586e75">/**
-&lt;/span>&lt;span style="color:#586e75"> * 请求中用来作Hash映射的参数的索引
-&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">int&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> argumentIndex&lt;span style="color:#719e07">;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>在新建ConsistentHashSelector对象的时候，就会遍历所有Invoker对象，然后计算出其地址（ip+port）对应的md5码，并按照配置的节点数目replicaNumber的值来初始化服务节点和所有虚拟节点：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">ConsistentHashSelector&lt;span style="color:#719e07">(&lt;/span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers&lt;span style="color:#719e07">,&lt;/span> String methodName&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> identityHashCode&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>virtualInvokers &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TreeMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>Long&lt;span style="color:#719e07">,&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;();&lt;/span>
-&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>identityHashCode &lt;span style="color:#719e07">=&lt;/span> identityHashCode&lt;span style="color:#719e07">;&lt;/span>
-URL url &lt;span style="color:#719e07">=&lt;/span> invokers&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">).&lt;/span>getUrl&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#586e75">// 获取配置的节点数目
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>replicaNumber &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getMethodParameter&lt;span style="color:#719e07">(&lt;/span>methodName&lt;span style="color:#719e07">,&lt;/span> HASH_NODES&lt;span style="color:#719e07">,&lt;/span> 160&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#586e75">// 获取配置的用作Hash映射的参数的索引
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span> index &lt;span style="color:#719e07">=&lt;/span> COMMA_SPLIT_PATTERN&lt;span style="color:#719e07">.&lt;/span>split&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">.&lt;/span>getMethodParameter&lt;span style="color:#719e07">(&lt;/span>methodName&lt;span style="color:#719e07">,&lt;/span> HASH_ARGUMENTS&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
-argumentIndex &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> &lt;span style="color:#dc322f">int&lt;/span>&lt;span style="color:#719e07">[&lt;/span>index&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">];&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> index&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">;&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-argumentIndex&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> Integer&lt;span style="color:#719e07">.&lt;/span>parseInt&lt;span style="color:#719e07">(&lt;/span>index&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#586e75">// 遍历所有Invoker对象
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> invoker &lt;span style="color:#719e07">:&lt;/span> invokers&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">// 获取Provider的ip+port
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> String address &lt;span style="color:#719e07">=&lt;/span> invoker&lt;span style="color:#719e07">.&lt;/span>getUrl&lt;span style="color:#719e07">().&lt;/span>getAddress&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> replicaNumber &lt;span style="color:#719e07">/&lt;/span> 4&lt;span style="color:#719e07">;&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> digest &lt;span style="color:#719e07">=&lt;/span> md5&lt;span style="color:#719e07">(&lt;/span>address &lt;span style="color:#719e07">+&lt;/span> i&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> h &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span> h &lt;span style="color:#719e07">&amp;lt;&lt;/span> 4&lt;span style="color:#719e07">;&lt;/span> h&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">long&lt;/span> m &lt;span style="color:#719e07">=&lt;/span> hash&lt;span style="color:#719e07">(&lt;/span>digest&lt;span style="color:#719e07">,&lt;/span> h&lt;span style="color:#719e07">);&lt;/span>
-virtualInvokers&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>m&lt;span style="color:#719e07">,&lt;/span> invoker&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里值得注意的是：以replicaNumber取默认值160为例，假设当前遍历到的Invoker地址为127.0.0.1:20880，它会依次获得“127.0.0.1:208800”、“127.0.0.1:208801”、&amp;hellip;&amp;hellip;、“127.0.0.1:2088040”的md5摘要，在每次获得摘要之后，还会对该摘要进行四次数位级别的散列。大致可以猜到其目的应该是为了加强散列效果。（希望有人能告诉我相关的理论依据。）&lt;/p>
-&lt;p>代码中 &lt;strong>virtualInvokers.put(m, invoker)&lt;/strong> 即是存储当前计算出的Hash值与Invoker的映射关系。&lt;/p>
-&lt;p>这段代码简单说来，就是为每个Invoker都创建replicaNumber个节点，Hash值与Invoker的映射关系即象征着一个节点，这个关系存储在TreeMap中。&lt;/p>
-&lt;h4 id="b映射请求">&lt;strong>b、映射请求&lt;/strong>&lt;/h4>
-&lt;p>让我们重新回到ConsistentHashLoadBalance的&lt;strong>doSelect&lt;/strong>方法，若没有找到selector则会新建selector，找到selector后便会调用selector的select方法：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">select&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#586e75">// 根据invocation的【参数值】来确定key，默认使用第一个参数来做hash计算
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> String key &lt;span style="color:#719e07">=&lt;/span> toKey&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">.&lt;/span>getArguments&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#586e75">// 获取【参数值】的md5编码
-&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> digest &lt;span style="color:#719e07">=&lt;/span> md5&lt;span style="color:#719e07">(&lt;/span>key&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> selectForKey&lt;span style="color:#719e07">(&lt;/span>hash&lt;span style="color:#719e07">(&lt;/span>digest&lt;span style="color:#719e07">,&lt;/span> 0&lt;span style="color:#719e07">));&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#586e75">// 根据参数索引获取参数，并将所有参数拼接成字符串
-&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">private&lt;/span> String &lt;span style="color:#268bd2">toKey&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Object&lt;span style="color:#719e07">[]&lt;/span> args&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-StringBuilder buf &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">:&lt;/span> argumentIndex&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>i &lt;span style="color:#719e07">&amp;gt;=&lt;/span> 0 &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> args&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-buf&lt;span style="color:#719e07">.&lt;/span>append&lt;span style="color:#719e07">(&lt;/span>args&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> buf&lt;span style="color:#719e07">.&lt;/span>toString&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#586e75">// 根据参数字符串的md5编码找出Invoker
-&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">private&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">selectForKey&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">long&lt;/span> hash&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-Map&lt;span style="color:#719e07">.&lt;/span>Entry&lt;span style="color:#719e07">&amp;lt;&lt;/span>Long&lt;span style="color:#719e07">,&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> entry &lt;span style="color:#719e07">=&lt;/span> virtualInvokers&lt;span style="color:#719e07">.&lt;/span>ceilingEntry&lt;span style="color:#719e07">(&lt;/span>hash&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>entry &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-entry &lt;span style="color:#719e07">=&lt;/span> virtualInvokers&lt;span style="color:#719e07">.&lt;/span>firstEntry&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> entry&lt;span style="color:#719e07">.&lt;/span>getValue&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>argumentIndex是在初始化Selector的时候一起赋值的，代表着需要用哪几个请求参数作Hash映射获取Invoker。比如：有方法methodA(Integer a, Integer b, Integer c)，如果argumentIndex的值为{0,2}，那么即用a和c拼接的字符串来计算Hash值。&lt;/p>
-&lt;p>我们已经知道virtualInvokers是一个TreeMap，TreeMap的底层实现是红黑树。对于TreeMap的方法ceilingEntry(hash)，它的作用是用来&lt;strong>获取比传入值大的第一个元素&lt;/strong>。可以看到，这一点与一般的一致性Hash算法的处理逻辑完全是相同的。&lt;/p>
-&lt;p>但这里的回环逻辑有点不同。对于取模运算来讲，大于最大值后，会自动回环从0开始，而这里的逻辑是：当没有比传入ceilingEntry()方法中的值大的元素的时候，virtualInvokers.ceilingEntry(hash)必然会得到null，于是，就用virtualInvokers.firstEntry()来获取整个TreeMap的第一个元素。&lt;/p>
-&lt;p>从selectForKey中获取到Invoker后，负载均衡策略也就算是执行完毕了。后续获取远程调用客户端等调用流程不再赘述。&lt;/p></description></item><item><title>Blog: Dubbo可扩展机制实战</title><link>/zh/blog/2019/04/25/dubbo%E5%8F%AF%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E5%AE%9E%E6%88%98/</link><pubDate>Thu, 25 Apr 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/04/25/dubbo%E5%8F%AF%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E5%AE%9E%E6%88%98/</guid><description>
-&lt;h2 id="1-dubbo的扩展机制">1. Dubbo的扩展机制&lt;/h2>
-&lt;p>在Dubbo的官网上，Dubbo描述自己是一个高性能的RPC框架。今天我想聊聊Dubbo的另一个很棒的特性, 就是它的可扩展性。
-如同罗马不是一天建成的，任何系统都一定是从小系统不断发展成为大系统的，想要从一开始就把系统设计的足够完善是不可能的，相反的，我们应该关注当下的需求，然后再不断地对系统进行迭代。在代码层面，要求我们适当的对关注点进行抽象和隔离，在软件不断添加功能和特性时，依然能保持良好的结构和可维护性，同时允许第三方开发者对其功能进行扩展。在某些时候，软件设计者对扩展性的追求甚至超过了性能。&lt;/p>
-&lt;p>在谈到软件设计时，可扩展性一直被谈起，那到底什么才是可扩展性，什么样的框架才算有良好的可扩展性呢？它必须要做到以下两点:&lt;/p>
-&lt;ol>
-&lt;li>作为框架的维护者，在添加一个新功能时，只需要添加一些新代码，而不用大量的修改现有的代码，即符合开闭原则。&lt;/li>
-&lt;li>作为框架的使用者，在添加一个新功能时，不需要去修改框架的源码，在自己的工程中添加代码即可。&lt;/li>
-&lt;/ol>
-&lt;p>Dubbo很好的做到了上面两点。这要得益于Dubbo的微内核+插件的机制。接下来的章节中我们会慢慢揭开Dubbo扩展机制的神秘面纱。&lt;/p>
-&lt;h2 id="2-可扩展的几种解决方案">2. 可扩展的几种解决方案&lt;/h2>
-&lt;p>通常可扩展的实现有下面几种:&lt;/p>
-&lt;ul>
-&lt;li>Factory模式&lt;/li>
-&lt;li>IoC容器&lt;/li>
-&lt;li>OSGI容器&lt;/li>
-&lt;/ul>
-&lt;p>Dubbo作为一个框架，不希望强依赖其他的IoC容器，比如Spring，Guice。OSGI也是一个很重的实现，不适合Dubbo。最终Dubbo的实现参考了Java原生的SPI机制，但对其进行了一些扩展，以满足Dubbo的需求。&lt;/p>
-&lt;h2 id="3-java-spi机制">3. Java SPI机制&lt;/h2>
-&lt;p>既然Dubbo的扩展机制是基于Java原生的SPI机制，那么我们就先来了解下Java SPI吧。了解了Java的SPI，也就是对Dubbo的扩展机制有一个基本的了解。如果对Java SPI比较了解的同学，可以跳过。&lt;/p>
-&lt;p>Java SPI(Service Provider Interface)是JDK内置的一种动态加载扩展点的实现。在ClassPath的&lt;code>META-INF/services&lt;/code>目录下放置一个与接口同名的文本文件，文件的内容为接口的实现类，多个实现类用换行符分隔。JDK中使用&lt;code>java.util.ServiceLoader&lt;/code>来加载具体的实现。
-让我们通过一个简单的例子，来看看Java SPI是如何工作的。&lt;/p>
-&lt;ol>
-&lt;li>定义一个接口IRepository用于实现数据储存&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IRepository&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">save&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String data&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>提供IRepository的实现
-IRepository有两个实现。MysqlRepository和MongoRepository。&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MysqlRepository&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> IRepository &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">save&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String data&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Save &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> data &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; to Mysql&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MongoRepository&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> IRepository &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">save&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String data&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Save &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> data &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; to Mongo&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
-&lt;li>添加配置文件
-在&lt;code>META-INF/services&lt;/code>目录添加一个文件，文件名和接口全名称相同，所以文件是&lt;code>META-INF/services/com.demo.IRepository&lt;/code>。文件内容为:&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">com.demo.MongoRepository
-com.demo.MysqlRepository
-&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
-&lt;li>通过ServiceLoader加载IRepository实现&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">ServiceLoader&lt;span style="color:#719e07">&amp;lt;&lt;/span>IRepository&lt;span style="color:#719e07">&amp;gt;&lt;/span> serviceLoader &lt;span style="color:#719e07">=&lt;/span> ServiceLoader&lt;span style="color:#719e07">.&lt;/span>load&lt;span style="color:#719e07">(&lt;/span>IRepository&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
-Iterator&lt;span style="color:#719e07">&amp;lt;&lt;/span>IRepository&lt;span style="color:#719e07">&amp;gt;&lt;/span> it &lt;span style="color:#719e07">=&lt;/span> serviceLoader&lt;span style="color:#719e07">.&lt;/span>iterator&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">while&lt;/span> &lt;span style="color:#719e07">(&lt;/span>it &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> it&lt;span style="color:#719e07">.&lt;/span>hasNext&lt;span style="color:#719e07">()){&lt;/span>
-IRepository demoService &lt;span style="color:#719e07">=&lt;/span> it&lt;span style="color:#719e07">.&lt;/span>next&lt;span style="color:#719e07">();&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;class:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> demoService&lt;span style="color:#719e07">.&lt;/span>getClass&lt;span style="color:#719e07">().&lt;/span>getName&lt;span style="color:#719e07">());&lt;/span>
-demoService&lt;span style="color:#719e07">.&lt;/span>save&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;tom&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>在上面的例子中，我们定义了一个扩展点和它的两个实现。在ClassPath中添加了扩展的配置文件，最后使用ServiceLoader来加载所有的扩展点。
-最终的输出结果为：
-class:testDubbo.MongoRepository
-Save tom to Mongo
-class:testDubbo.MysqlRepository
-Save tom to Mysql&lt;/p>
-&lt;h2 id="4-dubbo的spi机制">4. Dubbo的SPI机制&lt;/h2>
-&lt;p>Java SPI的使用很简单。也做到了基本的加载扩展点的功能。但Java SPI有以下的不足:&lt;/p>
-&lt;ul>
-&lt;li>需要遍历所有的实现，并实例化，然后我们在循环中才能找到我们需要的实现。&lt;/li>
-&lt;li>配置文件中只是简单的列出了所有的扩展实现，而没有给他们命名。导致在程序中很难去准确的引用它们。&lt;/li>
-&lt;li>扩展如果依赖其他的扩展，做不到自动注入和装配&lt;/li>
-&lt;li>不提供类似于Spring的IOC和AOP功能&lt;/li>
-&lt;li>扩展很难和其他的框架集成，比如扩展里面依赖了一个Spring bean，原生的Java SPI不支持&lt;/li>
-&lt;/ul>
-&lt;p>所以Java SPI应付一些简单的场景是可以的，但对于Dubbo，它的功能还是比较弱的。Dubbo对原生SPI机制进行了一些扩展。接下来，我们就更深入地了解下Dubbo的SPI机制。&lt;/p>
-&lt;h2 id="5-dubbo扩展点机制基本概念">5. Dubbo扩展点机制基本概念&lt;/h2>
-&lt;p>在深入学习Dubbo的扩展机制之前，我们先明确Dubbo SPI中的一些基本概念。在接下来的内容中，我们会多次用到这些术语。&lt;/p>
-&lt;h3 id="51-扩展点extension-point">5.1 扩展点(Extension Point)&lt;/h3>
-&lt;p>是一个Java的接口。&lt;/p>
-&lt;h3 id="52-扩展extension">5.2 扩展(Extension)&lt;/h3>
-&lt;p>扩展点的实现类。&lt;/p>
-&lt;h3 id="53-扩展实例extension-instance">5.3 扩展实例(Extension Instance)&lt;/h3>
-&lt;p>扩展点实现类的实例。&lt;/p>
-&lt;h3 id="54-扩展自适应实例extension-adaptive-instance">5.4 扩展自适应实例(Extension Adaptive Instance)&lt;/h3>
-&lt;p>第一次接触这个概念时，可能不太好理解(我第一次也是这样的&amp;hellip;)。如果称它为扩展代理类，可能更好理解些。扩展的自适应实例其实就是一个Extension的代理，它实现了扩展点接口。在调用扩展点的接口方法时，会根据实际的参数来决定要使用哪个扩展。比如一个IRepository的扩展点，有一个save方法。有两个实现MysqlRepository和MongoRepository。IRepository的自适应实例在调用接口方法的时候，会根据save方法中的参数，来决定要调用哪个IRepository的实现。如果方法参数中有repository=mysql，那么就调用MysqlRepository的save方法。如果repository=mongo，就调用MongoRepository的save方法。和面向对象的延迟绑定很类似。为什么Dubbo会引入扩展自适应实例的概念呢？&lt;/p>
-&lt;ul>
-&lt;li>Dubbo中的配置有两种，一种是固定的系统级别的配置，在Dubbo启动之后就不会再改了。还有一种是运行时的配置，可能对于每一次的RPC，这些配置都不同。比如在xml文件中配置了超时时间是10秒钟，这个配置在Dubbo启动之后，就不会改变了。但针对某一次的RPC调用，可以设置它的超时时间是30秒钟，以覆盖系统级别的配置。对于Dubbo而言，每一次的RPC调用的参数都是未知的。只有在运行时，根据这些参数才能做出正确的决定。&lt;/li>
-&lt;li>很多时候，我们的类都是一个单例的，比如Spring的bean，在Spring bean都实例化时，如果它依赖某个扩展点，但是在bean实例化时，是不知道究竟该使用哪个具体的扩展实现的。这时候就需要一个代理模式了，它实现了扩展点接口，方法内部可以根据运行时参数，动态的选择合适的扩展实现。而这个代理就是自适应实例。
-自适应扩展实例在Dubbo中的使用非常广泛，Dubbo中，每一个扩展都会有一个自适应类，如果我们没有提供，Dubbo会使用字节码工具为我们自动生成一个。所以我们基本感觉不到自适应类的存在。后面会有例子说明自适应类是怎么工作的。&lt;/li>
-&lt;/ul>
-&lt;h3 id="55-spi">5.5 @SPI&lt;/h3>
-&lt;p>@SPI注解作用于扩展点的接口上，表明该接口是一个扩展点。可以被Dubbo的ExtentionLoader加载。如果没有此ExtensionLoader调用会异常。&lt;/p>
-&lt;h3 id="56-adaptive">5.6 @Adaptive&lt;/h3>
-&lt;p>@Adaptive注解用在扩展接口的方法上。表示该方法是一个自适应方法。Dubbo在为扩展点生成自适应实例时，如果方法有@Adaptive注解，会为该方法生成对应的代码。方法内部会根据方法的参数，来决定使用哪个扩展。
-@Adaptive注解用在类上代表实现一个装饰类，类似于设计模式中的装饰模式，它主要作用是返回指定类，目前在整个系统中AdaptiveCompiler、AdaptiveExtensionFactory这两个类拥有该注解。&lt;/p>
-&lt;h3 id="57-extentionloader">5.7 ExtentionLoader&lt;/h3>
-&lt;p>类似于Java SPI的ServiceLoader，负责扩展的加载和生命周期维护。&lt;/p>
-&lt;h3 id="58-扩展别名">5.8 扩展别名&lt;/h3>
-&lt;p>和Java SPI不同，Dubbo中的扩展都有一个别名，用于在应用中引用它们。比如&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#268bd2">random&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.rpc.cluster.loadbalance.RandomLoadBalance
-&lt;span style="color:#268bd2">roundrobin&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中的random，roundrobin就是对应扩展的别名。这样我们在配置文件中使用random或roundrobin就可以了。&lt;/p>
-&lt;h3 id="59-一些路径">5.9 一些路径&lt;/h3>
-&lt;p>和Java SPI从&lt;code>/META-INF/services&lt;/code>目录加载扩展配置类似，Dubbo也会从以下路径去加载扩展配置文件:&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>META-INF/dubbo/internal&lt;/code>&lt;/li>
-&lt;li>&lt;code>META-INF/dubbo&lt;/code>&lt;/li>
-&lt;li>&lt;code>META-INF/services&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;h2 id="6-dubbo的loadbalance扩展点解读">6. Dubbo的LoadBalance扩展点解读&lt;/h2>
-&lt;p>在了解了Dubbo的一些基本概念后，让我们一起来看一个Dubbo中实际的扩展点，对这些概念有一个更直观的认识。&lt;/p>
-&lt;p>我们选择的是Dubbo中的LoadBalance扩展点。Dubbo中的一个服务，通常有多个Provider，consumer调用服务时，需要在多个Provider中选择一个。这就是一个LoadBalance。我们一起来看看在Dubbo中，LoadBalance是如何成为一个扩展点的。&lt;/p>
-&lt;h3 id="61-loadbalance接口">6.1 LoadBalance接口&lt;/h3>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@SPI&lt;/span>&lt;span style="color:#719e07">(&lt;/span>RandomLoadBalance&lt;span style="color:#719e07">.&lt;/span>NAME&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">LoadBalance&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Adaptive&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;loadbalance&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">select&lt;/span>&lt;span style="color:#719e07">(&lt;/span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers&lt;span style="color:#719e07">,&lt;/span> URL url&lt;span style="color:#719e07">,&lt;/span> Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> RpcException&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>LoadBalance接口只有一个select方法。select方法从多个invoker中选择其中一个。上面代码中和Dubbo SPI相关的元素有:&lt;/p>
-&lt;ul>
-&lt;li>@SPI(&lt;a href="http://RandomLoadBalance.NAME">RandomLoadBalance.NAME&lt;/a>)
-@SPI作用于LoadBalance接口，表示接口LoadBalance是一个扩展点。如果没有@SPI注解，试图去加载扩展时，会抛出异常。@SPI注解有一个参数，该参数表示该扩展点的默认实现的别名。如果没有显示的指定扩展，就使用默认实现。&lt;code>RandomLoadBalance.NAME&lt;/code>是一个常量，值是&amp;quot;random&amp;quot;，是一个随机负载均衡的实现。
-random的定义在配置文件&lt;code>META-INF/dubbo/internal/com.alibaba.dubbo.rpc.cluster.LoadBalance&lt;/code>中:&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#268bd2">random&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.rpc.cluster.loadbalance.RandomLoadBalance
-&lt;span style="color:#268bd2">roundrobin&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance
-&lt;span style="color:#268bd2">leastactive&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance
-&lt;span style="color:#268bd2">consistenthash&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.alibaba.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到文件中定义了4个LoadBalance的扩展实现。由于负载均衡的实现不是本次的内容，这里就不过多说明。只用知道Dubbo提供了4种负载均衡的实现，我们可以通过xml文件，properties文件，JVM参数显式的指定一个实现。如果没有，默认使用随机。&lt;/p>
-&lt;p>&lt;img src="https://raw.githubusercontent.com/vangoleo/wiki/master/dubbo/dubbo_loadbalance.png" alt="dubbo-loadbalance | left" title="">&lt;/p>
-&lt;ul>
-&lt;li>@Adaptive(&amp;ldquo;loadbalance&amp;rdquo;)
-@Adaptive注解修饰select方法，表明方法select方法是一个可自适应的方法。Dubbo会自动生成该方法对应的代码。当调用select方法时，会根据具体的方法参数来决定调用哪个扩展实现的select方法。@Adaptive注解的参数&lt;code>loadbalance&lt;/code>表示方法参数中的loadbalance的值作为实际要调用的扩展实例。
-但奇怪的是，我们发现select的方法中并没有loadbalance参数，那怎么获取loadbalance的值呢？select方法中还有一个URL类型的参数，Dubbo就是从URL中获取loadbalance的值的。这里涉及到Dubbo的URL总线模式，简单说，URL中包含了RPC调用中的所有参数。URL类中有一个&lt;code>Map&amp;lt;String, String&amp;gt; parameters&lt;/code>字段，parameters中就包含了loadbalance。&lt;/li>
-&lt;/ul>
-&lt;h3 id="62-获取loadbalance扩展">6.2 获取LoadBalance扩展&lt;/h3>
-&lt;p>Dubbo中获取LoadBalance的代码如下:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">LoadBalance lb &lt;span style="color:#719e07">=&lt;/span> ExtensionLoader&lt;span style="color:#719e07">.&lt;/span>getExtensionLoader&lt;span style="color:#719e07">(&lt;/span>LoadBalance&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">).&lt;/span>getExtension&lt;span style="color:#719e07">(&lt;/span>loadbalanceName&lt;span style="color:#719e07">);&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>使用ExtensionLoader.getExtensionLoader(LoadBalance.class)方法获取一个ExtensionLoader的实例，然后调用getExtension，传入一个扩展的别名来获取对应的扩展实例。&lt;/p>
-&lt;h2 id="7-自定义一个loadbalance扩展">7. 自定义一个LoadBalance扩展&lt;/h2>
-&lt;p>本节中，我们通过一个简单的例子，来自己实现一个LoadBalance，并把它集成到Dubbo中。我会列出一些关键的步骤和代码，也可以从这个地址(&lt;a href="https://github.com/vangoleo/dubbo-spi-demo">https://github.com/vangoleo/dubbo-spi-demo&lt;/a>)下载完整的demo。&lt;/p>
-&lt;h3 id="71-实现loadbalance接口">7.1 实现LoadBalance接口&lt;/h3>
-&lt;p>首先，编写一个自己实现的LoadBalance，因为是为了演示Dubbo的扩展机制，而不是LoadBalance的实现，所以这里LoadBalance的实现非常简单，选择第一个invoker，并在控制台输出一条日志。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#719e07">package&lt;/span> com.dubbo.spi.demo.consumer&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoLoadBalance&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> LoadBalance &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">select&lt;/span>&lt;span style="color:#719e07">(&lt;/span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers&lt;span style="color:#719e07">,&lt;/span> URL url&lt;span style="color:#719e07">,&lt;/span> Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> RpcException &lt;span style="color:#719e07">{&lt;/span>
-System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;DemoLoadBalance: Select the first invoker...&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">return&lt;/span> invokers&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="72-添加扩展配置文件">7.2 添加扩展配置文件&lt;/h3>
-&lt;p>添加文件:&lt;code>META-INF/dubbo/com.alibaba.dubbo.rpc.cluster.LoadBalance&lt;/code>。文件内容如下:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#268bd2">demo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>com.dubbo.spi.demo.consumer.DemoLoadBalance
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="73-配置使用自定义loadbalance">7.3 配置使用自定义LoadBalance&lt;/h3>
-&lt;p>通过上面的两步，已经添加了一个名字为demo的LoadBalance实现，并在配置文件中进行了相应的配置。接下来，需要显式的告诉Dubbo使用demo的负载均衡实现。如果是通过spring的方式使用Dubbo，可以在xml文件中进行设置。&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.dubbo.spi.demo.api.IHelloService&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;demo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>在consumer端的&lt;a href="dubbo:reference">dubbo:reference&lt;/a>中配置&amp;lt;loadbalance=&amp;ldquo;demo&amp;rdquo;&amp;gt;&lt;/p>
-&lt;h3 id="74-启动dubbo">7.4 启动Dubbo&lt;/h3>
-&lt;p>启动Dubbo，调用一次IHelloService，可以看到控制台会输出一条&lt;code>DemoLoadBalance: Select the first invoker...&lt;/code>日志。说明Dubbo的确是使用了我们自定义的LoadBalance。&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;p>到此，我们从Java SPI开始，了解了Dubbo SPI 的基本概念，并结合了Dubbo中的LoadBalance加深了理解。最后，我们还实践了一下，创建了一个自定义LoadBalance，并集成到Dubbo中。相信通过这里理论和实践的结合，大家对Dubbo的可扩展有更深入的理解。
-总结一下，Dubbo SPI有以下的特点:&lt;/p>
-&lt;ul>
-&lt;li>对Dubbo进行扩展，不需要改动Dubbo的源码&lt;/li>
-&lt;li>自定义的Dubbo的扩展点实现，是一个普通的Java类，Dubbo没有引入任何Dubbo特有的元素，对代码侵入性几乎为零。&lt;/li>
-&lt;li>将扩展注册到Dubbo中，只需要在ClassPath中添加配置文件。使用简单。而且不会对现有代码造成影响。符合开闭原则。&lt;/li>
-&lt;li>dubbo的扩展机制设计默认值：@SPI(&amp;ldquo;dubbo&amp;rdquo;) 代表默认的spi对象&lt;/li>
-&lt;li>Dubbo的扩展机制支持IoC,AoP等高级功能&lt;/li>
-&lt;li>Dubbo的扩展机制能很好的支持第三方IoC容器，默认支持Spring Bean，可自己扩展来支持其他容器，比如Google的Guice。&lt;/li>
-&lt;li>切换扩展点的实现，只需要在配置文件中修改具体的实现，不需要改代码。使用方便。&lt;/li>
-&lt;/ul>
-&lt;p>下一篇，我们将会一起深入Dubbo的源码，更深入的了解Dubbo的可扩展机制。&lt;/p></description></item><item><title>Blog: 提前if判断帮助CPU分支预测</title><link>/zh/blog/2019/02/03/%E6%8F%90%E5%89%8Dif%E5%88%A4%E6%96%AD%E5%B8%AE%E5%8A%A9cpu%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B/</link><pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate><guid>/zh/blog/2019/02/03/%E6%8F%90%E5%89%8Dif%E5%88%A4%E6%96%AD%E5%B8%AE%E5%8A%A9cpu%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B/</guid><description>
-&lt;h2 id="分支预测">分支预测&lt;/h2>
-&lt;p>在stackoverflow上有一个非常有名的问题：&lt;a href="https://stackoverflow.com/questions/11227809/why-is-it-faster-to-process-a-sorted-array-than-an-unsorted-array">为什么处理有序数组要比非有序数组快？&lt;/a>，可见分支预测对代码运行效率有非常大的影响。&lt;/p>
-&lt;p>现代CPU都支持分支预测(branch prediction)和指令流水线(instruction pipeline)，这两个结合可以极大提高CPU效率。对于像简单的if跳转，CPU是可以比较好地做分支预测的。但是对于switch跳转，CPU则没有太多的办法。switch本质上是据索引，从地址数组里取地址再跳转。&lt;/p>
-&lt;p>要提高代码执行效率，一个重要的原则就是尽量避免CPU把流水线清空，那么提高分支预测的成功率就非常重要。&lt;/p>
-&lt;p>那么对于代码里，如果某个switch分支概率很高，是否可以考虑代码层面帮CPU把判断提前，来提高代码执行效率呢？&lt;/p>
-&lt;h2 id="dubbo里channeleventrunnable的switch判断">Dubbo里ChannelEventRunnable的switch判断&lt;/h2>
-&lt;p>在&lt;code>ChannelEventRunnable&lt;/code>里有一个switch来判断channel state，然后做对应的逻辑：&lt;a href="https://github.com/hengyunabc/dubbo/blob/dubbo-2.6.1/dubbo-remoting/dubbo-remoting-api/src/main/java/com/alibaba/dubbo/remoting/transport/dispatcher/ChannelEventRunnable.java#L54">查看&lt;/a>&lt;/p>
-&lt;p>一个channel建立起来之后，超过99.9%情况它的state都是&lt;code>ChannelState.RECEIVED&lt;/code>，那么可以考虑把这个判断提前。&lt;/p>
-&lt;h2 id="benchmark验证">benchmark验证&lt;/h2>
-&lt;p>下面通过jmh来验证下：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TestBenchMarks&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">enum&lt;/span> ChannelState &lt;span style="color:#719e07">{&lt;/span>
-CONNECTED&lt;span style="color:#719e07">,&lt;/span> DISCONNECTED&lt;span style="color:#719e07">,&lt;/span> SENT&lt;span style="color:#719e07">,&lt;/span> RECEIVED&lt;span style="color:#719e07">,&lt;/span> CAUGHT
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">@State&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Scope&lt;span style="color:#719e07">.&lt;/span>Benchmark&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ExecutionPlan&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#268bd2">@Param&lt;/span>&lt;span style="color:#719e07">({&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1000000&amp;#34;&lt;/span> &lt;span style="color:#719e07">})&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> size&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> ChannelState&lt;span style="color:#719e07">[]&lt;/span> states &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#268bd2">@Setup&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setUp&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-ChannelState&lt;span style="color:#719e07">[]&lt;/span> values &lt;span style="color:#719e07">=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>values&lt;span style="color:#719e07">();&lt;/span>
-states &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ChannelState&lt;span style="color:#719e07">[&lt;/span>size&lt;span style="color:#719e07">];&lt;/span>
-Random random &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Random&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> Date&lt;span style="color:#719e07">().&lt;/span>getTime&lt;span style="color:#719e07">());&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> size&lt;span style="color:#719e07">;&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">int&lt;/span> nextInt &lt;span style="color:#719e07">=&lt;/span> random&lt;span style="color:#719e07">.&lt;/span>nextInt&lt;span style="color:#719e07">(&lt;/span>1000000&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>nextInt &lt;span style="color:#719e07">&amp;gt;&lt;/span> 100&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> values&lt;span style="color:#719e07">[&lt;/span>nextInt &lt;span style="color:#719e07">%&lt;/span> values&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">];&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">@Fork&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> 5&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">@Benchmark&lt;/span>
-&lt;span style="color:#268bd2">@BenchmarkMode&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Mode&lt;span style="color:#719e07">.&lt;/span>Throughput&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">benchSiwtch&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ExecutionPlan plan&lt;span style="color:#719e07">,&lt;/span> Blackhole bh&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">int&lt;/span> result &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> plan&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">;&lt;/span> &lt;span style="color:#719e07">++&lt;/span>i&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">switch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>plan&lt;span style="color:#719e07">.&lt;/span>states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">])&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> CONNECTED&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> DISCONNECTED&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>DISCONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> SENT&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>SENT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> RECEIVED&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> CAUGHT&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CAUGHT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-bh&lt;span style="color:#719e07">.&lt;/span>consume&lt;span style="color:#719e07">(&lt;/span>result&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#268bd2">@Fork&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> 5&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">@Benchmark&lt;/span>
-&lt;span style="color:#268bd2">@BenchmarkMode&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Mode&lt;span style="color:#719e07">.&lt;/span>Throughput&lt;span style="color:#719e07">)&lt;/span>
-&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">benchIfAndSwitch&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ExecutionPlan plan&lt;span style="color:#719e07">,&lt;/span> Blackhole bh&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#dc322f">int&lt;/span> result &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> plan&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">;&lt;/span> &lt;span style="color:#719e07">++&lt;/span>i&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-ChannelState state &lt;span style="color:#719e07">=&lt;/span> plan&lt;span style="color:#719e07">.&lt;/span>states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">];&lt;/span>
-&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>state &lt;span style="color:#719e07">==&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">switch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>state&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> CONNECTED&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> SENT&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>SENT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> DISCONNECTED&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>DISCONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">case&lt;/span> CAUGHT&lt;span style="color:#719e07">:&lt;/span>
-result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CAUGHT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-bh&lt;span style="color:#719e07">.&lt;/span>consume&lt;span style="color:#719e07">(&lt;/span>result&lt;span style="color:#719e07">);&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;span style="color:#719e07">}&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>benchSiwtch里是纯switch判断&lt;/li>
-&lt;li>benchIfAndSwitch 里用一个if提前判断state是否&lt;code>ChannelState.RECEIVED&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;p>benchmark结果是：&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">Result &amp;#34;io.github.hengyunabc.jmh.TestBenchMarks.benchSiwtch&amp;#34;:
-576.745 ±(99.9%) 6.806 ops/s [Average]
-(min, avg, max) = (490.348, 576.745, 618.360), stdev = 20.066
-CI (99.9%): [569.939, 583.550] (assumes normal distribution)
-# Run complete. Total time: 00:06:48
-Benchmark (size) Mode Cnt Score Error Units
-TestBenchMarks.benchIfAndSwitch 1000000 thrpt 100 1535.867 ± 61.212 ops/s
-TestBenchMarks.benchSiwtch 1000000 thrpt 100 576.745 ± 6.806 ops/s
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到提前if判断的确提高了代码效率，这种技巧可以放在性能要求严格的地方。&lt;/p>
-&lt;p>Benchmark代码：https://github.com/hengyunabc/jmh-demo&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;ul>
-&lt;li>switch对于CPU来说难以做分支预测&lt;/li>
-&lt;li>某些switch条件如果概率比较高，可以考虑单独提前if判断，充分利用CPU的分支预测机制&lt;/li>
-&lt;/ul></description></item></channel></rss>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到Protocol接口中有4个方法，但只有export和refer两个方法使用了@Adaptive注解。Dubbo自动生成的自适应实例，只有@Adaptive修饰的方法才有具体的实现。所以，Protocol$Adaptive 类中，也只有export和refer这两个方法有具体的实现，其余方法都是抛出异常。&lt;/p></description></item></channel></rss>

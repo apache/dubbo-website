@@ -1,0 +1,378 @@
+<!doctype html><html lang=zh class=no-js><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=generator content="Hugo 0.80.0"><meta name=ROBOTS content="INDEX, FOLLOW"><link rel="shortcut icon" href=/favicons/favicon.ico><link rel=apple-touch-icon href=/favicons/apple-touch-icon-180x180.png sizes=180x180><link rel=icon type=image/png href=/favicons/favicon-16x16.png sizes=16x16><link rel=icon type=image/png href=/favicons/favicon-32x32.png sizes=32x32><link rel=icon type=image/png href=/favicons/android-36x36.png sizes=36x36><link rel=icon type=image/png href=/favicons/android-48x48.png sizes=48x48><link rel=icon type=image/png href=/favicons/android-72x72.png sizes=72x72><link rel=icon type=image/png href=/favicons/android-96x96.png sizes=96x96><link rel=icon type=image/png href=/favicons/android-144x144.png sizes=144x144><link rel=icon type=image/png href=/favicons/android-192x192.png sizes=192x192><title>dubbo-go源码笔记（二）客户端调用过程 | Apache Dubbo</title><meta property="og:title" content="dubbo-go源码笔记（二）客户端调用过程"><meta property="og:description" content="随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。"><meta property="og:type" content="article"><meta property="og:url" content="/zh/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/"><meta property="article:published_time" content="2021-01-15T00:00:00+00:00"><meta property="article:modified_time" content="2021-01-15T11:39:06+08:00"><meta property="og:site_name" content="Apache Dubbo"><meta itemprop=name content="dubbo-go源码笔记（二）客户端调用过程"><meta itemprop=description content="随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。"><meta itemprop=datePublished content="2021-01-15T00:00:00+00:00"><meta itemprop=dateModified content="2021-01-15T11:39:06+08:00"><meta itemprop=wordCount content="1189"><meta itemprop=keywords content><meta name=twitter:card content="summary"><meta name=twitter:title content="dubbo-go源码笔记（二）客户端调用过程"><meta name=twitter:description content="随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。"><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;ga('create','UA-112489517-1','auto');ga('send','pageview');}</script><script async src=https://www.google-analytics.com/analytics.js></script><link rel=preload href=/scss/main.min.8b180b4f9c3e92478ac4794f7583d0b2a7c043e9717486d0407c2dfdf725043f.css as=style><link href=/scss/main.min.8b180b4f9c3e92478ac4794f7583d0b2a7c043e9717486d0407c2dfdf725043f.css rel=stylesheet integrity><script src=/js/jquery-3.5.1.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css></head><body class="td-page td-blog"><header><nav class="js-navbar-scroll navbar navbar-expand navbar-dark flex-column flex-md-row td-navbar"><a class=navbar-brand href=/zh/><span class=navbar-logo><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 321.39 78.54"><title id="title19">DUBBO LOGO</title><path class="cls-1" d="M68.46 50.38c0 14.06 11.39 22.11 25.45 22.11s25.45-8.05 25.45-22.11V7.25H68.46zm21.24-28h8.6V31H89.7zm0 22.25h8.6v8.6H89.7zM33.24 7.25H4.06v64H33.24c10.95.0 19.3-7.18 23.29-17.15a45.12 45.12.0 002.38-14.87A45.12 45.12.0 0056.53 24.4C52.84 14.62 44.19 7.25 33.24 7.25zm.43 14.63H30.34a3.44 3.44.0 00-3.44 3.44V53.23a3.44 3.44.0 003.44 3.44h3.33v4.63h-8.3a6.87 6.87.0 01-6.87-6.87V24.12a6.87 6.87.0 016.87-6.87h8.3zM285.51 6.06c-17.05.0-30.88 10.28-30.88 33.21s13.83 33.21 30.88 33.21 30.88-10.28 30.88-33.21S302.56 6.06 285.51 6.06zm7.59 48.36a6.87 6.87.0 01-6.87 6.87h-8.3V56.67h3.33a3.44 3.44.0 003.44-3.44V25.31a3.44 3.44.0 00-3.44-3.44h-3.33V17.25h8.3a6.87 6.87.0 016.87 6.87zm-53.4-17.56A17.39 17.39.0 00227.31 7.25H195.1v64h32.21a19.44 19.44.0 0012.38-34.44zM211.63 61.29h-6.08l18.68-44h6.08zM177 36.85A17.39 17.39.0 00164.65 7.25H132.43v64h32.21A19.44 19.44.0 00177 36.85zM149 61.29h-6.08l18.68-44h6.08z" style="fill:#fff;fill-opacity:1"/></svg></span><span class="text-uppercase font-weight-bold">Apache Dubbo</span></a><div class="td-navbar-nav-scroll ml-md-auto" id=main_navbar><ul class="navbar-nav mt-2 mt-lg-0"><li class="nav-item mr-4 mb-2 mb-lg-0"><a class=nav-link href=/zh/docs/><span>文档</span></a></li><li class="nav-item mr-4 mb-2 mb-lg-0"><a class="nav-link active" href=/zh/blog/><span class=active>博客</span></a></li><li class="nav-item mr-4 mb-2 mb-lg-0"><a class=nav-link href=/zh/community/><span>社区</span></a></li><li class="nav-item dropdown d-none d-lg-block"><a class="nav-link dropdown-toggle" href=# id=navbarDropdown role=button data-toggle=dropdown aria-haspopup=true aria-expanded=false>中文</a><div class=dropdown-menu aria-labelledby=navbarDropdownMenuLink><a class=dropdown-item href=/>English</a></div></li></ul></div><div class="navbar-nav d-none d-lg-block"><input type=search class="form-control td-search-input" placeholder="&#xf002 站内搜索…" aria-label=站内搜索… autocomplete=off></div></nav></header><div class="container-fluid td-outer"><div class=td-main><div class="row flex-xl-nowrap"><div class="col-12 col-md-3 col-xl-2 td-sidebar d-print-none"><div id=td-sidebar-menu class=td-sidebar__inner><div id=content-mobile><form class="td-sidebar__search d-flex align-items-center"><input type=search class="form-control td-search-input" placeholder="&#xf002 站内搜索…" aria-label=站内搜索… autocomplete=off>
+<button class="btn btn-link td-sidebar__toggle d-md-none p-0 ml-3 fas fa-bars" type=button data-toggle=collapse data-target=#td-section-nav aria-controls=td-docs-nav aria-expanded=false aria-label="Toggle section navigation"></button></form></div><div id=content-desktop></div><nav class="collapse td-sidebar-nav" id=td-section-nav><div class="nav-item dropdown d-block d-lg-none"><a class="nav-link dropdown-toggle" href=# id=navbarDropdown role=button data-toggle=dropdown aria-haspopup=true aria-expanded=false>中文</a><div class=dropdown-menu aria-labelledby=navbarDropdownMenuLink><a class=dropdown-item href=/>English</a></div></div><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/zh/blog/ class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">博客</a></li><ul><li class="collapse show" id=zhblog><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/zh/blog/news/ class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">技术分享</a></li><ul><li class="collapse show" id=zhblognews><a class="td-sidebar-link td-sidebar-link__page active" id=m-zhblog20210115dubbo-goe6ba90e7a081e7ac94e8aeb0e4ba8ce5aea2e688b7e7abafe8b083e794a8e8bf87e7a88b href=/zh/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/>dubbo-go源码笔记（二）客户端调用过程</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210115dubbogo-30e789b5e6898b-grpc-e8b5b0e59091e4ba91e58e9fe7949fe697b6e4bba3 href=/zh/blog/2021/01/15/dubbogo-3.0%E7%89%B5%E6%89%8B-grpc-%E8%B5%B0%E5%90%91%E4%BA%91%E5%8E%9F%E7%94%9F%E6%97%B6%E4%BB%A3/>dubbogo 3.0：牵手 gRPC 走向云原生时代</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210115e58886e5b883e5bc8fe4ba8be58aa1e6a186e69eb6-seata-golang-e9809ae4bfa1e6a8a1e59e8be8afa6e8a7a3 href=/zh/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/>分布式事务框架 seata-golang 通信模型详解</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-e4b8ad-rest-e58d8fe8aeaee5ae9ee78eb0 href=/zh/blog/2021/01/14/dubbo-go-%E4%B8%AD-rest-%E5%8D%8F%E8%AE%AE%E5%AE%9E%E7%8E%B0/>dubbo-go 中 REST 协议实现</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-e4b8ade5b086-kubernets-e58e9fe4bd9ce4b8bae6b3a8e5868ce4b8ade79a84e8aebee8aea1e5928ce5ae9ee78eb0 href=/zh/blog/2021/01/14/dubbo-go-%E4%B8%AD%E5%B0%86-kubernets-%E5%8E%9F%E4%BD%9C%E4%B8%BA%E6%B3%A8%E5%86%8C%E4%B8%AD%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/>dubbo-go 中将 Kubernets 原⽣作为注册中⼼的设计和实现</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-e58fafe4bfa1e8b083e794a8e5ae9ee78eb0 href=/zh/blog/2021/01/14/dubbo-go-%E5%8F%AF%E4%BF%A1%E8%B0%83%E7%94%A8%E5%AE%9E%E7%8E%B0/>dubbo-go 可信调用实现</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-e6ba90e7a081e7ac94e8aeb0e4b880server-e7abafe5bc80e590afe69c8de58aa1e8bf87e7a88b href=/zh/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/>Dubbo-go 源码笔记（一）Server 端开启服务过程</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-goe5ba94e794a8e7bbb4e5baa6e6b3a8e5868ce6a8a1e59e8b href=/zh/blog/2021/01/14/dubbo-go%E5%BA%94%E7%94%A8%E7%BB%B4%E5%BA%A6%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9E%8B/>Dubbo-go应用维度注册模型</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114go-e78988e69cace585a5-dubbo-e7949fe68081e4b880e591a8e5b9b4 href=/zh/blog/2021/01/14/go-%E7%89%88%E6%9C%AC%E5%85%A5-dubbo-%E7%94%9F%E6%80%81%E4%B8%80%E5%91%A8%E5%B9%B4/>Go 版本入 Dubbo 生态一周年</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114e5bfabe9809fe4b88ae6898b-dubbo-go href=/zh/blog/2021/01/14/%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B-dubbo-go/>快速上手 dubbo-go</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114e6b682e9b8a6e699bae883bd-dubbo-go-e4babfe7baa7e6b581e9878fe79a84e5ae9ee8b7b5e4b88ee68ea2e7b4a2 href=/zh/blog/2021/01/14/%E6%B6%82%E9%B8%A6%E6%99%BA%E8%83%BD-dubbo-go-%E4%BA%BF%E7%BA%A7%E6%B5%81%E9%87%8F%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%8E%A2%E7%B4%A2/>涂鸦智能 dubbo-go 亿级流量的实践与探索</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114e8a7a3e69e84-dubbo-go-e79a84e6a0b8e5bf83e6b3a8e5868ce5bc95e6938e-nacos href=/zh/blog/2021/01/14/%E8%A7%A3%E6%9E%84-dubbo-go-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B3%A8%E5%86%8C%E5%BC%95%E6%93%8E-nacos/>解构 Dubbo-go 的核心注册引擎 Nacos</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114e8aeb0e4b880e6aca1e59ca8-mosn-e5afb9-dubbodubbo-go-hessian2-e79a84e680a7e883bde4bc98e58c96 href=/zh/blog/2021/01/14/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%9C%A8-mosn-%E5%AF%B9-dubbodubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/>记一次在 mosn 对 dubbo、dubbo-go-hessian2 的性能优化</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114e983bde5b7b2e7bb8fe58d81e5b281e79a84-apache-dubboe8bf98e883bde5868de4b998e9a38ee7a0b4e6b5aae59097 href=/zh/blog/2021/01/14/%E9%83%BD%E5%B7%B2%E7%BB%8F%E5%8D%81%E5%B2%81%E7%9A%84-apache-dubbo%E8%BF%98%E8%83%BD%E5%86%8D%E4%B9%98%E9%A3%8E%E7%A0%B4%E6%B5%AA%E5%90%97/>都已经十岁的 Apache Dubbo，还能再乘风破浪吗？</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210112dubbo-go-e4b8ade5a682e4bd95e5ae9ee78eb0e8b7afe794b1e8a784e58899e58a9fe883bd href=/zh/blog/2021/01/12/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%B7%AF%E7%94%B1%E8%A7%84%E5%88%99%E5%8A%9F%E8%83%BD/>dubbo-go 中如何实现路由规则功能</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210112e8aeb0e4b880e6aca1e5afb9-dubbo-go-hessian2-e79a84e680a7e883bde4bc98e58c96 href=/zh/blog/2021/01/12/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%AF%B9-dubbo-go-hessian2-%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/>记一次对 dubbo-go-hessian2 的性能优化</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-e4b8ad-metrics-e79a84e8aebee8aea1 href=/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/>Dubbo Go 中 metrics 的设计</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111e586b2e4b88ae4ba91e58e9fe7949fdubbo-e58f91e5b883-go-e78988e69cac href=/zh/blog/2021/01/11/%E5%86%B2%E4%B8%8A%E4%BA%91%E5%8E%9F%E7%94%9Fdubbo-%E5%8F%91%E5%B8%83-go-%E7%89%88%E6%9C%AC/>Dubbo Go 发布</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-e59b9ee9a1bee4b88ee5b195e69c9b href=/zh/blog/2021/01/11/dubbo-go-%E5%9B%9E%E9%A1%BE%E4%B8%8E%E5%B1%95%E6%9C%9B/>Dubbo Go 回顾与展望</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-e5bfabe9809fe5bc80e5a78b href=/zh/blog/2021/01/11/dubbo-go-%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/>Dubbo Go 快速开始</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-e79a84e5898de4b896e4bb8ae7949f href=/zh/blog/2021/01/11/dubbo-go-%E7%9A%84%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F/>Dubbo Go 的前世今生</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-e8b8a9e59d91e8aeb0 href=/zh/blog/2021/01/11/dubbo-go-%E8%B8%A9%E5%9D%91%E8%AE%B0/>Dubbo Go 踩坑记</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-e4b8ade79a84-tps-limit-e8aebee8aea1e4b88ee5ae9ee78eb0 href=/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD%E7%9A%84-tps-limit-%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/>dubbo-go tps limit</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-e4b8ade5a682e4bd95e5ae9ee78eb0e8bf9ce7a88be9858de7bdaee7aea1e79086 href=/zh/blog/2021/01/11/dubbo-go-%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86/>dubbo-go 中如何实现远程配置管理？</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111dubbo-go-getty-e5bc80e58f91e697a5e5bf97 href=/zh/blog/2021/01/11/dubbo-go-getty-%E5%BC%80%E5%8F%91%E6%97%A5%E5%BF%97/>getty 开发日志</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111e59ca8dubbo-goe4b8ade4bdbfe794a8sentinel href=/zh/blog/2021/01/11/%E5%9C%A8dubbo-go%E4%B8%AD%E4%BD%BF%E7%94%A8sentinel/>在dubbo-go中使用sentinel</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210111e697a0e7bc9de8a194e68ea5-grpc-e4b88e-dubbo-go href=/zh/blog/2021/01/11/%E6%97%A0%E7%BC%9D%E8%A1%94%E6%8E%A5-grpc-%E4%B8%8E-dubbo-go/>无缝衔接 gRPC 与 dubbo-go</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20201222dubbo-api-docs-apache-dubboe69687e6a1a3e5b195e7a4bae6b58be8af95e5b7a5e585b7 href=/zh/blog/2020/12/22/dubbo-api-docs-apache-dubbo%E6%96%87%E6%A1%A3%E5%B1%95%E7%A4%BA%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7/>Dubbo-Api-Docs -- Apache Dubbo文档展示&测试工具</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20200511e4bb8e-2019-e588b0-2020apache-dubbo-e5b9b4e5baa6e59b9ee9a1bee4b88ee680bbe7bb93 href=/zh/blog/2020/05/11/%E4%BB%8E-2019-%E5%88%B0-2020apache-dubbo-%E5%B9%B4%E5%BA%A6%E5%9B%9E%E9%A1%BE%E4%B8%8E%E6%80%BB%E7%BB%93/>从 2019 到 2020，Apache Dubbo 年度回顾与总结</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191202dubboe6b58be8af95e9aa8ce8af81 href=/zh/blog/2019/12/02/dubbo%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81/>Dubbo测试验证</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191130dubbo-e59ca8-service-mesh-e4b88be79a84e6809de88083e5928ce696b9e6a188 href=/zh/blog/2019/11/30/dubbo-%E5%9C%A8-service-mesh-%E4%B8%8B%E7%9A%84%E6%80%9D%E8%80%83%E5%92%8C%E6%96%B9%E6%A1%88/>Dubbo 在 Service Mesh 下的思考和方案</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191102dubboe69c8de58aa1e7abafe5bc82e6ada5e68ea5e58fa3e79a84e5ae9ee78eb0e8838ce699afe5928ce5ae9ee8b7b5 href=/zh/blog/2019/11/02/dubbo%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%82%E6%AD%A5%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%AE%9E%E7%8E%B0%E8%83%8C%E6%99%AF%E5%92%8C%E5%AE%9E%E8%B7%B5/>Dubbo服务端异步接口的实现背景和实践</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191101dubboe5aea2e688b7e7abafe5bc82e6ada5e68ea5e58fa3e79a84e5ae9ee78eb0e8838ce699afe5928ce5ae9ee8b7b5 href=/zh/blog/2019/11/01/dubbo%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%BC%82%E6%AD%A5%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%AE%9E%E7%8E%B0%E8%83%8C%E6%99%AF%E5%92%8C%E5%AE%9E%E8%B7%B5/>Dubbo客户端异步接口的实现背景和实践</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191028dubbo-e59ca8e8b7a8e8afade8a880e5928ce58d8fe8aeaee7a9bfe9808fe680a7e696b9e59091e4b88ae79a84e68ea2e7b4a2e694afe68c81-http2-grpc-e5928c-protobuf href=/zh/blog/2019/10/28/dubbo-%E5%9C%A8%E8%B7%A8%E8%AF%AD%E8%A8%80%E5%92%8C%E5%8D%8F%E8%AE%AE%E7%A9%BF%E9%80%8F%E6%80%A7%E6%96%B9%E5%90%91%E4%B8%8A%E7%9A%84%E6%8E%A2%E7%B4%A2%E6%94%AF%E6%8C%81-http/2-grpc-%E5%92%8C-protobuf/>支持 HTTP/2 gRPC 和 Protobuf</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191022e69cace59cb0e5ad98e6a0b9e5928ce69cace59cb0e4bcaae8a385 href=/zh/blog/2019/10/22/%E6%9C%AC%E5%9C%B0%E5%AD%98%E6%A0%B9%E5%92%8C%E6%9C%AC%E5%9C%B0%E4%BC%AA%E8%A3%85/>本地存根和本地伪装</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191017dubbo-e4b8ade79a84-url-e7bb9fe4b880e6a8a1e59e8b href=/zh/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/>Dubbo 中的 URL 统一模型</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20191001e7a094e7a9b6-dubbo-e7bd91e58da1e59cb0e59d80e6b3a8e5868ce697b6e79a84e4b880e782b9e6809de88083 href=/zh/blog/2019/10/01/%E7%A0%94%E7%A9%B6-dubbo-%E7%BD%91%E5%8D%A1%E5%9C%B0%E5%9D%80%E6%B3%A8%E5%86%8C%E6%97%B6%E7%9A%84%E4%B8%80%E7%82%B9%E6%80%9D%E8%80%83/>研究 Dubbo 网卡地址注册时的一点思考</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190826service-test href=/zh/blog/2019/08/26/service-test/>Dubbo Admin服务测试功能</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190811e4bdbfe794a8apache-skywalking-incubator-e5819ae58886e5b883e5bc8fe8b79fe8b8aa href=/zh/blog/2019/08/11/%E4%BD%BF%E7%94%A8apache-skywalking-incubator-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/>使用Apache Skywalking (Incubator) 做分布式跟踪</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190811e69cace59cb0e8b083e794a8 href=/zh/blog/2019/08/11/%E6%9C%AC%E5%9C%B0%E8%B0%83%E7%94%A8/>本地调用</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190726e59ca8-dubbo-e4b8ade4bdbfe794a8-rest href=/zh/blog/2019/07/26/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-rest/>在 Dubbo 中使用 REST</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190622e4bdbfe794a8-dubbo-e8bf9ee68ea5e5bc82e69e84e5beaee69c8de58aa1e4bd93e7b3bb href=/zh/blog/2019/06/22/%E4%BD%BF%E7%94%A8-dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB/>使用 Dubbo 连接异构微服务体系</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190502dubboe58fafe689a9e5b195e69cbae588b6e6ba90e7a081e8a7a3e69e90 href=/zh/blog/2019/05/02/dubbo%E5%8F%AF%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/>Dubbo可扩展机制源码解析</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190501dubbo-e4b880e887b4e680a7hashe8b49fe8bdbde59d87e8a1a1e5ae9ee78eb0e58996e69e90 href=/zh/blog/2019/05/01/dubbo-%E4%B8%80%E8%87%B4%E6%80%A7hash%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0%E5%89%96%E6%9E%90/>Dubbo 一致性Hash负载均衡实现剖析</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190425dubboe58fafe689a9e5b195e69cbae588b6e5ae9ee68898 href=/zh/blog/2019/04/25/dubbo%E5%8F%AF%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E5%AE%9E%E6%88%98/>Dubbo可扩展机制实战</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190203e68f90e5898dife588a4e696ade5b8aee58aa9cpue58886e694afe9a284e6b58b href=/zh/blog/2019/02/03/%E6%8F%90%E5%89%8Dif%E5%88%A4%E6%96%AD%E5%B8%AE%E5%8A%A9cpu%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B/>提前if判断帮助CPU分支预测</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190202e5bd93dubboe98187e4b88aarthase68e92e69fa5e997aee9a298e79a84e5ae9ee8b7b5 href=/zh/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/>当Dubbo遇上Arthas：排查问题的实践</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190126e98187e8a781dubbo href=/zh/blog/2019/01/26/%E9%81%87%E8%A7%81dubbo/>遇见Dubbo</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190117e5a682e4bd95e4bdbfe794a8seatae4bf9de8af81dubboe5beaee69c8de58aa1e997b4e79a84e4b880e887b4e680a7 href=/zh/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/>如何使用Seata保证Dubbo微服务间的一致性</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20190107e696b0e78988-dubbo-admin-e4bb8be7bb8d href=/zh/blog/2019/01/07/%E6%96%B0%E7%89%88-dubbo-admin-%E4%BB%8B%E7%BB%8D/>新版 Dubbo Admin 介绍</a></li></ul></ul><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/zh/blog/releases/ class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">版本发布</a></li><ul><li class=collapse id=zhblogreleases><a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-150 href=/zh/blog/2021/01/14/dubbo-go-1.5.0/>dubbo-go 1.5.0</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-151 href=/zh/blog/2021/01/14/dubbo-go-1.5.1/>dubbo-go 1.5.1</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-hessian2-v160 href=/zh/blog/2021/01/14/dubbo-go-hessian2-v1.6.0/>dubbo-go-hessian2 v1.6.0</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210114dubbo-go-hessian2-v170 href=/zh/blog/2021/01/14/dubbo-go-hessian2-v1.7.0/>dubbo-go-hessian2 v1.7.0</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20210112dubbo-go-140 href=/zh/blog/2021/01/12/dubbo-go-1.4.0/>dubbo-go 1.4.0</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20200518275-e58a9fe883bde8a7a3e69e90 href=/zh/blog/2020/05/18/2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/>2.7.5</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-zhblog20200518e8bf87e5be80e78988e69cac href=/zh/blog/2020/05/18/%E8%BF%87%E5%BE%80%E7%89%88%E6%9C%AC/>过往版本</a></li></ul></ul></li></ul></ul></nav></div></div><div class="d-none d-xl-block col-xl-2 td-toc d-print-none"><div class="td-page-meta ml-2 pb-1 pt-2 mb-0"><a href=https://github.com/apache/dubbo-website/edit/master/content/zh/blog/news/dubbo-go-codewalk-2.md target=_blank><i class="fa fa-edit fa-fw"></i>编辑此页</a>
+<a href="https://github.com/apache/dubbo-website/new/master/content/zh/blog/news/dubbo-go-codewalk-2.md?filename=change-me.md&value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60getting-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A" target=_blank><i class="fa fa-edit fa-fw"></i>添加子页面</a>
+<a href="https://github.com/apache/dubbo-website/issues/new?title=dubbo-go%e6%ba%90%e7%a0%81%e7%ac%94%e8%ae%b0%ef%bc%88%e4%ba%8c%ef%bc%89%e5%ae%a2%e6%88%b7%e7%ab%af%e8%b0%83%e7%94%a8%e8%bf%87%e7%a8%8b" target=_blank><i class="fab fa-github fa-fw"></i>提交文档问题</a>
+<a href=https://github.com/apache/dubbo/issues/new target=_blank><i class="fas fa-tasks fa-fw"></i>提交项目问题</a></div><nav id=TableOfContents><ul><li><a href=#前言>前言</a></li><li><a href=#1-配置文件和客户端源码>1. 配置文件和客户端源码</a><ul><li></li></ul></li><li><a href=#2-实现远程过程调用>2. 实现远程过程调用</a><ul><li></li><li><a href=#23-将调用逻辑以代理函数的形式写入rpc-service>2.3 将调用逻辑以代理函数的形式写入rpc-service</a></li><li><a href=#3-从client到server的invoker嵌套链--小结>3. 从client到server的invoker嵌套链- 小结</a></li></ul></li></ul></nav></div><main class="col-12 col-md-9 col-xl-8 pl-md-5 pr-md-4" role=main><a class="btn btn-lg -bg-orange td-rss-button d-none d-lg-block" href=/zh/blog/news/index.xml target=_blank>RSS <i class="fa fa-rss ml-2"></i></a><div class=td-content><h1>dubbo-go源码笔记（二）客户端调用过程</h1><div class=lead>随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。</div><div class="td-byline mb-4"><time datetime=2021-01-15 class=text-muted>Friday, January 15, 2021</time></div><h2 id=前言>前言</h2><p>有了上一篇文章<a href=/zh/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/>《dubbo-go 源码笔记（一）Server服务暴露过程详解》</a> 的铺垫，可以大致上类比客户端服务类似于服务端启动过程。其中最大的区别是服务端通过zk注册服务，发布自己的ivkURL并订阅事件开启监听；而服务端应该是通过zk注册组件，<strong>拿到需要调用的serviceURL</strong>，<strong>更新invoker</strong>并<strong>重写用户的RPCService</strong>，从而实现对远程过程调用细节的封装。</p><h2 id=1-配置文件和客户端源码>1. 配置文件和客户端源码</h2><h4 id=11-client配置文件>1.1 client配置文件</h4><p>helloworld提供的demo：profiles/client.yaml</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#268bd2>registries </span>:
+  <span style=color:#2aa198>&#34;demoZk&#34;</span>:
+    <span style=color:#268bd2>protocol</span>: <span style=color:#2aa198>&#34;zookeeper&#34;</span>
+    <span style=color:#268bd2>timeout </span>: <span style=color:#2aa198>&#34;3s&#34;</span>
+    <span style=color:#268bd2>address</span>: <span style=color:#2aa198>&#34;127.0.0.1:2181&#34;</span>
+    <span style=color:#268bd2>username</span>: <span style=color:#2aa198>&#34;&#34;</span>
+    <span style=color:#268bd2>password</span>: <span style=color:#2aa198>&#34;&#34;</span>
+<span style=color:#268bd2>references</span>:
+  <span style=color:#2aa198>&#34;UserProvider&#34;</span>:
+    <span style=color:#586e75># 可以指定多个registry，使用逗号隔开;不指定默认向所有注册中心注册</span>
+    <span style=color:#268bd2>registry</span>: <span style=color:#2aa198>&#34;demoZk&#34;</span>
+    <span style=color:#268bd2>protocol </span>: <span style=color:#2aa198>&#34;dubbo&#34;</span>
+    <span style=color:#268bd2>interface </span>: <span style=color:#2aa198>&#34;com.ikurento.user.UserProvider&#34;</span>
+    <span style=color:#268bd2>cluster</span>: <span style=color:#2aa198>&#34;failover&#34;</span>
+    <span style=color:#268bd2>methods </span>:
+    - <span style=color:#268bd2>name</span>: <span style=color:#2aa198>&#34;GetUser&#34;</span>
+      <span style=color:#268bd2>retries</span>: <span style=color:#2aa198>3</span>
+</code></pre></div><p>可看到配置文件与之前讨论过的server端非常类似，其refrences部分字段就是对当前服务要主调的服务的配置，其中详细说明了调用协议、注册协议、接口id、调用方法、集群策略等，这些配置都会在之后与注册组件交互，重写ivk、调用的过程中使用到。</p><h4 id=12-客户端使用框架源码>1.2 客户端使用框架源码</h4><p>user.go</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#268bd2>func</span> <span style=color:#268bd2>init</span>() {
+    config.<span style=color:#268bd2>SetConsumerService</span>(userProvider)
+    hessian.<span style=color:#268bd2>RegisterPOJO</span>(<span style=color:#719e07>&amp;</span>User{})
+}
+</code></pre></div><p>main.go</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#268bd2>func</span> <span style=color:#268bd2>main</span>() {
+    hessian.<span style=color:#268bd2>RegisterPOJO</span>(<span style=color:#719e07>&amp;</span>User{})
+    config.<span style=color:#268bd2>Load</span>()
+    time.<span style=color:#268bd2>Sleep</span>(<span style=color:#2aa198>3e9</span>)
+    <span style=color:#b58900>println</span>(<span style=color:#2aa198>&#34;\n\n\nstart to test dubbo&#34;</span>)
+    user <span style=color:#719e07>:=</span> <span style=color:#719e07>&amp;</span>User{}
+    err <span style=color:#719e07>:=</span> userProvider.<span style=color:#268bd2>GetUser</span>(context.<span style=color:#268bd2>TODO</span>(), []<span style=color:#268bd2>interface</span>{}{<span style=color:#2aa198>&#34;A001&#34;</span>}, user)
+    <span style=color:#719e07>if</span> err <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {
+      <span style=color:#b58900>panic</span>(err)
+    }
+    <span style=color:#b58900>println</span>(<span style=color:#2aa198>&#34;response result: %v\n&#34;</span>, user)
+    <span style=color:#268bd2>initSignal</span>()
+}
+</code></pre></div><p>官网提供的helloworld demo的源码。可看到与服务端类似，在user.go内注册了rpc-service，以及需要rpc传输的结构体user。</p><p>在main函数中，同样调用了config.Load()函数，之后就可以直接通过实现好的rpc-service：userProvider 直接调用对应的功能函数，即可实现rpc调用。</p><p>可以猜到，从hessian注册结构、SetConsumerService，到调用函数.GetUser()期间，用户定义的rpc-service也就是userProvider对应的函数被重写，重写后的GetUser函数已经包含了实现了远程调用逻辑的invoker。</p><p>接下来，就要通过阅读源码，看看dubbo-go是如何做到的。</p><h2 id=2-实现远程过程调用>2. 实现远程过程调用</h2><h4 id=21-加载配置文件>2.1 加载配置文件</h4><p>config/config_loader.go :Load()</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#586e75>// Load Dubbo Init
+</span><span style=color:#586e75></span><span style=color:#268bd2>func</span> <span style=color:#268bd2>Load</span>() {
+    <span style=color:#586e75>// init router
+</span><span style=color:#586e75></span>    <span style=color:#268bd2>initRouter</span>()
+    <span style=color:#586e75>// init the global event dispatcher
+</span><span style=color:#586e75></span>    extension.<span style=color:#268bd2>SetAndInitGlobalDispatcher</span>(<span style=color:#268bd2>GetBaseConfig</span>().EventDispatcherType)
+    <span style=color:#586e75>// start the metadata report if config set
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> err <span style=color:#719e07>:=</span> <span style=color:#268bd2>startMetadataReport</span>(<span style=color:#268bd2>GetApplicationConfig</span>().MetadataType, <span style=color:#268bd2>GetBaseConfig</span>().MetadataReportConfig); err <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {
+      logger.<span style=color:#268bd2>Errorf</span>(<span style=color:#2aa198>&#34;Provider starts metadata report error, and the error is {%#v}&#34;</span>, err)
+  <span style=color:#719e07>return</span>
+    }
+    <span style=color:#586e75>// reference config
+</span><span style=color:#586e75></span>    <span style=color:#268bd2>loadConsumerConfig</span>()
+</code></pre></div><p>在main函数中调用的config.Load()函数，进而调用了loadConsumerConfig，类似于之前讲到的server端配置读入函数。</p><p>在loadConsumerConfig函数中，进行了三步操作：</p><p><img src=/imgs/blog/dubbo-go/code2/p1.png alt></p><ol><li>检查配置文件并将配置写入内存</li><li><strong>在for循环内部</strong>，依次引用（refer）并且实例化（implement）每个被调reference。</li><li>等待三秒钟所有invoker就绪</li></ol><p>其中重要的就是for循环里面的引用和实例化，两步操作，会在接下来展开讨论。</p><p>至此，配置已经被写入了框架。</p><h4 id=22-获取远程service-url实现可供调用的invoker>2.2 获取远程Service URL，实现可供调用的invoker</h4><p>上述的ref.Refer完成的就是这部分的操作。</p><p>图（一）</p><p><img src=/imgs/blog/dubbo-go/code2/p2.png alt></p><h5 id=221-构造注册url>2.2.1 构造注册url</h5><p>和server端类似，存在注册url和服务url，dubbo习惯将服务url作为注册url的sub。</p><p>config/reference_config.go: Refer()</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#719e07>/</span> Refer <span style=color:#719e07>...</span>
+<span style=color:#268bd2>func</span> (c <span style=color:#719e07>*</span>ReferenceConfig) <span style=color:#268bd2>Refer</span>(_ <span style=color:#268bd2>interface</span>{}) {
+    <span style=color:#586e75>//（一）配置url参数(serviceUrl)，将会作为sub
+</span><span style=color:#586e75></span>    cfgURL <span style=color:#719e07>:=</span> common.<span style=color:#268bd2>NewURLWithOptions</span>(
+  common.<span style=color:#268bd2>WithPath</span>(c.id),
+  common.<span style=color:#268bd2>WithProtocol</span>(c.Protocol),
+  common.<span style=color:#268bd2>WithParams</span>(c.<span style=color:#268bd2>getUrlMap</span>()),
+  common.<span style=color:#268bd2>WithParamsValue</span>(constant.BEAN_NAME_KEY, c.id),
+    )
+    <span style=color:#719e07>...</span>
+    <span style=color:#586e75>// （二）注册地址可以通过url格式给定，也可以通过配置格式给定
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// 这一步的意义就是配置-&gt;提取信息生成URL
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> c.Url <span style=color:#719e07>!=</span> <span style=color:#2aa198>&#34;&#34;</span> {<span style=color:#586e75>// 用户给定url信息，可以是点对点的地址，也可以是注册中心的地址
+</span><span style=color:#586e75></span>  <span style=color:#586e75>// 1. user specified URL, could be peer-to-peer address, or register center&#39;s address.
+</span><span style=color:#586e75></span>  urlStrings <span style=color:#719e07>:=</span> gxstrings.<span style=color:#268bd2>RegSplit</span>(c.Url, <span style=color:#2aa198>&#34;\\s*[;]+\\s*&#34;</span>)
+  <span style=color:#719e07>for</span> _, urlStr <span style=color:#719e07>:=</span> <span style=color:#719e07>range</span> urlStrings {
+    serviceUrl, err <span style=color:#719e07>:=</span> common.<span style=color:#268bd2>NewURL</span>(urlStr)
+    <span style=color:#719e07>...</span>
+  }
+    } <span style=color:#719e07>else</span> {<span style=color:#586e75>// 配置读入注册中心的信息
+</span><span style=color:#586e75></span>  <span style=color:#586e75>//  assemble SubURL from register center&#39;s configuration mode
+</span><span style=color:#586e75></span>  <span style=color:#586e75>// 这是注册url，protocol = registry,包含了zk的用户名、密码、ip等等
+</span><span style=color:#586e75></span>  c.urls = <span style=color:#268bd2>loadRegistries</span>(c.Registry, consumerConfig.Registries, common.CONSUMER)
+  <span style=color:#719e07>...</span>
+  <span style=color:#586e75>// set url to regUrls
+</span><span style=color:#586e75></span>  <span style=color:#719e07>for</span> _, regUrl <span style=color:#719e07>:=</span> <span style=color:#719e07>range</span> c.urls {
+    regUrl.SubURL = cfgURL<span style=color:#586e75>// regUrl的subURl存当前配置url
+</span><span style=color:#586e75></span>  }
+    }
+    <span style=color:#586e75>//至此，无论通过什么形式，已经拿到了全部的regURL
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// （三）获取registryProtocol实例，调用其Refer方法，传入新构建好的regURL
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> <span style=color:#b58900>len</span>(c.urls) <span style=color:#719e07>==</span> <span style=color:#2aa198>1</span> {
+  <span style=color:#586e75>// 这一步访问到registry/protocol/protocol.go registryProtocol.Refer
+</span><span style=color:#586e75></span>  <span style=color:#586e75>// 这里是registry
+</span><span style=color:#586e75></span>  c.invoker = extension.<span style=color:#268bd2>GetProtocol</span>(c.urls[<span style=color:#2aa198>0</span>].Protocol).<span style=color:#268bd2>Refer</span>(<span style=color:#719e07>*</span>c.urls[<span style=color:#2aa198>0</span>])
+    } <span style=color:#719e07>else</span> {
+  <span style=color:#586e75>// 如果有多个注册中心，即有多个invoker,则采取集群策略
+</span><span style=color:#586e75></span>  invokers <span style=color:#719e07>:=</span> <span style=color:#b58900>make</span>([]protocol.Invoker, <span style=color:#2aa198>0</span>, <span style=color:#b58900>len</span>(c.urls))
+  <span style=color:#719e07>...</span>
+    }
+</code></pre></div><p>这个函数中，已经处理完从Register配置到RegisterURL的转换,即图（一）中部分：</p><p><img src=/imgs/blog/dubbo-go/code2/p3.png alt></p><p>接下来，已经拿到的url将被传递给RegistryProtocol，进一步refer。</p><h5 id=222-registryprotocol获取到zkregistry实例进一步refer>2.2.2 registryProtocol获取到zkRegistry实例，进一步Refer</h5><p>registry/protocol/protocol.go: Refer</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#586e75>// Refer provider service from registry center
+</span><span style=color:#586e75>// 拿到的是配置文件registries的url，他能够生成一个invoker = 指向目的addr，以供客户端直接调用。
+</span><span style=color:#586e75></span><span style=color:#268bd2>func</span> (proto <span style=color:#719e07>*</span>registryProtocol) <span style=color:#268bd2>Refer</span>(url common.URL) protocol.Invoker {
+    <span style=color:#268bd2>var</span> registryUrl = url
+    <span style=color:#586e75>// 这里拿到的是referenceConfig，serviceUrl里面包含了Reference的所有信息，包含interfaceName、method等等
+</span><span style=color:#586e75></span>    <span style=color:#268bd2>var</span> serviceUrl = registryUrl.SubURL
+    <span style=color:#719e07>if</span> registryUrl.Protocol <span style=color:#719e07>==</span> constant.REGISTRY_PROTOCOL {<span style=color:#586e75>// registryUrl.Proto = &#34;registry&#34;
+</span><span style=color:#586e75></span>  protocol <span style=color:#719e07>:=</span> registryUrl.<span style=color:#268bd2>GetParam</span>(constant.REGISTRY_KEY, <span style=color:#2aa198>&#34;&#34;</span>)
+  registryUrl.Protocol = protocol<span style=color:#586e75>//替换成了具体的值，比如&#34;zookeeper&#34;
+</span><span style=color:#586e75></span>    }
+    <span style=color:#586e75>// 接口对象
+</span><span style=color:#586e75></span>    <span style=color:#268bd2>var</span> reg registry.Registry
+    <span style=color:#586e75>// （一）实例化接口对象，缓存策略
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> regI, loaded <span style=color:#719e07>:=</span> proto.registries.<span style=color:#268bd2>Load</span>(registryUrl.<span style=color:#268bd2>Key</span>()); !loaded {
+  <span style=color:#586e75>// 缓存中不存在当前registry，新建一个reg
+</span><span style=color:#586e75></span>  reg = <span style=color:#268bd2>getRegistry</span>(<span style=color:#719e07>&amp;</span>registryUrl)
+  <span style=color:#586e75>// 缓存起来
+</span><span style=color:#586e75></span>  proto.registries.<span style=color:#268bd2>Store</span>(registryUrl.<span style=color:#268bd2>Key</span>(), reg)
+    } <span style=color:#719e07>else</span> {
+  reg = regI.(registry.Registry)
+    }
+    <span style=color:#586e75>// 到这里，获取到了reg实例 zookeeper的registry
+</span><span style=color:#586e75></span>    <span style=color:#586e75>//（二）根据Register的实例zkRegistry和传入的regURL新建一个directory
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// 这一步存在复杂的异步逻辑，从注册中心拿到了目的service的真实addr，获取了invoker并放入directory，
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// 这一步将在下面详细给出步骤
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// new registry directory for store service url from registry
+</span><span style=color:#586e75></span>    directory, err <span style=color:#719e07>:=</span> extension.<span style=color:#268bd2>GetDefaultRegistryDirectory</span>(<span style=color:#719e07>&amp;</span>registryUrl, reg)
+    <span style=color:#719e07>if</span> err <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {
+  logger.<span style=color:#268bd2>Errorf</span>(<span style=color:#2aa198>&#34;consumer service %v  create registry directory  error, error message is %s, and will return nil invoker!&#34;</span>,
+    serviceUrl.<span style=color:#268bd2>String</span>(), err.<span style=color:#268bd2>Error</span>())
+  <span style=color:#719e07>return</span> <span style=color:#cb4b16>nil</span>
+    }
+    <span style=color:#586e75>// （三）DoRegister 在zk上注册当前client service
+</span><span style=color:#586e75></span>    err = reg.<span style=color:#268bd2>Register</span>(<span style=color:#719e07>*</span>serviceUrl)
+    <span style=color:#719e07>if</span> err <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {
+  logger.<span style=color:#268bd2>Errorf</span>(<span style=color:#2aa198>&#34;consumer service %v register registry %v error, error message is %s&#34;</span>,
+    serviceUrl.<span style=color:#268bd2>String</span>(), registryUrl.<span style=color:#268bd2>String</span>(), err.<span style=color:#268bd2>Error</span>())
+    }
+    <span style=color:#586e75>// （四）new cluster invoker，将directory写入集群，获得具有集群策略的invoker
+</span><span style=color:#586e75></span>    cluster <span style=color:#719e07>:=</span> extension.<span style=color:#268bd2>GetCluster</span>(serviceUrl.<span style=color:#268bd2>GetParam</span>(constant.CLUSTER_KEY, constant.DEFAULT_CLUSTER))
+    invoker <span style=color:#719e07>:=</span> cluster.<span style=color:#268bd2>Join</span>(directory)
+    <span style=color:#586e75>// invoker保存
+</span><span style=color:#586e75></span>    proto.invokers = <span style=color:#b58900>append</span>(proto.invokers, invoker)
+    <span style=color:#719e07>return</span> invoker
+}
+</code></pre></div><p>可详细阅读上述注释，这个函数完成了从url到invoker的全部过程</p><p>（一）首先获得Registry对象，默认是之前实例化的zkRegistry，和之前server获取Registry的处理很类似。
+（二）通过构造一个新的directory，异步拿到之前在zk上注册的server端信息，生成invoker
+（三）在zk上注册当前service
+（四）集群策略，获得最终invoker</p><p>这一步完成了图（一）中所有余下的绝大多数操作，接下来就需要详细的查看directory的构造过程：</p><h5 id=223-构造directory包含较复杂的异步操作>2.2.3 构造directory（包含较复杂的异步操作）</h5><p><img src=/imgs/blog/dubbo-go/code2/p4.png alt></p><p>图（二）</p><p>上述的 <code>extension.GetDefaultRegistryDirectory(&registryUrl, reg)</code>函数，本质上调用了已经注册好的<code>NewRegistryDirectory</code>函数:</p><p>registry/directory/directory.go: NewRegistryDirectory()</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#586e75>// NewRegistryDirectory will create a new RegistryDirectory
+</span><span style=color:#586e75>// 这个函数作为default注册在extension上面
+</span><span style=color:#586e75>// url为注册url，reg为zookeeper registry
+</span><span style=color:#586e75></span><span style=color:#268bd2>func</span> <span style=color:#268bd2>NewRegistryDirectory</span>(url <span style=color:#719e07>*</span>common.URL, registry registry.Registry) (cluster.Directory, <span style=color:#dc322f>error</span>) {
+    <span style=color:#719e07>if</span> url.SubURL <span style=color:#719e07>==</span> <span style=color:#cb4b16>nil</span> {
+  <span style=color:#719e07>return</span> <span style=color:#cb4b16>nil</span>, perrors.<span style=color:#268bd2>Errorf</span>(<span style=color:#2aa198>&#34;url is invalid, suburl can not be nil&#34;</span>)
+    }
+    dir <span style=color:#719e07>:=</span> <span style=color:#719e07>&amp;</span>RegistryDirectory{
+  BaseDirectory:    directory.<span style=color:#268bd2>NewBaseDirectory</span>(url),
+  cacheInvokers:    []protocol.Invoker{},
+  cacheInvokersMap: <span style=color:#719e07>&amp;</span>sync.Map{},
+  serviceType:      url.SubURL.<span style=color:#268bd2>Service</span>(),
+  registry:         registry,
+    }
+    dir.consumerConfigurationListener = <span style=color:#268bd2>newConsumerConfigurationListener</span>(dir)
+    <span style=color:#719e07>go</span> dir.<span style=color:#268bd2>subscribe</span>(url.SubURL)
+    <span style=color:#719e07>return</span> dir, <span style=color:#cb4b16>nil</span>
+}
+</code></pre></div><p>首先构造了一个注册directory，开启携程调用其subscribe函数，传入serviceURL。</p><p>这个directory目前包含了对应的zkRegistry，以及传入的URL，他cacheInvokers的部分是空的。</p><p>进入dir.subscribe(url.SubURL)这个异步函数：</p><p>registry/directory/directory.go: subscribe()</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#586e75>// subscribe from registry
+</span><span style=color:#586e75></span><span style=color:#268bd2>func</span> (dir <span style=color:#719e07>*</span>RegistryDirectory) <span style=color:#268bd2>subscribe</span>(url <span style=color:#719e07>*</span>common.URL) {
+    <span style=color:#586e75>// 增加两个监听，
+</span><span style=color:#586e75></span>    dir.consumerConfigurationListener.<span style=color:#268bd2>addNotifyListener</span>(dir)
+    dir.referenceConfigurationListener = <span style=color:#268bd2>newReferenceConfigurationListener</span>(dir, url)
+    <span style=color:#586e75>// subscribe调用
+</span><span style=color:#586e75></span>    dir.registry.<span style=color:#268bd2>Subscribe</span>(url, dir)
+}
+</code></pre></div><p>重点来了，他调用了zkRegistry的Subscribe方法,与此同时将自己作为ConfigListener传入</p><blockquote><p>我认为这种传入listener的设计模式非常值得学习，而且很有java的味道。</p><p>针对等待zk返回订阅信息这样的异步操作，需要传入一个Listener，这个Listener需要实现Notify方法，进而在作为参数传入内部之后，可以被异步地调用Notify，将内部触发的异步事件“传递出来”，再进一步处理加工。</p><p>层层的Listener事件链，能将传入的原始serviceURL通过zkConn发送给zk服务，获取到服务端注册好的url对应的二进制信息。</p><p>而Notify回调链，则将这串byte[]一步一步解析、加工；以事件的形式向外传递，最终落到directory上的时候，已经是成型的newInvokers了。</p><p>具体细节不再以源码形式展示，可参照上图查阅源码。</p></blockquote><p>至此已经拿到了server端注册好的真实invoker。</p><p>完成了图（一）中的部分：</p><p><img src=/imgs/blog/dubbo-go/code2/p5.png alt></p><h5 id=224-构造带有集群策略的clusterinvoker>2.2.4 构造带有集群策略的clusterinvoker</h5><p>经过上述操作，已经拿到了server端Invokers，放入了directory的cacheinvokers数组里面缓存。</p><p>后续的操作对应本文2.2.2的第四步，由directory生成带有特性集群策略的invoker</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#586e75>// （四）new cluster invoker，将directory写入集群，获得具有集群策略的invoker
+</span><span style=color:#586e75></span>    cluster <span style=color:#719e07>:=</span> extension.<span style=color:#268bd2>GetCluster</span>(serviceUrl.<span style=color:#268bd2>GetParam</span>(constant.CLUSTER_KEY, constant.DEFAULT_CLUSTER))
+    invoker <span style=color:#719e07>:=</span> cluster.<span style=color:#268bd2>Join</span>(directory)
+<span style=color:#2aa198>123</span>
+</code></pre></div><p>Join函数的实现就是如下函数：</p><p>cluster/cluster_impl/failover_cluster_invokers.go: newFailoverClusterInvoker()</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#268bd2>func</span> <span style=color:#268bd2>newFailoverClusterInvoker</span>(directory cluster.Directory) protocol.Invoker {
+    <span style=color:#719e07>return</span> <span style=color:#719e07>&amp;</span>failoverClusterInvoker{
+  baseClusterInvoker: <span style=color:#268bd2>newBaseClusterInvoker</span>(directory),
+    }
+}
+<span style=color:#2aa198>12345</span>
+</code></pre></div><p>dubbo-go框架默认选择failover策略，既然返回了一个invoker，我们查看一下failoverClusterInvoker的Invoker方法，看他是如何将集群策略封装到Invoker函数内部的：</p><p>cluster/cluster_impl/failover_cluster_invokers.go: Invoker()</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#586e75>// Invoker 函数
+</span><span style=color:#586e75></span><span style=color:#268bd2>func</span> (invoker <span style=color:#719e07>*</span>failoverClusterInvoker) <span style=color:#268bd2>Invoke</span>(ctx context.Context, invocation protocol.Invocation) protocol.Result {
+    <span style=color:#719e07>...</span>
+    <span style=color:#586e75>//调用List方法拿到directory缓存的所有invokers
+</span><span style=color:#586e75></span>    invokers <span style=color:#719e07>:=</span> invoker.directory.<span style=color:#268bd2>List</span>(invocation)
+    <span style=color:#719e07>if</span> err <span style=color:#719e07>:=</span> invoker.<span style=color:#268bd2>checkInvokers</span>(invokers, invocation); err <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {<span style=color:#586e75>// 检查是否可以实现调用
+</span><span style=color:#586e75></span>  <span style=color:#719e07>return</span> <span style=color:#719e07>&amp;</span>protocol.RPCResult{Err: err}
+    }
+    <span style=color:#586e75>// 获取来自用户方向传入的
+</span><span style=color:#586e75></span>    methodName <span style=color:#719e07>:=</span> invocation.<span style=color:#268bd2>MethodName</span>()
+    retries <span style=color:#719e07>:=</span> <span style=color:#268bd2>getRetries</span>(invokers, methodName)
+    loadBalance <span style=color:#719e07>:=</span> <span style=color:#268bd2>getLoadBalance</span>(invokers[<span style=color:#2aa198>0</span>], invocation)
+    <span style=color:#719e07>for</span> i <span style=color:#719e07>:=</span> <span style=color:#2aa198>0</span>; i <span style=color:#719e07>&lt;=</span> retries; i<span style=color:#719e07>++</span> {
+  <span style=color:#586e75>// 重要！这里是集群策略的体现，失败后重试！
+</span><span style=color:#586e75></span>  <span style=color:#586e75>//Reselect before retry to avoid a change of candidate `invokers`.
+</span><span style=color:#586e75></span>  <span style=color:#586e75>//NOTE: if `invokers` changed, then `invoked` also lose accuracy.
+</span><span style=color:#586e75></span>  <span style=color:#719e07>if</span> i &gt; <span style=color:#2aa198>0</span> {
+    <span style=color:#719e07>if</span> err <span style=color:#719e07>:=</span> invoker.<span style=color:#268bd2>checkWhetherDestroyed</span>(); err <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {
+    <span style=color:#719e07>return</span> <span style=color:#719e07>&amp;</span>protocol.RPCResult{Err: err}
+    }
+    invokers = invoker.directory.<span style=color:#268bd2>List</span>(invocation)
+    <span style=color:#719e07>if</span> err <span style=color:#719e07>:=</span> invoker.<span style=color:#268bd2>checkInvokers</span>(invokers, invocation); err <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {
+    <span style=color:#719e07>return</span> <span style=color:#719e07>&amp;</span>protocol.RPCResult{Err: err}
+    }
+  }
+  <span style=color:#586e75>// 这里是负载均衡策略的体现！选择特定ivk进行调用。
+</span><span style=color:#586e75></span>  ivk <span style=color:#719e07>:=</span> invoker.<span style=color:#268bd2>doSelect</span>(loadBalance, invocation, invokers, invoked)
+  <span style=color:#719e07>if</span> ivk <span style=color:#719e07>==</span> <span style=color:#cb4b16>nil</span> {
+    <span style=color:#719e07>continue</span>
+  }
+  invoked = <span style=color:#b58900>append</span>(invoked, ivk)
+  <span style=color:#586e75>//DO INVOKE
+</span><span style=color:#586e75></span>  result = ivk.<span style=color:#268bd2>Invoke</span>(ctx, invocation)
+  <span style=color:#719e07>if</span> result.<span style=color:#268bd2>Error</span>() <span style=color:#719e07>!=</span> <span style=color:#cb4b16>nil</span> {
+    providers = <span style=color:#b58900>append</span>(providers, ivk.<span style=color:#268bd2>GetUrl</span>().<span style=color:#268bd2>Key</span>())
+    <span style=color:#719e07>continue</span>
+  }
+  <span style=color:#719e07>return</span> result
+    }
+    <span style=color:#719e07>...</span>
+}
+</code></pre></div><blockquote><p>看了很多Invoke函数的实现，所有类似的Invoker函数都包含两个方向，一个是用户方向的invcation，一个是函数方向的底层invokers。</p><p>而集群策略的invoke函数本身作为接线员，把invocation一步步解析，根据调用需求和集群策略，选择特定的invoker来执行</p><p>proxy函数也是这样，一个是用户方向的ins[] reflect.Type, 一个是函数方向的invoker。</p><p>proxy函数负责将ins转换为invocation，调用对应invoker的invoker函数，实现连通。</p><p>而出于这样的设计，可以在一步步Invoker封装的过程中，每个Invoker只关心自己负责操作的部分，从而使整个调用栈解耦。</p><p>妙啊！！！</p></blockquote><p>至此，我们理解了failoverClusterInvoker 的Invoke函数实现，也正是和这个集群策略Invoker被返回，接受来自上方的调用。</p><p>已完成图（一）中的：</p><p><img src=/imgs/blog/dubbo-go/code2/p6.png alt></p><h5 id=225-在zookeeper上注册当前client>2.2.5 在zookeeper上注册当前client</h5><p>拿到invokers后，可以回到：</p><p>config/refrence_config.go: Refer()函数了。</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>    <span style=color:#719e07>if</span> <span style=color:#b58900>len</span>(c.urls) <span style=color:#719e07>==</span> <span style=color:#2aa198>1</span> {
+  <span style=color:#586e75>// 这一步访问到registry/protocol/protocol.go registryProtocol.Refer
+</span><span style=color:#586e75></span>  c.invoker = extension.<span style=color:#268bd2>GetProtocol</span>(c.urls[<span style=color:#2aa198>0</span>].Protocol).<span style=color:#268bd2>Refer</span>(<span style=color:#719e07>*</span>c.urls[<span style=color:#2aa198>0</span>])
+  <span style=color:#586e75>// （一）拿到了真实的invokers
+</span><span style=color:#586e75></span>    } <span style=color:#719e07>else</span> {
+  <span style=color:#586e75>// 如果有多个注册中心，即有多个invoker,则采取集群策略
+</span><span style=color:#586e75></span>  invokers <span style=color:#719e07>:=</span> <span style=color:#b58900>make</span>([]protocol.Invoker, <span style=color:#2aa198>0</span>, <span style=color:#b58900>len</span>(c.urls))
+  <span style=color:#719e07>...</span>
+  cluster <span style=color:#719e07>:=</span> extension.<span style=color:#268bd2>GetCluster</span>(hitClu)
+  <span style=color:#586e75>// If &#39;zone-aware&#39; policy select, the invoker wrap sequence would be:
+</span><span style=color:#586e75></span>  <span style=color:#586e75>// ZoneAwareClusterInvoker(StaticDirectory) -&gt;
+</span><span style=color:#586e75></span>  <span style=color:#586e75>// FailoverClusterInvoker(RegistryDirectory, routing happens here) -&gt; Invoker
+</span><span style=color:#586e75></span>  c.invoker = cluster.<span style=color:#268bd2>Join</span>(directory.<span style=color:#268bd2>NewStaticDirectory</span>(invokers))
+    }
+    <span style=color:#586e75>// （二）create proxy，为函数配置代理
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> c.Async {
+  callback <span style=color:#719e07>:=</span> <span style=color:#268bd2>GetCallback</span>(c.id)
+  c.pxy = extension.<span style=color:#268bd2>GetProxyFactory</span>(consumerConfig.ProxyFactory).<span style=color:#268bd2>GetAsyncProxy</span>(c.invoker, callback, cfgURL)
+    } <span style=color:#719e07>else</span> {
+  <span style=color:#586e75>// 这里c.invoker已经是目的addr了
+</span><span style=color:#586e75></span>  c.pxy = extension.<span style=color:#268bd2>GetProxyFactory</span>(consumerConfig.ProxyFactory).<span style=color:#268bd2>GetProxy</span>(c.invoker, cfgURL)
+    }
+</code></pre></div><p>我们有了可以打通的invokers，但还不能直接调用，因为invoker的入参是invocation，而调用函数使用的是具体的参数列表。需要通过一层proxy来规范入参和出参。</p><p>接下来新建一个默认proxy，放置在c.proxy内，以供后续使用</p><p>至此，完成了图（一）中最后的操作</p><p><img src=/imgs/blog/dubbo-go/code2/p7.png alt></p><h3 id=23-将调用逻辑以代理函数的形式写入rpc-service>2.3 将调用逻辑以代理函数的形式写入rpc-service</h3><p>上面完成了config.Refer操作</p><p>回到config/config_loader.go: loadConsumerConfig()</p><p><img src=/imgs/blog/dubbo-go/code2/p8.png alt></p><p>下一个重要的函数是Implement，他完的操作较为简单：旨在使用上面生成的c.proxy代理，链接用户自己定义的rpcService到clusterInvoker的信息传输。</p><p>函数较长，只选取了重要的部分:</p><p>common/proxy/proxy.go: Implement()</p><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#586e75>// Implement
+</span><span style=color:#586e75>// proxy implement
+</span><span style=color:#586e75>// In consumer, RPCService like:
+</span><span style=color:#586e75>//      type XxxProvider struct {
+</span><span style=color:#586e75>//    Yyy func(ctx context.Context, args []interface{}, rsp *Zzz) error
+</span><span style=color:#586e75>//      }
+</span><span style=color:#586e75>// Implement 实现的过程，就是proxy根据函数名和返回值，通过调用invoker 构造出拥有远程调用逻辑的代理函数
+</span><span style=color:#586e75>// 将当前rpc所有可供调用的函数注册到proxy.rpc内
+</span><span style=color:#586e75></span><span style=color:#268bd2>func</span> (p <span style=color:#719e07>*</span>Proxy) <span style=color:#268bd2>Implement</span>(v common.RPCService) {
+    <span style=color:#586e75>// makeDubboCallProxy 这是一个构造代理函数，这个函数的返回值是func(in []reflect.Value) []reflect.Value 这样一个函数
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// 这个被返回的函数是请求实现的载体，由他来发起调用获取结果
+</span><span style=color:#586e75></span>    makeDubboCallProxy <span style=color:#719e07>:=</span> <span style=color:#268bd2>func</span>(methodName <span style=color:#dc322f>string</span>, outs []reflect.Type) <span style=color:#268bd2>func</span>(in []reflect.Value) []reflect.Value {
+  <span style=color:#719e07>return</span> <span style=color:#268bd2>func</span>(in []reflect.Value) []reflect.Value {
+    <span style=color:#586e75>// 根据methodName和outs的类型，构造这样一个函数，这个函数能将in 输入的value转换为输出的value
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// 这个函数具体的实现如下：
+</span><span style=color:#586e75></span>    <span style=color:#719e07>...</span>
+    <span style=color:#586e75>// 目前拿到了 methodName、所有入参的interface和value，出参数reply
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// （一）根据这些生成一个 rpcinvocation
+</span><span style=color:#586e75></span>    inv = invocation_impl.<span style=color:#268bd2>NewRPCInvocationWithOptions</span>(
+    invocation_impl.<span style=color:#268bd2>WithMethodName</span>(methodName),
+    invocation_impl.<span style=color:#268bd2>WithArguments</span>(inIArr),
+    invocation_impl.<span style=color:#268bd2>WithReply</span>(reply.<span style=color:#268bd2>Interface</span>()),
+    invocation_impl.<span style=color:#268bd2>WithCallBack</span>(p.callBack),
+    invocation_impl.<span style=color:#268bd2>WithParameterValues</span>(inVArr))
+    <span style=color:#719e07>for</span> k, value <span style=color:#719e07>:=</span> <span style=color:#719e07>range</span> p.attachments {
+    inv.<span style=color:#268bd2>SetAttachments</span>(k, value)
+    }
+    <span style=color:#586e75>// add user setAttachment
+</span><span style=color:#586e75></span>    atm <span style=color:#719e07>:=</span> invCtx.<span style=color:#268bd2>Value</span>(constant.AttachmentKey) <span style=color:#586e75>// 如果传入的ctx里面有attachment，也要写入inv
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> m, ok <span style=color:#719e07>:=</span> atm.(<span style=color:#268bd2>map</span>[<span style=color:#dc322f>string</span>]<span style=color:#dc322f>string</span>); ok {
+    <span style=color:#719e07>for</span> k, value <span style=color:#719e07>:=</span> <span style=color:#719e07>range</span> m {
+        inv.<span style=color:#268bd2>SetAttachments</span>(k, value)
+    }
+    }
+    <span style=color:#586e75>// 至此构造inv完毕
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// (二）触发Invoker 之前已经将cluster_invoker放入proxy，使用Invoke方法，通过getty远程过程调用
+</span><span style=color:#586e75></span>    result <span style=color:#719e07>:=</span> p.invoke.<span style=color:#268bd2>Invoke</span>(invCtx, inv)
+    <span style=color:#586e75>// 如果有attachment，则加入
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> <span style=color:#b58900>len</span>(result.<span style=color:#268bd2>Attachments</span>()) &gt; <span style=color:#2aa198>0</span> {
+    invCtx = context.<span style=color:#268bd2>WithValue</span>(invCtx, constant.AttachmentKey, result.<span style=color:#268bd2>Attachments</span>())
+    }
+    <span style=color:#719e07>...</span>
+  }
+    }
+    numField <span style=color:#719e07>:=</span> valueOfElem.<span style=color:#268bd2>NumField</span>()
+    <span style=color:#719e07>for</span> i <span style=color:#719e07>:=</span> <span style=color:#2aa198>0</span>; i &lt; numField; i<span style=color:#719e07>++</span> {
+  t <span style=color:#719e07>:=</span> typeOf.<span style=color:#268bd2>Field</span>(i)
+  methodName <span style=color:#719e07>:=</span> t.Tag.<span style=color:#268bd2>Get</span>(<span style=color:#2aa198>&#34;dubbo&#34;</span>)
+  <span style=color:#719e07>if</span> methodName <span style=color:#719e07>==</span> <span style=color:#2aa198>&#34;&#34;</span> {
+    methodName = t.Name
+  }
+  f <span style=color:#719e07>:=</span> valueOfElem.<span style=color:#268bd2>Field</span>(i)
+  <span style=color:#719e07>if</span> f.<span style=color:#268bd2>Kind</span>() <span style=color:#719e07>==</span> reflect.Func <span style=color:#719e07>&amp;&amp;</span> f.<span style=color:#268bd2>IsValid</span>() <span style=color:#719e07>&amp;&amp;</span> f.<span style=color:#268bd2>CanSet</span>() { <span style=color:#586e75>// 针对于每个函数
+</span><span style=color:#586e75></span>    outNum <span style=color:#719e07>:=</span> t.Type.<span style=color:#268bd2>NumOut</span>()
+    <span style=color:#586e75>// 规定函数输出只能有1/2个
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> outNum <span style=color:#719e07>!=</span> <span style=color:#2aa198>1</span> <span style=color:#719e07>&amp;&amp;</span> outNum <span style=color:#719e07>!=</span> <span style=color:#2aa198>2</span> {
+    logger.<span style=color:#268bd2>Warnf</span>(<span style=color:#2aa198>&#34;method %s of mtype %v has wrong number of in out parameters %d; needs exactly 1/2&#34;</span>,
+        t.Name, t.Type.<span style=color:#268bd2>String</span>(), outNum)
+    <span style=color:#719e07>continue</span>
+    }
+    <span style=color:#586e75>// The latest return type of the method must be error.
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// 规定最后一个返回值一定是error
+</span><span style=color:#586e75></span>    <span style=color:#719e07>if</span> returnType <span style=color:#719e07>:=</span> t.Type.<span style=color:#268bd2>Out</span>(outNum <span style=color:#719e07>-</span> <span style=color:#2aa198>1</span>); returnType <span style=color:#719e07>!=</span> typError {
+    logger.<span style=color:#268bd2>Warnf</span>(<span style=color:#2aa198>&#34;the latest return type %s of method %q is not error&#34;</span>, returnType, t.Name)
+    <span style=color:#719e07>continue</span>
+    }
+    <span style=color:#586e75>// 获取到所有的出参类型，放到数组里
+</span><span style=color:#586e75></span>    <span style=color:#268bd2>var</span> funcOuts = <span style=color:#b58900>make</span>([]reflect.Type, outNum)
+    <span style=color:#719e07>for</span> i <span style=color:#719e07>:=</span> <span style=color:#2aa198>0</span>; i &lt; outNum; i<span style=color:#719e07>++</span> {
+    funcOuts[i] = t.Type.<span style=color:#268bd2>Out</span>(i)
+    }
+    <span style=color:#586e75>// do method proxy here:
+</span><span style=color:#586e75></span>    <span style=color:#586e75>// （三）调用make函数，传入函数名和返回值，获得能调用远程的proxy，将这个proxy替换掉原来的函数位置
+</span><span style=color:#586e75></span>    f.<span style=color:#268bd2>Set</span>(reflect.<span style=color:#268bd2>MakeFunc</span>(f.<span style=color:#268bd2>Type</span>(), <span style=color:#268bd2>makeDubboCallProxy</span>(methodName, funcOuts)))
+    logger.<span style=color:#268bd2>Debugf</span>(<span style=color:#2aa198>&#34;set method [%s]&#34;</span>, methodName)
+  }
+    }
+    <span style=color:#719e07>...</span>
+}
+</code></pre></div><p>正如之前所说，proxy的作用是将用户定义的函数参数列表，转化为抽象的invocation传入Invoker，进行调用。</p><p>其中已标明有三处较为重要的地方：</p><ol><li>在代理函数中实现由参数列表生成Invocation的逻辑</li><li>在代理函数实现调用Invoker的逻辑</li><li>将代理函数替换为原始rpc-service对应函数
+至此，也就解决了一开始的问题：
+client.go: main()</li></ol><div class=highlight><pre style=color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>    config.<span style=color:#268bd2>Load</span>()
+    user <span style=color:#719e07>:=</span> <span style=color:#719e07>&amp;</span>User{}
+    err <span style=color:#719e07>:=</span> userProvider.<span style=color:#268bd2>GetUser</span>(context.<span style=color:#268bd2>TODO</span>(), []<span style=color:#268bd2>interface</span>{}{<span style=color:#2aa198>&#34;A001&#34;</span>}, user)
+</code></pre></div><p>这里直接调用用户定义的rpcService的函数GetUser，这里实际调用的是经过重写入的函数代理，所以就能实现远程调用了。</p><h3 id=3-从client到server的invoker嵌套链--小结>3. 从client到server的invoker嵌套链- 小结</h3><p>在阅读dubbo-go源码的过程中，我能发现一条清晰的invoker-proxy嵌套链，我希望通过图的形式来展现：</p><p><img src=/imgs/blog/dubbo-go/code2/p9.png alt></p><blockquote><p>作者简介 李志信 (GitHubID LaurenceLiZhixin)，中山大学软件工程专业在校学生，擅长使用 Java/Go 语言，专注于云原生和微服务等技术方向。</p></blockquote><ul class="list-unstyled d-flex justify-content-between align-items-center mb-0 pt-5"><li><a href=/zh/blog/2021/01/15/dubbogo-3.0%E7%89%B5%E6%89%8B-grpc-%E8%B5%B0%E5%90%91%E4%BA%91%E5%8E%9F%E7%94%9F%E6%97%B6%E4%BB%A3/ class="btn btn-primary"><span class=mr-1>←</span> 上一页</a></li><a class="btn btn-primary disabled">下一页 <span class=ml-1>→</span></a></li></ul></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title="Dubbo mailing list archive" aria-label="Dubbo mailing list archive"><a class=text-white target=_blank rel="noopener noreferrer" href=https://lists.apache.org/list.html?dev@dubbo.apache.org><i class="fa fa-envelope"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/ApacheDubbo><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/apache/dubbo><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title="Subscribe to mailing list" aria-label="Subscribe to mailing list"><a class=text-white target=_blank rel="noopener noreferrer" href=mailto://dev-subscribe@dubbo.apache.org><i class="fa fa-envelope"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 The Apache Software Foundation. Apache and the Apache feather logo are trademarks of The Apache Software Foundation. All Rights Reserved</small></div></div></div></footer><div class="row pt-2 pb-2"><div class="container-fluid mx-sm-5"><div class=text-center id=my-footer><img style=float:left src=/imgs/apache_logo.png><ul><li><a href=http://www.apache.org>Foundation</a></li><li><a href=http://www.apache.org/licenses/>License</a></li><li><a href=https://www.apache.org/security/>Security</a></li><li><a href=http://www.apache.org/events/current-event>Events</a></li><li><a href=http://www.apache.org/foundation/sponsorship.html>Sponsorship</a></li><li><a href=http://www.apache.org/foundation/thanks.html>Thanks</a></li></ul></div></div></div></div><script src=/js/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.b5fc1b29d2465835844254bd4d804738eaf24c0cec53009b4c6899989be55a47.js integrity="sha256-tfwbKdJGWDWEQlS9TYBHOOryTAzsUwCbTGiZmJvlWkc=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/docsearch.js@2.6.3/dist/cdn/docsearch.min.js></script><script>docsearch({apiKey:'38eff7758162fbf70f2b8484932e62ae',indexName:'apache_dubbo',inputSelector:'.td-search-input',debug:false,});</script></body></html>
