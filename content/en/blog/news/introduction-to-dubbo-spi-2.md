@@ -6,7 +6,7 @@ description: >
     This article introduces the principles and details of Dubbo's SPI.
 ---
 
-In the [actual implementation of the Dubbo extensibility mechanism](./introduction-to-dubbo-spi.md), we learned some concepts of the Dubbo extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance on our own. Do you think Dubbo's extension mechanism is great? Next, we will go deep into the source code of Dubbo and see what it is.
+In the [actual implementation of the Dubbo extensibility mechanism]({{<ref "/blog/news/introduction-to-dubbo-spi.md" >}} ""), we learned some concepts of the Dubbo extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance on our own. Do you think Dubbo's extension mechanism is great? Next, we will go deep into the source code of Dubbo and see what it is.
 
 ## ExtensionLoader
 
