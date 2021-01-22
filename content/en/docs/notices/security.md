@@ -24,4 +24,6 @@ Dubbo 2.7 The official version provides the following serialization protocols:
 * Gson
 
 For the above serialization extension, after finding or receiving the relevant vulnerability report, Dubbo will follow up and upgrade to the latest security version, but the final vulnerability repair scheme depends on the serialization framework implementation.
-> For users using [dubbo hessian2](https://github.com/apache/dubbo-hessian-lite/releases), Dubbo will guarantee the security of Hessian 2 serialization mechanism and repair the reported security vulnerabilities as much as possible 
+> For users using [dubbo hessian2](https://github.com/apache/dubbo-hessian-lite/releases), Dubbo will guarantee the security of Hessian 2 serialization mechanism and repair the reported security vulnerabilities as much as possible   
+
+If you have any questions or security issues, please send mail to here security@dubbo.apache.org
