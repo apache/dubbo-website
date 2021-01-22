@@ -64,6 +64,6 @@ Service providers should not throw the exception of DAO or SQL to the consumer s
 
 ## Call
 
-Not just because it is a Dubbo call, wrap the call logic eith `try...catch`clause. `try...catch` should be added to the appropriate rollback boundary.
+Not just because it is a Dubbo call, wrap the call logic with `try...catch`clause. `try...catch` should be added to the appropriate rollback boundary.
 
 The check logic for the input parameters should be available at the Provider side. For performance considerations, the service implementer may consider adding a service Stub class to the API package to complete the test.
