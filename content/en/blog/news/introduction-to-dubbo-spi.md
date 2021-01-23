@@ -173,7 +173,7 @@ consistenthash=com.alibaba.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalan
 There are four extension implementations of LoadBalance defined in the configuration file. The implementation of load balancing will not be covered in this article. The only thing we need to know is that Dubbo provides four kinds of load balancing implementations. We can explicitly specify an implementation by using xml file, properties file or JVM parameter. If there has no explicitly specified implementation, Dubbo will use random as default.
 
 
-![dubbo-loadbalance | left](https://raw.githubusercontent.com/vangoleo/wiki/master/dubbo/dubbo_loadbalance.png "")
+![](/imgs/blog/dubbo_loadbalance.png)
 
 * @Adaptive("loadbalance")  Applying @Adaptive annotation on select method indicates that select method is an adaptive method. Dubbo will automatically generate the corresponding code for the method. When select method is called, it will decide which extension to apply based on the method parameters. @Adaptive parameter `loadbalance` indicates that the value of loadbalance in method is the extension implementation that will be actually called. However, we cannot find loadbalance parameter in select method, then how can we obtain the value of loadbalance? There is another URL-type parameter in select method, and Dubbo obtains the value of loadbalance from that URL. Here we need to use Dubbo’s URL bus pattern, in one word, URL contains all the parameters in RPC. There is a member variable `Map<String, String>parameters` in the URL class, which contains loadbalance as a parameter
 
