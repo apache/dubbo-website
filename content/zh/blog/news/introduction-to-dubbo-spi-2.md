@@ -193,7 +193,7 @@ private ExtensionLoader(Class<?> type) {
 objectFacory本身也是一个扩展，通过`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())`来获取。
 
 
-![Dubbo-ExtensionFactory | left](https://raw.githubusercontent.com/vangoleo/wiki/master/dubbo/dubbo-extensionfactory.png "")
+![Dubbo-ExtensionFactory](/imgs/blog/dubbo-extensionfactory.png "")
 
 ExtensionFactory 有三个实现：
 1. SpiExtensionFactory：Dubbo自己的Spi去加载Extension
