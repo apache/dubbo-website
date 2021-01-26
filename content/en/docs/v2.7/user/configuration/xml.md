@@ -7,7 +7,7 @@ description: "Configure Dubbo with XML"
 ---
 
 
-> About the XML configuration items, see：[XML References](../../references/xml/introduction). If you prefer use API directly instead of using Spring, see [API Configuration](../api). Want an example of how to use configuration, see [Quick Start](../../quick-start).
+> About the XML configuration items, see：[XML References](../references/xml). If you prefer use API directly instead of using Spring, see [API Configuration](../api). Want an example of how to use configuration, see [Quick Start](../../quick-start).
 
 
 ## provider.xml demo
