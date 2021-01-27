@@ -7,7 +7,7 @@ description: "以注解配置的方式来配置你的 Dubbo 应用"
 ---
 
 {{% alert title="提示" color="primary" %}}
-需要 `2.6.3` 及以上版本支持。 点此查看 [完整示例](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-annotation)
+需要 `2.6.3` 及以上版本支持。 点此查看 [完整示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-annotation)
 {{% /alert %}}
 
 
