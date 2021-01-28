@@ -1,4 +1,4 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Dubbo 源代码分析</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/</link><description>Recent content in Dubbo 源代码分析 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="http://dubbo.apache.org/zh/docs/v2.7/dev/source/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Dubbo SPI</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Dubbo 源代码分析</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/</link><description>Recent content in Dubbo 源代码分析 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs/v2.7/dev/source/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Dubbo SPI</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</guid><description>
 &lt;h2 id="1简介">1.简介&lt;/h2>
 &lt;p>SPI 全称为 Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件，加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过 SPI 机制为我们的程序提供拓展功能。SPI 机制在第三方框架中也有所应用，比如 Dubbo 就是通过 SPI 机制加载所有的组件。不过，Dubbo 并未使用 Java 原生的 SPI 机制，而是对其进行了增强，使其能够更好的满足需求。在 Dubbo 中，SPI 是一个非常重要的模块。基于 SPI，我们可以很容易的对 Dubbo 进行拓展。如果大家想要学习 Dubbo 的源码，SPI 机制务必弄懂。接下来，我们先来了解一下 Java SPI 与 Dubbo SPI 的用法，然后再来分析 Dubbo SPI 的源码。&lt;/p>
 &lt;p>需要特别说明的是，本篇文章以及本系列其他文章所分析的源码版本均为 &lt;strong>dubbo-2.6.4&lt;/strong>。因此大家在阅读文章的过程中，需注意将代码版本切换到 dubbo-2.6.4 tag 上。&lt;/p>
@@ -34,7 +34,7 @@ serviceLoader&lt;span style="color:#719e07">.&lt;/span>forEach&lt;span style="co
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>最后来看一下测试结果，如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/java-spi-result.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/java-spi-result.jpg" alt="">&lt;/p>
 &lt;p>从测试结果可以看出，我们的两个实现类被成功的加载，并输出了相应的内容。关于 Java SPI 的演示先到这里，接下来演示 Dubbo SPI。&lt;/p>
 &lt;h3 id="22-dubbo-spi-示例">2.2 Dubbo SPI 示例&lt;/h3>
 &lt;p>Dubbo 并未使用 Java SPI，而是重新实现了一套功能更强的 SPI 机制。Dubbo SPI 的相关逻辑被封装在了 ExtensionLoader 类中，通过 ExtensionLoader，我们可以加载指定的实现类。Dubbo SPI 所需的配置文件需放置在 META-INF/dubbo 路径下，配置内容如下。&lt;/p>
@@ -53,7 +53,7 @@ bumblebee&lt;span style="color:#719e07">.&lt;/span>sayHello&lt;span style="color
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>测试结果如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-spi-result.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-spi-result.jpg" alt="">&lt;/p>
 &lt;p>Dubbo SPI 除了支持按需加载接口实现类，还增加了 IOC 和 AOP 等特性，这些特性将会在接下来的源码分析章节中一一进行介绍。&lt;/p>
 &lt;h2 id="3-dubbo-spi-源码分析">3. Dubbo SPI 源码分析&lt;/h2>
 &lt;p>上一章简单演示了 Dubbo SPI 的使用方法。我们首先通过 ExtensionLoader 的 getExtensionLoader 方法获取一个 ExtensionLoader 实例，然后再通过 ExtensionLoader 的 getExtension 方法获取拓展类对象。这其中，getExtensionLoader 方法用于从缓存中获取与拓展类对应的 ExtensionLoader，若缓存未命中，则创建一个新的实例。该方法的逻辑比较简单，本章就不进行分析了。下面我们从 ExtensionLoader 的 getExtension 方法作为入口，对拓展类对象的获取过程进行详细的分析。&lt;/p>
@@ -335,7 +335,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;p>Dubbo IOC 目前仅支持 setter 方式注入，总的来说，逻辑比较简单易懂。&lt;/p>
 &lt;h2 id="4总结">4.总结&lt;/h2>
 &lt;p>本篇文章简单分别介绍了 Java SPI 与 Dubbo SPI 用法，并对 Dubbo SPI 的加载拓展类的过程进行了分析。另外，在 Dubbo SPI 中还有一块重要的逻辑这里没有进行分析，即 Dubbo SPI 的扩展点自适应机制。该机制的逻辑较为复杂，我们将会在下一篇文章中进行详细的分析。&lt;/p>
-&lt;p>好了，本篇文章就先到这里了。如果文章中有错误不妥之处，欢迎大家提 issue 进行反馈，或者提 pull request 进行修正。让我们携手共建 Dubbo 社区。&lt;/p></description></item><item><title>Docs: 服务路由</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</guid><description>
+&lt;p>好了，本篇文章就先到这里了。如果文章中有错误不妥之处，欢迎大家提 issue 进行反馈，或者提 pull request 进行修正。让我们携手共建 Dubbo 社区。&lt;/p></description></item><item><title>Docs: 服务路由</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</guid><description>
 &lt;h2 id="1-简介">1. 简介&lt;/h2>
 &lt;p>上一篇文章分析了集群容错的第一部分 — 服务目录 Directory。服务目录在刷新 Invoker 列表的过程中，会通过 Router 进行服务路由，筛选出符合路由规则的服务提供者。在详细分析服务路由的源码之前，先来介绍一下服务路由是什么。服务路由包含一条路由规则，路由规则决定了服务消费者的调用目标，即规定了服务消费者可调用哪些服务提供者。Dubbo 目前提供了三种服务路由实现，分别为条件路由 ConditionRouter、脚本路由 ScriptRouter 和标签路由 TagRouter。其中条件路由是我们最常使用的，标签路由是一个新的实现，暂时还未发布，该实现预计会在 2.7.x 版本中发布。本篇文章将分析条件路由相关源码，脚本路由和标签路由这里就不分析了。&lt;/p>
 &lt;h2 id="2-源码分析">2. 源码分析&lt;/h2>
@@ -735,7 +735,7 @@ String suffix &lt;span style="color:#719e07">=&lt;/span> pattern&lt;span style="
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>以上就是 isMatchGlobPattern 两个重载方法的全部逻辑，这两个方法分别对普通的匹配过程，以及”引用消费者参数“和通配符匹配等特性提供了支持。这两个方法的逻辑不是很复杂，且代码中也进行了比较详细的注释，因此就不多说了。&lt;/p>
 &lt;h2 id="3-总结">3. 总结&lt;/h2>
-&lt;p>本篇文章对条件路由的表达式解析和服务路由过程进行了较为细致的分析。总的来说，条件路由的代码还是有一些复杂的，需要静下心来看。在阅读条件路由代码的过程中，要多调试。一般的框架都会有单元测试，Dubbo 也不例外，因此大家可以直接通过 ConditionRouterTest 对条件路由进行调试，无需重头构建测试用例。&lt;/p></description></item><item><title>Docs: SPI 自适应拓展</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</guid><description>
+&lt;p>本篇文章对条件路由的表达式解析和服务路由过程进行了较为细致的分析。总的来说，条件路由的代码还是有一些复杂的，需要静下心来看。在阅读条件路由代码的过程中，要多调试。一般的框架都会有单元测试，Dubbo 也不例外，因此大家可以直接通过 ConditionRouterTest 对条件路由进行调试，无需重头构建测试用例。&lt;/p></description></item><item><title>Docs: SPI 自适应拓展</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</guid><description>
 &lt;h2 id="1原理">1.原理&lt;/h2>
 &lt;p>在 Dubbo 中，很多拓展都是通过 SPI 机制进行加载的，比如 Protocol、Cluster、LoadBalance 等。有时，有些拓展并不想在框架启动阶段被加载，而是希望在拓展方法被调用时，根据运行时参数进行加载。这听起来有些矛盾。拓展未被加载，那么拓展方法就无法被调用（静态方法除外）。拓展方法未被调用，拓展就无法被加载。对于这个矛盾的问题，Dubbo 通过自适应拓展机制很好的解决了。自适应拓展机制的实现逻辑比较复杂，首先 Dubbo 会为拓展接口生成具有代理功能的代码。然后通过 javassist 或 jdk 编译这段代码，得到 Class 类。最后再通过反射创建代理类，整个过程比较复杂。为了让大家对自适应拓展有一个感性的认识，下面我们通过一个示例进行演示。这是一个与汽车相关的例子，我们有一个车轮制造厂接口 WheelMaker：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">WheelMaker&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
@@ -1326,7 +1326,7 @@ codeBuilder&lt;span style="color:#719e07">.&lt;/span>append&lt;span style="color
 &lt;span style="color:#586e75">// 方法体
 &lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3总结">3.总结&lt;/h2>
-&lt;p>到此，关于自适应拓展的原理，实现就分析完了。总的来说自适应拓展整个逻辑还是很复杂的，并不是很容易弄懂。因此，大家在阅读该部分源码时，耐心一些。同时多进行调试，也可以通过生成好的代码思考代码的生成逻辑。好了，本篇文章就分析到这里。&lt;/p></description></item><item><title>Docs: 服务导出</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/export-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/export-service/</guid><description>
+&lt;p>到此，关于自适应拓展的原理，实现就分析完了。总的来说自适应拓展整个逻辑还是很复杂的，并不是很容易弄懂。因此，大家在阅读该部分源码时，耐心一些。同时多进行调试，也可以通过生成好的代码思考代码的生成逻辑。好了，本篇文章就分析到这里。&lt;/p></description></item><item><title>Docs: 服务导出</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/export-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/export-service/</guid><description>
 &lt;h2 id="1简介">1.简介&lt;/h2>
 &lt;p>本篇文章，我们来研究一下 Dubbo 导出服务的过程。Dubbo 服务导出过程始于 Spring 容器发布刷新事件，Dubbo 在接收到事件后，会立即执行服务导出逻辑。整个逻辑大致可分为三个部分，第一部分是前置工作，主要用于检查参数，组装 URL。第二部分是导出服务，包含导出服务到本地 (JVM)，和导出服务到远程两个过程。第三部分是向注册中心注册服务，用于服务发现。本篇文章将会对这三个部分代码进行详细的分析。&lt;/p>
 &lt;h2 id="2源码分析">2.源码分析&lt;/h2>
@@ -2541,7 +2541,7 @@ createPersistent&lt;span style="color:#719e07">(&lt;/span>path&lt;span style="co
 &lt;h3 id="225-订阅-override-数据">2.2.5 订阅 override 数据&lt;/h3>
 &lt;p>// 待补充&lt;/p>
 &lt;h2 id="3总结">3.总结&lt;/h2>
-&lt;p>本篇文章详细分析了 Dubbo 服务导出过程，包括配置检测，URL 组装，Invoker 创建过程、导出服务以及注册服务等等。篇幅比较大，需要大家耐心阅读。本篇文章先就到这，如果文章有不妥错误之处，希望大家能够进行反馈或修正。&lt;/p></description></item><item><title>Docs: 服务引用</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/refer-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/refer-service/</guid><description>
+&lt;p>本篇文章详细分析了 Dubbo 服务导出过程，包括配置检测，URL 组装，Invoker 创建过程、导出服务以及注册服务等等。篇幅比较大，需要大家耐心阅读。本篇文章先就到这，如果文章有不妥错误之处，希望大家能够进行反馈或修正。&lt;/p></description></item><item><title>Docs: 服务引用</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/refer-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/refer-service/</guid><description>
 &lt;h2 id="1-简介">1. 简介&lt;/h2>
 &lt;p>上一篇文章详细分析了服务导出的过程，本篇文章我们趁热打铁，继续分析服务引用过程。在 Dubbo 中，我们可以通过两种方式引用远程服务。第一种是使用服务直连的方式引用服务，第二种方式是基于注册中心进行引用。服务直连的方式仅适合在调试或测试服务的场景下使用，不适合在线上环境使用。因此，本文我将重点分析通过注册中心引用服务的过程。从注册中心中获取服务配置只是服务引用过程中的一环，除此之外，服务消费者还需要经历 Invoker 创建、代理类创建等步骤。这些步骤，将在后续章节中一一进行分析。&lt;/p>
 &lt;h2 id="2服务引用原理">2.服务引用原理&lt;/h2>
@@ -3276,12 +3276,12 @@ Object ret &lt;span style="color:#719e07">=&lt;/span> handler&lt;span style="col
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>好了，到这里代理类生成逻辑就分析完了。整个过程比较复杂，大家需要耐心看一下。&lt;/p>
 &lt;h2 id="4总结">4.总结&lt;/h2>
-&lt;p>本篇文章对服务引用的过程进行了较为详尽的分析，还有一些逻辑暂时没有分析到，比如 Directory、Cluster。这些接口及实现类功能比较独立，后续会单独成文进行分析。暂时我们可以先把这些类看成黑盒，只要知道这些类的用途即可。关于服务引用过程就分析到这里。&lt;/p></description></item><item><title>Docs: 服务调用过程</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/service-invoking-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/service-invoking-process/</guid><description>
+&lt;p>本篇文章对服务引用的过程进行了较为详尽的分析，还有一些逻辑暂时没有分析到，比如 Directory、Cluster。这些接口及实现类功能比较独立，后续会单独成文进行分析。暂时我们可以先把这些类看成黑盒，只要知道这些类的用途即可。关于服务引用过程就分析到这里。&lt;/p></description></item><item><title>Docs: 服务调用过程</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/service-invoking-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/service-invoking-process/</guid><description>
 &lt;h2 id="1-简介">1. 简介&lt;/h2>
 &lt;p>在前面的文章中，我们分析了 Dubbo SPI、服务导出与引入、以及集群容错方面的代码。经过前文的铺垫，本篇文章我们终于可以分析服务调用过程了。Dubbo 服务调用过程比较复杂，包含众多步骤，比如发送请求、编解码、服务降级、过滤器链处理、序列化、线程派发以及响应请求等步骤。限于篇幅原因，本篇文章无法对所有的步骤一一进行分析。本篇文章将会重点分析请求的发送与接收、编解码、线程派发以及响应的发送与接收等过程，至于服务降级、过滤器链和序列化大家自行进行分析，也可以将其当成一个黑盒，暂时忽略也没关系。介绍完本篇文章要分析的内容，接下来我们进入正题吧。&lt;/p>
 &lt;h2 id="2-源码分析">2. 源码分析&lt;/h2>
 &lt;p>在进行源码分析之前，我们先来通过一张图了解 Dubbo 服务调用过程。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/send-request-process.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/send-request-process.jpg" alt="">&lt;/p>
 &lt;p>首先服务消费者通过代理对象 Proxy 发起远程调用，接着通过网络客户端 Client 将编码后的请求发送给服务提供方的网络层上，也就是 Server。Server 在收到请求后，首先要做的事情是对数据包进行解码。然后将解码后的请求发送至分发器 Dispatcher，再由分发器将请求派发到指定的线程池上，最后由线程池调用具体的服务。这就是一个远程调用请求的发送与接收过程。至于响应的发送与接收过程，这张图中没有表现出来。对于这两个过程，我们也会进行详细分析。&lt;/p>
 &lt;h3 id="21-服务调用方式">2.1 服务调用方式&lt;/h3>
 &lt;p>Dubbo 支持同步和异步两种调用方式，其中异步调用还可细分为“有返回值”的异步调用和“无返回值”的异步调用。所谓“无返回值”异步调用是指服务消费方只管调用，但不关心调用结果，此时 Dubbo 会直接返回一个空的 RpcResult。若要使用异步特性，需要服务消费方手动进行配置。默认情况下，Dubbo 使用同步调用方式。&lt;/p>
@@ -3572,7 +3572,7 @@ Response res &lt;span style="color:#719e07">=&lt;/span> response&lt;span style="
 &lt;h3 id="22-服务消费方发送请求">2.2 服务消费方发送请求&lt;/h3>
 &lt;h4 id="221-发送请求">2.2.1 发送请求&lt;/h4>
 &lt;p>本节我们来看一下同步调用模式下，服务消费方是如何发送调用请求的。在深入分析源码前，我们先来看一张图。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/send-request-thread-stack.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/send-request-thread-stack.jpg" alt="">&lt;/p>
 &lt;p>这张图展示了服务消费方发送请求过程的部分调用栈，略为复杂。从上图可以看出，经过多次调用后，才将请求数据送至 Netty NioClientSocketChannel。这样做的原因是通过 Exchange 层为框架引入 Request 和 Response 语义，这一点会在接下来的源码分析过程中会看到。其他的就不多说了，下面开始进行分析。首先分析 ReferenceCountExchangeClient 的源码。&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ReferenceCountExchangeClient&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ExchangeClient &lt;span style="color:#719e07">{&lt;/span>
 &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> URL url&lt;span style="color:#719e07">;&lt;/span>
@@ -3847,7 +3847,7 @@ Throwable cause &lt;span style="color:#719e07">=&lt;/span> future&lt;span style=
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Netty 中，出站数据在发出之前还需要进行编码操作，接下来我们来分析一下请求数据的编码逻辑。&lt;/p>
 &lt;h4 id="222-请求编码">2.2.2 请求编码&lt;/h4>
 &lt;p>在分析请求编码逻辑之前，我们先来看一下 Dubbo 数据包结构。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/data-format.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/data-format.jpg" alt="">&lt;/p>
 &lt;p>Dubbo 数据包分为消息头和消息体，消息头用于存储一些元信息，比如魔数（Magic），数据包类型（Request/Response），消息体长度（Data Length）等。消息体中用于存储具体的调用消息，比如方法名称，参数列表等。下面简单列举一下消息头的内容。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -4242,7 +4242,7 @@ NettyChannel&lt;span style="color:#719e07">.&lt;/span>removeChannelIfDisconnecte
 &lt;h5 id="2321-线程派发模型">2.3.2.1 线程派发模型&lt;/h5>
 &lt;p>Dubbo 将底层通信框架中接收请求的线程称为 IO 线程。如果一些事件处理逻辑可以很快执行完，比如只在内存打一个标记，此时直接在 IO 线程上执行该段逻辑即可。但如果事件的处理逻辑比较耗时，比如该段逻辑会发起数据库查询或者 HTTP 请求。此时我们就不应该让事件处理逻辑在 IO 线程上执行，而是应该派发到线程池中去执行。原因也很简单，IO 线程主要用于接收请求，如果 IO 线程被占满，将导致它不能接收新的请求。&lt;/p>
 &lt;p>以上就是线程派发的背景，下面我们再来通过 Dubbo 调用图，看一下线程派发器所处的位置。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dispatcher-location.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dispatcher-location.jpg" alt="">&lt;/p>
 &lt;p>如上图，红框中的 Dispatcher 就是线程派发器。需要说明的是，Dispatcher 真实的职责创建具有线程派发能力的 ChannelHandler，比如 AllChannelHandler、MessageOnlyChannelHandler 和 ExecutionChannelHandler 等，其本身并不具备线程派发能力。Dubbo 支持 5 种不同的线程派发策略，下面通过一个表格列举一下。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -4940,16 +4940,16 @@ invokeCallback&lt;span style="color:#719e07">(&lt;/span>callback&lt;span style="
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>以上逻辑是将响应对象保存到相应的 DefaultFuture 实例中，然后再唤醒用户线程，随后用户线程即可从 DefaultFuture 实例中获取到相应结果。&lt;/p>
 &lt;p>本篇文章在多个地方都强调过调用编号很重要，但一直没有解释原因，这里简单说明一下。一般情况下，服务消费方会并发调用多个服务，每个用户线程发送请求后，会调用不同 DefaultFuture 对象的 get 方法进行等待。 一段时间后，服务消费方的线程池会收到多个响应对象。这个时候要考虑一个问题，如何将每个响应对象传递给相应的 DefaultFuture 对象，且不出错。答案是通过调用编号。DefaultFuture 被创建时，会要求传入一个 Request 对象。此时 DefaultFuture 可从 Request 对象中获取调用编号，并将 &amp;lt;调用编号, DefaultFuture 对象&amp;gt; 映射关系存入到静态 Map 中，即 FUTURES。线程池中的线程在收到 Response 对象后，会根据 Response 对象中的调用编号到 FUTURES 集合中取出相应的 DefaultFuture 对象，然后再将 Response 对象设置到 DefaultFuture 对象中。最后再唤醒用户线程，这样用户线程即可从 DefaultFuture 对象中获取调用结果了。整个过程大致如下图：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/request-id-application.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/request-id-application.jpg" alt="">&lt;/p>
 &lt;h2 id="3-总结">3. 总结&lt;/h2>
 &lt;p>本篇文章主要对 Dubbo 中的几种服务调用方式，以及从双向通信的角度对整个通信过程进行了详细的分析。按照通信顺序，通信过程包括服务消费方发送请求，服务提供方接收请求，服务提供方返回响应数据，服务消费方接收响应数据等过程。理解这些过程需要大家对网络编程，尤其是 Netty 有一定的了解。限于篇幅原因，本篇文章无法将服务调用的所有内容都一一进行分析。对于本篇文章未讲到或未详细分析的内容，比如服务降级、过滤器链、以及序列化等。大家若感兴趣，可自行进行分析。并将分析整理成文，分享给社区。&lt;/p>
-&lt;p>本篇文章就到这里了，感谢阅读。&lt;/p></description></item><item><title>Docs: 服务目录</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/directory/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/directory/</guid><description>
+&lt;p>本篇文章就到这里了，感谢阅读。&lt;/p></description></item><item><title>Docs: 服务目录</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/directory/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/directory/</guid><description>
 &lt;h2 id="1-简介">1. 简介&lt;/h2>
 &lt;p>本篇文章，将开始分析 Dubbo 集群容错方面的源码。集群容错源码包含四个部分，分别是服务目录 Directory、服务路由 Router、集群 Cluster 和负载均衡 LoadBalance。这几个部分的源码逻辑相对比较独立，我们将会分四篇文章进行分析。本篇文章作为集群容错的开篇文章，将和大家一起分析服务目录相关的源码。在进行深入分析之前，我们先来了解一下服务目录是什么。服务目录中存储了一些和服务提供者有关的信息，通过服务目录，服务消费者可获取到服务提供者的信息，比如 ip、端口、服务协议等。通过这些信息，服务消费者就可通过 Netty 等客户端进行远程调用。在一个服务集群中，服务提供者数量并不是一成不变的，如果集群中新增了一台机器，相应地在服务目录中就要新增一条服务提供者记录。或者，如果服务提供者的配置修改了，服务目录中的记录也要做相应的更新。如果这样说，服务目录和注册中心的功能不就雷同了吗？确实如此，这里这么说是为了方便大家理解。实际上服务目录在获取注册中心的服务配置信息后，会为每条配置信息生成一个 Invoker 对象，并把这个 Invoker 对象存储起来，这个 Invoker 才是服务目录最终持有的对象。Invoker 有什么用呢？看名字就知道了，这是一个具有远程调用功能的对象。讲到这大家应该知道了什么是服务目录了，它可以看做是 Invoker 集合，且这个集合中的元素会随注册中心的变化而进行动态调整。&lt;/p>
 &lt;p>关于服务目录这里就先介绍这些，大家先有个大致印象。接下来我们通过继承体系图来了解一下服务目录的家族成员都有哪些。&lt;/p>
 &lt;h2 id="2-继承体系">2. 继承体系&lt;/h2>
 &lt;p>服务目录目前内置的实现有两个，分别为 StaticDirectory 和 RegistryDirectory，它们均是 AbstractDirectory 的子类。AbstractDirectory 实现了 Directory 接口，这个接口包含了一个重要的方法定义，即 list(Invocation)，用于列举 Invoker。下面我们来看一下他们的继承体系图。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/directory-inherit-hierarchy.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/directory-inherit-hierarchy.png" alt="">&lt;/p>
 &lt;p>如上，Directory 继承自 Node 接口，Node 这个接口继承者比较多，像 Registry、Monitor、Invoker 等均继承了这个接口。这个接口包含了一个获取配置信息的方法 getUrl，实现该接口的类可以向外提供配置信息。另外，大家注意看 RegistryDirectory 实现了 NotifyListener 接口，当注册中心节点信息发生变化后，RegistryDirectory 可以通过此接口方法得到变更信息，并根据变更信息动态调整内部 Invoker 列表。&lt;/p>
 &lt;h2 id="3-源码分析">3. 源码分析&lt;/h2>
 &lt;p>本章将分析 AbstractDirectory 和它两个子类的源码。AbstractDirectory 封装了 Invoker 列举流程，具体的列举逻辑则由子类实现，这是典型的模板模式。所以，接下来我们先来看一下 AbstractDirectory 的源码。&lt;/p>
@@ -5400,13 +5400,13 @@ logger&lt;span style="color:#719e07">.&lt;/span>warn&lt;span style="color:#719e0
 &lt;/ol>
 &lt;p>Invoker 的刷新逻辑还是比较复杂的，大家在看的过程中多写点 demo 进行调试，以加深理解。&lt;/p>
 &lt;h2 id="4-总结">4. 总结&lt;/h2>
-&lt;p>本篇文章对 Dubbo 服务目录进行了较为详细的分析，篇幅主要集中在 RegistryDirectory 的源码分析上。从代码量上可以看出，想让本地服务目录和注册中心保持一致还是需要做很多事情的，并不简单。服务目录是 Dubbo 集群容错的一部分，也是比较基础的部分，所以大家应尽量搞懂。&lt;/p></description></item><item><title>Docs: 集群</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/cluster/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/cluster/</guid><description>
+&lt;p>本篇文章对 Dubbo 服务目录进行了较为详细的分析，篇幅主要集中在 RegistryDirectory 的源码分析上。从代码量上可以看出，想让本地服务目录和注册中心保持一致还是需要做很多事情的，并不简单。服务目录是 Dubbo 集群容错的一部分，也是比较基础的部分，所以大家应尽量搞懂。&lt;/p></description></item><item><title>Docs: 集群</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/cluster/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/cluster/</guid><description>
 &lt;h2 id="1简介">1.简介&lt;/h2>
 &lt;p>为了避免单点故障，现在的应用通常至少会部署在两台服务器上。对于一些负载比较高的服务，会部署更多的服务器。这样，在同一环境下的服务提供者数量会大于1。对于服务消费者来说，同一环境下出现了多个服务提供者。这时会出现一个问题，服务消费者需要决定选择哪个服务提供者进行调用。另外服务调用失败时的处理措施也是需要考虑的，是重试呢，还是抛出异常，亦或是只打印异常等。为了处理这些问题，Dubbo 定义了集群接口 Cluster 以及 Cluster Invoker。集群 Cluster 用途是将多个服务提供者合并为一个 Cluster Invoker，并将这个 Invoker 暴露给服务消费者。这样一来，服务消费者只需通过这个 Invoker 进行远程调用即可，至于具体调用哪个服务提供者，以及调用失败后如何处理等问题，现在都交给集群模块去处理。集群模块是服务提供者和服务消费者的中间层，为服务消费者屏蔽了服务提供者的情况，这样服务消费者就可以专心处理远程调用相关事宜。比如发请求，接受服务提供者返回的数据等。这就是集群的作用。&lt;/p>
 &lt;p>Dubbo 提供了多种集群实现，包含但不限于 Failover Cluster、Failfast Cluster 和 Failsafe Cluster 等。每种集群实现类的用途不同，接下来会一一进行分析。&lt;/p>
 &lt;h2 id="2-集群容错">2. 集群容错&lt;/h2>
 &lt;p>在对集群相关代码进行分析之前，这里有必要先来介绍一下集群容错的所有组件。包含 Cluster、Cluster Invoker、Directory、Router 和 LoadBalance 等。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/cluster.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/cluster.jpg" alt="">&lt;/p>
 &lt;p>集群工作过程可分为两个阶段，第一个阶段是在服务消费者初始化期间，集群 Cluster 实现类为服务消费者创建 Cluster Invoker 实例，即上图中的 merge 操作。第二个阶段是在服务消费者进行远程调用时。以 FailoverClusterInvoker 为例，该类型 Cluster Invoker 首先会调用 Directory 的 list 方法列举 Invoker 列表（可将 Invoker 简单理解为服务提供者）。Directory 的用途是保存 Invoker，可简单类比为 List&amp;lt;Invoker&amp;gt;。其实现类 RegistryDirectory 是一个动态服务目录，可感知注册中心配置的变化，它所持有的 Invoker 列表会随着注册中心内容的变化而变化。每次变化后，RegistryDirectory 会动态增删 Invoker，并调用 Router 的 route 方法进行路由，过滤掉不符合路由规则的 Invoker。当 FailoverClusterInvoker 拿到 Directory 返回的 Invoker 列表后，它会通过 LoadBalance 从 Invoker 列表中选择一个 Invoker。最后 FailoverClusterInvoker 会将参数传给 LoadBalance 选择出的 Invoker 实例的 invoke 方法，进行真正的远程调用。&lt;/p>
 &lt;p>以上就是集群工作的整个流程，这里并没介绍集群是如何容错的。Dubbo 主要提供了这样几种容错方式：&lt;/p>
 &lt;ul>
@@ -5871,7 +5871,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>warn&lt;span style="color:#719e0
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>以上就是 BroadcastClusterInvoker 的代码，比较简单，就不多说了。&lt;/p>
 &lt;h2 id="4总结">4.总结&lt;/h2>
 &lt;p>本篇文章详细分析了集群容错的几种实现方式。集群容错对于 Dubbo 框架来说，是很重要的逻辑。集群模块处于服务提供者和消费者之间，对于服务消费者来说，集群可向其屏蔽服务提供者集群的情况，使其能够专心进行远程调用。除此之外，通过集群模块，我们还可以对服务之间的调用链路进行编排优化，治理服务。总的来说，对于 Dubbo 而言，集群容错相关逻辑是非常重要的。想要对 Dubbo 有比较深的理解，集群容错是必须要掌握的。&lt;/p>
-&lt;p>关于集群模块就先分析到这，感谢阅读。&lt;/p></description></item><item><title>Docs: 负载均衡</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/</guid><description>
+&lt;p>关于集群模块就先分析到这，感谢阅读。&lt;/p></description></item><item><title>Docs: 负载均衡</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/</guid><description>
 &lt;h2 id="1简介">1.简介&lt;/h2>
 &lt;p>LoadBalance 中文意思为负载均衡，它的职责是将网络请求，或者其他形式的负载“均摊”到不同的机器上。避免集群中部分服务器压力过大，而另一些服务器比较空闲的情况。通过负载均衡，可以让每台服务器获取到适合自己处理能力的负载。在为高负载服务器分流的同时，还可以避免资源浪费，一举两得。负载均衡可分为软件负载均衡和硬件负载均衡。在我们日常开发中，一般很难接触到硬件负载均衡。但软件负载均衡还是可以接触到的，比如 Nginx。在 Dubbo 中，也有负载均衡的概念和相应的实现。Dubbo 需要对服务消费者的调用请求进行分配，避免少数服务提供者负载过大。服务提供者负载过大，会导致部分请求超时。因此将负载均衡到每个服务提供者上，是非常必要的。Dubbo 提供了4种负载均衡实现，分别是基于权重随机算法的 RandomLoadBalance、基于最少活跃调用数算法的 LeastActiveLoadBalance、基于 hash 一致性的 ConsistentHashLoadBalance，以及基于加权轮询算法的 RoundRobinLoadBalance。这几个负载均衡算法代码不是很长，但是想看懂也不是很容易，需要大家对这几个算法的原理有一定了解才行。如果不是很了解，也没不用太担心。我们会在分析每个算法的源码之前，对算法原理进行简单的讲解，帮助大家建立初步的印象。&lt;/p>
 &lt;p>本系列文章在编写之初是基于 Dubbo 2.6.4 的，近期，Dubbo 2.6.5 发布了，其中就有针对对负载均衡部分的优化。因此我们在分析完 2.6.4 版本后的源码后，会另外分析 2.6.5 更新的部分。其他的就不多说了，进入正题吧。&lt;/p>
@@ -6068,11 +6068,11 @@ offsetWeight &lt;span style="color:#719e07">-=&lt;/span> getWeight&lt;span style
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>以上就是 Dubbo 2.6.5 对 LeastActiveLoadBalance 的更新，内容不是很多，先分析到这。接下来分析基于一致性 hash 思想的 ConsistentHashLoadBalance。&lt;/p>
 &lt;h3 id="23-consistenthashloadbalance">2.3 ConsistentHashLoadBalance&lt;/h3>
 &lt;p>一致性 hash 算法由麻省理工学院的 Karger 及其合作者于1997年提出的，算法提出之初是用于大规模缓存系统的负载均衡。它的工作过程是这样的，首先根据 ip 或者其他的信息为缓存节点生成一个 hash，并将这个 hash 投射到 [0, 2&lt;sup>32&lt;/sup> - 1] 的圆环上。当有查询或写入请求时，则为缓存项的 key 生成一个 hash 值。然后查找第一个大于或等于该 hash 值的缓存节点，并到这个节点中查询或写入缓存项。如果当前节点挂了，则在下一次查询或写入缓存时，为缓存项查找另一个大于其 hash 值的缓存节点即可。大致效果如下图所示，每个缓存节点在圆环上占据一个位置。如果缓存项的 key 的 hash 值小于缓存节点 hash 值，则到该缓存节点中存储或读取缓存项。比如下面绿色点对应的缓存项将会被存储到 cache-2 节点中。由于 cache-3 挂了，原本应该存到该节点中的缓存项最终会存储到 cache-4 节点中。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/consistent-hash.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/consistent-hash.jpg" alt="">&lt;/p>
 &lt;p>下面来看看一致性 hash 在 Dubbo 中的应用。我们把上图的缓存节点替换成 Dubbo 的服务提供者，于是得到了下图：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/consistent-hash-invoker.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/consistent-hash-invoker.jpg" alt="">&lt;/p>
 &lt;p>这里相同颜色的节点均属于同一个服务提供者，比如 Invoker1-1，Invoker1-2，……, Invoker1-160。这样做的目的是通过引入虚拟节点，让 Invoker 在圆环上分散开来，避免数据倾斜问题。所谓数据倾斜是指，由于节点不够分散，导致大量请求落到了同一个节点上，而其他节点只会接收到了少量请求的情况。比如：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/consistent-hash-data-incline.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/consistent-hash-data-incline.jpg" alt="">&lt;/p>
 &lt;p>如上，由于 Invoker-1 和 Invoker-2 在圆环上分布不均，导致系统中75%的请求都会落到 Invoker-1 上，只有 25% 的请求会落到 Invoker-2 上。解决这个问题办法是引入虚拟节点，通过虚拟节点均衡各个节点的请求量。&lt;/p>
 &lt;p>到这里背景知识就普及完了，接下来开始分析源码。我们先从 ConsistentHashLoadBalance 的 doSelect 方法开始看起，如下：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ConsistentHashLoadBalance&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> AbstractLoadBalance &lt;span style="color:#719e07">{&lt;/span>

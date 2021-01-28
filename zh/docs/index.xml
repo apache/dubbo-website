@@ -1,4 +1,4 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 文档</title><link>http://dubbo.apache.org/zh/docs/</link><description>Recent content in 文档 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="http://dubbo.apache.org/zh/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Dubbo SPI</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 文档</title><link>https://dubbo.apache.org/zh/docs/</link><description>Recent content in 文档 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Dubbo SPI</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/dubbo-spi/</guid><description>
 &lt;h2 id="1简介">1.简介&lt;/h2>
 &lt;p>SPI 全称为 Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件，加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过 SPI 机制为我们的程序提供拓展功能。SPI 机制在第三方框架中也有所应用，比如 Dubbo 就是通过 SPI 机制加载所有的组件。不过，Dubbo 并未使用 Java 原生的 SPI 机制，而是对其进行了增强，使其能够更好的满足需求。在 Dubbo 中，SPI 是一个非常重要的模块。基于 SPI，我们可以很容易的对 Dubbo 进行拓展。如果大家想要学习 Dubbo 的源码，SPI 机制务必弄懂。接下来，我们先来了解一下 Java SPI 与 Dubbo SPI 的用法，然后再来分析 Dubbo SPI 的源码。&lt;/p>
 &lt;p>需要特别说明的是，本篇文章以及本系列其他文章所分析的源码版本均为 &lt;strong>dubbo-2.6.4&lt;/strong>。因此大家在阅读文章的过程中，需注意将代码版本切换到 dubbo-2.6.4 tag 上。&lt;/p>
@@ -34,7 +34,7 @@ serviceLoader&lt;span style="color:#719e07">.&lt;/span>forEach&lt;span style="co
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>最后来看一下测试结果，如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/java-spi-result.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/java-spi-result.jpg" alt="">&lt;/p>
 &lt;p>从测试结果可以看出，我们的两个实现类被成功的加载，并输出了相应的内容。关于 Java SPI 的演示先到这里，接下来演示 Dubbo SPI。&lt;/p>
 &lt;h3 id="22-dubbo-spi-示例">2.2 Dubbo SPI 示例&lt;/h3>
 &lt;p>Dubbo 并未使用 Java SPI，而是重新实现了一套功能更强的 SPI 机制。Dubbo SPI 的相关逻辑被封装在了 ExtensionLoader 类中，通过 ExtensionLoader，我们可以加载指定的实现类。Dubbo SPI 所需的配置文件需放置在 META-INF/dubbo 路径下，配置内容如下。&lt;/p>
@@ -53,7 +53,7 @@ bumblebee&lt;span style="color:#719e07">.&lt;/span>sayHello&lt;span style="color
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>测试结果如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-spi-result.jpg" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-spi-result.jpg" alt="">&lt;/p>
 &lt;p>Dubbo SPI 除了支持按需加载接口实现类，还增加了 IOC 和 AOP 等特性，这些特性将会在接下来的源码分析章节中一一进行介绍。&lt;/p>
 &lt;h2 id="3-dubbo-spi-源码分析">3. Dubbo SPI 源码分析&lt;/h2>
 &lt;p>上一章简单演示了 Dubbo SPI 的使用方法。我们首先通过 ExtensionLoader 的 getExtensionLoader 方法获取一个 ExtensionLoader 实例，然后再通过 ExtensionLoader 的 getExtension 方法获取拓展类对象。这其中，getExtensionLoader 方法用于从缓存中获取与拓展类对应的 ExtensionLoader，若缓存未命中，则创建一个新的实例。该方法的逻辑比较简单，本章就不进行分析了。下面我们从 ExtensionLoader 的 getExtension 方法作为入口，对拓展类对象的获取过程进行详细的分析。&lt;/p>
@@ -335,10 +335,10 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;p>Dubbo IOC 目前仅支持 setter 方式注入，总的来说，逻辑比较简单易懂。&lt;/p>
 &lt;h2 id="4总结">4.总结&lt;/h2>
 &lt;p>本篇文章简单分别介绍了 Java SPI 与 Dubbo SPI 用法，并对 Dubbo SPI 的加载拓展类的过程进行了分析。另外，在 Dubbo SPI 中还有一块重要的逻辑这里没有进行分析，即 Dubbo SPI 的扩展点自适应机制。该机制的逻辑较为复杂，我们将会在下一篇文章中进行详细的分析。&lt;/p>
-&lt;p>好了，本篇文章就先到这里了。如果文章中有错误不妥之处，欢迎大家提 issue 进行反馈，或者提 pull request 进行修正。让我们携手共建 Dubbo 社区。&lt;/p></description></item><item><title>Docs: dubbo 协议</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/dubbo/</guid><description>
+&lt;p>好了，本篇文章就先到这里了。如果文章中有错误不妥之处，欢迎大家提 issue 进行反馈，或者提 pull request 进行修正。让我们携手共建 Dubbo 社区。&lt;/p></description></item><item><title>Docs: dubbo 协议</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/dubbo/</guid><description>
 &lt;p>Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。&lt;/p>
 &lt;p>反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/dubbo-protocol.jpg" alt="dubbo-protocol.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-protocol.jpg" alt="dubbo-protocol.jpg">&lt;/p>
 &lt;ul>
 &lt;li>Transporter: mina, netty, grizzy&lt;/li>
 &lt;li>Serialization: dubbo, hessian2, java, json&lt;/li>
@@ -446,7 +446,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;p>1024Mbit=128MByte &lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: dubbo:application</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-application/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-application/</guid><description>
+&lt;/section></description></item><item><title>Docs: dubbo:application</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-application/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-application/</guid><description>
 &lt;p>应用信息配置。对应的配置类：&lt;code>org.apache.dubbo.config.ApplicationConfig&lt;/code>&lt;/p>
 &lt;table>
 &lt;thead>
@@ -543,7 +543,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.2.0以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:argument</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-argument/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-argument/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:argument</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-argument/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-argument/</guid><description>
 &lt;p>方法参数配置。对应的配置类： &lt;code>org.apache.dubbo.config.ArgumentConfig&lt;/code>。该标签为 &lt;code>&amp;lt;dubbo:method&amp;gt;&lt;/code> 的子标签，用于方法参数的特征描述，比如：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;findXxx&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;3000&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
 &lt;span style="color:#268bd2">&amp;lt;dubbo:argument&lt;/span> index=&lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span> callback=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
@@ -593,7 +593,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.0.6以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:config-center</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-config-center/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-config-center/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:config-center</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-config-center/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-config-center/</guid><description>
 &lt;p>配置中心。对应的配置类：&lt;code>org.apache.dubbo.config.ConfigCenterConfig&lt;/code>&lt;/p>
 &lt;table>
 &lt;thead>
@@ -726,7 +726,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.7.0+&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:consumer</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-consumer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-consumer/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:consumer</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-consumer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-consumer/</guid><description>
 &lt;p>服务消费者缺省值配置。配置类： &lt;code>org.apache.dubbo.config.ConsumerConfig&lt;/code> 。同时该标签为 &lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code> 标签的缺省值设置。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -923,7 +923,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>Dubbo2.1.0及其以上版本支持&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:method</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-method/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-method/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:method</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-method/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-method/</guid><description>
 &lt;p>方法级配置。对应的配置类： &lt;code>org.apache.dubbo.config.MethodConfig&lt;/code>。同时该标签为 &lt;code>&amp;lt;dubbo:service&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code> 的子标签，用于控制到方法级。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -1105,7 +1105,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
 &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;findXxx&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;3000&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: dubbo:module</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-module/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-module/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: dubbo:module</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-module/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-module/</guid><description>
 &lt;p>模块信息配置。对应的配置类 &lt;code>org.apache.dubbo.config.ModuleConfig&lt;/code>&lt;/p>
 &lt;table>
 &lt;thead>
@@ -1162,7 +1162,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.2.0以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:monitor</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-monitor/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-monitor/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:monitor</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-monitor/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-monitor/</guid><description>
 &lt;p>监控中心配置。对应的配置类： &lt;code>org.apache.dubbo.config.MonitorConfig&lt;/code>&lt;/p>
 &lt;table>
 &lt;thead>
@@ -1199,7 +1199,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>1.0.16以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:parameter</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-parameter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-parameter/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:parameter</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-parameter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-parameter/</guid><description>
 &lt;p>选项参数配置。对应的配置类：&lt;code>java.util.Map&lt;/code>。同时该标签为&lt;code>&amp;lt;dubbo:protocol&amp;gt;&lt;/code>或&lt;code>&amp;lt;dubbo:service&amp;gt;&lt;/code>或&lt;code>&amp;lt;dubbo:provider&amp;gt;&lt;/code>或&lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code>或&lt;code>&amp;lt;dubbo:consumer&amp;gt;&lt;/code>的子标签，用于配置自定义参数，该配置项将作为扩展点设置自定义参数使用。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -1243,7 +1243,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;span style="color:#268bd2">&amp;lt;/dubbo:protocol&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;jms&amp;#34;&lt;/span> p:queue=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: dubbo:protocol</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-protocol/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: dubbo:protocol</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-protocol/</guid><description>
 &lt;p>服务提供者协议配置。对应的配置类： &lt;code>org.apache.dubbo.config.ProtocolConfig&lt;/code>。同时，如果需要支持多协议，可以声明多个 &lt;code>&amp;lt;dubbo:protocol&amp;gt;&lt;/code> 标签，并在 &lt;code>&amp;lt;dubbo:service&amp;gt;&lt;/code> 中通过 &lt;code>protocol&lt;/code> 属性指定使用的协议。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -1500,7 +1500,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.0.6以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:provider</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-provider/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:provider</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-provider/</guid><description>
 &lt;p>服务提供者缺省值配置。对应的配置类： &lt;code>org.apache.dubbo.config.ProviderConfig&lt;/code>。同时该标签为 &lt;code>&amp;lt;dubbo:service&amp;gt;&lt;/code> 和 &lt;code>&amp;lt;dubbo:protocol&amp;gt;&lt;/code> 标签的缺省值设置。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -1957,7 +1957,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.0.7以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:reference</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-reference/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:reference</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-reference/</guid><description>
 &lt;p>服务消费者引用服务配置。对应的配置类： &lt;code>org.apache.dubbo.config.ReferenceConfig&lt;/code>&lt;/p>
 &lt;table>
 &lt;thead>
@@ -2244,7 +2244,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.2.0以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:registry</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-registry/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:registry</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-registry/</guid><description>
 &lt;p>注册中心配置。对应的配置类： &lt;code>org.apache.dubbo.config.RegistryConfig&lt;/code>。同时如果有多个不同的注册中心，可以声明多个 &lt;code>&amp;lt;dubbo:registry&amp;gt;&lt;/code> 标签，并在 &lt;code>&amp;lt;dubbo:service&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code> 的 &lt;code>registry&lt;/code> 属性指定使用的注册中心。&lt;/p>
 &lt;table>
 &lt;thead>
@@ -2441,7 +2441,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.7.0以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: dubbo:service</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-service/</guid><description>
+&lt;/table></description></item><item><title>Docs: dubbo:service</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-service/</guid><description>
 &lt;p>服务提供者暴露服务配置。对应的配置类：&lt;code>org.apache.dubbo.config.ServiceConfig&lt;/code>&lt;/p>
 &lt;table>
 &lt;thead>
@@ -2768,7 +2768,7 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 &lt;td>2.0.8以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Docs: Nacos 注册中心</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/nacos/</guid><description>
+&lt;/table></description></item><item><title>Docs: Nacos 注册中心</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/nacos/</guid><description>
 &lt;p>Nacos 是 Dubbo 生态系统中重要的注册中心实现，其中 &lt;a href="https://github.com/apache/incubator-dubbo/tree/master/dubbo-registry/dubbo-registry-nacos">&lt;code>dubbo-registry-nacos&lt;/code>&lt;/a> 则是 Dubbo 融合 Nacos 注册中心的实现。&lt;/p>
 &lt;h2 id="预备工作">预备工作&lt;/h2>
 &lt;p>当您将 &lt;a href="https://github.com/apache/incubator-dubbo/tree/master/dubbo-registry/dubbo-registry-nacos">dubbo-registry-nacos&lt;/a> 整合到您的 Dubbo 工程之前，请确保后台已经启动 Nacos 服务。如果您尚且不熟悉 Nacos 的基本使用的话，可先行参考 &lt;a href="https://nacos.io/en-us/docs/quick-start.html">Nacos 快速入门&lt;/a>。建议使用 Nacos &lt;code>1.0.0&lt;/code> 及以上的版本。&lt;/p>
@@ -2818,9 +2818,9 @@ logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e
 dubbo.registry.address = nacos://10.20.153.10:8848
 ...
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>随后，重启您的 Dubbo 应用，Dubbo 的服务提供和消费信息在 Nacos 控制台中可以显示：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-1.png" alt="dubbo-registry-nacos-1.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-1.png" alt="dubbo-registry-nacos-1.png">&lt;/p>
 &lt;p>如图所示，服务名前缀为 &lt;code>providers:&lt;/code> 的信息为服务提供者的元信息，&lt;code>consumers:&lt;/code> 则代表服务消费者的元信息。点击“&lt;strong>详情&lt;/strong>”可查看服务状态详情：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-2.png" alt="image-dubbo-registry-nacos-2.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-2.png" alt="image-dubbo-registry-nacos-2.png">&lt;/p>
 &lt;p>如果您正在使用 Spring XML 配置文件装配 Dubbo 注册中心的话，请参考下一节。&lt;/p>
 &lt;h3 id="spring-xml-配置文件">Spring XML 配置文件&lt;/h3>
 &lt;p>与 &lt;a href="https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/">Dubbo Spring 外部化配置&lt;/a> 配置类似，只需要调整 &lt;code>address&lt;/code> 属性配置即可：&lt;/p>
@@ -2836,7 +2836,7 @@ xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springfram
 ...
 &lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>重启 Dubbo 应用后，您同样也能发现服务提供方和消费方的注册元信息呈现在 Nacos 控制台中：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-3.png" alt="dubbo-registry-nacos-3.png">&lt;/p></description></item><item><title>Docs: XML 配置</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/xml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/xml/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-3.png" alt="dubbo-registry-nacos-3.png">&lt;/p></description></item><item><title>Docs: XML 配置</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/xml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/xml/</guid><description>
 &lt;p>有关 XML 的详细配置项，请参见：&lt;a href="../../references/xml">配置参考手册&lt;/a>。如果不想使用 Spring 配置，而希望通过 API 的方式进行调用，请参见：&lt;a href="../api">API配置&lt;/a>。想知道如何使用配置，请参见：&lt;a href="../../quick-start">快速启动&lt;/a>。&lt;/p>
 &lt;p>请在此查看文档描述的&lt;a href="https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-basic">完整示例&lt;/a>&lt;/p>
 &lt;h2 id="providerxml-示例">provider.xml 示例&lt;/h2>
@@ -2874,7 +2874,7 @@ xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springfram
 &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;jms&amp;#34;&lt;/span> p:queue=&lt;span style="color:#2aa198">&amp;#34;your_queue&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置之间的关系">配置之间的关系&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/dubbo-config.jpg" alt="dubbo-config">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-config.jpg" alt="dubbo-config">&lt;/p>
 &lt;table>
 &lt;thead>
 &lt;tr>
@@ -2948,7 +2948,7 @@ xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springfram
 &lt;li>如果级别一样，则消费方优先，提供方次之。&lt;/li>
 &lt;/ul>
 &lt;p>其中，服务提供方配置，通过 URL 经由注册中心传递给消费方。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/dubbo-config-override.jpg" alt="dubbo-config-override">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-config-override.jpg" alt="dubbo-config-override">&lt;/p>
 &lt;p>（建议由服务提供方设置超时，因为一个方法需要执行多长时间，服务提供方更清楚，如果一个消费方同时引用多个服务，就不需要关心每个服务的超时设置）。&lt;/p>
 &lt;p>理论上 ReferenceConfig 中除了&lt;code>interface&lt;/code>这一项，其他所有配置项都可以缺省不配置，框架会自动使用ConsumerConfig，ServiceConfig, ProviderConfig等提供的缺省配置。&lt;/p>
 &lt;section class="footnotes" role="doc-endnotes">
@@ -2961,9 +2961,9 @@ xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springfram
 &lt;p>引用缺省是延迟初始化的，只有引用被注入到其它 Bean，或被 &lt;code>getBean()&lt;/code> 获取，才会初始化。如果需要饥饿加载，即没有人引用也立即生成动态代理，可以配置：&lt;code>&amp;lt;dubbo:reference ... init=&amp;quot;true&amp;quot; /&amp;gt;&lt;/code> &lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: Zookeeper 注册中心</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/zookeeper/</guid><description>
+&lt;/section></description></item><item><title>Docs: Zookeeper 注册中心</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/zookeeper/</guid><description>
 &lt;p>&lt;a href="http://zookeeper.apache.org">Zookeeper&lt;/a> 是 Apache Hadoop 的子项目，是一个树型的目录服务，支持变更推送，适合作为 Dubbo 服务的注册中心，工业强度较高，可用于生产环境，并推荐使用 &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/zookeeper.jpg" alt="/user-guide/images/zookeeper.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/zookeeper.jpg" alt="/user-guide/images/zookeeper.jpg">&lt;/p>
 &lt;p>流程说明：&lt;/p>
 &lt;ul>
 &lt;li>服务提供者启动时: 向 &lt;code>/dubbo/com.foo.BarService/providers&lt;/code> 目录下写入自己的 URL 地址&lt;/li>
@@ -3043,7 +3043,7 @@ xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springfram
 &lt;p>建议使用 &lt;code>2.3.3&lt;/code> 以上版本的 zookeeper 注册中心客户端 &lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: 协议扩展</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/impls/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/impls/protocol/</guid><description>
+&lt;/section></description></item><item><title>Docs: 协议扩展</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/impls/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/impls/protocol/</guid><description>
 &lt;h2 id="扩展说明">扩展说明&lt;/h2>
 &lt;p>RPC 协议扩展，封装远程调用细节。&lt;/p>
 &lt;p>契约：&lt;/p>
@@ -3156,7 +3156,7 @@ xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springfram
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.rpc.Protocol：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">xxx=com.xxx.XxxProtocol
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 启动时检查</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/examples/preflight-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/examples/preflight-check/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 启动时检查</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/examples/preflight-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/examples/preflight-check/</guid><description>
 &lt;p>Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会抛出异常，阻止 Spring 初始化完成，以便上线时，能及早发现问题，默认 &lt;code>check=&amp;quot;true&amp;quot;&lt;/code>。&lt;/p>
 &lt;p>可以通过 &lt;code>check=&amp;quot;false&amp;quot;&lt;/code> 关闭检查，比如，测试时，有些服务不关心，或者出现了循环依赖，必须有一方先启动。&lt;/p>
 &lt;p>另外，如果你的 Spring 容器是懒加载的，或者通过 API 编程延迟引用服务，请关闭 check，否则服务临时不可用时，会抛出异常，拿到 null 引用，如果 &lt;code>check=&amp;quot;false&amp;quot;&lt;/code>，总是会返回引用，当服务恢复时，能自动连上。&lt;/p>
@@ -3181,7 +3181,7 @@ java -Ddubbo.registry.check&lt;span style="color:#719e07">=&lt;/span>&lt;span st
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置的含义">配置的含义&lt;/h2>
 &lt;p>&lt;code>dubbo.reference.check=false&lt;/code>，强制改变所有 reference 的 check 值，就算配置中有声明，也会被覆盖。&lt;/p>
 &lt;p>&lt;code>dubbo.consumer.check=false&lt;/code>，是设置 check 的缺省值，如果配置中有显式的声明，如：&lt;code>&amp;lt;dubbo:reference check=&amp;quot;true&amp;quot;/&amp;gt;&lt;/code>，不会受影响。&lt;/p>
-&lt;p>&lt;code>dubbo.registry.check=false&lt;/code>，前面两个都是指订阅成功，但提供者列表是否为空是否报错，如果注册订阅失败时，也允许启动，需使用此选项，将在后台定时重试。&lt;/p></description></item><item><title>Docs: 快速开始</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/quick-start/</guid><description>
+&lt;p>&lt;code>dubbo.registry.check=false&lt;/code>，前面两个都是指订阅成功，但提供者列表是否为空是否报错，如果注册订阅失败时，也允许启动，需使用此选项，将在后台定时重试。&lt;/p></description></item><item><title>Docs: 快速开始</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/quick-start/</guid><description>
 &lt;p>建议先使用 java 定义接口 jar，并使用 &lt;a href="https://github.com/apache/dubbo-erlang/tree/master/tools/erlanalysis">erlanalysis&lt;/a> 工具解析java接口至Erlang lib&lt;/p>
 &lt;h2 id="导入依赖库">导入依赖库&lt;/h2>
 &lt;h3 id="使用-rebar-编译工具">使用 Rebar 编译工具。&lt;/h3>
@@ -3219,14 +3219,14 @@ into the project&amp;rsquo;s &lt;code>apps&lt;/code> directory.&lt;/li>
 &lt;span style="color:#586e75">%% you can receive the message after.
 &lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">handle_cast&lt;/span>({msg_back,&lt;span style="color:#268bd2">RequestRef&lt;/span>,&lt;span style="color:#268bd2">Response&lt;/span>,&lt;span style="color:#268bd2">RpcContent&lt;/span>},&lt;span style="color:#268bd2">State&lt;/span>).
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="示例">示例&lt;/h2>
-&lt;p>参考项目 &lt;a href="https://github.com/apache/dubbo-erlang/tree/master/samples">dubboerl_demo&lt;/a>&lt;/p></description></item><item><title>Docs: 如何成为 Dubbo Committer</title><link>http://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/become-a-committer_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/become-a-committer_dev/</guid><description>
+&lt;p>参考项目 &lt;a href="https://github.com/apache/dubbo-erlang/tree/master/samples">dubboerl_demo&lt;/a>&lt;/p></description></item><item><title>Docs: 如何成为 Dubbo Committer</title><link>https://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/become-a-committer_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/become-a-committer_dev/</guid><description>
 &lt;p>每个人都可以成为 Apache 项目的贡献者。作为一个贡献者只是意味着你对项目感兴趣并以某种方式做出贡献，从提出合理的问题（这些问题记录了项目并向开发人员提供反馈）到提供新的特性作为补丁。&lt;/p>
 &lt;p>如果你成为对一个项目有价值的贡献者，你有可能被邀请成为一个 committer。committer 是 ASF（Apache软件基金会）中用来表示提交特定项目的人的术语。它给你带来对项目仓库和资源写的权限。&lt;/p>
 &lt;p>在 Dubbo 社区，如果一个 committer 获得大量的优秀成绩，就可以被邀请加入项目管理委员会（PMC）。&lt;/p>
 &lt;p>当您不熟悉ASF使用的开源的开发过程时，有时难以理解的一点，就是我们更重视社区而不是代码。一个强大而健康的社区将受到尊重，成为一个有趣和有益的地方。更重要的是，一个多元化和健康的社区可以长时间的持续支持代码，即使个别公司在这个领域来来往往，也是如此。&lt;/p>
 &lt;p>更多详细信息可以在&lt;a href="https://community.apache.org/contributors/">这里&lt;/a>找到。&lt;/p>
 &lt;h3 id="我可以贡献什么">我可以贡献什么？&lt;/h3>
-&lt;p>请参阅&lt;a href="new-contributor-guide_dev.md">新的贡献者指南&lt;/a>。&lt;/p></description></item><item><title>Docs: 服务路由</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</guid><description>
+&lt;p>请参阅&lt;a href="new-contributor-guide_dev.md">新的贡献者指南&lt;/a>。&lt;/p></description></item><item><title>Docs: 服务路由</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/router/</guid><description>
 &lt;h2 id="1-简介">1. 简介&lt;/h2>
 &lt;p>上一篇文章分析了集群容错的第一部分 — 服务目录 Directory。服务目录在刷新 Invoker 列表的过程中，会通过 Router 进行服务路由，筛选出符合路由规则的服务提供者。在详细分析服务路由的源码之前，先来介绍一下服务路由是什么。服务路由包含一条路由规则，路由规则决定了服务消费者的调用目标，即规定了服务消费者可调用哪些服务提供者。Dubbo 目前提供了三种服务路由实现，分别为条件路由 ConditionRouter、脚本路由 ScriptRouter 和标签路由 TagRouter。其中条件路由是我们最常使用的，标签路由是一个新的实现，暂时还未发布，该实现预计会在 2.7.x 版本中发布。本篇文章将分析条件路由相关源码，脚本路由和标签路由这里就不分析了。&lt;/p>
 &lt;h2 id="2-源码分析">2. 源码分析&lt;/h2>
@@ -3626,7 +3626,7 @@ String suffix &lt;span style="color:#719e07">=&lt;/span> pattern&lt;span style="
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>以上就是 isMatchGlobPattern 两个重载方法的全部逻辑，这两个方法分别对普通的匹配过程，以及”引用消费者参数“和通配符匹配等特性提供了支持。这两个方法的逻辑不是很复杂，且代码中也进行了比较详细的注释，因此就不多说了。&lt;/p>
 &lt;h2 id="3-总结">3. 总结&lt;/h2>
-&lt;p>本篇文章对条件路由的表达式解析和服务路由过程进行了较为细致的分析。总的来说，条件路由的代码还是有一些复杂的，需要静下心来看。在阅读条件路由代码的过程中，要多调试。一般的框架都会有单元测试，Dubbo 也不例外，因此大家可以直接通过 ConditionRouterTest 对条件路由进行调试，无需重头构建测试用例。&lt;/p></description></item><item><title>Docs: Apache 提交者注册流程</title><link>http://dubbo.apache.org/zh/docs/contribution-guidelines/committer/new-committer-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/contribution-guidelines/committer/new-committer-guide_dev/</guid><description>
+&lt;p>本篇文章对条件路由的表达式解析和服务路由过程进行了较为细致的分析。总的来说，条件路由的代码还是有一些复杂的，需要静下心来看。在阅读条件路由代码的过程中，要多调试。一般的框架都会有单元测试，Dubbo 也不例外，因此大家可以直接通过 ConditionRouterTest 对条件路由进行调试，无需重头构建测试用例。&lt;/p></description></item><item><title>Docs: Apache 提交者注册流程</title><link>https://dubbo.apache.org/zh/docs/contribution-guidelines/committer/new-committer-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/contribution-guidelines/committer/new-committer-guide_dev/</guid><description>
 &lt;h2 id="一apache-提交者的产生">一、Apache 提交者的产生&lt;/h2>
 &lt;h3 id="项目孵化初始化提交者">项目孵化初始化提交者&lt;/h3>
 &lt;p>项目孵化阶段，在孵化项目提案中，会有初始化提交者列表这一选项。确认你是初始化提交者的一员。项目在 apache 孵化器社区投票通过后，提交者可以开始准备注册账户了。可以参看&lt;a href="https://wiki.apache.org/incubator/">孵化器 wiki&lt;/a>&lt;/p>
@@ -3699,7 +3699,7 @@ String suffix &lt;span style="color:#719e07">=&lt;/span> pattern&lt;span style="
 &lt;h3 id="小福利">小福利&lt;/h3>
 &lt;p>Jetbrains 给 apache 提交者一个小福利，就是可以免费使用 idea 的全产品系列。具体注册地址为：https://www.jetbrains.com/shop/eform/apache?product=ALL&lt;/p>
 &lt;h3 id="相关-wiki">相关 wiki&lt;/h3>
-&lt;p>&lt;a href="https://www.apache.org/dev/new-committers-guide.html">https://www.apache.org/dev/new-committers-guide.html&lt;/a>&lt;/p></description></item><item><title>Docs: 源码构建</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/build/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/build/</guid><description>
+&lt;p>&lt;a href="https://www.apache.org/dev/new-committers-guide.html">https://www.apache.org/dev/new-committers-guide.html&lt;/a>&lt;/p></description></item><item><title>Docs: 源码构建</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/build/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/build/</guid><description>
 &lt;h2 id="代码签出">代码签出&lt;/h2>
 &lt;p>通过以下的这个命令签出最新的项目源码 &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">git clone https://github.com/apache/dubbo.git dubbo
@@ -3742,7 +3742,7 @@ String suffix &lt;span style="color:#719e07">=&lt;/span> pattern&lt;span style="
 &lt;p>UNIX 下的路径是 ${HOME}/.m2/repository, Windows 下的路径是 C:\Documents and Settings&amp;lt;user&amp;gt;.m2\repository &lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: 管理控制台安装</title><link>http://dubbo.apache.org/zh/docs/v2.7/admin/install/admin-console/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/admin/install/admin-console/</guid><description>
+&lt;/section></description></item><item><title>Docs: 管理控制台安装</title><link>https://dubbo.apache.org/zh/docs/v2.7/admin/install/admin-console/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/admin/install/admin-console/</guid><description>
 &lt;p>目前版本的管理控制台正在开发中，已经完成了服务查询和服务治理的功能，采用前后端分离的模式，具体的安装和使用步骤如下：&lt;/p>
 &lt;p>安装:&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">git clone https://github.com/apache/dubbo-admin.git /var/tmp/dubbo-admin
@@ -3766,20 +3766,20 @@ dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>zookeeper://127.
 &lt;p>当前版本中未实现登录功能，会在后续版本加上 &lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: 管理控制台运维</title><link>http://dubbo.apache.org/zh/docs/v2.7/admin/ops/functions/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/admin/ops/functions/</guid><description>
+&lt;/section></description></item><item><title>Docs: 管理控制台运维</title><link>https://dubbo.apache.org/zh/docs/v2.7/admin/ops/functions/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/admin/ops/functions/</guid><description>
 &lt;h2 id="搜索页面">搜索页面&lt;/h2>
 &lt;p>当你需要管理 Dubbo 的服务时，首先要搜索到这个服务，然后打开它的管理页面&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/admin/dubbo-search.jpg" alt="/admin-guide/images/dubbo-search.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/admin/dubbo-search.jpg" alt="/admin-guide/images/dubbo-search.png">&lt;/p>
 &lt;h2 id="服务提供者页面">服务提供者页面&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/admin/dubbo-providers.jpg" alt="/admin-guide/images/dubbo-providers.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/admin/dubbo-providers.jpg" alt="/admin-guide/images/dubbo-providers.png">&lt;/p>
 &lt;h2 id="服务消费者页面">服务消费者页面&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/admin/dubbo-consumers.jpg" alt="/admin-guide/images/dubbo-consumers.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/admin/dubbo-consumers.jpg" alt="/admin-guide/images/dubbo-consumers.png">&lt;/p>
 &lt;h2 id="添加路由规则页面">添加路由规则页面&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/admin/dubbo-add-route.jpg" alt="/admin-guide/images/dubbo-add-route.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/admin/dubbo-add-route.jpg" alt="/admin-guide/images/dubbo-add-route.png">&lt;/p>
 &lt;h2 id="添加动态配置页面">添加动态配置页面&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/admin/dubbo-add-config.jpg" alt="/admin-guide/images/dubbo-add-config.png">&lt;/p></description></item><item><title>Docs: 背景</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/preface/background/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/preface/background/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/admin/dubbo-add-config.jpg" alt="/admin-guide/images/dubbo-add-config.png">&lt;/p></description></item><item><title>Docs: 背景</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/preface/background/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/preface/background/</guid><description>
 &lt;p>随着互联网的发展，网站应用的规模不断扩大，常规的垂直应用架构已无法应对，分布式服务架构以及流动计算架构势在必行，亟需一个治理系统确保架构有条不紊的演进。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/dubbo-architecture-roadmap.jpg" alt="image">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-architecture-roadmap.jpg" alt="image">&lt;/p>
 &lt;h4 id="单一应用架构">单一应用架构&lt;/h4>
 &lt;p>当网站流量很小时，只需一个应用，将所有功能都部署在一起，以减少部署节点和成本。此时，用于简化增删改查工作量的数据访问框架(ORM)是关键。&lt;/p>
 &lt;h4 id="垂直应用架构">垂直应用架构&lt;/h4>
@@ -3787,13 +3787,13 @@ dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>zookeeper://127.
 &lt;h4 id="分布式服务架构">分布式服务架构&lt;/h4>
 &lt;p>当垂直应用越来越多，应用之间交互不可避免，将核心业务抽取出来，作为独立的服务，逐渐形成稳定的服务中心，使前端应用能更快速的响应多变的市场需求。此时，用于提高业务复用及整合的分布式服务框架(RPC)是关键。&lt;/p>
 &lt;h4 id="流动计算架构">流动计算架构&lt;/h4>
-&lt;p>当服务越来越多，容量的评估，小服务资源的浪费等问题逐渐显现，此时需增加一个调度中心基于访问压力实时管理集群容量，提高集群利用率。此时，用于提高机器利用率的资源调度和治理中心(SOA)是关键。&lt;/p></description></item><item><title>Docs: 需求</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/preface/requirements/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/preface/requirements/</guid><description>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/dubbo-service-governance.jpg" alt="image">&lt;/p>
+&lt;p>当服务越来越多，容量的评估，小服务资源的浪费等问题逐渐显现，此时需增加一个调度中心基于访问压力实时管理集群容量，提高集群利用率。此时，用于提高机器利用率的资源调度和治理中心(SOA)是关键。&lt;/p></description></item><item><title>Docs: 需求</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/preface/requirements/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/preface/requirements/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-service-governance.jpg" alt="image">&lt;/p>
 &lt;p>在大规模服务化之前，应用可能只是通过 RMI 或 Hessian 等工具，简单的暴露和引用远程服务，通过配置服务的URL地址进行调用，通过 F5 等硬件进行负载均衡。&lt;/p>
 &lt;p>&lt;strong>当服务越来越多时，服务 URL 配置管理变得非常困难，F5 硬件负载均衡器的单点压力也越来越大。&lt;/strong> 此时需要一个服务注册中心，动态地注册和发现服务，使服务的位置透明。并通过在消费方获取服务提供方地址列表，实现软负载均衡和 Failover，降低对 F5 硬件负载均衡器的依赖，也能减少部分成本。&lt;/p>
 &lt;p>&lt;strong>当进一步发展，服务间依赖关系变得错踪复杂，甚至分不清哪个应用要在哪个应用之前启动，架构师都不能完整的描述应用的架构关系。&lt;/strong> 这时，需要自动画出应用间的依赖关系图，以帮助架构师理清关系。&lt;/p>
 &lt;p>&lt;strong>接着，服务的调用量越来越大，服务的容量问题就暴露出来，这个服务需要多少机器支撑？什么时候该加机器？&lt;/strong> 为了解决这些问题，第一步，要将服务现在每天的调用量，响应时间，都统计出来，作为容量规划的参考指标。其次，要可以动态调整权重，在线上，将某台机器的权重一直加大，并在加大的过程中记录响应时间的变化，直到响应时间到达阈值，记录此时的访问量，再以此访问量乘以机器数反推总容量。&lt;/p>
-&lt;p>以上是 Dubbo 最基本的几个需求。&lt;/p></description></item><item><title>Docs: 魔鬼在细节</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/principals/code-detail/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/principals/code-detail/</guid><description>
+&lt;p>以上是 Dubbo 最基本的几个需求。&lt;/p></description></item><item><title>Docs: 魔鬼在细节</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/principals/code-detail/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/principals/code-detail/</guid><description>
 &lt;blockquote>
 &lt;p>&lt;a href="http://javatar.iteye.com/blog/1056664">http://javatar.iteye.com/blog/1056664&lt;/a>&lt;/p>
 &lt;/blockquote>
@@ -3813,7 +3813,7 @@ dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>zookeeper://127.
 &lt;h2 id="降低修改时的误解性不埋雷">降低修改时的误解性，不埋雷&lt;/h2>
 &lt;p>前面不停的提到代码被其他人修改，这也开发人员要随时紧记的。这个其他人包括未来的自己，你要总想着这个代码可能会有人去改它。我应该给修改的人一点什么提示，让他知道我现在的设计意图，而不要在程序里面加潜规则，或埋一些容易忽视的雷，比如：你用 null 表示不可用，size 等于 0 表示黑名单，这就是一个雷，下一个修改者，包括你自己，都不会记得有这样的约定，可能后面为了改某个其它 BUG，不小心改到了这里，直接引爆故障。对于这个例子，一个原则就是永远不要区分 null 引用和 empty 值。&lt;/p>
 &lt;h2 id="提高代码的可测性">提高代码的可测性&lt;/h2>
-&lt;p>这里的可测性主要指 Mock 的容易程度，和测试的隔离性。至于测试的自动性，可重复性，非偶然性，无序性，完备性(全覆盖)，轻量性(可快速执行)，一般开发人员，加上 JUnit 等工具的辅助基本都能做到，也能理解它的好处，只是工作量问题。这里要特别强调的是测试用例的单一性(只测目标类本身)和隔离性(不传染失败)。现在的测试代码，过于强调完备性，大量重复交叉测试，看起来没啥坏处，但测试代码越多，维护代价越高。经常出现的问题是，修改一行代码或加一个判断条件，引起 100 多个测试用例不通过。时间一紧，谁有这个闲功夫去改这么多形态各异的测试用例？久而久之，这个测试代码就已经不能真实反应代码现在的状况，很多时候会被迫绕过。最好的情况是，修改一行代码，有且只有一行测试代码不通过。如果修改了代码而测试用例还能通过，那也不行，表示测试没有覆盖到。另外，可 Mock 性是隔离的基础，把间接依赖的逻辑屏蔽掉。可 Mock 性的一个最大的杀手就是静态方法，尽量少用。&lt;/p></description></item><item><title>Docs: CLA 签署向导</title><link>http://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/cla-signing-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/cla-signing-guide_dev/</guid><description>
+&lt;p>这里的可测性主要指 Mock 的容易程度，和测试的隔离性。至于测试的自动性，可重复性，非偶然性，无序性，完备性(全覆盖)，轻量性(可快速执行)，一般开发人员，加上 JUnit 等工具的辅助基本都能做到，也能理解它的好处，只是工作量问题。这里要特别强调的是测试用例的单一性(只测目标类本身)和隔离性(不传染失败)。现在的测试代码，过于强调完备性，大量重复交叉测试，看起来没啥坏处，但测试代码越多，维护代价越高。经常出现的问题是，修改一行代码或加一个判断条件，引起 100 多个测试用例不通过。时间一紧，谁有这个闲功夫去改这么多形态各异的测试用例？久而久之，这个测试代码就已经不能真实反应代码现在的状况，很多时候会被迫绕过。最好的情况是，修改一行代码，有且只有一行测试代码不通过。如果修改了代码而测试用例还能通过，那也不行，表示测试没有覆盖到。另外，可 Mock 性是隔离的基础，把间接依赖的逻辑屏蔽掉。可 Mock 性的一个最大的杀手就是静态方法，尽量少用。&lt;/p></description></item><item><title>Docs: CLA 签署向导</title><link>https://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/cla-signing-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/cla-signing-guide_dev/</guid><description>
 &lt;p>以下情况，需要您签署 Apache ICLA：&lt;/p>
 &lt;ul>
 &lt;li>在 Dubbo 被捐赠给 Apache 之前，您已经为 Dubbo 作出了很多贡献，并且您以前没有签署过 Alibaba-CLA。&lt;/li>
@@ -3839,7 +3839,7 @@ dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>zookeeper://127.
 &lt;li>Mailing address：首选英文格式的公司地址&lt;/li>
 &lt;li>preferred apache id(s)：如果您被邀请成为一名提交者，那么需要您填写一个apache账号，否则，可以不填&lt;/li>
 &lt;li>notify project：Dubbo（意思就是Dubbo就是通知您签署ICLA的项目）&lt;/li>
-&lt;/ul></description></item><item><title>Docs: Dubbo 管理控制台介绍</title><link>http://dubbo.apache.org/zh/docs/v2.7/admin/ops/introduction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/admin/ops/introduction/</guid><description>
+&lt;/ul></description></item><item><title>Docs: Dubbo 管理控制台介绍</title><link>https://dubbo.apache.org/zh/docs/v2.7/admin/ops/introduction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/admin/ops/introduction/</guid><description>
 &lt;p>目前的管理控制台已经发布 0.1 版本，结构上采取了前后端分离的方式，前端使用 Vue 和 Vuetify 分别作为 Javascript 框架和UI框架，后端采用 Spring Boot 框架。既可以按照标准的 Maven 方式进行打包，部署，也可以采用前后端分离的部署方式，方便开发，功能上，目前具备了服务查询，服务治理(包括 Dubbo 2.7 中新增的治理规则)以及服务测试三部分内容。&lt;/p>
 &lt;h3 id="maven方式部署">Maven方式部署&lt;/h3>
 &lt;ul>
@@ -3897,9 +3897,9 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 &lt;p>当前版本中未实现登录功能，会在后续版本加上 &lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: Multicast 注册中心</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/multicast/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/multicast/</guid><description>
+&lt;/section></description></item><item><title>Docs: Multicast 注册中心</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/multicast/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/multicast/</guid><description>
 &lt;p>Multicast 注册中心不需要启动任何中心节点，只要广播地址一样，就可以互相发现。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/multicast.jpg" alt="/user-guide/images/multicast.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/multicast.jpg" alt="/user-guide/images/multicast.jpg">&lt;/p>
 &lt;ol start="0">
 &lt;li>提供方启动时广播自己的地址&lt;/li>
 &lt;li>消费方启动时广播订阅请求&lt;/li>
@@ -3919,7 +3919,7 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&amp;gt;&lt;/span>
 &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;unicast&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;span style="color:#268bd2">&amp;lt;/dubbo:consumer&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: rest 协议</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/rest/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/rest/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: rest 协议</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/rest/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/rest/</guid><description>
 &lt;p>基于标准的Java REST API——JAX-RS 2.0（Java API for RESTful Web Services的简写）实现的REST调用支持&lt;/p>
 &lt;h2 id="快速入门">快速入门&lt;/h2>
 &lt;p>在dubbo中开发一个REST风格的服务会比较简单，下面以一个注册用户的简单服务为例说明。&lt;/p>
@@ -4331,7 +4331,7 @@ cv&lt;span style="color:#719e07">.&lt;/span>getInvalidValue&lt;span style="color
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>然后将这个ExceptionMapper添加到XML配置中即可：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.MyValidationExceptionMapper&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: SPI 自适应拓展</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: SPI 自适应拓展</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/source/adaptive-extension/</guid><description>
 &lt;h2 id="1原理">1.原理&lt;/h2>
 &lt;p>在 Dubbo 中，很多拓展都是通过 SPI 机制进行加载的，比如 Protocol、Cluster、LoadBalance 等。有时，有些拓展并不想在框架启动阶段被加载，而是希望在拓展方法被调用时，根据运行时参数进行加载。这听起来有些矛盾。拓展未被加载，那么拓展方法就无法被调用（静态方法除外）。拓展方法未被调用，拓展就无法被加载。对于这个矛盾的问题，Dubbo 通过自适应拓展机制很好的解决了。自适应拓展机制的实现逻辑比较复杂，首先 Dubbo 会为拓展接口生成具有代理功能的代码。然后通过 javassist 或 jdk 编译这段代码，得到 Class 类。最后再通过反射创建代理类，整个过程比较复杂。为了让大家对自适应拓展有一个感性的认识，下面我们通过一个示例进行演示。这是一个与汽车相关的例子，我们有一个车轮制造厂接口 WheelMaker：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">WheelMaker&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
@@ -4922,7 +4922,7 @@ codeBuilder&lt;span style="color:#719e07">.&lt;/span>append&lt;span style="color
 &lt;span style="color:#586e75">// 方法体
 &lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3总结">3.总结&lt;/h2>
-&lt;p>到此，关于自适应拓展的原理，实现就分析完了。总的来说自适应拓展整个逻辑还是很复杂的，并不是很容易弄懂。因此，大家在阅读该部分源码时，耐心一些。同时多进行调试，也可以通过生成好的代码思考代码的生成逻辑。好了，本篇文章就分析到这里。&lt;/p></description></item><item><title>Docs: 动态配置中心</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/config-center/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/config-center/</guid><description>
+&lt;p>到此，关于自适应拓展的原理，实现就分析完了。总的来说自适应拓展整个逻辑还是很复杂的，并不是很容易弄懂。因此，大家在阅读该部分源码时，耐心一些。同时多进行调试，也可以通过生成好的代码思考代码的生成逻辑。好了，本篇文章就分析到这里。&lt;/p></description></item><item><title>Docs: 动态配置中心</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/config-center/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/config-center/</guid><description>
 &lt;p>配置中心（v2.7.0）在 Dubbo 中承担两个职责：&lt;/p>
 &lt;ol>
 &lt;li>外部化配置。启动配置的集中式存储 （简单理解为 dubbo.properties 的外部化存储）。&lt;/li>
@@ -4962,7 +4962,7 @@ dubbo.application.qos.port=33333
 &lt;h4 id="zookeeper">Zookeeper&lt;/h4>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:config-center&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>默认所有的配置都存储在 &lt;code>/dubbo/config&lt;/code> 节点，具体节点结构图如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/zk-configcenter.jpg" alt="zk-configcenter.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/zk-configcenter.jpg" alt="zk-configcenter.jpg">&lt;/p>
 &lt;ul>
 &lt;li>namespace，用于不同配置的环境隔离。&lt;/li>
 &lt;li>config，Dubbo约定的固定节点，不可更改，所有配置和服务治理规则都存储在此节点下。&lt;/li>
@@ -4973,11 +4973,11 @@ dubbo.application.qos.port=33333
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:config-center&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;apollo&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Apollo中的一个核心概念是命名空间 - namespace（和上面zookeeper的namespace概念不同），在这里全局和应用级别配置就是通过命名空间来区分的。&lt;/p>
 &lt;p>默认情况下，Dubbo会从名叫&lt;code>dubbo&lt;/code>（由于 Apollo 不支持特殊后缀 &lt;code>.properties&lt;/code> ）的命名空间中读取全局配置（&lt;code>&amp;lt;dubbo:config-center namespace=&amp;quot;your namespace&amp;quot;&amp;gt;&lt;/code>）&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/apollo-configcenter-dubbo.png" alt="apollo-configcenter-dubbo.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/apollo-configcenter-dubbo.png" alt="apollo-configcenter-dubbo.png">&lt;/p>
 &lt;p>由于 Apollo 也默认将会在 &lt;code>dubbo&lt;/code> namespace 中存储服务治理规则（如路由规则），建议通过单独配置 &lt;code>group&lt;/code> 将服务治理和配置文件托管分离开，以 XML 配置方式为例：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo&lt;/span> namespace=&lt;span style="color:#2aa198">&amp;#34;governance&amp;#34;&lt;/span> group =&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>这里，服务治理规则将存储在 governance namespace，而配置文件将存储在 dubbo namespace，如下图所示：
-&lt;img src="http://dubbo.apache.org/imgs/user/apollo-configcenter-governance-dubbo.png" alt="apollo-configcenter-governance-dubbo.png">&lt;/p>
+&lt;img src="https://dubbo.apache.org/imgs/user/apollo-configcenter-governance-dubbo.png" alt="apollo-configcenter-governance-dubbo.png">&lt;/p>
 &lt;blockquote>
 &lt;p>关于文件配置托管，相当于是把 &lt;code>dubbo.properties&lt;/code> 配置文件的内容存储在了 Apollo 中，应用通过关联共享的 &lt;code>dubbo&lt;/code> namespace 继承公共配置,
 应用也可以按照 Apollo 的做法来覆盖个别配置项。&lt;/p>
@@ -4994,7 +4994,7 @@ configCenter&lt;span style="color:#719e07">.&lt;/span>setExternalConfig&lt;span 
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="服务治理">服务治理&lt;/h2>
 &lt;h4 id="zookeeper-1">Zookeeper&lt;/h4>
 &lt;p>默认节点结构：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/zk-configcenter-governance.jpg" alt="zk-configcenter-governance">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/zk-configcenter-governance.jpg" alt="zk-configcenter-governance">&lt;/p>
 &lt;ul>
 &lt;li>namespace，用于不同配置的环境隔离。&lt;/li>
 &lt;li>config，Dubbo 约定的固定节点，不可更改，所有配置和服务治理规则都存储在此节点下。&lt;/li>
@@ -5003,13 +5003,13 @@ configCenter&lt;span style="color:#719e07">.&lt;/span>setExternalConfig&lt;span 
 &lt;/ul>
 &lt;h4 id="apollo-1">Apollo&lt;/h4>
 &lt;p>所有的服务治理规则都是全局性的，默认从公共命名空间 &lt;code>dubbo&lt;/code> 读取和订阅：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/apollo-configcenter-governance.jpg" alt="apollo-configcenter-governance.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/apollo-configcenter-governance.jpg" alt="apollo-configcenter-governance.jpg">&lt;/p>
 &lt;p>不同的规则以不同的 key 后缀区分：&lt;/p>
 &lt;ul>
 &lt;li>configurators，&lt;a href="../../examples/config-rule">覆盖规则&lt;/a>&lt;/li>
 &lt;li>tag-router，&lt;a href="../../examples/routing-rule">标签路由&lt;/a>&lt;/li>
 &lt;li>condition-router，&lt;a href="../../examples/routing-rule">条件路由&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Docs: 如何准备 Apache Release</title><link>http://dubbo.apache.org/zh/docs/contribution-guidelines/committer/release-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/contribution-guidelines/committer/release-guide_dev/</guid><description>
+&lt;/ul></description></item><item><title>Docs: 如何准备 Apache Release</title><link>https://dubbo.apache.org/zh/docs/contribution-guidelines/committer/release-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/contribution-guidelines/committer/release-guide_dev/</guid><description>
 &lt;h2 id="理解-apache-发布的内容和流程">理解 Apache 发布的内容和流程&lt;/h2>
 &lt;p>总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。&lt;/p>
 &lt;p>请参考以下链接，找到更多关于 ASF 的发布指南:&lt;/p>
@@ -5334,7 +5334,7 @@ an issue on GitHub[4].
 &lt;h4 id="gpg-signing-failed-inappropriate-ioctl-for-device">gpg: signing failed: Inappropriate ioctl for device&lt;/h4>
 &lt;p>If you&amp;rsquo;ve encountered this error, try the following commands:&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">export GPG_TTY=$(tty)
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 属性配置</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/properties/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/properties/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 属性配置</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/properties/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/properties/</guid><description>
 &lt;p>如果你的应用足够简单，例如，不需要多注册中心或多协议，并且需要在spring容器中共享配置，那么，我们可以直接使用 &lt;code>dubbo.properties&lt;/code> 作为默认配置。&lt;/p>
 &lt;p>Dubbo 可以自动加载 classpath 根目录下的 dubbo.properties，但是你同样可以使用 JVM 参数来指定路径：&lt;code>-Ddubbo.properties.file=xxx.properties&lt;/code>。&lt;/p>
 &lt;h1 id="映射规则">映射规则&lt;/h1>
@@ -5353,7 +5353,7 @@ an issue on GitHub[4].
 dubbo.application.owner=bar
 dubbo.registry.address=10.20.153.10:9090
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="重写与优先级">重写与优先级&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/dubbo-properties-override.jpg" alt="properties-override">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-properties-override.jpg" alt="properties-override">&lt;/p>
 &lt;p>优先级从高到低：&lt;/p>
 &lt;ul>
 &lt;li>JVM -D 参数：当你部署或者启动应用时，它可以轻易地重写配置，比如，改变 dubbo 协议端口；&lt;/li>
@@ -5363,7 +5363,7 @@ dubbo.registry.address=10.20.153.10:9090
 &lt;ol>
 &lt;li>如果在 classpath 下有超过一个 dubbo.properties 文件，比如，两个 jar 包都各自包含了 dubbo.properties，dubbo 将随机选择一个加载，并且打印错误日志。&lt;/li>
 &lt;li>如果 &lt;code>id&lt;/code> 没有在 &lt;code>protocol&lt;/code> 中配置，将使用 &lt;code>name&lt;/code> 作为默认属性。&lt;/li>
-&lt;/ol></description></item><item><title>Docs: 快速开始</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/quick-start/</guid><description>
+&lt;/ol></description></item><item><title>Docs: 快速开始</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/quick-start/</guid><description>
 &lt;p>Dubbo 采用全 Spring 配置方式，透明化接入应用，对应用没有任何 API 侵入，只需用 Spring 加载 Dubbo 的配置即可，Dubbo 基于 &lt;a href="https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/xsd-configuration.html">Spring 的 Schema 扩展&lt;/a> 进行加载。&lt;/p>
 &lt;p>如果不想使用 Spring 配置，可以通过 &lt;a href="../configuration/api">API 的方式&lt;/a> 进行调用。&lt;/p>
 &lt;h2 id="服务提供者">服务提供者&lt;/h2>
@@ -5454,11 +5454,11 @@ DemoService demoService &lt;span style="color:#719e07">=&lt;/span> &lt;span styl
 &lt;p>也可以使用 IoC 注入 &lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: 新贡献者向导</title><link>http://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/new-contributor-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/new-contributor-guide_dev/</guid><description>
+&lt;/section></description></item><item><title>Docs: 新贡献者向导</title><link>https://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/new-contributor-guide_dev/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/contribution-guidelines/contributor/new-contributor-guide_dev/</guid><description>
 &lt;p>这篇向导旨在给正在准备向 Dubbo 提交贡献的新手提供指导。&lt;/p>
 &lt;h3 id="邮件列表描述">邮件列表描述&lt;/h3>
 &lt;p>邮件列表是 Dubbo 官方推荐的讨论方式，所有与 Dubbo 相关的内容都可以在这里讨论，请点击 &lt;a href="https://github.com/apache/dubbo/issues/1393">issue&lt;/a> 了解更多关于邮件列表订阅的内容&lt;/p>
-&lt;p>如需订阅如下邮件列表，请参考 &lt;a href="http://dubbo.apache.org/zh-cn/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html">邮件列表订阅向导&lt;/a>&lt;/p>
+&lt;p>如需订阅如下邮件列表，请参考 &lt;a href="https://dubbo.apache.org/zh-cn/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html">邮件列表订阅向导&lt;/a>&lt;/p>
 &lt;ul>
 &lt;li>&lt;a href="mailto:dev@dubbo.apache.org">dev@dubbo.apache.org&lt;/a>：开发邮件列表，您在使用或者开发 Dubbo 的过程中遇到的任何问题，都可以在这里进行提问。&lt;/li>
 &lt;li>&lt;a href="mailto:commits@dubbo.apache.org">commits@dubbo.apache.org&lt;/a>：所有的提交内容都会推送到这个邮件列表，如果您对 Dubbo 的进展感兴趣，可以订阅这个邮件列表。&lt;/li>
@@ -5479,9 +5479,9 @@ git push origin your_awesome_patch
 &lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="编码规范">编码规范&lt;/h3>
 &lt;p>请按照&lt;a href="https://github.com/apache/dubbo/blob/master/CONTRIBUTING.md">CONTRIBUTING.md&lt;/a>中的编码规范对自己的代码进行检查。&lt;/p>
 &lt;h3 id="参与发布投票">参与发布投票&lt;/h3>
-&lt;p>参与发布投票是一种重要的贡献社区的方式，Dubbo 社区非常欢迎和鼓励任何人参与投票，每当一个版本需要正式发布的时候，会在开发者邮件列表上进行发布投票，只有当投票取得通过之后，才会正式发布，可以参考这个&lt;a href="https://wiki.apache.org/incubator/IncubatorReleaseChecklist">检查列表&lt;/a>对源码进行合规性检查。如果有任何问题，可以在开发者邮件列表上提问。&lt;/p></description></item><item><title>Docs: 框架设计</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/design/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/design/</guid><description>
+&lt;p>参与发布投票是一种重要的贡献社区的方式，Dubbo 社区非常欢迎和鼓励任何人参与投票，每当一个版本需要正式发布的时候，会在开发者邮件列表上进行发布投票，只有当投票取得通过之后，才会正式发布，可以参考这个&lt;a href="https://wiki.apache.org/incubator/IncubatorReleaseChecklist">检查列表&lt;/a>对源码进行合规性检查。如果有任何问题，可以在开发者邮件列表上提问。&lt;/p></description></item><item><title>Docs: 框架设计</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/design/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/design/</guid><description>
 &lt;h2 id="整体设计">整体设计&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-framework.jpg" alt="/dev-guide/images/dubbo-framework.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-framework.jpg" alt="/dev-guide/images/dubbo-framework.jpg">&lt;/p>
 &lt;p>图例说明：&lt;/p>
 &lt;ul>
 &lt;li>图中左边淡蓝背景的为服务消费方使用的接口，右边淡绿色背景的为服务提供方使用的接口，位于中轴线上的为双方都用到的接口。&lt;/li>
@@ -5511,7 +5511,7 @@ git push origin your_awesome_patch
 &lt;li>Registry 和 Monitor 实际上不算一层，而是一个独立的节点，只是为了全局概览，用层的方式画在一起。&lt;/li>
 &lt;/ul>
 &lt;h2 id="模块分包">模块分包&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-modules.jpg" alt="/dev-guide/images/dubbo-modules.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-modules.jpg" alt="/dev-guide/images/dubbo-modules.jpg">&lt;/p>
 &lt;p>模块说明：&lt;/p>
 &lt;ul>
 &lt;li>&lt;strong>dubbo-common 公共逻辑模块&lt;/strong>：包括 Util 类和通用模型。&lt;/li>
@@ -5531,7 +5531,7 @@ git push origin your_awesome_patch
 &lt;li>serialize 层放在 common 模块中，以便更大程度复用。&lt;/li>
 &lt;/ul>
 &lt;h2 id="依赖关系">依赖关系&lt;/h2>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-relation.jpg" alt="/dev-guide/images/dubbo-relation.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-relation.jpg" alt="/dev-guide/images/dubbo-relation.jpg">&lt;/p>
 &lt;p>图例说明：&lt;/p>
 &lt;ul>
 &lt;li>图中小方块 Protocol, Cluster, Proxy, Service, Container, Registry, Monitor 代表层或模块，蓝色的表示与业务有交互，绿色的表示只对 Dubbo 内部交互。&lt;/li>
@@ -5541,13 +5541,13 @@ git push origin your_awesome_patch
 &lt;/ul>
 &lt;h2 id="调用链">调用链&lt;/h2>
 &lt;p>展开总设计图的红色调用链，如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-extension.jpg" alt="/dev-guide/images/dubbo-extension.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-extension.jpg" alt="/dev-guide/images/dubbo-extension.jpg">&lt;/p>
 &lt;h2 id="暴露服务时序">暴露服务时序&lt;/h2>
 &lt;p>展开总设计图左边服务提供方暴露服务的蓝色初始化链，时序图如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-export.jpg" alt="/dev-guide/images/dubbo-export.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-export.jpg" alt="/dev-guide/images/dubbo-export.jpg">&lt;/p>
 &lt;h2 id="引用服务时序">引用服务时序&lt;/h2>
 &lt;p>展开总设计图右边服务消费方引用服务的蓝色初始化链，时序图如下：&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/dubbo-refer.jpg" alt="/dev-guide/images/dubbo-refer.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-refer.jpg" alt="/dev-guide/images/dubbo-refer.jpg">&lt;/p>
 &lt;h2 id="领域模型">领域模型&lt;/h2>
 &lt;p>在 Dubbo 的核心领域模型中：&lt;/p>
 &lt;ul>
@@ -5560,7 +5560,7 @@ git push origin your_awesome_patch
 &lt;li>采用 Microkernel + Plugin 模式，Microkernel 只负责组装 Plugin，Dubbo 自身的功能也是通过扩展点实现的，也就是 Dubbo 的所有功能点都可被用户自定义扩展所替换。&lt;/li>
 &lt;li>采用 URL 作为配置信息的统一格式，所有扩展点都通过传递 URL 携带配置信息。&lt;/li>
 &lt;/ul>
-&lt;p>更多设计原则参见：&lt;a href="../principals/">框架设计原则&lt;/a>&lt;/p></description></item><item><title>Docs: 消费者配置</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/reference/</guid><description>
+&lt;p>更多设计原则参见：&lt;a href="../principals/">框架设计原则&lt;/a>&lt;/p></description></item><item><title>Docs: 消费者配置</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/languages/erlang/reference/</guid><description>
 &lt;h2 id="基础配置">基础配置&lt;/h2>
 &lt;p>消费者配置项需要添加到 &lt;code>sys.config&lt;/code> 文件 &lt;code>dubboerl&lt;/code> 应用配置项里。&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-erlang" data-lang="erlang">{dubboerl,[
@@ -5571,7 +5571,7 @@ git push origin your_awesome_patch
 &lt;/span>&lt;span style="color:#586e75">&lt;/span> {&lt;span style="color:#719e07">&amp;lt;&amp;lt;&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.erlang.sample.service.facade.UserOperator&amp;#34;&lt;/span>&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span>,[]},
 ]}
 ]}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Option 配置项待添加中。&lt;/p></description></item><item><title>Docs: 示例提供者安装</title><link>http://dubbo.apache.org/zh/docs/v2.7/admin/install/provider-demo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/admin/install/provider-demo/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Option 配置项待添加中。&lt;/p></description></item><item><title>Docs: 示例提供者安装</title><link>https://dubbo.apache.org/zh/docs/v2.7/admin/install/provider-demo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/admin/install/provider-demo/</guid><description>
 &lt;p>安装：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">git clone https://github.com/apache/dubbo.git
 &lt;span style="color:#b58900">cd&lt;/span> dubbo/dubbo-demo/dubbo-demo-xml
@@ -5581,7 +5581,7 @@ git push origin your_awesome_patch
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sh" data-lang="sh">resources/spring/dubbo-provider.xml
 修改其中的dubbo:registry，替换成真实的注册中心地址，推荐使用zookeeper，如：
 &amp;lt;dubbo:registry &lt;span style="color:#268bd2">address&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>/&amp;gt;
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 自动加载环境变量</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/environment-variables/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/environment-variables/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 自动加载环境变量</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/environment-variables/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/environment-variables/</guid><description>
 &lt;p>从 2.7.3 版本开始，Dubbo 会自动从约定 key 中读取配置，并将配置以 Key-Value 的形式写入到URL中。&lt;/p>
 &lt;p>支持的 key 有以下两个：&lt;/p>
 &lt;ol>
@@ -5602,7 +5602,7 @@ DUBBO_LABELS = &amp;#34;tag1=value1; tag2=value2&amp;#34;
 DUBBO_ENV_KEYS = &amp;#34;DUBBO_TAG1, DUBBO_TAG2&amp;#34;
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>最终生成的 URL 会包含 DUBBO_TAG1、DUBBO_TAG2 两个 key: &lt;code>dubbo://xxx?DUBBO_TAG1=value1&amp;amp;DUBBO_TAG2=value2&lt;/code>&lt;/p>
 &lt;/li>
-&lt;/ol></description></item><item><title>Docs: 调用拦截扩展</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/impls/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/impls/filter/</guid><description>
+&lt;/ol></description></item><item><title>Docs: 调用拦截扩展</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/impls/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/impls/filter/</guid><description>
 &lt;h2 id="扩展说明">扩展说明&lt;/h2>
 &lt;p>服务提供方和服务消费方调用过程拦截，Dubbo 本身的大多功能均基于此扩展点实现，每次远程方法执行，该拦截都会被执行，请注意对性能的影响。&lt;/p>
 &lt;p>约定：&lt;/p>
@@ -5668,7 +5668,7 @@ DUBBO_ENV_KEYS = &amp;#34;DUBBO_TAG1, DUBBO_TAG2&amp;#34;
 &lt;span style="color:#719e07">}&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.rpc.Filter：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">xxx=com.xxx.XxxFilter
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 配置设计</title><link>http://dubbo.apache.org/zh/docs/v2.7/dev/principals/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/dev/principals/configuration/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: 配置设计</title><link>https://dubbo.apache.org/zh/docs/v2.7/dev/principals/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/dev/principals/configuration/</guid><description>
 &lt;blockquote>
 &lt;p>&lt;a href="http://javatar.iteye.com/blog/949527">http://javatar.iteye.com/blog/949527&lt;/a>&lt;/p>
 &lt;/blockquote>
@@ -5725,12 +5725,12 @@ dubbo.registry.address=N/A
 &lt;p>配置也存在“重复代码”，也存在“泛化与精化”的问题。比如：Dubbo 的超时时间设置，每个服务，每个方法，都应该可以设置超时时间。但很多服务不关心超时，如果要求每个方法都配置，是不现实的。所以 Dubbo 采用了方法超时继承服务超时，服务超时再继承缺省超时，没配置时，一层层向上查找。&lt;/p>
 &lt;p>另外，Dubbo 旧版本所有的超时时间，重试次数，负载均衡策略等都只能在服务消费方配置。但实际使用过程中发现，服务提供方比消费方更清楚，但这些配置项是在消费方执行时才用到的。新版本，就加入了在服务提供方也能配这些参数，通过注册中心传递到消费方，
 做为参考值，如果消费方没有配置，就以提供方的配置为准，相当于消费方继承了提供方的建议配置值。而注册中心在传递配置时，也可以在中途修改配置，这样就达到了治理的目的，继承关系相当于：服务消费者 &amp;ndash;&amp;gt; 注册中心 &amp;ndash;&amp;gt; 服务提供者&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/dev/configuration-override.png" alt="configuration-override">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/configuration-override.png" alt="configuration-override">&lt;/p>
 &lt;h2 id="配置向后兼容">配置向后兼容&lt;/h2>
 &lt;p>向前兼容很好办，你只要保证配置只增不减，就基本上能保证向前兼容。但向后兼容，也是要注意的，要为后续加入新的配置项做好准备。如果配置出现一个特殊配置，就应该为这个“特殊”情况约定一个兼容规则，因为这个特殊情况，很有可能在以后还会发生。比如：有一个配置文件是保存“服务=地址”映射关系的，其中有一行特殊，保存的是“注册中心=地址”。现在程序加载时，约定“注册中心”这个Key是特殊的，做特别处理，其它的都是“服务”。然而，新版本发现，要加一项“监控中心=地址”，这时，旧版本的程序会把“监控中心”做为“服务”处理，因为旧代码是不能改的，兼容性就很会很麻烦。如果先前约定“特殊标识+XXX”为特殊处理，后续就会方便很多。&lt;/p>
-&lt;p>向后兼容性，可以多向HTML5学习，参见：&lt;a href="http://javatar.iteye.com/blog/949390">HTML5设计原理&lt;/a>&lt;/p></description></item><item><title>Docs: 集群容错</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/examples/fault-tolerent-strategy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/examples/fault-tolerent-strategy/</guid><description>
+&lt;p>向后兼容性，可以多向HTML5学习，参见：&lt;a href="http://javatar.iteye.com/blog/949390">HTML5设计原理&lt;/a>&lt;/p></description></item><item><title>Docs: 集群容错</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/examples/fault-tolerent-strategy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/examples/fault-tolerent-strategy/</guid><description>
 &lt;p>在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。&lt;/p>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/cluster.jpg" alt="cluster">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/cluster.jpg" alt="cluster">&lt;/p>
 &lt;p>各节点关系：&lt;/p>
 &lt;ul>
 &lt;li>这里的 &lt;code>Invoker&lt;/code> 是 &lt;code>Provider&lt;/code> 的一个可调用 &lt;code>Service&lt;/code> 的抽象，&lt;code>Invoker&lt;/code> 封装了 &lt;code>Provider&lt;/code> 地址及 &lt;code>Service&lt;/code> 接口信息&lt;/li>
@@ -5775,7 +5775,7 @@ dubbo.registry.address=N/A
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: API 配置</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/configuration/api/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: API 配置</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/configuration/api/</guid><description>
 &lt;p>API 属性与配置项一对一，各属性含义，请参见：&lt;a href="../../references/xml/">配置参考手册&lt;/a>，比如：&lt;code>ApplicationConfig.setName(&amp;quot;xxx&amp;quot;)&lt;/code> 对应 &lt;code>&amp;lt;dubbo:application name=&amp;quot;xxx&amp;quot; /&amp;gt;&lt;/code> &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>&lt;/p>
 &lt;h2 id="服务提供者">服务提供者&lt;/h2>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.config.ApplicationConfig&lt;span style="color:#719e07">;&lt;/span>
@@ -5868,7 +5868,7 @@ ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>XxxService&lt;sp
 &lt;p>API使用范围说明：API 仅用于 OpenAPI, ESB, Test, Mock 等系统集成，普通服务提供方或消费方，请采用&lt;a href="../xml">XML 配置&lt;/a>方式使用 Dubbo &lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/section></description></item><item><title>Docs: http 协议</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/http/</guid><description>
+&lt;/section></description></item><item><title>Docs: http 协议</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/protocol/http/</guid><description>
 &lt;p>基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现&lt;/p>
 &lt;div class="alert alert-primary" role="alert">
 &lt;h4 class="alert-heading">提示&lt;/h4>
@@ -5909,14 +5909,14 @@ ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>XxxService&lt;sp
 &lt;ul>
 &lt;li>协议的端口 &lt;code>&amp;lt;dubbo:protocol port=&amp;quot;8080&amp;quot; /&amp;gt;&lt;/code> 必须与 servlet 容器的端口相同，&lt;/li>
 &lt;li>协议的上下文路径 &lt;code>&amp;lt;dubbo:protocol contextpath=&amp;quot;foo&amp;quot; /&amp;gt;&lt;/code> 必须与 servlet 应用的上下文路径相同。&lt;/li>
-&lt;/ul></description></item><item><title>Docs: Redis 注册中心</title><link>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://dubbo.apache.org/zh/docs/v2.7/user/references/registry/redis/</guid><description>
+&lt;/ul></description></item><item><title>Docs: Redis 注册中心</title><link>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v2.7/user/references/registry/redis/</guid><description>
 &lt;p>基于 Redis &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup> 实现的注册中心。&lt;/p>
 &lt;div class="alert alert-primary" role="alert">
 &lt;h4 class="alert-heading">提示&lt;/h4>
 &lt;p>从 &lt;code>2.1.0&lt;/code> 版本开始支持。&lt;/p>
 &lt;p>Redis 过期数据通过心跳的方式检测脏数据，服务器时间必须同步，并且对服务器有一定压力，否则过期检测会不准确&lt;/p>
 &lt;/div>
-&lt;p>&lt;img src="http://dubbo.apache.org/imgs/user/dubbo-redis-registry.jpg" alt="/user-guide/images/dubbo-redis-registry.jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-redis-registry.jpg" alt="/user-guide/images/dubbo-redis-registry.jpg">&lt;/p>
 &lt;p>使用 Redis 的 Key/Map 结构存储数据结构：&lt;/p>
 &lt;ul>
 &lt;li>主 Key 为服务名和类型&lt;/li>
