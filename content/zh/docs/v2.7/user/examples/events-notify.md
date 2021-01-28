@@ -69,7 +69,7 @@ class NotifyImpl implements Notify {
 #### 服务消费者 Callback 配置
 
 ```xml
-<bean id ="demoCallback" class = "org.apache.dubbo.callback.implicit.NofifyImpl" />
+<bean id ="demoCallback" class = "org.apache.dubbo.callback.implicit.NotifyImpl" />
 <dubbo:reference id="demoService" interface="org.apache.dubbo.callback.implicit.IDemoService" version="1.0.0" group="cn" >
       <dubbo:method name="get" async="true" onreturn = "demoCallback.onreturn" onthrow="demoCallback.onthrow" />
 </dubbo:reference>
@@ -92,7 +92,7 @@ class NotifyImpl implements Notify {
 
 ```java
 IDemoService demoService = (IDemoService) context.getBean("demoService");
-NofifyImpl notify = (NofifyImpl) context.getBean("demoCallback");
+NotifyImpl notify = (NotifyImpl) context.getBean("demoCallback");
 int requestId = 2;
 Person ret = demoService.get(requestId);
 Assert.assertEquals(null, ret);
