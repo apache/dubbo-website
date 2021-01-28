@@ -307,7 +307,7 @@ private Map<String, Invoker<T>> toInvokers(List<URL> urls) {
                 }
             }
             if (!accept) {
-                // 若服务消费者协议头不被消费者所支持，则忽略当前 providerUrl
+                // 若服务提供者协议头不被消费者所支持，则忽略当前 providerUrl
                 continue;
             }
         }
