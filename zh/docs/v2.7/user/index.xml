@@ -1371,6 +1371,7 @@ DemoService demoService &lt;span style="color:#719e07">=&lt;/span> &lt;span styl
 &lt;li>配置HTTP日志输出&lt;/li>
 &lt;li>输入参数的校验&lt;/li>
 &lt;li>是否应该透明发布REST服务&lt;/li>
+&lt;li>Dubbo的REST提供端在被调用时使用header&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;li>REST服务消费端详解
@@ -1378,6 +1379,7 @@ DemoService demoService &lt;span style="color:#719e07">=&lt;/span> &lt;span styl
 &lt;li>场景1：非dubbo的消费端调用dubbo的REST服务&lt;/li>
 &lt;li>场景2：dubbo消费端调用dubbo的REST服务&lt;/li>
 &lt;li>场景3：dubbo的消费端调用非dubbo的REST服务&lt;/li>
+&lt;li>Dubbo的消费端在调用REST服务时配置自定义header&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;li>Dubbo中JAX-RS的限制&lt;/li>
@@ -1888,7 +1890,11 @@ cv&lt;span style="color:#719e07">.&lt;/span>getInvalidValue&lt;span style="color
 &lt;p>当然，在没有添加REST调用之前，你的服务代码可能本身已经就充当了Facade和DTO的角色（至于为什么有些场景需要这些角色，有兴趣可参考&lt;a href="http://www.infoq.com/cn/articles/micro-soa-1">微观SOA：服务设计原则及其实践方式&lt;/a>）。这种情况下，在添加REST之后，如果你再额外添加与REST相关的Facade和DTO，就相当于对原有代码对再一次包装，即形成如下调用链：&lt;/p>
 &lt;p>&lt;code>RestFacade/RestDTO -&amp;gt; Facade/DTO -&amp;gt; Service&lt;/code>&lt;/p>
 &lt;p>这种体系比较繁琐，数据转换之类的工作量也不小，所以一般应尽量避免如此。&lt;/p>
-&lt;h2 id="rest服务消费端详解">REST服务消费端详解&lt;/h2>
+&lt;h3 id="dubbo的提供端在调用rest服务时使用header">dubbo的提供端在调用REST服务时使用header&lt;/h3>
+&lt;p>Dubbo通过RpcContextFilter将header取出分解之后设置到RpcContext的attachments，所以在提供端可以直接从RpcContext的attachments中获取到消费端设置的header信息：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"> RpcContext.getContext().getAttachment(key1)
+RpcContext.getContext().getAttachment(key2)
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="rest服务消费端详解">REST服务消费端详解&lt;/h2>
 &lt;p>这里我们用三种场景来分别讨论：&lt;/p>
 &lt;ol>
 &lt;li>非dubbo的消费端调用dubbo的REST服务（non-dubbo &amp;ndash;&amp;gt; dubbo）&lt;/li>
@@ -1958,6 +1964,13 @@ User &lt;span style="color:#268bd2">getUser&lt;/span>&lt;span style="color:#719e
 &lt;/blockquote>
 &lt;p>另外，这里依然可以配置客户端可启动的最大连接数和超时时间：&lt;/p>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx.UserService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;rest://api.foo.com/services/&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo的消费端在调用rest服务时配置自定义header">dubbo的消费端在调用REST服务时配置自定义header&lt;/h3>
+&lt;p>Dubbo进行rest调用的时候，采用的是将RpcContext的attachment转换为header的方式，所以，dubbo消费端可以按以下方式进行自定义header的设置：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"> RpcContext.getContext().setAttachment(&amp;#34;key1&amp;#34;, &amp;#34;value1&amp;#34;);
+RpcContext.getContext().setAttachment(&amp;#34;key2&amp;#34;, &amp;#34;value2&amp;#34;);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>即可设置如下格式的header:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"> key1=value1
+key2=value2
 &lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="dubbo中jax-rs的限制">Dubbo中JAX-RS的限制&lt;/h2>
 &lt;p>Dubbo中的REST开发是完全兼容标准JAX-RS的，但其支持的功能目前是完整JAX-RS的一个子集，部分因为它要受限于dubbo和spring的特定体系。&lt;/p>
 &lt;p>在dubbo中使用的JAX-RS的局限包括但不限于：&lt;/p>

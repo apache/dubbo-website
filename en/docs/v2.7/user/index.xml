@@ -1454,6 +1454,7 @@ For people who only want to get a glimpse of Dubbo and REST, all they need is to
 &lt;li>Configure HTTP Log Output&lt;/li>
 &lt;li>Verification of Input Parameters&lt;/li>
 &lt;li>Should REST Services be Published Transparently&lt;/li>
+&lt;li>Get Headers In Dubbo Rest Provider&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;li>Details of REST Service Consumer
@@ -1461,6 +1462,7 @@ For people who only want to get a glimpse of Dubbo and REST, all they need is to
 &lt;li>Scenario 1: Non-Dubbo Consumer Calls Dubbo REST Service&lt;/li>
 &lt;li>Scenario 2: Dubbo Consumer Calls Dubbo REST Service&lt;/li>
 &lt;li>Scenario 3: Dubbo Consumer Calls Non-Dubbo REST Service&lt;/li>
+&lt;li>Custom Header By Dubbo Consumer while Calling REST Service&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;li>JAX-RS Restrictions in Dubbo&lt;/li>
@@ -1983,7 +1985,11 @@ cv&lt;span style="color:#719e07">.&lt;/span>getInvalidValue&lt;span style="color
 &lt;p>Of course, your service code may already act as a Facade and DTO before adding RESTful Remoting (as to why some scenarios require these roles, and if you are interested, you can refer to [Micro-SOA: Service Design Principles and Practices] Http://www.infoq.com/cn/articles/micro-soa-1). In this case, after adding REST, if you add additional REST-related Facade and DTO, it is equivalent to wrapping the original code again, which forms the following call chain:&lt;/p>
 &lt;p>&lt;code>RestFacade/RestDTO -&amp;gt; Facade/DTO -&amp;gt; Service&lt;/code>&lt;/p>
 &lt;p>This kind of system is cumbersome, and the workload of data conversion is not small, so it should be avoided if possible.&lt;/p>
-&lt;h3 id="consumer-of-restful-remoting">Consumer of RESTful Remoting&lt;/h3>
+&lt;h3 id="get-headers-in-dubbo-rest-provider">Get Headers In Dubbo Rest Provider&lt;/h3>
+&lt;p>Dubbo take out and split headers by RpcContextFilter and put them into attachments of RpcContext, so provider can get headers from RpcContext attachments like:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"> String header-value1 = RpcContext.getContext().getAttachment(header-key1)
+String header-value2 = RpcContext.getContext().getAttachment(header-key2)
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="consumer-of-restful-remoting">Consumer of RESTful Remoting&lt;/h3>
 &lt;p>Here we use three scenarios:&lt;/p>
 &lt;ol>
 &lt;li>The non-Dubbo consumer calls Dubbo REST service (non-Dubbo &amp;ndash;&amp;gt; Dubbo)&lt;/li>
@@ -2053,6 +2059,14 @@ User &lt;span style="color:#268bd2">getUser&lt;/span>&lt;span style="color:#719e
 &lt;p>In addition, you can still configure the maximum number of connections and timeouts that the client can start:&lt;/p>
 &lt;/blockquote>
 &lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx.UserService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;rest://api.foo.com/services/&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="custom-header-by-dubbo-consumer-while-calls-rest-service">Custom Header By Dubbo Consumer while Calls REST Service&lt;/h3>
+&lt;p>When Dubbo calls rest, it uses the method of converting the attachments of RpcContext to header.&lt;/p>
+&lt;p>Therefore, you can set headers in the following ways:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"> RpcContext.getContext().setAttachment(&amp;#34;header-key1&amp;#34;, &amp;#34;header-value1&amp;#34;);
+RpcContext.getContext().setAttachment(&amp;#34;header-key2&amp;#34;, &amp;#34;header-value2&amp;#34;);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then the headers will be looks like following:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"> header-key1 = header-value1
+header-key2 = header-value2
 &lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="jax-rs-restrictions-in-dubbo">JAX-RS restrictions in Dubbo&lt;/h3>
 &lt;p>The REST development in Dubbo is fully compatible with standard JAX-RS, but the features it supports are currently a subset of full JAX-RS, in part because it is limited to the specific architecture of Dubbo and Spring. The limitations of JAX-RS used in Dubbo include but are not limited to:&lt;/p>
 &lt;ol>
