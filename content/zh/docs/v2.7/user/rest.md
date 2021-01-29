@@ -44,11 +44,13 @@ description: "在 Dubbo 中开发 REST 风格的远程调用"
     * 添加自定义的Exception处理	
     * 配置HTTP日志输出
     * 输入参数的校验
-    * 是否应该透明发布REST服务		
+    * 是否应该透明发布REST服务
+    * Dubbo的REST提供端在被调用时使用header		
 * REST服务消费端详解	
     * 场景1：非dubbo的消费端调用dubbo的REST服务	
     * 场景2：dubbo消费端调用dubbo的REST服务	
     * 场景3：dubbo的消费端调用非dubbo的REST服务	
+    * Dubbo的消费端在调用REST服务时配置自定义header	
 * Dubbo中JAX-RS的限制	
 * REST常见问题解答（REST FAQ）
     * Dubbo REST的服务能和Dubbo注册中心、监控中心集成吗？
@@ -885,6 +887,15 @@ Dubbo的REST调用和dubbo中其它某些RPC不同的是，需要在服务代码
 
 这种体系比较繁琐，数据转换之类的工作量也不小，所以一般应尽量避免如此。
 
+### dubbo的提供端在调用REST服务时使用header
+
+Dubbo通过RpcContextFilter将header取出分解之后设置到RpcContext的attachments，所以在提供端可以直接从RpcContext的attachments中获取到消费端设置的header信息：
+
+```
+    RpcContext.getContext().getAttachment(key1)
+    RpcContext.getContext().getAttachment(key2)
+```
+
 ## REST服务消费端详解
 
 这里我们用三种场景来分别讨论：
@@ -1006,6 +1017,23 @@ public class User implements Serializable {
 ```xml
 <dubbo:reference id="userService" interface="xxx.UserService" url="rest://api.foo.com/services/" timeout="2000" connections="10"/>
 ```
+
+### dubbo的消费端在调用REST服务时配置自定义header
+
+Dubbo进行rest调用的时候，采用的是将RpcContext的attachment转换为header的方式，所以，dubbo消费端可以按以下方式进行自定义header的设置：
+
+```
+    RpcContext.getContext().setAttachment("key1", "value1");
+    RpcContext.getContext().setAttachment("key2", "value2");
+```
+
+即可设置如下格式的header:
+
+```
+    key1=value1
+    key2=value2
+```
+
 
 ## Dubbo中JAX-RS的限制
 
