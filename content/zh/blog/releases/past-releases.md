@@ -12,10 +12,16 @@ description: >
 
 ## Apache Dubbo
 
-请点击了解各[版本详情和升级注意事项](http://dubbo.apache.org/zh-cn/docs/user/versions/index.html)
+请点击了解各[版本详情和升级注意事项](https://dubbo.apache.org/zh/docs/v2.7/user/versions/)
 
-> GitHub: https://github.com/apache/incubator-dubbo \
-> 发布说明：https://github.com/apache/incubator-dubbo/releases
+> GitHub: https://github.com/apache/dubbo \
+> 发布说明：https://github.com/apache/dubbo/releases
+
+### 2.7.8 (2020-12-28)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.8/apache-dubbo-2.7.8-source-release.zip) |
+[asc](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.8/apache-dubbo-2.7.8-source-release.zip.asc) |
+[sha512](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.8/apache-dubbo-2.7.8-source-release.zip.sha512)
 
 ### 2.7.7 (2020-05-18)
 
