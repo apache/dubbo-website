@@ -16,7 +16,7 @@ description: "在 Dubbo 中发起异步调用"
 
 ## 使用 CompletableFuture 签名的接口
 
-需要服务提供者事先定义 CompletableFuture 签名的服务，具体参见[服务端异步执行](./async-execute-on-provider.md)接口定义：
+需要服务提供者事先定义 CompletableFuture 签名的服务，具体参见[服务端异步执行]({{<ref "/docs/v2.7/user/examples/async-execute-on-provider.md" >}} "")接口定义：
 
 ```java
 public interface AsyncService {
