@@ -43,11 +43,13 @@ Working in progress ...
     * Add Custom Exception Handler	
     * Configure HTTP Log Output
     * Verification of Input Parameters
-    * Should REST Services be Published Transparently		
+    * Should REST Services be Published Transparently	
+    * Get Headers In Dubbo Rest Provider	
 * Details of REST Service Consumer	
     * Scenario 1: Non-Dubbo Consumer Calls Dubbo REST Service	
     * Scenario 2: Dubbo Consumer Calls Dubbo REST Service	
     * Scenario 3: Dubbo Consumer Calls Non-Dubbo REST Service	
+    * Custom Header By Dubbo Consumer while Calling REST Service
 * JAX-RS Restrictions in Dubbo	
 * REST FAQ
     * Can Dubbo REST Services be Integrated With Dubbo Registration Center and Monitoring Center?
@@ -899,6 +901,15 @@ Of course, your service code may already act as a Facade and DTO before adding R
 
 This kind of system is cumbersome, and the workload of data conversion is not small, so it should be avoided if possible.
 
+### Get Headers In Dubbo Rest Provider	
+
+Dubbo take out and split headers by RpcContextFilter and put them into attachments of RpcContext, so provider can get headers from RpcContext attachments like:
+
+```
+    String header-value1 = RpcContext.getContext().getAttachment(header-key1)
+    String header-value2 = RpcContext.getContext().getAttachment(header-key2)
+```
+
 ### Consumer of RESTful Remoting
 
 Here we use three scenarios:
@@ -1019,6 +1030,24 @@ For the configuration in Spring, because the REST service is not provided by Dub
 
 ```xml
 <dubbo:reference id="userService" interface="xxx.UserService" url="rest://api.foo.com/services/" timeout="2000" connections="10"/>
+```
+
+### Custom Header By Dubbo Consumer while Calls REST Service
+
+When Dubbo calls rest, it uses the method of converting the attachments of RpcContext to header. 
+
+Therefore, you can set headers in the following ways:
+
+```
+    RpcContext.getContext().setAttachment("header-key1", "header-value1");
+    RpcContext.getContext().setAttachment("header-key2", "header-value2");
+```
+
+Then the headers will be looks like following:
+
+```
+    header-key1 = header-value1
+    header-key2 = header-value2
 ```
 
 ### JAX-RS restrictions in Dubbo
