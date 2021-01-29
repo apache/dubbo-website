@@ -17,7 +17,7 @@ description: >
 > GitHub: https://github.com/apache/dubbo \
 > 发布说明：https://github.com/apache/dubbo/releases
 
-### 2.7.8 (2020-12-28)
+### 2.7.8 (2020-07-28)
 
 * [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.8/apache-dubbo-2.7.8-source-release.zip) |
 [asc](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.8/apache-dubbo-2.7.8-source-release.zip.asc) |
