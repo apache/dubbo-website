@@ -352,6 +352,9 @@ find . -name THIRD-PARTY.txt | xargs grep -E 'GPL|General Public License' | grep
 
 如果一个依赖提供了双协议或多重协议，可以选择与Apache最兼容的一个协议。
 
+你可以参考此文章：[ASF第三方许可证策](https://apache.org/legal/resolved.html)
+
+
 ### 检查二进制包的文件内容
 
 解压缩`apache-dubbo-${release_version}-bin-release.zip`，进行如下检查:
