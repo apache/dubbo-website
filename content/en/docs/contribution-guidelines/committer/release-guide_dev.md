@@ -357,8 +357,6 @@ Unzip apache-dubbo-${release_version}-source-release.zip to the default director
   - check there are no extra files or directories in the source package, for example, no empty directories or useless log files.  
     `diff -r rc_dir tag_dir`
   - check the top n tag commits, dive into the related files and check if the source package has the same changes
-  
-  you can refer to this article : [ASF 3RD PARTY LICENSE POLICY](https://apache.org/legal/resolved.html)
 
 
 ### check third party dependencies
@@ -371,6 +369,8 @@ find . -name THIRD-PARTY.txt | xargs grep -E 'GPL|General Public License' | grep
 ```
 
 If one dependency is dual/multiple licensed, just choose the most permissive one.
+  
+You can refer to this article : [ASF 3RD PARTY LICENSE POLICY](https://apache.org/legal/resolved.html)
 
 ### Check binary distribution file content
 
