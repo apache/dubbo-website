@@ -3,7 +3,7 @@ type: docs
 title: "GoogleProtobuf 对象泛化调用"
 linkTitle: "Protobuf 泛化调用"
 weight: 17
-description: "对 Goolgle Protobuf 对象进行泛化调用"
+description: "对 Google Protobuf 对象进行泛化调用"
 ---
 
 泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参考 [泛化调用](../generic-reference)。
@@ -11,7 +11,7 @@ description: "对 Goolgle Protobuf 对象进行泛化调用"
 
 GoogleProtobuf 序列化相关的Demo可以参考 [protobuf-demo](https://github.com/vio-lin/dubbo-samples/tree/protobuf-demo)
 
-## 通过Spring对Goolgle Protobuf对象泛化调用
+## 通过Spring对Google Protobuf对象泛化调用
 
 在 Spring 中配置声明 generic = "protobuf-json"
 
@@ -26,7 +26,7 @@ GenericService barService = (GenericService) applicationContext.getBean("barServ
 Object result = barService.$invoke("sayHello",new String[]{"org.apache.dubbo.protobuf.GooglePbBasic$CDubboGooglePBRequestType"}, new Object[]{"{\"double\":0.0,\"float\":0.0,\"bytesType\":\"Base64String\",\"int32\":0}"});
 ```
 
-## 通过 API 方式对 Goolgle Protobuf 对象泛化调用
+## 通过 API 方式对 Google Protobuf 对象泛化调用
 
 ```java
 ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
