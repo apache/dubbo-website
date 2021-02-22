@@ -70,6 +70,19 @@ description: "集群调用失败时，Dubbo 提供的容错方案"
 
 广播调用所有提供者，逐个调用，任意一台报错则报错。通常用于通知所有提供者更新缓存或日志等本地资源信息。
 
+现在广播调用中，可以通过 broadcast.fail.percent 配置节点调用失败的比例，当达到这个比例后，BroadcastClusterInvoker
+将不再调用其他节点，直接抛出异常. broadcast.fail.percent 取值在 0～100 范围内。默认情况下当全部调用失败后，才会抛出异常。
+broadcast.fail.percent 只是控制的当失败后是否继续调用其他节点，并不改变结果(任意一台报错则报错)。
+
+Broadcast Cluster 配置 broadcast.fail.percent.
+
+broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常，不再调用其他节点。
+
+```text
+@reference(cluster = "broadcast", parameters = {"broadcast.fail.percent", "20"})
+```
+
+
 {{% alert title="提示" color="primary" %}}
 `2.1.0` 开始支持
 {{% /alert %}}
