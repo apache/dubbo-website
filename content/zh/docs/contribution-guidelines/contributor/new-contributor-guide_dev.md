@@ -51,10 +51,12 @@ git fetch upstream
 ##### 4. **我们的工作以issue为驱动，认领一个issue，或者创建一个issue并描述清楚要做什么。**
 新人推荐标记为： `good first issue` 的 issue
 
-##### 5. **选择一个开发的基础分支，通常是 upstream/develop， 并基于此创建一个新的本地分支**
+##### 5. **选择一个开发的基础分支，通常是 upstream/master， 并基于此创建一个新的本地分支**
+upstream/master 分支是目前 2.7.x 版本的开发分支
+
 ```shell
-(从远程仓库拉创建分支到本地）
-git checkout -b up-dev-issue#${issue-number} upstream/develop
+# 从远程仓库创建分支到本地
+git checkout -b up-dev-issue#${issue-number} upstream/master
 ```
 为了避免一些不必要的麻烦，我们推荐以 "upstream" 中的分支为基础创建新的本地分支。
 可以以要做的事情的简单描述作为分支名(只要你能看懂就行)，通常情况下我们会把issue号包含到分支名中，例如上面的 checkout 命令中的。 
