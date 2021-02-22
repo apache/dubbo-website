@@ -66,6 +66,18 @@ Multiple servers are invoked in parallel, returning as soon as one succeeds. Usu
 
 Calling all providers broadcast, one by one call, any error is reported (`2.1.0+`). It is usually used to notify all providers to update local resource information such as caches or logs.
 
+Now in the broadcast call, the proportion of node call failures can be configured through broadcast.fail.percent. When this proportion is reached, BroadcastClusterInvoker will no longer call other nodes and directly throw an exception. The value of broadcast.fail.percent is in the range of 0-100. By default, an exception will be thrown when all calls fail.
+broadcast.fail.percent only controls whether to continue to call other nodes after failure, and does not change the result (any one will report an error). broadcast.fail.percent parameters
+Effective in dubbo2.7.10 and above.
+
+Broadcast Cluster configuration broadcast.fail.percent.
+
+broadcast.fail.percent=20 means that when 20% of the nodes fail to call, an exception will be thrown and no other nodes will be called.
+
+```text
+@reference(cluster = "broadcast", parameters = {"broadcast.fail.percent", "20"})
+```
+
 ## Cluster mode configuration
 
 Follow the example below to configure cluster mode on service providers and consumers
