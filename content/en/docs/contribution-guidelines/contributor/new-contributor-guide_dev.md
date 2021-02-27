@@ -11,7 +11,7 @@ This is a guide for new comers who wants to contribute to Dubbo.
 
 The mailing list is the recommended way for discussing almost anything that related to Dubbo. Please refer to this [issue](https://github.com/apache/dubbo/issues/1393) for detailed documentation on how to subscribe.
 
-To subscribe to the following mailing list, please refer to [Mailing list subscription guide](/en-us/docs/developers/contributor-guide/mailing-list-subscription-guide_dev.html)
+To subscribe to the following mailing list, please refer to [Mailing list subscription guide](/en/docs/contribution-guidelines/contributor/mailing-list-subscription-guide_dev)
 
 * dev@dubbo.apache.org: the develop mailing list, you can ask question here if you have encountered any problem when using or developing Dubbo.
 * commits@dubbo.apache.org: all the commits will be sent to this mailing list. You can subscribe to it if you are interested in Dubbo's development.

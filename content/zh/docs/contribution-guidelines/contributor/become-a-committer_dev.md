@@ -17,4 +17,4 @@ weight: 1
 
 ### 我可以贡献什么？
 
-请参阅[新的贡献者指南](new-contributor-guide_dev.md)。
+请参阅[新的贡献者指南](/zh/docs/contribution-guidelines/contributor/new-contributor-guide_dev)。
