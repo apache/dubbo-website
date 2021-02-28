@@ -497,7 +497,7 @@ To release the maven artifacts, go to [repository.apache.org](https://repository
 
 #### gpg: signing failed: Inappropriate ioctl for device
 
-If you've encoutered this error, try the following commands:
+If you've encountered this error, try the following commands:
 
 ```
 export GPG_TTY=$(tty)
