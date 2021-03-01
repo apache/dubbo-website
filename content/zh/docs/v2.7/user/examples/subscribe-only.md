@@ -21,5 +21,5 @@ description: "只订阅不注册"
 或者
 
 ```xml
-<dubbo:registry address="10.20.153.10:9090?register=false" />
+<dubbo:registry address="10.20.153.10:9090? register=false" />
 ```
