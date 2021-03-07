@@ -19,7 +19,7 @@ Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据
 
 ## 特性
 
-缺省协议，使用基于 mina `1.1.7` 和 hessian `3.2.1` 的 tbremoting 交互。
+缺省协议，使用基于 netty `3.2.5.Final` 和 hessian2 `3.2.1-fixed-2(Alibaba embed version)` 的 tbremoting 交互。
 
 * 连接个数：单连接
 * 连接方式：长连接
