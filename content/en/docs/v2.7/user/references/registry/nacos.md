@@ -126,13 +126,14 @@ After restarting the Dubbo app, you can also find that the registration meta-inf
 ![dubbo-registry-nacos-3.png](/imgs/blog/dubbo-registry-nacos-3.png)
 
 
-Additional information: since nacos-server@1.0.0, support client report instance info which contains particular key in metadata to control some behavior.
-such as: 
-`preserved.heart.beat.timeout`   : The time of the instance from healthy to unhealthy after heartbeat is not send.(unit:millisecond)
-`preserved.ip.delete.timeout`    : The time of the instance is dropped by server after the heartbeat is not send.(unit:millisecond)
-`preserved.heart.beat.interval`  : The interval of the instance to send heartbeat (unit:millisecond)
-`preserved.instance.id.generator`: The id generator strategy, value set as `snowflake` means the id will be increment from 0.
-`preserved.register.source`      : Reserved key, not used at now.
+**Additional information**: since nacos-server@1.0.0, support client report instance info which contains particular key in metadata to control some behavior.
 
-This feature will be support since Dubbo@2.7.10, you can use this feature by append param in nacos address. 
+Such as:  
+`preserved.heart.beat.timeout`   : The time of the instance from healthy to unhealthy after heartbeat is not send.(unit:millisecond)     
+`preserved.ip.delete.timeout`    : The time of the instance is dropped by server after the heartbeat is not send.(unit:millisecond)   
+`preserved.heart.beat.interval`  : The interval of the instance to send heartbeat (unit:millisecond)  
+`preserved.instance.id.generator`: The id generator strategy, value set as `snowflake` means the id will be increment from 0.   
+`preserved.register.source`      : Reserved key, not used at now.   
+
+This feature will be support since Dubbo@`2.7.10`, you can use this feature by append param in nacos address. 
 Such as: `nacos://10.20.153.10:8848?preserved.heart.beat.timeout=15000&preserved.ip.delete.timeout=30000&preserved.heart.beat.interval=10000`
