@@ -121,14 +121,15 @@ dubbo.registry.address = nacos://10.20.153.10:8848
 ![dubbo-registry-nacos-3.png](/imgs/blog/dubbo-registry-nacos-3.png)
 
 
-附加信息: 在nacos-server 1.0.0版本后，支持客户端通过上报一些包含特定的元数据的实例到服务端来控制实例的一些行为。
-例如: 
+**附加信息**: 在nacos-server@`1.0.0`版本后，支持客户端通过上报一些包含特定的元数据的实例到服务端来控制实例的一些行为。
+  
+ 例如:  
 `preserved.heart.beat.timeout`   : 该实例在不发送心跳后，从健康到不健康的时间。（单位:毫秒）
 `preserved.ip.delete.timeout`    : 该实例在不发送心跳后，被服务端下掉该实例的时间。（单位:毫秒）
 `preserved.heart.beat.interval`  : 该实例在客户端上报心跳的间隔时间。（单位:毫秒）
 `preserved.instance.id.generator`: 该实例的id生成策略，值为`snowflake`时，从0开始增加。
 `preserved.register.source`      : 保留键，目前未使用。
 
-该功能将在Dubbo-2.7.10开始支持，通过在address中增加参数来进行配置.
+该功能将在Dubbo@`2.7.10`开始支持，通过在address中增加参数来进行配置.
 例如: `nacos://10.20.153.10:8848?preserved.heart.beat.timeout=15000&preserved.ip.delete.timeout=30000&preserved.heart.beat.interval=10000`
 
