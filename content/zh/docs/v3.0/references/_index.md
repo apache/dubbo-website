@@ -2,7 +2,7 @@
 type: docs
 title: "功能参考手册"
 linkTitle: "参考手册"
-weight: 10
+weight: 12
 description: "面向用户的参考手册，涵盖了 Dubbo3 的所有核心功能"
 ---
 
