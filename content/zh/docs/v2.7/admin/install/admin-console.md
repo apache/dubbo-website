@@ -27,7 +27,7 @@ dubbo.registry.address=zookeeper://127.0.0.1:2181
 启动:
 
 ```sh
-mvn --projects dubbo-admin-backend spring-boot:run
+mvn --projects dubbo-admin-server spring-boot:run
 ```
 
 其他配置请访问 github 中的文档:
