@@ -1,4 +1,125 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 功能参考手册</title><link>https://dubbo.apache.org/zh/docs/v3.0/references/</link><description>Recent content in 功能参考手册 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs/v3.0/references/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: 路由规则规范说明</title><link>https://dubbo.apache.org/zh/docs/v3.0/references/routerule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/references/routerule/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 功能参考手册</title><link>https://dubbo.apache.org/zh/docs/v3.0/references/</link><description>Recent content in 功能参考手册 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs/v3.0/references/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Triple 协议</title><link>https://dubbo.apache.org/zh/docs/v3.0/references/tri/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/references/tri/</guid><description>
+&lt;p>Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在协议层面扩展了负载均衡和流量控制相关机制。本文档旨在指导用户正确的使用 Triple 协议。&lt;/p>
+&lt;p>在开始前，需要决定服务使用的序列化方式，如果为新服务，推荐使用 protobuf 作为默认序列化，在性能和跨语言上的效果都会更好。如果是原有服务想进行协议升级，Triple 协议也已经支持其他序列化方式，如 Hessian / JSON 等&lt;/p>
+&lt;h3 id="protobuf">Protobuf&lt;/h3>
+&lt;ol>
+&lt;li>
+&lt;p>编写 IDL 文件&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-protobuf" data-lang="protobuf">syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;span style="color:#719e07">option&lt;/span> java_multiple_files &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;span style="color:#719e07">option&lt;/span> java_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.hello&amp;#34;&lt;/span>;
+&lt;span style="color:#719e07">option&lt;/span> java_outer_classname &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;HelloWorldProto&amp;#34;&lt;/span>;
+&lt;span style="color:#719e07">option&lt;/span> objc_class_prefix &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;HLW&amp;#34;&lt;/span>;
+&lt;span style="color:#719e07">package&lt;/span> helloworld;
+&lt;span style="color:#586e75">// The request message containing the user&amp;#39;s name.
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloRequest&lt;/span> {
+&lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+}
+&lt;span style="color:#586e75">// The response message containing the greetings
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloReply&lt;/span> {
+&lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加编译 protobuf 的 extension 和 plugin (以 maven 为例)&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml"> &lt;span style="color:#268bd2">&amp;lt;extensions&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;extension&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>kr.motd.maven&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>os-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.6.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/extension&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/extensions&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;plugins&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.xolstice.maven.plugins&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>protobuf-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.6.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;protocArtifact&amp;gt;&lt;/span>com.google.protobuf:protoc:3.7.1:exe:${os.detected.classifier}&lt;span style="color:#268bd2">&amp;lt;/protocArtifact&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;pluginId&amp;gt;&lt;/span>triple-java&lt;span style="color:#268bd2">&amp;lt;/pluginId&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;outputDirectory&amp;gt;&lt;/span>build/generated/source/proto/main/java&lt;span style="color:#268bd2">&amp;lt;/outputDirectory&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>compile&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>test-compile&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;/plugins&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>构建/ 编译生成 protobuf Message 类&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">$ mvn clean install
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>编写 Java 接口&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.hello.HelloReply&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.hello.HelloRequest&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IGreeter&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#586e75">/**
+&lt;/span>&lt;span style="color:#586e75"> * &amp;lt;pre&amp;gt;
+&lt;/span>&lt;span style="color:#586e75"> * Sends a greeting
+&lt;/span>&lt;span style="color:#586e75"> * &amp;lt;/pre&amp;gt;
+&lt;/span>&lt;span style="color:#586e75"> */&lt;/span>
+HelloReply &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>HelloRequest request&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>创建 Provider&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java"> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String&lt;span style="color:#719e07">[]&lt;/span> args&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> InterruptedException &lt;span style="color:#719e07">{&lt;/span>
+ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>IGreeter&lt;span style="color:#719e07">&amp;gt;&lt;/span> service &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+service&lt;span style="color:#719e07">.&lt;/span>setInterface&lt;span style="color:#719e07">(&lt;/span>IGreeter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+service&lt;span style="color:#719e07">.&lt;/span>setRef&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> IGreeter1Impl&lt;span style="color:#719e07">());&lt;/span>
+&lt;span style="color:#586e75">// 这里需要显示声明使用的协议为triple
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> service&lt;span style="color:#719e07">.&lt;/span>setProtocol&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ProtocolConfig&lt;span style="color:#719e07">(&lt;/span>CommonConstants&lt;span style="color:#719e07">.&lt;/span>TRIPLE&lt;span style="color:#719e07">,&lt;/span> 50051&lt;span style="color:#719e07">));&lt;/span>
+service&lt;span style="color:#719e07">.&lt;/span>setApplication&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ApplicationConfig&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+service&lt;span style="color:#719e07">.&lt;/span>setRegistry&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> RegistryConfig&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+service&lt;span style="color:#719e07">.&lt;/span>export&lt;span style="color:#719e07">();&lt;/span>
+System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;dubbo service started&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">new&lt;/span> CountDownLatch&lt;span style="color:#719e07">(&lt;/span>1&lt;span style="color:#719e07">).&lt;/span>await&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>创建 Consumer&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String&lt;span style="color:#719e07">[]&lt;/span> args&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> IOException &lt;span style="color:#719e07">{&lt;/span>
+ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>IGreeter&lt;span style="color:#719e07">&amp;gt;&lt;/span> ref &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setInterface&lt;span style="color:#719e07">(&lt;/span>IGreeter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setCheck&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setInterface&lt;span style="color:#719e07">(&lt;/span>IGreeter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setCheck&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setProtocol&lt;span style="color:#719e07">(&lt;/span>CommonConstants&lt;span style="color:#719e07">.&lt;/span>TRIPLE&lt;span style="color:#719e07">);&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setLazy&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setTimeout&lt;span style="color:#719e07">(&lt;/span>100000&lt;span style="color:#719e07">);&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setApplication&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ApplicationConfig&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;demo-consumer&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+ref&lt;span style="color:#719e07">.&lt;/span>setRegistry&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> RegistryConfig&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#268bd2">final&lt;/span> IGreeter iGreeter &lt;span style="color:#719e07">=&lt;/span> ref&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">();&lt;/span>
+System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;dubbo ref started&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">final&lt;/span> HelloReply reply &lt;span style="color:#719e07">=&lt;/span> iGreeter&lt;span style="color:#719e07">.&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>HelloRequest&lt;span style="color:#719e07">.&lt;/span>newBuilder&lt;span style="color:#719e07">()&lt;/span>
+&lt;span style="color:#719e07">.&lt;/span>setName&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#719e07">.&lt;/span>build&lt;span style="color:#719e07">());&lt;/span>
+TimeUnit&lt;span style="color:#719e07">.&lt;/span>SECONDS&lt;span style="color:#719e07">.&lt;/span>sleep&lt;span style="color:#719e07">(&lt;/span>1&lt;span style="color:#719e07">);&lt;/span>
+System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Reply:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> reply&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Throwable t&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+t&lt;span style="color:#719e07">.&lt;/span>printStackTrace&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+System&lt;span style="color:#719e07">.&lt;/span>in&lt;span style="color:#719e07">.&lt;/span>read&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>运行 Provider 和 Consumer ,可以看到请求正常返回了&lt;/p>
+&lt;blockquote>
+&lt;p>Reply:message: &amp;ldquo;name&amp;rdquo;&lt;/p>
+&lt;/blockquote>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="其他序列化方式">其他序列化方式&lt;/h3>
+&lt;p>省略上文中的 1-3 步，指定 Provider 和 Consumer 使用的协议即可完成协议升级。&lt;/p>
+&lt;h3 id="示例程序">示例程序&lt;/h3>
+&lt;p>本文的示例程序可以在 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple">triple-samples&lt;/a> 找到&lt;/p></description></item><item><title>Docs: 路由规则规范说明</title><link>https://dubbo.apache.org/zh/docs/v3.0/references/routerule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/references/routerule/</guid><description>
 &lt;h3 id="基本思想基于路由链采用-pipeline-的处理方式">基本思想：基于路由链，采用 Pipeline 的处理方式&lt;/h3>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/route-rule1.png" alt="route-rule1.png">&lt;/p>
 &lt;p>可以把路由链的逻辑简单的理解为 target = rn(&amp;hellip;r3(r2(r1(src))))。对于每一个 router 内部的逻辑，可以抽象为输入地址 addrs-in 与 router 中按全量地址 addrs-all 实现切分好的 n 个互不相交的地址池 addrs-pool-1 &amp;hellip; addrs-pool-n 按实现定义好的规则取交集作为输出 addrs-out。以此类推，完成整个路由链的计算。&lt;/p>
