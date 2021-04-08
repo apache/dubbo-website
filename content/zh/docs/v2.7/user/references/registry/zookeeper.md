@@ -79,7 +79,7 @@ zookeeper://10.20.153.10:2181?client=zkclient
 
 ### 使用 curator 客户端
 
-从 `2.3.0` 版本开始支持可选 curator 实现。[Curator](https://github.com/Netflix/curator) 是 Netflix 开源的一个 Zookeeper 客户端实现。
+从 `2.3.0` 版本开始支持可选 curator 实现。[Curator](https://github.com/apache/curator) 是 Netflix 开源的一个 Zookeeper 客户端实现。
 
 如果需要改为 curator 实现，请配置：
 
@@ -99,13 +99,23 @@ dubbo.registry.client=curator
 zookeeper://10.20.153.10:2181?client=curator
 ```
 
-需依赖或直接[下载](http://repo1.maven.org/maven2/com/netflix/curator/curator-framework)：
+需依赖或直接下载[curator-framework](https://repo1.maven.org/maven2/org/apache/curator/curator-framework/), [curator-recipes](https://repo1.maven.org/maven2/org/apache/curator/curator-recipes/)：
 
 ```xml
+<properties>
+    <dubbo.version>2.7.8</dubbo.version>
+    <zookeeper.version>2.12.0</zookeeper.version>
+</properties>
+
 <dependency>
-    <groupId>com.netflix.curator</groupId>
+    <groupId>org.apache.curator</groupId>
     <artifactId>curator-framework</artifactId>
-    <version>1.1.10</version>
+    <version>${zookeeper.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-recipes</artifactId>
+    <version>${zookeeper.version}</version>
 </dependency>
 ```
 
