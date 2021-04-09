@@ -46,7 +46,7 @@ The protocol and deserialization method can be changed without affecting the bus
 
 Do not expose the open port of Dubbo server to the public network. But pay attention to the exceptional, if the attacker is in the Intranet environment, he can still attack.
 
-* Enable filtering of incoming serialization data for Java default serialization
+* Enable filtering of incoming serialization data for Java default serialization  
 Remember to configure filtering rules before enabling Java default serialization. 
 This feature is first supported in JDK 9 and has been back-ported to JDK 8, 7, and 6.  
 https://docs.oracle.com/javase/10/core/serialization-filtering1.htm#JSCOR-GUID-3ECB288D-E5BD-4412-892F-E9BB11D4C98A  
