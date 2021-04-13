@@ -3,7 +3,7 @@ type: docs
 title: "负载均衡"
 linkTitle: "负载均衡"
 weight: 8
-description: "本文介绍了集群的原理和实现细节"
+description: "本文介绍了负载均衡的原理和实现细节"
 ---
 
 
