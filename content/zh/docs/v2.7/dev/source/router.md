@@ -303,7 +303,7 @@ private boolean matchCondition(Map<String, MatchPair> condition, URL url, URL pa
         // 获取匹配项名称，比如 host、method 等
         String key = matchPair.getKey();
         String sampleValue;
-        // 如果 invocation 不为空，且 key 为 mehtod(s)，表示进行方法匹配
+        // 如果 invocation 不为空，且 key 为 method(s)，表示进行方法匹配
         if (invocation != null && (Constants.METHOD_KEY.equals(key) || Constants.METHODS_KEY.equals(key))) {
             // 从 invocation 获取被调用方法的名称
             sampleValue = invocation.getMethodName();
