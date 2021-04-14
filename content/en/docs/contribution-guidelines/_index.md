@@ -66,6 +66,7 @@ This is a rough outline of what a contributor's workflow looks like:
     git push origin your_awesome_patch
     ```
 * Submit a pull request to apache/dubbo and wait for the reply.
+* All pull requests are automatically tested on [GitHub Actions](https://github.com/apache/dubbo/actions) for AMD64 CPU architecture. Please check that all builds are successful! Additionally there are nightly tests set up at [TravisCI](https://travis-ci.com/github/apache/dubbo) to prevent any regressions on ARM64 CPU architecture.
 
 Thanks for contributing!
 
