@@ -5,8 +5,6 @@ linkTitle: "设计实现的健壮性"
 weight: 7
 ---
 
-> http://oldratlee.com/380/tech/java/robustness-of-implement.html
-
 
 Dubbo 作为远程服务暴露、调用和治理的解决方案，是应用运转的经络，其本身实现健壮性的重要程度是不言而喻的。
 
