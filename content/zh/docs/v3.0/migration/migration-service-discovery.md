@@ -105,7 +105,7 @@ dubbo.application.service-discovery.migration=APPLICATION_FIRST
 * 先进行地址列表（ClusterInvoker）筛选（接口级地址 or 应用级地址）
 * 再进行实际的 provider 地址（Invoker）筛选。
 
-![//imgs/v3/migration/migration-cluster-item.png](/imgs/v3/migration/nmigration-cluster-item.png)
+![//imgs/v3/migration/migration-cluster-item.png](/imgs/v3/migration/migration-cluster-invoker.png)
 
 ClusterInvoker 筛选的依据，可以通过 MigrationAddressComparator SPI 自行定义，目前官方提供了一个简单的地址数量比对策略，即当 `应用级地址数量 == 接口级地址数量` 满足时则进行迁移。
 
@@ -153,8 +153,8 @@ services:
 
 毫无疑问越早越彻底的升级，就能尽快摆脱这个局面。设想，如果可以将组织内所有的应用都升级到 3.x 版本，则版本收敛就变的非常简单：升级过程中 Provider 始终保持双注册，当所有的应用都升级到 3.x 之后，就可以调整全局默认行为，让 Provider 都变成应用级地址单注册了，这个过程并不会给 Consumer 应用带来困扰，因为它们已经是可以识别应用级地址的 3.x 版本了。
 
-如果没有办法做到应用的全量升级，甚至在相当长的时间内只能升级一部分应用，则可能，并且收敛也只能存 Provider 应用如何才能从双注册变为只注册应用级地址那？有一个衡量指标：当该 Provider 关联的所有 Consumer 应用都已经升级到 3.x 版本，并开启了应用级地址订阅。要衡量这个指标，需要一些额外统计数据的支持。
+如果没有办法做到应用的全量升级，甚至在相当长的时间内只能升级一部分应用，则不可避免的迁移状态要持续比较长的时间。
+在这种情况下，我们追求的只能是尽量保持已升级应用的上下游实现版本及功能收敛。推动某些 Provider 的上游消费者都升级到 Dubbo3，这样就可以解除这部分 Provider 的双注册，要做到这一点，可能需要一些辅助统计工具的支持。
 
-1. 要能分析出应用间的依赖关系，一个 Provdier 应用被哪些消费端应用消费，可以通过 Dubbo 提供的服务元数据上报能力。
-2. 要能知道每个应用的 dubbo 版本，可以通过扫描或者主动上报手段。
-3. 同时 Dubbo 框架提供一些迁移态的数据统计，以方便从全局了解当前应用的地址状态
+1. 要能分析出应用间的依赖关系，比如一个 Provdier 应用被哪些消费端应用消费，这可以通过 Dubbo 提供的服务元数据上报能力来实现。
+2. 要能知道每个应用当前使用的 dubbo 版本，可以通过扫描或者主动上报手段。
