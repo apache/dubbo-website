@@ -2,8 +2,8 @@
 type: docs
 title: "3.x 升级与兼容性指南"
 linkTitle: "总结"
-weight: 12
-description: ""
+weight: 1
+description: "快速了解 Dubbo3 的升级步骤与兼容性"
 ---
 
 **无需改动任何代码，直接升级到 Dubbo 3.0。**
