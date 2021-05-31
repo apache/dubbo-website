@@ -10,6 +10,8 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 
 在开始前，需要决定服务使用的序列化方式，如果为新服务，推荐使用 protobuf 作为默认序列化，在性能和跨语言上的效果都会更好。如果是原有服务想进行协议升级，Triple 协议也已经支持其他序列化方式，如 Hessian / JSON 等
 
+
+
 ### Protobuf 
 
 1. 编写 IDL 文件
@@ -69,6 +71,8 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
     ```shell
     $ mvn clean install
     ```
+
+### Unary 方式
 
 4.  编写 Java 接口
     ```java
@@ -137,9 +141,144 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 7. 运行 Provider 和 Consumer ,可以看到请求正常返回了
     > Reply:message: "name"
 
+### stream 方式
+
+8.  编写 Java 接口
+    ```java
+    import org.apache.dubbo.hello.HelloReply;
+    import org.apache.dubbo.hello.HelloRequest;
+
+    public interface IGreeter {
+        /**
+     	* <pre>
+     	*  Sends greeting by stream
+     	* </pre>
+    	 */
+	    StreamObserver<HelloRequest> sayHello(StreamObserver<HelloReply> replyObserver);
+
+    }
+    ```
+
+9. 编写实现类
+    ```java
+	public class IStreamGreeterImpl implements IStreamGreeter {
+
+	    @Override
+	    public StreamObserver<HelloRequest> sayHello(StreamObserver<HelloReply> replyObserver) {
+
+	        return new StreamObserver<HelloRequest>() {
+	            private List<HelloReply> replyList = new ArrayList<>();
+
+	            @Override
+	            public void onNext(HelloRequest helloRequest) {
+	                System.out.println("onNext receive request name:" + helloRequest.getName());
+	                replyList.add(HelloReply.newBuilder()
+	                    .setMessage("receive name:" + helloRequest.getName())
+	                    .build());
+	            }
+
+	            @Override
+	            public void onError(Throwable cause) {
+	                System.out.println("onError");
+	                replyObserver.onError(cause);
+	            }
+
+	            @Override
+	            public void onCompleted() {
+	                System.out.println("onComplete receive request size:" + replyList.size());
+	                for (HelloReply reply : replyList) {
+	                    replyObserver.onNext(reply);
+	                }
+	                replyObserver.onCompleted();
+	            }
+	        };
+	    }
+	}
+    ```
+
+10. 创建 Provider
+
+    ```java
+	public class StreamProvider {
+	    public static void main(String[] args) throws InterruptedException {
+	        ServiceConfig<IStreamGreeter> service = new ServiceConfig<>();
+	        service.setInterface(IStreamGreeter.class);
+	        service.setRef(new IStreamGreeterImpl());
+	        service.setProtocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051));
+	        service.setApplication(new ApplicationConfig("stream-provider"));
+	        service.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
+	        service.export();
+	        System.out.println("dubbo service started");
+	        new CountDownLatch(1).await();
+	    }
+	}
+    ```
+
+11. 创建 Consumer
+
+    ```java
+	public class StreamConsumer {
+	    public static void main(String[] args) throws InterruptedException, IOException {
+	        ReferenceConfig<IStreamGreeter> ref = new ReferenceConfig<>();
+	        ref.setInterface(IStreamGreeter.class);
+	        ref.setCheck(false);
+	        ref.setProtocol(CommonConstants.TRIPLE);
+	        ref.setLazy(true);
+	        ref.setTimeout(100000);
+	        ref.setApplication(new ApplicationConfig("stream-consumer"));
+	        ref.setRegistry(new RegistryConfig("zookeeper://mse-6e9fda00-p.zk.mse.aliyuncs.com:2181"));
+	        final IStreamGreeter iStreamGreeter = ref.get();
+
+	        System.out.println("dubbo ref started");
+	        try {
+
+	            StreamObserver<HelloRequest> streamObserver = iStreamGreeter.sayHello(new StreamObserver<HelloReply>() {
+	                @Override
+	                public void onNext(HelloReply reply) {
+	                    System.out.println("onNext");
+	                    System.out.println(reply.getMessage());
+	                }
+
+	                @Override
+	                public void onError(Throwable throwable) {
+	                    System.out.println("onError:" + throwable.getMessage());
+	                }
+
+	                @Override
+	                public void onCompleted() {
+	                    System.out.println("onCompleted");
+	                }
+	            });
+
+	            streamObserver.onNext(HelloRequest.newBuilder()
+	                .setName("tony")
+	                .build());
+
+	            streamObserver.onNext(HelloRequest.newBuilder()
+	                .setName("nick")
+	                .build());
+
+	            streamObserver.onCompleted();
+	        } catch (Throwable t) {
+	            t.printStackTrace();
+	        }
+	        System.in.read();
+	    }
+	}
+    ```
+
+12. 运行 Provider 和 Consumer ,可以看到请求正常返回了
+    > onNext\
+    > receive name:tony\
+    > onNext\
+    > receive name:nick\
+    > onCompleted
 
 ### 其他序列化方式
 省略上文中的 1-3 步，指定 Provider 和 Consumer 使用的协议即可完成协议升级。
 
 ### 示例程序
 本文的示例程序可以在 [triple-samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple) 找到
+
+
+   
