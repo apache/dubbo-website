@@ -2,7 +2,7 @@
 type: docs
 title: "Liveness Probe"
 linkTitle: "Liveness"
-weight: 9
+weight: 12
 ---
 
 ## Summary

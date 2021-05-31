@@ -2,7 +2,7 @@
 type: docs
 title: "使用方法"
 linkTitle: "使用方法"
-weight: 12
+weight: 9
 ---
 
 [Pod 的生命周期](https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/) 与服务调度息息相关，通过对 Kubernetes 官方探针的实现，能够使 Dubbo 乃至整个应用的生命周期与 Pod 的生命周期对齐。
