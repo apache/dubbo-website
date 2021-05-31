@@ -2,7 +2,7 @@
 type: docs
 title: "Startup Probe"
 linkTitle: "Startup"
-weight: 9
+weight: 12
 ---
 
 ## Summary

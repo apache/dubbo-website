@@ -2,7 +2,7 @@
 type: docs
 title: "Readiness Probe"
 linkTitle: "Readiness"
-weight: 9
+weight: 12
 ---
 
 ## Summary

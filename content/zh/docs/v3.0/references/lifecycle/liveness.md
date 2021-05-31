@@ -2,7 +2,7 @@
 type: docs
 title: "Liveness 存活探针"
 linkTitle: "存活探针"
-weight: 9
+weight: 12
 ---
 
 ## 扩展说明
