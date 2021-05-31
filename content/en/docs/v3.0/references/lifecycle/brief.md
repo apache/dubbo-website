@@ -2,7 +2,7 @@
 type: docs
 title: "Brief"
 linkTitle: "Brief"
-weight: 12
+weight: 9
 ---
 
 [Pod Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/) is closely related to micro-service scheduling. Through the implementation of official Kubernetes probes, the life cycle of Dubbo and even the entire application can be aligned with the Pod Lifecycle.
