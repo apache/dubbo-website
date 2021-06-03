@@ -13,10 +13,8 @@ Apache Dubbo 是一个款微服务开发框架，它提供了 RPC通信 与 微�
 
 Dubbo 提供了丰富的多语言客户端实现，其中 Java、Golang 版本是目前稳定性、活跃度最好的版本，其他多语言客户端也在持续建设中。
 
-This page introduces you to gRPC and protocol buffers. gRPC can use protocol buffers as both its Interface Definition Language (IDL) and as its underlying message interchange format. If you’re new to gRPC and/or protocol buffers, read this! If you just want to dive in and see gRPC in action first, select a language and try its Quick start.
 
 ## 简介
-In gRPC, a client application can directly call a method on a server application on a different machine as if it were a local object, making it easier for you to create distributed applications and services. As in many RPC systems, gRPC is based around the idea of defining a service, specifying the methods that can be called remotely with their parameters and return types. On the server side, the server implements this interface and runs a gRPC server to handle client calls. On the client side, the client has a stub (referred to as just a client in some languages) that provides the same methods as the server.
 
 ## 核心概念
 Dubbo 提供的核心能力包括:
