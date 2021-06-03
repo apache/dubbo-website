@@ -3,7 +3,7 @@
 type: docs
 title: "Dubbo 3.0"
 linkTitle: "Dubbo 3.0"
-weight: 20
+weight: 10
 description: "Dubbo 3.0 文档"
 ---
 
