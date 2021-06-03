@@ -79,7 +79,7 @@ public class AllChannelHandler2 extends AllChannelHandler {
 
 执行超时，直接对业务线程进行打断。即如果provider不能及时返回给counsumer执行结果，则对执行线程进行打断。
 
-```
+```java
 // 设置provider执行超时时间为1000ms
 @Service(interfaceClass = TestService.class,timeout = 1000)
 public class TestServiceImpl implements TestService {
