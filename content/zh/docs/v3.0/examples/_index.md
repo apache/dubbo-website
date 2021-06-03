@@ -1,9 +1,7 @@
 ---
 type: docs
-title: "示例"
-linkTitle: "快速开始"
-weight: 11
-description: "快速体验 Dubbo3。"
+title: "基本功能介绍与示例"
+linkTitle: "介绍与示例"
+weight: 20
+description: "Dubbo 基本功能的简单介绍与示例。"
 ---
-
-快速体验 Dubbo3。
