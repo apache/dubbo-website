@@ -6,7 +6,11 @@ weight: 3
 description: "For multiple instances registered in the provider cluster, specify Ip:Port to invoke."
 ---
 
-When multiple providers are registered at the register center, specifying a single instance's IP Port is allowed in order to invoke.
+When multiple providers are registered at the register center, dynamically specifying one of the instances’ IP through RpcContext is enabled. Port does Dubbo invoke.
+
+{{% alert title="Notice" color="primary" %}}
+support on `2.7.12` or above.
+{{% /alert %}}
 
 ## Demo
 

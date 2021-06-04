@@ -8,13 +8,17 @@ description: "Dubbo broadcast2 广播模式收集所有服务提供者的接口�
 
 适用场景：对于一个dubbo消费者，广播调用多个dubbo 提供者，该消费者可以收集所有服务提供者的响应结果。
 
+{{% alert title="提示" color="primary" %}}
+支持版本：`2.7.12` 之后
+{{% /alert %}}
+
 ## 使用示例
 
 - consumer demo
 
 @Reference引入服务提供者，其中，令cluster="broadcast2"，代表进行一个收集响应结果的广播调用。
 
-广播调用所有服务提供者，逐个调用，无论其中的服务提供者是否存在报错，总是返回成功。并将所有服务提供者的响应结果存于RpcContext。
+广播调用所有服务提供者，逐个调用，并且可以完整的返回所有服务提供者的执行结果(正确或异常)，并将所有服务提供者的响应结果存于RpcContext。
 
 ```java
 @RestController

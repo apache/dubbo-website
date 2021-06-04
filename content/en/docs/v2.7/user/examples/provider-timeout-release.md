@@ -10,6 +10,10 @@ Dubbo allows providers to shutdown operations based on how long the timeout last
 
 Applicable scenario: when a certain operation times out, providers can release that thread instead of simply printing out the timeout log message.
 
+{{% alert title="Notice" color="primary" %}}
+support on `2.7.12` or above.
+{{% /alert %}}
+
 ## Main Logic
 
 ```java

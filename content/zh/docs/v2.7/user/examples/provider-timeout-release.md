@@ -10,6 +10,10 @@ description: "Dubbo provider执行超时释放执行线程"
 
 适用场景：对于一个provider，如果某个操作执行超时，则打断(释放)该执行线程，而不是仅仅打印超时日志。
 
+{{% alert title="提示" color="primary" %}}
+支持版本：`2.7.12` 之后
+{{% /alert %}}
+
 ## 核心处理逻辑
 
 ```java

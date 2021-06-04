@@ -8,13 +8,17 @@ description: "Dubbo broadcast2 broadcast mode collects port responses from all p
 
 Applicable scenario: for any Dubbo consumer, broadcast calls multiple service providers. The consumer is able to collect responses from all of the providers. 
 
+{{% alert title="Notice" color="primary" %}}
+support on `2.7.12` or above.
+{{% /alert %}}
+
 ## Demo
 
 - consumer demo
 
 @Reference imports providers. Within the brackets, letting cluster = "broadcast2" represents doing one broadcast call that collects providers' responses. 
 
-Broadcast calls all service providers one by one. Regardless of whether errors are reported on the providers' side, broadcast always returns success and stores 
+Broadcast calls all service providers one by one. Is able to return all service providers’ execution outcomes (success or exceptions) completely and stores 
 providers' responses in RpcContext. 
 
 ```java
