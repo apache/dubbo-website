@@ -2,7 +2,7 @@
 type: docs
 title: "收集Dubbo广播响应"
 linkTitle: "收集广播响应"
-weight: 3
+weight: 15
 description: "Dubbo broadcast2 广播模式收集所有服务提供者的接口响应"
 ---
 

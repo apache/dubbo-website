@@ -2,7 +2,7 @@
 type: docs
 title: "provider超时打断"
 linkTitle: "provider超时打断"
-weight: 3
+weight: 15
 description: "Dubbo provider执行超时释放执行线程"
 ---
 

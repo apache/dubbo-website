@@ -2,7 +2,7 @@
 type: docs
 title: "provider timeout release"
 linkTitle: "provider timeout release"
-weight: 3
+weight: 15
 description: "Dubbo provider executes timeout release"
 ---
 

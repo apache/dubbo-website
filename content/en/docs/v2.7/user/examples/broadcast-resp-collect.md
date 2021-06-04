@@ -2,7 +2,7 @@
 type: docs
 title: "Collect Broadcast Responses"
 linkTitle: "Collect Broadcast Responses"
-weight: 3
+weight: 15
 description: "Dubbo broadcast2 broadcast mode collects port responses from all providers"
 ---
 

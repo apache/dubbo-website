@@ -2,7 +2,7 @@
 type: docs
 title: "Invoke provider with specified IP port"
 linkTitle: "Specified IP port"
-weight: 3
+weight: 15
 description: "For multiple instances registered in the provider cluster, specify Ip:Port to invoke."
 ---
 

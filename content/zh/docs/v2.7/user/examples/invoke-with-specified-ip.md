@@ -2,7 +2,7 @@
 type: docs
 title: "指定Ip Port调用Provider"
 linkTitle: "指定IP"
-weight: 3
+weight: 15
 description: "对于Provider集群中注册的多个实例，指定Ip:Port进行调用"
 ---
 
