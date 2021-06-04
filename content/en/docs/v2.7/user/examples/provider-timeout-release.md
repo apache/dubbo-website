@@ -47,7 +47,7 @@ public class AllChannelHandler2 extends AllChannelHandler {
 }
 ```
 
-## Example
+## Demo
 
 - Set Dubbo ProtocolConfig thread dispatch strategy as "all2".
 
@@ -104,6 +104,8 @@ public class TestServiceImpl implements TestService {
     }
 }
 ```
+As for the provider demo above, when running the last try-catch, if the thread is released then catch InterruptedException and return "call sum timeout".
+
 
 - consumer demo
 
