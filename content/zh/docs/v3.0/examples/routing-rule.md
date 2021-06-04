@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "路由规则规范说明"
-linkTitle: "路由规则规范说明"
+title: "路由规则规"
+linkTitle: "路由规则规"
 weight: 12
-description: "Dubbo 路由规则规范说明"
+description: "使用路由规则管控服务流量。"
 ---
 
 ### 基本思想：基于路由链，采用 Pipeline 的处理方式
