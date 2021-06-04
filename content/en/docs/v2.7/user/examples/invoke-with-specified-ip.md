@@ -48,18 +48,19 @@ import org.apache.dubbo.rpc.cluster.router.address.Address;
 public class TestServiceConsumer {
     @DubboReference(interfaceClass = TestService.class,group = "dev",parameters = {"router","address"})
     private TestService testService;
+   
     @GetMapping("/invokeByIpPortSpecified")
     public String invokeByIp(){
         try {
             // create Address instance based on provider's ip port
-            Address address = new Address("10.220.39.167", 20880);
+            Address address = new Address("10.220.47.253", 20880);
             RpcContext.getContext().setObjectAttachment("address", address);
-            Integer sum = testService.sum(1, 1);
-            return String.valueOf(sum);
+            return testService.sayHello("Tom");
         }catch (Throwable ex){
             return ex.getMessage();
         }
     }
+
 }
 ```
 

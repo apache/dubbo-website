@@ -50,18 +50,17 @@ public class TestServiceConsumer {
     @DubboReference(interfaceClass = TestService.class,group = "dev",parameters = {"router","address"})
     private TestService testService;
 
-    @GetMapping("/invokeByIpPortSpecified")
-    public String invokeByIp(){
-        try {
-            // 根据provider的ip,port创建Address实例
-            Address address = new Address("10.220.39.167", 20880);
-            RpcContext.getContext().setObjectAttachment("address", address);
-            Integer sum = testService.sum(1, 1);
-            return String.valueOf(sum);
-        }catch (Throwable ex){
-            return ex.getMessage();
-        }
-    }
+   @GetMapping("/invokeByIpPortSpecified")
+       public String invokeByIp(){
+           try {
+               // 根据provider的ip,port创建Address实例
+               Address address = new Address("10.220.47.253", 20880);
+               RpcContext.getContext().setObjectAttachment("address", address);
+               return testService.sayHello("Tom");
+           }catch (Throwable ex){
+               return ex.getMessage();
+           }
+       }
 }
 ```
 
