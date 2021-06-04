@@ -107,12 +107,14 @@ public class TestServiceImpl implements TestService {
             latch.await();
             return i.get();
         }catch (InterruptedException e){
-            // 业务执行超时，走入此逻辑
+            // 业务执行超时，并且被打断，走入此逻辑
             throw new RuntimeException("call sum timeout");
         }
     }
 }
 ```
+
+即对于上述provider demo，执行最后一个try catch时，如果业务线程被超时释放，则捕获InterruptedException异常进入catch块，返回"call sum timeout"。
 
 - consumer demo
 
