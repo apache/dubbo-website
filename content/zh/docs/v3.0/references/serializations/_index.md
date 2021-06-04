@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "路由规则"
-linkTitle: "路由规则"
+title: "序列化协议"
+linkTitle: "序列化"
 weight: 40
-description: "Dubbo 支持的路由类型及配合方式"
+description: ""
 ---
