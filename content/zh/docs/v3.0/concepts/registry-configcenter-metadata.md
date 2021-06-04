@@ -1,6 +1,6 @@
 ---
 type: docs
-title: "Dubbo 部署架构（注册中心 配置中心 元数据中心）"
+title: "部署架构（注册中心 配置中心 元数据中心）"
 linkTitle: "部署架构"
 weight: 5
 description: "了解 Dubbo 的三大中心化组件，它们各自的职责、工作方式。"
