@@ -19,9 +19,11 @@ mvn clean package
 
 ```sh
 配置文件为：
-dubbo-admin-backend/src/main/resources/application.properties
+dubbo-admin-server/src/main/resources/application.properties
 主要的配置有：
-dubbo.registry.address=zookeeper://127.0.0.1:2181
+admin.registry.address=zookeeper://127.0.0.1:2181
+admin.config-center=zookeeper://127.0.0.1:2181
+admin.metadata-report.address=zookeeper://127.0.0.1:2181
 ```
 
 启动:
