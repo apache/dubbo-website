@@ -101,6 +101,8 @@ public interface GreetingsService {
 ```
 
 那还有一种方式，就是利用 Java 8 提供的 default 接口实现，重载一个带有 CompletableFuture 签名的方法。
+  
+> CompletableFuture 签名的方法目前只支持 Dubbo 协议，其他协议由于第三方实现问题，需要视具体情况而定。
 
 有两种方式来实现：
 
