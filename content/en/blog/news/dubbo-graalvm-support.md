@@ -32,6 +32,7 @@ You can see the following output after compilation:
 ![](/imgs/blog/dubbo-graalvm-support/consumer_compiler.png)![](/imgs/blog/dubbo-graalvm-support/provider_compiler.png)
 
 Binary executable file generated can be found in the target catalog:
+
 ![](/imgs/blog/dubbo-graalvm-support/compile_result.png)
 
 Size of the binary executable file is around 40M:
