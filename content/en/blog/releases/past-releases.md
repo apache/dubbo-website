@@ -15,6 +15,45 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 > GitHub: https://github.com/apache/dubbo \
 > Release Notes: https://github.com/apache/dubbo/releases
 
+### 3.0.0 (2021-06-16)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/3.0.0/apache-dubbo-3.0.0-src.zip) |
+  [asc](https://www.apache.org/dist/dubbo/3.0.0/apache-dubbo-3.0.0-src.zip.asc) |
+  [sha512](https://www.apache.org/dist/dubbo/3.0.0/apache-dubbo-3.0.0-src.zip.sha512)
+
+### 2.7.12 (2021-06-11)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.12/apache-dubbo-2.7.12-src.zip) |
+  [asc](https://www.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.asc) |
+  [sha512](https://www.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.sha512)
+
+
+### 2.6.10.1 (2021-05-30)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip) |
+[asc](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip.asc) |
+[sha512](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip.sha512)
+
+### 2.7.11 (2021-05-12)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.11/apache-dubbo-2.7.11-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.11/apache-dubbo-2.7.11-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.11/apache-dubbo-2.7.11-src.zip.sha512)
+
+### 2.7.10 (2021-04-08)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.10/apache-dubbo-2.7.10-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.10/apache-dubbo-2.7.10-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.10/apache-dubbo-2.7.10-src.zip.sha512)
+
+
+### 2.7.9 (2020-02-23)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.9/apache-dubbo-2.7.9-src.zip) |
+[asc](https://www.apache.org/dist/dubbo/2.7.9/apache-dubbo-2.7.9-src.zip.asc) |
+[sha512](https://www.apache.org/dist/dubbo/2.7.9/apache-dubbo-2.7.9-src.zip.sha512)
+
+
 ### 2.7.8 (2020-07-28)
 
 * [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.8/apache-dubbo-2.7.8-source-release.zip) |

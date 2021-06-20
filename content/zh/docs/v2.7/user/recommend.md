@@ -10,7 +10,7 @@ description: "Dubbo 推荐用法举例"
 
 原因如下：
 
-* 作服务的提供方，比服务消费方更清楚服务的性能参数，如调用的超时时间、合理的重试次数等
+* 作为服务的提供方，比服务消费方更清楚服务的性能参数，如调用的超时时间、合理的重试次数等
 * 在 Provider 端配置后，Consumer 端不配置则会使用 Provider 端的配置，即 Provider 端的配置可以作为 Consumer 的缺省值 [^1]。否则，Consumer 会使用 Consumer 端的全局设置，这对于 Provider 是不可控的，并且往往是不合理的
 
 Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一开始就思考 Provider 端的服务特点和服务质量等问题。

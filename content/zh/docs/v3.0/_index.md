@@ -9,5 +9,5 @@ description: "Dubbo 3.0 文档"
 
 {{% pageinfo %}}
 建设中
+持续更新中...
 {{% /pageinfo %}}
-
