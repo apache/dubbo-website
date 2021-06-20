@@ -30,7 +30,7 @@ ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-> 为了兼容 2.6.x 版本配置，在使用 Zookeeper 作为注册中心，且没有显示配置配置中心的情况下，Dubbo 框架会默认将此 Zookeeper 用作配置中心，但将只作服务治理用途。
+> 为了兼容 2.6.x 版本配置，在使用 Zookeeper 作为注册中心，且没有显示配置中心的情况下，Dubbo 框架会默认将此 Zookeeper 用作配置中心，但将只作服务治理用途。
 
 ## 外部化配置
 
