@@ -111,7 +111,7 @@ Apollo中的一个核心概念是命名空间 - namespace（和上面zookeeper�
 
 Nacos虽然也存在命名空间 - namespace 的概念，但在 namespace 之下，还存在 group 概念。即通过 namespace 和 group 以及 dataId 去定位一个配置项，在不指定 namespace 的情况下，默认使用 `public` 作为默认的命名空间。
 
-在默认情况下，全局配置会读取 namespace : `public` dataId: `dubbo.properties` group: `dubbo` 配置项中的内容作为全局配置。应用级别的 group 和全局级别的 group 存在一点差异， 应用级别会读取 namespace: `public` dataId: `dubbo.properties` group: `your application name` 作为应用级别的配置。
+在默认情况下，全局配置会读取 namespace : `public`，dataId: `dubbo.properties`，group: `dubbo` 配置项中的内容作为全局配置。应用级别的 group 和全局级别的 group 存在一点差异， 应用级别会读取 namespace: `public`，dataId: `dubbo.properties`，group: `your application name` 作为应用级别的配置。
 
 全局：
 ![nacos-configcenter-global-properties.png](/imgs/user/nacos-configcenter-global-properties.png)
