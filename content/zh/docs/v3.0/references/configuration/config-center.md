@@ -61,7 +61,7 @@ dubbo.application.qos.port=33333
 
 - 作用域
 
-    外部化配置有全局和应用两个级别，全局配置是所有应用共享的，应用级配置是由每个应用自己维护且只对自身可见的。当前已支持的扩展实现有Zookeeper、Apollo。
+    外部化配置有全局和应用两个级别，全局配置是所有应用共享的，应用级配置是由每个应用自己维护且只对自身可见的。当前已支持的扩展实现有Zookeeper、Apollo、Nacos。
 
 
 #### Zookeeper
@@ -103,6 +103,22 @@ Apollo中的一个核心概念是命名空间 - namespace（和上面zookeeper�
 > 关于文件配置托管，相当于是把 `dubbo.properties` 配置文件的内容存储在了 Apollo 中，应用通过关联共享的 `dubbo` namespace 继承公共配置,
 >  应用也可以按照 Apollo 的做法来覆盖个别配置项。
 
+#### Nacos
+```xml
+<dubbo:config-center address="nacos://127.0.0.1:8848?username=nacos&password=nacos">
+</dubbo:config-center>
+```
+
+Nacos虽然也存在命名空间 - namespace 的概念，但在 namespace 之下，还存在 group 概念。即通过 namespace 和 group 以及 dataId 去定位一个配置项，在不指定 namespace 的情况下，默认使用 `public` 作为默认的命名空间。
+
+在默认情况下，全局配置会读取 namespace : `public` dataId: `dubbo.properties` group: `dubbo` 配置项中的内容作为全局配置。应用级别的 group 和全局级别的 group 存在一点差异， 应用级别会读取 namespace: `public` dataId: `dubbo.properties` group: `your application name` 作为应用级别的配置。
+
+全局：
+![nacos-configcenter-global-properties.png](/imgs/user/nacos-configcenter-global-properties.png)
+
+应用级别：
+![nacos-configcenter-application-properties.png](/imgs/user/nacos-configcenter-application-properties.png)
+
 
 #### 自己加载外部化配置
 
@@ -120,7 +136,6 @@ configCenter.setExternalConfig(dubboConfigurations);
 ```
 
 
-
 ## 服务治理
 
 #### Zookeeper
@@ -132,9 +147,7 @@ configCenter.setExternalConfig(dubboConfigurations);
 - namespace，用于不同配置的环境隔离。
 - config，Dubbo 约定的固定节点，不可更改，所有配置和服务治理规则都存储在此节点下。
 - dubbo，所有服务治理规则都是全局性的，dubbo 为默认节点
-- configurators/tag-router/condition-router，不同的服务治理规则类型，node value 存储具体规则内容
-
-
+- configurators/tag-router/condition-router/migration，不同的服务治理规则类型，node value 存储具体规则内容
 
 #### Apollo
 
@@ -146,4 +159,20 @@ configCenter.setExternalConfig(dubboConfigurations);
 
 - configurators，[覆盖规则](../../examples/config-rule)
 - tag-router，[标签路由](../../examples/routing-rule)
-- condition-router，[条件路由](../../examples/routing-rule)
+- condition-router，[条件路由](../../examples/condition-router)
+- migration, [迁移规则](../../examples/todo)
+
+#### Nacos
+
+所有的服务治理规则都是全局的，默认从 namespace: `public` 下进行读取， 通过 dataId: `interface name` 以及 group: `dubbo` 去读取和订阅：
+
+![nacos-configcenter-governance.jpg](/imgs/user/nacos-configcenter-governance.png)
+
+不同的规则以 dataId 的后缀区分：
+
+- configurators，[覆盖规则](../../examples/config-rule)
+- tag-router，[标签路由](../../examples/routing-rule)
+- condition-router，[条件路由](../../examples/condition-router)
+- migration, [迁移规则](../../examples/todo)
+
+
