@@ -128,6 +128,7 @@ message AnchorInfo {
 |  Feature  |  Java Interface   | Protobuf  | 备注  |
 |  ----  | ----  | ----  | ----  |
 | 方法重载  | √ | × |  |
+| 泛型/模板化  | √ | × |  |
 | 方法继承  | √ | × |  |
 | import文件  | √ | √  |  |
 | 字段为null  | √ | × |  |
