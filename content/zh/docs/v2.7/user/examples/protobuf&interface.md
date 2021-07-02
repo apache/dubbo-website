@@ -128,7 +128,7 @@ message AnchorInfo {
 |  Feature  |  Java Interface   | Protobuf  | 备注  |
 |  ----  | ----  | ----  | ----  |
 | 方法重载  | √ | × |  |
-| 子段为null  | √ | × |  |
+| 字段为null  | √ | × |  |
 | 多个入参  | √ | × | PB仅支持单入参 |
 | 0个入参  | √ | × | PB必须有入参 |
 | 0个出参  | √ | × | PB必须有出参 |
