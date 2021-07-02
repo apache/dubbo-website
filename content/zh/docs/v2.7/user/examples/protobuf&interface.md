@@ -94,7 +94,7 @@ message BatchOnlineRes {
 
 ```java
 message BatchAnchorInfoRes {
-    map<uint32, AnchorInfo> list = 1; //主播信息map列表
+    map<uint32, AnchorInfo> list = 1; //用户信息map列表
 }
 
 /*
