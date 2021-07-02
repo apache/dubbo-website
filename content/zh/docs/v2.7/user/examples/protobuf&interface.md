@@ -114,7 +114,7 @@ message AnchorInfo {
 
 ![image](https://user-images.githubusercontent.com/22830937/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png)
 
-## 3. 默认值
+## 3. 字段默认值
 
 * 对于字符串，默认值为空字符串。
 * 对于字节，默认值为空字节。
@@ -123,7 +123,19 @@ message AnchorInfo {
 * 对于枚举，默认值为第一个定义的枚举值，它必须为0。
 * 对于消息字段，未设置字段。 它的确切值是语言相关的。 有关详细信息，请参阅生成的代码指南。
 
-## 4. 社区资料
+## 4. 整体结构
+
+|  Feature  |  Java Interface   | Protobuf  | 备注  |
+|  ----  | ----  | ----  | ----  |
+| 方法重载  | √ | × |  |
+| 子段为null  | √ | × |  |
+| 多个入参  | √ | × | PB仅支持单入参 |
+| 0个入参  | √ | × | PB必须有入参 |
+| 0个出参  | √ | × | PB必须有出参 |
+| 参数为抽象类  | √ | × | PB参数必须为具象类 |
+| 参数为接口  | √ | × | PB参数必须为具象类 |
+
+## 5. 社区资料
 * 社区主页地址：https://developers.google.cn/protocol-buffers/
 * 社区开源地址：https://github.com/google/protobuf
 * 相关jar的maven：http://mvnrepository.com/artifact/com.google.protobuf
