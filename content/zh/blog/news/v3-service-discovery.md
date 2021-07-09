@@ -14,7 +14,7 @@ description: >
 
 下图是微服务中 Service Discovery 的基本工作原理图，微服务体系中的实例大概可分为三种角色：服务提供者（Provider）、服务消费者（Consumer）和注册中心（Registry）。而不同框架实现间最主要的区别就体现在注册中心数据的组织：地址如何组织、以什么粒度组织、除地址外还同步哪些数据？
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1590152557149-ea956a69-f303-4c0e-b098-89ed61caf30b.png)
+![img1](/imgs/blog/service-discovery-1.png)
 
 我们今天这篇文章就是围绕这三个角色展开，重点看下 Dubbo 中对于服务发现方案的设计，包括之前老的服务发现方案的优势和缺点，以及 Dubbo 3.0 中正在设计、开发中的全新的**面向应用粒度的地址发现方案**，我们期待这个新的方案能做到： 
 
@@ -108,7 +108,7 @@ dubbo://192.168.0.104:20880/org.apache.dubbo.samples.basic.api.GreetingService?a
 * 实例地址，服务消费方需要知道地址以建立链接
 * RPC 方法定义，服务消费方需要知道 RPC 服务的具体定义，不论服务类型是 rest 或 rmi 等。
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499778138-76fbb607-b351-47f4-ae18-2cd89b3f225b.png) 
+![img2](/imgs/blog/service-discovery-2.png)
 
 对于 RPC 实例间借助注册中心的数据同步，REST 定义了一套非常有意思的成熟度模型，感兴趣的朋友可以参考这里的链接 https://www.martinfowler.com/articles/richardsonMaturityModel.html， 按照文章中的 4 级成熟度定义，Dubbo 当前基于接口粒度的模型可以对应到 L4 级别。
 
@@ -122,14 +122,13 @@ RPC 服务这部分信息目前都是通过线下约定或离线的管理系统�
 优势：部署结构清晰、地址推送量小；
 缺点：地址订阅需要指定应用名， provider 应用变更（拆分）需消费端感知；RPC 调用无法全自动同步。
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499797278-bfd6d8dc-229f-441a-af53-1d07174406ff.png) 
+![img3](/imgs/blog/service-discovery-3.png)
 
 **2. Dubbo**
 
 Dubbo 通过注册中心同时同步了实例地址和 RPC 方法，因此其能实现 RPC 过程的自动同步，面向 RPC 编程、面向 RPC 治理，对后端应用的拆分消费端无感知，其缺点则是地址推送数量变大，和 RPC 方法成正比。
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499805538-758023d3-1f26-4d39-9705-74549f91f6ab.png) 
-
+![img4](/imgs/blog/service-discovery-4.png)
 
 **3. Dubbo + Kubernetes**
 
@@ -193,9 +192,9 @@ Dubbo 要支持 Kubernetes native service，相比之前自建注册中心的服
 >   ...
 >   ```
 >
->   
+>
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499823484-641d2e54-2833-40fc-8c17-8fbd5e9cd4da.png) 
+![img5](/imgs/blog/service-discovery-5.png)
 
 结合以上几种不同微服务框架模型的分析，我们可以发现，Dubbo 与 SpringCloud、Kubernetes 等不同产品在微服务的抽象定义上还是存在很大不同的。SpringCloud 和 Kubernetes 在微服务的模型抽象上还是比较接近的，两者基本都只关心实例地址的同步，如果我们去关心其他的一些服务框架产品，会发现它们绝大多数也是这么设计的；
 > 即 REST 成熟度模型中的 L3 级别。
@@ -208,7 +207,7 @@ Dubbo 要支持 Kubernetes native service，相比之前自建注册中心的服
 ### 3.2 更大规模的微服务集群 - 解决性能瓶颈
 这部分涉及到和注册中心、配置中心的交互，关于不同模型下注册中心数据的变化，之前原理部分我们简单分析过。为更直观的对比服务模型变更带来的推送效率提升，我们来通过一个示例看一下不同模型注册中心的对比：
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1590139913555-1673facd-87d0-4f89-b5e9-fef62745b7bb.png) 
+![img6](/imgs/blog/service-discovery-6.png)
 
 图中左边是微服务框架的一个典型工作流程，Provider 和  Consumer 通过注册中心实现自动化的地址通知。其中，Provider 实例的信息如图中表格所示：
 	应用 DEMO 包含三个接口 DemoService 1 2 3，当前实例的 ip 地址为 10.210.134.30。
@@ -240,7 +239,7 @@ Dubbo 要支持 Kubernetes native service，相比之前自建注册中心的服
 
 #### 4.2.1 注册中心数据以“应用 - 实例列表”格式组织，不再包含 RPC 服务信息
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499855399-61759d90-3d83-4957-9ea7-4d5a79ae8d96.png) 
+![img7](/imgs/blog/service-discovery-7.png)
 
 以下是每个 Instance metadata 的示例数据，总的原则是 metadata 只包含当前 instance 节点相关的信息，不涉及 RPC 服务粒度的信息。
 
@@ -273,7 +272,7 @@ Dubbo 要支持 Kubernetes native service，相比之前自建注册中心的服
 
 在注册中心不再同步 RPC 服务信息后，服务自省在服务消费端和提供端之间建立了一条内置的 RPC 服务信息协商机制，这也是“服务自省”这个名字的由来。服务端实例会暴露一个预定义的 MetadataService RPC 服务，消费端通过调用 MetadataService 获取每个实例 RPC 方法相关的配置信息。
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499880399-1c9c6209-4fd9-404d-ada7-60f55077e788.png) 
+![img8](/imgs/blog/service-discovery-8.png)
 
 当前 MetadataService 返回的数据格式如下，
 
@@ -294,7 +293,7 @@ Dubbo 要支持 Kubernetes native service，相比之前自建注册中心的服
 
 以下是服务自省的一个完整工作流程图，详细描述了服务注册、服务发现、MetadataService、RPC 调用间的协作流程。
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499901394-e5d282e9-14d1-40fa-be73-a6f08b9f37ff.png) 
+![img9](/imgs/blog/service-discovery-9.png)
 
 * 服务提供者启动，首先解析应用定义的“普通服务”并依次注册为 RPC 服务，紧接着注册内建的 MetadataService 服务，最后打开 TCP 监听端口。
 * 启动完成后，将实例信息注册到注册中心（仅限 ip、port 等实例相关数据），提供者启动完成。
@@ -319,7 +318,7 @@ MetadataService 通过标准的 Dubbo 协议暴露，根据查询条件，会将
 
 > 注意 consumer 端查询元数据中心的时机，是等到注册中心的地址更新通知之后。也就是通过注册中心下发的数据，我们能明确的知道何时某个实例的元数据被更新了，此时才需要去查元数据中心。
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499932997-1da7a8ef-ccd1-4bb5-8ac6-daab62b26a92.png) 
+![img10](/imgs/blog/service-discovery-10.png)
 
 #### 4.3.2 RPC 服务 < - > 应用映射关系
 
@@ -351,7 +350,7 @@ MetadataService 通过标准的 Dubbo 协议暴露，根据查询条件，会将
 
 为了使整个开发流程对老的 Dubbo 用户更透明，同时避免指定 provider 对可扩展性带来的影响（参见下方说明），我们设计了一套 `RPC 服务到应用名`的映射关系，以尝试在 consumer 自动完成 RPC 服务到 provider 应用名的转换。
 
-![undefined](https://intranetproxy.alipay.com/skylark/lark/0/2020/png/54037/1583499946918-83bbb6a2-3847-45a1-9b28-d2e34cca6634.png) 
+![img11](/imgs/blog/service-discovery-11.png)
 
 > Dubbo 之所以选择建立一套“接口-应用”的映射关系，主要是考虑到 service - app 映射关系的不确定性。一个典型的场景即是应用/服务拆分，如上面提到的配置`<dubbo:reference interface="RPC Service 2" provided-by="provider-app-x" />`，PC Service 2 是定义于 provider-app-x 中的一个服务，未来它随时可能会被开发者分拆到另外一个新的应用如 provider-app-x-1 中，这个拆分要被所有的 PC Service 2 消费方感知到，并对应用进行修改升级，如改为`<dubbo:reference interface="RPC Service 2" provided-by="provider-app-x-1" />`，这样的升级成本不可否认还是挺高的。
 > 到底是 Dubbo 框架帮助开发者透明的解决这个问题，还是交由开发者自己去解决，当然这只是个策略选择问题，并且 Dubbo 2.7.5+ 版本目前是都提供了的。其实我个人更倾向于交由业务开发者通过组织上的约束来做，这样也可进一步降低 Dubbo 框架的复杂度，提升运行态的稳定性。
