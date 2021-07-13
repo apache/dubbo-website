@@ -1,10 +1,10 @@
-### Overview
+## Overview
 
 This document will show you how to access GraalVM with a dubbo project and how to compile the project to a binary executable using native-image. 
 
 For more information about GraalVM, read https://www.graalvm.org/docs/getting-started/container-images/.
 
-### Demo
+## Demo
 
 Before compiling the dubbo project, make sure that we are programming based on the GraalVM environment.
 
@@ -12,21 +12,21 @@ Before compiling the dubbo project, make sure that we are programming based on t
 
    Visite the official website (https://www.graalvm.org/ ) and install the latest version based on your system:
 
-   (图片)
+![](/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg)
 
    After installation, configure the path of JAVA_HOME. You should see thr following in your local jdk after this step:
 
-   （图片）
+![](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
 
    GraalVM we use here is based on jdk version 1.8.
 
-2. Pull dubbo code and switch to branch apache:3.0.
+2. Pull dubbo code and switch to branch [apache:3.0](https://github.com/apache/dubbo).
 
 3. Manually generate SPI code
 
    Currently native-image compiling does not support dynamic code generation. Therefore we need to first manually generate the part of the code that is generated dynamically. The tool function is provided here:
 
-   （图片）
+![](/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg)
 
    Execute CodeGenerator can generate SPI code under the dubbo-native module. 
 
@@ -48,15 +48,15 @@ Before compiling the dubbo project, make sure that we are programming based on t
 
    Since we have imported native-image plugin in maven, here we can use '-P native' to execute the plugin.
 
-   （图片）
+![](/imgs/blog/dubbo3.0-graalvm-support/native_image_build.jpg)
 
    After a success compilation, we can find the generated binary file under target. Succefully iniate a zookeeper locally and execute the binary executable file should show us this:
 
-   （图片）
+![](/imgs/blog/dubbo3.0-graalvm-support/run_provider.jpg)
 
    Compile on consumer' side will generate a binary executable file 'demo-native-consumer' under consumer's target. Execute the file will give us the following output:
 
-   （图片）
+![](/imgs/blog/dubbo3.0-graalvm-support/run_consumer.jpg)
 
 ### Additional Steps
 
@@ -144,7 +144,7 @@ In this demo, we did extra work to make sure the project can be compiled. Here a
 
   Launch in conventional way, create folder 'META-INF.native-image' under the resources folder and paste the generated files in the local directory into the folder.
 
-  （图片）
+![](/imgs/blog/dubbo3.0-graalvm-support/resources.jpg)
 
   (Missing classes' information may exist. These information need to be manually added according to the error message reported while compiling or running.)
 
