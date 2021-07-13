@@ -1,15 +1,12 @@
 ---
-type: docs
-title: "快速开始"
-linkTitle: "快速开始"
-weight: 10
-description: ""
+title: 快速开始
+keywords: 快速开始, hellowworld, Provider
+description: 快速上手dubbo-go，编写一个简单的hellowworld应用
 ---
 
-Dubbo3 推荐使用 IDL 定义跨语言服务，特定语言实现请移步[多语言](../../languages)模块
+推荐[使用 IDL](../../../examples/quick-start) 定义跨语言的服务与编码格式，以下展示的是 Golang 语言版本的服务定义与开发方式，如果你有遗留系统或无多语言开发需求，可参考以下使用方式。
 
-> 使用 IDL 定义服务有很多有很多优势，如
-> 使用 Dubbo3 定义的服务只有一个入参与出参，更有利于多语言实现与向后兼容性，支持依赖 Protobuf 序列化的向后兼容性透明的增删字段
+# 快速开始
 
 通过一个 `hellowworld` 例子带领大家快速上手Dubbo-go框架。
 
@@ -17,10 +14,6 @@ Dubbo3 推荐使用 IDL 定义跨语言服务，特定语言实现请移步[多�
 编码：Hessian2  
 注册中心：Zookeeper 
 
-
-## Java
-
-## GO
 ## 环境
 
 * Go编程环境
