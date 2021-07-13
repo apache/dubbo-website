@@ -14,8 +14,8 @@ description: "本文档专门针对使用 2.x 版本的老用户，详细阐述�
 
 简单的修改 pom.xml 到最新版本就可以完成升级，如果要迁移到应用级地址，只需要调整开关控制 3.x 版本的默认行为。
 
-1. 升级 Provider 应用到最新 3.x 版本依赖，配置双注册开关`dubbo.application.register-mode=all`（建议通过全局配置中心设置），完成应用发布。
-2. 升级 Consumer 应用到最新 3.x 版本依赖，配置双订阅开关`dubbo.application.service-discovery.migration=APPLICATION_FIRST`（建议通过全局配置中心设置），完成应用发布。
+1. 升级 Provider 应用到最新 3.x 版本依赖，配置双注册开关`dubbo.application.register-mode=all`（建议通过全局配置中心设置，默认已自动开启），完成应用发布。
+2. 升级 Consumer 应用到最新 3.x 版本依赖，配置双订阅开关`dubbo.application.service-discovery.migration=APPLICATION_FIRST`（建议通过全局配置中心设置，默认已自动开启），完成应用发布。
 3. 在确认 Provider 的上有 Consumer 全部完成应用级地址迁移后，Provider 切到应用级地址单注册。完成升级
 
 
@@ -24,11 +24,11 @@ description: "本文档专门针对使用 2.x 版本的老用户，详细阐述�
 
 ## 2 Provider 端升级过程详解
 
-在不改变任何 Dubbo 配置的情况下，可以将一个应用或实例升级到 3.x 版本，升级后的 Dubbo 实例会默保持与 2.x 版本完全一致的行为，即会正常注册 2.x 格式的地址到注册中心，因此升级后的实例仍会对整个集群仍保持可见状态。
+在不改变任何 Dubbo 配置的情况下，可以将一个应用或实例升级到 3.x 版本，升级后的 Dubbo 实例会默保保证与 2.x 版本的兼容性，即会正常注册 2.x 格式的地址到注册中心，因此升级后的实例仍会对整个集群仍保持可见状态。
 
 
 
-如果要启用新的地址发现模型（注册应用级别的地址），则需要考虑配置双注册参数，让 3.x 实例在启动阶段实现新、老地址的双注册。
+同时新的地址发现模型（注册应用级别的地址）也将会自动注册。
 
 ![//imgs/v3/migration/provider-registration.png](/imgs/v3/migration/provider-registration.png)
 
@@ -67,12 +67,12 @@ description: "本文档专门针对使用 2.x 版本的老用户，详细阐述�
 
 对于 2.x 的消费者实例，它们看到的自然都是 2.x 版本的提供者地址列表；
 
-对于 3.x 的消费者，它具备同时发现 2.x 与 3.x 提供者地址列表的能力。在默认情况下，升级到 3.x 的消费者仍将消费 2.x 的提供者地址。Dubbo3 提供了开关来控制这个行为：
+对于 3.x 的消费者，它具备同时发现 2.x 与 3.x 提供者地址列表的能力。在默认情况下，如果集群中存在可以消费的 3.x 的地址，将自动消费 3.x 的地址，如果不存在新地址则自动消费 2.x 的地址。Dubbo3 提供了开关来控制这个行为：
 
 ```text
 dubbo.application.service-discovery.migration=APPLICATION_FIRST
 # 可选值 
-# INTERFACE_FIRST，只消费接口级地址，如无地址则报错，单订阅 2.x 地址
+# FORCE_INTERFACE，只消费接口级地址，如无地址则报错，单订阅 2.x 地址
 # APPLICATION_FIRST，智能决策接口级/应用级地址，双订阅
 # FORCE_APPLICATION，只消费应用级地址，如无地址则报错，单订阅 3.x 地址
 ```
@@ -109,7 +109,7 @@ dubbo.application.service-discovery.migration=APPLICATION_FIRST
 
 ClusterInvoker 筛选的依据，可以通过 MigrationAddressComparator SPI 自行定义，目前官方提供了一个简单的地址数量比对策略，即当 `应用级地址数量 == 接口级地址数量` 满足时则进行迁移。
 
-> 其实 INTERFACE_FIRST、APPLICATION_FIRST、FORCE_APPLICATION 控制的都是这里的 ClusterInvoker 类型的筛选策略
+> 其实 FORCE_INTERFACE、APPLICATION_FIRST、FORCE_APPLICATION 控制的都是这里的 ClusterInvoker 类型的筛选策略
 
  
 
@@ -136,7 +136,7 @@ applications:
    step: FORCE_APPLICATION
 services:
  - serviceKey: org.apache.dubbo.config.api.DemoService:1.0.0
-   step: INTERFACE_FIRST
+   step: FORCE_INTERFACE
 ```
 
 使用这种方式能做到比较精细迁移控制，但是当下及后续的改造成本会比较高，除了一些特别场景，我们不太推荐启用这种配置方式。**官方推荐使用的全局的开关式的迁移策略，让消费端实例在启动阶段自行决策使用哪份可用的地址列表。**
