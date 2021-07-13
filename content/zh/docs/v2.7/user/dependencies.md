@@ -19,7 +19,7 @@ JDK 1.6+ [^1]
 [INFO] |  \- org.jboss.netty:netty:jar:3.2.5.Final:compile
 ```
 
-这里所有依赖都是换照 Dubbo 缺省配置选的，这些缺省值是基于稳定性和性能考虑的。
+这里所有依赖都是按照 Dubbo 缺省配置选的，这些缺省值是基于稳定性和性能考虑的。
   
 * javassist.jar [^3]: 如果 `<dubbo:provider proxy="jdk" />` 或 `<dubbo:consumer proxy="jdk" />`，以及 `<dubbo:application compiler="jdk" />`，则不需要。
 * spring-context.jar [^4]: 如果用 `ServiceConfig` 和 `ReferenceConfig` 的 API 调用，则不需要。
