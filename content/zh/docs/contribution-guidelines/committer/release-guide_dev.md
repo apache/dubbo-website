@@ -309,7 +309,7 @@ $ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
 ```sh
  $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS >> KEYS # download public keys to local directory
  $ gpg --import KEYS # import keys
- $ gpg —edit-key liujun
+ $ gpg —-edit-key liujun
    > trust # type trust command
  ```
 然后使用如下命令检查签名
