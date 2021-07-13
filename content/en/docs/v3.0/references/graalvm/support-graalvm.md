@@ -19,6 +19,7 @@ Before compiling the dubbo project, make sure that we are programming based on t
 ![](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
 
    GraalVM we use here is based on jdk version 1.8.
+   To install native-image, run 'gu install native-image'.
 
 2. Pull dubbo code and switch to branch [apache:3.0](https://github.com/apache/dubbo).
 
