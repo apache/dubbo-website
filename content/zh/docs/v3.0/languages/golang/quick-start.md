@@ -1,7 +1,9 @@
 ---
-title: 快速开始
-keywords: 快速开始, hellowworld, Provider
-description: 快速上手dubbo-go，编写一个简单的hellowworld应用
+type: docs
+title: "Go 快速开始"
+linkTitle: "Go 快速开始"
+weight: 10
+description: ""
 ---
 
 推荐[使用 IDL](../../../examples/quick-start) 定义跨语言的服务与编码格式，以下展示的是 Golang 语言版本的服务定义与开发方式，如果你有遗留系统或无多语言开发需求，可参考以下使用方式。
