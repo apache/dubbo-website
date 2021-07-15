@@ -1,138 +1,188 @@
 ---
-title: 快速开始
-keywords: 快速开始, hellowworld, Provider
-description: 快速上手dubbo-go，编写一个简单的hellowworld应用
+type: docs
+title: "Java 快速开始"
+linkTitle: "Java 快速开始"
+weight: 10
+description: ""
 ---
 
-推荐[使用 IDL](../../../examples/quick-start) 定义跨语言的服务与编码格式，以下展示的是 Java 语言版本的服务定义与开发方式，如果你有遗留系统或无多语言开发需求，可参考以下使用方式。
+## 下载示例代码
+示例代码在 [dubbo-samples](https://github.com/apache/dubbo-samples) 中
+1. 下载源码
+```shell script
+$ git clone -b master https://github.com/apache/dubbo-samples.git
+```
+2. 进入示例目录
+```shell script
+$ cd dubbo-samples/dubbo-samples-protobuf
+```
 
-Dubbo 采用全 Spring 配置方式，透明化接入应用，对应用没有任何 API 侵入，只需用 Spring 加载 Dubbo 的配置即可，Dubbo 基于 [Spring 的 Schema 扩展](https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/xsd-configuration.html) 进行加载。
+## 快速运行示例
+在 dubbo-samples-protobuf 目录
 
-如果不想使用 Spring 配置，可以通过 [API 的方式](../configuration/api) 进行调用。
+1. 编译示例项目
+```shell script
+$ mvn clean compile
+```
 
-## 服务提供者
+2. 运行 Provider
+```shell script
+$ java -jar ./dubbo-samples-protobuf/protobuf-provider/target/protobuf-provider-1.0-SNAPSHOT.jar 
+```
 
-完整安装步骤，请参见：[示例提供者安装](../../admin/install/provider-demo)
+3. 运行 consumer
+```shell script
+$ java -jar ./dubbo-samples-protobuf/protobuf-provider/target/protobuf-consumer-1.0-SNAPSHOT.jar 
 
-### 定义服务接口
+输出以下结果
+result: Hello Hello, response from provider: 30.225.20.43:20880
+```
 
-DemoService.java [^1]：
 
+以上就是一个简单的 Dubbo 服务定义、服务调用流程
+
+## 详细讲解
+1. 服务定义
+```text
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.apache.dubbo.demo";
+option java_outer_classname = "DemoServiceProto";
+option objc_class_prefix = "DEMOSRV";
+
+package demoservice;
+
+// The demo service definition.
+service DemoService {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+
+```
+
+2. Protobuf Compiler 插件配置
+```xml
+<plugin>
+    <groupId>org.xolstice.maven.plugins</groupId>
+    <artifactId>protobuf-maven-plugin</artifactId>
+    <version>0.5.1</version>
+    <configuration>
+        <protocArtifact>com.google.protobuf:protoc:3.7.1:exe:${os.detected.classifier}</protocArtifact>
+        <outputDirectory>build/generated/source/proto/main/java</outputDirectory>
+        <clearOutputDirectory>false</clearOutputDirectory>
+        <protocPlugins>
+            <protocPlugin>
+                <id>dubbo</id>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-compiler</artifactId>
+                <version>${dubbo.compiler.version}</version>
+                <mainClass>org.apache.dubbo.gen.dubbo.Dubbo3Generator</mainClass>
+            </protocPlugin>
+        </protocPlugins>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>compile</goal>
+                <goal>test-compile</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+3. 编译与stub
+运行 mvn clean compile 后
+
+生成代码路径
+`dubbo-samples-protobuf/protobuf-provider/build/generated/source/proto/main/java/org/apache/dubbo/demo`
+
+生成文件列表
+```text
+.
+├── DemoService.java
+├── DemoServiceDubbo.java
+├── DemoServiceProto.java
+├── HelloReply.java
+├── HelloReplyOrBuilder.java
+├── HelloRequest.java
+└── HelloRequestOrBuilder.java
+```
+
+DemoService.java 定义如下
 ```java
-package org.apache.dubbo.demo;
-
+@javax.annotation.Generated(
+value = "by Dubbo generator",
+comments = "Source: DemoService.proto")
 public interface DemoService {
-    String sayHello(String name);
+    static final String JAVA_SERVICE_NAME = "org.apache.dubbo.demo.DemoService";
+    static final String SERVICE_NAME = "demoservice.DemoService";
+
+    static final boolean inited = DemoServiceDubbo.init();
+
+    org.apache.dubbo.demo.HelloReply sayHello(org.apache.dubbo.demo.HelloRequest request);
+
+    CompletableFuture<org.apache.dubbo.demo.HelloReply> sayHelloAsync(org.apache.dubbo.demo.HelloRequest request);
 }
 ```
 
-### 在服务提供方实现接口
-
-DemoServiceImpl.java [^2]：
-
+4. 发布服务
 ```java
-
-package org.apache.dubbo.demo.provider;
- 
-import org.apache.dubbo.demo.DemoService;
- 
 public class DemoServiceImpl implements DemoService {
-    public String sayHello(String name) {
-        return "Hello " + name;
+    private static final Logger logger = LoggerFactory.getLogger(DemoServiceImpl.class);
+
+    @Override
+    public HelloReply sayHello(HelloRequest request) {
+        logger.info("Hello " + request.getName() + ", request from consumer: " + RpcContext.getContext().getRemoteAddress());
+        return HelloReply.newBuilder()
+                .setMessage("Hello " + request.getName() + ", response from provider: "
+                        + RpcContext.getContext().getLocalAddress())
+                .build();
+    }
+
+    @Override
+    public CompletableFuture<HelloReply> sayHelloAsync(HelloRequest request) {
+        return CompletableFuture.completedFuture(sayHello(request));
     }
 }
 ```
-
-### 用 Spring 配置声明暴露服务 
-
-provider.xml：
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
- 
-    <!-- 提供方应用信息，用于计算依赖关系 -->
-    <dubbo:application name="hello-world-app"  />
- 
-    <!-- 使用multicast广播注册中心暴露服务地址 -->
-    <dubbo:registry address="multicast://224.5.6.7:1234" />
- 
-    <!-- 用dubbo协议在20880端口暴露服务 -->
-    <dubbo:protocol name="dubbo" port="20880" />
- 
-    <!-- 声明需要暴露的服务接口 -->
-    <dubbo:service interface="org.apache.dubbo.demo.DemoService" ref="demoService" />
- 
-    <!-- 和本地bean一样实现服务 -->
-    <bean id="demoService" class="org.apache.dubbo.demo.provider.DemoServiceImpl" />
-</beans>
+<bean id="demoServiceImpl" class="org.apache.dubbo.demo.provider.DemoServiceImpl"/>
+
+<dubbo:service serialization="protobuf" interface="org.apache.dubbo.demo.DemoService"
+               ref="demoServiceImpl"/>
 ```
 
-### 加载 Spring 配置 
-
-Provider.java：
-
-```java
-import org.springframework.context.support.ClassPathXmlApplicationContext;
- 
-public class Provider {
-    public static void main(String[] args) throws Exception {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"META-INF/spring/dubbo-demo-provider.xml"});
-        context.start();
-        System.in.read(); // 按任意键退出
-    }
-}
-```
-
-## 服务消费者
-
-完整安装步骤，请参见：[示例消费者安装](../../admin/install/consumer-demo)
-
-### 通过 Spring 配置引用远程服务
-
-consumer.xml：
+5. 使用服务
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
- 
-    <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
-    <dubbo:application name="consumer-of-helloworld-app"  />
- 
-    <!-- 使用multicast广播注册中心暴露发现服务地址 -->
-    <dubbo:registry address="multicast://224.5.6.7:1234" />
- 
-    <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
-    <dubbo:reference id="demoService" interface="org.apache.dubbo.demo.DemoService" />
-</beans>
+<dubbo:reference scope="remote" id="demoService" check="false" interface="org.apache.dubbo.demo.DemoService"/>
 ```
 
-### 加载Spring配置，并调用远程服务
-
-Consumer.java [^3]：
-
 ```java
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.apache.dubbo.demo.DemoService;
- 
-public class Consumer {
+public class ConsumerApplication {
     public static void main(String[] args) throws Exception {
-       ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"META-INF/spring/dubbo-demo-consumer.xml"});
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/dubbo-consumer.xml");
         context.start();
-        DemoService demoService = (DemoService)context.getBean("demoService"); // 获取远程服务代理
-        String hello = demoService.sayHello("world"); // 执行远程方法
-        System.out.println( hello ); // 显示调用结果
+        DemoService demoService = context.getBean("demoService", DemoService.class);
+        HelloRequest request = HelloRequest.newBuilder().setName("Hello").build();
+        HelloReply reply = demoService.sayHello(request);
+        System.out.println("result: " + reply.getMessage());
+        System.in.read();
     }
 }
 ```
 
-
-[^1]: 该接口需单独打包，在服务提供方和消费方共享
-[^2]: 对服务消费方隐藏实现
-[^3]: 也可以使用 IoC 注入
+## 其他
+示例运行过程中还用到了服务发现等机制，详情请参见相关章节说明

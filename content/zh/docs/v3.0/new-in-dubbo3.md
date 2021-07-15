@@ -18,7 +18,7 @@ Dubbo 可支持集群规模步入百万实例层次。
 
 ## 下一代 RPC 通信协议
 定义了全新的 RPC 通信协议 -- Triple，一句话概括 Triple：它是基于 HTTP/2 上构建的 RPC 协议，完全兼容 gRPC，并在此基础上扩展出了更丰富的语义。
-使用 Triple 协议，用户将获得以下能力
+使用 Triple 协议，用户将获得以下能力  
 * 更容易到适配网关、Mesh架构，Triple 协议让 Dubbo 更方便的与各种网关、Sidecar 组件配合工作。
 * 多语言友好，推荐配合 Protobuf 使用 Triple 协议，使用 IDL 定义服务，使用 Protobuf 编码业务数据。
 * 流式通信支持。Triple 协议支持 Request Stream、Response Stream、Bi-direction Stream
