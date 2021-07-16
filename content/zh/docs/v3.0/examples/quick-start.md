@@ -122,7 +122,7 @@ public void callService() throws Exception {
 
 
 ## 查看完整示例
-* [Java Quick Start](../../languages/java/quick-start)
-* [Golang Quick Start](../../languages/golang/quick-start)
+* [Java IDL Quick Start](../../languages/java/quick-start)
+* [Golang IDL Quick Start](../../languages/golang/quick-start)
 * [Java 语言特定用法](../../languages/java/java-specific)
 * [Golang 语言特定用法](../../languages/golang/go-specific)
