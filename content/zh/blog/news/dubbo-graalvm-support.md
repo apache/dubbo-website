@@ -1,3 +1,11 @@
+---
+title: "使用 GraalVM 构建 Native Image"
+linkTitle: "Native Image"
+date: 2021-01-14
+description: >
+  本文讲解了如何使用 GraavlVM 构建 Dubbo 的 Native Image
+---
+
 # dubbo项目支持native-image
 
 ## 概述
