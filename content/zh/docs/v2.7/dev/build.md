@@ -24,7 +24,7 @@ Dubbo 使用 [maven](http://maven.apache.org) 作为构建工具。
 
 要求
 
-* Java 1.5 以上的版本
+* Java 1.8 以上的版本
 * Maven 2.2.1 或者以上的版本   
 
 构建之前需要配置以下的 `MAVEN_OPTS`
