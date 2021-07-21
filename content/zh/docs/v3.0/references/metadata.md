@@ -17,9 +17,10 @@ dubbo consumer中的配置项也有[20+个配置项](https://dubbo.apache.org/zh
 
 ## 目标
 
-需要将注册中心原来的数据信息和元数据信息保存到独立的key-value的存储中，这个key-value可以是DB，redis或者其他持久化存储。核心代码中支持了zookeeper，redis(推荐)的默认支持。
+需要将注册中心原来的数据信息和元数据信息保存到独立的key-value的存储中，这个key-value可以是DB，redis或者其他持久化存储。核心代码中支持了zookeeper，redis, nacos(推荐)的默认支持。
+>因为是基于key-value存储，key不会改变，最新的value会将原来的value进行覆盖
 
-provider存储内容的格式，参见：org.apache.dubbo.metadata.definition.model.FullServiceDefinition。是该类型gson化之后的存储。
+Provider存储内容的格式，参见：org.apache.dubbo.metadata.definition.model.FullServiceDefinition。是该类型gson化之后的存储。
 Consumer存储内容，为Map格式。从Consumer端注册到注册中心的URL中的获取参数信息。即通过URL.getParameterMap()获取到的Map，进行gson化之后进行存储。
 
 详细的内容，可以参考下面的sample输出。
@@ -42,31 +43,42 @@ Consumer存储内容，为Map格式。从Consumer端注册到注册中心的URL�
 
 ```properties
 dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
-dubbo.metadata-report.username=xxx        ##非必须
-dubbo.metadata-report.password=xxx        ##非必须
+dubbo.metadata-report.username=xxx         ##非必须
+dubbo.metadata-report.password=xxx         ##非必须
 dubbo.metadata-report.retry-times=30       ##非必须,default值100
 dubbo.metadata-report.retry-period=5000    ##非必须,default值3000
 dubbo.metadata-report.cycle-report=false   ##非必须,default值true
+dubbo.metadata-report.sync.report=false    ##非必须,default值为false
 ```
-> 如果元数据地址(dubbo.metadata-report.address)也不进行配置，整个元数据的写入不会生效，但是不影响程序运行。
+> 如果元数据地址(dubbo.metadata-report.address)也不进行配置，会判断注册中心的协议是否支持元数据中心，如果支持，会使用注册中心的地址来用作元数据中心。
 
 
 接下来看几个sample的配置。无论哪种配置方式，都需要引入maven依赖：
 
+zookeeper:
 ```xml
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-metadata-report-zookeeper</artifactId>
 </dependency>
 ```
-如果需要使用redis，可以引入对应的redis的依赖：
 
+redis:
 ```xml
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-metadata-report-redis</artifactId>
 </dependency>
 ```
+
+nacos:
+```xml
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-metadata-report-nacos</artifactId>
+</dependency>
+```
+
 
 > **完整的sample，查看[sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)**
 
@@ -389,3 +401,185 @@ redis=org.apache.dubbo.metadata.store.redis.RedisMetadataReportFactory
 只要将上面的修改和project打包成jar包，然后配置元数据中心的url：redis://10.20.153.10:6379。
 
 至此，一个自定义的元数据存储就可以运行了。
+
+
+
+#### Zookeeper
+
+```xml
+<dubbo:metadata-report address="zookeeper://127.0.0.1:2181"/>
+```
+
+Zookeeper 基于树形结构进行数据存储，它的元数据信息位于以下节点:
+```text
+Provider: /dubbo/metadata/{interface name}/{version}/{group}/provider/{application name} 
+Consumer: /dubbo/metadata/{interface name}/{version}/{group}/consumer/{application name}
+```
+
+当 version 或者 group 不存在时，version 路径和 group 路径会取消，路径如下:
+```text
+Provider: /dubbo/metadata/{interface name}/provider/{application name} 
+Consumer: /dubbo/metadata/{interface name}/consumer/{application name}
+```
+
+通过 zkCli get 操作查看数据.
+
+Provider node:
+```shell script
+[zk: localhost:2181(CONNECTED) 8] get /dubbo/metadata/org.apache.dubbo.demo.DemoService/provider/demo-provider
+{"parameters":{"side":"provider","interface":"org.apache.dubbo.demo.DemoService","metadata-type":"remote","application":"demo-provider","dubbo":"2.0.2","release":"","anyhost":"true","delay":"5000","methods":"sayHello,sayHelloAsync","deprecated":"false","dynamic":"true","timeout":"3000","generic":"false"},"canonicalName":"org.apache.dubbo.demo.DemoService","codeSource":"file:/Users/apple/IdeaProjects/dubbo/dubbo-demo/dubbo-demo-interface/target/classes/","methods":[{"name":"sayHelloAsync","parameterTypes":["java.lang.String"],"returnType":"java.util.concurrent.CompletableFuture"},{"name":"sayHello","parameterTypes":["java.lang.String"],"returnType":"java.lang.String"}],"types":[{"type":"java.util.concurrent.CompletableFuture","properties":{"result":"java.lang.Object","stack":"java.util.concurrent.CompletableFuture.Completion"}},{"type":"java.lang.Object"},{"type":"java.lang.String"},{"type":"java.util.concurrent.CompletableFuture.Completion","properties":{"next":"java.util.concurrent.CompletableFuture.Completion","status":"int"}},{"type":"int"}]}
+cZxid = 0x25a9b1
+ctime = Mon Jun 28 21:35:17 CST 2021
+mZxid = 0x25a9b1
+mtime = Mon Jun 28 21:35:17 CST 2021
+pZxid = 0x25a9b1
+cversion = 0
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 1061
+numChildren = 0
+```
+
+Consumer node:
+```shell script
+[zk: localhost:2181(CONNECTED) 10] get /dubbo/metadata/org.apache.dubbo.demo.DemoService/consumer/demo-consumer
+{"side":"consumer","interface":"org.apache.dubbo.demo.DemoService","metadata-type":"remote","application":"demo-consumer","dubbo":"2.0.2","release":"","sticky":"false","check":"false","methods":"sayHello,sayHelloAsync"}
+cZxid = 0x25aa24
+ctime = Mon Jun 28 21:57:43 CST 2021
+mZxid = 0x25aa24
+mtime = Mon Jun 28 21:57:43 CST 2021
+pZxid = 0x25aa24
+cversion = 0
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 219
+numChildren = 0
+```
+
+
+#### Redis
+
+```xml
+<dubbo:metadata-report address="redis://127.0.0.1:6779"/>
+```
+
+在Redis中，使用string数据结构来进行存储元数据信息:
+```text
+Provider: {service name}:{version}:{group}:provider:{application name}
+Consumer: {service name}:{version}:{group}:consumer:{application name}
+```
+
+当 version 或者 group 不存在时，`:` 依然保留:
+
+```text
+Provider: {service name}:::provider:{application name}
+Consumer: {service name}:::consumer:{application name}
+``` 
+
+通过 Redis client get key 查看数据.
+
+Provider key:
+```shell script
+127.0.0.1:6379> get org.apache.dubbo.demo.DemoService:::provider:demo-provider
+"{\"parameters\":{\"side\":\"provider\",\"interface\":\"org.apache.dubbo.demo.DemoService\",\"metadata-type\":\"remote\",\"application\":\"demo-provider\",\"dubbo\":\"2.0.2\",\"release\":\"\",\"anyhost\":\"true\",\"delay\":\"5000\",\"methods\":\"sayHello,sayHelloAsync\",\"deprecated\":\"false\",\"dynamic\":\"true\",\"timeout\":\"3000\",\"generic\":\"false\"},\"canonicalName\":\"org.apache.dubbo.demo.DemoService\",\"codeSource\":\"file:/Users/apple/IdeaProjects/dubbo/dubbo-demo/dubbo-demo-interface/target/classes/\",\"methods\":[{\"name\":\"sayHello\",\"parameterTypes\":[\"java.lang.String\"],\"returnType\":\"java.lang.String\"},{\"name\":\"sayHelloAsync\",\"parameterTypes\":[\"java.lang.String\"],\"returnType\":\"java.util.concurrent.CompletableFuture\"}],\"types\":[{\"type\":\"java.util.concurrent.CompletableFuture\",\"properties\":{\"result\":\"java.lang.Object\",\"stack\":\"java.util.concurrent.CompletableFuture.Completion\"}},{\"type\":\"java.lang.Object\"},{\"type\":\"java.lang.String\"},{\"type\":\"java.util.concurrent.CompletableFuture.Completion\",\"properties\":{\"next\":\"java.util.concurrent.CompletableFuture.Completion\",\"status\":\"int\"}},{\"type\":\"int\"}]}"
+```
+
+Consumer key:
+```shell script
+127.0.0.1:6379> get org.apache.dubbo.demo.DemoService:::consumer:demo-consumer
+"{\"side\":\"consumer\",\"interface\":\"org.apache.dubbo.demo.DemoService\",\"metadata-type\":\"remote\",\"application\":\"demo-consumer\",\"dubbo\":\"2.0.2\",\"release\":\"\",\"sticky\":\"false\",\"check\":\"false\",\"methods\":\"sayHello,sayHelloAsync\"}"
+```
+
+#### Nacos
+```xml
+<dubbo:metadata-report address="nacos://127.0.0.1:8848"/>
+```
+
+在 Nacos 中，本身就存在配置中心这个概念，正好用于元数据存储。在配置中心的场景下，存在命名空间- namespace 的概念，在 namespace 之下，还存在 group 概念。即通过 namespace 和 group 以及 dataId 去定位一个配置项，在不指定 namespace 的情况下，默认使用 `public` 作为默认的命名空间。
+
+```text
+Provider: namespace: 'public', dataId: '{service name}:{version}:{group}:provider:{application name}', group: 'dubbo'
+Consumer: namespace: 'public', dataId: '{service name}:{version}:{group}:consumer:{application name}', group: 'dubbo'
+```
+
+当 version 或者 group 不存在时，`:` 依然保留:
+
+```text
+Provider: namespace: 'public', dataId: '{service name}:::provider:{application name}', group: 'dubbo'
+Consumer: namespace: 'public', dataId: '{service name}:::consumer:{application name}', group: 'dubbo'
+```
+
+可以通过 Nacos 自带的 web console 界面进行查看.
+
+Provider data:
+![nacos-metadata-report-provider-metadata.png](/imgs/user/nacos-metadata-report-provider-metadata.png)
+
+Consumer data:
+![nacos-metadata-report-consumer-metadata.png](/imgs/user/nacos-metadata-report-consumer-metadata.png)
+
+
+
+#### 服务自省映射- Service Name Mapping
+在Dubbo 3.0 中，默认使用了服务自省机制去实现服务发现，关于服务自省可以查看[服务自省](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
+
+简而言之，服务自省机制需要能够通过 interface name 去找到对应的 application name，这个关系可以是一对多的，即一个 service name 可能会对应多个不同的 application name。在 3.0 中，元数据中心提供此项映射的能力。
+
+
+#### Zookeeper
+在上面提到，service name 和 application name 可能是一对多的，在 zookeeper 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 zookeeper 中的版本机制 version 去解决该问题。在 zookeeper 中，每一次对数据进行修改，dataVersion 都会进行增加，我们可以利用 version 这个机制去解决多个客户端同时更新映射的并发问题。不同客户端在更新之前，先去查一次 version，当作本地凭证。在更新时，把凭证 version 传到服务端比对 version, 如果不一致说明在次期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
+
+Curator api.
+```java
+CuratorFramework client = ... 
+client.setData().withVersion(ticket).forPath(path, dataBytes);
+``` 
+
+映射信息位于: 
+```text
+/dubbo/mapping/{service name}
+``` 
+
+通过 zkCli get 操作查看数据.
+
+```shell script
+[zk: localhost:2181(CONNECTED) 26] get /dubbo/mapping/org.apache.dubbo.demo.DemoService
+demo-provider,two-demo-provider,dubbo-demo-annotation-provider
+cZxid = 0x25a80f
+ctime = Thu Jun 10 01:36:40 CST 2021
+mZxid = 0x25a918
+mtime = Fri Jun 11 18:46:40 CST 2021
+pZxid = 0x25a80f
+cversion = 0
+dataVersion = 2
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 62
+numChildren = 0
+```
+
+
+#### Redis
+Redis 元数据中心目前还不支持服务自省映射，但已提上日程，会在近期进行实现。
+
+
+#### Nacos
+在上面提到，service name 和 application name 可能是一对多的，在 nacos 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 nacos 中 publishConfigCas 的能力去解决该问题。在 nacos 中，使用 publishConfigCas 会让用户传递一个参数 casMd5，该值的含义是之前配置内容的 md5 值。不同客户端在更新之前，先去查一次 nacos 的 content 的值，计算出 md5 值，当作本地凭证。在更新时，把凭证 md5 传到服务端比对 md5 值, 如果不一致说明在次期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
+
+Nacos api:
+```java
+ConfigService configService = ...
+configService.publishConfigCas(key, group, content, ticket);
+```
+
+映射信息位于 namespace: 'public', dataId: '{service name}', group: 'mapping'.
+
+![nacos-metadata-report-service-name-mapping.png](/imgs/user/nacos-metadata-report-service-name-mapping.png)
+
+
+
+
+
+
+

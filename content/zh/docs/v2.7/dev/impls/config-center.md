@@ -1,6 +1,6 @@
 ---
 type: docs
-title: "Dubbo 配置中心扩展"
+title: "配置中心扩展"
 linkTitle: "配置中心扩展"
 weight: 13
 ---

@@ -8,7 +8,7 @@ description: "通过 Dubbo 定义的路由规则，实现对流量分布的控�
 
 ### 流量管理
 
-`Dubbo`提供了强大的流量管理能力。流量管理的本质是将请求根据制定好的路由规则分发到应用服务上，如下图所示：
+流量管理的本质是将请求根据制定好的路由规则分发到应用服务上，如下图所示：
 
 ![What is traffic control](/imgs/v3/concepts/what-is-traffic-control.png)
 
@@ -19,14 +19,18 @@ description: "通过 Dubbo 定义的路由规则，实现对流量分布的控�
 + 路由规则也可以不路由到任何应用服务。如：Router(m)没有路由到任何一个Service上，所有命中Router(m)的请求都会因为没有对应的应用服务处理而导致报错
 + 应用服务可以是单个的实例，也可以是一个应用集群。
 
-### 应用场景
-`Dubbo`支持生产上常用的流量应用场景。
+### Dubbo流量管理介绍
 
-##### 蓝绿部署
-蓝绿部署是让线上的老版本继续运行，直接部署新版本然后进行测试，当新版本测试通过以后，将流量切到新版本，最后将老版本同时也升级到新版本。整个过程无需停机，风险较小且可控。
+Dubbo提供了支持mesh方式的流量管理策略，可以很容易实现 [A/B测试](../../examples/routing/ab-testing-deployment/)、[金丝雀发布](../../examples/routing/canary-deployment/)、[蓝绿发布](../../examples/routing/blue-green-deployment/)等能力。
 
-##### AB测试
-AB测试是用来测试应用功能的一种方案。通过科学的实验设计、样本采样、流量分割和校验等方式来获得具有代表性的实验结论，并确信该结论再推广到全部流量可信。
+Dubbo将整个流量管理分成[VirtualService](../../references/routers/virtualservice/)和[DestinationRule](../../references/routers/destination-rule/)两部分。当Consumer接收到一个请求时，会根据[VirtualService](../../references/routers/virtualservice/)中定义的[DubboRoute](../../references/routers/virtualservice/#dubboroute)和[DubboRouteDetail](../../references/routers/virtualservice/#dubboroutedetail)匹配到对应的[DubboDestination](../../references/routers/virtualservice/#dubbodestination)中的[subnet](../../references/routers/destination-rule/#subset)，最后根据[DestinationRule](../../references/routers/destination-rule/)中配置的[subnet](../../references/routers/destination-rule/#subset)信息中的labels找到对应需要具体路由的Provider集群。其中：
 
-##### 金丝雀部署
-金丝雀部署是在原有版本可用的情况下，同时部署一个新版本应用作为“金丝雀”，测试新版本的性能和表现，在保障整体系统稳定的前提下，尽早发现、及时调整。
++ [VirtualService](../../references/routers/virtualservice/)主要处理入站流量分流的规则，支持服务级别和方法级别的分流。
++ [DubboRoute](../../references/routers/virtualservice/#dubboroute)主要解决服务级别的分流问题。同时，还提供的重试机制、超时、故障注入、镜像流量等能力。
++ [DubboRouteDetail](../../references/routers/virtualservice/#dubboroutedetail)主要解决某个服务中方法级别的分流问题。支持方法名、方法参数、参数个数、参数类型、header等各种维度的分流能力。同时也支持方法级的重试机制、超时、故障注入、镜像流量等能力。
++ [DubboDestination](../../references/routers/virtualservice/#dubbodestination)用来描述路由流量的目标地址，支持host、port、subnet等方式。
++ [DestinationRule](../../references/routers/destination-rule/)主要处理目标地址规则，可以通过hosts、[subnet](../../references/routers/destination-rule/#subset)等方式关联到Provider集群。同时可以通过[trafficPolicy](../../references/routers/destination-rule/#trafficpolicy)来实现负载均衡。
+
+
+
+这种设计理念很好的解决流量分流和目标地址之间的耦合问题。不仅将配置规则进行了简化有效避免配置冗余的问题，还支持[VirtualService](../../references/routers/virtualservice/)和[DestinationRule](../../references/routers/destination-rule/)的任意组合，可以非常灵活的支持各种业务使用场景。

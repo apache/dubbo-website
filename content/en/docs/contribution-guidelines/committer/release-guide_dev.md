@@ -327,7 +327,7 @@ If it's your first time verify a release candidte, you should import public keys
 ```sh
  $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS >> KEYS # download public keys to local directory
  $ gpg --import KEYS # import keys
- $ gpg —edit-key liujun
+ $ gpg -—edit-key liujun
    > trust # type trust command
  ```
 Now, you can verify signature with command
