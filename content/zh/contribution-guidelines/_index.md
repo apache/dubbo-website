@@ -4,7 +4,9 @@ type: docs
 title: "为 Dubbo 做贡献"
 linkTitle: "贡献指南"
 description: "Dubbo 贡献指南"
-weight: 90
+menu:
+  main:
+    weight: 50
 ---
 
 

@@ -5,7 +5,7 @@ linkTitle: "文档"
 weight: 20
 menu:
   main:
-    weight: 20
+    weight: 10
 ---
 
 欢迎阅读 Dubbo 文档
