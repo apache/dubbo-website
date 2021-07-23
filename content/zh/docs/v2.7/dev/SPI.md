@@ -179,9 +179,9 @@ Wheel wheel = wheelMaker.makeWheel(url);
 // ...
 ```
 
-时，注入的 `Adaptive` 实例可以提取约定 Key 来决定使用哪个 `WheelMaker` 实现来调用对应实现的真正的 `makeWheel` 方法。如提取 `wheel.type`, key 即 `url.get("wheel.type")` 来决定 `WheelMake` 实现。`Adaptive` 实例的逻辑是固定，指定提取的 URL 的 Key，即可以代理真正的实现类上，可以动态生成。
+时，注入的 `Adaptive` 实例可以提取事先定义好的 Key 来决定使用哪个 `WheelMaker` 实现来调用对应实现的真正的 `makeWheel` 方法。如提取 `wheel.type` Key，即 `url.get("wheel.type")` 来决定 `WheelMaker` 实现。`Adaptive` 实例的逻辑是固定，从 URL 中提取事先定义好的 Key，动态生成真正的实现并执行它。
 
-在 Dubbo 的 `ExtensionLoader` 的扩展点类对应的 `Adaptive` 实现是在加载扩展点里动态生成。指定提取的 URL 的 Key 通过 `@Adaptive` 注解在接口方法上提供。
+`ExtensionLoader` 里面的扩展点注入的 `Adaptive` 实现是在dubbo加载扩展点时动态生成的。Key是从URL中获取的，而URL中Key的值是在扩展点接口的方法定义上通过@Adaptive注解提供的。
 
 下面是 Dubbo 的 Transporter 扩展点的代码：
 
