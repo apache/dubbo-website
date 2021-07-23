@@ -33,7 +33,7 @@ RPC 协议的设计需要考虑以下内容：
 
 #### HTTP/1.1
 
-比于直接构建与 TPC 传输层的私有 RPC 协议，构建于 HTTP 之上的远程调用解决方案会有更好的通用性，如WebServices 或 REST 架构，使用 HTTP + JSON 可以说是一个事实标准的解决方案。
+比于直接构建于 TCP 传输层的私有 RPC 协议，构建于 HTTP 之上的远程调用解决方案会有更好的通用性，如WebServices 或 REST 架构，使用 HTTP + JSON 可以说是一个事实标准的解决方案。
 
 选择构建在 HTTP 之上，有两个最大的优势：
 
@@ -47,7 +47,7 @@ RPC 协议的设计需要考虑以下内容：
 - 无直接 Server Push 支持，需要使用 Polling Long-Polling 等变通模式
 
 #### gRPC
-上面提到了在 HTTP 及 TCP 协议之上构建 RPC 协议各自的优缺点，相比于 Dubbo 构建于 TPC 传输层之上，Google 选择将 gRPC 直接定义在 HTTP/2 协议之上。
+上面提到了在 HTTP 及 TCP 协议之上构建 RPC 协议各自的优缺点，相比于 Dubbo 构建于 TCP 传输层之上，Google 选择将 gRPC 直接定义在 HTTP/2 协议之上。
 gRPC 的优势由HTTP2 和 Protobuf 继承而来。
 
 - 基于 HTTP2 的协议足够简单，用户学习成本低，天然有 server push/ 多路复用 / 流量控制能力
