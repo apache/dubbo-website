@@ -24,7 +24,7 @@ Dubbo 可支持集群规模步入百万实例层次。
 * 流式通信支持。Triple 协议支持 Request Stream、Response Stream、Bi-direction Stream
 
 ## 云原生
-Dubbo3 构建的业务应用可直接部署在 VM、Container、Kubernetes 等平台，Dubbo3 很好的解决了 Dubbo 服务与调度平台之间的声明周期对齐，Dubbo 服务发现地址
+Dubbo3 构建的业务应用可直接部署在 VM、Container、Kubernetes 等平台，Dubbo3 很好的解决了 Dubbo 服务与调度平台之间的生命周期对齐，Dubbo 服务发现地址
 与容器平台绑定的问题。
 
 在服务发现层面，Dubbo3 支持与 [Kubernetes Native Service]() 的融合，目前限于 Headless Service。

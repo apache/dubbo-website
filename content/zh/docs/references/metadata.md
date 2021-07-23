@@ -13,6 +13,7 @@ dubbo consumer中的配置项也有[20+个配置项](https://dubbo.apache.org/zh
 这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心(如zookeeper)的网络开销增大，性能降低。  
 除了上述配置项的存储之外，dubbo服务元数据信息也需要被存储下来。元数据信息包括服务接口，及接口的方法信息。这些信息将被用于服务mock，服务测试。
 
+以上的元数据都是基于接口级别。在3.0版本中，引入了应用元数据的概念，应用元数据描述的是整个应用的信息概览。并且引入了服务自省映射，用于应用级别的服务发现。
 
 
 ## 目标
@@ -403,8 +404,11 @@ redis=org.apache.dubbo.metadata.store.redis.RedisMetadataReportFactory
 至此，一个自定义的元数据存储就可以运行了。
 
 
+### 数据存储
 
-#### Zookeeper
+#### 接口级别元数据
+
+##### Zookeeper 
 
 ```xml
 <dubbo:metadata-report address="zookeeper://127.0.0.1:2181"/>
@@ -459,7 +463,7 @@ numChildren = 0
 ```
 
 
-#### Redis
+##### Redis
 
 ```xml
 <dubbo:metadata-report address="redis://127.0.0.1:6779"/>
@@ -492,7 +496,7 @@ Consumer key:
 "{\"side\":\"consumer\",\"interface\":\"org.apache.dubbo.demo.DemoService\",\"metadata-type\":\"remote\",\"application\":\"demo-consumer\",\"dubbo\":\"2.0.2\",\"release\":\"\",\"sticky\":\"false\",\"check\":\"false\",\"methods\":\"sayHello,sayHelloAsync\"}"
 ```
 
-#### Nacos
+##### Nacos
 ```xml
 <dubbo:metadata-report address="nacos://127.0.0.1:8848"/>
 ```
@@ -520,14 +524,44 @@ Consumer data:
 ![nacos-metadata-report-consumer-metadata.png](/imgs/user/nacos-metadata-report-consumer-metadata.png)
 
 
+#### 应用级别元数据
+应用级别元数据只有当一个应用定义服务之后，才会进行暴露。会根据当前应用的自身信息，以及接口信息，去计算出该应用的 revision 修订值，用于保存应用级别元数据，
 
-#### 服务自省映射- Service Name Mapping
+##### Zookeeper
+Zookeeper 的应用级别元数据位于 /dubbo/metadata/{application name}/{revision}
+
+```shell script
+[zk: localhost:2181(CONNECTED) 33] get /dubbo/metadata/demo-provider/da3be833baa2088c5f6776fb7ab1a436
+{"app":"demo-provider","revision":"da3be833baa2088c5f6776fb7ab1a436","services":{"org.apache.dubbo.demo.DemoService:dubbo":{"name":"org.apache.dubbo.demo.DemoService","protocol":"dubbo","path":"org.apache.dubbo.demo.DemoService","params":{"side":"provider","release":"","methods":"sayHello,sayHelloAsync","deprecated":"false","dubbo":"2.0.2","pid":"38298","interface":"org.apache.dubbo.demo.DemoService","service-name-mapping":"true","timeout":"3000","generic":"false","metadata-type":"remote","delay":"5000","application":"demo-provider","dynamic":"true","REGISTRY_CLUSTER":"registry1","anyhost":"true","timestamp":"1626887121829"}},"org.apache.dubbo.demo.RestDemoService:1.0.0:rest":{"name":"org.apache.dubbo.demo.RestDemoService","version":"1.0.0","protocol":"rest","path":"org.apache.dubbo.demo.RestDemoService","params":{"side":"provider","release":"","methods":"getRemoteApplicationName,sayHello,hello,error","deprecated":"false","dubbo":"2.0.2","pid":"38298","interface":"org.apache.dubbo.demo.RestDemoService","service-name-mapping":"true","version":"1.0.0","timeout":"5000","generic":"false","revision":"1.0.0","metadata-type":"remote","delay":"5000","application":"demo-provider","dynamic":"true","REGISTRY_CLUSTER":"registry1","anyhost":"true","timestamp":"1626887120943"}}}}
+cZxid = 0x25b336
+ctime = Thu Jul 22 01:05:55 CST 2021
+mZxid = 0x25b336
+mtime = Thu Jul 22 01:05:55 CST 2021
+pZxid = 0x25b336
+cversion = 0
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 1286
+numChildren = 0
+```
+
+#### Redis
+Redis 元数据中心目前还不支持应用级别元数据，但已提上日程，会在近期进行实现。
+
+##### Nacos
+Nacos 应用级别的元数据位于 namespace: 'public', dataId: '{application name}', group: '{revision}'
+
+![nacos-metadata-report-application-metadata.png](/imgs/user/nacos-metadata-report-application-metadata.png)
+
+
+#### 服务自省映射 - Service Name Mapping
 在Dubbo 3.0 中，默认使用了服务自省机制去实现服务发现，关于服务自省可以查看[服务自省](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
 
 简而言之，服务自省机制需要能够通过 interface name 去找到对应的 application name，这个关系可以是一对多的，即一个 service name 可能会对应多个不同的 application name。在 3.0 中，元数据中心提供此项映射的能力。
 
 
-#### Zookeeper
+##### Zookeeper
 在上面提到，service name 和 application name 可能是一对多的，在 zookeeper 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 zookeeper 中的版本机制 version 去解决该问题。在 zookeeper 中，每一次对数据进行修改，dataVersion 都会进行增加，我们可以利用 version 这个机制去解决多个客户端同时更新映射的并发问题。不同客户端在更新之前，先去查一次 version，当作本地凭证。在更新时，把凭证 version 传到服务端比对 version, 如果不一致说明在次期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
 
 Curator api.
@@ -560,11 +594,11 @@ numChildren = 0
 ```
 
 
-#### Redis
+##### Redis
 Redis 元数据中心目前还不支持服务自省映射，但已提上日程，会在近期进行实现。
 
 
-#### Nacos
+##### Nacos
 在上面提到，service name 和 application name 可能是一对多的，在 nacos 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 nacos 中 publishConfigCas 的能力去解决该问题。在 nacos 中，使用 publishConfigCas 会让用户传递一个参数 casMd5，该值的含义是之前配置内容的 md5 值。不同客户端在更新之前，先去查一次 nacos 的 content 的值，计算出 md5 值，当作本地凭证。在更新时，把凭证 md5 传到服务端比对 md5 值, 如果不一致说明在次期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
 
 Nacos api:
