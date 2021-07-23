@@ -25,7 +25,7 @@ Dubbo relies on [maven](http://maven.apache.org) as the building tool.
 
 Requirements:
 
-* Java above 1.5 version
+* Java above 1.8 version
 * Maven version 2.2.1 or above    
 
 The following `MAVEN_OPTS`should be configured before building:
