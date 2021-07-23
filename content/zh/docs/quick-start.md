@@ -2,7 +2,9 @@
 type: docs
 title: "快速开始"
 linkTitle: "快速开始"
-weight: 3
+menu:
+  main:
+    weight: 30
 description: ""
 ---
 

@@ -2,7 +2,9 @@
 type: docs
 title: "概念与架构"
 linkTitle: "概念&架构"
-weight: 10
+menu:
+  main:
+    weight: 40
 description: "了解 Dubbo3 的核心架构，快速掌握基本概念与特性。"
 ---
 
