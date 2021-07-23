@@ -2,9 +2,7 @@
 type: docs
 title: "What's New in Dubbo3"
 linkTitle: "新版本特性速览"
-menu:
-  main:
-    weight: 20
+weight: 2
 description: "Dubbo3 相比 2.7 版本进行了全面的升级，以下是新增的一些核心特性"
 ---
 

@@ -2,9 +2,7 @@
 type: docs
 title: "Dubbo3 简介"
 linkTitle: "简介"
-menu:
-  main:
-    weight: 10
+weight: 2
 description: "这篇文档是关于 Dubbo 的简单介绍，涵盖 Dubbo 的核心概念、基本使用方式以及 Dubbo3 核心功能，无论你是 Dubbo 的老用户还是新用户，都可以通过这篇
 文档快速了解 Dubbo 及新版本带来的变化。"
 ---
