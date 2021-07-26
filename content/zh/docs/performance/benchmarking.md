@@ -72,25 +72,28 @@ description: ""
 
 ### 3.2 数据分析
 
-| **Dubbo + Hessian2****2.7** | **Dubbo + Hessian2****3.0** | **Dubbo + Protobuf****3.0** |
-| --------------------------- | --------------------------- | --------------------------- |
-| 30333 ops/s2.5ms P99        | 30414 ops/s2.4ms P99        | 24123 ops/s3.2ms P99        |
-| 8984 ops/s6.1 ms P99        | 12279 ops/s5.7 ms P99       | 21479 ops/s3.0 ms P99       |
-| 1916 ops/s34 ms P99         | 2037 ops/s34 ms P99         | 12722 ops/s7.7 ms P99       |
+|                    | **Dubbo + Hessian2<br />2.7** | **Dubbo + Hessian2<br />3.0** | **Dubbo + Protobuf<br />3.0** | **Triple + Protobuf<br />3.0** | **Triple + Protobuf(Hessian)<br />3.0** |
+| ------------------ | ----------------------------- | ----------------------------- | ----------------------------- | ------------------------------ | --------------------------------------- |
+| **无参方法**       | 30333 ops/s<br />2.5ms P99    | 30414 ops/s<br />2.4ms P99    | 24123 ops/s<br />3.2ms P99    | 7016 ops/s<br />8.7ms P99      | 6635 ops/s<br />9.1ms P99               |
+| **pojo返回值**     | 8984 ops/s<br />6.1 ms P99    | 12279 ops/s<br />5.7 ms P99   | 21479 ops/s<br />3.0 ms P99   | 6255 ops/s<br />8.9 ms P99     | 6491 ops/s<br />10 ms P99               |
+| **pojo列表返回值** | 1916 ops/s<br />34 ms P99     | 2037 ops/s<br />34 ms P99     | 12722 ops/s<br />7.7 ms P99   | 6920 ops/s<br />9.6 ms P99     | 2833 ops/s<br />27 ms P99               |
 
 #### 3.2.1 Dubbo 协议不同版本实现对比
 
 ![//imgs/v3/performance/rpc-dubbo.svg](/imgs/v3/performance/rpc-dubbo.svg)
 
-<br />图三  Dubbo协议在不同版本的实现对比<br />就 Dubbo RPC + Hessian 的默认组合来说，Dubbo3 与 Dubbo2 在性能上在不同调用场景下基本持平
+<br />图三  Dubbo协议在不同版本的实现对比<br />
+
+- 就 Dubbo RPC + Hessian 的默认组合来说，Dubbo3 与 Dubbo2 在性能上在不同调用场景下基本持平
 
 #### 3.2.2 Dubbo协议 vs Triple协议
 
 ![//imgs/v3/performance/rpc-triple.svg](/imgs/v3/performance/rpc-triple.svg)
 
-<br />图四 Triple vs Dubbo<br />单纯看 Consumer <-> Provider 的点对点调用，可以看出 Triple 协议本身并不占优势，同样使用 Protobuf 序列化方式，Dubbo RPC 协议总体性能还是要优于 Triple。<br /><br />
+<br />图四 Triple vs Dubbo<br />
 
-Triple 实现在 3.0 版本中将会得到持续优化，但不能完全改变在某些场景下“基于 HTTP/2 的 RPC 协议”对比“基于 TCP 的 RPC 协议”处于劣势的局面
+- 单纯看 Consumer <-> Provider 的点对点调用，可以看出 Triple 协议本身并不占优势，同样使用 Protobuf 序列化方式，Dubbo RPC 协议总体性能还是要优于 Triple。<br /><br />
+- Triple 实现在 3.0 版本中将会得到持续优化，但不能完全改变在某些场景下“基于 HTTP/2 的 RPC 协议”对比“基于 TCP 的 RPC 协议”处于劣势的局面
 
 #### 3.2.3 补充网关场景
 
