@@ -1,4 +1,13 @@
-1 Benchmark 结论
+---
+type: docs
+title: "基准测试"
+linkTitle: "基准测试"
+weight: 1
+description: ""
+---
+
+
+## 1 Benchmark 结论
 
 对比 2.x 版本，Dubbo3 版本
 
@@ -13,18 +22,18 @@
 
 以下是详细压测过程与数据
 
-2 应用级服务发现（地址推送链路）
+## 2 应用级服务发现（地址推送链路）
 
 此部分压测数据是由工商银行 Dubbo 团队基于内部生产数据给出，压测过程模拟了“生产环境地址+zookeeper”的服务发现架构。
 
-2.1 环境
+### 2.1 环境
 
 | **压测数据** | 提供者<br/>500运行实例✖️8interface✖️5protocol，即每个提供者向注册中心注册40个URL，总计20000个URL，每个URL字符长度约1k。<br/><br/>注册中心<br/>2个独立zookeeper注册中心，服务提供者消费者采用并行配置。<br/><br/>消费者<br/>配置1c2g，xmx=768，开启GC，从2个注册中心订阅，每5秒调用一次服务。运行20小时。 |
 | ------------ | ------------------------------------------------------------ |
 | **压测环境** | Java version "1.8.0"<br/>Java(TM) SE Runtime Enviroment (build pxa6480sr3fp12-20160919_01(SR3 FP12))<br/>IBM J9 VM (Build 2.8, JRE 1.8.0 Linux amd64-64 Compressed References 20160915_318796, JIT enabled, AOT enabled) |
 
 
-2.2 数据分析
+### 2.2 数据分析
 
 ![//imgs/v3/performance/registry-mem.svg](/imgs/v3/performance/registry-mem.svg)
 
@@ -43,7 +52,7 @@
 
 
 
-3 RPC 协议（远程调用链路）
+## 3 RPC 协议（远程调用链路）
 
 - Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。
 - 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。
@@ -51,7 +60,7 @@
 
 
 
-3.1 环境
+### 3.1 环境
 
 
 | **机器**     | 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） |
@@ -61,7 +70,7 @@
 
 <br />
 
-3.2 数据分析
+### 3.2 数据分析
 
 | **Dubbo + Hessian2****2.7** | **Dubbo + Hessian2****3.0** | **Dubbo + Protobuf****3.0** |
 | --------------------------- | --------------------------- | --------------------------- |
@@ -69,13 +78,13 @@
 | 8984 ops/s6.1 ms P99        | 12279 ops/s5.7 ms P99       | 21479 ops/s3.0 ms P99       |
 | 1916 ops/s34 ms P99         | 2037 ops/s34 ms P99         | 12722 ops/s7.7 ms P99       |
 
-3.2.1 Dubbo 协议不同版本实现对比
+#### 3.2.1 Dubbo 协议不同版本实现对比
 
 ![//imgs/v3/performance/rpc-dubbo.svg](/imgs/v3/performance/rpc-dubbo.svg)
 
 <br />图三  Dubbo协议在不同版本的实现对比<br />就 Dubbo RPC + Hessian 的默认组合来说，Dubbo3 与 Dubbo2 在性能上在不同调用场景下基本持平
 
-3.2.2 Dubbo协议 vs Triple协议
+#### 3.2.2 Dubbo协议 vs Triple协议
 
 ![//imgs/v3/performance/rpc-triple.svg](/imgs/v3/performance/rpc-triple.svg)
 
@@ -83,10 +92,10 @@
 
 Triple 实现在 3.0 版本中将会得到持续优化，但不能完全改变在某些场景下“基于 HTTP/2 的 RPC 协议”对比“基于 TCP 的 RPC 协议”处于劣势的局面
 
-3.2.3 补充网关场景
+#### 3.2.3 补充网关场景
 
 TBD<br /><br />
 
-3.3.4 模拟 Stream 通信场景的吞吐量提升
+#### 3.3.4 模拟 Stream 通信场景的吞吐量提升
 
 TBD

@@ -1,4 +1,5 @@
 ---
+type: docs
 title: "Protobuf与Interface对比"
 linkTitle: "Protobuf vs Interface"
 weight: 100
