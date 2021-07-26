@@ -105,10 +105,10 @@ Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一�
 
 ## 了解更多
 
-What's New in Dubbo3
+[What's New in Dubbo3](../new-in-dubbo3)
 
-体验 Dubbo3
+[体验 Dubbo3](../quick-start)
 
-迁移到 Dubbo3
+[迁移到 Dubbo3](../migration)
 
 
