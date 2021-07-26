@@ -7,7 +7,7 @@ description: ""
 ---
 
 ## 定义服务
-Dubbo3 推荐使用 IDL 定义跨语言服务，如期望使用特定语言的服务定义方式请移步[多语言](../../languages)模块。
+Dubbo3 推荐使用 IDL 定义跨语言服务，如期望使用特定语言的服务定义方式请移步[多语言](../languages)模块。
 
 服务是 Dubbo 中的核心概念，一个服务代表一组 RPC 方法的集合，服务是面向用户编程、服务发现机制等的基本单位。基本流程是，用户定义 RPC 服务，通过约定的配置
 方式将 RPC 声明为 Dubbo 服务，然后就可以基于服务进行编程了，对服务提供者来说，是提供 RPC 服务的具体实现，对服务消费者来说，则是使用特定数据发起服务调用。
@@ -122,7 +122,7 @@ public void callService() throws Exception {
 
 
 ## 查看完整示例
-* [Java IDL Quick Start](../../languages/java/quick-start)
-* [Golang IDL Quick Start](../../languages/golang/quick-start)
-* [Java 语言特定用法](../../languages/java/java-specific)
-* [Golang 语言特定用法](../../languages/golang/go-specific)
+* [Java IDL Quick Start](../languages/java/quick-start)
+* [Golang IDL Quick Start](../languages/golang/quick-start)
+* [Java 语言特定用法](../languages/java/java-specific)
+* [Golang 语言特定用法](../languages/golang/go-specific)
