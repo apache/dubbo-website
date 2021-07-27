@@ -34,7 +34,7 @@ Dubbo3 规划了两种形态的 Service Mesh 方案，在不同的业务场景�
 * 经典的基于 Sidecar 的 Service Mesh
 * 无 Sidecar 的 Proxyless Mesh
 
-用户在 Dubbo2 中熟知的路由规则，在 3.x 中将被一套[`统一的流量治理规则`]()取代，这套统一流量规则将覆盖未来 Dubbo3 的 Service Mesh、SDK 等多种部署形态，
+用户在 Dubbo2 中熟知的路由规则，在 3.x 中将被一套[`统一的流量治理规则`](../concepts/traffic-management)取代，这套统一流量规则将覆盖未来 Dubbo3 的 Service Mesh、SDK 等多种部署形态，
 实现对整套微服务体系的治理。
 
 ## 扩展点分离

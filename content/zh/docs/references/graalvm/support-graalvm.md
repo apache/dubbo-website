@@ -1,3 +1,11 @@
+---
+type: docs
+title: "使用 GraalVM 打包 Native Image"
+linkTitle: "Native Image"
+weight: 1
+---
+
+
 dubbo3.0支持native-image文档
 
 ## 概述
