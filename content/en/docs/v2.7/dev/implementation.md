@@ -142,6 +142,76 @@ The above class would be encapsulated to be a `AbstractProxyInvoker` instance, a
 
 ![/dev-guide/images/dubbo_protocol_header.jpg](/imgs/dev/dubbo_protocol_header.png)
 
+- Magic - Magic High & Magic Low (16 bits)
+
+  Identify protocol version, Dubbo protocol: 0xdabb
+
+- Req/Res (1 bit)
+
+  Identify a request or response. request: 1; response: 0.
+
+- 2 Way (1 bit)
+
+  Only useful when Req/Res is 1(request), identifying if you expect to return a value from the server. Set to 1 if a return value from the server is required.
+
+- Event (1 bit)
+
+  Identifies whether it is an event message, for example, a heartbeat event. Set to 1 if this is an event.
+
+- Serialization ID (5 bit)
+
+  Identifies the serialization type: for example, the value of fastjson is 6.
+
+- Status (8 bits)
+
+   Only useful when Req/Res is 0 (response), used to identify the status of the response
+
+  - 20 - OK
+  - 30 - CLIENT_TIMEOUT
+  - 31 - SERVER_TIMEOUT
+  - 40 - BAD_REQUEST
+  - 50 - BAD_RESPONSE
+  - 60 - SERVICE_NOT_FOUND
+  - 70 - SERVICE_ERROR
+  - 80 - SERVER_ERROR
+  - 90 - CLIENT_ERROR
+  - 100 - SERVER_THREADPOOL_EXHAUSTED_ERROR
+
+- Request ID (64 bits)
+
+  Identifies the only request, the type is long.
+
+- Data Length (32 bits)
+
+   The length of the serialized content (variable part), counted in bytes, the type is int.
+
+- Variable Part
+
+   After being serialized by a specific serialization type (identified by the serialization ID), each part is a byte [] or byte.
+
+  - If it is a request packet (Req/Res = 1), each part is:
+    - Dubbo version
+    - Service name
+    - Service version
+    - Method name
+    - Method parameter types
+    - Method arguments
+    - Attachments
+  - If it is a response packet (Req/Res = 0), each part is:
+    - Return value's type (byte), identifying the type of value returned from the server:
+      - Return null: RESPONSE_NULL_VALUE 2
+      - Normal response value: RESPONSE_VALUE  1
+      - Exception: RESPONSE_WITH_EXCEPTION  0
+    - Return value: response bytes returned from the server
+
+**Note:** For the variable part, when uses json serialization in current version of Dubbo framework, an additional line break is added as a separator between each part of the content. Please add a new line break after each part of the variable part, such as:
+
+```
+Dubbo version bytes (line break)
+Service name bytes  (line break)
+...
+```
+
 ### Thread dispatch model
 
 ![/dev-guide/images/dubbo-protocol.jpg](/imgs/dev/dubbo-protocol.jpg)
