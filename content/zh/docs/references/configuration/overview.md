@@ -27,6 +27,23 @@ Dubbo框架的配置项比较繁多，为了更好地管理各种配置，将其
 - metrics: 指标配置
 - ssl:  SSL/TLS配置
 
+### consumer 与 reference的关系
+
+reference可以指定具体的consumer，如果没有指定consumer则会自动使用全局默认的consumer配置。
+
+consumer的属性是reference属性的默认值，可以体现在两个地方：
+
+1. 在刷新属性(属性覆盖)时，先提取其consumer的属性，然后提取reference自身的属性覆盖上去，叠加后的属性集合作为配置来源之一。
+2. 在组装reference的URL参数时，先附加其consumer的属性，然后附加reference自身的属性。
+
+> 可以将consumer组件理解为reference组件的虚拟分组，根据需要可以定义多个不同的consumer，不同的consumer设置特定的默认值，
+然后在reference中指定consumer或者将<dubbo:reference /> 标签嵌套在<dubbo:consumer />标签之中。
+
+### provider 与 service的关系
+
+service可以指定具体的provider，如果没有指定则会自动使用全局默认的provider配置。
+provider的属性是service属性的默认值，覆盖规则类似上面的consumer与reference，也可以将provider理解为service的虚拟分组。
+
 
 ## 配置来源
 
@@ -46,6 +63,7 @@ Dubbo框架的配置项比较繁多，为了更好地管理各种配置，将其
 ![覆盖关系](/imgs/blog/configuration.jpg)
 
 请参考相关内容：[属性覆盖](../properties#属性覆盖)。
+
 
 ## 配置方式
 
