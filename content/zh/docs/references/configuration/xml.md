@@ -2,11 +2,11 @@
 type: docs
 title: "XML 配置"
 linkTitle: "XML 配置"
-weight: 1
+weight: 30
 description: "以 XML 配置的方式来配置你的 Dubbo 应用"
 ---
 
-有关 XML 的详细配置项，请参见：[配置参考手册](../../references/xml)。如果不想使用 Spring 配置，而希望通过 API 的方式进行调用，请参见：[API配置](../api)。想知道如何使用配置，请参见：[快速启动](../../quick-start)。
+有关 XML 的详细配置项，请参见：[XML配置参考手册](../../../references/xml)。如果不想使用 Spring 配置，而希望通过 API 的方式进行调用，请参见：[API配置](../api)。想知道如何使用配置，请参见：[快速启动](../../quick-start)。
 
 请在此查看文档描述的[完整示例](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-basic)
 
@@ -61,7 +61,7 @@ description: "以 XML 配置的方式来配置你的 Dubbo 应用"
 ```
 
 ## 配置之间的关系
-  
+
 ![dubbo-config](/imgs/user/dubbo-config.jpg)
 
 标签  | 用途 | 解释
