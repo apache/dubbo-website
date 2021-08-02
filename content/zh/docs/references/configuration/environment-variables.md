@@ -2,7 +2,7 @@
 type: docs
 title: "自动加载环境变量"
 linkTitle: "自动加载环境变量"
-weight: 2
+weight: 70
 description: "在 Dubbo 中自动加载环境变量"
 ---
 
