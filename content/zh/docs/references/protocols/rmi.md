@@ -26,11 +26,6 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 * 参数及返回值需实现 `Serializable` 接口
 * dubbo 配置中的超时时间对 RMI 无效，需使用 java 启动参数设置：`-Dsun.rmi.transport.tcp.responseTimeout=3000`，参见下面的 RMI 配置
 
-## dubbo.properties 配置
-
-```properties
-dubbo.service.protocol=rmi
-```
 
 ## RMI配置
 
@@ -66,10 +61,10 @@ java -Dsun.rmi.transport.tcp.responseTimeout=3000
 <dubbo:provider protocol="rmi" />
 ```
 
-设置服务协议：
+设置某个服务的协议：
 
 ```xml
-<dubbo:service protocol="rmi" />
+<dubbo:service interface="..." protocol="rmi" />
 ```
 
 多端口：
@@ -78,7 +73,7 @@ java -Dsun.rmi.transport.tcp.responseTimeout=3000
 <dubbo:protocol id="rmi1" name="rmi" port="1099" />
 <dubbo:protocol id="rmi2" name="rmi" port="2099" />
  
-<dubbo:service protocol="rmi1" />
+<dubbo:service interface="..." protocol="rmi1" />
 ```
 
 Spring 兼容性：

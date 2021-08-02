@@ -63,10 +63,10 @@ Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据
 <dubbo:provider protocol="dubbo" />
 ```
 
-设置服务协议：
+设置某个服务的协议：
 
 ```xml
-<dubbo:service protocol="dubbo" />
+<dubbo:service interface="..." protocol="dubbo" />
 ```
 
 多端口：
@@ -87,8 +87,8 @@ Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据
 Dubbo 协议缺省每服务每提供者每消费者使用单一长连接，如果数据量较大，可以使用多个连接。
 
 ```xml
-<dubbo:service connections="1"/>
-<dubbo:reference connections="1"/>
+<dubbo:service interface="..." connections="1"/>
+<dubbo:reference interface="..." connections="1"/>
 ```
 
 * `<dubbo:service connections="0">` 或 `<dubbo:reference connections="0">` 表示该服务使用 JVM 共享长连接。**缺省**
@@ -100,13 +100,6 @@ Dubbo 协议缺省每服务每提供者每消费者使用单一长连接，如�
 ```xml
 <dubbo:protocol name="dubbo" accepts="1000" />
 ```
-
-`dubbo.properties` 配置：
-
-```sh
-dubbo.service.protocol=dubbo
-```
-
 
 ## 常见问题
 
