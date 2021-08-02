@@ -179,7 +179,7 @@ Wheel wheel = wheelMaker.makeWheel(url);
 // ...
 ```
 
-时，注入的 `Adaptive` 实例可以提取事先定义好的 Key 来决定使用哪个 `WheelMaker` 实现来调用对应实现的真正的 `makeWheel` 方法。如提取 `wheel.type` Key，即 `url.get("wheel.type")` 来决定 `WheelMaker` 实现。`Adaptive` 实例的逻辑是固定，从 URL 中提取事先定义好的 Key，动态生成真正的实现并执行它。
+时，注入的 `Adaptive` 实例可以提取事先定义好的 Key 来决定使用哪个 `WheelMaker` 实现来调用对应实现的真正的 `makeWheel` 方法。如提取 `wheel.type` Key，即 `url.get("wheel.type")` 来决定 `WheelMaker` 实现。`Adaptive` 实例的逻辑是固定的，从 URL 中提取事先定义好的 Key，动态生成真正的实现并执行它。
 
 `ExtensionLoader` 里面的扩展点注入的 `Adaptive` 实现是在dubbo加载扩展点时动态生成的。Key是从URL中获取的，而URL中Key的值是在扩展点接口的方法定义上通过@Adaptive注解提供的。
 
@@ -239,5 +239,4 @@ public class XxxFilter implements Filter {
 
 [^1]: 注意：这里的配置文件是放在你自己的 jar 包内，不是 dubbo 本身的 jar 包内，Dubbo 会全 ClassPath 扫描所有 jar 包内同名的这个文件，然后进行合并
 [^2]: 注意：扩展点使用单一实例加载（请确保扩展实现的线程安全性），缓存在 `ExtensionLoader` 中
-
 
