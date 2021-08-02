@@ -14,13 +14,13 @@ description: "通过令牌验证在注册中心控制权限"
 
 ```xml
 <!--随机token令牌，使用UUID生成-->
-<dubbo:provider interface="com.foo.BarService" token="true" />
+<dubbo:provider token="true" />
 ```
 或
 
 ```xml
 <!--固定token令牌，相当于密码-->
-<dubbo:provider interface="com.foo.BarService" token="123456" />
+<dubbo:provider token="123456" />
 ```
 
 也可在服务级别设置：
