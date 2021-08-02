@@ -3,7 +3,7 @@ type: docs
 title: "Bad Smell"
 linkTitle: "Bad Smell"
 weight: 12
-description: "Bade code small which should be avoided"
+description: "Bad code smells which should be avoided"
 ---
 
 Ugly Dubbo design or implementation will be record here.
