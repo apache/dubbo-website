@@ -73,7 +73,7 @@ description: "Dubbo 代码中的一些实现细节"
 
 上图是服务提供者暴露服务的主过程：
 
-首先 `ServiceConfig` 类拿到对外提供服务的实际类 ref(如：HelloWorldImpl),然后通过 `ProxyFactory` 类的 `getInvoker` 方法使用 ref 生成一个 `AbstractProxyInvoker` 实例，到这一步就完成具体服务到 `Invoker` 的转化。接下来就是 `Invoker` 转换到 `Exporter` 的过程。
+首先 `ServiceConfig` 类拿到对外提供服务的实际类 ref（如：HelloWorldImpl），然后通过 `ProxyFactory` 类的 `getInvoker` 方法使用 ref 生成一个 `AbstractProxyInvoker` 实例，到这一步就完成具体服务到 `Invoker` 的转化。接下来就是 `Invoker` 转换到 `Exporter` 的过程。
 
 Dubbo 处理服务暴露的关键就在 `Invoker` 转换到 `Exporter` 的过程，上图中的红色部分。下面我们以 Dubbo 和 RMI 这两种典型协议的实现来进行说明：
 
@@ -91,14 +91,14 @@ RMI 协议的 `Invoker` 转为 `Exporter` 发生在 `RmiProtocol`类的 `export`
 
 上图是服务消费的主过程：
 
-首先 `ReferenceConfig` 类的 `init` 方法调用 `Protocol` 的 `refer` 方法生成 `Invoker` 实例(如上图中的红色部分)，这是服务消费的关键。接下来把 `Invoker` 转换为客户端需要的接口(如：HelloWorld)。
+首先 `ReferenceConfig` 类的 `init` 方法调用 `Protocol` 的 `refer` 方法生成 `Invoker` 实例（如上图中的红色部分），这是服务消费的关键。接下来把 `Invoker` 转换为客户端需要的接口（如：HelloWorld）。
 
 关于每种协议如 RMI/Dubbo/Web service 等它们在调用 `refer` 方法生成 `Invoker` 实例的细节和上一章节所描述的类似。
 
 ### 满眼都是 Invoker
 
 由于 `Invoker` 是 Dubbo 领域模型中非常重要的一个概念，很多设计思路都是向它靠拢。这就使得 `Invoker` 渗透在整个实现代码里，对于刚开始接触 Dubbo 的人，确实容易给搞混了。
-下面我们用一个精简的图来说明最重要的两种 `Invoker`：服务提供 `Invoker` 和服务消费 `Invoker`：
+下面我们用一个精简的图来说明最重要的两种 `Invoker`——服务提供 `Invoker` 和服务消费 `Invoker`：
 
 ![/dev-guide/images/dubbo_rpc_invoke.jpg](/imgs/dev/dubbo_rpc_invoke.jpg)
 
@@ -144,29 +144,29 @@ public class DemoServiceImpl implements DemoService {
 
 
 - Magic - Magic High & Magic Low (16 bits)
-  
-  Identifies dubbo protocol with value: 0xdabb
-  
+
+  标识协议版本号，Dubbo 协议：0xdabb
+
 - Req/Res (1 bit)
-  
-  Identifies this is a request or response. Request - 1; Response - 0.
-  
+
+  标识是请求或响应。请求： 1; 响应： 0。
+
 - 2 Way (1 bit)
-  
-  Only useful when Req/Res is 1 (Request), expect for a return value from server or not. Set to 1 if need a return value from server.
-  
+
+  仅在 Req/Res 为1（请求）时才有用，标记是否期望从服务器返回值。如果需要来自服务器的返回值，则设置为1。
+
 - Event (1 bit)
-  
-  Identifies an event message or not, for example, heartbeat event. Set to 1 if this is an event.
-  
+
+  标识是否是事件消息，例如，心跳事件。如果这是一个事件，则设置为1。
+
 - Serialization ID (5 bit)
-  
-  Identifies serialization type: the value for fastjson is 6.
-  
+
+  标识序列化类型：比如 fastjson 的值为6。
+
 - Status (8 bits)
-  
-  Only useful when  Req/Res is 0 (Response), identifies the status of response
-  
+
+   仅在 Req/Res 为0（响应）时有用，用于标识响应的状态。
+
   - 20 - OK
   - 30 - CLIENT_TIMEOUT
   - 31 - SERVER_TIMEOUT
@@ -177,36 +177,36 @@ public class DemoServiceImpl implements DemoService {
   - 80 - SERVER_ERROR
   - 90 - CLIENT_ERROR
   - 100 - SERVER_THREADPOOL_EXHAUSTED_ERROR
-    
+
 - Request ID (64 bits)
-  
-  Identifies an unique request. Numeric (long).
-  
-- Data Length (32)
-  
-  Length of the content (the variable part) after serialization, counted by bytes. Numeric (integer).
-  
+
+  标识唯一请求。类型为long。
+
+- Data Length (32 bits)
+
+   序列化后的内容长度（可变部分），按字节计数。int类型。
+
 - Variable Part
-  
-  Each part is a byte[] after serialization with specific serialization type, identifies by Serialization ID.
-  
-Every part is a byte[] after serialization with specific serialization type, identifies by Serialization ID
 
-1. If the content is a Request (Req/Res = 1), each part consists of the content, in turn is:
-   - Dubbo version
-   - Service name
-   - Service version
-   - Method name
-   - Method parameter types
-   - Method arguments
-   - Attachments 
+   被特定的序列化类型（由序列化 ID 标识）序列化后，每个部分都是一个 byte [] 或者 byte
 
-1. If the content is a Response (Req/Res = 0), each part consists of the content, in turn is:
-   - Return value type, identifies what kind of value returns from server side: RESPONSE_NULL_VALUE - 2, RESPONSE_VALUE - 1, RESPONSE_WITH_EXCEPTION - 0.
-   -  Return value, the real value returns from server.
+  - 如果是请求包 ( Req/Res = 1)，则每个部分依次为：
+    - Dubbo version
+    - Service name
+    - Service version
+    - Method name
+    - Method parameter types
+    - Method arguments
+    - Attachments
+  - 如果是响应包（Req/Res = 0），则每个部分依次为：
+    - 返回值类型(byte)，标识从服务器端返回的值类型：
+      - 返回空值：RESPONSE_NULL_VALUE 2
+      - 正常响应值： RESPONSE_VALUE  1
+      - 异常：RESPONSE_WITH_EXCEPTION  0
+    - 返回值：从服务端返回的响应bytes
 
+**注意：** 对于(Variable Part)变长部分，当前版本的Dubbo 框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请在Variable Part的每个part后额外增加换行符， 如：
 
-**注意：**对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：
 ```
 Dubbo version bytes (换行符)
 Service name bytes  (换行符)
@@ -226,7 +226,6 @@ Service name bytes  (换行符)
 [^3]: 即：`<dubbo:reference url="dubbo://service-host/com.foo.FooService?version=1.0.0" />`
 [^4]: 即：`<dubbo:registry address="zookeeper://10.20.153.10:2181" />`
 [^5]: `DubboInvoker`、 `HessianRpcInvoker`、 `InjvmInvoker`、 `RmiInvoker`、 `WebServiceInvoker` 中的任何一个
-
 
 
 
