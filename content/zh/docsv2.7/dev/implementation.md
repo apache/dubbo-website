@@ -73,7 +73,7 @@ description: "Dubbo 代码中的一些实现细节"
 
 上图是服务提供者暴露服务的主过程：
 
-首先 `ServiceConfig` 类拿到对外提供服务的实际类 ref(如：HelloWorldImpl),然后通过 `ProxyFactory` 类的 `getInvoker` 方法使用 ref 生成一个 `AbstractProxyInvoker` 实例，到这一步就完成具体服务到 `Invoker` 的转化。接下来就是 `Invoker` 转换到 `Exporter` 的过程。
+首先 `ServiceConfig` 类拿到对外提供服务的实际类 ref（如：HelloWorldImpl），然后通过 `ProxyFactory` 类的 `getInvoker` 方法使用 ref 生成一个 `AbstractProxyInvoker` 实例，到这一步就完成具体服务到 `Invoker` 的转化。接下来就是 `Invoker` 转换到 `Exporter` 的过程。
 
 Dubbo 处理服务暴露的关键就在 `Invoker` 转换到 `Exporter` 的过程，上图中的红色部分。下面我们以 Dubbo 和 RMI 这两种典型协议的实现来进行说明：
 
@@ -91,14 +91,14 @@ RMI 协议的 `Invoker` 转为 `Exporter` 发生在 `RmiProtocol`类的 `export`
 
 上图是服务消费的主过程：
 
-首先 `ReferenceConfig` 类的 `init` 方法调用 `Protocol` 的 `refer` 方法生成 `Invoker` 实例(如上图中的红色部分)，这是服务消费的关键。接下来把 `Invoker` 转换为客户端需要的接口(如：HelloWorld)。
+首先 `ReferenceConfig` 类的 `init` 方法调用 `Protocol` 的 `refer` 方法生成 `Invoker` 实例（如上图中的红色部分），这是服务消费的关键。接下来把 `Invoker` 转换为客户端需要的接口（如：HelloWorld）。
 
 关于每种协议如 RMI/Dubbo/Web service 等它们在调用 `refer` 方法生成 `Invoker` 实例的细节和上一章节所描述的类似。
 
 ### 满眼都是 Invoker
 
 由于 `Invoker` 是 Dubbo 领域模型中非常重要的一个概念，很多设计思路都是向它靠拢。这就使得 `Invoker` 渗透在整个实现代码里，对于刚开始接触 Dubbo 的人，确实容易给搞混了。
-下面我们用一个精简的图来说明最重要的两种 `Invoker`：服务提供 `Invoker` 和服务消费 `Invoker`：
+下面我们用一个精简的图来说明最重要的两种 `Invoker`——服务提供 `Invoker` 和服务消费 `Invoker`：
 
 ![/dev-guide/images/dubbo_rpc_invoke.jpg](/imgs/dev/dubbo_rpc_invoke.jpg)
 
