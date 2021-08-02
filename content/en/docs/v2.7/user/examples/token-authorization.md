@@ -15,13 +15,13 @@ You can turn on token authentication globally:
 
 ```xml
 <!--Random token , generated using a UUID-->
-<dubbo:provider interface="com.foo.BarService" token="true" />
+<dubbo:provider token="true" />
 ```
 or
 
 ```xml
 <!--Fixed token, equivalent to the password-->
-<dubbo:provider interface="com.foo.BarService" token="123456" />
+<dubbo:provider token="123456" />
 ```
 
 Of course can turn on token authentication at service level:
