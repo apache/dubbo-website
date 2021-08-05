@@ -17,6 +17,12 @@ description: >
 > GitHub: https://github.com/apache/dubbo \
 > 发布说明: https://github.com/apache/dubbo/releases
 
+### 2.7.13 (2021-08-05)
+
+* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.7.13/apache-dubbo-2.7.13-src.zip) |
+  [asc](https://www.apache.org/dist/dubbo/2.7.13/apache-dubbo-2.7.13-src.zip.asc) |
+  [sha512](https://www.apache.org/dist/dubbo/2.7.13/apache-dubbo-2.7.13-src.zip.sha512)
+  
 ### 3.0.1 (2021-07-02)
 
 * [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/3.0.1/apache-dubbo-3.0.1-src.zip) |
