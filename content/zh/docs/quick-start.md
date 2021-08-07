@@ -66,6 +66,34 @@ public interface DemoService {
 
 ### Golang
 
+Go 语言生成的 stub 如下，这个 stub 里存了用户定义的接口和数据的类型。
+
+```go
+func _DUBBO_Greeter_SayHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HelloRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	base := srv.(dgrpc.Dubbo3GrpcService)
+	args := []interface{}{}
+	args = append(args, in)
+	invo := invocation.NewRPCInvocation("SayHello", args, nil)
+	if interceptor == nil {
+		result := base.GetProxyImpl().Invoke(ctx, invo)
+		return result.Result(), result.Error()
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.Greeter/SayHello",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		result := base.GetProxyImpl().Invoke(context.Background(), invo)
+		return result.Result(), result.Error()
+	}
+	return interceptor(ctx, in, info, handler)
+}
+```
+
 
 ## 配置并加载服务
 提供端负责提供具体的 Dubbo 服务实现，也就是遵循 RPC 签名所约束的格式，去实现具体的业务逻辑代码。在实现服务之后，要将服务实现注册为标准的 Dubbo 服务，
@@ -119,6 +147,87 @@ public void callService() throws Exception {
 ```
 
 ### Golang
+
+提供端，实现服务
+
+```go
+type User struct {
+	ID   string
+	Name string
+	Age  int32
+	Time time.Time
+}
+
+type UserProvider struct {
+}
+
+func (u *UserProvider) GetUser(ctx context.Context, req []interface{}) (*User, error) {
+	gxlog.CInfo("req:%#v", req)
+	rsp := User{"A001", "Alex Stocks", 18, time.Now()}
+	gxlog.CInfo("rsp:%#v", rsp)
+	return &rsp, nil
+}
+
+func (u *UserProvider) Reference() string {
+	return "UserProvider"
+}
+
+func (u User) JavaClassName() string {
+	return "org.apache.dubbo.User"
+}
+
+func main() {
+    hessian.RegisterPOJO(&User{})
+	config.SetProviderService(new(UserProvider))
+}
+```
+
+提供端，注册服务
+
+
+```yaml
+services:
+  "UserProvider":
+    registry: "demoZk"
+    protocol: "dubbo"
+    interface: "org.apache.dubbo.UserProvider"
+    loadbalance: "random"
+    warmup: "100"
+    cluster: "failover"
+    methods:
+      - name: "GetUser"
+        retries: 1
+        loadbalance: "random"
+```
+
+消费端，引用服务
+
+```yaml
+references:
+  "UserProvider":
+    registry: "demoZk"
+    protocol: "dubbo"
+    interface: "org.apache.dubbo.UserProvider"
+    cluster: "failover"
+    methods:
+      - name: "GetUser"
+        retries: 3
+```
+
+消费端，使用服务 proxy
+
+```go
+func main() {
+	config.Load()
+	user := &pkg.User{}
+	err := userProvider.GetUser(context.TODO(), []interface{}{"A001"}, user)
+	if err != nil {
+		os.Exit(1)
+		return
+	}
+	gxlog.CInfo("response result: %v\n", user)
+}
+```
 
 
 ## 查看完整示例
