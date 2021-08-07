@@ -182,38 +182,6 @@ func main() {
 }
 ```
 
-提供端，注册服务
-
-
-```yaml
-services:
-  "UserProvider":
-    registry: "demoZk"
-    protocol: "dubbo"
-    interface: "org.apache.dubbo.UserProvider"
-    loadbalance: "random"
-    warmup: "100"
-    cluster: "failover"
-    methods:
-      - name: "GetUser"
-        retries: 1
-        loadbalance: "random"
-```
-
-消费端，引用服务
-
-```yaml
-references:
-  "UserProvider":
-    registry: "demoZk"
-    protocol: "dubbo"
-    interface: "org.apache.dubbo.UserProvider"
-    cluster: "failover"
-    methods:
-      - name: "GetUser"
-        retries: 3
-```
-
 消费端，使用服务 proxy
 
 ```go
