@@ -501,7 +501,7 @@ public static ExchangeClient connect(URL url, ExchangeHandler handler) throws Re
 }
 ```
 
-如上，getExchanger 会通过 SPI 加载 HeaderExchangeClient 实例，这个方法比较简单，大家自己看一下吧。接下来分析 HeaderExchangeClient 的实现。
+如上，getExchanger 会通过 SPI 加载 HeaderExchanger 实例，这个方法比较简单，大家自己看一下吧。接下来分析 HeaderExchanger.connect 的实现。
 
 ```java
 public ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException {
