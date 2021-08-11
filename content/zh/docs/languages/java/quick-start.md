@@ -20,7 +20,7 @@ $ cd dubbo-samples/dubbo-samples-protobuf
 ## 快速运行示例
 在 dubbo-samples-protobuf 目录
 
-1. 编译示例项目
+1. 编译并打包示例项目
 ```shell script
 $ mvn clean package
 ```
