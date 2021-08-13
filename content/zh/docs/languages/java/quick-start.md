@@ -20,19 +20,19 @@ $ cd dubbo-samples/dubbo-samples-protobuf
 ## 快速运行示例
 在 dubbo-samples-protobuf 目录
 
-1. 编译示例项目
+1. 编译并打包示例项目
 ```shell script
-$ mvn clean compile
+$ mvn clean package
 ```
 
 2. 运行 Provider
 ```shell script
-$ java -jar ./dubbo-samples-protobuf/protobuf-provider/target/protobuf-provider-1.0-SNAPSHOT.jar 
+$ java -jar ./protobuf-provider/target/protobuf-provider-1.0-SNAPSHOT.jar 
 ```
 
 3. 运行 consumer
 ```shell script
-$ java -jar ./dubbo-samples-protobuf/protobuf-provider/target/protobuf-consumer-1.0-SNAPSHOT.jar 
+$ java -jar ./protobuf-consumer/target/protobuf-consumer-1.0-SNAPSHOT.jar 
 
 输出以下结果
 result: Hello Hello, response from provider: 30.225.20.43:20880
