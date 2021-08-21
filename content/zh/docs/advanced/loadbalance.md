@@ -10,7 +10,7 @@ description: "Dubbo 提供的集群负载均衡策略"
 
 具体实现上，Dubbo 提供的是客户端负载均衡，即由 Consumer 通过负载均衡算法得出需要将请求提交到哪个 Provider 实例。
 
-可以自行扩展负载均衡策略，参见：[负载均衡扩展](../../../dev/impls/load-balance)
+可以自行扩展负载均衡策略，参见：[负载均衡扩展](../../references/spis/load-balance)
 
 ## 负载均衡策略
 目前 Dubbo 内置了如下负载均衡算法，用户可直接配置使用：
