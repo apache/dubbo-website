@@ -79,10 +79,8 @@ dubbo.protocols.hessian.port=8089
 扩展配置
 
 ```properties
-dubbo.application.parameters.item1=value1
-dubbo.application.parameters.item2=value2
-dubbo.registry.parameters.item3=value3
-dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters.item4=value4
+dubbo.application.parameters=[{item1:value1},{item2:value2}]
+dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:value3}]
 ```
 
 ## 几种编程配置方式
