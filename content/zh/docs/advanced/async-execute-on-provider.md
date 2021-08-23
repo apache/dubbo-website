@@ -55,7 +55,7 @@ public class AsyncServiceImpl implements AsyncService {
 
 ## 使用AsyncContext
 
-Dubbo 提供了一个类似 Serverlet 3.0 的异步接口`AsyncContext`，在没有 CompletableFuture 签名接口的情况下，也可以实现 Provider 端的异步执行。
+Dubbo 提供了一个类似 Servlet 3.0 的异步接口`AsyncContext`，在没有 CompletableFuture 签名接口的情况下，也可以实现 Provider 端的异步执行。
 
 服务接口定义：
 
