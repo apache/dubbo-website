@@ -81,6 +81,4 @@ subscription address.
 
 4. 如果您想取消订阅，只需发送一封邮件到dev-unsubscribe@dubbo.apache.org，收到回复后，请按其指定步骤执行。
 
-> 请注意：dev@dubbo.apache.org和dev@dubbo.apache.org都是有效的, 您可以订阅它们中的任何一个。
-
 [^1] http://apache.org/foundation/mailinglists.html#subscribing
