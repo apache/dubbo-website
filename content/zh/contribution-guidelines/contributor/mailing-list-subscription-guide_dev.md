@@ -83,4 +83,4 @@ subscription address.
 
 > 请注意：dev@dubbo.apache.org和dev@dubbo.apache.org都是有效的, 您可以订阅它们中的任何一个。
 
-[^1] http://apache.org/foundation/mailinglists.html#subscribing
+[^1] https://apache.org/foundation/mailinglists.html#subscribing
