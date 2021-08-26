@@ -26,6 +26,8 @@ Pick one from service providers and fire the invocation.
 * `org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance`
 * `org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance`
 * `org.apache.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance`
+* `org.apache.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance`
+* `org.apache.dubbo.rpc.cluster.loadbalance.ShortestResponseLoadBalance`
 
 ## Extension Guide
 
