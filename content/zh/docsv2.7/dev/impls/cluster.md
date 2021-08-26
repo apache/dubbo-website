@@ -23,12 +23,16 @@ weight: 5
 
 ## 已知扩展
 
+* `org.apache.dubbo.rpc.cluster.support.wrapper.MockClusterWrapper`
 * `org.apache.dubbo.rpc.cluster.support.FailoverCluster`
 * `org.apache.dubbo.rpc.cluster.support.FailfastCluster`
 * `org.apache.dubbo.rpc.cluster.support.FailsafeCluster`
 * `org.apache.dubbo.rpc.cluster.support.FailbackCluster`
 * `org.apache.dubbo.rpc.cluster.support.ForkingCluster`
 * `org.apache.dubbo.rpc.cluster.support.AvailableCluster`
+* `org.apache.dubbo.rpc.cluster.support.MergeableCluster`
+* `org.apache.dubbo.rpc.cluster.support.BroadcastCluster`
+* `org.apache.dubbo.rpc.cluster.support.registry.ZoneAwareCluster`
 
 ## 扩展示例
 
