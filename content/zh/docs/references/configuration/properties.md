@@ -183,12 +183,10 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.0.callback=tru
 
 ### 参数配置
 
-parameters参数为map对象，支持xxx.parameters.key=value方式进行配置。
+parameters参数为map对象，支持xxx.parameters=[{key:value},{key:value}]方式进行配置。
 ```properties
-dubbo.application.parameters.item1=value1
-dubbo.application.parameters.item2=value2
-dubbo.registry.parameters.item3=value3
-dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters.item4=value4
+dubbo.application.parameters=[{item1:value1},{item2:value2}]
+dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:value3}]
 ```
 
 ### 属性与XML配置映射规则
