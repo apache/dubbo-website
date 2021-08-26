@@ -18,3 +18,4 @@ description: "dubbo:application 配置"
 | environment | environment | string | 可选 | | 服务治理 | 应用环境，如：develop/test/product，不同环境使用不同的缺省值，以及作为只用于开发测试功能的限制条件 | 2.0.0以上版本 |
 | compiler | compiler | string | 可选 | javassist | 性能优化 | Java字节码编译器，用于动态类的生成，可选：jdk或javassist | 2.1.0以上版本 |
 | logger | logger | string | 可选 | slf4j | 性能优化 | 日志输出方式，可选：slf4j,jcl,log4j,log4j2,jdk | 2.2.0以上版本 | 
+| metadata-type | metadata-type |String| 可选 | local | 服务治理 | metadata 传递方式，是以 Provider 视角而言的，可选值：<br>remote - Provider 把 metadata 放到远端注册中心，Consumer 从注册中心获取<br/>local - Provider 把 metadata 放在本地，Consumer 从 Provider 处直接获取| 2.7.6以上版本 |
