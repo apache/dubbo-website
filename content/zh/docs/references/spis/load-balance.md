@@ -26,6 +26,8 @@ weight: 7
 * `org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance`
 * `org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance`
 * `org.apache.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance`
+* `org.apache.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance`
+* `org.apache.dubbo.rpc.cluster.loadbalance.ShortestResponseLoadBalance`
 
 ## 扩展示例
 
