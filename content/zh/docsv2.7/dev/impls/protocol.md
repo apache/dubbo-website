@@ -75,6 +75,10 @@ public interface Protocol {
 * `org.apache.dubbo.rpc.protocol.rmi.RmiProtocol`
 * `org.apache.dubbo.rpc.protocol.http.HttpProtocol`
 * `org.apache.dubbo.rpc.protocol.http.hessian.HessianProtocol`
+* `org.apache.dubbo.rpc.protocol.memcached.MemcachedProtocol`
+* `org.apache.dubbo.rpc.support.MockProtocol`
+* `org.apache.dubbo.rpc.protocol.redis.RedisProtocol`
+* `org.apache.dubbo.rpc.protocol.nativethrift.ThriftProtocol`
 
 ## 扩展示例
 
