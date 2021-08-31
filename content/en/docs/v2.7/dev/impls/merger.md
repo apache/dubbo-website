@@ -25,6 +25,14 @@ Merge strategy for return result aggregation in group.
 * `org.apache.dubbo.rpc.cluster.merger.ListMerger`
 * `org.apache.dubbo.rpc.cluster.merger.SetMerger`
 * `org.apache.dubbo.rpc.cluster.merger.MapMerger`
+* `org.apache.dubbo.rpc.cluster.merger.ByteArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.CharArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.ShortArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.IntArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.LongArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.FloatArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.DoubleArrayMerger`
+* `org.apache.dubbo.rpc.cluster.merger.BooleanArrayMerger`
 
 ## Extension Guide
 
