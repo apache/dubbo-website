@@ -36,7 +36,7 @@ description: "本文档专门针对使用 2.x 版本的老用户，详细阐述�
 
 ```text
 -Ddubbo.application.register-mode=all
-# 可选值 interface、instance、all，默认是 interface，即只注册接口级地址
+# 可选值 interface、instance、all，默认是 all，即接口级地址、应用级地址都注册
 ```
 
 
@@ -126,7 +126,6 @@ ClusterInvoker 筛选的依据，可以通过 MigrationAddressComparator SPI 自
 
 除了全局的迁移策略之外，Dubbo 在消费端提供了更细粒度的迁移策略支持。控制单位可以是某一个消费者应用，它消费的服务A、服务B可以有各自独立的迁移策略，具体是用方式是在消费端配置迁移规则：
 
-在 classpath 下增加 dubbo-migration.yml 配置
 
 ```yaml
 key: demo-consumer
@@ -139,7 +138,8 @@ services:
    step: FORCE_INTERFACE
 ```
 
-使用这种方式能做到比较精细迁移控制，但是当下及后续的改造成本会比较高，除了一些特别场景，我们不太推荐启用这种配置方式。**官方推荐使用的全局的开关式的迁移策略，让消费端实例在启动阶段自行决策使用哪份可用的地址列表。**
+使用这种方式能做到比较精细迁移控制，但是当下及后续的改造成本会比较高，除了一些特别场景，我们不太推荐启用这种配置方式。
+([迁移指南](../../advanced/migration-invoker/)) **官方推荐使用的全局的开关式的迁移策略，让消费端实例在启动阶段自行决策使用哪份可用的地址列表。**
 
 
 
