@@ -112,7 +112,7 @@ broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常�
 <dubbo:registry address="zookeeper://127.0.0.1:2181" zone="beijing" />
 ```
 
-3. 权重轮训：根据每个注册中心的权重分配流量
+3. 权重轮询：根据每个注册中心的权重分配流量
 
 ```xml
 <dubbo:registry id="beijing" address="zookeeper://127.0.0.1:2181" weight="100" />
