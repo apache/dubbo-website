@@ -20,7 +20,7 @@ description: "集群调用失败时，Dubbo 提供的容错方案"
 
 ## 集群容错模式
 
-可以自行扩展集群容错策略，参见：[集群扩展](../../../dev/impls/cluster)
+可以自行扩展集群容错策略，参见：[集群扩展](../../references/spis/cluster)
 
 ### Failover Cluster
 
@@ -87,6 +87,40 @@ broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常�
 {{% alert title="提示" color="primary" %}}
 `2.1.0` 开始支持
 {{% /alert %}}
+
+### Available Cluster
+
+调用目前可用的实例（只调用一个），如果当前没有可用的实例，则抛出异常。通常用于不需要负载均衡的场景。
+
+### Mergeable Cluster
+
+将集群中的调用结果聚合起来返回结果，通常和group一起配合使用。通过分组对结果进行聚合并返回聚合后的结果，比如菜单服务，用group区分同一接口的多种实现，现在消费方需从每种group中调用一次并返回结果，对结果进行合并之后返回，这样就可以实现聚合菜单项。
+
+### ZoneAware Cluster
+
+多注册中心订阅的场景，注册中心集群间的负载均衡。对于多注册中心间的选址策略有如下四种
+
+1. 指定优先级：`preferred="true"`注册中心的地址将被优先选择
+
+```xml
+<dubbo:registry address="zookeeper://127.0.0.1:2181" preferred="true" />
+```
+
+2. 同中心优先：检查当前请求所属的区域，优先选择具有相同区域的注册中心
+
+```xml
+<dubbo:registry address="zookeeper://127.0.0.1:2181" zone="beijing" />
+```
+
+3. 权重轮询：根据每个注册中心的权重分配流量
+
+```xml
+<dubbo:registry id="beijing" address="zookeeper://127.0.0.1:2181" weight="100" />
+
+<dubbo:registry id="shanghai" address="zookeeper://127.0.0.1:2182" weight="10" />
+```
+
+4. 缺省值：选择一个可用的注册中心
 
 ## 集群模式配置
 
