@@ -28,8 +28,9 @@ description: ""
 
 ### 2.1 环境
 
-| **压测数据** | 提供者<br/>500运行实例✖️8interface✖️5protocol，即每个提供者向注册中心注册40个URL，总计20000个URL，每个URL字符长度约1k。<br/><br/>注册中心<br/>2个独立zookeeper注册中心，服务提供者消费者采用并行配置。<br/><br/>消费者<br/>配置1c2g，xmx=768，开启GC，从2个注册中心订阅，每5秒调用一次服务。运行20小时。 |
+|  | 描述 |
 | ------------ | ------------------------------------------------------------ |
+| **压测数据** | 提供者<br/>500运行实例✖️8interface✖️5protocol，即每个提供者向注册中心注册40个URL，总计20000个URL，每个URL字符长度约1k。<br/><br/>注册中心<br/>2个独立zookeeper注册中心，服务提供者消费者采用并行配置。<br/><br/>消费者<br/>配置1c2g，xmx=768，开启GC，从2个注册中心订阅，每5秒调用一次服务。运行20小时。 |
 | **压测环境** | Java version "1.8.0"<br/>Java(TM) SE Runtime Enviroment (build pxa6480sr3fp12-20160919_01(SR3 FP12))<br/>IBM J9 VM (Build 2.8, JRE 1.8.0 Linux amd64-64 Compressed References 20160915_318796, JIT enabled, AOT enabled) |
 
 
@@ -63,8 +64,9 @@ description: ""
 ### 3.1 环境
 
 
-| **机器**     | 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） |
+|     | 描述 |
 | ------------ | ------------------------------------------------------------ |
+| **机器**     | 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） |
 | **压测用例** | RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值<br /><br />2.7 版本 Dubbo 协议（Hessian2 序列化）<br />3.0 版本 Dubbo 协议（Hessian2 序列化）<br />3.0 版本 Dubbo 协议（Protobuf 序列化）<br />3.0 版本 Triple 协议（Protobuf 序列化）<br />3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） |
 | **压测方法** | 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据<br /> 压测数据通过 https://github.com/apache/dubbo-benchmark 得出 |
 
