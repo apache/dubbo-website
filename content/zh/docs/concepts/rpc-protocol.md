@@ -193,7 +193,7 @@ Every part is a byte[] after serialization with specific serialization type, ide
    -  Return value, the real value returns from server.
 
 
-**注意：**对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：
+**注意：** 对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：
 ```
 Dubbo version bytes (换行符)
 Service name bytes  (换行符)
