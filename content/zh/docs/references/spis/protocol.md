@@ -75,6 +75,7 @@ public interface Protocol {
 * `org.apache.dubbo.rpc.protocol.rmi.RmiProtocol`
 * `org.apache.dubbo.rpc.protocol.http.HttpProtocol`
 * `org.apache.dubbo.rpc.protocol.http.hessian.HessianProtocol`
+* `org.apache.dubbo.rpc.support.MockProtocol`
 
 ## 扩展示例
 
