@@ -191,7 +191,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:valu
 
 ### 传输层配置
 
-triple协议采用Http2做底层通信协议，允许使用者可以自定义Http2的[6个settings参数](https://datatracker.ietf.org/doc/html/rfc7540#section-6.5.2)
+triple协议采用Http2做底层通信协议，允许使用者自定义Http2的[6个settings参数](https://datatracker.ietf.org/doc/html/rfc7540#section-6.5.2)
 
 配置格式如下：
 
@@ -211,7 +211,7 @@ dubbo.rpc.tri.initial-window-size=1048576
 # 设置帧的最大字节数
 dubbo.rpc.tri.max-frame-size=32768
 
-# 通知对端header未压缩
+# 通知对端header未压缩的最大字节数
 dubbo.rpc.tri.max-header-list-size=8192
 ```
 
