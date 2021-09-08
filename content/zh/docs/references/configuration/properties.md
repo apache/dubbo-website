@@ -189,6 +189,48 @@ dubbo.application.parameters=[{item1:value1},{item2:value2}]
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:value3}]
 ```
 
+### 传输层配置
+
+triple协议采用Http2做底层通信协议，允许使用者可以自定义Http2的[6个settings参数](https://datatracker.ietf.org/doc/html/rfc7540#section-6.5.2)
+
+配置格式如下：
+
+```properties
+# 通知对端header压缩索引表的上限个数
+dubbo.rpc.tri.header-table-size=4096
+
+# 启用服务端推送功能
+dubbo.rpc.tri.enable-push=false
+
+# 通知对端允许的最大并发流数
+dubbo.rpc.tri.max-concurrent-streams=2147483647
+
+# 声明发送端的窗口大小
+dubbo.rpc.tri.initial-window-size=1048576
+
+# 设置帧的最大字节数
+dubbo.rpc.tri.max-frame-size=32768
+
+# 通知对端header未压缩
+dubbo.rpc.tri.max-header-list-size=8192
+```
+
+等价于yml配置：
+
+```yaml
+dubbo:
+  rpc:
+    tri:
+      header-table-size: 4096
+      enable-push: false
+      max-concurrent-streams: 2147483647
+      initial-window-size: 1048576
+      max-frame-size: 32768
+      max-header-list-size: 8192
+```
+
+
+
 ### 属性与XML配置映射规则
 
 可以将 xml 的 tag 名和属性名组合起来，用 ‘.’ 分隔。每行一个属性。
