@@ -26,7 +26,7 @@ spec:
 | hosts | string[] |  一般指应用名 | NO  |
 | dubbo | DubboRoute[] | dubbo 路由规则，顺序执行，符合条件立即返回 | NO |
 
-Router类型如下：
++ Router类型如下：
 
 | name|  Description |
 | --- | --- |

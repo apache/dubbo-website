@@ -20,7 +20,7 @@ description: "集群调用失败时，Dubbo 提供的容错方案"
 
 ## 集群容错模式
 
-可以自行扩展集群容错策略，参见：[集群扩展](../../../references/spis/cluster)
+可以自行扩展集群容错策略，参见：[集群扩展](../../references/spis/cluster)
 
 ### Failover Cluster
 
@@ -94,7 +94,7 @@ broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常�
 
 ### Mergeable Cluster
 
-将集群中的调用结果聚合起来返回结果，通常和group一起配合使用。比如接口一样，但有多种实现，用group区分，消费者需从每种group中调用一次返回结果，合并结果返回。
+将集群中的调用结果聚合起来返回结果，通常和group一起配合使用。通过分组对结果进行聚合并返回聚合后的结果，比如菜单服务，用group区分同一接口的多种实现，现在消费方需从每种group中调用一次并返回结果，对结果进行合并之后返回，这样就可以实现聚合菜单项。
 
 ### ZoneAware Cluster
 
@@ -112,7 +112,7 @@ broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常�
 <dubbo:registry address="zookeeper://127.0.0.1:2181" zone="beijing" />
 ```
 
-3. 权重轮训：根据每个注册中心的权重分配流量
+3. 权重轮询：根据每个注册中心的权重分配流量
 
 ```xml
 <dubbo:registry id="beijing" address="zookeeper://127.0.0.1:2181" weight="100" />
