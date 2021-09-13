@@ -6,9 +6,24 @@ weight: 4
 description: "Triple协议迁移指南"
 ---
 
-## Triple Basic
+## Triple Basic & Why Should I Migrate From Origin Protocols to Triple
 
-## Why Should I Migrate From Origin Protocols to Triple
+关于`Triple`协议的介绍可以在[RPC 通信协议](https://dubbo.apache.org/zh/docs/concepts/rpc-protocol/)了解更多。
+
+了解过了`Triple` 协议，我们可以知道 `Triple` 协议有以下优势:
+
+- 具备跨语言互通的能力，传统的多语言多 SDK 模式和 Mesh 化跨语言模式都需要一种更通用易扩展的数据传输格式。
+- 提供更完善的请求模型，除了支持 Request/Response 模型，还支持 Streaming 和 Bidirectional。
+- 易扩展、穿透性高，包括但不限于 Tracing / Monitoring 等支持，也应该能被各层设备识别，网关设施等可以识别数据报文，对 Service Mesh 部署友好，降低用户理解难度。
+- 完整兼容grpc、客户端/服务端可以与原生grpc客户端打通。
+- 可以利用现有 grpc 生态下的组件。
+
+对于使用其他协议的 dubbo 用户，迁移协议几乎是0成本的。
+
+对于需要对接 grpc 服务的 dubbo 用户，现在可以直接使用 triple 协议来实现打通，不需要单独引入 grpc client 来完成，降低程序的复杂度。
+
+对于需要网关接入的 dubbo 用户，在使用 dubbo 协议时几乎是无能为力的，对于 Triple 协议就非常容易了，如果不想进行开发。那可以复用 grpc 的网关。如果有很强的自定义需求，因为元信息在请求头中，可以很方便的解析请求头实现相关逻辑。
+
 
 ## dubbo2 迁移到 dubbo3 的 Triple 协议需要做哪些事呢？
 
@@ -282,7 +297,26 @@ public interface PbGreeter {
 
 ## Triple on Application Level Discovery
 
+关于 Triple 协议的应用级服务注册和发现和其他语言是一致的，可以通过下列内容了解更多。
+
+- [服务发现](https://dubbo.apache.org/zh/docs/concepts/service-discovery/)
+- [应用级地址发现迁移指南](https://dubbo.apache.org/zh/docs/migration/migration-service-discovery/)
+
 ## Interop with GRPC
 
+通过对于协议的介绍，我们知道 `Triple` 协议是基于 `HTTP2` 并兼容 `GRPC`。为了保证和验证与`GRPC`互通能力，Dubbo3 也编写了各种从场景下的测试。详细的可以通过[这里](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/README.MD)了解更多。
+
 ## The Future: Everything on Stub
+
+用过 `Grpc` 的同学应该对 `Stub` 都不陌生。
+Grpc 使用 `compiler` 将编写的 `proto` 文件编译为相关的 protobuf 对象和相关 rpc 接口。默认的会同时生成几种不同的 `stub`
+
+- blockingStub
+- futureStub
+- reactorStub
+- ...
+
+`stub` 用一种统一的使用方式帮我们屏蔽了不同调用方式的细节。不过目前`Dubbo3`暂时只支持传统定义接口并进行调用的使用方式。
+
+在不久的未来，`Triple` 也将实现各种常用的 `Stub`,让用户写一份`proto`文件，通过`comipler`可以在任意场景方便的使用,请拭目以待。
 
