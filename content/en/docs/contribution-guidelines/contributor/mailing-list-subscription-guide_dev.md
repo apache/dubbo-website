@@ -81,6 +81,4 @@ subscription address.
 
 4. If you want to unsubscribe, just send an email to dev-unsubscribe@dubbo.apache.org, and follow the steps once you get an reply.
 
-> Note that both dev@dubbo.apache.org and dev@dubbo.incubator.apache.org should work, you can pick any of it.
-
 [^1] http://apache.org/foundation/mailinglists.html#subscribing
