@@ -21,7 +21,7 @@ echo status | nc -i 1 localhost 20880
 ```
 
 
-status命令所检查的资源也可以扩展，参见：[扩展参考手册](../../../dev/impls/status-checker)。
+status命令所检查的资源也可以扩展，参见：[扩展参考手册](../../references/spis/status-checker)。
 
 ## 命令
 
