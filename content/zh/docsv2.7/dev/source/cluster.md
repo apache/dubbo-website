@@ -416,7 +416,7 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
 #### 3.2.3 FailfastClusterInvoker
 
-FailfastClusterInvoker 只会进行一次调用，失败后立即抛出异常。适用于幂等操作，比如新增记录。源码如下：
+FailfastClusterInvoker 只会发起一次调用，失败后立即抛出异常。通常用于非幂等性的写操作，比如新增记录。源码如下：
 
 ```java
 public class FailfastClusterInvoker<T> extends AbstractClusterInvoker<T> {
