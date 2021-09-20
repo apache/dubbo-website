@@ -21,11 +21,11 @@ echo status | nc -i 1 localhost 20880
 ```
 
 
-status命令所检查的资源也可以扩展，参见：[扩展参考手册](../../../dev/impls/status-checker)。
+status命令所检查的资源也可以扩展，参见：[扩展参考手册](../../references/spis/status-checker)。
 
 ## 命令
 
-以下展示了 dubbo 内建的 telnet 命令的说明和用法，此外，telnet 命令还支持用户自行扩展，参见：[Telnet 命令扩展](../../../dev/impls/telnet-handler)。
+以下展示了 dubbo 内建的 telnet 命令的说明和用法，此外，telnet 命令还支持用户自行扩展，参见：[Telnet 命令扩展](../../references/spis/telnet-handler)。
 
 ### `ls`
 
