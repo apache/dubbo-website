@@ -73,7 +73,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 ### 仅使用 dubbo 协议
 
 为了保证兼容性，首先以 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboProvider) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboConsumer) ,完成调用，输出如下:
-![result](/static/imgs/v3/migration/tri/Dubbo3-tri-migration-dubbo-dubbo-result.png)
+![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
 
 ###  同时使用 dubbo 和 triple 协议
 
@@ -82,7 +82,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationBothProvider)和[`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationBothConsumer),完成调用，输出如下:
 
-![result](/static/imgs/v3/migration/tri/Dubbo3-tri-migration-both-dubbo-tri-result.png)
+![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
 
 
 ### 仅使用 triple 协议
@@ -90,7 +90,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 当所有的 consuemr 都升级至支持 Triple 协议的版本后，provider 可切换至仅使用`Triple`协议启动 [Provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationTriProvider)
 和 [Consumer](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationTriConsumer) 完成调用，输出如下:
 
-![result](/static/imgs/v3/migration/tri/Dubbo3-tri-migration-tri-tri-result.png)
+![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
 
 
 ### 实现原理
@@ -134,7 +134,7 @@ message TripleResponseWrapper {
 
 编写好的`.proto`文件使用 `dubbo-compiler` 插件进行编译并编写实现类。完成方法调用
 
-![result](/static/imgs/v3/migration/tri/Dubbo3-tri-migration-tri-tri-result.png)
+![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
 
 从上面升级的例子我们可以知道，`Triple`协议使用`protbuf`对象序列化后进行传输，所以对于本身就是`protobuf`对象的方法来说，没有任何其他逻辑。
 
