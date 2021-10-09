@@ -44,7 +44,6 @@ Dubbo3的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 �
 ### 定义服务
 
 1. 定义接口
-
 ```java
 public interface IWrapperGreeter {
 
@@ -59,7 +58,6 @@ public interface IWrapperGreeter {
 ```
 
 2. 实现类如下
-
 ```java
 public class IGreeter2Impl implements IWrapperGreeter {
 
@@ -305,18 +303,18 @@ public interface PbGreeter {
 
 - 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
 
-## Triple on Application Level Discovery
+## Triple 与应用级注册发现
 
 关于 Triple 协议的应用级服务注册和发现和其他语言是一致的，可以通过下列内容了解更多。
 
 - [服务发现](https://dubbo.apache.org/zh/docs/concepts/service-discovery/)
 - [应用级地址发现迁移指南](https://dubbo.apache.org/zh/docs/migration/migration-service-discovery/)
 
-## Interop with GRPC
+## 与 GRPC 互通
 
 通过对于协议的介绍，我们知道 `Triple` 协议是基于 `HTTP2` 并兼容 `GRPC`。为了保证和验证与`GRPC`互通能力，Dubbo3 也编写了各种从场景下的测试。详细的可以通过[这里](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/README.MD) 了解更多。
 
-## The Future: Everything on Stub
+##  未来: Everything on Stub
 
 用过 `Grpc` 的同学应该对 `Stub` 都不陌生。
 Grpc 使用 `compiler` 将编写的 `proto` 文件编译为相关的 protobuf 对象和相关 rpc 接口。默认的会同时生成几种不同的 `stub`
