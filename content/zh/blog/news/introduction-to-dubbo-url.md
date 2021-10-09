@@ -3,7 +3,7 @@ title: "Dubbo 中的 URL 统一模型"
 linkTitle: "Dubbo 中的 URL 统一模型"
 date: 2019-10-17
 description: >
-    URL 是 Dubbo 种一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。
+    URL 是 Dubbo 中一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。
 ---
 
 ### 定义
@@ -152,7 +152,7 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 
 ### URL 统一模型的意义
 
-对于 dubbo 中的 URL，有人理解为配置总线，有人理解为统一配置模型，说法虽然不同，但都是在表达一个意思，这样的 URL 在 dubbo 中被当做是[公共契约](http://dubbo.apache.org/zh-cn/docs/dev/contract.html)，所有扩展点参数都包含 URL 参数，URL 作为上下文信息贯穿整个扩展点设计体系。
+对于 dubbo 中的 URL，有人理解为配置总线，有人理解为统一配置模型，说法虽然不同，但都是在表达一个意思，这样的 URL 在 dubbo 中被当做是[公共契约](https://dubbo.apache.org/zh/docs/v2.7/dev/contract/)，所有扩展点参数都包含 URL 参数，URL 作为上下文信息贯穿整个扩展点设计体系。
 
 在没有 URL 之前，只能以字符串传递参数，不停的解析和拼装，导致相同类型的接口，参数时而 Map, 时而 Parameters 类包装：
 
