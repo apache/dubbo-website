@@ -70,13 +70,21 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 ### 仅使用 dubbo 协议
 
-为了保证兼容性，首先以 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboProvider) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboConsumer) ,完成调用，输出如下:
+为保证兼容性，我们先将部分 provider和 consumer 升级到`dubbo3`版本并使用 `dubbo` 协议。
+
+结构如图所示:
+![strust](/imgs/v3/migration/tri/migrate-only-dubbo-strust.png)
+
+使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboProvider) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboConsumer) ,完成调用，输出如下:
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
 
 ###  同时使用 dubbo 和 triple 协议
 
 对于线上服务的升级，不可能一蹴而就同时完成 provider 和 consumer 升级, 需要按步操作，保证业务稳定。
 第二步, provider 提供双协议的方式同时支持 dubbo + tri 两种协议的客户端。
+
+结构如图所示:
+![strust](/imgs/v3/migration/tri/migrate-dubbo-tri-strust.png)
 
 使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationBothProvider)和[`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationBothConsumer),完成调用，输出如下:
 
@@ -85,7 +93,12 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 ### 仅使用 triple 协议
 
-当所有的 consuemr 都升级至支持 Triple 协议的版本后，provider 可切换至仅使用`Triple`协议启动 [Provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationTriProvider)
+当所有的 consuemr 都升级至支持 Triple 协议的版本后，provider 可切换至仅使用`Triple`协议启动 
+
+结构如图所示:
+![strust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
+
+[Provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationTriProvider)
 和 [Consumer](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationTriConsumer) 完成调用，输出如下:
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
@@ -167,8 +180,11 @@ Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使�
 
 Stream 分为以下三种:
 - SERVER_STREAM(服务端流)
+![SERVER_STREAM](/imgs/v3/migration/tri/migrate-server-stream.png)
 - CLIENT_STREAM(客户端流)
+![CLIENT_STREAM](/imgs/v3/migration/tri/migrate-client-stream.png)
 - BIDIRECTIONAL_STREAM(双向流)
+![BIDIRECTIONAL_STREAM](/imgs/v3/migration/tri/migrate-bi-stream.png)
 
 > 由于 `java` 语言的限制，BIDIRECTIONAL_STREAM 和 CLIENT_STREAM 的实现是一样的。
 
