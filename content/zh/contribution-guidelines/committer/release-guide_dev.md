@@ -111,7 +111,7 @@ sub   rsa4096 2019-10-17 [E]
 ```
 登录 https://id.apache.org, 将上面的 fingerprint （即 1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0）
 粘贴到自己的用户信息中 OpenPGP Public Key Primary Fingerprint
- 
+
 ### 设置 Apache 中央仓库
 
 Dubbo 项目的父 pom 为 Apache pom(2.7.0 以上版本需要，2.6.x 发布版本不需要此操作)
@@ -126,7 +126,7 @@ Dubbo 项目的父 pom 为 Apache pom(2.7.0 以上版本需要，2.6.x 发布版
 
  添加以下内容到 .m2/settings.xml
  所有密码请使用 [maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html)加密后再填入
- 
+
 ```xml
 <settings>
 ...
@@ -247,26 +247,26 @@ $ mvn deploy -Prelease -DskipTests
    $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
    ```
 
-5. 拷贝`distribution/target`下的source相关的包到svn本地仓库`dubbo/${release_version}`
+5. 拷贝`dubbo-distribution/dubbo-apache-release/target`下的source相关的包到svn本地仓库`dubbo/${release_version}`
 
 6. 生成sha512签名
 
-   针对`source-release.zip`
+   针对`src.zip`
 
    ```shell
-   $ shasum -a 512 apache-dubbo-${release_version}-source-release.zip >> apache-dubbo-${release_version}-source-release.zip.sha512
+   $ shasum -a 512 apache-dubbo-${release_version}-src.zip >> apache-dubbo-${release_version}-src.zip.sha512
    ```
   
    针对`bin-release.zip`，需要增加`-b`参数，表明是一个二进制文件
 
    ```shell
-   $ shasum -b -a 512 apache-dubbo-${release_version}-bin-release.zip >> apache-dubbo-${release_version}-bin-release.zip.sha512
+   $ shasum -b -a 512 apache-dubbo-${release_version}-bin.zip >> apache-dubbo-${release_version}-bin.zip.sha512
    ```
 
 
 7. 如果有binary release要同时发布
 
-   在`distribution/target`目录下，拷贝`bin-release.zip`以及`bin-release.zip.asc`到svn本地仓库`dubbo/${release_version}`，参考第6步，生成sha512签名。
+   在`dubbo-distribution/dubbo-apache-release/target`目录下，拷贝`bin.zip`以及`bin.zip.asc`到svn本地仓库`dubbo/${release_version}`，参考第6步，生成sha512签名。
 
 8. 提交到Apache svn
 
@@ -298,8 +298,8 @@ https://dist.apache.org/repos/dist/dev/dubbo/${release_version}/
 #### 检查sha512哈希
 
 ```sh
-$ shasum -c apache-dubbo-${release_version}-source-release.zip.sha512
-$ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
+$ shasum -c apache-dubbo-${release_version}-src.zip.sha512
+$ shasum -c apache-dubbo-${release_version}-bin.zip.sha512
 ```
 
 #### 检查gpg签名
@@ -311,19 +311,19 @@ $ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
  $ gpg --import KEYS # import keys
  $ gpg —-edit-key liujun
    > trust # type trust command
- ```
+```
 然后使用如下命令检查签名
- 
+
  ```sh
-gpg --verify apache-dubbo-2.6.3-source-release.zip.asc apache-dubbo-2.6.3-source-release.zip
-gpg --verify apache-dubbo-2.6.3-bin-release.zip.asc apache-dubbo-2.6.3-bin-release.zip
- ``` 
+gpg --verify apache-dubbo-3.0.4-src.zip.asc apache-dubbo-3.0.4-src.zip
+gpg --verify apache-dubbo-3.0.4-bin.zip.asc apache-dubbo-3.0.4-bin.zip
+ ```
 
 
 ### 检查源码包的文件内容
 
-解压缩`apache-dubbo-${release_version}-source-release.zip`，进行如下检查:
-  
+解压缩`apache-dubbo-${release_version}-src.zip`，进行如下检查:
+
 - DISCLAIMER exists
 - LICENSE and NOTICE exists and contents are good
 - All files and no binary files exist
@@ -357,7 +357,7 @@ find . -name THIRD-PARTY.txt | xargs grep -E 'GPL|General Public License' | grep
 
 ### 检查二进制包的文件内容
 
-解压缩`apache-dubbo-${release_version}-bin-release.zip`，进行如下检查:
+解压缩`apache-dubbo-${release_version}-bin.zip`，进行如下检查:
 
 * Check signatures are good
 * LICENSE and NOTICE exists and contents are good
@@ -429,12 +429,13 @@ The Apache Dubbo Team
 1. 将[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/dubbo)目录下，KEYS有更新的，也需要同步更新。
 2. 删除[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包
 3. 删除[release](https://dist.apache.org/repos/dist/release/dubbo)目录下上一个版本的发布包，这些包会被自动保存在[这里](https://archive.apache.org/dist/dubbo)
-4. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
-5. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
-6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似[这样](https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md) [可以参考] (https://github.com/apache/dubbo-website/pull/887)
-7. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
-8. 发邮件到 `dev@dubbo.apache.org`
-宣布release邮件模板： 
+4. 此步骤为发布2.7.0及以上版本必须要的步骤。在此之前请先确保所有的artifact都是ok的。登录http://repository.apache.org，点击左侧的`Staging repositories`，然后搜索Dubbo关键字，会出现一系列的仓库，选择你最近上传的仓库，然后点击上方的Release按钮.
+5. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
+6. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
+7. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似[这样](https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md) [可以参考] (https://github.com/apache/dubbo-website/pull/887)
+8. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
+9. 发邮件到 `dev@dubbo.apache.org`
+  宣布release邮件模板： 
 
 ```text
 Hello Community,
