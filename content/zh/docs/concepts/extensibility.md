@@ -64,7 +64,7 @@ Dubbo 加载扩展的整个流程如下：
 
 (1) 在协议的实现 jar 包内放置文本文件：META-INF/dubbo/org.apache.dubbo.remoting.api.WireProtocol
 ```text
-tri=org.apache.dubbo.remoting.api.WireProtocol
+tri=org.apache.dubbo.rpc.protocol.tri.TripleHttp2Protocol
 ```
 
 (2) 实现类内容
