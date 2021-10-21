@@ -193,7 +193,7 @@ RpcContext.getContext().setAttachment(Constants.REQUEST_TAG_KEY,"red");
    
 
 [^1]: `2.2.0` 以上版本支持
-[^2]: 路由规则扩展点：[路由扩展](../../../dev/impls/router)
+[^2]: 路由规则扩展点：[路由扩展](../../references/spis/router)
 [^3]: 注意：一个服务只能有一条白名单规则，否则两条规则交叉，就都被筛选掉了
 [^4]: 注意：脚本没有沙箱约束，可执行任意代码，存在后门风险
 [^5]: 该特性在 `2.7.0` 以上版本支持
