@@ -15,7 +15,7 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 > GitHub: https://github.com/apache/dubbo \
 > Release Notes: https://github.com/apache/dubbo/releases
 
-### 3.0.4 (2021-10-24)ß
+### 3.0.4 (2021-10-24)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.4/apache-dubbo-3.0.4-src.zip) |
   [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.4/apache-dubbo-3.0.4-src.zip.asc) |
