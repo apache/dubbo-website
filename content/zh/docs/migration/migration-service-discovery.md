@@ -36,7 +36,7 @@ description: "本文档专门针对使用 2.x 版本的老用户，详细阐述�
 
 ```text
 -Ddubbo.application.register-mode=all
-# 可选值 interface、instance、all，默认是 all，即接口级地址、应用级地址都注册
+# 可选值 interface、instance、all，默认是 instance，即接口级地址、应用级地址都注册
 ```
 
 
