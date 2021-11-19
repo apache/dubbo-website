@@ -38,8 +38,8 @@ Dubbo3的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 �
 接下来我们我们以一个使用 Dubbo2 协议的[工程](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration) 来举例，如何一步一步安全的升级。
 
 1. 仅使用 `dubbo` 协议启动 `provider` 和 `consumer`，并完成调用。
-2. 使用 `dubbo` 和 `tri` 协议 启动`provider`，以`dubbo`协议启动`consumer`，并完成调用。
-3. 仅使用`tri` 协议 启动`provider`和 `consumer`，并完成调用。
+2. 使用 `dubbo` 和 `tri` 协议 启动`provider`，以 `dubbo` 协议启动 `consumer`，并完成调用。
+3. 仅使用 `tri` 协议 启动 `provider`和 `consumer`，并完成调用。
 
 ### 定义服务
 
@@ -70,7 +70,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 ### 仅使用 dubbo 协议
 
-为保证兼容性，我们先将部分 provider 升级到`dubbo3`版本并使用 `dubbo` 协议。
+为保证兼容性，我们先将部分 provider 升级到 `dubbo3` 版本并使用 `dubbo` 协议。
 
 使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboProvider) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboConsumer) ,完成调用，输出如下:
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
@@ -92,7 +92,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 ### 仅使用 triple 协议
 
-当所有的 consuemr 都升级至支持 Triple 协议的版本后，provider 可切换至仅使用`Triple`协议启动 
+当所有的 consuemr 都升级至支持 `Triple` 协议的版本后，provider 可切换至仅使用 `Triple` 协议启动 
 
 结构如图所示:
 ![strust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
@@ -107,9 +107,9 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 通过上面介绍的升级过程，我们可以很简单的通过修改协议类型来完成升级。框架是怎么帮我们做到这些的呢？
 
-通过对`Triple`协议的介绍，我们知道Dubbo3的`Triple`的数据类型是 `protobuf`对象，那为什么非 `protobuf`的 java 对象也可以被正常传输呢。
+通过对 `Triple` 协议的介绍，我们知道Dubbo3的 `Triple` 的数据类型是 `protobuf` 对象，那为什么非 `protobuf` 的 java 对象也可以被正常传输呢。
 
-这里 Dubbo3 使用了一个巧妙的设计，首先判断参数类型是否为`protobuf`对象，如果不是。用一个`protobuf`对象将`request`和`response`进行 wrapper，这样就屏蔽了其他各种序列化带来的复杂度。在 wrapper 对象内部声明序列化类型，来支持序列化的扩展。
+这里 Dubbo3 使用了一个巧妙的设计，首先判断参数类型是否为 `protobuf` 对象，如果不是。用一个 `protobuf` 对象将 `request` 和 `response` 进行 wrapper，这样就屏蔽了其他各种序列化带来的复杂度。在 `wrapper` 对象内部声明序列化类型，来支持序列化的扩展。
 
 wrapper 的`protobuf`的 IDL如下:
 ```proto
@@ -147,7 +147,7 @@ message TripleResponseWrapper {
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
 
-从上面升级的例子我们可以知道，`Triple`协议使用`protbuf`对象序列化后进行传输，所以对于本身就是`protobuf`对象的方法来说，没有任何其他逻辑。
+从上面升级的例子我们可以知道，`Triple` 协议使用 `protbuf` 对象序列化后进行传输，所以对于本身就是 `protobuf` 对象的方法来说，没有任何其他逻辑。
 
 使用 `protobuf` 插件编译后接口如下：
 ```java
@@ -293,7 +293,7 @@ request.onCompleted();
 
 ## 使用 Protobuf 序列化的流
 
-对于`Protobuf`序列化方式，推荐编写`IDL`使用`compiler`插件进行编译生成。生成的代码大致如下:
+对于 `Protobuf` 序列化方式，推荐编写 `IDL` 使用 `compiler` 插件进行编译生成。生成的代码大致如下:
 ```java
 public interface PbGreeter {
 
@@ -314,7 +314,7 @@ public interface PbGreeter {
 
 `Triple`协议的流模式是怎么支持的呢？
 
-- 从协议层来说，`Triple`是建立在`HTTP2`基础上的，所以直接拥有所有`HTTP2`的能力，故拥有了分 stream 和全双工的能力。
+- 从协议层来说，`Triple` 是建立在 `HTTP2` 基础上的，所以直接拥有所有 `HTTP2` 的能力，故拥有了分 `stream` 和全双工的能力。
 
 - 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
 
@@ -339,6 +339,6 @@ Grpc 使用 `compiler` 将编写的 `proto` 文件编译为相关的 protobuf �
 - reactorStub
 - ...
 
-`stub` 用一种统一的使用方式帮我们屏蔽了不同调用方式的细节。不过目前`Dubbo3`暂时只支持传统定义接口并进行调用的使用方式。
+`stub` 用一种统一的使用方式帮我们屏蔽了不同调用方式的细节。不过目前 `Dubbo3` 暂时只支持传统定义接口并进行调用的使用方式。
 
-在不久的未来，`Triple` 也将实现各种常用的 `Stub`,让用户写一份`proto`文件，通过`comipler`可以在任意场景方便的使用,请拭目以待。
+在不久的未来，`Triple` 也将实现各种常用的 `Stub`，让用户写一份`proto`文件，通过 `comipler` 可以在任意场景方便的使用，请拭目以待。
