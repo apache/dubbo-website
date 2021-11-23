@@ -6,10 +6,12 @@ weight: 10
 description: ""
 ---
 
-It is recommended to use IDL to define cross-language services and coding formats. The following shows the service definition and development methods of the Golang language version. If you have a legacy system or do not have multi-language development requirements, you can refer to the following usage methods.
+It is recommended to use IDL to define cross-language services and coding formats.
+
+The following shows the service definition and development methods of the Golang language version. If you have a legacy system or do not have multi-language development requirements, you can refer to the following usage methods.
 
 # Quick start
-use `hello world` example to show how to start with Dubbo-go framework.
+use `hello world` example to show how to start with the Dubbo-go framework.
 
 Protocol: Dubbo
 
@@ -30,37 +32,37 @@ Registration Center: Zookeeper
 > <https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/user.go>
 
 
-1. Write structure which need be transferred, since we are using `Hessian2`, so `User` class need implement `JavaClassName` method. It will include class name.
+1. Write structure which needs to be transferred, since we are using `Hessian2`, so the `User` class needs to implement the `JavaClassName` method. It will include class names.
 
 ```go
 type User struct {
-	Id   string
-	Name string
-	Age  int32
-	Time time.Time
+         Id      string
+         Name string
+         Age     int32
+         Time time.Time
 }
 
 func (u User) JavaClassName() string {
-	return "com.ikurento.user.User"
+         return "com.ikurento.user.User"
 }
 ```
 
-2.Writing business logic in `UserProvider` which is same as what we do in dubbo java. 
-Need to implement `Reference` method, the return value is uniquely identify in the service, corresponding to the dubbo `beans` and `path` fields.
+2.Writing business logic in `UserProvider` which is the same as what we do in dubbo java.
+Need to implement the `Reference` method, the return value is uniquely identified in the service, corresponding to the dubbo `beans` and `path` fields.
 
 ```go
 type UserProvider struct {
 }
 
 func (u *UserProvider) GetUser(ctx context.Context, req []interface{}) (*User, error) {
-	println("req:%#v", req)
-	rsp := User{"A001", "hellowworld", 18, time.Now()}
-	println("rsp:%#v", rsp)
-	return &rsp, nil
+         println("req:%#v", req)
+         rsp := User{"A001", "hellowworld", 18, time.Now()}
+         println("rsp:%#v", rsp)
+         return &rsp, nil
 }
 
 func (u *UserProvider) Reference() string {
-	return "UserProvider"
+         return "UserProvider"
 }
 ```
 
@@ -68,9 +70,9 @@ func (u *UserProvider) Reference() string {
 
 ```go
 func init() {
-	config.SetProviderService(new(UserProvider))
-	// ------for hessian2------
-	hessian.RegisterPOJO(&User{})
+         config.SetProviderService(new(UserProvider))
+         // ------for hessian2------
+         hessian.RegisterPOJO(&User{})
 }
 ```
 
@@ -82,16 +84,16 @@ func init() {
 
 ```go
 import (
-	hessian "github.com/apache/dubbo-go-hessian2"
-	"github.com/apache/dubbo-go/config"
-	_ "github.com/apache/dubbo-go/registry/protocol"
-	_ "github.com/apache/dubbo-go/common/proxy/proxy_factory"
-	_ "github.com/apache/dubbo-go/filter/impl"
-	_ "github.com/apache/dubbo-go/cluster/cluster_impl"
-	_ "github.com/apache/dubbo-go/cluster/loadbalance"
-	_ "github.com/apache/dubbo-go/registry/zookeeper"
+         hessian "github.com/apache/dubbo-go-hessian2"
+         "github.com/apache/dubbo-go/config"
+         _ "github.com/apache/dubbo-go/registry/protocol"
+         _ "github.com/apache/dubbo-go/common/proxy/proxy_factory"
+         _ "github.com/apache/dubbo-go/filter/impl"
+         _ "github.com/apache/dubbo-go/cluster/cluster_impl"
+         _ "github.com/apache/dubbo-go/cluster/loadbalance"
+         _ "github.com/apache/dubbo-go/registry/zookeeper"
 
-	_ "github.com/apache/dubbo-go/protocol/dubbo"
+         _ "github.com/apache/dubbo-go/protocol/dubbo"
 )
 
 ```
@@ -100,7 +102,7 @@ import (
 
 ```go
 func main() {
-	config.Load()
+         config.Load()
 }
 ```
 
@@ -112,7 +114,7 @@ Mainly edit the following parts:
 
 * `registries`: The number and address of zk server
 
-* `services`: Service specific information in the configuration node, modify `interfacec` to the interface to the corresponding service name, modify `key` to the value which same as first step `Referenc` return value.
+* `services`: Service specific information in the configuration node, modify `interfacec` to the interface to the corresponding service name, modify `key` to the value which is the same as the first step `Referenc` return value.
 
 2. Configure the above two configuration files as environment variables
 
@@ -133,11 +135,11 @@ export APP_LOG_CONF_FILE="xxx"
 
 ```go
 type UserProvider struct {
-	GetUser func(ctx context.Context, req []interface{}, rsp *User) error
+         GetUser func(ctx context.Context, req []interface{}, rsp *User) error
 }
 
 func (u *UserProvider) Reference() string {
-	return "UserProvider"
+         return "UserProvider"
 }
 ```
 
@@ -145,8 +147,8 @@ func (u *UserProvider) Reference() string {
 
 ```go
 func init() {
-	config.SetConsumerService(userProvider)
-	hessian.RegisterPOJO(&User{})
+         config.SetConsumerService(userProvider)
+         hessian.RegisterPOJO(&User{})
 }
 ```
 
@@ -158,16 +160,16 @@ func init() {
 
 ```go
 import (
-	hessian "github.com/apache/dubbo-go-hessian2"
-	"github.com/apache/dubbo-go/config"
-	_ "github.com/apache/dubbo-go/registry/protocol"
-	_ "github.com/apache/dubbo-go/common/proxy/proxy_factory"
-	_ "github.com/apache/dubbo-go/filter/impl"
-	_ "github.com/apache/dubbo-go/cluster/cluster_impl"
-	_ "github.com/apache/dubbo-go/cluster/loadbalance"
-	_ "github.com/apache/dubbo-go/registry/zookeeper"
+         hessian "github.com/apache/dubbo-go-hessian2"
+         "github.com/apache/dubbo-go/config"
+         _ "github.com/apache/dubbo-go/registry/protocol"
+         _ "github.com/apache/dubbo-go/common/proxy/proxy_factory"
+         _ "github.com/apache/dubbo-go/filter/impl"
+         _ "github.com/apache/dubbo-go/cluster/cluster_impl"
+         _ "github.com/apache/dubbo-go/cluster/loadbalance"
+         _ "github.com/apache/dubbo-go/registry/zookeeper"
 
-	_ "github.com/apache/dubbo-go/protocol/dubbo"
+         _ "github.com/apache/dubbo-go/protocol/dubbo"
 )
 ```
 
@@ -175,19 +177,19 @@ import (
 
 ```go
 func main() {
-	config.Load()
-	time.Sleep(3e9)
+         config.Load()
+         time.Sleep(3e9)
 
-	println("\n\n\nstart to test dubbo")
-	user := &User{}
-	err := userProvider.GetUser(context.TODO(), []interface{}{"A001"}, user)
-	if err != nil {
-		panic(err)
-	}
-	println("response result: %v\n", user)
+         println("\n\n\nstart to test dubbo")
+         user := &User{}
+         err := userProvider.GetUser(context.TODO(), []interface{}{"A001"}, user)
+         if err != nil {
+               panic(err)
+         }
+         println("response result: %v\n", user)
 }
 func println(format string, args ...interface{}) {
-	fmt.Printf("\033[32;40m"+format+"\033[0m\n", args...)
+         fmt.Printf("\033[32;40m"+format+"\033[0m\n", args...)
 }
 ```
 
@@ -200,7 +202,7 @@ Mainly edit the following parts:
 
 * `registries`: The number and address of zk server
 
-* `services`: Service specific information in the configuration node, modify `interfacec` to the interface to the corresponding service name, modify `key` to the value which same as first step `Referenc` return value.
+* `services`: Service specific information in the configuration node, modify `interfacec` to the interface to the corresponding service name, modify `key` to the value which is the same as the first step `Reference` return value.
 
 2. Configure the above two configuration files as environment variables. In order to prevent the log environment variables from conflicting with the server-side log environment variables, it is recommended that all environment variables should not be configured globally, and they can take effect at present.
 
