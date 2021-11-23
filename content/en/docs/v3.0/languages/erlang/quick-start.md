@@ -1,31 +1,35 @@
 ---
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
+title: "Quick start "
+linkTitle: "Quick start"
 weight: 1
-description: "Erlang 快速开始"
+description: "Erlang Quick start"
 ---
 
-建议先使用 java 定义接口 jar，并使用 [erlanalysis](https://github.com/apache/dubbo-erlang/tree/master/tools/erlanalysis) 工具解析java接口至Erlang lib
+It is recommended to use java to define the interface jar first, and use the [erlanalysis](https://github.com/apache/dubbo-erlang/tree/master/tools/erlanalysis) tool to parse the java interface to Erlang lib
 
-## 导入依赖库
 
-### 使用 Rebar 编译工具。
-Add dubblerl to rebar.config with your project
+## Import dependent libraries
+
+### Use the Rebar compilation tool.
+
+Add dubblerl to rebar.config to your project
+
 ```erlang
 {deps, [
     {dubboerl, {git, "https://github.com/apache/dubbo-erlang.git", {branch, "master"}}}
 ]}.
 ```
 
-### 使用 erlang.mk 编译工具
-`待补充`
+### Use erlang.mk compilation tool
 
-## 导入接口库
+`in progress...`
+
+## Import interface library
 Suppose the interface lib you exported is called dubbo_service.   
 * If you didn't upload your lib to your git repository, It is recommended that you copy the `dubbo_service` lib 
 into the project's `apps` directory.  
-* If it is upload to your git repository, you can import like this:
+* If it is uploaded to your git repository, you can import like this:
 ```erlang
 {deps, [
     {dubboerl, {git, "https://github.com/apache/dubbo-erlang.git", {branch, "master"}}},
@@ -33,7 +37,7 @@ into the project's `apps` directory.
 ]}.
 ```
 
-## 消费者配置
+## Consumer configuration
 Please reference [Reference Config](./reference.md)
 
 ## Init dubbolib in your project
@@ -42,16 +46,17 @@ It is need you
 dubboerl:init().
 ```
 
-## 如何调用？
+## How to call？
 
-### 同步调用
+### Synchronous call
+
 ```erlang
 Request = #userInfoRequest{requestId = 123, username = "testname"},
 {ok,RequestRef,Response,RpcContent}  = userOperator:queryUserInfo(Request,#{sync=> true}).
 ```
 If it occur error, is reponse `{error,Reason}`. 
 
-### 异步调用
+### Asynchronous call
 
 Default is Async call.
 ```erlang
@@ -62,5 +67,5 @@ Request = #userInfoRequest{requestId = 123, username = "testname"},
 handle_cast({msg_back,RequestRef,Response,RpcContent},State).
 ```
 
-## 示例
-参考项目 [dubboerl_demo](https://github.com/apache/dubbo-erlang/tree/master/samples)
+## Example
+Refer to [dubboerl_demo](https://github.com/apache/dubbo-erlang/tree/master/samples)

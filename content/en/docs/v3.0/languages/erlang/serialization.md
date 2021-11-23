@@ -1,18 +1,18 @@
 ---
 type: docs
-title: "序列化配置项"
-linkTitle: "序列化配置项"
+title: "Serialized configuration items"
+linkTitle: "Serialized configuration items"
 weight: 4
-description: "在 erlang 中配置序列化方式"
+description: "Configure the serialization method in erlang"
 ---
 
-当前该库只实现了 `dubbo://` 通讯协议。
+The library currently only implements the `dubbo://` communication protocol.
 
-序列化方式实现了 `hessian` 和 `json` 两种方式。
+It supports `hessian` and `json` as serialization method.
 
-## 配置样例
+## Configuration example
 
-序列化配置需要添加到 `sys.config` 文件 `dubboerl` 应用配置项里。
+Provider configuration items to add to the `sys.config` file `dubboerl` field.
 
 ```erlang
 {dubboerl,[
@@ -24,4 +24,3 @@ description: "在 erlang 中配置序列化方式"
 | ConfigName | Type | DefaultValue | Remarks |
 | --- | --- | --- | --- |
 | protocol | atom() | hessian | hessian,json |
- 

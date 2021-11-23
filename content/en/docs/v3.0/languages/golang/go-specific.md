@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "Go 语言定义服务"
-linkTitle: "Go 语言定义服务"
+title: "Go language definition service"
+linkTitle: "Go language definition service"
 weight: 10
 description: ""
 ---

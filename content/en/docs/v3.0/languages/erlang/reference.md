@@ -1,14 +1,14 @@
 ---
 type: docs
-title: "消费者配置"
-linkTitle: "消费者配置"
+title: "Consumer configuration"
+linkTitle: "Consumer configuration"
 weight: 2
-description: "在 erlang 中配置消费者"
+description: "Configure consumers in erlang"
 ---
 
-## 基础配置
+## Basic configuration
 
-消费者配置项需要添加到 `sys.config` 文件 `dubboerl` 应用配置项里。
+Consumers need to add configuration items to `sys.config` file `dubboerl` filed.
 
 ```erlang
 {dubboerl,[
@@ -21,4 +21,4 @@ description: "在 erlang 中配置消费者"
 ]}
 ```
 
-Option 配置项待添加中。
+Option is to be added.

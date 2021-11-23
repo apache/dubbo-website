@@ -1,14 +1,14 @@
 ---
 type: docs
-title: "提供者配置"
-linkTitle: "提供者配置"
+title: "Provider configuration"
+linkTitle: "Provider configuration"
 weight: 3
-description: "在 erlang 中配置服务提供者"
+description: "Configure service provider in erlang"
 ---
 
-## 基本配置
+## basic configuration
 
-提供者配置项需要添加到 `sys.config` 文件 `dubboerl` 应用配置项里。
+Provider configuration items to add to the `sys.config` file `dubboerl` field
 
 ```erlang
 {dubboerl,[
