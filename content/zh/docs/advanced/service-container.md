@@ -10,7 +10,7 @@ description: "使用 Dubbo 中的服务容器"
 
 服务容器只是一个简单的 Main 方法，并加载一个简单的 Spring 容器，用于暴露服务。
 
-服务容器的加载内容可以扩展，内置了 spring, jetty, log4j 等加载，可通过[容器扩展点](../../../dev/impls/container)进行扩展。配置配在 java 命令的 -D 参数或者 `dubbo.properties` 中。
+服务容器的加载内容可以扩展，内置了 spring, jetty, log4j 等加载，可通过[容器扩展点](../../references/spis/container)进行扩展。配置配在 java 命令的 -D 参数或者 `dubbo.properties` 中。
 
 ## 容器类型
 
