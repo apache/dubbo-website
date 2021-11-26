@@ -26,7 +26,7 @@ $ cd dubbo-samples/dubbo-samples-basic
 
 1. 编译 Provider
 ```shell script
-$ mvn clean compile -Pprovider
+$ mvn clean package -Pprovider
 ```
 
 2. 运行 Provider
@@ -36,7 +36,7 @@ $ java -jar ./target/provider.jar
 
 3. 编译 Consumer
 ```shell script
-$ mvn clean compile -Pconsumer
+$ mvn clean package -Pconsumer
 ```
 
 4. 运行 consumer
