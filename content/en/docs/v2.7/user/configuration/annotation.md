@@ -13,10 +13,10 @@ description: "Configure Dubbo with annotation"
 
 ## Provider Side
 k
-### `@Service` annotation for exporting
+### `@DubboService` annotation for exporting
 
 ```java
-@Service
+@DubboService
 public class AnnotationServiceImpl implements AnnotationService {
     @Override
     public String sayHello(String name) {
