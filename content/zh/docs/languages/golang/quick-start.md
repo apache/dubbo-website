@@ -197,7 +197,7 @@ func println(format string, args ...interface{}) {
 
 * `references` 结点下配置服务的具体信息，需要配置 `interface` 配置，修改为对应服务的接口名，服务的key对应第一步中 `Provider` 的 `Reference` 返回值
 
-2. 把上面的两个配置文件费别配置为环境变量，为防止log的环境变量和服务端的log环境变量冲突，建议所有的环境变量不要做全局配置，在当前起效即可。
+2. 把上面的两个配置文件分别配置为环境变量，为防止log的环境变量和服务端的log环境变量冲突，建议所有的环境变量不要做全局配置，在当前起效即可。
 
 ```shell
 export CONF_CONSUMER_FILE_PATH="xxx"
