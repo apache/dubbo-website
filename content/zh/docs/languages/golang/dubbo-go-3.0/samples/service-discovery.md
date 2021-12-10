@@ -1,11 +1,11 @@
 ---
-title: dubbogo 3.0 应用级服务发现
-keywords: dubbogo 3.0 应用级服务发现
+title: Dubbo-go 3.0 应用级服务发现
+keywords: Dubbo-go 3.0 应用级服务发现
 linkTitle: 应用级服务发现
-description: dubbogo 3.0 应用级服务发现
+description: Dubbo-go 3.0 应用级服务发现
 ---
 
-# Dubbogo 3.0 应用级服务发现
+# Dubbo-go 3.0 应用级服务发现
 
 参考文章[**《Dubbo 迈出云原生重要一步 应用级服务发现解析》**](https://baijiahao.baidu.com/s?id=1669266413887039723&wfr=spider&for=pc)
 

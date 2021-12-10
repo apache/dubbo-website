@@ -1,12 +1,12 @@
 ---
 type: docs
-title: Dubbogo的配置
-keywords: Dubbogo的配置
+title: Dubbo-go的配置
+keywords: Dubbo-go的配置
 linkTitle: 框架配置
-description: Dubbogo的配置
+description: Dubbo-go的配置
 ---
 
-# Dubbogo 配置项
+# Dubbo-go 配置项
 
 ## 1. 配置结构
 
@@ -187,7 +187,7 @@ func main() {
 }
 ```
 
-配置 API 看上去写法较为复杂，但单个配置结构的构造过程都是一致的，参考 Java  Builder 的设计，我们在配置 API 模块选用 `New().SetA().SetB().Build()`的方式来构造单个配置结构。
+配置 API 看上去写法较为复杂，但单个配置结构的构造过程都是一致的，参考 Java Builder 的设计，我们在配置 API 模块选用 `New().SetA().SetB().Build()`的方式来构造单个配置结构。
 
 将上述例子中的 rootConfig 构造过程，可以拆解为：
 
@@ -212,7 +212,7 @@ rc := config.NewRootConfigBuilder().
 
 ### 2.3 从配置中心读取
 
-Dubbogo 服务框架支持将配置文件 'dubbogo.yml' 的内容预先放入配置中心，再通过配置注册中心的地址。在本地 dubbogo.yml 配置文件内只需写入配置中心的信息即可，目前支持作为配置中心的中间件有：apollo、nacos、zookeeper
+Dubbo-go 服务框架支持将配置文件 'dubbogo.yml' 的内容预先放入配置中心，再通过配置注册中心的地址。在本地 dubbogo.yml 配置文件内只需写入配置中心的信息即可，目前支持作为配置中心的中间件有：apollo、nacos、zookeeper
 
 可参考[配置中心Samples](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)，凡是正确配置了config-center 配置的服务，都会优先从配置中心加载整个配置文件。
 
@@ -224,7 +224,7 @@ dubbo:
     app-id: demo_server
     cluster: default
     namespace: demo-provider-config
-# 框架从apollo配置中最更新对应位置加载配置文件，并根据该配置文件启动
+# 框架从 apollo 配置中最更新对应位置加载配置文件，并根据该配置文件启动
 ```
 
 下一章：[【Dubbogo Samples 介绍】](../samples/samples_repo.html)

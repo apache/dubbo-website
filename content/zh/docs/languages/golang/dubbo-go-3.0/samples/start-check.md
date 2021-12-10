@@ -1,9 +1,9 @@
 ---
 type: docs
-title: dubbogo 3.0  启动时检查
-keywords: dubbogo 3.0 启动时检查
+title: Dubbo-go 3.0  启动时检查
+keywords: Dubbo-go 3.0 启动时检查
 linkTitle: 启动时检查
-description: dubbogo 3.0 启动时检查
+description: Dubbo-go 3.0 启动时检查
 ---
 
 # 启动时检查

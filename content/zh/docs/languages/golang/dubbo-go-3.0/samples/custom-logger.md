@@ -1,18 +1,18 @@
 ---
 type: docs
-title: dubbogo 3.0 自定义日志
-keywords: dubbogo 3.0 自定义日志
-description: dubbogo 3.0 自定义日志
+title: Dubbo-go 3.0 自定义日志
+keywords: Dubbo-go 3.0 自定义日志
+description: Dubbo-go 3.0 自定义日志
 linkTitle: 日志
 ---
 
-# Dubbogo 3.0 自定义日志组件
+# Dubbo-go 3.0 自定义日志组件
 
 参考samples [dubbo-go-samples/logger](https://github.com/apache/dubbo-go-samples/tree/master/logger)
 
 ## 1. 日志配置
 
-dubbogo 3.0 默认采用 zap 日志库，在配置文件中不添加 logger 配置，日志将会打印到控制默认级别为debug。您也可在配置文件中配置日志级别、, 可参照如下方式来配置zap-config和lumberjack-config，从而定制化日志输出。
+Dubbo-go 3.0 默认采用 zap 日志库，在配置文件中不添加 logger 配置，日志将会打印到控制默认级别为debug。您也可在配置文件中配置日志级别、, 可参照如下方式来配置zap-config和lumberjack-config，从而定制化日志输出。
 
 ```yaml
 dubbo:

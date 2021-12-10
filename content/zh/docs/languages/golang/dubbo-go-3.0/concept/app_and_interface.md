@@ -6,9 +6,9 @@ linkTitle: 服务层级
 description: Dubbo的应用和接口
 ---
 
-# Dubbogo 服务层级
+# Dubbo-go 服务层级
 
-Dubbogo 服务层级为两个级别：分别是应用级别(App Level)和接口级别(Interface Level)，该服务分层与**框架配置**结构息息相关。
+Dubbo-go 服务层级为两个级别：分别是应用级别(App Level)和接口级别(Interface Level)，该服务分层与**框架配置**结构息息相关。
 
 如下图所示，可以看到，应用级别的组件以浅红色标注，接建立如下文件目录口级别的组件以浅蓝色标注：
 

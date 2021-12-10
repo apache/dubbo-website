@@ -1,12 +1,12 @@
 ---
 type: docs
 title: Dubbo-go 数据上报
-keywords: dubbogo 数据上报
+keywords: Dubbo-go 数据上报
 linkTitle: Metrics 数据上报
 description: 提示用户dubbo使用的数据上报方式
 ---
 
-# Dubbogo 3.0 数据上报
+# Dubbo-go 3.0 数据上报
 
 参考Samples： [dubbo-go-samples/metrics](https://github.com/apache/dubbo-go-samples/tree/master/metrics)
 

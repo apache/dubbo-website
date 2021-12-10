@@ -1,12 +1,12 @@
 ---
 type: docs
-title: dubbogo 3.0 注册中心
-keywords: dubbogo 3.0 注册中心
+title: Dubbo-go 3.0 注册中心
+keywords: Dubbo-go 3.0 注册中心
 linkTitle: 注册中心
-description: dubbogo 3.0 注册中心
+description: Dubbo-go 3.0 注册中心
 ---
 
-# Dubbogo 3.0 注册中心配置
+# Dubbo-go 3.0 注册中心配置
 
 参考samples [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
 
@@ -43,7 +43,7 @@ dubbo:
         group: myInterfaceGroup # 默认为空
 ```
 
-dubbogo 的注册中心配置的 group、namespace、username、password，均与 nacos 相关概念对应。
+Dubbo-go 的注册中心配置的 group、namespace、username、password，均与 nacos 相关概念对应。
 
 - **Zookeeper 注册中心**
 

@@ -44,7 +44,7 @@ JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
 
   - Hessian 序列化
 
-  POJO for Go，需参考 [Dubbogo Hessian 序列化支持文档](https://www.yuque.com/docs/share/c698bd6e-e4d6-47db-bc1c-c757cc9b4f3e?)
+  POJO for Go，需参考 [Dubbo-go Hessian 序列化支持文档](https://www.yuque.com/docs/share/c698bd6e-e4d6-47db-bc1c-c757cc9b4f3e?)
 
   ```go
   type User struct {
@@ -113,7 +113,7 @@ JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
   }
   ```
 
-  Go 方法需要遵守 [Dubbogo 3.0 用户服务接口定义规范](https://www.yuque.com/docs/share/eff9c51f-a7f4-47d6-87ff-11a2152bdffe?)
+  Go 方法需要遵守 [Dubbo-go 3.0 用户服务接口定义规范](https://www.yuque.com/docs/share/eff9c51f-a7f4-47d6-87ff-11a2152bdffe?)
 
   
 

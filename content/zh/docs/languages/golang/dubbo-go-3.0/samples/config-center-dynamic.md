@@ -1,6 +1,6 @@
 ---
 type: docs
-title: dubbogo 3.0 动态配置
+title: Dubbo-go 3.0 动态配置
 keywords: dubbogo 3.0 动态配置
 description: dubbogo 3.0 动态配置
 linkTitle: 配置中心和配置监听

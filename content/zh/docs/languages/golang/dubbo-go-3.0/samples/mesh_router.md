@@ -1,9 +1,9 @@
 ---
 type: docs
 title: Dubbo-go v3 统一路由规则
-keywords: dubbogo，v3，路由规则
+keywords: Dubbo-go，v3，路由规则
 linkTitle: 路由规则
-description: 提示用户dubbo使用的路由协议，介绍dubbogov3采用的统一路由规则
+description: 提示用户dubbo使用的路由协议，介绍Dubbo-gov3采用的统一路由规则
 ---
 
 # Dubbo-go v3 Mesh路由规则

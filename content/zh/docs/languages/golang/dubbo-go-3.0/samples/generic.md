@@ -1,18 +1,18 @@
 ---
 type: docs
-title: dubbogo 泛化调用
-keywords: dubbogo 泛化调用
+title: Dubbo-go 泛化调用
+keywords: Dubbo-go 泛化调用
 linkTitle: 泛化调用
-description: dubbogo 泛化调用
+description: Dubbo-go 泛化调用
 ---
 
-# Dubbogo 泛化调用 
+# Dubbo-go 泛化调用 
 
-## 1. Dubbogo 泛化调用 Java Server
+## 1. Dubbo-go 泛化调用 Java Server
 
 使用 Triple 协议 + hessian2 序列化方案
 
-可参考Dubbogo 3.0 [泛化调用文档](https://www.yuque.com/docs/share/f4e72670-74ab-45b9-bc0c-4b42249ed953?#)
+可参考Dubbo-go 3.0 [泛化调用文档](https://www.yuque.com/docs/share/f4e72670-74ab-45b9-bc0c-4b42249ed953?#)
 
 ### 1.1 Java-Server启动
 

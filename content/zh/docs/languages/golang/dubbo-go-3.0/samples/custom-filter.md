@@ -1,12 +1,12 @@
 ---
 type: docs
-title: dubbogo 3.0 自定义filter
-keywords: dubbogo 3.0 自定义filter
-description: dubbogo 3.0 自定义filter
+title: Dubbo-go 3.0 自定义filter
+keywords: Dubbo-go 3.0 自定义filter
+description: Dubbo-go 3.0 自定义filter
 linkTitle: Filter
 ---
 
-# Dubbogo 3.0 自定义Filter组件
+# Dubbo-go 3.0 自定义Filter组件
 
 参考samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/master/filter)
 
