@@ -1,9 +1,9 @@
 ---
 type: docs
-title: Dubbo的应用和接口
-keywords: Dubbo的应用和接口
+title: Dubbo-go 的应用和接口
+keywords: Dubbo-go 的应用和接口
 linkTitle: 服务层级
-description: Dubbo的应用和接口
+description: Dubbo-go 的应用和接口
 ---
 
 # Dubbo-go 服务层级

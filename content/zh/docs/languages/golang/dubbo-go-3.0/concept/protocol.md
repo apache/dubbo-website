@@ -1,9 +1,9 @@
 ---
 type: docs
-title: Dubbo的网络协议
-keywords: Dubbo的网络协议
+title: Dubbo-go 的网络协议
+keywords: Dubbo-go 的网络协议
 linkTitle: 网络协议
-description: Dubbo的网络协议
+description: Dubbo-go 的网络协议
 ---
 
 # 网络协议

@@ -1,9 +1,9 @@
 ---
 type: docs
-title: Dubbo的注册中心
-keywords: Dubbo的注册中心
+title: Dubbo-go 的注册中心
+keywords: Dubbo-go 的注册中心
 linkTitle: 注册中心
-description: Dubbo的注册中心
+description: Dubbo-go 的注册中心
 ---
 
 # 注册中心

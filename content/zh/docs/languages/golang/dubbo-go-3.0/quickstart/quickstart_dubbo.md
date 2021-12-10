@@ -1,12 +1,12 @@
 ---
 type: docs
-title: Dubbo 协议快速开始
+title: Dubbo-go 协议快速开始
 keywords: 快速开始,helloworld,
-linkTitle: "Dubbo 协议快速开始"
+linkTitle: "Dubbo-go 协议快速开始"
 description: 快速上手dubbo-go3.0，编写一个简单的helloworld应用
 ---
 
-# Dubbo 协议快速开始
+# Dubbo-go 协议快速开始
 
 ## 1. 环境安装
 
