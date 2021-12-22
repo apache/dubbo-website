@@ -42,7 +42,7 @@ message HelloReply {
 ```
 
 以上是使用 IDL 定义服务的一个简单示例，我们可以把它命名为 `DemoService.proto`，proto 文件中定义了 RPC 服务名称 `DemoService` 与方法签名
- `SayHello (HelloRequest) returns (HelloReply) {}`，同时还定义了方法的入参结构体、出参结构体 `HelloRequest` 与 `HelloResponse`。
+ `SayHello (HelloRequest) returns (HelloReply) {}`，同时还定义了方法的入参结构体、出参结构体 `HelloRequest` 与 `HelloReply`。
  IDL 格式的服务依赖 Protobuf 编译器，用来生成可以被用户调用的客户端与服务端编程 API，Dubbo 在原生 Protobuf Compiler 的基础上提供了适配多种语言的特有插件，用于适配 Dubbo 框架特有的 API 与编程模型。
  
 > 使用 Dubbo3 IDL 定义的服务只允许一个入参与出参，这种形式的服务签名🈶两个优势，一是对多语言实现更友好，二是可以保证服务的向后兼容性，依赖于 Protobuf 序列化的兼容性，我们可以很容易的调整传输的数据结构如增、删字段等，完全不用担心接口的兼容性。
