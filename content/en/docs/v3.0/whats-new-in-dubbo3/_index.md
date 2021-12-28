@@ -17,7 +17,7 @@ description: "A summary of the new features available in Dubbo 3.x"
 
 * Compatible with gRPC
 
-* Multi-language friendly: You can use Protobuf to encode business data
+* Multi-language friendly: You can use Protobuf to encode data
 
 * Support for streams such as Request Stream, Response Stream, and Bidirectional Stream.
 
