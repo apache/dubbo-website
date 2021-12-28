@@ -219,7 +219,7 @@ host != 172.22.3.* => host != 172.22.3.*
 #### Consumer
 
 ```java
-RpcContext.getContext().setAttachment(Constants.REQUEST_TAG_KEY,"tag1");
+RpcContext.getContext().setAttachment(CommonConstants.TAG_KEY,"tag1");
 ```
 
 请求标签的作用域为每一次 invocation，使用 attachment 来传递请求标签，注意保存在 attachment 中的值将会在一次完整的远程调用中持续传递，得益于这样的特性，我们只需要在起始调用时，通过一行代码的设置，达到标签的持续传递。
