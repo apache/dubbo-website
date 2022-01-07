@@ -30,7 +30,7 @@ org.apache.dubbo.config.MethodConfig
 org.apache.dubbo.config.ArgumentConfig
 ```
 
-详细参见：[API配置](../../configuration/api)  
+详细参见：[API配置](../configuration/api)  
 
 ## 注解 API
 
@@ -39,7 +39,7 @@ org.apache.dubbo.config.annotation.Service
 org.apache.dubbo.config.annotation.Reference
 ```
 
-详细参见：[注解配置](../../configuration/annotation)
+详细参见：[注解配置](../configuration/annotation)
 
 ## 模型 API
 
@@ -54,7 +54,7 @@ org.apache.dubbo.rpc.RpcException
 org.apache.dubbo.rpc.RpcContext
 ```
 
-详细参见：[上下文信息](../../examples/context) & [隐式传参](../../examples/attachment) & [异步调用](../../examples/async-call)
+详细参见：[上下文信息](../../advanced/context) & [隐式传参](../../advanced/attachment) & [异步调用](../../advanced/async-call)
 
 ## 服务 API
 
@@ -63,9 +63,9 @@ org.apache.dubbo.rpc.service.GenericService
 org.apache.dubbo.rpc.service.GenericException
 ```
 
-详细参见：[泛化引用](../../examples/generic-reference) & [泛化实现](../../examples/generic-service)
+详细参见：[泛化引用](../../advanced/generic-reference) & [泛化实现](../../advanced/generic-service)
 
 ```
 org.apache.dubbo.rpc.service.EchoService
 ```
-详细参见：[回声测试](../../examples/echo-service)
+详细参见：[回声测试](../../advanced/echo-service)
