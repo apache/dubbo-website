@@ -14,7 +14,7 @@ description: ""
 
 协议：Dubbo     
 编码：Hessian2  
-注册中心：Zookeeper 
+注册中心：Zookeeper
 
 ## 环境
 
