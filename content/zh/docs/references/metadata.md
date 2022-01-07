@@ -186,7 +186,7 @@ consumer端存储了consumer往注册中心填写的全部参数。
 
 ### 方式二：配置在项目中-properties方式引入配置
 
-参考sample：dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-xml工程。
+参考sample：dubbo-samples-metadata-report/dubbo-samples-metadata-report-local-properties工程。
 
 ##### dubbo.properties
 
