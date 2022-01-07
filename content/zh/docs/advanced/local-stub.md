@@ -13,13 +13,13 @@ description: "在 Dubbo 中利用本地存根在客户端执行部分逻辑"
 在 spring 配置文件中按以下方式配置：
 
 ```xml
-<dubbo:service interface="com.foo.BarService" stub="true" />
+<dubbo:consumer interface="com.foo.BarService" stub="true" />
 ```
 
 或
 
 ```xml
-<dubbo:service interface="com.foo.BarService" stub="com.foo.BarServiceStub" />
+<dubbo:consumer interface="com.foo.BarService" stub="com.foo.BarServiceStub" />
 ```
 
 提供 Stub 的实现 [^2]：
