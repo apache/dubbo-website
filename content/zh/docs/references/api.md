@@ -35,8 +35,8 @@ org.apache.dubbo.config.ArgumentConfig
 ## 注解 API
 
 ```
-org.apache.dubbo.config.annotation.Service
-org.apache.dubbo.config.annotation.Reference
+org.apache.dubbo.config.annotation.DubboService
+org.apache.dubbo.config.annotation.DubboReference
 ```
 
 详细参见：[注解配置](../../configuration/annotation)
