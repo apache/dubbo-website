@@ -18,7 +18,7 @@ Dubbo 支持方法级别的粘滞连接，如果你想进行更细粒度的控�
 
 ```xml
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService">
-    <dubbo:mothod name="sayHello" sticky="true" />
+    <dubbo:method name="sayHello" sticky="true" />
 </dubbo:reference>
 ```
 
