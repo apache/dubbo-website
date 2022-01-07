@@ -116,13 +116,13 @@ Maybe it is a little difficult to understand this concept when hearing about it 
 
 ### 5.5 @SPI
 
-@SPI annotation works on the interface of the extension point, which indicates that the interface is an extension point, and can be loaded by Dubbo ExtentionLoader. If there is no such ExtentionLoader, the call will throw an exception.
+@SPI annotation works on the interface of the extension point, which indicates that the interface is an extension point, and can be loaded by Dubbo ExtensionLoader. If there is no such ExtentionLoader, the call will throw an exception.
 
 ### 5.6 @Adaptive
 
 @Adaptive annotation is used on the method that extends the interface, which indicates an adaptive method. When Dubbo generates an adaptive instance for an extension point, if the function has @Adaptive annotation, then Dubbo will generate the corresponding code for the method. The method determines which extension to use according to the parameters. When @Adaptive annotation is used on the class to implement a Decorator class, it is similar to the Decorator pattern, whose major function is to return a specified class. Currently in Dubbo, both AdaptiveCompiler and AdaptiveExtensionFactory have @Adaptive annotation. 
 
-### 5.7 ExtentionLoader
+### 5.7 ExtensionLoader
 
 Similar to the Java SPI ServiceLoader, it is responsible for loading extensions and life-cycle maintenance.
 
