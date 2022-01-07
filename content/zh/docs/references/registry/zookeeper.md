@@ -153,7 +153,7 @@ Zookeeper 集群配置：
 
 ## zookeeper 安装
 
-安装方式参见: [Zookeeper安装手册](../../../../admin/install/zookeeper)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../../quick-start) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
+安装方式参见: [Zookeeper安装手册](../../../../docsv2.7/admin/install/zookeeper)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../../quick-start) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
 
 
 ## 可靠性声明
