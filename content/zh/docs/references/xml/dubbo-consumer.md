@@ -28,3 +28,4 @@ description: "dubbo:consumer 配置"
 | init | init | boolean | 可选 | false | 性能调优 | 是否在afterPropertiesSet()时饥饿初始化引用，否则等到有人注入或引用该实例时再初始化。 | 2.0.10以上版本 |
 | cache | cache | string/boolean | 可选 | | 服务治理 | 以调用参数为key，缓存返回结果，可选：lru, threadlocal, jcache等 | Dubbo2.1.0及其以上版本支持 |
 | validation | validation | boolean | 可选 | | 服务治理 | 是否启用JSR303标准注解验证，如果启用，将对方法参数上的注解进行校验 | Dubbo2.1.0及其以上版本支持 |
+| version | version | string | 可选 | | 服务治理 | 在 Dubbo 中为同一个服务配置多个版本 | Dubbo2.2.0及其以上版本支持 |
