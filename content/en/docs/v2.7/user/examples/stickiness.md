@@ -14,10 +14,10 @@ Sticky connections will automatically open [Lazy Connection](../lazy-connect) to
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService" sticky="true" />
 ```
 
-Dubbo supports method-level sticky connection, and if you want more granular control, you can also configure as follow.
+Dubbo supports method-level sticky connection, and if you want more granular control, you can also configure as follows.
 
 ```xml
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService">
-    <dubbo:mothod name="sayHello" sticky="true" />
+    <dubbo:method name="sayHello" sticky="true" />
 </dubbo:reference>
 ```
