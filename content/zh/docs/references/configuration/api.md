@@ -22,10 +22,10 @@ description: "以API 配置的方式来配置你的 Dubbo 应用"
 > 注意：为了更好支持Dubbo3的应用级服务发现，推荐使用新的DubboBootstrap API。
 
 ```java
-import org.apache.dubbo.rpc.config.ApplicationConfig;
-import org.apache.dubbo.rpc.config.RegistryConfig;
-import org.apache.dubbo.rpc.config.ProviderConfig;
-import org.apache.dubbo.rpc.config.ServiceConfig;
+import org.apache.dubbo.config.ApplicationConfig;
+import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.config.ProviderConfig;
+import org.apache.dubbo.config.ServiceConfig;
 import com.xxx.DemoService;
 import com.xxx.DemoServiceImpl;
 
@@ -74,10 +74,10 @@ public class DemoProvider {
 > 注意：为了更好支持Dubbo3的应用级服务发现，推荐使用新的DubboBootstrap API。
 
 ```java
-import org.apache.dubbo.rpc.config.ApplicationConfig;
-import org.apache.dubbo.rpc.config.RegistryConfig;
-import org.apache.dubbo.rpc.config.ConsumerConfig;
-import org.apache.dubbo.rpc.config.ReferenceConfig;
+import org.apache.dubbo.config.ApplicationConfig;
+import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.config.ConsumerConfig;
+import org.apache.dubbo.config.ReferenceConfig;
 import com.xxx.DemoService;
 
 public class DemoConsumer {
@@ -112,10 +112,10 @@ public class DemoConsumer {
 
 ```java
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
-import org.apache.dubbo.rpc.config.ApplicationConfig;
-import org.apache.dubbo.rpc.config.RegistryConfig;
-import org.apache.dubbo.rpc.config.ProviderConfig;
-import org.apache.dubbo.rpc.config.ServiceConfig;
+import org.apache.dubbo.config.ApplicationConfig;
+import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.config.ProviderConfig;
+import org.apache.dubbo.config.ServiceConfig;
 import com.xxx.DemoService;
 import com.xxx.DemoServiceImpl;
 
@@ -161,10 +161,10 @@ public class DemoProvider {
 
 ```java
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
-import org.apache.dubbo.rpc.config.ApplicationConfig;
-import org.apache.dubbo.rpc.config.RegistryConfig;
-import org.apache.dubbo.rpc.config.ProviderConfig;
-import org.apache.dubbo.rpc.config.ServiceConfig;
+import org.apache.dubbo.config.ApplicationConfig;
+import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.config.ProviderConfig;
+import org.apache.dubbo.config.ServiceConfig;
 import com.xxx.DemoService;
 import com.xxx.DemoServiceImpl;
 
