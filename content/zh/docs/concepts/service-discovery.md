@@ -46,8 +46,7 @@ Dubbo3 格式的 Provider 地址不能被 Dubbo2 的 Consumer 识别到，反之
 
 ![//imgs/v3/concepts/servicediscovery_old.png](/imgs/v3/concepts/servicediscovery_old.png)
 
-而在接入云原生基础设施后，基础设施融入了微服务概念的抽象，容器化微服务被编排、调度的过程即
-完成了在基础设施层面的注册。如下图所示，基础设施即承担了注册中心的职责，又完成了服务注册的动作，而 “RPC 接口”这部分信息，由于与具体的业务相关，不可能也不适合被基础设施托管。
+而在接入云原生基础设施后，基础设施融入了微服务概念的抽象，容器化微服务被编排、调度的过程即完成了在基础设施层面的注册。如下图所示，基础设施既承担了注册中心的职责，又完成了服务注册的动作，而 “RPC 接口”这部分信息，由于与具体的业务相关，不可能也不适合被基础设施托管。
 
 ![//imgs/v3/concepts/servicediscovery_k8s.png](/imgs/v3/concepts/servicediscovery_k8s.png)
 
