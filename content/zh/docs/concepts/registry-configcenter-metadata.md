@@ -36,7 +36,7 @@ Dubbo 定义了一些中心化组件，这包括：
 
 ![//imgs/v3/concepts/centers-registry.png](/imgs/v3/concepts/centers-registry.png)
 
-该图中没有部署配置中心和元数据中中心，在Dubbo中会默认将注册中心的实例同时作为配置中心和元数据中心，这是Dubbo的默认行为，如果确实不需要配置中心或者元数据中心的能力，可在配置中关闭，在注册中心的配置中有两个配置分别为use-as-config-center和use-as-metadata-center，将配置置为false即可。
+该图中没有部署配置中心和元数据中心，在Dubbo中会默认将注册中心的实例同时作为配置中心和元数据中心，这是Dubbo的默认行为，如果确实不需要配置中心或者元数据中心的能力，可在配置中关闭，在注册中心的配置中有两个配置分别为use-as-config-center和use-as-metadata-center，将配置置为false即可。
 
 ## 元数据中心
 
