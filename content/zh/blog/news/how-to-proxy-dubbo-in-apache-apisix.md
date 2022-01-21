@@ -44,7 +44,7 @@ public interface DemoService {
 
 如上所示，Dubbo 接口的定义是固定的。即方法参数中 `Map` 表示 APISIX 传递给 Dubbo Provider 关于 HTTP request 的一些信息（如：header、body...)。而方法返回值的 `Map` 表示 Dubbo Provider 传递给 APISIX 要如何返回 HTTP response 的一些信息。
 
-接口信息之后可通过 XML 配置方式发布 DemoService。
+接口信息配置好之后可通过 XML 配置方式发布 DemoService。
 
 ```xml
 <!-- service implementation, as same as regular local bean -->
