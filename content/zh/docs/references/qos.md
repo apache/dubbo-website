@@ -173,7 +173,7 @@ QoS提供了一些启动参数，来对启动进行配置，他们主要包括�
 
 | 参数               | 说明              | 默认值 |
 | ------------------ | ----------------- | ------ |
-| qos-enable          | 是否启动QoS       | true   |
+| qos-enable          | 是否启动QoS       | false   |
 | qos-port            | 启动QoS绑定的端口 | 22222  |
 | qos-accept-foreign-ip | 是否允许远程访问  | false  |
 
@@ -191,7 +191,7 @@ QoS参数可以通过如下方式进行配置
 ### 使用系统属性方式进行配置
 
 ```
--Ddubbo.application.qos-enable=true
+-Ddubbo.application.qos-enable=false
 -Ddubbo.application.qos-port=33333
 -Ddubbo.application.qos-accept-foreign-ip=false
 ```
@@ -200,7 +200,7 @@ QoS参数可以通过如下方式进行配置
 
 在项目的`src/main/resources`目录下添加dubbo.properties文件，内容如下:
 ```
-dubbo.application.qos-enable=true
+dubbo.application.qos-enable=false
 dubbo.application.qos-port=33333
 dubbo.application.qos-accept-foreign-ip=false
 ```
@@ -218,7 +218,7 @@ dubbo.application.qos-accept-foreign-ip=false
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
   <dubbo:application name="demo-provider">
-    <dubbo:parameter key="qos-enable" value="true"/>
+    <dubbo:parameter key="qos-enable" value="false"/>
     <dubbo:parameter key="qos-accept-foreign-ip" value="false"/>
     <dubbo:parameter key="qos-port" value="33333"/>
   </dubbo:application>
@@ -234,7 +234,7 @@ dubbo.application.qos-accept-foreign-ip=false
 如果是spring-boot的应用，可以在`application.properties`或者`application.yml`上配置:
 
 ```
-dubbo.application.qos-enable=true
+dubbo.application.qos-enable=false
 dubbo.application.qos-port=33333
 dubbo.application.qos-accept-foreign-ip=false
 ```
