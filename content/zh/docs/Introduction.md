@@ -89,10 +89,10 @@ Kubernetes Service 是另一个层面的适配，这体现了服务定义与注�
 
 ### Service Mesh
 
-Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一代的微服务架构，这主要是因为它解决了很多棘手的问题，包括透明升级、多语言、依赖冲突、流量治理等。Service Mesh 的典型架构是通过部署独立的 Sidecar 组件来拦截所有的出口与入口流量，并在 Sidecar 中集成丰富的流量治理策略如负载均衡、路由等，除此之外，Service Mesh 还需要一个控制面（Control Plane）来实现对 Sidecar 流量的管控，即各种策略下发。我们在这里称这种架构为经典 Mesh。
+Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一代的微服务架构，这主要是因为它解决了很多棘手的问题，包括透明升级、多语言、依赖冲突、流量治理等。Service Mesh 的典型架构是通过部署独立的 Sidecar 组件来拦截所有的出口与入口流量，并在 Sidecar 中集成丰富的流量治理策略如负载均衡、路由等，除此之外，Service Mesh 还需要一个控制面（Control Panel）来实现对 Sidecar 流量的管控，即各种策略下发。我们在这里称这种架构为经典 Mesh。
 
 然而任何技术架构都不是完美的，经典 Mesh 在实施层面也面临成本过高的问题
-1. 需要运维控制面（Control Plane）
+1. 需要运维控制面（Control Panel）
 2. 需要运维 Sidecar
 3. 需要考虑如何从原有 SDK 迁移到 Sidecar
 4. 需要考虑引入 Sidecar 后整个链路的性能损耗
