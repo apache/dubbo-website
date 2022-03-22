@@ -219,12 +219,12 @@ host != 172.22.3.* => host != 172.22.3.*
 #### Consumer
 
 ```java
-RpcContext.getContext().setAttachment(Constants.REQUEST_TAG_KEY,"tag1");
+RpcContext.getContext().setAttachment(Constants.TAG_KEY,"tag1");
 ```
 
 请求标签的作用域为每一次 invocation，使用 attachment 来传递请求标签，注意保存在 attachment 中的值将会在一次完整的远程调用中持续传递，得益于这样的特性，我们只需要在起始调用时，通过一行代码的设置，达到标签的持续传递。
 
-> 目前仅仅支持 hardcoding 的方式设置 requestTag。注意到 RpcContext 是线程绑定的，优雅的使用 TagRouter 特性，建议通过 servlet 过滤器(在 web 环境下)，或者定制的 SPI 过滤器设置 requestTag。
+> 目前仅仅支持 hardcoding 的方式设置 dubboTag。注意到 RpcContext 是线程绑定的，优雅的使用 TagRouter 特性，建议通过 servlet 过滤器(在 web 环境下)，或者定制的 SPI 过滤器设置 dubboTag。
 
 
 
@@ -245,9 +245,9 @@ RpcContext.getContext().setAttachment(Constants.REQUEST_TAG_KEY,"tag1");
 
 #### 降级约定
 
-1. `request.tag=tag1` 时优先选择 标记了`tag=tag1` 的 provider。若集群中不存在与请求标记对应的服务，默认将降级请求 tag为空的provider；如果要改变这种默认行为，即找不到匹配tag1的provider返回异常，需设置`request.tag.force=true`。
+1. `dubbo.tag=tag1` 时优先选择 标记了`tag=tag1` 的 provider。若集群中不存在与请求标记对应的服务，默认将降级请求 tag为空的provider；如果要改变这种默认行为，即找不到匹配tag1的provider返回异常，需设置`dubbo.force.tag=true`。
 
-2. `request.tag`未设置时，只会匹配tag为空的provider。即使集群中存在可用的服务，若 tag 不匹配也就无法调用，这与约定1不同，携带标签的请求可以降级访问到无标签的服务，但不携带标签/携带其他种类标签的请求永远无法访问到其他标签的服务。
+2. `dubbo.tag`未设置时，只会匹配tag为空的provider。即使集群中存在可用的服务，若 tag 不匹配也就无法调用，这与约定1不同，携带标签的请求可以降级访问到无标签的服务，但不携带标签/携带其他种类标签的请求永远无法访问到其他标签的服务。
 
 {{% alert title="提示" color="primary" %}}
 `2.6.x` 版本以及更早的版本请使用[老版本路由规则](../routing-rule-deprecated)
