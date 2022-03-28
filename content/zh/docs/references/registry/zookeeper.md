@@ -104,18 +104,23 @@ zookeeper://10.20.153.10:2181?client=curator
 ```xml
 <properties>
     <dubbo.version>2.7.8</dubbo.version>
-    <zookeeper.version>2.12.0</zookeeper.version>
+    <curator.version>5.2.1</curator.version>
 </properties>
 
 <dependency>
     <groupId>org.apache.curator</groupId>
     <artifactId>curator-framework</artifactId>
-    <version>${zookeeper.version}</version>
+    <version>${curator.version}</version>
 </dependency>
 <dependency>
     <groupId>org.apache.curator</groupId>
     <artifactId>curator-recipes</artifactId>
-    <version>${zookeeper.version}</version>
+    <version>${curator.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-x-discovery</artifactId>
+    <version>${curator.version}</version>
 </dependency>
 ```
 
