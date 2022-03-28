@@ -34,7 +34,7 @@ description: "Zookeeper 注册中心参考手册"
 <dependency>
     <groupId>org.apache.zookeeper</groupId>
     <artifactId>zookeeper</artifactId>
-    <version>3.3.3</version>
+    <version>3.8.0</version>
 </dependency>
 ```
 
@@ -72,7 +72,7 @@ zookeeper://10.20.153.10:2181?client=zkclient
 <dependency>
     <groupId>com.github.sgroschupf</groupId>
     <artifactId>zkclient</artifactId>
-    <version>0.1</version>
+    <version>0.11</version>
 </dependency>
 ```
 
@@ -103,7 +103,6 @@ zookeeper://10.20.153.10:2181?client=curator
 
 ```xml
 <properties>
-    <dubbo.version>2.7.8</dubbo.version>
     <curator.version>5.2.1</curator.version>
 </properties>
 
