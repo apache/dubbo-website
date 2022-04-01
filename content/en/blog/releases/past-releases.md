@@ -29,9 +29,9 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 
 ### 2.6.12 (2021-12-29)
 
-* [source](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.6.12/apache-dubbo-2.6.12-source-release.zip) |
-  [asc](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.6.12/apache-dubbo-2.6.12-source-release.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.cgi?path=dubbo/2.6.12/apache-dubbo-2.6.12-source-release.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.6.12/apache-dubbo-v-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip.sha512)
 
 ### 3.0.4 (2021-10-24)
 

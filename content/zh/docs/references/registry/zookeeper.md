@@ -34,7 +34,7 @@ description: "Zookeeper 注册中心参考手册"
 <dependency>
     <groupId>org.apache.zookeeper</groupId>
     <artifactId>zookeeper</artifactId>
-    <version>3.3.3</version>
+    <version>3.8.0</version>
 </dependency>
 ```
 
@@ -72,7 +72,7 @@ zookeeper://10.20.153.10:2181?client=zkclient
 <dependency>
     <groupId>com.github.sgroschupf</groupId>
     <artifactId>zkclient</artifactId>
-    <version>0.1</version>
+    <version>0.11</version>
 </dependency>
 ```
 
@@ -103,19 +103,23 @@ zookeeper://10.20.153.10:2181?client=curator
 
 ```xml
 <properties>
-    <dubbo.version>2.7.8</dubbo.version>
-    <zookeeper.version>2.12.0</zookeeper.version>
+    <curator.version>5.2.1</curator.version>
 </properties>
 
 <dependency>
     <groupId>org.apache.curator</groupId>
     <artifactId>curator-framework</artifactId>
-    <version>${zookeeper.version}</version>
+    <version>${curator.version}</version>
 </dependency>
 <dependency>
     <groupId>org.apache.curator</groupId>
     <artifactId>curator-recipes</artifactId>
-    <version>${zookeeper.version}</version>
+    <version>${curator.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-x-discovery</artifactId>
+    <version>${curator.version}</version>
 </dependency>
 ```
 
@@ -153,7 +157,7 @@ Zookeeper 集群配置：
 
 ## zookeeper 安装
 
-安装方式参见: [Zookeeper安装手册](../../../../admin/install/zookeeper)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../../quick-start) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
+安装方式参见: [Zookeeper安装手册](../../../../docsv2.7/admin/install/zookeeper)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../../quick-start) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
 
 
 ## 可靠性声明

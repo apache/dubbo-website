@@ -153,6 +153,10 @@ public interface ValidationService {
 <dubbo:service interface="org.apache.dubbo.examples.validation.api.ValidationService" ref="validationService" validation="true" />
 ```
 
+{{% alert title="提示" color="primary" %}}
+Dubbo 默认支持 hibernate-validator 版本 <=6.x，若使用 hibernate-validator 7.x 版本，请将 validation 参数声明为 jvalidatorNew
+{{% /alert %}}
+
 ## 验证异常信息
 
 ```java

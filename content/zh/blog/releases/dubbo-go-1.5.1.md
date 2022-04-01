@@ -123,8 +123,8 @@ err := userProvider.GetUser(ctx, []interface{}{"A001"}, user)
 
 ##### 降级约定
 
-1. `request.tag=tag1` 时优先选择 标记了 `tag=tag1` 的 provider。若集群中不存在与请求标记对应的服务，默认将降级请求 tag 为空的 provider；如果要改变这种默认行为，即找不到匹配 tag1 的 provider 返回异常，需设置`request.tag.force=true`。
-2. `request.tag` 未设置时，只会匹配 tag 为空的 provider。即使集群中存在可用的服务，若 tag 不匹配也就无法调用，这与约定 1 不同，携带标签的请求可以降级访问到无标签的服务，但不携带标签/携带其他种类标签的请求永远无法访问到其他标签的服务。
+1. `dubbo.tag=tag1` 时优先选择 标记了 `tag=tag1` 的 provider。若集群中不存在与请求标记对应的服务，默认将降级请求 tag 为空的 provider；如果要改变这种默认行为，即找不到匹配 tag1 的 provider 返回异常，需设置`dubbo.force.tag=true`。
+2. `dubbo.tag` 未设置时，只会匹配 tag 为空的 provider。即使集群中存在可用的服务，若 tag 不匹配也就无法调用，这与约定 1 不同，携带标签的请求可以降级访问到无标签的服务，但不携带标签/携带其他种类标签的请求永远无法访问到其他标签的服务。
 
 ###  5.2 应用/服务级条件路由
 

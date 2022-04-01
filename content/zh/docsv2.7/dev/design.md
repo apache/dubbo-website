@@ -85,7 +85,7 @@ description: "Dubbo 框架设计概览"
 
 ## 引用服务时序
 
-展开总设计图右边服务消费方引用服务的蓝色初始化链，时序图如下：
+展开总设计图右边服务消费方引用服务的绿色初始化链，时序图如下：
 
 ![/dev-guide/images/dubbo-refer.jpg](/imgs/dev/dubbo-refer.jpg)
 
