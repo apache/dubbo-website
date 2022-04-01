@@ -18,6 +18,18 @@ description: >
 > 发布说明: https://github.com/apache/dubbo/releases
 >
 
+### 3.0.7 (2022-04-01)
+
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.7/apache-dubbo-3.0.7-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.7/apache-dubbo-3.0.7-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.0.7/apache-dubbo-3.0.7-src.zip.sha512)
+
+### 3.0.6 (2022-02-28)
+
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.6/apache-dubbo-3.0.6-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.6/apache-dubbo-3.0.6-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.0.6/apache-dubbo-3.0.6-src.zip.sha512)
+
 ### 3.0.5 (2021-12-30)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.5/apache-dubbo-3.0.5-src.zip) |
