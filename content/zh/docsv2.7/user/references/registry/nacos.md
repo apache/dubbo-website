@@ -37,7 +37,7 @@ Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤�
     <dependency>
         <groupId>com.alibaba.nacos</groupId>
         <artifactId>nacos-client</artifactId>
-        <version>[0.6.1,)</version>
+        <version>0.6.1</version>
     </dependency>
     
     <!-- Dubbo dependency -->

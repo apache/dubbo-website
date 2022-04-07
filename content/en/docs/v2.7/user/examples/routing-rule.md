@@ -177,18 +177,18 @@ The application which configures no tag will be considered as the default applic
 ### Consumer
 
 ```Java
-RpcContext.getContext().setAttachment(Constants.REQUEST_TAG_KEY,"red");
+RpcContext.getContext().setAttachment(Constants.TAG_KEY,"red");
 ```
 
-The scope of the `request.tag` is for each invocation, using the attachment to pass the request tag. Note that the value stored in the attachment will be passed continuously in a complete remote invocation, thanks to this feature, we only need to set the tag at the beginning of a invocation. 
+The scope of the `dubbo.tag` is for each invocation, using the attachment to pass the request tag. Note that the value stored in the attachment will be passed continuously in a complete remote invocation, thanks to this feature, we only need to set the tag at the beginning of a invocation. 
 
-> Currently, only **hardcoding** is supported to set requestTag. Note that RpcContext is thread-bound, elegantly using the TagRouter feature, it is recommended to set the request tag via a servlet filter (in the web environment) or a custom dubbo SPI filter.
+> Currently, only **hardcoding** is supported to set dubboTag. Note that RpcContext is thread-bound, elegantly using the TagRouter feature, it is recommended to set the request tag via a servlet filter (in the web environment) or a custom dubbo SPI filter.
 
 ### Rules:
 
-1. `request.tag=red` will firstlt choose the provider which configures as `tag=red`. If there is no service corresponding to the request tag in the cluster, it will downgrade to `tag=null` provider, seen as default provider。
+1. `dubbo.tag=red` will firstlt choose the provider which configures as `tag=red`. If there is no service corresponding to the request tag in the cluster, it will downgrade to `tag=null` provider, seen as default provider。
 
-2. when `request.tag=null`, only `tag=null`  provider will be matched. Even if there are services available in the cluster, the tags do not match, they cannot be called. This is different from rule 1. Tagged invocation can be downgraded to untagged services, but invocations that do not carry tags/carry other types of tags can never be accessed other tag services.
+2. when `dubbo.tag=null`, only `tag=null`  provider will be matched. Even if there are services available in the cluster, the tags do not match, they cannot be called. This is different from rule 1. Tagged invocation can be downgraded to untagged services, but invocations that do not carry tags/carry other types of tags can never be accessed other tag services.
 
 
 
