@@ -102,7 +102,7 @@ RPC 服务这部分信息目前都是通过线下约定或离线的管理系统�
 #### Dubbo
 Dubbo 通过注册中心同时同步了实例地址和 RPC 方法，因此其能实现 RPC 过程的自动同步，面向 RPC 编程、面向 RPC 治理，对后端应用的拆分消费端无感知，其缺点则是地址推送数量变大，和 RPC 方法成正比。
 
-![//imgs/v3/concepts/Dubbo.png](/imgs/v3/concepts/Dubbo.png)
+![//imgs/v3/concepts/Dubbo.png](/imgs/v3/concepts/dubbo.png)
 
 ### 更大规模的微服务集群 - 解决性能瓶颈
 这部分涉及到和注册中心、配置中心的交互，关于不同模型下注册中心数据的变化，为更直观的对比服务模型变更带来的推送效率提升，我们来通过一个示例看一下不同模型注册中心的对比：
@@ -141,7 +141,7 @@ Provier 应用数量往往要超过 10 个，而具体到其要消费（订阅�
 在注册中心不再同步 RPC 服务信息后，服务自省在服务消费端和提供端之间建立了一条内置的 RPC 服务信息协商机制，这也是"服务自省"这个名字的由来。
 服务端实例会暴露一个预定义的 MetadataService RPC 服务，消费端通过调用 MetadataService 获取每个实例 RPC 方法相关的配置信息。
 
-![//imgs/v3/concepts/metadata-service-rpc.png](/imgs/v3/concepts/metadata-service-rpc.png)
+![//imgs/v3/concepts/metadataservice-rpc.png](/imgs/v3/concepts/metadataservice-rpc.png)
 
 ### 服务自省的工作流程
 以下是服务自省的一个完整工作流程图，详细描述了服务注册、服务发现、MetadataService、RPC 调用间的协作流程。
@@ -152,7 +152,7 @@ Provier 应用数量往往要超过 10 个，而具体到其要消费（订阅�
 应用服务发现模型强调注册中心不再包含 RPC 信息，以"应用 - 实例列表"来组织，metadata 只包含当前 instance 节点相关的信息，不涉及 RPC 服务粒度的信息。
 总体信息概括如下：实例地址、实例各种环境标、metadata service 元数据、其他少量必要属性。
 
-![//imgs/v3/concepts/metadata-instance.png](/imgs/v3/concepts/metadata-instance.png)
+![//imgs/v3/concepts/application-instance.png](/imgs/v3/concepts/application-instance.png)
 
 ### 元数据同步机制
 
@@ -165,11 +165,11 @@ MetadataService 通过标准的 Dubbo 协议暴露，根据查询条件，会将
 复用 2.7 版本中引入的元数据中心，provider 实例启动后，会尝试将内部的 RPC 服务组织成元数据的格式到元数据中心，而 consumer 则在每次收到注册中心推送更新后，主动查询元数据中心。
 注意 consumer 端查询元数据中心的时机，是等到注册中心的地址更新通知之后。也就是通过注册中心下发的数据，我们能明确的知道何时某个实例的元数据被更新了，此时才需要去查元数据中心。
 
-![//imgs/v3/concepts/metadata-center.png](/imgs/v3/concepts/metadata-center.png)
+![//imgs/v3/concepts/metadatacenter.png](/imgs/v3/concepts/metadatacenter.png)
 
 ### 构建 RPC 服务到应用名的映射关系
 
 为了使整个开发流程对老的 Dubbo 用户更透明，同时避免指定 provider 对可扩展性带来的影响，我们设计了一套 RPC 服务到应用名的映射关系，
 以尝试在 consumer 端自动完成 RPC 服务到 provider 应用名的转换。
 
-![//imgs/v3/concepts/rpc-application-mapping.png](/imgs/v3/concepts/rpc-application-mapping.png)
+![//imgs/v3/concepts/application-rpc-mapping.png](/imgs/v3/concepts/application-rpc-mapping.png)
