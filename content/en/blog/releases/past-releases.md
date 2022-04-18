@@ -8,7 +8,7 @@ description: >
 
 ## Verification  
 
-you can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://downloads.apache.org/PROJECT/KEYS) file to verify the download files
+you can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://downloads.apache.org/dubbo/KEYS) file to verify the download files
 
 ## Apache Dubbo
 
