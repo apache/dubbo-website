@@ -1,7 +1,8 @@
+
 ---
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
+title: "3.0 速览"
+linkTitle: "3.0速览"
 weight: 3
 ---
 
@@ -29,10 +30,9 @@ weight: 3
             </div>
         </div>
     </div>
-    
+
 </div>
 <hr>
 </div>
 
 {{< /blocks/section >}}
-
