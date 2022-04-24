@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
-weight: 3
+title: "应用级服务发现"
+linkTitle: "应用级服务发现"
+weight: 2
 ---
 
 

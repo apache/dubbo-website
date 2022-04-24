@@ -7,7 +7,6 @@ no_list: true
 menu:
   main:
     weight: 10
-    name: "文档"
 ---
 
 Dubbo 是一款包含多种语言实现（Java、Golang等）的 RPC 服务框架，在这里可以查看 Dubbo 核心概念以及每种语言实现的 Demo、用户手册等。
@@ -23,7 +22,7 @@ Dubbo 是一款包含多种语言实现（Java、Golang等）的 RPC 服务框�
   * 3.0 特性一览
   * 查看相应语言 SDK 实现，了解升级与兼容性
 
-## 相关链接
+#### 相关链接
 Dubbo 的多语言实现及文档:
 
 Language	OS	Compilers / SDK

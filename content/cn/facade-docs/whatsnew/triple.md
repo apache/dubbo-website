@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
-weight: 3
+title: "Triple 协议"
+linkTitle: "Triple 协议"
+weight: 1
 ---
 
 
