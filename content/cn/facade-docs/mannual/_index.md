@@ -4,6 +4,7 @@ type: docs
 title: "用户手册"
 linkTitle: "用户手册"
 weight: 5
+no_list: true
 nav_children: section
 notoc: true
 simple_list: true
