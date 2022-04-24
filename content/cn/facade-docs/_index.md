@@ -25,7 +25,8 @@ Dubbo 是一款包含多种语言实现（Java、Golang等）的 RPC 服务框�
 #### 相关链接
 Dubbo 的多语言实现及文档:
 
-Language	OS	Compilers / SDK
-Go	Windows, Linux, Mac	Go 1.13+
-Java	Windows, Linux, Mac	Java 8+
+Language | OS | Compilers/SDK  
+-- | -- | -- 
+Go|Windows, Linux, Mac|Go 1.13+  
+Java|Windows, Linux, Mac|Java 8+  
 
