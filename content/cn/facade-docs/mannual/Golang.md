@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "优势"
-linkTitle: "优势"
+title: "Golang SDK"
+linkTitle: "golang"
 description: ""
-weight: 1
+weight: 2
 ---
 
 

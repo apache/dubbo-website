@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "如何联系Dubbo社区？"
-linkTitle: "如何联系Dubbo社区？"
+title: "联系社区"
+linkTitle: "联系社区"
 description: ""
-weight: 4
+weight: 6
 ---
 
 

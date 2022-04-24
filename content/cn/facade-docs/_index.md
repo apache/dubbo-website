@@ -5,7 +5,9 @@ title: "文档"
 linkTitle: "文档"
 no_list: true
 menu:
-  main: {weight: 10}
+  main:
+    weight: 10
+    name: "文档"
 ---
 
 Dubbo 是一款包含多种语言实现（Java、Golang等）的 RPC 服务框架，在这里可以查看 Dubbo 核心概念以及每种语言实现的 Demo、用户手册等。
