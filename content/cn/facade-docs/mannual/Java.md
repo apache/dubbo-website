@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "优势"
-linkTitle: "优势"
+title: "Java SDK"
+linkTitle: "java"
 description: ""
 weight: 1
 ---

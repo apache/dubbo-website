@@ -1,8 +1,9 @@
+
 ---
 type: docs
 title: "快速开始"
 linkTitle: "快速开始"
-weight: 3
+weight: 2
 ---
 
 {{< blocks/section color="white" height="auto">}}
@@ -29,10 +30,9 @@ weight: 3
             </div>
         </div>
     </div>
-    
+
 </div>
 <hr>
 </div>
 
 {{< /blocks/section >}}
-
