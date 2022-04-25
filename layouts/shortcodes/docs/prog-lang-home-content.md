@@ -13,6 +13,8 @@
 
 <ul>
 {{ range $items }}
+  {{ $item := replace . "$src_repo_url" $src_repo_url }}
+  {{ $item = replace $item "$src_repo_link" $src_repo_link }}
   <li>{{ $item | $.Page.RenderString }}</li>
 {{ end }}
 </ul>
