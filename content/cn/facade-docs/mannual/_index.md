@@ -19,7 +19,7 @@ simple_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href="https://dubbo.apache.org/cn/java-sdk/v3.x/quick-start">参考手册</a>
+                    <a target="_blank" href="https://dubbo.apache.org/cn/java-sdk/v3.x/quick-start">参考手册</a>
                 </h4>
                 <p>Dubbo Java SDK</p>
             </div>
@@ -29,7 +29,7 @@ simple_list: true
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href="https://dubbo.apache.org/cn/golang-sdk/quick-start/">参考手册</a>
+                    <a target="_blank" href="https://dubbo.apache.org/cn/golang-sdk/quick-start/">参考手册</a>
                 </h4>
                 <p>Dubbo Golang SDK</p>
             </div>
