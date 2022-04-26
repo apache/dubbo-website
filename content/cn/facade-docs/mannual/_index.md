@@ -5,13 +5,10 @@ title: "用户手册"
 linkTitle: "用户手册"
 weight: 5
 no_list: true
-nav_children: section
-notoc: true
-simple_list: true
 ---
 
 
-{{< blocks/section color="white" height="auto">}}
+{{< blocks/section color="white" height="auto" >}}
 <div class="td-content list-page">
     <div class="lead"></div><header class="article-meta">
     </header><div class="row">
@@ -19,9 +16,9 @@ simple_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href="https://dubbo.apache.org/cn/java-sdk/v3.x/quick-start">参考手册</a>
+                    <a target="_blank" href='{{< relref "../../java-sdk" >}}'>Java SDK</a>
                 </h4>
-                <p>Dubbo Java SDK</p>
+                <p>Java SDK</p>
             </div>
         </div>
     </div>
@@ -29,9 +26,9 @@ simple_list: true
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href="https://dubbo.apache.org/cn/golang-sdk/quick-start/">参考手册</a>
+                    <a target="_blank" href='{{< relref "../../golang-sdk" >}}'>Golang SDK</a>
                 </h4>
-                <p>Dubbo Golang SDK</p>
+                <p>Golang SDK</p>
             </div>
         </div>
     </div>

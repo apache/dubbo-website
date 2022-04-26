@@ -5,7 +5,7 @@ title: "Java SDK"
 linkTitle: "java"
 description: ""
 weight: 1
-manualLinkRelref:  
+manualLinkRelref: ../../java-sdk/
 manualLinkTarget: _blank
 _build: { render: link }
 ---
