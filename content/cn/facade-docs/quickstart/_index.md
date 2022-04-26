@@ -14,7 +14,7 @@ weight: 2
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href="https://dubbo.apache.org/cn/java-sdk/v3.x/quick-start">Quick start</a>
+                    <a target="_blank" href='{{< relref "../../java-sdk/quick-start" >}}'>Quick start</a>
                 </h4>
                 <p>Dubbo Java SDK</p>
             </div>
@@ -24,7 +24,7 @@ weight: 2
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href="https://dubbo.apache.org/cn/golang-sdk/quick-start/">Quick start</a>
+                    <a target="_blank" href='{{< relref "../../golang-sdk" >}}'>Quick start</a>
                 </h4>
                 <p>Dubbo Golang SDK</p>
             </div>

@@ -4,6 +4,7 @@ type: docs
 title: "文档"
 linkTitle: "文档"
 no_list: true
+hide_summary: true
 menu:
   main:
     weight: 10
