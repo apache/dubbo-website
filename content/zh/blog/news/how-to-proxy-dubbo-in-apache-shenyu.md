@@ -3,7 +3,7 @@ title: "如何通过 Apache ShenYu 网关代理 Dubbo 服务"
 linkTitle: "如何通过 Apache ShenYu 网关代理 Dubbo 服务"
 date: 2022-05-04
 description: >
-本文介绍了如何通过`Apache ShenYu`网关访问`Dubbo`服务，主要内容包括从简单示例到核心调用流程分析，并对设计原理进行了总结。
+  本文介绍了如何通过`Apache ShenYu`网关访问`Dubbo`服务，主要内容包括从简单示例到核心调用流程分析，并对设计原理进行了总结。
 ---
 
 ![](/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png)
