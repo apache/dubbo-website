@@ -2,7 +2,7 @@
 ---
 type: docs
 title: "Golang SDK"
-linkTitle: "golang"
+linkTitle: "Golang"
 description: ""
 weight: 2
 manualLinkTarget: _blank

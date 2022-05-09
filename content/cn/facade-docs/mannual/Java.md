@@ -2,7 +2,7 @@
 ---
 type: docs
 title: "Java SDK"
-linkTitle: "java"
+linkTitle: "Java"
 description: ""
 weight: 1
 manualLinkRelref: ../../java-sdk/
