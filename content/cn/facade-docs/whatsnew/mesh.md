@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "Mesh"
-linkTitle: "Mesh"
+title: "Dubbo Mesh"
+linkTitle: "Dubbo Mesh"
 weight: 1
 ---
 
