@@ -11,7 +11,7 @@ weight: 4
 ## Service Mesh
 在云原生背景下，如果我们将 Service Mesh 理解为底层基础设施，则在 Mesh 架构中，以往耦合在业务进程中的微服务治理部分能力正被 Mesh 接管，传统微服务框架更注重 RPC 协议与编程模型。以下是时下流行的 Mesh 产品 Istio 的架构图：
 
-![istio](/imgs/istio.png)
+![istio](/imgs/v3/mesh/istio.png)
 
 在 Mesh 架构下
 * 统一的控制面提供证书管理、可观测性、流量治理等能力
@@ -21,11 +21,11 @@ weight: 4
 Dubbo Mesh 从设计理念上更强调控制面的统一管控、标准化与治理能力，而在数据面给出了更多的选择，包括 Sidecar Mesh 与 Proxyless Mesh 等部署模式。
 多种部署模型给企业提供了更多选择，通过混合部署的模型，在实现服务治理控制面的共享的同时，可以更好的应对不同场景的部署要求，适应复杂的基础设施环境并从总体上提升架构的可用性。
 
-![dubbo-sidecar](/imgs/dubbo-sidecar.png)
+![dubbo-sidecar](/imgs/v3/mesh/dubbo-sidecar.png)
 
 ### Sidecar Mesh
 
-![dubbo-sidecar](/imgs/dubbo-sidecar.png)
+![dubbo-sidecar](/imgs/v3/mesh/dubbo-sidecar.png)
 
 如上图所示，Dubbo 可以与 Sidecar 部署在同一个 Pod 或容器中，通过在外围部署一个独立的控制平面，实现对流量和治理的统一管控。控制面与 SIcecar 之间通过图中虚线所示的 xDS 协议进行配置分发，而 Dubbo 进程间的通信不再是直连模式，转而通过 Sidecar 代理，Sidecar 拦截所有进出流量，并完成路由寻址等服务治理任务。
 
@@ -35,7 +35,7 @@ Sidecar 模式的 Mesh 架构有很多优势，如平滑升级、多语言、业
 * 部署环境受限，并不是所有的环境都能满足 Sidecar 部署与请求拦截要求。
 
 ### Proxyless Mesh
-![dubbo-proxyless](/imgs/dubbo-proxyless.png)
+![dubbo-proxyless](/imgs/v3/mesh/dubbo-proxyless.png)
 
 针对上述问题，Dubbo 社区自很早之前就做了 Dubbo 直接对接到控制面的设想与思考，并在国内开源社区率先提出了 Proxyless Mesh 的概念，Proxyless 概念最开始是谷歌提出来的。
 Proxyless 模式使得微服务又回到了 2.x 时代的部署架构，如上图所示，和我们上面看的 Dubbo 经典服务治理模式非常相似，所以说这个模式并不新鲜， Dubbo 从最开始就是这么样的设计模式。但相比于 Mesh 架构，Dubbo2 并没有强调控制面的统一管控，而这点恰好是 Service Mesh 所强调的，强调对流量、可观测性、证书等的标准化管控与治理，也是 Mesh 理念先进的地方。
