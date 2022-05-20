@@ -5,8 +5,8 @@ linkTitle: "Dubbo Mesh"
 weight: 4
 ---
 通过以下示例快速查看使用&部署示例
-* [Dubbo Sidecar Mesh](../tasks/dubbo-mesh-sidecar)
-* [Dubbo Proxyless Mesh](../tasks/dubbo-mesh-sidecar)
+* [Dubbo Sidecar Mesh](../../tasks/dubbo-mesh-sidecar)
+* [Dubbo Proxyless Mesh](../../tasks/dubbo-mesh-sidecar)
 
 ## Service Mesh
 在云原生背景下，如果我们将 Service Mesh 理解为底层基础设施，则在 Mesh 架构中，以往耦合在业务进程中的微服务治理部分能力正被 Mesh 接管，传统微服务框架更注重 RPC 协议与编程模型。以下是时下流行的 Mesh 产品 Istio 的架构图：
