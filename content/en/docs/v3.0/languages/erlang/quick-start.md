@@ -38,7 +38,7 @@ into the project's `apps` directory.
 ```
 
 ## Consumer configuration
-Please reference [Reference Config](./reference.md)
+Please reference [Reference Config](content/old/en/docs/v3.0/languages/erlang/reference.md)
 
 ## Init dubbolib in your project
 It is need you 
