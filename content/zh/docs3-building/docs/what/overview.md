@@ -6,19 +6,19 @@ weight: 1
 description: ""
 ---
 
-Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下的服务治理与通信问题，并提供了 Java、Golang 等多种语言的 SDK 实现。使用 Dubbo 开发的微服务，将原生具备相互之间的远程地址发现与通信能力，
-同时利用 Dubbo 提供的丰富服务治理特性，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。Dubbo 被设计为高度可扩展，用户几乎可以在任意功能点去定制自己的实现以满足自身业务需求。
+Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下的服务治理与通信问题，官方提供了 Java、Golang 等多语言 SDK 实现。使用 Dubbo 开发的微服务原生具备相互之间的远程地址发现与通信能力，
+利用 Dubbo 提供的丰富服务治理特性，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。Dubbo 被设计为高度可扩展，用户可以方便的实现流量拦截、选址的各种定制逻辑。
 
-3.0 版本（Dubbo3）开始，我们将 Dubbo 定义为面向云原生的下一代 RPC 服务框架。3.0 基于 [Dubbo 2.x]() 演进而来，在保持原有核心功能特性的同时， Dubbo3 在易用性、超大规模微服务实践、云原生基础设施适配、安全性等几大方向上进行了全面升级。
+Dubbo3 定义为面向云原生的下一代 RPC 服务框架。3.0 基于 [Dubbo 2.x](../../docsv2.7) 演进而来，在保持原有核心功能特性的同时， Dubbo3 在易用性、超大规模微服务实践、云原生基础设施适配、安全性等几大方向上进行了全面升级。
 
 ### Dubbo 是什么
 
 Apache Dubbo 是一款开源 RPC 服务框架，它最初在 2008 年由 Alibaba 捐献开源，并且很快成为了国内开源服务框架选型的事实标准框架，得到了各行各业的广泛应用。在 2017 年，Dubbo 正式捐献到 Apache 软件基金会并成为 Apache 顶级项目，目前 Dubbo3 已经是一站式的微服务解决方案提供：
-* 基于 HTTP/2 的 [Triple 协议]()以及面向代理 API 的编程体验。
-* 强大的[流量治理能力]()，如地址发现、负载均衡、路由选址、动态配置等。
-* [多语言 SDK 实现]()，涵盖 Java、Golang、Javascript 等，更多语言实现将会陆续发布。
+* 基于 HTTP/2 的 [Triple 协议](../whatsnew/triple)以及面向代理 API 的编程体验。
+* 强大的[流量治理能力](../tasks/traffic-management)，如地址发现、负载均衡、路由选址、动态配置等。
+* [多语言 SDK 实现](../mannual/)，涵盖 Java、Golang、Javascript 等，更多语言实现将会陆续发布。
 * 灵活的适配与扩展能力，可轻松与微服务体系其他组件如 Tracing、Transaction 等适配。
-* [Service Mesh 解决方案]()，同时支持 Sidecar、Proxyless 等灵活的 Mesh 部署方案。
+* [Service Mesh 解决方案](../whatsnew/mesh)，同时支持 Sidecar、Proxyless 等灵活的 Mesh 部署方案。
 
 Apache Dubbo 总体架构能很好的满足企业的大规模微服务实践，因为它从设计之初就是为了解决超大规模微服务集群实践问题，不论是阿里巴巴还是工商银行、中国平安、携程等社区用户，它们都通过多年的大规模生产环境流量对 Dubbo 的稳定性与性能进行了充分验证，因此，Dubbo 在解决业务落地与规模化实践方面有着无可比拟的优势：
 * 开箱即用
@@ -80,8 +80,8 @@ Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任�
 
 #### 丰富的扩展组件及生态
 Dubbo 强大的服务治理能力不仅体现在核心框架上，还包括其优秀的扩展能力以及周边配套设施的支持。通过 Filter、Router、Protocol 等几乎存在于每一个关键流程上的扩展点定义，我们可以丰富 Dubbo 的功能或实现与其他微服务配套系统的对接，包括 Transaction、Tracing 目前都有通过 SPI 扩展的实现方案，具体可以参见 Dubbo 扩展性的详情，也可以在 [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions) 项目中发现与更多的扩展实现。具体可参见：
-* [Dubbo 生态]()
-* [官方扩展组件]()
+* [Dubbo 生态](./ecosystem)
+* [官方扩展组件](https://github.com/apache/dubbo-spi-extensions)
 * [Dubbo 可扩展性设计]()
 
 #### 面向云原生设计

@@ -19,7 +19,7 @@ Dubbo 是一款包含多种语言实现（Java、Golang等）的 RPC 服务框�
 
 * **如果你是第一次接触 Dubbo**，可以通过以下链接快速了解 Dubbo:
   * [什么是 Dubbo](what/overview)
-  * [用户案例与生态](what/usecases)
+  * [用户案例与生态](../../users/)
   * 通过 [**快速开始**](quickstart/) 体验 Dubbo
 * 想了解更多 Dubbo 特性与使用细节?
   * 选择相应 [**多语言 SDK 实现**](mannual/)，并参考**高级特性**或**参考手册**

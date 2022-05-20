@@ -6,6 +6,9 @@ weight: 3
 description: ""
 ---
 
+### SPI 扩展实现
+* [dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions)
+
 ### 多语言实现
 * Golang
 * Java
