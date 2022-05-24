@@ -219,11 +219,11 @@ weight: 2
    $ mvn clean install
    ```
 10. 启动服务端
-    ```
+   ```
     $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboServer"
     Dubbo triple stub server started
-    ```
-11. 启动一个新的终端，启动客户端
+   ```
+11. 打开新的终端，启动客户端
    ```
    $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboClient"
    Received reply:message: "Hello,Demo!"
