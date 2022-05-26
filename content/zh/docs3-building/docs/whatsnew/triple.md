@@ -19,5 +19,5 @@ Java SDK 支持 [IDL 生成 Stub](../../../java-sdk/reference-manual/protocol/tr
 Interface 方式。
 
 - 已有服务参考[从现有协议升级至 Triple](TBD)
-- 新服务参考[Dubbo3 Triple Quick Start](../../java-sdk/quick-start/_index)
+- 新服务参考[Dubbo3 Triple Quick Start](../../../java-sdk/quick-start)
 - 深入了解 Triple 协议:[Dubbo3 Triple 协议设计与原理](TBD)
