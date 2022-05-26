@@ -99,6 +99,9 @@ Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一�
 
 为了解决 Sidecar 引入的相关成本问题，Dubbo 引入了另一种变相的 Mesh 架构 - Proxyless Mesh，顾名思义，Proxyless Mesh 就是指没有 Sidecar 的部署，转而由 Dubbo SDK 直接与控制面交互，其架构图如下
 
+![//imgs/v3/concepts/proxyless-mesh.png](/imgs/v3/concepts/proxyless-mesh.png)
+
+> 在 Istio Proxyless Mesh 架构中，agent 是必须的，agent 主要来负责初始化和与控制面的通信。但是在 Dubbo Proxyless Mesh 架构中不是必须的，Dubbo SDK 可以直接与控制面进行交互。
 
 可以设想，在不同的组织、不同的发展阶段，未来以 Dubbo 构建的微服务将会允许有三种部署架构：传统 SDK、基于 Sidecar 的 Service Mesh、脱离 Sidecar 的 Proxyless Mesh。基于 Sidecar 的 Service Mesh，即经典的 Mesh 架构，独立的 sidecar 运行时接管所有的流量，脱离 Sidecar 的 Proxyless Mesh，富 SDK 直接通过 xDS 与控制面通信。Dubbo 微服务允许部署在物理机、容器、Kubernetes 平台之上，能做到以 Admin 为控制面，以统一的流量治理规则进行治理。
 
