@@ -80,11 +80,7 @@ POJO on Triple 原理请参考[POJO on Triple](TBD)
       }
    }
    ```
-<<<<<<< HEAD
 6. 添加服务端启动类 `src/main/java/org/apache/dubbo/MyDubboServer.java`
-=======
-7. 添加服务端启动类 `src/main/java/org/apache/dubbo/MyDubboServer.java`
->>>>>>> master
     ```java
    package org.apache.dubbo;
 
@@ -116,11 +112,7 @@ POJO on Triple 原理请参考[POJO on Triple](TBD)
    }
     ```
 
-<<<<<<< HEAD
 7. 添加客户端启动类`src/main/java/org/apache/dubbo/MyDubboClient.java`
-=======
-8. 添加客户端启动类`src/main/java/org/apache/dubbo/MyDubboClient.java`
->>>>>>> master
    ```java
    package org.apache.dubbo;
 
