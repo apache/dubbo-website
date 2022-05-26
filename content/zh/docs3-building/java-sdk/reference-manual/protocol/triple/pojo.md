@@ -80,7 +80,7 @@ POJO on Triple 原理请参考[POJO on Triple](TBD)
       }
    }
    ```
-7. 添加服务端启动类 `src/main/java/org/apache/dubbo/MyDubboServer.java`
+6. 添加服务端启动类 `src/main/java/org/apache/dubbo/MyDubboServer.java`
     ```java
    package org.apache.dubbo;
 
@@ -112,7 +112,7 @@ POJO on Triple 原理请参考[POJO on Triple](TBD)
    }
     ```
 
-8. 添加客户端启动类`src/main/java/org/apache/dubbo/MyDubboClient.java`
+7. 添加客户端启动类`src/main/java/org/apache/dubbo/MyDubboClient.java`
    ```java
    package org.apache.dubbo;
 
@@ -140,16 +140,16 @@ POJO on Triple 原理请参考[POJO on Triple](TBD)
        }
    }
    ```
-9. 编译代码
+8. 编译代码
    ```
    $ mvn clean install
    ```
-10. 启动服务端
+9. 启动服务端
    ```
-    $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboServer"
-    Dubbo triple pojo server started
+   $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboServer"
+   Dubbo triple pojo server started
    ```
-11. 打开新的终端，启动客户端
+10. 打开新的终端，启动客户端
    ```
    $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboClient"
    Received reply:message: "Hello,Demo!"

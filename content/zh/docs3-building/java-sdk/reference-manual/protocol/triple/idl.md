@@ -219,8 +219,8 @@ weight: 2
    ```
 10. 启动服务端
    ```
-    $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboServer"
-    Dubbo triple stub server started
+   $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboServer"
+   Dubbo triple stub server started
    ```
 11. 打开新的终端，启动客户端
    ```
