@@ -26,8 +26,7 @@ Dubbo 基于消费端的自动服务发现能力，其基本工作原理如下�
 在云原生背景下，比如当应用部署在 Kubernetes 等平台，由于平台自身维护了应用/服务与实例间的映射关系，因此注册中心与注册动作在一定程度上被下沉到了基础设施层，因此框架自身的注册动作有时并不是必须的。
 
 Dubbo3 提供了全新的应用级服务发现模型，该模型在设计与实现上区别于 Dubbo2 的接口级服务发现模型。可在此查看：
-* [应用级服务发现速览]()
-* [应用级服务发现详细设计方案](https://github.com/apache/dubbo-awesome/blob/master/proposals/D1-application-level-service-discovery.md)
+* [应用级服务发现](../../whatsnew/service-discovery)
 
 ## 流量治理
 Dubbo2 开始 Dubbo 就提供了丰富服务治理规则，包括路由规则、动态配置等。
