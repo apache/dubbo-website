@@ -5,8 +5,8 @@ linkTitle: "Dubbo Mesh"
 weight: 4
 ---
 通过以下示例快速查看使用&部署示例
-* [Dubbo Sidecar Mesh](../../tasks/dubbo-mesh-sidecar)
-* [Dubbo Proxyless Mesh](../../tasks/dubbo-mesh-sidecar)
+* [Dubbo Sidecar Mesh](../../tasks/dubbo-mesh)
+* [Dubbo Proxyless Mesh](../../tasks/dubbo-mesh)
 
 ## Service Mesh
 在云原生背景下，如果我们将 Service Mesh 理解为底层基础设施，则在 Mesh 架构中，以往耦合在业务进程中的微服务治理部分能力正被 Mesh 接管，传统微服务框架更注重 RPC 协议与编程模型。以下是时下流行的 Mesh 产品 Istio 的架构图：
@@ -49,7 +49,7 @@ Proxyless 模式使得微服务又回到了 2.x 时代的部署架构，如下�
 * 适用于几乎所有的部署环境
 
 ### 高级用法
-Dubbo SDK 提供了非常灵活的配置来控制服务治理行为，如接口粒度的服务地址发现能力、接口粒度的配置同步等，这些能力让应用的开发和部署更加灵活。而在通用的 Mesh 部署方案或产品下一些高级功能可能受限，从总体上影响了易用性与灵活性，为此 Dubbo 计划提供了一些变种的部署方案或控制面定制产品，以满足深度用户的一些高级需求。
+Dubbo SDK 提供了非常灵活的配置来控制服务治理行为，如接口粒度的服务地址发现能力、接口粒度的配置同步等，这些能力让应用的开发和部署更加灵活。而在通用的 Mesh 部署方案或产品下一些高级功能可能受限，从总体上影响了易用性与灵活性。为此 Dubbo 计划提供自研控制面产品，以最大化的在 Mesh 体系发挥 Dubbo3 能力。
 
 
 
