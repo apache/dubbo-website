@@ -7,6 +7,7 @@ weight: 3
 
 在这里查看更多文档
 * [应用级服务发现详细设计](https://github.com/apache/dubbo-awesome/blob/master/proposals/D1-application-level-service-discovery.md)
+* [应用级服务发现解读 (blog)](https://dubbo.apache.org/zh/blog/2021/06/02/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/)
 * [如何从接口级服务发现迁移到应用级服务发现](../../../java-sdk/upgrades-and-compatibility/migration-service-discovery)
 * [饿了么应用级服务发现迁移指南](../../../../users/eleme)
 * [工商银行应用级服务发现](../../../../users/icbc)
