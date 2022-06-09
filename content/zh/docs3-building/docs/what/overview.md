@@ -13,12 +13,12 @@ Dubbo3 定义为面向云原生的下一代 RPC 服务框架。3.0 基于 [Dubbo
 
 ### Dubbo 是什么
 
-Apache Dubbo 是一款开源 RPC 服务框架，它最初在 2008 年由 Alibaba 捐献开源，并且很快成为了国内开源服务框架选型的事实标准框架，得到了各行各业的广泛应用。在 2017 年，Dubbo 正式捐献到 Apache 软件基金会并成为 Apache 顶级项目，目前 Dubbo3 已经是一站式的微服务解决方案提供：
-* 基于 HTTP/2 的 [Triple 协议](../whatsnew/triple)以及面向代理 API 的编程体验。
-* 强大的[流量治理能力](../tasks/traffic-management)，如地址发现、负载均衡、路由选址、动态配置等。
-* [多语言 SDK 实现](../mannual/)，涵盖 Java、Golang、Javascript 等，更多语言实现将会陆续发布。
+Apache Dubbo 最初在 2008 年由 Alibaba 捐献开源，很快成为了国内开源服务框架选型的事实标准框架    ，得到了各行各业的广泛应用。在 2017 年，Dubbo 正式捐献到 Apache 软件基金会并成为 Apache 顶级项目，目前 Dubbo3 已经是一站式的微服务解决方案提供：
+* 基于 HTTP/2 的 [Triple 协议](../../whatsnew/triple)以及面向代理 API 的编程体验。
+* 强大的[流量治理能力](../../tasks/traffic-management)，如地址发现、负载均衡、路由选址、动态配置等。
+* [多语言 SDK 实现](../../mannual/)，涵盖 Java、Golang、Javascript 等，更多语言实现将会陆续发布。
 * 灵活的适配与扩展能力，可轻松与微服务体系其他组件如 Tracing、Transaction 等适配。
-* [Service Mesh 解决方案](../whatsnew/mesh)，同时支持 Sidecar、Proxyless 等灵活的 Mesh 部署方案。
+* [Service Mesh 解决方案](../../whatsnew/mesh)，同时支持 Sidecar、Proxyless 等灵活的 Mesh 部署方案。
 
 Apache Dubbo 总体架构能很好的满足企业的大规模微服务实践，因为它从设计之初就是为了解决超大规模微服务集群实践问题，不论是阿里巴巴还是工商银行、中国平安、携程等社区用户，它们都通过多年的大规模生产环境流量对 Dubbo 的稳定性与性能进行了充分验证，因此，Dubbo 在解决业务落地与规模化实践方面有着无可比拟的优势：
 * 开箱即用
@@ -27,33 +27,25 @@ Apache Dubbo 总体架构能很好的满足企业的大规模微服务实践，�
 * 面向超大规模微服务集群设计
     * 极致性能，高性能的 RPC 通信协议设计与实现
     * 横向可扩展，轻松支持百万规模集群实例的地址发现与流量治理
-* [高度可扩展]()
+* [高度可扩展](../extensibility)
   * 调用过程中对流量及协议的拦截扩展，如 Filter、Router、LB 等
   * 微服务治理组件扩展，如 Registry、Config Center、Metadata Center 等
 * 企业级微服务治理能力
     * 国内共有云厂商支持的事实标准服务框架
-    * 多年企业实践经验考验，参考[用户实践案例](../../users)
+    * 多年企业实践经验考验，参考[用户实践案例](../../../users)
     
 ### Dubbo 基本工作流程
 
 ![dubbo-rpc](/imgs/v3/concepts/rpc.png)
 
-Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编程方式。如上图所示，用户在使用 Dubbo 时首先需要定义好 Dubbo 服务；其次，是在将 Dubbo 服务部署上线之后，依赖 Dubbo 的应用层通信协议实现数据交换，Dubbo 所传输的数据都要经过序列化，而这里的[序列化协议]()是完全可扩展的。  
-使用 Dubbo 的第一步就是定义 Dubbo 服务，服务在 Dubbo 中的定义就是完成业务功能的一组方法的集合，可以选择使用与某种语言绑定的方式定义，如在 Java 中 Dubbo 服务就是有一组方法的 Interface 接口，也可以使用语言中立的 Protobuf Buffers  [IDL 定义服务]()。定义好服务之后，服务端（Provider）需要提供服务的具体实现，并将其声明为 Dubbo 服务，而站在服务消费方（Consumer）的视角，通过调用 Dubbo 框架提供的 API 可以获得一个服务代理（stub）对象，然后就可以像使用本地服务一样对服务方法发起调用了。
+Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编程方式。如上图所示，用户在使用 Dubbo 时首先需要定义好 Dubbo 服务；其次，是在将 Dubbo 服务部署上线之后，依赖 Dubbo 的应用层通信协议实现数据交换，Dubbo 所传输的数据都要经过序列化，而这里的序列化协议是完全可扩展的。
+使用 Dubbo 的第一步就是定义 Dubbo 服务，服务在 Dubbo 中的定义就是完成业务功能的一组方法的集合，可以选择使用与某种语言绑定的方式定义，如在 Java 中 Dubbo 服务就是有一组方法的 Interface 接口，也可以使用语言中立的 Protobuf Buffers  [IDL 定义服务](../../tasks/idl)。定义好服务之后，服务端（Provider）需要提供服务的具体实现，并将其声明为 Dubbo 服务，而站在服务消费方（Consumer）的视角，通过调用 Dubbo 框架提供的 API 可以获得一个服务代理（stub）对象，然后就可以像使用本地服务一样对服务方法发起调用了。
 在消费端对服务方法发起调用后，Dubbo 框架负责将请求发送到部署在远端机器上的服务提供方，提供方收到请求后会调用服务的实现类，之后将处理结果返回给消费端，这样就完成了一次完整的服务调用。如图中的 Request、Response 数据流程所示。
 >需要注意的是，在 Dubbo 中，我们提到服务时，通常是指 RPC 粒度的、提供某个具体业务增删改功能的接口或方法，与一些微服务概念书籍中泛指的服务并不是一个概念。
 
 在分布式系统中，尤其是随着微服务架构的发展，应用的部署、发布、扩缩容变得极为频繁，作为 RPC 消费方，如何定动态的发现服务提供方地址成为 RPC 通信的前置条件。Dubbo 提供了自动的地址发现机制，用于应对分布式场景下机器实例动态迁移的问题。如下图所示，通过引入注册中心来协调提供方与消费方的地址，提供者启动之后向注册中心注册自身地址，消费方通过拉取或订阅注册中心特定节点，动态的感知提供方地址列表的变化。
 
-![arch-service-discovery](/imgs/v3/architecture.png)
-
-地址发现解决了实例变更的问题，但微服务环境下的服务治理诉求同样变得非常复杂，用户需要考虑 Dubbo 服务治理的问题如服务测试、服务元数据管理、流量管控、动态行为调整等，为此， Dubbo 架构引入了配置中心、元数据中心进一步拓展了其服务治理边界。
-
-![how-dubbo-works](/imgs/v3/concepts/threecenters.png)
-
-随着云原生架构的发展，更多的微服务组件及能力正下沉到以 Kubernetes 为代表的基础设施层。一方面传统微服务开发框架应剔除一些冗余机制，积极的适配到基础设施层以做到能力复用；另一方面微服务框架生命周期、服务治理等能力应更好地与 Kubernetes 服务编排机制融合。更近一步的，以 Service Mesh 为代表的微服务架构给微服务开发带来了新的选择，Dubbo3 也完成了对 Kubernetes、Mesh 的适配。
-
-![mix-mesh](/imgs/v3/mesh/mix-mesh.png)
+![arch-service-discovery](/imgs/architecture.png)
 
 ### Dubbo 核心特性
 
@@ -65,7 +57,7 @@ Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编�
 * 提供端响应流（Response Streaming）
 * 双向流式通信（Bidirectional Streaming）
 
-具体可参见[可选协议列表]()、[Triple协议]()
+具体可参见[可选协议列表]() 或 [Triple协议](../../triple)
 
 #### 自动服务（地址）发现
 Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任意部署，消费端可以在无需感知对端部署位置与 IP 地址的情况下完成通信。Dubbo 提供的是 Client-Based 的服务发现机制，使用者可以有多种方式启用服务发现：
@@ -80,9 +72,9 @@ Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任�
 
 #### 丰富的扩展组件及生态
 Dubbo 强大的服务治理能力不仅体现在核心框架上，还包括其优秀的扩展能力以及周边配套设施的支持。通过 Filter、Router、Protocol 等几乎存在于每一个关键流程上的扩展点定义，我们可以丰富 Dubbo 的功能或实现与其他微服务配套系统的对接，包括 Transaction、Tracing 目前都有通过 SPI 扩展的实现方案，具体可以参见 Dubbo 扩展性的详情，也可以在 [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions) 项目中发现与更多的扩展实现。具体可参见：
-* [Dubbo 生态](./ecosystem)
+* [Dubbo 生态](../ecosystem)
 * [官方扩展组件](https://github.com/apache/dubbo-spi-extensions)
-* [Dubbo 可扩展性设计]()
+* [Dubbo 可扩展性设计](../extensibility)
 
 #### 面向云原生设计
 
