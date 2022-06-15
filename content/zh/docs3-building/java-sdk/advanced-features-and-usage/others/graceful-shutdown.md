@@ -18,7 +18,7 @@ description: "让 Dubbo 服务完成优雅停机"
 1. 通过 `kill PID` 停止服务
 2. 通过 SpringBoot Actuator 的 `/shutdown` 停止服务
 
-Dubbo3 以上版本支持不同类型的Java应用，包括 SpringBoot 应用、 Spring 应用、非 Spring 应用。
+Dubbo 3.0 及以上版本支持不同类型的Java应用，包括 SpringBoot 应用、 Spring 应用、非 Spring 应用。
 
 * 使用方式
 
