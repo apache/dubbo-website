@@ -13,7 +13,7 @@ weight: 6
 
 通过 Dubbo 的 SPI 机制，在内部实现多种“探针”，基于 Dubbo QOS 运维模块的 HTTP 服务，使容器探针能够获取到应用内对应探针的状态。另外，SPI 的实现机制也利于用户自行拓展内部“探针”，使整个应用的生命周期更有效的进行管控
 
-## Dobbo   SPI 接口探针 [Dubbo SPI扩展](https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/spi/description/)
+## Dobbo SPI 接口探针
 
 三种探针对应的 SPI 接口如下：
 
@@ -22,6 +22,7 @@ weight: 6
 -   startupProbe:  `org.apache.dubbo.qos.probe.StartupProbe`
 
 接口将自动获取当前应用所有 SPI 的实现，对应接口的 SPI 实现均成功就绪则接口返回成功。
+SPI的介绍见[Dubbo SPI扩展](https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/spi/description/)
 
 #### 存活检测[](https://dubbo.apache.org/zh/docs/references/lifecycle/brief/#%E5%AD%98%E6%B4%BB%E6%A3%80%E6%B5%8B)
 
