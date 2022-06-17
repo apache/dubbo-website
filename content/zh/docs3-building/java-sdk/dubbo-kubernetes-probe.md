@@ -38,9 +38,14 @@
 ## 使用场景
 
  
+## 使用方式：
+  步骤一：需要先配置 `参考示例`，保证 Kubernetes 集群的 Pod 健康检查。
+  
+  步骤二：为了使 Kubernetes 集群能够正常访问到探针，需要开启 QOS 允许远程访问，此操作有可能带来安全风险，请仔细评估后再打开。
+#### 说明：
+ QOS 当计算节点检测到内存压力时，kuberentes 会 BestEffort -> Burstable -> Guaranteed 依次驱逐 Pod
 
-
-## 参考示例
+### 参考示例
 ```yaml
 livenessProbe:
   httpGet:
@@ -62,10 +67,3 @@ startupProbe:
   periodSeconds: 10
 ```
 目前三种探针均有对应的接口，路径为 QOS 中的命令，端口信息请根据 QOS 配置进行对应修改（默认端口为 22222）。其他参数请参考[Kubernetes官方文档说明](https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)。
-
-## 使用方式：
-  步骤一：需要先配置 `参考示例`，保证 Kubernetes 集群的 Pod 健康检查。
-  
-  步骤二：为了使 Kubernetes 集群能够正常访问到探针，需要开启 QOS 允许远程访问，此操作有可能带来安全风险，请仔细评估后再打开。
-#### 说明：
- QOS 当计算节点检测到内存压力时，kuberentes 会 BestEffort -> Burstable -> Guaranteed 依次驱逐 Pod
