@@ -1,3 +1,10 @@
+---
+type: docs
+title: "Kubernetes 生命周期探针"
+linkTitle: "Kubernetes 生命周期探针"
+weight: 6
+---
+
 # Dubbo using Kubernetes probe
 了解 Dubbo 与 Kubernetes 生命周期对齐探针的扩展与应用场景
 
