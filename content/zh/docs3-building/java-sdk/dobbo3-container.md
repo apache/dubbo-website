@@ -11,9 +11,9 @@ Dobbo3 服务容器只是一个简单的 Main 方法，并加载一个简单的 
 
 ## Dobbo3 自定义容器类型：
 
-### Spring Container
-### Jetty Container
-### Log4j Container
+- Spring Container
+- Jetty Container
+- Log4j Container
  
 
 ## 使用场景
