@@ -32,9 +32,9 @@ dubbo
 * Dubbo2 接口级服务发现，以接口粒度组织地址数据
 
 Dubbo3 格式的 Provider 地址不能被 Dubbo2 的 Consumer 识别到，反之 Dubbo2 的消费者也不能订阅到 Dubbo3 Provider。
-* 对于新用户，我们提倡直接启用 Dubbo3 的默认行为，即启用应用级服务发现，参见《[应用级服务发现](../../examples/service-discovery)》；
+* 对于新用户，我们提倡直接启用 Dubbo3 的默认行为，即启用应用级服务发现，参见《[应用级服务发现](https://dubbo.apache.org/zh/docs3-building/java-sdk/upgrades-and-compatibility/service-discovery/)》；
 * 对于老用户，要面临如何平滑迁移到应用级服务发现的问题，考虑到老用户的规模如此之大，Dubbo3 默认保持了接口级地址发现的行为，这保证了老用户可以直接无感升级到 Dubbo3。
-而如果要开启应用级服务发现，则需要通过配置显示开启（双注册、双订阅），具体开启与平滑迁移过程，可参见《[地址发现迁移指南](../../migration/migration-service-discovery)》。
+而如果要开启应用级服务发现，则需要通过配置显示开启（双注册、双订阅），具体开启与平滑迁移过程，可参见《[地址发现迁移指南](https://dubbo.apache.org/zh/docs3-building/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/)》。
 
 ## 应用级服务发现简介
 概括来说，Dubbo3 引入的应用级服务发现主要有以下优势
