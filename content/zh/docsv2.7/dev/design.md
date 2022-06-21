@@ -79,13 +79,13 @@ description: "Dubbo 框架设计概览"
 
 ## 暴露服务时序
 
-展开总设计图左边服务提供方暴露服务的蓝色初始化链，时序图如下：
+展开总设计图右边服务提供方暴露服务的蓝色初始化链，时序图如下：
 
 ![/dev-guide/images/dubbo-export.jpg](/imgs/dev/dubbo-export.jpg)
 
 ## 引用服务时序
 
-展开总设计图右边服务消费方引用服务的绿色初始化链，时序图如下：
+展开总设计图左边服务消费方引用服务的绿色初始化链，时序图如下：
 
 ![/dev-guide/images/dubbo-refer.jpg](/imgs/dev/dubbo-refer.jpg)
 
