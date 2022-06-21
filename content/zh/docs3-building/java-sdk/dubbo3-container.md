@@ -1,15 +1,15 @@
-# customize dobbo3 service container
+# customize dubbo3 service container
 
-了解 dobbo3 中服务自定义容器类型和使用
+了解 dubbo3 中服务自定义容器类型和使用
 
 ## 特性说明：
-Dobbo3 的服务容器是一个 standalone 的启动程序，因为后台服务不需要 Tomcat 或 JBoss 等 Web 容器的功能，如果硬要用 Web 容器去加载服务提供方，增加复杂性，也浪费资源。所以服务通常不需要Tomcat/JBoss等Web容器的特性，没必要用Web容器去加载服务。
+Dubbo3 的服务容器是一个 standalone 的启动程序，因为后台服务不需要 Tomcat 或 JBoss 等 Web 容器的功能，如果硬要用 Web 容器去加载服务提供方，增加复杂性，也浪费资源。所以服务通常不需要 Tomcat/JBoss 等 Web 容器的特性，没必要用 Web 容器去加载服务。
 
-Dobbo3 服务容器只是一个简单的 Main 方法，并加载一个简单的 Spring 容器，用于暴露服务。
+Dubbo3 服务容器只是一个简单的 Main 方法，并加载一个简单的 Spring 容器，用于暴露服务。
 
 服务容器的加载内容可以扩展，内置了 spring, jetty, log4j 等加载，可通过[容器扩展点](https://dubbo.apache.org/zh/docs3-building/java-sdk/advanced-features-and-usage/references/spis/container)进行扩展。配置配在 java 命令的 -D 参数或者  `dubbo.properties`  中。
 
-## Dobbo3 自定义容器类型：
+## Dubbo3 自定义容器类型：
 
 - Spring Container
 - Jetty Container
