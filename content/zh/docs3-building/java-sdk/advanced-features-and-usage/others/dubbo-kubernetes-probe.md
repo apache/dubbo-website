@@ -5,8 +5,6 @@ linkTitle: "Kubernetes 生命周期探针"
 weight: 5
 description: "了解 Dubbo 与 Kubernetes 生命周期对齐探针的扩展与应用场景"
 ---
-了解 Dubbo 与 Kubernetes 生命周期对齐探针的扩展与应用场景
-
 ## 特性说明
 [Pod 的生命周期](https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/)  与服务调度息息相关，通过对 Kubernetes 官方探针的实现，能够使 Dubbo 乃至整个应用的生命周期与 Pod 的生命周期，在 Pod 的整个生命周期中，影响到 Pod 的就只有健康检查这一部分, 我们可以通过配置 liveness probe（存活探针）和 readiness probe（可读性探针）来影响容器的生命周期。
 
