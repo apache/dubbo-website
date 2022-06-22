@@ -38,16 +38,16 @@ Dubbo的配置来源有多种，配置项划分为多个配置组件，详细请
 
 Dubbo启动后监听服务治理相关的配置项，当配置发生变化时，会自动进行相应的处理。
 
-服务治理规则的用法介绍请参考 [服务治理和配置管理](https://dubbo.apache.org/zh/docsv2.7/admin/ops/governance/)
+服务治理规则的用法介绍请参考 [服务治理和配置管理](../../docsv2.7/admin/ops/governance)
 
-服务治理规则的存储方法请参考 [配置中心#服务治理](https://dubbo.apache.org/zh/docs/v2.7/user/configuration/config-center/#%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86)
+服务治理规则的存储方法请参考 [配置中心#服务治理](../../docsv2.7/user/configuration/config-center#服务治理)
 
 ## 动态配置项
 动态配置项一般用于控制动态开关。
 
 Dubbo启动后监听动态配置项，当配置发生变化时，会自动进行相应的处理。
 
-动态配置的存储方式请参考 [配置中心#动态配置](https://dubbo.apache.org/zh/docs/v2.7/user/configuration/config-center/)
+动态配置的存储方式请参考 [配置中心#动态配置](../../references/config-center#动态配置)
 
 常用的动态配置项如下：
 
