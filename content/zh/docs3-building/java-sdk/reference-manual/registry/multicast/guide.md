@@ -6,7 +6,7 @@ weight: 2
 ---
 Multicast 注册中心不需要启动任何中心节点，只要广播地址一样，就可以互相发现。
 
-![multicast](https://user-images.githubusercontent.com/91593982/174997487-a24b6024-21da-4578-b56b-44da0c7ef3b1.jpg)
+![/user-guide/images/multicast.jpg](/imgs/user/multicast.jpg)
 
 ### 使用者类型:
 
