@@ -3,51 +3,53 @@ type: docs
 title: "配置概述"
 linkTitle: "配置概述"
 weight: 1
-description: "Dubbo配置介绍"
+description: "本文是 Dubbo 配置总体设计与工作原理的概述，，包括配置组件、配置来源、配置方式及配置加载流程。"
 ---
-
-本文主要介绍Dubbo配置概况，包括配置组件、配置来源、配置方式及配置加载流程。
+如果你只是想了解如何快速开发 Dubbo 应用，请查看以下链接：
+* [使用 Spring Boot 快速开发 Dubbo 应用]()
+* [Spring 注解配置]()
+* [Spring XML 配置]()
+* [Dubbo 配置项参考手册]()
+* [Dubbo 配置加载及覆盖原理]()
 
 ## 配置组件
 
-Dubbo框架的配置项比较繁多，为了更好地管理各种配置，将其按照用途划分为不同的组件，最终所有配置项都会汇聚到URL中，传递给后续处理模块。
+为了更好地管理各种配置，Dubbo 抽象了一套结构化的配置组件，各组件总体以用途划分，分别控制不同作用域的行为。
 
-常用配置组件如下：
-- application:  Dubbo应用配置
-- registry:  注册中心
-- protocol: 服务提供者RPC协议
-- config-center: 配置中心
-- metadata-report: 元数据中心
-- service: 服务提供者配置
-- reference: 远程服务引用配置
-- provider: service的默认配置或分组配置
-- consumer: reference的默认配置或分组配置
-- module: 模块配置
-- monitor: 监控配置
-- metrics: 指标配置
-- ssl:  SSL/TLS配置
-
-### consumer 与 reference的关系
-
-reference可以指定具体的consumer，如果没有指定consumer则会自动使用全局默认的consumer配置。
-
-consumer的属性是reference属性的默认值，可以体现在两个地方：
-
-1. 在刷新属性(属性覆盖)时，先提取其consumer的属性，然后提取reference自身的属性覆盖上去，叠加后的属性集合作为配置来源之一。
-2. 在组装reference的URL参数时，先附加其consumer的属性，然后附加reference自身的属性。
-
-> 可以将consumer组件理解为reference组件的虚拟分组，根据需要可以定义多个不同的consumer，不同的consumer设置特定的默认值，
-然后在reference中指定consumer或者将<dubbo:reference /> 标签嵌套在<dubbo:consumer />标签之中。
-
-### provider 与 service的关系
-
-service可以指定具体的provider，如果没有指定则会自动使用全局默认的provider配置。
-provider的属性是service属性的默认值，覆盖规则类似上面的consumer与reference，也可以将provider理解为service的虚拟分组。
+组件名称 | 描述 | 范围 | 是否必须配置
+------ | ------ | ------ | ------
+application |  指定应用名等应用级别相关信息 |  一个应用内只允许出现一个 |  必选
+service |  声明普通接口或实现类为 Dubbo 服务 |  一个应用内可以有 0 到多个 service |  service/reference 至少一种
+reference |  声明普通接口为 Dubbo 服务 |  一个应用内可以有 0 到多个 reference |  service/reference 至少一种
+protocol |  要暴露的 RPC 协议及相关配置如端口号等 |  一个应用可配置多个，一个 protocol 可作用于一组 service&reference |  可选，默认 dubbo
+registry |  注册中心类型、地址及相关配置 |  一个应用内可配置多个，一个 registry 可作用于一组 service&reference|  必选
+config-center | 配置中心类型、地址及相关配置 |  一个应用内可配置多个，所有服务共享 |  可选
+metadata-report |  元数据中心类型、地址及相关配置 |  一个应用内可配置多个，所有服务共享 |  可选
+consumer |  reference 间共享的默认配置 |  一个应用内可配置多个，一个 consumer 可作用于一组 reference |  可选
+provider |  service 间共享的默认配置 |  一个应用内可配置多个，一个 provider 可作用于一组 service |  可选
+monitor |  监控系统类型及地址 |  一个应用内只允许配置一个 |  可选
+metrics |  数据采集模块相关配置 |  一个应用内只允许配置一个 |  可选
+ssl |  ssl/tls 安全链接相关的证书等配置 |  一个应用内只允许配置一个 |  可选
 
 
-## 配置来源
+> 从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 [Blog](/blog/introduction-to-dubbo-url)。
 
-从Dubbo支持的配置来源说起，默认有6种配置来源：
+### service 与 reference
+`service` 与 `reference` 是 Dubbo 最基础的两个配置项，它们用来将某个指定的接口或实现类注册为 Dubbo 服务，并通过配置项控制服务的行为。
+* `service` 用于服务提供者端，通过 `service` 配置的接口和实现类将被定义为标准的 Dubbo 服务，从而实现对外提供 RPC 请求服务。
+* `reference` 用于服务消费者端，通过 `reference` 配置的接口将被定义为标准的 Dubbo 服务，生成的 proxy 可发起对远端的 RPC 请求。
+
+一个应用中可以配置任意多个 `service` 与 `reference`。
+
+### consumer 与 provider
+* 当应用内有多个 `reference` 配置时，`consumer` 指定了这些 `reference` 共享的默认值，如共享的超时时间等以简化繁琐的配置，如某个 `reference` 中单独设置了配置项值则该 `reference` 中的配置优先级更高。
+* 当应用内有多个 `service` 配置时，`provider` 指定了这些 `service` 共享的默认值，如某个 `service` 中单独设置了配置项值则该 `service` 中的配置优先级更高。
+
+> consumer 组件还可以对 reference 进行虚拟分组，不通分组下的 reference 可有不同的 consumer 默认值设定；如在 XML 格式配置中，<dubbo:reference /> 标签可通过嵌套在 <dubbo:consumer /> 标签之中实现分组。provider 与 service 分组同理。
+
+## 配置形式(来源)
+
+Dubbo 支持 6 种配置来源，即 Dubbo 会分别尝试从以下几个位置尝试加载配置数据：
 
 - JVM System Properties，JVM -D 参数
 - System environment，JVM进程的环境变量
@@ -57,8 +59,7 @@ provider的属性是service属性的默认值，覆盖规则类似上面的consu
 - 从classpath读取配置文件 dubbo.properties
 
 ### 覆盖关系
-
-下图展示了配置覆盖关系的优先级，从上到下优先级依次降低：
+不通配置来源之间的配置会互相覆盖，它们的覆盖关系或优先级如下(从上到下优先级依次降低)：
 
 ![覆盖关系](/imgs/blog/configuration.jpg)
 

@@ -5,19 +5,13 @@ linkTitle: "生态系统"
 weight: 4
 ---
 
-### 多语言实现
-* Golang
-* Java
-* Rust
-* Node
-* Python
-* PHP
-
 ### Dashboard
 * [Dubbo-admin](https://github.com/apache/dubbo-admin)
 
 ### 支持的组件与部署架构
-Dubbo 实现普遍支持以下产品或部署架构。
+
+Dubbo 实现普遍支持以下产品或部署架构，具体多语言 SDK 实现可能有差异。
+
 * 注册中心
   * Zookeeper
   * Nacos
@@ -56,3 +50,11 @@ Dubbo 实现普遍支持以下产品或部署架构。
 ### 其他微服务组件
 * 限流 [Sentinel]()
 * 事务 [Seata]()
+
+### 多语言实现
+* Golang
+* Java
+* Rust
+* Node
+* Python
+* PHP
