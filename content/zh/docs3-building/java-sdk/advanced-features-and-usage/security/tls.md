@@ -5,16 +5,16 @@ linkTitle: "TLS支持"
 weight: 1
 description: " 了解在 dubbo3 的 TLS 保证传输安全"
 ---
-## 特性说明：
+## 特性说明
 2.7.5 版本在传输链路的安全性上做了很多工作，对于内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。
 
 TLS 的配置都有统一的入口。
-### 配置类型：
+#### 配置类型
 - Provider 端
 - Consumer 端
 
 ## 使用场景
-## 使用方式：
+## 使用方式
 
 ##### Provider 端
 ```java
