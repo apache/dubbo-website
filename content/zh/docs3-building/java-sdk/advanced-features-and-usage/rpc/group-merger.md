@@ -36,7 +36,7 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 <dubbo:reference interface="com.xxx.MenuService" group="*" merger="true">  
  <dubbo:method name="getMenuItems" merger="false" /></dubbo:reference>  
 ```   
-指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称  [合并结果扩展](/zh/docs/references/spis/merger)
+指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称  [合并结果扩展](../../../reference-manual/spi/description/merger)
 
 ```xml  
 <dubbo:reference interface="com.xxx.MenuService" group="*">  
