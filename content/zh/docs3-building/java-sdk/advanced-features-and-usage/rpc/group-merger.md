@@ -43,7 +43,7 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称
 
 {{% alert title="提示" color="primary" %}}
-参见：[合并结果扩展](../../../java-sdk/reference-manual/spi/description/merger)
+参见：[合并结果扩展](../../../reference-manual/spi/description/merger)
 {{% /alert %}}
 
 ```xml
