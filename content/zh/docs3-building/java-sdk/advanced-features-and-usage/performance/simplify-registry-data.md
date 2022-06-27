@@ -6,8 +6,7 @@ weight: 3
 description: "了解 dubbo3 减少注册中心上服务的注册数据"
 ---  
 
-## 特性说明：
-
+## 特性说明
 Dubbo provider 中的服务配置项有接近 [30 个配置项](/zh/docs/references/xml/dubbo-parameter)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
 
 Dubbo consumer 中的配置项也有 [20+个配置项](/zh/docs/references/xml/dubbo-consumer)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。    
