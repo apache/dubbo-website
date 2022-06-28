@@ -3,12 +3,12 @@ type: docs
 title: "参数校验"
 linkTitle: "参数校验"
 weight: 2
-description: "在 Dubbo 中进行参数校验"
+description: "在 dubbo3 中进行参数校验"
 ---
-
+## 特性说明
 参数验证功能是基于 [JSR303](https://jcp.org/en/jsr/detail?id=303) 实现的，用户只需标识 JSR303 标准的验证 annotation，并通过声明 filter 来实现验证。
 
-## Maven 依赖
+####  Maven 依赖
 
 ```xml
 <dependency>
@@ -23,9 +23,16 @@ description: "在 Dubbo 中进行参数校验"
 </dependency>
 ```
 
-## 示例
+#### 示例类型
+- 参数标注
+- 分组验证
+- 关联验证
+- 参数验证
 
-### 参数标注示例
+## 使用场景
+## 使用方式
+
+#### 参数标注示例
 
 ```java
 import java.io.Serializable;
@@ -102,7 +109,7 @@ public class ValidationParameter implements Serializable {
 }
 ```
 
-### 分组验证示例
+#### 分组验证示例
 
 ```java
 public interface ValidationService { // 缺省可按服务接口区分验证场景，如：@NotNull(groups = ValidationService.class)   
@@ -112,7 +119,7 @@ public interface ValidationService { // 缺省可按服务接口区分验证场�
 }
 ```
 
-### 关联验证示例
+#### 关联验证示例
 
 ```java
 import javax.validation.GroupSequence;
@@ -127,7 +134,7 @@ public interface ValidationService {
 }
 ```
 
-### 参数验证示例
+#### 参数验证示例
 
 ```java
 import javax.validation.constraints.Min;
@@ -138,16 +145,17 @@ public interface ValidationService {
     void delete(@Min(1) int id); // 直接对基本类型参数验证
 }
 ```
+#### 配置
+- 客户端
+- 服务器端
 
-## 配置
-
-### 在客户端验证参数
+#### 在客户端验证参数
 
 ```xml
 <dubbo:reference id="validationService" interface="org.apache.dubbo.examples.validation.api.ValidationService" validation="true" />
 ```
 
-### 在服务器端验证参数
+#### 在服务器端验证参数
 
 ```xml
 <dubbo:service interface="org.apache.dubbo.examples.validation.api.ValidationService" ref="validationService" validation="true" />
@@ -157,7 +165,7 @@ public interface ValidationService {
 Dubbo 默认支持 hibernate-validator 版本 <=6.x，若使用 hibernate-validator 7.x 版本，请将 validation 参数声明为 jvalidatorNew
 {{% /alert %}}
 
-## 验证异常信息
+#### 验证异常信息
 
 ```java
 import javax.validation.ConstraintViolationException;
@@ -189,9 +197,8 @@ public class ValidationConsumer {
 }
 ```
 
-{{% alert title="提示" color="primary" %}}
-自 `2.1.0` 版本开始支持, 如何使用可以参考 [dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation)
+#### 提示：
+自 `2.1.0` 版本开始支持, 如何使用 [dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation)
 
-验证方式可扩展，扩展方式参见开发者手册中的[验证扩展](../../../java-sdk/reference-manual/spi/description/validation)
-{{% /alert %}}
+验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](../../../reference-manual/spi/description/validation)
 
