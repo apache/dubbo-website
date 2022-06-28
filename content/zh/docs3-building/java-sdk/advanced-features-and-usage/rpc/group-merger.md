@@ -65,28 +65,3 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 
 #### 提示：
 从 `2.1.0` 版本开始支持
-
-
-
-参见：[合并结果扩展](../../../reference-manual/spi/description/merger)
-{{% /alert %}}
-
-```xml
-<dubbo:reference interface="com.xxx.MenuService" group="*">
-    <dubbo:method name="getMenuItems" merger="mymerge" />
-</dubbo:reference>
-```
-
-指定合并方法，将调用返回结果的指定方法进行合并，合并方法的参数类型必须是返回结果类型本身
-
-```xml
-<dubbo:reference interface="com.xxx.MenuService" group="*">
-    <dubbo:method name="getMenuItems" merger=".addAll" />
-</dubbo:reference>
-```
-
-
-{{% alert title="提示" color="primary" %}}
-从 `2.1.0` 版本开始支持
-{{% /alert %}}
-
