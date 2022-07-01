@@ -5,12 +5,17 @@ linkTitle: "RPC调用上下文"
 weight: 6
 description: "通过上下文存放当前调用过程中所需的环境信息"
 ---
-
-上下文中存放的是当前调用过程中所需的环境信息。所有配置信息都将转换为 URL 的参数，参见 [Schema 配置参考手册](../../v3.0/references/xml) 中的**对应URL参数**一列。
+## 特性说明
+上下文中存放的是当前调用过程中所需的环境信息。所有配置信息都将转换为 URL 的参数，参见 [schema 配置参考手册](../../../v3.0/references/xml) 中的**对应URL参数**一列。
 
 RpcContext 是一个 ThreadLocal 的临时状态记录器，当接收到 RPC 请求，或发起 RPC 请求时，RpcContext 的状态都会变化。比如：A 调 B，B 再调 C，则 B 机器上，在 B 调 C 之前，RpcContext 记录的是 A 调 B 的信息，在 B 调 C 之后，RpcContext 记录的是 B 调 C 的信息。
+#### 类型：
+- 服务消费方
+- 服务提供方
 
-## 服务消费方
+## 使用场景
+## 使用方式
+#### 服务消费方
 
 ```java
 // 远程调用
@@ -25,7 +30,7 @@ String application = RpcContext.getContext().getUrl().getParameter("application"
 yyyService.yyy();
 ```
 
-## 服务提供方
+#### 服务提供方
 
 ```java
 public class XxxServiceImpl implements XxxService {
