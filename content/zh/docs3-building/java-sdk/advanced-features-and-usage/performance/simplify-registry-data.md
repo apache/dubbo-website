@@ -85,13 +85,13 @@ Constant Key 表示来自于类 org.apache.dubbo.common.Constants 的字段。
 ```
 dubbo%3A%2F%2F30.5.124.158%3A20880%2Forg.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService
 %3Fanyhost%3Dtrue%26application%3Dsimplified-registry-xml-provider%26async%3Dtrue%26dubbo%3D
-2.0.2%26**executes**%3D4500%26generic%3Dfalse%26group%3Ddubbo-simple%26interface%3D
+2.0.2%26executes%3D4500%26generic%3Dfalse%26group%3Ddubbo-simple%26interface%3D
 org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService%26methods%3D
-sayHello%26**owner**%3Dvict%26pid%3D2767%26**retries**%3D7%26revision%3D1.2.3%26side%3D
-provider%26**timeout**%3D5300%26timestamp%3D1542361152795%26valid%3Dtrue%26version%3D1.2.3
+sayHello%26owner%3Dvict%26pid%3D2767%26retries%3D7%26revision%3D1.2.3%26side%3D
+provider%26timeout%3D5300%26timestamp%3D1542361152795%26valid%3Dtrue%26version%3D1.2.3
 ```
 
-从加粗字体中能看到有：executes, retries, owner, timeout。但是这些字段不是每个都需要传递给 dubbo ops 或者 dubbo consumer。 同样的，consumer 也有这个问题，可以在例子中启动 Consumer 的 main 方法进行查看。
+从中能看到有：`executes`, `retries`, `owner`, `timeout`。但是这些字段不是每个都需要传递给 dubbo ops 或者 dubbo consumer。 同样的，consumer 也有这个问题，可以在例子中启动 Consumer 的 main 方法进行查看。
 
 
 
@@ -134,8 +134,8 @@ dubbo.registry.extra-keys=retries,owner
 得到的 zookeeper 的叶子节点的值：
 ```
 dubbo%3A%2F%2F30.5.124.149%3A20880%2Forg.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService%3F
-application%3Dsimplified-registry-xml-provider%26dubbo%3D2.0.2%26group%3Ddubbo-simple%26**owner**%3D
-vict%26**retries**%3D7%26**timeout**%3D5300%26timestamp%3D1542594503305%26version%3D1.2.3
+application%3Dsimplified-registry-xml-provider%26dubbo%3D2.0.2%26group%3Ddubbo-simple%26owner%3D
+vict%26retries%3D7%26timeout%3D5300%26timestamp%3D1542594503305%26version%3D1.2.3
 ```
 
 #### consumer 端配置
