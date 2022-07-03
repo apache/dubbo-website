@@ -10,7 +10,7 @@ description: "了解 Dubbo3 与 Kubernetes 生命周期对齐探针的扩展与�
 
 通过 Dubbo3 的 SPI 机制，在内部实现多种“探针”，基于 Dubbo3 QOS 运维模块的 HTTP 服务，使容器探针能够获取到应用内对应探针的状态。另外，SPI 的实现机制也利于用户自行拓展内部“探针”，使整个应用的生命周期更有效的进行管控
 
-## Dobbo3 SPI 接口探针
+#### Dobbo3 SPI 接口探针
 
 三种探针对应的 SPI 接口如下：
 
@@ -41,7 +41,8 @@ SPI的介绍见[Dubbo SPI扩展](https://dubbo.apache.org/zh/docs3-building/java
 关于 [startup 启动探针](https://dubbo.apache.org/zh/docs/references/lifecycle/startup/) 扩展示例
 
 ## 使用场景
-
+- kubelet 使用 `liveness probe` 来确定你的应用程序是否正在运行，查看是否存活。一般来说，如果你的程序一旦崩溃了， Kubernetes 就会立刻知道这个程序已经终止了，然后就会重启这个程序。而我们的 liveness probe 的目的就是来捕获到当前应用程序还没有终止，还没有崩溃，如果出现了这些情况，那么就重启处于该状态下的容器，使应用程序在存在 bug 的情况下依然能够继续运行下去。
+- kubelet 使用 `readiness probe` 来确定容器是否已经就绪可以接收流量过来。是否准备就绪，现在是否可以开始工作。只有当 Pod 中的容器都处于就绪状态的时候 kubelet 才会认定该 Pod 处于就绪状态，因为一个 Pod 下面可能会有多个容器。 Pod 如果处于非就绪状态，那么我们就会将他从 Service 的 Endpoints 列表中移除出来，这样我们的流量就不会被路由到这个 Pod 里面。
  
 ## 使用方式：
   步骤一：需要先配置 `参考示例`，保证 Kubernetes 集群的 Pod 健康检查。
