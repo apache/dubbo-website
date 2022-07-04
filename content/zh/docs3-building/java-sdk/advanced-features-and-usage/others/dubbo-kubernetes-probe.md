@@ -51,7 +51,7 @@ SPI的介绍见[Dubbo SPI扩展](https://dubbo.apache.org/zh/docs3-building/java
 #### 说明：
  QOS 当计算节点检测到内存压力时，kuberentes 会 BestEffort -> Burstable -> Guaranteed 依次驱逐 Pod
 
-### 参考示例
+#### 参考示例
 ```yaml
 livenessProbe:
   httpGet:
