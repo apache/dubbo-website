@@ -6,7 +6,6 @@ weight: 7
 description: "通过缓存结果加速访问速度"
 ---
 ## 特性说明
-结果缓存，用于加速热门数据的访问速度，Dubbo 提供声明式缓存，以减少用户加缓存的工作量。 
 
 #### 缓存类型
 
@@ -19,6 +18,9 @@ description: "通过缓存结果加速访问速度"
 关于 [示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-cache)
 
 ## 使用场景
+
+结果缓存，用于加速热门数据的访问速度，Dubbo 提供声明式缓存，以减少用户加缓存的工作量。 
+
 ## 使用方式
 
 ```xml
