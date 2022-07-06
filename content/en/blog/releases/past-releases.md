@@ -15,6 +15,12 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 > GitHub: https://github.com/apache/dubbo \
 > Release Notes: https://github.com/apache/dubbo/releases
 
+### 2.7.16 (2022-07-06)
+
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.sha512)
+
 ### 3.0.9 (2022-06-23)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.9/apache-dubbo-3.0.9-src.zip) |
@@ -47,9 +53,9 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 
 ### 2.7.15 (2021-12-29)
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip.sha512)
+* [source](https://archive.apache.org/dist/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip.sha512)
 
 ### 2.6.12 (2021-12-29)
 
