@@ -3,6 +3,7 @@ type: docs
 title: "XML 配置"
 linkTitle: "XML 配置"
 weight: 4
+description: "以 Spring XML 开发 Dubbo 应用"
 ---
 
 Dubbo 有基于 Spring Schema 扩展的自定义配置组件，使用 XML 能达到的配置能力总体与 [配置参考手册](../properties) 对等。

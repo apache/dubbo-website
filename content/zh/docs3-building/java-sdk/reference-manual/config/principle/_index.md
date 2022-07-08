@@ -3,7 +3,7 @@ type: docs
 title: "配置工作原理"
 linkTitle: "配置工作原理"
 weight: 5
-description: "对 Dubbo 配置总体设计与工作原理进行了总体概述，包括配置组件、配置来源、配置方式及配置加载流程等。"
+description: "Dubbo 配置方式和工作原理的深度解读，包括配置格式、设计思路、来源、加载流程等。"
 ---
 
 以下是一个 Dubbo 属性配置的例子 [dubbo-spring-boot-samples](https://github.com/apache/dubbo-spring-boot-project/tree/master/dubbo-spring-boot-samples)

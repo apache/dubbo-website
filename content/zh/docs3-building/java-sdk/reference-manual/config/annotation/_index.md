@@ -3,7 +3,7 @@ type: docs
 title: "Annotation 配置"
 linkTitle: "Annotation 配置"
 weight: 3
-description: "以注解方式来配置你的 Dubbo 应用"
+description: "以 Annotation、Spring Boot 开发 Dubbo 应用"
 ---
 
 {{% alert title="提示" color="primary" %}}
