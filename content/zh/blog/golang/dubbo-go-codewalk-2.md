@@ -8,7 +8,7 @@ description: >
 
 ## 前言
 
-有了上一篇文章[《dubbo-go 源码笔记（一）Server服务暴露过程详解》]({{<ref "/blog/news/dubbo-go-codewalk-1.md" >}} "") 的铺垫，可以大致上类比客户端服务类似于服务端启动过程。其中最大的区别是服务端通过zk注册服务，发布自己的ivkURL并订阅事件开启监听；而服务端应该是通过zk注册组件，**拿到需要调用的serviceURL**，**更新invoker**并**重写用户的RPCService**，从而实现对远程过程调用细节的封装。
+有了上一篇文章[《dubbo-go 源码笔记（一）Server服务暴露过程详解》]({{<ref "/blog/golang/dubbo-go-codewalk-1.md" >}} "") 的铺垫，可以大致上类比客户端服务类似于服务端启动过程。其中最大的区别是服务端通过zk注册服务，发布自己的ivkURL并订阅事件开启监听；而服务端应该是通过zk注册组件，**拿到需要调用的serviceURL**，**更新invoker**并**重写用户的RPCService**，从而实现对远程过程调用细节的封装。
 
 ## 1. 配置文件和客户端源码
 

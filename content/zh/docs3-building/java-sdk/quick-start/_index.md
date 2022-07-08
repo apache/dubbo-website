@@ -42,3 +42,90 @@ weight: 2
    INFO stub.TriStubClient: tri-stub Unary reply <-message: "hello,name"
    ```
 恭喜，一个简单的客户端-服务端 Dubbo 应用运行成功了
+
+## 服务提供方
+
+### `Service`注解暴露服务
+
+```java
+@DubboService
+public class AnnotationServiceImpl implements AnnotationService {
+    @Override
+    public String sayHello(String name) {
+        return "annotation: hello, " + name;
+    }
+}
+```
+
+使用
+
+### 增加应用共享配置
+
+```properties
+# dubbo-provider.properties
+dubbo.application.name=annotation-provider
+dubbo.registry.address=zookeeper://127.0.0.1:2181
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=20880
+```
+
+### 指定Spring扫描路径
+
+```java
+@Configuration
+@EnableDubbo(scanBasePackages = "org.apache.dubbo.samples.simple.annotation.impl")
+@PropertySource("classpath:/spring/dubbo-provider.properties")
+static public class ProviderConfiguration {
+
+}
+```
+
+## 服务消费方
+
+### `Reference`注解引用服务
+
+```java
+@Component("annotationAction")
+public class AnnotationAction {
+
+    @Reference
+    private AnnotationService annotationService;
+
+    public String doSayHello(String name) {
+        return annotationService.sayHello(name);
+    }
+}
+
+```
+
+### 增加应用共享配置
+
+```properties
+# dubbo-consumer.properties
+dubbo.application.name=annotation-consumer
+dubbo.registry.address=zookeeper://127.0.0.1:2181
+dubbo.consumer.timeout=3000
+```
+
+### 指定Spring扫描路径
+
+```java
+@Configuration
+@EnableDubbo(scanBasePackages = "org.apache.dubbo.samples.simple.annotation.action")
+@PropertySource("classpath:/spring/dubbo-consumer.properties")
+@ComponentScan(value = {"org.apache.dubbo.samples.simple.annotation.action"})
+static public class ConsumerConfiguration {
+
+}
+```
+
+### 调用服务
+
+```java
+public static void main(String[] args) throws Exception {
+    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConsumerConfiguration.class);
+    context.start();
+    final AnnotationAction annotationAction = (AnnotationAction) context.getBean("annotationAction");
+    String hello = annotationAction.doSayHello("world");
+}
+```
