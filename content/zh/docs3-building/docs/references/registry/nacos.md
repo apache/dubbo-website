@@ -6,7 +6,7 @@ weight: 1
 description: "Nacos 注册中心参考手册"
 ---
 
-Nacos 是 Dubbo 生态系统中重要的注册中心实现，其中 [`dubbo-registry-nacos`](https://github.com/apache/incubator-dubbo/tree/master/dubbo-registry/dubbo-registry-nacos) 则是 Dubbo 融合 Nacos 注册中心的实现。
+Nacos 是 Dubbo 生态系统中重要的注册中心实现，其中 [`dubbo-registry-nacos`](https://github.com/apache/dubbo/tree/3.0/dubbo-registry/dubbo-registry-nacos) 则是 Dubbo 融合 Nacos 注册中心的实现。
 
 ## 预备工作
 
@@ -15,12 +15,12 @@ Dubbo使用nacos注册中心之前，需先成功启动nacos server，操作步�
 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。
 ## 快速上手
 
-Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤可分为“增加 Maven 依赖”以及“配置注册中心“。
+Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤可分为“增加 Maven 依赖”以及“配置注册中心”。
 
 
 ### 增加 Maven 依赖
 
-首先，您需要将 `dubbo-registry-nacos` 的 Maven 依赖添加到您的项目 `pom.xml` 文件中，并且强烈地推荐您使用 Dubbo `2.6.5`：
+首先，您需要将 `dubbo-registry-nacos` 的 Maven 依赖添加到您的项目 `pom.xml` 文件中。
 
 **注**：Dubbo `3.0.0`及以上版本，dubbo-registry-nacos引入nacos-client`2.0.0`及以上版本。
 ```xml
