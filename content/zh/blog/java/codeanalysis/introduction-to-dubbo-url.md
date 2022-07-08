@@ -106,6 +106,23 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 
 ### URL 相关的生命周期
 
+#### RPC调用
+
+从地址发现的视角，URL 代表了一条可用的 provider 实例地址，除了地址信息之外还有相关的配置信息，这些配置信息是层次化的，有 provider 侧指定的配置值、consumer 侧指定的配置值、接口级别的配置值、方法级别的配置值等。这些 URL 配置值将直接影响消费端的 RPC 调用行为。
+
+以 timeout 为例，下图显示了配置的查找顺序，其它 retries, loadbalance, actives 等类似：
+
+* 方法级优先，接口级次之，全局配置再次之。
+* 如果级别一样，则消费方优先，提供方次之。
+
+其中，服务提供方配置，通过 URL 经由注册中心传递给消费方。
+
+![dubbo-config-override](/imgs/user/dubbo-config-override.jpg)
+
+（建议由服务提供方设置超时，因为一个方法需要执行多长时间，服务提供方更清楚，如果一个消费方同时引用多个服务，就不需要关心每个服务的超时设置）。
+
+理论上 ReferenceConfig 中除了`interface`这一项，其他所有配置项都可以缺省不配置，框架会自动使用ConsumerConfig，ServiceConfig, ProviderConfig等提供的缺省配置。
+
 #### 解析服务
 
 基于 dubbo.jar 内的 `META-INF/spring.handlers` 配置，Spring 在遇到 dubbo 名称空间时，会回调 `DubboNamespaceHandler`。

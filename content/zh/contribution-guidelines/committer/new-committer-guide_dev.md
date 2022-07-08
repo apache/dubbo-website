@@ -32,7 +32,7 @@ weight: 1
 2. 关于 apache 邮箱：apache.org 邮箱并没有自己的邮件内容存储服务器。它需要借用其他邮件提供商的邮件内容存储、分发功能。在很多投票环节是建议使用 apache 邮箱的。
     这里就有一个问题，怎么在其它邮箱里面配置 apache.org 邮箱转发功能：
     * 收件箱：收取发送到 apache.org 的邮件。这个在第一步配置好 Apache 账户工具的 forward 邮箱就可以用 forward 邮箱收取邮件了
-    * 发件箱：将发出的邮件显示发件邮箱为 apache.org 邮箱。请参考：[设置 apache 邮箱指南](https://reference.apache.org/committer/email)和[ gmail 邮箱设置方式](http://gmailblog.blogspot.com/2009/07/send-mail-from-another-address-without.html)。 其他邮箱服务的设置方式不方便找到，gmail 的最方便，建议换成 gmail 邮箱(不是广告)。
+    * 发件箱：将发出的邮件显示发件邮箱为 apache.org 邮箱。请参考：[设置 apache 邮箱指南](https://reference.apache.org/committer/email)和[ gmail 邮箱设置方式](https://support.google.com/mail/answer/22370)。 其他邮箱服务的设置方式不方便找到，gmail 的最方便，建议换成 gmail 邮箱(不是广告)。
 3. 修改编辑页面的 homepage url，[apache 提交者列表页](http://people.apache.org/committer-index.html)中你的账户能加主页链接。
 4. 修改编辑页面的 github 账户(username)，提交确认后两个小时内会有邮件邀请你加入 github.com/apache-committers 组。这期间可以阅读[ ASF 工作方式](http://www.apache.org/foundation/how-it-works.html#developers)以对 ASF 开发做一些基本了解。
 ## 四、提交者获得对项目的写权限
@@ -50,7 +50,7 @@ weight: 1
 * 在手机安装 “google 身份验证器” app
 * 按照[授权 GitHub 2FA wiki](https://help.github.com/articles/configuring-two-factor-authentication-via-a-totp-mobile-app/) 一步一步操作。
 
-   在[两因素授权验证](https://github.com/settings/two_factor_authentication/verify)界面，不建议选择用手机扫描二维码，因为有些手机会扫描不出来。
+   在[两因素授权验证](https://github.com/settings/security)界面，不建议选择用手机扫描二维码，因为有些手机会扫描不出来。
    请打开手机 “google 身份验证器” app，点“+”选择“输入提供的秘钥”： 在“账户名” input 框写入 github 账户。在“您的秘钥” input 框写入:打开的网页中 "enter this text code" 链接里面的文本。在 app 中点击"添加" 后，将为此账户生成6位数字动态。将此6位数字写入网页中的文本框，然后点 “Enable”。这样 2FA 就设置成功了。
 
 * 退出并重新登陆 github，输入用户名、密码后会多一步动态密码的填写，该动态密码就是 google 身份验证器上面的动态密码
