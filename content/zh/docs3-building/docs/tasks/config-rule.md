@@ -2,7 +2,7 @@
 type: docs
 title: "配置规则"
 linkTitle: "配置规则"
-weight: 34
+weight: 5
 description: "在 Dubbo 中配置应用级治理规则和服务级治理规则"
 ---
 
