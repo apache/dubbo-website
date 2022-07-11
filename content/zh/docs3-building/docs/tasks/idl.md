@@ -2,7 +2,7 @@
 type: docs
 title: "使用 IDL + Protobuf 跨语言定义服务"
 linkTitle: "使用 IDL + Protobuf 跨语言定义服务"
-weight: 3
+weight: 4
 description: ""
 ---
 
