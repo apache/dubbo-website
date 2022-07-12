@@ -5,7 +5,9 @@ linkTitle: "使用说明"
 weight: 2
 ---
 ## 特性说明
-[Zookeeper](http://zookeeper.apache.org) 是 Apache Hadoop 的子项目，是一个树型的目录服务，支持变更推送，适合作为 Dubbo 服务的注册中心，工业强度较高，可用于生产环境，并推荐使用 [^1]。
+[Zookeeper](http://zookeeper.apache.org) 是 Apache Hadoop 的子项目，是一个树型的目录服务，支持变更推送，适合作为 Dubbo 服务的注册中心，工业强度较高，可用于生产环境，并推荐使用。
+
+建议使用 `2.3.3` 以上版本的 zookeeper 注册中心客户端。
 
 ![/user-guide/images/zookeeper.jpg](/imgs/user/zookeeper.jpg)
 
@@ -24,7 +26,26 @@ weight: 2
 * 可通过 `<dubbo:registry group="dubbo" />` 设置 zookeeper 的根节点，不配置将使用默认的根节点。
 * 支持 `*` 号通配符 `<dubbo:reference group="*" version="*" />`，可订阅服务的所有分组和所有版本的提供者
 
+#### 安装
+
+[Zookeeper安装手册](../../../docsv2.7/admin/install/zookeeper)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../../quick-start) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
+
+声明类型：
+- 可靠性
+- 兼容性
+
+#### 可靠性声明
+
+阿里内部并没有采用 Zookeeper 做为注册中心，而是使用自己实现的基于数据库的注册中心，即：Zookeeper 注册中心并没有在阿里内部长时间运行的可靠性保障，此 Zookeeper 桥接实现只为开源版本提供，其可靠性依赖于 Zookeeper 本身的可靠性。
+
+#### 兼容性声明
+
+因 `2.0.8` 最初设计的 zookeeper 存储结构不能扩充不同类型的数据，`2.0.9` 版本做了调整，所以不兼容，需全部改用 `2.0.9` 版本才行，以后的版本会保持兼容 `2.0.9`。`2.2.0` 版本改为基于 zkclient 实现，需增加 zkclient 的依赖包，`2.3.0` 版本增加了基于 curator 的实现，作为可选实现策略。
+
 ## 使用场景
+
+数据发布/订阅，负载均衡，分布式协调/通知，分布式锁，分布式队列，集群管理等
+
 ## 使用方式
 
  provider 和 consumer 中增加 zookeeper 客户端 jar 包依赖或直接[下载](https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper)。
@@ -157,21 +178,3 @@ Zookeeper 集群配置：
 <dubbo:registry id="chinaRegistry" protocol="zookeeper" address="10.20.153.10:2181" group="china" />
 <dubbo:registry id="intlRegistry" protocol="zookeeper" address="10.20.153.10:2181" group="intl" />
 ```
-
-#### zookeeper 安装
-
-安装 [Zookeeper安装手册](../../../docsv2.7/admin/install/zookeeper)，只需搭一个原生的 Zookeeper 服务器，并将 [Quick Start](../../../quick-start) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `zookeeper://127.0.0.1:2181` 即可使用。
-
-声明类型：
-- 可靠性
-- 兼容性
-
-#### 可靠性声明
-
-阿里内部并没有采用 Zookeeper 做为注册中心，而是使用自己实现的基于数据库的注册中心，即：Zookeeper 注册中心并没有在阿里内部长时间运行的可靠性保障，此 Zookeeper 桥接实现只为开源版本提供，其可靠性依赖于 Zookeeper 本身的可靠性。
-
-#### 兼容性声明
-
-因 `2.0.8` 最初设计的 zookeeper 存储结构不能扩充不同类型的数据，`2.0.9` 版本做了调整，所以不兼容，需全部改用 `2.0.9` 版本才行，以后的版本会保持兼容 `2.0.9`。`2.2.0` 版本改为基于 zkclient 实现，需增加 zkclient 的依赖包，`2.3.0` 版本增加了基于 curator 的实现，作为可选实现策略。
-
-[^1]: 建议使用 `2.3.3` 以上版本的 zookeeper 注册中心客户端
