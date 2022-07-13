@@ -112,7 +112,6 @@ provider的属性是service属性的默认值，覆盖规则类似上面的consu
 - Spring Annotation
 - Spring Boot
 - API
-- 
 #### Spring XML
 
 > [示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-basic)
