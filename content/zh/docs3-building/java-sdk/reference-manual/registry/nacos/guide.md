@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "Nacos 注册中心"
-linkTitle: "Nacos"
-weight: 1
+title: "使用说明"
+linkTitle: "使用说明"
+weight: 2
 description: "Nacos 注册中心参考手册"
 ---
 
@@ -97,16 +97,16 @@ dubbo.registry.address=nacos://10.20.153.10:8848
 
 随后，重启您的 Dubbo 应用，Dubbo 的服务提供和消费信息在 Nacos 控制台中可以显示：
 
-![image-dubbo-registry-nacos-6.png](/static/imgs/blog/dubbo-registry-nacos-6.png)
+![image-dubbo-registry-nacos-6.png](/imgs/blog/dubbo-registry-nacos-6.png)
 
 
 如图所示，服务名前缀为 `providers:` 的信息为服务提供者的元信息，`consumers:` 则代表服务消费者的元信息。点击“**详情**”可查看`providers:` 服务状态详情：
 
-![image-dubbo-registry-nacos-7.png](/static/imgs/blog/dubbo-registry-nacos-7.png)
+![image-dubbo-registry-nacos-7.png](/imgs/blog/dubbo-registry-nacos-7.png)
 
 `consumers:` 服务状态详情：
 
-![image-dubbo-registry-nacos-8.png](/static/imgs/blog/dubbo-registry-nacos-8.png)
+![image-dubbo-registry-nacos-8.png](/imgs/blog/dubbo-registry-nacos-8.png)
 
 
 如果您正在使用 Spring XML 配置文件装配 Dubbo 注册中心的话，请参考下一节。
@@ -158,15 +158,15 @@ dubbo.registry.address=nacos://10.20.153.10:8848
 
 重启Dubbo应用后，在Nacos的控制台同样上可看到服务提供者和消费者的的注册元信息：
 
-![image-dubbo-registry-nacos-9.png](/static/imgs/blog/dubbo-registry-nacos-9.png)
+![image-dubbo-registry-nacos-9.png](/imgs/blog/dubbo-registry-nacos-9.png)
 
 如图所示，服务名前缀为 `providers:` 的信息为服务提供者的元信息，`consumers:` 则代表服务消费者的元信息。点击“**详情**”可查看`providers:` 服务状态详情：
 
-![image-dubbo-registry-nacos-10.png](/static/imgs/blog/dubbo-registry-nacos-10.png)
+![image-dubbo-registry-nacos-10.png](/imgs/blog/dubbo-registry-nacos-10.png)
 
 `consumers:` 服务状态详情：
 
-![image-dubbo-registry-nacos-11.png](/static/imgs/blog/dubbo-registry-nacos-11.png)
+![image-dubbo-registry-nacos-11.png](/imgs/blog/dubbo-registry-nacos-11.png)
 
 ### Nacos通用参数说明
 
