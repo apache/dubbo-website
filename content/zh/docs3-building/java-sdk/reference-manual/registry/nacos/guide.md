@@ -5,20 +5,47 @@ linkTitle: "Nacos"
 weight: 1
 description: "Nacos 注册中心参考手册"
 ---
-
+## 特性说明
 Nacos 是 Dubbo 生态系统中重要的注册中心实现，其中 [`dubbo-registry-nacos`](https://github.com/apache/dubbo/tree/3.0/dubbo-registry/dubbo-registry-nacos) 则是 Dubbo 融合 Nacos 注册中心的实现。
 
-## 预备工作
+#### 预备工作
 
-Dubbo使用nacos注册中心之前，需先成功启动nacos server，操作步骤请参考[nacos快速入门](https://nacos.io/zh-cn/docs/quick-start.html) 。<br>
+Dubbo 使用 nacos 注册中心之前，需先成功启动nacos server，操作步骤请参考 [nacos快速入门](https://nacos.io/zh-cn/docs/quick-start.html) 。<br>
 
 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。
-## 快速上手
 
+#### Nacos通用参数说明
+
+参数名 | 中文描述| 默认值
+---|---|---
+username|连接Nacos Server的用户名|nacos
+paasword|连接Nacos Server的密码|nacos
+backup|备用地址|空
+namespace|命名空间的ID|public
+group|分组名称|DEFAULT_GROUP
+register-consumer-url|是否注册消费端|false
+com.alibaba.nacos.naming.log.filename|初始化日志文件名|naming.log
+endpoint|连接Nacos Server指定的连接点，可参考[文档](https://nacos.io/zh-cn/blog/address-server.html)|空
+endpointPort|连接Nacos Server指定的连接点端口，可以参考[文档](https://nacos.io/zh-cn/blog/address-server.html)|空
+endpointQueryParams|endpoint查参数询|空
+isUseCloudNamespaceParsing|是否解析云环境中的namespace参数|true
+isUseEndpointParsingRule|是否开启endpoint 参数规则解析|true
+namingLoadCacheAtStart|启动时是否优先读取本地缓存|true
+namingCacheRegistryDir|指定缓存子目录，位置为 .../nacos/{SUB_DIR}/naming|空
+namingClientBeatThreadCount|客户端心跳的线程池大小|机器的CPU数的一半
+namingPollingThreadCount|客户端定时轮询数据更新的线程池大小|机器的CPU数的一半
+namingRequestDomainMaxRetryCount|client通过HTTP向Nacos Server请求的重试次数|3
+namingPushEmptyProtection|在服务没有有效（健康）实例时，是否开启保护，开启后则会使用旧的服务实例|false
+push.receiver.udp.port|客户端UDP的端口|空
+
+## 使用场景
+
+## 使用方式
+#### 快速上手
 Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤可分为“增加 Maven 依赖”以及“配置注册中心”。
 
 
-### 增加 Maven 依赖
+#### 增加 Maven 依赖
 
 首先，您需要将 `dubbo-registry-nacos` 的 Maven 依赖添加到您的项目 `pom.xml` 文件中。
 
@@ -45,18 +72,16 @@ Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤�
 
 当项目中添加  `dubbo-registry-nacos` 后，您无需显式地编程实现服务发现和注册逻辑，实际实现由该三方包提供，接下来配置 Naocs 注册中心。
 
-### 配置注册中心
+#### 配置注册中心
 
-如果Dubbo 应用使用 Spring Framework 装配，将有两种配置方法可选，分别为：[Dubbo Spring 外部化配置](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/)以及 Spring XML 配置文件，推荐前者。
+如果 Dubbo 应用使用 Spring Framework 装配，将有两种配置方法可选，分别为：[Dubbo Spring 外部化配置](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/)以及 Spring XML 配置文件，推荐前者。
 
 
-### Dubbo Spring 外部化配置
+#### Dubbo Spring 外部化配置
 
-> [参考](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/)
+Dubbo Spring [外部化配置](https://mercyblitz.github.io/2018/01/18/Dubbo-%E5%A4%96%E9%83%A8%E5%8C%96%E9%85%8D%E7%BD%AE/) 是由 Dubbo 2.5.8 引入的新特性，可通过 Spring `Environment` 属性自动地生成并绑定 Dubbo 配置 Bean，实现配置简化，并且降低微服务开发门槛。
 
-Dubbo Spring 外部化配置是由 Dubbo 2.5.8 引入的新特性，可通过 Spring `Environment` 属性自动地生成并绑定 Dubbo 配置 Bean，实现配置简化，并且降低微服务开发门槛。
-
-当Dubbo使用Nacos为注册中心，假设启动服务器IP `10.20.153.10`，端口号`8848`，则在Dubbo外部化配置文件中添加以下配置：
+当 Dubbo 使用 Nacos 为注册中心，假设启动服务器IP `10.20.153.10`，端口号`8848`，则在 Dubbo 外部化配置文件中添加以下配置：
 
 ```properties
 ## 其他属性保持不变
@@ -79,9 +104,9 @@ dubbo.registry.address=nacos://10.20.153.10:8848
 #dubbo.registry.parameters.group=demo
 ...
 ```
-关于nacos配置参数请参考nacos通用参数说明
+关于 nacos 配置参数请参考 nacos 通用参数说明
 
-注：Dubbo3.0.0版本以后，增加了是否注册消费者的参数，如果需要将消费者注册到nacos注册中心上，需要将参数(register-consumer-url)设置为true，默认是false。
+注：Dubbo3.0.0版本以后，增加了是否注册消费者的参数，如果需要将消费者注册到 nacos 注册中心上，需要将参数 (register-consumer-url)设置为true，默认是false。
 
 设置方式如下：
 ```properties
@@ -111,9 +136,9 @@ dubbo.registry.address=nacos://10.20.153.10:8848
 
 如果您正在使用 Spring XML 配置文件装配 Dubbo 注册中心的话，请参考下一节。
 
-### Spring XML 配置文件
+#### Spring XML 配置文件
 
-当Dubbo使用Nacos为注册中心，假设启动服务器IP `10.20.153.10`，端口号`8848`，在Spring Bean在XML文件中添加以下配置：
+当 Dubbo 使用 Nacos 为注册中心，假设启动服务器IP `10.20.153.10`，端口号`8848`，在 Spring Bean 在 XML 文件中添加以下配置：
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -138,9 +163,9 @@ dubbo.registry.address=nacos://10.20.153.10:8848
 </beans>
 ```
 
-关于nacos配置参数请参考nacos通用参数说明
+关于 nacos 配置参数请参考 nacos 通用参数说明
 
-**注**：Dubbo3.0.0版本以后，增加了是否注册消费者的参数，如果需要将消费者注册到nacos注册中心上，需要将参数(register-consumer-url)设置为true，默认是false。设置方式如下：
+**注**：Dubbo3.0.0版本以后，增加了是否注册消费者的参数，如果需要将消费者注册到 nacos 注册中心上，需要将参数 (register-consumer-url) 设置为 true，默认是 false。设置方式如下：
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -156,7 +181,7 @@ dubbo.registry.address=nacos://10.20.153.10:8848
 </beans>
 ```
 
-重启Dubbo应用后，在Nacos的控制台同样上可看到服务提供者和消费者的的注册元信息：
+重启 Dubbo 应用后，在 Nacos 的控制台同样上可看到服务提供者和消费者的的注册元信息：
 
 ![image-dubbo-registry-nacos-9.png](/static/imgs/blog/dubbo-registry-nacos-9.png)
 
@@ -167,27 +192,3 @@ dubbo.registry.address=nacos://10.20.153.10:8848
 `consumers:` 服务状态详情：
 
 ![image-dubbo-registry-nacos-11.png](/static/imgs/blog/dubbo-registry-nacos-11.png)
-
-### Nacos通用参数说明
-
-参数名 | 中文描述| 默认值
----|---|---
-username|连接Nacos Server的用户名|nacos
-paasword|连接Nacos Server的密码|nacos
-backup|备用地址|空
-namespace|命名空间的ID|public
-group|分组名称|DEFAULT_GROUP
-register-consumer-url|是否注册消费端|false
-com.alibaba.nacos.naming.log.filename|初始化日志文件名|naming.log
-endpoint|连接Nacos Server指定的连接点，可参考[文档](https://nacos.io/zh-cn/blog/address-server.html)|空
-endpointPort|连接Nacos Server指定的连接点端口，可以参考[文档](https://nacos.io/zh-cn/blog/address-server.html)|空
-endpointQueryParams|endpoint查参数询|空
-isUseCloudNamespaceParsing|是否解析云环境中的namespace参数|true
-isUseEndpointParsingRule|是否开启endpoint 参数规则解析|true
-namingLoadCacheAtStart|启动时是否优先读取本地缓存|true
-namingCacheRegistryDir|指定缓存子目录，位置为 .../nacos/{SUB_DIR}/naming|空
-namingClientBeatThreadCount|客户端心跳的线程池大小|机器的CPU数的一半
-namingPollingThreadCount|客户端定时轮询数据更新的线程池大小|机器的CPU数的一半
-namingRequestDomainMaxRetryCount|client通过HTTP向Nacos Server请求的重试次数|3
-namingPushEmptyProtection|在服务没有有效（健康）实例时，是否开启保护，开启后则会使用旧的服务实例|false
-push.receiver.udp.port|客户端UDP的端口|空
