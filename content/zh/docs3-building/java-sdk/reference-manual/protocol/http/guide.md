@@ -4,15 +4,8 @@ title: "使用说明"
 linkTitle: "使用说明"
 weight: 2
 ---
-
-
-基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现
-
-{{% alert title="提示" color="primary" %}}
-`2.3.0` 以上版本支持
-{{% /alert %}}
-
-## 特性
+## 特性说明
+基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现，`2.3.0` 以上版本支持。
 
 * 连接个数：多连接
 * 连接方式：短连接
@@ -22,25 +15,22 @@ weight: 2
 * 适用范围：传入传出参数数据包大小混合，提供者比消费者个数多，可用浏览器查看，可用表单或URL传入参数，暂不支持传文件。
 * 适用场景：需同时给应用程序和浏览器 JS 使用的服务。
 
-## 约束
+#### 约束
 * 参数及返回值需符合 Bean 规范
 
-## 配置
-
+## 使用场景
+## 使用方式
 配置协议：
-
 ```xml
 <dubbo:protocol name="http" port="8080" />
 ```
 
 配置 Jetty Server (默认)：
-
 ```xml
 <dubbo:protocol ... server="jetty" />
 ```
 
 配置 Servlet Bridge Server (推荐使用)：
-
 ```xml
 <dubbo:protocol ... server="servlet" />
 ```
@@ -59,7 +49,7 @@ weight: 2
 </servlet-mapping>
 ```
 
-注意，如果使用 servlet 派发请求：
-
+#### 注意：
+如果使用 servlet 派发请求：
 * 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同，
 * 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。

@@ -3,7 +3,6 @@ type: docs
 title: "使用说明"
 linkTitle: "使用说明"
 weight: 2
-description: "Nacos 元数据中心参考手册"
 ---
 
 #简单介绍
