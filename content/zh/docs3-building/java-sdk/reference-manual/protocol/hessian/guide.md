@@ -15,7 +15,7 @@ Hessian 协议用于集成 Hessian 的服务，Hessian 底层采用 Http 通讯�
 * 传输方式：同步传输
 * 序列化：Hessian二进制序列化
 * 适用范围：传入传出参数数据包较大，提供者比消费者个数多，提供者压力较大，可传文件。
-* 适用场景：页面传输，文件传输，或与原生hessian服务互操作
+* 适用场景：页面传输，文件传输，或与原生hessian服务互操作。
 
 Dubbo 的 Hessian 协议可以和原生 Hessian 服务互操作，即：
 
@@ -27,6 +27,9 @@ Dubbo 的 Hessian 协议可以和原生 Hessian 服务互操作，即：
 * 参数及返回值不能自定义实现 `List`, `Map`, `Number`, `Date`, `Calendar` 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。
 
 ## 使用场景
+hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序列化与反序列化实例。
+
+
 ## 使用方式
 
 #### 依赖
