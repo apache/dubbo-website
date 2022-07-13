@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "Nacos元数据中心"
-linkTitle: "Nacos"
+title: "使用说明"
+linkTitle: "使用说明"
 weight: 2
 description: "Nacos 元数据中心参考手册"
 ---
@@ -373,7 +373,7 @@ configService.publishConfigCas(key, group, content, ticket);
 
 映射信息位于 ```namespace: ‘public’, dataId: ‘{service name}’, group: ‘mapping’```.
 
-![image-dubbo-servicenamemapping.png](images/blog/dubbo-servicenamemapping.png)
+![image-dubbo-servicenamemapping.png](/imgs/blog/dubbo-servicenamemapping.png)
 
 # 完整配置项
 
