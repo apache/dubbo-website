@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "RPC 协议参考手册"
-linkTitle: "RPC 协议参考手册"
+title: "RPC 协议"
+linkTitle: "RPC 协议"
 weight: 4
 ---
 
