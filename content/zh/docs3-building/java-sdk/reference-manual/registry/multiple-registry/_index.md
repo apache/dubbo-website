@@ -51,7 +51,7 @@ dubbo
 
 `default` 用来设置全局默认注册中心，默认值为 `true` 即被视作全局注册中心。未指定注册中心 id 的服务将自动注册或订阅全局默认注册中心。
 
-### 1.2 显示关联服务与注册中心
+### 1.3 显示关联服务与注册中心
 
 通过在 Dubbo 服务定义组件上增加 registry 配置，将服务与注册中心关联起来。
 
@@ -115,7 +115,7 @@ RpcContext.getContext().setAttachment("registry_zone", "qingdao");
 
 根据 Invocation 中带的流量参数或者在当前节点通过 context 上下文设置的参数，流量会被精确的引导到对应的集群。
 
-### 2.1 多注册中心地址聚合
+### 2.2 多注册中心地址聚合
 ```xml
 <dubbo:registry address="multiple://127.0.0.1:2181?separator=;&reference-registry=zookeeper://address11?backup=address12,address13;zookeeper://address21?backup=address22,address23" />
 ```
@@ -163,7 +163,7 @@ CRM 有些服务是专门为国际站设计的，有些服务是专门为中文�
 <dubbo:service interface="com.alibaba.hello.api.DemoService" version="1.0.0" ref="demoService" registry="intlRegistry" />
 ```
 
-### 3.3 场景三：
+### 3.3 场景三
 
 CRM 需同时调用中文站和国际站的 PC2 服务，PC2 在中文站和国际站均有部署，接口及版本号都一样，但连的数据库不一样。
 
