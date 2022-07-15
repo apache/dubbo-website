@@ -6,13 +6,13 @@ weight: 2
 description: "以 API 的方式来配置你的 Dubbo 应用"
 ---
 
-通过API编码方式组装配置、启动 Dubbo、发布及订阅服务。此方式可以支持动态创建 ReferenceConfig/ServiceConfig，结合泛化调用可以满足 API Gateway 或测试平台的需要。
+通过 API 编码方式组装配置、启动 Dubbo、发布及订阅服务。此方式可以支持动态创建 ReferenceConfig/ServiceConfig，结合泛化调用可以满足 API Gateway 或测试平台的需要。
 
-> 参考[API示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api)
+> 参考 [API示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api)
 
 ## 服务提供者
 
-通过ServiceConfig暴露服务接口，发布服务接口到注册中心。
+通过 ServiceConfig 暴露服务接口，发布服务接口到注册中心。
 
 > 注意：为了更好支持 Dubbo3 应用级服务发现，推荐使用新的 [DubboBootstrap API](#bootstrap-api)。
 
@@ -103,7 +103,7 @@ public class DemoConsumer {
 
 ## Bootstrap API
 
-通过 DubboBootstrap API 可以减少重复配置，更好控制启动过程，支持批量发布/订阅服务接口，还可以更好支持Dubbo3的应用级服务发现。
+通过 DubboBootstrap API 可以减少重复配置，更好控制启动过程，支持批量发布/订阅服务接口，还可以更好支持 Dubbo3 的应用级服务发现。
 
 ```java
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
@@ -200,11 +200,15 @@ public class DemoConsumer {
 
 ## 其它配置
 
+- 基本配置
+- 方法级配置
+- 点对点直连
+
 API 提供了最灵活丰富的配置能力，以下是一些可配置组件示例。
 
-### 基本配置
+#### 基本配置
 
-可以在DubboBootstrap中设置全局基本配置，包括应用配置、协议配置、注册中心、配置中心、元数据中心、模块、监控、SSL、provider配置、consumer配置等。
+可以在 DubboBootstrap 中设置全局基本配置，包括应用配置、协议配置、注册中心、配置中心、元数据中心、模块、监控、SSL、provider 配置、consumer 配置等。
 
 ```java
 // 注册中心
@@ -269,7 +273,7 @@ DubboBootstrap.getInstance()
 
 ```
 
-### 方法级设置
+#### 方法级设置
 
 ```java
 ...
@@ -290,7 +294,7 @@ reference.setMethods(methods); // 设置方法级配置
 ...
 ```
 
-### 点对点直连
+#### 点对点直连
 
 ```java
 
@@ -305,4 +309,3 @@ reference.setUrl("dubbo://10.20.130.230:20880/com.xxx.DemoService");
 
 ...
 ```
-

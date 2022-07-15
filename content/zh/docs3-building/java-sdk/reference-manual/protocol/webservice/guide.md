@@ -25,6 +25,7 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 * 参数尽量使用基本类型和 POJO
 
 ## 使用场景
+发布一个服务（对内/对外），不考虑客户端类型，不考虑性能，建议使用webservice。服务端已经确定使用webservice，客户端不能选择，必须使用webservice。
 ## 使用方式
 #### 依赖
 ```xml
