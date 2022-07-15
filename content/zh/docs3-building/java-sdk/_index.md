@@ -7,17 +7,14 @@ weight: 3
 #hide_summary: true
 content:
   - 快速开始:
-    - "[Spring Boot 快速开始](quick-start/)"
-  - 概念与架构:
-    - "[性能与基准测试](concepts-and-architecture/)"
+    - "[Spring Boot 快速开发 Dubbo 服务](quick-start/spring-boot/)"
+    - "[配置参考手册](reference-manual/config/)"
   - 高级特性:
-    - "[常用高级配置方式](advanced-features-and-usage/)"
+    - "[扩展 Filter、Router 拦截流量](advanced-features-and-usage/)"
   - 参考手册:
-    - "[可扩展性：Filter、Router 等](reference-manual/)"
-    - "[元数据中心与服务测试](reference-manual/)"
+    - "[注册中心配置指南](reference-manual/registry/)"
   - 升级与兼容性:
     - "[3.0 迁移指南](upgrades-and-compatibility/)"
-    - "[Triple 协议与Stream 流式接口](upgrades-and-compatibility/)"
 ---
 
 {{% docs/content_box %}}
