@@ -1,13 +1,13 @@
 
 ---
 type: docs
-title: "Spring Boot 快速开发 Dubbo 服务"
-linkTitle: "快速开始"
-weight: 3
-description: "示例演示了如何使用 Dubbo Spring Boot Starter 方式快速开发 Dubbo 应用。"
+title: "Spring Boot"
+linkTitle: "Spring Boot 开发服务"
+weight: 1
+description: "示例演示了如何使用 Spring Boot 方式快速开发 Dubbo 应用。"
 ---
 
-> Dubbo 还提供了包括XML、API 等多种启动与接入方式，更多开发方式和配置细节可参见[配置手册](../references/configuration/)。
+> Dubbo 还提供了包括[XML](../../reference-manual/config/xml)、[API](../../reference-manual/config/api)等多种启动与接入方式，更多开发方式和配置细节可参见[配置手册](../../reference-manual/config/)。
 
 ## 下载示例代码
 完整示例代码在 [dubbo-samples](https://github.com/apache/dubbo-samples/dubbo-samples-spring-boot) 中
@@ -50,6 +50,9 @@ java -jar ./target/dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar
 ```
 
 ## 详细解释
+
+### 示例架构
+
 
 ### 定义服务接口
 
