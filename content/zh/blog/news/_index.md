@@ -2,7 +2,7 @@
 ---
 title: "社区动态"
 linkTitle: "社区动态"
-weight: 30
+weight: 10
 ---
 
 
