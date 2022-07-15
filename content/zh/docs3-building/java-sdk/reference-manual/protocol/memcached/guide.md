@@ -10,6 +10,7 @@ weight: 2
 [Memcached](http://memcached.org/) 是一个高效的 KV 缓存服务器。
 
 ## 使用场景
+缓解数据库压力，提高交互速度等。
 ## 使用方式
 #### 注册 memcached 服务的地址
 ```java
