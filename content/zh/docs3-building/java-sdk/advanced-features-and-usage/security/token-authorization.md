@@ -11,7 +11,7 @@ description: "了解 dubbo3 权限控制的配置和使用"
 另外通过注册中心可灵活改变授权方式，而不需修改或升级提供者。
 
 ![/user-guide/images/dubbo-token.jpg](/imgs/user/dubbo-token.jpg)
-### 设置类型：
+#### 设置类型：
 - 全局设置
 - 服务级别设置
 
