@@ -21,7 +21,5 @@ registry.register(URL.valueOf("override://0.0.0.0/com.foo.BarService?category=co
 * `mock=force:return+null` 表示消费方对该服务的方法调用都直接返回 null 值，不发起远程调用。用来屏蔽不重要服务不可用时对调用方的影响。
 * 还可以改为 `mock=fail:return+null` 表示消费方对该服务的方法调用在失败后，再返回 null 值，不抛异常。用来容忍不重要服务不稳定时对调用方的影响。
 
-{{% alert title="提示" color="primary" %}}
+#### 提示：
 `2.2.0` 以上版本支持
-{{% /alert %}}
-
