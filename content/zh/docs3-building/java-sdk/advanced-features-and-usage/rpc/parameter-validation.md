@@ -33,6 +33,10 @@ description: "在 dubbo3 中进行参数校验"
 
 服务端在向外提供接口服务时，解决各种接口参数校验问题。
 
+## 参考用例
+
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation)
+
 ## 使用方式
 
 #### 参数标注示例
@@ -201,7 +205,6 @@ public class ValidationConsumer {
 ```
 
 #### 提示：
-自 `2.1.0` 版本开始支持, 如何使用 [dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation)
 
 验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](../../../reference-manual/spi/description/validation)
 
