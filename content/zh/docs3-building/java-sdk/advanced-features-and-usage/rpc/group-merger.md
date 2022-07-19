@@ -65,6 +65,3 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
     <dubbo:method name="getMenuItems" merger=".addAll" />
 </dubbo:reference>
 ```
-
-#### 提示：
-从 `2.1.0` 版本开始支持
