@@ -2,7 +2,7 @@
 type: docs
 title: "指定 IP 调用"
 linkTitle: "运行时指定 IP 调用"
-weight: 4
+weight: 5
 description: "在发起 Dubbo 调用之前指定本次调用的目标 IP"
 ---
 
