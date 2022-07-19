@@ -8,14 +8,15 @@ description: "以 Spring XML 开发 Dubbo 应用"
 
 Dubbo 有基于 Spring Schema 扩展的自定义配置组件，使用 XML 能达到的配置能力总体与 [配置参考手册](../properties) 对等。
 
-## 使用讲解
+
 以下内容的完整示例请参考 [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-basic)
 
-### 服务提供者
+## 服务提供者
 
-### 定义服务接口
 
-DemoService.java [^1]：
+#### 定义服务接口
+
+DemoService.java：
 
 ```java
 package org.apache.dubbo.demo;
@@ -25,9 +26,9 @@ public interface DemoService {
 }
 ```
 
-### 在服务提供方实现接口
+#### 在服务提供方实现接口
 
-DemoServiceImpl.java [^2]：
+DemoServiceImpl.java：
 
 ```java
 package org.apache.dubbo.demo.provider;
@@ -40,7 +41,7 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-### 用 Spring 配置声明暴露服务
+#### 用 Spring 配置声明暴露服务
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -64,7 +65,7 @@ public class DemoServiceImpl implements DemoService {
 </beans>
 ```
 
-### 加载 Spring 配置
+#### 加载 Spring 配置
 
 ```java
 public class DemoServiceImpl implements DemoService {
@@ -77,7 +78,7 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-### 服务消费者
+## 服务消费者
 
 #### 通过 Spring 配置引用远程服务
 
