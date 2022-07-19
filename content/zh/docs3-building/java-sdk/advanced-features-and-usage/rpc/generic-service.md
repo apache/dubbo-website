@@ -9,19 +9,25 @@ description: "不需要服务端API的RPC调用"
 ## 特性说明
 
 泛化调用是指在调用方没有服务方提供的API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。
+
 ## 使用场景
+
 泛化调用主要用于实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求。比如如下场景：
 
-①网关服务：如果要搭建一个网关服务，那么服务网关要作为所有RPC服务的调用端。但是网关本身不应该依赖于服务提供方的接口API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。
+1. 网关服务：如果要搭建一个网关服务，那么服务网关要作为所有RPC服务的调用端。但是网关本身不应该依赖于服务提供方的接口API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。
 
-②测试平台：如果要搭建一个可以测试RPC调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的RPC服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口API。所以需要泛化调用的支持。
+2. 测试平台：如果要搭建一个可以测试RPC调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的RPC服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口API。所以需要泛化调用的支持。
 
 ## 使用方式
+
 demo可见[dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-generic)
 
 API部分以此demo为例讲解使用方式。
+
 ### 服务定义
+
 #### 服务接口
+
 ``` java
 public interface HelloService {
 
@@ -35,7 +41,9 @@ public interface HelloService {
 }
 
 ```
+
 #### 服务实现类
+
 ``` java
 public class HelloServiceImpl implements HelloService {
 
@@ -94,14 +102,17 @@ public class HelloServiceImpl implements HelloService {
 }
 
 ```
+
 ### 通过API使用泛化调用
+
 #### 服务启动方
-①在设置ServiceConfig时，使用setGeneric("true")来开启泛化调用
 
-②在设置ServiceConfig时，使用setRef指定实现类时，要设置一个GenericService的对象。而不是真正的服务实现类对象
+1. 在设置 `ServiceConfig` 时，使用`setGeneric("true")`来开启泛化调用
 
+2. 在设置 `ServiceConfig` 时，使用setRef指定实现类时，要设置一个 `GenericService` 的对象。而不是真正的服务实现类对象
 
-③其他设置与正常Api服务启动一致即可
+3. 其他设置与正常Api服务启动一致即可
+
 ``` java
 private static String zookeeperAddress = "zookeeper://" + System.getProperty("zookeeper.address", "127.0.0.1") + ":2181";
 
@@ -136,17 +147,17 @@ private static String zookeeperAddress = "zookeeper://" + System.getProperty("zo
     }
 }
 ```
+
 #### 泛化调用方
 步骤：
 
-①在设置ReferenceConfig时，使用setGeneric("true")来开启泛化调用
+1. 在设置 `ReferenceConfig` 时，使用 `setGeneric("true")` 来开启泛化调用
 
-②配置完ReferenceConfig后，使用referenceConfig.get()获取到GenericService类的实例
+2. 配置完 `ReferenceConfig` 后，使用 `referenceConfig.get()` 获取到 `GenericService` 类的实例
 
+3. 使用其 `$invoke` 方法获取结果
 
-③使用其$invoke方法获取结果
-
-④其他设置与正常Api服务启动一致即可
+4. 其他设置与正常 Api 服务启动一致即可
 
 ``` java
     //定义泛化调用服务类
@@ -193,21 +204,24 @@ private static String zookeeperAddress = "zookeeper://" + System.getProperty("zo
         System.err.println("invokeSayHello(return): " + result);
         latch.await();
     }
-
 ```
+
 ### 通过Spring使用泛化调用
 Spring中服务暴露与服务发现有多种使用方式，如xml，注解。这里以xml为例。
 步骤：
 
-①生产者端无需改动
+1. 生产者端无需改动
 
-②消费者端原有的reference标签加上generic=true的属性。
+2. 消费者端原有的 `dubbo:reference` 标签加上 `generic=true` 的属性。
+
 ``` xml
    <dubbo:reference id="helloService" generic = "true" interface="org.apache.dubbo.samples.generic.call.api.HelloService"/>
 ```
-③获取到Bean容器，通过Bean容器拿到GenericService实例。
 
-④调用$invoke方法获取结果
+3. 获取到 Bean 容器，通过 Bean 容器拿到 `GenericService` 实例。
+
+4. 调用 `$invoke` 方法获取结果
+
 ``` java
 
     private static GenericService genericService;
@@ -221,45 +235,11 @@ Spring中服务暴露与服务发现有多种使用方式，如xml，注解。�
         Object result = genericService.$invoke("sayHello", new String[]{"java.lang.String"}, new Object[]{"world"});
     }
 ```
-## 注意事项
 
-①如果参数为基本类型或者Date,List,Map等，则不需要转换，直接调用。
 
-②如果参数为其他POJO，则使用Map代替。
-
-如：
-``` java
-public class Student {
-    String name;
-    int age;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-}
-
-```
-在调用时应该转换为：
-``` java
-Map<String, Object> student = new HashMap<String, Object>();
-student.put("name", "xxx");
-student.put("age", "xxx");
-```
-③对于其他序列化格式，需要特殊配置
 ### Protobuf对象泛化调用
-一般泛化调用只能用于生成的服务参数为POJO的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常POJO，可以通过 protobuf-json 泛化调用。  
+
+一般泛化调用只能用于生成的服务参数为POJO的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常POJO，可以通过 protobuf-json 泛化调用。
 
 GoogleProtobuf 序列化相关的Demo可以参考 [protobuf-demo](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-protobuf)
 
@@ -352,3 +332,45 @@ Google Protobuf 对象缺少标准的 JSON 格式，生成的服务元数据信�
 ```
 
 从服务元数据中也可以比较容易构建泛化调用对象。
+
+
+## 注意事项
+
+1. 如果参数为基本类型或者Date,List,Map等，则不需要转换，直接调用。
+
+2. 如果参数为其他POJO，则使用Map代替。
+
+如：
+``` java
+public class Student {
+    String name;
+    int age;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+```
+
+在调用时应该转换为：
+
+``` java
+Map<String, Object> student = new HashMap<String, Object>();
+student.put("name", "xxx");
+student.put("age", "xxx");
+```
+
+3. 对于其他序列化格式，需要特殊配置

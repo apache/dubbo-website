@@ -22,11 +22,11 @@ RpcContext 是一个 ThreadLocal 的临时状态记录器，当接收到 RPC 请
 // 远程调用
 xxxService.xxx();
 // 本端是否为消费端，这里会返回true
-boolean isConsumerSide = RpcContext.getContext().isConsumerSide();
+boolean isConsumerSide = RpcContext.getServiceContext().isConsumerSide();
 // 获取最后一次调用的提供方IP地址
-String serverIP = RpcContext.getContext().getRemoteHost();
+String serverIP = RpcContext.getServiceContext().getRemoteHost();
 // 获取当前服务配置信息，所有配置信息都将转换为URL的参数
-String application = RpcContext.getContext().getUrl().getParameter("application");
+String application = RpcContext.getServiceContext().getUrl().getParameter("application");
 // 注意：每发起RPC调用，上下文状态会变化
 yyyService.yyy();
 ```
@@ -38,15 +38,15 @@ public class XxxServiceImpl implements XxxService {
  
     public void xxx() {
         // 本端是否为提供端，这里会返回true
-        boolean isProviderSide = RpcContext.getContext().isProviderSide();
+        boolean isProviderSide = RpcContext.getServiceContext().isProviderSide();
         // 获取调用方IP地址
-        String clientIP = RpcContext.getContext().getRemoteHost();
+        String clientIP = RpcContext.getServiceContext().getRemoteHost();
         // 获取当前服务配置信息，所有配置信息都将转换为URL的参数
-        String application = RpcContext.getContext().getUrl().getParameter("application");
+        String application = RpcContext.getServiceContext().getUrl().getParameter("application");
         // 注意：每发起RPC调用，上下文状态会变化
         yyyService.yyy();
         // 此时本端变成消费端，这里会返回false
-        boolean isProviderSide = RpcContext.getContext().isProviderSide();
+        boolean isProviderSide = RpcContext.getServiceContext().isProviderSide();
     } 
 }
 ```

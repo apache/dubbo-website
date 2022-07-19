@@ -124,7 +124,3 @@ callbackService.addListener("foo.bar", new CallbackListener(){
     }
 });
 ```
-
-#### 提示：
-`2.0.6` 及其以上版本支持
-
