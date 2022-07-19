@@ -97,8 +97,6 @@ public class DemoService {
 
 ### 使用 force 和 fail 关键字来配置 Mock 的行为
 
-在 `2.6.6` 以上的版本，可以开始在 Spring XML 配置文件中使用 `fail:` 和 `force:`。
-
 `force:` 代表强制使用 Mock 行为，在这种情况下不会走远程调用。
 
 `fail:` 与默认行为一致，只有当远程调用发生错误时才使用 Mock 行为。也就是说，配置的时候其实是可以不使用 `fail` 关键字的，直接使用 `throw` 或者 `return` 就可以了。 

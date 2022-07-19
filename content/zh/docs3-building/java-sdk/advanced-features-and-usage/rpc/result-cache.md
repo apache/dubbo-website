@@ -34,6 +34,3 @@ description: "通过缓存结果加速访问速度"
     <dubbo:method name="findBar" cache="lru" />
 </dubbo:reference>
 ```
-
-#### 提示：
-`2.1.0` 以上版本支持。

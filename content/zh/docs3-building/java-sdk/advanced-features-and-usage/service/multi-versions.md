@@ -5,6 +5,7 @@ linkTitle: "服务分版本"
 weight: 1
 description: "在 Dubbo 中为同一个服务配置多个版本"
 ---
+
 ## 特性说明
 按照以下的步骤进行版本迁移：
 
@@ -18,6 +19,11 @@ description: "在 Dubbo 中为同一个服务配置多个版本"
 
 ## 使用场景
 当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。
+
+## 参考用例
+
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version)
+
 ## 使用方式
 - 服务提供者
 老版本服务提供者配置：
@@ -44,5 +50,3 @@ description: "在 Dubbo 中为同一个服务配置多个版本"
 ```xml
 <dubbo:reference id="barService" interface="com.foo.BarService" version="*" />
 ```
-#### 提示：
-`2.2.0` 以上版本支持

@@ -7,7 +7,7 @@ weight: 3
 description: "了解 dubbo3 减少注册中心上服务的注册数据"
 ---  
 
-## 特性说明：
+## 特性说明
 
 Dubbo provider 中的服务配置项有接近 [30 个配置项](/zh/docs/references/xml/dubbo-parameter)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
 
@@ -25,27 +25,27 @@ Dubbo consumer 中的配置项也有 [20+个配置项](/zh/docs/references/xml/d
 
 provider：
 
-| Constant Key  | Key  | remark |  
-| ------ | ------ | ------ |  
-| APPLICATION_KEY | application |  |  
-| CODEC_KEY | codec |  |  
-| EXCHANGER_KEY | exchanger |   |  
+| Constant Key  | Key           | remark |  
+| ------ |---------------| ------ |  
+| APPLICATION_KEY | application   |  |  
+| CODEC_KEY | codec         |  |  
+| EXCHANGER_KEY | exchanger     |   |  
 | SERIALIZATION_KEY | serialization |   |  
-| CLUSTER_KEY | cluster |  |  
-| CONNECTIONS_KEY | connections |   |  
-| DEPRECATED_KEY | deprecated |  |  
-| GROUP_KEY | group |   |  
-| LOADBALANCE_KEY | loadbalance |  |  
-| MOCK_KEY | mock |  |  
-| PATH_KEY | path |  |  
-| TIMEOUT_KEY | timeout |  |  
-| TOKEN_KEY | token |  |  
-| VERSION_KEY | version |  |  
-| WARMUP_KEY | warmup |  |  
-| WEIGHT_KEY | weight |  |  
-| TIMESTAMP_KEY | timestamp |  |  
-| DUBBO_VERSION_KEY | dubbo |  |  
-| SPECIFICATION_VERSION_KEY | **specVersion** | 新增，用于表述dubbo版本，如2.7.0 |  
+| CLUSTER_KEY | cluster       |  |  
+| CONNECTIONS_KEY | connections   |   |  
+| DEPRECATED_KEY | deprecated    |  |  
+| GROUP_KEY | group         |   |  
+| LOADBALANCE_KEY | loadbalance   |  |  
+| MOCK_KEY | mock          |  |  
+| PATH_KEY | path          |  |  
+| TIMEOUT_KEY | timeout       |  |  
+| TOKEN_KEY | token         |  |  
+| VERSION_KEY | version       |  |  
+| WARMUP_KEY | warmup        |  |  
+| WEIGHT_KEY | weight        |  |  
+| DUBBO_VERSION_KEY | dubbo         |  |  
+| RELEASE_KEY | release       |  |  
+| SIDE_KEY | side          |  |  
 
 
 consumer：
@@ -56,7 +56,6 @@ consumer：
 | VERSION_KEY |  version |  |  
 | GROUP_KEY | group |  |  
 | DUBBO_VERSION_KEY | dubbo |  |  
-| SPECIFICATION_VERSION_KEY | **specVersion** | 新增，用于表述dubbo版本，如2.7.0 |  
 
 Constant Key 表示来自于类 org.apache.dubbo.common.Constants 的字段。
 
