@@ -14,6 +14,10 @@ Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环
 
 获取当前的每层路由的分组状态。（仅支持 StateRouter）
 
+命令：`getRouterSnapshot {serviceName}`
+
+`serviceName` 为需要采集的服务名，支持匹配
+
 ```
 dubbo>getRouterSnapshot com.dubbo.dubbointegration.BackendService
 com.dubbo.dubbointegration.BackendService@2c2e824a
@@ -80,7 +84,7 @@ dubbo>
 
 ## getRecentRouterSnapshot 命令
 
-通过 qos 命令获取历史的路由状态。
+通过 qos 命令获取历史的路由状态。（最多存储 32 个结果）
 
 ```
 dubbo>getRecentRouterSnapshot
