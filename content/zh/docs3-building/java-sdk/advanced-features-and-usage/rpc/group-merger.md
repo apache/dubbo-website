@@ -22,19 +22,19 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 
 ## 使用方式
 
-搜索所有分组
+**搜索所有分组**
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*" merger="true" />
 ```
 
-合并指定分组
+**合并指定分组**
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="aaa,bbb" merger="true" />
 ```
 
-指定方法合并结果，其它未指定的方法，将只调用一个 Group
+**指定方法合并结果**，其它未指定的方法，将只调用一个 Group
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">
@@ -42,7 +42,7 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 </dubbo:reference>
 ```
 
-某个方法不合并结果，其它都合并结果
+**某个方法不合并结果**，其它都合并结果
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*" merger="true">
@@ -50,7 +50,7 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 </dubbo:reference>
 ```
 
-指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称 [合并结果扩展](../../../reference-manual/spi/description/merger)
+**指定合并策略**，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称 [合并结果扩展](../../../reference-manual/spi/description/merger)
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">
@@ -58,10 +58,13 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 </dubbo:reference>
 
 ```
-指定合并方法，将调用返回结果的指定方法进行合并，合并方法的参数类型必须是返回结果类型本身
+**指定合并方法**，将调用返回结果的指定方法进行合并，合并方法的参数类型必须是返回结果类型本身
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">
     <dubbo:method name="getMenuItems" merger=".addAll" />
 </dubbo:reference>
 ```
+
+#### 提示：
+从 `2.1.0` 版本开始支持
