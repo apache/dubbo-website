@@ -60,7 +60,7 @@ Dubbo 加载扩展的整个流程如下：
 
 ## 如何使用 Dubbo 扩展能力进行扩展
 
-下面以扩展注册中心为例进行说明如何利用 Dubbo 提供的扩展能力扩展 Triple 协议。
+下面以扩展协议为例进行说明如何利用 Dubbo 提供的扩展能力扩展 Triple 协议。
 
 (1) 在协议的实现 jar 包内放置文本文件：META-INF/dubbo/org.apache.dubbo.remoting.api.WireProtocol
 ```text

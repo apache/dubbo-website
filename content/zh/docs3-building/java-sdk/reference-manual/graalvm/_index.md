@@ -2,6 +2,8 @@
 type: docs
 title: "Dubbo 集成 Graalvm参考手册"
 linkTitle: "Dubbo 集成 Graalvm参考手册"
+toc_hide: true
+hide_summary: true
 weight: 9
 description: ""
 ---

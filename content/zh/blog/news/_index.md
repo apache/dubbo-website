@@ -1,8 +1,8 @@
 
 ---
-title: "技术分享"
-linkTitle: "技术分享"
-weight: 20
+title: "社区动态"
+linkTitle: "社区动态"
+weight: 10
 ---
 
 

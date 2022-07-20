@@ -25,6 +25,10 @@ Apache Dubbo 诞生于阿里巴巴微服务实践之中，在开源之后深受�
 </p>
 
 {{< cardpane >}}
+  {{< card header="阿里云服务治理平台 MSE" >}}
+阿里云基于 Dubbo 构建了微服务引擎产品 - MSE。MSE 支持 Zookeeper、Nacos 等官方扩展，同时在 Dubbo 上构建了丰富的服务治理能力。<br/><br/>
+<a href='https://www.aliyun.com/product/aliware/mse?spm=dubbo-website.topbar.0.0.0' target='_blank'>了解更多</a>
+  {{< /card >}}
   {{< card header="阿里巴巴的 Dubbo3 落地实践" >}}
 阿里巴巴电商核心系统已成功升级到 Dubbo3 版本，用于取代上一代 HSF2 服务框架，2022 年起双 11 核心链路都将跑在 Dubbo3 之上。<br/><br/>
 <a href='{{< relref "alibaba" >}}'>了解更多</a>
@@ -35,13 +39,9 @@ Apache Dubbo 诞生于阿里巴巴微服务实践之中，在开源之后深受�
   <a href='{{< relref "icbc" >}}'>了解更多</a>
   {{< /card >}}
 
-  {{< card header="小米的 Dubbo3 实践" >}}
-  小米对 Dubbo 多语言版本 Java、Golang 都有着广泛的使用。<br/><br/>
-  <a href='{{< relref "xiaomi" >}}'>了解更多</a>
-  {{< /card >}}
 {{< /cardpane >}}
 
-  {{< cardpane >}}
+{{< cardpane >}}
   {{< card header="饿了么全站成功升级 Dubbo3" >}}
   饿了么当前有接近 2000 应用、10 万实例跑在 Dubbo3 之上，通过应用级服务发现与 Triple 协议解决了跨单元的互联互通问题。<br/><br/>
   <a href='{{< relref "eleme" >}}'>了解更多</a>
@@ -54,8 +54,13 @@ Apache Dubbo 诞生于阿里巴巴微服务实践之中，在开源之后深受�
   烽火递的所有新业务都使用 Dubbo3 构建，由于没有 dubbo2 的迁移成本，业务得以很快的稳定上线，新业务都跑在 Dubbo3 的新特性之上。<br/><br/>
   <a href='{{< relref "fenghuodi" >}}'>了解更多</a>
   {{< /card >}}
-  {{< /cardpane >}}
+{{< /cardpane >}}
 
+{{< cardpane >}}
+  {{< card header="小米的 Dubbo3 实践" >}}
+  小米对 Dubbo 多语言版本 Java、Golang 都有着广泛的使用。<br/><br/>
+  <a href='{{< relref "xiaomi" >}}'>了解更多</a>
+{{< /card >}}
 
 </div>
 </div>

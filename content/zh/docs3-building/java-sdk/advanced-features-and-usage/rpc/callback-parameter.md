@@ -5,13 +5,23 @@ linkTitle: "服务端对客户端进行回调"
 weight: 9
 description: "通过参数回调从服务器端调用客户端逻辑"
 ---
-
+## 特性说明
 参数回调方式与调用本地 callback 或 listener 相同，只需要在 Spring 的配置文件中声明哪个参数是 callback 类型即可。Dubbo 将基于长连接生成反向代理，这样就可以从服务器端调用客户端逻辑。可以参考 [dubbo 项目中的示例代码](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-callback)。
+#### 配置
+- 服务提供者
+- 服务消费者
+#### 接口类型
+- 服务提供者接口
+- 服务接口
 
+## 使用场景
+
+回调函数通知客户端执行结果，或发送通知，在方法执行时间比较长时，类似异步调用，审批工作流中回调客户端审批结果。
+
+## 使用方式
 #### 服务接口示例
 
 ###### CallbackService.java
-
 ```java
 package com.callback;
  
@@ -114,7 +124,3 @@ callbackService.addListener("foo.bar", new CallbackListener(){
     }
 });
 ```
-
-{{% alert title="提示" color="primary" %}}
-`2.0.6` 及其以上版本支持
-{{% /alert %}}

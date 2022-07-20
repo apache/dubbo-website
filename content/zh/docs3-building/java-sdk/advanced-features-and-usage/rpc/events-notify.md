@@ -3,14 +3,20 @@ type: docs
 title: "调用触发事件通知"
 linkTitle: "调用触发事件通知"
 weight: 8
-description: "在调用之前、调用之后、出现异常时的事件通知"
+description: "在调用前后出现异常时的事件通知"
 ---
-
+## 特性说明
 在调用之前、调用之后、出现异常时，会触发 `oninvoke`、`onreturn`、`onthrow` 三个事件，可以配置当事件发生时，通知哪个类的哪个方法。
 
-{{% alert title="提示" color="primary" %}}
-支持版本：`2.0.7` 之后
-{{% /alert %}}
+## 参考用例
+
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify)
+
+## 使用场景
+
+调用服务方法前我们可以记录开始时间，调用结束后统计整个调用耗费，发生异常时我们可以告警或打印错误日志或者调用服务前后记录请求日志、响应日志等。
+
+## 使用方式
 
 #### 服务提供者与消费者共享服务接口
 
@@ -19,7 +25,7 @@ interface IDemoService {
     public Person get(int id);
 }
 ```
-
+- 服务提供者
 #### 服务提供者实现
 
 ```java
@@ -38,7 +44,7 @@ class NormalDemoService implements IDemoService {
 <bean id="demoService" class="org.apache.dubbo.callback.implicit.NormalDemoService" />
 <dubbo:service interface="org.apache.dubbo.callback.implicit.IDemoService" ref="demoService" version="1.0.0" group="cn"/>
 ```
-
+- 服务消费者
 #### 服务消费者 Callback 接口
 
 ```java
@@ -68,25 +74,21 @@ class NotifyImpl implements Notify {
 
 #### 服务消费者 Callback 配置
 
+两者叠加存在以下几种组合情况：
+
+* 异步回调模式：`async=true onreturn="xxx"`
+* 同步回调模式：`async=false onreturn="xxx"`
+* 异步无回调 ：`async=true`
+* 同步无回调 ：`async=false`
+
+`callback` 与 `async` 功能正交分解，`async=true` 表示结果是否马上返回，`async=false` 默认，`onreturn` 表示是否需要回调。
 ```xml
 <bean id ="demoCallback" class = "org.apache.dubbo.callback.implicit.NotifyImpl" />
 <dubbo:reference id="demoService" interface="org.apache.dubbo.callback.implicit.IDemoService" version="1.0.0" group="cn" >
       <dubbo:method name="get" async="true" onreturn = "demoCallback.onreturn" onthrow="demoCallback.onthrow" />
 </dubbo:reference>
 ```
-
-`callback` 与 `async` 功能正交分解，`async=true` 表示结果是否马上返回，`onreturn` 表示是否需要回调。  
-
-两者叠加存在以下几种组合情况：
-
-* 异步回调模式：`async=true onreturn="xxx"`  
-* 同步回调模式：`async=false onreturn="xxx"`  
-* 异步无回调 ：`async=true`  
-* 同步无回调 ：`async=false` 
-
-{{% alert title="提示" color="primary" %}}
-`async=false` 默认
-{{% /alert %}}
+ 
 
 #### 测试代码
 

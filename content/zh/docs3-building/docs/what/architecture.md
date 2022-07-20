@@ -33,11 +33,11 @@ Dubbo2 开始 Dubbo 就提供了丰富服务治理规则，包括路由规则、
 
 一方面 Dubbo3 正在通过对接 xDS 对接到时下流行的 Mesh 产品如 Istio 中所使用的以 VirtualService、DestinationRule 为代表的治理规则，另一方面 Dubbo 正寻求设计一套自有规则以实现在不通部署场景下的流量治理，以及灵活的治理能力。
 
-* [Dubbo2 服务治理规则]()
+* [Dubbo2 服务治理规则](../../tasks/traffic-management)
 * Dubbo3 服务治理规则
 
 ## Dubbo Mesh
-Dubbo Mesh 既有对业务通用产品如 Istio 的适配，又有集成
+Dubbo Mesh 的目标是提供适应 Dubbo 体系的完整 Mesh 解决方案，包含定制化控制面（Control Plane）、定制化数据面解决方案。Dubbo 控制面基于业界主流 Istio 扩展，支持更丰富的流量治理规则、Dubbo应用级服务发现模型等，Dubbo 数据面可以采用 Envoy Sidecar，即实现 Dubbo SDK + Envoy 的部署方案，也可以采用 Dubbo Proxyless 模式，直接实现 Dubbo 与控制面的通信。Dubbo Mesh 在快速演进中，我们将努力保持文档内容的更新。
 
 ![mix-mesh](/imgs/v3/mesh/mix-mesh.png)
 
