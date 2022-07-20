@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "如何准备 Apache Release"
-linkTitle: "发版准备"
+title: "Java SDK Release 流程"
+linkTitle: "Java SDK Release"
 weight: 2
 ---
 
@@ -169,40 +169,6 @@ $ mvn deploy
 ```
 
 上述命令将snapshot包推送到maven中央仓库
-
-### ~~用maven-release-plugin发布~~ (`废弃`，参考后一步)
-
-~~先用dryRun验证是否ok~~
-
-```shell
-$ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID-DdryRun=true
-```
-
-~~验证通过后，执行release:prepare~~
-
-```shell
-$ mvn release:clean
-$ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
-```
-
-> 执行release插件时，如果指定了`-DpushChanges=true`, 插件会自动提交到远端的GitHub仓库中，此时就需要输入GitHub的密码，注意不是输入web页面的登录密码，而是一个`Personal access tokens`，获取方式详见[这里](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line)
-
-> 这里有一点要注意的是tag， 在执行过程中，需要选择发布的artifactId, 下一个版本artifactId以及发布版本的tag, tag默认的是dubbo-parent-xxxx，需要改成dubbo-xxxx
-
-执行完上述步骤后，你会发现：
-1. `source-release.zip` 和 `bin-release.zip`包已经生成在`dubbo-distribution`目录下，请解压并检查文件是否完整
-2. 本地已经打出相应的tag，同时新增一个commit，名叫`[maven-release-plugin] prepare release dubbo-x.x.x`
-3. 分支版本自动升级为`${release_version+1}-SNAPSHOT`，同时新增一个commit，名叫`[[maven-release-plugin] prepare for next development iteration`
-
-> 如果指定了`-DpushChanges=true`, 则本地提交会自动推送到远端的GitHub仓库。根据经验，建议不要指定为true，请设置为false，待本地检查通过之后再手动提交
-
-~~执行release:perform，做staging发布~~
-
-```shell
-$ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID
-```
-
-此时插件会自动下载远端的tag对应的源码，编译后，将所有Artifacts发布到配置的远程[maven仓库](http://repository.apache.org)，处于staging状态。
 
 ### 使用mvn deploy进行deploy
 
