@@ -4,6 +4,7 @@ type: docs
 title: "联系社区"
 linkTitle: "联系社区"
 description: "联系社区，Dubbo 社区贡献指南"
+weight: 1000
 ---
 
 ## 为 Dubbo 做贡献

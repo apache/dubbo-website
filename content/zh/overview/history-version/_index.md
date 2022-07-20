@@ -1,14 +1,12 @@
 
 ---
 type: docs
-title: "用户手册"
-linkTitle: "用户手册"
-weight: 5
-no_list: true
+title: "查看历史版本文档"
+linkTitle: "查看历史版本文档"
+weight: 100000
 ---
 
-
-{{< blocks/section color="white" height="auto" >}}
+{{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
     <div class="lead"></div><header class="article-meta">
     </header><div class="row">
@@ -16,9 +14,9 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href='{{< relref "../../java-sdk" >}}'>Java SDK</a>
+                    <a target="_blank" href='{{< relref "../../docs/" >}}'>Early 3.0 Version</a>
                 </h4>
-                <p>Java SDK</p>
+                <p>早期 3.0 版本文档</p>
             </div>
         </div>
     </div>
@@ -26,9 +24,9 @@ no_list: true
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href='{{< relref "../../golang-sdk" >}}'>Golang SDK</a>
+                    <a target="_blank" href='{{< relref "../../docsv2.7/" >}}'>2.7.x Version</a>
                 </h4>
-                <p>Golang SDK</p>
+                <p>2.7.x 版本文档</p>
             </div>
         </div>
     </div>
