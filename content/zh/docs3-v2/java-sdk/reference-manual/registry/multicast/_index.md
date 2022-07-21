@@ -21,7 +21,7 @@ Multicast 注册中心不需要启动任何中心节点，只要广播地址一�
 ```xml
 <dubbo:registry protocol="multicast" address="224.5.6.7:1234" />
 ```
-### 注意:
+#### 注意:
 为了减少广播量，Dubbo 缺省使用单播发送提供者地址信息给消费者。
 如果一个机器上同时启了多个消费者进程，消费者需声明 `unicast=false`，否则只会有一个消费者能收到消息; 当服务者和消费者运行在同一台机器上，消费者同样需要声明`unicast=false`，否则消费者无法收到消息，导致No provider available for the service异常：
 
