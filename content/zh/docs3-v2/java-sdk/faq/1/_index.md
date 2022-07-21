@@ -1,7 +1,8 @@
 
 ---
 type: docs
-title: "1 - 注册中心"
-linkTitle: "1 - 注册中心"
+title: "1 - 注册中心层"
+linkTitle: "1 - 注册中心层"
+
 weight: 1
 ---
