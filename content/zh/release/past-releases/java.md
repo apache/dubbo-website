@@ -15,6 +15,26 @@ weight: 1
 > 发布说明: https://github.com/apache/dubbo/releases
 >
 
+### 3.0.9 (2022-06-23)
+
+#### Source Release
+
+* [source](https://archive.apache.org/dist/dubbo/3.0.9/apache-dubbo-3.0.9-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/3.0.9/apache-dubbo-3.0.9-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/3.0.9/apache-dubbo-3.0.9-src.zip.sha512)
+
+#### Maven Release
+
+* [org.apache.dubbo:dubbo:3.0.9](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.0.9/jar)
+
+```xml
+<dependency>
+  <groupId>org.apache.dubbo</groupId>
+  <artifactId>dubbo</artifactId>
+  <version>3.0.9</version>
+</dependency>
+```
+
 ### 3.0.8 (2022-05-11)
 
 * [source](https://archive.apache.org/dist/dubbo/3.0.8/apache-dubbo-3.0.8-src.zip) |
