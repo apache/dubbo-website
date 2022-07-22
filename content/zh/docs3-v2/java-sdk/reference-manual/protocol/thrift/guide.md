@@ -12,6 +12,9 @@ weight: 2
 使用 dubbo thrift 协议同样需要使用 thrift 的 idl compiler 编译生成相应的 java 代码，后续版本中会在这方面做一些增强。
 
 ## 使用场景
+
+适用于 SOA 标准 RPC 框架。
+
 ## 使用方式
 
 #### 依赖
