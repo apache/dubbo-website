@@ -17,7 +17,9 @@ Dubbo consumer中的配置项也有[20+个配置项](https://dubbo.apache.org/zh
 使用Dubbo`3.0.0`及以上版本时，引入了应用元数据的概念，并且引入了服务自省映射，用于应用级别的服务发现。
 
 # 预备工作
-Dubbo使用nacos注册中心之前，需先成功启动nacos server，操作步骤请参考[nacos快速入门](https://nacos.io/zh-cn/docs/quick-start.html)。
+- 了解[Dubbo基本开发步骤](https://dubbo.apache.org/zh/docs3-building/java-sdk/quick-start/spring-boot/)
+- 启动nacos server，请参考[nacos快速入门](https://nacos.io/zh-cn/docs/quick-start.html)
+
 > 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本
 
 # 快速上手
@@ -51,9 +53,12 @@ Dubbo`3.0.0`及以上版本，dubbo-metadata-report-nacos引入nacos-client版�
 ```
 
 ## 配置元数据中心
-如果Dubbo使用 Spring Framework 装配，有三种配置方法分别为：Dubbo Spring 外部化配置、Spring XML 配置文件和API配置，推荐使用第一种配置方式。
+如果Dubbo使用 Spring Framework 装配，有三种配置方法分别为：
+- [Dubbo Spring 外部化配置](#method1)
+- [Spring XML 配置文件](#method2)
+- [API配置](#method3)
 
-### Dubbo Spring外部化配置
+### <a id="method1">Dubbo Spring外部化配置</a>
 Dubbo Spring 外部化配置是由 Dubbo 2.5.8引入的新特性，可通过 Spring Environment 属性自动地生成并绑定 Dubbo 配置 Bean，实现配置简化，并且降低微服务开发门槛。
 
 当Dubbo使用Nacos为注册中心，假设启动服务器IP为：10.20.153.10，端口号为：8848，则在Dubbo外部化配置文件中添加以下配置：
@@ -76,6 +81,7 @@ dubbo.metadata-report.address=nacos://10.20.153.10:8848
 #dubbo.metadata-report.parameters.namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932
 #dubbo.metadata-report.group=demo
 ...
+
 ```
 可配置的参数参考完整配置项说明
 
@@ -140,7 +146,7 @@ Consumers接口元信息详情：
 
 ![image-dubbo-metadata-nacos-4.png](/imgs/blog/dubbo-metadata-nacos-4.png)
 
-### Spring XML配置文件
+### <a id="method2">Spring XML配置文件</a>
 同样，当Dubbo使用Nacos为注册中心，假设启动服务器IP为：10.20.153.10，端口号为：8848，则在Spring Bean在XML文件中添加以下配置：
 
 ```xml
@@ -246,7 +252,7 @@ Consumers接口元信息详情：
 ![image-dubbo-metadata-nacos-4.png](/imgs/blog/dubbo-metadata-nacos-4.png)
 
 
-### API配置
+### <a id="method3">API配置</a>
 同样，当Dubbo使用Nacos为注册中心，假设启动服务器IP为：10.20.153.10，端口号为：8848，则在Spring Bean在XML文件中添加以下配置：
 
 ```java
@@ -383,7 +389,7 @@ paasword|连接Nacos Server的密码|空
 backup|访问Nacos备用地址|空
 namespace|命名空间的ID|public
 group|分组名称|DEFAULT_GROUP
-timeout|连接元数据中心超时时间（ms）|
+timeout|请求元数据中心超时时间（ms）|
 retry-time|重试次数|100
 retry-period|重试间隔时间(ms)|3000
 cycle-report|是否每天上报元数据|true
