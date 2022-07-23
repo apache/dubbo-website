@@ -4,7 +4,6 @@ title: "分布式事务"
 linkTitle: "分布式事务"
 weight: 1
 description: "在 Dubbo 中使用分布式事务"
-typora-root-url: ..\..\..\..\..\..\static
 ---
 
 ## 分布式事务
@@ -17,7 +16,7 @@ typora-root-url: ..\..\..\..\..\..\static
 
 **第二步:**
 
-1.在你的参与全局事务的数据库中加入undo_log这张表(TCC,SAGA,XA可跳过)
+1.在你的参与全局事务的数据库中加入undo_log这张表(TCC,SAGA,XA可跳过这步)
 
 ```sql
 -- for AT mode you must to init this sql for you business database. the seata server not need it.
