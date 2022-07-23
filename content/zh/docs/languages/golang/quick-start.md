@@ -6,6 +6,9 @@ weight: 10
 description: ""
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../../docs3-v2/golang-sdk/quickstart/)。
+{{% /pageinfo %}}
+
 推荐[使用 IDL](../../../examples/quick-start) 定义跨语言的服务与编码格式，以下展示的是 Golang 语言版本的服务定义与开发方式，如果你有遗留系统或无多语言开发需求，可参考以下使用方式。
 
 # 快速开始

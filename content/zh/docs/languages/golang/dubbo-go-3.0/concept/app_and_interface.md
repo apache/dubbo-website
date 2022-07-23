@@ -6,6 +6,9 @@ linkTitle: 服务层级
 description: Dubbo-go 的应用和接口
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../../../../docs3-v2/golang-sdk/concept/more/app_and_interface/)。
+{{% /pageinfo %}}
+
 # Dubbo-go 服务层级
 
 Dubbo-go 服务层级为两个级别：分别是应用级别(App Level)和接口级别(Interface Level)，该服务分层与**框架配置**结构息息相关。

@@ -2,6 +2,8 @@
 title: dubbogo 3.0  启动时检查
 keywords: dubbogo 3.0 启动时检查
 description: dubbogo 3.0 启动时检查
+weight: 4
+type: docs
 ---
 
 # 启动时检查

@@ -6,6 +6,9 @@ weight: 18
 description: "基于实际情况来制定路由规则。"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../..//docs3-v2/java-sdk/advanced-features-and-usage/service/routing/mesh-style/demo-rule-deployment/)。
+{{% /pageinfo %}}
+
 #### 应用服务
 
 ```yaml

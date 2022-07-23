@@ -7,6 +7,9 @@ weight: 3
 description: "示例演示了如何使用 Dubbo Spring Boot Starter 方式快速开发 Dubbo 应用。"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../overview/quickstart/)。
+{{% /pageinfo %}}
+
 > Dubbo 还提供了包括XML、API 等多种启动与接入方式，更多开发方式和配置细节可参见[配置手册](../references/configuration/)。
 
 ## 下载示例代码
