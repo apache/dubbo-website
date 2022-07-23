@@ -6,6 +6,9 @@ description: dubbogo 3.0 异常回传
 linkTitle: Triple 异常回传
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../../../../docs3-v2/golang-sdk/samples/exception_response/)。
+{{% /pageinfo %}}
+
 # Triple 协议异常回传
 
 参考samples [dubbo-go-samples/error](https://github.com/apache/dubbo-go-samples/tree/master/error)

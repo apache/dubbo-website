@@ -6,6 +6,9 @@ linkTitle: 网络协议
 description: Dubbo-go 的网络协议
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../../../../docs3-v2/golang-sdk/concept/rpc/protocol/)。
+{{% /pageinfo %}}
+
 # 网络协议
 
 ## 1. 网络协议是什么

@@ -6,6 +6,9 @@ linkTitle: 架构
 description: 对dubbo-go整体架构的概要描述
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../../../../docs3-v2/golang-sdk/concept/more/architecture/)。
+{{% /pageinfo %}}
+
 # 架构
 ![architecture](/imgs/golang/dubbo-go-architecture.png)
 

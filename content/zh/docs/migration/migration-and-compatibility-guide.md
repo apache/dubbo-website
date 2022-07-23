@@ -6,6 +6,9 @@ weight: 1
 description: "快速了解 Dubbo3 的升级步骤与兼容性"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../docs3-v2/java-sdk/upgrades-and-compatibility/2.x-to-3.x-compatibility-guide/)。
+{{% /pageinfo %}}
+
 **无需改动任何代码，直接升级到 Dubbo 3.0。**
 
 在 3.0 版本的设计与开发之初，我们就定下了兼容老版本 Dubbo 用户（2.5、2.6、2.7）的目标。因此，往 3.0 版本的升级过程将会是完全透明的，用户无需做任何业务改造，升级 3.x 后的框架行为将保持与 2.x 版本完全一致。

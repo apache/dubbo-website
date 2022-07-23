@@ -1,5 +1,7 @@
 ---
 title: dubbo-go 3.0 示例仓库
+weight: 4
+type: docs
 keywords: dubbo-go 3.0 示例仓库
 description: dubbo-go 3.0 示例仓库
 ---
