@@ -6,6 +6,8 @@ weight: 1
 description: "dubbo:reference 配置"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/properties/#reference)。
+{{% /pageinfo %}}
 
 服务消费者引用服务配置。对应的配置类： `org.apache.dubbo.config.ReferenceConfig`
 

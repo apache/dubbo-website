@@ -5,6 +5,9 @@ linkTitle: "合并结果扩展"
 weight: 8
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/merger/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 合并返回结果，用于分组聚合。

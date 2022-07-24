@@ -5,6 +5,9 @@ linkTitle: "负载均衡扩展"
 weight: 7
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/load-balance/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 从多个服务提供方中选择一个进行调用

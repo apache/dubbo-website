@@ -6,6 +6,9 @@ weight: 16
 description: "实现一个通用的服务测试框架，可通过 `GenericService` 调用所有服务实现"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/generic-reference/)。
+{{% /pageinfo %}}
+
 泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参数及返回值中的所有 POJO 均用 `Map` 表示，通常用于框架集成，比如：实现一个通用的服务测试框架，可通过 `GenericService` 调用所有服务实现。
 
 ## 通过 Spring 使用泛化调用

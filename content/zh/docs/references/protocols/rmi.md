@@ -6,6 +6,9 @@ weight: 5
 description: "rmi:// 协议参考手册"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/protocol/rmi/)。
+{{% /pageinfo %}}
+
 
 RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和 JDK 标准序列化方式。
 

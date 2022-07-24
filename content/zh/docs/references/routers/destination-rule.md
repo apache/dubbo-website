@@ -6,6 +6,8 @@ weight: 40
 description: "目标地址规则"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/routing/mesh-style/destination-rule/)。
+{{% /pageinfo %}}
 
 #### DestinationRule
 `DestinationRule`用来处理目标地址的规则，与`DestinationRule`相关的`ServiceEntry`, `WorkloadEntry`等定义与开源保持一致

@@ -6,6 +6,9 @@ weight: 30
 description: "入站流量的规则"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/routing/mesh-style/virtualservice/)。
+{{% /pageinfo %}}
+
 #### VirtualService
 `VirtualService`是用来处理入站流量的规则，也就是说用来描述哪些入站流量适用于该路由规则。
 + 使用示例

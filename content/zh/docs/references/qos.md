@@ -6,6 +6,9 @@ weight: 11
 description: "新版本 telnet 命令使用说明"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/qos/)。
+{{% /pageinfo %}}
+
 dubbo `2.5.8` 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
 
 ## 端口

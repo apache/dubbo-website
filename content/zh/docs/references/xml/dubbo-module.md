@@ -6,6 +6,9 @@ weight: 1
 description: "dubbo:module 配置"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/properties/#module)。
+{{% /pageinfo %}}
+
 模块信息配置。对应的配置类 `org.apache.dubbo.config.ModuleConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |

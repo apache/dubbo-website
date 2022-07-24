@@ -5,6 +5,9 @@ linkTitle: "配置中心扩展"
 weight: 13
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/config-center/)。
+{{% /pageinfo %}}
+
 ## 设计目的
 
 配置中心的核心功能是作为 Key-Value 存储，Dubbo 框架告知配置中心其关心的 key，配置中心返回该key对应的 value 值。

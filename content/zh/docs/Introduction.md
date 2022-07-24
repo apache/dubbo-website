@@ -7,7 +7,7 @@ description: "这篇文档是关于 Dubbo 的简单介绍，涵盖 Dubbo 的核�
 文档快速了解 Dubbo 及新版本带来的变化。"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../overview/what/overview/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/overview/what/overview/)。
 {{% /pageinfo %}}
 
 Apache Dubbo 是一款微服务开发框架，它提供了 RPC通信 与 微服务治理 两大关键能力。这意味着，使用 Dubbo 开发的微服务，将具备相互之间的远程发现与通信能力，

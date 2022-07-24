@@ -8,7 +8,7 @@ linkTitle: client
 description: 快速上手dubbo-go，编写一个简单的hellowworld应用
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../../../../docs3-v2/golang-sdk/quickstart/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/quickstart/)。
 {{% /pageinfo %}}
 
 # client

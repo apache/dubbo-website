@@ -6,6 +6,9 @@ weight: 20
 description: "以API 配置的方式来配置你的 Dubbo 应用"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/api/)。
+{{% /pageinfo %}}
+
 通过API编码方式组装配置，启动Dubbo，发布及订阅服务。此方式可以支持动态创建ReferenceConfig/ServiceConfig，结合泛化调用可以满足API Gateway或测试平台的需要。
 
 > API 属性与XML配置项一一对应，各属性含义请参见：[XML配置参考手册](../../../references/xml/)，比如：`ApplicationConfig.setName("xxx")` 对应  `<dubbo:application name="xxx" />`

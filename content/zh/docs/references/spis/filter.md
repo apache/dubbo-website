@@ -5,6 +5,9 @@ linkTitle: "调用拦截扩展"
 weight: 2
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/filter/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 服务提供方和服务消费方调用过程拦截，Dubbo 本身的大多功能均基于此扩展点实现，每次远程方法执行，该拦截都会被执行，请注意对性能的影响。

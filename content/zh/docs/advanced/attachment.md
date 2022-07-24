@@ -6,6 +6,9 @@ weight: 20
 description: "通过 Dubbo 中的 Attachment 在服务消费方和提供方之间隐式传递参数"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/attachment/)。
+{{% /pageinfo %}}
+
 可以通过 `RpcContext` 上的 `setAttachment` 和 `getAttachment` 在服务消费方和提供方之间进行参数的隐式传递。 
 
 {{% alert title="注意" color="primary" %}}

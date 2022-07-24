@@ -6,6 +6,9 @@ weight: 22
 description: "在 Dubbo 中进行本地调用"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/local-call/)。
+{{% /pageinfo %}}
+
 本地调用使用了 injvm 协议，是一个伪协议，它不开启端口，不发起远程调用，只在 JVM 内直接关联，但执行 Dubbo 的 Filter 链。
 
 ## 配置

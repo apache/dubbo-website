@@ -5,6 +5,9 @@ linkTitle: "状态检查扩展"
 weight: 21
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/status-checker/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 检查服务依赖各种资源的状态，此状态检查可同时用于 telnet 的 status 命令和 hosting 的 status 页面。

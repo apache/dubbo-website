@@ -6,7 +6,7 @@ weight: 2
 description: "本文档专门针对使用 2.x 版本的老用户，详细阐述了升级到 3.x 后的默认地址注册与发现行为、如何平滑的迁移到新版本的地址模型。"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/)。
 {{% /pageinfo %}}
 
 **总体上来说，在地址注册与发现环节，3.x 是完全兼容 2.x 版本的，这意味着，用户可以选择将集群内任意数量的应用或机器升级到 3.x，同时在这个过程中保持与 2.x 版本的互操作性。**

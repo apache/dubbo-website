@@ -6,6 +6,9 @@ weight: 5
 description: "Dubbo 服务元数据参考手册"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/metadata-center/)。
+{{% /pageinfo %}}
+
 ## 背景
 
 dubbo provider中的服务配置项有接近[30个配置项](https://dubbo.apache.org/zh/docs/v2.7/user/references/xml/dubbo-provider/)。 排除注册中心服务治理需要之外，很大一部分配置项是provider自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以key-value形式持久化存储。

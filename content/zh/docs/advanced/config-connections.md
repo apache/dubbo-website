@@ -6,6 +6,9 @@ weight: 29
 description: "Dubbo 中服务端和客户端的连接控制"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/)。
+{{% /pageinfo %}}
+
 ## 服务端连接控制
 
 限制服务器端接受的连接不能超过 10 个 [^1]：

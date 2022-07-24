@@ -6,6 +6,9 @@ weight: 30
 description: "以 XML 配置的方式来配置你的 Dubbo 应用"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/xml/)。
+{{% /pageinfo %}}
+
 有关 XML 的详细配置项，请参见：[XML配置参考手册](../../../references/xml)。如果不想使用 Spring 配置，而希望通过 API 的方式进行调用，请参见：[API配置](../api)。想知道如何使用配置，请参见：[快速启动](../../../quick-start)。
 
 请在此查看文档描述的[完整示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-basic)

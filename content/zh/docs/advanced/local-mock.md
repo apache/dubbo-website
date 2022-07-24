@@ -6,6 +6,9 @@ weight: 26
 description: "如何在 Dubbo 中利用本地伪装实现服务降级"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/local-mock/)。
+{{% /pageinfo %}}
+
 本地伪装 [^1] 通常用于服务降级，比如某验权服务，当服务提供方全部挂掉后，客户端不抛出异常，而是通过 Mock 数据返回授权失败。
 
 在 spring 配置文件中按以下方式配置：

@@ -6,7 +6,7 @@ weight: 6
 description: "Dubbo 通过 SPI 机制提供了非常灵活的可扩展性"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../docs3-v2/java-sdk/reference-manual/spi/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/)。
 {{% /pageinfo %}}
 
 ## 扩展设计理念
