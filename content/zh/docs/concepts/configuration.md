@@ -6,7 +6,7 @@ weight: 4
 description: "描述 Dubbo 支持的配置，Dubbo 的动态配置能力。"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](../../../docs3-v2/java-sdk/reference-manual/config/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/)。
 {{% /pageinfo %}}
 
 Dubbo配置主要分为几大类： 启动阶段配置项、服务治理规则、动态配置项。

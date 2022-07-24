@@ -6,6 +6,9 @@ weight: 40
 description: "Dubbo支持的路由类型及配合方式"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/routing/)。
+{{% /pageinfo %}}
+
 ### 基本思想
 基于路由链，采用Pipeline的处理方式，如下图所示：
 

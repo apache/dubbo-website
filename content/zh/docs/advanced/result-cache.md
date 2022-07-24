@@ -6,6 +6,9 @@ weight: 15
 description: "通过缓存结果加速访问速度"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/)。
+{{% /pageinfo %}}
+
 结果缓存，用于加速热门数据的访问速度，Dubbo 提供声明式缓存，以减少用户加缓存的工作量。
 
 ## 缓存类型

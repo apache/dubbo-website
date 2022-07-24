@@ -5,6 +5,9 @@ linkTitle: "扩展点加载扩展"
 weight: 11
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/extension-factory/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 扩展点本身的加载容器，可从不同容器加载扩展点。

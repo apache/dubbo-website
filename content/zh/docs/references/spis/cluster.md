@@ -5,6 +5,9 @@ linkTitle: "集群扩展"
 weight: 5
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/cluster/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 当有多个服务提供方时，将多个服务提供方组织成一个集群，并伪装成一个提供方。

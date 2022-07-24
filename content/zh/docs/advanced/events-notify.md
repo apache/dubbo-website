@@ -6,6 +6,9 @@ weight: 24
 description: "在调用之前、调用之后、出现异常时的事件通知"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/events-notify/)。
+{{% /pageinfo %}}
+
 在调用之前、调用之后、出现异常时，会触发 `oninvoke`、`onreturn`、`onthrow` 三个事件，可以配置当事件发生时，通知哪个类的哪个方法。
 
 {{% alert title="提示" color="primary" %}}

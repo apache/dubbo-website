@@ -7,6 +7,9 @@ description: >-
      本文对比了Protobuf和Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/upgrades-and-compatibility/protobufinterface/)。
+{{% /pageinfo %}}
+
 # Protobuf与Interface这2种IDL的差异
 
 ## 1. 数据类型

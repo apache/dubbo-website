@@ -6,6 +6,9 @@ weight: 17
 description: "对 Google Protobuf 对象进行泛化调用"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/generic-reference/#protobuf对象泛化调用)。
+{{% /pageinfo %}}
+
 泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参考 [泛化调用](../generic-reference)。
 一般泛化调用只能用于生成的服务参数为POJO的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常POJO，可以通过 protobuf-json 泛化调用。  
 

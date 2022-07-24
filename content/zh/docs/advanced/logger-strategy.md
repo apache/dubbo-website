@@ -6,6 +6,9 @@ weight: 38
 description: "在 Dubbo 中适配日志框架"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-management/)。
+{{% /pageinfo %}}
+
 自 `2.2.1` 开始，dubbo 开始内置 log4j、slf4j、jcl、jdk 这些日志框架的适配[1]，也可以通过以下方式显式配置日志输出策略：
 
 0. 命令行

@@ -6,6 +6,9 @@ weight: 10
 description: "Dubbo配置介绍"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/overview/)。
+{{% /pageinfo %}}
+
 本文主要介绍Dubbo配置概况，包括配置组件、配置来源、配置方式及配置加载流程。
 
 ## 配置组件

@@ -6,6 +6,9 @@ weight: 2
 description: "Dubbo 配置中心参考手册"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config-center/)。
+{{% /pageinfo %}}
+
 配置中心在 Dubbo 中承担3个职责：
 
 1. 外部化配置：启动配置的集中式存储 （简单理解为 dubbo.properties 的外部化存储）。

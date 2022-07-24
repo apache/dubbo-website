@@ -6,6 +6,9 @@ weight: 40
 description: "使用 Dubbo 中的服务容器"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/others/service-container/)。
+{{% /pageinfo %}}
+
 服务容器是一个 standalone 的启动程序，因为后台服务不需要 Tomcat 或 JBoss 等 Web 容器的功能，如果硬要用 Web 容器去加载服务提供方，增加复杂性，也浪费资源。
 
 服务容器只是一个简单的 Main 方法，并加载一个简单的 Spring 容器，用于暴露服务。

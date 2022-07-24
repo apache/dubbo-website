@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "路由规则"
-linkTitle: "路由规则"
+title: "Mesh 路由规则"
+linkTitle: "Mesh 路由规则"
 weight: 40
-description: "Dubbo支持的路由类型及配合方式"
+description: "Dubbo 支持 Mesh 路由类型及配合方式"
 ---
 
 ### 基本思想

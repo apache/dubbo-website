@@ -6,6 +6,9 @@ weight: 35
 description: "Dubbo 中旧版本的规则配置方式"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/config-rule/)。
+{{% /pageinfo %}}
+
 向注册中心写入动态配置覆盖规则。该功能通常由监控中心或治理中心的页面完成。
 
 ```java

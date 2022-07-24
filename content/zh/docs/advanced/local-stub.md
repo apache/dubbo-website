@@ -6,6 +6,9 @@ weight: 25
 description: "在 Dubbo 中利用本地存根在客户端执行部分逻辑"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/local-stub/)。
+{{% /pageinfo %}}
+
 远程服务后，客户端通常只剩下接口，而实现全在服务器端，但提供方有些时候想在客户端也执行部分逻辑，比如：做 ThreadLocal 缓存，提前验证参数，调用失败后伪造容错数据等等，此时就需要在 API 中带上 Stub，客户端生成 Proxy 实例，会把 Proxy 通过构造函数传给 Stub [^1]，然后把 Stub 暴露给用户，Stub 可以决定要不要去调 Proxy。
 
 ![/user-guide/images/stub.jpg](/imgs/user/stub.jpg)

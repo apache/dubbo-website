@@ -6,6 +6,9 @@ weight: 36
 description: "让 Dubbo 服务完成优雅停机"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/others/graceful-shutdown/)。
+{{% /pageinfo %}}
+
 Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用户使用 `kill -9 PID` 等强制关闭指令，是不会执行优雅停机的，只有通过 `kill PID` 时，才会执行。
 
 ## 原理

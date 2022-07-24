@@ -1,3 +1,14 @@
+---
+type: docs
+title: "服务鉴权"
+linkTitle: "服务鉴权"
+weight: 23
+description: "服务鉴权"
+---
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/)。
+{{% /pageinfo %}}
+
 # 服务鉴权
 
 类似支付之类的对安全性敏感的业务可能会有限制匿名调用的需求。在加固安全性方面，2.7.5 引入了基于AK/SK机制的认证鉴权机制，并且引入了鉴权服务中心，主要原理是消费端在请求需要鉴权的服务时，会通过SK、请求元数据、时间戳、参数等信息来生成对应的请求签名，通过Dubbo的Attahcment机制携带到对端进行验签，验签通过才进行业务逻辑处理。如下图所示：

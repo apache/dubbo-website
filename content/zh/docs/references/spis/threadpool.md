@@ -5,6 +5,9 @@ linkTitle: "线程池扩展"
 weight: 15
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/threadpool/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 服务提供方线程池实现策略，当服务器收到一个请求时，需要在线程池中创建一个线程去执行服务提供方业务逻辑。

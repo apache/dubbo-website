@@ -6,6 +6,9 @@ weight: 17
 description: "实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/generic-service/)。
+{{% /pageinfo %}}
+
 泛接口实现方式主要用于服务器端没有 API 接口及模型类元的情况，参数及返回值中的所有 POJO 均用 Map 表示，通常用于框架集成，比如：实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求。
 
 在 Java 代码中实现 `GenericService` 接口：

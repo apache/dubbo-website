@@ -6,6 +6,9 @@ weight: 33
 description: "通过 Dubbo 中的路由规则做服务治理"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/routing/routing-rule/)。
+{{% /pageinfo %}}
+
 路由规则在发起一次RPC调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起RPC调用的备选地址。
 
 - 条件路由。支持以服务或 Consumer 应用为粒度配置路由规则。

@@ -6,6 +6,9 @@ weight: 23
 description: "通过参数回调从服务器端调用客户端逻辑"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/callback-parameter/)。
+{{% /pageinfo %}}
+
 参数回调方式与调用本地 callback 或 listener 相同，只需要在 Spring 的配置文件中声明哪个参数是 callback 类型即可。Dubbo 将基于长连接生成反向代理，这样就可以从服务器端调用客户端逻辑。可以参考 [dubbo 项目中的示例代码](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-callback)。
 
 #### 服务接口示例

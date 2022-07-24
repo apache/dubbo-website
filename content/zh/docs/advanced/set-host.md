@@ -6,6 +6,9 @@ weight: 37
 description: "自定义 Dubbo 服务对外暴露的主机地址"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/others/set-host/)。
+{{% /pageinfo %}}
+
 ## 背景
 
 在 Dubbo 中， Provider 启动时主要做两个事情，一是启动 server，二是向注册中心注册服务。启动 server 时需要绑定 socket，向注册中心注册服务时也需要发送 socket 唯一标识服务地址。

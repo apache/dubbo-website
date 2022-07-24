@@ -6,6 +6,9 @@ weight: 3
 description: "Dubbo 提供的集群负载均衡策略"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/)。
+{{% /pageinfo %}}
+
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `random` 随机调用。
 
 具体实现上，Dubbo 提供的是客户端负载均衡，即由 Consumer 通过负载均衡算法得出需要将请求提交到哪个 Provider 实例。

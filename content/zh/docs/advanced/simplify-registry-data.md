@@ -6,6 +6,9 @@ weight: 37
 description: "减少注册中心上服务的注册数据"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/)。
+{{% /pageinfo %}}
+
 ## 背景
 
 Dubbo provider 中的服务配置项有接近 [30 个配置项](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-service.html)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。

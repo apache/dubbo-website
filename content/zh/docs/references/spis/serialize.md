@@ -5,6 +5,9 @@ linkTitle: "序列化扩展"
 weight: 16
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/spi/description/serialize/)。
+{{% /pageinfo %}}
+
 ## 扩展说明
 
 将对象转成字节流，用于网络传输，以及将字节流转为对象，用于在收到字节流数据后还原成对象。

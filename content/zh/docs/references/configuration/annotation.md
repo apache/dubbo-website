@@ -6,6 +6,9 @@ weight: 40
 description: "以注解配置的方式来配置你的 Dubbo 应用"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/annotation/)。
+{{% /pageinfo %}}
+
 {{% alert title="提示" color="primary" %}}
 需要 `2.6.3` 及以上版本支持。 点此查看 [完整示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-annotation)
 {{% /alert %}}

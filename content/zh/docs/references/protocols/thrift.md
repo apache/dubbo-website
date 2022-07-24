@@ -6,6 +6,9 @@ weight: 4
 description: "thrift:// 协议参考手册"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/protocol/thrift/)。
+{{% /pageinfo %}}
+
 
 当前 dubbo 支持的 thrift 协议是对 thrift 原生协议 [^1] 的扩展，在原生协议的基础上添加了一些额外的头信息，比如 service name，magic number 等。
 

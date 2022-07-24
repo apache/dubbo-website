@@ -6,6 +6,9 @@ weight: 4
 description: "hessian:// 协议参考手册"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/protocol/hessian/)。
+{{% /pageinfo %}}
+
 Hessian [^1] 协议用于集成 Hessian 的服务，Hessian 底层采用 Http 通讯，采用 Servlet 暴露服务，Dubbo 缺省内嵌 Jetty 作为服务器实现。
 
 Dubbo 的 Hessian 协议可以和原生 Hessian 服务互操作，即：

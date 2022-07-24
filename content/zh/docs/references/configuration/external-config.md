@@ -6,6 +6,9 @@ weight: 60
 description: "将Dubbo应用的配置放到外部集中管理"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/reference-manual/config/external-config/)。
+{{% /pageinfo %}}
+
 ### 外部化配置
 
 外部化配置目的之一是实现配置的集中式管理，这部分业界已经有很多成熟的专业配置系统如 Apollo, Nacos 等，Dubbo 所做的主要是保证能配合这些系统正常工作。

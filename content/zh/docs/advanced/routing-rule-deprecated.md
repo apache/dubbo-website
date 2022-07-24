@@ -6,6 +6,9 @@ weight: 34
 description: "在 Dubbo `2.6.x` 版本以及更早的版本中配置路由规则"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/routing/routing-rule/)。
+{{% /pageinfo %}}
+
 路由规则 [^1] 决定一次 dubbo 服务调用的目标服务器，分为条件路由规则和脚本路由规则，并且支持可扩展 [^2]。
 
 ## 写入路由规则

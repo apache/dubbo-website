@@ -6,6 +6,9 @@ weight: 2
 description: "集群调用失败时，Dubbo 提供的容错方案"
 ---
 
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/rpc/fault-tolerent-strategy/)。
+{{% /pageinfo %}}
+
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 
 ![cluster](/imgs/user/cluster.jpg)
