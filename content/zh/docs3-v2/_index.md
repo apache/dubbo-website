@@ -43,7 +43,7 @@ menu:
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./erlang-sdk" >}}'>Golang SDK</a>
+                    <a href='{{< relref "./erlang-sdk" >}}'>Erlang SDK</a>
                 </h4>
                 <p>Dubbo Erlang SDK 手册</p>
             </div>
