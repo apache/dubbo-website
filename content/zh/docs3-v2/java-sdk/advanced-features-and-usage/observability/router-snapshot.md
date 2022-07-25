@@ -5,7 +5,7 @@ linkTitle: "路由状态采集"
 weight: 2
 description: "路由状态采集"
 ---
-
+## 功能说明
 ## 使用场景
 
 Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环境中，如果出现流量结果不符合预期的情况，可以通过路由状态命令来查看路由的状态，以此来定位可能存在的问题。
@@ -17,9 +17,9 @@ Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环
 Dubbo 在收到地址变更的时候，会将地址信息推送给所有的 `Router`，这些 `Router` 可以在此阶段提前计算路由的分组，缓存起来，以避免在调用时需要遍历所有的提供者计算分组参数。
 在 Dubbo 3 中引入的 `StateRouter` 提供了通过 qos 命令工具实时获取每个路由的状态的能力。
 
-运维人员可以通过 `getRouterSnapshot` 命令获取路由的状态。具体命令使用方式可以参考[getRouterSnapshot 命令](../../..//reference-manual/qos/router-snapshot/#getroutersnapshot-%E5%91%BD%E4%BB%A4)文档。
+运维人员可以通过 `getRouterSnapshot` 命令获取路由的状态。具体命令使用方式可以参考 [getRouterSnapshot 命令](../../..//reference-manual/qos/router-snapshot/#getroutersnapshot-%E5%91%BD%E4%BB%A4) 文档。
 
-注：此功能仅支持 `StateRoute`，且 `StateRouter` 需要基于 `AbstractStateRouter` 实现 `doBuildSnapshot` 接口。
+**注：此功能仅支持 `StateRoute`，且 `StateRouter` 需要基于 `AbstractStateRouter` 实现 `doBuildSnapshot` 接口。**
 
 ### 查看实际请求的路由计算结果
 
@@ -34,7 +34,7 @@ No provider available after route for the service 服务 from registry 注册中
     [ 路由名称 (Input: 当前节点输入地址数) (Current Node Output: 当前节点计算结果数) (Chain Node Output: 当前节点和后级节点交集结果数) Router message: 路由日志 ] Current Node Output: 当前输入的地址示例（显示最多 5 个）
 ```
 
-注：
+#### 注意：
 - 路由日志需要依赖路由实现判断 `needToPrintMessage` 参数，并在需要时写入 `messageHolder` 路由日志
 - 由于多级路由结果是结果取交集的，所以当前节点计算结果数可能和后级取交后为空
 
@@ -50,7 +50,7 @@ No provider available after route for the service 服务 from registry 注册中
 
 #### 开启路由全采样
 
-在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以[通过 qos 开启路由全采样](../../..//reference-manual/qos/router-snapshot/)。通过 qos 的 `getRecentRouterSnapshot` 命令可以远程获取最近的路由快照。
+在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以 [通过 qos 开启路由全采样](../../..//reference-manual/qos/router-snapshot/)。通过 qos 的 `getRecentRouterSnapshot` 命令可以远程获取最近的路由快照。
 
 ```
 dubbo>getRecentRouterSnapshot
@@ -75,4 +75,5 @@ dubbo>getRecentRouterSnapshot
 dubbo>
 ```
 
-注：由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](../../others/logger-management/)动态修改日志输出框架。
+#### 注意：
+由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](../../others/logger-management/)动态修改日志输出框架。
