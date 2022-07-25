@@ -552,7 +552,7 @@ numChildren = 0
 #### Redis
 Redis 元数据中心目前还不支持应用级别元数据，但已提上日程，会在近期进行实现。
 
-##### Nacos
+##### [Nacos](https://nacos.io/)
 Nacos 应用级别的元数据位于 namespace: 'public', dataId: '{application name}', group: '{revision}'
 
 ![nacos-metadata-report-application-metadata.png](/imgs/user/nacos-metadata-report-application-metadata.png)

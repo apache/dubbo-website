@@ -14,15 +14,15 @@ Dubbo 实现普遍支持以下产品或部署架构，具体多语言 SDK 实现
 
 * 注册中心
   * Zookeeper
-  * Nacos
+  * [Nacos](https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html)
   * Kubernetes
 * 元数据中心
   * Zookeeper
-  * Nacos
+  * [Nacos](https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html)
   * Redis
 * 配置中心
   * Zookeeper
-  * Nacos
+  * [Nacos](https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html)
   * Redis
   * Apollo
 * Mesh
