@@ -72,10 +72,12 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 ## Dubbo 2.7
 ### URL 结构
 在 Dubbo 2.7 中，URL 的结构非常简单，一个类就涵盖了所有内容，如下图所示。
+
 ![Dubbo2 URL类图.png](/imgs/blog/url-perf-tuning-1.png)
 
 ### 地址推送模型
 接下来我们再来看看 Dubbo 2.7 中的地址推送模型方案，主要性能问题由下列过程引起。
+
 ![Dubbo2 地址推送模型.png](/imgs/blog/url-perf-tuning-2.png)
 
 上图中主要的流程为
@@ -88,7 +90,9 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 ## Dubbo 3.0
 ### URL 结构
 当然，地址推送模型的优化依然离不开 URL 的优化，下图是Dubbo 3.0中优化地址推送模型的过程中使用的新的URL结构。
+
 ![Dubbo3 URL类图.png](/imgs/blog/url-perf-tuning-3.png)
+
 根据上图我们可以看出，在 Dubbo 2.7 的 URL 中的几个重要属性在 Dubbo 3.0 中已经不存在了，取而代之的是 URLAddress 和 URLParam 两个类。原来的 parameters 属性被移动到了 URLParam 中的 params，其他的属性则移动到了 URLAddress 及其子类中。
 再来介绍 URL 新增的 3 个子类，其中 InstanceAddressURL 属于应用级接口地址，本篇章中不做介绍。
 而 ServiceConfigURL 及 ServiceAddressURL 主要的差别就是，ServiceConfigURL 是程序读取配置文件时生成的 URL。而 ServiceAddressURL 则是注册中心推送一些信息（如 providers）过来时生成的 URL。
@@ -104,16 +108,22 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 #### 多级缓存
 缓存是 Dubbo 3.0 在 URL 上做的优化的重点，同时这部分也是直接针对地址推送模型所做的优化，那么接下来我们就开始来介绍一下多级缓存的具体实现。
 首先，多级缓存主要体现在 CacheableFailbackRegistry 这个类之中，它直接继承于 FailbackRegistry，以 Zookeeper 为例，我们看看 Dubbo 2.7 和 Dubbo 3.0 继承结构的区别。
+
 ![Dubbo3 CacheableFailbackRegistry缓存.png](/imgs/blog/url-perf-tuning-4.png)
+
 可以看到在 CacheableFailbackRegistry 缓存中，我们新增了 3 个缓存属性 `stringAddress`，`stringParam` 和 `stringUrls`。我们通过下图来描述这 3 个缓存的具体使用场景。
+
 ![多级缓存.png](/imgs/blog/url-perf-tuning-5.png)
+
 在该方案下，我们使用了 3 个纬度的缓存数据(URL 字符串缓存、URL 地址缓存、URL 参数缓存)，这样一来，在大部分情况下都能有效利用到缓存中的数据，减少了 Zookeeper 重复通知的消耗。
 
 #### 延迟通知
 除了上面提到的优化之外，其实另外还有两个小小的优化。
 第一个是解析 URL 时可以直接使用编码后的 URL 字符串字节进行解析，而在 Dubbo 2.7 中，所有编码后的 URL 字符串都需要经过解码才可以正常解析为 URL 对象。该方式也直接减少了 URL 解码过程的开销。
 第二个则是 URL 变更后的通知机制增加了延迟，下图以Zookeeper为例讲解了实现细节。
+
 ![延迟通知.png](/imgs/blog/url-perf-tuning-6.png)
+
 在该方案中，当 Consumer 接收 Zookeeper 的变更通知后会主动休眠一段时间，而这段时间内的变更在休眠结束后只会保留最后一次变更，Consumer 便会使用最后一次变更来进行监听实例的更新，以此方法来减少大量 URL 的创建开销。
 
 #### 字符串重用
@@ -153,7 +163,11 @@ public class URLItemCache {
 
 ### 优化结果
 这里优化结果我引用了[《Dubbo 3.0 前瞻：服务发现支持百万集群，带来可伸缩微服务架构》](https://zhuanlan.zhihu.com/p/345626851)这篇文章中的两副图来说明，下图模拟了在**220万**个 Provider 接口的情况下，接口数据不断变更导致的 Consumer 端的消耗，我们看到整个 Consumer 端几乎被 Full GC 占满了，严重影响了性能。
+
 ![Dubbo2 接口级地址模型.png](/imgs/blog/url-perf-tuning-7.png)
+
 那么我们再来看看 Dubbo 3.0 中对 URL 进行优化后同一个环境下的压测结果，如下图所示。
+
 ![Dubbo3 接口级地址模型.png](/imgs/blog/url-perf-tuning-8.png)
+
 我们明显可以看到 Full GC 的频率减少到了只有 3 次，大大提升了性能。当然，该文章中还有其他方面的对比，此处便不一一引用了，感兴趣的读者可以自行去阅读该文章。
