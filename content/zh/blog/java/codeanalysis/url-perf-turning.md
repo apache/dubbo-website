@@ -72,11 +72,13 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 ## Dubbo 2.7
 ### URL 结构
 在 Dubbo 2.7 中，URL 的结构非常简单，一个类就涵盖了所有内容，如下图所示。
-![Dubbo2 URL类图.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684355065-047f2b60-0d02-41fb-8f57-ef7c89d625a5.png#clientId=u77103d46-bf79-4&from=ui&id=ub3498039&margin=%5Bobject%20Object%5D&name=Dubbo2%20URL%E7%B1%BB%E5%9B%BE.png&originHeight=212&originWidth=201&originalType=binary&ratio=1&size=14586&status=done&style=none&taskId=u4e81299b-9890-41ff-b1e5-0f430096690)
+
+![Dubbo2 URL类图.png](/imgs/blog/url-perf-tuning-1.png)
 
 ### 地址推送模型
 接下来我们再来看看 Dubbo 2.7 中的地址推送模型方案，主要性能问题由下列过程引起。
-![Dubbo2 地址推送模型.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684380374-8c7f1087-5251-44ab-b1ef-36d3350dbc67.png#clientId=u77103d46-bf79-4&from=ui&id=ufea40a0b&margin=%5Bobject%20Object%5D&name=Dubbo2%20%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%A8%A1%E5%9E%8B.png&originHeight=629&originWidth=654&originalType=binary&ratio=1&size=50785&status=done&style=none&taskId=u6ef56cee-840d-48fb-bf06-85c9ee3d8bd)
+
+![Dubbo2 地址推送模型.png](/imgs/blog/url-perf-tuning-2.png)
 
 上图中主要的流程为
 1、用户新增/删除DemoService的某个具体Provider实例（常见于扩容缩容、网络波动等原因）
@@ -88,7 +90,9 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 ## Dubbo 3.0
 ### URL 结构
 当然，地址推送模型的优化依然离不开 URL 的优化，下图是Dubbo 3.0中优化地址推送模型的过程中使用的新的URL结构。
-![Dubbo3 URL类图.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684404347-633f5a87-0e12-4760-b38b-374e1b4c85a0.png#clientId=u77103d46-bf79-4&from=ui&id=u59706a31&margin=%5Bobject%20Object%5D&name=Dubbo3%20URL%E7%B1%BB%E5%9B%BE.png&originHeight=329&originWidth=1221&originalType=binary&ratio=1&size=54053&status=done&style=none&taskId=uba60500c-0a03-46f7-a85b-2eb574777b2)
+
+![Dubbo3 URL类图.png](/imgs/blog/url-perf-tuning-3.png)
+
 根据上图我们可以看出，在 Dubbo 2.7 的 URL 中的几个重要属性在 Dubbo 3.0 中已经不存在了，取而代之的是 URLAddress 和 URLParam 两个类。原来的 parameters 属性被移动到了 URLParam 中的 params，其他的属性则移动到了 URLAddress 及其子类中。
 再来介绍 URL 新增的 3 个子类，其中 InstanceAddressURL 属于应用级接口地址，本篇章中不做介绍。
 而 ServiceConfigURL 及 ServiceAddressURL 主要的差别就是，ServiceConfigURL 是程序读取配置文件时生成的 URL。而 ServiceAddressURL 则是注册中心推送一些信息（如 providers）过来时生成的 URL。
@@ -104,16 +108,22 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 #### 多级缓存
 缓存是 Dubbo 3.0 在 URL 上做的优化的重点，同时这部分也是直接针对地址推送模型所做的优化，那么接下来我们就开始来介绍一下多级缓存的具体实现。
 首先，多级缓存主要体现在 CacheableFailbackRegistry 这个类之中，它直接继承于 FailbackRegistry，以 Zookeeper 为例，我们看看 Dubbo 2.7 和 Dubbo 3.0 继承结构的区别。
-![Dubbo3 CacheableFailbackRegistry缓存.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684433702-091378b5-5f80-4ac7-b755-5dab707051da.png#clientId=u77103d46-bf79-4&from=ui&id=u9118b5a9&margin=%5Bobject%20Object%5D&name=Dubbo3%20CacheableFailbackRegistry%E7%BC%93%E5%AD%98.png&originHeight=361&originWidth=751&originalType=binary&ratio=1&size=32461&status=done&style=none&taskId=ub04aaa61-0d89-457e-a555-47edd7e39a0)
+
+![Dubbo3 CacheableFailbackRegistry缓存.png](/imgs/blog/url-perf-tuning-4.png)
+
 可以看到在 CacheableFailbackRegistry 缓存中，我们新增了 3 个缓存属性 `stringAddress`，`stringParam` 和 `stringUrls`。我们通过下图来描述这 3 个缓存的具体使用场景。
-![多级缓存.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684457488-ccb22d6c-3ade-4aec-a21a-c71c381a9734.png#clientId=u77103d46-bf79-4&from=ui&id=ue0c6b8dc&margin=%5Bobject%20Object%5D&name=%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98.png&originHeight=622&originWidth=926&originalType=binary&ratio=1&size=73539&status=done&style=none&taskId=u47ede71a-33bd-4405-bd98-30d40e1b32c)
+
+![多级缓存.png](/imgs/blog/url-perf-tuning-5.png)
+
 在该方案下，我们使用了 3 个纬度的缓存数据(URL 字符串缓存、URL 地址缓存、URL 参数缓存)，这样一来，在大部分情况下都能有效利用到缓存中的数据，减少了 Zookeeper 重复通知的消耗。
 
 #### 延迟通知
 除了上面提到的优化之外，其实另外还有两个小小的优化。
 第一个是解析 URL 时可以直接使用编码后的 URL 字符串字节进行解析，而在 Dubbo 2.7 中，所有编码后的 URL 字符串都需要经过解码才可以正常解析为 URL 对象。该方式也直接减少了 URL 解码过程的开销。
 第二个则是 URL 变更后的通知机制增加了延迟，下图以Zookeeper为例讲解了实现细节。
-![延迟通知.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684474208-db533419-6352-4d25-bcbe-21e473673828.png#clientId=u77103d46-bf79-4&from=ui&id=u9d0b8bd3&margin=%5Bobject%20Object%5D&name=%E5%BB%B6%E8%BF%9F%E9%80%9A%E7%9F%A5.png&originHeight=402&originWidth=352&originalType=binary&ratio=1&size=30489&status=done&style=none&taskId=u14d9d5be-4b1c-448a-8452-c975f3e8679)
+
+![延迟通知.png](/imgs/blog/url-perf-tuning-6.png)
+
 在该方案中，当 Consumer 接收 Zookeeper 的变更通知后会主动休眠一段时间，而这段时间内的变更在休眠结束后只会保留最后一次变更，Consumer 便会使用最后一次变更来进行监听实例的更新，以此方法来减少大量 URL 的创建开销。
 
 #### 字符串重用
@@ -153,7 +163,11 @@ public class URLItemCache {
 
 ### 优化结果
 这里优化结果我引用了[《Dubbo 3.0 前瞻：服务发现支持百万集群，带来可伸缩微服务架构》](https://zhuanlan.zhihu.com/p/345626851)这篇文章中的两副图来说明，下图模拟了在**220万**个 Provider 接口的情况下，接口数据不断变更导致的 Consumer 端的消耗，我们看到整个 Consumer 端几乎被 Full GC 占满了，严重影响了性能。
-![Dubbo2 接口级地址模型.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684502762-bbe06025-ec68-460f-9169-d8fcd5d9589c.png#clientId=u77103d46-bf79-4&from=ui&id=u627fbc4e&margin=%5Bobject%20Object%5D&name=Dubbo2%20%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%A8%A1%E5%9E%8B.png&originHeight=829&originWidth=1440&originalType=binary&ratio=1&size=163554&status=done&style=none&taskId=ucce3e68c-f033-455b-9944-eba82ef078c)
+
+![Dubbo2 接口级地址模型.png](/imgs/blog/url-perf-tuning-7.png)
+
 那么我们再来看看 Dubbo 3.0 中对 URL 进行优化后同一个环境下的压测结果，如下图所示。
-![Dubbo3 接口级地址模型.png](https://cdn.nlark.com/yuque/0/2021/png/1921386/1626684517859-7c42871f-5f98-48c2-8815-bf8f5e992efb.png#clientId=u77103d46-bf79-4&from=ui&id=ua17678af&margin=%5Bobject%20Object%5D&name=Dubbo3%20%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%A8%A1%E5%9E%8B.png&originHeight=690&originWidth=1440&originalType=binary&ratio=1&size=185862&status=done&style=none&taskId=u137b18a8-0c04-48ca-bb14-f6e1c9e8f7a)
+
+![Dubbo3 接口级地址模型.png](/imgs/blog/url-perf-tuning-8.png)
+
 我们明显可以看到 Full GC 的频率减少到了只有 3 次，大大提升了性能。当然，该文章中还有其他方面的对比，此处便不一一引用了，感兴趣的读者可以自行去阅读该文章。
