@@ -10,7 +10,7 @@ description: "示例演示了如何使用 Spring Boot 方式快速开发 Dubbo �
 > Dubbo 还提供了包括[XML](../../reference-manual/config/xml)、[API](../../reference-manual/config/api)等多种启动与接入方式，更多开发方式和配置细节可参见[配置手册](../../reference-manual/config/)。
 
 ## 下载示例代码
-完整示例代码在 [dubbo-samples](https://github.com/apache/dubbo-samples/dubbo-samples-spring-boot) 中
+完整示例代码在 [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-spring-boot) 中
 
 1. 下载源码
 ```shell script
