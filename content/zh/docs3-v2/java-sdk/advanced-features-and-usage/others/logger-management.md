@@ -28,7 +28,7 @@ description: "在 Dubbo 中适配日志框架并支持运行时动态切换使�
       <dubbo:application logger="log4j" />
     ```
 
-[1]: 自定义扩展可以参考 [日志适配扩展](../../../dev/impls/logger-adapter)
+[1]: 自定义扩展可以参考 [日志适配扩展](../../../reference-manual/spi/description/logger-adapter)
 
 ## 日志框架运行时管理
 
