@@ -510,3 +510,43 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
     ```
 
    最终生成的 URL 会包含 DUBBO_TAG1、DUBBO_TAG2 两个 key: `dubbo://xxx?DUBBO_TAG1=value1&DUBBO_TAG2=value2`
+### 其他配置
+#### config-mode
+**背景**
+
+在每个dubbo应用中某些种类的配置类实例只能出现一次（比如`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`），有些能出现多次（比如`RegistryConfig`、`ProtocolConfig`等）。
+
+如果应用程序意外的扫描到了多个唯一配置类实例（比如用户在一个dubbo应用中错误了配置了两个`ApplicationConfig`），应该以哪种策略来处理这种情况呢？是直接抛异常？是保留前者忽略后者？是忽略前者保留后者？还是允许某一种形式的并存（比如后者的属性覆盖到前者上）？
+
+目前dubbo中的唯一配置类类型和以及某唯一配置类型找到多个实例允许的配置模式/策略如下。
+
+**唯一配置类类型**
+
+`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`。
+
+前四个属于应用级别的，最后一个属于模块级别的。
+
+**配置模式**
+
+- `strict`：严格模式。直接抛异常。
+- `override`：覆盖模式。忽略前者保留后者。
+- `ignore`：忽略模式。忽略后者保留前者。
+- `override_all`：属性覆盖模式。不管前者的属性值是否为空，都将后者的属性覆盖/设置到前者上。
+- `override_if_absent`：若不存在则属性覆盖模式。只有前者对应属性值为空，才将后者的属性覆盖/设置到前者上。
+
+注：后两种还影响配置实例的属性覆盖。因为dubbo有多种配置方式，即存在多个配置源，配置源也有优先级。比如通过xml方式配置了一个`ServiceConfig`且指定属性`version=1.0.0`，同时我们又在外部配置(配置中心)中配置了`dubbo.service.{interface}.version=2.0.0`，在没有引入`config-mode`配置项之前，按照原有的配置源优先级，最终实例的`version=2.0.0`。但是引入了`config-mode`配置项之后，配置优先级规则也不再那么严格，即如果指定`config-mode为override_all`则为`version=2.0.0`，如果`config-mode为override_if_absent`则为`version=1.0.0`，`config-mode`为其他值则遵循原有配置优先级进行属性设值/覆盖。
+
+**配置方式**
+
+配置的key为`dubbo.config.mode`，配置的值为如上描述的几种，默认的策略值为`strict`。下面展示了配置示例
+
+```properties
+# JVM -D
+-Ddubbo.config.mode=strict
+
+# 环境变量
+dubbo.config.mode=strict
+
+# 外部配置(配置中心)、Spring应用的Environment、dubbo.properties
+dubbo.config.mode=strict
+```
