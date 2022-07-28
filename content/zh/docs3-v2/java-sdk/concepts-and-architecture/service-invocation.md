@@ -75,7 +75,7 @@ public interface ClusterFilter extends BaseFilter {
 @Activate(group = CommonConstants.CONSUMER)
 ```
 
-如果需要在 Provider 侧生效 `Filter` 或 `ClusterFilter`，需要增加 `@activate` 注解，并且需要指定 `group` 的值为 `provider`。
+如果需要在 Provider 侧生效 `Filter` 或 `ClusterFilter`，需要增加 `@Activate` 注解，并且需要指定 `group` 的值为 `provider`。
 
 ```java
 @Activate(group = CommonConstants.PROVIDER)
