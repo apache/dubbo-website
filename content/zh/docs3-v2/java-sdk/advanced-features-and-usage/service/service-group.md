@@ -21,9 +21,12 @@ description: "使用服务分组区分服务接口的不同实现"
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group)
 
 ## 使用方式
-Dubbo 服务分组可选择使用 [注解配置](#properties1)、 [xml配置](#properties2) 或 [API配置](#properties3) 方式
+Dubbo 服务分组可选择使用方式 
+- 注解配置
+- xml配置
+- API配置
 
-#### **注解配置**
+### 注解配置
 
 #### 服务提供端
 
@@ -64,7 +67,7 @@ private DemoService demoService2;
 同样启动 Dubbo 服务后，可在注册中心看到相同服务名不同分组的引用者，以 Nacos 作为注册中心为例，显示如下内容：
 ![image-service-group-2.png](/imgs/blog/service-group-2.png)
 
-#### **xml配置**
+### xml配置
 
 #### 服务提供端
 
@@ -120,7 +123,7 @@ private DemoService demoService2;
 
 ![image-service-group-2.png](/imgs/blog/service-group-2.png)
 
-#### **API配置**
+### API配置
 
 #### 服务提供端
 
