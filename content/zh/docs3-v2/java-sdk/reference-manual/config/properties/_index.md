@@ -34,8 +34,8 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | enableFileCache | file.cache | boolean | 可选 | true | 服务治理 | 是否开启本地缓存 | 3.0.0以上版本 |
 | protocol | | string | 可选 | dubbo | 服务治理 | 首选协议，适用于无法确定首选协议的时候 | 3.0.0以上版本 |
 | metadataType | metadata-type |String| 可选 | local | 服务治理 | 应用级服务发现 metadata 传递方式，是以 Provider 视角而言的，Consumer 侧配置无效，可选值有：<br>* remote - Provider 把 metadata 放到远端注册中心，Consumer 从注册中心获取；<br/>* local - Provider 把 metadata 放在本地，Consumer 从 Provider 处直接获取；| 2.7.5以上版本 |
-| metadataServiceProtocol | metadata-service-protocol | string | 可选 | dubbo | 服务治理 | 如 metadataType 配置为 remote，则该属性设置 MetadataService 服务所用的通信协议，默认为 dubbo| 3.0.0以上版本 |
-| metadataServicePort | metadata-service-port | int | 可选 | | 服务治理 | 如 metadataType 配置为 remote，则该属性设置 MetadataService 服务所用的端口号| 2.7.9以上版本 |
+| metadataServiceProtocol | metadata-service-protocol | string | 可选 | dubbo | 服务治理 | 如 metadataType 配置为 local，则该属性设置 MetadataService 服务所用的通信协议，默认为 dubbo| 3.0.0以上版本 |
+| metadataServicePort | metadata-service-port | int | 可选 | | 服务治理 | 如 metadataType 配置为 local，则该属性设置 MetadataService 服务所用的端口号| 2.7.9以上版本 |
 | livenessProbe | liveness-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 liveness probe | 3.0.0以上版本 |
 | readinessProbe | readiness-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 readiness probe | 3.0.0以上版本 |
 | startupProbe | startup-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 startup probe | 3.0.0以上版本 |
