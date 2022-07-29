@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "FAQ"
-linkTitle: "FAQ"
+title: "错误码 FAQ"
+linkTitle: "错误码 FAQ"
 weight: 7
 ---
 
