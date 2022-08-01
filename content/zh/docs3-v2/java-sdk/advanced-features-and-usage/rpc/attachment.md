@@ -10,7 +10,7 @@ description: "通过 Dubbo 中的 Attachment 在服务消费方和提供方之�
 
 可以通过 `RpcContext` 上的 `setAttachment` 和 `getAttachment` 在服务消费方和提供方之间进行参数的隐式传递。
 
-## 背景
+#### 背景
 
 上下文信息是 RPC 框架很重要的一个功能，使用 RpcContext 可以为单次调用指定不同配置。如分布式链路追踪场景，其实现原理就是在全链路的上下文中维护一个 traceId，Consumer 和 Provider 通过传递 traceId 来连接一次RPC调用，分别上报日志后可以在追踪系统中串联并展示完整的调用流程。这样可以更方便地发现异常，定位问题。
 Dubbo 中的 RpcContext 是一个 ThreadLocal 的临时状态记录器，当接收到 RPC 请求，或发起 RPC 请求时，RpcContext 的状态都会变化。比如：A 调 B，B 再调 C，则 B 机器上，在 B 调 C 之前，RpcContext 记录的是 A 调 B 的信息，在 B 调 C 之后，RpcContext 记录的是 B 调 C 的信息。
