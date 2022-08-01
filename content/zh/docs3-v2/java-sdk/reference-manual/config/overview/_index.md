@@ -6,9 +6,9 @@ weight: 1
 description: "对 Dubbo 配置总体设计与工作原理进行了总体概述，包括配置组件、配置来源、配置方式及配置加载流程等。"
 ---
 通过以下链接快速跳转到关心的内容：
-* [使用 Spring Boot 快速开发 Dubbo 应用](../../../quick-start/)
-* [配置项参考手册](../properties)
-* [配置加载及覆盖原理](../principle)
+* [使用 Spring Boot 快速开发 Dubbo 应用](../../../quick-start/spring-boot/)
+* [配置项参考手册，了解有哪些配置项可用](../properties)
+* [配置加载及覆盖的工作原理](../principle)
 * [运行态地址 URL 及优先级规则](../blog)
 
 ## 配置组件
