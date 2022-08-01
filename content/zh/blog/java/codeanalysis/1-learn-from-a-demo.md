@@ -14,7 +14,7 @@ description: >
 ## 1.1 启动Zookeeper
 
 为了Demo可以正常启动,需要我们先在本地启动一个Zookeeper如下图所示:
-![在这里插入图片描述](/imgs/admin/blog/songxiaosheng/1-zookeeper.png)
+![在这里插入图片描述](/imgs/admin/blog/source-blog/1-zookeeper.png)
 
 
 ## 1.2 服务提供者
@@ -100,7 +100,7 @@ public class Application {
 
 ## 1.4 启用服务后写入Zookeeper的节点数据
 启动服务,这个时候我们打开Zookeeper图形化客户端来看看这个服务在Zookeeper上面写入来哪些数据,如下图:
-![在这里插入图片描述](/imgs/admin/blog/songxiaosheng/1-zookeeper-data.png)
+![在这里插入图片描述](/imgs/admin/blog/source-blog/1-zookeeper-data.png)
 写入Zookeper上的节点用于服务在分布式场景下的协调,这些节点是比较重要的。
 
 如果了解过Dubbo的同学,应该会知道Dubbo在低版本的时候会向注册中心中写入服务接口,具体路径在上面的  **dubbo目录下**  ,然后在 **/dubbo/服务接口/** 路径下写入如下信息:
