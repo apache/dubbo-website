@@ -180,7 +180,7 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | parameters       | parameters      | Map<string, string> | 可选     |                  | 扩展参数，用来支持不同配置中心的定制化配置参数               | 2.7.0以上版本 |
 | includeSpringEnv |include-spring-env| boolean            | 可选     | false            | 使用Spring框架时支持，为true时，会自动从Spring Environment中读取配置。<br />默认依次读取<br />key为dubbo.properties的配置<br />key为dubbo.properties的PropertySource | 2.7.0以上版本 |
 
-### metadata-config
+### metadata-report-config
 
 元数据中心。对应的配置类：`org.apache.dubbo.config.MetadataReportConfig`
 
@@ -200,8 +200,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | cluster         | cluster  | string | 可选    |            | 含义视所选定的元数据中心而不同。<br />如Apollo中用来区分不同的配置集群 | 2.7.0以上版本 |
 | file            | file      | string | 可选   |            | 使用文件缓存元数据中心列表，应用重启时将基于此文件恢复，注意：两个元数据中心不能使用同一文件存储 | 2.7.0以上版本 |
 | check           | check   | boolean | 可选   | true       | 当元数据中心连接失败时，是否终止应用启动。                     | 3.0.0以上版本 |
-| reportMetadata  | report-metadata | boolean | 可选 | false | 当元数据存储类型为本地(`metadataType=local`)时，是否同步元数据到元数据中心 | 3.0.0以上版本 |
-| reportDefinition | report-definition | boolean | 可选 | true | 是否上报接口级别元数据                                   | 3.0.0以上版本 |
+| reportMetadata  | report-metadata | boolean | 可选 | false | 是否上地址发现中的接口配置报元数据，`dubbo.application.metadata-type=remote` 该配置不起作用即一定会上报，`dubbo.application.metadata-type=local` 时是否上报由该配置值决定 | 3.0.0以上版本 |
+| reportDefinition | report-definition | boolean | 可选 | true | 是否上报服务运维用元数据                                   | 3.0.0以上版本 |
+| reportConsumerDefinition | report-consumer-definition | boolean | 可选 | true | 是否在消费端上报服务运维用元数据                                    | 3.0.0以上版本 |
 | parameters      | parameters | Map<string, string> | 可选     |  | 扩展参数，用来支持不同元数据中心的定制化配置参数         | 2.7.0以上版本 |
 
 ### protocol
