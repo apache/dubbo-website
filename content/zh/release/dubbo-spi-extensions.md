@@ -13,13 +13,13 @@ weight: 5
 > 发布说明: https://github.com/apache/dubbo-spi-extensions/releases
 >
 
-## Dubbo SPI Extensions 1.0.1 (2022-03-14)
+## Dubbo SPI Extensions 1.0.2 (2022-08-02)
 
 #### Source Release
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.1/apache-dubbo-extensions-1.0.1-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.1/apache-dubbo-extensions-1.0.1-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.1/apache-dubbo-extensions-1.0.1-src.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.sha512)
 
 #### Maven Release
 
@@ -33,31 +33,32 @@ weight: 5
 
 #### Included Components
 
-- dubbo-api-docs:1.0.0
-- dubbo-cluster-extensions
-    - dubbo-cluster-broadcast-1:1.0.0
-    - dubbo-cluster-loadbalance-peakewma:.1.0.0
-    - dubbo-cluster-specify-address-dubbo2:1.0.0
-    - dubbo-cluster-specify-address-dubbo3:1.0.0
+- dubbo-configcenter-extensions
+  - dubbo-configcenter-consul:1.0.0
+  - dubbo-configcenter-etcd:1.0.0
+- dubbo-filter-extensions
+  - dubbo-filter-seata:1.0.0
+- dubbo-metadata-report-extensions
+  - dubbo-metadata-report-consul:1.0.0
+  - dubbo-metadata-report-etcd:1.0.0
 - dubbo-registry-extensions
-    - dubbo-registry-dns:1.0.0
-    - dubbo-registry-kubernetes:1.0.0
-    - dubbo-registry-xds:1.0.0
+  - dubbo-registry-consul:1.0.0
+  - dubbo-registry-etcd3:1.0.0
+  - dubbo-registry-redis:1.0.0
+  - dubbo-registry-sofa:1.0.0
 - dubbo-remoting-extensions
-    - dubbo-remoting-quic:1.0.0
+  - dubbo-remoting-etcd3:1.0.0
+  - dubbo-remoting-grizzly:1.0.0
+  - dubbo-remoting-mina:1.0.0
+  - dubbo-remoting-p2p:1.0.0
+  - dubbo-remoting-redis:1.0.0
 - dubbo-rpc-extensions
-    - dubbo-rpc-native-thrift:1.0.0
-    - dubbo-rpc-http:1.0.0
-    - dubbo-rpc-webservice:1.0.0
-    - dubbo-rpc-rmi:1.0.0
+  - dubbo-rpc-hessian:1.0.0
+  - dubbo-rpc-memcached:1.0.0
+  - dubbo-rpc-redis:1.0.0
 - dubbo-serialization-extensions
-    - dubbo-serialization-protostuff:1.0.0
-    - dubbo-serialization-protobuf:1.0.0
-    - dubbo-serialization-kryo:1.0.0
-    - dubbo-serialization-gson:1.0.0
-    - dubbo-serialization-fst:1.0.0
-    - dubbo-serialization-fastjson:1.0.0
-    - dubbo-serialization-avro:1.0.0
+  - dubbo-serialization-msgpack:1.0.0
+  - dubbo-serialization-native-hession:1.0.0
 
 ## All Dubbo SPI Extensions status
 
@@ -72,15 +73,23 @@ weight: 5
 
 ### dubbo-configcenter
 
-待发布
+| 模块 | 版本号   | 适配 Dubbo 版本   |
+| --- |-------|---------------|
+| dubbo-configcenter-consul | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-configcenter-etcd | 1.0.0 | 2.7.x ~ 3.x.x |
 
 ### dubbo-filter
 
-待发布
+| 模块 | 版本号   | 适配 Dubbo 版本   |
+| --- |-------|---------------|
+| dubbo-filter-seata | 1.0.0 | 2.7.x ~ 3.x.x |
 
 ### dubbo-metadata-report
 
-待发布
+| 模块 | 版本号   | 适配 Dubbo 版本   |
+| --- |-------|---------------|
+| dubbo-metadata-report-consul | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-metadata-report-etcd | 1.0.0 | 2.7.x ~ 3.x.x |
 
 ### dubbo-registry
 
@@ -89,12 +98,21 @@ weight: 5
 | dubbo-registry-dns | 1.0.0 | 3.0.1 ~ 3.0.5 |
 | dubbo-registry-kubernetes | 1.0.0 | 3.0.1 ~ 3.0.5 |
 | dubbo-registry-xds | 1.0.0 | 3.0.1 ~ 3.0.5 |
+| dubbo-registry-consul | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-registry-etcd3 | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-registry-redis | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-registry-sofa | 1.0.0 | 2.7.x ~ 3.x.x |
 
 ### dubbo-remoting
 
 | 模块 | 版本号   | 适配 Dubbo 版本   |
 | --- |-------|---------------|
 | dubbo-remoting-quic | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-remoting-etcd3 | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-remoting-grizzly | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-remoting-mina | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-remoting-p2p | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-remoting-redis | 1.0.0 | 2.7.x ~ 3.x.x |
 
 ### dubbo-rpc
 
@@ -104,6 +122,8 @@ weight: 5
 | dubbo-rpc-http | 1.0.0 | 2.7.x ~ 3.x.x |
 | dubbo-rpc-webservice | 1.0.0 | 2.7.x ~ 3.x.x |
 | dubbo-rpc-rmi | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-rpc-hessian | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-rpc-memcached | 1.0.0 | 2.7.x ~ 3.x.x |
 
 ### dubbo-serialization
 
@@ -116,6 +136,8 @@ weight: 5
 | dubbo-serialization-fst | 1.0.0 | 2.7.x ~ 3.x.x |
 | dubbo-serialization-fastjson | 1.0.0 | 2.7.x ~ 3.x.x |
 | dubbo-serialization-avro | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-serialization-hession | 1.0.0 | 2.7.x ~ 3.x.x |
+| dubbo-serialization-msgpack | 1.0.0 | 2.7.x ~ 3.x.x |
 
 ### dubbo-plugin
 
