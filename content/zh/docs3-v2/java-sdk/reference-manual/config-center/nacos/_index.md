@@ -64,7 +64,7 @@ dubbo
 
 ![nacos-configcenter-global-properties.png](/imgs/user/nacos-configcenter-global-properties.png)
 
-dataId 是 `dubbo.properties`，group 分组与 config-center 保持一致，如未设置则默认是 `dubbo`。
+dataId 是 `dubbo.properties`，group 分组与 config-center 保持一致，如未设置则默认填 `dubbo`。
 
 #### 3.1.2 应用特有外部化配置
 
@@ -82,7 +82,7 @@ dubbo
 
 ![nacos-configcenter-application-properties.png](/imgs/user/nacos-configcenter-application-properties.png)
 
-dataId 是 `dubbo.properties`，group 分组为应用名即 `demo-provider`。
+dataId 是 `dubbo.properties`，group 分组设置为应用名即 `demo-provider`。
 
 ### 3.2 设置 group 与 namespace
 ```yaml
@@ -91,22 +91,24 @@ dubbo
     address: zookeeper://127.0.0.1:2181
     group: dubbo-cluster1
     namespace: dev1
-```
+``
 
 对配置中心而言，`group` 与 `namespace` 应该是全公司（集群）统一的，应该避免不同应用使用不同的值。
 
-## 4 工作原理
+### 3.3 Nacos 扩展配置
+更多 Nacos sdk/server 支持的参数配置请参见 [Nacos 注册中心 - 更多配置](../../registry/nacos/#3.5-更多配置)
+
+## 4 流量治理规则
 对 Nacos 而言，所有流量治理规则和外部化配置都应该是全局可见的，因此相同逻辑集群内的应用都必须使用相同的 namespace 与 group。其中，namespace 的默认值是 `public`，group 默认值是 `dubbo`，应用不得擅自修改 namespace 与 group，除非能保持全局一致。
 
-### 4.1 流量治理规则
+流量治理规则的增删改建议通过 dubbo-admin 完成，更多内容可查看 [Dubbo 支持的流量治理能力]()。
 
 ![nacos-configcenter-governance.jpg](/imgs/user/nacos-configcenter-governance.png)
 
 流量治理规则有多种类型，不同类型的规则 dataId 的后缀是不同的：
 
-- configurators，[覆盖规则](../../examples/config-rule)
-- tag-router，[标签路由](../../examples/routing-rule)
-- condition-router，[条件路由](../../examples/condition-router)
-- migration, [迁移规则](../../examples/todo)
+- configurators，[覆盖规则](../../../advanced-features-and-usage/rpc/config-rule/)
+- tag-router，[标签路由](../../../advanced-features-and-usage/service/routing/routing-rule/#标签路由)
+- condition-router，[条件路由](../../../advanced-features-and-usage/service/routing/routing-rule/#条件路由)
 
 
