@@ -81,12 +81,12 @@ http response 中包含请求的处理状态，返回结果或者调用的错误
 
 Header中必须包含以下条目：
 
-- x-dubbo-http1.1-dubbo-version
+- x-dubbo-service-protocol
 
 表明这个Http 请求是一个Http转dubbo的请求，目前支持Dubbo 协议和 triple 协议，可配置的选项为：
 
-- - x-dubbo-http1.1-dubbo-version: triple
-  - x-dubbo-http1.1-dubbo-version: dubbo
+- - x-dubbo-service-protocol: triple
+  - x-dubbo-service-protocol: dubbo
 
 ​      前者表示这是转化为triple协议，后者表示转化为dubbo协议
 
