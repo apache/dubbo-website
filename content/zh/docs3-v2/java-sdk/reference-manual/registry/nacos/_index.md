@@ -22,23 +22,24 @@ description: "Nacos 注册中心的基本使用和工作原理。"
         <artifactId>dubbo</artifactId>
         <version>3.0.9</version>
     </dependency>
-    <!-- Introduce Nacos dependency, or you can add Nacos dependency directly as shown blow-->
-    <dependency>
-        <groupId>org.apache.dubbo</groupId>
-        <artifactId>dubbo-registry-nacos</artifactId>
-        <version>3.0.9</version>
-    </dependency>
-    <!--
     <dependency>
       <groupId>com.alibaba.nacos</groupId>
       <artifactId>nacos-client</artifactId>
-      <version></version>
+      <version>2.1.0</version>
     </dependency>
-    -->
+     <!-- Introduce Dubbo Nacos extension, or you can add Nacos dependency directly as shown above-->
+     <!--
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-registry-nacos</artifactId>
+            <version>3.0.9</version>
+        </dependency>
+     -->
 </dependencies>
 ```
 增加 Dubbo 与 Nacos 依赖
->Dubbo `3.0.0`及以上版本，dubbo-registry-nacos引入nacos-client`2.0.0`及以上版本
+
+> Dubbo `3.0.0` 及以上版本需 nacos-client `2.0.0` 及以上版本
 
 ### 2.2 配置并启用 Nacos
 

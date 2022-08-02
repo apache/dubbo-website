@@ -163,7 +163,7 @@ CRM 有些服务是专门为国际站设计的，有些服务是专门为中文�
 <dubbo:service interface="com.alibaba.hello.api.DemoService" version="1.0.0" ref="demoService" registry="intlRegistry" />
 ```
 
-### 3.3 场景三
+### 3.3 场景三：根据业务调用服务
 
 CRM 需同时调用中文站和国际站的 PC2 服务，PC2 在中文站和国际站均有部署，接口及版本号都一样，但连的数据库不一样。
 

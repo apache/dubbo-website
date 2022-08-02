@@ -3,48 +3,106 @@ type: docs
 title: "Nacos"
 linkTitle: "Nacos"
 weight: 3
-description: ""
+description: "Nacos 配置中心的基本使用和工作原理。"
 ---
 
-## 外部化配置
-请参考文档 [外部化配置](../configuration/external-config)
+## 1 前置条件
+* 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
+* 安装并启动 [Nacos](https://nacos.io/zh-cn/docs/quick-start.html)
+> 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。
 
-## 动态配置
-[TODO 待完善]
+## 2 使用说明
 
-## 服务治理
+### 2.1 增加 Maven 依赖
+如果项目已经启用 Nacos 作为注册中心，则无需增加任何额外配置。
 
-#### Zookeeper
+如果未启用 Nacos 注册中心，则请参考 [为注册中心增加 Nacos 依赖](../../registry/nacos/#21-增加依赖)。
 
-默认节点结构：
+### 2.2 启用 Zookeeper 配置中心
+```xml
+<dubbo:config-center address="nacos://127.0.0.1:8848"/>
+```
 
-![zk-configcenter-governance](/imgs/user/zk-configcenter-governance.jpg)
+或者
 
-- namespace，用于不同配置的环境隔离。
-- config，Dubbo 约定的固定节点，不可更改，所有配置和服务治理规则都存储在此节点下。
-- dubbo，所有服务治理规则都是全局性的，dubbo 为默认节点
-- configurators/tag-router/condition-router/migration，不同的服务治理规则类型，node value 存储具体规则内容
+```yaml
+dubbo
+  config-center
+    address: nacos://127.0.0.1:8848
+```
 
-#### Apollo
+或者
 
-所有的服务治理规则都是全局性的，默认从公共命名空间 `dubbo` 读取和订阅：
+```properties
+dubbo.config-center.address=nacos://127.0.0.1:8848
+```
 
-![apollo-configcenter-governance.jpg](/imgs/user/apollo-configcenter-governance.jpg)
+或者
 
-不同的规则以不同的 key 后缀区分：
+```java
+ConfigCenterConfig configCenter = new ConfigCenterConfig();
+configCenter.setAddress("nacos://127.0.0.1:8848");
+```
 
-- configurators，[覆盖规则](../../examples/config-rule)
-- tag-router，[标签路由](../../examples/routing-rule)
-- condition-router，[条件路由](../../examples/condition-router)
-- migration, [迁移规则](../../examples/todo)
+`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#2.2-配置并启用-Nacos)
 
-#### Nacos
+## 3 高级配置
+如要开启认证鉴权，请参考 [Nacos 注册中心 - 启用认证鉴权](../../registry/nacos/#3.1-认证)
 
-所有的服务治理规则都是全局的，默认从 namespace: `public` 下进行读取， 通过 dataId: `interface name` 以及 group: `dubbo` 去读取和订阅：
+### 3.1 外部化配置
+#### 3.1.1 全局外部化配置
+**1. 应用开启 config-center 配置**
+```yaml
+dubbo
+  config-center
+    address: nacos://127.0.0.1:2181
+    config-file: dubbo.properties # optional
+```
+`config-file` - 全局外部化配置文件 key 值，默认 `dubbo.properties`。`config-file` 代表将 Dubbo 配置文件存储在远端注册中心时，文件在配置中心对应的 key 值，通常不建议修改此配置项。
+
+**2. Nacos Server 增加配置**
+
+![nacos-configcenter-global-properties.png](/imgs/user/nacos-configcenter-global-properties.png)
+
+dataId 是 `dubbo.properties`，group 分组与 config-center 保持一致，如未设置则默认是 `dubbo`。
+
+#### 3.1.2 应用特有外部化配置
+
+**1. 应用开启 config-center 配置**
+```yaml
+dubbo
+  config-center
+    address: nacos://127.0.0.1:2181
+    app-config-file: dubbo.properties # optional
+```
+
+`app-config-file` - 当前应用特有的外部化配置文件 key 值，如 `app-name-dubbo.properties`，仅在需要覆盖全局外部化配置文件 `config-file` 时才配置。
+
+**2. Nacos Server 增加配置**
+
+![nacos-configcenter-application-properties.png](/imgs/user/nacos-configcenter-application-properties.png)
+
+dataId 是 `dubbo.properties`，group 分组为应用名即 `demo-provider`。
+
+### 3.2 设置 group 与 namespace
+```yaml
+dubbo
+  config-center
+    address: zookeeper://127.0.0.1:2181
+    group: dubbo-cluster1
+    namespace: dev1
+```
+
+对配置中心而言，`group` 与 `namespace` 应该是全公司（集群）统一的，应该避免不同应用使用不同的值。
+
+## 4 工作原理
+对 Nacos 而言，所有流量治理规则和外部化配置都应该是全局可见的，因此相同逻辑集群内的应用都必须使用相同的 namespace 与 group。其中，namespace 的默认值是 `public`，group 默认值是 `dubbo`，应用不得擅自修改 namespace 与 group，除非能保持全局一致。
+
+### 4.1 流量治理规则
 
 ![nacos-configcenter-governance.jpg](/imgs/user/nacos-configcenter-governance.png)
 
-不同的规则以 dataId 的后缀区分：
+流量治理规则有多种类型，不同类型的规则 dataId 的后缀是不同的：
 
 - configurators，[覆盖规则](../../examples/config-rule)
 - tag-router，[标签路由](../../examples/routing-rule)
