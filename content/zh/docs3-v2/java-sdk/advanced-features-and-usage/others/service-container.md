@@ -3,7 +3,7 @@ type: docs
 title: "自定义服务容器"
 linkTitle: "自定义服务容器"
 weight: 1
-description: "了解 dubbo3 中服务自定义容器类型和使用"
+description: "了解 Dubbo 3 中服务自定义容器类型和使用"
 ---
 
 ## 特性说明
