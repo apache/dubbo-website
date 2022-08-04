@@ -1,7 +1,7 @@
 ---
 type: docs
 title: "部署到 Kubernetes"
-linkTitle: "如何部署 Dubbo 到 Kubernetes"
+linkTitle: "基于 API-SERVER 的原生 K8S Service"
 weight: 2
 description: "该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo 应用部署到 Kubernetes 并复用 Kubernetes Native Service 的使用示例。
 此示例的局限在于需要授予每个 Dubbo 应用访问 API-SERVER 特定资源的权限，同时直接访问和监听 API-SERVER 对中小集群来说并没有什么问题，
