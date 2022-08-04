@@ -9,7 +9,7 @@ description: "该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo
 该方案无需授予 Dubbo 应用访问 API-SERVER 的权限，也无需为 API-SERVER 引连接过多数据面造成的稳定性而担心。"
 ---
 
-可以按照下文步骤，将 Demo 部署到本地集群，也可在 [KataCoda 在线快速体验]()。
+可以按照下文步骤，将 Demo 部署到本地集群。
 
 ## 1 总体目标
 
