@@ -16,7 +16,7 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./timeout/" >}}'>调整服务超时时间</a>
+                    <a href='{{< relref "./timeout/" >}}'>动态调整请求超时时间</a>
                 </h4>
                 <p>给 Dubbo 请求设置超时时间可以有效的提高系统稳定性，避免个别服务阻塞占用过多资源。<br/><br/> 而通过在运行期动态的调整服务超时时间，可以有效的应对超时设置不合理、系统突发情况等导致的服务频繁超时、服务阻塞等问题，提升系统稳定性。</p>
             </div>

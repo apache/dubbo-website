@@ -1,7 +1,7 @@
 ---
 type: docs
 title: "流量灰度"
-linkTitle: "流量灰度"
+linkTitle: "通过权重调整流量分布"
 weight: 5
 description: "在 Dubbo 中配置应用级治理规则和服务级治理规则"
 ---
