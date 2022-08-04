@@ -14,8 +14,8 @@ Triple 是 Dubbo3 提出的基于 HTTP2 的开放协议，旨在解决 Dubbo2 �
 
 目前 Java 和 Go 的 Dubbo SDK 已全面支持 Triple 协议。在阿里巴巴，Triple 协议广泛用于跨环境、跨语言、跨生态互通，已有数十万容器生产级使用。
 
-Java SDK 支持 [IDL 生成 Stub](../../../docs3-v2/java-sdk/reference-manual/protocol/triple/idl)
-和 [Java Interface](../../../docs3-v2/java-sdk/reference-manual/protocol/triple/idl) 两种方式，多语言、生态互通、流式需求推荐使用 IDL 方式，现有服务平滑升级推荐使用
+Java SDK 支持 [IDL 生成 Stub](../../../docs3-v2/java-sdk/quick-start/idl)
+和 [Java Interface](../../../docs3-v2/java-sdk/quick-start/idl) 两种方式，多语言、生态互通、流式需求推荐使用 IDL 方式，现有服务平滑升级推荐使用
 Interface 方式。
 
 - Dubbo2 老用户如何[从现有协议升级至 Triple](TBD)
