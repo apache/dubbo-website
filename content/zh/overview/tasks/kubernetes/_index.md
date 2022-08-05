@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "Dubbo Kubernetes 部署方案"
-linkTitle: "Dubbo Kubernetes 部署方案"
+title: "Kubernetes 部署方案"
+linkTitle: "Kubernetes 部署方案"
 weight: 2
 hide_summary: true
 no_list: true
