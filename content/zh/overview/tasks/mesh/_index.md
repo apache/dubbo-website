@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "Dubbo Mesh 部署方案"
-linkTitle: "Dubbo Mesh 部署方案"
+title: "Mesh 部署方案"
+linkTitle: "Mesh 部署方案"
 weight: 2
 hide_summary: true
 no_list: true

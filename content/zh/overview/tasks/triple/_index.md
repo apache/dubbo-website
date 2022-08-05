@@ -2,7 +2,7 @@
 ---
 type: docs
 title: "Triple "
-linkTitle: "Triple 示例"
+linkTitle: "Triple 使用示例"
 weight: 2
 hide_summary: true
 no_list: true
