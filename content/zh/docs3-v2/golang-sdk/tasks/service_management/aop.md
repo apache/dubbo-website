@@ -9,7 +9,7 @@ weight: 1
 ## 1. 准备工作
 
 - dubbo-go cli 工具和依赖工具已安装
-- 阅读[【组件加载与可扩展性】](../../concept/service_management/aop_and_extension/)
+- 阅读[【组件加载与可扩展性】](../../../concept/service_management/aop_and_extension/)
 - 创建一个新的 demo 应用
 
 ## 2. 配置指定 Filter

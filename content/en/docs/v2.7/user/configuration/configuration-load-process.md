@@ -30,7 +30,7 @@ The figure below shows the priority of configuration override, decreasing from t
 
 ![Override Priority](/imgs/blog/configuration.jpg)
 
-click here to view [Externalize configuration details](./config-center.md)
+click here to view [Externalize configuration details](/zh/docsv2.7/user/configuration/config-center/)
 
 
 ## Configuration Format

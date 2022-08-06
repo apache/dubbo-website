@@ -123,11 +123,11 @@ POJO Response
 
 50K TPS
 
-![50ktps.png](static/imgs/user/50ktps.png)
+![50ktps.png](/imgs/user/50ktps.png)
 
 50K Response
 
-![50kres.png](static/imgs/user/50kres.png)
+![50kres.png](/imgs/user/50kres.png)
 
 
 ### Scene name: scence 200k string

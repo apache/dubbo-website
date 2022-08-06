@@ -12,7 +12,7 @@ description: ""
 下面从定义服务、编译服务、配置并加载服务三个方面说明如何快速的开发 Dubbo 服务。
 
 ## 定义服务
-Dubbo3 推荐使用 IDL 定义跨语言服务，如您更习惯使用特定语言的服务定义方式，请移步[多语言 SDK](../mannual)查看。
+Dubbo3 推荐使用 IDL 定义跨语言服务，如您更习惯使用特定语言的服务定义方式，请移步[多语言 SDK](/zh/docs3-v2/)查看。
 
 ```text
 syntax = "proto3";
@@ -198,7 +198,3 @@ func main() {
 	gxlog.CInfo("response result: %v\n", user)
 }
 ```
-
-## 查看完整示例
-* [Java IDL Quick Start]()
-* [Golang IDL Quick Start]()

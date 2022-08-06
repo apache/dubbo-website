@@ -4,7 +4,7 @@ title: 架构
 keywords: 架构
 ---
 
-![architecture](https://github.com/dubbogo/dubbogo.github.io/blob/master/img/architecture.png?raw=true)
+![architecture](/imgs/docs3-v2/golang-sdk/concept/more/architecture/architecture.png)
 
 #### 节点说明
 

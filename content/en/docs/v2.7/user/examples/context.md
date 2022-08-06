@@ -6,7 +6,7 @@ weight: 19
 description: "Dubbo context"
 ---
 
-All environment information of during the current call will put into the context,and all configuration information will convert the parameters of `URL` instance,Ref to the column of **URL parameters** at the [schema configuration reference book](content/old/en/docs/v2.7/user/references/xml)
+All environment information of during the current call will put into the context,and all configuration information will convert the parameters of `URL` instance,Ref to the column of **URL parameters** at the [schema configuration reference book](/en/docs/v2.7/user/references/xml)
 
 
 `RpcContext` is a temporary status recorder of `ThreadLocal`,when accept `RPC` request or send `RPC` request,The `RpcContext` will be  changed.Such as: `A` call `B` and `B` call `C`. On `B` machine,before `B` call `C`,the `RpcContext` will record the information of `A` call `B`.After `B` call `C`,the `RpcContext` record the information of `B` call `C`.

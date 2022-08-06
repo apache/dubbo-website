@@ -43,8 +43,8 @@ ThinSDK + Sidecar 模式的 Mesh 架构有很多优势，如平滑升级、多�
 * 部署环境受限，并不是所有的环境都能满足 Sidecar 部署与请求拦截要求。
 
 详细方案设计与示例请参考
-* [Dubbo ThinSDK Proposal](../../tasks/dubbo-mesh)
-* [使用示例](../../tasks/dubbo-mesh)
+* [Dubbo ThinSDK Proposal](../../tasks/mesh/dubbo-mesh)
+* [使用示例](../../tasks/mesh/dubbo-mesh)
 
 ### Dubbo Proxyless Mesh
 作为 ThinSDK + Sidecar 模式的补充，Dubbo 社区自很早之前就做了 Dubbo 直接对接到控制面的设想与思考，也就是当前所说的 Proxyless Mesh 模式。Proxyless 模式使得微服务又回到了 2.x 时代的部署架构。如下图所示，和我们上面看的 Dubbo 经典服务治理模式非常相似，所以说这个模式并不新鲜， Dubbo 从最开始就是这么样的设计模式。但相比于 Mesh 架构，Dubbo2 并没有强调控制面的统一管控，而这点恰好是 Service Mesh 所强调的，强调对流量、可观测性、证书等的标准化管控与治理，也是 Mesh 理念先进的地方。
@@ -62,8 +62,8 @@ ThinSDK + Sidecar 模式的 Mesh 架构有很多优势，如平滑升级、多�
 * 适用于几乎所有的部署环境
 
 详细方案设计与示例请参考
-* [Dubbo Proxyless Mesh](../../tasks/dubbo-mesh)
-* [使用示例](../../tasks/dubbo-mesh)
+* [Dubbo Proxyless Mesh](../../tasks/mesh/dubbo-mesh)
+* [使用示例](../../tasks/mesh/dubbo-mesh)
 
 ### Dubbo 控制面治理规则
 TBD

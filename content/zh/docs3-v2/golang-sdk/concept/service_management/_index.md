@@ -7,8 +7,6 @@ weight: 3
 
 # Dubbo-go 概念
 
-![](../../pic/3.0/dubbogo.png)
-
 Apache/Dubbo-go ([github.com/apache/dubbo-go](https://github.com/apache/dubbo-go))
 
 是一款分布式 RPC 框架；是 Apache/Dubbo 的 Go 语言实现。旨在为开发者提供便利的微服务应用开发体验。

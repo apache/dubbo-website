@@ -5,9 +5,6 @@ linkTitle: "Details"
 weight: 1
 ---
 
-
-> http://javatar.iteye.com/blog/1056664
-
 Recently, I have been worried about the quality of the Dubbo distributed service framework. If there are more maintenance personnel or changes, there will be a decline in quality. I am thinking, is there any need for everyone to abide by it, according to a habit when writing code, I have summarized it. The code process, especially the framework code, should always keep in mind the details. Maybe the following will be said, everyone will feel very simple, very basic, but always keep in mind. Considering these factors in every line of code requires a lot of patience. It is often said that the devil is in the details.
 
 ## Prevent null pointer dereference and index out of bounds

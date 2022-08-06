@@ -193,7 +193,7 @@ The scope of the `dubbo.tag` is for each invocation, using the attachment to pas
 
 
 [^1]: Support since `2.2.0`   
-[^2]: Routing Rules Extension Point: [Route Extension](/docs/dev/impls/router.html)   
+[^2]: Routing Rules Extension Point: [Route Extension](/en/docs/v2.7/dev/impls/router/)   
 [^3]: Note: A service can only have one whitelist rule, otherwise the two rules will be filtered out.  
 [^4]: Note: Scripts have no sandbox constraints, can execute arbitrary code, and poses a backdoor risk.  
 [^5]: Support since `2.7.0`

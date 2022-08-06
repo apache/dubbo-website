@@ -13,7 +13,7 @@ weight: 1
 
 Dubbo-go-pixiu 网关支持调用 GO/Java 的 Dubbo 集群。在 Dubbo-go 3.0 的场景下，我们可以通过 Pixiu 网关，在集群外以 HTTP 协议请求 pixiu 网关，在网关层进行协议转换，进一步调用集群内的Dubbo-go 服务。
 
-![image.png](https://raw.githubusercontent.com/dubbogo/dubbogo.github.io/master/img/triple-pixiu.png)
+![image.png](/imgs/docs3-v2/golang-sdk/tasks/pixiu/http_triple/triple-pixiu.png)
 
 用户调用 Dubbo-go 服务的 path 为http://$(app_name)/$(service_name)/$(method)。
 

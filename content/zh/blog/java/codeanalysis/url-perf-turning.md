@@ -10,7 +10,7 @@ description: >
 在阐述地址推送性能的具体优化之前，我们有必要先了解一下与之息息相关的内容 --- URL。
 
 ### 定义
-在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 ([RFC1738](https://link.zhihu.com/?target=https%3A//www.ietf.org/rfc/rfc1738.txt)――Uniform Resource Locators (URL))应该是最广为人知的一个 RFC 规范，它的定义也非常简单。
+在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 ([RFC1738](https://www.ietf.org/rfc/rfc1738.txt)――Uniform Resource Locators (URL))应该是最广为人知的一个 RFC 规范，它的定义也非常简单。
 > 因特网上的可用资源可以用简单字符串来表示，该文档就是描述了这种字符串的语法和语 义。而这些字符串则被称为：“统一资源定位器”（URL）
 
 **一个标准的 URL 格式**至多可以包含如下的几个部分

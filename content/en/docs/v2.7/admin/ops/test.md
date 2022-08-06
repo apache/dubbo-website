@@ -5,4 +5,4 @@ linkTitle: "Test"
 weight: 3
 ---
 
-please refer to this [blog](../../../../../blog//2019/08/26/service-test/)
+please refer to this [blog](/en/blog/2019/08/26/service-test/)

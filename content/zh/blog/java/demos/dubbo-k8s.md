@@ -53,7 +53,7 @@ Kubernetes是天然可作为微服务的地址注册中心，类似于Zookeeper�
 
 1. DNS： 默认Kubernetes的service是靠DNS插件(最新版推荐是coreDNS)， Dubbo上有个proposal是关于这个的。我的理解是static resolution的机制是最简单最需要支持的一种service discovery机制，具体也可以参考Envoy在此的观点，由于HSF/Dubbo一直突出其软负载的地址发现能力，反而忽略Static的策略。同时蚂蚁的SOFA一直是支持此种策略，那一个SOFA工程的工程片段做一个解释。这样做有两个好处，1）当软负载中心crash不可用造成无法获取地址列表时，有一定的机制Failover到此策略来处理一定的请求。 2）在LDC/单元化下，蚂蚁的负载中心集群是机房/区域内收敛部署的，首先保证软负载中心的LDC化了进而稳定可控，当单元需要请求中心时，此VIP的地址发现就排上用场了。
 
-![img](https://img.alicdn.com/tfs/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png)
+![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png)
 
 2. API：DNS是依靠DNS插件进行的，相当于额外的运维开销，所以考虑直接通过kubernetes的client来获取endpoint。事实上，通过访问Kubernetes的API server接口是可以直接获取某个servie背后的endpoint列表，同时可以监听其地址列表的变化。从而实现Dubbo/HSF所推荐的软负载发现策略。具体可以参考代码：
 
@@ -68,25 +68,25 @@ Kubernetes是天然可作为微服务的地址注册中心，类似于Zookeeper�
 
 1. 创建镜像仓库并绑定github代码库。如下图
 
-![img](https://img.alicdn.com/tfs/TB1m.tEtrorBKNjSZFjXXc_SpXa-1892-870.png)
+![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1m.tEtrorBKNjSZFjXXc_SpXa-1892-870.png)
 
 2. 点击管理 **进行创建好的仓库**，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。
 
-![img](https://img.alicdn.com/tfs/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png)
+![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png)
 
 3. 切换到企业级分布式应用服务（EDAS）产品，在资源管理 -> 集群 下创建Kubernetes集群并绑定ECS，如下图.
 
-![img](https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
+![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
 
 4. 应用管理 -》创建应用，**类型为kubernetes应用** 并且指定在容器镜像服务中的镜像。如下图。
 
-![img](https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
+![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
 
-![](https://img.alicdn.com/tfs/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
+![](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
 
 5. 创建完成后，进行应用部署。如下图
 
-![](https://img.alicdn.com/tfs/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
+![](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
 
 - 补充应用名不能有大写字母，全部小写，否则有部署失败的问题。
 

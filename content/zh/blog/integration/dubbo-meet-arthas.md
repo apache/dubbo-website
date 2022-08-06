@@ -16,7 +16,7 @@ Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用�
 Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。
 
 * Github: https://github.com/alibaba/arthas
-* 文档：https://alibaba.github.io/arthas/
+* 文档：https://arthas.aliyun.com/doc/
 * Arthas开源交流QQ群: 916328269
 * Arthas开源交流钉钉群: 21965291
 
@@ -71,10 +71,10 @@ public class UserServiceImpl implements UserService {
 
 ### Arthas快速开始
 
-* https://alibaba.github.io/arthas/install-detail.html
+* https://arthas.aliyun.com/doc/install-detail.html
 
 ```bash
-$ wget https://alibaba.github.io/arthas/arthas-boot.jar
+$ wget https://arthas.aliyun.com/arthas-boot.jar
 $ java -jar arthas-boot.jar
 ```
 
@@ -96,7 +96,7 @@ $ java -jar arthas-boot.jar
 |  | |  ||  |\  \    |  |   |  |  |  ||  | |  |.-'    |
 `--' `--'`--' '--'   `--'   `--'  `--'`--' `--'`-----'
 
-wiki: https://alibaba.github.io/arthas
+wiki: https://arthas.aliyun.com/doc
 version: 3.0.5
 pid: 43523
 time: 2018-12-05 16:23:52
@@ -107,7 +107,7 @@ $
 
 ### Dubbo线上服务抛出异常，怎么获取调用参数？
 
-* https://alibaba.github.io/arthas/watch.html
+* https://arthas.aliyun.com/doc/watch.html
 
 当线上服务抛出异常时，最着急的是什么参数导致了抛异常？
 
@@ -135,7 +135,7 @@ ts=2018-12-05 16:26:44; [cost=3.905523ms] result=@ArrayList[
 
 ### 怎样线上调试Dubbo服务代码?
 
-* https://alibaba.github.io/arthas/redefine.html
+* https://arthas.aliyun.com/doc/redefine.html
 
 在本地开发时，可能会用到热部署工具，直接改代码，不需要重启应用。但是在线上环境，有没有办法直接动态调试代码？比如增加日志。
 
@@ -169,8 +169,8 @@ redefine success, size: 1
 
 ### 怎样动态修改Dubbo的logger级别?
 
-* https://alibaba.github.io/arthas/ognl.html
-* https://alibaba.github.io/arthas/sc.html
+* https://arthas.aliyun.com/doc/ognl.html
+* https://arthas.aliyun.com/doc/sc.html
 * https://commons.apache.org/proper/commons-ognl/language-guide.html
 
 在排查问题时，需要查看到更多的信息，如果可以把logger级别修改为`DEBUG`，就非常有帮助。
@@ -230,7 +230,7 @@ $ ognl '@org.slf4j.LoggerFactory@getLogger("root").getLevel().toString()'
 
 ### 怎样减少测试小姐姐重复发请求的麻烦?
 
-* https://alibaba.github.io/arthas/tt.html
+* https://arthas.aliyun.com/doc/tt.html
 
 在平时开发时，可能需要测试小姐姐发请求过来联调，但是我们在debug时，可能不小心直接跳过去了。这样子就尴尬了，需要测试小姐姐再发请求过来。
 
@@ -269,7 +269,7 @@ Affect(row-cnt:1) cost in 4 ms.
 
 ### Dubbo运行时有哪些Filter? 耗时是多少?
 
-* https://alibaba.github.io/arthas/trace.html
+* https://arthas.aliyun.com/doc/trace.html
 
 Dubbo运行时会加载很多的Filter，那么一个请求会经过哪些Filter处理，Filter里的耗时又是多少呢？
 
@@ -297,7 +297,7 @@ Affect(class-cnt:19 , method-cnt:59) cost in 1441 ms.
 
 ### Dubbo动态代理是怎样实现的?
 
-* https://alibaba.github.io/arthas/jad.html
+* https://arthas.aliyun.com/doc/jad.html
 * com.alibaba.dubbo.common.bytecode.Wrapper
 
 通过Arthas的`jad`命令，可以看到Dubbo通过javaassist动态生成的Wrappr类的代码：

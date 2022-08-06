@@ -115,5 +115,5 @@ dubbo:
         interface: com.apache.dubbo.sample.basic.IGreeter
 ```
 
-下一章: [【Triple 协议异常回传】](./exception_response.html)
+下一章: [【Triple 协议异常回传】](../exception_response/)
 

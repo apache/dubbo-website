@@ -13,9 +13,9 @@ description: 服务注册发现
 
 服务端注册接口信息和到自身地址到注册中心，客户端从注册中心读取和订阅需要调用的地址列表。整个架构如图所示：
 
-![](https://dubbo.apache.org/imgs/architecture.png)
+![](/imgs/architecture.png)
 
-关于 Dubbo 服务发现细节，详情可参考 [Dubbo 官网的概念介绍](https://dubbo.apache.org/zh/docs/concepts/service-discovery/)
+关于 Dubbo 服务发现细节，详情可参考 [Dubbo 官网的概念介绍](/zh/docs/concepts/service-discovery/)
 
 ## 2. 概念
 

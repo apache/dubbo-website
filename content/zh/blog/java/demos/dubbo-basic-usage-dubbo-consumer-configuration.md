@@ -77,7 +77,7 @@ description: >
 
 ###### 配置的覆盖关系
 
-![undefined](https://cdn.nlark.com/lark/0/2018/png/15841/1536496436861-1b63bc4e-3e59-4aa3-800e-a32cfe64950d.png)   
+![undefined](/imgs/blog/2018/08/14/dubbo-usage/1536496436861-1b63bc4e-3e59-4aa3-800e-a32cfe64950d.png)   
 
 <center>配置的覆盖关系图</center> 
 

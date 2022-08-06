@@ -28,11 +28,11 @@ yaml
 
 开发者可以使用 API 的形式构建配置，从而启动框架。该方法较适合 dubbo-go 作为第三方组件引入的情况。
 
-详情见任务[【配置API】](../../tasks/config/config_api/)
+详情见任务[【配置API】](../../../tasks/config/config_api/)
 
 ## 3. 配置中心
 
 开发者可以将配置放置在配置中心，从而便于配置的管理和修改。
 
-详情见任务[【远程配置】](../../tasks/config/remote_config/)
+详情见任务[【远程配置】](../../../tasks/config/remote_config/)
 

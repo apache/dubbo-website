@@ -16,7 +16,7 @@ All Dubbo tags are parsed by `DubboBeanDefinitionParser`, based on one to one at
 
 Transfer Bean object to URL, and transfer all attributes of Bean to URL parameters when `ServiceConfig.export()` or `ReferenceConfig.get()` initialization.
 
-Then pase URL to [Protocol extension point](../impls/protocol), based on [Extension point adaptive mechanism](../SPI) of extension point, processing service exposure or reference for different protocols according to URL protocol header.
+Then pase URL to [Protocol extension point](../impls/protocol), based on [Extension point adaptive mechanism](../spi/) of extension point, processing service exposure or reference for different protocols according to URL protocol header.
 
 ### Service Exposure
 

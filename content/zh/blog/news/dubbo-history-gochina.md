@@ -126,11 +126,11 @@ Go 语言是一个适合处理 IO 密集型任务的语言，不擅长处理 CPU
 
 Dubbo 的限流接口源码如下：
 
-![](/imgs/blog/dubbo-go/gochina/p15.jpeg)
+![](/imgs/blog/dubbo-go/gochina/p15.png)
 
 这个接口抽象是非常漂亮的，第一个是限流 url，第二个服务调用。下面是 Dubbo 的固定窗口限流源码：
 
-![](/imgs/blog/dubbo-go/gochina/p16.jpeg)
+![](/imgs/blog/dubbo-go/gochina/p16.png)
 
 上面的代码很明显，"private final" 决定了 Dubbo 使用者只能使用期给定的固定窗口限流限算法，无法扩展。
 
@@ -179,7 +179,7 @@ dubbogo 的单机熔断是基于 hystrix-go 实现的，其判定参数有最大
 
 所以每一步基本上都要给程序一定的时间进行等待，所以等的时间窗口是多少呢？dubbogo 默认每个步骤大概花2秒，总体一个时间窗口是10秒。
 
-![](/imgs/blog/dubbo-go/gochina/p24.jpeg)
+![](/imgs/blog/dubbo-go/gochina/p24.png)
 
 基本上在别的 RPC 框架里面，可能不太常见到这种处理。
 
@@ -205,8 +205,6 @@ k8s 提供了 pod/endpoint/service 三层维度的资源。简单的做法，可
 ## 七 展望未来
 
 最后就是展望未来，也就是明年的规划。
-
-![](/imgs/blog/dubbo-go/gochina/p27.jpeg)
 
 明年我们将会很快实现 dubbo router。社区在 8月份已经实现了 router 功能需要的底层的算法模块，但是当时配置中心下发相关的参数的能力还不是很强，所以没有最终完成。最近服务治理配置刚刚支持了 zookeeper 和 apollo，预计很快就可以将 router 的参数通过配置中心下发的形式支持掉。另外，还有 tracing，我们将会引入社区主流的 tracing 方案，以 opentracing 为标准，去集成 opentracing 开源生态的相关能力。第三个是 kubernetes operator，这个就是刚才说的 K8s 的服务调用，我们会基于 operator 的方案做一版新的基于 k8s 的注册中心实现。最后就是云原生生态的融入，即与 istio 的集成，dubbogo 将会成为 dubbo 在 service mesh 生态中的重要角色。
 

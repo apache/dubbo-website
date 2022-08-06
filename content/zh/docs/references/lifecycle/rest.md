@@ -186,7 +186,7 @@ JAX-RS是标准的Java REST API，得到了业界的广泛支持和应用，其�
 
 JAX-RS在网上的资料非常丰富，例如下面的入门教程：
 
-* Oracle官方的tutorial：http://docs.oracle.com/javaee/7/tutorial/doc/jaxrs.htm
+* Oracle官方的tutorial：https://www.oracle.com/technical-resources/articles/java/jax-rs.html
 * IBM developerWorks中国站文章：http://www.ibm.com/developerworks/cn/java/j-lo-jaxrs/
 
 更多的资料请自行google或者百度一下。就学习JAX-RS来说，一般主要掌握其各种annotation的用法即可。

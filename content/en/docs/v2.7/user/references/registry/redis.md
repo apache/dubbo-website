@@ -73,7 +73,7 @@ A home-brewed service registry server is used in Alibaba instead of redis server
 ## Installation
 
 
-Pls. refer to [redis install manual](http://dubbo.apache.org/en-us/docs/admin/install/redis.html) for how to install a redis based registry server. To set it up, specify `dubbo.registry.address` to `redis://127.0.0.1:6379` in `conf/dubbo.properties` for both provider and consumer (you can refer to [quick start](content/old/en/docs/v2.7/user/quick-start.md)) after install a redis server.
+Pls. refer to [redis install manual](/en/docs/v2.7/admin/install/redis/) for how to install a redis based registry server. To set it up, specify `dubbo.registry.address` to `redis://127.0.0.1:6379` in `conf/dubbo.properties` for both provider and consumer (you can refer to [quick start](/en/docs/v2.7/user/quick-start/)) after install a redis server.
 
 
 [^1]: [Redis](http://redis.io) is a high performance KV cache server

@@ -160,7 +160,7 @@ JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
 
 #### Java-Server 启动
 
-1. 定义 Java 的 PB 文件，可参考 [Dubbo 快速开始](https://dubbo.apache.org/zh/docs/quick-start/)
+1. 定义 Java 的 PB 文件，可参考 [Dubbo 快速开始](/zh/docs/quick-start/)
 
 ```protobuf
 syntax = "proto3";
@@ -450,13 +450,13 @@ public class ApiConsumer {
 
 ## 2. 基于 Dubbo 协议互通 (Hessian2序列化)
 
-参考 [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/rpc/dubbo)
+参考 [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/master/rpc/dubbo)
 
 ### 2.1 Go-Client -> Java-Server
 
 #### Java-Server 启动
 
-1. 定义 Java 接口、参数和返回值，可参考 [Dubbo 快速开始](https://dubbo.apache.org/zh/docs/quick-start/)
+1. 定义 Java 接口、参数和返回值，可参考 [Dubbo 快速开始](/zh/docs/quick-start/)
 
 ```java
 package org.apache.dubbo;
@@ -853,5 +853,5 @@ public class Consumer {
 }
 ```
 
-下一章: [【配置中心和配置监听】](./config-center-dynamic.html)
+下一章: [【配置中心和配置监听】](../config-center-dynamic/)
 

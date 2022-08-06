@@ -59,7 +59,7 @@ Pixiu 的整体设计遵守以下原则：
 
 不同的使用场景有着各自独特的需求。为满足不同用户的定制化需求，Pixiu 使用了插件模式。开发者可以通过编写 go plugin，将自身特有的业务逻辑以 filter 形式内嵌至 Pixiu 网关中，实现诸如企业登录鉴权等功能。
 
-![](https://static001.geekbang.org/infoq/fd/fd38da297d095e4c3af1c89b18804ef1.webp)
+![](/imgs/blog/1/01/01/dubbo-go-pixiu/fd38da297d095e4c3af1c89b18804ef1.webp)
 
 图 1: Pixiu 核心功能列表
 
@@ -67,7 +67,7 @@ Pixiu 的整体设计遵守以下原则：
 ## Pixiu 的架构设计
 
 
-![](https://static001.geekbang.org/infoq/2b/2b2fd6ea1cc0375392919d9e0c181f2b.webp)
+![](/imgs/blog/1/01/01/dubbo-go-pixiu/2b2fd6ea1cc0375392919d9e0c181f2b.webp)
 
 图 2: Pixiu 架构
 
@@ -234,7 +234,7 @@ func (ef *GenericFilter) Invoke(ctx context.Context, invoker protocol.Invoker, i
 
 ### Pixiu 的未来
 
-![](https://static001.geekbang.org/infoq/e5/e57050f224f658b96cd6bd917050b259.webp)
+![](/imgs/blog/1/01/01/dubbo-go-pixiu/e57050f224f658b96cd6bd917050b259.webp)
 图 3: Pixiu 迭代里程碑
 
 
@@ -246,7 +246,7 @@ Pixiu 作为网关产品外，其衍生项目也会在我们的未来计划中�
 Pixiu 目前的定位是一个七层协议网关，其最初版本是被定义成一个 Dubbo 的服务网关。作为云时代的产品，Pixiu 的发展方向必然是面向云原生的。现在的版本为 0.2.1, 已经实现基本的 Dubbo/Http 服务代理和部分的网关通用功能。目前正在开发中的 0.4 及其后续版本支持 gRPC 和 Spring Cloud 服务调用， 后续还将提供 MQ 服务支持。另外，社区将继续优化配置方式，降低用户的使用难度，继续优化官方的 filter，使 Pixiu 可以在官方层面实现更多的网关通用功能。
 
 
-![](https://static001.geekbang.org/infoq/0c/0c1afe00699eb3e5cc022e48966ef5a6.webp)
+![](/imgs/blog/1/01/01/dubbo-go-pixiu/0c1afe00699eb3e5cc022e48966ef5a6.webp)
 
 在未来的一年内，社区计划支持 xDS API，将 Pixiu 演化为 Dubbo mesh 的 sidecar。其最终目的就是：在现有的 dubbo mesh 形态中演化出 Proxy Service Mesh 形态。基于这个形态，Js、Python、PHP、Ruby 和 Perl 等脚本语言程序除了收获 dubbo mesh 原有的技术红利之外，大概率还能收获性能上的提升。
 

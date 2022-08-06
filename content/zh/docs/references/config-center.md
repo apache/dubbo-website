@@ -63,9 +63,9 @@ configCenter.setAddress("zookeeper://127.0.0.1:2181");
 
 不同的规则以不同的 key 后缀区分：
 
-- configurators，[覆盖规则](../../examples/config-rule)
-- tag-router，[标签路由](../../examples/routing-rule)
-- condition-router，[条件路由](../../examples/condition-router)
+- configurators，[覆盖规则](/zh/docsv2.7/user/examples/config-rule/)
+- tag-router，[标签路由](/zh/docsv2.7/user/examples/routing-rule/)
+- condition-router，[条件路由](/zh/docsv2.7/user/examples/routing-rule/#条件路由)
 - migration，[迁移规则](../../migration/migration-service-discovery)
 
 #### Nacos
@@ -76,8 +76,8 @@ configCenter.setAddress("zookeeper://127.0.0.1:2181");
 
 不同的规则以 dataId 的后缀区分：
 
-- configurators，[覆盖规则](../../examples/config-rule)
-- tag-router，[标签路由](../../examples/routing-rule)
-- condition-router，[条件路由](../../examples/condition-router)
+- configurators，[覆盖规则](/zh/docsv2.7/user/examples/config-rule/)
+- tag-router，[标签路由](/zh/docsv2.7/user/examples/routing-rule/)
+- condition-router，[条件路由](/zh/docsv2.7/user/examples/routing-rule/#条件路由)
 - migration，[迁移规则](../../migration/migration-service-discovery)
 

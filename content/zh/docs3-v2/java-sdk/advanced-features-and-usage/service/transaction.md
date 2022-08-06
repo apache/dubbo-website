@@ -10,7 +10,7 @@ description: "在 Dubbo 中使用分布式事务"
 
 **第一步:**
 
-首先访问: [https://seata.io/zh-cn/blog/download.html](https://gitee.com/link?target=https%3A%2F%2Fseata.io%2Fzh-cn%2Fblog%2Fdownload.html)
+首先访问: [https://seata.io/zh-cn/blog/download.html](https://seata.io/zh-cn/blog/download.html)
 
 下载我们需要使用的seata1.5.2服务
 

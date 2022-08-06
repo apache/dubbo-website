@@ -98,7 +98,7 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 为此 2.7.5 版本引入了对 IDL + Protobuf 的支持，以解决跨语言的服务定义问题，具体可参见示例：
 
-[dubbo-samples-protobuf](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-protobuf)
+[dubbo-samples-protobuf](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-protobuf)
 
 ![service idl](/imgs/blog/service-idl.png) 
 
@@ -106,7 +106,7 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 ![idl dubbo compiler](/imgs/blog/idl-dubbo-compiler.png) 
 
-但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
+但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
 
 ### 性能优化
 
@@ -120,7 +120,7 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 ![filter](/imgs/blog/filter.png) 
    
-   关于消费端线程模型的优化，对于网关类应用，需要消费大量服务的应用，都会在系统稳定性和性能表现上有很大提升，其优化后的总体工作原理图所下所示，具体解析可以参见之前发布的文章：[《消费端线程池模型》](http://dubbo.apache.org/zh-cn/docs/user/demos/consumer-threadpool.html)
+   关于消费端线程模型的优化，对于网关类应用，需要消费大量服务的应用，都会在系统稳定性和性能表现上有很大提升，其优化后的总体工作原理图所下所示，具体解析可以参见之前发布的文章：[《消费端线程池模型》](/zh/docsv2.7/user/examples/consumer-threadpool/)
    
    
    老线程模型工作原理：

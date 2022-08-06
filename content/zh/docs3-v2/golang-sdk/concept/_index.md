@@ -8,7 +8,7 @@ weight: 1
 
 # Dubbo-go 概念
 
-![](https://github.com/dubbogo/dubbogo.github.io/blob/master/docs/zh-cn/pic/3.0/dubbogo.png?raw=true)
+![](/imgs/docs3-v2/golang-sdk/concept/dubbogo.png)
 
 Apache/Dubbo-go ([github.com/apache/dubbo-go](https://github.com/apache/dubbo-go))
 

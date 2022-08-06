@@ -28,7 +28,7 @@ description: >
 
 ## 快速上手
 
-​	为了便于用户快速上手，我们在本分支，即[apache:2.7-native_image](https://github.com/apache/dubbo/tree/2.7-native_image)分支中，提供了如下demo。
+​	为了便于用户快速上手，我们在 Dubbo 仓库中，提供了如下demo。
 
 ​	模块名dubbo-demo-native，该模块中提供了简易版本的dubbo的provider以及consumer:
 
@@ -339,7 +339,3 @@ public <T> T getProxy(Invoker<T> invoker, boolean generic) throws RpcException {
 ​	这里由于该service拥有多个接口获取proxy时需要是有序的，原先使用的set不满足需求，这里用ArrayList替代。
 
 ​	以上就是为了支持graalvm对dubbo源码的主要改动点。
-
-分支地址如下：
-
-https://github.com/apache/dubbo/tree/2.7-native_image

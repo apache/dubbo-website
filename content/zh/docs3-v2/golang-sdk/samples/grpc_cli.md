@@ -16,6 +16,6 @@ Triple 协议兼容 gRPC 生态，并默认开启 gRPC 反射服务，因此可�
 
 ## 3. 例子
 
-参考 [3.0 快速开始](https://dubbogo.github.io/zh-cn/docs/user/quickstart/3.0/quickstart_triple/)
+参考 [3.0 快速开始](../../quickstart/quickstart_triple/)
 
 

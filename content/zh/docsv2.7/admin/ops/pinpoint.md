@@ -62,7 +62,7 @@ weight: 5
 
 ### 启动 Pinpoint
 
-参考 Pinpoint 的 [Quick start](http://naver.github.io/pinpoint/quickstart.html) 搭建环境（不需要启动 TestApp）
+参考 Pinpoint 的 [Quick start](https://pinpoint-apm.github.io/pinpoint/quickstart.html) 搭建环境（不需要启动 TestApp）
 
 ### 准备 Dubbo 示例程序
 

@@ -28,7 +28,7 @@ description: >
 
 ## 2. Dubbo快速开始
 
-本小节介绍如何将`Dubbo`服务接入到`ShenYu`网关，您可以直接在工程下找到本小节的[示例代码](https://github.com/apache/incubator-shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo/shenyu-examples-apache-dubbo-service) 。
+本小节介绍如何将`Dubbo`服务接入到`ShenYu`网关，您可以直接在工程下找到本小节的[示例代码](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo) 。
 
 
 ### 2.1 启动shenyu-admin
@@ -84,7 +84,7 @@ description: >
 
 ### 2.3 启动shenyu-examples-dubbo
 
-以官网提供的例子为例 [shenyu-examples-dubbo](https://github.com/apache/incubator-shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo/shenyu-examples-apache-dubbo-service) 。 假如`dubbo`服务定义如下：
+以官网提供的例子为例 [shenyu-examples-dubbo](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo) 。 假如`dubbo`服务定义如下：
 
 ```xml
 <beans /* ...... * />
@@ -176,7 +176,7 @@ shenyu:
 >
 > 然后可以采用 `Match`，`=`，`Regex`，`Groovy`，`Exclude`等匹配方式，匹配出你所预想的数据。多组匹配添加可以使用`And/Or`的匹配策略。
 >
-> 具体的介绍与使用请看: [选择器与规则管理](https://shenyu.apache.org/zh/docs/design/user-guide/admin-usage/selector-and-rule) 。
+> 具体的介绍与使用请看: [选择器与规则管理](https://shenyu.apache.org/zh/docs/user-guide/admin-usage/selector-and-rule) 。
 
 
 发起`GET`请求，通过`ShenYu`网关调用`dubbo`服务：

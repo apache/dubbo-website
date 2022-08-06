@@ -57,7 +57,7 @@ description: 本文介绍了Dubbo在Service Mesh方向的实践与探索
 数据安全将成为公有云分布式应用的生命线。云原生时代，业务即便没上云，企业对自身数据的安全都是有诉求的，尤其是在金融行业，如果通过抓包就能获取一些敏感信息，这将会给企业带来巨大的风险。
 
 Cloud native成为distributionless（无分布式）的主要探索路径。分布式发展的终极形式是无分布式，在未来我们做开发，所有的代码在web上写好后，通过点击一个按钮，所有部署都会自动实现，所有的code review的工作可以在一个统一的工作台上全部实现。
-![img](/imgs/blog/meetup-chengdu/audience-shapshot)
+![img](/imgs/blog/meetup-chengdu/audience-shapshot.webp)
 
 以更快的速度，通过构建软件去探索新业务。工程师服务的是客户，通过技术输出来实现技术价值，以互联网的架构帮助赋能传统企业，帮助企业获得差异化竞争力。
 

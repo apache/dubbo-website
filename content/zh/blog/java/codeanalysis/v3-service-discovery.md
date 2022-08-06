@@ -135,7 +135,7 @@ Dubbo 通过注册中心同时同步了实例地址和 RPC 方法，因此其能
 Dubbo 要支持 Kubernetes native service，相比之前自建注册中心的服务发现体系来说，在工作机制上主要有两点变化：
 
 * 服务注册由平台接管，provider 不再需要关心服务注册
-* consumer 端服务发现将是 Dubbo 关注的重点，通过对接平台层的 API-Server、DNS 等，Dubbo client 可以通过一个 [Service Name](https://kubernetes.io/docs/concepts/services-networking/service/)（通常对应到 Application Name）查询到一组 [Endpoints]()（一组运行 provider 的 pod），通过将 Endpoints 映射到 Dubbo 内部地址列表，以驱动 Dubbo 内置的负载均衡机制工作。
+* consumer 端服务发现将是 Dubbo 关注的重点，通过对接平台层的 API-Server、DNS 等，Dubbo client 可以通过一个 [Service Name](https://kubernetes.io/docs/concepts/services-networking/service/)（通常对应到 Application Name）查询到一组 Endpoints（一组运行 provider 的 pod），通过将 Endpoints 映射到 Dubbo 内部地址列表，以驱动 Dubbo 内置的负载均衡机制工作。
 
 >  Kubernetes Service 作为一个抽象概念，怎么映射到 Dubbo 是一个值得讨论的点
 >

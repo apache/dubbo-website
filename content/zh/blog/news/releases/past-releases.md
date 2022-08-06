@@ -12,7 +12,7 @@ description: >
 
 ## Apache Dubbo
 
-请点击了解各[版本详情和升级注意事项](https://dubbo.apache.org/zh/docs/v2.7/user/versions/)
+请点击了解各[版本详情和升级注意事项](/zh/docsv2.7/user/versions/)
 
 > GitHub: https://github.com/apache/dubbo \
 > 发布说明: https://github.com/apache/dubbo/releases
@@ -125,13 +125,6 @@ description: >
 * [source](https://archive.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip) |
   [asc](https://archive.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.asc) |
   [sha512](https://archive.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.sha512)
-
-
-### 2.6.10.1 (2021-05-30)
-
-* [source](https://archive.apache.org/dist/dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip) |
-  [asc](https://archive.apache.org/dist/dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip.asc) |
-  [sha512](https://archive.apache.org/dist/dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip.sha512)
 
 ### 2.7.11 (2021-05-12)
 

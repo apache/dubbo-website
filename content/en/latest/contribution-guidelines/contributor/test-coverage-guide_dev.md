@@ -14,7 +14,7 @@ weight: 7
 * 注意边界条件。
 * 单元测试也应该好好设计，不要写无用的代码。
 * 当你发现一个`方法`很难写单元测试时，如果可以确认这个`方法`是`臭代码`，那么就和开发者一起重构它。
-* Dubbo中用的mock框架是: [mockito](http://site.mockito.org/). 下面是一些开发向导:[mockito tutorial](http://www.baeldung.com/bdd-mockito),[mockito refcard](https://dzone.com/refcardz/mockito)
+* Dubbo中用的mock框架是: [mockito](http://site.mockito.org/). 下面是一些开发向导:[mockito tutorial](https://www.baeldung.com/bdd-mockito),[mockito refcard](https://dzone.com/refcardz/mockito)
 * TDD（可选）：当你开始写一个新的功能时，你可以试着先写测试用例。 
 ### 测试覆盖率设定值
 * 在现阶段，Delta更改代码的测试覆盖设定值为：>＝60%，越高越好。

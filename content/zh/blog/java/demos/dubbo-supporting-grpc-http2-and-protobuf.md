@@ -16,7 +16,7 @@ description: >
 
 ![image-20191029103919557](/imgs/blog/grpc/dubbo-ptotocol.png)
 
-众所周知，Dubbo 协议是直接定义在 TCP 传输层协议之上，由于 TCP 高可靠全双工的特点，为 Dubbo 协议的定义提供了最大的灵活性，但同时也正是因为这样的灵活性，RPC 协议普遍都是定制化的私有协议，Dubbo 同样也面临这个问题。在这里我们着重讲一下 Dubbo 在协议通用性方面值得改进的地方，关于协议详细解析请参见[官网博客](http://dubbo.apache.org/zh-cn/blog/dubbo-protocol.html)
+众所周知，Dubbo 协议是直接定义在 TCP 传输层协议之上，由于 TCP 高可靠全双工的特点，为 Dubbo 协议的定义提供了最大的灵活性，但同时也正是因为这样的灵活性，RPC 协议普遍都是定制化的私有协议，Dubbo 同样也面临这个问题。在这里我们着重讲一下 Dubbo 在协议通用性方面值得改进的地方，关于协议详细解析请参见[官网博客](/zh/blog/2018/10/05/dubbo-协议详解/)
 
 * Dubbo 协议体 Body 中有一个可扩展的 attachments 部分，这给 RPC 方法之外额外传递附加属性提供了可能，是一个很好的设计。但是类似的 Header 部分，却缺少类似的可扩展 attachments，这点可参考 HTTP 定义的 Ascii Header 设计，将 Body Attachments 和 Header Attachments 做职责划分。
 * Body 协议体中的一些 RPC 请求定位符如 Service Name、Method Name、Version 等，可以提到 Header 中，和具体的序列化协议解耦，以更好的被网络基础设施识别或用于流量管控。
@@ -68,7 +68,7 @@ HTTP/2 保留了 HTTP/1 的所有语义，在保持兼容的同时，在通信�
 
 ### gRPC
 
-上面提到了在 HTTP 及 TCP 协议之上构建 RPC 协议各自的优缺点，相比于 Dubbo 构建于 TPC 传输层之上，Google 选择将 gRPC 直接定义在 HTTP/2 协议之上，关于 gRPC 的 [基本介绍](https://platformlab.stanford.edu/Seminar Talks/gRPC.pdf)和 [设计愿景](https://grpc.io/blog/principles/?spm=ata.13261165.0.0.2be55017XbUhs8) 请参考以上两篇文章，我这里仅摘取 设计愿景 中几个能反映 gRPC 设计目的特性来做简单说明。
+上面提到了在 HTTP 及 TCP 协议之上构建 RPC 协议各自的优缺点，相比于 Dubbo 构建于 TPC 传输层之上，Google 选择将 gRPC 直接定义在 HTTP/2 协议之上，关于 gRPC 的 [基本介绍](https://grpc.io/docs/what-is-grpc/introduction/)和 [设计愿景](https://grpc.io/blog/principles/?spm=ata.13261165.0.0.2be55017XbUhs8) 请参考以上两篇文章，我这里仅摘取 设计愿景 中几个能反映 gRPC 设计目的特性来做简单说明。
 
 * Coverage & Simplicity，协议设计和框架实现要足够通用和简单，能运行在任何设备之上，甚至一些资源首先的如 IoT、Mobile 等设备。
 
@@ -227,7 +227,7 @@ pluginArtifact 指定了 Dubbo 定制版本的 Java Protobuf Compiler 插件，�
  <pluginArtifact>org.apache.dubbo:protoc-gen-dubbo-java:1.19.0-SNAPSHOT:exe:${os.detected.classifier}</pluginArtifact>
 ```
 
-由于 `protoc-gen-dubbo-java` 支持 gRPC 和 Dubbo 两种协议，可生成的 stub 类型，默认值是 gRPC，关于 dubbo 协议的使用可参见 [使用 Protobuf 开发 Dubbo 服务]()。
+由于 `protoc-gen-dubbo-java` 支持 gRPC 和 Dubbo 两种协议，可生成的 stub 类型，默认值是 gRPC，关于 dubbo 协议的使用可参见 [使用 Protobuf 开发 Dubbo 服务](/zh/docs3-v2/java-sdk/quick-start/idl/)。
 
 ```xml
 <pluginParameter>grpc</pluginParameter>
@@ -514,7 +514,7 @@ default=org.apache.dubbo.samples.basic.comtomize.MyGrpcConfigurator
 
 **三、TLS 配置**
 
-配置方式和 Dubbo 提供的通用的 [TLS 支持]()一致，具体请参见文档
+配置方式和 Dubbo 提供的通用的 [TLS 支持](/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/)一致，具体请参见文档
 
 
 

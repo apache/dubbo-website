@@ -1,0 +1,46 @@
+name: Link Check
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Setup Docsy
+        run: git submodule update --init --recursive && sudo npm install -D --save autoprefixer && sudo npm install -D --save postcss-cli
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+          extended: true
+      - name: Build
+        env:
+          HUGO_ENV: production
+        run: hugo --minify --baseURL /
+      - name: Setup Html Test
+        run: curl https://htmltest.wjdp.uk | bash
+      - name: Lint Self
+        run: ./bin/htmltest -s
+      - name: Lint External
+        run: ./bin/htmltest
+      - name: Print lint failed list if failure
+        if: failure()
+        run: cat tmp/.htmltest/htmltest.log | grep -v "hitting ---"
+      - name: Pack lint result if failure
+        if: failure()
+        run: 7z a ${{ github.workspace }}/htmltest.zip tmp/.htmltest/* -r
+      - name: Upload lint result failure
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: "htmltest.zip"
+          path: htmltest.zip
