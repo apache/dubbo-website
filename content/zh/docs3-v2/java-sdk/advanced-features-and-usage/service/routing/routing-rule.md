@@ -249,6 +249,7 @@ RpcContext.getContext().setAttachment(Constants.TAG_KEY,"tag1");
 
 2. `dubbo.tag`未设置时，只会匹配tag为空的provider。即使集群中存在可用的服务，若 tag 不匹配也就无法调用，这与约定1不同，携带标签的请求可以降级访问到无标签的服务，但不携带标签/携带其他种类标签的请求永远无法访问到其他标签的服务。
 
+{{% alert title="提示" color="primary" %}}
 自定义路由参考[路由扩展](/zh/docs3-v2/java-sdk/reference-manual/spi/description/router/)
 {{% /alert %}}
 
