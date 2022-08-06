@@ -6,17 +6,17 @@ weight: 1
 description: "在 Dubbo 中使用分布式事务"
 ---
 
-## 分布式事务
+## 使用方式
 
-**第一步:**
+### **第一步**
 
 首先访问: [https://seata.io/zh-cn/blog/download.html](https://gitee.com/link?target=https%3A%2F%2Fseata.io%2Fzh-cn%2Fblog%2Fdownload.html)
 
-下载我们需要使用的seata1.5.2服务
+下载我们需要使用的 seata1.5.2 服务
 
-**第二步:**
+### **第二步**
 
-1.在你的参与全局事务的数据库中加入undo_log这张表(TCC,SAGA,XA可跳过这步)
+1.在你的参与全局事务的数据库中加入 undo_log 这张表(TCC,SAGA,XA 可跳过这步)
 
 ```sql
 -- for AT mode you must to init this sql for you business database. the seata server not need it.
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `undo_log`
   DEFAULT CHARSET = utf8 COMMENT ='AT transaction mode undo table';
 ```
 
-2.在你的mysql数据库中创建名为seata的库,并使用以下下sql
+2.在你的 mysql 数据库中创建名为 seata 的库,并使用以下下 sql
 
 ```sql
 -- -------------------------------- The script used when storeMode is 'db' --------------------------------
@@ -96,11 +96,11 @@ CREATE TABLE IF NOT EXISTS `lock_table`
   DEFAULT CHARSET = utf8;
 ```
 
-**第三步:**
+### **第三步**
 
-在你的项目中引入seata依赖
+在你的项目中引入 seata 依赖
 
-spring-boot应用:
+spring-boot 应用:
 
 ```
             <dependency>
@@ -110,7 +110,7 @@ spring-boot应用:
             </dependency>
 ```
 
-spring应用:
+spring 应用:
 
 ```
             <dependency>
@@ -120,13 +120,13 @@ spring应用:
             </dependency>
 ```
 
-**第四步:**
+### **第四步**
 
-spring-boot应用:
+spring-boot 应用:
 
-参考[seata/script/client/spring at develop · seata/seata (github.com)](https://github.com/seata/seata/tree/develop/script/client/spring)
+参考 [seata/script/client/spring at develop · seata/seata (github.com)](https://github.com/seata/seata/tree/develop/script/client/spring)
 
-加到你项目的application.yml中.
+加到你项目的 application.yml中.
 
 ```yaml
 seata:
@@ -155,9 +155,9 @@ seata:
       password: "nacos"
 ```
 
-spring应用:
+spring 应用:
 
-添加[seata/script/client/conf at develop · seata/seata (github.com)](https://github.com/seata/seata/tree/develop/script/client/conf) 下registry.conf,由于高可用部署使用第三方配置中心,故无需file.conf
+添加 [seata/script/client/conf at develop · seata/seata (github.com)](https://github.com/seata/seata/tree/develop/script/client/conf) 下 registry.conf,由于高可用部署使用第三方配置中心,故无需 file.conf
 
 ```
 registry {
@@ -195,9 +195,9 @@ config {
 }
 ```
 
-**第五步:**
+### **第五步**
 
-运行你下载的nacos,并参考[https://github.com/seata/seata/tree/develop/script/config-center](https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fseata%2Fseata%2Ftree%2Fdevelop%2Fscript%2Fconfig-center) 的config.txt并修改
+运行你下载的 nacos,并参考 [https://github.com/seata/seata/tree/develop/script/config-center](https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fseata%2Fseata%2Ftree%2Fdevelop%2Fscript%2Fconfig-center) 的 config.txt 并修改
 
 ```properties
 #仅client使用
@@ -220,13 +220,12 @@ store.db.lockTable=lock_table
 store.db.maxWait=5000
 ```
 
-打开nacos控制台,在对应的namespace下创建dataId为seata.properties的配置,并填写group为SEATA_GROUP,并将以上内容填入选择类型为properties保存
-
+打开 nacos 控制台,在对应的 namespace 下创建 dataId 为 seata.properties 的配置,并填写 group 为 SEATA_GROUP,并将以上内容填入选择类型为 properties 保存
 <img src="/imgs/blog/Dingtalk_20220724021635.jpg" alt="Dingtalk_20220724021635.jpg.png" style="zoom:50%;" />
 
-**第六步**:
+### **第六步**
 
-更改server中的application.yml
+更改 server 中的 application.yml
 
 ```yaml
 server:
@@ -283,9 +282,9 @@ seata:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
 ```
 
-**第七步:**
+### **第七步**
 
-在全局事务调用者(发起全局事务的服务)的接口上加入@GlobalTransactional 示例如下:
+在全局事务调用者(发起全局事务的服务)的接口上加入 @GlobalTransactional 示例如下:
 
 ```java
 @GetMapping(value = "testCommit")
@@ -308,7 +307,7 @@ public Object testCommit(@RequestParam(name = "id",defaultValue = "1") Integer i
 }
 ```
 
-spring应用在使用AT或XA模式下需手动代理数据源选择事务模式和初始化事务扫描器
+spring 应用在使用 AT 或 XA 模式下需手动代理数据源选择事务模式和初始化事务扫描器
 
 ```java
 @Primary
@@ -328,9 +327,9 @@ public DataSource dataSource(DataSource druidDataSource) {
        }
 ```
 
-如果使用tcc模式,需要额外在对应的provider的serviceimpl中定义两阶段的try和confirm(commit) cancel(rollback)
+如果使用 tcc 模式,需要额外在对应的 provider 的 serviceimpl 中定义两阶段的 try 和 confirm(commit) cancel(rollback)
 
-spring-boot应用需关闭数据源代理
+spring-boot 应用需关闭数据源代理
 
 ```yaml
 seata:
@@ -387,11 +386,11 @@ cd bin
 ./seata-server.bat
 ```
 
-运行seata-server,成功后,运行自己的服务dubbo provider&consumer
+运行 seata-server,成功后,运行自己的服务 dubbo provider&consumer
 
 
 
-**第八步高可用Seata-server搭建**
+### **第八步高可用Seata-server搭建**
 
 由于seata-server支持计算与存储分离模式,并支持暴露服务地址至多种注册中心,仅需按照第六步配置完毕后水平扩展即可
 
