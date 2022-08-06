@@ -153,7 +153,7 @@ JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
 
 #### Java-Server 启动
 
-1. 定义 Java 的 PB 文件，可参考 [Dubbo 快速开始](https://dubbo.apache.org/zh/docs/quick-start/)
+1. 定义 Java 的 PB 文件，可参考 [Dubbo 快速开始](/zh/docs/quick-start/)
 
 ```protobuf
 syntax = "proto3";
@@ -448,7 +448,7 @@ public class ApiConsumer {
 
 #### Java-Server 启动
 
-1. 定义 Java 接口、参数和返回值，可参考 [Dubbo 快速开始](https://dubbo.apache.org/zh/docs/quick-start/)
+1. 定义 Java 接口、参数和返回值，可参考 [Dubbo 快速开始](/zh/docs/quick-start/)
 
 ```java
 package org.apache.dubbo;

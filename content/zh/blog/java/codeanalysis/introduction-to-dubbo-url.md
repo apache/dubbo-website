@@ -169,7 +169,7 @@ consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consu
 
 ### URL 统一模型的意义
 
-对于 dubbo 中的 URL，有人理解为配置总线，有人理解为统一配置模型，说法虽然不同，但都是在表达一个意思，这样的 URL 在 dubbo 中被当做是[公共契约](https://dubbo.apache.org/zh/docsv2.7/dev/contract/)，所有扩展点参数都包含 URL 参数，URL 作为上下文信息贯穿整个扩展点设计体系。
+对于 dubbo 中的 URL，有人理解为配置总线，有人理解为统一配置模型，说法虽然不同，但都是在表达一个意思，这样的 URL 在 dubbo 中被当做是[公共契约](/zh/docsv2.7/dev/contract/)，所有扩展点参数都包含 URL 参数，URL 作为上下文信息贯穿整个扩展点设计体系。
 
 在没有 URL 之前，只能以字符串传递参数，不停的解析和拼装，导致相同类型的接口，参数时而 Map, 时而 Parameters 类包装：
 

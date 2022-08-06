@@ -15,9 +15,9 @@ description: Dubbo-go 的注册中心
 
 对于 Dubbo-go 微服务框架，注册中心在 RPC 场景下复杂保存 Provider 应用的服务信息。Provider 注册地址到注册中心，Consumer 从注册中心读取和订阅 Provider 地址列表。如图所示：
 
-![](https://dubbo.apache.org/imgs/architecture.png)
+![](/imgs/architecture.png)
 
-关于 Dubbo 服务发现细节，详情可参考 [Dubbo 官网的概念介绍](https://dubbo.apache.org/zh/docs/concepts/service-discovery/)
+关于 Dubbo 服务发现细节，详情可参考 [Dubbo 官网的概念介绍](/zh/docs/concepts/service-discovery/)
 
 Dubbo-go 为注册中心抽象了一套接口如下：
 

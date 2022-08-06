@@ -57,7 +57,7 @@ description: >
 
 
 
-在 Dubbo 官方用户手册的[“属性配置”](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/properties/)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
+在 Dubbo 官方用户手册的[“属性配置”](/zh/docs3-v2/java-sdk/reference-manual/config/properties/)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
 
 
 

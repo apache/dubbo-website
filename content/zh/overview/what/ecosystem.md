@@ -38,8 +38,8 @@ Dubbo 实现普遍支持以下产品或部署架构，具体多语言 SDK 实现
 * [dubbo-spi-extensions]
 
 ### 网关组件
-* [Apache Shenyu(Incubating)](https://dubbo.apache.org/zh/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/)
-* [Apache APISIX](https://dubbo.apache.org/zh/blog/2022/01/18/%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E6%93%8D%E4%BD%9C%E8%AE%A9%E4%BD%A0%E5%9C%A8-apache-apisix-%E4%B8%AD%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1%E6%9B%B4%E4%BE%BF%E6%8D%B7/)
+* [Apache Shenyu(Incubating)](/zh/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/)
+* [Apache APISIX](/zh/blog/2022/01/18/%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E6%93%8D%E4%BD%9C%E8%AE%A9%E4%BD%A0%E5%9C%A8-apache-apisix-%E4%B8%AD%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1%E6%9B%B4%E4%BE%BF%E6%8D%B7/)
 * [Apache Dubbo-pixiu]
 * [Tengine]
 

@@ -53,7 +53,7 @@ RpcContext.getContext()
 
 ### 异步调用
 
-在异步调用时，可通过`getCompletableFuture`或`getFuture`获取相关的 Future，异步调用相关文档请参阅：[异步调用](https://dubbo.apache.org/zh/docs/advanced/async-call/)
+在异步调用时，可通过`getCompletableFuture`或`getFuture`获取相关的 Future，异步调用相关文档请参阅：[异步调用](/zh/docs/advanced/async-call/)
 
 ## 注意事项
 

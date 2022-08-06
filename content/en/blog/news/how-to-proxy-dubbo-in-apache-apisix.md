@@ -7,7 +7,7 @@ description: In this article, we introduced how to use Apache APISIX to implemen
 
 ## Background
 
-[Apache Dubbo](https://dubbo.apache.org/en/) is a MicroService development framework open sourced by Alibaba and donated to Apache, which provides two key capabilities of RPC communication and microservice governance. It has not only been validated by Ali's massive traffic in e-commerce scenario, but also been widely implemented in domestic technology companies.
+[Apache Dubbo](/en/) is a MicroService development framework open sourced by Alibaba and donated to Apache, which provides two key capabilities of RPC communication and microservice governance. It has not only been validated by Ali's massive traffic in e-commerce scenario, but also been widely implemented in domestic technology companies.
 
 In practical application scenarios, Apache Dubbo is generally used as the implementation framework for RPC calls between back-end systems, and when HTTP interfaces need to be provided to the front-end, the Dubbo Service is packaged as an HTTP interface through a "glue layer" and then delivered to the front-end system.
 

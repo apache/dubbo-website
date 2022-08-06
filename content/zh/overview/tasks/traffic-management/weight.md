@@ -8,7 +8,7 @@ description: "在 Dubbo 中配置应用级治理规则和服务级治理规则"
 
 > **提示**
 >
-> 本文描述的是新版本规则配置，而不是[老版本配置规则](https://dubbo.apache.org/zh/docs/advanced/config-rule-deprecated)
+> 本文描述的是新版本规则配置，而不是[老版本配置规则](/zh/docs/advanced/config-rule-deprecated)
 
 # 配置规则
 

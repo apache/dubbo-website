@@ -9,7 +9,7 @@ toc_hide: true
 
 > **提示**
 >
-> 本文描述的是新版本规则配置，而不是[老版本配置规则](https://dubbo.apache.org/zh/docs/advanced/config-rule-deprecated)
+> 本文描述的是新版本规则配置，而不是[老版本配置规则](/zh/docs/advanced/config-rule-deprecated)
 
 # 配置规则
 

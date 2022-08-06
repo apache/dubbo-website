@@ -834,7 +834,7 @@ dubbogo 主要有三个配置文件：
 
 ## 四、参考
 
-- [https://dubbo.apache.org/zh/docsv2.7/user/configuration/api/](https://dubbo.apache.org/zh/docsv2.7/user/configuration/api/)
+- [https://dubbo.apache.org/zh/docsv2.7/user/configuration/api/](/zh/docsv2.7/user/configuration/api/)
 - [https://github.com/apache/dubbo-go/issues/257](https://github.com/apache/dubbo-go/issues/257)
 
 ---

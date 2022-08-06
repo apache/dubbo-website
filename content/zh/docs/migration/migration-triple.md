@@ -11,7 +11,7 @@ description: "Triple协议迁移指南"
 
 ## Triple 介绍
 
-`Triple` 协议的格式和原理请参阅 [RPC 通信协议](https://dubbo.apache.org/zh/docs/concepts/rpc-protocol/)
+`Triple` 协议的格式和原理请参阅 [RPC 通信协议](/zh/docs/concepts/rpc-protocol/)
 
 根据 Triple 设计的目标，`Triple` 协议有以下优势:
 
@@ -325,8 +325,8 @@ public interface PbGreeter {
 
 关于 Triple 协议的应用级服务注册和发现和其他语言是一致的，可以通过下列内容了解更多。
 
-- [服务发现](https://dubbo.apache.org/zh/docs/concepts/service-discovery/)
-- [应用级地址发现迁移指南](https://dubbo.apache.org/zh/docs/migration/migration-service-discovery/)
+- [服务发现](/zh/docs/concepts/service-discovery/)
+- [应用级地址发现迁移指南](/zh/docs/migration/migration-service-discovery/)
 
 ## 与 GRPC 互通
 

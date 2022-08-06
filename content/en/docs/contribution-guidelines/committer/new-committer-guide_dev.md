@@ -87,9 +87,9 @@ If not discussed in the community (mailing list), just as it did not happen.
 
 ### Add your name
 
-Please update Dubbo incubator status [page](https://incubator.apache.org/projects/dubbo.html) to add your name. See this [guide](https://dubbo.apache.org/en/latest/contribution-guidelines/contributor/) for instructions.
+Please update Dubbo incubator status [page](https://incubator.apache.org/projects/dubbo.html) to add your name. See this [guide](/en/latest/contribution-guidelines/contributor/) for instructions.
 
-Please update Dubbo official [website](https://dubbo.apache.org/en/latest/contribution-guidelines/committer) to update your name.
+Please update Dubbo official [website](/en/latest/contribution-guidelines/committer) to update your name.
 
 
 ### A small benefit

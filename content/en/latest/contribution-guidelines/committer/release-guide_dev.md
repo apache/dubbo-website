@@ -432,7 +432,7 @@ The Apache Dubbo Team
 4. 此步骤为发布2.7.0及以上版本必须要的步骤。在此之前请先确保所有的artifact都是ok的。登录http://repository.apache.org，点击左侧的`Staging repositories`，然后搜索Dubbo关键字，会出现一系列的仓库，选择你最近上传的仓库，然后点击上方的Release按钮.
 5. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
 6. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
-7. 在官网下载[页面](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似`https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. 具体可以参考过往的[下载链接](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/) [可以参考] (https://github.com/apache/dubbo-website/pull/887)
+7. 在官网下载[页面](/en/blog/2020/05/18/past-releases/)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似`https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. 具体可以参考过往的[下载链接](/en/blog/2020/05/18/past-releases/) [可以参考] (https://github.com/apache/dubbo-website/pull/887)
 8. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
 9. 发邮件到 `dev@dubbo.apache.org`
   宣布release邮件模板： 
