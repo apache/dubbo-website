@@ -80,7 +80,7 @@ Configuration is also "duplicate code", there is also a "generalization and elab
 Dubbo, moreover, the old version all the timeout, retries, load balancing strategies are only in the service consumer configuration.But in the process of actual use, found that the service provider knows better than consumer, but the configuration items are used in consumer.The new version, joined in the provider can match these parameters, through the registry to the consumer,As a reference, if there is no configuration, consumer to provide configuration shall prevail, the equivalent of consumption ji-cheng fang the provider's advice configuration values.And at the time of the relay configuration registry, can also be on the way to modify configuration, so that achieve the purpose of governance, the equivalent of inheritance relationship：Service consumers --> Registry --> Service provider 
 Dubbo, moreover, the old version all the timeout, retries, load balancing strategies are only in the service consumer configuration.But in the process of actual use, found that the service provider knows better than consumer, but the configuration items are used in consumer.The new version, joined in the provider can match these parameters, through the registry to the consumer. 
  
-![configuration-override](static/imgs/dev/configuration-override.png)
+![configuration-override](/imgs/dev/configuration-override.png)
 
 ## Configuration backward compatibility 
 
