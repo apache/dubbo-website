@@ -25,7 +25,7 @@ In May 2021, `ShenYu` was donated to the `Apache` Software Foundation, and the A
 
 ## 2. Quick Start with Dubbo
 
-This section describes how to connect the `Dubbo` service to the `Shenyu` gateway. You can find the [sample code] for this section directly under the project (https://github.com/apache/incubator-shenyu/tree/master/shenyu-examples/shenyu -examples-dubbo/shenyu-examples-apache-dubbo-service).
+This section describes how to connect the `Dubbo` service to the `Shenyu` gateway. You can find the [sample code] for this section directly under the project (https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo -examples-dubbo/shenyu-examples-apache-dubbo-service).
 
 ### 2.1 Start shenyu-admin
 
@@ -79,7 +79,7 @@ Make sure the gateway has introduced the relevant dependencies before starting. 
 
 ### 2.3 Start shenyu-examples-dubbo
 
-Take the example provided on the official website [shenyu-examples-dubbo](https://github.com/apache/incubator-shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo/shenyu-examples-apache-dubbo-service). Suppose the `dubbo` service is defined as follows.
+Take the example provided on the official website [shenyu-examples-dubbo](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo-examples-dubbo/shenyu-examples-apache-dubbo-service). Suppose the `dubbo` service is defined as follows.
 
 ```xml
 <beans /* ...... * />

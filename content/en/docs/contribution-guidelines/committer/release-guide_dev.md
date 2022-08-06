@@ -258,7 +258,7 @@ After this, maven will deploy jar to remote maven repsoitry in staging state.
    $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
    ```
 
-   For more information on how to get your key id, please refer to this [guide](https://help.github.com/articles/generating-a-new-gpg-key/)
+   For more information on how to get your key id, please refer to this [guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key)
 
 5. Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version} 
 
@@ -307,7 +307,7 @@ After this, maven will deploy jar to remote maven repsoitry in staging state.
 
 ## Verify Release Candidates
 
-**A full check list can be found [here](https://cwiki.apache.org/confluence/display/incubator/IncubatorReleaseChecklist)**
+**A full check list can be found [here](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist)**
 
 The verification link includes but is not limited to the following contents and forms:
 

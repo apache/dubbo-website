@@ -171,7 +171,7 @@ $ mvn release:clean
 $ mvn release:prepare -Prelease -Darguments="-DskipTests" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
 ```
 
-> 执行release插件时，如果指定了`-DpushChanges=true`, 插件会自动提交到远端的GitHub仓库中，此时就需要输入GitHub的密码，注意不是输入web页面的登录密码，而是一个`Personal access tokens`，获取方式详见[这里](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line)
+> 执行release插件时，如果指定了`-DpushChanges=true`, 插件会自动提交到远端的GitHub仓库中，此时就需要输入GitHub的密码，注意不是输入web页面的登录密码，而是一个`Personal access tokens`，获取方式详见[这里](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 
 > 这里有一点要注意的是tag， 在执行过程中，需要选择发布的artifactId, 下一个版本artifactId以及发布版本的tag, tag默认的是dubbo-parent-xxxx，需要改成dubbo-xxxx
 
@@ -250,7 +250,7 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 
 ## 验证Release Candidates
 
-详细的检查列表请参考官方的[check list](https://cwiki.apache.org/confluence/display/incubator/IncubatorReleaseChecklist)
+详细的检查列表请参考官方的[check list](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist)
 
 首先，从一下地址下载要发布的Release Candidate到本地环境：
 

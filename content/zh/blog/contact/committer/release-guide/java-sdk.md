@@ -249,7 +249,7 @@ $ mvn deploy -Prelease -DskipTests
 
 ## 验证Release Candidates
 
-详细的检查列表请参考官方的[check list](https://cwiki.apache.org/confluence/display/incubator/IncubatorReleaseChecklist)
+详细的检查列表请参考官方的[check list](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist)
 
 首先，从一下地址下载要发布的Release Candidate到本地环境：
 

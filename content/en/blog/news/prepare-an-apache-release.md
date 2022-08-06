@@ -277,7 +277,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
 
 ## Verify Release Candidates
 
-**A full check list can be found [here](https://cwiki.apache.org/confluence/display/incubator/IncubatorReleaseChecklist)**
+**A full check list can be found [here](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist)**
 
 The verification link includes but is not limited to the following contents and forms:
 
@@ -462,7 +462,7 @@ When the release vote has passed,
 3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
 5. Publish [release notes](https://github.com/apache/dubbo/releases) on Github.
 6. Update the recommend dependency on [Github](https://github.com/apache/dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
-7. Add the download link to official website https://dubbo.apache.org/en/blog/2020/05/18/past-releases/, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). Please refer to the [download page](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/) for more details.
+7. Add the download link to official website https://dubbo.apache.org/en/blog/2020/05/18/past-releases/, using the ASF mirror system. The latest release download link should be something like `https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip`. The download link for the previous release version should be changed like `https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip)`. Please refer to the [download page](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/) for more details.
 8. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
 9. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed. 
 The mail template to announce release: 
