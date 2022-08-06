@@ -5,7 +5,7 @@ keywords: 多语言 RPC
 ---
 
 
-![](https://dubbogo.github.io/img/dubbogo-3.0-invocation.png)
+![](/imgs/docs3-v2/golang-sdk/concept/rpc/multi_language/dubbogo-3.0-invocation.png)
 
 ## 跨语言调用
 

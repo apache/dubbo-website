@@ -10,7 +10,7 @@ description: "服务鉴权"
 
 类似支付之类的对安全性敏感的业务可能会有限制匿名调用的需求。在加固安全性方面，2.7.5 引入了基于AK/SK机制的认证鉴权机制，并且引入了鉴权服务中心，主要原理是消费端在请求需要鉴权的服务时，会通过SK、请求元数据、时间戳、参数等信息来生成对应的请求签名，通过Dubbo的Attahcment机制携带到对端进行验签，验签通过才进行业务逻辑处理。如下图所示：
 
-![](https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/auth.png)
+![](/imgs/docsv2.7/user/examples/auth/auth.png)
 
 
 

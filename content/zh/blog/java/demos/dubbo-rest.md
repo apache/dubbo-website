@@ -39,7 +39,7 @@ REST 是 Roy Thomas Fielding [^1] 在 2000 年他的博士论文 [^2]  “架构
 
 ![micro-image](/imgs/blog/rest-sample.png)
 
-*source: https://www.nginx.com/wp-content/uploads/2016/04/micro-image.png*
+*source: /imgs/blog/2019/07/26/rest/micro-image.png*
 
 
 

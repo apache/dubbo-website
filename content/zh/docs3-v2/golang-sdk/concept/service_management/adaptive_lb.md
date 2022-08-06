@@ -18,7 +18,7 @@ description: 柔性负载均衡
 - TPS 从服务提供者的角度反映系统利用率。在系统压力未饱和前，请求数越大则系统利用率越高，但是进一步加大请求量直至系统过饱和后，出现过载的问题，导致整体效率呈下降趋势。
 - 响应时间是从服务调用者的角度反映系统性能。在系统压力未饱和前，响应时间与请求数成线性增长的关系，但是进一步加大请求量直至系统过饱和后，响应时间与请求数成指数级增长。
 
-![img](https://dubbogo.github.io/img/adaptive.png)
+![img](/imgs/docs3-v2/golang-sdk/samples/adaptive-service/adaptive.png)
 
 
 柔性服务则在调用过程中收集

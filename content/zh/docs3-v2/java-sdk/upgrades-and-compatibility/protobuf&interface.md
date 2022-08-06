@@ -50,7 +50,7 @@ enum TrafficLightColor {
 
 * 生成的java代码
 
-![image](https://user-images.githubusercontent.com/22830937/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png)
+![image](/imgs/docs/advanced/protobufinterface/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png)
 
 > 枚举是常量，因此采用大写
 ### 1.2.2. 数组
@@ -65,7 +65,7 @@ message VipIDToRidReq {
 
 * 生成的java代码
 
-![image](https://user-images.githubusercontent.com/22830937/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png)
+![image](/imgs/docs/advanced/protobufinterface/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png)
 
 > 底层实际上是1个ArrayList
 ### 2.2.3. 集合
@@ -84,7 +84,7 @@ message BatchOnlineRes {
 
 * 生成的java代码
 
-![image](https://user-images.githubusercontent.com/22830937/124234654-e4568080-db46-11eb-9700-b30022ebee21.png)
+![image](/imgs/docs/advanced/protobufinterface/124234654-e4568080-db46-11eb-9700-b30022ebee21.png)
 
 ### 2.2.5. 嵌套
 
@@ -109,7 +109,7 @@ message AnchorInfo {
 
 * 生成的java代码
 
-![image](https://user-images.githubusercontent.com/22830937/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png)
+![image](/imgs/docs/advanced/protobufinterface/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png)
 
 ## 3. 字段默认值
 

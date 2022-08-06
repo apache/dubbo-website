@@ -85,7 +85,7 @@ Here we only discuss the situation that the Dubbo service in the cluster is acce
 
 1. DNS: The default Kubernetes service is based on the DNS plugin (The latest version of the recommendation is coreDNS), one proposal on Dubbo is about this.  since HSF/Dubbo has always highlighted its soft-load address discovery capability, it ignores Static's strategy insteadily, my understanding is that as a service discovery mechanism, the static resolution mechanism is one of the simplest and most needed to support mechanism, you can also refer to Envoy's point of views. While at the same time, ant's SOFA has always supported this static strategy, it can provides an explanation for an engineering fragment of the SOFA project. There are two advantages to doing this. 1) When the soft load center crash is unavailable and the address list cannot be obtained, there is a mechanism to Failover to this policy to handle certain requests. 2) Under LDC/unitization, the ant's load center cluster is deployed in the equipment room/area. First, the LDC of the soft load center is guaranteed to be stable and controllable. When the unit needs the request center, the address of the VIP can come in handy.
 
-   ![img](https://img.alicdn.com/tfs/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png)
+   ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png)
 
 2. API：DNS relies on the DNS plugin, which will generate additional operation, so consider directly obtaining the endpoint through the client of Kubernetes. In fact, by accessing the API server interface of Kubernetes, you can directly obtain the list of endpoints behind a certain servie, and can also monitor the changes in its address list. Thereby implementing the soft load discovery strategy recommended by Dubbo/HSF. Refer to the code for details:
 
@@ -99,27 +99,27 @@ The above two thoughts need to consider the following two points:
 The following is a demo deployment through Kubernetes service in Alibaba Cloud's Container Registry and   EDAS. Visit Alibaba Cloud -》Container Registry.
 
 1. Create repo and bind the github codebase. As shown below.
-    ![img](https://img.alicdn.com/tfs/TB1m.tEtrorBKNjSZFjXXc_SpXa-1892-870.png)
+    ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1m.tEtrorBKNjSZFjXXc_SpXa-1892-870.png)
 
 2. Click Manage enter the repository details page. Click Build in images service panel,  construct the demo into image and publish it to the specified repository. As shown below.
-   ![img](https://img.alicdn.com/tfs/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png)
+   ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png)
 
 
 
 3. Switch to Enterprise Distributed Application Services (EDAS) products panel, visit Resource Management -> Clusters. Create Kubernetes cluster and bind ECS. As shown below.
-   ![img](https://img.alicdn.com/tfs/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
+   ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
 
 
 
 4. Application Management -> Create  application, type Kubernetes application and specify the image in the container registry . As shown below.
-   ![img](https://img.alicdn.com/tfs/TB1_YywtDCWBKNjSZFtXXaC3FXa-1737-588.png)
+   ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1_YywtDCWBKNjSZFtXXaC3FXa-1737-588.png)
 
-   ![](https://img.alicdn.com/tfs/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
+   ![](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
 
 
 
 5.  After creation , then deploy applications. As shown below.
-   ![](https://img.alicdn.com/tfs/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
+   ![](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
 
 - The supplementary application name cannot have uppercase letters, all lowercase, otherwise there is a problem of deployment failure.
 
