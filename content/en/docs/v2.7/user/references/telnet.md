@@ -25,7 +25,7 @@ It is possible to extend command `status` to check more resources, pls. refer to
 ## Supported Commands
 
 The built-in telnet commands are listed below. Furthermore, it is possible to extend telnet commands, pls. refer to 
-[extend telnet command](http://dubbo.apache.org/en-us/docs/user/references/telnet.html) for more details.
+[extend telnet command](/en/docs/user/references/telnet.html) for more details.
 
 ### `ls`
 
