@@ -182,7 +182,7 @@ JAX-RS is a standard Java REST API that has been widely supported and applied in
 
 JAX-RS has a wealth of information on the web, such as the following introductory tutorial:
 
-* Oracle official tutorial: http://docs.oracle.com/javaee/7/tutorial/doc/jaxrs.htm
+* Oracle official tutorial: https://www.oracle.com/technical-resources/articles/java/jax-rs.html
 * Article on IBM developerWorks China: http://www.ibm.com/developerworks/cn/java/j-lo-jaxrs/
 
 For more information, please feel free to Google or Baidu. As far as learning JAX-RS is concerned, it is generally enough to master the usage of various annotations.

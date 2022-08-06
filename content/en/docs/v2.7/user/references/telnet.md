@@ -23,7 +23,7 @@ echo status | nc -i 1 localhost 20880
 ## Supported Commands
 
 The built-in telnet commands are listed below. Furthermore, it is possible to extend telnet commands, pls. refer to 
-[extend telnet command](/en/docs/user/references/telnet.html) for more details.
+[extend telnet command](/en/docs/v2.7/user/references/telnet/) for more details.
 
 ### `ls`
 
