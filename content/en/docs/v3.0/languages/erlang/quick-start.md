@@ -38,7 +38,7 @@ into the project's `apps` directory.
 ```
 
 ## Consumer configuration
-Please reference [Reference Config](../reference/)
+Please reference [Reference Config](.../reference/)
 
 ## Init dubbolib in your project
 It is need you 

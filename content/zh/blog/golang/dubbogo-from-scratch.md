@@ -68,7 +68,7 @@ public class User implements Serializable {
 #### 2.1.2 启动 dubbo 服务提供者
 
 
-用的 [dubbo 官方示例代码](http://dubbo.apache.org/zh/docs/v2.7/user/configuration/api/):
+用的 [dubbo 官方示例代码](/zh/docs/v2.7/user/configuration/api/):
 
 
 ```java

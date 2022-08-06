@@ -84,7 +84,7 @@ Spring注解诸如`@EnableDubbo`、`@Service`以及`@Reference`，由于不能�
 
 ## 扩展SPI
 
-Dubbo的SPI扩展机制，可以通过[Dubbo可扩展机制实战](http://dubbo.apache.org/zh-cn/blog/introduction-to-dubbo-spi.html)这篇博客详细了解。
+Dubbo的SPI扩展机制，可以通过[Dubbo可扩展机制实战](/zh/blog/2019/04/25/dubbo可扩展机制实战/)这篇博客详细了解。
 
 以Filter扩展为例，简单来说就是：
 

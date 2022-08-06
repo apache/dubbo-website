@@ -11,9 +11,9 @@ description: "减少注册中心上服务的注册数据"
 
 ## 背景
 
-Dubbo provider 中的服务配置项有接近 [30 个配置项](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-service.html)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
+Dubbo provider 中的服务配置项有接近 [30 个配置项](/zh/docsv2.7/user/references/xml/dubbo-service/)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
 
-Dubbo consumer 中的配置项也有 [20+个配置项](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-reference.html)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。
+Dubbo consumer 中的配置项也有 [20+个配置项](/zh/docsv2.7/user/references/xml/dubbo-reference/)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。
 
 这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心(如 zookeeper)的网络开销增大，性能降低。
 

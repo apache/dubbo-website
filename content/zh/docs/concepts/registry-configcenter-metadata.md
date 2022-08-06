@@ -78,4 +78,4 @@ Dubbo SDK对三大中心都支持了Multiple模式。
 
 拿注册中心举例，下面是一个多活场景的部署架构示意图：
 
-![//imgs/v3/concepts/multiple-registry-deployment-architecture](/imgs/v3/concepts/multiple-registry-deployment-architecture)
+![//imgs/v3/concepts/multiple-registry-deployment-architecture](/imgs/v3/concepts/multiple-registry-deployment-architecture.png)

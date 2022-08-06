@@ -97,7 +97,7 @@ Mailing list 简单来说，就是一个邮件通知机制，所有的 Dubbo 开
 
 ### 3.1 撰写文档
 
- [Dubbo文档](http://dubbo.apache.org/zh-cn/)是其开源组成成分的重要一环，其内容源文件位于：[https://github.com/apache/dubbo-website](https://github.com/apache/dubbo-website)。同样也是一个 Git 仓库，任何你想要对 dubbo 知识点的补充，都可以在这儿提交 pull request，只需要一些 markdown 的语法知识，和一些可有可无的 npm 语法即可。如果你觉得贡献代码对于现在的自己仍然有点难度，不妨从贡献文档开始接触开源。
+ [Dubbo文档](https://dubbo.apache.org/)是其开源组成成分的重要一环，其内容源文件位于：[https://github.com/apache/dubbo-website](https://github.com/apache/dubbo-website)。同样也是一个 Git 仓库，任何你想要对 dubbo 知识点的补充，都可以在这儿提交 pull request，只需要一些 markdown 的语法知识，和一些可有可无的 npm 语法即可。如果你觉得贡献代码对于现在的自己仍然有点难度，不妨从贡献文档开始接触开源。
 
 ### 3.2 ISSUE
 

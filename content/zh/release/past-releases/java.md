@@ -65,12 +65,6 @@ weight: 1
   [asc](https://archive.apache.org/dist/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip.asc) |
   [sha512](https://archive.apache.org/dist/dubbo/2.7.15/apache-dubbo-2.7.15-src.zip.sha512)
 
-### 2.6.12 (2021-12-29)
-
-* [source](https://archive.apache.org/dist/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip) |
-  [asc](https://archive.apache.org/dist/dubbo/2.6.12/apache-dubbo-v-src.zip.asc) |
-  [sha512](https://archive.apache.org/dist/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip.sha512)
-
 ### 3.0.4 (2021-10-24)
 
 * [source](https://archive.apache.org/dist/dubbo/3.0.4/apache-dubbo-3.0.4-src.zip) |

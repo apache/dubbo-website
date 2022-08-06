@@ -109,7 +109,7 @@ dubbo.metadataReport.address=redis://127.0.0.1:6379
 <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService" ref="demoService"/>
 ```
 
-通过[OPS控制台](http://47.91.207.147/#/management?key=global)将以下全局配置迁移到配置中心，成为所有应用共享的配置。
+通过OPS控制台将以下全局配置迁移到配置中心，成为所有应用共享的配置。
 
 ```properties
 dubbo.registry.address=zookeeper://127.0.0.1:2181
@@ -133,7 +133,7 @@ dubbo.protocol.port=20880
 
 
 
-这里增加了一篇[Dubbo配置方式]()的说明文档，详细描述了Dubbo当前支持的配置类型、不同配置之间的覆盖关系等。
+这里增加了一篇Dubbo配置方式的说明文档，详细描述了Dubbo当前支持的配置类型、不同配置之间的覆盖关系等。
 
 
 
@@ -141,7 +141,7 @@ dubbo.protocol.port=20880
 
 2.7版本可以读取到老的治理规则，因此不用担心升级2.7的应用后老规则会失效，可以选择先升级上线，再慢慢的做增量式规则迁移。
 
-请参考[OPS -> 服务治理](http://47.91.207.147/#/governance/routingRule)了解规则配置方式，这里我们重点关注的是规则格式，以下提供几个简单示例：
+请参考OPS -> 服务治理了解规则配置方式，这里我们重点关注的是规则格式，以下提供几个简单示例：
 
 - 条件路由
 

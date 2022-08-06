@@ -53,4 +53,4 @@ Dubbo 允许配置多协议，在不同服务上支持不同协议或者同一�
 </beans>
 ```
 
-[^1]: 可以自行扩展协议，参见：[协议扩展](http://dubbo.apache.org/books/dubbo-dev-book/impls/protocol.html)
+[^1]: 可以自行扩展协议，参见：[协议扩展](/zh/docsv2.7/dev/impls/protocol/)
