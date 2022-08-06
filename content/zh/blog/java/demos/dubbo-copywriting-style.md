@@ -244,9 +244,6 @@ Microsoft 有个 [`-ms-text-autospace`](http://msdn.microsoft.com/en-us/library/
 | [Apple 中国](http://www.apple.com/cn/)             | Yes  | N/A          |
 | [Apple 香港](http://www.apple.com/hk/)             | Yes  | N/A          |
 | [Apple 台湾](http://www.apple.com/tw/)             | Yes  | N/A          |
-| [Microsoft 中国](https://www.microsoft.com/zh-cn/) | Yes  | N/A          |
-| [Microsoft 香港](https://www.microsoft.com/zh-hk/) | Yes  | N/A          |
-| [Microsoft 台湾](https://www.microsoft.com/zh-tw/) | Yes  | N/A          |
 | [LeanCloud](https://leancloud.cn/)               | Yes  | N/A          |
 | [知乎](https://www.zhihu.com/)                     | Yes  | 部分用户达成 |
 | [V2EX](https://www.v2ex.com/)                    | Yes  | Yes          |
