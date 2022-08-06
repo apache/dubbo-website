@@ -176,4 +176,4 @@ System.out.println(helloService.hello("community"));
 ## 其他
 
 * 本文介绍的泛化调用和泛接口实现，都是在原生的 `Dubbo` 协议之上的。在 2.6.2 版本之前，其他协议如 http/hessian 等是不支持泛化调用的，2.6.3 版本将会对这两个协议的泛化调用做支持。
-* 本文中提到的相关示例代码可以在 dubbo-samples中找到：https://github.com/apache/dubbo-samples/tree/master/java/dubbo-samples-generic
+* 本文中提到的相关示例代码可以在 dubbo-samples中找到：https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-generic

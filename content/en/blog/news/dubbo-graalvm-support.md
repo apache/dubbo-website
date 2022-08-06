@@ -25,7 +25,7 @@ GraalVM we use here is based on jdk version 1.8.
 
 ## Get Started
 
-For user's convenience, we provide the following demo in the [apache:2.7-native_image](https://github.com/apache/dubbo/tree/2.7-native_image) branch. In module dubbo-demo-native, dubbo's provider and consumer demos are given:
+For user's convenience, we provide the following demo in the [apache dubbo](https://github.com/apache/dubbo/) branch. In module dubbo-demo-native, dubbo's provider and consumer demos are given:
 
 ![](/imgs/blog/dubbo-graalvm-support/demo_path.png)
 
@@ -329,7 +329,3 @@ public <T> T getProxy(Invoker<T> invoker, boolean generic) throws RpcException {
 The service here has multiple interfaces which have to be in order when requesting proxy. Set does not fulfill the requirement so we use ArrayList instead.
 
 Major modifications to dubbo source code are listed above.
-
-
-
-Link to the branch: https://github.com/apache/dubbo/tree/2.7-native_image

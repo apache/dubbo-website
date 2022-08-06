@@ -75,7 +75,7 @@ public class ConsumerController {
 ```
 
 ### 部署 Apache Skywalking
-Apache Skywalking 共提供两种部署模式：单节点模式和集群模式，以下为单节点模式部署步骤，集群模式部署详情参考[文档](https://github.com/apache/skywalking/blob/master/docs/cn/Deploy-backend-in-cluster-mode-CN.md)。
+Apache Skywalking 共提供两种部署模式：单节点模式和集群模式，以下为单节点模式部署步骤，集群模式部署详情参考[文档](https://skywalking.apache.org/docs/main/latest/en/setup/backend/backend-setup/)。
 
 #### 依赖第三方组件
 

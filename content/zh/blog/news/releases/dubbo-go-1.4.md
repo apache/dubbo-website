@@ -146,7 +146,7 @@ Dubbo 鉴权认证是为了避免敏感接口被匿名用户调用而在 SDK 层
 
 目前这些规划的 任务清单[^4]，都已经放入在 dubbo-go 项目的 issue 里面，欢迎感兴趣的朋友认领参与开发。dubbo-go 社区在 **钉钉群 23331795** 欢迎你的加入。
 
-[^1]: https://github.com/apache/dubbo-samples/tree/master/golang/registry/kubernetes
+[^1]: https://github.com/apache/dubbo-go-samples/tree/master/registry/kubernetes
 [^2]: https://github.com/dubbogo/dubbo-samples/tree/master/golang/router/condition
 [^3]: https://github.com/dubbogo/dubbo-samples/tree/master/golang/configcenter/nacos
 [^4]: https://github.com/apache/dubbo-go/milestone/1

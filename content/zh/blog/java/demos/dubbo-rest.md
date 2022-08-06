@@ -15,21 +15,21 @@ REST 是 Roy Thomas Fielding [^1] 在 2000 年他的博士论文 [^2]  “架构
 
 
 
-举例来说，一个简单的静态 HTML 页面的网站就很好的符合了 RESTful 架构风格。访问 http://acme.com/accounts 返回一个包含所有账号的页面，选取其中一个链接 http://acme.com/accounts/1 又会返回包含用户 1 的详细信息。爬虫软件在这种场景下工作的很好，当知道了某个网站的首页地址后，可以自举发现这个网站上所有关联的网页。更重要的是，这种访问形式不依赖网站提供的任何客户端，而是仅仅通过 HTTP 标准的访问方式完成的。可以说，HTML 这种超媒体文档的组织形式就是资源的表现层状态迁移的一种形式。
+举例来说，一个简单的静态 HTML 页面的网站就很好的符合了 RESTful 架构风格。访问 `http://example.com/accounts` 返回一个包含所有账号的页面，选取其中一个链接 `http://example.com/accounts/1` 又会返回包含用户 1 的详细信息。爬虫软件在这种场景下工作的很好，当知道了某个网站的首页地址后，可以自举发现这个网站上所有关联的网页。更重要的是，这种访问形式不依赖网站提供的任何客户端，而是仅仅通过 HTTP 标准的访问方式完成的。可以说，HTML 这种超媒体文档的组织形式就是资源的表现层状态迁移的一种形式。
 
 
 
 对于一个提供服务的动态网站来说，可以按照类似的思路将其 RESTful 化：
 
-- GET http://acme.com/accounts 返回所有账号信息
+- GET `http://example.com/accounts` 返回所有账号信息
 
-- POST http://acme.com/accounts 创建一个新的账号
+- POST `http://example.com/accounts` 创建一个新的账号
 
-- GET http://acme.com/accounts/1 返回账号 1 的信息
+- GET `http://example.com/accounts/1` 返回账号 1 的信息
 
-- DELETE http://acme.com/accounts/1 删除账号 1
+- DELETE `http://example.com/accounts/1` 删除账号 1
 
-- PUT http://acme.com/accounts/1 更新账号 1 信息
+- PUT `http://example.com/accounts/1` 更新账号 1 信息
 
 
 
@@ -816,7 +816,7 @@ components:
 
 
 
-![swagger-ui](../../img/blog/swagger-ui.png)
+![swagger-ui](/imgs/blog/swagger-ui.png)
 
 
 
@@ -824,7 +824,7 @@ components:
 
 
 
-![swagger-ui-execute](../../img/blog/swagger-ui-execute.png)
+![swagger-ui-execute](/imgs/blog/swagger-ui-execute.png)
 
 
 

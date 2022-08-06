@@ -9,7 +9,7 @@ description: 本文记录了一个用户第一次接入 Dubbo Go 的体验
 
 ### 前尘
 
-由于我的一个项目需要做公司用户鉴权，而组内其他小伙伴刚好有一个 *dubbo* 的鉴权 *rpc* ，一开始我是打算直接的读 *redis* 数据然后自己做解密。工作进行到一半，由于考虑到如果以后这个服务有任何变动，我这边要有联动行为，所以改用 *go* 来调用 *dubbo* 的 *rpc* ，于是我在 *github* 上找到了 [雨神](https://github.com/AlexStocks) 的 [dubbogo](https://github.com/AlexStocks/dubbogo) (PS: 这个是 *dubbo-go* 前身)。不得不说，雨神是热心的人儿啊，当时还帮着我调试代码。最后也是接入了一个阉割版的吧，主要是当时 *hessian2* 对泛型支持的不怎么好。
+由于我的一个项目需要做公司用户鉴权，而组内其他小伙伴刚好有一个 *dubbo* 的鉴权 *rpc* ，一开始我是打算直接的读 *redis* 数据然后自己做解密。工作进行到一半，由于考虑到如果以后这个服务有任何变动，我这边要有联动行为，所以改用 *go* 来调用 *dubbo* 的 *rpc* ，于是我在 *github* 上找到了 [雨神](https://github.com/AlexStocks) 的 `https://github.com/apache/dubbo-go-samples/tree/master` (PS: 这个是 *dubbo-go* 前身)。不得不说，雨神是热心的人儿啊，当时还帮着我调试代码。最后也是接入了一个阉割版的吧，主要是当时 *hessian2* 对泛型支持的不怎么好。
 
 ### 现在
 
@@ -73,7 +73,7 @@ dubbo:
             retries: "3"
 ```
 
-我这里是把 *dubbo-go* 作为第三方库来用，所以我没使用官方 [dubbo-samples](https://github.com/dubbogo/dubbo-samples/golang) 那样在 *init* 函数中读入配置。
+我这里是把 *dubbo-go* 作为第三方库来用，所以我没使用官方 [dubbo-samples](https://github.com/apache/dubbo-go-samples/) 那样在 *init* 函数中读入配置。
 
 配置代码如下：
 
