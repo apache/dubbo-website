@@ -6,8 +6,8 @@ linkTitle: "3.0 速览"
 weight: 3
 content:
   - 核心特性:
-    - "[Triple]()"
-    - "[Examples]()"
+    - "Triple"
+    - "Examples"
   - 关注迁移:
     - "[Java](../java-sdk/)"
     - "[Golang](../golang-sdk/upgrades-and-compatibility/)"
@@ -28,4 +28,4 @@ cascade:
     * [Golang - 迁移指南](../../golang-sdk/)
 * 其他 **Dubbo3 相关资源：**
     * 更多资料，如性能指标、高级特性说明等请参考 [多语言 SDK 实现](../mannual/)
-    * [演讲与线下活动]()
+    * 演讲与线下活动

@@ -75,7 +75,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 为保证兼容性，我们先将部分 provider 升级到 `dubbo3` 版本并使用 `dubbo` 协议。
 
-使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java) ,完成调用，输出如下:
+使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java) ,完成调用，输出如下:
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
 
 ###  同时使用 dubbo 和 triple 协议
@@ -88,7 +88,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 > 按照推荐升级步骤，provider 已经支持了tri协议，所以 dubbo3的 consumer 可以直接使用 tri 协议
 
-使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider)和[`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java),完成调用，输出如下:
+使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java)和[`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java),完成调用，输出如下:
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
 

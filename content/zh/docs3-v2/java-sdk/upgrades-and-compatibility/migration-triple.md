@@ -97,8 +97,8 @@ public class IGreeter2Impl implements IWrapperGreeter {
 结构如图所示:
 ![strust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
 
-[Provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider)
-和 [Consumer](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer) 完成调用，输出如下:
+[Provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java)
+和 [Consumer](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java) 完成调用，输出如下:
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
 
