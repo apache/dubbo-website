@@ -230,4 +230,4 @@ dubbo:
 # 框架从 apollo 配置中最更新对应位置加载配置文件，并根据该配置文件启动
 ```
 
-下一章：[【Dubbogo Samples 介绍】](../samples/samples_repo.html)
+下一章：[【Dubbogo Samples 介绍】](../../samples/samples_repo/)

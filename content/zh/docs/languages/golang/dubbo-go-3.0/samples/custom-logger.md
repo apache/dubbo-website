@@ -91,5 +91,5 @@ logger.SetLogger(myLogger)  // 在 main 函数中设置自定义logger
 
 - 日志API不可以在Init 阶段使用，否则可能会发生意料之外的问题。
 
-下一章: [【Metrics 数据上报】](./metrics.html)
+下一章: [【Metrics 数据上报】](../metrics/)
 

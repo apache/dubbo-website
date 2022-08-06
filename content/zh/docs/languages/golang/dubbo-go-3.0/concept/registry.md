@@ -177,4 +177,4 @@ dubbo:
         interface: com.apache.dubbo.sample.basic.IGreeter 
 ```
 
-下一章：[【框架配置介绍】](./configuration.html)
+下一章：[【框架配置介绍】](../configuration/)

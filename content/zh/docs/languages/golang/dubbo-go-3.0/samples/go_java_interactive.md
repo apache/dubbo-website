@@ -450,7 +450,7 @@ public class ApiConsumer {
 
 ## 2. 基于 Dubbo 协议互通 (Hessian2序列化)
 
-参考 [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/rpc/dubbo)
+参考 [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/rpc/dubbo)
 
 ### 2.1 Go-Client -> Java-Server
 
@@ -853,5 +853,5 @@ public class Consumer {
 }
 ```
 
-下一章: [【配置中心和配置监听】](./config-center-dynamic.html)
+下一章: [【配置中心和配置监听】](../config-center-dynamic/)
 
