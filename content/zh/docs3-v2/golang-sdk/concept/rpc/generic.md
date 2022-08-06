@@ -86,7 +86,7 @@ Consumer 端的 Filter 会自动根据 Dubbo URL 携带的配置自动将普通�
 
 ### 手动泛化调用
 
-手动泛化调用发起的请求不经过 filter，所以需要 consumer 端显式地发起泛化调用，典型应用场景是测试。在 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/3.0/generic) 中，为了便于测试都是采用手动调用的方式。
+手动泛化调用发起的请求不经过 filter，所以需要 consumer 端显式地发起泛化调用，典型应用场景是测试。在 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/master/generic) 中，为了便于测试都是采用手动调用的方式。
 
 泛化调用不需要创建配置文件（dubbogo.yaml），但是需要在代码中手动配置注册中心、reference 等信息，初始化方法被封装到 newRefConf 方法中，如下所示。
 
@@ -152,4 +152,4 @@ GenericService 的 Invoke 方法接收四个参数，分别是：
 
 相关阅读：[【Dubbo-go 服务代理模型】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
 
-相关任务[【泛化调用】](../../tasks/rpc/generic/)
+相关任务[【泛化调用】](../../../tasks/rpc/generic/)

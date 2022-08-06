@@ -8,7 +8,7 @@ keywords: 无代理服务网格
 
 ### 1.1 Service Mesh 简析
 
-Istio 是当今最流行的开源服务网格。它由控制平面和数据平面构成，其架构如下，图片摘自 [istio官网](istio.io)
+Istio 是当今最流行的开源服务网格。它由控制平面和数据平面构成，其架构如下，图片摘自 [istio官网](https://istio.io/)
 
 ![使用 Istio 后](https://istio.io/latest/img/service-mesh.svg)
 
@@ -75,7 +75,7 @@ Dubbo-go 拥有路由能力，通过 xds 协议客户端从 istiod 订阅路由�
 
 dubbogo-cli 是 Apach/dubbo-go 生态的子项目，为开发者提供便利的应用模板创建、工具安装、接口调试等功能，以提高用户的研发效率。
 
-详情可以参阅 [【dubbogo-cli 工具】](../../refer/use_dubbogo_cli/)
+详情可以参阅 [【dubbogo-cli 工具】](../../../refer/use_dubbogo_cli/)
 
 ## 3. Dubbo-go-Mesh 的优势
 
@@ -108,4 +108,4 @@ Dubbo-go 是一个横跨多个生态的服务框架。
 
 ## 4. 任务
 
-您可以跟随[【Dubbo-go Mesh 任务】](../../tasks/mesh/build/)来体验 Dubbo-go 服务网格能力。
+您可以跟随[【Dubbo-go Mesh 任务】](../../../tasks/mesh/build/)来体验 Dubbo-go 服务网格能力。

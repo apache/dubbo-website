@@ -241,7 +241,7 @@ Dubbo 默认支持 6 种配置来源：
 
 - JVM System Properties，JVM -D 参数
 - System environment，JVM进程的环境变量
-- Externalized Configuration，[外部化配置](#3.3-外部化配置)，从配置中心读取
+- Externalized Configuration，[外部化配置](#33-外部化配置)，从配置中心读取
 - Application Configuration，应用的属性配置，从Spring应用的Environment中提取"dubbo"打头的属性集
 - API / XML /注解等编程接口采集的配置可以被理解成配置来源的一种，是直接面向用户编程的配置采集方式
 - 从classpath读取配置文件 dubbo.properties
@@ -324,7 +324,7 @@ dubbo.application.qos.port=33333
 ```
 
 - 优先级
-  外部化配置默认较本地配置有更高的优先级，因此这里配置的内容会覆盖本地配置值，关于各配置形式间的[覆盖关系](#覆盖关系) 有单独一章说明。
+  外部化配置默认较本地配置有更高的优先级，因此这里配置的内容会覆盖本地配置值，关于各配置形式间的[覆盖关系](#21-覆盖关系) 有单独一章说明。
 
 - 作用域
   外部化配置有全局和应用两个级别，全局配置是所有应用共享的，应用级配置是由每个应用自己维护且只对自身可见的。当前已支持的扩展实现有 Zookeeper、Apollo、Nacos。

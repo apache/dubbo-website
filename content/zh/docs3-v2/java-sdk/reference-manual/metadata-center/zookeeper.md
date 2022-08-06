@@ -51,7 +51,7 @@ metadataConfig.setAddress("zookeeper://127.0.0.1:2181");
 
 ## 4 工作原理
 
-### 4.1 [服务运维元数据](../overview/2-服务运维元数据)
+### 4.1 [服务运维元数据](../overview/#2-服务运维元数据)
 
 Zookeeper 基于树形结构进行数据存储，它的元数据信息位于以下节点:
 ```text
@@ -101,7 +101,7 @@ dataLength = 219
 numChildren = 0
 ```
 
-### 4.2 [地址发现 - 接口-应用名映射](../overview/2-地址发现元数据)
+### 4.2 [地址发现 - 接口-应用名映射](../overview/#2-地址发现元数据)
 在Dubbo 3.0 中，默认使用了服务自省机制去实现服务发现，关于服务自省可以查看[服务自省](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
 
 简而言之，服务自省机制需要能够通过 interface name 去找到对应的 application name，这个关系可以是一对多的，即一个 service name 可能会对应多个不同的 application name。在 3.0 中，元数据中心提供此项映射的能力。
@@ -139,7 +139,7 @@ dataLength = 62
 numChildren = 0
 ```
 
-### 4.3 [地址发现 - 接口配置元数据](../overview/2-地址发现元数据)
+### 4.3 [地址发现 - 接口配置元数据](../overview/#2-地址发现元数据)
 
 要开启远程接口配置元数据注册，需在应用中增加以下配置，因为默认情况下 Dubbo3 应用级服务发现会启用服务自省模式，并不会注册数据到元数据中心。
 

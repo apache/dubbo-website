@@ -227,4 +227,4 @@ Dubbo 用户可以在自己系统的基础上对标签路由进行二次扩展�
 
 ## 7 总结
 
-本文介绍了 Dubbo 2.7 比较重要的三大新特性：异步化改造，三大中心改造，服务治理增强。Dubbo 2.7 还包含了很多功能优化、特性升级，可以在项目源码的 [CHANGES.md](https://github.com/apache/dubbo/blob/master/CHANGES.md) 中浏览全部的改动点。最后提供一份 Dubbo 2.7 的升级文档：[2.7迁移文档](/zh/docs/user/versions/version-270.html)，欢迎体验。
+本文介绍了 Dubbo 2.7 比较重要的三大新特性：异步化改造，三大中心改造，服务治理增强。Dubbo 2.7 还包含了很多功能优化、特性升级，可以在项目源码的 [CHANGES.md](https://github.com/apache/dubbo/blob/master/CHANGES.md) 中浏览全部的改动点。最后提供一份 Dubbo 2.7 的升级文档：[2.7迁移文档](/zh/docsv2.7/user/versions/version-270/)，欢迎体验。

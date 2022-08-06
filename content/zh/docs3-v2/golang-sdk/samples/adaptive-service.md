@@ -25,4 +25,4 @@ description: dubbogo 3.0 柔性服务
 服务柔性将在之后的迭代中持续优化，追求与 Dubbo 社区共同探索出最佳实践。
 
 
-下一章: [【使用 Pixiu 暴露 Dubbo-go 服务】](./pixiu-nacos-triple/)
+下一章: [【使用 Pixiu 暴露 Dubbo-go 服务】](../pixiu-nacos-triple/)

@@ -209,5 +209,5 @@ dubbo.metadata-report.sync.report=false    ##非必须,default值为false
 > 如果元数据地址(dubbo.metadata-report.address)也不进行配置，会判断注册中心的协议是否支持元数据中心，如果支持，会使用注册中心的地址来用作元数据中心。
 
 ## 4 了解如何扩展
-请参见 [扩展 metadata-report](../spi/description/metadata-report/) 了解如何扩展自定义第三方实现。
+请参见 [扩展 metadata-report](../../spi/description/metadata-report/) 了解如何扩展自定义第三方实现。
 

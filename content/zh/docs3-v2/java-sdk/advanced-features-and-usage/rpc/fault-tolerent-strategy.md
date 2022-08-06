@@ -20,7 +20,7 @@ description: "集群调用失败时，Dubbo 提供的容错方案"
 
 ## 集群容错模式
 
-可以自行扩展集群容错策略，参见：[集群扩展](../../references/spis/cluster)
+可以自行扩展集群容错策略，参见：[集群扩展](../../../reference-manual/spi/description/cluster/)
 
 ### Failover Cluster
 

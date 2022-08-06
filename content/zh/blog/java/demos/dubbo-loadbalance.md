@@ -225,7 +225,7 @@ if (! sameWeight && totalWeight > 0) {
 
 ## 扩展负载均衡
 
-Dubbo的4种负载均衡的实现，大多数情况下能满足要求。有时候，因为业务的需要，我们可能需要实现自己的负载均衡策略。本章只说明如何配置负载均衡算法。关于Dubbo扩展机制的更多内容，请前往[Dubbo可扩展机制实战](https://lark.alipay.com/aliware_articles/vtpf9h/pe9pyr)。
+Dubbo的4种负载均衡的实现，大多数情况下能满足要求。有时候，因为业务的需要，我们可能需要实现自己的负载均衡策略。本章只说明如何配置负载均衡算法。关于Dubbo扩展机制的更多内容，请前往[Dubbo可扩展机制实战](/zh/blog/2019/04/25/dubbo可扩展机制实战/)。
 
 1. 实现LoadBalance接口, 以下是Dubbo的LoadBalance接口:
 

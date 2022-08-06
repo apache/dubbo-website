@@ -19,7 +19,7 @@ description: >
 
 ## 2.6.x版本之前的异步方式
 
-在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](/zh/docsv2.7/user/examples/async-call/)、[参数回调](/zh/docsv.27/user/examples/callback-parameter/)、[事件通知](/zh/docsv2.7/user/examples/events-notify/)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
+在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](/zh/docsv2.7/user/examples/async-call/)、[参数回调](/zh/docsv2.7/user/examples/callback-parameter/)、[事件通知](/zh/docsv2.7/user/examples/events-notify/)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
 
 关于参数回调，其本质上是一种服务端的数据推送能力，这是终端应用很常见的一种需求，关于这部分的重构计划，不在本文讨论范围。
 
@@ -170,7 +170,7 @@ Dubbo在2.7.0版本已经升级了对Java 8的支持，同时基于CompletableFu
 
 ## 示例1：CompletableFuture类型接口
 
-CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见[dubbo-samples-async-original-future](https://github.com/apache/dubbo-samples/tree/3.x/dubbo-samples-async/dubbo-samples-async-original-future)。
+CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见[dubbo-samples-async-original-future](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-original-future)。
 
 1. 定义接口
    
@@ -246,7 +246,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
 
 ## 示例2：重载同步接口
 
-这个示例演示了如何在同步接口的基础上，通过增加重载方法实现消费端的异步调用，具体代码参见地址[dubbo-samples-async-generated-future](https://github.com/apache/dubbo-samples/tree/3.x/dubbo-samples-async/dubbo-samples-async-generated-future)
+这个示例演示了如何在同步接口的基础上，通过增加重载方法实现消费端的异步调用，具体代码参见地址[dubbo-samples-async-generated-future](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-generated-future)
 
 1. 定义接口
 
@@ -322,7 +322,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
 
 ## 示例3：使用AsyncContext
 
-本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见[dubbo-samples-async-provider](https://github.com/apache/dubbo-samples/tree/3.x/dubbo-samples-async/dubbo-samples-async-provider)。
+本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见[dubbo-samples-async-provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-provider)。
 
 > 之前已经提到过，已经是CompletableFuture签名的接口，要实现Provider端异步没必要再用AsyncContext。
 

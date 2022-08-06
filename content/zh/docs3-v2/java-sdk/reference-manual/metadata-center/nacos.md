@@ -47,7 +47,7 @@ MetadataReportConfig metadataConfig = new MetadataReportConfig();
 metadataConfig.setAddress("nacos://127.0.0.1:8848");
 ```
 
-`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#2.2-配置并启用-Nacos)
+`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#22-配置并启用-Nacos)
 
 ## 3 高级配置
 
@@ -55,7 +55,7 @@ metadataConfig.setAddress("nacos://127.0.0.1:8848");
 
 ## 4 工作原理
 
-### 4.1 [服务运维元数据](../overview/2-服务运维元数据)
+### 4.1 [服务运维元数据](../overview/#2-服务运维元数据)
 
 在 Nacos 的控制台上可看到服务提供者、消费者注册的服务运维相关的元数据信息：
 
@@ -81,7 +81,7 @@ Consumers接口元信息详情（通过 `report-consumer-definition=true` 控制
 
 ![image-dubbo-metadata-nacos-4.png](/imgs/blog/dubbo-metadata-nacos-4.png)
 
-### 4.2 [地址发现 - 接口-应用映射](../overview/2-地址发现元数据)
+### 4.2 [地址发现 - 接口-应用映射](../overview/#2-地址发现元数据)
 在上面提到，service name 和 application name 可能是一对多的，在 nacos 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 nacos 中 publishConfigCas 的能力去解决该问题。在 nacos 中，使用 publishConfigCas 会让用户传递一个参数 casMd5，该值的含义是之前配置内容的 md5 值。不同客户端在更新之前，先去查一次 nacos 的 content 的值，计算出 md5 值，当作本地凭证。在更新时，把凭证 md5 传到服务端比对 md5 值, 如果不一致说明在次期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
 
 Nacos api:
@@ -94,7 +94,7 @@ configService.publishConfigCas(key, group, content, ticket);
 
 ![nacos-metadata-report-service-name-mapping.png](/imgs/user/nacos-metadata-report-service-name-mapping.png)
 
-### 4.3 [地址发现 - 接口配置元数据](../overview/2-地址发现元数据)
+### 4.3 [地址发现 - 接口配置元数据](../overview/#2-地址发现元数据)
 
 要开启远程接口配置元数据注册，需在应用中增加以下配置，因为默认情况下 Dubbo3 应用级服务发现会启用服务自省模式，并不会注册数据到元数据中心。
 

@@ -114,4 +114,4 @@ dubbo.apache.org/dubbo-go/v3/common/proxy/proxy_factory.(*ProxyInvoker).Invoke
 
 可看到报错信息和堆栈
 
-下一章: [【日志】](./custom-logger/)
+下一章: [【日志】](../custom-logger/)

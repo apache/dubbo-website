@@ -9,7 +9,6 @@ description: "对 Dubbo 配置总体设计与工作原理进行了总体概述�
 * [使用 Spring Boot 快速开发 Dubbo 应用](../../../quick-start/spring-boot/)
 * [配置项参考手册，了解有哪些配置项可用](../properties)
 * [配置加载及覆盖的工作原理](../principle)
-* [运行态地址 URL 及优先级规则](../blog)
 
 ## 配置组件
 
@@ -35,7 +34,7 @@ method | 指定方法级的配置 | service 和 reference 的子配置 |  可选
 argument | 某个方法的参数配置 | method的子配置 |  可选
 
 
-> 1. 从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 [Blog](/zh/blog/java/codeanalysis/introduction-to-dubbo-url#rpc调用)。
+> 1. 从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 [Blog](/zh/blog/2019/10/17/dubbo-中的-url-统一模型/#rpc调用)。
 > 2. 各组件支持的具体配置项及含义请参考 [配置项手册](../properties)
 
 ### service 与 reference
@@ -143,14 +142,14 @@ demo.service.version=1.0.0
 ### 属性配置
 根据属性Key-value生成配置组件，类似SpringBoot的ConfigurationProperties，具体请参考[属性配置](../properties)。
 
-属性配置的另外一个重要的功能特性是[属性覆盖](../properties#属性覆盖)，使用外部属性的值覆盖已创建的配置组件属性。
+属性配置的另外一个重要的功能特性是[属性覆盖](../properties/#属性覆盖)，使用外部属性的值覆盖已创建的配置组件属性。
 
-如果要将属性配置放到外部的配置中心，请参考[外部化配置](../external-config)。
+如果要将属性配置放到外部的配置中心，请参考[外部化配置](../principle/#33-外部化配置)。
 
 除了外围驱动方式上的差异，Dubbo 的配置读取总体上遵循了以下几个原则：
 
 1. Dubbo 支持了多层级的配置，并按预定优先级自动实现配置间的覆盖，最终所有配置汇总到数据总线URL后驱动后续的服务暴露、引用等流程。
-2. 配置格式以 Properties 为主，在配置内容上遵循约定的 `path-based` 的[命名规范](../properties#配置格式)
+2. 配置格式以 Properties 为主，在配置内容上遵循约定的 `path-based` 的[命名规范](../properties/#配置格式)
 
 
 ## 配置加载流程
@@ -161,7 +160,7 @@ Dubbo 遵循一种 [path-based 的配置规范](../principle/)，每一个配置
 
 - JVM System Properties，JVM -D 参数
 - System environment，JVM进程的环境变量
-- Externalized Configuration，[外部化配置](../properties#3.3-外部化配置)，从配置中心读取
+- Externalized Configuration，[外部化配置](../principle/#33-外部化配置)，从配置中心读取
 - Application Configuration，应用的属性配置，从Spring应用的Environment中提取"dubbo"打头的属性集
 - API / XML /注解等编程接口采集的配置可以被理解成配置来源的一种，是直接面向用户编程的配置采集方式
 - 从classpath读取配置文件 dubbo.properties

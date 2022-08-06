@@ -12,7 +12,7 @@ description: >
 
 ## 外部化配置
 
-在[Dubbo 注解驱动](Dubbo-Annotation-Driven.md)例子中，无论是服务提供方，还是服务消费方，均需要转配相关配置Bean：
+在[Dubbo 注解驱动](/zh/blog/2018/08/07/dubbo-注解驱动/)例子中，无论是服务提供方，还是服务消费方，均需要转配相关配置Bean：
 
 ```java
     @Bean
@@ -57,7 +57,7 @@ description: >
 
 
 
-在 Dubbo 官方用户手册的[“属性配置”](/docs/3.0/zh-cn/docs/user/configuration/configuration-load-process.md)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
+在 Dubbo 官方用户手册的[“属性配置”](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/properties/)章节中，`dubbo.properties` 配置属性能够映射到  `ApplicationConfig` 、`ProtocolConfig` 以及 `RegistryConfig` 的字段。从某种意义上来说，`dubbo.properties`  也是 Dubbo 的外部化配置。
 
 
 

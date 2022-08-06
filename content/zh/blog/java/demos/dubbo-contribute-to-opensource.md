@@ -178,7 +178,7 @@ Mailing list 简单来说，就是一个邮件通知机制，所有的 Dubbo 开
 
 如果说项目是托管在 GitHub上的，以下是我们总结出的提交RP的建议：
 
-- **Fork 代码仓库** 并克隆到本地，在本地的仓库配置“上游”为远端仓库。这样你可以在提交你的PR时保持和“上游”同步，会减少很多解决冲突的时间。(更多关于同步的说明，请参考[这里](https://help.github.com/articles/syncing-a-fork/).)
+- **Fork 代码仓库** 并克隆到本地，在本地的仓库配置“上游”为远端仓库。这样你可以在提交你的PR时保持和“上游”同步，会减少很多解决冲突的时间。(更多关于同步的说明，请参考[这里](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).)
 - **创建一个分支** 用于自己编辑。
 - **参考任何相关的issue** 或者在你的RP中支持文档(比如. “Closes #37.”)
 - **包含之前和之后的快照** 如果你的改动是包含了不同的 HTML/CSS。在你的PR中拖拉相应的图片。

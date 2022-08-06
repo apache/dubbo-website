@@ -22,8 +22,8 @@ static_resources:
 Http Listener 的具体实现可以参考 `pkg/listener/http`。
 
 有关 HTTP Listener 的案例，可以参考：
-- HTTP to Dubbo 请求的转换，[案例](../../samples/http_to_dubbo.html)
-- HTTP 请求代理，[案例](../../samples/http_proxy.html)
+- HTTP to Dubbo 请求的转换，[案例](../../../samples/http_to_dubbo/)
+- HTTP 请求代理，[案例](../../../samples/http_proxy/)
 
 目前也支持 HTTPS 协议。可以将 `protocol_type` 修改为 `HTTPS`。并且添加 `domains` 和 `certs_dir` 来指定域名和 cert 文件目录。
 
@@ -40,7 +40,7 @@ Http Listener 的具体实现可以参考 `pkg/listener/http`。
           certs_dir: $PROJECT_DIR/cert
 ```
 
-具体案例可以查看 [案例](../../samples/https.html)
+具体案例可以查看 [案例](../../../samples/https/)
 
 
 

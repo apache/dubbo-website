@@ -24,7 +24,7 @@ cascade:
     * [百万实例集群的秘密 - 应用级服务发现](service-discovery)
     * [Dubbo Mesh](mesh)
 * Dubbo3 的兼容性与迁移成本?
-    * [Java - 迁移指南](../../java-sdk/upgrades-and-compatibility)
+    * [Java - 迁移指南](/zh/docs3/java-sdk/java-sdk/upgrades-and-compatibility)
     * [Golang - 迁移指南](../../golang-sdk/)
 * 其他 **Dubbo3 相关资源：**
     * 更多资料，如性能指标、高级特性说明等请参考 [多语言 SDK 实现](../mannual/)

@@ -65,7 +65,7 @@ configCenter.setAddress("zookeeper://127.0.0.1:2181");
 
 - configurators，[覆盖规则](/zh/docsv2.7/user/examples/config-rule/)
 - tag-router，[标签路由](/zh/docsv2.7/user/examples/routing-rule/)
-- condition-router，[条件路由](/zh/docsv2.7/user/examples/condition-router/)
+- condition-router，[条件路由](/zh/docsv2.7/user/examples/routing-rule/#条件路由)
 - migration，[迁移规则](../../migration/migration-service-discovery)
 
 #### Nacos
@@ -78,6 +78,6 @@ configCenter.setAddress("zookeeper://127.0.0.1:2181");
 
 - configurators，[覆盖规则](/zh/docsv2.7/user/examples/config-rule/)
 - tag-router，[标签路由](/zh/docsv2.7/user/examples/routing-rule/)
-- condition-router，[条件路由](/zh/docsv2.7/user/examples/condition-router/)
+- condition-router，[条件路由](/zh/docsv2.7/user/examples/routing-rule/#条件路由)
 - migration，[迁移规则](../../migration/migration-service-discovery)
 

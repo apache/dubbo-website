@@ -12,6 +12,6 @@ Apache Dubbo 是一款 RPC 微服务框架，提供了包括 Java、Golang 等�
 * 高级用法请参考 [多语言 SDK 文档](../mannual)
 * 关注 Dubbo3 
   * [3.0 设计理念与核心功能](../whatsnew/background)
-  * [如何迁移到 Dubbo3](../../java-sdk/upgrades-and-compatibility)
+  * [如何迁移到 Dubbo3](/zh/docs3/java-sdk/upgrades-and-compatibility)
 
 
