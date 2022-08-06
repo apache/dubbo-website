@@ -43,7 +43,7 @@ dubbo.service.shutdown.wait=20000
 
 在关闭应用前，首先通过 QOS 的`offline`指令下线所有服务，然后等待一定时间确保已经到达请求全部处理完毕，由于服务已经在注册中心下线，当前应用不会有新的请求。这时再执行真正的关闭(`SIGTERM` 或` SIGINT`)流程，就能保证服务无损。
 
-QOS可通过 telnet 或 HTTP 方式使用，具体方式请见[Dubbo-QOS命令使用说明](http://dubbo.apache.org/zh-cn/docs/user/references/qos.html)。
+QOS可通过 telnet 或 HTTP 方式使用，具体方式请见[Dubbo-QOS命令使用说明](/zh/docs/user/references/qos.html)。
 
 ## 流程
 

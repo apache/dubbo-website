@@ -19,7 +19,7 @@ description: >
 
 ## 2.6.x版本之前的异步方式
 
-在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](http://dubbo.apache.org/zh-cn/docs/user/demos/async-call.html)、[参数回调](http://dubbo.apache.org/zh-cn/docs/user/demos/callback-parameter.html)、[事件通知](http://dubbo.apache.org/zh-cn/docs/user/demos/events-notify.html)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
+在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](/zh/docs/user/demos/async-call.html)、[参数回调](/zh/docs/user/demos/callback-parameter.html)、[事件通知](/zh/docs/user/demos/events-notify.html)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
 
 关于参数回调，其本质上是一种服务端的数据推送能力，这是终端应用很常见的一种需求，关于这部分的重构计划，不在本文讨论范围。
 

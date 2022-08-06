@@ -57,7 +57,7 @@ description: >
 
 #### 5.1.1 动态规则打标
 
-可随时在[服务治理控制台](http://dubbo.apache.org/zh-cn/docs/user/demos/routing-rule.html)下发标签归组规则
+可随时在[服务治理控制台](/zh/docs/user/demos/routing-rule.html)下发标签归组规则
 
 ```yaml
 # governance-tagrouter-provider应用增加了两个标签分组tag1和tag2

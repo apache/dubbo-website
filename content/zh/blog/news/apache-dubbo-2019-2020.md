@@ -120,7 +120,7 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 ![filter](/imgs/blog/filter.png) 
    
-   关于消费端线程模型的优化，对于网关类应用，需要消费大量服务的应用，都会在系统稳定性和性能表现上有很大提升，其优化后的总体工作原理图所下所示，具体解析可以参见之前发布的文章：[《消费端线程池模型》](http://dubbo.apache.org/zh-cn/docs/user/demos/consumer-threadpool.html)
+   关于消费端线程模型的优化，对于网关类应用，需要消费大量服务的应用，都会在系统稳定性和性能表现上有很大提升，其优化后的总体工作原理图所下所示，具体解析可以参见之前发布的文章：[《消费端线程池模型》](/zh/docs/user/demos/consumer-threadpool.html)
    
    
    老线程模型工作原理：
