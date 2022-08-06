@@ -50,7 +50,7 @@ dubbo:
 #### Pixiu 配置和启动
 
 为了用例的场景，Pixiu 需要启动对应的 HTTP Listener 进行 HTTP 请求的监听，所以就会使用到 `httpconnectionmanager`。
-然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 `dgp.filter.http.dubboproxy`，这里我们将其`auto_resolve` 设置为true，表示开启 HTTP to Dubbo 默认转换协议(具体定义请看[附录](/zh-cn/docs/user/appendix/http-to-dubbo-default-stragety.html))。
+然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 `dgp.filter.http.dubboproxy`，这里我们将其`auto_resolve` 设置为true，表示开启 HTTP to Dubbo 默认转换协议(具体定义请看[附录](../appendix/http-to-dubbo-default-stragety))。
 
 Pixiu 的具体配置如下所示
 

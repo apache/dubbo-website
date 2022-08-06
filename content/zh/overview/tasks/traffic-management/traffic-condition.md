@@ -1,9 +1,10 @@
 ---
 type: docs
-title: "配置规则"
-linkTitle: "配置规则"
+title: "流量隔离"
+linkTitle: "流量隔离"
 weight: 5
 description: "在 Dubbo 中配置应用级治理规则和服务级治理规则"
+toc_hide: true
 ---
 
 > **提示**
