@@ -19,7 +19,7 @@ description: "了解 Dubbo3 与 Kubernetes 生命周期对齐探针的扩展与�
 -   startupProbe:  `org.apache.dubbo.qos.probe.StartupProbe`
 
 接口将自动获取当前应用所有 SPI 的实现，对应接口的 SPI 实现均成功就绪则接口返回成功。
-SPI的介绍见[Dubbo SPI扩展](/zh/docs3-building/java-sdk/reference-manual/spi/description/)
+SPI的介绍见[Dubbo SPI扩展](/zh/docs3-v2/java-sdk/reference-manual/spi/description/)
 
 #### 存活检测
 

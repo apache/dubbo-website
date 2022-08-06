@@ -7,7 +7,7 @@ description: "Nacos 元数据中心基本使用与工作原理"
 ---
 
 ## 1 预备工作
-- 了解 [Dubbo 基本开发步骤](/zh/docs3-building/java-sdk/quick-start/spring-boot/)
+- 了解 [Dubbo 基本开发步骤](/zh/docs3-v2/java-sdk/quick-start/spring-boot/)
 - 参考 [Nacos快速入门](https://nacos.io/zh-cn/docs/quick-start.html) 启动 Nacos server
 
 > 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本
