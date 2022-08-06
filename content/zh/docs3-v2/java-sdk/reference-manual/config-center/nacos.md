@@ -44,7 +44,7 @@ ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("nacos://127.0.0.1:8848");
 ```
 
-`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#22-配置并启用-Nacos)
+`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#22-配置并启用-nacos)
 
 ## 3 高级配置
 如要开启认证鉴权，请参考 [Nacos 注册中心 - 启用认证鉴权](../../registry/nacos/#31-认证)
@@ -108,7 +108,7 @@ dubbo
 流量治理规则有多种类型，不同类型的规则 dataId 的后缀是不同的：
 
 - configurators，[覆盖规则](../../../advanced-features-and-usage/rpc/config-rule/)
-- tag-router，[标签路由](../../../advanced-features-and-usage/service/routing/routing-rule/#标签路由)
+- tag-router，[标签路由](../../../advanced-features-and-usage/service/routing/routing-rule/#标签路由规则)
 - condition-router，[条件路由](../../../advanced-features-and-usage/service/routing/routing-rule/#条件路由)
 
 

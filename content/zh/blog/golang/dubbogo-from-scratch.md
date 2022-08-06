@@ -68,7 +68,7 @@ public class User implements Serializable {
 #### 2.1.2 启动 dubbo 服务提供者
 
 
-用的 [dubbo 官方示例代码](/zh/docs/v2.7/user/configuration/api/):
+用的 [dubbo 官方示例代码](/zh/docsv2.7/user/configuration/api/):
 
 
 ```java
@@ -834,7 +834,7 @@ dubbogo 主要有三个配置文件：
 
 ## 四、参考
 
-- [https://dubbo.apache.org/zh/docs/v2.7/user/configuration/api/](https://dubbo.apache.org/zh/docs/v2.7/user/configuration/api/)
+- [https://dubbo.apache.org/zh/docsv2.7/user/configuration/api/](https://dubbo.apache.org/zh/docsv2.7/user/configuration/api/)
 - [https://github.com/apache/dubbo-go/issues/257](https://github.com/apache/dubbo-go/issues/257)
 
 ---

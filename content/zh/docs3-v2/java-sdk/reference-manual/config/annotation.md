@@ -85,7 +85,7 @@ description: "以 Annotation、Spring Boot 开发 Dubbo 应用"
 
 ### application.yml 或 application.properties
 
-除 service、reference 之外的组件都可以在 application.yml 文件中设置，如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解的配置)。
+除 service、reference 之外的组件都可以在 application.yml 文件中设置，如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
 
 service、reference 组件也可以通过 `id` 与 application 中的全局组件做关联，以下面配置为例：
 
@@ -205,7 +205,7 @@ public class ProviderConfiguration {
 ```
 
 #### 通过 dubbo.properties 补充配置
-对于使用 `DubboService` 或 `DubboReference` 的场景，可以使用 dubbo.properties 作为配置补充，[具体格式](../principle#1-配置格式)这里有更详细解释。
+对于使用 `DubboService` 或 `DubboReference` 的场景，可以使用 dubbo.properties 作为配置补充，[具体格式](../principle/#1-配置格式)这里有更详细解释。
 
 ```properties
 dubbo.service.org.apache.dubbo.springboot.demo.DemoService.timeout=5000

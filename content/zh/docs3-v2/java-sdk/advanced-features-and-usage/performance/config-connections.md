@@ -34,7 +34,7 @@ description: "Dubbo 中服务端和客户端的连接控制"
 <dubbo:service interface="com.foo.BarService" connections="10" />
 ```
 
-如果 `<dubbo:service>` 和 `<dubbo:reference>` 都配了 connections，`<dubbo:reference>` 优先，参见：[配置的覆盖策略](../../config/principle)
+如果 `<dubbo:service>` 和 `<dubbo:reference>` 都配了 connections，`<dubbo:reference>` 优先，参见：[配置的覆盖策略](../../../reference-manual/config/principle/)
 
 [^1]: 因为连接在 Server上，所以配置在 Provider 上
 [^2]: 如果是长连接，比如 Dubbo 协议，connections 表示该服务对每个提供者建立的长连接数
