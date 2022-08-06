@@ -457,9 +457,9 @@ The Apache Dubbo (Incubating) Team
 When the release vote has passed,
 
 
-1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo)
+1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/dubbo)
 2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/dubbo)
-3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
+3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
 5. Publish [release notes](https://github.com/apache/dubbo/releases) on Github.
 6. Update the recommend dependency on [Github](https://github.com/apache/dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
 7. Add the download link to official website https://dubbo.apache.org/en/blog/2020/05/18/past-releases/, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). Please refer to the [download page](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/) for more details.

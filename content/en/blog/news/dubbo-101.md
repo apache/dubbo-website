@@ -86,7 +86,7 @@ The basic concepts of current framework of distributed service is similar to the
 5.	Running container – Initialize and load the provider and manage the lifecycle of running.
 
 
-![dubbo-architecture](../../img/blog/dubbo-architecture.png)
+![dubbo-architecture](/imgs/blog/dubbo-architecture.png)
 
 
 
@@ -269,7 +269,7 @@ hi, dubbo
 
 Dubbo also provides a public platform that can create a Dubbo application quickly based on Spring Boot. Visit  http://start.dubbo.io and follow the figure below to create an example project:
 
-![dubbo initializr](../../img/blog/dubbo-initializr.png)
+![dubbo initializr](/imgs/blog/dubbo-initializr.png)
 
 **Notes**：
 

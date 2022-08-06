@@ -137,7 +137,7 @@ world
 ## Using Zookeeper in Dubbo
 Zookeeper is used for service registration discovery and configuration management in Dubbo, and the structure of data in Zookeeper is shown in the following figure:
 
-![dubbo-in-zk](../../img/blog/dubbo-in-zk.jpg)
+![dubbo-in-zk](/imgs/blog/dubbo-in-zk.jpg)
 
 First, all data related to Dubbo is organized under the root node of `/dubbo`.
 

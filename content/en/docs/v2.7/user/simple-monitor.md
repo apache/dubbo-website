@@ -11,7 +11,6 @@ Monitor service is a standard Dubbo service，can be exported to the registry，
 
 [Install the simple registry](/en/docs/v2.7/admin/install/)
 {{% /alert %}}
-{{% /alert %}}
 
 
 0. export a simple monitor service to the registry: (If you use the installer, you don't need to write this configuration yourself. if you implement the monitor service yourself，need it)
