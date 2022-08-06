@@ -12,7 +12,7 @@ description: "了解 dubbo3 减少注册中心上服务的注册数据"
 Dubbo provider 中的服务配置项有接近 [30 个配置项](/zh/docs/references/xml/dubbo-parameter)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
 
 Dubbo consumer 中的配置项也有 [20+个配置项](/zh/docs/references/xml/dubbo-consumer)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。    
-这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心(如 zookeeper)的网络开销增大，性能降低。
+这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心 (如 zookeeper) 的网络开销增大，性能降低。
 
 #### 设计目标和宗旨
 期望简化进入注册中心的 provider 和 consumer 配置数量。  
@@ -62,6 +62,9 @@ Constant Key 表示来自于类 org.apache.dubbo.common.Constants 的字段。
 下面介绍几种常用的使用方式。所有的 sample，都可以查看 [sample-2.7](https://github.com/dubbo/dubbo-samples/tree/master)
 
 ## 使用场景
+
+数据量大导致注册中心的网络开销增大，性能降低。
+
 ## 使用方式
 
 **现有功能 sample** 当前现状一个简单展示。通过这个展示，分析下为什么需要做简化配置。

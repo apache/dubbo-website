@@ -34,8 +34,8 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | enableFileCache | file.cache | boolean | 可选 | true | 服务治理 | 是否开启本地缓存 | 3.0.0以上版本 |
 | protocol | | string | 可选 | dubbo | 服务治理 | 首选协议，适用于无法确定首选协议的时候 | 3.0.0以上版本 |
 | metadataType | metadata-type |String| 可选 | local | 服务治理 | 应用级服务发现 metadata 传递方式，是以 Provider 视角而言的，Consumer 侧配置无效，可选值有：<br>* remote - Provider 把 metadata 放到远端注册中心，Consumer 从注册中心获取；<br/>* local - Provider 把 metadata 放在本地，Consumer 从 Provider 处直接获取；| 2.7.5以上版本 |
-| metadataServiceProtocol | metadata-service-protocol | string | 可选 | dubbo | 服务治理 | 如 metadataType 配置为 remote，则该属性设置 MetadataService 服务所用的通信协议，默认为 dubbo| 3.0.0以上版本 |
-| metadataServicePort | metadata-service-port | int | 可选 | | 服务治理 | 如 metadataType 配置为 remote，则该属性设置 MetadataService 服务所用的端口号| 2.7.9以上版本 |
+| metadataServiceProtocol | metadata-service-protocol | string | 可选 | dubbo | 服务治理 | 如 metadataType 配置为 local，则该属性设置 MetadataService 服务所用的通信协议，默认为 dubbo| 3.0.0以上版本 |
+| metadataServicePort | metadata-service-port | int | 可选 | | 服务治理 | 如 metadataType 配置为 local，则该属性设置 MetadataService 服务所用的端口号| 2.7.9以上版本 |
 | livenessProbe | liveness-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 liveness probe | 3.0.0以上版本 |
 | readinessProbe | readiness-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 readiness probe | 3.0.0以上版本 |
 | startupProbe | startup-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 startup probe | 3.0.0以上版本 |
@@ -180,7 +180,7 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | parameters       | parameters      | Map<string, string> | 可选     |                  | 扩展参数，用来支持不同配置中心的定制化配置参数               | 2.7.0以上版本 |
 | includeSpringEnv |include-spring-env| boolean            | 可选     | false            | 使用Spring框架时支持，为true时，会自动从Spring Environment中读取配置。<br />默认依次读取<br />key为dubbo.properties的配置<br />key为dubbo.properties的PropertySource | 2.7.0以上版本 |
 
-### metadata-config
+### metadata-report-config
 
 元数据中心。对应的配置类：`org.apache.dubbo.config.MetadataReportConfig`
 
@@ -200,8 +200,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | cluster         | cluster  | string | 可选    |            | 含义视所选定的元数据中心而不同。<br />如Apollo中用来区分不同的配置集群 | 2.7.0以上版本 |
 | file            | file      | string | 可选   |            | 使用文件缓存元数据中心列表，应用重启时将基于此文件恢复，注意：两个元数据中心不能使用同一文件存储 | 2.7.0以上版本 |
 | check           | check   | boolean | 可选   | true       | 当元数据中心连接失败时，是否终止应用启动。                     | 3.0.0以上版本 |
-| reportMetadata  | report-metadata | boolean | 可选 | false | 当元数据存储类型为本地(`metadataType=local`)时，是否同步元数据到元数据中心 | 3.0.0以上版本 |
-| reportDefinition | report-definition | boolean | 可选 | true | 是否上报接口级别元数据                                   | 3.0.0以上版本 |
+| reportMetadata  | report-metadata | boolean | 可选 | false | 是否上地址发现中的接口配置报元数据，`dubbo.application.metadata-type=remote` 该配置不起作用即一定会上报，`dubbo.application.metadata-type=local` 时是否上报由该配置值决定 | 3.0.0以上版本 |
+| reportDefinition | report-definition | boolean | 可选 | true | 是否上报服务运维用元数据                                   | 3.0.0以上版本 |
+| reportConsumerDefinition | report-consumer-definition | boolean | 可选 | true | 是否在消费端上报服务运维用元数据                                    | 3.0.0以上版本 |
 | parameters      | parameters | Map<string, string> | 可选     |  | 扩展参数，用来支持不同元数据中心的定制化配置参数         | 2.7.0以上版本 |
 
 ### protocol
@@ -459,7 +460,7 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 | --- | --- | ---- | --- | --- | --- | --- | --- |
 | index | | int | <b>必填</b> | | 标识 | 参数索引 | 2.0.6以上版本 |
 | type | | String | 与index二选一 | | 标识 | 通过参数类型查找参数的index | 2.0.6以上版本 |
-| callback | &lt;metodName&gt;&lt;index&gt;.retries | boolean | 可选 | | 服务治理 | 参数是否为callback接口，如果为callback，服务提供方将生成反向代理，可以从服务提供方反向调用消费方，通常用于事件推送. | 2.0.6以上版本 |
+| callback | &lt;metodName&gt;&lt;index&gt;.callback | boolean | 可选 | | 服务治理 | 参数是否为callback接口，如果为callback，服务提供方将生成反向代理，可以从服务提供方反向调用消费方，通常用于事件推送. | 2.0.6以上版本 |
 
 ### parameter
 
@@ -510,3 +511,43 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
     ```
 
    最终生成的 URL 会包含 DUBBO_TAG1、DUBBO_TAG2 两个 key: `dubbo://xxx?DUBBO_TAG1=value1&DUBBO_TAG2=value2`
+### 其他配置
+#### config-mode
+**背景**
+
+在每个dubbo应用中某些种类的配置类实例只能出现一次（比如`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`），有些能出现多次（比如`RegistryConfig`、`ProtocolConfig`等）。
+
+如果应用程序意外的扫描到了多个唯一配置类实例（比如用户在一个dubbo应用中错误了配置了两个`ApplicationConfig`），应该以哪种策略来处理这种情况呢？是直接抛异常？是保留前者忽略后者？是忽略前者保留后者？还是允许某一种形式的并存（比如后者的属性覆盖到前者上）？
+
+目前dubbo中的唯一配置类类型和以及某唯一配置类型找到多个实例允许的配置模式/策略如下。
+
+**唯一配置类类型**
+
+`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`。
+
+前四个属于应用级别的，最后一个属于模块级别的。
+
+**配置模式**
+
+- `strict`：严格模式。直接抛异常。
+- `override`：覆盖模式。忽略前者保留后者。
+- `ignore`：忽略模式。忽略后者保留前者。
+- `override_all`：属性覆盖模式。不管前者的属性值是否为空，都将后者的属性覆盖/设置到前者上。
+- `override_if_absent`：若不存在则属性覆盖模式。只有前者对应属性值为空，才将后者的属性覆盖/设置到前者上。
+
+注：后两种还影响配置实例的属性覆盖。因为dubbo有多种配置方式，即存在多个配置源，配置源也有优先级。比如通过xml方式配置了一个`ServiceConfig`且指定属性`version=1.0.0`，同时我们又在外部配置(配置中心)中配置了`dubbo.service.{interface}.version=2.0.0`，在没有引入`config-mode`配置项之前，按照原有的配置源优先级，最终实例的`version=2.0.0`。但是引入了`config-mode`配置项之后，配置优先级规则也不再那么严格，即如果指定`config-mode为override_all`则为`version=2.0.0`，如果`config-mode为override_if_absent`则为`version=1.0.0`，`config-mode`为其他值则遵循原有配置优先级进行属性设值/覆盖。
+
+**配置方式**
+
+配置的key为`dubbo.config.mode`，配置的值为如上描述的几种，默认的策略值为`strict`。下面展示了配置示例
+
+```properties
+# JVM -D
+-Ddubbo.config.mode=strict
+
+# 环境变量
+dubbo.config.mode=strict
+
+# 外部配置(配置中心)、Spring应用的Environment、dubbo.properties
+dubbo.config.mode=strict
+```

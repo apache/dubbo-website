@@ -57,7 +57,7 @@ Dubbo3 从服务定义、RPC 协议、序列化、服务治理等多个方面都
 #### Kubernetes
 Dubbo3 开发的应用可以原生部署到 Kubernetes 平台，Dubbo3 在地址、生命周期等已设计可与 Kubernetes 等容器调度平台对齐；对于要进一步复用 Kubernetes 底层基础设施能力的用户来说，Dubbo3 也已对接到了原生的 Kubernetes Service 体系。
 
-#### Serivice Mesh
+#### Service Mesh
 Service Mesh 强调控制面在微服务治理中的作用，在一定程度上推动了控制面通信协议、职责范围的扩展与标准化；传统 Mesh 架构下的 Sidecar 模型强调旁路代理对于流量的统一管控，以实现透明升级、多语言无感、无业务侵入等特性。
 
 Dubbo3 提供了基于自身思考的 Dubbo Mesh 解决方案，强调了控制面对微服务集群的统一管控，而在部署架构上，同时支持 sicecar 与无 sidecar 的 proxyless 部署架构，使用 Dubbo Mesh 的用户基于自身的业务特点将有更多的部署架构选择。
