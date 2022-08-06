@@ -45,7 +45,7 @@ if (!mutualTls) {}
 为尽可能保证应用启动的灵活性，TLS Cert 的指定还能通过 -D 参数或环境变量等方式来在启动阶段根据部署环境动态指定，具体请参见 Dubbo 配置读取规则与 TLS 示例
 
 {{% alert title="提示" color="primary" %}}
-参考 Dubbo [配置读取规则](/zh/docsv2.7/configuration/configuration-load-process/)，TLS [示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl)
+参考 Dubbo [配置读取规则](/zh/docsv2.7/user/configuration/configuration-load-process/)，TLS [示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl)
 
 如果要使用的是 gRPC 协议，在开启 TLS 时会使用到协议协商机制，因此必须使用支持 ALPN 机制的 Provider，推荐使用的是 netty-tcnative，具体可参见 gRPC Java 社区的[总结]( https://github.com/grpc/grpc-java/blob/master/SECURITY.md)
 {{% /alert %}}
