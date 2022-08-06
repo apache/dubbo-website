@@ -28,7 +28,7 @@ description: >
 
 ## 2. Dubbo快速开始
 
-本小节介绍如何将`Dubbo`服务接入到`ShenYu`网关，您可以直接在工程下找到本小节的[示例代码](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo-examples-dubbo/shenyu-examples-apache-dubbo-service) 。
+本小节介绍如何将`Dubbo`服务接入到`ShenYu`网关，您可以直接在工程下找到本小节的[示例代码](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo) 。
 
 
 ### 2.1 启动shenyu-admin
@@ -84,7 +84,7 @@ description: >
 
 ### 2.3 启动shenyu-examples-dubbo
 
-以官网提供的例子为例 [shenyu-examples-dubbo](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo-examples-dubbo/shenyu-examples-apache-dubbo-service) 。 假如`dubbo`服务定义如下：
+以官网提供的例子为例 [shenyu-examples-dubbo](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo) 。 假如`dubbo`服务定义如下：
 
 ```xml
 <beans /* ...... * />

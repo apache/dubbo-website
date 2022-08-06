@@ -282,9 +282,7 @@ func (s *GreeterProvider) SayHello(ctx context.Context, in *api.HelloRequest) (*
 
 quickstart 目录下，执行 `go mod init dubbo3-demo`
 
-如果弹出 go mod detected 弹窗，需要勾选 Enable Go modules integration ，设置GOPROXY，保证 Goland 可以正确拉取到依赖，方便开发。或者在设置中按照如下位置设置。
-
-![](../../../../../img/doc-module.png)
+如果弹出 go mod detected 弹窗，需要勾选 Enable Go modules integration ，设置GOPROXY，保证 Goland 可以正确拉取到依赖，方便开发。
 
 命令行执行 `export GOPROXY="https://goproxy.cn" `设置PROXY
 

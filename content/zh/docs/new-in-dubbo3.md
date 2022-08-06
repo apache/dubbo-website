@@ -30,7 +30,7 @@ Dubbo 可支持集群规模步入百万实例层次。
 Dubbo3 构建的业务应用可直接部署在 VM、Container、Kubernetes 等平台，Dubbo3 很好的解决了 Dubbo 服务与调度平台之间的生命周期对齐，Dubbo 服务发现地址
 与容器平台绑定的问题。
 
-在服务发现层面，Dubbo3 支持与 [Kubernetes Native Service]() 的融合，目前限于 Headless Service。
+在服务发现层面，Dubbo3 支持与 Kubernetes Native Service 的融合，目前限于 Headless Service。
 
 Dubbo3 规划了两种形态的 Service Mesh 方案，在不同的业务场景、不同的迁移阶段、不同的基础设施保障情况下，Dubbo 都会有 Mesh 方案可供选择，
 而这进一步的都可以通过统一的控制面进行治理。

@@ -79,7 +79,7 @@ Make sure the gateway has introduced the relevant dependencies before starting. 
 
 ### 2.3 Start shenyu-examples-dubbo
 
-Take the example provided on the official website [shenyu-examples-dubbo](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo-examples-dubbo/shenyu-examples-apache-dubbo-service). Suppose the `dubbo` service is defined as follows.
+Take the example provided on the official website [shenyu-examples-dubbo](https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo). Suppose the `dubbo` service is defined as follows.
 
 ```xml
 <beans /* ...... * />

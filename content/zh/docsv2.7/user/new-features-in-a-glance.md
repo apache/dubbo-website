@@ -30,7 +30,7 @@ Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
 ## 值得关注的新特性
 * Dubbo 云原生计划（敬请期待...）
 * Kubernetes Native Service Discovery（敬请期待...）
-* [gRPC (HTTP/2) 协议](../references/protocol/gRPC/)
+* [gRPC (HTTP/2) 协议](../references/protocol/grpc/)
 * [使用 Protobuf 定义 Dubbo 服务](../examples/protobuf-idl/)
 * [TLS 安全传输](../examples/tls/)
 * 实例级服务发现
@@ -38,7 +38,7 @@ Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
 * 性能优化
     * [调用链路提升 30%](/zh/blog/2020/05/18/2.7.5-功能解析/)
     * [消费端线程模型](../examples/consumer-threadpool/)
-    * [地址推送链路]()
+    * 地址推送链路
     
 ## 热门文章列表
 [从 2019 到 2020，Apache Dubbo 年度总结](/zh/blog/2020/05/11/从-2019-到-2020apache-dubbo-年度回顾与总结/)  
