@@ -65,7 +65,7 @@ connected UDP 的两次发送过程如下：
 
 这个 case 下，内核只在第一次设定下虚拟链接的 peer address，后面进行连续发送即可。所以 connected UDP 的发送过程减少了 1/3 的等待时间。
 
-2017年5月7日 我曾用 [python 程序](https://github.com/alexStocks/python-practice/blob/master/tcp_udp_http_ws/udp/client.py)
+2017年5月7日 我曾用 python 程序(`https://github.com/alexStocks/python-practice/blob/master/tcp_udp_http_ws/udp/client.py`)
 对二者之间的性能做过测试，如果 client 和 server 都部署在本机，测试结果显示发送 100 000 量的 UDP datagram packet 时，connected UDP 比 unconnected UDP 少用了 2
 / 13 的时间。
 
@@ -74,7 +74,7 @@ connected UDP 的两次发送过程如下：
 #### 1.3 Go UDP
 
 Go 语言 UDP 编程也对 connected UDP 和 unconnected UDP 进行了明确区分，参考文档2 详细地列明了如何使用相关
-API，根据这篇文档个人也写一个 [程序](https://github.com/alexstocks/go-practice/blob/master/udp-tcp-http/udp/connected-udp.go) 测试这些
+API，根据这篇文档个人也写一个 程序(`https://github.com/alexstocks/go-practice/blob/master/udp-tcp-http/udp/connected-udp.go`) 测试这些
 API，测试结论如下：
 
 * connected UDP 读写方法是 Read 和 Write；
@@ -90,7 +90,7 @@ API，测试结论如下：
 
 #### 1.4 Getty UDP
 
-版本 v0.8.1 Getty 中添加 connected UDP 支持时，其连接函数 [dialUDP](https://github.com/alexstocks/getty/blob/master/client.go#L141)
+版本 v0.8.1 Getty 中添加 connected UDP 支持时，其连接函数 dialUDP(`https://github.com/alexstocks/getty/blob/master/client.go#L141`)
 这是简单调用了 net.DialUDP 函数，导致昨日（20180318 22:19 pm）测试的时候遇到一个怪现象：把 peer UDP endpoint 关闭，local udp endpoint 进行 connect 时
 net.DialUDP 函数返回成功，然后 lsof 命令查验结果时看到确实存在这个单链接：
 
@@ -99,7 +99,7 @@ net.DialUDP 函数返回成功，然后 lsof 命令查验结果时看到确实�
 
 然后当 net.UDPConn 进行 read 动作的时候，会得到错误 “read: connection refused”。
 
-于是模仿C语言中对 TCP client connect 成功与否判断方法，对 [dialUDP](https://github.com/alexstocks/getty/blob/master/client.go#L141) 改进如下：
+于是模仿C语言中对 TCP client connect 成功与否判断方法，对 dialUDP(`https://github.com/alexstocks/getty/blob/master/client.go#L141`) 改进如下：
 
 * net.DialUDP 成功之后，判断其是否是自连接，是则退出；
 * connected UDP 向对端发送一个无用的 datagram packet【”ping”字符串，对端会因其非正确 datagram 而丢弃】，失败则退出；
@@ -132,11 +132,11 @@ net.DialUDP 函数返回成功，然后 lsof 命令查验结果时看到确实�
 但是为何发生读超时错误则毫无头绪。
 
 2018/03/07 日测试 TCP compression 的时候发现启动 compression 后，程序 CPU 也会很快跑到
-100%，进一步追查后发现函数 [getty/conn.go:gettyTCPConn::read](https://github.com/alexstocks/getty/blob/master/conn.go#L228) 里面的 log
+100%，进一步追查后发现函数 getty/conn.go:gettyTCPConn::read(`https://github.com/alexstocks/getty/blob/master/conn.go#L228`) 里面的 log
 有很多 “io timeout” error。当时查到这个错误很疑惑，因为我已经在 TCP read 之前进行了超时设置【SetReadDeadline】，难道启动 compression
 会导致超时设置失效使得socket成了非阻塞的socket？
 
-于是在 [getty/conn.go:gettyTCPConn::read](https://github.com/alexstocks/getty/blob/master/conn.go#L228) 中添加了一个逻辑：启用 TCP
+于是在 getty/conn.go:gettyTCPConn::read(`https://github.com/alexstocks/getty/blob/master/conn.go#L228`) 中添加了一个逻辑：启用 TCP
 compression 的时不再设置超时时间【默认情况下tcp connection是永久阻塞的】，CPU 100% 的问题很快就得到了解决。
 
 至于为何 `启用 TCP compression 会导致 SetDeadline 失效使得socket成了非阻塞的socket`，囿于个人能力和精力，待将来追查出结果后再在此补充之。
@@ -146,7 +146,7 @@ compression 的时不再设置超时时间【默认情况下tcp connection是永
 TCP compression 的问题解决后，个人猜想 Websocket compression
 程序遇到的问题或许也跟 `启用 TCP compression 会导致 SetDeadline 失效使得socket成了非阻塞的socket` 有关。
 
-于是借鉴 TCP 的解决方法，在 [getty/conn.go:gettyWSConn::read](https://github.com/alexstocks/getty/blob/master/conn.go#L527)
+于是借鉴 TCP 的解决方法，在 getty/conn.go:gettyWSConn::read(`https://github.com/alexstocks/getty/blob/master/conn.go#L527`)
 直接把超时设置关闭，然后 CPU 100% 被解决，且程序运转正常。
 
 ### <a name="3">3 unix socket</a>
@@ -219,15 +219,28 @@ Task 派发采用 RoundRobin 方式。
 1. [connect Function with UDP](http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch08lev1sec11.html)
 2. [深入Go UDP编程](http://colobu.com/2016/10/19/Go-UDP-Programming/)
 
-[1]:https://github.com/dubbogo/getty
-[2]:https://github.com/apache/dubbo-go/
-[3]:https://github.com/alexstocks/getty
-[4]:https://www.oschina.net/question/3820517_2306822
-[5]:https://github.com/alexstocks/goext/blob/master/sync/pool/worker_pool.go
-[6]:https://github.com/AlexStocks/kafka-connect-elasticsearch
-[7]:https://github.com/AlexStocks/kafka-connect-elasticsearch/blob/master/app/worker.go
-[8]:https://github.com/dubbogo/getty/pull/6/commits/4b32c61e65858b3eea9d88d8f1c154ab730c32f1
-[9]:https://github.com/dubbogo/getty/pull/6/files/c4d06e2a329758a6c65c46abe464a90a3002e428#diff-9922b38d89e2ff9f820f2ce62f254162
-[10]:https://github.com/wongoo
-[11]:https://github.com/dubbogo/getty/pull/6/commits/1991056b300ba9804de0554dbb49b5eb04560c4b
-[12]:https://github.com/wenweihu86
+
+
+> 1: https://github.com/dubbogo/getty
+> 
+> 2: https://github.com/apache/dubbo-go/
+> 
+> 3: https://github.com/alexstocks/getty
+> 
+> 4: https://www.oschina.net/question/3820517_2306822
+> 
+> 5: https://github.com/alexstocks/goext/blob/master/sync/pool/worker_pool.go
+> 
+> 6: https://github.com/AlexStocks/kafka-connect-elasticsearch
+> 
+> 7: https://github.com/AlexStocks/kafka-connect-elasticsearch/blob/master/app/worker.go
+> 
+> 8: https://github.com/dubbogo/getty/pull/6/commits/4b32c61e65858b3eea9d88d8f1c154ab730c32f1
+> 
+> 9: https://github.com/dubbogo/getty/pull/6/files/c4d06e2a329758a6c65c46abe464a90a3002e428#diff-9922b38d89e2ff9f820f2ce62f254162
+> 
+> 10: https://github.com/wongoo
+> 
+> 11: https://github.com/dubbogo/getty/pull/6/commits/1991056b300ba9804de0554dbb49b5eb04560c4b
+> 
+> 12: https://github.com/wenweihu86
