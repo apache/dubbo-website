@@ -217,7 +217,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
 2. Checkout dubbo to local directory
 
    ```shell
-   $ svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo
+   $ svn checkout https://dist.apache.org/repos/dist/dev/dubbo
    ```
    Assume that the local directory is `~/apache/incubator/dubbo`
 
@@ -228,7 +228,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
    $ mkdir ${release_version}
    ```
 
-4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS) file if you are the first time to be a release manager. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
+4. Add public key to [KEYS](https://dist.apache.org/repos/dist/dev/dubbo/KEYS) file if you are the first time to be a release manager. KEYS is mainly used to allow people who participate in the voting to be imported locally to verify the correctness of the sign.
 
    ```shell
    $ gpg -a --export your_key_id >> KEYS
@@ -295,7 +295,7 @@ $ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
 If it's your first time verify a release candidte, you should import public keys first.  
 
 ```sh
- $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
+ $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS >> KEYS # download public keys to local directory
  $ gpg --import KEYS # import keys
  $ gpg —edit-key liujun
    > trust # type trust command
@@ -355,7 +355,7 @@ Hello Dubbo Community,
 This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
 
 The release candidates:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
+https://dist.apache.org/repos/dist/dev/dubbo/2.6.2/
 
 Git tag for the release:
 https://github.com/apache/dubbo/tree/dubbo-2.6.2
@@ -367,7 +367,7 @@ Release Notes:
 https://github.com/apache/dubbo/releases/tag/untagged-4775c0a22c60fca55118
 
 The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+https://dist.apache.org/repos/dist/dev/dubbo/KEYS
 
 The vote will be open for at least 72 hours or until necessary number of votes are reached.
 
@@ -404,7 +404,7 @@ https://lists.apache.org/thread.html/8d5c39eece6288beed2e22ca976350728c571d2a9ce
 A minor issue also can be found in the above thread.
 
 The release candidates (RC1):
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4
+https://dist.apache.org/repos/dist/dev/dubbo/2.6.4
 
 Git tag for the release (RC1):
 https://github.com/apache/dubbo/tree/dubbo-2.6.4
@@ -418,7 +418,7 @@ Release Notes:
 
 The artifacts have been signed with Key : 7955FB6D1DD21CF7, which can be
 found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+https://dist.apache.org/repos/dist/dev/dubbo/KEYS
 
 Look at here for how to verify this release candidate:
 https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/prepare-an-apache-release.md#prepare-apache-release
@@ -458,7 +458,7 @@ When the release vote has passed,
 
 
 1. Add the release files to [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo)
-2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/incubator/dubbo)
+2. Remove the release files in [dev directory](https://dist.apache.org/repos/dist/dev/dubbo)
 3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
 5. Publish [release notes](https://github.com/apache/dubbo/releases) on Github.
 6. Update the recommend dependency on [Github](https://github.com/apache/dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.

@@ -126,13 +126,6 @@ description: >
   [asc](https://archive.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.asc) |
   [sha512](https://archive.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.sha512)
 
-
-### 2.6.10.1 (2021-05-30)
-
-* [source](https://archive.apache.org/dist/dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip) |
-  [asc](https://archive.apache.org/dist/dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip.asc) |
-  [sha512](https://archive.apache.org/dist/dubbo/2.6.10.1/apache-dubbo-2.6.10.1-source-release.zip.sha512)
-
 ### 2.7.11 (2021-05-12)
 
 * [source](https://archive.apache.org/dist/dubbo/2.7.11/apache-dubbo-2.7.11-src.zip) |

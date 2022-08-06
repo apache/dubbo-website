@@ -203,7 +203,7 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 2. 将dubbo checkout到本地目录
 
    ```shell
-   $ svn checkout https://dist.apache.org/repos/dist/dev/incubator/dubbo
+   $ svn checkout https://dist.apache.org/repos/dist/dev/dubbo
    # 假定本地目录为 ~/apache/incubator/dubbo
    ```
 
@@ -214,7 +214,7 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
    $ mkdir ${release_version}
    ```
 
-4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
+4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
 
    ```sh
    $ gpg -a --export your_key_id >> KEYS
@@ -255,7 +255,7 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 首先，从一下地址下载要发布的Release Candidate到本地环境：
 
 <pre>
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/${release_version}/
+https://dist.apache.org/repos/dist/dev/dubbo/${release_version}/
 </pre>
 
 然后，开始验证环节，验证包含但不限于以下内容和形式
@@ -274,7 +274,7 @@ $ shasum -c apache-dubbo-${release_version}-bin-release.zip.sha512
 如果是第一次检查，需要首先导入公钥。 
 
 ```sh
- $ curl https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS >> KEYS # download public keys to local directory
+ $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS >> KEYS # download public keys to local directory
  $ gpg --import KEYS # import keys
  $ gpg —edit-key liujun
    > trust # type trust command
@@ -335,7 +335,7 @@ Hello Dubbo Community,
 This is a call for vote to release Apache Dubbo (Incubating) version 2.6.2.
 
 The release candidates:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.2/
+https://dist.apache.org/repos/dist/dev/dubbo/2.6.2/
 
 Git tag for the release:
 https://github.com/apache/dubbo/tree/dubbo-2.6.2
@@ -347,7 +347,7 @@ Release Notes:
 https://github.com/apache/dubbo/releases/tag/untagged-4775c0a22c60fca55118
 
 The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+https://dist.apache.org/repos/dist/dev/dubbo/KEYS
 
 The vote will be open for at least 72 hours or until necessary number of votes are reached.
 
@@ -384,7 +384,7 @@ https://lists.apache.org/thread.html/8d5c39eece6288beed2e22ca976350728c571d2a9ce
 A minor issue also can be found in the above thread.
 
 The release candidates (RC1):
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/2.6.4
+https://dist.apache.org/repos/dist/dev/dubbo/2.6.4
 
 Git tag for the release (RC1):
 https://github.com/apache/dubbo/tree/dubbo-2.6.4
@@ -398,7 +398,7 @@ Release Notes:
 
 The artifacts have been signed with Key : 7955FB6D1DD21CF7, which can be
 found in the keys file:
-https://dist.apache.org/repos/dist/dev/incubator/dubbo/KEYS
+https://dist.apache.org/repos/dist/dev/dubbo/KEYS
 
 Look at here for how to verify this release candidate:
 https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/prepare-an-apache-release.md#prepare-apache-release
@@ -433,12 +433,12 @@ The Apache Dubbo (Incubating) Team
 
 ## 正式发布
 
-1. 将[dev](https://dist.apache.org/repos/dist/dev/incubator/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下，KEYS有更新的，也需要同步更新。
-2. 删除[dev](https://dist.apache.org/repos/dist/dev/incubator/dubbo)目录下的发布包
+1. 将[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下，KEYS有更新的，也需要同步更新。
+2. 删除[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包
 3. 删除[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下上一个版本的发布包，这些包会被自动保存在[这里](https://archive.apache.org/dist/incubator/dubbo)
 4. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
 5. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
-6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似[这样](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md)
+6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似`https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip`. 同时更新以前版本的下载链接，改为类似`https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md)
 7. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
 8. 发邮件到 `dev@dubbo.apache.org` 和 `general@incubator.apache.org`
 宣布release邮件模板： 
