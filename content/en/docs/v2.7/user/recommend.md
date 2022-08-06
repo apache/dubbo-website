@@ -168,7 +168,7 @@ The Dubbo default value is used if completely not set up , please see the instru
     <dubbo:reference interface="com.alibaba.xxx.XxxService" check="false" />
     ```
 
-[^1]: Overlay rules for configuration: 1) The method level configuration has a higher priority than the interface level, that is to say,small scope have a high priority 2) Consumer side configuration has a higher priority than provider side, better than global configuration, the last one is the Dubbo hard coded configuration value（[Dubbo configuration introduction](/en/docs/v2.7/user/configuration/properties.md)）
+[^1]: Overlay rules for configuration: 1) The method level configuration has a higher priority than the interface level, that is to say,small scope have a high priority 2) Consumer side configuration has a higher priority than provider side, better than global configuration, the last one is the Dubbo hard coded configuration value（[Dubbo configuration introduction](/en/docs/v2.7/user/configuration/properties/)）
 [^2]: With the first call, the call will be called 3 times
 [^3]: How to select a service to call when there are multiple Provider services
 [^4]: It means that consumer service can call the best provider service, and reduce to call the the slow provider service.

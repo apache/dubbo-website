@@ -117,7 +117,7 @@ reference.setMethods(methods);
 ...
  
 ReferenceConfig<XxxService> reference = new ReferenceConfig<XxxService>(); 
-// If you know the address of the provider and want to bypass the registry, use `reference.setUrl()` to specify the provider directly. Refer [How to Invoke a specific provider](../demos/explicit-target.md) for details.
+// If you know the address of the provider and want to bypass the registry, use `reference.setUrl()` to specify the provider directly. Refer [How to Invoke a specific provider](../demos/explicit-target/) for details.
 reference.setUrl("dubbo://10.20.130.230:20880/com.xxx.XxxService"); 
  
 ...

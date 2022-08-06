@@ -30,14 +30,14 @@ Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
 ## 值得关注的新特性
 * Dubbo 云原生计划（敬请期待...）
 * Kubernetes Native Service Discovery（敬请期待...）
-* [gRPC (HTTP/2) 协议](./references/protocol/gRPC.md)
-* [使用 Protobuf 定义 Dubbo 服务](./demos/protobuf-idl.md)
-* [TLS 安全传输](./demos/tls.md)
+* [gRPC (HTTP/2) 协议](./references/protocol/gRPC/)
+* [使用 Protobuf 定义 Dubbo 服务](./demos/protobuf-idl/)
+* [TLS 安全传输](./demos/tls/)
 * [实例级服务发现]()
-* [服务鉴权](./demos/auth.md)
+* [服务鉴权](./demos/auth/)
 * 性能优化
     * [调用链路提升 30%](/zh-cn/blog/2.7.5-release.html)
-    * [消费端线程模型](./demos/consumer-threadpool.md)
+    * [消费端线程模型](./demos/consumer-threadpool/)
     * [地址推送链路]()
     
 ## 热门文章列表

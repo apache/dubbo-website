@@ -23,7 +23,7 @@ tag route is a new feature in Dubbo2.7, in application scope, to set different t
 the client can use `setAttachment` to specify different tag, is the above case, `setAttachment(tag1)`, the client will choose from the three servers in the picture above. In this way, you can implement features such as traffic isolation and gray release. 
 
 ### condition route
-condition route is a traditional function in Dubbo, now you can create it in either service scope or application scope. Condition route is in `yaml` format, you can read [here](../user/demo/routing-rule.md) to find more.
+condition route is a traditional function in Dubbo, now you can create it in either service scope or application scope. Condition route is in `yaml` format, you can read [here](../user/demo/routing-rule/) to find more.
 
 ### black white list
 black white list is a part of condition route and store with condition route together, you can set black list or white list, in either service scope or application scope:
@@ -35,7 +35,7 @@ dynamic configuration has the same level with routing rule, it can change the RP
 
 ![config](/imgs/admin/config.jpg)
 
-to read more, please refer [here](../user/demos/config-rule.md)
+to read more, please refer [here](../user/demos/config-rule/)
 
 ### weight adjust  
 weigth adjuest is part of dynamic configuration, change the weight of server side to do traffic control dynamically: 

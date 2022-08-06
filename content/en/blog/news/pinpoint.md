@@ -59,7 +59,7 @@ View additional details on the application such as CPU usage, Memory/Garbage Col
 
 ### Quickstart Pinpoint
 
-[Quick start](http://naver.github.io/pinpoint/quickstart.html)（No neet to start TestApp）
+[Quick start](https://pinpoint-apm.github.io/pinpoint/quickstart.html)（No neet to start TestApp）
 
 ### Dubbo demo
 

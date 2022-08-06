@@ -53,7 +53,7 @@ admin.config-center=zookeeper://127.0.0.1:2181
 admin.registry.address=zookeeper://127.0.0.1:2181
 admin.metadata-report.address=zookeeper://127.0.0.1:2181
 ```
-the three configure item above are configuration center, registry center and metadata center respectively, you can find explanation about the three centers [here](../user/configuration/config-center.md)
+the three configure item above are configuration center, registry center and metadata center respectively, you can find explanation about the three centers [here](../user/configuration/config-center/)
 Same as Dubbo 2.7, you can set the addresses of metadata center and registry center on configuration center, in zookeeper, the path and content are as below: 
 ```properties
 # /dubbo/config/dubbo/dubbo.properties
