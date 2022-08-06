@@ -84,7 +84,7 @@ dubbo
 对配置中心而言，`group` 与 `namespace` 应该是全公司（集群）统一的，应该避免不同应用使用不同的值，外部化配置和治理规则也应该存放在对应的 group 与 namespace。
 
 ## 4 流量治理规则
-所有流量治理规则默认都存储在 `/dubbo/config` 节点下，具体节点结构图如下。流量治理规则的增删改建议通过 dubbo-admin 完成，更多内容可查看 [Dubbo 支持的具体流量治理能力]()
+所有流量治理规则默认都存储在 `/dubbo/config` 节点下，具体节点结构图如下。流量治理规则的增删改建议通过 dubbo-admin 完成，更多内容可查看 Dubbo 支持的具体流量治理能力
 
 ![zk-configcenter-governance](/imgs/user/zk-configcenter-governance.jpg)
 
