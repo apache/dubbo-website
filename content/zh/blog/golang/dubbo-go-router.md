@@ -264,7 +264,7 @@ force: true
 conditions : ["host = 1.1.1.1 => host = 192.168.199.214"]
 ```
 
-更多配置方式：[条件路由配置](/zh/docs/user/demos/routing-rule.html)
+更多配置方式：[条件路由配置](/zh/docsv2.7/user/examples/routing-rule/)
 
 ### 配置中心配置
 
