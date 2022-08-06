@@ -250,7 +250,7 @@ $ mvn -Prelease release:perform -Darguments="-DskipTests" -DautoVersionSubmodule
 
 ## 验证Release Candidates
 
-详细的检查列表请参考官方的[check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)
+详细的检查列表请参考官方的[check list](https://cwiki.apache.org/confluence/display/incubator/IncubatorReleaseChecklist)
 
 首先，从一下地址下载要发布的Release Candidate到本地环境：
 
@@ -438,7 +438,7 @@ The Apache Dubbo (Incubating) Team
 3. 删除[release](https://dist.apache.org/repos/dist/release/incubator/dubbo)目录下上一个版本的发布包，这些包会被自动保存在[这里](https://archive.apache.org/dist/incubator/dubbo)
 4. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
 5. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
-6. 在官网下载[页面](http://dubbo.apache.org/en-us/blog/download.html)上添加最新版本的下载链接。最新的下载链接应该类似`https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip`. 同时更新以前版本的下载链接，改为类似`https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. 具体可以参考过往的[下载链接](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md)
+6. 在官网下载[页面](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/)上添加最新版本的下载链接。最新的下载链接应该类似`https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip`. 同时更新以前版本的下载链接，改为类似`https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. 具体可以参考过往的[下载链接](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/)
 7. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
 8. 发邮件到 `dev@dubbo.apache.org` 和 `general@incubator.apache.org`
 宣布release邮件模板： 
@@ -471,7 +471,7 @@ an issue on GitHub[4].
 Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
 
 
-[1] http://dubbo.apache.org/en-us/blog/download.html
+[1] https://dubbo.apache.org/en/blog/2020/05/18/past-releases/
 [2] http://central.maven.org/maven2/com/alibaba/dubbo
 [3] https://github.com/apache/dubbo/releases
 [4] https://github.com/apache/dubbo/issues

@@ -5,10 +5,6 @@ linkTitle: "Robustness"
 weight: 7
 ---
 
-
-> http://oldratlee.com/380/tech/java/robustness-of-implement.html
-
-
 Dubbo as a remote service exposure, calls and management solutions, through the meridians of the application is running, its itself to achieve robustness of importance is self-evident.
 
 Here are some Dubbo principle and method of use.

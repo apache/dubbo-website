@@ -186,7 +186,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
     $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
     ```
 
-    > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not. Please refer to this [guide](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for more infomation.
+    > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not. Please refer to this [guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for more infomation.
     > you need to choose the release artifactId, next artifactId and the release tag, the default tag is dubbo-parent-xxxx, you need to change it to dubbo-xxxx
 
 
@@ -234,7 +234,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
    $ gpg -a --export your_key_id >> KEYS
    ```
 
-   For more information on how to get your key id, please refer to this [guide](https://help.github.com/articles/generating-a-new-gpg-key/)
+   For more information on how to get your key id, please refer to this [guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key)
 
 5. Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version} 
 
@@ -277,7 +277,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
 
 ## Verify Release Candidates
 
-**A full check list can be found [here](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)**
+**A full check list can be found [here](https://cwiki.apache.org/confluence/display/incubator/IncubatorReleaseChecklist)**
 
 The verification link includes but is not limited to the following contents and forms:
 
@@ -462,7 +462,7 @@ When the release vote has passed,
 3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/incubator/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/incubator/dubbo/)
 5. Publish [release notes](https://github.com/apache/dubbo/releases) on Github.
 6. Update the recommend dependency on [Github](https://github.com/apache/dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
-7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). Please refer to the [download page](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
+7. Add the download link to official website https://dubbo.apache.org/en/blog/2020/05/18/past-releases/, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=incubator/dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/incubator/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). Please refer to the [download page](https://dubbo.apache.org/en/blog/2020/05/18/past-releases/) for more details.
 8. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
 9. Send mail to dev@dubbo.apache.org and general@incubator.apache.org, notify the community that the release is completed. 
 The mail template to announce release: 
@@ -494,7 +494,7 @@ an issue on GitHub[4].
 Apache Dubbo is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
 
 
-[1] http://dubbo.apache.org/en-us/blog/download.html
+[1] https://dubbo.apache.org/en/blog/2020/05/18/past-releases/
 [2] http://central.maven.org/maven2/com/alibaba/dubbo
 [3] https://github.com/apache/dubbo/releases
 [4] https://github.com/apache/dubbo/issues

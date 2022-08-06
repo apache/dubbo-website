@@ -46,9 +46,9 @@ weight: 1
 按照提示授权对 github 账户的 OAuth 协议登入
 
 ### 在 github.com 设置 github 账户两因素授权（2FA）
-按照[授权 GitHub 2FA wiki](https://help.github.com/articles/configuring-two-factor-authentication-via-a-totp-mobile-app/) 操作如下：
+按照[授权 GitHub 2FA wiki](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication) 操作如下：
 * 在手机安装 “google 身份验证器” app
-* 按照[授权 GitHub 2FA wiki](https://help.github.com/articles/configuring-two-factor-authentication-via-a-totp-mobile-app/) 一步一步操作。
+* 按照[授权 GitHub 2FA wiki](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication) 一步一步操作。
 
    在[两因素授权验证](https://github.com/settings/security)界面，不建议选择用手机扫描二维码，因为有些手机会扫描不出来。
    请打开手机 “google 身份验证器” app，点“+”选择“输入提供的秘钥”： 在“账户名” input 框写入 github 账户。在“您的秘钥” input 框写入:打开的网页中 "enter this text code" 链接里面的文本。在 app 中点击"添加" 后，将为此账户生成6位数字动态。将此6位数字写入网页中的文本框，然后点 “Enable”。这样 2FA 就设置成功了。
@@ -60,7 +60,7 @@ weight: 1
 * 2FA 提交后，你已经 clone 的项目会有权限校验问题，解决方法为下面二选一：
   * 申请 Access Token：
    在 github 上生成 access token 后，指令行需要密码的地方就粘贴token。
-   参考官网[帮助链接一](https://help.github.com/articles/https-cloning-errors/#provide-access-token-if-2fa-enabled)和[帮助链接二](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)
+   参考官网[帮助链接一](https://docs.github.com/cn/repositories/creating-and-managing-repositories/troubleshooting-cloning-errors#provide-access-token-if-2fa-enabled)和[帮助链接二](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
   * 改用 ssh：
    在命令行执行 ssh-keygen 命令， 然后把pub文件中的内容粘贴到 github 上
   

@@ -130,4 +130,4 @@ Dubbo社区将会Review您的Pull Request，并可能提出修改意见，您可
 
 ### 参与发布投票
 
-参与发布投票是一种重要的贡献社区的方式，Dubbo 社区非常欢迎和鼓励任何人参与投票，每当一个版本需要正式发布的时候，会在开发者邮件列表上进行发布投票，只有当投票取得通过之后，才会正式发布，可以参考这个[检查列表](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)对源码进行合规性检查。如果有任何问题，可以在开发者邮件列表上提问。
+参与发布投票是一种重要的贡献社区的方式，Dubbo 社区非常欢迎和鼓励任何人参与投票，每当一个版本需要正式发布的时候，会在开发者邮件列表上进行发布投票，只有当投票取得通过之后，才会正式发布，可以参考这个[检查列表](https://cwiki.apache.org/confluence/display/incubator/IncubatorReleaseChecklist)对源码进行合规性检查。如果有任何问题，可以在开发者邮件列表上提问。

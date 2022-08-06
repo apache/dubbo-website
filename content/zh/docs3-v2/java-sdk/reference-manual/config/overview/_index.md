@@ -35,7 +35,7 @@ method | 指定方法级的配置 | service 和 reference 的子配置 |  可选
 argument | 某个方法的参数配置 | method的子配置 |  可选
 
 
-> 1. 从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 [Blog](/blog/java/codeanalysis/introduction-to-dubbo-url#rpc调用)。
+> 1. 从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 [Blog](/zh/blog/java/codeanalysis/introduction-to-dubbo-url#rpc调用)。
 > 2. 各组件支持的具体配置项及含义请参考 [配置项手册](../properties)
 
 ### service 与 reference
