@@ -10,7 +10,7 @@ weight: 2
 
 - dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。
 - docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）
-- [任务【istio 环境部署】](./build/) 已完成
+- [任务【istio 环境部署】](../build/) 已完成
 
 ## 2. 开发 server 端 Dubbo-go 应用
 
@@ -237,7 +237,7 @@ Forwarding from 127.0.0.1:20000 -> 20000
 Forwarding from [::1]:20000 -> 20000
 ```
 
-使用 grpc_cli 调试集群内的应用，参考任务[【使用 grpc_cli 调试 Dubbo-go 应用】](../debug/grpc_cli/)
+使用 grpc_cli 调试集群内的应用，参考任务[【使用 grpc_cli 调试 Dubbo-go 应用】](../../debug/grpc_cli/)
 
 ```bash
 $ grpc_cli ls localhost:20000 -l

@@ -289,7 +289,7 @@ Dubbo 体系内的部分应用作为透明的联通两个体系的关键节点�
 
 这个场景和上一节中讲到的的 SpringCloud 迁移有些类似，最大的区别在于 rest 协议是 Dubbo 官方默认提供支持的，而对于已有的微服务体系内的私有通信协议，则需要先要自己去扩展 Dubbo Protocol 来提供协议层面的支持，关于 Protocol 如何扩展请参见以下官方文档：
 
-http://dubbo.apache.org/zh-cn/docs/dev/impls/protocol.html
+/zh/docs/dev/impls/protocol.html
 
 ## 总结与展望
 

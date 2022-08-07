@@ -34,7 +34,7 @@ into the project's `apps` directory.
 ```
 
 ## 消费者配置
-Please reference [Reference Config](./reference.md)
+Please reference [Reference Config](../reference/)
 
 ## Init dubbolib in your project
 It is need you 

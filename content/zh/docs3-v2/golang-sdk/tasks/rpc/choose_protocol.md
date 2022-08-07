@@ -230,4 +230,4 @@ response result: &{ID:1 Name:laurence Age:22 Time:2021-11-12 17:59:39.185 +0800 
 
 调用成功
 
-更多samples可以参阅 [【dubbo-go-samples】](../../samples/samples_repo/)
+更多samples可以参阅 [【dubbo-go-samples】](../../../samples/samples_repo/)

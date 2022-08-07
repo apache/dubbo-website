@@ -37,7 +37,7 @@ Add zookeeper client dependency in both provider and consumer:
 </dependency>
 ```
 
-Or [download](http://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper) directly from apache.
+Or [download](https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper) directly from apache.
 
 Dubbo supports two zookeeper clients: zkclient and curator:
 
@@ -65,7 +65,7 @@ Or:
 zookeeper://10.20.153.10:2181?client=zkclient
 ```
 
-In order to use it, need to explicitly declare the following maven dependency or [download its client](http://repo1.maven.org/maven2/com/github/sgroschupf/zkclient).
+In order to use it, need to explicitly declare the following maven dependency or [download its client](https://repo1.maven.org/maven2/com/github/sgroschupf/zkclient).
 
 ```xml
 <dependency>
@@ -97,7 +97,7 @@ Or:
 zookeeper://10.20.153.10:2181?client=curator
 ```
 
-Also need to explicitly add maven dependency or directly [download](http://repo1.maven.org/maven2/com/netflix/curator/curator-framework) the jar:
+Also need to explicitly add maven dependency or directly [download](https://repo1.maven.org/maven2/com/netflix/curator/curator-framework) the jar:
 
 ```xml
 <dependency>
@@ -142,7 +142,7 @@ Configure single zookeeper to serve as multiple registry servers:
 ## Zookeeper Installation
 
 
-Pls. refer to [zookeeper install manual](content/old/en/docs/v2.7/admin/install/zookeeper.md) for how to install zookeeper based registry server. To set it up, specify `dubbo.registry.address` to `zookeeper://127.0.0.1:2181` in `conf/dubbo.properties` for both provider and consumer (you can refer to [quick start](content/old/en/docs/v2.7/user/quick-start.md)) after install a zookeeper server.
+Pls. refer to [zookeeper install manual](/en/docs/v2.7/admin/install/zookeeper/) for how to install zookeeper based registry server. To set it up, specify `dubbo.registry.address` to `zookeeper://127.0.0.1:2181` in `conf/dubbo.properties` for both provider and consumer (you can refer to [quick start](/en/docs/v2.7/user/quick-start/)) after install a zookeeper server.
 
 
 ## Declaration of Reliability

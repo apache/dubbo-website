@@ -75,12 +75,3 @@ Redis 过期数据通过心跳的方式检测脏数据，服务器时间必须�
 ## 可靠性声明
 
 阿里内部并没有采用 Redis 做为注册中心，而是使用自己实现的基于数据库的注册中心，即：Redis 注册中心并没有在阿里内部长时间运行的可靠性保障，此 Redis 桥接实现只为开源版本提供，其可靠性依赖于 Redis 本身的可靠性。
-
-
-## 安装
-
-
-安装方式参见: [Redis安装手册]( ../../../admin/install/redis.md)，只需搭一个原生的 Redis 服务器，并将 [Quick Start](../../preface/usage.md) 中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `redis://127.0.0.1:6379` 即可使用。
-
-
-[^1]: [Redis](http://redis.io) 是一个高效的 KV 存储服务器

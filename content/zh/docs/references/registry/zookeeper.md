@@ -41,7 +41,7 @@ description: "Zookeeper 注册中心参考手册"
 </dependency>
 ```
 
-或直接[下载](http://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper)。
+或直接[下载](https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper)。
 
 Dubbo 支持 zkclient 和 curator 两种 Zookeeper 客户端实现：
 
@@ -69,7 +69,7 @@ dubbo.registry.client=zkclient
 zookeeper://10.20.153.10:2181?client=zkclient
 ```
 
-需依赖或直接[下载](http://repo1.maven.org/maven2/com/github/sgroschupf/zkclient)：
+需依赖或直接[下载](https://repo1.maven.org/maven2/com/github/sgroschupf/zkclient)：
 
 ```xml
 <dependency>

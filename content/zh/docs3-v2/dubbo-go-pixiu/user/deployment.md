@@ -14,7 +14,7 @@ weight: 30
 `docker pull phial3/dubbo-go-pixiu:latest`
 
 ### 2、按照需求准备pixiu配置
-#### [pixiu配置参数详解](./configurations.md)
+#### [pixiu配置参数详解](../configurations/)
 
 准备 `log.yml` 和 `conf.yaml` 配置文件，将这两个配置文件在pixiu启动的时候挂在到本地
 
@@ -63,7 +63,7 @@ docker run -itd --name dubbo-go-pixiu -p 8883:8883 \
 
 ### 2、配置pixiu
 
-#### [pixiu配置参数详解](./configurations.md)
+#### [pixiu配置参数详解](../configurations/)
 
 进入到pixiu的源码目录`cd dubbo-go-pixiu/`,在`dubbo-go-pixiu/configs/`目录下
 修改配置文件`conf.yaml`和`log.yml`
@@ -76,4 +76,4 @@ docker run -itd --name dubbo-go-pixiu -p 8883:8883 \
 
 在当前目录下`make run` 可根据你当前的配置直接启动pixiu服务
 
-[运行示例参考](./quickstart.md)
+[运行示例参考](../quickstart/)

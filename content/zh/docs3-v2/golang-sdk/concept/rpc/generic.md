@@ -10,7 +10,7 @@ keywords: 泛化调用
 
 为了便于理解，这篇文档中以网关使用场景介绍泛化调用。我们先来考虑普通调用（非泛化调用）。下图包含了 consumer 和 provider 两个关键角色（后文中用 endpoint 代表一个 consumer 或一个 provider），各自都有一份关于 org.apache.dubbo.sample.User 接口的定义。假定在调用行为中需要使用 org.apache.dubbo.sample.User 接口。
 
-![img](https://cdn.nlark.com/yuque/0/2021/png/291978/1631941941270-86ce9845-5a88-4cb5-8c8a-da8ae7eeb4d5.png)
+![img](/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1631941941270-86ce9845-5a88-4cb5-8c8a-da8ae7eeb4d5.png)
 
 RPC 需要借助网络介质传输，因此数据不能以 go struct 形式传输，而必须以二进制形式传输。这就要求 consumer 端在传输前，需要将实现 org.apache.dubbo.sample.User 接口的结构体序列化为二进制格式。同样的，对于 provider 端，需要将二进制数据反序列化为结构体信息。**总之，普通调用要求接口信息在每一个 endpoint 必须有相同的定义，这样才能保证数据序列化和反序列化的结果与预期一致**。
 
@@ -20,7 +20,7 @@ RPC 需要借助网络介质传输，因此数据不能以 go struct 形式传�
 
 泛化调用本质上就是把复杂结构转化为通用结构，这里说的通用结构是指 map、string 等，网关是可以顺利解析并传递这些通用结构的。
 
-![img](https://cdn.nlark.com/yuque/0/2021/png/291978/1632207075184-25939db4-f384-452e-a0b8-e1deff7971de.png)
+![img](/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1632207075184-25939db4-f384-452e-a0b8-e1deff7971de.png)
 
 目前，Dubbo-go v3 只支持 Map 泛化方式（default）。我们以 User 接口为例，其定义如下所示。
 
@@ -86,7 +86,7 @@ Consumer 端的 Filter 会自动根据 Dubbo URL 携带的配置自动将普通�
 
 ### 手动泛化调用
 
-手动泛化调用发起的请求不经过 filter，所以需要 consumer 端显式地发起泛化调用，典型应用场景是测试。在 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/3.0/generic) 中，为了便于测试都是采用手动调用的方式。
+手动泛化调用发起的请求不经过 filter，所以需要 consumer 端显式地发起泛化调用，典型应用场景是测试。在 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/master/generic) 中，为了便于测试都是采用手动调用的方式。
 
 泛化调用不需要创建配置文件（dubbogo.yaml），但是需要在代码中手动配置注册中心、reference 等信息，初始化方法被封装到 newRefConf 方法中，如下所示。
 
@@ -152,4 +152,4 @@ GenericService 的 Invoke 方法接收四个参数，分别是：
 
 相关阅读：[【Dubbo-go 服务代理模型】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
 
-相关任务[【泛化调用】](../../tasks/rpc/generic/)
+相关任务[【泛化调用】](../../../tasks/rpc/generic/)

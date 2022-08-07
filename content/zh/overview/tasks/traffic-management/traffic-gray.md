@@ -9,7 +9,7 @@ toc_hide: true
 
 > **提示**
 >
-> 本文描述的是新版本规则配置，而不是[老版本配置规则](https://dubbo.apache.org/zh/docs/advanced/config-rule-deprecated)
+> 本文描述的是新版本规则配置，而不是[老版本配置规则](/zh/docs/advanced/config-rule-deprecated)
 
 # 配置规则
 
@@ -124,7 +124,7 @@ dubbo-samples-applevel-override示例中，BasicConsumer类和BascicProvider类�
 
 目前需要临时剔除在20880端口的提供者，可以使用覆盖规则进行动态配置。
 
-1.打开[服务治理控制台](http://0.0.0.0/#/governance/config)，点击”创建“，填入应用名和配置，这个配置将禁用在20880端口上提供（side:provider）的所有服务（scope:application）。
+1.打开服务治理控制台，点击”创建“，填入应用名和配置，这个配置将禁用在20880端口上提供（side:provider）的所有服务（scope:application）。
 
 ```yaml
 configVersion: v2.7
@@ -197,7 +197,7 @@ dubbo-samples-servicelevel-override示例与上面的示例类似，故不赘述
 
 目前需要修改提供者服务的超时时间
 
-1.打开[服务治理控制台](http://0.0.0.0/#/governance/config)，点击”创建“，填入服务名和配置，这个配置将所有消费（side:consumer）DemoService服务（org.apache.dubbo.samples.governance.api.DemoService）的应用实例（addresses:[0.0.0.0]），超时时间修改为300ms
+1.打开服务治理控制台，点击”创建“，填入服务名和配置，这个配置将所有消费（side:consumer）DemoService服务（org.apache.dubbo.samples.governance.api.DemoService）的应用实例（addresses:[0.0.0.0]），超时时间修改为300ms
 
 ```yaml
 configVersion: v2.7

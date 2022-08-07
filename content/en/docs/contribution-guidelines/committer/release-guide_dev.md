@@ -197,7 +197,7 @@ modifications and taggings related to ${release_version} Release Candidates are 
     $ mvn release:prepare -Prelease -Darguments="-Dmaven.test.skip=true" -DautoVersionSubmodules=true -Dusername=YOUR GITHUB ID -DpushChanges=false
     ```
 
-    > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not. Please refer to this [guide](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for more infomation.
+    > If you are promted to input password for pushing to GitHub (basically including adding new commits and tags), do not input your login password of GitHub. Use `Personal access tokens` instead. You can go to https://github.com/settings/profile, click `Developer settings` -> `Personal access tokens`, and generate a new token if not. Please refer to this [guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for more infomation.
     > you need to choose the release artifactId, next artifactId and the release tag, the default tag is dubbo-parent-xxxx, you need to change it to dubbo-xxxx
 
 
@@ -258,7 +258,7 @@ After this, maven will deploy jar to remote maven repsoitry in staging state.
    $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
    ```
 
-   For more information on how to get your key id, please refer to this [guide](https://help.github.com/articles/generating-a-new-gpg-key/)
+   For more information on how to get your key id, please refer to this [guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key)
 
 5. Copy the source.zip package from the Dubbo root directory to the svn local repository dubbo/${release_version} 
 
@@ -301,13 +301,13 @@ After this, maven will deploy jar to remote maven repsoitry in staging state.
 
 9. Close the maven staging repository
 
-   This step is required when prepare for a 2.7.0+ release, where package name has been changed to org.apache. Before that, please make sure all the maven artifacts look good. Login to http://repository.apache.org, click the `Staging repositories` on the left bar, search with keyword Dubbo, and you will see a list of repositories. Find the one you just uploaded, and then click the close button in the top area. This will do some sannity check, such as gpg signature check, and checksum check. After that, a link will be shown in the summary tab in the bottom. Please copy that link, it will be used for release vote. The link should look like this: https://repository.apache.org/content/repositories/orgapachedubbo-1015.
+   This step is required when prepare for a 2.7.0+ release, where package name has been changed to org.apache. Before that, please make sure all the maven artifacts look good. Login to http://repository.apache.org, click the `Staging repositories` on the left bar, search with keyword Dubbo, and you will see a list of repositories. Find the one you just uploaded, and then click the close button in the top area. This will do some sannity check, such as gpg signature check, and checksum check. After that, a link will be shown in the summary tab in the bottom. Please copy that link, it will be used for release vote. The link should look like this: `https://repository.apache.org/content/repositories/orgapachedubbo-1015`.
 
    > Please be aware that it may fail when you close the repository, this is normally due to network issues, please try again if it failed. You can confirm it by clicking the `Activiey` tab next to `Summary`.
 
 ## Verify Release Candidates
 
-**A full check list can be found [here](https://wiki.apache.org/incubator/IncubatorReleaseChecklist)**
+**A full check list can be found [here](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist)**
 
 The verification link includes but is not limited to the following contents and forms:
 
@@ -453,7 +453,7 @@ When the release vote has passed,
 3. Remove the the release file for the previous release under [official release directory](https://dist.apache.org/repos/dist/release/dubbo/), which will be archived and can be found [here](https://archive.apache.org/dist/dubbo/)
 5. Publish [release notes](https://github.com/apache/dubbo/releases) on Github.
 6. Update the recommend dependency on [Github](https://github.com/apache/dubbo#maven-dependency) to the latest version, also update the version in other place if necessary.
-7. Add the download link to official website http://dubbo.apache.org/en-us/blog/download.html, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like [this](https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip). Please refer to the [download page](https://github.com/apache/dubbo-website/blob/asf-site/blog/en-us/download.md) for more details.
+7. Add the download link to official website https://dubbo.apache.org/en/blog/2020/05/18/past-releases/, using the ASF mirror system. The latest release download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). The download link for the previous release version should be changed like `https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. Please refer to the [download page](/en/blog/2020/05/18/past-releases/) for more details.
 8. Make sure all the commits in the release branch are merged into master branch, and then remove the remote release branch. For example: `git push origin --delete 2.7.0-release`
 9. Send mail to dev@dubbo.apache.org , notify the community that the release is completed. 
 The mail template to announce release: 
@@ -479,7 +479,7 @@ an issue on GitHub[4].
 
 
 
-[1] http://dubbo.apache.org/en-us/blog/download.html
+[1] https://dubbo.apache.org/en/blog/2020/05/18/past-releases/
 [2] https://repo1.maven.org/maven2/org/apache/dubbo/dubbo
 [3] https://github.com/apache/dubbo/releases
 [4] https://github.com/apache/dubbo/issues

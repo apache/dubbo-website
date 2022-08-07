@@ -7,8 +7,8 @@ description: "References documentation for dubbo metadata"
 ---
 
 ## Background
-There are close to [30 configurations](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-service.html) in dubbo provider. Excluding registry center governance requirements, a large part of configurations are used by the provider itself and do not need to be delivered to the consumer. This part of the data does not need to be written to the registry, but only needs to be persisted as key-value.
-There are also [20+ configurations](http://dubbo.apache.org/en-us/docs/user/references/xml/dubbo-reference.html) in dubbo consumer. In the registry center, only a few configurations such as application, version, group, ip, dubbo version are needed in the list of service consumers. Other configurations can also be persisted in key-value form.
+There are close to [30 configurations](/en/docs/v2.7/user/references/xml/dubbo-service/) in dubbo provider. Excluding registry center governance requirements, a large part of configurations are used by the provider itself and do not need to be delivered to the consumer. This part of the data does not need to be written to the registry, but only needs to be persisted as key-value.
+There are also [20+ configurations](/en/docs/v2.7/user/references/xml/dubbo-reference/) in dubbo consumer. In the registry center, only a few configurations such as application, version, group, ip, dubbo version are needed in the list of service consumers. Other configurations can also be persisted in key-value form.
 This data is registered into the registry in the service dimension, which leads to the expansion of data volume, and then causes the increased network overhead of the registry (such as zookeeper) and decreased performance.
   
 In addition to the storage of the above configuration items, Dubbo service metadata information also needs to be stored. Metadata information includes service interface and method information of interface. This information will be used for service mock, service test.  

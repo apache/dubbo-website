@@ -108,5 +108,5 @@ INFO    cmd/client.go:89        GetUser1(userId string) res: map[age:48 class:or
 
 
 
-下一章: [【应用级服务发现】](./service-discovery.html)
+下一章: [【应用级服务发现】](../service-discovery/)
 

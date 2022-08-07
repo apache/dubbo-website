@@ -37,13 +37,13 @@ Dubbo 3.0 提供的新特性包括：
 
 * **新的地址发现模型（应用级服务发现）。**
    * 查看[应用级服务发现的迁移步骤](../migration-service-discovery)
-   * 查看[应用级服务发现的使用方式]()
-   * 查看[应用级服务发现设计与实现]()。
+   * 查看应用级服务发现的使用方式
+   * 查看应用级服务发现设计与实现。
 * **下一代基于 HTTP/2 的 Triple 协议。**
    * 查看[Triple 协议迁移步骤](../migration-triple)
    * 查看 [Triple 协议使用方式](../../references/protocols/tri)
    * 查看 Triple 协议设计与实现。
 * **统一的路由规则。**
-   * 查看[统一路由规则的迁移步骤](../migration-routingrule)
-   * 查看[统一路由规则使用方式](../../references/routerule)
+   * 查看[统一路由规则的迁移步骤](../migration-routingrule/)
+   * 查看[统一路由规则使用方式](../../references/routers/)
    * 查看统一路由规则设计与实现

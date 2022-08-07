@@ -27,7 +27,7 @@ description: >
 
 基于 Seata 扩展实现。通过增加过滤器，在服务端接收  xid 并结合 [seata-golang](https://github.com/seata-golang/seata-golang) 达到支持分布式事务的目的。 从而使 Dubbo-go 在分布式场景下，让用户有更多的选择，能适应更多的个性化场景。
 
-我们在 dubbo-samples 中给出了 [事务测试用例](https://github.com/apache/dubbo-samples/tree/master/golang/seata) 。
+我们在 dubbo-samples 中给出了 [事务测试用例](https://github.com/apache/dubbo-go-samples/tree/1.5/seata) 。
 
 ## 3 多注册中心集群负载均衡
 
@@ -57,7 +57,7 @@ description: >
 
 #### 5.1.1 动态规则打标
 
-可随时在[服务治理控制台](http://dubbo.apache.org/zh-cn/docs/user/demos/routing-rule.html)下发标签归组规则
+可随时在[服务治理控制台](/zh/docsv2.7/user/examples/routing-rule/)下发标签归组规则
 
 ```yaml
 # governance-tagrouter-provider应用增加了两个标签分组tag1和tag2

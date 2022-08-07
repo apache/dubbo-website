@@ -60,7 +60,7 @@ Dubbo-go的Consumer在启动的时候会调用Nacos-SDK-go的Subscribe接口，�
 
 ## 环境准备
 
-dubbo-go samples代码下载：https://github.com/apache/dubbo-samples/tree/master/golang，基于Nacos注册中心的应用级服务发现的hello world代码目录在 registry/servicediscovery/nacos。
+dubbo-go samples代码下载：https://github.com/apache/dubbo-go-samples/tree/master，基于Nacos注册中心的应用级服务发现的hello world代码目录在 registry/servicediscovery/nacos。
 
 ![](/imgs/blog/dubbo-go/nacos/p7.png)
 

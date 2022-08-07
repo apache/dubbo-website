@@ -56,7 +56,7 @@ http response 中包含请求的处理状态，返回结果或者调用的错误
 
 #### Http 请求的 URL
 
-格式：[http://host/ {service} / {method](http://host/service/method)} or [https://host/ {service} / {method](https://host/service/method)}
+格式：`[http://host/ {service} / {method](http://host/service/method)}` or `[https://host/ {service} / {method](https://host/service/method)}`
 
 
 
@@ -275,7 +275,7 @@ Triple 是基于GRPC的，定义在Http2 协议之上
 
 #### Triple 通过 URL 传递调用的服务名和方法名
 
-格式： [http://host/ {service} / {method](http://host/service/method)}
+格式： `[http://host/ {service} / {method](http://host/service/method)}`
 
 我们的规范兼容 Triple 通过http2传递参数的形式，尽量做到dubbo 和 triple 的统一。
 

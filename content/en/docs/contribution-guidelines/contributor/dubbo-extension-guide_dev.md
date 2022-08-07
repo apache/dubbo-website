@@ -24,7 +24,7 @@ For example:
 ```
 
 ## Src Guide
-Usually, implement special extension, just need reference the [Developer Guide](http://dubbo.apache.org/#/docs/dev/build.md?lang=en-us) docs. Implement necessary interface and adapt extension to dubbo. Besides, some others should be considered:
+Usually, implement special extension, just need reference the [Developer Guide](/en/latest/contribution-guidelines/) docs. Implement necessary interface and adapt extension to dubbo. Besides, some others should be considered:
 1. Well tested. You should write unit test and mock test to eliminate potential bugs.
 2. No warning, if some warning cannot to avoid, use @SuppressWarnings to suppress it, but do not abuse it.
 3. README. Add necessary readme to show how to use your extension, and something to take notice.

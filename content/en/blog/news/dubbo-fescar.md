@@ -228,7 +228,7 @@ sh seata-server.sh -p 8091 -h 127.0.0.1 -m file
 ### Step 5: Run example
 
 - Start AccountService ([DubboAccountServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboAccountServiceStarter.java)).
-- Start StorageService ([DubboStorageServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboStorageServiceStarter.java)).
+- Start StockService ([DubboStockServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboStockServiceStarter.java)).
 - Start OrderService  ([DubboOrderServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboOrderServiceStarter.java)).
 - Run BusinessService for test ([DubboBusinessTester](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboBusinessTester.java)).
 

@@ -113,7 +113,7 @@ Because of the advantages of REST in applicability, supporting REST in Dubbo can
 It should be pointed out that I think that 1~3 are the most valuable application scenarios for Dubbo's REST call. And the main purpose why we add REST calls for Dubbo is to provide a service-oriented provider. In other words, to develop REST services for Non-Dubbo (heterogeneous) consumers.
 
 To sum up, all application scenarios are shown below:
-![no image found](images/rest.jpg)
+![rest.jpg](/imgs/user/rest.jpg)
 
 Borrowing the most famous slogan of Java in the past, by adding REST calls to Dubbo, you can implement the "Write once, access everywhere" service, which can theoretically be accessed all over the world, thus truly achieving an idealized Service-oriented Architecture (SOA).
 
@@ -182,7 +182,7 @@ JAX-RS is a standard Java REST API that has been widely supported and applied in
 
 JAX-RS has a wealth of information on the web, such as the following introductory tutorial:
 
-* Oracle official tutorial: http://docs.oracle.com/javaee/7/tutorial/doc/jaxrs.htm
+* Oracle official tutorial: https://www.oracle.com/technical-resources/articles/java/jax-rs.html
 * Article on IBM developerWorks China: http://www.ibm.com/developerworks/cn/java/j-lo-jaxrs/
 
 For more information, please feel free to Google or Baidu. As far as learning JAX-RS is concerned, it is generally enough to master the usage of various annotations.

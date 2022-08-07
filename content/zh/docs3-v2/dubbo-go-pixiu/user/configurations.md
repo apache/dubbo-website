@@ -52,7 +52,7 @@ static_resources:
 
 #### Listener
 
-比如说上述配置就声明了一个监听本地 8883 端口的 HTTP 类型的 Listener，更多 Listener 的配置可以查看 [Listener](/zh-cn/docs/user/listener/http.html)。
+比如说上述配置就声明了一个监听本地 8883 端口的 HTTP 类型的 Listener，更多 Listener 的配置可以查看 [Listener](../listener/http/)。
 
 ```
   listeners:
@@ -78,7 +78,7 @@ filters:
                 http_filters:
 ```
 
-上述配置指明了使用 `dgp.filter.httpconnectionmanager` 这款 NetworkFilter，它能够接收 Http 请求的 `Request` 和 `Response` 进行处理，并且可以配置 Route 路由信息和使用 HttpFilter 对请求进行链式处理。更多的 NetworkFilter 可以查看 [NetworkfFilter文档](/zh-cn/docs/user/networkfilter/http.html)
+上述配置指明了使用 `dgp.filter.httpconnectionmanager` 这款 NetworkFilter，它能够接收 Http 请求的 `Request` 和 `Response` 进行处理，并且可以配置 Route 路由信息和使用 HttpFilter 对请求进行链式处理。更多的 NetworkFilter 可以查看 [NetworkfFilter文档](../networkfilter/http/)
 
 
 
@@ -138,13 +138,13 @@ route 可以用于对请求进行路由分发，以下面配置为例。具体�
 ```
 
 如上配置所示，`httpconnectionmanager` 这个 NetworkFilter 下有一个 HttpFilter chain。其中包括 `dgp.filter.http.dubboproxy` 这一款 HttpFilter。
-它负责将 HTTP 请求转换为 Dubbo 请求，并转发出去。它需要配置一个 Dubbo 集群注册中心的地址信息，指定其为 zookeeper 中间件。其中 `auto_resolve` 则指定使用 HTTP to Dubbo 默认转换协议来进行相关数据转换，具体可以参考[《默认转换协议》](/zh-cn/docs/user/appendix/http-to-dubbo-default-stragety.html)。
+它负责将 HTTP 请求转换为 Dubbo 请求，并转发出去。它需要配置一个 Dubbo 集群注册中心的地址信息，指定其为 zookeeper 中间件。其中 `auto_resolve` 则指定使用 HTTP to Dubbo 默认转换协议来进行相关数据转换，具体可以参考[《默认转换协议》](../appendix/http-to-dubbo-default-stragety/)。
 
-更多的 HttpFilter 可以查看 [HttpFilter文档](/zh-cn/docs/user/httpfilter/dubbo.html)。
+更多的 HttpFilter 可以查看 [HttpFilter文档](../httpfilter/dubbo/)。
 
 #### Adapter
 
 Adapter 代表 Pixiu 和外界元数据中心交互的能力。目前有两款，分别是 `dgp.adapter.dubboregistrycenter` 和 `dgp.adapter.springcloud`，分别代表从 Dubbo 集群注册中心和 Spring Cloud 集群注册中心获取服务实例信息，构建 Pixiu 转发 Http 请求路由规则的。
 
-更多的 Adapter 可以查看 [Adapter文档](/zh-cn/docs/user/adapter/dubbo.html)。
+更多的 Adapter 可以查看 [Adapter文档](../adapter/dubbo/)。
 

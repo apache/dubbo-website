@@ -11,7 +11,7 @@ description: "Triple协议迁移指南"
 
 ## Triple 介绍
 
-`Triple` 协议的格式和原理请参阅 [RPC 通信协议](https://dubbo.apache.org/zh/docs/concepts/rpc-protocol/)
+`Triple` 协议的格式和原理请参阅 [RPC 通信协议](/zh/docs/concepts/rpc-protocol/)
 
 根据 Triple 设计的目标，`Triple` 协议有以下优势:
 
@@ -38,7 +38,7 @@ Dubbo3的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 �
 
 所以，如果决定要升级到 Dubbo3 的 `Triple` 协议，只需要修改配置中的协议名称为 `tri` (注意: 不是triple)即可。
 
-接下来我们我们以一个使用 Dubbo2 协议的[工程](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration) 来举例，如何一步一步安全的升级。
+接下来我们我们以一个使用 Dubbo2 协议的[工程](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri) 来举例，如何一步一步安全的升级。
 
 1. 仅使用 `dubbo` 协议启动 `provider` 和 `consumer`，并完成调用。
 2. 使用 `dubbo` 和 `tri` 协议 启动`provider`，以 `dubbo` 协议启动 `consumer`，并完成调用。
@@ -75,7 +75,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 为保证兼容性，我们先将部分 provider 升级到 `dubbo3` 版本并使用 `dubbo` 协议。
 
-使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboProvider) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationDubboConsumer) ,完成调用，输出如下:
+使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java) ,完成调用，输出如下:
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
 
 ###  同时使用 dubbo 和 triple 协议
@@ -88,7 +88,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 > 按照推荐升级步骤，provider 已经支持了tri协议，所以 dubbo3的 consumer 可以直接使用 tri 协议
 
-使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationBothProvider)和[`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationBothConsumer),完成调用，输出如下:
+使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java)和[`Consumer`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java),完成调用，输出如下:
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
 
@@ -100,8 +100,8 @@ public class IGreeter2Impl implements IWrapperGreeter {
 结构如图所示:
 ![strust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
 
-[Provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationTriProvider)
-和 [Consumer](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/com/apache/dubbo/sample/basic/migration/ApiMigrationTriConsumer) 完成调用，输出如下:
+[Provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java)
+和 [Consumer](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java) 完成调用，输出如下:
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
 
@@ -325,8 +325,8 @@ public interface PbGreeter {
 
 关于 Triple 协议的应用级服务注册和发现和其他语言是一致的，可以通过下列内容了解更多。
 
-- [服务发现](https://dubbo.apache.org/zh/docs/concepts/service-discovery/)
-- [应用级地址发现迁移指南](https://dubbo.apache.org/zh/docs/migration/migration-service-discovery/)
+- [服务发现](/zh/docs/concepts/service-discovery/)
+- [应用级地址发现迁移指南](/zh/docs/migration/migration-service-discovery/)
 
 ## 与 GRPC 互通
 

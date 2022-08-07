@@ -11,7 +11,7 @@ Dubbogo 服务层级为两个级别：分别是应用级别(App Level)和接口�
 
 如下图所示，可以看到，应用级别的组件以浅红色标注，接口级别的组件以浅蓝色标注：
 
-![](https://github.com/dubbogo/dubbogo.github.io/blob/master/docs/zh-cn/pic/3.0/dubbogo-concept.png?raw=true)
+![](/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png)
 
 ## 1. 应用级别组件
 

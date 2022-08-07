@@ -8,7 +8,7 @@ description: >
 
 基于Dubbo实现全异步编程，是在2.7.0版本中对现有异步方式增强后新引入的功能。本文先是回顾2.6.x及之前版本对异步的支持情况及存在的问题，引出了2.7.0版本基于CompletableFuture做了哪些针对性的增强，通过几个示例详细阐述了增强后的异步编程的使用方式，最后总结了引入异步模式带来的新问题及Dubbo的解决方法。通过阅读这篇文章，可以很容易的基于Dubbo2.7.0+版本实现一个全异步的远程服务调用链路。
 
-从3.0.0版本开始，Dubbo框架提供了对Reactive编程范式的支持，除了编程接口之外，在跨进程的RPC通信中引入了Reactive的语义。如果你所在的环境需要使用Reactive编程范式，或者你的RPC调用需要支持流式传输，Reactive应该会给你带来帮助，具体请参考发布在阿里巴巴中间件公众号上的[响应式编程支持]()相关文章。
+从3.0.0版本开始，Dubbo框架提供了对Reactive编程范式的支持，除了编程接口之外，在跨进程的RPC通信中引入了Reactive的语义。如果你所在的环境需要使用Reactive编程范式，或者你的RPC调用需要支持流式传输，Reactive应该会给你带来帮助，具体请参考发布在阿里巴巴中间件公众号上的响应式编程支持相关文章。
 > 注意，你可能并不是总需要Reactive的语义，尤其是在RPC的场景，CompletableFuture本身也能带给你Reactive模式的编程模型，在选择Reactive（RxJava、Reactor之类）而不是理解及使用成本更低的CompletableFuture前，请尝试关注以下问题：
 > 1. 你是请求/响应是一次性传输的还是流式传输的，一个明显特征是你定义的数据类型是 `List<String>` 还是 `Stream<String>`
 > 2. 你的RPC请求有没有要求是Cold，即在subscribe后触发，因为CompletableFuture总是hot的
@@ -19,7 +19,7 @@ description: >
 
 ## 2.6.x版本之前的异步方式
 
-在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](http://dubbo.apache.org/zh-cn/docs/user/demos/async-call.html)、[参数回调](http://dubbo.apache.org/zh-cn/docs/user/demos/callback-parameter.html)、[事件通知](http://dubbo.apache.org/zh-cn/docs/user/demos/events-notify.html)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
+在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](/zh/docsv2.7/user/examples/async-call/)、[参数回调](/zh/docsv2.7/user/examples/callback-parameter/)、[事件通知](/zh/docsv2.7/user/examples/events-notify/)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
 
 关于参数回调，其本质上是一种服务端的数据推送能力，这是终端应用很常见的一种需求，关于这部分的重构计划，不在本文讨论范围。
 
@@ -170,7 +170,7 @@ Dubbo在2.7.0版本已经升级了对Java 8的支持，同时基于CompletableFu
 
 ## 示例1：CompletableFuture类型接口
 
-CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见[dubbo-samples-async-original-future](https://github.com/apache/dubbo-samples/tree/3.x/dubbo-samples-async/dubbo-samples-async-original-future)。
+CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见[dubbo-samples-async-original-future](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-original-future)。
 
 1. 定义接口
    
@@ -246,7 +246,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
 
 ## 示例2：重载同步接口
 
-这个示例演示了如何在同步接口的基础上，通过增加重载方法实现消费端的异步调用，具体代码参见地址[dubbo-samples-async-generated-future](https://github.com/apache/dubbo-samples/tree/3.x/dubbo-samples-async/dubbo-samples-async-generated-future)
+这个示例演示了如何在同步接口的基础上，通过增加重载方法实现消费端的异步调用，具体代码参见地址[dubbo-samples-async-generated-future](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-generated-future)
 
 1. 定义接口
 
@@ -322,7 +322,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
 
 ## 示例3：使用AsyncContext
 
-本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见[dubbo-samples-async-provider](https://github.com/apache/dubbo-samples/tree/3.x/dubbo-samples-async/dubbo-samples-async-provider)。
+本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见[dubbo-samples-async-provider](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async/dubbo-samples-async-provider)。
 
 > 之前已经提到过，已经是CompletableFuture签名的接口，要实现Provider端异步没必要再用AsyncContext。
 

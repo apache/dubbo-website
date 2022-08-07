@@ -101,5 +101,3 @@ weight: 2
 
 * 采用 Microkernel + Plugin 模式，Microkernel 只负责组装 Plugin，Dubbo 自身的功能也是通过扩展点实现的，也就是 Dubbo 的所有功能点都可被用户自定义扩展所替换。
 * 采用 URL 作为配置信息的统一格式，所有扩展点都通过传递 URL 携带配置信息。
-
-更多设计原则参见：[框架设计原则](../principals/)

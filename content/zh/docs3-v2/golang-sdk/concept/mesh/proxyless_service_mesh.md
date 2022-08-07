@@ -8,9 +8,9 @@ keywords: 无代理服务网格
 
 ### 1.1 Service Mesh 简析
 
-Istio 是当今最流行的开源服务网格。它由控制平面和数据平面构成，其架构如下，图片摘自 [istio官网](istio.io)
+Istio 是当今最流行的开源服务网格。它由控制平面和数据平面构成，其架构如下，图片摘自 [istio官网](https://istio.io/)
 
-![使用 Istio 后](https://istio.io/latest/img/service-mesh.svg)
+![使用 Istio 后](/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/service-mesh.svg)
 
 位于图中下半部分的控制平面负责配置、服务信息、证书等资源的下发。位于上半部分的数据平面关注业务之间的通信流量；传统服务网格通过代理的方式拦截所有的业务网络流量，代理需要感知到控制平面下发的配置资源，从而按照要求控制网络流量的走向。
 
@@ -26,7 +26,7 @@ Service 为服务治理提供了一个很好的思路，将基础架构与业务
 
 无代理服务网格，是近几年提出的一个新的概念，isito、gRPC、brpc 等开源社区都在这一方向进行了探索和实践。无代理服务网格框架以 SDK 的形式被业务应用引入，负责服务之间的通信、治理。来自控制平面的配置直接下发至服务框架，由服务框架代替上述 sidecar 的功能。
 
-![](https://ata2-img.oss-cn-zhangjiakou.aliyuncs.com/neweditor/894c0e52-9d34-4490-b49b-24973ef4aabc.png)
+![](/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/894c0e52-9d34-4490-b49b-24973ef4aabc.png)
 
 服务框架（SDK）的主要能力可以概括为以下三点：
 
@@ -58,7 +58,7 @@ Service 为服务治理提供了一个很好的思路，将基础架构与业务
 
 Dubbo-go 本身拥有可扩展的服务注册发现能力，我们为 service mesh 场景适配了注册中心的实现。开发人员可以将 dubbo-go 应用的信息注册在 istiod 控制平面上。客户端应用可以查询已经注册的接口数据，完成服务发现过程。
 
-![](https://ata2-img.oss-cn-zhangjiakou.aliyuncs.com/neweditor/454d1e31-0be3-41fe-97ec-f52673ebf74f.png)
+![](/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/454d1e31-0be3-41fe-97ec-f52673ebf74f.png)
 
 1. 开发人员使用 dubbogo-cli 工具创建应用模板，发布 Deployment / Service 到集群中。
 2. 服务端拉取全量 CDS 和 EDS ，比对本机IP，拿到当前应用的的主机名。并将本应用的所有接口名到主机名的映射，注册在Istiod上面。
@@ -75,7 +75,7 @@ Dubbo-go 拥有路由能力，通过 xds 协议客户端从 istiod 订阅路由�
 
 dubbogo-cli 是 Apach/dubbo-go 生态的子项目，为开发者提供便利的应用模板创建、工具安装、接口调试等功能，以提高用户的研发效率。
 
-详情可以参阅 [【dubbogo-cli 工具】](../../refer/use_dubbogo_cli/)
+详情可以参阅 [【dubbogo-cli 工具】](../../../refer/use_dubbogo_cli/)
 
 ## 3. Dubbo-go-Mesh 的优势
 
@@ -108,4 +108,4 @@ Dubbo-go 是一个横跨多个生态的服务框架。
 
 ## 4. 任务
 
-您可以跟随[【Dubbo-go Mesh 任务】](../../tasks/mesh/build/)来体验 Dubbo-go 服务网格能力。
+您可以跟随[【Dubbo-go Mesh 任务】](../../../tasks/mesh/build/)来体验 Dubbo-go 服务网格能力。

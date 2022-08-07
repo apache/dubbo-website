@@ -138,7 +138,7 @@ world
 
 Dubbo 使用 Zookeeper 用于服务的注册发现和配置管理，在 Zookeeper 中数据的组织由下图所示：
 
-![dubbo-in-zk](../../img/blog/dubbo-in-zk.jpg)
+![dubbo-in-zk](/imgs/blog/dubbo-in-zk.jpg)
 
 首先，所有 Dubbo 相关的数据都组织在 `/dubbo` 的根节点下。
 

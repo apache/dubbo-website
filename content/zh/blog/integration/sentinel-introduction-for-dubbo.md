@@ -55,13 +55,13 @@ Sentinel 的控制台（Dashboard）是流量控制、熔断降级规则统一�
 
 - **单台设备监控**：当在机器列表中看到您的机器，就代表着已经成功接入控制台，可以查看单台设备的设备名称、IP地址、端口号、健康状态和心跳时间等信息。
 
-![Discovery](https://github.com/alibaba/Sentinel/wiki/image/machinediscover.png)
+![Discovery](/imgs/blog/2018/07/27/sentinel/machinediscover.png)
 
 - **链路监控**：簇点链路实时的去拉取指定客户端资源的运行情况，它提供了两种展示模式，一种用书状结构展示资源的调用链路；另外一种则不区分调用链路展示资源的运行情况。通过链路监控，可以查看到每个资源的流控和降级的历史状态。
 
 | 树状链路| 平铺链路 
 | :----: | :----
-|![resourceTree](https://github.com/alibaba/Sentinel/wiki/image/resourceTree.png)|![cluster](https://github.com/alibaba/Sentinel/wiki/image/sentine_dashboard.gif)
+|![resourceTree](/imgs/blog/2018/07/27/sentinel/resourceTree.png)|![cluster](/imgs/blog/2018/07/27/sentinel/sentine_dashboard.gif)
 
 - **聚合监控**：同一个服务下的所有机器的簇点信息会被汇总，实现实时监控，精确度达秒级。
 
@@ -121,7 +121,7 @@ Service Consumer 作为客户端去调用远程服务。每一个服务都可能
 
 ### Fallback
 
-从 0.1.1 版本开始，Sentinel Dubbo Adapter 还支持配置全局的 fallback 函数，可以在 Dubbo 服务被限流/降级/负载保护的时候进行相应的 fallback 处理。用户只需要实现自定义的 [`DubboFallback`](https://github.com/alibaba/Sentinel/blob/master/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/fallback/DubboFallback.java) 接口，并通过 `DubboFallbackRegistry` 注册即可。默认情况会直接将 `BlockException` 包装后抛出。同时，我们还可以配合 [Dubbo 的 fallback 机制](http://dubbo.apache.org/#!/docs/user/demos/local-mock.md?lang=zh-cn) 来为降级的服务提供替代的实现。
+从 0.1.1 版本开始，Sentinel Dubbo Adapter 还支持配置全局的 fallback 函数，可以在 Dubbo 服务被限流/降级/负载保护的时候进行相应的 fallback 处理。用户只需要实现自定义的 [`DubboFallback`](https://github.com/alibaba/Sentinel/blob/master/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/fallback/DubboFallback.java) 接口，并通过 `DubboFallbackRegistry` 注册即可。默认情况会直接将 `BlockException` 包装后抛出。同时，我们还可以配合 [Dubbo 的 fallback 机制](/zh/docsv2.7/user/examples/local-mock/) 来为降级的服务提供替代的实现。
 
 ## Sentinel 与 Hystrix 的比较
 

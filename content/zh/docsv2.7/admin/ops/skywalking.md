@@ -7,7 +7,7 @@ weight: 5
 
 ## Apache Skywalking 简介
 
-[Apache Skywalking](https://github.com/apache/incubator-skywalking) 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM系统。[Apache Skywalking](https://github.com/apache/incubator-skywalking) 通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。[Apache Skywalking](https://github.com/apache/incubator-skywalking) 目前支持多种语言，其中包括 [Java](https://github.com/apache/incubator-skywalking)，[.Net Core](https://github.com/OpenSkywalking/skywalking-netcore)，[Node.js](https://github.com/OpenSkywalking/skywalking-nodejs) 和 [Go](https://github.com/OpenSkywalking/skywalking-go) 语言。
+[Apache Skywalking](https://github.com/apache/skywalking) 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM系统。[Apache Skywalking](https://github.com/apache/skywalking) 通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。[Apache Skywalking](https://github.com/apache/skywalking) 目前支持多种语言，其中包括 [Java](https://github.com/apache/skywalking)，[.Net Core](https://github.com/SkyAPM/SkyAPM-dotnet)，[Node.js](https://github.com/apache/skywalking-nodejs) 和 [Go](https://github.com/SkyAPM/go2sky) 语言。
 
 目前 Skywalking 已经支持从 6 个可视化维度剖析分布式系统的运行情况。总览视图是应用和组件的全局视图，其中包括组件和应用数量，应用的告警波动，慢服务列表以及应用吞吐量；拓扑图从应用依赖关系出发，展现整个应用的拓扑关系；应用视图则是从单个应用的角度，展现应用的上下游关系，TopN 的服务和服务器，JVM 的相关信息以及对应的主机信息。服务视图关注单个服务入口的运行情况以及此服务的上下游依赖关系，依赖度，帮助用户针对单个服务的优化和监控；调用链展现了调用的单次请求经过的所有埋点以及每个埋点的执行时长；告警视图根据配置阈值针对应用、服务器、服务进行实时告警。
 
@@ -75,7 +75,7 @@ public class ConsumerController {
 ```
 
 ### 部署 Apache Skywalking
-Apache Skywalking 共提供两种部署模式：单节点模式和集群模式，以下为单节点模式部署步骤，集群模式部署详情参考[文档](https://github.com/apache/incubator-skywalking/blob/master/docs/cn/Deploy-backend-in-cluster-mode-CN.md)。
+Apache Skywalking 共提供两种部署模式：单节点模式和集群模式，以下为单节点模式部署步骤，集群模式部署详情参考[文档](https://skywalking.apache.org/docs/main/latest/en/setup/backend/backend-setup/)。
 
 #### 依赖第三方组件
 

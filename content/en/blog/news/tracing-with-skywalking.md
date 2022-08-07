@@ -8,7 +8,7 @@ description: >
 
 ## Introduction to Apache Skywalking
 
-[Apache Skywalking](https://github.com/apache/incubator-skywalking)  is the APM system that it designed for micro-services architectures and cloud native architecture systems and supports distribute tracking. [Apache skywalking (incubator)](https://github.com/apache/incubator-skywalking) collects and analyzes the trace data and generates the relationship between the application and the service metric, Apache skywalking  supports multiple languages agent, for example [Java](https://github.com/apache/incubator-skywalking),[.net core](https://github.com/OpenSkywalking/skywalking-netcore),[Node.js](https://github.com/OpenSkywalking/skywalking-nodejs) and [Go](https://github.com/OpenSkywalking/skywalking-go).
+[Apache Skywalking](https://github.com/apache/skywalking)  is the APM system that it designed for micro-services architectures and cloud native architecture systems and supports distribute tracking. [Apache skywalking (incubator)](https://github.com/apache/skywalking) collects and analyzes the trace data and generates the relationship between the application and the service metric, Apache skywalking  supports multiple languages agent, for example [Java](https://github.com/apache/skywalking),[.net core](https://github.com/OpenSkywalking/skywalking-netcore),[Node.js](https://github.com/OpenSkywalking/skywalking-nodejs) and [Go](https://github.com/SkyAPM/go2sky).
 
 Currently, Skywalking has supported analysis the operation of distributed systems from 6 visual dimensions. The overview view is a global view of your applications and components, including the number of components and applications, application alarm fluctuations, slow service lists, and application throughput; The topology shows the topological relationship of the whole application; The application view represents the upstream and downstream relationship of the application from single application, TOP N services and servers, JVM, host and process info. The service view focuses on the operation of a single service portal and the upstream and downstream dependencies of this service and it helps the user to optimize and monitor a single service; the trace graph shows all the buried points of the invocation and the execution time of each burial point, and the alarm view is based on the configuration threshold for the application, server, service for real-time alarms
 
@@ -70,7 +70,7 @@ public class ConsumerController {
 
 ### Deploy Apache Skywalking
 
-[Apache skywalking](https://github.com/apache/incubator-skywalking) offers  two deployment modes: single-node mode and cluster mode,Here is  the single-node mode deployment step, and more about how to deploy skywalking with cluster mode, please reference [document](https://github.com/apache/incubator-skywalking/blob/master/docs/en/Deploy-backend-in-cluster-mode.md).
+[Apache skywalking](https://github.com/apache/skywalking) offers  two deployment modes: single-node mode and cluster mode,Here is  the single-node mode deployment step, and more about how to deploy skywalking with cluster mode, please reference [document](https://skywalking.apache.org/docs/main/latest/en/setup/backend/backend-setup/).
 
 #### Third-party components
 

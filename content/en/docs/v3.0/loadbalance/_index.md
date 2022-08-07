@@ -8,7 +8,7 @@ description: "Load Balance in Apache Dubbo 3.x"
 
 Dubbo offers a number of balancing strategies for cluster load balancing, which defaults to `random`.
 
-You can extend the load balancing strategy by yourself, see: [LoadBalance extension](../../../v2.7/dev/impls/load-balance)
+You can extend the load balancing strategy by yourself, see: [LoadBalance extension](../../v2.7/dev/impls/load-balance/)
 
 ## LoadBalance strategy
 

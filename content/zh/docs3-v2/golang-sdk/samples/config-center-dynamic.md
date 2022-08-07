@@ -138,7 +138,7 @@ func (l listener) Process(event *config_center.ConfigChangeEvent) {
 
 ```
 
-当然，以 API 的形式来启动框架时，可以直接以API的形式来启动框架。参考基本概念模块的 [Dubbogo 框架配置](../concept/configuration/)
+当然，以 API 的形式来启动框架时，可以直接以API的形式来启动框架。参考基本概念模块的 [Dubbogo 框架配置](../../concept/config/)
 
 ## 4. Dubbogo 配置热更新
 
@@ -148,5 +148,5 @@ func (l listener) Process(event *config_center.ConfigChangeEvent) {
 
 
 
-下一章: [【Filter】](./custom-filter/)
+下一章: [【Filter】](../custom-filter/)
 

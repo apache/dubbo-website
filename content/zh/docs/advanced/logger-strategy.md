@@ -29,4 +29,4 @@ description: "在 Dubbo 中适配日志框架"
       <dubbo:application logger="log4j" />
     ```
 
-[1]: 自定义扩展可以参考 [日志适配扩展](../../../dev/impls/logger-adapter)
+[1]: 自定义扩展可以参考 [日志适配扩展](../../../docsv2.7/dev/impls/logger-adapter/)

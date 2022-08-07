@@ -18,7 +18,7 @@ PS：以下的学习方式适用于很多新技术
 
 **首先学习一个技术首先要看看它的整体架构和基本概念**，每个技术都有着自己的名词解释和实现方式，如果文档齐全就简单很多。
 
-[http://dubbo.apache.org/zh-cn/docs/user/preface/background.html](https://links.jianshu.com/go?to=http%3A%2F%2Fdubbo.apache.org%2Fzh-cn%2Fdocs%2Fuser%2Fpreface%2Fbackground.html)
+[/zh/docs/user/preface/background.html](https://links.jianshu.com/go?to=http%3A%2F%2Fdubbo.apache.org%2Fzh-cn%2Fdocs%2Fuser%2Fpreface%2Fbackground.html)
 
 大致浏览了背景、需求、架构之后基本上有一个大致概念
 

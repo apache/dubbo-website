@@ -213,4 +213,4 @@ dubbo_test_summary_with_label_count{summarylabel1="value1",summarylabel2="value2
 
 
 
-下一章: [【泛化调用】](./generic.html)
+下一章: [【泛化调用】](../generic/)

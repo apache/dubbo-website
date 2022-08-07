@@ -102,7 +102,7 @@ dubbo:service、dubbo:reference、dubbo:provider、dubbo:consumer、dubbo:method
 
 Dubbo实现的是客户端负载均衡。关于服务接口代理类的实现，这里不做详细描述，可以参考官网：
 
-> 服务引入：http://dubbo.apache.org/zh-cn/docs/source_code_guide/refer-service.html。  
+> 服务引入：/zh/docs/source_code_guide/refer-service.html。  
 
 在接口代理类生成、并且装配好后，服务的调用基本是这样一个流程：proxy -> MockClusterInvoker -> 集群策略（如：FailoverClusterInvoker） -> 初始化负载均衡策略 -> 根据选定的负载均衡策略确定Invoker。    
 

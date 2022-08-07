@@ -46,7 +46,7 @@ Please check the [CONTRIBUTING.md](https://github.com/apache/dubbo/blob/master/C
 
 ### Participate in the release vote
 
-Participate in the release vote is an important way to contribute to Dubbo. The Dubbo community welcomes everyone to partipate, you can check the release vote using this [check list](https://wiki.apache.org/incubator/IncubatorReleaseChecklist).
+Participate in the release vote is an important way to contribute to Dubbo. The Dubbo community welcomes everyone to partipate, you can check the release vote using this [check list](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist).
 If you have any question regarding the check list, please feel free to ask on dev@dubbo.apache.org.
 
 

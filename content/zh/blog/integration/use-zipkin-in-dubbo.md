@@ -18,7 +18,7 @@ Zipkin 是基于 [Dapper](https://ai.google/research/pubs/pub36356) 论文实现
 
 ![Zipkin architecture](/imgs/blog/zipkin-architecture.png)
 
-Collector 收集器、Storage 存储、API、UI 用户界面等几部分构成了 Zipkin Server 部分，对应于 GitHub 上 [openzipkin/zipkin](https://github.com/openzipkin/zipkin) 这个项目。而收集应用中调用的耗时信息并将其上报的组件与应用共生，并拥有各个语言的实现版本，其中 Java 的实现是 GitHub 上 [openzipkin/brave](https://github.com/openzipkin/brave)。除了 Java 客户端实现之外，openzipkin 还提供了许多其他语言的实现，其中包括了 go、php、JavaScript、.net、ruby 等，具体列表可以参阅 Zipkin 的 [Exiting instrumentations](https://zipkin.io/pages/existing_instrumentations)。
+Collector 收集器、Storage 存储、API、UI 用户界面等几部分构成了 Zipkin Server 部分，对应于 GitHub 上 [openzipkin/zipkin](https://github.com/openzipkin/zipkin) 这个项目。而收集应用中调用的耗时信息并将其上报的组件与应用共生，并拥有各个语言的实现版本，其中 Java 的实现是 GitHub 上 [openzipkin/brave](https://github.com/openzipkin/brave)。除了 Java 客户端实现之外，openzipkin 还提供了许多其他语言的实现，其中包括了 go、php、JavaScript、.net、ruby 等，具体列表可以参阅 Zipkin 的 [Exiting instrumentations](https://zipkin.io/pages/tracers_instrumentation.html)。
 
 ### Zipkin 的工作过程
 

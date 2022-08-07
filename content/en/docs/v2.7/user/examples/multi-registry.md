@@ -87,4 +87,4 @@ When testing, the service needs to be temporarily register to two registries, wh
 </beans>
 ```
 
-[^1]: custom registry, see：[registry extension](/docs/dev/impls/registry.html)
+[^1]: custom registry, see：[registry extension](/en/docs/v2.7/dev/impls/registry/)

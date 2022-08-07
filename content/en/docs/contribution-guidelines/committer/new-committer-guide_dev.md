@@ -52,9 +52,9 @@ According to the prompt, the OAuth protocol of Github account is authorized to l
 ### 3, Set up GitHub account in github.com, two-factors authorization (2FA)
 
 * 1) install "Google Authenticator" app on your cell phone
-* 2), Following the [authorized GitHub 2FA wiki](https://help.github.com/articles/configuring-two-factor-authentication-via-a-totp-mobile-app/),  you can operation step by step .
+* 2), Following the [authorized GitHub 2FA wiki](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication),  you can operation step by step .
 
-In the [two-factors authorization authentication (2. Scan this barcode with your app.)](https://github.com/settings/two_factor_authentication/verify) page, it is not recommended to select a two-dimensional code with a cell phone, because some of the cell phones will not be able to scan.
+In the [two-factors authorization authentication (2. Scan this barcode with your app.)](https://github.com/settings/security) page, it is not recommended to select a two-dimensional code with a cell phone, because some of the cell phones will not be able to scan.
 
 Please open the cell phone "Google Authenticator" app, click "+" to select "input the secret key": write the GitHub account in the account name input box. In your "secret key" input box, write the text of the "enter this text code" link in the open web page. After clicking "add" in app, 6 digit dynamic will be generated for this account. Write the 6 digit number to the text box in the web page, and then click "Enable". In this way, the 2fa is set successfully.
 
@@ -68,7 +68,7 @@ Please open the cell phone "Google Authenticator" app, click "+" to select "inpu
 
 When access token is generated on GitHub, the token where the instruction line needs a password is pasted.
 
-Refer to website [referenced link one](https://help.github.com/articles/https-cloning-errors/#provide-access-token-if-2fa-enabled) and [referenced link two](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)
+Refer to website [referenced link one](https://docs.github.com/en/repositories/creating-and-managing-repositories/troubleshooting-cloning-errors) and [referenced link two](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 
 * B. switch to SSH
 
@@ -87,9 +87,9 @@ If not discussed in the community (mailing list), just as it did not happen.
 
 ### Add your name
 
-Please update Dubbo incubator status [page](https://incubator.apache.org/projects/dubbo.html) to add your name. See this [guide](http://dubbo.apache.org/en-us/docs/developers/committer-guide/apache-dubbo-page_dev.html) for instructions.
+Please update Dubbo incubator status [page](https://incubator.apache.org/projects/dubbo.html) to add your name. See this [guide](/en/latest/contribution-guidelines/contributor/) for instructions.
 
-Please update Dubbo official [website](http://dubbo.apache.org/en-us/docs/developers/developers_dev.html) to update your name.
+Please update Dubbo official [website](/en/latest/contribution-guidelines/committer) to update your name.
 
 
 ### A small benefit

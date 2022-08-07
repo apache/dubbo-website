@@ -49,4 +49,4 @@ Different protocol performance is not the same. Such as big data should use shor
 </beans>
 ```
 
-[^1]: custom protocol, see:[protocol extension](http://dubbo.apache.org/books/dubbo-dev-book-en/impls/protocol.html)
+[^1]: custom protocol, see:[protocol extension](/en/docs/v2.7/dev/impls/protocol/)

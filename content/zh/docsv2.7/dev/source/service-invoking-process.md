@@ -46,7 +46,7 @@ Dubbo 支持同步和异步两种调用方式，其中异步调用还可细分�
  *    $ jad com.alibaba.dubbo.common.bytecode.proxy0
  *
  * 更多使用方法请参考 Arthas 官方文档：
- *   https://alibaba.github.io/arthas/quick-start.html
+ *   https://arthas.aliyun.com/doc/quick-start.html
  */
 public class proxy0 implements ClassGenerator.DC, EchoService, DemoService {
     // 方法数组

@@ -6,7 +6,7 @@ weight: 2
 ---
 
 这篇教程会通过从零构建一个简单的工程来演示如何基于 POJO 方式使用 Dubbo Triple, 在应用不改变已有接口定义的同时升级到 Triple 协议。
-POJO on Triple 原理请参考[POJO on Triple](TBD)
+POJO on Triple 原理请参考POJO on Triple(TBD)
 
 ### 前置条件
 - [JDK](https://jdk.java.net/) 版本 >= 8

@@ -90,10 +90,10 @@ Dubbo-go 处于一个比较稳定成熟的状态。目前新版本正处于往�
 
 （图 2 ）
 
-以前的 dubbo-go RPC 层直接复用了 getty 框架 的 RPC[[^3](https://github.com/AlexStocks/getty/tree/master/rpc)]，未能实现协议和应用通信地址的隔离。阿里中间件展图同学重构了 dubbo-go  RPC 层，实现了连接复用：可以实现 consumer 与 provider 端的同一个 TCP 连接上进行多协议通信。相关 PR 业已合并，会在 dubbo-go v1.5.1 中发布。
+以前的 dubbo-go RPC 层直接复用了 getty 框架 的 RPC[[^3](https://github.com/AlexStocks/getty/tree/feature/rpc)]，未能实现协议和应用通信地址的隔离。阿里中间件展图同学重构了 dubbo-go  RPC 层，实现了连接复用：可以实现 consumer 与 provider 端的同一个 TCP 连接上进行多协议通信。相关 PR 业已合并，会在 dubbo-go v1.5.1 中发布。
 
 目前下一个版本正在紧锣密鼓的开发中，具体规划及任务清单[^1] ，都已经在 Github 上体现。
 
 [^1]: https://github.com/apache/dubbo-go/projects/8
 [^2]: https://github.com/seata-golang/seata-golang
-[^3]: https://github.com/AlexStocks/getty/tree/master/rpc
+[^3]: https://github.com/AlexStocks/getty/tree/feature/rpc

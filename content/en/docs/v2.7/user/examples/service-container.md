@@ -10,7 +10,7 @@ The service container is a standalone launcher because the backend service does 
 
 The service container is just a simple Main method and loads a simple Spring container to expose the service.
 
-The content of Service container can be extended, built-in spring, jetty, log4j etc..  This can be expanded with [Container Extension Points](/docs/dev/impls/container.html). Configure it with the -D parameter in the java command or `dubbo.properties`.
+The content of Service container can be extended, built-in spring, jetty, log4j etc..  This can be expanded with [Container Extension Points](/en/docs/v2.7/dev/impls/container/). Configure it with the -D parameter in the java command or `dubbo.properties`.
 
 ## Container type
 

@@ -9,7 +9,7 @@ description: "Dubbo simple monitor service"
 {{% alert title="Warning" color="warning" %}}
 Monitor service is a standard Dubbo service，can be exported to the registry，also can be connected straightly.
 
-[Install the simple registry](admin-guide-install-manual)
+[Install the simple registry](/en/docs/v2.7/admin/install/)
 {{% /alert %}}
 
 

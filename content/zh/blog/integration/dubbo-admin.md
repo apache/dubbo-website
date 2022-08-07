@@ -7,7 +7,6 @@ description: >
 ---
 
 ```
-Demo地址：http://47.91.207.147/#/service  
 github: https://github.com/apache/dubbo-ops
 ```
 Dubbo Admin之前的版本过于老旧，也长期疏于维护，因此在去年年中的时候，对该项目进行了一次重构，项目结构上的变化如下：  

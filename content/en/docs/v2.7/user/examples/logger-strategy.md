@@ -26,4 +26,4 @@ description: "Config logger Strategy in dubbo"
     <dubbo:application logger="log4j" />
     ```
 
-[^1]: Custom Extensions: [logger-adapter](/docs/dev/impls/logger-adapter)
+[^1]: Custom Extensions: [logger-adapter](/en/docs/v2.7/dev/impls/logger-adapter)

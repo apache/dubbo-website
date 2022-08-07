@@ -109,4 +109,4 @@ dubbo:
 ```
 
 
-下一章：[【注册中心】](./registry.html)
+下一章：[【注册中心】](../registry/)

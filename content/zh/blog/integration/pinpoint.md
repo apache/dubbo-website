@@ -62,7 +62,7 @@ description: >
 
 ### 启动Pinpoint
 
-参考Pinpoint的[Quick start](http://naver.github.io/pinpoint/quickstart.html)搭建环境（不需要启动TestApp）
+参考Pinpoint的[Quick start](https://pinpoint-apm.github.io/pinpoint/quickstart.html)搭建环境（不需要启动TestApp）
 
 ### 准备Dubbo示例程序
 
