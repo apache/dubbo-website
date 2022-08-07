@@ -1,7 +1,7 @@
 ---
 title: "02-启动服务前服务配置ServiceConfig类型是如何初始化的?"
 linkTitle: "2-ServiceConfig类型是如何初始化的?"
-date: 2022-08-06
+date: 2022-08-02
 author: 宋小生
 description: >
     [Dubbo 3.0.8源码解析] 了解一下服务配置的设计原理，有助于理解后面的服务治理的原理
