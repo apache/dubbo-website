@@ -12,7 +12,7 @@ description: "性能采样命令"
 `detail profiler` 相较 `simple profiler` 模式多采集了每个 filter 的处理耗时、协议上的具体耗时等。
 在 `simple profiler` 模式下如果发现 Dubbo 框架内部存在耗时长的情况，可以开启 `detail profiler` 模式，以便更好地排查问题。
 
-参考链接：[请求耗时采样](../../../advanced-features-and-usage/observability/profiler/)
+参考链接：[请求耗时采样](../../../advanced-features-and-usage/performance/profiler/)
 
 ## enableSimpleProfiler 命令
 

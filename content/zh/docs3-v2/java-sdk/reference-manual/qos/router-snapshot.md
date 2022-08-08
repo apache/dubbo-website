@@ -8,7 +8,7 @@ description: "路由状态命令"
 
 Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环境中，如果出现流量结果不符合预期的情况，可以通过路由状态命令来查看路由的状态，以此来定位可能存在的问题。
 
-参考链接：[路由状态采集](../../../advanced-features-and-usage/observability/router-snapshot/)
+参考链接：[路由状态采集](../../../advanced-features-and-usage/performance/router-snapshot/)
 
 ## getRouterSnapshot 命令
 
