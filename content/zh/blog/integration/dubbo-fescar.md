@@ -227,10 +227,10 @@ sh seata-server.sh -p 8091 -h 127.0.0.1 -m file
 
 ### Step 5: 运行例子
 
-- 启动账户服务 ([DubboAccountServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboAccountServiceStarter.java))。
-- 启动库存服务 ([DubboStockServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboStockServiceStarter.java))。
-- 启动订单服务 ([DubboOrderServiceStarter](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboOrderServiceStarter.java))。
-- 运行BusinessService入口 ([DubboBusinessTester](https://github.com/seata/seata-samples/blob/master/dubbo/src/main/java/io/seata/samples/dubbo/starter/DubboBusinessTester.java))。
+- 启动账户服务 ([DubboAccountServiceStarter](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java)).
+- 启动库存服务 ([DubboStorageServiceStarter](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java)).
+- 启动订单服务  ([DubboOrderServiceStarter](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java)).
+- 运行BusinessService入口 ([DubboBusinessTester](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java)).
 
 ### 相关项目
 * Seata:          https://github.com/seata/seata
