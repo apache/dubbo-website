@@ -6,7 +6,7 @@ weight: 15
 description: "类groovy脚本动态路由。"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh//docs3-v2/java-sdk/advanced-features-and-usage/service/routing/mesh-style/dynamic-rule-deployment/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh//docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/dynamic-rule-deployment/)。
 {{% /pageinfo %}}
 
 ```yaml

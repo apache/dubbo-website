@@ -10,7 +10,7 @@ content:
     - "[Spring Boot 快速开发 Dubbo 服务](quick-start/spring-boot/)"
     - "[配置参考手册](reference-manual/config/)"
   - 高级特性:
-    - "[扩展 Filter、Router 拦截流量](advanced-features-and-usage/)"
+    - "[扩展 Filter、Router 拦截流量](concepts-and-architecture/service-invocation/)"
   - 参考手册:
     - "[注册中心配置指南](reference-manual/registry/)"
   - 升级与兼容性:

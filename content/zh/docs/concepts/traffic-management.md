@@ -6,7 +6,7 @@ weight: 3
 description: "通过 Dubbo 定义的路由规则，实现对流量分布的控制"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/routing/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/)。
 {{% /pageinfo %}}
 
 ### 流量管理

@@ -1,10 +1,13 @@
+
 ---
 type: docs
-title: "服务流量管理"
-linkTitle: "流量管理"
-weight: 7
-description: "通过 Dubbo 定义的路由规则，实现对流量分布的控制"
+title: "流量治理规则"
+linkTitle: "流量治理"
+weight: 2
+no_list: true
+hide_summary: true
 ---
+
 
 
 ### 流量管理
@@ -33,3 +36,6 @@ Dubbo 将整个流量管理分成 [VirtualService](./mesh-style/virtualservice/)
 + [DestinationRule](./mesh-style/destination-rule/) 主要处理目标地址规则，可以通过 hosts、subnet 等方式关联到 Provider 集群。同时可以通过 [trafficPolicy](./mesh-style/destination-rule/#trafficpolicy) 来实现负载均衡。
 
 这种设计理念很好的解决流量分流和目标地址之间的耦合问题。不仅将配置规则进行了简化有效避免配置冗余的问题，还支持 [VirtualService](./mesh-style/virtualservice/) 和 [DestinationRule](./mesh-style/destination-rule/) 的任意组合，可以非常灵活的支持各种业务使用场景。
+
+
+
