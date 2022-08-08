@@ -23,7 +23,7 @@ Dubbo可以通过XML配置，注解配置，动态配置实现动态调整超时
 > docker部署dubbo-admin，docker-compose.yml如下：
 >
 > ```
->version: '3'
+> version: '3'
 > services:
 > zk:
 >  image: zookeeper
