@@ -95,7 +95,7 @@ configs:
    - 应用：`scope: application, key: app-name`（还可使用`services`指定某几个服务）。
    - 服务：`scope: service, key:group+service+version `。
 2. 修改是作用到消费者端还是提供者端。
-   - 消费者：`side: consumer` ，作用到消费端时（你还可以进一步使用`providerAddress`, `applications`选定特定的提供者示例或应用）。
+   - 消费者：`side: consumer` ，作用到消费端时，你还可以进一步使用`providerAddress`, `applications`选定特定的提供者示例或应用，如果同时配置消费者和提供者，消费者会覆盖提供者。
    - 提供者：`side: provider`。
 3. 配置是否只对某几个特定实例生效。
    - 所有实例：`addresses: ["0.0.0.0"] `或`addresses: ["0.0.0.0:*"] `具体由side值决定。
