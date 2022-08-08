@@ -25,38 +25,41 @@ ls # 查看目录结构
 ## 快速运行示例
 
 1. 编译 Provider
-在 dubbo-samples-spring-boot 目录，进入 dubbo-samples-spring-boot-provider 目录并执行 maven 命令
+在 dubbo-samples-spring-boot 目录执行 maven 命令
 ```shell script
-cd ./dubbo-samples-spring-boot-provider
 mvn clean package
 ```
 
 2. 运行 Provider
+进入 dubbo-samples-spring-boot-provider/target 目录并启动 java 进程
 ```shell script
+cd ./dubbo-samples-spring-boot-provider
 java -jar ./target/dubbo-samples-spring-boot-provider-1.0-SNAPSHOT.jar
 ```
 
-3. 编译 Consumer
-进入 dubbo-samples-spring-boot-consumer 目录并执行 maven 命令
-
-```shell script
-cd ../dubbo-samples-spring-boot-consumer
-mvn clean package
-```
-
-4. 运行 consumer
+3. 运行 consumer
+进入 dubbo-samples-spring-boot-consumer 目录并启动 java 进程
 ```shell script
 java -jar ./target/dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar
 ```
 
-## 详细解释
+4. 查看结果
+在 consumer 侧会输出如下信息：
+```
+result: Hello World
+```
+在 provider 侧会输出如下信息：
+```
+Hello World, request from consumer: xxx.xxx.xxx.xxx
+```
+
+至此就把 Dubbo 的基本功能都实现了，可以在 Dubbo 的基础上进行更多的开发。
+
+## 示例核心流程
 
 关于示例的更详细解读可参见 [注解配置](../../reference-manual/config/annotation/)
 
-### 示例架构
-
-
-### 定义服务接口
+### 1. 定义服务接口
 
 dubbo-samples-spring-boot-interface/DemoService.java
 
@@ -68,7 +71,7 @@ public interface DemoService {
 }
 ```
 
-### 提供方实现接口并暴露服务
+### 2. 提供方实现接口并暴露服务
 
 dubbo-samples-spring-boot-provider/DemoServiceImpl.java
 
@@ -83,7 +86,7 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-### 配置 application.yml 文件
+### 3. 配置 application.yml 文件
 
 dubbo-samples-spring-boot-provider/resources/application.yml
 
@@ -103,7 +106,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-### 定义 Spring Boot 主函数
+### 4. 定义 Spring Boot 主函数
 
 dubbo-samples-spring-boot-provider/ProviderApplication.java
 
@@ -122,7 +125,7 @@ public class ProviderApplication {
 ```
 其中，`@EnableDubbo` 必须配置。
 
-### 引用远程服务
+### 5. 引用远程服务
 
 dubbo-samples-spring-boot-consumer/ConsumerApplication.java
 
@@ -133,7 +136,7 @@ public class ConsumerApplication {
 }
 ```
 
-### 定义 application.yml
+### 6. 定义 application.yml
 
 dubbo-samples-spring-boot-consumer/application.yml
 
@@ -153,7 +156,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-### 加载 Spring 配置，并调用远程服务
+### 7. 加载 Spring 配置，并调用远程服务
 
 dubbo-samples-spring-boot-consumer/ConsumerApplication.java
 
