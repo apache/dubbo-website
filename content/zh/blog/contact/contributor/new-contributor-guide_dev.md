@@ -10,24 +10,24 @@ weight: 2
 
 ### 邮件列表描述
 
-邮件列表是 Dubbo 官方推荐的讨论方式，所有与 Dubbo 相关的内容都可以在这里讨论，请点击 [Issue](https://github.com/apache/dubbo/Issues/1393) 了解更多关于邮件列表订阅的内容
+邮件列表是 Dubbo 官方推荐的讨论方式，所有与 Dubbo 相关的内容都可以在这里讨论，请点击 [Issue](https://github.com/apache/dubbo/issues/1393) 了解更多关于邮件列表订阅的内容
 
 如需订阅如下邮件列表，请参考 [邮件列表订阅向导](/zh/blog/1/01/01/邮件列表订阅向导/)
 
 * dev@dubbo.apache.org：开发邮件列表，您在使用或者开发 Dubbo 的过程中遇到的任何问题，都可以在这里进行提问。
 * commits@dubbo.apache.org：所有的提交内容都会推送到这个邮件列表，如果您对 Dubbo 的进展感兴趣，可以订阅这个邮件列表。
-* Issues@dubbo.apache.org：所有的 JIRA [Issues](https://Issues.apache.org/jira/projects/DUBBO/Issues) 和修改信息都会推送到这个邮件列表。Dubbo 社区已经决定使用 github Issues 代替 JIRA Issues，因此大部分 Issues 将由 github Issues 进行跟踪。JIRA Issues 用于跟踪 ASF 相关问题。
+* issues@dubbo.apache.org：所有的 [JIRA Issues](https://issues.apache.org/jira/projects/DUBBO/issues) 和修改信息都会推送到这个邮件列表。Dubbo 社区已经决定使用 GitHub Issues 代替 JIRA Issues，因此大部分 Issues 将由 GitHub Issues 进行跟踪。JIRA Issues 用于跟踪 ASF 相关问题。
 
 ### 报告问题
-* 非安全问题直接在 GitHub Issue 中提出，另请参考 [Issue Template](https://github.com/apache/dubbo/blob/master/.github/ISSUE_TEMPLATE/dubbo-Issue-report-template.md) 。
+* 非安全问题直接在 GitHub Issue 中提出，另请参考 [Issue Template](https://github.com/apache/dubbo/blob/master/.github/ISSUE_TEMPLATE/dubbo-issue-report-template.md) 。
 * 安全问题请参考 [“反馈漏洞”](../报告安全问题) 。
 
 ### 贡献代码流程
-此贡献流程适用于所有的Apache Dubbo社区内容，包括但不限于dubbo(主干仓库)、dubbo admin、dubbo website。
+此贡献流程适用于所有的 Apache Dubbo 社区内容，包括但不限于 dubbo（主干仓库）、dubbo-admin、dubbo-website。
 
-以下以贡献dubbo(主干仓库)为例，详细说明贡献流程。
+以下以贡献 dubbo （主干仓库） 为例，详细说明贡献流程。
 
-#### 1. **Fork apache/Dubbo 项目到您的github帐号下**
+#### 1. **Fork apache/dubbo 项目到您的 GitHub 帐号下**
 
 #### 2. **克隆您 Fork 的 Dubbo 代码仓库到您本地**
 ```shell
@@ -50,7 +50,7 @@ git fetch origin
 git fetch upstream
 ```
 #### 4. **我们的工作以 Issue 为驱动，认领个 Issue，或者创建一个 Issue 并描述清楚要做什么。**
-新人推荐标记为： `good first Issue` 的 Issue
+新人推荐标记为： `good first issue` 的 Issue
 
 #### 5. **选择一个开发的基础分支，通常是 master / 3.0 / 3.1，并基于此创建一个新的本地分支**
 * 3.1 分支是 3.1 版本的开发分支
@@ -59,10 +59,10 @@ git fetch upstream
 
 ```shell
 # 从远程仓库创建分支到本地
-git checkout -b up-dev-Issue#${Issue-number} upstream/master
+git checkout -b up-dev-issue#${issue-number} upstream/master
 ```
 为了避免一些不必要的麻烦，我们推荐以 "upstream" 中的分支为基础创建新的本地分支。
-可以以要做的事情的简单描述作为分支名(只要你能看懂就行)，通常情况下我们会把Issue号包含到分支名中，例如上面的 checkout 命令中的。 
+可以以要做的事情的简单描述作为分支名(只要你能看懂就行)，通常情况下我们会把 Issue 号包含到分支名中，例如上面的 checkout 命令中的。 
 
 #### 6. **在本地新建的开发分支上进行各种修改**
 首先请保证您阅读并正确设置 Dubbo code style，相关内容请阅读 [编码规范](#编码规范) 。
@@ -73,7 +73,7 @@ git checkout -b up-dev-Issue#${Issue-number} upstream/master
 
 #### 7. **将您开发完成后的分支，上传到您fork的仓库**
 ```shell
-git push origin up-dev-Issue#${Issue-number}
+git push origin up-dev-issue#${issue-number}
 ```
 
 #### 8. **创建 Pull Request**
@@ -92,9 +92,9 @@ Dubbo 社区将会 Review 您的 Pull Request，并可能提出修改意见，�
 * 一件事情可以是一个 Issue，也可以是一个 Issue 中的部分 （Issue 太大可以拆解）。
 * 一个分支（一件事情）只提一个PR。
 * 提了 PR 后，如果 PR 有问题需要修改，可以继续在这个 PR 关联的分支修改提交。在 PR 被 merge 前，向这个分支继提交都会进入这个 PR。
-* 如果只是想纯更新代码，可以从主仓库提PR到你fork的仓库， 源选择主仓库里的分支，目标选你fork的仓库的分支。
+* 如果只是想纯更新代码，可以从主仓库提 PR 到你fork的仓库，源选择主仓库里的分支，目标选你 fork 的仓库的分支。
 * 这种方式更新代码，你 Fork 的仓库中会多一个提交。如果以你 Fork 的仓库中的分支为源创建分支， 这个提交纪录会被带过去并出现在PR中，所以要以主仓库的分支为源创建分支。
-* Issue 认领: 在要认领的 Issue 中回复，明确表式你将处理这个 Issue。这样社区的 PMC 和 Committer 会把该 Issue assign给你。当然认领前先看下这个 Issue 有没有被别人认领了。
+* Issue 认领: 在要认领的 Issue 中回复，明确表式你将处理这个 Issue。这样社区的 PMC 和 Committer 会把该 Issue assign 给你。当然认领前先看下这个 Issue 有没有被别人认领了。
   为了方便，我们可以把认领的回复统一为: **@i will solve it@**， 当然这不是必须的。
 
 #### 编码规范
