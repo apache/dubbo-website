@@ -51,8 +51,8 @@ git fetch upstream
 ##### 4. **我们的工作以issue为驱动，认领一个issue，或者创建一个issue并描述清楚要做什么。**
 新人推荐标记为： `good first issue` 的 issue
 
-##### 5. **选择一个开发的基础分支，通常是 upstream/master， 并基于此创建一个新的本地分支**
-upstream/master 分支是目前 2.7.x 版本的开发分支
+##### 5. **选择一个开发的基础分支，通常是 master/3.1， 并基于此创建一个新的本地分支**
+master/3.1 分支是目前 3.1 版本的开发分支
 
 ```shell
 # 从远程仓库创建分支到本地
