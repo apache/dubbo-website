@@ -16,35 +16,6 @@ Dubbo可以通过XML配置，注解配置，动态配置实现动态调整超时
 
 请确保成功运行Dubbo-Admin
 
-
-
-> **提示**
->
-> docker部署dubbo-admin，docker-compose.yml如下：
->
-> ```
-> version: '3'
-> services:
-> zk:
->  image: zookeeper
->    container_name: zk
->     ports:
->          - 2181:2181
->      dubbo-admin:
->     image: apache/dubbo-admin
->     container_name: dubbo-admin
->     # 等待zk启动后再启动
->     depends_on:
->       - zk
->     ports:
->       - 8080:8080
->     environment:
->       - admin.registry.address=zookeeper://zk:2181
->       - admin.config-center=zookeeper://zk:2181
->       - admin.metadata-report.address=zookeeper://zk:2181
-> ```
-> 
-
 ## 背景信息
 
 在日常工作中会遇到各类超时配置，业务逻辑变更后，已有调用关系随着业务发展可能需要不断调整，相应服务接口响应时间的变化可能需要上线后才能确定。Dubbo-Admin提供了动态的超时配置能力，能够帮助您快速动态调整接口超时时间，提高服务的可用性。
@@ -53,15 +24,17 @@ Dubbo可以通过XML配置，注解配置，动态配置实现动态调整超时
 
 ## 操作步骤
 
+### 动态配置
+
 1. 登录Dubbo-Admin控制台
 2. 在左侧导航栏选择服务治理 > 动态配置。
 3. 点击创建按钮，在创建动态配置面板中，填写规则内容，然后单击保存。
 
 
 
-## 规则详解
+#### 规则详解
 
-#### 配置模板
+##### 配置模板
 
 ```yaml
 ---

@@ -46,10 +46,9 @@ no_list: true
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-<!--                     <a href='{{< relref "./traffic-gray/" >}}'>流量灰度 (TBD)</a> -->
-                    <p>流量灰度 (文档建设中)</p>
+                    <a href='{{< relref "./traffic-gray/" >}}'>流量灰度</a>
                 </h4>
-                <p>根据请求上下文中的标签，实现对</p>
+                <p>根据请求上下文中的标签，实现对流量进行约束，实现灰度发布</p>
             </div>
         </div>
     </div>
@@ -57,8 +56,7 @@ no_list: true
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-<!--                     <a href='{{< relref "./traffic-routing/" >}}'>请求路由 (TBD)</a> -->
-                    <p>根据请求条件路由 (文档建设中)</p>
+                    <a href='{{< relref "./traffic-routing/" >}}'>根据请求条件路由</a>
                 </h4>
                 <p>根据请求发起方、请求的方法条件路由</p>
             </div>
@@ -68,10 +66,9 @@ no_list: true
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-<!--                     <a href='{{< relref "./traffic-condition/" >}}'>流量隔离 (TBD)</a> -->
-                <p>流量隔离 (文档建设中)</p>
+                    <a href='{{< relref "./traffic-condition/" >}}'>流量隔离</a>
                 </h4>
-                <p>流量隔离</p>
+                <p>将不同环境的服务流量进行隔离，保证服务相互不受影响</p>
             </div>
         </div>
     </div>

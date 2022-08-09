@@ -9,42 +9,12 @@ description: "在 Dubbo-Admin 临时踢除问题服务实例"
 
 Dubbo提供临时踢除问题服务实例的服务治理能力，可以在无需重启应用的情况下，临时踢除问题服务实例。
 
-Dubbo可以通过XML配置，注解配置，动态配置实现动态调整超时时间，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](https://dubbo.apache.org/zh/docsv2.7/user/configuration/)
+Dubbo可以通过XML配置，注解配置，动态配置实现临时踢除问题服务实例，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](https://dubbo.apache.org/zh/docsv2.7/user/configuration/)
 
 
 ## 开始之前
 
 请确保成功运行Dubbo-Admin
-
-
-
-> **提示**
->
-> docker部署dubbo-admin，docker-compose.yml如下：
->
-> ```
-> version: '3'
-> services:
-> zk:
->  image: zookeeper
->    container_name: zk
->     ports:
->          - 2181:2181
->      dubbo-admin:
->     image: apache/dubbo-admin
->     container_name: dubbo-admin
->     # 等待zk启动后再启动
->     depends_on:
->       - zk
->     ports:
->       - 8080:8080
->     environment:
->       - admin.registry.address=zookeeper://zk:2181
->       - admin.config-center=zookeeper://zk:2181
->       - admin.metadata-report.address=zookeeper://zk:2181
-> ```
-> 
-
 
 ## 背景信息
 
@@ -54,15 +24,17 @@ Dubbo可以通过XML配置，注解配置，动态配置实现动态调整超时
 
 ## 操作步骤
 
+### 动态配置
+
 1. 登录Dubbo-Admin控制台
 2. 在左侧导航栏选择服务治理 > 动态配置。
 3. 点击创建按钮，在创建动态配置面板中，填写规则内容，然后单击保存。
 
 
 
-## 规则详解
+#### 规则详解
 
-#### 配置模板
+##### 配置模板
 
 ```yaml
 ---

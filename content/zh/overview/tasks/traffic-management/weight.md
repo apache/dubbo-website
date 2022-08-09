@@ -17,35 +17,6 @@ Dubbo可以通过XML配置，注解配置，动态配置实现通过权重调整
 请确保成功运行Dubbo-Admin
 
 
-
-> **提示**
->
-> docker部署dubbo-admin，docker-compose.yml如下：
->
-> ```
-> version: '3'
-> services:
-> zk:
->  image: zookeeper
->    container_name: zk
->     ports:
->          - 2181:2181
->      dubbo-admin:
->     image: apache/dubbo-admin
->     container_name: dubbo-admin
->     # 等待zk启动后再启动
->     depends_on:
->       - zk
->     ports:
->       - 8080:8080
->     environment:
->       - admin.registry.address=zookeeper://zk:2181
->       - admin.config-center=zookeeper://zk:2181
->       - admin.metadata-report.address=zookeeper://zk:2181
-> ```
-> 
-
-
 ## 背景信息
 
 在机器性能差异的场景下，不同机器的负载需要进行系统评估，需要对某些机器降级。通过权重调整机器的流量比例，可以合理地评估机器性能。
@@ -54,12 +25,14 @@ Dubbo可以通过XML配置，注解配置，动态配置实现通过权重调整
 
 ## 操作步骤
 
+### 权重调整
+
 1. 登录Dubbo-Admin控制台
 2. 在左侧导航栏选择服务治理 > 权重调整。
 3. 点击创建按钮，在新建权重规则面板中，填写规则内容，然后单击保存。
 
 
-## 规则详解
+#### 规则详解
 
 
 **对于通过权重动态调整流量分布场景，只需要理清楚以下问题基本就知道配置该怎么写了：**
