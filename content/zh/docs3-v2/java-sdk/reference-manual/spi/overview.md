@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "Dubbo SPI概述"
-linkTitle: "Dubbo SPI概述"
+title: "Dubbo SPI 概述"
+linkTitle: "Dubbo SPI 概述"
 weight: 1
 description: "Dubbo 通过 SPI 机制提供了非常灵活的可扩展性"
 ---
