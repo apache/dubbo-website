@@ -25,7 +25,7 @@ description: "本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署
 2. 构建容器镜像并推送到镜像仓库（ [本示例官方镜像](https://hub.docker.com/u/dubboteam) ）
 3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes 并验证 Envoy 代理注入成功
 4. 验证 Envoy 发现服务地址、正常拦截 RPC 流量并实现负载均衡
-5. 优化并配置健康检查流程
+5. 基于 Istio VirtualService 实现按比例流量转发
 
 ## 3 详细步骤
 
@@ -162,7 +162,7 @@ provider istio-proxy 日志输出如下:
   outbound_.50052_._.dubbo-samples-mesh-provider.dubbo-demo.svc.cluster.local default
 ```
 
-### 3.5 Istio 流量治理
+### 3.5 流量治理 - VirtualService 实现按比例流量转发
 
 部署 v2 版本的 demo provider
 ```shell
@@ -210,7 +210,7 @@ kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/d
 
 ```
 
-#### 查看 dashboard
+### 3.6 查看 dashboard
 Istio 官网查看 [如何启动 dashboard](https://istio.io/latest/docs/setup/getting-started/#dashboard)。
 
 ## 4 修改示例
