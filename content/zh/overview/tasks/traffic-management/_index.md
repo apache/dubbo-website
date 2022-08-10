@@ -76,10 +76,9 @@ no_list: true
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-<!--                     <a href='{{< relref "./zone/" >}}'>同机房/区域优先 (TBD)</a> -->
-                <p>同机房/区域优先 (文档建设中)</p>
+                    <a href='{{< relref "./zone/" >}}'>同机房/区域优先</a>
                 </h4>
-                <p>同机房/区域优先</p>
+                <p>应用调用服务时，优先调用同机房/区域的服务提供者。</p>
             </div>
         </div>
     </div>
