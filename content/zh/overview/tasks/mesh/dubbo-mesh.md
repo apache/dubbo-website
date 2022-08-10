@@ -14,7 +14,7 @@ description: "本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署
 * Istio 自动注入 Envoy 并实现流量拦截
 * 基于 Istio 规则进行流量治理
 
-<h2 id="basic">2 基本流程与工作原理</h2>
+## 2 基本流程与工作原理
 这个示例演示了如何将 Dubbo 开发的应用部署在 Istio 体系下，以实现 Envoy 对 Dubbo 服务的自动代理，示例总体架构如下图所示。
 
 ![thinsdk](/imgs/v3/mesh/thinsdk-envoy.png)
