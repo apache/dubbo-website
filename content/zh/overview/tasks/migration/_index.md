@@ -3,7 +3,9 @@
 type: docs
 title: "如何平滑的迁移到 Dubbo3 的新功能"
 linkTitle: "迁移到 Dubbo3"
+description: "演示如何以最小代价迁移到 Dubbo3 并开启各项新特性。"
 weight: 5
+no_list: true
 ---
 
 {{< blocks/section color="white" height="auto">}}
