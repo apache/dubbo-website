@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "Triple "
+title: "Triple 使用示例"
 linkTitle: "Triple 使用示例"
+description: "演示 Triple 跨语言通信、Streaming 等能力"
 weight: 2
-hide_summary: true
 no_list: true
 ---
 
