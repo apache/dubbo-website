@@ -30,7 +30,7 @@ description: "本示例演示了如何使用经典的 Istio+Envoy 的 Service Me
 <h2 id="basic">2 基本流程与工作原理</h2>
 这个示例演示了如何将 Dubbo 开发的应用部署在 Istio 体系下，以实现 Envoy 对 Dubbo 服务的自动代理，示例总体架构如下图所示。
 
-[thinsdk](./assets/thinsdk.png)
+![thinsdk](/imgs/v3/mesh/thinsdk-envoy.png)
 
 完成示例将需要的步骤如下：
 
@@ -228,8 +228,8 @@ Istio 官网查看 [如何启动 dashboard](https://istio.io/latest/docs/setup/g
 
 <h3 id="image">4 修改示例</h3>
 
-> 1. 注意项目存储路径一定是英文，否则 protobuf 编译失败。
-> 2. 以为应用开发与打包的指引说明。
+> 1. 修改示例并非必须步骤，本小节是为想要调整代码并查看部署效果的读者准备的。
+> 2. 注意项目源码存储路径一定是英文，否则 protobuf 编译失败。
 
 修改 Dubbo Provider 配置 `dubbo-provider.properties`
 
