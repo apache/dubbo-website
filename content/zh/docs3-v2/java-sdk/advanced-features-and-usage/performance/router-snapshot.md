@@ -17,7 +17,7 @@ Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环
 Dubbo 在收到地址变更的时候，会将地址信息推送给所有的 `Router`，这些 `Router` 可以在此阶段提前计算路由的分组，缓存起来，以避免在调用时需要遍历所有的提供者计算分组参数。
 在 Dubbo 3 中引入的 `StateRouter` 提供了通过 qos 命令工具实时获取每个路由的状态的能力。
 
-运维人员可以通过 `getRouterSnapshot` 命令获取路由的状态。具体命令使用方式可以参考 [getRouterSnapshot 命令](../../..//reference-manual/qos/router-snapshot/#getroutersnapshot-%E5%91%BD%E4%BB%A4) 文档。
+运维人员可以通过 `getRouterSnapshot` 命令获取路由的状态。具体命令使用方式可以参考 [getRouterSnapshot 命令](../../../reference-manual/qos/router-snapshot/#getroutersnapshot-%E5%91%BD%E4%BB%A4) 文档。
 
 **注：此功能仅支持 `StateRoute`，且 `StateRouter` 需要基于 `AbstractStateRouter` 实现 `doBuildSnapshot` 接口。**
 
@@ -50,7 +50,7 @@ No provider available after route for the service 服务 from registry 注册中
 
 #### 开启路由全采样
 
-在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以 [通过 qos 开启路由全采样](../../..//reference-manual/qos/router-snapshot/)。通过 qos 的 `getRecentRouterSnapshot` 命令可以远程获取最近的路由快照。
+在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以 [通过 qos 开启路由全采样](../../../reference-manual/qos/router-snapshot/)。通过 qos 的 `getRecentRouterSnapshot` 命令可以远程获取最近的路由快照。
 
 ```
 dubbo>getRecentRouterSnapshot
