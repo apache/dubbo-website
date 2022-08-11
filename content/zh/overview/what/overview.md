@@ -14,11 +14,11 @@ Dubbo3 定义为面向云原生的下一代 RPC 服务框架。3.0 基于 [Dubbo
 ### Dubbo 是什么
 
 Apache Dubbo 最初在 2008 年由 Alibaba 捐献开源，很快成为了国内开源服务框架选型的事实标准框架    ，得到了各行各业的广泛应用。在 2017 年，Dubbo 正式捐献到 Apache 软件基金会并成为 Apache 顶级项目，目前 Dubbo3 已经是一站式的微服务解决方案提供：
-* 基于 HTTP/2 的 [Triple 协议](../../whatsnew/triple)以及面向代理 API 的编程体验。
+* 基于 HTTP/2 的 [Triple 协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)以及面向代理 API 的编程体验。
 * 强大的[流量治理能力](../../tasks/traffic-management)，如地址发现、负载均衡、路由选址、动态配置等。
 * [多语言 SDK 实现](../../mannual/)，涵盖 Java、Golang、Javascript 等，更多语言实现将会陆续发布。
 * 灵活的适配与扩展能力，可轻松与微服务体系其他组件如 Tracing、Transaction 等适配。
-* [Dubbo Mesh 解决方案](../../whatsnew/mesh)，同时支持 Sidecar、Proxyless 等灵活的 Mesh 部署方案。
+* [Dubbo Mesh 解决方案](/zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/)，同时支持 Sidecar、Proxyless 等灵活的 Mesh 部署方案。
 
 Apache Dubbo 总体架构能很好的满足企业的大规模微服务实践，因为它从设计之初就是为了解决超大规模微服务集群实践问题，不论是阿里巴巴还是工商银行、中国平安、携程等社区用户，它们都通过多年的大规模生产环境流量对 Dubbo 的稳定性与性能进行了充分验证，因此，Dubbo 在解决业务落地与规模化实践方面有着无可比拟的优势：
 * 开箱即用
@@ -57,7 +57,7 @@ Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编�
 * 提供端响应流（Response Streaming）
 * 双向流式通信（Bidirectional Streaming）
 
-具体可参见各语言 SKDK 实现的可选协议列表 或 [Triple协议](../../whatsnew/triple)
+具体可参见各语言 SKDK 实现的可选协议列表 或 [Triple协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
 
 #### 自动服务（地址）发现
 Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任意部署，消费端可以在无需感知对端部署位置与 IP 地址的情况下完成通信。Dubbo 提供的是 Client-Based 的服务发现机制，使用者可以有多种方式启用服务发现：
@@ -81,7 +81,7 @@ Dubbo 从设计上是完全遵循云原生微服务开发理念的，这体现�
 
 结合当前版本，本节主要从以下两点展开 Dubbo 的云原生特性
 * [容器调度平台（Kubernetes）](../../tasks/kubernetes/deploy-on-k8s)
-* [Dubbo Mesh](../../whatsnew/mesh)
+* [Dubbo Mesh](/zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/)
 
 ##### Kubernetes
 Dubbo 微服务要支持 Kubernetes 平台调度，最基础的就是实现 dubbo 服务生命周期与容器生命周期的对齐，这包括 Dubbo 的启动、销毁、服务注册等生命周期事件。相比于以往 Dubbo 自行定义生命周期事件，并要求开发人员在运维实践过程中遵守约定，Kubernetes 底层基础设施定义了严格的组件生命周期事件(probe)，转而要求 Dubbo 去按约定适配。

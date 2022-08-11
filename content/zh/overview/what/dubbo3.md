@@ -15,7 +15,7 @@ weight: 2
   * [Java - 迁移指南](/zh/docs3-v2/java-sdk/upgrades-and-compatibility)
   * [Golang - 迁移指南](/zh/docs3-v2/golang-sdk/)
 * 其他 **Dubbo3 相关资源：**
-  * 更多资料，如性能指标、高级特性说明等请参考 [多语言 SDK 实现](../mannual/)
+  * 更多资料，如性能指标、高级特性说明等请参考 [多语言 SDK 实现](/zh/overview/mannual/)
   * 演讲与线下活动
 
 ### 背景
