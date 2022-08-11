@@ -1,9 +1,11 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "Rmi协议"
+linkTitle: "Rmi协议"
+weight: 8
 ---
+
 ## 特性说明
 RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和 JDK 标准序列化方式。
 
@@ -26,6 +28,17 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 是 Java 的一组拥护开发分布式应用程序的 API，实现了不同操作系统之间程序的方法调用。
 
 ## 使用方式
+
+#### 引入依赖
+
+从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-rpc-rmi</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
 ```sh
 java -Dsun.rmi.transport.tcp.responseTimeout=3000

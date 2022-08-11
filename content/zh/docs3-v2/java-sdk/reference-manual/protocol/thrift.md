@@ -1,9 +1,12 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "Thrift协议"
+linkTitle: "Thrift协议"
+weight: 7
 ---
+
+
 ## 特性说明
 当前 dubbo 支持的 thrift 协议是对 thrift 原生协议的扩展，在原生协议的基础上添加了一些额外的头信息，比如 service name，magic number 等。`2.3.0` 以上版本支持。
 
@@ -18,6 +21,17 @@ weight: 2
 ## 使用方式
 
 #### 依赖
+
+从 Dubbo 3 开始，Thrift 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-rpc-native-thrift</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+
 ```xml
 <dependency>
     <groupId>org.apache.thrift</groupId>
