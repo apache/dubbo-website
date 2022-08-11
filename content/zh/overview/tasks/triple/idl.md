@@ -11,6 +11,8 @@ description: ""
 
 下面从定义服务、编译服务、配置并加载服务三个方面说明如何快速的开发 Dubbo 服务。
 
+具体用例可以参考：[dubbo-samples-triple/stub](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/stub);
+
 ## 定义服务
 Dubbo3 推荐使用 IDL 定义跨语言服务，如您更习惯使用特定语言的服务定义方式，请移步[多语言 SDK](/zh/docs3-v2/)查看。
 
@@ -51,6 +53,42 @@ IDL 格式的服务依赖 Protobuf 编译器，用来生成可以被用户调用
 根据当前采用的语言，配置相应的 Protobuf 插件，编译后将生产语言相关的服务定义 stub。
 
 ### Java
+
+Java compiler 配置参考：
+```xml
+<plugin>
+    <groupId>org.xolstice.maven.plugins</groupId>
+    <artifactId>protobuf-maven-plugin</artifactId>
+    <version>0.6.1</version>
+    <configuration>
+        <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
+        </protocArtifact>
+        <pluginId>grpc-java</pluginId>
+        <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
+        </pluginArtifact>
+        <protocPlugins>
+            <protocPlugin>
+                <id>dubbo</id>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-compiler</artifactId>
+                <version>3.0.10</version>
+                <mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
+            </protocPlugin>
+        </protocPlugins>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>compile</goal>
+                <goal>test-compile</goal>
+                <goal>compile-custom</goal>
+                <goal>test-compile-custom</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
 Java 语言生成的 stub 如下，核心是一个接口定义
 ```java
 @javax.annotation.Generated(
@@ -114,9 +152,9 @@ public class DemoServiceImpl implements DemoService {
     public HelloReply sayHello(HelloRequest request) {
         logger.info("Hello " + request.getName() + ", request from consumer: " + RpcContext.getContext().getRemoteAddress());
         return HelloReply.newBuilder()
-                .setMessage("Hello " + request.getName() + ", response from provider: "
-                        + RpcContext.getContext().getLocalAddress())
-                .build();
+    .setMessage("Hello " + request.getName() + ", response from provider: "
+            + RpcContext.getContext().getLocalAddress())
+    .build();
     }
 
     @Override
