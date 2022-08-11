@@ -1,9 +1,12 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "gRPC协议"
+linkTitle: "gRPC协议"
+weight: 5
 ---
+
+
 ## 特性说明
 Dubbo 自 2.7.5 版本开始支持 gRPC 协议，对于计划使用 HTTP/2 通信，或者想利用 gRPC 带来的 Stream、反压、Reactive 编程等能力的开发者来说，
 都可以考虑启用 gRPC 协议。

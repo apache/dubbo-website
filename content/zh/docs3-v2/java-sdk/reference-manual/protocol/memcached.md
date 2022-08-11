@@ -1,9 +1,12 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "Memcached协议"
+linkTitle: "Memcached协议"
+weight: 12
 ---
+
+
 ## 特性说明
 基于 memcached 实现的 RPC 协议。 `2.3.0` 以上版本支持。
 
@@ -12,6 +15,18 @@ weight: 2
 ## 使用场景
 缓解数据库压力，提高交互速度等。
 ## 使用方式
+
+#### 引入依赖
+
+从 Dubbo 3 开始，Memcached 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-rpc-memcached</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
 #### 注册 memcached 服务的地址
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();

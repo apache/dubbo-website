@@ -1,9 +1,12 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "Redis协议"
+linkTitle: "Redis协议"
+weight: 9
 ---
+
+
 ## 特性说明
 基于 Redis 实现的 RPC 协议。 `2.3.0` 以上版本支持。
 
@@ -14,6 +17,19 @@ weight: 2
 缓存，限流，分布式锁等
 
 ## 使用方式
+
+#### 引入依赖
+
+从 Dubbo 3 开始，Redis 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-rpc-redis</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+
 #### 注册 redis 服务的地址
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();

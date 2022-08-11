@@ -1,9 +1,11 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "Webservice协议"
+linkTitle: "Webservice协议"
+weight: 11
 ---
+
 
 ## 特性说明
 基于 WebService 的远程调用协议，基于 [Apache CXF](http://cxf.apache.org) 的 `frontend-simple` 和 `transports-http` 实现。`2.3.0` 以上版本支持。
@@ -28,6 +30,16 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 发布一个服务（对内/对外），不考虑客户端类型，不考虑性能，建议使用webservice。服务端已经确定使用webservice，客户端不能选择，必须使用webservice。
 ## 使用方式
 #### 依赖
+
+从 Dubbo 3 开始，Redis 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-rpc-webservice</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
 ```xml
 <dependency>
     <groupId>org.apache.cxf</groupId>

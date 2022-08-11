@@ -1,9 +1,12 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "HTTP协议"
+linkTitle: "HTTP协议"
+weight: 6
 ---
+
+
 ## 特性说明
 基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现，`2.3.0` 以上版本支持。
 
@@ -23,6 +26,16 @@ weight: 2
 http短连接，协议标准化且易读，容易对接外部系统，适用于上层业务模块。
 
 ## 使用方式
+
+从 Dubbo 3 开始，Http 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-rpc-http</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
 配置协议：
 ```xml
 <dubbo:protocol name="http" port="8080" />

@@ -1,9 +1,12 @@
+
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
-weight: 2
+title: "Hessian协议"
+linkTitle: "Hessian协议"
+weight: 10
 ---
+
+
 ## 特性说明
 Hessian 协议用于集成 Hessian 的服务，Hessian 底层采用 Http 通讯，采用 Servlet 暴露服务，Dubbo 缺省内嵌 Jetty 作为服务器实现。
 
@@ -33,6 +36,16 @@ hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序
 ## 使用方式
 
 #### 依赖
+
+从 Dubbo 3 开始，Hessian 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-rpc-hessian</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
 ```xml
 <dependency>
     <groupId>com.caucho</groupId>
