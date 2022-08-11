@@ -2,7 +2,7 @@
 type: docs
 title: "Dubbo 生态"
 linkTitle: "生态系统"
-weight: 4
+weight: 5
 ---
 
 ### Dashboard

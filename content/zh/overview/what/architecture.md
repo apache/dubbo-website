@@ -2,7 +2,7 @@
 type: docs
 title: "概念与架构"
 linkTitle: "概念与架构"
-weight: 2
+weight: 3
 ---
 ## RPC 通信
 Dubbo3 的 Triple 协议构建在 HTTP/2 协议之上，因此具有更好的穿透性与通用性，Triple 协议兼容 gRPC，提供 Request Response、Request Streaming、Response Streaming、Bi-directional Streaming 等通信模型；从 Triple 协议开始，Dubbo 还支持基于 IDL 的服务定义。
