@@ -31,7 +31,7 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 ## 使用方式
 #### 依赖
 
-从 Dubbo 3 开始，Redis 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+从 Dubbo 3 开始，Redis 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

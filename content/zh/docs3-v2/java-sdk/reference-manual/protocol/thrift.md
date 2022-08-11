@@ -22,7 +22,7 @@ weight: 7
 
 #### 依赖
 
-从 Dubbo 3 开始，Thrift 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+从 Dubbo 3 开始，Thrift 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

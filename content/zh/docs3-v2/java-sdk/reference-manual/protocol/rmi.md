@@ -31,7 +31,7 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 
 #### 引入依赖
 
-从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

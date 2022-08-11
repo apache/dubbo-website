@@ -27,7 +27,7 @@ http短连接，协议标准化且易读，容易对接外部系统，适用于�
 
 ## 使用方式
 
-从 Dubbo 3 开始，Http 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的模块。
+从 Dubbo 3 开始，Http 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
