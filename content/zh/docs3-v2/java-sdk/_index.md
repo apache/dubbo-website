@@ -2,7 +2,7 @@
 ---
 type: docs
 title: "Java"
-weight: 3
+weight: 10
 #no_list: true
 #hide_summary: true
 content:
