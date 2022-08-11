@@ -6,7 +6,7 @@ weight: 2
 description: "Dubbo3 相比 2.7 版本进行了全面的升级，以下是新增的一些核心特性"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/overview/whatsnew/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/overview/what/dubbo3/)。
 {{% /pageinfo %}}
 
 ## 全新服务发现模型
