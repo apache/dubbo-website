@@ -68,7 +68,7 @@ return referenceConfig.get();
 
 3. 动态配置（优先级最高，可以在运行时修改配置）
 
-此配置需要基于配置中心进行推送，Key 为应用名 + `.migration` （如 `demo-application.migraion`），Group 为 `DUBBO_SERVICEDISCOVERY_MIGRATION`。规则体配置详见[接口级服务发现迁移至应用级服务发现指南](../migration-service-discovery/)。
+此配置需要基于配置中心进行推送，Key 为应用名 + `.migration` （如 `demo-application.migraion`），Group 为 `DUBBO_SERVICEDISCOVERY_MIGRATION`。规则体配置详见[接口级服务发现迁移至应用级服务发现指南](/zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/)。
 > 示例：[https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java)
 
 ```java
