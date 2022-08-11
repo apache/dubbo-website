@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "一致性事务"
-linkTitle: "一致性事务"
+title: "事务管理"
+linkTitle: "事务管理"
 weight: 1
-description: "快速玩转 Dubbo 生态之一致性事务篇（Seata）"
+description: "本示例演示如何通过 Seata 实现分布式 Dubbo 服务的事务管理，保证数据一致性。"
 ---
 
 ## Seata 是什么

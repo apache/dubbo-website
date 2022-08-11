@@ -3,7 +3,7 @@ type: docs
 title: "限流降级"
 linkTitle: "限流降级"
 weight: 2
-description: "快速玩转 Dubbo 生态之一致性限流降级篇（Sentinel）"
+description: "使用 Sentinel 保护您的应用，防止应用因个别服务的突发流量过载而出现稳定性问题。"
 ---
 
 ## Sentinel 是什么
