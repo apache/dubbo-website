@@ -6,9 +6,8 @@ description: Dubbo-go 框架概念
 weight: 1
 ---
 
-# Dubbo-go 概念
 
-![](/imgs/docs3-v2/golang-sdk/concept/dubbogo.png)
+![img](/imgs/docs3-v2/golang-sdk/concept/dubbogo.png)
 
 Apache/Dubbo-go ([github.com/apache/dubbo-go](https://github.com/apache/dubbo-go))
 
