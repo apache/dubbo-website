@@ -59,6 +59,16 @@ menu:
             </div>
         </div>
     </div>
+    <div class="col-sm col-md-6 mb-4 mb-md-0">
+        <div class="h-100 card shadow">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <a href='{{< relref "./rust-sdk" >}}'>Rust SDK</a>
+                </h4>
+                <p>Rust SDK 手册</p>
+            </div>
+        </div>
+    </div>
 
 </div>
 <hr>
