@@ -1,3 +1,11 @@
+---
+title: "8-Dubbo启动器DubboBootstrap借助双重校验锁的单例模式进行对象的初始化"
+linkTitle: "8-Dubbo启动器DubboBootstrap借助双重校验锁的单例模式进行对象的初始化"
+date: 2022-08-08
+author: 宋小生
+description: >
+    [Dubbo 3.0.8源码解析] 启动器是为使用者提供简化的API功能来进行Dubbo应用的启动，手写Dubbo服务的启动使用启动器是必要的。
+---
 
 #  8-Dubbo启动器DubboBootstrap借助双重校验锁的单例模式进行对象的初始化
 ## 8.1 启动器简介
