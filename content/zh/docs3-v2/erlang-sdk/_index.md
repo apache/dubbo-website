@@ -3,7 +3,7 @@
 type: docs
 title: "Erlang"
 linkTitle: "Erlang"
-weight: 200
+weight: 500
 description: "Erlang 支持"
 ---
 

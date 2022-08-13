@@ -3,8 +3,8 @@
 type: docs
 title: "Kubernetes 部署方案"
 linkTitle: "Kubernetes 部署方案"
+description: "演示如何将 Dubbo 部署到 Kubernetes 并复用 Kubernetes Native Service。"
 weight: 2
-hide_summary: true
 no_list: true
 ---
 
@@ -26,10 +26,9 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-<!--                     <a href='{{< relref "./deploy-on-k8s/" >}}'>Dubbo Mesh</a> -->
-                    <p>Dubbo Mesh (建设中)</p>
+                    <a href='{{< relref "../mesh/" >}}'>Dubbo Mesh</a>
                 </h4>
-                <p>依赖 Dubbo Control Plane 屏蔽服务治理细节</p>
+                <p>通过 Dubbo Control Plane 屏蔽服务治理细节，保留适配 kubernetes 原生能力的同时从架构上实现数据面与 kubernetes 的解耦，避免数据面与 kubernetes 直接通信带来的各种问题。<br/><br/>具体请参见 Mesh解决方案 小节</p>
             </div>
         </div>
     </div>

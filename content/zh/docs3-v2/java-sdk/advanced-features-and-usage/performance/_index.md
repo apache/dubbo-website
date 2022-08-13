@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "性能优化类特性"
-linkTitle: "性能优化类特性"
-weight: 5
+title: "诊断与调优"
+linkTitle: "诊断与调优"
+weight: 3
 ---
 

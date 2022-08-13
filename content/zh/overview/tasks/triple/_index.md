@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "Triple "
+title: "Triple 使用示例"
 linkTitle: "Triple 使用示例"
+description: "演示 Triple 跨语言通信、Streaming 等能力"
 weight: 2
-hide_summary: true
 no_list: true
 ---
 
@@ -26,8 +26,17 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-<!--                     <a href='{{< relref "./streaming/" >}}'>Streaming 通信 (TBD)</a> -->
-                <p>Stream 通信模式 (文档建设中)</p>
+                     <a href='{{< relref "./wrap/" >}}'>Pojo 序列化兼容模式</a>
+                </h4>
+                <p>Pojo 序列化兼容模式</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm col-md-6 mb-4 mb-md-0">
+        <div class="h-100 card shadow" href="#">
+            <div class="card-body">
+                <h4 class="card-title">
+                     <a href='{{< relref "./streaming/" >}}'>Streaming 通信</a>
                 </h4>
                 <p>Stream 通信模式</p>
             </div>

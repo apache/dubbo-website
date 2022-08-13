@@ -1,12 +1,17 @@
 name: Link Check
 
-on: [push, pull_request, workflow_dispatch]
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  link_check_job:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Link Check Job
     steps:
       - uses: actions/checkout@v2
         with:
@@ -28,6 +33,13 @@ jobs:
         run: hugo --minify --baseURL /
       - name: Setup Html Test
         run: curl https://htmltest.wjdp.uk | bash
+      - name: Cache Html Test Ref
+        uses: actions/cache@v2
+        with:
+          path: tmp/.htmltest/refcache.json
+          key: ${{ runner.os }}-htmltest-ref-${{ github.run_number }}-${{ github.run_id }}-
+          restore-keys: |
+            ${{ runner.os }}-htmltest-ref-
       - name: Lint Self
         run: ./bin/htmltest -s
       - name: Lint External

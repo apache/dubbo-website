@@ -3,8 +3,8 @@
 type: docs
 title: "流量治理"
 linkTitle: "流量治理"
+description: "演示 Dubbo 流量治理特性的使用方式。"
 weight: 1
-hide_summary: true
 no_list: true
 ---
 

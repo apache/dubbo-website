@@ -14,7 +14,7 @@ weight: 2
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href='{{< relref "../../docs3-v2/java-sdk/quick-start" >}}'>Java SDK</a>
+                    <a target="_blank" href='{{< relref "../../docs3-v2/java-sdk/quick-start/spring-boot/" >}}'>Java SDK</a>
                 </h4>
                 <p>Dubbo Java SDK Quick start</p>
             </div>
@@ -24,7 +24,7 @@ weight: 2
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href='{{< relref "../../docs3-v2/golang-sdk" >}}'>Golang SDK</a>
+                    <a target="_blank" href='{{< relref "../../docs3-v2/golang-sdk/quickstart/" >}}'>Golang SDK</a>
                 </h4>
                 <p>Dubbo Golang SDK Quick start</p>
             </div>

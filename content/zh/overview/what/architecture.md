@@ -2,7 +2,7 @@
 type: docs
 title: "概念与架构"
 linkTitle: "概念与架构"
-weight: 2
+weight: 3
 ---
 ## RPC 通信
 Dubbo3 的 Triple 协议构建在 HTTP/2 协议之上，因此具有更好的穿透性与通用性，Triple 协议兼容 gRPC，提供 Request Response、Request Streaming、Response Streaming、Bi-directional Streaming 等通信模型；从 Triple 协议开始，Dubbo 还支持基于 IDL 的服务定义。
@@ -10,7 +10,7 @@ Dubbo3 的 Triple 协议构建在 HTTP/2 协议之上，因此具有更好的穿
 此外，Dubbo 还集成了业界主流的大部分协议，使得用户可以在 Dubbo 框架范围内使用这些通信协议，为用户提供了统一的编程模型与服务治理模型，这些协议包括 rest、hessian2、jsonrpc、thrift 等，注意不同语言 SDK 实现支持的范围会有一些差异。
 
 具体可查看
-* [Triple 速览](../../whatsnew/triple)
+* [Triple 速览](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
 * [Specification](https://github.com/apache/dubbo-awesome/blob/master/proposals/D0-triple.md)
 
 ## 服务发现
@@ -26,7 +26,7 @@ Dubbo 基于消费端的自动服务发现能力，其基本工作原理如下�
 在云原生背景下，比如当应用部署在 Kubernetes 等平台，由于平台自身维护了应用/服务与实例间的映射关系，因此注册中心与注册动作在一定程度上被下沉到了基础设施层，因此框架自身的注册动作有时并不是必须的。
 
 Dubbo3 提供了全新的应用级服务发现模型，该模型在设计与实现上区别于 Dubbo2 的接口级服务发现模型。可在此查看：
-* [应用级服务发现](../../whatsnew/service-discovery)
+* [应用级服务发现](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/#应用级服务发现简介)
 
 ## 流量治理
 Dubbo2 开始 Dubbo 就提供了丰富服务治理规则，包括路由规则、动态配置等。

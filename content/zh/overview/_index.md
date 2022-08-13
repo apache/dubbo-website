@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "文档"
-linkTitle: "文档"
+title: "入门文档"
+linkTitle: "入门文档"
 no_list: true
 hide_summary: true
 menu:
@@ -24,7 +24,7 @@ Dubbo 是一款包含多种语言实现（Java、Golang等）的 RPC 服务框�
 * 想了解更多 Dubbo 特性与使用细节?
   * 选择相应 [**多语言 SDK 实现**](mannual/)，并参考**高级特性**或**参考手册**
 * 老用户，想快速了解 **Dubbo 3.0** 相关知识
-  * [3.0 特性一览](whatsnew/)
+  * [3.0 特性一览](what/dubbo3/)
   * 查看相应[多语言 SDK 实现](mannual/)，了解升级与兼容性
 
 #### 相关链接

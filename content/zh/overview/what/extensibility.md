@@ -2,7 +2,7 @@
 type: docs
 title: "可扩展性"
 linkTitle: "可扩展性"
-weight: 3
+weight: 4
 ---
 
 ## 扩展设计理念
