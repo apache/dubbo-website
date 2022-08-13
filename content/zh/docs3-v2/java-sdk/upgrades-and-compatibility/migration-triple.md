@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "Dubbo协议迁移至Triple协议指南"
-linkTitle: "Dubbo协议迁移至Triple协议指南"
+title: "Dubbo 协议迁移至 Triple 协议指南"
+linkTitle: "Dubbo 协议迁移至 Triple 协议指南"
 weight: 2
-description: "Triple协议迁移指南"
+description: "Triple 协议迁移指南"
 ---
 
 ## Triple 介绍

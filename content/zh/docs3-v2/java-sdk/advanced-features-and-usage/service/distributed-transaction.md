@@ -1,14 +1,14 @@
 ---
 type: docs
-title: "分布式事务"
-linkTitle: "分布式事务"
+title: "分布式事务支持"
+linkTitle: "分布式事务支持"
 weight: 42
 description: "Dubbo 中分布式事务的支持"
 ---
 
 分布式事务基于 JTA/XA 规范实现。
 
-两阶段提交：
+**两阶段提交**
 
 ![/user-guide/images/jta-xa.jpg](/imgs/user/jta-xa.jpg)
 

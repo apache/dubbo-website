@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "Mulicast"
-linkTitle: "Mulicast"
+title: "Multicast"
+linkTitle: "Multicast"
 weight: 4
 description: "Multicast 广播注册中心（限开发阶段使用）。"
 ---

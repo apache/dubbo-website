@@ -6,7 +6,7 @@ weight: 3
 description: "降级 Dubbo 服务"
 ---
 
-推荐使用相关限流降级组件（如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)）以达到最佳体验。
+推荐使用相关限流降级组件（如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)）以达到最佳体验。参考示例实践：[微服务治理/限流降级](/zh/overview/tasks/ecosystem/rate-limit/);
 
 ## 特性说明
 

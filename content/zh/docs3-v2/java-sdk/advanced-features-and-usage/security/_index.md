@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "安全类特性"
-linkTitle: "安全类特性"
+title: "提升服务安全性"
+linkTitle: "提升安全性"
 weight: 4
 ---
 

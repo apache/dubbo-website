@@ -3,8 +3,8 @@
 type: docs
 title: "Mesh 部署方案"
 linkTitle: "Mesh 部署方案"
+description: "演示多种部署形态的 Dubbo Mesh 解决方案，以及 Dubbo Mesh 如何帮助用户实现架构的平滑迁移。 "
 weight: 2
-hide_summary: true
 no_list: true
 ---
 

@@ -6,7 +6,40 @@ weight: 2
 ---
 
 这篇教程会通过从零构建一个简单的工程来演示如何基于 POJO 方式使用 Dubbo Triple, 在应用不改变已有接口定义的同时升级到 Triple 协议。
-POJO on Triple 原理请参考POJO on Triple(TBD)
+
+
+### 实现原理
+
+通过上面介绍的升级过程，我们可以很简单的通过修改协议类型来完成升级。框架是怎么帮我们做到这些的呢？
+
+通过对 `Triple` 协议的介绍，我们知道Dubbo3的 `Triple` 的数据类型是 `protobuf` 对象，那为什么非 `protobuf` 的 java 对象也可以被正常传输呢。
+
+这里 Dubbo3 使用了一个巧妙的设计，首先判断参数类型是否为 `protobuf` 对象，如果不是。用一个 `protobuf` 对象将 `request` 和 `response` 进行 wrapper，这样就屏蔽了其他各种序列化带来的复杂度。在 `wrapper` 对象内部声明序列化类型，来支持序列化的扩展。
+
+wrapper 的`protobuf`的 IDL如下:
+```proto
+syntax = "proto3";
+
+package org.apache.dubbo.triple;
+
+message TripleRequestWrapper {
+    // hessian4
+    // json
+    string serializeType = 1;
+    repeated bytes args = 2;
+    repeated string argTypes = 3;
+}
+
+message TripleResponseWrapper {
+    string serializeType = 1;
+    bytes data = 2;
+    string type = 3;
+}
+```
+
+对于请求，使用`TripleRequestWrapper`进行包装，对于响应使用`TripleResponseWrapper`进行包装。
+
+> 对于请求参数，可以看到 args 被`repeated`修饰，这是因为需要支持 java 方法的多个参数。当然，序列化只能是一种。序列化的实现沿用 Dubbo2 实现的 spi
 
 ### 前置条件
 - [JDK](https://jdk.java.net/) 版本 >= 8
