@@ -3,7 +3,7 @@ type: docs
 title: 安装 Dubbo-go 开发环境
 weight: 1
 ---
-## 1. 安装Go语言环境
+### 1. 安装Go语言环境
 
 建议使用最新版 go 1.17
 
@@ -13,11 +13,11 @@ go version >= go 1.15
 
 将 $GOPATH/bin 加入环境变量
 
-## 2 安装序列化工具protoc
+### 2. 安装序列化工具protoc
 
 [【protoc 下载地址】](https://github.com/protocolbuffers/protobuf/releases)
 
-## 3 安装 dubbogo-cli 以及相关插件
+### 3. 安装 dubbogo-cli 以及相关插件
 
 执行以下指令安装dubbogo-cli 至 $GOPATH/bin
 
