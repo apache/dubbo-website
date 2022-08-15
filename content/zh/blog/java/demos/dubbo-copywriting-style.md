@@ -237,24 +237,6 @@ Microsoft 有个 [`-ms-text-autospace`](http://msdn.microsoft.com/en-us/library/
 | [sparanoid/grunt-auto-spacing](https://github.com/sparanoid/grunt-auto-spacing) | Node.js (Grunt) |
 | [hjiang/scripts/add-space-between-latin-and-cjk](https://github.com/hjiang/scripts/blob/master/add-space-between-latin-and-cjk) | Python          |
 
-## 谁在这样做？
-
-| 网站                                               | 文案 | UGC          |
-|--------------------------------------------------| ---- | ------------ |
-| [Apple 中国](http://www.apple.com/cn/)             | Yes  | N/A          |
-| [Apple 香港](http://www.apple.com/hk/)             | Yes  | N/A          |
-| [Apple 台湾](http://www.apple.com/tw/)             | Yes  | N/A          |
-| [LeanCloud](https://leancloud.cn/)               | Yes  | N/A          |
-| [知乎](https://www.zhihu.com/)                     | Yes  | 部分用户达成 |
-| [V2EX](https://www.v2ex.com/)                    | Yes  | Yes          |
-| [SegmentFault](https://segmentfault.com/)        | Yes  | 部分用户达成 |
-| [Apple4us](http://apple4us.com/)                 | Yes  | N/A          |
-| [豌豆荚](https://www.wandoujia.com/)                | Yes  | N/A          |
-| [Ruby China](https://ruby-china.org/)            | Yes  | 标题达成     |
-| [PHPHub](https://phphub.org/)                    | Yes  | 标题达成     |
-| [少数派](http://sspai.com/)                         | Yes  | N/A          |
-
-
 ## 参考文献
 
 - [Guidelines for Using Capital Letters](http://grammar.about.com/od/punctuationandmechanics/a/Guidelines-For-Using-Capital-Letters.htm)
