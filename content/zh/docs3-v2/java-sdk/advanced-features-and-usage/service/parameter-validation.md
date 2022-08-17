@@ -23,12 +23,6 @@ description: "在 dubbo3 中进行参数校验"
 </dependency>
 ```
 
-#### 示例类型
-- 参数标注
-- 分组验证
-- 关联验证
-- 参数验证
-
 ## 使用场景
 
 服务端在向外提供接口服务时，解决各种接口参数校验问题。
@@ -39,7 +33,7 @@ description: "在 dubbo3 中进行参数校验"
 
 ## 使用方式
 
-#### 参数标注示例
+### 参数标注示例
 
 ```java
 import java.io.Serializable;
@@ -116,7 +110,7 @@ public class ValidationParameter implements Serializable {
 }
 ```
 
-#### 分组验证示例
+### 分组验证示例
 
 ```java
 public interface ValidationService { // 缺省可按服务接口区分验证场景，如：@NotNull(groups = ValidationService.class)   
@@ -126,7 +120,7 @@ public interface ValidationService { // 缺省可按服务接口区分验证场�
 }
 ```
 
-#### 关联验证示例
+### 关联验证示例
 
 ```java
 import javax.validation.GroupSequence;
@@ -141,7 +135,7 @@ public interface ValidationService {
 }
 ```
 
-#### 参数验证示例
+### 参数验证示例
 
 ```java
 import javax.validation.constraints.Min;
@@ -152,27 +146,22 @@ public interface ValidationService {
     void delete(@Min(1) int id); // 直接对基本类型参数验证
 }
 ```
-#### 配置
-- 客户端
-- 服务器端
 
-#### 在客户端验证参数
+### 在客户端验证参数
 
 ```xml
 <dubbo:reference id="validationService" interface="org.apache.dubbo.examples.validation.api.ValidationService" validation="true" />
 ```
 
-#### 在服务器端验证参数
+### 在服务器端验证参数
 
 ```xml
 <dubbo:service interface="org.apache.dubbo.examples.validation.api.ValidationService" ref="validationService" validation="true" />
 ```
 
-{{% alert title="提示" color="primary" %}}
-Dubbo 默认支持 hibernate-validator 版本 <=6.x，若使用 hibernate-validator 7.x 版本，请将 validation 参数声明为 jvalidatorNew
-{{% /alert %}}
+> **Dubbo 默认支持 hibernate-validator 版本 <=6.x，若使用 hibernate-validator 7.x 版本，请将 validation 参数声明为 jvalidatorNew**
 
-#### 验证异常信息
+### 验证异常信息
 
 ```java
 import javax.validation.ConstraintViolationException;
@@ -204,7 +193,4 @@ public class ValidationConsumer {
 }
 ```
 
-#### 提示：
-
-验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](../../../reference-manual/spi/description/validation)
-
+> **验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](../../../reference-manual/spi/description/validation)**
