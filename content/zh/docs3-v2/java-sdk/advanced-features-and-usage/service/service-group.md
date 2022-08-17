@@ -9,10 +9,6 @@ description: "使用服务分组区分服务接口的不同实现"
 ## 特性说明
 同一个接口针对不同的业务场景、不同的使用需求或者不同的功能模块等场景，可使用服务分组来区分不同的实现方式。同时，这些不同实现所提供的服务是可并存的，也支持互相调用。
 
-#### 配置
-- 服务提供端
-- 服务消费端
-
 ## 使用场景
 当一个接口有多种实现时，可以用 group 区分。
 
@@ -21,14 +17,10 @@ description: "使用服务分组区分服务接口的不同实现"
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group)
 
 ## 使用方式
-Dubbo 服务分组可选择使用方式 
-- 注解配置
-- xml配置
-- API配置
 
 ### 注解配置
 
-#### 服务提供端
+#### 服务提供端(注解配置)
 
 使用 @DubboService 注解，添加 group 参数
 
@@ -48,7 +40,7 @@ public class Demo2ServiceImpl implements DemoService {
 
 ![image-service-group-1.png](/imgs/blog/service-group-1.png)
 
-#### 服务消费端
+#### 服务消费端(注解配置)
 
 使用 @DubboReference 注解，添加 group 参数
 
@@ -69,7 +61,7 @@ private DemoService demoService2;
 
 ### xml配置
 
-#### 服务提供端
+#### 服务提供端( xml 配置)
 
 使用 <dubbo:service /> 标签，添加 group 参数
 
@@ -94,7 +86,7 @@ private DemoService demoService2;
 
 ![image-service-group-1.png](/imgs/blog/service-group-1.png)
 
-#### 服务消费端
+#### 服务消费端( xml 配置)
 
 使用 <dubbo:reference/> 注解，添加 group 参数
 
@@ -125,7 +117,7 @@ private DemoService demoService2;
 
 ### API配置
 
-#### 服务提供端
+#### 服务提供端( API 配置)
 
 使用 org.apache.dubbo.config.ServiceConfig 类，添加 group 参数
 
@@ -147,7 +139,7 @@ service.setGroup("demo2");
 
 ![image-service-group-1.png](/imgs/blog/service-group-1.png)
 
-#### 服务消费端
+#### 服务消费端( API 配置)
 
 使用 org.apache.dubbo.config.ReferenceConfig，添加 group 参数
 
@@ -173,5 +165,5 @@ reference3.setGroup("*");
 同样启动 Dubbo 服务后，可在注册中心看到相同服务名不同分组的引用者，以 Nacos 作为注册中心为例，显示如下内容：
 ![image-service-group-2.png](/imgs/blog/service-group-2.png)
 
-#### 提示：
-总是 **只调** 一个可用组的实现
+
+> 总是 **只调** 一个可用组的实现
