@@ -4,7 +4,7 @@ linkTitle: "17-Dubbo服务提供者的双注册原理"
 date: 2022-08-17
 author: 宋小生
 description: >
-    [Dubbo 3.0.8源码解析] 对于直接使用Dubbo3的用户还好，可以仅仅开启应用级注册，但是对于Dubbo2.x的用户升级到Dubbo3的用户来说前期都是要开启双注册来慢慢迁移的，既注册传统的接口信息到注册中心，又注册应用信息到注册中心，同时注册应用与接口关系的元数据信息。。
+    [Dubbo 3.0.8源码解析] 对于直接使用Dubbo3的用户还好，可以仅仅开启应用级注册，但是对于Dubbo2.x的用户升级到Dubbo3的用户来说前期都是要开启双注册来慢慢迁移的，既注册传统的接口信息到注册中心，又注册应用信息到注册中心，同时注册应用与接口关系的元数据信息。
 ---
 
 # 17-Dubbo服务提供者的双注册原理
@@ -982,6 +982,5 @@ ZookeeperMetadataReport的storeMetadata
     }
 
 ```
-
 
 原文地址：[17-Dubbo服务提供者的双注册原理](https://blog.elastic.link/2022/07/10/dubbo/17-dubbo3-ying-yong-ji-zhu-ce-zhi-fu-wu-ti-gong-zhe-de-shuang-zhu-ce-yuan-li/)
