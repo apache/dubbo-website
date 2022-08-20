@@ -1,4 +1,11 @@
-
+---
+title: "14-Dubbo配置加载全解析"
+linkTitle: "14-Dubbo配置加载全解析"
+date: 2022-08-14
+author: 宋小生
+description: >
+    [Dubbo 3.0.8源码解析]  Dubbo框架的配置项比较繁多，为了更好地管理各种配置，将其按照用途划分为不同的组件，最终所有配置项都会汇聚到URL中，传递给后续处理模块。
+---
 # 14-Dubbo配置加载全解析
 ## 14.1 回到启动器的初始化过程
 在应用程序启动的时候会调用发布器的启动方法 ,然后调用初始化方法,在发布器DefaultApplicationDeployer中的初始化方法initialize() 如下:
