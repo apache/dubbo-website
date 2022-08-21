@@ -6,13 +6,15 @@ weight: 5
 description: "在发起 Dubbo 调用之前指定本次调用的目标 IP"
 ---
 ## 特性说明
+使用 Dubbo 的扩展，实现指定 IP 调用。
+
 ## 使用场景
 
 发起请求的时候需要指定本次调用的服务端，如消息回调、流量隔离等。
 
 ## 使用方式
 
-#### 插件依赖
+### 插件依赖
 
 适配 Dubbo 3 版本
 
@@ -34,7 +36,7 @@ description: "在发起 Dubbo 调用之前指定本次调用的目标 IP"
 </dependency>
 ```
 
-#### 调用示例
+### 调用示例
 
 ```java
 ReferenceConfig<DemoService> referenceConfig = new ReferenceConfig<>();
@@ -55,7 +57,7 @@ UserSpecifiedAddressUtil.setAddress(new Address("10.10.10.10", 0, true));
 demoService.sayHello("world");
 ```
 
-#### 参数说明
+### 参数说明
 
 指定 IP 调用的参数围绕 `Address` 对象展开。参数类型参考如下：
 
@@ -98,4 +100,4 @@ public class UserSpecifiedAddressUtil {
 }
 ```
 
-注：**必须每次都设置，而且设置后必须马上发起调用**，如果出现拦截器报错（Dubbo 框架内 remove 此值是在选址过程进行的）建议设置 null 以避免 ThreadLocal 内存泄漏导致影响后续调用。
+> **必须每次都设置，而且设置后必须马上发起调用**，如果出现拦截器报错（Dubbo 框架内 remove 此值是在选址过程进行的）建议设置 null 以避免 ThreadLocal 内存泄漏导致影响后续调用。
