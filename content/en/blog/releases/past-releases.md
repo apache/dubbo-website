@@ -15,6 +15,12 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 > GitHub: https://github.com/apache/dubbo \
 > Release Notes: https://github.com/apache/dubbo/releases
 
+### 3.1.0 (2022-08-22)
+
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip.sha512)
+
 ### 3.0.10 (2022-07-21)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.10/apache-dubbo-3.0.10-src.zip) |
