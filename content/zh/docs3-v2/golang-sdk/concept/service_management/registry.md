@@ -5,19 +5,17 @@ keywords: 服务注册发现
 description: 服务注册发现
 ---
 
-# 服务注册发现
-
 ## 1. Dubbo 的注册中心
 
 注册中心在 RPC 场景下负责保存服务端应用的信息。
 
 服务端注册接口信息和到自身地址到注册中心，客户端从注册中心读取和订阅需要调用的地址列表。整个架构如图所示：
 
-![](/imgs/architecture.png)
+![img](/imgs/architecture.png)
 
 关于 Dubbo 服务发现细节，详情可参考 [Dubbo 官网的概念介绍](/zh/docs/concepts/service-discovery/)
 
-## 2. 概念
+## 2. 服务发现概念
 
 Dubbo 生态中，服务发现有以下主要概念：
 
@@ -75,7 +73,7 @@ Dubbo-go 最的服务网格能力，引入以下几个概念
 
   服务网格元数据是接口名到主机名到映射，用于客户端查询所需接口的主机名信息。
 
-## 3. Dubbo-go 支持的注册中心类型
+## 3. Dubbo-go 注册中心
 
 Dubbo-go 支持的注册中心类型如下：
 
