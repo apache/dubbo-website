@@ -5,8 +5,6 @@ keywords: AOP 与可扩展机制
 description: AOP 与可扩展机制
 ---
 
-# 组件加载与可扩展性
-
 ## 1. extension 模块与 init 方法
 
 ### 1.1 接口与实现
@@ -87,13 +85,13 @@ import (
 
 ## 2. 组件加载流程
 
-1. 用户在代码中引入 _  "dubbo.apache.org/dubbo-go/v3/imports"
+1. 用户在代码中引入 _ "dubbo.apache.org/dubbo-go/v3/imports"
 
 2. 程序启动，init 函数被依次执行，注册工厂函数/实例化对象到 extension 模块。
 
 3. 框架启动，加载配置，配置中获取需要加载的模块key，根据key获取实例化对象。
 
-   用户也可以手动调用 extension 的 Get 方法，获取实例化对象并直接使用。
+4. 用户也可以手动调用 extension 的 Get 方法，获取实例化对象并直接使用。
 
 ## 3. 自定义组件
 
