@@ -391,7 +391,7 @@ private void createInvokerForRemote() {
 - RegistryProtocol 注册协议的refer方法 （会添加容错逻辑）
 - RegistryProtocol 注册协议的doRefer方法（调用方法创建Invoker对象）
 
-[](/img/dubbo/createInvokerRemote.png)
+[](/imgs/blog/source-blog/21-createInvokerRemote.png)
 
 这里我们不再详细说这个引用链的具体过程直接定位到RegistryProtocol中创建Invoker类型的地方。
 先来看RegistryProtocol类型的refer方法，如下代码所示：
