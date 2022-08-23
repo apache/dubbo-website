@@ -15,6 +15,27 @@ weight: 1
 > 发布说明: https://github.com/apache/dubbo/releases
 >
 
+### 2.7.16 (2022-07-06)
+
+#### Source Release
+
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.sha512)
+
+
+#### Maven Release
+
+* [org.apache.dubbo:dubbo:2.7.16](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.16/jar)
+
+```xml
+<dependency>
+  <groupId>org.apache.dubbo</groupId>
+  <artifactId>dubbo</artifactId>
+  <version>2.7.16</version>
+</dependency>
+```
+
 ### 3.0.10 (2022-07-21)
 
 #### Source Release

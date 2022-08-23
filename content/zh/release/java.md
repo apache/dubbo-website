@@ -57,23 +57,23 @@ weight: 1
 </dependency>
 ```
 
-### 2.7.16 (2022-07-06)
+### 2.7.17 (2022-08-23)
 
 #### Source Release
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip.sha512)
 
 
 #### Maven Release
 
-* [org.apache.dubbo:dubbo:2.7.16](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.16/jar)
+* [org.apache.dubbo:dubbo:2.7.17](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.17/jar)
 
 ```xml
 <dependency>
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
-  <version>2.7.16</version>
+  <version>2.7.17</version>
 </dependency>
 ```
