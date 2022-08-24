@@ -57,7 +57,7 @@ Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编�
 * 提供端响应流（Response Streaming）
 * 双向流式通信（Bidirectional Streaming）
 
-具体可参见各语言 SKDK 实现的可选协议列表 或 [Triple协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
+具体可参见各语言 SDK 实现的可选协议列表 或 [Triple协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
 
 #### 自动服务（地址）发现
 Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任意部署，消费端可以在无需感知对端部署位置与 IP 地址的情况下完成通信。Dubbo 提供的是 Client-Based 的服务发现机制，使用者可以有多种方式启用服务发现：
