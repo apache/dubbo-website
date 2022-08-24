@@ -57,7 +57,7 @@ Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编�
 * 提供端响应流（Response Streaming）
 * 双向流式通信（Bidirectional Streaming）
 
-具体可参见各语言 SKDK 实现的可选协议列表 或 [Triple协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
+具体可参见各语言 SDK 实现的可选协议列表 或 [Triple协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
 
 #### 自动服务（地址）发现
 Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任意部署，消费端可以在无需感知对端部署位置与 IP 地址的情况下完成通信。Dubbo 提供的是 Client-Based 的服务发现机制，使用者可以有多种方式启用服务发现：
@@ -102,6 +102,6 @@ Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一�
 
 ![dubbo-proxyless](/imgs/v3/mesh/dubbo-proxyless.png)
 
-可以设想，在不同的组织、不同的发展阶段，未来以 Dubbo 构建的微服务将会允许有三种部署架构：传统 SDK、基于 Sidecar 的 Service Mesh、脱离 Sidecar 的 Proxyless Mesh。基于 Sidecar 的 Service Mesh，即经典的 Mesh 架构，独立的 sidecar 运行时接管所有的流量，脱离 Sidecar 的 Proxyless Mesh，富 SDK 直接通过 xDS 与控制面通信。Dubbo 微服务允许部署在物理机、容器、Kubernetes 平台之上，能做到以 Admin 为控制面，以统一的流量治理规则进行治理。
+可以设想，在不同的组织、不同的发展阶段，未来以 Dubbo 构建的微服务将会允许有三种部署架构：传统 SDK、基于 Sidecar 的 Service Mesh、脱离 Sidecar 的 Proxyless Mesh。基于 Sidecar 的 Service Mesh，即经典的 Mesh 架构，独立的 sidecar 运行时接管所有的流量，脱离 Sidecar 的 Proxyless Mesh，副 SDK 直接通过 xDS 与控制面通信。Dubbo 微服务允许部署在物理机、容器、Kubernetes 平台之上，能做到以 Admin 为控制面，以统一的流量治理规则进行治理。
 
 
