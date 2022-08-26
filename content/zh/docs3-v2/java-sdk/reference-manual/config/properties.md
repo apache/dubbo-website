@@ -121,6 +121,8 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | init | init | boolean | 可选 | false | 性能调优 | 是否在afterPropertiesSet()时饥饿初始化引用，否则等到有人注入或引用该实例时再初始化。 | 2.0.10以上版本  |
 | protocol | protocol | string | 可选 | | 服务治理 | 只调用指定协议的服务提供方，其它协议忽略。 | 2.7.0以上版本 |
 | client | client | string | 可选 | dubbo协议缺省为netty | 服务发现 | 协议的客户端实现类型，比如：dubbo协议的mina,netty等 | 2.7.0以上版本 |
+| providerPort | provider-port | int | 可选 | | Service Mesh | 当dubbo.consumer.meshEnable=true，Dubbo默认会将请求转换成K8S标准格式，结合VirtualService和DestinationRule进行流量治理，此时consumer端可以感知到provider。如果不想使用VirtualService和DestinationRule，请设置providerPort，使consumer端感知provider暴露的服务端口 | 3.1.0以上版本 |。
+| unloadClusterRelated | unloadClusterRelated | boolean | 可选 | false | Service Mesh | 当dubbo.consumer.meshEnable=true，在Service Mesh模式下，设置为true，可在当前调用中卸载与Cluster相关的Directory、Router和Load Balance，将重试、负载平衡、超时和其他流量管理功能下放至Sidecar，使用VirtualService和DestinationRule进行流量治理 | 3.1.0以上版本 |
 | parameters | 无 | Map<string, string> | 可选 | | 服务治理 | 扩展预留，可扩展定义任意参数，所有扩展参数都将原样反映在 URL 配置上 | 2.0.0以上版本 |
 
 
@@ -330,6 +332,7 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | queues | queues | int | 可选 | 0 | 性能调优 | 线程池队列大小，当线程池满时，排队等待执行的队列大小，建议不要设置，当线程池满时应立即失败，重试其它服务提供机器，而不是排队，除非有特殊需求。 | 2.0.5以上版本 |
 | shareconnections | shareconnections | int | 可选 | 1 | 性能调优| 共享连接数。当connection参数设置为0时，会启用共享方式连接，默认只有一个连接。仅支持dubbo协议 | 2.7.0以上版本 |
 | referThreadNum | | int | 可选 | | 性能优化 | 异步调用线程池大小 | 3.0.0以上版本 |
+| meshEnable | mesh-enable| boolean | 可选 | false | Service Mesh | Dubbo Mesh模式的开关。开启后，可适配SideCar模式，将Dubbo服务调用转换为K8S标准调用。仅支持Triple协议，兼容GRPC。设置为true后，原生对接K8S，无需第三方注册中心，设置dubbo.registry.address=N/A即可 | 3.1.0以上版本 |
 | parameters | parameters | Map<string, string> | 可选 | | 服务治理 | 扩展参数 | 2.0.0以上版本 |
 
 ### metrics
