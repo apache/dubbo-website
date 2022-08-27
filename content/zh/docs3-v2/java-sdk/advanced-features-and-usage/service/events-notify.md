@@ -18,15 +18,14 @@ description: "在调用前后出现异常时的事件通知"
 
 ## 使用方式
 
-#### 服务提供者与消费者共享服务接口
+### 服务提供者与消费者共享服务接口
 
 ```java
 interface IDemoService {
     public Person get(int id);
 }
 ```
-- 服务提供者
-#### 服务提供者实现
+### 服务提供者实现
 
 ```java
 class NormalDemoService implements IDemoService {
@@ -36,7 +35,7 @@ class NormalDemoService implements IDemoService {
 }
 ```
 
-#### 服务提供者配置
+### 服务提供者配置
 
 ```xml
 <dubbo:application name="rpc-callback-demo" />
@@ -44,8 +43,7 @@ class NormalDemoService implements IDemoService {
 <bean id="demoService" class="org.apache.dubbo.callback.implicit.NormalDemoService" />
 <dubbo:service interface="org.apache.dubbo.callback.implicit.IDemoService" ref="demoService" version="1.0.0" group="cn"/>
 ```
-- 服务消费者
-#### 服务消费者 Callback 接口
+### 服务消费者 Callback 接口
 
 ```java
 interface Notify {
@@ -54,7 +52,7 @@ interface Notify {
 }
 ```
 
-#### 服务消费者 Callback 实现
+### 服务消费者 Callback 实现
 
 ```java
 class NotifyImpl implements Notify {
@@ -72,7 +70,7 @@ class NotifyImpl implements Notify {
 }
 ```
 
-#### 服务消费者 Callback 配置
+### 服务消费者 Callback 配置
 
 两者叠加存在以下几种组合情况：
 
@@ -90,7 +88,7 @@ class NotifyImpl implements Notify {
 ```
  
 
-#### 测试代码
+### 测试代码
 
 ```java
 IDemoService demoService = (IDemoService) context.getBean("demoService");
