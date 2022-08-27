@@ -33,7 +33,7 @@ description: >
 
 ### 2.1 启动shenyu-admin
 
-`shenyu-admin`是`Apache ShenYu`后台管理系统， 启动的方式有多种，本文通过 [本地部署](https://shenyu.apache.org/zh/docs/deployment/deployment-local) 的方式启动。启动成功后，需要在基础配置`->`插件管理中，把`dubbo` 插件设置为开启，并设置你的注册地址，请确保注册中心已经开启。
+`shenyu-admin`是`Apache ShenYu`后台管理系统， 启动的方式有多种，本文通过 `[本地部署](https://shenyu.apache.org/zh/docs/deployment/deployment-local)` 的方式启动。启动成功后，需要在基础配置`->`插件管理中，把`dubbo` 插件设置为开启，并设置你的注册地址，请确保注册中心已经开启。
 
 ![](/imgs/blog/shenyu-dubbo/dubbo-enable-zh.png)
 
@@ -151,7 +151,7 @@ shenyu:
 
 在配置文件中，声明`dubbo`使用的注册中心地址，`dubbo`服务向`shenyu-admin`注册，使用的方式是`http`，注册地址是`http://localhost:9095`。
 
-关于注册方式的使用，请参考 [应用客户端接入](https://shenyu.apache.org/docs/design/register-center-design/) 。
+关于注册方式的使用，请参考 `[应用客户端接入](https://shenyu.apache.org/docs/design/register-center-design/)` 。
 
 
 ### 2.4 调用dubbo服务
@@ -176,7 +176,7 @@ shenyu:
 >
 > 然后可以采用 `Match`，`=`，`Regex`，`Groovy`，`Exclude`等匹配方式，匹配出你所预想的数据。多组匹配添加可以使用`And/Or`的匹配策略。
 >
-> 具体的介绍与使用请看: [选择器与规则管理](https://shenyu.apache.org/zh/docs/user-guide/admin-usage/selector-and-rule) 。
+> 具体的介绍与使用请看: `[选择器与规则管理](https://shenyu.apache.org/zh/docs/user-guide/admin-usage/selector-and-rule)` 。
 
 
 发起`GET`请求，通过`ShenYu`网关调用`dubbo`服务：
@@ -278,7 +278,7 @@ Accept: application/json
 
 注解扫描通过`ApacheDubboServiceBeanListener`完成，它实现了`ApplicationListener<ContextRefreshedEvent>`接口，在`Spring`容器启动过程中，发生上下文刷新事件时，开始执行事件处理方法`onApplicationEvent()`。在重写的方法逻辑中，读取`Dubbo`服务`ServiceBean`，构建元数据对象和`URI`对象，并向`shenyu-admin`注册。
 
-具体的注册逻辑由注册中心实现，请参考 [客户端接入原理](https://shenyu.apache.org/zh/docs/design/register-center-design/) 。
+具体的注册逻辑由注册中心实现，请参考 `[客户端接入原理](https://shenyu.apache.org/zh/docs/design/register-center-design/)` 。
 
 
 - 处理注册信息

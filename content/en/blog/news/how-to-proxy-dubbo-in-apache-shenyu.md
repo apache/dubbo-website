@@ -29,7 +29,7 @@ This section describes how to connect the `Dubbo` service to the `Shenyu` gatewa
 
 ### 2.1 Start shenyu-admin
 
-`shenyu-admin` is the `Apache ShenYu` backend management system, there are various ways to start it, this article is started by [local deployment](https://shenyu.apache.org/docs/deployment/deployment-local) way. After successful startup, you need to set the `dubbo` plugin to be on and set your registered address in the base configuration `->`Plugin Management', please make sure the registration center has been opened.
+`shenyu-admin` is the `Apache ShenYu` backend management system, there are various ways to start it, this article is started by `[local deployment](https://shenyu.apache.org/docs/deployment/deployment-local)` way. After successful startup, you need to set the `dubbo` plugin to be on and set your registered address in the base configuration `->`Plugin Management', please make sure the registration center has been opened.
 
 ![](/imgs/blog/shenyu-dubbo/dubbo-enable-en.png)
 
@@ -146,7 +146,7 @@ shenyu:
 
 In the configuration file, declare the registry address used by `dubbo`. The `dubbo` service registers with `shenyu-admin`, using the method `http`, and the registration address is `http://localhost:9095`.
 
-See [Application Client Access](https://shenyu.apache.org/docs/design/register-center-design/) for more information on the use of the registration method.
+See `[Application Client Access](https://shenyu.apache.org/docs/design/register-center-design/)` for more information on the use of the registration method.
 
 
 ### 2.4 Invoke the Dubbo service
@@ -169,7 +169,7 @@ Information on the rules for successful registration.
 >
 > Then you can use `Match`, `=`, `Regex`, `Groovy`, `Exclude` and other matching methods to match the data you expect. Multi-group match additions can use the `And/Or` matching strategy.
 >
-> See: [Selector and Rule Management](https://shenyu.apache.org/docs/user-guide/admin-usage/selector-and-rule) for details and usage.
+> See: `[Selector and Rule Management](https://shenyu.apache.org/docs/user-guide/admin-usage/selector-and-rule)` for details and usage.
 
 
 Initiate a `GET` request to invoke the `dubbo` service through the `ShenYu` gateway.
@@ -206,7 +206,7 @@ Application client access refers to accessing microservices to the `Apache ShenY
 
 Accessing application clients to the `Apache ShenYu` gateway is achieved through the registry, which involves client-side registration and server-side synchronization of data. The registry supports `Http`, `Zookeeper`, `Etcd`, `Consul` and `Nacos`. The default is to register by `Http`.
 
-Please refer to [Client Access Configuration](https://shenyu.apache.org/docs/user-guide/register-center-access) for client access related configuration.
+Please refer to `[Client Access Configuration](https://shenyu.apache.org/docs/user-guide/register-center-access)` for client access related configuration.
 
 #### 3.1.1 Client-side Registration
 
