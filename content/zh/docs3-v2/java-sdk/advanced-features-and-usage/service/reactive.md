@@ -22,6 +22,8 @@ Dubbo + Reactive Stream Stub 的组合模式可以给用户带来最方便的流
 
 https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple-reactor
 
+## 使用场景
+
 ## 使用方式
 
 Triple 使用及配置可参考 [IDL 方式使用 Triple](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/protocol/triple/idl/)，并确保 Dubbo 版本 >= 3.1.0。
