@@ -29,7 +29,7 @@ This section describes how to connect the `Dubbo` service to the `Shenyu` gatewa
 
 ### 2.1 Start shenyu-admin
 
-`shenyu-admin` is the `Apache ShenYu` backend management system, there are various ways to start it, this article is started by [local deployment](https://shenyu.apache.org/docs/deployment/deployment-local) way. After successful startup, you need to set the `dubbo` plugin to be on and set your registered address in the base configuration `->`Plugin Management', please make sure the registration center has been opened.
+`shenyu-admin` is the `Apache ShenYu` backend management system, there are various ways to start it, this article is started by `[local deployment](https://shenyu.apache.org/docs/deployment/deployment-local)` way. After successful startup, you need to set the `dubbo` plugin to be on and set your registered address in the base configuration `->`Plugin Management', please make sure the registration center has been opened.
 
 ![](/imgs/blog/shenyu-dubbo/dubbo-enable-en.png)
 
@@ -146,7 +146,7 @@ shenyu:
 
 In the configuration file, declare the registry address used by `dubbo`. The `dubbo` service registers with `shenyu-admin`, using the method `http`, and the registration address is `http://localhost:9095`.
 
-See [Application Client Access](https://shenyu.apache.org/docs/design/register-center-design/) for more information on the use of the registration method.
+See `[Application Client Access](https://shenyu.apache.org/docs/design/register-center-design/)` for more information on the use of the registration method.
 
 
 ### 2.4 Invoke the Dubbo service
@@ -169,7 +169,7 @@ Information on the rules for successful registration.
 >
 > Then you can use `Match`, `=`, `Regex`, `Groovy`, `Exclude` and other matching methods to match the data you expect. Multi-group match additions can use the `And/Or` matching strategy.
 >
-> See: [Selector and Rule Management](https://shenyu.apache.org/docs/user-guide/admin-usage/selector-and-rule) for details and usage.
+> See: `[Selector and Rule Management](https://shenyu.apache.org/docs/user-guide/admin-usage/selector-and-rule)` for details and usage.
 
 
 Initiate a `GET` request to invoke the `dubbo` service through the `ShenYu` gateway.
@@ -206,7 +206,7 @@ Application client access refers to accessing microservices to the `Apache ShenY
 
 Accessing application clients to the `Apache ShenYu` gateway is achieved through the registry, which involves client-side registration and server-side synchronization of data. The registry supports `Http`, `Zookeeper`, `Etcd`, `Consul` and `Nacos`. The default is to register by `Http`.
 
-Please refer to [Client Access Configuration](https://shenyu.apache.org/docs/user-guide/register-center-access) for client access related configuration.
+Please refer to `[Client Access Configuration](https://shenyu.apache.org/docs/user-guide/register-center-access)` for client access related configuration.
 
 #### 3.1.1 Client-side Registration
 
@@ -229,7 +229,7 @@ The `Disruptor` plays a role in decoupling data and operation, which is good for
 
 Data synchronization refers to the policy used to synchronize data to the `Apache ShenYu` gateway after the `shenyu-admin` backend has manipulated the data. The `Apache ShenYu` gateway currently supports `ZooKeeper`, `WebSocket`, `Http long polling`, `Nacos`, `Etcd` and `Consul` for data synchronization. The default is to synchronize data via `WebSocket`.
 
-Please refer to [Data Synchronization Configuration](https://shenyu.apache.org/docs/user-guide/use-data-sync) for the configuration of data synchronization.
+Please refer to `[Data Synchronization Configuration](https://shenyu.apache.org/docs/user-guide/use-data-sync)` for the configuration of data synchronization.
 
 #### 3.2.1 The Significance of Data Synchronization
 
@@ -269,7 +269,7 @@ Use the annotation `@ShenyuDubboClient` to mark `dubbo` services that need to be
 
 Annotation scanning is done via the `ApacheDubboServiceBeanListener`, which implements the `ApplicationListener<ContextRefreshedEvent>` interface and starts executing the event handler method when a context refresh event occurs during the `Spring` container startup `onApplicationEvent()`. In the rewritten method logic, the `Dubbo` service `ServiceBean` is read, the metadata object and the `URI` object are constructed and registered with `shenyu-admin`.
 
-The specific registration logic is implemented by the registry, please refer to [Client Access Principles](https://shenyu.apache.org/docs/design/register-center-design/) .
+The specific registration logic is implemented by the registry, please refer to `[Client Access Principles](https://shenyu.apache.org/docs/design/register-center-design/)` .
 
 - Processing registration information
 
