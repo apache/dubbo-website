@@ -229,7 +229,7 @@ The `Disruptor` plays a role in decoupling data and operation, which is good for
 
 Data synchronization refers to the policy used to synchronize data to the `Apache ShenYu` gateway after the `shenyu-admin` backend has manipulated the data. The `Apache ShenYu` gateway currently supports `ZooKeeper`, `WebSocket`, `Http long polling`, `Nacos`, `Etcd` and `Consul` for data synchronization. The default is to synchronize data via `WebSocket`.
 
-Please refer to [Data Synchronization Configuration](https://shenyu.apache.org/docs/user-guide/use-data-sync) for the configuration of data synchronization.
+Please refer to `[Data Synchronization Configuration](https://shenyu.apache.org/docs/user-guide/use-data-sync)` for the configuration of data synchronization.
 
 #### 3.2.1 The Significance of Data Synchronization
 
@@ -269,7 +269,7 @@ Use the annotation `@ShenyuDubboClient` to mark `dubbo` services that need to be
 
 Annotation scanning is done via the `ApacheDubboServiceBeanListener`, which implements the `ApplicationListener<ContextRefreshedEvent>` interface and starts executing the event handler method when a context refresh event occurs during the `Spring` container startup `onApplicationEvent()`. In the rewritten method logic, the `Dubbo` service `ServiceBean` is read, the metadata object and the `URI` object are constructed and registered with `shenyu-admin`.
 
-The specific registration logic is implemented by the registry, please refer to [Client Access Principles](https://shenyu.apache.org/docs/design/register-center-design/) .
+The specific registration logic is implemented by the registry, please refer to `[Client Access Principles](https://shenyu.apache.org/docs/design/register-center-design/)` .
 
 - Processing registration information
 

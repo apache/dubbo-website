@@ -215,7 +215,7 @@ Accept: application/json
 
 将应用客户端接入到`Apache ShenYu`网关是通过注册中心来实现的，涉及到客户端注册和服务端同步数据。注册中心支持`Http`、`Zookeeper`、`Etcd`、`Consul`和`Nacos`。默认是通过`Http`方式注册。
 
-客户端接入的相关配置请参考 [客户端接入配置](https://shenyu.apache.org/zh/docs/user-guide/register-center-access) 。
+客户端接入的相关配置请参考 `[客户端接入配置](https://shenyu.apache.org/zh/docs/user-guide/register-center-access)` 。
 
 #### 3.1.1 客户端注册
 
@@ -238,7 +238,7 @@ Accept: application/json
 
 数据同步是指在 `shenyu-admin` 后台操作数据以后，使用何种策略将数据同步到 `Apache ShenYu` 网关。`Apache ShenYu` 网关当前支持`ZooKeeper`、`WebSocket`、`Http长轮询`、`Nacos` 、`Etcd` 和 `Consul` 进行数据同步。默认是通过`WebSocket`进行数据同步。
 
-数据同步的相关配置请参考 [数据同步配置](https://shenyu.apache.org/zh/docs/user-guide/use-data-sync) 。
+数据同步的相关配置请参考 `[数据同步配置](https://shenyu.apache.org/zh/docs/user-guide/use-data-sync)` 。
 
 #### 3.2.1 数据同步的意义
 
