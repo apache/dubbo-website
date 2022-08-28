@@ -172,7 +172,7 @@ public class ConsumerApplication {
         ConfigurableApplicationContext context = SpringApplication.run(ConsumerApplication.class, args);
         ConsumerApplication application = context.getBean(ConsumerApplication.class);
         String result = application.doSayHello("world");
-        System.out.println("result: " + result);
+        System.out.println(application.sayHello(result));
     }
 }
 ```
