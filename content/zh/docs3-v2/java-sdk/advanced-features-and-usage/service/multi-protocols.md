@@ -5,11 +5,14 @@ linkTitle: "多协议"
 weight: 9
 description: "在 Dubbo 中配置多协议"
 ---
-
+## 特性说明
 Dubbo 允许配置多协议，在不同服务上支持不同协议或者同一服务上同时支持多种协议。
 
-## 不同服务不同协议
+## 使用场景
 
+## 使用方式
+
+### 不同服务不同协议
 不同服务在性能上适用不同协议进行传输，比如大数据用短连接协议，小数据大并发用长连接协议
 
 ```xml
@@ -30,8 +33,7 @@ Dubbo 允许配置多协议，在不同服务上支持不同协议或者同一�
 </beans>
 ```
 
-## 多协议暴露服务
-
+### 多协议暴露服务
 需要与 http 客户端相互操作
 
 ```xml
@@ -49,5 +51,3 @@ Dubbo 允许配置多协议，在不同服务上支持不同协议或者同一�
     <dubbo:service id="helloService" interface="com.alibaba.hello.api.HelloService" version="1.0.0" protocol="dubbo,hessian" />
 </beans>
 ```
-
-[^1]: 可以自行扩展协议，参见：[协议扩展](/zh/docsv2.7/dev/impls/protocol/)
