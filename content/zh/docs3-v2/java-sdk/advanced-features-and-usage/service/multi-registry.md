@@ -5,13 +5,14 @@ linkTitle: "多注册中心"
 weight: 10
 description: "在 Dubbo 中把同一个服务注册到多个注册中心上"
 ---
-
+## 特性说明
 Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分别注册到不同的注册中心上去，甚至可以同时引用注册在不同注册中心上的同名服务。另外，注册中心是支持自定义扩展的 [^1]。
+## 使用场景
 
-## 多注册中心注册
+## 使用方式
+### 多注册中心注册
 
 比如：中文站有些服务来不及在青岛部署，只在杭州部署，而青岛的其它应用需要引用此服务，就可以将服务同时注册到两个注册中心。
-
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -27,11 +28,9 @@ Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分�
 </beans>
 ```
 
-## 不同服务使用不同注册中心
+### 不同服务使用不同注册中心
 
 比如：CRM 有些服务是专门为国际站设计的，有些服务是专门为中文站设计的。
-
-
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -49,10 +48,9 @@ Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分�
 </beans>
 ```
 
-## 多注册中心引用
+### 多注册中心引用
 
 比如：CRM 需同时调用中文站和国际站的 PC2 服务，PC2 在中文站和国际站均有部署，接口及版本号都一样，但连的数据库不一样。
-
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -87,4 +85,3 @@ Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分�
 ```
 
 [^1]: 可以自行扩展注册中心，参见：[注册中心扩展](../../../reference-manual/spi/description/registry)
-
