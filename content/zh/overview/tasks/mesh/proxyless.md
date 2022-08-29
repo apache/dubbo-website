@@ -131,10 +131,10 @@ mvn clean package -DskipTests
 ```bash
 cd ./dubbo-samples-xds-provider/
 # dubbo-samples-xds/dubbo-samples-xds-provider/Dockerfile
-docker build -t dubboteam/dubbo-samples-xds-provider:1.0.0 .
+docker build -t apache/dubbo-demo:dubbo-samples-xds-provider_0.0.1 .
 cd ../dubbo-samples-xds-consumer/
 # dubbo-samples-xds/dubbo-samples-xds-consumer/Dockerfile
-docker build -t dubboteam/dubbo-samples-xds-consumer:1.0.0 .
+docker build -t apache/dubbo-demo:dubbo-samples-xds-consumer_0.0.1 .
 cd ../
 ```
 

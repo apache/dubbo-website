@@ -22,7 +22,7 @@ description: "本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署
 完成示例将需要的步骤如下：
 
 1. 创建一个 Dubbo 应用( [dubbo-samples-mesh-k8s](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-mesh-k8s) )
-2. 构建容器镜像并推送到镜像仓库（ [本示例官方镜像](https://hub.docker.com/u/dubboteam) ）
+2. 构建容器镜像并推送到镜像仓库（ [本示例官方镜像](https://hub.docker.com/r/apache/dubbo-demo) ）
 3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes 并验证 Envoy 代理注入成功
 4. 验证 Envoy 发现服务地址、正常拦截 RPC 流量并实现负载均衡
 5. 基于 Istio VirtualService 实现按比例流量转发
@@ -256,7 +256,7 @@ dubbo.consumer.meshEnable=true
 mvn compile jib:build
 ```
 
-> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 dubboteam 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
+> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 apache/dubbo-demo 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
 > 可以通过直接在命令行指定 `mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth.username=x`，或者使用 docker-credential-helper.
 
 ## 5 常用命令

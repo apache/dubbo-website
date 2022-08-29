@@ -21,7 +21,7 @@ description: "该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo
 
 1. 创建一个 Dubbo
    应用( [dubbo-samples-kubernetes](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-kubernetes) )
-2. 构建容器镜像并推送到镜像仓库（ [dubboteam 示例例镜像](https://hub.docker.com/u/dubboteam) ）
+2. 构建容器镜像并推送到镜像仓库（ [dubbo-demo 示例例镜像](https://hub.docker.com/r/apache/dubbo-demo) ）
 3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes
 4. 验证服务发现与调用正常
 
@@ -142,7 +142,7 @@ dubbo.provider.token=true
 mvn compile jib:build
 ```
 
-> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 dubboteam 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
+> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 apache/dubbo-demo 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
 > 可以通过直接在命令行指定 `mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth.username=x`，或者使用 docker-credential-helper.
 
 ## 4 最佳实践
@@ -235,7 +235,7 @@ spec:
       serviceAccountName: dubbo-sa
       containers:
         - name: server
-          image: dubboteam/dubbo-samples-apiserver-provider
+          image: apache/dubbo-deemo:dubbo-samples-apiserver-provider_0.0.1
           ports:
             - containerPort: 20880
           livenessProbe:
@@ -297,7 +297,7 @@ spec:
       serviceAccountName: dubbo-sa
       containers:
         - name: server
-          image: dubboteam/dubbo-samples-apiserver-consumer
+          image: apache/dubbo-demo:dubbo-samples-apiserver-consumer_0.0.1
           ports:
             - containerPort: 20880
           livenessProbe:
