@@ -68,6 +68,8 @@ package org.apache.dubbo.samples.basic.api;
 
 public interface DemoService {
     String sayHello(String name);
+   
+    String doSayHello(String result);
 }
 ```
 
@@ -172,7 +174,7 @@ public class ConsumerApplication {
         ConfigurableApplicationContext context = SpringApplication.run(ConsumerApplication.class, args);
         ConsumerApplication application = context.getBean(ConsumerApplication.class);
         String result = application.doSayHello("world");
-        System.out.println(application.sayHello(result));
+        System.out.println("result: " + result);
     }
 }
 ```
