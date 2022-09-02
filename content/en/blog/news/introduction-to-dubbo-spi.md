@@ -161,7 +161,7 @@ public interface LoadBalance {
 }
 ```
 LoadBalance interface has only one select method. Select method chose one invoker among multiple invokers. In the code above, the elements related to Dubbo SPI are:
-* @SPI([RandomLoadBalance.NAME](http://RandomLoadBalance.NAME)) @SPI is used for LoadBalance interface, which indicates that the LoadBalance interface is an extension point. Without the @SPI annotation, if we try to load the extension, it will throw an exception. @SPI annotation has one parameter, and this parameter represents the Alias of the default implementation of the extension point. If there has no explicitly specified extension, the default implementation will be used.
+* @SPI(RandomLoadBalance.NAME) @SPI is used for LoadBalance interface, which indicates that the LoadBalance interface is an extension point. Without the @SPI annotation, if we try to load the extension, it will throw an exception. @SPI annotation has one parameter, and this parameter represents the Alias of the default implementation of the extension point. If there has no explicitly specified extension, the default implementation will be used.
 `RandomLoadBalance.NAME` is a constant with value “random” and is a random load balancing implementation. The definition of random is in the configuration file `META-INF/dubbo/internal/com.alibaba.dubbo.rpc.cluster.LoadBalance`:
 
 ```bash
