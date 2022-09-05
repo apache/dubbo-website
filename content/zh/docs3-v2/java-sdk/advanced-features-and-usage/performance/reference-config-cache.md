@@ -16,6 +16,7 @@ description: "在 Dubbo3 中缓存 ReferenceConfig"
 网关等存在动态创建订阅的场景，由于 ReferenceConfig 本身很重，会创建特别多的中间对象，而 proxy 本身是可以复用的，所以通过 ReferenceConfigCache 可以缓存这部分的属性。
 
 ## 使用方式
+### 消除并销毁
 消除 Cache 中的 `ReferenceConfig`，将销毁 `ReferenceConfig` 并释放对应的资源。
 ```java  
 ReferenceConfig<XxxService> reference = new ReferenceConfig<XxxService>();  
@@ -35,6 +36,7 @@ cache.destroy(reference);
 ```   
 缺省 `ReferenceConfigCache` 把相同服务 Group、接口、版本的 `ReferenceConfig` 认为是相同，缓存一份。即以服务 Group、接口、版本为缓存的 Key。
 
+### 修改策略
 可以修改这个策略，在 `ReferenceConfigCache.getCache` 时，传一个 `KeyGenerator`。详见 `ReferenceConfigCache` 类的方法。
 ```java  
 KeyGenerator keyGenerator = new ...  
