@@ -138,7 +138,17 @@ docker build -t apache/dubbo-demo:dubbo-samples-xds-consumer_0.0.1 .
 cd ../
 ```
 
-### Step 5: 部署容器
+### Step 5: 创建namespace
+
+```bash
+# 初始化命名空间
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-xds/deploy/Namespace.yml
+
+# 切换命名空间
+kubens dubbo-demo
+```
+
+### Step 6: 部署容器
 
 ```bash
 cd ./dubbo-samples-xds-provider/src/main/resources/k8s
