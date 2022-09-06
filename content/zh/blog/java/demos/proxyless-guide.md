@@ -494,3 +494,15 @@ result: hello, xDS Consumer! from host: 172.17.0.5
 result: hello, xDS Consumer! from host: 172.17.0.6
 result: hello, xDS Consumer! from host: 172.17.0.6
 ```
+
+## 总结&展望
+
+本文主要剖析了 Dubbo Proxyless Mesh 的架构、服务发现以及证书管理等核心流程，最后通过示例给大家演示了如何使用 Dubbo Proxyless。
+
+![部署provider](/imgs/blog/20220905/16.png)
+
+随着 Dubbo 3.1 的 release，Dubbo 在云原生的路上又迈出了重要的一步。在今年年底，Dubbo Mesh 将发布具有服务发现能力的版本，
+届时将面向所有 Dubbo 用户提供从低版本平滑迁移到 Mesh 架构的能力；在明年年初春季的时候将发布带有治理能力的版本；在明年年底前发布带热插件更新能力的版本，
+希望有兴趣见证 Dubbo 云原生之路的同学可以积极参与社区贡献！
+
+更多关于 Dubbo Mesh 的动态可以关注 Apache Dubbo 社区官方公众号（ApacheDubbo），及时获取最新消息。
