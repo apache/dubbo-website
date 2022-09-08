@@ -5,11 +5,14 @@ linkTitle: "粘滞连接"
 weight: 31
 description: "为有状态服务配置粘滞连接"
 ---
+## 特性说明
 
+## 使用场景
 粘滞连接用于有状态服务，尽可能让客户端总是向同一提供者发起调用，除非该提供者挂了，再连另一台。
 
-粘滞连接将自动开启[延迟连接](../lazy-connect)，以减少长连接数。
+粘滞连接将自动开启 [延迟连接](../lazy-connect)，以减少长连接数。
 
+## 使用方式
 ```xml
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService" sticky="true" />
 ```
@@ -21,4 +24,3 @@ Dubbo 支持方法级别的粘滞连接，如果你想进行更细粒度的控�
     <dubbo:method name="sayHello" sticky="true" />
 </dubbo:reference>
 ```
-
