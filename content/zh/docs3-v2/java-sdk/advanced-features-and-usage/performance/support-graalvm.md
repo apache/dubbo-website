@@ -6,25 +6,24 @@ weight: 40
 description: ""
 ---
 
-dubbo3.0支持native-image文档
+dubbo3.0 支持 native-image 文档
 
-## 概述
+## 特性说明
+本文档将介绍将 dubbo3.0 项目接入 GraalVM，进行 native-image 编译为二进制的流程。
 
-本文档将介绍将dubbo3.0项目接入GraalVM，进行native-image编译为二进制的流程。
+关于 GraalVm 的更多信息可以阅读 https://www.graalvm.org/docs/getting-started/container-images/ 此文档。
 
-关于GraalVm的更多信息可以阅读 https://www.graalvm.org/docs/getting-started/container-images/ 此文档。
+## 使用场景
 
-## 使用样例
-
+## 使用方式
 在编译我们的dubbo项目之前，需要确保我们正基于graalVm的环境。
 
-1. 安装GraalVM
-
-进入https://www.graalvm.org/ 官网根据自己的系统选取最新版本安装：
+### 安装GraalVM
+进入 https://www.graalvm.org/ 官网根据自己的系统选取最新版本安装：
 
 ![](/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg)
 
-安装完成后，修改配置JAVA_HOME的路径，生效后查看本地jdk可以看到如下：
+安装完成后，修改配置 JAVA_HOME 的路径，生效后查看本地 jdk 可以看到如下：
 
 ![](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
 这里我们使用的基于jdk1.8版本的GraalVM。
@@ -39,7 +38,7 @@ dubbo3.0支持native-image文档
 ![](/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg)
 执行CodeGenerator即可在dubbo-native模块下生成SPI代码。
 
-1. 在根目录下执行install
+### 在根目录下执行install
 
 ```
 MacdeMacBook-pro-3:incubator-dubbo mac$ pwd
@@ -49,7 +48,7 @@ MacdeMacBook-pro-3:incubator-dubbo mac$ pwd
 MacdeMacBook-pro-3:incubator-dubbo mac$ mvn clean package install -Dmaven.test.skip=true
 ```
 
-1. 编译demo项目
+### 编译demo项目
 
 这里我们提供了可直接进行编译的示例项目，dubbo-demo/dubbo-demo-native。上面步骤install完成后，先到dubbo-demo-native的provider下，执行native-image编译：
 
