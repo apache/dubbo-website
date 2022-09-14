@@ -5,48 +5,50 @@ linkTitle: "日志框架适配及运行时管理"
 weight: 4
 description: "在 Dubbo 中适配日志框架并支持运行时动态切换使用的日志框架"
 ---
+## 特性说明
+日志框架适配，自 `2.2.1` 开始，dubbo 开始内置 log4j、slf4j、jcl、jdk 这些日志框架的适配。
 
+日志框架运行时管理，自 `3.0.10` 开始，dubbo-qos 运行时管控支持查询日志配置以及动态修改使用的日志框架和日志级别。
+
+> 通过 dubbo-qos 修改的日志配置不进行持久化存储，在应用重启后将会失效。
+## 使用场景
+
+## 使用方式
 ## 日志框架适配
+可以通过以下方式显式配置日志输出策略
 
-自 `2.2.1` 开始，dubbo 开始内置 log4j、slf4j、jcl、jdk 这些日志框架的适配[1]，也可以通过以下方式显式配置日志输出策略：
+### 1. 命令行
 
-0. 命令行
+```sh
+java -Ddubbo.application.logger=log4j
+```
 
-    ```sh
-      java -Ddubbo.application.logger=log4j
-    ```
+### 2.  `dubbo.properties` 中指定
 
-0. 在 `dubbo.properties` 中指定
+```
+dubbo.application.logger=log4j
+```
 
-    ```
-      dubbo.application.logger=log4j
-    ```
+### 3.  `dubbo.xml` 中配置
 
-0. 在 `dubbo.xml` 中配置
+```xml
+<dubbo:application logger="log4j" />
+```
 
-    ```xml
-      <dubbo:application logger="log4j" />
-    ```
-
-[1]: 自定义扩展可以参考 [日志适配扩展](../../../reference-manual/spi/description/logger-adapter)
+自定义扩展可以参考 [日志适配扩展](../../../reference-manual/spi/description/logger-adapter)
 
 ## 日志框架运行时管理
-
-自 `3.0.10` 开始，dubbo-qos 运行时管控支持查询日志配置以及动态修改使用的日志框架和日志级别。
-
-注：通过 dubbo-qos 修改的日志配置不进行持久化存储，在应用重启后将会失效。
-
 ### 1. 查询日志配置
 
 命令：`loggerInfo`
 
-示例：
+**示例**
 ```bash
 > telnet 127.0.0.1 22222
 > loggerInfo
 ```
 
-输出：
+**输出**
 ```
 Trying 127.0.0.1...
 Connected to localhost.
@@ -65,13 +67,13 @@ Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. L
 
 level: `ALL`, `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`
 
-示例：
+**示例**
 ```bash
 > telnet 127.0.0.1 22222
 > switchLogLevel WARN
 ```
 
-输出：
+**输出**
 ```
 Trying 127.0.0.1...
 Connected to localhost.
@@ -94,13 +96,13 @@ Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. L
 
 loggerAdapterName: `slf4j`, `jcl`, `log4j`, `jdk`, `log4j2`
 
-示例：
+**示例**
 ```bash
 > telnet 127.0.0.1 22222
 > switchLogger slf4j
 ```
 
-输出：
+**输出**
 ```
 Trying 127.0.0.1...
 Connected to localhost.
