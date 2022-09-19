@@ -33,19 +33,17 @@ description: "Dubbo 配置方式和工作原理的深度解读，包括配置格
 ```
 接下来，我们就围绕这个示例，分别从配置格式、配置来源、加载流程三个方面对 Dubbo 配置的工作原理进行分析。
 
-## 配置格式
+## 1 配置格式
 
 目前Dubbo支持的所有配置都是`.properties`格式的，包括`-D`、`Externalized Configuration`等，`.properties`中的所有配置项遵循一种`path-based`的配置格式。
 
 在Spring应用中也可以将属性配置放到`application.yml`中，其树层次结构的方式可读性更好一些。
 
 ```properties
-# 应用级配置
-（无id）
+# 应用级配置（无id）
 dubbo.{config-type}.{config-item}={config-item-value}
 
-# 实例级配置
-（指定id或name）
+# 实例级配置（指定id或name）
 dubbo.{config-type}s.{config-id}.{config-item}={config-item-value}
 dubbo.{config-type}s.{config-name}.{config-item}={config-item-value}
 
@@ -61,13 +59,12 @@ dubbo.reference.{interface-name}.{method-name}.{config-item}={config-item-value}
 dubbo.reference.{interface-name}.{method-name}.{argument-index}.{config-item}={config-item-value}
 
 ```
-## 应用级与实例级
-### 应用级配置
-> 无id
+
+### 1.1 应用级配置（无id）
 
 应用级配置的格式为：配置类型单数前缀，无id/name。
 ```properties
-## 应用级配置
+# 应用级配置（无id）
 dubbo.{config-type}.{config-item}={config-item-value}
 ```
 
@@ -83,8 +80,7 @@ dubbo.protocol.name=dubbo
 dubbo.protocol.port=-1
 ```
 
-### 实例级配置
-> 指定id或name
+### 1.2 实例级配置（指定id或name）
 
 针对某个实例的属性配置需要指定id或者name，其前缀格式为：配置类型复数前缀 + id/name。适用于 `protocol`、`registry` 等支持多例配置的组件。
 
@@ -111,13 +107,13 @@ dubbo.protocols.hessian.name=hessian
 dubbo.protocols.hessian.port=8089
 ```
 
-## 其他配置
-### 服务接口配置
+### 1.3 服务接口配置
 
 ```properties
 dubbo.service.org.apache.dubbo.samples.api.DemoService.timeout=5000
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.timeout=6000
 ```
+
 ### 方法配置
 
 方法配置格式:
@@ -151,7 +147,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.0.callback=tru
 </dubbo:reference>
 ```
 
-### 参数配置
+### 1.4 参数配置
 
 parameters参数为map对象，支持xxx.parameters=[{key:value},{key:value}]方式进行配置。
 ```properties
@@ -159,7 +155,7 @@ dubbo.application.parameters=[{item1:value1},{item2:value2}]
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:value3}]
 ```
 
-### 传输层配置
+### 1.5 传输层配置
 
 triple协议采用Http2做底层通信协议，允许使用者自定义Http2的[6个settings参数](https://datatracker.ietf.org/doc/html/rfc7540#section-6.5.2)
 
@@ -200,8 +196,8 @@ dubbo:
 ```
 
 
-## 配置说明
-### 属性与 XML 配置映射规则
+
+### 1.6 属性与XML配置映射规则
 
 可以将 xml 的 tag 名和属性名组合起来，用 ‘.’ 分隔。每行一个属性。
 
@@ -213,7 +209,7 @@ dubbo:
 * `dubbo.protocols.rmi.port=1099` 相当于 `<dubbo:protocol id="rmi" name="rmi" port="1099" /> `
 * `dubbo.registries.china.address=10.20.153.10:9090` 相当于 `<dubbo:registry id="china" address="10.20.153.10:9090" />`
 
-### 配置项单复数对照表
+### 1.7 配置项单复数对照表
 复数配置的命名与普通单词变复数的规则相同：
 
 1. 字母y结尾时，去掉y，改为ies
@@ -239,7 +235,7 @@ dubbo:
 | argument                          | dubbo.service.{interfaceName}.{methodName}.{arg-index}.xxx=xxx | 无                                  |
 
 
-### 配置来源
+## 2 配置来源
 
 Dubbo 默认支持 6 种配置来源：
 
@@ -255,13 +251,13 @@ Dubbo 默认支持 6 种配置来源：
 1. 如果在 classpath 下有超过一个 dubbo.properties 文件，比如，两个 jar 包都各自包含了 dubbo.properties，dubbo 将随机选择一个加载，并且打印错误日志。
 2. Dubbo 可以自动加载 classpath 根目录下的 dubbo.properties，但是你同样可以使用 JVM 参数来指定路径：`-Ddubbo.properties.file=xxx.properties`。
 
-### 覆盖关系
+### 2.1 覆盖关系
 
 如果通过多种配置来源指定了相同的配置项，则会出现配置项的互相覆盖，具体覆盖关系和优先级请参考下一小节。
 
-## 配置加载流程
+## 3 配置加载流程
 
-### 处理流程
+### 3.1 处理流程
 
 Dubbo 配置加载大概分为两个阶段：
 
@@ -270,17 +266,17 @@ Dubbo 配置加载大概分为两个阶段：
 * 第一阶段为DubboBootstrap初始化之前，在Spring context启动时解析处理XML配置/注解配置/Java-config 或者是执行API配置代码，创建config bean并且加入到ConfigManager中。
 * 第二阶段为DubboBootstrap初始化过程，从配置中心读取外部配置，依次处理实例级属性配置和应用级属性配置，最后刷新所有配置实例的属性，也就是[属性覆盖](../principle#32-属性覆盖)。
 
-## 属性覆盖
+### 3.2 属性覆盖
 
 发生属性覆盖可能有两种情况，并且二者可能是会同时发生的：
 1. 不同配置源配置了相同的配置项
 2. 相同配置源，但在不同层次指定了相同的配置项
 
-### 不同配置源
+#### 3.2.1 不同配置源
 
 ![覆盖关系](/imgs/blog/configuration.jpg)
 
-### 相同配置源
+#### 3.2.1 相同配置源
 
 属性覆盖是指用配置的属性值覆盖config bean实例的属性，类似Spring [PropertyOverrideConfigurer](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/PropertyOverrideConfigurer.html) 的作用。
 
@@ -308,7 +304,7 @@ dubbo.{config-type}.{config-item}={config-item-value}
 
 ![属性覆盖流程](/imgs/v3/config/properties-override.svg)
 
-## 外部化配置
+### 3.3 外部化配置
 
 外部化配置目的之一是实现配置的集中式管理，这部分业界已经有很多成熟的专业配置系统如 Apollo, Nacos 等，Dubbo 所做的主要是保证能配合这些系统正常工作。
 
@@ -333,7 +329,7 @@ dubbo.application.qos.port=33333
 - 作用域
   外部化配置有全局和应用两个级别，全局配置是所有应用共享的，应用级配置是由每个应用自己维护且只对自身可见的。当前已支持的扩展实现有 Zookeeper、Apollo、Nacos。
 
-### 外部化配置使用方式
+#### 3.3.1 外部化配置使用方式
 
 1. 增加 config-center 配置
 
@@ -362,7 +358,7 @@ dubbo
     address: nacos://127.0.0.1:8848
 ```
 
-### 自行加载外部化配置
+#### 3.3.2 自行加载外部化配置
 
 所谓 Dubbo 对配置中心的支持，本质上就是把 `.properties` 从远程拉取到本地，然后和本地的配置做一次融合。理论上只要 Dubbo 框架能拿到需要的配置就可以正常的启动，它并不关心这些配置是自己加载到的还是应用直接塞给它的，所以Dubbo还提供了以下API，让用户将自己组织好的配置塞给 Dubbo 框架（配置加载的过程是用户要完成的），这样 Dubbo 框架就不再直接和 Apollo 或 Zookeeper 做读取配置交互。
 
