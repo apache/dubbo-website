@@ -1,0 +1,133 @@
+---
+type: docs
+title: "端口协议复用"
+linkTitle: "端口协议复用"
+weight: 1
+description: "dubbo3 端口协议复用, 单端口多协议支持"
+---
+## 特性说明
+通过对protocol进行配置，dubbo3可以支持端口的协议复用。
+比如使用Triple协议启动端口复用后，可以在相同的端口上为服务增加
+Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个统一的端口复用
+服务器进行处理的，可以用于服务的协议迁移，并且可以节约端口以及相关的资源，减少运维的复杂性。
+
+![pu-server-image1](/imgs/blog/pu-server/pu-server-flow.png)
+
+- 在服务的创建阶段，通过从Config层获取到服务导出的协议配置从而创建不同的Protocol对象进行导出。在导出的过程
+中，如果不是第一次创建端口复用的Server，那么Exchanger会将Protcol层传递的数据保存到Server，用于后续处理该协议类型的消息。
+
+- 当客户端的消息传递过来后，首先会通过Server传递给ProtocolDetector，如果完成了识别，那么就会标记该客户端为对应的协议。并通过WireProtocol配置对应的处理逻辑，最后交给ChannelOperator完成底层的IO框架和对应的Dubbo框架的处理逻辑的绑定。
+
+- 以上的协议识别完成之后，Channel已经确定了如何处理远程的客户端消息，通过对应的ServerPipeline进行处理即可（在处理的过程中也会根据配置信息决定消息的处理线程）。
+
+
+## 参考用例
+
+TODO
+
+## 配置方式
+
+关于Dubbo支持的配置方式，可以参考[配置说明](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/)
+
+### 服务多协议导出
+
+ext-protocol参数支持配置多个不同的协议，协议之间通过","进行分隔。
+
+#### xml 配置
+
+```xml
+<dubbo:protocol name="dubbo" port="-1" ext-protocol="tri,"/>
+
+<bean id="greetingService" class="org.apache.dubbo.demo.provider.GreetingServiceImpl"/>
+
+<dubbo:service delay="5000" version="1.0.0" group="greeting" timeout="5000" interface="org.apache.dubbo.demo.GreetingService" ref="greetingService" protocol="dubbo"/>
+
+```
+
+#### API 配置
+
+```java
+ProtocolConfig config = new ProtocolConfig(CommonConstants.TRIPLE, -1);
+
+config.setExtProtocol(CommonConstants.DUBBO+",");
+```
+
+#### yaml 配置
+
+``` yaml
+dubbo:
+  application:
+    name: dubbo-springboot-demo-provider
+  protocol:
+    name: tri
+    port: -1
+    ext-protocol: dubbo,
+```
+
+#### properties 配置
+```properties
+dubbo.protocol.name=tri
+dubbo.protocol.ext-protocol=dubbo,
+dubbo.protocol.port=20880
+```
+
+### Qos接入
+
+#### Qos模块导入
+
+```xml
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-qos</artifactId>
+</dependency>
+```
+
+完成Qos模块的导入之后，相关的配置项可参考[Qos操作手册](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/qos/overview/)进行配置。
+
+默认情况下，基于端口复用的Qos服务在模块导入后是启动的。
+
+## 使用方式
+
+### Qos使用
+
+将Qos协议接入到端口复用的场景下，需要在建立连接之后，客户端先向服务端发送消息，对比将Qos协议通过单个端口提供服务，端口复用版的Qos协议在处理telnet连接的情况下需要用户执行一些操作，完成协议识别（二选一）。
+
+1. 直接调用命令
+
+    直接调用telnet支持的命令也可以完成识别，在用户不熟悉的情况下可以调用help指令完成识别
+
+    ![pu-server-image2](/imgs/blog/pu-server/qos-telnet-directcall.png)
+
+2. 发送telnet命令识别
+   
+   通过telnet命令建立连接之后，执行以下几个步骤：
+   
+   1. 使用 crtl + "]" 进入到telnet交互界面(telnet默认的escape character)
+   2. 调用 "send ayt" 向服务端发送特殊识别字段(为telnet协议的一个特殊字段)
+   3. 回车完成消息发送并进入到dubbo的交互界面 
+
+   ![pu-server-imgs3](/imgs/blog/pu-server/qos-telnet-sendayt.png)
+
+### 直连模式
+
+当前版本中，完成服务的多协议注册之后，暂时只能通过直连模式完成不同协议的服务选择。
+有关直连模式的设置，可以参考[直连提供者](https://dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/)
+
+```java
+ReferenceConfig<GreeterService> referenceConfig = new ReferenceConfig<>();
+// set url to decide to call which protocol
+referenceConfig.setUrl("dubbo://10.180.24.181:50051/org.apache.dubbo.demo.GreeterService");
+// referenceConfig.setUrl("tri://10.180.24.181:50051/org.apache.dubbo.demo.GreeterService");
+DubboBootstrap bootstrap = DubboBootstrap.getInstance();
+bootstrap.application(new ApplicationConfig("dubbo-demo-triple-api-consumer"))
+    ...
+    .reference(referenceConfig)
+    .start();
+GreeterService greeterService = referenceConfig.get();
+```
+
+### 服务发现
+
+- [ ] 单个服务多协议注册之后暂只能发现后注册的服务
+
+
