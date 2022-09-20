@@ -8,11 +8,11 @@ weight: 1
 Dubbo3 提供了 Triple(Dubbo3)、Dubbo2 协议，这是 Dubbo 框架的原生协议。除此之外，Dubbo3 也对众多第三方协议进行了集成，并将它们纳入 Dubbo 的编程与服务治理体系，
 包括 gRPC、Thrift、JsonRPC、Hessian2、REST 等。以下重点介绍 Triple 与 Dubbo2 协议。
 
-## Triple 协议
+## 协议说明
 
 Triple 协议是 Dubbo3 推出的主力协议。Triple 意为第三代，通过 Dubbo1.0/ Dubbo2.0 两代协议的演进，以及云原生带来的技术标准化浪潮，Dubbo3 新协议 Triple 应运而生。
 
-### RPC 协议的选择
+### 选择 RPC 协议
 
 协议是 RPC 的核心，它规范了数据在网络中的传输内容和格式。除必须的请求、响应数据外，通常还会包含额外控制数据，如单次请求的序列化方式、超时时间、压缩方式和鉴权信息等。
 
@@ -30,7 +30,7 @@ RPC 协议的设计需要考虑以下内容：
 - 穿透性：能够被各种终端设备识别和转发：网关、代理服务器等
   通用性和高性能通常无法同时达到，需要协议设计者进行一定的取舍。
 
-#### HTTP/1.1
+### HTTP/1.1 协议
 
 比于直接构建于 TCP 传输层的私有 RPC 协议，构建于 HTTP 之上的远程调用解决方案会有更好的通用性，如WebServices 或 REST 架构，使用 HTTP + JSON 可以说是一个事实标准的解决方案。
 
@@ -45,7 +45,7 @@ RPC 协议的设计需要考虑以下内容：
 - Human Readable Headers，使用更通用、更易于人类阅读的头部传输格式，但性能相当差
 - 无直接 Server Push 支持，需要使用 Polling Long-Polling 等变通模式
 
-#### gRPC
+### gRPC 协议
 上面提到了在 HTTP 及 TCP 协议之上构建 RPC 协议各自的优缺点，相比于 Dubbo 构建于 TCP 传输层之上，Google 选择将 gRPC 直接定义在 HTTP/2 协议之上。
 gRPC 的优势由HTTP2 和 Protobuf 继承而来。
 
@@ -58,7 +58,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。
 - 对服务治理的支持比较基础，更偏向于基础的 RPC 功能，协议层缺少必要的统一定义，对于用户而言直接用起来并不容易。
 - 强绑定 protobuf 的序列化方式，需要较高的学习成本和改造成本，对于现有的偏单语言的用户而言，迁移成本不可忽视
 
-#### 最终的选择 Triple
+### 最终选择 Triple 协议
 最终我们选择了兼容 gRPC ，以 HTTP2 作为传输层构建新的协议，也就是 Triple。
 
 容器化应用程序和微服务的兴起促进了针对负载内容优化技术的发展。 客户端中使用的传统通信协议（ RESTFUL或其他基于 HTTP 的自定义协议）难以满足应用在性能、可维护性、扩展性、安全性等方便的需求。一个跨语言、模块化的协议会逐渐成为新的应用开发协议标准。自从 2017 年 gRPC 协议成为 CNCF 的项目后，包括 k8s、etcd 等越来越多的基础设施和业务都开始使用 gRPC 的生态，作为云原生的微服务化框架， Dubbo 的新协议也完美兼容了 gRPC。并且，对于 gRPC 协议中一些不完善的部分， Triple 也将进行增强和补充。
@@ -70,29 +70,29 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。
 - 安全性上，支持双向TLS认证（mTLS）等加密传输能力。
 - 易用性上，Triple 除了支持原生 gRPC 所推荐的 Protobuf 序列化外，使用通用的方式支持了 Hessian / JSON 等其他序列化，能让用户更方便的升级到 Triple 协议。对原有的 Dubbo 服务而言，修改或增加 Triple 协议 只需要在声明服务的代码块添加一行协议配置即可，改造成本几乎为 0。
 
-### Triple 协议
+## Triple 协议
 
 ![Triple 协议通信方式](/imgs/v3/concepts/triple.png)
 
-- 现状
+现状
 
-1、完整兼容grpc、客户端/服务端可以与原生grpc客户端打通
+- 1、完整兼容grpc、客户端/服务端可以与原生grpc客户端打通
 
-2、目前已经经过大规模生产实践验证，达到生产级别
+- 2、目前已经经过大规模生产实践验证，达到生产级别
 
-- 特点与优势
+特点与优势
 
-1、具备跨语言互通的能力，传统的多语言多 SDK 模式和 Mesh 化跨语言模式都需要一种更通用易扩展的数据传输格式。
+- 1、具备跨语言互通的能力，传统的多语言多 SDK 模式和 Mesh 化跨语言模式都需要一种更通用易扩展的数据传输格式。
 
-2、提供更完善的请求模型，除了 Request/Response 模型，还应该支持 Streaming 和 Bidirectional。
+- 2、提供更完善的请求模型，除了 Request/Response 模型，还应该支持 Streaming 和 Bidirectional。
 
-3、易扩展、穿透性高，包括但不限于 Tracing / Monitoring 等支持，也应该能被各层设备识别，网关设施等可以识别数据报文，对 Service Mesh 部署友好，降低用户理解难度。
+- 3、易扩展、穿透性高，包括但不限于 Tracing / Monitoring 等支持，也应该能被各层设备识别，网关设施等可以识别数据报文，对 Service Mesh 部署友好，降低用户理解难度。
 
-4、多种序列化方式支持、平滑升级
+- 4、多种序列化方式支持、平滑升级
 
-5、支持 Java 用户无感知升级，不需要定义繁琐的 IDL 文件，仅需要简单的修改协议名便可以轻松升级到 Triple 协议
+- 5、支持 Java 用户无感知升级，不需要定义繁琐的 IDL 文件，仅需要简单的修改协议名便可以轻松升级到 Triple 协议
 
-#### Triple 协议内容介绍
+### Triple 协议内容介绍
 
 基于 grpc 协议进行进一步扩展
 
@@ -104,7 +104,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。
 
 其中 Service-Version 跟 Service-Group 分别标识了 Dubbo 服务的 version 跟 group 信息，因为grpc的 path 申明了 service name 跟 method name，相比于 Dubbo 协议，缺少了version 跟 group 信息；Tracing-ID、Tracing-RPC-ID 用于全链路追踪能力，分别表示 tracing id 跟 span id 信息；Cluster-Info 表示集群信息，可以使用其构建一些如集群划分等路由相关的灵活的服务治理能力。
 
-#### Triple Streaming
+### Triple Streaming
 
 Triple协议相比传统的unary方式，多了目前提供的Streaming RPC的能力
 
@@ -192,9 +192,9 @@ Every part is a byte[] after serialization with specific serialization type, ide
     -  Return value, the real value returns from server.
 
 
-**注意：** 对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：
+> 对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：
+
 ```
 Dubbo version bytes (换行符)
 Service name bytes  (换行符)
-...
 ```
