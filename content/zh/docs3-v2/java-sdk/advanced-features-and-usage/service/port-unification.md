@@ -22,8 +22,8 @@ Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个
 
 
 ## 参考用例
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification)
 
-TODO
 
 ## 配置方式
 
@@ -104,30 +104,22 @@ dubbo.protocol.port=20880
    
    1. 使用 crtl + "]" 进入到telnet交互界面(telnet默认的escape character)
    2. 调用 "send ayt" 向服务端发送特殊识别字段(为telnet协议的一个特殊字段)
-   3. 回车完成消息发送并进入到dubbo的交互界面 
+   3. 回车完成消息发送并进入到dubbo的交互界面
 
    ![pu-server-imgs3](/imgs/blog/pu-server/qos-telnet-sendayt.png)
 
-### 直连模式
 
-当前版本中，完成服务的多协议注册之后，暂时只能通过直连模式完成不同协议的服务选择。
-有关直连模式的设置，可以参考[直连提供者](https://dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/)
+### 服务引用
+
+以[dubbo-samples-port-unification](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification)中的例子作为基础, 引用不同协议的服务和非端口复用情况下的配置是一致的，下面通过Consumer端的InvokerListener输出调用过程中的URL信息。
 
 ```java
-ReferenceConfig<GreeterService> referenceConfig = new ReferenceConfig<>();
-// set url to decide to call which protocol
-referenceConfig.setUrl("dubbo://10.180.24.181:50051/org.apache.dubbo.demo.GreeterService");
-// referenceConfig.setUrl("tri://10.180.24.181:50051/org.apache.dubbo.demo.GreeterService");
-DubboBootstrap bootstrap = DubboBootstrap.getInstance();
-bootstrap.application(new ApplicationConfig("dubbo-demo-triple-api-consumer"))
-    ...
-    .reference(referenceConfig)
-    .start();
-GreeterService greeterService = referenceConfig.get();
+ReferenceConfig<GreetingService> reference = new ReferenceConfig<>();
+reference.setInterface(GreetingService.class);
+reference.setListener("consumer");
+reference.setProtocol(this.protocol);
+// reference.setProtocol(CommonConstants.DUBBO);
+// reference.setProtocol(CommonConstants.TRIPLE);
 ```
 
-### 服务发现
-
-- [ ] 单个服务多协议注册之后暂只能发现后注册的服务
-
-
+![pu-server-imgs4](/imgs/blog/pu-server/reference-service.png)
