@@ -10,10 +10,9 @@ weight: 3
 ```sh
 git clone https://github.com/apache/dubbo.git
 cd dubbo/dubbo-demo/dubbo-demo-xml
-```
-
 运行 dubbo-demo-xml-consumer 中的 org.apache.dubbo.demo.consumer.Application
 请确保先启动 Provider，如果使用 Intellij Idea 请加上 -Djava.net.preferIPv4Stack=true
+```
 
 配置:
 
