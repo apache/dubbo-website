@@ -31,7 +31,7 @@ Dubbo3 提供了全新的应用级服务发现模型，该模型在设计与实�
 ## 流量治理
 Dubbo2 开始 Dubbo 就提供了丰富服务治理规则，包括路由规则、动态配置等。
 
-一方面 Dubbo3 正在通过对接 xDS 对接到时下流行的 Mesh 产品如 Istio 中所使用的以 VirtualService、DestinationRule 为代表的治理规则，另一方面 Dubbo 正寻求设计一套自有规则以实现在不通部署场景下的流量治理，以及灵活的治理能力。
+一方面 Dubbo3 正在通过对接 xDS 对接到时下流行的 Mesh 产品如 Istio 中所使用的以 VirtualService、DestinationRule 为代表的治理规则，另一方面 Dubbo 正寻求设计一套自有规则以实现在不同部署场景下的流量治理，以及灵活的治理能力。
 
 * [Dubbo2 服务治理规则](../../tasks/traffic-management)
 * Dubbo3 服务治理规则
