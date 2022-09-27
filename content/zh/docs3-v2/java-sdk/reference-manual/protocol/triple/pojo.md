@@ -8,7 +8,7 @@ weight: 2
 这篇教程会通过从零构建一个简单的工程来演示如何基于 POJO 方式使用 Dubbo Triple, 在应用不改变已有接口定义的同时升级到 Triple 协议。
 
 
-### 实现原理
+## 实现原理
 
 通过上面介绍的升级过程，我们可以很简单的通过修改协议类型来完成升级。框架是怎么帮我们做到这些的呢？
 
@@ -41,14 +41,14 @@ message TripleResponseWrapper {
 
 > 对于请求参数，可以看到 args 被`repeated`修饰，这是因为需要支持 java 方法的多个参数。当然，序列化只能是一种。序列化的实现沿用 Dubbo2 实现的 spi
 
-### 前置条件
+## 前置条件
 - [JDK](https://jdk.java.net/) 版本 >= 8
 - 已安装 [Maven](https://maven.apache.org/)
 - 已安装并启动 [Zookeeper](https://zookeeper.apache.org/)
 
-### 创建工程
-1. 首先创建一个空的 maven 工程
-    ```
+## 创建工程
+### 首先创建一个空的 maven 工程
+```
    $ mvn archetype:generate                                \
         -DgroupId=org.apache.dubbo                          \
         -DartifactId=tri-pojo-demo                          \
@@ -56,13 +56,14 @@ message TripleResponseWrapper {
         -DarchetypeVersion=1.4                              \
         -DarchetypeGroupId=org.apache.maven.archetypes      \
         -Dversion=1.0-SNAPSHOT
-   ```
-2. 切换到工程目录
-    ```
+```
+### 切换到工程目录
+```
    $ cd tri-pojo-demo
-   ```
-3. 在 `pom.xml` 中设置 JDK 版本，添加 Dubbo 依赖和插件
-    ```xml
+```
+### 添加 Dubbo 依赖和插件
+在 `pom.xml` 中设置 JDK 版本
+```xml
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -93,17 +94,19 @@ message TripleResponseWrapper {
             <version>3.19.4</version>
         </dependency>
     </dependencies>
-   ```
-4. 添加接口定义`src/main/java/org/apache/dubbo/Greeter.java`
-    ```java
+```
+### 添加接口定义
+`src/main/java/org/apache/dubbo/Greeter.java`
+```java
    package org.apache.dubbo;
 
    public interface Greeter {
        String sayHello(String name);
    }
-   ```
-5. 添加服务端接口实现`src/main/java/org/apache/dubbo/GreeterImpl.java`
-   ```java
+```
+### 添加服务端接口实现
+`src/main/java/org/apache/dubbo/GreeterImpl.java`
+```java
    package org.apache.dubbo;
 
    public class GreeterImpl implements Greeter {
@@ -112,9 +115,10 @@ message TripleResponseWrapper {
          return "Hello," + name + "!";
       }
    }
-   ```
-6. 添加服务端启动类 `src/main/java/org/apache/dubbo/MyDubboServer.java`
-    ```java
+```
+### 添加服务端启动类 
+`src/main/java/org/apache/dubbo/MyDubboServer.java`
+```java
    package org.apache.dubbo;
 
    import org.apache.dubbo.common.constants.CommonConstants;
@@ -143,10 +147,11 @@ message TripleResponseWrapper {
            System.in.read();
        }
    }
-    ```
+```
 
-7. 添加客户端启动类`src/main/java/org/apache/dubbo/MyDubboClient.java`
-   ```java
+### 添加客户端启动类
+`src/main/java/org/apache/dubbo/MyDubboClient.java`
+```java
    package org.apache.dubbo;
 
    import org.apache.dubbo.common.constants.CommonConstants;
@@ -172,18 +177,18 @@ message TripleResponseWrapper {
          System.out.println("Received reply:" + reply);
        }
    }
-   ```
-8. 编译代码
-   ```
+```
+### 编译代码
+```
    $ mvn clean install
-   ```
-9. 启动服务端
-   ```
+```
+### 启动服务端
+```
    $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboServer"
    Dubbo triple pojo server started
-   ```
-10. 打开新的终端，启动客户端
-   ```
+  ```
+### 打开新的终端，启动客户端
+```
    $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboClient"
    Received reply:message: "Hello,Demo!"
-   ```
+```
