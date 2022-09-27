@@ -279,3 +279,19 @@ kubectl label namespace ${your namespace} istio-injection=enabled --overwrite
 # 关闭自动注入sidecar
 kubectl label namespace ${your namespace} istio-injection=disabled --overwrite
 ```
+## 6 注意事项
+1. 示例中，生产者消费者都属于同一个namespace；如果需要调用不同的namespace的提供者，需要按如下配置(**dubbo版本>=3.1.1**)：
+
+注解方式：
+```java
+ @DubboReference(providedBy = "istio-demo-dubbo-producer",providerPort = 20885, providerNamespace = "istio-demo")
+
+```
+xml方式
+```xml
+<dubbo:reference id="demoService" check="true"
+                  interface="org.apache.dubbo.samples.basic.api.DemoService"
+                  provider-port="20885"
+                  provided-by="istio-dubbo-producer"
+                  provider-namespace="istio-demo"/>
+```
