@@ -67,4 +67,4 @@ reply: GreeterReply { message: "msg3 from server" }
 trailer: Some(Metadata { inner: {"content-type": "application/grpc", "grpc-message": "poll trailer successfully.", "grpc-accept-encoding": "gzip,identity", "grpc-status": "0"} })
 ```
 
-[The interface defination on Rust side](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple)
+[The interface defination on Rust side](https://github.com/apache/dubbo-rust/blob/main/examples/greeter/proto/greeter.proto)
