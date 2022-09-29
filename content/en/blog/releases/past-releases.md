@@ -35,33 +35,33 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 
 ### 2.7.17 (2022-08-23)
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip.sha512)
+* [source](https://archive.apache.org/dist/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/2.7.17/apache-dubbo-2.7.17-src.zip.sha512)
 
 ### 3.0.11 (2022-08-23)
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.11/apache-dubbo-3.0.11-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.11/apache-dubbo-3.0.11-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.0.11/apache-dubbo-3.0.11-src.zip.sha512)
+* [source](https://archive.apache.org/dist/dubbo/3.0.11/apache-dubbo-3.0.11-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/3.0.11/apache-dubbo-3.0.11-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/3.0.11/apache-dubbo-3.0.11-src.zip.sha512)
 
 ### 3.1.0 (2022-08-22)
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip.sha512)
+* [source](https://archive.apache.org/dist/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/3.1.0/apache-dubbo-3.1.0-src.zip.sha512)
 
 ### 3.0.10 (2022-07-21)
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.10/apache-dubbo-3.0.10-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.10/apache-dubbo-3.0.10-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.0.10/apache-dubbo-3.0.10-src.zip.sha512)
+* [source](https://archive.apache.org/dist/dubbo/3.0.10/apache-dubbo-3.0.10-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/3.0.10/apache-dubbo-3.0.10-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/3.0.10/apache-dubbo-3.0.10-src.zip.sha512)
 
 ### 2.7.16 (2022-07-06)
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.sha512)
+* [source](https://archive.apache.org/dist/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/2.7.16/apache-dubbo-2.7.16-src.zip.sha512)
 
 ### 3.0.9 (2022-06-23)
 
