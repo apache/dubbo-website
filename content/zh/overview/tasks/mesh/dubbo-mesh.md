@@ -280,7 +280,7 @@ kubectl label namespace ${your namespace} istio-injection=enabled --overwrite
 kubectl label namespace ${your namespace} istio-injection=disabled --overwrite
 ```
 ## 6 注意事项
-1. 示例中，生产者消费者都属于同一个namespace；如果需要调用不同的namespace的提供者，需要按如下配置(**dubbo版本>=3.1.1**)：
+1. 示例中，生产者消费者都属于同一个namespace；如果需要调用不同的namespace的提供者，需要按如下配置(**dubbo版本>=3.1.2**)：
 
 注解方式：
 ```java
