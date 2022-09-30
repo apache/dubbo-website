@@ -125,7 +125,7 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 | unloadClusterRelated | unloadClusterRelated | boolean | 可选 | false | Service Mesh | 当dubbo.consumer.meshEnable=true，在Service Mesh模式下，设置为true，可在当前调用中卸载与Cluster相关的Directory、Router和Load Balance，将重试、负载平衡、超时和其他流量管理功能下放至Sidecar，使用VirtualService和DestinationRule进行流量治理 | 3.1.0以上版本 |
 | parameters | 无 | Map<string, string> | 可选 | | 服务治理 | 扩展预留，可扩展定义任意参数，所有扩展参数都将原样反映在 URL 配置上 | 2.0.0以上版本 |
 | providedBy | provided-by | string | 可选 | | Service Mesh | 当dubbo.consumer.meshEnable=true，Dubbo默认会将请求转换成K8S标准格式，结合VirtualService和DestinationRule进行流量治理，此时consumer端可以感知到provider。该值应当与声明的`k8s service`一致 | 3.1.0以上版本 |
-| providerNamespace | provider-namespace | string | 可选 | | Service Mesh | 当dubbo.consumer.meshEnable=true，Dubbo默认会将请求转换成K8S标准格式，结合VirtualService和DestinationRule进行流量治理，此时consumer端可以感知到provider。请设置providerNamespace，使consumer端按照此配置寻址provider dns，默认`default` | 3.1.1以上版本 |
+| providerNamespace | provider-namespace | string | 可选 | | Service Mesh | 当dubbo.consumer.meshEnable=true，Dubbo默认会将请求转换成K8S标准格式，结合VirtualService和DestinationRule进行流量治理，此时consumer端可以感知到provider。请设置providerNamespace，使consumer端按照此配置寻址provider dns，默认`default` | 3.1.2以上版本 |
 
 
 ### registry
