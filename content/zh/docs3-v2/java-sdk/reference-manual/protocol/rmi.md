@@ -29,7 +29,7 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 
 ## 使用方式
 
-#### 引入依赖
+### 引入依赖
 
 从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
@@ -45,7 +45,7 @@ java -Dsun.rmi.transport.tcp.responseTimeout=3000
 ```
 更多 RMI 优化参数请查看 [JDK 文档](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
 
-#### 接口说明
+### 接口说明
 如果服务接口继承了 `java.rmi.Remote` 接口，可以和原生 RMI 互操作，即：
 
 * 提供者用 Dubbo 的 RMI 协议暴露服务，消费者直接用标准 RMI 接口调用，
@@ -89,7 +89,9 @@ java -Dsun.rmi.transport.tcp.responseTimeout=3000
 <dubbo:protocol name="rmi" codec="spring" />
 ```
 
-#### 注意：
-- **如果正在使用 RMI 提供服务给外部访问，** 公司内网环境应该不会有攻击风险。
-- **同时应用里依赖了老的 common-collections 包的情况下，** dubbo 不会依赖这个包，请排查自己的应用有没有使用。
-- **存在反序列化安全风险。** 请检查应用：将 commons-collections3 请升级到 [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html)；将 commons-collections4 请升级到 [4.1](https://commons.apache.org/proper/commons-collections/release_4_1.html)。新版本的 commons-collections 解决了该问题。
+
+> - **如果正在使用 RMI 提供服务给外部访问，** 公司内网环境应该不会有攻击风险。
+
+> - **同时应用里依赖了老的 common-collections 包的情况下，** dubbo 不会依赖这个包，请排查自己的应用有没有使用。
+
+> - **存在反序列化安全风险。** 请检查应用：将 commons-collections3 请升级到 [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html)；将 commons-collections4 请升级到 [4.1](https://commons.apache.org/proper/commons-collections/release_4_1.html)。新版本的 commons-collections 解决了该问题。
