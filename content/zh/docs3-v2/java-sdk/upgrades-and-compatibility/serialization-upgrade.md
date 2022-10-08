@@ -25,5 +25,5 @@ dubbo.provider.serialization=hessian2
 
 **实现原理**
 
-dubbo 客户端序列化协议是根据服务端的注册配置来选择的（即服务端的`serialization`配置）。在请求阶段 dubbo 会把客户端的序列化协议组装到请求头上，服务端在进行反序列化时会根据请求头来确定反序列化协议。**所以，如果服务端和客户端的版本不一致就可能会出现客户端序列化不了的情况。** 为了解决这个情况，3.1.1 在客户端序列化的时候会优先使用`prefer-serialization`配置的协议，如果不支持`prefer-serialization`相关的协议，才会使用`serialization`配置的协议。（可以把`serialization`理解为一个兜底的配置）
+dubbo 客户端序列化协议是根据服务端的注册配置来选择的（即服务端的`serialization`配置）。在请求阶段 dubbo 会把客户端的序列化协议组装到请求头上，服务端在进行反序列化时会根据请求头来确定反序列化协议。**所以，如果服务端和客户端的版本不一致就可能会出现客户端序列化不了的情况。** 为了解决这个情况，3.2.0 在客户端序列化的时候会优先使用`prefer-serialization`配置的协议，如果不支持`prefer-serialization`相关的协议，才会使用`serialization`配置的协议。（可以把`serialization`理解为一个兜底的配置）
 
