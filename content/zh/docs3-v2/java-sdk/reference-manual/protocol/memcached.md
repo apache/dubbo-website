@@ -5,8 +5,6 @@ title: "Memcached协议"
 linkTitle: "Memcached协议"
 weight: 12
 ---
-
-
 ## 特性说明
 基于 memcached 实现的 RPC 协议。 `2.3.0` 以上版本支持。
 
@@ -14,9 +12,9 @@ weight: 12
 
 ## 使用场景
 缓解数据库压力，提高交互速度等。
-## 使用方式
 
-#### 引入依赖
+## 使用方式
+### 引入依赖
 
 从 Dubbo 3 开始，Memcached 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
@@ -27,29 +25,29 @@ weight: 12
 </dependency>
 ```
 
-#### 注册 memcached 服务的地址
+### 注册 memcached 服务的地址
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
 Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.153.10:2181"));
 registry.register(URL.valueOf("memcached://10.20.153.11/com.foo.BarService?category=providers&dynamic=false&application=foo&group=member&loadbalance=consistenthash"));
 ```
 
-#### 在客户端引用
-不需要感知 Memcached 的地址
+### 在客户端引用
+**不需要感知 Memcached 的地址**
 
-在客户端使用：
+在客户端使用
 
 ```xml
 <dubbo:reference id="cache" interface="java.util.Map" group="member" />
 ```
 
-或者点对点直连：
+或者点对点直连
 
 ```xml
 <dubbo:reference id="cache" interface="java.util.Map" url="memcached://10.20.153.10:11211" />
 ```
 
-也可以使用自定义接口：
+也可以使用自定义接口
 ```xml
 <dubbo:reference id="cache" interface="com.foo.CacheService" url="memcached://10.20.153.10:11211" />
 ```
