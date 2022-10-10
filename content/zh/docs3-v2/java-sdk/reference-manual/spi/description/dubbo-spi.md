@@ -331,6 +331,19 @@ private T injectExtension(T instance) {
             if (method.getAnnotation(DisableInject.class) != null) {
                 continue;
             }
+            
+            /**
+             * 检测是否实现了ScopeModelAware、ExtensionAccessorAware类，如果实现则不注入
+             */
+            if (method.getDeclaringClass() == ScopeModelAware.class) {
+                    continue;
+            }
+            if (instance instanceof ScopeModelAware || instance instanceof ExtensionAccessorAware) {
+                if (ignoredInjectMethodsDesc.contains(ReflectUtils.getDesc(method))) {
+                    continue;
+                }
+            }
+            
             // 基本类型不注入
             Class<?> pt = method.getParameterTypes()[0];
             if (ReflectUtils.isPrimitives(pt)) {
