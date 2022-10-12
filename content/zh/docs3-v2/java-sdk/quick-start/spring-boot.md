@@ -168,7 +168,7 @@ public class ConsumerApplication {
     @DubboReference
     private DemoService demoService;
     
-    public String sayHello(String name) {
+    public String doSayHello(String name) {
         return demoService.sayHello(name);
     }
 
