@@ -167,6 +167,10 @@ dubbo-samples-spring-boot-consumer/ConsumerApplication.java
 public class ConsumerApplication {
     @DubboReference
     private DemoService demoService;
+    
+    public String sayHello(String name) {
+        return demoService.sayHello(name);
+    }
 
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(ConsumerApplication.class, args);
