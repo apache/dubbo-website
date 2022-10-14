@@ -41,7 +41,7 @@ jobs:
           name: ${{ matrix.target }}-output
           path: ${{ matrix.target }}-output.txt
 
-  merge-result:
+  download-result:
     needs: [benchmark-run]
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -54,13 +54,9 @@ jobs:
         with:
           name: ${{ matrix.target }}-output
           path: ./
-      - name: Print Result Header
-        run: echo '----------' >> final-output.txt && echo ${{ matrix.target }} >> final-output.txt && echo '----------' >> final-output.txt
-      - name: Print Result body
-        run: cat ${{ matrix.target }}-output.txt >> final-output.txt
 
   update-result:
-    needs: [merge-result]
+    needs: [download-result]
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
@@ -85,7 +81,7 @@ jobs:
       - name: Copy other files
         run: cp .htaccess ./public
       - name: Copy benchmark result files
-        run: cp final-output.txt ./public
+        run: cp *-output ./public
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master'
