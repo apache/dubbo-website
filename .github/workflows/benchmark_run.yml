@@ -12,14 +12,11 @@ jobs:
   benchmark-run:
     runs-on: ubuntu-18.04
     timeout-minutes: 30
-    strategy:
-      matrix:
-        target: [ "dubbo-fastjson","dubbo-gson","dubbo-grpc","dubbo-hessianlite","dubbo-kryo","dubbo-native-hessian","dubbo-protobuf-json","dubbo-triple" ]
     steps:
       - uses: actions/checkout@v2
         with:
-          repository: 'apache/dubbo-benchmark'
-          ref: master
+          repository: 'dkisser/dubbo-benchmark'
+          ref: batch-run
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
@@ -28,35 +25,21 @@ jobs:
       - name: Prepare base
         run: mvn clean package -DskipTests=true -pl benchmark-base,client-base,server-base
       - name: Start server
-        run: ./benchmark.sh ${{ matrix.target }}-server &
+        run: ./batch-run.sh -S dubbo-fastjson-server dubbo-gson-server dubbo-grpc-server dubbo-hessianlite-server dubbo-kryo-server dubbo-native-hessian-server dubbo-protobuf-json-server dubbo-triple-server
       - name: Wait server ready
         run: sleep 20
       - name: Run benchmark
-        run: ./benchmark.sh -a "--warmupIterations=1 --warmupTime=1 --measurementIterations=1 --measurementTime=1" ${{ matrix.target }}-client >> ${{ matrix.target }}-output.txt
+        run: ./benchmark.sh -a "--warmupIterations=1 --warmupTime=1 --measurementIterations=1 --measurementTime=1" dubbo-fastjson-client dubbo-gson-client dubbo-grpc-client dubbo-hessianlite-client dubbo-kryo-client dubbo-native-hessian-client dubbo-protobuf-json-client dubbo-triple-client -f benchmark-result.txt
       - name: Kill jobs
         run: jobs -p | grep -o -E '\s\d+\s' | xargs kill || true
       - name: Save output
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.target }}-output
-          path: ${{ matrix.target }}-output.txt
-
-  download-result:
-    needs: [benchmark-run]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      matrix:
-        target: [ "dubbo-fastjson","dubbo-gson","dubbo-grpc","dubbo-hessianlite","dubbo-kryo","dubbo-native-hessian","dubbo-protobuf-json","dubbo-triple" ]
-    steps:
-      - name: download output
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ matrix.target }}-output
-          path: ./
+          name: benchmark-result
+          path: benchmark-result.txt
 
   update-result:
-    needs: [download-result]
+    needs: [benchmark-run]
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
@@ -80,6 +63,13 @@ jobs:
         run: hugo --minify
       - name: Copy other files
         run: cp .htaccess ./public
+      - name: download output
+        uses: actions/download-artifact@v2
+        with:
+          name: benchmark-result
+          path: ./
+      - name: Copy other files
+          run: cp benchmark-result.txt ./public
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master'
