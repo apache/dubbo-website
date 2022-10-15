@@ -99,7 +99,7 @@ func checkHealth(service string, conn *grpc.ClientConn) {
 
 + 启动dubbo-go-samples中的[triple服务](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc/go-server)，提供`org.apache.dubbogo.samples.api.Greeter`服务。使用grpc-health-probe检查该服务的健康状态，`grpc-health-probe -addr=localhost:20000 -service "org.apache.dubbogo.samples.api.Greeter"`
 
-![image-20220620162015613](https://picture-table.oss-cn-beijing.aliyuncs.com/img/image-20220620162015613.png)
+![image-health-check](imgs/docs3-v2/golang-sdk/tasks/service_management/triple-health-check/health-check.png)
 
 #### 参考：
 
