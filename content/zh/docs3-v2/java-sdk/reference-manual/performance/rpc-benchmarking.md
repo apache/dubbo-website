@@ -50,6 +50,6 @@ description: ""
 
 TBD<br /><br />
 
-### 1.3.4 模拟 Stream 通信场景的吞吐量提升
+### 1.2.4 模拟 Stream 通信场景的吞吐量提升
 
 TBD

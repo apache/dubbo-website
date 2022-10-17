@@ -7,8 +7,6 @@ description: >-
      本文对比了Protobuf和Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。
 ---
 
-# Protobuf与Interface这2种IDL的差异
-
 ## 1. 数据类型
 
 ### 1.1. 基本类型
@@ -32,9 +30,9 @@ string | String
 bytes | ByteString
 
 > [注]在Java中，无符号的32位和64位整数使用它们的有符号对数来表示，顶部位只存储在符号位中。
-### 1.2. 复合类型
+## 2. 复合类型
 
-#### 1.2.1. 枚举
+### 2.1. 枚举
 
 * 原始pb代码
 
@@ -53,7 +51,7 @@ enum TrafficLightColor {
 ![image](/imgs/docs/advanced/protobufinterface/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png)
 
 > 枚举是常量，因此采用大写
-### 1.2.2. 数组
+### 2.2. 数组
 
 * 原始pb代码
 
@@ -68,11 +66,11 @@ message VipIDToRidReq {
 ![image](/imgs/docs/advanced/protobufinterface/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png)
 
 > 底层实际上是1个ArrayList
-### 2.2.3. 集合
+### 2.3. 集合
 
 PB不支持无序、不重复的集合，只能 ``借用数组实现``，需要 ``自行去重``。
 
-### 2.2.4. 字典
+### 2.4. 字典
 
 * 原始pb代码
 
@@ -86,7 +84,7 @@ message BatchOnlineRes {
 
 ![image](/imgs/docs/advanced/protobufinterface/124234654-e4568080-db46-11eb-9700-b30022ebee21.png)
 
-### 2.2.5. 嵌套
+### 2.5. 嵌套
 
 * 原始pb代码
 
