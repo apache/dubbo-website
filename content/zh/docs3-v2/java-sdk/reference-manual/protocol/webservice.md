@@ -29,9 +29,9 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 ## 使用场景
 发布一个服务（对内/对外），不考虑客户端类型，不考虑性能，建议使用webservice。服务端已经确定使用webservice，客户端不能选择，必须使用webservice。
 ## 使用方式
-#### 依赖
+### 依赖
 
-从 Dubbo 3 开始，Redis 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
+从 Dubbo 3 开始，Webservice 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
@@ -53,49 +53,49 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 </dependency>
 ```
 
-配置协议：
+### 配置协议
 ```xml
 <dubbo:protocol name="webservice" port="8080" server="jetty" />
 ```
 
-配置默认协议：
+### 配置默认协议
 ```xml
 <dubbo:provider protocol="webservice" />
 ```
 
-配置服务协议：
+### 配置服务协议
 ```xml
 <dubbo:service protocol="webservice" />
 ```
 
-多端口：
+### 多端口
 ```xml
 <dubbo:protocol id="webservice1" name="webservice" port="8080" />
 <dubbo:protocol id="webservice2" name="webservice" port="8081" />
 ```
 
-直连：
+### 直连
 ```xml
 <dubbo:reference id="helloService" interface="HelloWorld" url="webservice://10.20.153.10:8080/com.foo.HelloWorld" />
 ```
 
-WSDL：
+### WSDL
 ```
 http://10.20.153.10:8080/com.foo.HelloWorld?wsdl
 ```
 
-Jetty Server (默认)：
+### Jetty Server (默认)
 
 ```xml
 <dubbo:protocol ... server="jetty" />
 ```
 
-Servlet Bridge Server (推荐)：
+### Servlet Bridge Server (推荐)
 ```xml
 <dubbo:protocol ... server="servlet" />
 ```
 
-配置 DispatcherServlet：
+### 配置 DispatcherServlet
 ```xml
 <servlet>
          <servlet-name>dubbo</servlet-name>
@@ -108,6 +108,6 @@ Servlet Bridge Server (推荐)：
 </servlet-mapping>
 ```
 
-#### 注意：如果使用 servlet 派发请求：
-* 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同。
-* 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。
+> 如果使用 servlet 派发请求
+> * 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同。
+> * 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。

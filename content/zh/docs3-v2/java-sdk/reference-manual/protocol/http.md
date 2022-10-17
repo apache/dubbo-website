@@ -36,22 +36,22 @@ http短连接，协议标准化且易读，容易对接外部系统，适用于�
 </dependency>
 ```
 
-配置协议：
+### 配置协议
 ```xml
 <dubbo:protocol name="http" port="8080" />
 ```
 
-配置 Jetty Server (默认)：
+### 配置 Jetty Server (默认)
 ```xml
 <dubbo:protocol ... server="jetty" />
 ```
 
-配置 Servlet Bridge Server (推荐使用)：
+### 配置 Servlet Bridge Server (推荐使用)
 ```xml
 <dubbo:protocol ... server="servlet" />
 ```
 
-配置 DispatcherServlet：
+### 配置 DispatcherServlet
 
 ```xml
 <servlet>
@@ -65,7 +65,6 @@ http短连接，协议标准化且易读，容易对接外部系统，适用于�
 </servlet-mapping>
 ```
 
-#### 注意：
-如果使用 servlet 派发请求：
-* 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同，
-* 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。
+> 如果使用 servlet 派发请求
+> * 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同，
+> * 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。

@@ -70,7 +70,7 @@ public class ConsumerController {
 
 ### Deploy Apache Skywalking
 
-[Apache skywalking](https://github.com/apache/skywalking) offers  two deployment modes: single-node mode and cluster mode,Here is  the single-node mode deployment step, and more about how to deploy skywalking with cluster mode, please reference [document](https://skywalking.apache.org/docs/main/latest/en/setup/backend/backend-setup/).
+[Apache skywalking](https://github.com/apache/skywalking) offers  two deployment modes: single-node mode and cluster mode,Here is  the single-node mode deployment step, and more about how to deploy skywalking with cluster mode, please reference [document](https://skywalking.apache.org/docs/main/next/en/setup/backend/backend-setup/).
 
 #### Third-party components
 

@@ -6,15 +6,19 @@ weight: 3
 description: "自定义 Dubbo 服务对外暴露的主机地址"
 ---
 
-## 背景
+## 特性说明
 
-在 Dubbo 中， Provider 启动时主要做两个事情，一是启动 server，二是向注册中心注册服务。启动 server 时需要绑定 socket，向注册中心注册服务时也需要发送 socket 唯一标识服务地址。
+在 Dubbo 中， Provider 启动时主要做两个事情
+- 一是启动 server
+- 二是向注册中心注册服务。启动 server 时需要绑定 socket，向注册中心注册服务时也需要发送 socket 唯一标识服务地址。
 
-1. `dubbo`中不设置`host`时默认`host`是什么?
-2. 那在`dubbo`中如何指定服务的`host`,我们是否可以用hostname或domain代替IP地址作为`host`?
-3. 在使用docker时,有时需要设置端口映射,此时,启动server时绑定的socket和向注册中心注册的socket使用不同的端口号,此时又该如何设置?
+1. `dubbo` 中不设置 `host` 时默认 `host` 是什么?
+2. 那在 `dubbo` 中如何指定服务的 `host`,我们是否可以用 hostname 或 domain 代替 IP 地址作为 `host`?
+3. 在使用 docker 时,有时需要设置端口映射,此时,启动 server 时绑定的 socket 和向注册中心注册的 socket 使用不同的端口号,此时又该如何设置?
 
-#### dubbo 中不设置 host 时默认 host 是什么
+## 使用场景
+## 使用方式
+### 不设置 host 时默认 host
 
 一般的 dubbo 协议配置如下:
 ``` xml
@@ -31,7 +35,7 @@ description: "自定义 Dubbo 服务对外暴露的主机地址"
 2. 在阿里云服务器中，返回私有地址,如: 172.18.46.234
 3. 在本机测试时，返回公有地址，如: 30.5.10.11
 
-#### 那在 dubbo 中如何指定服务的 socket?
+### 指定服务的 socket
 
 除此之外,可以通过 `dubbo.protocol` 或 `dubbo.provider `的 `host` 属性对 `host` 进行配置,支持IP地址和域名,如下:
 
@@ -41,7 +45,7 @@ description: "自定义 Dubbo 服务对外暴露的主机地址"
     ...
 ```
 
-####  在使用 docker 时，有时需要设置端口映射，此时，启动 server 时绑定的 socket 和向注册中心注册的 socket 使用不同的端口号，此时又该如何设置？
+### socket 使用不同的端口号
 
 见 [dubbo 通过环境变量设置 host](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-docker)
 
@@ -64,12 +68,12 @@ PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BI
 如设置 PORT_TO_REGISTRY=20881 IP_TO_REGISTRY=30.5.97.6，则 PORT_TO_BIND IP_TO_BIND 不受影响
 如果设置 PORT_TO_BIND=20881 IP_TO_BIND=30.5.97.6，则默认 PORT_TO_REGISTRY=20881 IP_TO_REGISTRY=30.5.97.6
 
-## 总结
+### 总结
 
  1. 可以通过`dubbo.protocol`或`dubbo.provider`的`host`属性对`host`进行配置,支持IP地址和域名.但此时注册到注册中心的IP地址和监听IP地址是同一个值
  2. 为了解决在虚拟环境或局域网内consumer无法与provider通信的问题,可以通过环境变量分别设置注册到注册中心的IP地址和监听IP地址,其优先级高于`dubbo.protocol`或`dubbo.provider`的`host`配置
 
-## 参考
+### 参考
 
  1. [Proposal: support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
  2. [dubbo通过环境变量设置host](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-docker)

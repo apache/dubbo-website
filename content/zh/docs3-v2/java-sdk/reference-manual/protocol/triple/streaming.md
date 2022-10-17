@@ -4,8 +4,16 @@ title: "Streaming 通信"
 linkTitle: "Streaming 通信"
 weight: 10
 ---
+## 流的实现原理
 
-## 开启 Triple 新特性 —— Stream (流)
+`Triple`协议的流模式
+
+- 从协议层来说，`Triple` 是建立在 `HTTP2` 基础上的，所以直接拥有所有 `HTTP2` 的能力，故拥有了分 `stream` 和全双工的能力。
+
+- 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
+
+## 开启 Triple 新特性 
+### Stream 流
 Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
 
 - 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
@@ -32,8 +40,8 @@ Stream 分为以下三种:
 - 全双工，发送不需要等待
 - 支持取消和超时
 
-### 非 PB 序列化的流
-1. api
+## 非 PB 序列化的流
+### api
 ```java
 public interface IWrapperGreeter {
 
@@ -45,8 +53,7 @@ public interface IWrapperGreeter {
 
 > Stream 方法的方法入参和返回值是严格约定的，为防止写错而导致问题，Dubbo3 框架侧做了对参数的检查, 如果出错则会抛出异常。
 > 对于 `双向流(BIDIRECTIONAL_STREAM)`, 需要注意参数中的 `StreamObserver` 是响应流，返回参数中的 `StreamObserver` 为请求流。
-
-2. 实现类
+### 实现类
 ```java
 public class WrapGreeterImpl implements WrapGreeter {
 
@@ -84,7 +91,7 @@ public class WrapGreeterImpl implements WrapGreeter {
 }
 ```
 
-3. 调用方式
+### 调用方式
 ```java
 delegate.sayHelloServerStream("server stream", new StreamObserver<String>() {
     @Override
@@ -144,11 +151,3 @@ public interface PbGreeter {
     org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterRequest> greetStream(org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
 }
 ```
-
-### 流的实现原理
-
-`Triple`协议的流模式是怎么支持的呢？
-
-- 从协议层来说，`Triple` 是建立在 `HTTP2` 基础上的，所以直接拥有所有 `HTTP2` 的能力，故拥有了分 `stream` 和全双工的能力。
-
-- 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
