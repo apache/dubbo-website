@@ -1,12 +1,10 @@
-```
 ---
 title: 基于Grpc的健康检查
-keywords: 基于Grpc的健康检查
-description: 基于Grpc的健康检查
+type: docs
+weight: 2
 ---
-```
 
-#### Grpc健康检查
+## 1. Grpc健康检查
 
 Grpc健康检查是通过一个普通的用户rpc调用进行实现，Grpc的健康检查定义了如下的protobuf，这样就能实现所有的Grpc协议健康检查的互通。
 
@@ -38,12 +36,12 @@ service Health {
 }
 ```
 
-#### triple健康检查服务
+## 2 triple健康检查服务
 
 + Dubbo-go框架在启动后会自动向框架中注册健康检查服务，提供基于grpc health proto的健康检查服务，无需在配置文件中额外配置。
 + triple健康检查服务可以通过grpc-health-probe检查框架中服务的状态，也可以通过grpc调用该健康检查服务，但是不能通过triple客户端调用该健康检查服务(基于grpc的健康检查服务不通过注册中心注册)，调用的服务名为“grpc.health.v1.Health”，接口为check。
 
-##### 通过gprc客户端调用健康检查服务：
+### 2.1 通过gprc客户端调用健康检查服务：
 
 + 启动dubbo-go-samples中的[triple服务](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc/go-server)，通过下面的grpc客户端便可以查看"org.apache.dubbogo.samples.api.Greeter"的状态。triple健康检查服务与grpc互通，所以可以通过grpc客户端查看基于triple协议服务的健康状态。
 
@@ -95,7 +93,7 @@ func checkHealth(service string, conn *grpc.ClientConn) {
 }
 ```
 
-##### grpc-health-probe调试健康检查服务：
+### 2.2 grpc-health-probe调试健康检查服务：
 
 + 启动dubbo-go-samples中的[triple服务](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc/go-server)，提供`org.apache.dubbogo.samples.api.Greeter`服务。使用grpc-health-probe检查该服务的健康状态，`grpc-health-probe -addr=localhost:20000 -service "org.apache.dubbogo.samples.api.Greeter"`
 
