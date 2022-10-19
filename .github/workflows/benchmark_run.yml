@@ -33,13 +33,15 @@ jobs:
         run: sleep 20
       - name: Run benchmark
         run: ./benchmark.sh -a "--warmupIterations=1 --warmupTime=1 --measurementIterations=1 --measurementTime=1" ${{ matrix.target }}-client >> ${{ matrix.target }}-output.txt
+      - name: Generate md file
+          run: cat ./benchmark-template.json | python3 -c "import sys, json; print (json.load(sys.stdin)[${{ matrix.target }}])" >> ${{ matrix.target }}-output.md
       - name: Kill jobs
         run: jobs -p | grep -o -E '\s\d+\s' | xargs kill || true
       - name: Save output
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.target }}-output
-          path: ${{ matrix.target }}-output.txt
+          path: ${{ matrix.target }}-output.md
 
   update-result:
     needs: [benchmark-run]
@@ -49,6 +51,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+      - name: download output
+        uses: actions/download-artifact@v2
+      - name: Copy benchmark-result
+        run: cp -r *-output* ./content/zh/benchmark-result
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
@@ -67,10 +73,6 @@ jobs:
         run: hugo --minify
       - name: Copy other files
         run: cp .htaccess ./public
-      - name: download output
-        uses: actions/download-artifact@v2
-      - name: Copy benchmark-result
-        run: mkdir -p ./public/dubbo-website/content/zh/benchmark-result && cp -r *-output* ./public/dubbo-website/content/zh/benchmark-result
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master'
