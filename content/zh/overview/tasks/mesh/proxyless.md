@@ -63,8 +63,6 @@ public class GreetingServiceConsumer {
 
 为了使 Kubernetes 感知到应用的状态，需要配置 `qosAcceptForeignIp` 参数，以便 Kubernetes 可以获得正确的应用状态，[对齐生命周期](/zh/docs3-v2/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/)。
 
-```yaml
-
 ```properties
 dubbo.application.name=dubbo-samples-xds-provider
 dubbo.application.metadataServicePort=20885
