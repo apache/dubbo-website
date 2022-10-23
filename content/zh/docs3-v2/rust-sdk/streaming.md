@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
-weight: 1
-description: "使用 Rust 快速开发 Dubbo 服务。"
+title: "Streaming 通信模型"
+linkTitle: "Streaming通信模型"
+weight: 3
+description: "介绍使用 Dubbo Rust 快速开发 Client streaming、Server streaming、Bidirectional streaming 模型的服务。"
 ---
 
 本文重点讲解 Dubbo Rust Streaming 通信模式，请先查看 [Quick Start](../quick-start) 了解 Dubbo Rust 基本使用，在此查看本文的[完整示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
