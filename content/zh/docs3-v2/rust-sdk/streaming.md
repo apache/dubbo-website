@@ -6,15 +6,11 @@ weight: 1
 description: "使用 Rust 快速开发 Dubbo 服务。"
 ---
 
-请在此查看完整 [示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
+本文重点讲解 Dubbo Rust Streaming 通信模式，请先查看 [Quick Start](../quick-start) 了解 Dubbo Rust 基本使用，在此查看本文的[完整示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
 
-## 1 前置条件
-- 安装 [Rust](https://rustup.rs/) 开发环境
-- 安装 [protoc](https://grpc.io/docs/protoc-installation/) 工具
+## 1 IDL 中增加 Streaming 模型定义
 
-## 2 使用 IDL 定义 Dubbo 服务
-
-Greeter 服务定义如下，包含一个 Unary、Client stream、Server stream、Bidirectional stream 模型的 Dubbo 服务。
+完整 Greeter 服务定义如下，包含一个 Unary、Client stream、Server stream、Bidirectional stream 模型的 Dubbo 服务。
 
 ```protobuf
 // ./proto/greeter.proto
@@ -36,61 +32,25 @@ message GreeterReply {
 }
 
 service Greeter{
+
   // unary
   rpc greet(GreeterRequest) returns (GreeterReply);
+
+  // clientStream
+  rpc greetClientStream(stream GreeterRequest) returns (GreeterReply);
+
+  // serverStream
+  rpc greetServerStream(GreeterRequest) returns (stream GreeterReply);
+
+  // bi streaming
+  rpc greetStream(stream GreeterRequest) returns (stream GreeterReply);
+
 }
 ```
 
-## 3 添加 Dubbo-rust 及相关依赖到项目
-```toml
-# ./Cargo.toml
-[package]
-name = "example-greeter"
-version = "0.1.0"
-edition = "2021"
+## 2 使用 Streaming 模型定义编写逻辑
 
-[[bin]]
-name = "greeter-server"
-path = "src/greeter/server.rs"
-
-[[bin]]
-name = "greeter-client"
-path = "src/greeter/client.rs"
-
-[dependencies]
-http = "0.2"
-http-body = "0.4.4"
-futures-util = {version = "0.3", default-features = false}
-tokio = { version = "1.0", features = [ "rt-multi-thread", "time", "fs", "macros", "net", "signal"] }
-prost-derive = {version = "0.10", optional = true}
-prost = "0.10.4"
-async-trait = "0.1.56"
-tokio-stream = "0.1"
-
-dubbo = "0.1.0"
-dubbo-config = "0.1.0"
-
-[build-dependencies]
-dubbo-build = "0.1.0"
-```
-
-## 4 配置 dubbo-build 编译 IDL
-
-在项目根目录创建 (not /src)，创建 `build.rs` 文件并添加以下内容：
-
-```rust
-// ./build.rs
-fn main() {
-    dubbo_build::prost::configure()
-        .compile(&["proto/greeter.proto"], &["proto/"])
-        .unwrap();
-}
-```
-这样配置之后，编译项目就可以生成 Dubbo Stub 相关代码，路径一般在`./target/debug/build/example-greeter-<id>/out/org.apache.dubbo.sample.tri.rs`。
-
-## 5 编写 Dubbo 业务代码
-
-### 5.1 编写 Dubbo Server
+### 2.1 编写 Streaming Server
 
 ```rust
 // ./src/greeter/server.rs
@@ -274,33 +234,7 @@ fn match_for_io_error(err_status: &dubbo::status::Status) -> Option<&std::io::Er
 }
 ```
 
-### 5.2 配置dubbo.yaml
-
-dubbo.yaml指示server端的配置，包括暴露的服务列表、协议配置、监听配置等。
-
-```yaml
-# ./dubbo.yaml
-name: dubbo
-service:
-  org.apache.dubbo.sample.tri.Greeter:
-    version: 1.0.0
-    group: test
-    protocol: triple
-    registry: ''
-    serializer: json
-    protocol_configs:
-      triple:
-        ip: 0.0.0.0
-        port: '8888'
-        name: triple
-protocols:
-  triple:
-    ip: 0.0.0.0
-    port: '8888'
-    name: triple
-```
-
-### 5.3 编写 Dubbo Client
+### 2.2 编写 Streaming Client
 
 ```rust
 // ./src/greeter/client.rs
@@ -406,7 +340,7 @@ async fn main() {
 }
 ```
 
-## 6 运行并总结
+## 3 运行示例
 
 1. 编译
 
@@ -421,7 +355,7 @@ $ ./target/debug/greeter-server
 2022-09-28T23:33:28.104577Z  INFO dubbo::framework: url: Some(Url { uri: "triple://0.0.0.0:8888/org.apache.dubbo.sample.tri.Greeter", protocol: "triple", location: "0.0.0.0:8888", ip: "0.0.0.0", port: "8888", service_key: ["org.apache.dubbo.sample.tri.Greeter"], params: {} })
 ```
 
-3. 运行client，验证调用是否成功
+3. 运行client，可以看到 Streaming 通信效果
 
 执行`./target/debug/greeter-client`来运行client，调用`triple://127.0.0.1:8888/org.apache.dubbo.sample.tri.Greeter`下的各种方法：
 
