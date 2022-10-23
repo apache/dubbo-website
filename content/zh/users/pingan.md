@@ -18,7 +18,7 @@ dubbo社区关于dubbo3的文档和资料越来越完善，以下是我们从社
 
 ## 2.1 下一代云原生服务框架
 
-![](RackMultipart20221023-1-ctrqax_html_67fbe5f1cdffe5a9.png)
+![pingan](/imgs/v3/users/pingan-2.png)
 
 Dubbo3被社区寄予厚望，将其视为下一代云原生服务框架打造，Dubbo3 提供的核心特性列表，主要包括四部分。
 
@@ -27,7 +27,7 @@ Dubbo3被社区寄予厚望，将其视为下一代云原生服务框架打造�
 - **统一流量治理模型** 。面向云原生流量治理，SDK、Mesh、VM、Container 等统一治理规则；能够支持更丰富的流量治理场景。
 - **Service Mesh** 。在最新的3.1.0的版本中支持Sidecar Mesh 与 Proxyless Mesh，提供更多架构选择，降低迁移、落地成本。
 
-![](RackMultipart20221023-1-ctrqax_html_89ed45dadc24e8a6.png)
+![pingan](/imgs/v3/users/pingan-3.png)
 
 首先是性能、资源利用率的提升。社区资料显示，升级 Dubbo3 的应用预期能实现单机内存 50% 的下降，对于越大规模的集群效果将越明显，Dubbo3 从架构上支持百万实例级别的集群横向扩展,同时依赖应用级服务发现、Triple协议等可以大大提供应用的服务治理效率和吞吐量。
 
@@ -37,7 +37,7 @@ Dubbo3被社区寄予厚望，将其视为下一代云原生服务框架打造�
 
 ## 2.2 应用级服务发现核心原理
 
-![](RackMultipart20221023-1-ctrqax_html_cf9077526a830eec.png)
+![pingan](/imgs/v3/users/pingan-4.png)
 
 我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。 在这个过程中
 
@@ -45,7 +45,7 @@ Dubbo3被社区寄予厚望，将其视为下一代云原生服务框架打造�
   - 注册中心通过这个 key 对 provider 实例地址进行聚合；
   - Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；
 
-![](RackMultipart20221023-1-ctrqax_html_dbbe0e5e1d617949.png)
+![pingan](/imgs/v3/users/pingan-5.png)
 
 再来看一下Provider向注册中心注册的URL 地址的详细格式，这里把 URL 地址数据划分成了几份：
 
@@ -68,7 +68,7 @@ Dubbo3被社区寄予厚望，将其视为下一代云原生服务框架打造�
 - 如何在保留易用性、功能性的同时，重新组织 URL 地址数据，避免冗余数据的出现，让 Dubbo3 能支撑更大规模集群水平扩容？
 - 如何在地址发现层面与其他的微服务体系如 Kubernetes、Spring Cloud 打通？
 
-![](RackMultipart20221023-1-ctrqax_html_15b9d3a9ddfb4f0.png)
+![pingan](/imgs/v3/users/pingan-6.png)
 
 最终，社区给出的方案也是非常巧妙和经典。Dubbo3 的应用级服务发现方案设计的基本思路是：地址发现链路上的聚合元素也就是之前提到的 Key 由服务调整为应用，这也是其名称叫做应用级服务发现的由来,与kubernetes和spring cloud的服务注册发现处于同一粒度，能够平滑打通；另外，通过注册中心同步的数据内容上做了大幅精简，只保留最核心的 ip、port 地址数据。 经过上述调整，应用级别服务发现在保持接口级地址模型易用性的同时，实现了地址单条数据大小和总数量的下降。
 
@@ -165,7 +165,7 @@ Dubbo3被社区寄予厚望，将其视为下一代云原生服务框架打造�
 
 方案的设计重点放在"平滑、可控"两点，根据dubbo3的新架构，目前正在验证中的迁移方案示意图如下：
 
-![](RackMultipart20221023-1-ctrqax_html_a3305ffbc07fe810.png)
+![pingan](/imgs/v3/users/pingan-7.png)
 
 从上图可以看出，除了应用外，逻辑上还分了3个区域，分别是注册域、配置管控哉和监控域。注册域主要服务于服务的注册和发现，例如provider在DubboService暴露时，将服务信息和元数据信息上报到注册域的注册中心和元数据中心，consumer通过注册中心和元数据中心来发现服务。配置管控域主要是管理应用配置和迁移流量管控，dubbo3的配置中心天然就支持dubbo3的配置，所以可以流量规则的配置也由dubbo3的配置中心进行维护，dubbo3的DynamicConfigration提供了很多关于动态配置的方法可以直接使用。监控域主要除了原RPC流量的监控外，还细分了迁移流量的监控，在迁移过程中，可以通过监控直观的看到迁移流量的现状，出现问题时，也可以及时报警通知相关人员介入。
 
