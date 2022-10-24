@@ -3,7 +3,7 @@ type: docs
 title: "服务调用扩展点"
 linkTitle: "服务调用"
 weight: 4
-description: "本文将介绍如何 Dubbo 3 中自定义扩展调用链路上核心的扩展点以满足您的需求。"
+description: "本文将介绍如何在 Dubbo 3 中自定义调用链路上核心的扩展点以满足您的需求。"
 ---
 
 ![dubbo-architucture](/imgs/v3/concepts/invoke-arch.jpg)
