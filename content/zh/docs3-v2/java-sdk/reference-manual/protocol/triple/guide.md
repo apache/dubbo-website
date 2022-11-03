@@ -114,8 +114,6 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
         ReferenceConfig<IGreeter> ref = new ReferenceConfig<>();
         ref.setInterface(IGreeter.class);
         ref.setCheck(false);
-        ref.setInterface(IGreeter.class);
-        ref.setCheck(false);
         ref.setProtocol(CommonConstants.TRIPLE);
         ref.setLazy(true);
         ref.setTimeout(100000);
