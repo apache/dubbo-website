@@ -152,7 +152,7 @@ bobtthp/pilot                                                     latest        
 
 
 
-<h4 id="ddploy">3.3.1 部署</h4>
+<h4 id="ddeploy">3.3.2 部署</h4>
 
 1. 使用刚构建的镜像部署:
 ```
