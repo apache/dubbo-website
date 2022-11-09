@@ -551,7 +551,7 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 -Ddubbo.config.mode=strict
 
 # 环境变量
-dubbo.config.mode=strict
+DUBBO_CONFIG_MODE=strict
 
 # 外部配置(配置中心)、Spring应用的Environment、dubbo.properties
 dubbo.config.mode=strict
