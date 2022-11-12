@@ -20,7 +20,7 @@ Dubbo 基于消费端的自动服务发现能力，其基本工作原理如下�
 以 dubbo-spring-boot-starter 使用方式为例，增加 registry 配置
 
 ```properties
-# application.properties
+# application.yml
 dubbo
  registry
   address: zookeeper://127.0.0.1:2181
