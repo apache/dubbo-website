@@ -5,8 +5,6 @@ linkTitle: "dubbo-pilot Control Plane 部署"
 weight: 2
 ---
 
-# dubbo-pilot Control Plane 部署
-
 * [1.总体目标](#target)
 * [2.基本流程](#basic)
 * [3.详细步骤](#detail)
