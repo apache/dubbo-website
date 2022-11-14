@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "入门文档"
-linkTitle: "入门文档"
+title: "Dubbo 文档"
+linkTitle: "文档"
 no_list: true
 hide_summary: true
 menu:

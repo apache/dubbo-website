@@ -1,0 +1,12 @@
+---
+type: docs
+title: "临时踢除问题服务实例"
+linkTitle: "临时踢除问题服务实例"
+weight: 5
+description: "在 Dubbo-Admin 临时踢除问题服务实例"
+feature:
+  title: Horizontales Skalieren
+  description: >
+    Skaliere deine Anwendung mit einem einfachen Befehl, über die Benutzeroberfläche oder automatisch, basierend auf der CPU-Auslastung.
+
+---
