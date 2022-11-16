@@ -2,7 +2,7 @@
 title: Dubbo 文档
 noedit: true
 type: docs
-linkTitle: "主页"
+linkTitle: "文档"
 main_menu: true
 weight: 1
 hide_feedback: true

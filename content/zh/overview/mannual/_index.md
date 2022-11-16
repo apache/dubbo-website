@@ -17,7 +17,7 @@ no_list: true
             <div class="h-100 card shadow" href="#">
                 <div class="card-body">
                     <h4 class="card-title">
-                        <a target="_blank" href='{{< relref "../../docs3-v2/java-sdk" >}}'>Java SDK</a>
+                        <a target="_blank" href='{{< relref "../../docs3-v2/java-sdk/home/" >}}'>Java SDK</a>
                     </h4>
                     <p>Java SDK</p>
                 </div>
