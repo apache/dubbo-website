@@ -7,11 +7,13 @@
 <div class="col-sm col-md-6 mb-4">
   <div class="h-100 card shadow" href="#">
     <div class="card-body">
-  {{ $item :=. }}
+  {{ $item := . }}
+  {{ $name := $item.name }}
+  {{ $links := $item.links }}
   <h4 class="card-title">
     {{ $item.name | $.Page.RenderString }}
   </h4>
-  <p>{{ $item.description }}</p>
+    <ul>{{ range $links }}{{ $link := . }}<li>{{ $link | $.Page.RenderString }}</li>{{ end }}</ul>
     </div>
   </div>
 </div>

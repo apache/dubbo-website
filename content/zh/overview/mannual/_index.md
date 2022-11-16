@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "用户手册"
-linkTitle: "用户手册"
+title: "SDK 用户手册"
+linkTitle: "SDK 用户手册"
 weight: 5
 no_list: true
 ---
