@@ -5,8 +5,7 @@ linkTitle: "临时踢除问题服务实例"
 weight: 5
 description: "在 Dubbo-Admin 临时踢除问题服务实例"
 feature:
-  title: Horizontales Skalieren
+  title: 多语言 SDK
   description: >
-    Skaliere deine Anwendung mit einem einfachen Befehl, über die Benutzeroberfläche oder automatisch, basierend auf der CPU-Auslastung.
-
+    Dubbo3 提供了 Java、Golang、Rust、Node.js、Python 等多语言 SDK 实现，支持基于 IDL 的跨语言服务定义和基于 Protobuf、Json 的数据编码
 ---

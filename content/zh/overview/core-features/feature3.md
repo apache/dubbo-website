@@ -2,11 +2,10 @@
 type: docs
 title: "临时踢除问题服务实例"
 linkTitle: "临时踢除问题服务实例"
-weight: 5
+weight: 3
 description: "在 Dubbo-Admin 临时踢除问题服务实例"
 feature:
-  title: Horizontales Skalieren
+  title: 多种通信协议
   description: >
-    Skaliere deine Anwendung mit einem einfachen Befehl, über die Benutzeroberfläche oder automatisch, basierend auf der CPU-Auslastung.
-
+    根据技术栈与业务需求选择合适的通信协议，如 gRPC/Triple (HTTP/2)、TCP 二进制、HTTP+JSON 等，切换协议只需要修改一行配置，同时支持单个端口上的多协议发布
 ---
