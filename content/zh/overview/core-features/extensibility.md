@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "临时踢除问题服务实例"
-linkTitle: "临时踢除问题服务实例"
-weight: 4
-description: "在 Dubbo-Admin 临时踢除问题服务实例"
+title: "扩展适配"
+linkTitle: "扩展适配"
+weight: 50
+description: ""
 feature:
   title: 可扩展性
   description: >

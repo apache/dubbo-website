@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "临时踢除问题服务实例"
-linkTitle: "临时踢除问题服务实例"
-weight: 5
-description: "在 Dubbo-Admin 临时踢除问题服务实例"
+title: "观测服务"
+linkTitle: "观测服务"
+weight: 60
+description: ""
 feature:
   title: 可观测性
   description: >

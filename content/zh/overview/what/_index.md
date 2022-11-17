@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "什么是 Dubbo"
-linkTitle: "什么是 Dubbo"
-weight: 2
+title: "了解 Dubbo 概念及优势"
+linkTitle: "介绍"
+weight: 20
 description: ""
 ---
     

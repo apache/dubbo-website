@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "临时踢除问题服务实例"
-linkTitle: "临时踢除问题服务实例"
-weight: 2
-description: "在 Dubbo-Admin 临时踢除问题服务实例"
+title: "流量管控"
+linkTitle: "流量管控"
+weight: 30
+description: ""
 feature:
   title: 流量管控
   description: >

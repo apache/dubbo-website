@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "如何平滑的迁移到 Dubbo3 的新功能"
-linkTitle: "迁移到 Dubbo3"
+title: "版本迁移"
+linkTitle: "版本迁移"
 description: "演示如何以最小代价迁移到 Dubbo3 并开启各项新特性。"
-weight: 5
+weight: 80
 no_list: true
 ---
 

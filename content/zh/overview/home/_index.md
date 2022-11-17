@@ -2,14 +2,15 @@
 title: Dubbo 文档
 noedit: true
 type: docs
-linkTitle: "文档"
+linkTitle: "主页"
 main_menu: true
-weight: 1
+weight: 10
 hide_feedback: true
 no_list: true
 hide_summary: true
 menu:
   main:
+    name: "文档"
     weight: 1
 description: Apache Dubbo 是一款支持多语言的、易用的 web 和 rpc 框架，同时为构建企业级微服务提供服务发现、流量治理、可观测、认证鉴权等能力、工具与最佳实践。
 content:

@@ -2,9 +2,13 @@
 ---
 type: docs
 title: "SDK 用户手册"
-linkTitle: "SDK 用户手册"
-weight: 5
+linkTitle: "SDK"
+weight: 50
 no_list: true
+feature:
+  title: 多语言 SDK
+  description: >
+    Dubbo3 提供了 Java、Golang、Rust、Node.js、Python 等多语言 SDK 实现，支持基于 IDL 的跨语言服务定义和基于 Protobuf、Json 的数据编码
 ---
 
 

@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "Dubbo 简介"
+title: "了解 Dubbo 特点"
 linkTitle: "了解 Dubbo"
-weight: 1
+weight: 10
 description: ""
 ---
 

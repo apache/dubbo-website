@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "Dubbo 生态"
-linkTitle: "生态系统"
-weight: 5
+title: "流量治理"
+linkTitle: "流量治理"
+weight: 40
 ---
 
 ### Dashboard

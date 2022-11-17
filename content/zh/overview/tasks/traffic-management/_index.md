@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "流量治理"
-linkTitle: "流量治理"
+title: "流量管控"
+linkTitle: "流量管控"
 description: "演示 Dubbo 流量治理特性的使用方式。"
-weight: 1
+weight: 30
 no_list: true
 ---
 

@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "临时踢除问题服务实例"
-linkTitle: "临时踢除问题服务实例"
-weight: 3
-description: "在 Dubbo-Admin 临时踢除问题服务实例"
+title: "通信协议"
+linkTitle: "通信协议"
+weight: 40
+description: ""
 feature:
   title: 多种通信协议
   description: >

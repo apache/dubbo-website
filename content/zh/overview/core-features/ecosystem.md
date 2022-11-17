@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "临时踢除问题服务实例"
-linkTitle: "临时踢除问题服务实例"
-weight: 5
-description: "在 Dubbo-Admin 临时踢除问题服务实例"
+title: "微服务生态"
+linkTitle: "微服务生态"
+weight: 70
+description: ""
 feature:
   title: 丰富生态
   description: >

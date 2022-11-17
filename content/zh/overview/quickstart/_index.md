@@ -2,8 +2,8 @@
 ---
 type: docs
 title: "快速开始"
-linkTitle: "快速开始"
-weight: 2
+linkTitle: "入门"
+weight: 15
 ---
 
 {{< blocks/section color="white" height="auto">}}

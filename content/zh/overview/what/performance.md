@@ -1,9 +1,9 @@
 
 ---
 type: docs
-title: "3.0 速览"
-linkTitle: "3.0 速览"
-weight: 2
+title: "高性能"
+linkTitle: "高性能"
+weight: 30
 ---
 
 本文将带你快速了解 Dubbo3 的设计背景、总体架构与核心特性、与典型用户如阿里巴巴 HSF2 的关系等。也可以通过如下部分了解更多：
