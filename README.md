@@ -39,6 +39,7 @@ git submodule add https://github.com/google/docsy.git themes/docsy
 ```sh
 git submodule update --init --recursive
 ```
+
 6. Install npm packages: 
 ```sh
 npm install
