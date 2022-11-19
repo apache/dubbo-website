@@ -1,11 +1,15 @@
 
 ---
 type: docs
-title: "Kubernetes 部署方案"
-linkTitle: "Kubernetes 部署方案"
+title: "Kubernetes"
+linkTitle: "Kubernetes"
 description: "演示如何将 Dubbo 部署到 Kubernetes 并复用 Kubernetes Native Service。"
-weight: 2
+weight: 60
 no_list: true
+feature:
+  title: 云原生友好
+  description: >
+    Kubernetes 部署、Kubernetes 原生服务、Service Mesh。
 ---
 
 {{< blocks/section color="white" height="auto">}}

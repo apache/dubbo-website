@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "Triple 使用示例"
-linkTitle: "Triple 使用示例"
+title: "通信协议"
+linkTitle: "通信协议"
 description: "演示 Triple 跨语言通信、Streaming 等能力"
-weight: 2
+weight: 50
 no_list: true
 ---
 
