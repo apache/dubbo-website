@@ -6,20 +6,23 @@ weight: 4
 description: "提供一种新的线程池管理方式，用于隔离服务之间的线程池"
 ---
 
-# 线程池隔离
+## 特性说明
 一种新的线程池管理方式，使得提供者应用内各个服务的线程池隔离开来，互相独立，某个服务的线程池资源耗尽不会影响其他正常服务。支持线程池可配置化，由用户手动指定。
 
-# 新增配置参数
+## 使用场景
+
+## 使用方式
+
+目前可以以 API、XML、Annotation 的方式进行配置
+
+**配置参数**
 - `ApplicationConfig` 新增 `String executor-management-mode` 参数，配置值为 `default` 和 `isolation` ，默认为 `default`。
-  - `executor-management-mode = default` 使用原有 **以协议端口为粒度、服务间共享** 的线程池管理方式
-  - `executor-management-mode = isolation` 使用新增的 **以服务三元组为粒度、服务间隔离** 的线程池管理方式
+    - `executor-management-mode = default` 使用原有 **以协议端口为粒度、服务间共享** 的线程池管理方式
+    - `executor-management-mode = isolation` 使用新增的 **以服务三元组为粒度、服务间隔离** 的线程池管理方式
 - `ServiceConfig` 新增 `Executor executor` 参数，**用以服务间隔离的线程池**，可以由用户配置化、提供自己想要的线程池，若没有指定，则会根据协议配置(`ProtocolConfig`)信息构建默认的线程池用以服务隔离。
 
-**注意**`ServiceConfig` 新增 `Executor executor` 配置参数只有指定`executor-management-mode = isolation` 才生效。
-
-# 配置方式
-目前可以以 API、XML、Annotation 的方式进行配置
-## API
+> `ServiceConfig` 新增 `Executor executor` 配置参数只有指定`executor-management-mode = isolation` 才生效。
+### API
 ```java
     public void test() {
         // provider app
@@ -69,7 +72,7 @@ description: "提供一种新的线程池管理方式，用于隔离服务之间
     }
 ```
 
-## XML
+### XML
 ```xml
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
@@ -115,7 +118,7 @@ description: "提供一种新的线程池管理方式，用于隔离服务之间
 
 </beans>
 ```
-## Annotation
+### Annotation
 ```java
 @Configuration
 @EnableDubbo(scanBasePackages = "org.apache.dubbo.config.spring.isolation.spring.annotation.provider")
