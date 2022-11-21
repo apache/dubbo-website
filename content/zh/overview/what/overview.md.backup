@@ -1,0 +1,112 @@
+---
+type: docs
+title: "了解 Dubbo 的核心概念和架构"
+linkTitle: "概念与架构"
+weight: 10
+description: ""
+---
+
+## 基本架构
+![arch-service-discovery](/imgs/architecture.png)
+
+以上是 Dubbo 的工作原理架构图，有三个核心的抽象角色：服务消费者 (Client/Consumer)、服务提供者 (Server/Provider)、服务治理中心。
+* **代表业务服务的消费者和提供者统称为 Dubbo 数据面**，组成数据面的业务服务之间依赖 Dubbo 实现数据传输，即某个服务 (消费者) 以 RPC 或 HTTP 形式发起调用，目标服务 (提供者) 收到并回复对方的请求，Dubbo 定义了微服务开发与调用规范并完成数据传输的编解码工作。
+* **服务治理中心控制 Dubbo 数据面的行为**，比如作为注册中心协调服务组件间的地址自动发现、作为规则管控中心下发流量治理策略等。治理中心不是指如注册中心类的单个具体组件，而是 对 Dubbo 治理体系的抽象表达。
+
+## Dubbo 数据面
+从数据面的视角，Dubbo 帮我们完成如下事项：
+* Dubbo 作为**服务开发框架**定义了微服务定义、开发与调用的规范
+* Dubbo 作为 **RPC 协议实现**解决服务间通信的编解码工作
+
+![架构图](#)
+
+### 服务开发框架
+就好比 Java 体系的 Spring 定义了
+服务定义：IDL、Java、Golang 等
+调用方式：同步、异步、Reactive
+服务行为：超时、延迟注册、预热、治理中心等
+配置：xml yaml properties
+多语言：Java Spring、Golang xx
+
+### 通信协议
+不绑定通信协议
+流式通信模型
+不绑定序列化协议
+多协议暴露、同时支持单端口上的协议自动识别
+高性能实现：benchmark 图
+
+![dubbo-rpc](/imgs/v3/concepts/rpc.png)
+
+Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编程方式。如上图所示，用户在使用 Dubbo 时首先需要定义好 Dubbo 服务；其次，是在将 Dubbo 服务部署上线之后，依赖 Dubbo 的应用层通信协议实现数据交换，Dubbo 所传输的数据都要经过序列化，而这里的序列化协议是完全可扩展的。
+使用 Dubbo 的第一步就是定义 Dubbo 服务，服务在 Dubbo 中的定义就是完成业务功能的一组方法的集合，可以选择使用与某种语言绑定的方式定义，如在 Java 中 Dubbo 服务就是有一组方法的 Interface 接口，也可以使用语言中立的 Protobuf Buffers  [IDL 定义服务](../../tasks/triple/idl/)。定义好服务之后，服务端（Provider）需要提供服务的具体实现，并将其声明为 Dubbo 服务，而站在服务消费方（Consumer）的视角，通过调用 Dubbo 框架提供的 API 可以获得一个服务代理（stub）对象，然后就可以像使用本地服务一样对服务方法发起调用了。
+在消费端对服务方法发起调用后，
+Dubbo 框架负责将请求发送到部署在远端机器上的服务提供方，提供方收到请求后会调用服务的实现类，之后将处理结果返回给消费端，这样就完成了一次完整的服务调用。如图中的 Request、Response 数据流程所示。
+>需要注意的是，在 Dubbo 中，我们提到服务时，通常是指 RPC 粒度的、提供某个具体业务增删改功能的接口或方法，与一些微服务概念书籍中泛指的服务并不是一个概念。
+
+在分布式系统中，尤其是随着微服务架构的发展，应用的部署、发布、扩缩容变得极为频繁，作为 RPC 消费方，如何动态的发现服务提供方地址成为 RPC 通信的前置条件。Dubbo 提供了自动的地址发现机制，用于应对分布式场景下机器实例动态迁移的问题。如下图所示，通过引入注册中心来协调提供方与消费方的地址，提供者启动之后向注册中心注册自身地址，消费方通过拉取或订阅注册中心特定节点，动态的感知提供方地址列表的变化。
+
+跨进程或主机的服务通信是 Dubbo 的一项基本能力，Dubbo RPC 以预先定义好的协议编码方式将请求数据（Request）发送给后端服务，并接收服务端返回的计算结果（Response）。RPC 通信对用户来说是完全透明的，使用者无需关心请求是如何发出去的、发到了哪里，每次调用只需要拿到正确的调用结果就行。除了同步模式的 Request-Response 通信模型外，Dubbo3 还提供更丰富的通信模型选择：
+* 消费端异步请求(Client Side Asynchronous Request-Response)
+* 提供端异步执行（Server Side Asynchronous Request-Response）
+* 消费端请求流（Request Streaming）
+* 提供端响应流（Response Streaming）
+* 双向流式通信（Bidirectional Streaming）
+
+## 服务治理
+
+服务发现
+负载均衡
+动态配置
+流量路由
+链路追踪
+服务网格
+
+#### 自动服务（地址）发现
+Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任意部署，消费端可以在无需感知对端部署位置与 IP 地址的情况下完成通信。Dubbo 提供的是 Client-Based 的服务发现机制，使用者可以有多种方式启用服务发现：
+* 使用独立的注册中心组件，如 Nacos、Zookeeper、Consul、Etcd 等。
+* 将服务的组织与注册交给底层容器平台，如 Kubernetes，这被理解是一种更云原生的使用方式
+
+#### 运行态流量管控
+透明地址发现让 Dubbo 请求可以被发送到任意 IP 实例上，这个过程中流量被随机分配。当需要对流量进行更丰富、更细粒度的管控时，就可以用到 Dubbo 的流量管控策略，Dubbo 提供了包括负载均衡、流量路由、请求超时、流量降级、重试等策略，基于这些基础能力可以轻松的实现更多场景化的路由方案，包括金丝雀发布、A/B测试、权重路由、同区域优先等，更酷的是，Dubbo 支持流控策略在运行态动态生效，无需重新部署。具体可参见：
+* [流量治理示例](../../tasks/traffic-management)
+
+#### 丰富的扩展组件及生态
+Dubbo 强大的服务治理能力不仅体现在核心框架上，还包括其优秀的扩展能力以及周边配套设施的支持。通过 Filter、Router、Protocol 等几乎存在于每一个关键流程上的扩展点定义，我们可以丰富 Dubbo 的功能或实现与其他微服务配套系统的对接，包括 Transaction、Tracing 目前都有通过 SPI 扩展的实现方案，具体可以参见 Dubbo 扩展性的详情，也可以在 [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions) 项目中发现与更多的扩展实现。具体可参见：
+* [Dubbo 生态](../../what/ecosystem)
+* [Dubbo 可扩展性设计](../../what/extensibility)
+
+#### 面向云原生设计
+
+Dubbo 从设计上是完全遵循云原生微服务开发理念的，这体现在多个方面，首先是对云原生基础设施与部署架构的支持，包括 容器、Kubernetes 等，Dubbo Mesh 总体解决方案也在 3.1 版本正式发布；另一方面，Dubbo 众多核心组件都已面向云原生升级，包括 Triple 协议、统一路由规则、对多语言的支持。
+
+值得一提的是，如何使用 Dubbo 支持弹性伸缩的服务如 Serverless 也在未来计划之中，这包括利用 Native Image 提高 Dubbo 的启动速度与资源消耗等。
+
+结合当前版本，本节主要从以下两点展开 Dubbo 的云原生特性
+* [容器调度平台（Kubernetes）](../../tasks/kubernetes/deploy-on-k8s)
+* [Dubbo Mesh](/zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/)
+
+##### Kubernetes
+Dubbo 微服务要支持 Kubernetes 平台调度，最基础的就是实现 dubbo 服务生命周期与容器生命周期的对齐，这包括 Dubbo 的启动、销毁、服务注册等生命周期事件。相比于以往 Dubbo 自行定义生命周期事件，并要求开发人员在运维实践过程中遵守约定，Kubernetes 底层基础设施定义了严格的组件生命周期事件(probe)，转而要求 Dubbo 去按约定适配。
+
+Kubernetes Service 是另一个层面的适配，这体现了服务定义与注册向云原生底层基础设施下沉的趋势。在这种模式下，用户不再需要搭建额外的注册中心组件，Dubbo 消费端节点能自动对接到 Kubernetes（API-Server 或 DNS），根据服务名（Kubernetes Service Name） 查询到实例列表（Kubernetes endpoints）。 此时服务是通过标准的 Kubernetes Service API 定义，并被调度到各个节点。
+
+##### Dubbo Mesh
+
+Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一代的微服务架构，这主要是因为它解决了很多棘手的问题，包括透明升级、多语言、依赖冲突、流量治理等。Service Mesh 的典型架构是通过部署独立的 Sidecar 组件来拦截所有的出口与入口流量，并在 Sidecar 中集成丰富的流量治理策略如负载均衡、路由等，除此之外，Service Mesh 还需要一个控制面（Control Panel）来实现对 Sidecar 流量的管控，即各种策略下发。我们在这里称这种架构为经典 Mesh。
+
+然而任何技术架构都不是完美的，经典 Mesh 在实施层面也面临成本过高的问题
+1. 需要运维控制面（Control Panel）
+2. 需要运维 Sidecar
+3. 需要考虑如何从原有 SDK 迁移到 Sidecar
+4. 需要考虑引入 Sidecar 后整个链路的性能损耗
+
+为了解决 Sidecar 引入的相关成本问题，Dubbo 引入并实现了全新的 Proxyless Mesh 架构，顾名思义，Proxyless Mesh 就是指没有 Sidecar 的部署，转而由 Dubbo SDK 直接与控制面交互，其架构图如下
+
+![dubbo-proxyless](/imgs/v3/mesh/dubbo-proxyless.png)
+
+可以设想，在不同的组织、不同的发展阶段，未来以 Dubbo 构建的微服务将会允许有三种部署架构：传统 SDK、基于 Sidecar 的 Service Mesh、脱离 Sidecar 的 Proxyless Mesh。基于 Sidecar 的 Service Mesh，即经典的 Mesh 架构，独立的 sidecar 运行时接管所有的流量，脱离 Sidecar 的 Proxyless Mesh，副 SDK 直接通过 xDS 与控制面通信。Dubbo 微服务允许部署在物理机、容器、Kubernetes 平台之上，能做到以 Admin 为控制面，以统一的流量治理规则进行治理。
+
+
+
+
+
