@@ -260,7 +260,7 @@ dubbo.application.qosAcceptForeignIp=true
 
 Proxyless 模式下 pod 不需要再开启 envoy 注入，请确认 namespace 中没有 `istio-injection=enabled` 的标签。
 
-8. metadataServicePort
+8. 明文连接istiod
 
 Proxyless 模式下默认通过ssl方式连接istiod，同时也支持通过明文的方式连接istiod。
 
