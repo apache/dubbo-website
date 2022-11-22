@@ -4,6 +4,7 @@ title: "可观测性"
 linkTitle: "可观测性"
 weight: 50
 ---
+Istio generates detailed telemetry for all service communications within a mesh. This telemetry provides observability of service behavior, empowering operators to troubleshoot, maintain, and optimize their applications – without imposing any additional burdens on service developers. Through Istio, operators gain a thorough understanding of how monitored services are interacting, both with other services and with the Istio components themselves.
 
 可观测性分为三个维度度量、链路追踪以及日志，Dubbo从这三个方面为开发者提供了全面的可观测性解决方案。
 
