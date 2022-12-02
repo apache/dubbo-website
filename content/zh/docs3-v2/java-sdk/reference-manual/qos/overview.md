@@ -66,8 +66,6 @@ dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
 -Ddubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13,132.12.10.13/24
 ```
 
- 
-
 ## 协议
 ### telnet 与 http 协议
 
