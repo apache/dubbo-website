@@ -15,7 +15,7 @@ description: "通过缓存结果加速访问速度"
 
 缓存类型可扩展 [缓存扩展](../../../reference-manual/spi/description/cache)
 
-关于 [示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-cache)
+关于 [示例代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
 
 ## 使用场景
 
