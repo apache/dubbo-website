@@ -22,7 +22,7 @@ description: "在 Dubbo 中为同一个服务配置多个版本"
 
 ## 参考用例
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-version)
 
 ## 使用方式
 ### 服务提供者
