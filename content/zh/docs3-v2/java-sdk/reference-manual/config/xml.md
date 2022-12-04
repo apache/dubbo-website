@@ -9,7 +9,7 @@ description: "以 Spring XML 开发 Dubbo 应用"
 Dubbo 有基于 Spring Schema 扩展的自定义配置组件，使用 XML 能达到的配置能力总体与 [配置参考手册](../properties) 对等。
 
 
-以下内容的完整示例请参考 [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-basic)
+以下内容的完整示例请参考 [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-basic)
 
 ## 服务提供者
 
