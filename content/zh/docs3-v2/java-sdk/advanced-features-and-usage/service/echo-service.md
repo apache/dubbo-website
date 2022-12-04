@@ -10,7 +10,7 @@ description: "通过回声测试检测 Dubbo 服务是否可用"
 回声测试用于检测服务是否可用，回声测试按照正常请求流程执行，能够测试整个调用是否通畅，可用于监控。
 
 ## 参考用例
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-echo](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-echo)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-echo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-echo)
 
 ## 使用场景
 
