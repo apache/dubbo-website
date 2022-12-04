@@ -17,7 +17,7 @@ description: "在 Dubbo 中发起异步调用"
 
 ## 参考用例
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async)
 ## 使用场景
 ## 使用方式
 ### 使用 CompletableFuture 签名的接口
