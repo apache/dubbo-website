@@ -10,7 +10,7 @@ description: "在调用前后出现异常时的事件通知"
 
 ## 参考用例
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)
 
 ## 使用场景
 
