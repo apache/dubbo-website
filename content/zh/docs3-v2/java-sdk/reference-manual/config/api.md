@@ -8,7 +8,7 @@ description: "以 API 的方式来配置你的 Dubbo 应用"
 
 通过 API 编码方式组装配置、启动 Dubbo、发布及订阅服务。此方式可以支持动态创建 ReferenceConfig/ServiceConfig，结合泛化调用可以满足 API Gateway 或测试平台的需要。
 
-> 参考 [API示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api)
+> 参考 [API示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api)
 
 ## 服务提供者
 
