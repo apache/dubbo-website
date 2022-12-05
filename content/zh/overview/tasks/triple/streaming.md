@@ -6,7 +6,7 @@ weight: 3
 description: ""
 ---
 
-具体用例可以参考：[dubbo-samples-triple/pojo](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo);
+具体用例可以参考：[dubbo-samples-triple/pojo](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo);
 
 ## 开启 Triple 新特性 —— Stream (流)
 Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
