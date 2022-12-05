@@ -17,7 +17,7 @@ TLS 的配置都有统一的入口。
 
 ## 参考用例
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
 
 ## 使用方式
 
