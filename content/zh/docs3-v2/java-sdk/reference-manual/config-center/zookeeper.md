@@ -11,7 +11,7 @@ description: "Zookeeper 配置中心的基本使用和工作原理。"
 * 安装并启动 [Zookeeper](https://zookeeper.apache.org/)
 
 ## 2 使用说明
-在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-configcenter/dubbo-samples-configcenter-annotation)
+在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/configcenter/dubbo-samples-configcenter-annotation)
 
 ### 2.1 增加 Maven 依赖
 如果项目已经启用 Zookeeper 作为注册中心，则无需增加任何额外配置。
