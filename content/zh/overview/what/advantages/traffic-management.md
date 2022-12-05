@@ -5,11 +5,23 @@ linkTitle: "流量治理"
 weight: 40
 ---
 
-按标签的条件路由
+bla bla bla ...
 
-Service Mesh 路由
+## 1 如何配置规则
 
-路由规则可扩展
+* dubboctl
+* dubbo admin
+* kubectl
+
+### 2.1 传统部署架构
+
+### 2.2 云原生部署架构
+
+## 2 支持的规则
+
+
+
+## 3 流量管控支持的场景
 
 * 超时
 * 重试

@@ -49,6 +49,12 @@ dubbo:
 * 支持服务 Mock
 * Admin 服务查询
 
+### gRPC over Dubbo
+
+### Dubbo 与 Spring Cloud 互通
+
+
+### Dubbo HTTP
 
 ## 部署
 Dubbo 原生服务可打包部署到 Docker 容器、Kubernetes、Service Mesh 等云原生基础设施和微服务架构。
