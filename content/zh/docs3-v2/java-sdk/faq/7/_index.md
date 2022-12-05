@@ -1,6 +1,6 @@
 ---
 type: docs
-title: "7 - 元数据服务模块"
-linkTitle: "7 - 元数据服务模块"
+title: "7 - QoS 插件模块"
+linkTitle: "7 - QoS 插件模块"
 weight: 7
 ---
