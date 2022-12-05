@@ -7,6 +7,8 @@ weight: 60
 no_list: true
 ---
 
+## 以下是老文档内容存档
+
 Dubbo 扩展平等的对待内部实现和第三方实现。更多使用场景，参见 [SPI 扩展实现](/zh/docs3-v2/java-sdk/reference-manual/spi/description/)
 
 ## 扩展设计理念
