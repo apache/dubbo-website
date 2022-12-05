@@ -18,7 +18,7 @@ git clone -b master https://github.com/apache/dubbo-samples.git
 ```
 2. 进入示例目录
 ```shell script
-cd dubbo-samples/dubbo-samples-spring-boot
+cd dubbo-samples/1-basic/dubbo-samples-spring-boot
 ls # 查看目录结构
 ```
 
