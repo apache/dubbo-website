@@ -10,7 +10,7 @@ description: "介绍使用 Dubbo Rust Triple 协议使用 Unix 套接字连接�
 
 ## 1 Triple 使用 Unix 套接字连接器
 
-完整 Greeter 服务定义如下，包含一个 Unary、Client stream、Server stream、Bidirectional stream 模型的 Dubbo 服务。
+TripleServer 调整如下。
 
 ```rust
 // dubbo/src/protocol/triple/triple_server.rs
