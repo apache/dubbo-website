@@ -89,7 +89,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:valu
 
 #### Spring XML
 
-> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-basic)
+> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-basic)
 
 ```xml
   <!-- dubbo-provier.xml -->
@@ -107,7 +107,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:valu
 
 #### Spring Annotation
 
-> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-annotation)
+> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
 
 ```java
   // AnnotationService服务实现
@@ -161,7 +161,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:valu
 
 #### API
 
-> 参考[示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api)
+> 参考[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api)
 
 ```java
 public static void main(String[] args) throws IOException {
