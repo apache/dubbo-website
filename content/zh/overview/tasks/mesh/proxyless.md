@@ -9,7 +9,7 @@ description: ""
 Proxyless 模式是指 Dubbo 直接与 Istiod 通信，通过 xDS 协议实现服务发现和服务治理等能力。
 本示例中将通过一个简单的示例来演示如何使用 Proxyless 模式。
 
-[示例地址](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-xds)
+[示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds)
 
 ## 代码架构
 
