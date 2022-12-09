@@ -46,7 +46,7 @@ description: "自定义 Dubbo 服务对外暴露的主机地址"
 
 ####  在使用 docker 时，有时需要设置端口映射，此时，启动 server 时绑定的 socket 和向注册中心注册的 socket 使用不同的端口号，此时又该如何设置？
 
-见 [dubbo 通过环境变量设置 host](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-docker)
+见 [dubbo 通过环境变量设置 host](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
 
 有些部署场景需要动态指定服务注册的地址，如 docker bridge 网络模式下要指定注册宿主机 ip 以实现外网通信。dubbo 提供了两对启动阶段的系统属性，用于设置对外通信的ip、port地址。
 
@@ -75,4 +75,4 @@ PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BI
 ## 参考
 
  1. [Proposal: support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
- 2. [dubbo通过环境变量设置host](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-docker)
+ 2. [dubbo通过环境变量设置host](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
