@@ -31,7 +31,7 @@ description: >
 
 ### 示例
 
-事件通知的示例代码请参考：[https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)
+事件通知的示例代码请参考：[https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)
 
 事件通知允许 Consumer 端在调用之前、调用正常返回之后或调用出现异常时，触发 `oninvoke`、`onreturn`、`onthrow` 三个事件。
 
