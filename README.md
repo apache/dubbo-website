@@ -50,6 +50,15 @@ npm install
 ```sh
 hugo server --disableFastRender
 ```
+
+> Troubleshooting. If you run into error like `fatal error: pipe failed` on MacOS, try the following command first:
+> ```sh
+> sudo launchctl limit maxfiles 65535 200000
+> ulimit -n 65535
+> sudo sysctl -w kern.maxfiles=100000
+> sudo sysctl -w kern.maxfilesperproc=65535
+> ```
+
 2. Navigate to `http://localhost:1313`
 
 ## Update docs

@@ -4,12 +4,40 @@ title: "可观测性"
 linkTitle: "可观测性"
 weight: 50
 ---
-Istio generates detailed telemetry for all service communications within a mesh. This telemetry provides observability of service behavior, empowering operators to troubleshoot, maintain, and optimize their applications – without imposing any additional burdens on service developers. Through Istio, operators gain a thorough understanding of how monitored services are interacting, both with other services and with the Istio components themselves.
 
-可观测性分为三个维度度量、链路追踪以及日志，Dubbo从这三个方面为开发者提供了全面的可观测性解决方案。
+Dubbo 内部维护了多个纬度的可观测指标，并且支持多种方式的可视化监测。可观测性指标从总体上来说分为三个度量纬度：
 
-Metrics：Dubbo集成了prometheus监控系统，在指标数据上Dubbo支持多维度的RT指标数据，包括Max、Min、Avg、P99、P95等维度，支持多维度的请求量指标数据，包括QPS、调用成功的请求量、调用失败的请求量等。除此之外，Dubbo还能够通过SPI扩展来完成集成其他监控系统。
+* **Metrics。** Dubbo 统计了一系列的流量指标如 QPS、RT、成功请求数、失败请求数等，还包括一系列的内部组件状态如线程池数、服务健康状态等。
 
-Tracing：Dubbo提供了链路追踪所需的必备数据，为Dubbo集成各类链路追踪系统提供了便捷，以辅助用户完成更加强大的链路追踪能力。目前流行的skywalking、zipkin、jaeger都支持Dubbo服务的链路追踪。
+* **Tracing。** Dubbo 与业界主流的链路追踪工作做了适配，包括 Skywalking、Zipkin、Jaeger 都支持 Dubbo 服务的链路追踪。
 
-Logging：Dubbo支持多种的日志框架的适配。包括常见的slf4j、log4j2、log4j、jcl等。用户可以在这些框架中自由切换。
+* **Logging。** Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹。
+
+## Metrics
+Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数，失败原因统计等在内的核心服务指标，同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如线程池数量、服务健康状态等。
+
+可以通过 Dubbo Admin 可视化的查看 Metrics 指标
+
+![Admin 效果图]()
+
+也可以使用 Grafana、Prometheus 等实现可视化指标监测，具体请参考以下可视化任务示例：
+
+* [Admin 任务链接]()
+* [Grafana 任务链接]()
+* [Prometheus 任务链接]()
+
+## Tracing
+全链路追踪对于监测分布式系统运行状态具有非常重要的价值，Dubbo 通过 Filter 拦截器实现了请求运行时的埋点跟踪，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等，可以实现全链路跟踪数据的分析与可视化展示。
+
+只需要简单的一行配置即可切换链路跟踪的后端实现，并且，你可以随时通过 Dubbo Admin 等治理平台动态调整 Dubbo 的链路追踪采样率，对于问题排查都非常有价值。
+
+* [基于 Skywalking 实现全链路追踪]()
+* [基于 Zipkin 实现全链路追踪]()
+
+## Logging
+访问日志可以帮助分析系统的流量情况，在有些场景下，开启访问日志对于排查问题也非常有帮助。
+
+* [开启 Access Log]()
+
+
+
