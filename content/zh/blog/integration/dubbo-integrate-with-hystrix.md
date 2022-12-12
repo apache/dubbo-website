@@ -20,7 +20,7 @@ Dubbo是Alibaba开源的，目前国内最流行的java rpc框架。
 
 ## Spring Boot应用
 
-Demo地址： <https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-spring-boot-hystrix>
+Demo地址： <https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix>
 
 ### 生成dubbo集成spring boot的应用
 
@@ -86,7 +86,7 @@ public class HelloServiceImpl implements HelloService {
 
 ## 传统Spring Annotation应用
 
-Demo地址： <https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-spring-hystrix>
+Demo地址： <https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-hystrix>
 
 传统spring annotation应用的配置其实也很简单，和spring boot应用不同的是：
 
