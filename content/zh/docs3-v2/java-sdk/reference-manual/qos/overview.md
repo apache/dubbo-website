@@ -70,15 +70,15 @@ dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
 ## 权限
 为了对生命周期探针的默认支持，QoS 提供了匿名访问的能力以及对权限级别的设置，目前支持的权限级别有：
 - PUBLIC(1)   
-  目前只支持生命周期探针相关的命令
+  默认支持匿名访问的命令权限级别，目前只支持生命周期探针相关的命令
 - PROTECTED(2)  
-  命令默认的权限级别，支持访问`PUBLIC`和 `PROTECTED`权限级别的命令
+  命令默认的权限级别
 - PRIVATE(3)  
   保留的最高权限级别，目前未支持
 - NONE  
   最低权限级别，即不支持匿名访问
 
-权限级别`PRIVATE`> `PROTECTED`> `PUBLIC`> `NONE`, 高级别权限可访问同级别和低级别权限命令。
+> 权限级别 `PRIVATE`> `PROTECTED`> `PUBLIC`> `NONE`, 高级别权限可访问同级别和低级别权限命令。
 当前以下命令权限为`PUBLIC`, 其它命令默认权限别为`PROTECTED`。
 
 | 命令                                    | 权限等级      |
