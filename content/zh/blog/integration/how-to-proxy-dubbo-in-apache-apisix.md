@@ -78,7 +78,7 @@ public class DemoServiceImpl implements DemoService {
 
 #### 操作步骤
 
-1. 启动 [`dubbo-samples`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-tengine#install-dubbo)。
+1. 启动 [`dubbo-samples`](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-tengine#install-dubbo)。
 2. 在 `config.yaml` 文件中进行 `dubbo-proxy` 插件启用。
 
 ```yaml
