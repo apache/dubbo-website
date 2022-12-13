@@ -150,7 +150,7 @@ Dubbo 使用 Zookeeper 用于服务的注册发现和配置管理，在 Zookeepe
 
 ### 准备示例代码
 
-本文的代码可以在 https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-zookeeper 中找到。
+本文的代码可以在 https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper 中找到。
 
 #### 1. 接口定义
 
