@@ -55,6 +55,27 @@ weight: 1
 </dependency>
 ```
 
+### 2.7.18 (2022-09-29)
+
+#### Source Release
+
+* [source](https://archive.apache.org/dist/dubbo/2.7.18/apache-dubbo-2.7.18-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/2.7.18/apache-dubbo-2.7.18-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/2.7.18/apache-dubbo-2.7.18-src.zip.sha512)
+
+
+#### Maven Release
+
+* [org.apache.dubbo:dubbo:2.7.18](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.18/jar)
+
+```xml
+<dependency>
+  <groupId>org.apache.dubbo</groupId>
+  <artifactId>dubbo</artifactId>
+  <version>2.7.18</version>
+</dependency>
+```
+
 ### 3.2.0-beta.1 (2022-11-08)
 
 #### Source Release
@@ -92,6 +113,26 @@ weight: 1
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
   <version>3.1.2</version>
+</dependency>
+```
+
+### 3.1.1 (2022-09-29)
+
+#### Source Release
+
+* [source](https://archive.apache.org/dist/dubbo/3.1.1/apache-dubbo-3.1.1-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/3.1.1/apache-dubbo-3.1.1-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/3.1.1/apache-dubbo-3.1.1-src.zip.sha512)
+
+#### Maven Release
+
+* [org.apache.dubbo:dubbo:3.1.1](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.1.1/jar)
+
+```xml
+<dependency>
+  <groupId>org.apache.dubbo</groupId>
+  <artifactId>dubbo</artifactId>
+  <version>3.1.1</version>
 </dependency>
 ```
 
