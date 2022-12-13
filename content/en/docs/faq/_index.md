@@ -29,7 +29,7 @@ The dubbo-admin has been moved from core repository to https://github.com/apache
 
 ### How to register IP correctly in Docker?
 
-Dubbo supports specifying IP/port via system environment variables, examples can be found [here](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-docker).
+Dubbo supports specifying IP/port via system environment variables, examples can be found [here](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker).
 
 
 
