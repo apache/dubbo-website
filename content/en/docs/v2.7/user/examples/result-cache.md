@@ -34,4 +34,4 @@ or：
 supported in `2.1.0` or above.
 {{% /alert %}}
 
-[^1]: [examples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-cache)
+[^1]: [examples](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
