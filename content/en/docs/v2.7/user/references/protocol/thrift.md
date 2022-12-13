@@ -29,7 +29,7 @@ The use of dubbo thrift protocol also need to use thrift idl compiler to generat
 
 ## Example
 
-you can check [dubbo thrift example](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-thrift)
+you can check [dubbo thrift example](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-thrift)
 
 ## Common problem
 
