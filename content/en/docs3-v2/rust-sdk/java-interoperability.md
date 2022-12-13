@@ -13,7 +13,7 @@ description: "Use Dubbo-rust call Duboo Java service"
 
 ## 2 Run example of Java Dubbo provider
 
-Java version of Dubbo provider example <https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple>.
+Java version of Dubbo provider example <https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple>.
 
 Clone the source code, compile, and run provider:
 
@@ -31,11 +31,11 @@ $ java -Dprovider.port=8888 -jar ./target/dubbo-samples-triple-1.0-SNAPSHOT.jar
 Dubbo triple stub server started, port=8888
 ```
 
-[The interface defination on Java side](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-triple/src/main/proto/greeter.proto)
+[The interface defination on Java side](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/proto/greeter.proto)
 
 ## 3 Run Rust version of  Dubbo consumer
 
-Rust version of Dubbo consumer <https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple>.
+Rust version of Dubbo consumer <https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple>.
 
 Clone the source code, compile and run consumer:
 
