@@ -6,7 +6,7 @@ weight: 23
 description: "Callback parameter in dubbo"
 ---
 
-The parameter callback is the same as calling a local callback or listener, just declare which parameter is a callback type in Spring's configuration file, and Dubbo will generate a reverse proxy based on the long connection so that client logic can be called from the server.Can ref to [Sample code in the dubbo project](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-callback).
+The parameter callback is the same as calling a local callback or listener, just declare which parameter is a callback type in Spring's configuration file, and Dubbo will generate a reverse proxy based on the long connection so that client logic can be called from the server.Can ref to [Sample code in the dubbo project](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-callback).
 
 ## Example of service interface
 
