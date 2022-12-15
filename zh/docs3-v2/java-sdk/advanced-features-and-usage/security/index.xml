@@ -1,0 +1,80 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 提升服务安全性</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/</link><description>Recent content in 提升服务安全性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: TLS支持</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。&lt;/p>
+&lt;p>TLS 的配置都有统一的入口。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>对全链路有加密需求的用户可以使用 TLS。&lt;/p>
+&lt;h2 id="参考用例">参考用例&lt;/h2>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl">https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl&lt;/a>&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="provider-端">Provider 端&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>SslConfig sslConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SslConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sslConfig&lt;span style="color:#719e07">.&lt;/span>setServerKeyCertChainPath&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;path to cert&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sslConfig&lt;span style="color:#719e07">.&lt;/span>setServerPrivateKeyPath&lt;span style="color:#719e07">(&lt;/span>args&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 如果开启双向 cert 认证
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>mutualTls&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig&lt;span style="color:#719e07">.&lt;/span>setServerTrustCertCollectionPath&lt;span style="color:#719e07">(&lt;/span>args&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ProtocolConfig protocolConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ProtocolConfig&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;dubbo/grpc&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>protocolConfig&lt;span style="color:#719e07">.&lt;/span>setSslEnabled&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果要使用的是 gRPC 协议，在开启 TLS 时会使用到协议协商机制，因此必须使用支持 ALPN 机制的 Provider，推荐使用的是 netty-tcnative，具体可参见 gRPC Java 社区的 &lt;a href="https://github.com/grpc/grpc-java/blob/master/SECURITY.md">总结&lt;/a>&lt;/p>
+&lt;h3 id="consumer-端">Consumer 端&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>mutualTls&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig&lt;span style="color:#719e07">.&lt;/span>setClientTrustCertCollectionPath&lt;span style="color:#719e07">(&lt;/span>args&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig&lt;span style="color:#719e07">.&lt;/span>setClientTrustCertCollectionPath&lt;span style="color:#719e07">(&lt;/span>args&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig&lt;span style="color:#719e07">.&lt;/span>setClientKeyCertChainPath&lt;span style="color:#719e07">(&lt;/span>args&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig&lt;span style="color:#719e07">.&lt;/span>setClientPrivateKeyPath&lt;span style="color:#719e07">(&lt;/span>args&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为尽可能保证应用启动的灵活性，TLS Cert 的指定还能通过 -D 参数或环境变量等方式来在启动阶段根据部署环境动态指定，参考 Dubbo &lt;a href="https://cn.dubbo.apache.org/zh/docs/advanced/config-rule">配置读取规则&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>在服务调用的安全性上，Dubbo 在后续的版本中会持续投入，其中服务发现/调用的鉴权机制预计在接下来的版本中就会和大家见面。&lt;/p>
+&lt;/blockquote></description></item><item><title>Docs3-V2: 权限控制</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/token-authorization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/token-authorization/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>通过令牌验证在注册中心控制权限，以决定要不要下发令牌给消费者，
+可以防止消费者绕过注册中心访问提供者，
+另外通过注册中心可灵活改变授权方式，而不需修改或升级提供者。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/user/dubbo-token.jpg" alt="/user-guide/images/dubbo-token.jpg">&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>在一定程度上实现客户端和服务端的可信鉴权，避免任意客户端都可以访问，降低出现安全问题的风险。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="全局设置">全局设置&lt;/h3>
+&lt;p>开启令牌验证&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!--随机token令牌，使用UUID生成--&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> token=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!--固定token令牌，相当于密码--&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> token=&lt;span style="color:#2aa198">&amp;#34;123456&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务级别设置">服务级别设置&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!--随机token令牌，使用UUID生成--&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> token=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!--固定token令牌，相当于密码--&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> token=&lt;span style="color:#2aa198">&amp;#34;123456&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: 服务鉴权</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>类似支付之类的对安全性敏感的业务可能会有限制匿名调用的需求。在加固安全性方面，2.7.5 引入了基于 AK/SK 机制的认证鉴权机制，并且引入了鉴权服务中心，主要原理是消费端在请求需要鉴权的服务时，会通过 SK、请求元数据、时间戳、参数等信息来生成对应的请求签名，通过 Dubbo 的 Attahcment 机制携带到对端进行验签，验签通过才进行业务逻辑处理。如下图所示：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/docsv2.7/user/examples/auth/auth.png" alt="">&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="接入方式">接入方式&lt;/h3>
+&lt;ol>
+&lt;li>
+&lt;p>使用者需要在微服务站点上填写自己的应用信息，并为该应用生成唯一的证书凭证。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>之后在管理站点上提交工单，申请某个敏感业务服务的使用权限，并由对应业务管理者进行审批，审批通过之后，会生成对应的 AK/SK 到鉴权服务中心。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>导入该证书到对应的应用下，并且进行配置。配置方式也十分简单，以注解方式为例：&lt;/p>
+&lt;h3 id="服务提供端">服务提供端&lt;/h3>
+&lt;p>只需要设置 &lt;code>service.auth&lt;/code> 为 true，表示该服务的调用需要鉴权认证通过。&lt;code>param.sign&lt;/code> 为 &lt;code>true&lt;/code> 表示需要对参数也进行校验。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>&lt;span style="color:#719e07">(&lt;/span>parameters &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;service.auth&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span>&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span>&lt;span style="color:#2aa198">&amp;#34;param.sign&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span>&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#719e07">})&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AuthDemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> AuthService &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务消费端">服务消费端&lt;/h3>
+&lt;p>只需要配置好对应的证书等信息即可，之后会自动地在对这些需要认证的接口发起调用前进行签名操作，通过与鉴权服务的交互，用户无需在代码中配置 AK/SK 这些敏感信息，并且在不重启应用的情况下刷新 AK/SK，达到权限动态下发的目的。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>该方案目前已经提交给 Dubbo 开源社区，并且完成了基本框架的合并，除了 AK/SK 的鉴权方式之外，通过 SPI 机制支持用户可定制化的鉴权认证以及适配公司内部基础设施的密钥存储。&lt;/p></description></item></channel></rss>
