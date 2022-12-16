@@ -28,7 +28,7 @@ The example blow is to illustrate it.
 
 ### The sample
 
-Refer to the example code for event notification: [https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)
+Refer to the example code for event notification: [https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)
 
 Event notification allows the Consumer to trigger 'oninvoke', 'onreturn' and 'onthrow' events, which respectively represent before the call, after the call returns normally, or when an exception occurs.
 
