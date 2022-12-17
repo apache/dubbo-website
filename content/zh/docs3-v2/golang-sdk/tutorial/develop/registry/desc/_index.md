@@ -1,4 +1,3 @@
-
 ---
 type: docs
 title: "了解注册中心"

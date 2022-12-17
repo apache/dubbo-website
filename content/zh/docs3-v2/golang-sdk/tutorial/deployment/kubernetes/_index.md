@@ -1,4 +1,3 @@
-
 ---
 type: docs
 title: "Kubernetes 部署教程"

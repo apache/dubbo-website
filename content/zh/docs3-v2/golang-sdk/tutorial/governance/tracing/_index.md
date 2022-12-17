@@ -1,5 +1,5 @@
 ---
 type: docs
-title: "泛化调用"
+title: "全链路追踪"
 weight: 2
 ---

@@ -1,4 +1,3 @@
-
 ---
 type: docs
 title: "配置中心是什么"

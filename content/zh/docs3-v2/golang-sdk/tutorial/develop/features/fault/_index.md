@@ -1,4 +1,3 @@
-
 ---
 type: docs
 title: "容错"
