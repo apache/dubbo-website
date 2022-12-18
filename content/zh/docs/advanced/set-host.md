@@ -46,26 +46,27 @@ description: "自定义 Dubbo 服务对外暴露的主机地址"
 
 ####  在使用 docker 时，有时需要设置端口映射，此时，启动 server 时绑定的 socket 和向注册中心注册的 socket 使用不同的端口号，此时又该如何设置？
 
-见 [dubbo 通过环境变量设置 host](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-docker)
+见 [dubbo 通过环境变量设置 host](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
 
 有些部署场景需要动态指定服务注册的地址，如 docker bridge 网络模式下要指定注册宿主机 ip 以实现外网通信。dubbo 提供了两对启动阶段的系统属性，用于设置对外通信的ip、port地址。
 
-* DUBBO_IP_TO_REGISTRY --- 注册到注册中心的ip地址
-* DUBBO_PORT_TO_REGISTRY --- 注册到注册中心的port端口
-* DUBBO_IP_TO_BIND --- 监听ip地址
-* DUBBO_PORT_TO_BIND --- 监听port端口
+* **DUBBO_IP_TO_REGISTRY**：注册到注册中心的 ip 地址
+* **DUBBO_PORT_TO_REGISTRY**：注册到注册中心的 port 端口
+* **DUBBO_IP_TO_BIND**：监听 ip 地址
+* **DUBBO_PORT_TO_BIND**：监听 port 端口
 
 以上四个配置项均为可选项，如不配置 dubbo 会自动获取 ip 与端口，请根据具体的部署场景灵活选择配置。
 dubbo 支持多协议，如果一个应用同时暴露多个不同协议服务，且需要为每个服务单独指定 ip 或 port，请分别在以上属性前加协议前缀。 如：
 
-* HESSIAN_DUBBO_PORT_TO_BIND hessian协议绑定的port
-* DUBBO_DUBBO_PORT_TO_BIND   dubbo协议绑定的port
-* HESSIAN_DUBBO_IP_TO_REGISTRY hessian协议注册的ip
-* DUBBO_DUBBO_PORT_TO_BIND     dubbo协议注册的ip
+* **HESSIAN_DUBBO_PORT_TO_BIND**：hessian 协议绑定的 port
+* **DUBBO_DUBBO_PORT_TO_BIND**：dubbo 协议绑定的 port
+* **HESSIAN_DUBBO_IP_TO_REGISTRY**：hessian 协议注册的 ip
+* **DUBBO_DUBBO_IP_TO_REGISTRY**：dubbo 协议注册的 ip
 
-PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BIND，但是反过来是成立的
-如设置 PORT_TO_REGISTRY=20881 IP_TO_REGISTRY=30.5.97.6，则 PORT_TO_BIND IP_TO_BIND 不受影响
-如果设置 PORT_TO_BIND=20881 IP_TO_BIND=30.5.97.6，则默认 PORT_TO_REGISTRY=20881 IP_TO_REGISTRY=30.5.97.6
+PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BIND，但是反过来是成立的。如：
+
+* 设置 `PORT_TO_REGISTRY=20881` 和 `IP_TO_REGISTRY=30.5.97.6`，则 `PORT_TO_BIND` 和 `IP_TO_BIND` 不受影响
+* 设置 `PORT_TO_BIND=20881` 和 `IP_TO_BIND=30.5.97.6`，则默认 `PORT_TO_REGISTRY=20881`  且 `IP_TO_REGISTRY=30.5.97.6`
 
 ## 总结
 
@@ -75,4 +76,4 @@ PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BI
 ## 参考
 
  1. [Proposal: support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
- 2. [dubbo通过环境变量设置host](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-docker)
+ 2. [dubbo通过环境变量设置host](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)

@@ -9,7 +9,7 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 ## 特性说明
 通过分组对结果进行聚合并返回聚合后的结果，比如菜单服务，用 group 区分同一接口的多种实现，现在消费方需从每种 group 中调用一次并返回结果，对结果进行合并之后返回，这样就可以实现聚合菜单项。
 
-相关代码可以参考 [dubbo 项目中的示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-merge)
+相关代码可以参考 [dubbo 项目中的示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge)
 
 ## 使用场景
 

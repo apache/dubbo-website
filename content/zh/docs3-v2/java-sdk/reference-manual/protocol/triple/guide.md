@@ -275,7 +275,7 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 省略上文中的 1-3 步，指定 Provider 和 Consumer 使用的协议即可完成协议升级。
 
 ### 示例程序
-本文的示例程序可以在 [triple-samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple) 找到
+本文的示例程序可以在 [triple-samples](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple) 找到
 
 
    

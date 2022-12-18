@@ -20,7 +20,7 @@ Dubbo + Reactive Stream Stub 的组合模式可以给用户带来最方便的流
 
 ## 参考用例
 
-https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple-reactor
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple-reactor](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple-reactor)
 
 ## 使用场景
 
