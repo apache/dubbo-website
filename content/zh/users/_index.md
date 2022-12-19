@@ -50,7 +50,7 @@ Apache Dubbo 诞生于阿里巴巴微服务实践之中，在开源之后深受�
     {{< /card >}}
   {{< card header="中伦网络" >}}
   中伦网络在 2022 年完成了服务框架从 Dubbo2 到 Dubbo3 的全站升级，深度使用了应用级服务发现、Kubernetes 原生服务部署、服务治理等核心能力。来自中仑网络的技术负责人来彬彬对整个 Dubbo3 的选型、升级过程及收益等做了深入总结。<br/><br/>
-  <a href='{{< relref "xiaomi" >}}'>了解更多</a>
+  <a href='{{< relref "zhonglunwangluo" >}}'>了解更多</a>
   {{< /card >}}
 {{< /cardpane >}}
 
@@ -61,11 +61,11 @@ Apache Dubbo 诞生于阿里巴巴微服务实践之中，在开源之后深受�
   {{< /card >}}
   {{< card header="店小蜜" >}}
   阿里云-达摩院-云小蜜对话机器人产品基于深度机器学习技术、自然语言理解技术和对话管理技术，为企业提供多引擎、多渠道、多模态的对话机器人服务。通过全链路升级至开源 Dubbo3.0，云原生网关默认支持 Dubbo3.0，实现透明转发，网关转发 RT 小于 1ms，利用 Dubbo3.0 支持 HTTP2 特性，云原生网关之间采用 mTLS 保障安全。<br/><br/>
-  <a href='{{< relref "xiaomi" >}}'>了解更多</a>
+  <a href='{{< relref "dianxiaomi" >}}'>了解更多</a>
   {{< /card >}}
   {{< card header="瓜子" >}}
   瓜子二手车的 Dubbo 实践经验分享<br/><br/>
-  <a href='{{< relref "xiaomi" >}}'>了解更多</a>
+  <a href='{{< relref "guazi" >}}'>了解更多</a>
   {{< /card >}}
 {{< /cardpane >}}
 </div>
