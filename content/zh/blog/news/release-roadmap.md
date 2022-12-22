@@ -3,7 +3,7 @@ title: "聚焦稳定性，Dubbo 发版规划公布"
 linkTitle: "Dubbo 发版规划"
 date: 2022-12-05
 description: >
-聚焦稳定性，Dubbo 发版规划公布
+  聚焦稳定性，Dubbo 发版规划公布
 ---
 
 ## Dubbo 简介
