@@ -176,7 +176,7 @@ public AbstractConfig() {
         if (this.monitor != null && this.monitor.getScopeModel() != applicationModel) {
             this.monitor.setScopeModel(applicationModel);
         }
-        //这哥if判断和上面的上面是重复的估计是写代码人加班加的太久了,没注意看
+        //这个if判断和上面的上面是重复的估计是写代码人加班加的太久了,没注意看
         if (this.metadataReportConfig != null && this.metadataReportConfig.getScopeModel() != applicationModel) {
             this.metadataReportConfig.setScopeModel(applicationModel);
         }
