@@ -64,7 +64,166 @@ Triple 在 inbound 流量上使用了 Netty 的默认流控实现，
 基于业务负载自适应调整反压流控，
 一是在 inbound 上将流控窗口包发送时机调整到服务端业务处理完成后，
 二是在 outbound 流量上关联客户端业务层，动态调整客户端发送速率。
-从而实现基于服务端业务负载动态反压流控机制。&lt;/p></description></item><item><title>Blog: 浅析 Dubbo 3.0 中接口级地址推送性能的优化</title><link>https://cn.dubbo.apache.org/zh/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</link><pubDate>Thu, 23 Jun 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</guid><description>
+从而实现基于服务端业务负载动态反压流控机制。&lt;/p></description></item><item><title>Blog: Triple 协议支持 Java 异常回传的设计与实现</title><link>https://cn.dubbo.apache.org/zh/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</link><pubDate>Mon, 19 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>在一些业务场景, 往往需要自定义异常来满足特定的业务, 主流用法是在catch里抛出异常, 例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deal&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span>&lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//doSomething
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span>&lt;span style="color:#719e07">(&lt;/span>IGreeterException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者通过ExceptionBuilder，把相关的异常对象返回给consumer：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>provider&lt;span style="color:#719e07">.&lt;/span>send&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ExceptionBuilders&lt;span style="color:#719e07">.&lt;/span>IGreeterExceptionBuilder&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>setDescription&lt;span style="color:#719e07">(&lt;/span>&amp;#39;异常描述信息&amp;#39;&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在抛出异常后, 通过捕获和instanceof来判断特定的异常, 然后做相应的业务处理，例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy&lt;span style="color:#719e07">.&lt;/span>echo&lt;span style="color:#719e07">(&lt;/span>REQUEST_MSG&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>IGreeterException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//做相应的处理
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Dubbo 2.x 版本，可以通过上述方法来捕获 Provider 端的异常。
+而随着云原生时代的到来， Dubbo 也开启了 3.0 的里程碑。&lt;/p>
+&lt;p>Dubbo 3.0 的一个很重要的目标就是全面拥抱云原生，
+在 3.0 的许多特性中，很重要的一个改动就是支持&lt;strong>新的一代Rpc协议Triple&lt;/strong>。&lt;/p>
+&lt;p>Triple 协议基于 HTTP 2.0 进行构建，对网关的穿透性强，&lt;strong>兼容 gRPC&lt;/strong>，
+提供 Request Response、Request Streaming、Response Streaming、
+Bi-directional Streaming 等通信模型；
+从 Triple 协议开始，Dubbo 还支持基于 IDL 的服务定义。&lt;/p>
+&lt;p>采用 Triple 协议的用户可以在 provider 端生成用户定义的异常信息，
+记录异常产生的堆栈，triple 协议可保证将用户在客户端获取到异常的message。&lt;/p>
+&lt;p>Triple 的回传异常会在 &lt;code>AbstractInvoker&lt;/code> 的 &lt;code>waitForResultIfSync&lt;/code>
+中把异常信息堆栈统一封装成 &lt;code>RpcException&lt;/code>，
+所有来自 Provider 端的异常都会被封装成 &lt;code>RpcException&lt;/code> 类型并抛出，
+这会导致用户无法根据特定的异常类型捕获来自 Provider 的异常，
+只能通过捕获 RpcException 异常来返回信息，
+且 Provider 携带的异常 message 也无法回传，只能获取打印的堆栈信息：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy&lt;span style="color:#719e07">.&lt;/span>echo&lt;span style="color:#719e07">(&lt;/span>REQUEST_MSG&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>RpcException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e&lt;span style="color:#719e07">.&lt;/span>printStackTrace&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>自定义异常信息在社区中的呼声也比较高，
+因此本次改动将支持自定义异常的功能, 使得服务端能抛出自定义异常后被客户端捕获到。&lt;/p>
+&lt;h2 id="dubbo异常处理简介">Dubbo异常处理简介&lt;/h2>
+&lt;p>我们从Consumer的角度看一下一次Triple协议 Unary请求的大致流程：&lt;/p>
+&lt;p>Dubbo Consumer 从 Spring 容器中获取 bean 时获取到的是一个代理接口，
+在调用接口的方法时会通过代理类远程调用接口并返回结果。&lt;/p>
+&lt;p>Dubbo提供的代理工厂类是 &lt;code>ProxyFactory&lt;/code>，通过 SPI 机制默认实现的是 &lt;code>JavassistProxyFactory&lt;/code>，
+&lt;code>JavassistProxyFactory&lt;/code> 创建了一个继承自 &lt;code>AbstractProxyInvoker&lt;/code> 类的匿名对象，
+并重写了抽象方法 &lt;code>doInvoke&lt;/code>。
+重写后的 &lt;code>doInvoke&lt;/code> 只是将调用请求转发给了 &lt;code>Wrapper&lt;/code> 类的 &lt;code>invokeMethod&lt;/code> 方法，
+并生成 &lt;code>invokeMethod&lt;/code> 方法代码和其他一些方法代码。&lt;/p>
+&lt;p>代码生成完毕后，通过 &lt;code>Javassist&lt;/code> 生成 &lt;code>Class&lt;/code> 对象，
+最后再通过反射创建 &lt;code>Wrapper&lt;/code> 实例，随后通过 &lt;code>InvokerInvocationHandler&lt;/code> -&amp;gt; &lt;code>InvocationUtil&lt;/code> -&amp;gt; &lt;code>AbstractInvoker&lt;/code> -&amp;gt; 具体实现类发送请求到Provider端。&lt;/p>
+&lt;p>Provider 进行相应的业务处理后返回相应的结果给 Consumer 端，来自 Provider 端的结果会被封装成 &lt;code>AsyncResult&lt;/code> ，在 &lt;code>AbstractInvoker&lt;/code> 的具体实现类里，
+接受到来自 Provider 的响应之后会调用 &lt;code>appResponse&lt;/code> 到 &lt;code>recreate&lt;/code> 方法，若 &lt;code>appResponse&lt;/code> 里包含异常，
+则会抛出给用户，大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/1.jpeg" alt="1.jpeg">&lt;/p>
+&lt;p>上述的异常处理相关环节是在 Consumer 端，在 Provider 端则是由 &lt;code>org.apache.dubbo.rpc.filter.ExceptionFilter&lt;/code> 进行处理，
+它是一系列责任链 Filter 中的一环，专门用来处理异常。&lt;/p>
+&lt;p>Dubbo 在 Provider 端的异常会在封装进 &lt;code>appResponse&lt;/code> 中。下面的流程图揭示了 &lt;code>ExceptionFilter&lt;/code> 源码的异常处理流程:&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/2.jpeg" alt="2.jpeg">&lt;/p>
+&lt;p>而当 &lt;code>appResponse&lt;/code> 回到了 Consumer 端，会在 &lt;code>InvocationUtil&lt;/code> 里调用 &lt;code>AppResponse&lt;/code> 的 &lt;code>recreate&lt;/code> 方法抛出异常，
+最终可以在 Consumer 端捕获：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">recreate&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Throwable &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>exception &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object stackTrace &lt;span style="color:#719e07">=&lt;/span> exception&lt;span style="color:#719e07">.&lt;/span>getStackTrace&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>stackTrace &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> exception&lt;span style="color:#719e07">.&lt;/span>setStackTrace&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> StackTraceElement&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Exception e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> exception&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> result&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="triple-通信原理">Triple 通信原理&lt;/h2>
+&lt;p>在上一节中，我们已经介绍了 Dubbo 在 Consumer 端大致发送数据的流程，
+可以看到最终依靠的是 &lt;code>AbstractInvoker&lt;/code> 的实现类来发送数据。
+在 Triple 协议中，&lt;code>AbstractInvoker&lt;/code> 的具体实现类是 &lt;code>TripleInvoker&lt;/code> ，
+&lt;code>TripleInvoker&lt;/code> 在发送前会启动监听器，监听来自 Provider 端的响应结果，
+并调用 &lt;code>ClientCallToObserverAdapter&lt;/code> 的 &lt;code>onNext&lt;/code> 方法发送消息，
+最终会在底层封装成 Netty 请求发送数据。&lt;/p>
+&lt;p>在正式的请求发起前，TripleServer 会注册 &lt;code>TripleHttp2FrameServerHandler&lt;/code>，
+它继承自 Netty 的 &lt;code>ChannelDuplexHandler&lt;/code>，
+其作用是会在 &lt;code>channelRead&lt;/code> 方法中不断读取 Header 和 Data 信息并解析，
+经过层层调用，
+会在 &lt;code>AbstractServerCall&lt;/code> 的 &lt;code>onMessage&lt;/code> 方法里把来自 consumer 的信息流进行反序列化，
+并最终由交由 &lt;code>ServerCallToObserverAdapter&lt;/code> 的 &lt;code>invoke&lt;/code> 方法进行处理。&lt;/p>
+&lt;p>在 &lt;code>invoke&lt;/code> 方法中，根据 consumer 请求的数据调用服务端相应的方法，并异步等待结果；'
+若服务端抛出异常，则调用 &lt;code>onError&lt;/code> 方法进行处理，
+否则，调用 &lt;code>onReturn&lt;/code> 方法返回正常的结果，大致代码逻辑如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">invoke&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用invoke方法请求服务
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Result response &lt;span style="color:#719e07">=&lt;/span> invoker&lt;span style="color:#719e07">.&lt;/span>invoke&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//异步等待结果
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> response&lt;span style="color:#719e07">.&lt;/span>whenCompleteWithContext&lt;span style="color:#719e07">((&lt;/span>r&lt;span style="color:#719e07">,&lt;/span> t&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//若异常不为空
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>t &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用方法过程出现异常，调用onError方法处理
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> responseObserver&lt;span style="color:#719e07">.&lt;/span>onError&lt;span style="color:#719e07">(&lt;/span>t&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>response&lt;span style="color:#719e07">.&lt;/span>hasException&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用onReturn方法处理业务异常
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> onReturn&lt;span style="color:#719e07">(&lt;/span>response&lt;span style="color:#719e07">.&lt;/span>getException&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//正常返回结果
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> onReturn&lt;span style="color:#719e07">(&lt;/span>r&lt;span style="color:#719e07">.&lt;/span>getValue&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/3.jpeg" alt="3.jpeg">&lt;/p>
+&lt;h2 id="实现版本">实现版本&lt;/h2>
+&lt;p>了解了上述原理，我们就可以进行相应的改造了，
+能让 consumer 端捕获异常的&lt;strong>关键在于把异常对象以及异常信息序列化后再发送给consumer端&lt;/strong>。
+常见的序列化协议很多，例如 Dubbo/HSF 默认的 hessian2 序列化；
+还有使用广泛的 JSON 序列化；以及 gRPC 原生支持的 protobuf(PB) 序列化等等。
+Triple协议因为兼容grpc的原因，默认采用 Protobuf 进行序列化。
+上述提到的这三种典型的序列化方案作用类似，但在实现和开发中略有不同。
+PB 不可由序列化后的字节流直接生成内存对象，
+而 Hessian 和 JSON 都是可以的。后两者反序列化的过程不依赖“二方包”，
+其序列化和反序列化的代码由 proto 文件相同，只要客户端和服务端用相同的 proto 文件进行通信，
+就可以构造出通信双方可解析的结构。&lt;/p>
+&lt;p>单一的 protobuf 无法序列化异常信息，
+因此我们采用 &lt;code>Wrapper + PB&lt;/code> 的形式进行序列化异常信息，
+抽象出一个 &lt;code>TripleExceptionWrapperUtils&lt;/code> 用于序列化异常，
+并在 &lt;code>trailer&lt;/code> 中采用 &lt;code>TripleExceptionWrapperUtils&lt;/code> 序列化异常，大致代码流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/4.jpeg" alt="4.jpeg">&lt;/p>
+&lt;p>上面的实现方案看似非常合理，已经能把 Provider 端的异常对象和信息回传，
+并在 Consumer 端进行捕获。但仔细想想还是有问题的：
+通常在 HTTP2 为基础的通信协议里会对 header 大小做一定的限制，
+太大的header size 会导致性能退化严重，为了保证性能，
+往往以 HTTP2 为基础的协议在建立连接的时候是要协商最大 header size 的，
+超过后会发送失败。对于 Triple 协议来说，在设计之初就是基于 HTTP 2.0，
+能无缝兼容 Grpc，而 Grpc header 头部只有 8KB 大小，
+异常对象大小可能超过限制，从而丢失异常信息；
+且多一个 header 携带序列化的异常信息意味着用户能加的 header 数量会减少，
+挤占了其他 header 所能占用的空间。&lt;/p>
+&lt;p>经过讨论，考虑将异常信息放置在 Body，将序列化后的异常从 trailer 挪至 body，
+采用 &lt;code>TripleWrapper + protobuf&lt;/code> 进行序列化，把相关的异常信息序列化后回传。
+社区围绕这个问题进行了一系列的争论，读者也可尝试先思考一下：&lt;/p>
+&lt;p>1.在 body 中携带回传的异常信息，其对应HTTP header状态码该设置为多少？&lt;/p>
+&lt;p>2.基于 http2 构建的协议，按照主流的 grpc 实现方案，相关的错误信息放在 &lt;code>trailer&lt;/code>，理论上不存在body，上层协议也需要保持语义一致性，若此时在payload回传异常对象，且grpc并没有支持在Body回传序列化对象的功能， 会不会破坏Http和grpc协议的语义？从这个角度出发，异常信息更应该放在trailer里。&lt;/p>
+&lt;p>3.作为开源社区，不能一味满足用户的需求，非标准化的用法注定是会被淘汰的，应该尽量避免更改 Protobuf的语义，是否在Wrapper层去支持序列化异常就能满足需求？&lt;/p>
+&lt;p>首先回答第二、三个问题：HTTP 协议并没有约定在状态码非 2xx 的时候不能返回 body，返回之后是否读取取决于用户。grpc 采用protobuf进行序列化，所以无法返回 exception；且try catch机制为java独有，其他语言并没有对应的需求，但Grpc暂时不支持的功能并一定是unimplemented，Dubbo的设计目标之一是希望能和主流协议甚至架构进行对齐，但对于用户合理的需求也希望能进行一定程度的修改。且从throw本身的语义出发，throw 的数据不只是一个 error message，序列化的异常信息带有业务属性，根据这个角度，更不应该采用类似trailer的设计。至于单一的Wrapper层，也没办法和grpc进行互通。至于Http header状态码设置为200，因为其返回的异常信息已经带有一定的业务属性，不再是单纯的error，这个设计也与grpc保持一致，未来考虑网关采集可以增加新的triple-status。&lt;/p>
+&lt;p>更改后的版本只需在异常不为空时返回相关的异常信息，采用 &lt;code>TripleWrapper + Protobuf&lt;/code> 进行序列化异常信息，并在consumer端进行解析和反序列化，大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/5.jpeg" alt="5.jpeg">&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>通过对 Dubbo 3.0 新增自定义异常的版本迭代中可以看出，尽管只能新增一个小小的特性，流程下并不复杂，但由于要考虑互通、兼容和协议的设计理念，因此思考和讨论的时间可能比写代码的时间更多。&lt;/p></description></item><item><title>Blog: 浅析 Dubbo 3.0 中接口级地址推送性能的优化</title><link>https://cn.dubbo.apache.org/zh/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</link><pubDate>Thu, 23 Jun 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</guid><description>
 &lt;h2 id="url-简介">URL 简介&lt;/h2>
 &lt;p>在阐述地址推送性能的具体优化之前，我们有必要先了解一下与之息息相关的内容 &amp;mdash; URL。&lt;/p>
 &lt;h3 id="定义">定义&lt;/h3>

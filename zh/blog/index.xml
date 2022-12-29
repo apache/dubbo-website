@@ -150,7 +150,166 @@ Triple 在 inbound 流量上使用了 Netty 的默认流控实现，
 &lt;/ul>
 &lt;h1 id="未来版本规划">未来版本规划&lt;/h1>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/release/release-roadmap.png" alt="image.png">&lt;/p>
-&lt;p>Dubbo 版本的发布规划以及在《&lt;a href="https://mp.weixin.qq.com/s?__biz=MzIwODYwNTA4MA==&amp;amp;mid=2247484424&amp;amp;idx=1&amp;amp;sn=2f5ff4846f7dafad325f78fd8cf4d1fc&amp;amp;chksm=9701deffa07657e9a46eb97bb859770b4856599566b992724013a848a730f394702938e72404&amp;amp;token=1547029975&amp;amp;lang=zh_CN#rd">聚焦稳定性，Dubbo 发版规划公布&lt;/a>》一文中正式发布，欢迎查看。&lt;/p></description></item><item><title>Blog: 聚焦稳定性，Dubbo 发版规划公布</title><link>https://cn.dubbo.apache.org/zh/blog/2022/12/05/%E8%81%9A%E7%84%A6%E7%A8%B3%E5%AE%9A%E6%80%A7dubbo-%E5%8F%91%E7%89%88%E8%A7%84%E5%88%92%E5%85%AC%E5%B8%83/</link><pubDate>Mon, 05 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/blog/2022/12/05/%E8%81%9A%E7%84%A6%E7%A8%B3%E5%AE%9A%E6%80%A7dubbo-%E5%8F%91%E7%89%88%E8%A7%84%E5%88%92%E5%85%AC%E5%B8%83/</guid><description>
+&lt;p>Dubbo 版本的发布规划以及在《&lt;a href="https://mp.weixin.qq.com/s?__biz=MzIwODYwNTA4MA==&amp;amp;mid=2247484424&amp;amp;idx=1&amp;amp;sn=2f5ff4846f7dafad325f78fd8cf4d1fc&amp;amp;chksm=9701deffa07657e9a46eb97bb859770b4856599566b992724013a848a730f394702938e72404&amp;amp;token=1547029975&amp;amp;lang=zh_CN#rd">聚焦稳定性，Dubbo 发版规划公布&lt;/a>》一文中正式发布，欢迎查看。&lt;/p></description></item><item><title>Blog: Triple 协议支持 Java 异常回传的设计与实现</title><link>https://cn.dubbo.apache.org/zh/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</link><pubDate>Mon, 19 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>在一些业务场景, 往往需要自定义异常来满足特定的业务, 主流用法是在catch里抛出异常, 例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deal&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span>&lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//doSomething
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span>&lt;span style="color:#719e07">(&lt;/span>IGreeterException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者通过ExceptionBuilder，把相关的异常对象返回给consumer：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>provider&lt;span style="color:#719e07">.&lt;/span>send&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ExceptionBuilders&lt;span style="color:#719e07">.&lt;/span>IGreeterExceptionBuilder&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>setDescription&lt;span style="color:#719e07">(&lt;/span>&amp;#39;异常描述信息&amp;#39;&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在抛出异常后, 通过捕获和instanceof来判断特定的异常, 然后做相应的业务处理，例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy&lt;span style="color:#719e07">.&lt;/span>echo&lt;span style="color:#719e07">(&lt;/span>REQUEST_MSG&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>IGreeterException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//做相应的处理
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Dubbo 2.x 版本，可以通过上述方法来捕获 Provider 端的异常。
+而随着云原生时代的到来， Dubbo 也开启了 3.0 的里程碑。&lt;/p>
+&lt;p>Dubbo 3.0 的一个很重要的目标就是全面拥抱云原生，
+在 3.0 的许多特性中，很重要的一个改动就是支持&lt;strong>新的一代Rpc协议Triple&lt;/strong>。&lt;/p>
+&lt;p>Triple 协议基于 HTTP 2.0 进行构建，对网关的穿透性强，&lt;strong>兼容 gRPC&lt;/strong>，
+提供 Request Response、Request Streaming、Response Streaming、
+Bi-directional Streaming 等通信模型；
+从 Triple 协议开始，Dubbo 还支持基于 IDL 的服务定义。&lt;/p>
+&lt;p>采用 Triple 协议的用户可以在 provider 端生成用户定义的异常信息，
+记录异常产生的堆栈，triple 协议可保证将用户在客户端获取到异常的message。&lt;/p>
+&lt;p>Triple 的回传异常会在 &lt;code>AbstractInvoker&lt;/code> 的 &lt;code>waitForResultIfSync&lt;/code>
+中把异常信息堆栈统一封装成 &lt;code>RpcException&lt;/code>，
+所有来自 Provider 端的异常都会被封装成 &lt;code>RpcException&lt;/code> 类型并抛出，
+这会导致用户无法根据特定的异常类型捕获来自 Provider 的异常，
+只能通过捕获 RpcException 异常来返回信息，
+且 Provider 携带的异常 message 也无法回传，只能获取打印的堆栈信息：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy&lt;span style="color:#719e07">.&lt;/span>echo&lt;span style="color:#719e07">(&lt;/span>REQUEST_MSG&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>RpcException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e&lt;span style="color:#719e07">.&lt;/span>printStackTrace&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>自定义异常信息在社区中的呼声也比较高，
+因此本次改动将支持自定义异常的功能, 使得服务端能抛出自定义异常后被客户端捕获到。&lt;/p>
+&lt;h2 id="dubbo异常处理简介">Dubbo异常处理简介&lt;/h2>
+&lt;p>我们从Consumer的角度看一下一次Triple协议 Unary请求的大致流程：&lt;/p>
+&lt;p>Dubbo Consumer 从 Spring 容器中获取 bean 时获取到的是一个代理接口，
+在调用接口的方法时会通过代理类远程调用接口并返回结果。&lt;/p>
+&lt;p>Dubbo提供的代理工厂类是 &lt;code>ProxyFactory&lt;/code>，通过 SPI 机制默认实现的是 &lt;code>JavassistProxyFactory&lt;/code>，
+&lt;code>JavassistProxyFactory&lt;/code> 创建了一个继承自 &lt;code>AbstractProxyInvoker&lt;/code> 类的匿名对象，
+并重写了抽象方法 &lt;code>doInvoke&lt;/code>。
+重写后的 &lt;code>doInvoke&lt;/code> 只是将调用请求转发给了 &lt;code>Wrapper&lt;/code> 类的 &lt;code>invokeMethod&lt;/code> 方法，
+并生成 &lt;code>invokeMethod&lt;/code> 方法代码和其他一些方法代码。&lt;/p>
+&lt;p>代码生成完毕后，通过 &lt;code>Javassist&lt;/code> 生成 &lt;code>Class&lt;/code> 对象，
+最后再通过反射创建 &lt;code>Wrapper&lt;/code> 实例，随后通过 &lt;code>InvokerInvocationHandler&lt;/code> -&amp;gt; &lt;code>InvocationUtil&lt;/code> -&amp;gt; &lt;code>AbstractInvoker&lt;/code> -&amp;gt; 具体实现类发送请求到Provider端。&lt;/p>
+&lt;p>Provider 进行相应的业务处理后返回相应的结果给 Consumer 端，来自 Provider 端的结果会被封装成 &lt;code>AsyncResult&lt;/code> ，在 &lt;code>AbstractInvoker&lt;/code> 的具体实现类里，
+接受到来自 Provider 的响应之后会调用 &lt;code>appResponse&lt;/code> 到 &lt;code>recreate&lt;/code> 方法，若 &lt;code>appResponse&lt;/code> 里包含异常，
+则会抛出给用户，大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/1.jpeg" alt="1.jpeg">&lt;/p>
+&lt;p>上述的异常处理相关环节是在 Consumer 端，在 Provider 端则是由 &lt;code>org.apache.dubbo.rpc.filter.ExceptionFilter&lt;/code> 进行处理，
+它是一系列责任链 Filter 中的一环，专门用来处理异常。&lt;/p>
+&lt;p>Dubbo 在 Provider 端的异常会在封装进 &lt;code>appResponse&lt;/code> 中。下面的流程图揭示了 &lt;code>ExceptionFilter&lt;/code> 源码的异常处理流程:&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/2.jpeg" alt="2.jpeg">&lt;/p>
+&lt;p>而当 &lt;code>appResponse&lt;/code> 回到了 Consumer 端，会在 &lt;code>InvocationUtil&lt;/code> 里调用 &lt;code>AppResponse&lt;/code> 的 &lt;code>recreate&lt;/code> 方法抛出异常，
+最终可以在 Consumer 端捕获：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">recreate&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Throwable &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>exception &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object stackTrace &lt;span style="color:#719e07">=&lt;/span> exception&lt;span style="color:#719e07">.&lt;/span>getStackTrace&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>stackTrace &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> exception&lt;span style="color:#719e07">.&lt;/span>setStackTrace&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> StackTraceElement&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Exception e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> exception&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> result&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="triple-通信原理">Triple 通信原理&lt;/h2>
+&lt;p>在上一节中，我们已经介绍了 Dubbo 在 Consumer 端大致发送数据的流程，
+可以看到最终依靠的是 &lt;code>AbstractInvoker&lt;/code> 的实现类来发送数据。
+在 Triple 协议中，&lt;code>AbstractInvoker&lt;/code> 的具体实现类是 &lt;code>TripleInvoker&lt;/code> ，
+&lt;code>TripleInvoker&lt;/code> 在发送前会启动监听器，监听来自 Provider 端的响应结果，
+并调用 &lt;code>ClientCallToObserverAdapter&lt;/code> 的 &lt;code>onNext&lt;/code> 方法发送消息，
+最终会在底层封装成 Netty 请求发送数据。&lt;/p>
+&lt;p>在正式的请求发起前，TripleServer 会注册 &lt;code>TripleHttp2FrameServerHandler&lt;/code>，
+它继承自 Netty 的 &lt;code>ChannelDuplexHandler&lt;/code>，
+其作用是会在 &lt;code>channelRead&lt;/code> 方法中不断读取 Header 和 Data 信息并解析，
+经过层层调用，
+会在 &lt;code>AbstractServerCall&lt;/code> 的 &lt;code>onMessage&lt;/code> 方法里把来自 consumer 的信息流进行反序列化，
+并最终由交由 &lt;code>ServerCallToObserverAdapter&lt;/code> 的 &lt;code>invoke&lt;/code> 方法进行处理。&lt;/p>
+&lt;p>在 &lt;code>invoke&lt;/code> 方法中，根据 consumer 请求的数据调用服务端相应的方法，并异步等待结果；'
+若服务端抛出异常，则调用 &lt;code>onError&lt;/code> 方法进行处理，
+否则，调用 &lt;code>onReturn&lt;/code> 方法返回正常的结果，大致代码逻辑如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">invoke&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用invoke方法请求服务
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Result response &lt;span style="color:#719e07">=&lt;/span> invoker&lt;span style="color:#719e07">.&lt;/span>invoke&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//异步等待结果
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> response&lt;span style="color:#719e07">.&lt;/span>whenCompleteWithContext&lt;span style="color:#719e07">((&lt;/span>r&lt;span style="color:#719e07">,&lt;/span> t&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//若异常不为空
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>t &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用方法过程出现异常，调用onError方法处理
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> responseObserver&lt;span style="color:#719e07">.&lt;/span>onError&lt;span style="color:#719e07">(&lt;/span>t&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>response&lt;span style="color:#719e07">.&lt;/span>hasException&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用onReturn方法处理业务异常
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> onReturn&lt;span style="color:#719e07">(&lt;/span>response&lt;span style="color:#719e07">.&lt;/span>getException&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//正常返回结果
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> onReturn&lt;span style="color:#719e07">(&lt;/span>r&lt;span style="color:#719e07">.&lt;/span>getValue&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/3.jpeg" alt="3.jpeg">&lt;/p>
+&lt;h2 id="实现版本">实现版本&lt;/h2>
+&lt;p>了解了上述原理，我们就可以进行相应的改造了，
+能让 consumer 端捕获异常的&lt;strong>关键在于把异常对象以及异常信息序列化后再发送给consumer端&lt;/strong>。
+常见的序列化协议很多，例如 Dubbo/HSF 默认的 hessian2 序列化；
+还有使用广泛的 JSON 序列化；以及 gRPC 原生支持的 protobuf(PB) 序列化等等。
+Triple协议因为兼容grpc的原因，默认采用 Protobuf 进行序列化。
+上述提到的这三种典型的序列化方案作用类似，但在实现和开发中略有不同。
+PB 不可由序列化后的字节流直接生成内存对象，
+而 Hessian 和 JSON 都是可以的。后两者反序列化的过程不依赖“二方包”，
+其序列化和反序列化的代码由 proto 文件相同，只要客户端和服务端用相同的 proto 文件进行通信，
+就可以构造出通信双方可解析的结构。&lt;/p>
+&lt;p>单一的 protobuf 无法序列化异常信息，
+因此我们采用 &lt;code>Wrapper + PB&lt;/code> 的形式进行序列化异常信息，
+抽象出一个 &lt;code>TripleExceptionWrapperUtils&lt;/code> 用于序列化异常，
+并在 &lt;code>trailer&lt;/code> 中采用 &lt;code>TripleExceptionWrapperUtils&lt;/code> 序列化异常，大致代码流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/4.jpeg" alt="4.jpeg">&lt;/p>
+&lt;p>上面的实现方案看似非常合理，已经能把 Provider 端的异常对象和信息回传，
+并在 Consumer 端进行捕获。但仔细想想还是有问题的：
+通常在 HTTP2 为基础的通信协议里会对 header 大小做一定的限制，
+太大的header size 会导致性能退化严重，为了保证性能，
+往往以 HTTP2 为基础的协议在建立连接的时候是要协商最大 header size 的，
+超过后会发送失败。对于 Triple 协议来说，在设计之初就是基于 HTTP 2.0，
+能无缝兼容 Grpc，而 Grpc header 头部只有 8KB 大小，
+异常对象大小可能超过限制，从而丢失异常信息；
+且多一个 header 携带序列化的异常信息意味着用户能加的 header 数量会减少，
+挤占了其他 header 所能占用的空间。&lt;/p>
+&lt;p>经过讨论，考虑将异常信息放置在 Body，将序列化后的异常从 trailer 挪至 body，
+采用 &lt;code>TripleWrapper + protobuf&lt;/code> 进行序列化，把相关的异常信息序列化后回传。
+社区围绕这个问题进行了一系列的争论，读者也可尝试先思考一下：&lt;/p>
+&lt;p>1.在 body 中携带回传的异常信息，其对应HTTP header状态码该设置为多少？&lt;/p>
+&lt;p>2.基于 http2 构建的协议，按照主流的 grpc 实现方案，相关的错误信息放在 &lt;code>trailer&lt;/code>，理论上不存在body，上层协议也需要保持语义一致性，若此时在payload回传异常对象，且grpc并没有支持在Body回传序列化对象的功能， 会不会破坏Http和grpc协议的语义？从这个角度出发，异常信息更应该放在trailer里。&lt;/p>
+&lt;p>3.作为开源社区，不能一味满足用户的需求，非标准化的用法注定是会被淘汰的，应该尽量避免更改 Protobuf的语义，是否在Wrapper层去支持序列化异常就能满足需求？&lt;/p>
+&lt;p>首先回答第二、三个问题：HTTP 协议并没有约定在状态码非 2xx 的时候不能返回 body，返回之后是否读取取决于用户。grpc 采用protobuf进行序列化，所以无法返回 exception；且try catch机制为java独有，其他语言并没有对应的需求，但Grpc暂时不支持的功能并一定是unimplemented，Dubbo的设计目标之一是希望能和主流协议甚至架构进行对齐，但对于用户合理的需求也希望能进行一定程度的修改。且从throw本身的语义出发，throw 的数据不只是一个 error message，序列化的异常信息带有业务属性，根据这个角度，更不应该采用类似trailer的设计。至于单一的Wrapper层，也没办法和grpc进行互通。至于Http header状态码设置为200，因为其返回的异常信息已经带有一定的业务属性，不再是单纯的error，这个设计也与grpc保持一致，未来考虑网关采集可以增加新的triple-status。&lt;/p>
+&lt;p>更改后的版本只需在异常不为空时返回相关的异常信息，采用 &lt;code>TripleWrapper + Protobuf&lt;/code> 进行序列化异常信息，并在consumer端进行解析和反序列化，大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/19/triple/5.jpeg" alt="5.jpeg">&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>通过对 Dubbo 3.0 新增自定义异常的版本迭代中可以看出，尽管只能新增一个小小的特性，流程下并不复杂，但由于要考虑互通、兼容和协议的设计理念，因此思考和讨论的时间可能比写代码的时间更多。&lt;/p></description></item><item><title>Blog: 聚焦稳定性，Dubbo 发版规划公布</title><link>https://cn.dubbo.apache.org/zh/blog/2022/12/05/%E8%81%9A%E7%84%A6%E7%A8%B3%E5%AE%9A%E6%80%A7dubbo-%E5%8F%91%E7%89%88%E8%A7%84%E5%88%92%E5%85%AC%E5%B8%83/</link><pubDate>Mon, 05 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/blog/2022/12/05/%E8%81%9A%E7%84%A6%E7%A8%B3%E5%AE%9A%E6%80%A7dubbo-%E5%8F%91%E7%89%88%E8%A7%84%E5%88%92%E5%85%AC%E5%B8%83/</guid><description>
 &lt;h2 id="dubbo-简介">Dubbo 简介&lt;/h2>
 &lt;p>Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下的服务治理与通信问题，官方提供了 Java、Golang 等多语言 SDK 实现。使用 Dubbo 开发的微服务原生具备相互之间的远程地址发现与通信能力， 利用 Dubbo 提供的丰富服务治理特性，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。Dubbo 被设计为高度可扩展，用户可以方便的实现流量拦截、选址的各种定制逻辑。&lt;/p>
 &lt;h2 id="我应该如何选择版本">我应该如何选择版本？&lt;/h2>
@@ -14310,70 +14469,4 @@ HTTP 协议与 dubbo 协议之间的映射关系。&lt;/p>
 &lt;p>v1.7.0 之前嵌套map无法正确解析，主要原因是对应的map对象被当做一个数据类型却未被自动加到类引用列表中，而嵌套map类信息是同一类型的引用，去类引用列表找，找不到就报错了。 解决这个问题的方法就是遇到map类对象，也将其加入到类引用列表中即可。 问题详细参考 &lt;a href="https://github.com/apache/dubbo-go-hessian2/issues/119">#119&lt;/a>.&lt;/p>
 &lt;h3 id="34-fix-fields-name-mismatch-in-duration-class-234httpsgithubcomapachedubbo-go-hessian2pull234">3.4 fix fields name mismatch in Duration class. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/234">#234&lt;/a>&lt;/h3>
 &lt;p>这个 PR 解决了Duration对象中字段错误定义，原来是&amp;quot;second/nano&amp;quot;， 应该是&amp;quot;seconds/nanos&amp;quot;。&lt;/p>
-&lt;p>同时改善了测试验证数据。之前使用0作为int字段的测试数据，这是不准确的，因为int类型默认值就是0.&lt;/p></description></item><item><title>Blog: Dubbo-go应用维度注册模型</title><link>https://cn.dubbo.apache.org/zh/blog/2021/01/14/dubbo-go%E5%BA%94%E7%94%A8%E7%BB%B4%E5%BA%A6%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9E%8B/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/blog/2021/01/14/dubbo-go%E5%BA%94%E7%94%A8%E7%BB%B4%E5%BA%A6%E6%B3%A8%E5%86%8C%E6%A8%A1%E5%9E%8B/</guid><description>
-&lt;p>Dubbo 3.0 将至。其最重要的一点就是服务自省，其基础即是应用维度的注册模型，作为目前与 Dubbo 在功能上完全对齐的 Dubbo-go，已于 本年【2020 年】7 月份发布了其 v1.5.0 版本，实现了该模型，为年底实现与 Dubbo 3.0 对齐的新版本奠定了基础。&lt;/p>
-&lt;p>Dubbo-go 作为 Dubbo 的 Go 语言版本，因跨语言之故，二者针对同一模型的实现必然有较大差异，故本文注重讨论 Dubbo-go 社区自身对该模型的理解和实现，以及其与 Dubbo 之间的差异。&lt;/p>
-&lt;h2 id="1-引语">1 引语&lt;/h2>
-&lt;p>在 v1.5 以前，Dubbo-go 注册模型都是以服务为维度的，直观的理解可认为其是接口维度。譬如注册信息，按照服务维度模型其示例如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;com.xxx.User&amp;#34;&lt;/span>:[
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;instance1&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;127.0.0.1&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>:{&lt;span style="color:#268bd2">&amp;#34;timeout&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">1000&lt;/span>}},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;instance2&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;127.0.0.2&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>:{&lt;span style="color:#268bd2">&amp;#34;timeout&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">2000&lt;/span>}},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;instance3&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;127.0.0.3&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>:{&lt;span style="color:#268bd2">&amp;#34;timeout&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">3000&lt;/span>}},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>]
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种模式的好处是不言而喻的，简单直观，提供了细粒度的服务控制手段。&lt;/p>
-&lt;p>而近两年，随着云时代的到来，这种模式就暴露了不足：&lt;/p>
-&lt;ol>
-&lt;li>主流的注册模型都是应用维度的；&lt;/li>
-&lt;li>以服务维度来注册，那么规模与服务数量成正比，大规模集群之下【工行软件中心的接口注册规模达到万级】，注册中心压力非常大；&lt;/li>
-&lt;/ol>
-&lt;h2 id="2-dubbo-go-v150-的新注册模型">2 Dubbo-go v1.5.0 的新注册模型&lt;/h2>
-&lt;p>这次 Dubbo-go 支持了新的注册模型，也就是应用维度的注册模型。简单而言，在应用维度注册下，其注册信息类似：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;application1&amp;#34;&lt;/span>: [
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;instance1&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;127.0.0.1&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>:{}},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;instance2&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;127.0.0.2&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>:{}},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;instanceN&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;127.0.0.3&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>:{}}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>]
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在此模式之下，可以看到注册信息将会大幅度减少，集群规模只与实例数量相关。&lt;/p>
-&lt;p>与此同时，在实现这一个功能的时候，Dubbo-go 还希望保持两个目标：&lt;/p>
-&lt;ol>
-&lt;li>对用户完全兼容，用户迁移无感知；&lt;/li>
-&lt;li>保持住原本服务粒度上精细控制的能力——即保留现有的服务维度的元数据；&lt;/li>
-&lt;/ol>
-&lt;p>因此 Dubbo-go 要着力解决以下几点：&lt;/p>
-&lt;ol>
-&lt;li>目前 Consumer 的配置是以接口为准的，如何根据接口找到该接口对应的应用？例如，用户配置了 &lt;code>com.xxx.User&lt;/code> 服务，那么，Dubbo-go 怎么知道这个服务是由哪个应用来提供的呢？&lt;/li>
-&lt;li>在知道了是哪个应用之后，可以从注册中心拿到应用的注册信息，如实例信息等；那怎么知道 &lt;code>com.xxx.User&lt;/code> 服务自身的元数据呢？&lt;/li>
-&lt;/ol>
-&lt;p>为了解决这两个问题，在已有的注册模型的基础上，Dubbo-go 引入两个额外的组件：ServiceNameMapping 和 MetadataService。&lt;/p>
-&lt;p>前者用于解决服务-应用之间的映射，后者用于获取服务的元数据。&lt;/p>
-&lt;p>由此，Dubbo-go 的应用维度注册模型就变为：&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/app-registry/app-registry-model.png" alt="">&lt;/p>
-&lt;h3 id="21-servicenamemapping">2.1 ServiceNameMapping&lt;/h3>
-&lt;p>ServiceNameMapping 并不复杂。考虑到一般人在 Consumer 侧想要调用一个服务，其十有八九是知道这个服务是哪个应用提供的，于是 Dubbo-go 引入了新的配置项 &lt;code>provideBy&lt;/code>&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/app-registry/provideby.png" alt="">&lt;/p>
-&lt;p>当然，所谓 “十有八九”就是说有些时候确实不知道是服务是谁提供的，所以 Dubbo-go 还支持了基于配置中心的 ServiceNameMapping 实现。Dubbo-go 会用服务名作为 Key 从配置中心里面读出对应的应用名。这意味着, Provider 启动的时候，也会在配置中心将自身的 服务-应用名映射 写入配置中心。&lt;/p>
-&lt;h3 id="22-metadataservice">2.2 MetadataService&lt;/h3>
-&lt;p>MetadataService 稍微要复杂一点，有 &lt;code>remote&lt;/code> 和 &lt;code>local&lt;/code> 两种模式。&lt;/p>
-&lt;p>类似于前面的 ServiceNameMapping，Dubbo-go 提供了基于配置中心的 MetadataService 的实现，即 &lt;code>remote&lt;/code> 模式。Provider 启动的时候，就会将服务的元数据写进去。&lt;/p>
-&lt;p>另外一种模式是 &lt;code>local&lt;/code> 模式。Dubbo-go 可以直接将 MetadataService 看做是一个普通的微服务，而后由 &lt;code>Provider&lt;/code> 所提供。类似于：&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/app-registry/local-metadata-service.png" alt="">&lt;/p>
-&lt;p>由此带来一个问题：&lt;/p>
-&lt;p>既然 Dubbo-go 将 MetadataService 看做是一个普通的服务，那么 MetadataService 的元数据，Consumer 该怎么获得呢？这是一个典型的鸡生蛋蛋生鸡的问题。&lt;/p>
-&lt;p>Dubbo-go 的方案非常简单粗暴，Provider 启动的时候，不仅仅往注册中心里面写入应用本身的信息，还要把它的 MetadataService 信息写入。&lt;/p>
-&lt;p>这是一个应用的注册信息：&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/app-registry/registry-info.png" alt="">&lt;/p>
-&lt;p>本质上来说，应用维度注册信息 + 服务元数据 = 服务维度注册信息。或者说，应用维度注册，只是一种重新组织这些信息的方式。&lt;/p>
-&lt;h2 id="3-差异与改进">3 差异与改进&lt;/h2>
-&lt;p>Dubbo-go v1.5.x 对标 Dubbo 2.7.5，可以认为是参照 Dubbo 2.7.5 直接实现其 Go 源码，但是考虑到 Java 和 Go 之间的语言差异，导致二者之间的实现不可能完全对等。&lt;/p>
-&lt;h3 id="31-修订版本号revision比对">3.1 修订版本号revision比对&lt;/h3>
-&lt;p>Dubbo v2.7.x 在 MetadataService 注册时，会对其 provider 应用的所有服务接口的 hash 值做为修订版本号写入元数据中心，此 revision 是对所有接口的方法以及其参数总体的计算结果。其目的是减少 consumer 端到注册中心的拉取次数。&lt;/p>
-&lt;p>在Go中用的计算 revision 的 hash 算法与 Java 是不一致的，而且 Go 与 Java 的方法签名信息是不相同的，所以计算出来的 hash 值一定是不一样的。&lt;/p>
-&lt;p>此不一致会导致如果Go应用和Java应用同时发布同一个服务的时候，Go服务和Java服务的修订版本号必定是不相同的，Consumer需要分别缓存这两个修订版本的元数据。&lt;/p>
-&lt;h3 id="32-应用注册时机">3.2 应用注册时机&lt;/h3>
-&lt;p>Dubbo-go v1.5.0 实现时，其中一个考量是全面向后兼容 v1.4.x。Dubbo-go v1.5.x 应用 consumer 既可以调用 Dubbo-go v1.4.x 应用的服务，也可以调用 Dubbo v2.6.x 应用的服务，当然也可以调用其对标的 v2.7.x 应用的服务。&lt;/p>
-&lt;p>为了达到兼容性，Dubbo-go v1.5.x 实现时面临一个问题：Dubbo-go provider 应用启动时有一个服务启动成功，把应用信息注册到元数据中心之后，就会把实例注册到注册中心，而 Dubbo 2.7.x 的 provider 应用则是在其所有服务接口的信息注册到元数据中心后才会注册实例！&lt;/p>
-&lt;p>这个问题的后果就是：Dubbo-go v1.5.0 的 provider 每次发布接口到元数据中心的同时，都会触发Dubbo-go v1.5.0 / Dubbo v2.7.x 的 consumer 应用拉取 Dubbo-go v1.5.0 应用信息，当provider 发布的服务过多时 consumer 侧性能损耗非常明显！&lt;/p>
-&lt;p>Dubbo-go 在 v1.5.1 中已经修复了这个问题，provider 在启动时先将其全部服务接口发布到元数据中心，然后注册实例到注册中心，减少了 consumer 拉取元数据的次数。&lt;/p>
-&lt;blockquote>
-&lt;p>本文作者： 白泽（蒋超），Github ID &lt;a href="https://github.com/Patrick0308">@Patrick0308&lt;/a>，开源爱好者。&lt;/p>
-&lt;/blockquote></description></item></channel></rss>
+&lt;p>同时改善了测试验证数据。之前使用0作为int字段的测试数据，这是不准确的，因为int类型默认值就是0.&lt;/p></description></item></channel></rss>
