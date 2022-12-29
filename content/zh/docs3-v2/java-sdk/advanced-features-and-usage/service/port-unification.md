@@ -20,6 +20,8 @@ Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个
 
 - 以上的协议识别完成之后，Channel已经确定了如何处理远程的客户端消息，通过对应的ServerPipeline进行处理即可（在处理的过程中也会根据配置信息决定消息的处理线程）。
 
+## 使用方式
+在同一主机上部署多个服务或需要通过负载均衡器访问多个服务。
 
 ## 参考用例
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-port-unification)
