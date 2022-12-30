@@ -26,11 +26,11 @@ hide_summary: true
 ```
 
 Dubbo可观测性主要管理如下几大纬度分别是:
-+ [指标埋点](meter.md) 
-+ [链路追踪](tracing.md) 
-+ [日志管理](logging.md) 
-+ [健康检查](health-information.md)  
-+ [K8S探测器](kubernetes-probes.md)
-+ [文档案例](doc.md) 
+- [指标埋点](./meter.md) 
+- [链路追踪](./tracing.md) 
+- [日志管理](./logging.md) 
+- [健康检查](./health-information.md)  
+- [K8S探测器](./kubernetes-probes.md)
+- [文档案例](./doc.md) 
  
 
