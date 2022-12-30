@@ -102,7 +102,7 @@ func init() {
 	config.SetProviderService(&GeneratorServerImpl{})
 }
 ```
-同时，我们调整conf/dubbogo.yaml中的provider部分
+同时，我们调整conf/dubbogo.yaml中的provider部分，
 ```yaml
 dubbo:
   registries:
@@ -118,8 +118,7 @@ dubbo:
       GeneratorServerImpl:
         interface: "" # read from stub
 ```
-同时，我们需要拉起一个依赖的注册中心，nacos，如果你本地有现成，本步骤可以忽略
-我们使用docker来快速启动一个nacos
+我们需要拉起一个依赖的注册中心，nacos，如果你有现成的，本步骤可以忽略，我们使用docker来快速启动一个nacos，
 
 ```bash
 git clone https://github.com/nacos-group/nacos-docker.git
@@ -137,7 +136,7 @@ go run cmd/app.go
 
 
 ## 2. 客户端使用
-首先，我们可以使用共享我们的服务端的api定义给客户端，并生成相关的代码（这里可以根据实际项目需要，共享共享proto，每个consumer自行生成代码，或统一生成sdk后给依赖的服务引入）
+首先，我们可以共享我们的服务端的api给客户端，并生成相关的代码（这里可以根据实际项目需要，共享共享proto，每个consumer自行生成代码，或统一生成sdk后给依赖的服务引入）
 客户端目录如下：
 ```bash
 .
