@@ -362,7 +362,7 @@ ROUTINE ======================== bufio.NewReaderSize in /usr/local/go/src/bufio/
          .          .     58:}
 ```
 
-我们可以写个池化内存前后性能对比, 性能提升 85.4% , [benchmark 用例](https://github.com/zonghaishang/dubbo-go-hessian2/blob/9b418c4e2700964f244e6b982855b4e89b45990d/string_test.go#L161) ：
+我们可以写个池化内存前后性能对比, 性能提升 85.4% , [benchmark 用例](https://github.com/apache/dubbo-go-hessian2/blob/9b418c4e2700964f244e6b982855b4e89b45990d/string_test.go#L161) ：
 
 ```bash
 BenchmarkNewDecoder-12  1487685 803 ns/op   4528 B/op   9 allocs/op

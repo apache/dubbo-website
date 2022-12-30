@@ -35,7 +35,7 @@ hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序
 
 ## 使用方式
 
-#### 依赖
+### 依赖
 
 从 Dubbo 3 开始，Hessian 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
@@ -54,28 +54,28 @@ hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序
 </dependency>
 ```
 
-定义 hessian 协议：
+### 定义 hessian 协议
 ```xml
 <dubbo:protocol name="hessian" port="8080" server="jetty" />
 ```
 
-设置默认协议：
+### 设置默认协议
 ```xml
 <dubbo:provider protocol="hessian" />
 ```
 
-设置 service 协议：
+### 设置 service 协议
 ```xml
 <dubbo:service protocol="hessian" />
 ```
 
-多端口：
+### 多端口
 ```xml
 <dubbo:protocol id="hessian1" name="hessian" port="8080" />
 <dubbo:protocol id="hessian2" name="hessian" port="8081" />
 ```
 
-直连：
+### 直连
 ```xml
 <dubbo:reference id="helloService" interface="HelloWorld" url="hessian://10.20.153.10:8080/helloWorld" />
 ```

@@ -3,26 +3,26 @@ type: docs
 linkTitle: "泛化调用"
 title: "泛化调用（客户端泛化）"
 weight: 4
-description: "不需要服务端API的RPC调用"
+description: "不需要服务端 API 的 RPC 调用"
 ---
 
 ## 特性说明
 
-泛化调用是指在调用方没有服务方提供的API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。
+泛化调用是指在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。
 
 ## 使用场景
 
 泛化调用主要用于实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求。比如如下场景：
 
-1. 网关服务：如果要搭建一个网关服务，那么服务网关要作为所有RPC服务的调用端。但是网关本身不应该依赖于服务提供方的接口API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。
+1. 网关服务：如果要搭建一个网关服务，那么服务网关要作为所有 RPC 服务的调用端。但是网关本身不应该依赖于服务提供方的接口 API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。
 
-2. 测试平台：如果要搭建一个可以测试RPC调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的RPC服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口API。所以需要泛化调用的支持。
+2. 测试平台：如果要搭建一个可以测试 RPC 调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的 RPC 服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口 API。所以需要泛化调用的支持。
 
 ## 使用方式
 
-demo可见[dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-generic)
+demo 可见 [dubbo 项目中的示例代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic)
 
-API部分以此demo为例讲解使用方式。
+API 部分以此 demo 为例讲解使用方式。
 
 ### 服务定义
 
@@ -109,9 +109,9 @@ public class HelloServiceImpl implements HelloService {
 
 1. 在设置 `ServiceConfig` 时，使用`setGeneric("true")`来开启泛化调用
 
-2. 在设置 `ServiceConfig` 时，使用setRef指定实现类时，要设置一个 `GenericService` 的对象。而不是真正的服务实现类对象
+2. 在设置 `ServiceConfig` 时，使用 setRef 指定实现类时，要设置一个 `GenericService` 的对象。而不是真正的服务实现类对象
 
-3. 其他设置与正常Api服务启动一致即可
+3. 其他设置与正常 Api 服务启动一致即可
 
 ``` java
 private static String zookeeperAddress = "zookeeper://" + System.getProperty("zookeeper.address", "127.0.0.1") + ":2181";
@@ -206,8 +206,8 @@ private static String zookeeperAddress = "zookeeper://" + System.getProperty("zo
     }
 ```
 
-### 通过Spring使用泛化调用
-Spring中服务暴露与服务发现有多种使用方式，如xml，注解。这里以xml为例。
+### 通过 Spring 使用泛化调用
+Spring 中服务暴露与服务发现有多种使用方式，如 xml，注解。这里以 xml 为例。
 步骤：
 
 1. 生产者端无需改动
@@ -237,13 +237,13 @@ Spring中服务暴露与服务发现有多种使用方式，如xml，注解。�
 ```
 
 
-### Protobuf对象泛化调用
+### Protobuf 对象泛化调用
 
-一般泛化调用只能用于生成的服务参数为POJO的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常POJO，可以通过 protobuf-json 泛化调用。
+一般泛化调用只能用于生成的服务参数为 POJO 的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常 POJO，可以通过 protobuf-json 泛化调用。
 
-GoogleProtobuf 序列化相关的Demo可以参考 [protobuf-demo](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-protobuf)
+GoogleProtobuf 序列化相关的 Demo 可以参考 [protobuf-demo](https://github.com/apache/dubbo-samples/tree/master/3-extensions/serialization/dubbo-samples-protobuf)
 
-#### 通过Spring对Google Protobuf对象泛化调用
+#### 通过 Spring 对 Google Protobuf 对象泛化调用
 
 在 Spring 中配置声明 generic = "protobuf-json"
 
@@ -283,7 +283,7 @@ Object result = genericService.$invoke("sayHello", new String[] {
 
 #### GoogleProtobuf 对象的处理
 
-GoogleProtobuf 对象是由 Protocol 契约生成,相关知识请参考 [ProtocolBuffers 文档](https://developers.google.com/protocol-buffers/?hl=zh-CN)。假如有如下Protobuf 契约
+GoogleProtobuf 对象是由 Protocol 契约生成,相关知识请参考 [ProtocolBuffers 文档](https://developers.google.com/protocol-buffers/?hl=zh-CN)。假如有如下 Protobuf 契约
 
 ```proto
 syntax = "proto3";
@@ -336,9 +336,9 @@ Google Protobuf 对象缺少标准的 JSON 格式，生成的服务元数据信�
 
 ## 注意事项
 
-1. 如果参数为基本类型或者Date,List,Map等，则不需要转换，直接调用。
+1. 如果参数为基本类型或者 Date,List,Map 等，则不需要转换，直接调用。
 
-2. 如果参数为其他POJO，则使用Map代替。
+2. 如果参数为其他 POJO，则使用 Map 代替。
 
 如：
 ``` java

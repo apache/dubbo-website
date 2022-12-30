@@ -7,9 +7,9 @@ description: "从零演示如何基于 IDL 方式来定义 Dubbo 服务并使用
 ---
 
 使用 IDL 定义服务具有更好的跨语言友好性，对于 Dubbo3 新用户而言，我们推荐使用这种方式。
-然而 Triple 协议并不是和 IDL 强绑定的，也可以使用 Java Interface + Pojo 的方式定义服务并启用 Triple 协议，具体可参见[示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo)。
+然而 Triple 协议并不是和 IDL 强绑定的，也可以使用 Java Interface + Pojo 的方式定义服务并启用 Triple 协议，具体可参见[示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo)。
 
-更多 Triple 和 IDL 使用方式，请参考[官方示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple)
+更多 Triple 和 IDL 使用方式，请参考[官方示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple)
 
 ### 前置条件
 - [JDK](https://jdk.java.net/) 版本 >= 8

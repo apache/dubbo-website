@@ -9,7 +9,7 @@ description: "该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo
 该方案无需授予 Dubbo 应用访问 API-SERVER 的权限，也无需为 API-SERVER 引连接过多数据面造成的稳定性而担心。"
 ---
 
-可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 [完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-kubernetes/)
+可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 [完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes)
 
 ## 1 总体目标
 
@@ -20,8 +20,8 @@ description: "该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo
 ## 2 基本流程
 
 1. 创建一个 Dubbo
-   应用( [dubbo-samples-kubernetes](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-kubernetes) )
-2. 构建容器镜像并推送到镜像仓库（ [dubboteam 示例例镜像](https://hub.docker.com/u/dubboteam) ）
+   应用( [dubbo-samples-kubernetes](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes) )
+2. 构建容器镜像并推送到镜像仓库（ [dubbo-demo 示例例镜像](https://hub.docker.com/r/apache/dubbo-demo) ）
 3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes
 4. 验证服务发现与调用正常
 
@@ -119,7 +119,7 @@ kubectl logs your-pod-id
 
 ### 3.4 修改项目并打包（可跳过）
 
-示例项目及相关镜像均已就绪，此小节仅面向需要修改示例并查看部署效果的用户。在此查看[完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-kubernetes/)
+示例项目及相关镜像均已就绪，此小节仅面向需要修改示例并查看部署效果的用户。在此查看[完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes)
 
 设置 Dubbo 项目使用 Kubernetes 作为注册中心，这里通过 DEFAULT_MASTER_HOST指定使用默认 API-SERVER 集群地址 kubernetes.default.srv，同时还指定了
 namespace、trustCerts 两个参数
@@ -142,7 +142,7 @@ dubbo.provider.token=true
 mvn compile jib:build
 ```
 
-> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 dubboteam 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
+> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 apache/dubbo-demo 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
 > 可以通过直接在命令行指定 `mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth.username=x`，或者使用 docker-credential-helper.
 
 ## 4 最佳实践
@@ -235,7 +235,7 @@ spec:
       serviceAccountName: dubbo-sa
       containers:
         - name: server
-          image: dubboteam/dubbo-samples-apiserver-provider
+          image: apache/dubbo-deemo:dubbo-samples-apiserver-provider_0.0.1
           ports:
             - containerPort: 20880
           livenessProbe:
@@ -297,7 +297,7 @@ spec:
       serviceAccountName: dubbo-sa
       containers:
         - name: server
-          image: dubboteam/dubbo-samples-apiserver-consumer
+          image: apache/dubbo-demo:dubbo-samples-apiserver-consumer_0.0.1
           ports:
             - containerPort: 20880
           livenessProbe:

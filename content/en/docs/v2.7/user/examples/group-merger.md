@@ -8,7 +8,7 @@ description: "Group merger in dubbo"
 
 According to the group to invoke server and return the merge result [^1], such as the menu service, the same interface, but there are a variety of implementations, using group distinction, consumers call each group and get the results, the merger can merge the resules, so that you can achieve aggregation Menu Item.
 
-Related code can refer to [dubbo project example](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-merge)
+Related code can refer to [dubbo project example](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge)
 
 ## Configuration
 

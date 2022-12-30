@@ -13,6 +13,53 @@ weight: 5
 > 发布说明: https://github.com/apache/dubbo-spi-extensions/releases
 >
 
+## Dubbo SPI Extensions 1.0.2 (2022-08-02)
+
+#### Source Release
+
+* [source](https://archive.apache.org/dist/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.sha512)
+
+#### Maven Release
+
+```xml
+<dependency>
+  <groupId>org.apache.dubbo.extensions</groupId>
+  <artifactId>${component_name}</artifactId>
+  <version>${component_version}</version>
+</dependency>
+```
+
+#### Included Components
+
+- dubbo-configcenter-extensions
+  - dubbo-configcenter-consul:1.0.0
+  - dubbo-configcenter-etcd:1.0.0
+- dubbo-filter-extensions
+  - dubbo-filter-seata:1.0.0
+- dubbo-metadata-report-extensions
+  - dubbo-metadata-report-consul:1.0.0
+  - dubbo-metadata-report-etcd:1.0.0
+- dubbo-registry-extensions
+  - dubbo-registry-consul:1.0.0
+  - dubbo-registry-etcd3:1.0.0
+  - dubbo-registry-redis:1.0.0
+  - dubbo-registry-sofa:1.0.0
+- dubbo-remoting-extensions
+  - dubbo-remoting-etcd3:1.0.0
+  - dubbo-remoting-grizzly:1.0.0
+  - dubbo-remoting-mina:1.0.0
+  - dubbo-remoting-p2p:1.0.0
+  - dubbo-remoting-redis:1.0.0
+- dubbo-rpc-extensions
+  - dubbo-rpc-hessian:1.0.0
+  - dubbo-rpc-memcached:1.0.0
+  - dubbo-rpc-redis:1.0.0
+- dubbo-serialization-extensions
+  - dubbo-serialization-msgpack:1.0.0
+  - dubbo-serialization-native-hession:1.0.0
+
 ## Dubbo SPI Extensions 1.0.1 (2022-03-14)
 
 #### Source Release

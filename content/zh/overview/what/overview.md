@@ -31,7 +31,7 @@ Apache Dubbo 总体架构能很好的满足企业的大规模微服务实践，�
   * 调用过程中对流量及协议的拦截扩展，如 Filter、Router、LB 等
   * 微服务治理组件扩展，如 Registry、Config Center、Metadata Center 等
 * 企业级微服务治理能力
-    * 国内共有云厂商支持的事实标准服务框架
+    * 国内公有云厂商支持的事实标准服务框架
     * 多年企业实践经验考验，参考[用户实践案例](../../../users)
     
 ### Dubbo 基本工作流程
@@ -43,7 +43,7 @@ Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编�
 在消费端对服务方法发起调用后，Dubbo 框架负责将请求发送到部署在远端机器上的服务提供方，提供方收到请求后会调用服务的实现类，之后将处理结果返回给消费端，这样就完成了一次完整的服务调用。如图中的 Request、Response 数据流程所示。
 >需要注意的是，在 Dubbo 中，我们提到服务时，通常是指 RPC 粒度的、提供某个具体业务增删改功能的接口或方法，与一些微服务概念书籍中泛指的服务并不是一个概念。
 
-在分布式系统中，尤其是随着微服务架构的发展，应用的部署、发布、扩缩容变得极为频繁，作为 RPC 消费方，如何定动态的发现服务提供方地址成为 RPC 通信的前置条件。Dubbo 提供了自动的地址发现机制，用于应对分布式场景下机器实例动态迁移的问题。如下图所示，通过引入注册中心来协调提供方与消费方的地址，提供者启动之后向注册中心注册自身地址，消费方通过拉取或订阅注册中心特定节点，动态的感知提供方地址列表的变化。
+在分布式系统中，尤其是随着微服务架构的发展，应用的部署、发布、扩缩容变得极为频繁，作为 RPC 消费方，如何动态的发现服务提供方地址成为 RPC 通信的前置条件。Dubbo 提供了自动的地址发现机制，用于应对分布式场景下机器实例动态迁移的问题。如下图所示，通过引入注册中心来协调提供方与消费方的地址，提供者启动之后向注册中心注册自身地址，消费方通过拉取或订阅注册中心特定节点，动态的感知提供方地址列表的变化。
 
 ![arch-service-discovery](/imgs/architecture.png)
 
@@ -57,7 +57,7 @@ Dubbo 首先是一款 RPC 框架，它定义了自己的 RPC 通信协议与编�
 * 提供端响应流（Response Streaming）
 * 双向流式通信（Bidirectional Streaming）
 
-具体可参见各语言 SKDK 实现的可选协议列表 或 [Triple协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
+具体可参见各语言 SDK 实现的可选协议列表 或 [Triple协议](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
 
 #### 自动服务（地址）发现
 Dubbo 的服务发现机制，让微服务组件之间可以独立演进并任意部署，消费端可以在无需感知对端部署位置与 IP 地址的情况下完成通信。Dubbo 提供的是 Client-Based 的服务发现机制，使用者可以有多种方式启用服务发现：
@@ -102,6 +102,6 @@ Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一�
 
 ![dubbo-proxyless](/imgs/v3/mesh/dubbo-proxyless.png)
 
-可以设想，在不同的组织、不同的发展阶段，未来以 Dubbo 构建的微服务将会允许有三种部署架构：传统 SDK、基于 Sidecar 的 Service Mesh、脱离 Sidecar 的 Proxyless Mesh。基于 Sidecar 的 Service Mesh，即经典的 Mesh 架构，独立的 sidecar 运行时接管所有的流量，脱离 Sidecar 的 Proxyless Mesh，富 SDK 直接通过 xDS 与控制面通信。Dubbo 微服务允许部署在物理机、容器、Kubernetes 平台之上，能做到以 Admin 为控制面，以统一的流量治理规则进行治理。
+可以设想，在不同的组织、不同的发展阶段，未来以 Dubbo 构建的微服务将会允许有三种部署架构：传统 SDK、基于 Sidecar 的 Service Mesh、脱离 Sidecar 的 Proxyless Mesh。基于 Sidecar 的 Service Mesh，即经典的 Mesh 架构，独立的 sidecar 运行时接管所有的流量，脱离 Sidecar 的 Proxyless Mesh，副 SDK 直接通过 xDS 与控制面通信。Dubbo 微服务允许部署在物理机、容器、Kubernetes 平台之上，能做到以 Admin 为控制面，以统一的流量治理规则进行治理。
 
 

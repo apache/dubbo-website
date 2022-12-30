@@ -38,13 +38,13 @@ public final class Duplicate {
                 URL url = urls.nextElement();  
                 if (url != null) {  
                     String file = url.getFile();  
-                    if (file != null &amp;&amp; file.length() &gt; 0) {  
+                    if (file != null && file.length() > 0) {  
                         files.add(file);  
                     }  
                 }  
             }  
             // 如果有多个，就表示重复  
-            if (files.size() &gt; 1) {  
+            if (files.size() > 1) {  
                 logger.error("Duplicate class " + path + " in " + files.size() + " jar " + files);  
             }  
         } catch (Throwable e) { // 防御性容错  

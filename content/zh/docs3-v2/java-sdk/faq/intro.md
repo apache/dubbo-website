@@ -1,4 +1,3 @@
-
 ---
 type: docs
 title: "错误码机制的介绍"
@@ -34,7 +33,7 @@ void warn(String code, String cause, String extendedInformation, String msg);
 void warn(String code, String cause, String extendedInformation, String msg, Throwable e);
 ```
 
-其中 code 指错误码，cause 指可能的原因（即 caused by...），extendedInformation 作为补充信息。
+其中 code 指错误码，cause 指可能的原因（即 caused by... 后面所接的文字），extendedInformation 作为补充信息，直接附加在 caused by 这句话的后面。
 
 对于 error 级别也做了相同的扩展。
 

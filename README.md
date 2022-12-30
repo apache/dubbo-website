@@ -16,6 +16,12 @@ This project contains the hugo project, markdown files, and theme configurations
 
 ## Environment setup
 
+You can directly start working on this repository even from your browser by just clicking on the following button
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/apache/dubbo-website)
+
+Or, you can follow the manual steps given below.
+
 1. Ensure pre-requisites are installed
 2. Clone this repository
 ```sh

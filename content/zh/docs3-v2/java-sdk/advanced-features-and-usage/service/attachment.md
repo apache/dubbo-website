@@ -30,12 +30,7 @@ Dubbo 中的 RpcContext 是一个 ThreadLocal 的临时状态记录器，当接�
 在服务端处理结束之后，Method Response 结果会连同 RpcServiceContext 一起生成 Result 对象。
 服务端的 Result 结果对象经过序列化后通过网络传输发送回消费端，消费端解析 Result 生成 Method Response 结果和 RpcServiceContext，返回真实调用结果和上下文给消费端。
 
-#### 注意：
-path, group, version, dubbo, token, timeout 几个 key 是保留字段，请使用其它值。
-
-#### 隐式参数配置：
-- 服务消费方
-- 服务提供方
+> path, group, version, dubbo, token, timeout 几个 key 是保留字段，请使用其它值。
 
 ## 使用场景
 
@@ -43,11 +38,9 @@ path, group, version, dubbo, token, timeout 几个 key 是保留字段，请使�
 
 ## 使用方式
 
-#### 注意：
+> `setAttachment` 设置的 KV 对，在完成下面一次远程调用会被清空，即多次远程调用要多次设置。
 
-`setAttachment` 设置的 KV 对，在完成下面一次远程调用会被清空，即多次远程调用要多次设置。
-
-#### 在服务消费方端设置隐式参数
+### 在服务消费方端设置隐式参数
 
 ```java
 RpcContext.getClientAttachment().setAttachment("index", "1"); // 隐式传参，后面的远程调用都会隐式将这些参数发送到服务器端，类似cookie，用于框架集成，不建议常规业务使用
@@ -55,7 +48,7 @@ xxxService.xxx(); // 远程调用
 // ...
 ```
 
-#### 在服务提供方端获取隐式参数
+### 在服务提供方端获取隐式参数
 
 ```java
 public class XxxServiceImpl implements XxxService {
@@ -67,7 +60,7 @@ public class XxxServiceImpl implements XxxService {
 }
 ```
 
-#### 在服务提供方写入回传参数
+### 在服务提供方写入回传参数
 
 ```java
 public class XxxServiceImpl implements XxxService {
@@ -79,7 +72,7 @@ public class XxxServiceImpl implements XxxService {
 }
 ```
 
-#### 在消费端获取回传参数
+### 在消费端获取回传参数
 
 ```java
 xxxService.xxx(); // 远程调用

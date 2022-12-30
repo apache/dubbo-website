@@ -14,7 +14,7 @@ description: "Dubbo 消费端线程池模型用法"
 
 改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。
 
-#### 老的线程池模型
+## 老的线程池模型
 
 ![消费端线程池.png](/imgs/user/consumer-threadpool0.png)
 
@@ -27,7 +27,7 @@ description: "Dubbo 消费端线程池模型用法"
 
 
 
-**2.7.5 版本引入的线程池模型**
+## 2.7.5 版本引入的线程池模型
 
 ![消费端线程池新.png](/imgs/user/consumer-threadpool1.png)
 

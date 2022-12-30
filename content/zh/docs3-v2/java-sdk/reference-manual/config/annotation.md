@@ -6,15 +6,15 @@ weight: 3
 description: "以 Annotation、Spring Boot 开发 Dubbo 应用"
 ---
 
-本文以 Spring Boot + Annotation 模式描述 Dubbo 应用开发，在此查看无 Spring Boot 的 Spring 注解开发模式 [完整示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-annotation)
+本文以 Spring Boot + Annotation 模式描述 Dubbo 应用开发，在此查看无 Spring Boot 的 Spring 注解开发模式 [完整示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
 
 在 Dubbo Spring Boot 开发中，你只需要增加几个注解，并配置 `application.properties` 或 `application.yml` 文件即可完成 Dubbo 服务定义：
 * 注解有 `@DubboService`、`@DubboReference` 与 `EnableDubbo`。其中 `@DubboService` 与 `@DubboReference` 用于标记 Dubbo 服务，`EnableDubbo` 启动 Dubbo 相关配置并指定 Spring Boot 扫描包路径。
 * 配置文件 `application.properties` 或 `application.yml`
 
-以下内容的完整示例请参考 [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-spring-boot)
+以下内容的完整示例请参考 [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot)
 
-### 增加 Maven 依赖
+## 增加 Maven 依赖
 
 使用 Dubbo Spring Boot Starter 首先引入以下 Maven 依赖
 ```xml
@@ -79,11 +79,9 @@ description: "以 Annotation、Spring Boot 开发 Dubbo 应用"
         </dependency>
     </dependencies>
 ```
+> 区分上面的 **与**
 
-#### 注意：
-区分上面的 **与**
-
-### application.yml 或 application.properties
+## application.yml 或 application.properties
 
 除 service、reference 之外的组件都可以在 application.yml 文件中设置，如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
 
@@ -124,12 +122,7 @@ public class ProviderConfiguration {
 }
 ```
 ## 注解
-- @DubboService 注解
-- @DubboReference 注解
-- @EnableDubbo 注解
-- 扩展注解
-
-#### @DubboService 注解
+### @DubboService 注解
 
 > `@Service` 注解从 3.0 版本开始就已经废弃，改用 `@DubboService`，以区别于 Spring 的 `@Service` 注解
 
@@ -146,7 +139,7 @@ public class DemoServiceImpl implements DemoService {}
 public class DemoServiceImpl implements DemoService {}
 ```
 
-#### @DubboReference 注解
+### @DubboReference 注解
 
 > `@Reference` 注解从 3.0 版本开始就已经废弃，改用 `@DubboReference`，以区别于 Spring 的 `@Reference` 注解
 
@@ -160,7 +153,7 @@ public class DemoClient {
 
 `@DubboReference` 注解将自动注入为 Dubbo 服务代理实例，使用 demoService 即可发起远程服务调用
 
-#### @EnableDubbo 注解
+### @EnableDubbo 注解
 `@EnableDubbo` 注解必须配置，否则将无法加载 Dubbo 注解定义的服务，`@EnableDubbo` 可以定义在主类上
 
 ```java
@@ -175,7 +168,7 @@ public class ProviderApplication {
 
 Spring Boot 注解默认只会扫描 main 类所在的 package，如果服务定义在其它 package 中，需要增加配置 `EnableDubbo(scanBasePackages = {"org.apache.dubbo.springboot.demo.provider"})`
 
-#### 扩展注解配置
+### 扩展注解配置
 虽然可以通过 `@DubboService` 和 `DubboReference` 调整配置参数（如下代码片段所示），但总体来说注解提供的配置项还是非常有限。在这种情况下，如果有更复杂的参数设置需求，可以使用 `Java Config` 或 `dubbo.properties` 两种方式。
 
 ```java
@@ -183,7 +176,7 @@ Spring Boot 注解默认只会扫描 main 类所在的 package，如果服务定
 @DubboReference(version = "1.0.0", group = "dev", timeout = 5000)
 ```
 
-#### 使用 Java Config 代替注解
+### 使用 Java Config 代替注解
 
 注意，Java Config 是 `DubboService` 或 `DubboReference` 的替代方式，对于有复杂配置需求的服务建议使用这种方式。
 
@@ -204,7 +197,7 @@ public class ProviderConfiguration {
 }
 ```
 
-#### 通过 dubbo.properties 补充配置
+### 通过 dubbo.properties 补充配置
 对于使用 `DubboService` 或 `DubboReference` 的场景，可以使用 dubbo.properties 作为配置补充，[具体格式](../principle/#1-配置格式)这里有更详细解释。
 
 ```properties
@@ -212,7 +205,5 @@ dubbo.service.org.apache.dubbo.springboot.demo.DemoService.timeout=5000
 dubbo.service.org.apache.dubbo.springboot.demo.DemoService.parameters=[{myKey:myValue},{anotherKey:anotherValue}]
 dubbo.reference.org.apache.dubbo.springboot.demo.DemoService.timeout=6000
 ```
-#### 提示：
-properties 格式配置目前结构性不太强，比如体现在 key 字段冗余较多，后续会考虑提供对于 yaml 格式的支持。
 
-
+> properties 格式配置目前结构性不太强，比如体现在 key 字段冗余较多，后续会考虑提供对于 yaml 格式的支持。

@@ -18,7 +18,7 @@ description: "Nacos 配置中心的基本使用和工作原理。"
 
 如果未启用 Nacos 注册中心，则请参考 [为注册中心增加 Nacos 依赖](../../registry/nacos/#21-增加依赖)。
 
-### 2.2 启用 Zookeeper 配置中心
+### 2.2 启用 Nacos 配置中心
 ```xml
 <dubbo:config-center address="nacos://127.0.0.1:8848"/>
 ```

@@ -19,8 +19,7 @@ weight: 7
 适用于 SOA 标准 RPC 框架。
 
 ## 使用方式
-
-#### 依赖
+### 依赖
 
 从 Dubbo 3 开始，Thrift 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
@@ -40,14 +39,14 @@ weight: 7
 </dependency>
 ```
 
-所有服务共用一个端口：
+### 所有服务共用一个端口
 
-与原生Thrift不兼容
+与原生 Thrift 不兼容
 ```xml
 <dubbo:protocol name="thrift" port="3030" />
 ```
 
  [dubbo 项目中的示例代码](https://github.com/apache/dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol/thrift)
 
-#### 提示：
-* Thrift 不支持 null 值，即：不能在协议中传递 null 值
+
+> Thrift 不支持 null 值，即：不能在协议中传递 null 值

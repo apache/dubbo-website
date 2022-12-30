@@ -9,7 +9,7 @@ weight: 5
 
 ## 什么是 Pinpoint 
 
-> 摘自 [Pinpoint 学习笔记](https://skyao.gitbooks.io/learning-pinpoint/)
+> 摘自 [Pinpoint 学习笔记](https://skyao.gitbooks.io/learning-pinpoint/content/index.html)
 
 [Pinpoint](https://github.com/naver/pinpoint) 是一个开源的 APM (Application Performance Management/应用性能管理)工具，用于基于java的大规模分布式系统。
 
