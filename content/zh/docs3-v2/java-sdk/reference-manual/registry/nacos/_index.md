@@ -12,7 +12,7 @@ description: "Nacos 注册中心的基本使用和工作原理。"
 >当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。
 
 ## 2 使用说明
-在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-nacos/dubbo-samples-nacos-registry/)
+在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-nacos/dubbo-samples-nacos-registry)
 
 ### 2.1 增加依赖
 ```xml

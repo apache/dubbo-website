@@ -13,13 +13,6 @@ Dubbo3 服务容器只是一个简单的 Main 方法，并加载一个简单的 
 
 服务容器的加载内容可以扩展，内置了 spring, jetty, log4j 等加载，可通过 [容器扩展点](../../../reference-manual/spi/description/container) 进行扩展。配置配在 java 命令的 -D 参数或者 `dubbo.properties` 中。
 
-#### Dubbo 3 自定义容器类型：
-
--  Spring Container
--  Jetty Container
--  Log4j Container
- 
-
 ## 使用场景
 web 容器主要是用来响应 http 请求以及静态页面的，Dubbo 服务提供方只是对外提供 dubbo 服务，用 web 容器不太适合，单独作为 dubbo 服务提供方，只需要通过一个 main 方法加载一个简单的 spring 容器将服务暴露。
 
@@ -28,7 +21,7 @@ web 容器主要是用来响应 http 请求以及静态页面的，Dubbo 服务�
 -   自动加载  `META-INF/spring`  目录下的所有 Spring 配置。
 
 -   配置 spring 配置加载位置：
-    
+
     ```fallback
     dubbo.spring.config=classpath*:META-INF/spring/*.xml
 ### Jetty Container

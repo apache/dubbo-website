@@ -29,7 +29,7 @@ description: "在 dubbo3 中进行参数校验"
 
 ## 参考用例
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-validation)
 
 ## 使用方式
 

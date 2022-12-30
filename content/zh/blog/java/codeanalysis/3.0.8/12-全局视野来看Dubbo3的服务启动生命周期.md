@@ -234,7 +234,7 @@ ModuleDeployer的start()方法代码：
         }
 
         try {
-        	//启动重或者已经启动了则直接返回一个Future对象 
+        	//启动中或者已经启动了则直接返回一个Future对象 
             if (isStarting() || isStarted()) {
                 return startFuture;
             }

@@ -7,7 +7,7 @@ description: "目标地址规则"
 ---
 
 
-#### DestinationRule
+### DestinationRule
 `DestinationRule`用来处理目标地址的规则，与`DestinationRule`相关的`ServiceEntry`, `WorkloadEntry`等定义与开源保持一致
 + 使用示例
 
@@ -30,7 +30,7 @@ spec:
 | trafficPolicy | TrafficPolicy | 流量策略 | NO |
 | subsets | Subset[] | 服务的单一版本或多版本的命名 | YES |
 
-#### Subset
+### Subset
 `Subset`应用服务的命名，可以是单个也可以是多个版本
 + 使用示例
 
@@ -51,7 +51,7 @@ spec:
 | name | string | 服务版本名称 | YES |
 | labels | map<string, string> | 打在服务身上的标签 | YES |
 
-#### TrafficPolicy
+### TrafficPolicy
 `TrafficPolicy`表示负载均衡策略
 + 使用示例
 
@@ -70,7 +70,7 @@ spec:
 | --- | --- | --- | --- |
 | loadBalancer | LoadBalancerSettings | 负载均衡设置 | YES |
 
-#### LoadBalancerSettings
+### LoadBalancerSettings
 `LoadBalancerSettings`用来表示负载均衡相关的配置
 + 使用示例
 

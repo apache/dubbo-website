@@ -9,7 +9,7 @@ description: ""
 Proxyless 模式是指 Dubbo 直接与 Istiod 通信，通过 xDS 协议实现服务发现和服务治理等能力。
 本示例中将通过一个简单的示例来演示如何使用 Proxyless 模式。
 
-[示例地址](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-xds)
+[示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds)
 
 ## 代码架构
 
@@ -62,8 +62,6 @@ public class GreetingServiceConsumer {
 我们建议将 `protocol` 配置为 tri 协议（全面兼容 grpc 协议），以获得在 istio 体系下更好的体验。
 
 为了使 Kubernetes 感知到应用的状态，需要配置 `qosAcceptForeignIp` 参数，以便 Kubernetes 可以获得正确的应用状态，[对齐生命周期](/zh/docs3-v2/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/)。
-
-```yaml
 
 ```properties
 dubbo.application.name=dubbo-samples-xds-provider
@@ -131,14 +129,24 @@ mvn clean package -DskipTests
 ```bash
 cd ./dubbo-samples-xds-provider/
 # dubbo-samples-xds/dubbo-samples-xds-provider/Dockerfile
-docker build -t dubboteam/dubbo-samples-xds-provider:1.0.0 .
+docker build -t apache/dubbo-demo:dubbo-samples-xds-provider_0.0.1 .
 cd ../dubbo-samples-xds-consumer/
 # dubbo-samples-xds/dubbo-samples-xds-consumer/Dockerfile
-docker build -t dubboteam/dubbo-samples-xds-consumer:1.0.0 .
+docker build -t apache/dubbo-demo:dubbo-samples-xds-consumer_0.0.1 .
 cd ../
 ```
 
-### Step 5: 部署容器
+### Step 5: 创建namespace
+
+```bash
+# 初始化命名空间
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-xds/deploy/Namespace.yml
+
+# 切换命名空间
+kubens dubbo-demo
+```
+
+### Step 6: 部署容器
 
 ```bash
 cd ./dubbo-samples-xds-provider/src/main/resources/k8s
@@ -251,3 +259,12 @@ dubbo.application.qosAcceptForeignIp=true
 7. 不需要开启注入
 
 Proxyless 模式下 pod 不需要再开启 envoy 注入，请确认 namespace 中没有 `istio-injection=enabled` 的标签。
+
+8. 明文连接istiod
+
+Proxyless 模式下默认通过ssl方式连接istiod，同时也支持通过明文的方式连接istiod。
+
+明文连接参考配置：
+```properties
+dubbo.registry.secure=plaintext
+```

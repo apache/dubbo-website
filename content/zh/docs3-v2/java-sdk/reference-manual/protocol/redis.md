@@ -18,7 +18,7 @@ weight: 9
 
 ## 使用方式
 
-#### 引入依赖
+### 引入依赖
 
 从 Dubbo 3 开始，Redis 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh/release/dubbo-spi-extensions/#dubbo-rpc)。
 ```xml
@@ -30,14 +30,14 @@ weight: 9
 ```
 
 
-#### 注册 redis 服务的地址
+### 注册 redis 服务的地址
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
 Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.153.10:2181"));
 registry.register(URL.valueOf("redis://10.20.153.11/com.foo.BarService?category=providers&dynamic=false&application=foo&group=member&loadbalance=consistenthash"));
 ```
 
-#### 在客户端引用
+### 在客户端引用
 不需要感知 Redis 的地址
 
 在客户端使用：

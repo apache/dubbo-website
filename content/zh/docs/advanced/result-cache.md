@@ -36,6 +36,6 @@ description: "通过缓存结果加速访问速度"
 {{% alert title="提示" color="primary" %}}
 `2.1.0` 以上版本支持。 
 
-[示例代码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-cache)
+[示例代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
 {{% /alert %}}
 

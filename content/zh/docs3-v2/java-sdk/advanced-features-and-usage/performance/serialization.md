@@ -57,7 +57,26 @@ dubbo RPC主要用于两个dubbo系统之间作远程调用，特别适合高并
 
 ## 启用Kryo和FST
 
-使用Kryo和FST非常简单，只需要在dubbo RPC的XML配置中添加一个属性即可：
+使用Kryo和FST非常简单，只需要先增加对应的依赖：
+更多插件： [Dubbo SPI Extensions](https://dubbo.apache.org/zh/release/dubbo-spi-extensions)
+
+```xml
+<dependency>
+   <groupId>org.apache.dubbo.extensions</groupId>
+   <artifactId>dubbo-serialization-kryo</artifactId>
+   <version>1.0.0</version>
+</dependency>
+```
+
+```xml
+<dependency>
+   <groupId>org.apache.dubbo.extensions</groupId>
+   <artifactId>dubbo-serialization-fst</artifactId>
+   <version>1.0.0</version>
+</dependency>
+```
+
+然后在dubbo RPC的XML配置中添加一个属性即可：
 
 ```xml
 <dubbo:protocol name="dubbo" serialization="kryo"/>

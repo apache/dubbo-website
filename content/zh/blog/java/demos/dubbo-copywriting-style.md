@@ -204,15 +204,15 @@ Microsoft 有个 [`-ms-text-autospace`](http://msdn.microsoft.com/en-us/library/
 
 用法：
 
-> 请 [提交一个 issue](https://www.cnkirito.moe/chinese-copywriting-guidelines/#) 并分配给相关同事。
+> 请 [提交一个 issue](https://github.com/mzlogin/chinese-copywriting-guidelines) 并分配给相关同事。
 
-> 访问我们网站的最新动态，请 [点击这里](https://www.cnkirito.moe/chinese-copywriting-guidelines/#) 进行订阅！
+> 访问我们网站的最新动态，请 [点击这里](https://github.com/mzlogin/chinese-copywriting-guidelines) 进行订阅！
 
 对比用法：
 
-> 请[提交一个 issue](https://www.cnkirito.moe/chinese-copywriting-guidelines/#) 并分配给相关同事。
+> 请[提交一个 issue](https://github.com/mzlogin/chinese-copywriting-guidelines) 并分配给相关同事。
 
-> 访问我们网站的最新动态，请[点击这里](https://www.cnkirito.moe/chinese-copywriting-guidelines/#)进行订阅！
+> 访问我们网站的最新动态，请[点击这里](https://github.com/mzlogin/chinese-copywriting-guidelines)进行订阅！
 
 ### 简体中文使用直角引号
 
