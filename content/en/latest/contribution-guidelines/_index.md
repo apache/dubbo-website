@@ -4,9 +4,6 @@ type: docs
 title: "Dubbo Contribution Guidelines"
 linkTitle: "Contribution"
 description: "Dubbo Contribution Guidelines"
-menu:
-  main:
-    weight: 50
 ---
 
 
