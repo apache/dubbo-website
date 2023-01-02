@@ -204,5 +204,5 @@ go run cmd/client.go
 ```
 ## 3. 更多
 
-可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考samples [【dubbo-go-samples】](../../samples/samples_repo/)
+可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考[注册中心](/zh/docs3-v2/golang-sdk/tutorial/develop/registry/)
 

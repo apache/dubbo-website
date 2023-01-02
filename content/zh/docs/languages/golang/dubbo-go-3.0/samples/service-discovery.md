@@ -5,7 +5,7 @@ linkTitle: 应用级服务发现
 description: Dubbo-go 3.0 应用级服务发现
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/samples/service-discovery/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/tutorial/develop/registry/service-discovery/)。
 {{% /pageinfo %}}
 
 # Dubbo-go 3.0 应用级服务发现
@@ -60,5 +60,3 @@ dubbo:
 ```
 
 相比于常规配置，定义好registry-type: service, 并且定义好元数据中心后，将会使用应用级服务注册/服务发现。
-
-下一章: [【路由规则】](../mesh_router/)

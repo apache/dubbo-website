@@ -1,5 +1,5 @@
 ---
 type: docs
 title: "注册中心"
-weight: 1
+weight: 2
 ---
