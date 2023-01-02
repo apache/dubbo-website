@@ -117,5 +117,3 @@ Get the result of the call successfully
 ## 3. more
 
 Careful readers can find that the server written in the above example can accept ordinary RPC and streaming RPC call requests from the client. At present, only the Client for common calls has been written. Readers can try to write streaming clients and servers based on the examples in the samples library.
-
-For more samples, please refer to [[dubbo-go-samples]](../../samples/samples_repo/)

@@ -112,5 +112,3 @@ func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result,
 
 
 
-下一章: [【注册中心配置】](../registry/)
-

@@ -151,5 +151,3 @@ GenericService 的 Invoke 方法接收四个参数，分别是：
 注意：在目前版本中，无参调用会出现崩溃问题。
 
 相关阅读：[【Dubbo-go 服务代理模型】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
-
-相关任务[【泛化调用】](../../../tasks/rpc/generic/)

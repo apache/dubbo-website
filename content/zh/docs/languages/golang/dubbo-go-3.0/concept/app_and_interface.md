@@ -6,7 +6,7 @@ linkTitle: 服务层级
 description: Dubbo-go 的应用和接口
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/concept/more/app_and_interface/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/preface/design/app_and_interface/)。
 {{% /pageinfo %}}
 
 # Dubbo-go 服务层级
@@ -67,5 +67,3 @@ Dubbo-go 服务层级为两个级别：分别是应用级别(App Level)和接口
 ## 3. 说明
 
 暴露的服务是接口级别的，一个用户定义的 Provider Struct/一个用户定义的Consumer Struct，对应一个Service/Reference 模块，一个应用可以同时存在Consumer 模块和 Provider 模块，因此可以同时存在多个Service/Reference 模块。
-
-下一章：[【网络协议】](../protocol/)

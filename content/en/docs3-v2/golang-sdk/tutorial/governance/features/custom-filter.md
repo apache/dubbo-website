@@ -111,5 +111,3 @@ return result
 ```
 
 
-
-Next chapter: [[Registry Configuration]](../registry/)

@@ -9,7 +9,7 @@ Refer to samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-sa
 ## 1. Preparations
 
 - dubbo-go cli tools and dependent tools have been installed
-- Read [[Component Loading and Extensibility]](../../../concept/service_management/aop_and_extension/)
+- Read [[Component Loading and Extensibility]](/en/docs3-v2/golang-sdk/preface/design/aop_and_extension/)
 - Create a new demo application
 
 ## 2. Configure the specified Filter

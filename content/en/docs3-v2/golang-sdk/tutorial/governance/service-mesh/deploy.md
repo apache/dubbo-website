@@ -10,7 +10,7 @@ In this chapter, we will use the application template to quickly create a set of
 
 - The dubbo-go cli tool and dependent tools have been installed, grpc_cli (for local debugging).
 - The docker, helm, and kubectl environments have been installed. (arm machines need to support docker buildx)
-- [Task [istio environment deployment]](../build/) completed
+- [Task [istio environment deployment]](../istio/) completed
 
 ## 2. Develop server-side Dubbo-go application
 
@@ -237,7 +237,7 @@ Forwarding from 127.0.0.1:20000 -> 20000
 Forwarding from [::1]:20000 -> 20000
 ```
 
-Use grpc_cli to debug applications in the cluster, refer to the task [[Use grpc_cli to debug Dubbo-go applications]](../../debug/grpc_cli/)
+Use grpc_cli to debug applications in the cluster, refer to the task [[Use grpc_cli to debug Dubbo-go applications]](/en/docs3-v2/golang-sdk/tutorial/debugging/grpc_cli/)
 
 ```bash
 $ grpc_cli ls localhost:20000 -l

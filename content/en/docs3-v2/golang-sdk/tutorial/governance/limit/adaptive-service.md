@@ -24,5 +24,3 @@ In Dubbo-go version 3.0, service flexible load balancing is supported. In the mi
 
 Service flexibility will continue to be optimized in subsequent iterations, seeking to explore best practices with the Dubbo community.
 
-
-Next chapter: [[Use Pixiu to expose Dubbo-go services]](../pixiu-nacos-triple/)

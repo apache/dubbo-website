@@ -4,7 +4,7 @@ type: docs
 weight: 3
 ---
 
-In this section, we will continue the previous task [[Deploy Dubbo-go application in Istio environment]](../app/).
+In this section, we will continue the previous task [[Deploy Dubbo-go application in Istio environment]](../deploy/).
 
 In the previous task, we deployed a set of Dubbo-go Server and Client applications in the cluster, and verified the success of service discovery and invocation. In this section, we will create a new version of the server-side application. By configuring VirtualService and DestinationRule, routing management and traffic transfer capabilities are realized
 
@@ -12,7 +12,7 @@ In the previous task, we deployed a set of Dubbo-go Server and Client applicatio
 
 - The dubbo-go cli tool and dependent tools have been installed, grpc_cli (for local debugging).
 - The docker, helm, and kubectl environments have been installed. (arm machines need to support docker buildx)
-- Task [[Deploy Dubbo-go application in Istio environment]](../app/) completed
+- Task [[Deploy Dubbo-go application in Istio environment]](../deploy/) completed
 
 ## 2. Develop multi-version Dubbo-go applications.
 

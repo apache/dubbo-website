@@ -28,10 +28,7 @@ When the framework is loaded, any form of configuration will be parsed into Root
 
 Developers can start the framework by building configurations in the form of an API. This method is more suitable for the situation where dubbo-go is introduced as a third-party component.
 
-For details, see task[[Configuration API]](../../../tasks/config/config_api/)
 
 ## 3. Configuration Center
 
 Developers can place configurations in the configuration center to facilitate configuration management and modification.
-
-See task [[Remote Configuration]](../../../tasks/config/remote_config/) for details

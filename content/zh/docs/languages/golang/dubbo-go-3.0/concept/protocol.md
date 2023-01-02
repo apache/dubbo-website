@@ -6,7 +6,7 @@ linkTitle: 网络协议
 description: Dubbo-go 的网络协议
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/concept/rpc/protocol/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/preface/concept/protocol/)。
 {{% /pageinfo %}}
 
 # 网络协议
@@ -108,5 +108,3 @@ dubbo:
         interface: com.apache.dubbo.sample.basic.IGreeter
 ```
 
-
-下一章：[【注册中心】](../registry/)

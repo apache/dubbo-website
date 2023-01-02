@@ -204,4 +204,4 @@ go run cmd/client.go
 ```
 ## 3. more
 
-It can be found that we use nacos for the registration center. Of course, we can also use other registration centers. For more usage methods, you can refer to samples [[dubbo-go-samples]](../../samples/samples_repo/)
+It can be found that we use nacos for the registration center. Of course, we can also use other registration centers. For more usage methods, you can refer to [Registry](/en/docs3-v2/golang-sdk/tutorial/develop/registry/)

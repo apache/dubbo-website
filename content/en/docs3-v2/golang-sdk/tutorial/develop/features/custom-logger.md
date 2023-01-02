@@ -83,5 +83,3 @@ logger.SetLogger(myLogger) // Set a custom logger in the main function
 ```
 
 - The log API cannot be used in the Init phase, otherwise unexpected problems may occur.
-
-Next chapter: [[Metrics data reporting]](../metrics/)

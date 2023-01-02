@@ -8,7 +8,6 @@ weight: 10
 
 - dubbo-go cli tools and dependent tools have been installed
 - Create a new demo application
-- Refer to the task [[Modify the protocol used]](../../rpc/choose_protocol/) to modify the application to use the dubbo protocol to expose
 
 ## 2. Use grpc_cli tool to debug Dubbo service
 

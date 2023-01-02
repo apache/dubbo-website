@@ -8,7 +8,6 @@ weight: 10
 
 - dubbo-go cli 工具和依赖工具已安装
 - 创建一个新的 demo 应用
-- 参考任务[【修改使用的协议】](../../rpc/choose_protocol/)将应用使用修改为使用 dubbo 协议暴露
 
 ## 2. 使用 grpc_cli 工具进行 Dubbo 服务调试
 

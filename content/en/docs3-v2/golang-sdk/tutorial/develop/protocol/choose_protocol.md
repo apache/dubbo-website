@@ -229,5 +229,3 @@ response result: &{ID:1 Name:laurence Age:22 Time:2021-11-12 17:59:39.185 +0800 
 ```
 
 successful call
-
-For more samples, please refer to [[dubbo-go-samples]](../../../samples/samples_repo/)

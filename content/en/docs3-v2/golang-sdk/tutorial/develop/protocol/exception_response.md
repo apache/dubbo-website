@@ -113,5 +113,3 @@ dubbo.apache.org/dubbo-go/v3/common/proxy/proxy_factory.(*ProxyInvoker).Invoke
 ```
 
 You can see the error message and stack
-
-Next chapter: [[Log]](../custom-logger/)

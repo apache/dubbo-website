@@ -73,9 +73,9 @@ Dubbo-go 拥有路由能力，通过 xds 协议客户端从 istiod 订阅路由�
 
 #### 云原生脚手架
 
-dubbogo-cli 是 Apach/dubbo-go 生态的子项目，为开发者提供便利的应用模板创建、工具安装、接口调试等功能，以提高用户的研发效率。
+dubbogo-cli 是 Apache/dubbo-go 生态的子项目，为开发者提供便利的应用模板创建、工具安装、接口调试等功能，以提高用户的研发效率。
 
-详情可以参阅 [【dubbogo-cli 工具】](../../../refer/use_dubbogo_cli/)
+详情可以参阅 [【dubbogo-cli 工具】](/zh/docs3-v2/golang-sdk/refer/use_dubbogo_cli/)
 
 ## 3. Dubbo-go-Mesh 的优势
 
@@ -105,7 +105,3 @@ Dubbo-go 是一个横跨多个生态的服务框架。
   - 多语言优势，可以实现 go-java 应用互通。
   - 兼容 pixiu 网关，方便地进行服务的暴露和协议转换。
   - 使用 Dubbo-go 生态组件。
-
-## 4. 任务
-
-您可以跟随[【Dubbo-go Mesh 任务】](../../../tasks/mesh/build/)来体验 Dubbo-go 服务网格能力。

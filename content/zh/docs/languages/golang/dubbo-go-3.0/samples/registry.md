@@ -6,7 +6,7 @@ linkTitle: 注册中心
 description: Dubbo-go 3.0 注册中心
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/samples/registry/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/tutorial/develop/registry/)。
 {{% /pageinfo %}}
 
 # Dubbo-go 3.0 注册中心配置
@@ -115,5 +115,5 @@ dubbo:
         interface: com.apache.dubbo.sample.basic.IGreeter
 ```
 
-下一章: [【Triple 协议异常回传】](../exception_response/)
+
 

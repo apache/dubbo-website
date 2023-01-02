@@ -151,5 +151,3 @@ The Invoke method of GenericService receives four parameters, which are:
 Note: In the current version, there will be a crash problem when calling without parameters.
 
 Related reading: [[Dubbo-go service proxy model]](https://blog.csdn.net/weixin_39860915/article/details/122738548)
-
-Related tasks [[generalization call]](../../../tasks/rpc/generic/)

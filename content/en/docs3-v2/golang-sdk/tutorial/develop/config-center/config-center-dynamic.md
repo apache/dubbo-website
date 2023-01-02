@@ -138,7 +138,7 @@ func (l listener) Process(event *config_center. ConfigChangeEvent) {
 
 ```
 
-Of course, when starting the framework in the form of API, you can start the framework directly in the form of API. Refer to [Dubbogo framework configuration](../../concept/config/) of the basic concept module
+Of course, when starting the framework in the form of API, you can start the framework directly in the form of API. 
 
 ## 4. Dubbogo configuration hot update
 
@@ -146,6 +146,3 @@ Of course, when starting the framework in the form of API, you can start the fra
 
 under development
 
-
-
-Next chapter: [[Filter]](../custom-filter/)

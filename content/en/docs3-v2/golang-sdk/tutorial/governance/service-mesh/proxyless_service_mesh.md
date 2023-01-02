@@ -75,7 +75,7 @@ Dubbo-go has routing capabilities, subscribes to routing configuration from isti
 
 dubbogo-cli is a sub-project of the Apache/dubbo-go ecosystem, which provides developers with convenient functions such as application template creation, tool installation, and interface debugging to improve user R&D efficiency.
 
-For details, please refer to [[dubbogo-cli tool]](../../../refer/use_dubbogo_cli/)
+For details, please refer to [[dubbogo-cli tool]](/en/docs3-v2/golang-sdk/refer/use_dubbogo_cli/)
 
 ## 3. Advantages of Dubbo-go-Mesh
 
@@ -105,7 +105,3 @@ Dubbo-go is a service framework that spans multiple ecosystems.
   - Multilingual advantage, can realize go-java application intercommunication.
   - Compatible with pixiu gateway, convenient for service exposure and protocol conversion.
   - Use Dubbo-go ecological components.
-
-## 4. Tasks
-
-You can follow [[Dubbo-go Mesh task]](../../../tasks/mesh/build/) to experience the Dubbo-go service mesh capabilities.

@@ -97,7 +97,6 @@ _ "dubbo.apache.org/dubbo-go/v3/imports"
 
 On the basis of the above introduction, developers can follow the example of built-in modules and write custom extension components.
 
-You can refer to the task [[Custom Service Invocation Middleware]](../../../tasks/service_management/aop/), this example takes the Filter interface as an example, based on the idea of aspect-oriented programming, it is provided for users to intervene The ability to invoke links for filtering.
 
 ## 4. Aspect-Oriented Programming Design (AOP)
 
