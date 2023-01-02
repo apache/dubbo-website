@@ -51,7 +51,7 @@ Dubbo3 integrates a large amount of service management experience of Alibaba HSF
 
 ### For millions of cluster instances, horizontal scalability
 
-With the accumulation of practical experience in microservices, microservices are split into finer grains and deployed to more and more machine instances to support the growing business scale. Among many Dubbo2 enterprise users, especially large-scale enterprises represented by finance, insurance and the Internet, they began to encounter cluster capacity bottlenecks (for typical cases, please refer to [Industrial and Commercial Bank of China Practice Cases](/en/users/icbc/)):
+With the accumulation of practical experience in microservices, microservices are split into finer grains and deployed to more and more machine instances to support the growing business scale. Among many Dubbo2 enterprise users, especially large-scale enterprises represented by finance, insurance and the Internet, they began to encounter cluster capacity bottlenecks (for typical cases, please refer to [Industrial and Commercial Bank of China Practice Cases](/zh/users/icbc/)):
 * **Service discovery process**
   * The data storage scale of the registration center reaches the capacity bottleneck
   * Data registration & push efficiency is seriously reduced

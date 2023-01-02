@@ -1,47 +1,47 @@
 ---
 type: docs
-title: "Streaming 通信"
-linkTitle: "Streaming 通信"
+title: "Streaming Communication"
+linkTitle: "Streaming communication"
 weight: 10
 ---
-## 流的实现原理
+## Implementation principle of stream
 
-`Triple`协议的流模式
+Stream mode for the `Triple` protocol
 
-- 从协议层来说，`Triple` 是建立在 `HTTP2` 基础上的，所以直接拥有所有 `HTTP2` 的能力，故拥有了分 `stream` 和全双工的能力。
+- From the perspective of the protocol layer, `Triple` is built on the basis of `HTTP2`, so it directly has all the capabilities of `HTTP2`, so it has the ability to split `stream` and full-duplex.
 
-- 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
+- In terms of the framework layer, `StreamObserver` is provided to users as a stream interface to provide stream processing for input and output parameters. The framework makes corresponding interface calls when sending and receiving stream data, so as to ensure the integrity of the life cycle of the stream.
 
-## 开启 Triple 新特性 
-### Stream 流
-Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
+## Enable new features of Triple
+### Stream stream
+Stream is a new call type provided by Dubbo3. It is recommended to use stream in the following scenarios:
 
-- 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
-- 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的
-- 推送类场景，多个消息在同一个调用的上下文中被发送和处理
+- The interface needs to send a large amount of data. These data cannot be placed in an RPC request or response, and need to be sent in batches. However, if the application layer cannot solve the order and performance problems in the traditional multiple RPC method, if the order needs to be guaranteed , it can only be sent serially
+- In streaming scenarios, data needs to be processed in the order they are sent, and the data itself has no definite boundary
+- In push scenarios, multiple messages are sent and processed in the context of the same call
 
-Stream 分为以下三种:
-- SERVER_STREAM(服务端流)
+Stream is divided into the following three types:
+- SERVER_STREAM (server stream)
   ![SERVER_STREAM](/imgs/v3/migration/tri/migrate-server-stream.png)
-- CLIENT_STREAM(客户端流)
+- CLIENT_STREAM (client stream)
   ![CLIENT_STREAM](/imgs/v3/migration/tri/migrate-client-stream.png)
-- BIDIRECTIONAL_STREAM(双向流)
+- BIDIRECTIONAL_STREAM (bidirectional stream)
   ![BIDIRECTIONAL_STREAM](/imgs/v3/migration/tri/migrate-bi-stream.png)
 
-> 由于 `java` 语言的限制，BIDIRECTIONAL_STREAM 和 CLIENT_STREAM 的实现是一样的。
+> Due to the limitations of the `java` language, the implementation of BIDIRECTIONAL_STREAM and CLIENT_STREAM is the same.
 
-在 Dubbo3 中，流式接口以 `SteamObserver` 声明和使用，用户可以通过使用和实现这个接口来发送和处理流的数据、异常和结束。
+In Dubbo3, the stream interface is declared and used as `SteamObserver`, and users can use and implement this interface to send and handle stream data, exceptions, and end.
 
-> 对于 Dubbo2 用户来说，可能会对StreamObserver感到陌生，这是Dubbo3定义的一种流类型，Dubbo2 中并不存在 Stream 的类型，所以对于迁移场景没有任何影响。
+> For Dubbo2 users, they may be unfamiliar with StreamObserver, which is a stream type defined by Dubbo3. There is no Stream type in Dubbo2, so it has no impact on migration scenarios.
 
-流的语义保证
-- 提供消息边界，可以方便地对消息单独处理
-- 严格有序，发送端的顺序和接收端顺序一致
-- 全双工，发送不需要等待
-- 支持取消和超时
+Stream Semantic Guarantees
+- Provide message boundaries, which can easily process messages separately
+- Strictly ordered, the order of the sender is consistent with the order of the receiver
+- Full duplex, no need to wait for sending
+- Support cancellation and timeout
 
-## 非 PB 序列化的流
-### api
+## Non-PB serialized stream
+### APIs
 ```java
 public interface IWrapperGreeter {
 
@@ -51,9 +51,9 @@ public interface IWrapperGreeter {
 }
 ```
 
-> Stream 方法的方法入参和返回值是严格约定的，为防止写错而导致问题，Dubbo3 框架侧做了对参数的检查, 如果出错则会抛出异常。
-> 对于 `双向流(BIDIRECTIONAL_STREAM)`, 需要注意参数中的 `StreamObserver` 是响应流，返回参数中的 `StreamObserver` 为请求流。
-### 实现类
+> The method input parameters and return values of the Stream method are strictly agreed. In order to prevent problems caused by writing errors, the Dubbo3 framework side checks the parameters, and throws an exception if there is an error.
+> For `BIDIRECTIONAL_STREAM`, it should be noted that `StreamObserver` in the parameter is the response stream, and `StreamObserver` in the return parameter is the request stream.
+### Implementation class
 ```java
 public class WrapGreeterImpl implements WrapGreeter {
 
@@ -70,7 +70,7 @@ public class WrapGreeterImpl implements WrapGreeter {
 
             @Override
             public void onError(Throwable throwable) {
-                throwable.printStackTrace();
+                throwable. printStackTrace();
             }
 
             @Override
@@ -91,7 +91,7 @@ public class WrapGreeterImpl implements WrapGreeter {
 }
 ```
 
-### 调用方式
+### Call method
 ```java
 delegate.sayHelloServerStream("server stream", new StreamObserver<String>() {
     @Override
@@ -101,7 +101,7 @@ delegate.sayHelloServerStream("server stream", new StreamObserver<String>() {
 
     @Override
     public void onError(Throwable throwable) {
-        throwable.printStackTrace();
+        throwable. printStackTrace();
     }
 
     @Override
@@ -119,7 +119,7 @@ StreamObserver<String> request = delegate.sayHelloStream(new StreamObserver<Stri
 
     @Override
     public void onError(Throwable throwable) {
-        throwable.printStackTrace();
+        throwable. printStackTrace();
     }
 
     @Override
@@ -133,9 +133,9 @@ for (int i = 0; i < n; i++) {
 request.onCompleted();
 ```
 
-## 使用 Protobuf 序列化的流
+## Serialized stream using Protobuf
 
-对于 `Protobuf` 序列化方式，推荐编写 `IDL` 使用 `compiler` 插件进行编译生成。生成的代码大致如下:
+For the `Protobuf` serialization method, it is recommended to write `IDL` and use the `compiler` plugin to compile and generate. The generated code is roughly as follows:
 ```java
 public interface PbGreeter {
 

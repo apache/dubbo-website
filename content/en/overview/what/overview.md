@@ -9,7 +9,7 @@ description: ""
 Apache Dubbo is an RPC service development framework, which is used to solve service governance and communication problems under the microservice architecture. It officially provides multi-language SDK implementations such as Java and Golang. Microservices developed using Dubbo are natively capable of remote address discovery and communication with each other.
 Using the rich service governance features provided by Dubbo, service governance demands such as service discovery, load balancing, and traffic scheduling can be realized. Dubbo is designed to be highly scalable, and users can easily implement various custom logics for traffic interception and location selection.
 
-Dubbo3 is defined as a cloud-native-oriented next-generation RPC service framework. 3.0 has evolved based on [Dubbo 2.x](/en/docsv2.7). While maintaining the original core features, Dubbo3 has improved in ease of use, ultra-large-scale microservice practice, cloud-native infrastructure adaptation, and security. A comprehensive upgrade has been carried out in several major directions such as sex.
+Dubbo3 is defined as a cloud-native-oriented next-generation RPC service framework. 3.0 has evolved based on Dubbo 2.x. While maintaining the original core features, Dubbo3 has improved in ease of use, ultra-large-scale microservice practice, cloud-native infrastructure adaptation, and security. A comprehensive upgrade has been carried out in several major directions such as sex.
 
 ### What is Dubbo
 

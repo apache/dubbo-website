@@ -8,7 +8,7 @@ description: "Triple Protocol Migration Guide"
 
 ## Triple Introduction
 
-For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/en/docs/concepts/rpc-protocol/)
+For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/en/docs3-v2/java-sdk/reference-manual/protocol/triple/overview/)
 
 According to the goals of Triple design, the `Triple` protocol has the following advantages:
 
