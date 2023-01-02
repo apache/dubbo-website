@@ -138,4 +138,4 @@ message AnchorInfo {
 ## 5. Community profile
 * Community homepage address: https://developers.google.cn/protocol-buffers/
 * Community open source address: https://github.com/google/protobuf
-* Maven of related jars: http://mvnrepository.com/artifact/com.google.protobuf
+* Maven of related jars: https://search.maven.org/search?q=com.google.protobuf

@@ -17,7 +17,7 @@ Users who require encryption for the entire link can use TLS.
 
 ## Reference use case
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo- samples-ssl)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
 
 ## How to use
 
