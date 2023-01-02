@@ -6,6 +6,9 @@ description: >
     This article will introduce you how to understand the details of each version and upgrade matters needing attention.
 ---
 
+{{% pageinfo %}} This document is no longer maintained. You are currently viewing a snapshot version. If you want to see the latest version of the documentation, see [Latest Version](/en/release/).
+{{% /pageinfo %}}
+
 ## Verification  
 
 you can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://downloads.apache.org/dubbo/KEYS) file to verify the download files
