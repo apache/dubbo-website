@@ -1,9 +1,9 @@
 
 ---
 type: docs
-title: "服务治理"
-linkTitle: "服务治理"
-description: "演示如何解决 Dubbo 微服务治理问题，如事务、全链路跟踪、限流降级等。"
+title: "微服务生态"
+linkTitle: "微服务生态"
+description: "围绕 Dubbo 生态的限流降级、全链路追踪、分布式一致性等解决方案"
 weight: 40
 no_list: true
 ---
