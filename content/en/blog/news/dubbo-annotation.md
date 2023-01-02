@@ -167,7 +167,7 @@ In addition, it should be noted that, `application`, `module`, `consumer`, `prot
 
 ## Example practice
 
-After learn what `@EnableDubbo`, `@Service`, `@Reference` is, there is a practical example showing how to use the annotation to develop a Dubbo application.The following code can be found at https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-annotation
+After learn what `@EnableDubbo`, `@Service`, `@Reference` is, there is a practical example showing how to use the annotation to develop a Dubbo application.The following code can be found at https://github.com/dubbo/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation
 
 ### 1.Interface Definition
 

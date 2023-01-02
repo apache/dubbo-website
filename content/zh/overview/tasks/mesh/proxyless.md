@@ -9,7 +9,7 @@ description: ""
 Proxyless 模式是指 Dubbo 直接与 Istiod 通信，通过 xDS 协议实现服务发现和服务治理等能力。
 本示例中将通过一个简单的示例来演示如何使用 Proxyless 模式。
 
-[示例地址](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-xds)
+[示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds)
 
 ## 代码架构
 
@@ -259,3 +259,12 @@ dubbo.application.qosAcceptForeignIp=true
 7. 不需要开启注入
 
 Proxyless 模式下 pod 不需要再开启 envoy 注入，请确认 namespace 中没有 `istio-injection=enabled` 的标签。
+
+8. 明文连接istiod
+
+Proxyless 模式下默认通过ssl方式连接istiod，同时也支持通过明文的方式连接istiod。
+
+明文连接参考配置：
+```properties
+dubbo.registry.secure=plaintext
+```

@@ -17,63 +17,43 @@ weight: 1
 > 发布说明: https://github.com/apache/dubbo/releases
 >
 
-### 3.2.0-beta.1 (2022-11-08)
+### 3.2.0-beta.3 (2022-12-22)
 
 #### Source Release
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.1/apache-dubbo-3.2.0-beta.1-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.1/apache-dubbo-3.2.0-beta.1-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.1/apache-dubbo-3.2.0-beta.1-src.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.sha512)
 
 #### Maven Release
 
-* [org.apache.dubbo:dubbo:3.2.0-beta.1](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.2.0-beta.1/jar)
+* [org.apache.dubbo:dubbo:3.2.0-beta.3](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.2.0-beta.3/jar)
 
 ```xml
 <dependency>
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
-  <version>3.2.0-beta.1</version>
+  <version>3.2.0-beta.</version>
 </dependency>
 ```
 
-### 3.1.2 (2022-11-08)
+### 3.1.4 (2022-12-22)
 
 #### Source Release
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.1.2/apache-dubbo-3.1.2-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.1.2/apache-dubbo-3.1.2-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.1.2/apache-dubbo-3.1.2-src.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip.sha512)
 
 #### Maven Release
 
-* [org.apache.dubbo:dubbo:3.1.2](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.1.2/jar)
+* [org.apache.dubbo:dubbo:3.1.4](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.1.4/jar)
 
 ```xml
 <dependency>
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
-  <version>3.1.2</version>
-</dependency>
-```
-
-### 3.1.1 (2022-09-29)
-
-#### Source Release
-
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.1.1/apache-dubbo-3.1.1-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.1.1/apache-dubbo-3.1.1-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.1.1/apache-dubbo-3.1.1-src.zip.sha512)
-
-#### Maven Release
-
-* [org.apache.dubbo:dubbo:3.1.1](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.1.1/jar)
-
-```xml
-<dependency>
-  <groupId>org.apache.dubbo</groupId>
-  <artifactId>dubbo</artifactId>
-  <version>3.1.1</version>
+  <version>3.1.4</version>
 </dependency>
 ```
 
@@ -97,23 +77,23 @@ weight: 1
 </dependency>
 ```
 
-### 2.7.18 (2022-09-29)
+### 2.7.19 (2022-12-13)
 
 #### Source Release
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.18/apache-dubbo-2.7.18-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.18/apache-dubbo-2.7.18-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.18/apache-dubbo-2.7.18-src.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.sha512)
 
 
 #### Maven Release
 
-* [org.apache.dubbo:dubbo:2.7.18](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.18/jar)
+* [org.apache.dubbo:dubbo:2.7.19](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.19/jar)
 
 ```xml
 <dependency>
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
-  <version>2.7.18</version>
+  <version>2.7.19</version>
 </dependency>
 ```

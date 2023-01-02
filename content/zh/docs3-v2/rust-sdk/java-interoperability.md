@@ -13,7 +13,7 @@ description: "使用 Rust 调用 Java 开发的 Dubbo 服务。"
 
 ## 2 运行示例 Java 版本的 Dubbo provider
 
-Java 版本的 Dubbo provider 示例源码见<https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple>。
+Java 版本的 Dubbo provider 示例源码见<https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple>。
 
 Clone 源代码、编译构建，并运行 provider：
 
@@ -31,7 +31,7 @@ $ java -Dprovider.port=8888 -jar ./target/dubbo-samples-triple-1.0-SNAPSHOT.jar
 Dubbo triple stub server started, port=8888
 ```
 
-[Java 侧的接口定义](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-triple/src/main/proto/greeter.proto)
+[Java 侧的接口定义](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/proto/greeter.proto)
 
 ## 3 运行 Rust 版本的 Dubbo consumer
 

@@ -150,7 +150,7 @@ For example, the service provider of `com.foo.BarService`  will register its URL
 
 ### Prepare the sample code
 
-The code in this document can be found in https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-zookeeper.
+The code in this document can be found in https://github.com/dubbo/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper.
 
 #### 1. Interface definition
 
