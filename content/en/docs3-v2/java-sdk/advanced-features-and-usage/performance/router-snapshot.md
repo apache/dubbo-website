@@ -17,7 +17,7 @@ Many of Dubbo's traffic management capabilities are implemented based on Router.
 When Dubbo receives the address change, it will push the address information to all `Routers`, and these `Routers` can calculate the routing packets in advance at this stage and cache them to avoid the need to traverse all provider calculations when calling grouping parameters.
 The `StateRouter` introduced in Dubbo 3 provides the ability to obtain the status of each route in real time through the qos command tool.
 
-The operation and maintenance personnel can obtain the status of the route through the `getRouterSnapshot` command. For specific commands, please refer to the [getRouterSnapshot command](../../../reference-manual/qos/router-snapshot/#getroutersnapshot-%E5%91%BD%E4%BB%A4) document.
+The operation and maintenance personnel can obtain the status of the route through the `getRouterSnapshot` command. For specific commands, please refer to the [getRouterSnapshot command](../../../reference-manual/qos/router-snapshot/#getroutersnapshot-command) document.
 
 **Note: This feature only supports `StateRoute`, and `StateRouter` needs to implement the `doBuildSnapshot` interface based on `AbstractStateRouter`. **
 

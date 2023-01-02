@@ -81,7 +81,7 @@ For the upgrade of online services, it is impossible to complete the provider an
 In the second step, the provider provides a dual-protocol way to support dubbo + tri clients at the same time.
 
 The structure is shown in the figure:
-![trust](/imgs/v3/migration/tri/migrate-dubbo-tri-trust.png)
+![trust](/imgs/v3/migration/tri/migrate-dubbo-tri-strust.png)
 
 > According to the recommended upgrade steps, the provider already supports the tri protocol, so the consumer of dubbo3 can directly use the tri protocol
 
@@ -95,7 +95,7 @@ Start [`Provider`] using `dubbo` protocol and `triple` protocol (https://github.
 When all consuemr are upgraded to a version that supports the `Triple` protocol, the provider can be switched to only use the `Triple` protocol to start
 
 The structure is shown in the figure:
-![trust](/imgs/v3/migration/tri/migrate-only-tri-trust.png)
+![trust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
 
 [Provider](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/ migration/ApiMigrationTriProvider.java)
 and [Consumer](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri /migration/ApiMigrationTriConsumer.java) to complete the call, the output is as follows:
