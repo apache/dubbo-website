@@ -7,7 +7,7 @@ description: "Basic use and working principle of Zookeeper metadata center"
 ---
 
 ## 1 Preparations
-- Understand [Dubbo basic development steps](/zh/docs3-v2/java-sdk/quick-start/spring-boot/)
+- Understand [Dubbo basic development steps](/en/docs3-v2/java-sdk/quick-start/spring-boot/)
 - Install and start [Zookeeper](https://zookeeper.apache.org/)
 
 ## 2 Instructions for use

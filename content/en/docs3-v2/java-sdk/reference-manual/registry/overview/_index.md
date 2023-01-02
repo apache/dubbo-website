@@ -6,7 +6,7 @@ weight: 1
 description: ""
 ---
 
-The registration center is the core component of Dubbo service governance. Dubbo relies on the coordination of the registration center to realize service (address) discovery. Automatic service discovery is the basis for microservices to achieve dynamic scaling, load balancing, and traffic management. Dubbo's service discovery mechanism has experienced interface-level service discovery in the Dubbo2 era and application-level service discovery in the Dubbo3 era. For details, see [Service Discovery Mechanism](/zh/docs3-v2/java-sdk/concepts-and-architecture/service -discovery/) analysis to understand the specific evolution process.
+The registration center is the core component of Dubbo service governance. Dubbo relies on the coordination of the registration center to realize service (address) discovery. Automatic service discovery is the basis for microservices to achieve dynamic scaling, load balancing, and traffic management. Dubbo's service discovery mechanism has experienced interface-level service discovery in the Dubbo2 era and application-level service discovery in the Dubbo3 era. For details, see [Service Discovery Mechanism](/en/docs3-v2/java-sdk/concepts-and-architecture/service -discovery/) analysis to understand the specific evolution process.
 
 ## Basic usage
 The Dubbo registry component must be specified when developing an application. The configuration is very simple, just specify the cluster address of the registry:
@@ -28,7 +28,7 @@ If you need a cluster format address, you can use the backup parameter
 
 > The application must specify the Dubbo registration center, even if the registration center is not enabled (you can set the address to be empty address='N/A' ).
 
-In addition to the rest, depending on each configuration center, you can refer to the [registry configuration reference manual](/zh/docs3-v2/java-sdk/reference-manual/config/properties/#registry) or expand through the parameters parameter.
+In addition to the rest, depending on each configuration center, you can refer to the [registry configuration reference manual](/en/docs3-v2/java-sdk/reference-manual/config/properties/#registry) or expand through the parameters parameter.
 
 ## Configuration Center and Metadata Center
 The configuration center and metadata center are the basic components to realize Dubbo's high-level service governance capabilities. Compared with the registration center, the configuration of these two components is usually optional.

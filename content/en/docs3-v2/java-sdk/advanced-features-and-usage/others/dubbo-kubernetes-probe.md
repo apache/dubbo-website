@@ -19,7 +19,7 @@ Through the SPI mechanism of Dubbo3, various "probes" are implemented internally
 
 The interface will automatically obtain the implementation of all SPIs of the current application, and the interface will return success if the SPI implementations of the corresponding interface are successfully ready.
 
-For an introduction to more extensions of Dubbo3 SPI, see [Dubbo SPI Extensions](/zh/docs3-v2/java-sdk/reference-manual/spi/description/)
+For an introduction to more extensions of Dubbo3 SPI, see [Dubbo SPI Extensions](/en/docs3-v2/java-sdk/reference-manual/spi/description/)
 
 ## scenes to be used
 - kubelet uses `liveness probe` to determine if your application is running, to see if it is alive. Generally speaking, if your program crashes, Kubernetes will immediately know that the program has terminated, and then restart the program. The purpose of our liveness probe is to capture that the current application has not terminated or crashed. If these situations occur, restart the container in this state so that the application can still continue in the presence of bugs run down.

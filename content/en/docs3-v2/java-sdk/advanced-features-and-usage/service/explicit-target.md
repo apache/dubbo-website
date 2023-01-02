@@ -6,7 +6,7 @@ weight: 5
 description: "Direct point-to-point connection in Dubbo"
 ---
 
-{{% pageinfo %}} This document is no longer maintained. You are currently viewing a snapshot version. If you want to view the latest version of the documentation, see [Latest Version](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/specify-ip/).
+{{% pageinfo %}} This document is no longer maintained. You are currently viewing a snapshot version. If you want to view the latest version of the documentation, see [Latest Version](/en/docs3-v2/java-sdk/advanced-features-and-usage/service/specify-ip/).
 {{% /pageinfo %}}
 
 In the development and testing environment, it is often necessary to bypass the registration center and only test the specified service provider. At this time, point-to-point direct connection may be required. The point-to-point direct connection method will use the service interface as the unit and ignore the provider list of the registration center. A The point-to-point interface configuration does not affect the B interface to obtain the list from the registration center.

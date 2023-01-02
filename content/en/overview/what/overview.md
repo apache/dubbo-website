@@ -9,16 +9,16 @@ description: ""
 Apache Dubbo is an RPC service development framework, which is used to solve service governance and communication problems under the microservice architecture. It officially provides multi-language SDK implementations such as Java and Golang. Microservices developed using Dubbo are natively capable of remote address discovery and communication with each other.
 Using the rich service governance features provided by Dubbo, service governance demands such as service discovery, load balancing, and traffic scheduling can be realized. Dubbo is designed to be highly scalable, and users can easily implement various custom logics for traffic interception and location selection.
 
-Dubbo3 is defined as a cloud-native-oriented next-generation RPC service framework. 3.0 has evolved based on [Dubbo 2.x](/zh/docsv2.7). While maintaining the original core features, Dubbo3 has improved in ease of use, ultra-large-scale microservice practice, cloud-native infrastructure adaptation, and security. A comprehensive upgrade has been carried out in several major directions such as sex.
+Dubbo3 is defined as a cloud-native-oriented next-generation RPC service framework. 3.0 has evolved based on [Dubbo 2.x](/en/docsv2.7). While maintaining the original core features, Dubbo3 has improved in ease of use, ultra-large-scale microservice practice, cloud-native infrastructure adaptation, and security. A comprehensive upgrade has been carried out in several major directions such as sex.
 
 ### What is Dubbo
 
 Apache Dubbo was originally donated by Alibaba as an open source in 2008, and soon became the de facto standard framework for the selection of open source service frameworks in China, and has been widely used in various industries. In 2017, Dubbo officially donated to the Apache Software Foundation and became a top-level project of Apache. Currently, Dubbo3 is already a one-stop microservice solution providing:
-* HTTP/2-based [Triple protocol](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/) and programming experience for proxy API.
+* HTTP/2-based [Triple protocol](/en/docs3-v2/java-sdk/concepts-and-architecture/triple/) and programming experience for proxy API.
 * Powerful [traffic management capability] (../../tasks/traffic-management), such as address discovery, load balancing, routing address selection, dynamic configuration, etc.
 * [Multi-language SDK implementation](../../mannual/), covering Java, Golang, Javascript, etc. More language implementations will be released in succession.
 * Flexible adaptation and expansion capabilities, which can be easily adapted to other components of the microservice system such as Tracing and Transaction.
-* [Dubbo Mesh Solution](/zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/), while supporting flexible Mesh deployment solutions such as Sidecar and Proxyless.
+* [Dubbo Mesh Solution](/en/docs3-v2/java-sdk/concepts-and-architecture/mesh/), while supporting flexible Mesh deployment solutions such as Sidecar and Proxyless.
 
 The overall architecture of Apache Dubbo can well meet the large-scale microservice practice of enterprises, because it is designed to solve the practical problems of ultra-large-scale microservice clusters from the beginning, whether it is Alibaba, ICBC, China Ping An, Ctrip and other community users, They have fully verified the stability and performance of Dubbo through years of large-scale production environment traffic. Therefore, Dubbo has unparalleled advantages in solving business landing and large-scale practice:
 * out of the box
@@ -57,7 +57,7 @@ Service communication across processes or hosts is a basic capability of Dubbo. 
 * Provider response stream (Response Streaming)
 * Bidirectional Streaming
 
-For details, please refer to the list of optional protocols implemented by each language SDK or [Triple Protocol](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
+For details, please refer to the list of optional protocols implemented by each language SDK or [Triple Protocol](/en/docs3-v2/java-sdk/concepts-and-architecture/triple/)
 
 #### Automatic service (address) discovery
 Dubbo's service discovery mechanism allows microservice components to evolve independently and be deployed arbitrarily, and the consumer can complete communication without knowing the deployment location and IP address of the peer. Dubbo provides a Client-Based service discovery mechanism, and users can enable service discovery in various ways:
@@ -81,7 +81,7 @@ It is worth mentioning that how to use Dubbo to support elastic scaling services
 
 Combined with the current version, this section mainly expands Dubbo's cloud-native features from the following two points
 * [Container Scheduling Platform (Kubernetes)](../../tasks/kubernetes/deploy-on-k8s)
-* [Dubbo Mesh](/zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/)
+* [Dubbo Mesh](/en/docs3-v2/java-sdk/concepts-and-architecture/mesh/)
 
 ##### Kubernetes
 For Dubbo microservices to support Kubernetes platform scheduling, the most basic thing is to realize the alignment of the dubbo service life cycle and the container life cycle, which includes life cycle events such as Dubbo startup, destruction, and service registration. Compared with the past where Dubbo defined life cycle events by itself and required developers to abide by the agreement during operation and maintenance practice, the underlying infrastructure of Kubernetes defines strict component life cycle events (probes), and instead requires Dubbo to adapt according to the agreement.

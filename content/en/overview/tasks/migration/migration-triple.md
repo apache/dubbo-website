@@ -8,7 +8,7 @@ description: "Triple Protocol Migration Guide"
 
 ## Triple Introduction
 
-For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/zh/docs/concepts/rpc-protocol/)
+For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/en/docs/concepts/rpc-protocol/)
 
 According to the goals of Triple design, the `Triple` protocol has the following advantages:
 
@@ -35,4 +35,4 @@ At the beginning of Dubbo3, one goal was to be perfectly compatible with Dubbo2.
 
 **So, if you decide to upgrade to Dubbo3's `Triple` protocol, you only need to modify the protocol name in the configuration to `tri` (note: not triple). **
 
-For more instructions on using the `Triple` protocol, please refer to [Triple Protocol Migration Guide](/zh/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/).
+For more instructions on using the `Triple` protocol, please refer to [Triple Protocol Migration Guide](/en/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/).

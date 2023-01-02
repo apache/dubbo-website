@@ -70,7 +70,7 @@ return referenceConfig.get();
 
 3. Dynamic configuration (highest priority, configuration can be modified at runtime)
 
-This configuration needs to be pushed based on the configuration center, the Key is the application name + `.migration` (such as `demo-application.migraion`), and the Group is `DUBBO_SERVICEDISCOVERY_MIGRATION`. For details on rule body configuration, see [Guidelines for migrating from interface-level service discovery to application-level service discovery](/zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/).
+This configuration needs to be pushed based on the configuration center, the Key is the application name + `.migration` (such as `demo-application.migraion`), and the Group is `DUBBO_SERVICEDISCOVERY_MIGRATION`. For details on rule body configuration, see [Guidelines for migrating from interface-level service discovery to application-level service discovery](/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/).
 > Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/ org/apache/dubbo/demo/consumer/UpgradeUtil.java](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-servicediscovery-migration /dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java)
 
 ```java

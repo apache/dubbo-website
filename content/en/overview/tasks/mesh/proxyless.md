@@ -42,7 +42,7 @@ public class AnnotatedGreetingService implements GreetingService {
 
 **Because the native xDS protocol cannot support the mapping from interface to application name, it is necessary to configure the `providedBy` parameter to mark which application this service comes from. **
 
-In the future, we will realize automatic [service mapping](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) relationship acquisition based on the control plane of Dubbo Mesh, and there will be no need for independent configuration parameters at that time. Dubbo can be run under the Mesh system, so stay tuned.
+In the future, we will realize automatic [service mapping](/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) relationship acquisition based on the control plane of Dubbo Mesh, and there will be no need for independent configuration parameters at that time. Dubbo can be run under the Mesh system, so stay tuned.
 
 ```java
 @Component("annotated Consumer")
@@ -61,7 +61,7 @@ The server configuration registration center is the address of istio, and the pr
 
 We recommend configuring `protocol` to be the tri protocol (fully compatible with the grpc protocol) for a better experience in the istio system.
 
-In order to make Kubernetes aware of the state of the application, it is necessary to configure `qosAcceptForeignIp` parameter so that Kubernetes can obtain the correct application state, [alignment lifecycle](/zh/docs3-v2/java-sdk/advanced-features-and-usage/ others/dubbo-kubernetes-probe/).
+In order to make Kubernetes aware of the state of the application, it is necessary to configure `qosAcceptForeignIp` parameter so that Kubernetes can obtain the correct application state, [alignment lifecycle](/en/docs3-v2/java-sdk/advanced-features-and-usage/ others/dubbo-kubernetes-probe/).
 
 ```properties
 dubbo.application.name=dubbo-samples-xds-provider
@@ -211,7 +211,7 @@ Since the current Dubbo version does not support istio's `third-party-jwt` authe
 3. providedBy
 
 Since the current Dubbo version is limited by the communication model of istio and cannot obtain the application name corresponding to the interface, it is necessary to configure the `providedBy` parameter to mark which application the service comes from.
-In the future, we will realize automatic [service mapping](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) relationship acquisition based on the control plane of Dubbo Mesh, and there will be no need for independent configuration parameters at that time. Dubbo can be run under the Mesh system, so stay tuned.
+In the future, we will realize automatic [service mapping](/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) relationship acquisition based on the control plane of Dubbo Mesh, and there will be no need for independent configuration parameters at that time. Dubbo can be run under the Mesh system, so stay tuned.
 
 4. protocol name
 
@@ -244,7 +244,7 @@ Reference configuration:
 dubbo.application.metadataServicePort=20885
 ```
 
-In the future, we will realize automatic acquisition of [service metadata](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) based on the control plane of Dubbo Mesh, and no independent configuration parameters will be required at that time. Dubbo can be run under the Mesh system, so stay tuned.
+In the future, we will realize automatic acquisition of [service metadata](/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) based on the control plane of Dubbo Mesh, and no independent configuration parameters will be required at that time. Dubbo can be run under the Mesh system, so stay tuned.
 
 6. qosAcceptForeignIp
 

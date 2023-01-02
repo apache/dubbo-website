@@ -14,7 +14,7 @@ The following describes how to quickly develop Dubbo services from three aspects
 For specific use cases, please refer to: [dubbo-samples-triple/stub](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java /org/apache/dubbo/sample/tri/stub);
 
 ## Define the service
-Dubbo3 recommends using IDL to define cross-language services. If you are more accustomed to using language-specific service definition methods, please move to [Multi-language SDK](/zh/docs3-v2/) to view.
+Dubbo3 recommends using IDL to define cross-language services. If you are more accustomed to using language-specific service definition methods, please move to [Multi-language SDK](/en/docs3-v2/) to view.
 
 ```text
 syntax = "proto3";

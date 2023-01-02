@@ -92,4 +92,4 @@ Blocked
 Blocked
 ```
 
-> For more usage methods of Sentinel, please refer to: [Sentinel escorts Dubbo services](/zh/blog/2018/07/27/sentinel-escorts-dubbo-services/), [Sentinel official website](https: //sentinelguard.io/zh-cn/index.html)
+> For more usage methods of Sentinel, please refer to: [Sentinel escorts Dubbo services](/en/blog/2018/07/27/sentinel-escorts-dubbo-services/), [Sentinel official website](https://sentinelguard.io/zh-cn/index.html)

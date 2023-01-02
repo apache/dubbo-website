@@ -8,14 +8,14 @@ weight: 2
 
 This article will take you to quickly understand the design background, overall architecture and core features of Dubbo3, and its relationship with typical users such as Alibaba HSF2, etc. You can also learn more in the following sections:
 * **New users, take a quick look at the core features of Dubbo3:**
-  * [Next Generation Communication Protocol - Triple](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
-  * [Secrets of a million-instance cluster - application-level service discovery](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/)
-  * [Dubbo Mesh](/zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/)
+  * [Next Generation Communication Protocol - Triple](/en/docs3-v2/java-sdk/concepts-and-architecture/triple/)
+  * [Secrets of a million-instance cluster - application-level service discovery](/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/)
+  * [Dubbo Mesh](/en/docs3-v2/java-sdk/concepts-and-architecture/mesh/)
 * **Dubbo3 compatibility and migration cost?**
-  * [Java - Migration Guide](/zh/docs3-v2/java-sdk/upgrades-and-compatibility)
-  * [Golang - Migration Guide](/zh/docs3-v2/golang-sdk/)
+  * [Java - Migration Guide](/en/docs3-v2/java-sdk/upgrades-and-compatibility)
+  * [Golang - Migration Guide](/en/docs3-v2/golang-sdk/)
 * **Dubbo3 related resources:**
-  * For more information, such as performance indicators, advanced feature descriptions, etc., please refer to [Multilingual SDK Implementation](/zh/overview/mannual/)
+  * For more information, such as performance indicators, advanced feature descriptions, etc., please refer to [Multilingual SDK Implementation](/en/overview/mannual/)
   * Speeches and offline activities
 
 ### background
@@ -51,7 +51,7 @@ Dubbo3 integrates a large amount of service management experience of Alibaba HSF
 
 ### For millions of cluster instances, horizontal scalability
 
-With the accumulation of practical experience in microservices, microservices are split into finer grains and deployed to more and more machine instances to support the growing business scale. Among many Dubbo2 enterprise users, especially large-scale enterprises represented by finance, insurance and the Internet, they began to encounter cluster capacity bottlenecks (for typical cases, please refer to [Industrial and Commercial Bank of China Practice Cases](/zh/users/icbc/)):
+With the accumulation of practical experience in microservices, microservices are split into finer grains and deployed to more and more machine instances to support the growing business scale. Among many Dubbo2 enterprise users, especially large-scale enterprises represented by finance, insurance and the Internet, they began to encounter cluster capacity bottlenecks (for typical cases, please refer to [Industrial and Commercial Bank of China Practice Cases](/en/users/icbc/)):
 * **Service discovery process**
   * The data storage scale of the registration center reaches the capacity bottleneck
   * Data registration & push efficiency is seriously reduced

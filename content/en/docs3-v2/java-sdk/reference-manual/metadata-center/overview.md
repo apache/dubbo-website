@@ -16,7 +16,7 @@ The metadata center provides access to two types of metadata in Dubbo:
 For how to configure and open the metadata center, please refer to the specific implementation document.
 
 ## 1 Address Discovery Metadata
-[Application-level service discovery mechanism](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/#Application-level service discovery introduction) is introduced in Dubbo3 to solve the problem of heterogeneous microservice system interoperability and For performance issues in large-scale cluster practice, application-level service discovery will fully replace interface-level service discovery in the 2.x era.
+[Application-level service discovery mechanism](/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/#Application-level service discovery introduction) is introduced in Dubbo3 to solve the problem of heterogeneous microservice system interoperability and For performance issues in large-scale cluster practice, application-level service discovery will fully replace interface-level service discovery in the 2.x era.
 At the same time, in order to maintain Dubbo's service/interface-oriented ease of use and flexibility of service governance, Dubbo has built a set of metadata mechanisms around application-level service discovery, namely `interface-application mapping relationship` and `interface configuration metadata`.
 
 ### 1.1 Interface - application mapping relationship

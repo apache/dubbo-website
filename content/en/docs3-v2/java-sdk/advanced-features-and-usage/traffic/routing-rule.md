@@ -250,5 +250,5 @@ The scope of the request tag is each invocation. Use attachment to pass the requ
 2. When `dubbo.tag` is not set, only the provider whose tag is empty will be matched. Even if there is an available service in the cluster, if the tag does not match, it cannot be called. This is different from Convention 1. Requests with tags can be downgraded to untagged services, but requests without tags/with other types of tags can never be accessed to other tabbed services.
 
 {{% alert title="Prompt" color="primary" %}}
-Custom routing reference [routing extension](/zh/docs3-v2/java-sdk/reference-manual/spi/description/router/)
+Custom routing reference [routing extension](/en/docs3-v2/java-sdk/reference-manual/spi/description/router/)
 {{% /alert %}}

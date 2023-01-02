@@ -13,7 +13,7 @@ Dubbo is an RPC service framework that includes multiple language implementation
 
 * **If you are new to Dubbo**, you can quickly learn about Dubbo through the following links:
   * [What is Dubbo](what/overview)
-  * [User Cases and Ecology](/zh/users/)
+  * [User Cases and Ecology](/en/users/)
   * Experience Dubbo via [**Quick Start**](quickstart/)
 * Want to know more about Dubbo features and usage details?
   * Select the corresponding [**Multilanguage SDK Implementation**](mannual/), and refer to **Advanced Features** or **Reference Manual**

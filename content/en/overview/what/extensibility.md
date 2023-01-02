@@ -97,4 +97,4 @@ Dubbo's extensibility makes it easy to divide the Dubbo project into sub-modules
 * If you need to implement a custom registry, you can use Dubbo's extension capabilities.
 * If you need to implement custom filters, you can use Dubbo's extension capabilities.
 
-Dubbo extensions treat internal implementations and third-party implementations equally. For more usage scenarios, see [SPI extension implementation](/zh/docs3-v2/java-sdk/reference-manual/spi/description/)
+Dubbo extensions treat internal implementations and third-party implementations equally. For more usage scenarios, see [SPI extension implementation](/en/docs3-v2/java-sdk/reference-manual/spi/description/)

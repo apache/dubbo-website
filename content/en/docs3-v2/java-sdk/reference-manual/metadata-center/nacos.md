@@ -7,7 +7,7 @@ description: "Basic use and working principle of Nacos metadata center"
 ---
 
 ## 1 Preparations
-- Understand [Dubbo basic development steps](/zh/docs3-v2/java-sdk/quick-start/spring-boot/)
+- Understand [Dubbo basic development steps](/en/docs3-v2/java-sdk/quick-start/spring-boot/)
 - Refer to [Nacos Quick Start](https://nacos.io/zh-cn/docs/quick-start.html) to start the Nacos server
 
 > When Dubbo uses `3.0.0` and above, it needs to use Nacos `2.0.0` and above

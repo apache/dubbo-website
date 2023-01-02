@@ -11,7 +11,7 @@ Dubbo3's Triple protocol is built on the HTTP/2 protocol, so it has better penet
 In addition, Dubbo also integrates most of the industry's mainstream protocols, allowing users to use these communication protocols within the Dubbo framework, providing users with a unified programming model and service governance model, these protocols include rest, hessian2, jsonrpc, thrift, etc. , note that there will be some differences in the range supported by different language SDK implementations.
 
 Details can be viewed
-* [Triple Quick Facts](/zh/docs3-v2/java-sdk/concepts-and-architecture/triple/)
+* [Triple Quick Facts](/en/docs3-v2/java-sdk/concepts-and-architecture/triple/)
 * [Specification](https://github.com/apache/dubbo-awesome/blob/master/proposals/D0-triple.md)
 
 ## Service Discovery
@@ -27,7 +27,7 @@ Under the traditional deployment architecture, service discovery involves three 
 In the context of cloud native, for example, when the application is deployed on a platform such as Kubernetes, since the platform itself maintains the mapping relationship between the application/service and the instance, the registration center and the registration action are sinked to the infrastructure layer to a certain extent, so the framework Own registration action is sometimes not necessary.
 
 Dubbo3 provides a new application-level service discovery model, which is different from Dubbo2's interface-level service discovery model in terms of design and implementation. It can be viewed here:
-* [Application-level service discovery](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/#Introduction to application-level service discovery)
+* [Application-level service discovery](/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/#Introduction to application-level service discovery)
 
 ## Traffic management
 Since Dubbo2, Dubbo has provided rich service governance rules, including routing rules, dynamic configuration, etc.

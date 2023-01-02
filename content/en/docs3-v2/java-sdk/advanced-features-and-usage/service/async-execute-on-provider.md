@@ -6,7 +6,7 @@ weight: 21
 description: "Asynchronous execution of Dubbo service provider"
 ---
 
-{{% pageinfo %}} This document is no longer maintained. You are currently viewing a snapshot version. If you want to see the latest version of the documentation, see [Latest Version](/zh/docs3-v2/java-sdk/advanced-features-and-usage/service/attachment/).
+{{% pageinfo %}} This document is no longer maintained. You are currently viewing a snapshot version. If you want to see the latest version of the documentation, see [Latest Version](/en/docs3-v2/java-sdk/advanced-features-and-usage/service/attachment/).
 {{% /pageinfo %}}
 
 

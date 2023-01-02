@@ -13,4 +13,4 @@ Apache Dubbo is an RPC microservice framework that provides SDK implementations 
 * Dubbo3 Advanced Usage Reference [Multilanguage SDK Documentation](../mannual)
 * Dubbo3 design and migration
   * [3.0 Design Concept and Core Functions](./dubbo3/)
-  * [How to migrate to Dubbo3](/zh/docs3-v2/java-sdk/upgrades-and-compatibility)
+  * [How to migrate to Dubbo3](/en/docs3-v2/java-sdk/upgrades-and-compatibility)
