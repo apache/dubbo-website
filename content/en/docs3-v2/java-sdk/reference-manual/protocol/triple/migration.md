@@ -52,7 +52,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 To ensure compatibility, we first upgrade some providers to the `dubbo3` version and use the `dubbo` protocol.
 
-Start a [`Provider`] using the `dubbo` protocol (https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org /apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) and [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples- triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java), complete the call, the output is as follows:
+Start a [`Provider`] using the `dubbo` protocol (https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org /apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) and [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java), complete the call, the output is as follows:
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
 
 ### Use dubbo and triple protocol at the same time

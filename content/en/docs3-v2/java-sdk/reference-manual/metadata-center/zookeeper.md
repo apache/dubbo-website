@@ -102,7 +102,7 @@ numChildren = 0
 ```
 
 ### 4.2 [Address Discovery - Interface-Application Name Mapping](../overview/#11-Interface---Application Mapping Relationship)
-In Dubbo 3.0, the service introspection mechanism is used by default to realize service discovery. For service introspection, please refer to [Service Introspection](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C %8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
+In Dubbo 3.0, the service introspection mechanism is used by default to realize service discovery. For service introspection, please refer to [Service Introspection](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
 
 In short, the service introspection mechanism needs to be able to find the corresponding application name through the interface name. This relationship can be one-to-many, that is, one service name may correspond to multiple different application names. In 3.0, the metadata center provides this mapping capability.
 

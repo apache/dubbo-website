@@ -14,7 +14,7 @@ When an interface has multiple implementations, it can be distinguished by group
 
 ## Reference use case
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo- samples-group)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-group)
 
 ## How to use
 

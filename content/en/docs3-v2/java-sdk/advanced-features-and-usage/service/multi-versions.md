@@ -22,7 +22,7 @@ When an interface is implemented and an incompatible upgrade occurs, the version
 
 ## Reference use case
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo- samples-version)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-version)
 
 ## How to use
 ### service provider

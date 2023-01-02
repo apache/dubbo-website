@@ -10,7 +10,7 @@ description: "Check whether Dubbo service is available by echo test"
 The echo test is used to detect whether the service is available. The echo test is performed according to the normal request process. It can test whether the entire call is smooth and can be used for monitoring.
 
 ## Reference use case
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-echo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo- samples-echo)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-echo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-echo)
 
 ## scenes to be used
 

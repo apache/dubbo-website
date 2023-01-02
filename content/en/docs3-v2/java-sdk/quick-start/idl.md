@@ -7,7 +7,7 @@ description: "Demo from zero how to define Dubbo service based on IDL and use Tr
 ---
 
 Using IDL to define services has better cross-language friendliness. For new users of Dubbo3, we recommend this method.
-However, the Triple protocol is not strongly bound to IDL. You can also use Java Interface + Pojo to define services and enable the Triple protocol. For details, see [Example](https://github.com/apache/dubbo-samples/tree /master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo).
+However, the Triple protocol is not strongly bound to IDL. You can also use Java Interface + Pojo to define services and enable the Triple protocol. For details, see [Example](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo).
 
 For more usage of Triple and IDL, please refer to [official samples](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple)
 

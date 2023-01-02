@@ -29,7 +29,7 @@ When the server provides interface services to the outside, it solves various in
 
 ## Reference use case
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo- samples-validation)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-validation)
 
 ## How to use
 

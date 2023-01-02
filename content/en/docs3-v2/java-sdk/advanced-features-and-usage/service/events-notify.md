@@ -10,7 +10,7 @@ Before calling, after calling, and when an exception occurs, three events `oninv
 
 ## Reference use case
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo- samples-notify)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)
 
 ## scenes to be used
 

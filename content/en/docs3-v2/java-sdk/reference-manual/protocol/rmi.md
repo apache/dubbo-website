@@ -93,4 +93,4 @@ If the service interface does not extend the `java.rmi.Remote` interface:
 
 > - **At the same time, if the application relies on the old common-collections package,** dubbo will not depend on this package. Please check whether your application has used it.
 
-> - ** There is a deserialization security risk. ** Please check the application: Please upgrade commons-collections3 to [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html); Please upgrade commons-collections4 to [4.1] (https://commons.apache.org/proper/commons-collections/release_4_1.html). The new version of commons-collections solves this problem.
+> - ** There is a deserialization security risk. ** Please check the application: Please upgrade commons-collections3 to [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html); Please upgrade commons-collections4 to [4.1](https://commons.apache.org/proper/commons-collections/release_4_1.html). The new version of commons-collections solves this problem.

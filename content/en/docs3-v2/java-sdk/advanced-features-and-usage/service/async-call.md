@@ -17,7 +17,7 @@ Based on NIO's non-blocking implementation of parallel calls, the client does no
 
 ## Reference use case
 
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo- samples-async)
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async)
 ## scenes to be used
 
 Send the user request content to the target request. When the target request encounters high traffic or needs to be processed for a long time, the asynchronous call function will allow the response to be returned to the user immediately, while the target request continues to process the request in the background. When the target request returns the result, the content will be sent displayed to the user.
