@@ -33,7 +33,7 @@ void warn(String code, String cause, String extendedInformation, String msg);
 void warn(String code, String cause, String extendedInformation, String msg, Throwable e);
 ```
 
-Among them, code refers to the error code, cause refers to the possible reason (that is, the text followed by caused by...), extendedInformation is used as supplementary information, and is directly attached to the sentence caused by.
+Among them, code refers to the error code, cause refers to the Possible Reason (that is, the text followed by caused by...), extendedInformation is used as supplementary information, and is directly attached to the sentence caused by.
 
 The same extension is done for the error level.
 
