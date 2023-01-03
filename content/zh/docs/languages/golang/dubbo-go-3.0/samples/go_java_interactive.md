@@ -6,7 +6,7 @@ linkTitle: Go-Java 互通
 description: go-java 3.0 互通示例
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/samples/go_java_interactive/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/)。
 {{% /pageinfo %}}
 
 # Go-Java 互通示例
@@ -853,5 +853,4 @@ public class Consumer {
 }
 ```
 
-下一章: [【配置中心和配置监听】](../config-center-dynamic/)
 

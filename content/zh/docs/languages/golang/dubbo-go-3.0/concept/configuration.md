@@ -6,7 +6,7 @@ linkTitle: 框架配置
 description: Dubbo-go的配置
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/concept/config/basic_concept/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/tutorial/develop/config-center/)。
 {{% /pageinfo %}}
 
 # Dubbo-go 配置项
@@ -229,5 +229,3 @@ dubbo:
     namespace: demo-provider-config
 # 框架从 apollo 配置中最更新对应位置加载配置文件，并根据该配置文件启动
 ```
-
-下一章：[【Dubbogo Samples 介绍】](../../samples/samples_repo/)

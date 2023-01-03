@@ -6,7 +6,7 @@ linkTitle: Metrics 数据上报
 description: 提示用户dubbo使用的数据上报方式
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/samples/metrics/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/tutorial/governance/monitor/)。
 {{% /pageinfo %}}
 
 # Dubbo-go 3.0 数据上报
@@ -213,4 +213,4 @@ dubbo_test_summary_with_label_count{summarylabel1="value1",summarylabel2="value2
 
 
 
-下一章: [【泛化调用】](../generic/)
+
