@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "health information"
-linkTitle: "health information"
+title: "Health Information"
+linkTitle: "Health Information"
 weight: 4
 no_list: true
 hide_summary: true
