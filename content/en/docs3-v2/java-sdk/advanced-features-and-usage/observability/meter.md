@@ -384,7 +384,7 @@ Suppose we initially have 6 buckets, and each window time is set to 2 minutes
 Every time the index data is written, the data will be written into 6 buckets respectively, and a bucket will be moved every two minutes and the data in the original bucket will be cleared
 When reading the indicator, read the bucket pointed to by the current current to achieve the effect of sliding window
 Specifically, as shown in the figure below, the current bucket stores the data within the bucket life cycle set in the configuration, that is, the recent data
-![img_1.png](/imgs/docs3-v2/java-sdk/observability/img_1.png)
+![img_1.png](/imgs/docs3-v2/java-sdk/observability/aggre.png)
 
 In each bucket, use the **TDigest algorithm** to calculate the quantile index
 > **TDigest algorithm** (extreme quantile accuracy is high, such as p1 p99, middle quantile accuracy is low, such as p50), the relevant information is as follows>

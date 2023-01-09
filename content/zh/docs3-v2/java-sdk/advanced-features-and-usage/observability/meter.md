@@ -390,7 +390,7 @@ private void registerListener() {
 每次写入指标数据时，会将数据分别写入6个bucket内，每隔两分钟移动一个bucket并且清除原来bucket内的数据
 读取指标时，读取当前current指向的bucket，以达到滑动窗口的效果
 具体如下图所示，实现了当前 bucket 内存储了配置中设置的 bucket 生命周期内的数据，即近期数据
-![img_1.png](/imgs/docs3-v2/java-sdk/observability/img_1.png)
+![img_1.png](/imgs/docs3-v2/java-sdk/observability/aggre.png)
 
 在每个bucket内，使用**TDigest 算法**计算分位数指标
 
