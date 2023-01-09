@@ -4,7 +4,7 @@ type: docs
 title: "微服务生态"
 linkTitle: "微服务生态"
 description: "围绕 Dubbo 生态的限流降级、全链路追踪、分布式一致性等解决方案"
-weight: 40
+weight: 30
 no_list: true
 ---
 

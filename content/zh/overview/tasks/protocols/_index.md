@@ -4,7 +4,8 @@ type: docs
 title: "通信协议"
 linkTitle: "通信协议"
 description: "演示 Dubbo 支持的通信协议"
-weight: 50
+weight: 40
+hide: true
 no_list: true
 ---
 

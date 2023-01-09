@@ -1,9 +1,9 @@
 
 ---
 type: docs
-title: "可观测性"
-linkTitle: "可观测性"
+title: "观测服务"
+linkTitle: "观测服务"
 description: "演示如何将 Dubbo 部署到 Kubernetes 并复用 Kubernetes Native Service。"
-weight: 60
+weight: 50
 no_list: true
 ---
