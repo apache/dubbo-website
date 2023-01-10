@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "kubernetes probes"
-linkTitle: "kubernetes probes"
+title: "Kubernetes Probes"
+linkTitle: "Kubernetes Probes"
 weight: 5
 no_list: true
 hide_summary: true

@@ -14,14 +14,6 @@ hide_summary: true
 Observability is the ability to observe the internal state of a running system from the outside. It consists of three pillars of logging, metrics and tracing.
 To gain insight into what's going on inside Dubbo, Dubbo Observability includes many additional features to help you monitor and manage your application as you push it to production. You can choose to use HTTP endpoints or JMX to manage and monitor the application. Auditing, health and metrics collection can also be automatically applied to applications.
 
-How to enable the observability of Dubbo? Mainly by introducing the following dependencies:
-```xml
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-spring-boot-actuator</artifactId>
-    <version>${dubbo.version}</version>
-</dependency>
-```
 
 Dubbo observability mainly manages the following latitudes:
 - [meter](./meter/) 
