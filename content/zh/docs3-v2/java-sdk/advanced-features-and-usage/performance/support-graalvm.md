@@ -6,14 +6,20 @@ weight: 40
 description: ""
 ---
 
-dubbo3.0 支持 native-image 文档
+Dubbo3.0 支持 Native-Image 文档
 
-## 特性说明
+## 功能说明
 本文档将介绍将 dubbo3.0 项目接入 GraalVM，进行 native-image 编译为二进制的流程。
 
 关于 GraalVm 的更多信息可以阅读 https://www.graalvm.org/docs/getting-started/container-images/ 此文档。
 
 ## 使用场景
+1. 本机映像编译：将应用程序预编译为本机映像，缩短启动时间并减少内存使用。
+2. 语言互操作：GraalVM 能够用多种语言编写代码，在同一应用程序中进行互操作。
+3. 优化：GraalVM 为用 Java、JavaScript 和其他语言编写的应用程序提供优化，提高 Dubbo 应用程序的性能。
+4. Polyglot 调试：GraalVM 能够在同一会话中调试用多种语言编写的代码，对复杂 Dubbo 应用程序中的问题进行故障排除时非常有用。
+5. Java 运行时：可以在 GraalVM 上运行，提供更快、更高效的 Java 运行时环境。
+6. 开发微服务：可以与 GraalVM 结合，创建高性能、低资源利用率的微服务。
 
 ## 使用方式
 在编译我们的dubbo项目之前，需要确保我们正基于graalVm的环境。
