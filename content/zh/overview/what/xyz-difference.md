@@ -6,13 +6,13 @@ weight: 20
 description: ""
 ---
 
-很多开发者经常会问到 Apache Dubbo 与 Spring Cloud、gRPC 以及一些 Service Mesh 项目如 Istio 的关系，要解释清楚它们的关系并不困难，你只需要跟随这篇文章和 Dubbo 文档做一些更深入的了解，但总的来说，它们有些能力与 Dubbo 是重合的，但在一些场景你可以把它们放在一起使用。
+很多开发者经常会问到 Apache Dubbo 与 Spring Cloud、gRPC 以及一些 Service Mesh 项目如 Istio 的关系，要解释清楚它们的关系并不困难，你只需要跟随这篇文章和 Dubbo 文档做一些更深入的了解，但总的来说，它们之间有些能力是重合的，但在一些场景你可以把它们放在一起使用。
 
 虽然这是一篇 Dubbo 维护者写的文档，我们仍会尽力将 Dubbo 与其他组件之间的联系与差异客观、透明的展现出来，但考虑到每个人对不同产品的熟悉程度不一，这里的个别表述可能并不完全准确，希望能给开发者带来帮助。
 
 ## Dubbo 与 Spring Cloud
 
-![架构图](#)
+![dubbo-springcloud](/imgs/v3/difference/img.png)
 
 从上图我们可以看出，Dubbo 和 Spring Cloud 有很多相似之处，它们都在整个架构图的相同位置并提供一些相似的功能。
 
@@ -53,6 +53,8 @@ Dubbo 与 gRPC 最大的差异在于两者的定位上：
 
 Dubbo 不绑定特定的通信协议，即 Dubbo 服务间可通过多种 RPC 协议通信并支持灵活切换。因此，你可以在 Dubbo 开发的微服务中选用 gRPC 通信，**Dubbo 完全兼容 gRPC，并将 gRPC 设计为内置原生支持的协议之一**。
 
+![dubbo-springcloud](/imgs/v3/difference/dubbo-grpc.png)
+
 如果您看中基于 HTTP/2 的通信协议、基于 Protobuf 的服务定义，并基于此决定选型 gRPC 作为微服务开发框架，那很有可能您会在未来的微服务业务开发中遇到障碍，这主要源于 gRPC 没有为开发者提供以下能力：
 * 缺乏与业务应用框架集成的开发模式，用户需要基于 gRPC 底层的 RPC API 定义、发布或调用微服务，中间可能还有与业务应用开发框架整合的问题
 * 缺乏微服务周边生态扩展与适配，如服务发现、限流降级、链路追踪等没有多少可供选择的官方实现，且扩展起来非常困难
@@ -69,7 +71,7 @@ Service Mesh 是近年来在云原生背景下诞生的一种微服务架构，�
 
 **Dubbo 已经实现了对 Istio 体系的全面接入，可以用 Istio 控制面治理 Dubbo 服务，而在数据面部署架构上，针对 Sidecar 引入的复杂性与性能问题，Dubbo 还支持无代理的 Proxyless 模式。** 除此之外，Dubbo Mesh 体系还解决了 Istio 架构落地过程中的很多问题，包括提供更灵活的数据面部署架构、更低的迁移成本等。
 
-![架构图](#)
+![Dubbo-Mesh](/imgs/v3/mesh/istio.jpg)
 
 从**数据面**的视角，Dubbo 支持如下两种开发和部署模式，可以通过 Istio、Consul、Linkerd 等控制面组件实现对数据面服务的治理。
 * 以 Dubbo ThinSDK 的模式与 Envoy 一起部署，此时，Dubbo 作为微服务编程框架 & 协议通信组件而存在，与 Istio 控制面的交互由 Envoy 实现

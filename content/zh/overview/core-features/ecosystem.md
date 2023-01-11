@@ -2,7 +2,7 @@
 type: docs
 title: "微服务生态"
 linkTitle: "微服务生态"
-weight: 70
+weight: 90
 description: ""
 feature:
   title: 丰富生态
@@ -10,57 +10,21 @@ feature:
     在以下微服务领域提供了众多官方生态适配，包括注册中心、配置中心、网关、限流降级、负载均衡、一致性事务、异步消息、Tracing、可观测等。
 ---
 
+<!-- <link rel="stylesheet" href="https://g.alicdn.com/mamba/assets/0.0.3/mse-arc-ui.min.css" /> -->
+<!-- <script src="https://g.alicdn.com/mamba/assets/0.0.3/mse-arc-ui.min.js"></script> -->
 
-### Dashboard
-* [Dubbo-admin](https://github.com/apache/dubbo-admin)
+<!-- {{< blocks/section color="white" height="auto" >}} -->
+<!-- <div class="msemap-section"> -->
+<!--  <div class="msemap-container"> -->
+<!--     <div id="mse-arc-container"></div> -->
+<!--   </div> -->
+<!-- </div> -->
+<!-- {{< /blocks/section >}} -->
 
-### 支持的组件与部署架构
+Dubbo 社区和众多优秀的开源项目一起围绕 Dubbo 建立了丰富的微服务生态支持，这让开发者从选型 Dubbo 作为开发框架的第一天，就无需担心后续的服务治理诉求，Dubbo 对每一个常见问题均提供了生产级的解决方案。
 
-Dubbo 实现普遍支持以下产品或部署架构，具体多语言 SDK 实现可能有差异。
+基于 Dubbo 灵活的可扩展性，Dubbo 微服务集群不会绑定任何特定组件实现、不绑定单一通信协议。
 
-* 注册中心
-  * Zookeeper
-  * [Nacos](https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html)
-  * Kubernetes
-* 元数据中心
-  * Zookeeper
-  * [Nacos](https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html)
-  * Redis
-* 配置中心
-  * Zookeeper
-  * [Nacos](https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html)
-  * Redis
-  * Apollo
-* Mesh
-  * 数据面 Envoy
-  * 控制面 Istio
+![ecosystem](/imgs/v3/feature/ecosystem/ecosystem.png)
 
-### 协议与互通性
-* 基于 Triple 协议可实现与 gRPC 体系互通
-* 基于 REST 协议以及应用级服务发现可实现 Spring Cloud 体系在协议和地址发现层面的互通
-
-### SPI 集成
-这里有众多的 Dubbo 扩展实现，包括协议、序列化、注册中心等
-* [dubbo-spi-extensions]
-
-### 网关组件
-* [Apache Shenyu](/zh/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/)
-* [Apache APISIX](/zh/blog/2022/01/18/%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E6%93%8D%E4%BD%9C%E8%AE%A9%E4%BD%A0%E5%9C%A8-apache-apisix-%E4%B8%AD%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1%E6%9B%B4%E4%BE%BF%E6%8D%B7/)
-* [Apache Dubbo-pixiu]
-* [Tengine]
-
-### 链路追踪
-* [Zipkin]
-* [Apache Skywalking]
-
-### 其他微服务组件
-* 限流 [Sentinel]
-* 事务 [Seata]
-
-### 多语言实现
-* Golang
-* Java
-* Rust
-* Node
-* Python
-* PHP
+可通过 [微服务生态]() 任务，了解更多 Dubbo 生态能力和使用方式。
