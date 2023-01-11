@@ -10,39 +10,82 @@ feature:
     多种形态数据面支持，包括以 Thin SDK 模式与 Envoy 等一起部署或以 Proxyless 模式独立部署，所有模式均可以开源标准方式无缝接入 Istio、Consul 等服务治理体系。
 ---
 
+Dubbo Mesh 是 Dubbo 在云原生背景的微服务整体解决方案，它帮助开发者实现 Dubbo 服务与标准的 Kubernetes Native Service 体系的打通，让 Dubbo 应用能够无缝接入 Istio 等业界主流服务网格产品。
 
-* 数据面形态
-* 提供平滑迁移方案
-* 官方提供自定义控制面，且支持任一业界主流控制面 Istio、Linkerd 等。
+以下是 Dubbo Mesh 的部署架构图
+
+![Dubbo-Mesh](/imgs/v3/mesh/istio.jpg)
+
+* 控制面。Istio 作为统一控制面，为集群提供 Kubernetes 适配、服务发现、证书管理、可观测性、流量治理等能力。
+* 数据面。Dubbo 应用实例作为数据面组件，支持两种部署模式
+    * Proxy 模式。Dubbo 进程与 Envoy 部署在同一 pod，进出 Dubbo 的流量都经 Envoy 代理拦截，由 Envoy 执行流量管控。
+    * Proxyless 模式。Dubbo 进程独立部署，进程间直接通信，通过 xDS 协议与控制面直接交互。
+
+关于服务网格架构以及为何要接入 Istio 控制面，请参考 [Istio 官网](https://istio.io/)，本文不包含这部分通用内容的讲解，而是会侧重在 Dubbo Mesh 解决方案本身。
 
 ## Dubbo Mesh
 
-### Sidecar Mesh
+### Proxy Mesh
+在 proxy 模式下，Dubbo 与 Envoy 等边车 (Sidecar) 部署在一起
+
+![dubbo-sidecar](/imgs/v3/mesh/dubbo-sidecar.png)
+
+以上是 Dubbo Proxy Mesh 部署架构图
+* Dubbo 与 Envoy 部署在同一个 Pod 中，Istio 实现对流量和治理的统一管控。
+* Dubbo 只提供面向业务应用的编程 API、RPC 通信能力，其余流量管控能力如地址发现、负载均衡、路由寻址等都下沉到 Envoy，Envoy 拦截所有进出流量并完成路由寻址等服务治理工作。
+* 控制面与 Envoy 之间通过图中虚线所示的 xDS 协议进行配置分发。
+
+在 Proxy 模式下，Dubbo3 通信层选用 Triple、gRPC、REST 等基于 HTTP 的通信协议可以获得更好的网关穿透性与性能体验。
 
 ### Proxyless Mesh
+在 Proxyless 模式下，没有 Envoy 等代理组件，Dubbo 进程保持独立部署并直接通信，Istio 控制面通过 xDS 与 Dubbo 进程进行治理能力交互。
 
-## 迁移方案
+![dubbo-proxyless](/imgs/v3/mesh/dubbo-proxyless.png)
+
+Proxyless 模式下 Dubbo 部署与服务网格之前基本一致，通过不同语言版本的 Dubbo3 SDK 直接实现 xDS 协议解析
+
+#### 为什么需要 Proxyless Mesh
+
+Proxy 模式很好的实现了治理能力与有很多优势，如平滑升级、多语言、业务侵入小等，但也带来了一些额外的问题，比如：
+* Sidecar 通信带来了额外的性能损耗，这在复杂拓扑的网络调用中将变得尤其明显。
+* Sidecar 的存在让应用的声明周期管理变得更加复杂。
+* 部署环境受限，并不是所有的环境都能满足 Sidecar 部署与请求拦截要求。
+
+在 Proxyless 模式下，Dubbo 进程之间继续保持直连通信模式：
+* 没有额外的 Proxy 中转损耗，因此更适用于性能敏感应用
+* 更有利于遗留系统的平滑迁移
+* 架构简单，容易运维部署
+* 适用于几乎所有的部署环境
+
+## 示例任务
+了解了足够多的原理知识，我们推荐你访问如下 [示例]() 进行动手实践。
+
+## 可视化
+推荐使用 [Dubbo Admin]() 作为您 Dubbo 集群的可视化控制台，它兼容所有 Kubernetes、Mesh 和非 Mesh 架构的部署。
+
+除此之外，你也可以使用 [Istio 官方推荐的可视化工具](https://istio.io/latest/docs/tasks/observability/kiali/) 来管理您的 Dubbo Mesh 集群。
+
+## 接入非 Istio 控制面
+Dubbo Mesh 本身并不绑定任何控制面产品实现，你可以使用 Istio、Linkerd、Kuma 或者任一支持 xDS 协议的控制面产品，对于 Sidecar 亦是如此。
+
+如果你已经完整的体验了 [基于 Istio 的 Dubbo Mesh]() 示例任务，并且发现 Istio 很好的满足了你的 Dubbo Mesh 治理诉求，那么采用 Istio 作为你的控制面是首选的解决方案。
+
+如果你发现 Istio 模式下 Dubbo 部分能力受限，而这部分能力正好是你需要的，那么你需要考虑接入 Dubbo 控制面，用 Dubbo 控制面来替代 Istio，以获得更多 Dubbo 体系原生能力支持、更好的性能体验。具体请参见 [基于 Dubbo 定制控制面 的 Dubbo Mesh]()  示例任务。
+
+> 简单来讲，这是 Dubbo 社区发布的一款基于 Istio 的定制版本控制面，Dubbo 控制面安装与能力差异请参见上面的示例任务链接。
+
+## 老系统迁移方案
+### 如何解决注册中心数据同步的问题？
 
 
-Service Mesh 强调控制面在微服务治理中的作用，在一定程度上推动了控制面通信协议、职责范围的扩展与标准化；传统 Mesh 架构下的 Sidecar 模型强调旁路代理对于流量的统一管控，以实现透明升级、多语言无感、无业务侵入等特性。
+### 如何解决 Dubbo2 协议通信的问题？
 
-Dubbo3 提供了基于自身思考的 Dubbo Mesh 解决方案，强调了控制面对微服务集群的统一管控，而在部署架构上，同时支持 sidecar 与无 sidecar 的 proxyless 部署架构，使用 Dubbo Mesh 的用户基于自身的业务特点将有更多的部署架构选择。
+Aeraki Mesh
 
 
-Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一代的微服务架构，这主要是因为它解决了很多棘手的问题，包括透明升级、多语言、依赖冲突、流量治理等。Service Mesh 的典型架构是通过部署独立的 Sidecar 组件来拦截所有的出口与入口流量，并在 Sidecar 中集成丰富的流量治理策略如负载均衡、路由等，除此之外，Service Mesh 还需要一个控制面（Control Panel）来实现对 Sidecar 流量的管控，即各种策略下发。我们在这里称这种架构为经典 Mesh。
 
-然而任何技术架构都不是完美的，经典 Mesh 在实施层面也面临成本过高的问题
 
-需要运维控制面（Control Panel）
-需要运维 Sidecar
-需要考虑如何从原有 SDK 迁移到 Sidecar
-需要考虑引入 Sidecar 后整个链路的性能损耗
-为了解决 Sidecar 引入的相关成本问题，Dubbo 引入并实现了全新的 Proxyless Mesh 架构，顾名思义，Proxyless Mesh 就是指没有 Sidecar 的部署，转而由 Dubbo SDK 直接与控制面交互，其架构图如下
 
-可以设想，在不同的组织、不同的发展阶段，未来以 Dubbo 构建的微服务将会允许有三种部署架构：传统 SDK、基于 Sidecar 的 Service Mesh、脱离 Sidecar 的 Proxyless Mesh。基于 Sidecar 的 Service Mesh，即经典的 Mesh 架构，独立的 sidecar 运行时接管所有的流量，脱离 Sidecar 的 Proxyless Mesh，副 SDK 直接通过 xDS 与控制面通信。Dubbo 微服务允许部署在物理机、容器、Kubernetes 平台之上，能做到以 Admin 为控制面，以统一的流量治理规则进行治理。
 
-Dubbo Mesh 的目标是提供适应 Dubbo 体系的完整 Mesh 解决方案，包含定制化控制面（Control Plane）、定制化数据面解决方案。Dubbo 控制面基于业界主流 Istio 扩展，支持更丰富的流量治理规则、Dubbo应用级服务发现模型等，Dubbo 数据面可以采用 Envoy Sidecar，即实现 Dubbo SDK + Envoy 的部署方案，也可以采用 Dubbo Proxyless 模式，直接实现 Dubbo 与控制面的通信。Dubbo Mesh 在快速演进中，我们将努力保持文档内容的更新。
 
-![Proxy Mesh]()
 
-![]()
