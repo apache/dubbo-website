@@ -18,7 +18,7 @@ Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数�
 
 可以通过 Dubbo Admin 可视化的查看 Metrics 指标
 
-![Admin 效果图]()
+![Admin 效果图](/imgs/v3/advantages/observability-grafana.png)
 
 也可以使用 Grafana、Prometheus 等实现可视化指标监测，具体请参考以下可视化任务示例：
 
@@ -28,6 +28,8 @@ Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数�
 
 ## Tracing
 全链路追踪对于监测分布式系统运行状态具有非常重要的价值，Dubbo 通过 Filter 拦截器实现了请求运行时的埋点跟踪，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等，可以实现全链路跟踪数据的分析与可视化展示。
+
+![Admin 效果图](/imgs/v3/advantages/observability-tracing.png)
 
 只需要简单的一行配置即可切换链路跟踪的后端实现，并且，你可以随时通过 Dubbo Admin 等治理平台动态调整 Dubbo 的链路追踪采样率，对于问题排查都非常有价值。
 
