@@ -14,7 +14,7 @@ Dubbo 的各语言 sdk 实现都是采用的 "微内核+插件" 的设计模式�
 * 扩展适配能力是实现 Dubbo 微服务生态的关键，Dubbo 生态组件如全链路追踪、注册中心实现等的适配都是基于 Filter、Registry、DynamicConfiguration 等扩展点实现。
 * 扩展适配给用户带来最大的灵活性，开发者可以随时接入公司内部组件、按需定制核心能力等。
 
-![extensibility-echosystem.png](/imgs/v3/concepts/extensibility-echosystem.png)
+![extensibility-echosystem.png](/imgs/v3/feature/extensibility/arc.png)
 
 以上是按架构层次划分的 Dubbo 内的一些核心扩展点定义及实现，从三个层次来展开：
 * 协议通信层
@@ -24,7 +24,7 @@ Dubbo 的各语言 sdk 实现都是采用的 "微内核+插件" 的设计模式�
 ## 协议通信层
 在通信协议一节我们强调过，Dubbo 不绑定任何协议，用户可以选择 Triple、gRPC、Dubbo2、REST、自定义协议等任一 RPC 远程通信协议，除此之外，RPC 协议之上的数据编码格式 (即序列化协议) 也是通过扩展点定义，用户可以灵活选择 RPC 与序列化的通信协议组合。
 
-![协议与编码原理图](/imgs/v3/concepts/rpc.png)
+![协议与编码原理图](/imgs/v3/feature/extensibility/protocol.png)
 
 ### Protocol
 Protocol 扩展点定义对应的是 RPC 协议，利用这个扩展点可以让 Dubbo 作为统一的微服务开发和治理框架，而在下层通信协议上实现灵活切换。官方发布了对大多数主流 RPC 通信协议的适配，你可以通过几条简单的配置直接使用，如果你想使用公司自定义的 RPC 通信协议，请通过 Protocol 提供自定义扩展实现。
@@ -35,7 +35,7 @@ Serialization 扩展点定义了序列化协议扩展，Dubbo 官方提供了 Fa
 ## 流量管控层
 Dubbo 在服务调用链路上预置了大量扩展点，通过这些扩展点用户可以控制运行态的流量走向、改变运行时调用行为等，包括 Dubbo 内置的一些负载均衡策略、流量路由策略、超时等很多流量管控能力都是通过这类扩展点实现的。
 
-![协议与编码原理图](/imgs/v3/feature/extensibility/filter.png)
+![协议与编码原理图](/imgs/v3/feature/extensibility/traffic.png)
 
 ### Filter
 Filter 流量拦截器是 Dubbo 服务调用之上的 AOP 设计模式，Filter 用来对每次服务调用做一些预处理、后处理动作，使用 Filter 可以完成访问日志、加解密、流量统计、参数验证等任务，Dubbo 中的很多生态适配如限流降级 Sentinel、全链路追踪 Tracing 等都是通过 Fitler 扩展实现的。一次请求过程中可以植入多个 Filter，Filter 之间相互独立没有依赖。

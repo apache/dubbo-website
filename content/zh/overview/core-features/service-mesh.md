@@ -14,7 +14,7 @@ Dubbo Mesh 是 Dubbo 在云原生背景的微服务整体解决方案，它帮�
 
 以下是 Dubbo Mesh 的部署架构图
 
-![Dubbo-Mesh](/imgs/v3/mesh/istio.jpg)
+![Dubbo-Mesh](/imgs/v3/mesh/mix-mesh.png)
 
 * 控制面。Istio 作为统一控制面，为集群提供 Kubernetes 适配、服务发现、证书管理、可观测性、流量治理等能力。
 * 数据面。Dubbo 应用实例作为数据面组件，支持两种部署模式
@@ -26,9 +26,9 @@ Dubbo Mesh 是 Dubbo 在云原生背景的微服务整体解决方案，它帮�
 ## Dubbo Mesh
 
 ### Proxy Mesh
-在 proxy 模式下，Dubbo 与 Envoy 等边车 (Sidecar) 部署在一起
+在 proxy 模式下，Dubbo 与 Envoy 等边车 (Proxy or Sidecar) 部署在一起
 
-![dubbo-sidecar](/imgs/v3/mesh/dubbo-sidecar.png)
+![dubbo-sidecar](/imgs/v3/mesh/dubbo-proxy.png)
 
 以上是 Dubbo Proxy Mesh 部署架构图
 * Dubbo 与 Envoy 部署在同一个 Pod 中，Istio 实现对流量和治理的统一管控。
@@ -76,7 +76,7 @@ Dubbo Mesh 本身并不绑定任何控制面产品实现，你可以使用 Istio
 
 ## 老系统迁移方案
 ### 如何解决注册中心数据同步的问题？
-
+Address Synchronization
 
 ### 如何解决 Dubbo2 协议通信的问题？
 

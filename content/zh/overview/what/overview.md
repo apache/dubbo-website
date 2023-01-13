@@ -33,7 +33,7 @@ Dubbo 作为服务开发框架包含的具体内容如下：
 * **RPC 服务发布与调用 API**。Dubbo 支持同步、异步、Reactive Streaming 等服务调用编程模式，还支持请求上下文 API、设置超时时间等。
 * **服务治理策略、流程与适配方式等**。作为服务框架数据面，Dubbo 定义了服务地址发现、负载均衡策略、基于规则的流量路由、Metrics 指标采集等服务治理抽象，并适配到特定的产品实现。
 
-如果你不知道如何开始微服务开发，选择如下 Dubbo 服务开发框架实现，就可以开始微服务项目开发之旅啦：
+想了解如何使用 Dubbo 微服务框架进行业务编码？从以下 SDK 开始微服务项目开发之旅吧：
 * [Java](../../..docs3-v2/java-sdk/)
 * [Golang]()
 * [Rust]()
@@ -86,20 +86,27 @@ Dubbo 支持通过一系列流量规则控制服务调用的流量分布与行�
 
 * **链路追踪**
 
-全链路追踪
+Dubbo 官方通过适配 OpenTelemetry 提供了对 Tracing 全链路追踪支持，用户可以接入支持 OpenTelemetry 标准的产品如 Skywalking、Zipkin 等。另外，很多社区如 Skywalking、Zipkin 等在官方也提供了对 Dubbo 的适配。
 
 * **可观测性**
 
 Dubbo 实例通过 Prometheus 等上报 QPS、RT、请求次数、成功率、异常次数等多维度的可观测指标帮助了解服务运行状态，通过接入 Grafana、Admin 控制台帮助实现数据指标可视化展示。
 
-Dubbo 服务治理生态还提供了对 API 网关、限流降级、数据一致性、认证鉴权等场景的支持。
+Dubbo 服务治理生态还提供了对 **API 网关**、**限流降级**、**数据一致性**、**认证鉴权**等场景的适配支持。
 
 ### Dubbo Admin
-Admin 控制台是 Dubbo
+Admin 控制台提供了 Dubbo 集群的可视化视图，通过 Admin 你可以完成集群的几乎所有管控工作。
+* 查询服务、应用或机器状态
+* 创建项目、服务测试、文档管理等
+* 查看集群实时流量、定位异常问题等
+* 流量比例分发、参数路由等流量管控规则下发
+
+![Admin](/imgs/v3/what/admin.png)
 
 ### 服务网格
+将 Dubbo 接入 Istio 等服务网格治理体系。
 
-
+![Dubbo-Mesh](/imgs/v3/mesh/mix-mesh.png)
 
 
 
