@@ -1,0 +1,131 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 性能参考手册</title><link>https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/performance/</link><description>Recent content in 性能参考手册 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/performance/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: RPC 协议 Triple&amp;Dubbo 基准测试</title><link>https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/performance/rpc-benchmarking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/performance/rpc-benchmarking/</guid><description>
+&lt;ul>
+&lt;li>Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。&lt;/li>
+&lt;li>由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。&lt;/li>
+&lt;li>Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。&lt;/li>
+&lt;/ul>
+&lt;h2 id="11-环境">1.1 环境&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>描述&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;strong>机器&lt;/strong>&lt;/td>
+&lt;td>4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;strong>压测用例&lt;/strong>&lt;/td>
+&lt;td>RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值&lt;br />&lt;br />2.7 版本 Dubbo 协议（Hessian2 序列化）&lt;br />3.0 版本 Dubbo 协议（Hessian2 序列化）&lt;br />3.0 版本 Dubbo 协议（Protobuf 序列化）&lt;br />3.0 版本 Triple 协议（Protobuf 序列化）&lt;br />3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;strong>压测方法&lt;/strong>&lt;/td>
+&lt;td>单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据&lt;br /> 压测数据通过 &lt;a href="https://github.com/apache/dubbo-benchmark">https://github.com/apache/dubbo-benchmark&lt;/a> 得出&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;br />
+&lt;h2 id="12-数据分析">1.2 数据分析&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>&lt;strong>Dubbo + Hessian2&lt;br />2.7&lt;/strong>&lt;/th>
+&lt;th>&lt;strong>Dubbo + Hessian2&lt;br />3.0&lt;/strong>&lt;/th>
+&lt;th>&lt;strong>Dubbo + Protobuf&lt;br />3.0&lt;/strong>&lt;/th>
+&lt;th>&lt;strong>Triple + Protobuf&lt;br />3.0&lt;/strong>&lt;/th>
+&lt;th>&lt;strong>Triple + Protobuf(Hessian)&lt;br />3.0&lt;/strong>&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;strong>无参方法&lt;/strong>&lt;/td>
+&lt;td>30333 ops/s&lt;br />2.5ms P99&lt;/td>
+&lt;td>30414 ops/s&lt;br />2.4ms P99&lt;/td>
+&lt;td>24123 ops/s&lt;br />3.2ms P99&lt;/td>
+&lt;td>7016 ops/s&lt;br />8.7ms P99&lt;/td>
+&lt;td>6635 ops/s&lt;br />9.1ms P99&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;strong>pojo返回值&lt;/strong>&lt;/td>
+&lt;td>8984 ops/s&lt;br />6.1 ms P99&lt;/td>
+&lt;td>12279 ops/s&lt;br />5.7 ms P99&lt;/td>
+&lt;td>21479 ops/s&lt;br />3.0 ms P99&lt;/td>
+&lt;td>6255 ops/s&lt;br />8.9 ms P99&lt;/td>
+&lt;td>6491 ops/s&lt;br />10 ms P99&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;strong>pojo列表返回值&lt;/strong>&lt;/td>
+&lt;td>1916 ops/s&lt;br />34 ms P99&lt;/td>
+&lt;td>2037 ops/s&lt;br />34 ms P99&lt;/td>
+&lt;td>12722 ops/s&lt;br />7.7 ms P99&lt;/td>
+&lt;td>6920 ops/s&lt;br />9.6 ms P99&lt;/td>
+&lt;td>2833 ops/s&lt;br />27 ms P99&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="121-dubbo-协议不同版本实现对比">1.2.1 Dubbo 协议不同版本实现对比&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/performance/rpc-dubbo.svg" alt="//imgs/v3/performance/rpc-dubbo.svg">&lt;/p>
+&lt;p>&lt;br />图三 Dubbo协议在不同版本的实现对比&lt;br />&lt;/p>
+&lt;ul>
+&lt;li>就 Dubbo RPC + Hessian 的默认组合来说，Dubbo3 与 Dubbo2 在性能上在不同调用场景下基本持平&lt;/li>
+&lt;/ul>
+&lt;h3 id="122-dubbo协议-vs-triple协议">1.2.2 Dubbo协议 vs Triple协议&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/performance/rpc-triple.svg" alt="//imgs/v3/performance/rpc-triple.svg">&lt;/p>
+&lt;p>&lt;br />图四 Triple vs Dubbo&lt;br />&lt;/p>
+&lt;ul>
+&lt;li>单纯看 Consumer &amp;lt;-&amp;gt; Provider 的点对点调用，可以看出 Triple 协议本身并不占优势，同样使用 Protobuf 序列化方式，Dubbo RPC 协议总体性能还是要优于 Triple。&lt;br />&lt;br />&lt;/li>
+&lt;li>Triple 实现在 3.0 版本中将会得到持续优化，但不能完全改变在某些场景下“基于 HTTP/2 的 RPC 协议”对比“基于 TCP 的 RPC 协议”处于劣势的局面&lt;/li>
+&lt;/ul>
+&lt;h3 id="123-补充网关场景">1.2.3 补充网关场景&lt;/h3>
+&lt;p>TBD&lt;br />&lt;br />&lt;/p>
+&lt;h3 id="124-模拟-stream-通信场景的吞吐量提升">1.2.4 模拟 Stream 通信场景的吞吐量提升&lt;/h3>
+&lt;p>TBD&lt;/p></description></item><item><title>Docs3-V2: 应用级服务发现基准测试</title><link>https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/performance/benchmarking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/performance/benchmarking/</guid><description>
+&lt;h2 id="1-benchmark-结论">1 Benchmark 结论&lt;/h2>
+&lt;p>对比 2.x 版本，Dubbo3 版本&lt;/p>
+&lt;ul>
+&lt;li>服务发现资源利用率显著提升。
+&lt;ul>
+&lt;li>对比接口级服务发现，单机常驻内存下降 50%，地址变更期 GC 消耗下降一个数量级 (百次 -&amp;gt; 十次)&lt;/li>
+&lt;li>对比应用级服务发现，单机常驻内存下降 75%，GC 次数趋零&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>以下是详细压测过程与数据&lt;/p>
+&lt;h2 id="2-应用级服务发现地址推送链路">2 应用级服务发现（地址推送链路）&lt;/h2>
+&lt;p>此部分压测数据是由工商银行 Dubbo 团队基于内部生产数据给出，压测过程模拟了“生产环境地址+zookeeper”的服务发现架构。&lt;/p>
+&lt;h3 id="21-环境">2.1 环境&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>描述&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;strong>压测数据&lt;/strong>&lt;/td>
+&lt;td>提供者&lt;br/>500运行实例✖️8interface✖️5protocol，即每个提供者向注册中心注册40个URL，总计20000个URL，每个URL字符长度约1k。&lt;br/>&lt;br/>注册中心&lt;br/>2个独立zookeeper注册中心，服务提供者消费者采用并行配置。&lt;br/>&lt;br/>消费者&lt;br/>配置1c2g，xmx=768，开启GC，从2个注册中心订阅，每5秒调用一次服务。运行20小时。&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;strong>压测环境&lt;/strong>&lt;/td>
+&lt;td>Java version &amp;ldquo;1.8.0&amp;rdquo;&lt;br/>Java(TM) SE Runtime Enviroment (build pxa6480sr3fp12-20160919_01(SR3 FP12))&lt;br/>IBM J9 VM (Build 2.8, JRE 1.8.0 Linux amd64-64 Compressed References 20160915_318796, JIT enabled, AOT enabled)&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="22-数据分析">2.2 数据分析&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/performance/registry-mem.svg" alt="//imgs/v3/performance/registry-mem.svg">&lt;/p>
+&lt;p>&lt;br />图一 服务发现模型内存占用变化&lt;br />&lt;br />&lt;/p>
+&lt;ul>
+&lt;li>Dubbo3 接口级服务发现模型，常驻内存较 2.x 版本下降约 50%&lt;/li>
+&lt;li>Dubbo3 应用级服务发现模型，常驻内存较 2.x 版本下降约 75%&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/performance/registry-gc.svg" alt="//imgs/v3/performance/registry-gc.svg">&lt;/p>
+&lt;p>&lt;br />图二 服务发现模型 GC 变化&lt;br />&lt;br />&lt;/p>
+&lt;ul>
+&lt;li>Dubbo3 接口级服务发现模型，YGC 次数 2.x 版本大幅下降，从数百次下降到十几次&lt;/li>
+&lt;li>Dubbo3 应用级服务发现模型，FGC 次数 2.x 版本大幅下降，从数百次下降到零次&lt;/li>
+&lt;/ul></description></item></channel></rss>

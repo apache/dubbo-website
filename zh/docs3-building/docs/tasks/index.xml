@@ -1,0 +1,413 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 示例实践</title><link>https://dubbo.apache.org/zh/docs3-building/docs/tasks/</link><description>Recent content in 示例实践 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs3-building/docs/tasks/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-Building: Dubbo Mesh</title><link>https://dubbo.apache.org/zh/docs3-building/docs/tasks/dubbo-mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/docs/tasks/dubbo-mesh/</guid><description/></item><item><title>Docs3-Building: 部署到 Kubernetes</title><link>https://dubbo.apache.org/zh/docs3-building/docs/tasks/deploy-on-k8s/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/docs/tasks/deploy-on-k8s/</guid><description/></item><item><title>Docs3-Building: 流量管理</title><link>https://dubbo.apache.org/zh/docs3-building/docs/tasks/traffic-management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/docs/tasks/traffic-management/</guid><description>
+&lt;ul>
+&lt;li>超时&lt;/li>
+&lt;li>路由规则&lt;/li>
+&lt;li>动态配置&lt;/li>
+&lt;li>多注册中心&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-Building: 使用 IDL + Protobuf 跨语言定义服务</title><link>https://dubbo.apache.org/zh/docs3-building/docs/tasks/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/docs/tasks/idl/</guid><description>
+&lt;p>服务是 Dubbo 中的核心概念，一个服务代表一组 RPC 方法的集合，服务是面向用户编程、服务发现机制等的基本单位。Dubbo 开发的基本流程是：用户定义 RPC 服务，通过约定的配置
+方式将 RPC 声明为 Dubbo 服务，然后就可以基于服务 API 进行编程了。对服务提供者来说是提供 RPC 服务的具体实现，而对服务消费者来说则是使用特定数据发起服务调用。&lt;/p>
+&lt;p>下面从定义服务、编译服务、配置并加载服务三个方面说明如何快速的开发 Dubbo 服务。&lt;/p>
+&lt;h2 id="定义服务">定义服务&lt;/h2>
+&lt;p>Dubbo3 推荐使用 IDL 定义跨语言服务，如您更习惯使用特定语言的服务定义方式，请移步&lt;a href="../mannual">多语言 SDK&lt;/a>查看。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>syntax = &amp;#34;proto3&amp;#34;;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>option java_multiple_files = true;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>option java_package = &amp;#34;org.apache.dubbo.demo&amp;#34;;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>option java_outer_classname = &amp;#34;DemoServiceProto&amp;#34;;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>option objc_class_prefix = &amp;#34;DEMOSRV&amp;#34;;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>package demoservice;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>// The demo service definition.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service DemoService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHello (HelloRequest) returns (HelloReply) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>// The request message containing the user&amp;#39;s name.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>message HelloRequest {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string name = 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>// The response message containing the greetings
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>message HelloReply {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string message = 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上是使用 IDL 定义服务的一个简单示例，我们可以把它命名为 &lt;code>DemoService.proto&lt;/code>，proto 文件中定义了 RPC 服务名称 &lt;code>DemoService&lt;/code> 与方法签名
+&lt;code>SayHello (HelloRequest) returns (HelloReply) {}&lt;/code>，同时还定义了方法的入参结构体、出参结构体 &lt;code>HelloRequest&lt;/code> 与 &lt;code>HelloReply&lt;/code>。
+IDL 格式的服务依赖 Protobuf 编译器，用来生成可以被用户调用的客户端与服务端编程 API，Dubbo 在原生 Protobuf Compiler 的基础上提供了适配多种语言的特有插件，用于适配 Dubbo 框架特有的 API 与编程模型。&lt;/p>
+&lt;blockquote>
+&lt;p>使用 Dubbo3 IDL 定义的服务只允许一个入参与出参，这种形式的服务签名有两个优势，一是对多语言实现更友好，二是可以保证服务的向后兼容性，依赖于 Protobuf 序列化的兼容性，我们可以很容易的调整传输的数据结构如增、删字段等，完全不用担心接口的兼容性。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="编译服务">编译服务&lt;/h2>
+&lt;p>根据当前采用的语言，配置相应的 Protobuf 插件，编译后将生产语言相关的服务定义 stub。&lt;/p>
+&lt;h3 id="java">Java&lt;/h3>
+&lt;p>Java 语言生成的 stub 如下，核心是一个接口定义&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@javax.annotation.Generated&lt;/span>&lt;span style="color:#719e07">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;by Dubbo generator&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>comments &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Source: DemoService.proto&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String JAVA_SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;demoservice.DemoService&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloReply &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloRequest request&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>&lt;span style="color:#719e07">(&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloRequest request&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="golang">Golang&lt;/h3>
+&lt;p>Go 语言生成的 stub 如下，这个 stub 里存了用户定义的接口和数据的类型。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">_DUBBO_Greeter_SayHello_Handler&lt;/span>(srv &lt;span style="color:#268bd2">interface&lt;/span>{}, ctx context.Context, dec &lt;span style="color:#268bd2">func&lt;/span>(&lt;span style="color:#268bd2">interface&lt;/span>{}) &lt;span style="color:#dc322f">error&lt;/span>, interceptor grpc.UnaryServerInterceptor) (&lt;span style="color:#268bd2">interface&lt;/span>{}, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> in &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">new&lt;/span>(HelloRequest)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">dec&lt;/span>(in); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>, err
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> base &lt;span style="color:#719e07">:=&lt;/span> srv.(dgrpc.Dubbo3GrpcService)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> args &lt;span style="color:#719e07">:=&lt;/span> []&lt;span style="color:#268bd2">interface&lt;/span>{}{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> args = &lt;span style="color:#b58900">append&lt;/span>(args, in)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> invo &lt;span style="color:#719e07">:=&lt;/span> invocation.&lt;span style="color:#268bd2">NewRPCInvocation&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;SayHello&amp;#34;&lt;/span>, args, &lt;span style="color:#cb4b16">nil&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> interceptor &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">:=&lt;/span> base.&lt;span style="color:#268bd2">GetProxyImpl&lt;/span>().&lt;span style="color:#268bd2">Invoke&lt;/span>(ctx, invo)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result.&lt;span style="color:#268bd2">Result&lt;/span>(), result.&lt;span style="color:#268bd2">Error&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> info &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>grpc.UnaryServerInfo{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Server: srv,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> FullMethod: &lt;span style="color:#2aa198">&amp;#34;/main.Greeter/SayHello&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> handler &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>(ctx context.Context, req &lt;span style="color:#268bd2">interface&lt;/span>{}) (&lt;span style="color:#268bd2">interface&lt;/span>{}, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">:=&lt;/span> base.&lt;span style="color:#268bd2">GetProxyImpl&lt;/span>().&lt;span style="color:#268bd2">Invoke&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), invo)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result.&lt;span style="color:#268bd2">Result&lt;/span>(), result.&lt;span style="color:#268bd2">Error&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#268bd2">interceptor&lt;/span>(ctx, in, info, handler)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置并加载服务">配置并加载服务&lt;/h2>
+&lt;p>提供端负责提供具体的 Dubbo 服务实现，也就是遵循 RPC 签名所约束的格式，去实现具体的业务逻辑代码。在实现服务之后，要将服务实现注册为标准的 Dubbo 服务，
+之后 Dubbo 框架就能根据接收到的请求转发给服务实现，执行方法，并将结果返回。&lt;/p>
+&lt;p>消费端的配置会更简单一些，只需要声明 IDL 定义的服务为标准的 Dubbo 服务，框架就可以帮助开发者生成相应的 proxy，开发者将完全面向 proxy 编程，
+基本上 Dubbo 所有语言的实现都保证了 proxy 依据 IDL 服务定义暴露标准化的接口。&lt;/p>
+&lt;h3 id="java-1">Java&lt;/h3>
+&lt;p>提供端，实现服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Logger logger &lt;span style="color:#719e07">=&lt;/span> LoggerFactory&lt;span style="color:#719e07">.&lt;/span>getLogger&lt;span style="color:#719e07">(&lt;/span>DemoServiceImpl&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> HelloReply &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>HelloRequest request&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger&lt;span style="color:#719e07">.&lt;/span>info&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request&lt;span style="color:#719e07">.&lt;/span>getName&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, request from consumer: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">().&lt;/span>getRemoteAddress&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> HelloReply&lt;span style="color:#719e07">.&lt;/span>newBuilder&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>setMessage&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request&lt;span style="color:#719e07">.&lt;/span>getName&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, response from provider: &amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">+&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">().&lt;/span>getLocalAddress&lt;span style="color:#719e07">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>build&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>HelloReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>&lt;span style="color:#719e07">(&lt;/span>HelloRequest request&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> CompletableFuture&lt;span style="color:#719e07">.&lt;/span>completedFuture&lt;span style="color:#719e07">(&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>request&lt;span style="color:#719e07">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>提供端，注册服务(以 Spring XML 为例)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoServiceImpl&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.provider.DemoServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;protobuf&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>消费端，引用服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> scope=&lt;span style="color:#2aa198">&amp;#34;remote&amp;#34;&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>消费端，使用服务 proxy&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">callService&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Exception &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DemoService demoService &lt;span style="color:#719e07">=&lt;/span> context&lt;span style="color:#719e07">.&lt;/span>getBean&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> DemoService&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HelloRequest request &lt;span style="color:#719e07">=&lt;/span> HelloRequest&lt;span style="color:#719e07">.&lt;/span>newBuilder&lt;span style="color:#719e07">().&lt;/span>setName&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Hello&amp;#34;&lt;/span>&lt;span style="color:#719e07">).&lt;/span>build&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HelloReply reply &lt;span style="color:#719e07">=&lt;/span> demoService&lt;span style="color:#719e07">.&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>request&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;result: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> reply&lt;span style="color:#719e07">.&lt;/span>getMessage&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="golang-1">Golang&lt;/h3>
+&lt;p>提供端，实现服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Time time.Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, req []&lt;span style="color:#268bd2">interface&lt;/span>{}) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> gxlog.&lt;span style="color:#268bd2">CInfo&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;req:%#v&amp;#34;&lt;/span>, req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rsp &lt;span style="color:#719e07">:=&lt;/span> User{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;Alex Stocks&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">18&lt;/span>, time.&lt;span style="color:#268bd2">Now&lt;/span>()}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> gxlog.&lt;span style="color:#268bd2">CInfo&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;rsp:%#v&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>rsp, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">Reference&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetProviderService&lt;/span>(&lt;span style="color:#b58900">new&lt;/span>(UserProvider))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>消费端，使用服务 proxy&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">Load&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>pkg.User{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> os.&lt;span style="color:#268bd2">Exit&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> gxlog.&lt;span style="color:#268bd2">CInfo&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v\n&amp;#34;&lt;/span>, user)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="查看完整示例">查看完整示例&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="">Java IDL Quick Start&lt;/a>&lt;/li>
+&lt;li>&lt;a href="">Golang IDL Quick Start&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-Building: 配置规则</title><link>https://dubbo.apache.org/zh/docs3-building/docs/tasks/config-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/docs/tasks/config-rule/</guid><description>
+&lt;blockquote>
+&lt;p>&lt;strong>提示&lt;/strong>&lt;/p>
+&lt;p>本文描述的是新版本规则配置，而不是&lt;a href="https://dubbo.apache.org/zh/docs/advanced/config-rule-deprecated">老版本配置规则&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h1 id="配置规则">配置规则&lt;/h1>
+&lt;p>此任务将展示在 Dubbo 中配置应用级治理规则和服务级治理规则&lt;/p>
+&lt;p>覆盖规则是 Dubbo 设计的在无需重启应用的情况下，动态调整 RPC 调用行为的一种能力。2.7.0 版本开始，支持从&lt;strong>服务&lt;/strong>和&lt;strong>应用&lt;/strong>两个粒度来调整动态配置。&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>安装idea&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>克隆&lt;a href="https://github.com/apache/dubbo-samples.git">dubbo-samples&lt;/a>到本地，idea打开&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>拉取dubbo-admin镜像并运行镜像&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>&lt;strong>提示&lt;/strong>&lt;/p>
+&lt;p>可参考如下步骤部署dubbo-admin&lt;/p>
+&lt;ol>
+&lt;li>创建docker-compose.yml文件，内容如下:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>version: &amp;#39;3&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>services:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> zk:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> image: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> container_name: zk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ports:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - 2181:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubbo-admin:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> image: apache/dubbo-admin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> container_name: dubbo-admin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> # 等待zk启动后再启动
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> depends_on:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - zk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ports:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - 8080:8080
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environment:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - admin.registry.address=zookeeper://zk:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - admin.config-center=zookeeper://zk:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - admin.metadata-report.address=zookeeper://zk:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>2.运行命令&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker-compose up
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/blockquote>
+&lt;p>运行成功后，可以看见dubbo-admin界面&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/config-rule/dubbo_console.png" alt="dubbo_console">&lt;/p>
+&lt;h2 id="概览">概览&lt;/h2>
+&lt;p>dubbo-samples-governance示例包含dubbo-samples-applevel-override和dubbo-samples-servicelevel-override子示例，这2个子示例分别从&lt;strong>服务&lt;/strong>和&lt;strong>应用&lt;/strong>两个粒度应用覆盖规则动态调整路由。&lt;/p>
+&lt;p>此任务的最初目标是应用覆盖规则在无需重启应用的情况下动态调整流量路由。稍后，您将从&lt;strong>服务&lt;/strong>和&lt;strong>应用&lt;/strong>两个粒度应用规则动态调整路由。&lt;/p>
+&lt;p>下图展示本任务的应用端到端架构。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/config-rule/demo_architecture.png" alt="demo_architecture">&lt;/p>
+&lt;h3 id="应用粒度">应用粒度&lt;/h3>
+&lt;p>dubbo-samples-applevel-override示例中，BasicConsumer类和BascicProvider类为消费者类和提供者类，现在运行BasicProvider，成功后如图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/config-rule/BasicProvider_run.png" alt="BasicProvider_run">&lt;/p>
+&lt;p>在控制台查询服务，可以看到应用governance-appoverride-provider，如图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/config-rule/BasicProvider1_check.png" alt="BasicProvider1_check">&lt;/p>
+&lt;p>现在再运行一个提供者示例，运行在20881端口，首先修改dubbo-demo-provider.xml，将&amp;lt; dubbo:protocol /&amp;gt;标签中端口修改修改为20881，运行BasicProvider，成功后查询控制台，如图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/config-rule/BasicProvider2_check.png" alt="BasicProvider2_check">&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>提示&lt;/strong>&lt;/p>
+&lt;p>如果运行BasicProvider示例失败，请修改BasicProvider配置，勾选Allow multiple instances&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="任务1临时剔除提供者">任务1：临时剔除提供者&lt;/h4>
+&lt;p>目前需要临时剔除在20880端口的提供者，可以使用覆盖规则进行动态配置。&lt;/p>
+&lt;p>1.打开&lt;a href="http://0.0.0.0/#/governance/config">服务治理控制台&lt;/a>，点击”创建“，填入应用名和配置，这个配置将禁用在20880端口上提供（side:provider）的所有服务（scope:application）。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: governance-appoverride-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">disabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行BasicConsumer，此时发现是运行在20881端口的提供者提供服务，说明覆盖规则生效。&lt;/p>
+&lt;h4 id="任务2评估系统容量">任务2：评估系统容量&lt;/h4>
+&lt;p>目前需要对系统容量进行评估，进行调整权重。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>修改刚才的配置，填入配置如下，这个配置将调整20880端口的提供者权重(通常用于容量评估，缺省权重为 200)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: governance-appoverride-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>多次运行BasicConsumer，发现运行在20880端口的提供者示例提供服务次数多于20881端口的提供者示例。&lt;/p>
+&lt;h4 id="任务3调整负载均衡策略">任务3：调整负载均衡策略&lt;/h4>
+&lt;p>目前需要调整负载均衡策略。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>修改刚才的配置，填入配置如下，这个配置将调整负载均衡策略：(缺省负载均衡策略为 random)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: governance-appoverride-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadbalance&lt;/span>: random
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>Random策略按权重设置随机概率，多次运行BasicConsumer，BasicConsumer访问20880端口的概率大于访问20881端口的概率。&lt;/p>
+&lt;h3 id="服务粒度">服务粒度&lt;/h3>
+&lt;p>dubbo-samples-servicelevel-override示例与上面的示例类似，故不赘述。运行BasicProvider类。&lt;/p>
+&lt;h4 id="任务1修改提供者服务的超时时间">任务1：修改提供者服务的超时时间&lt;/h4>
+&lt;p>目前需要修改提供者服务的超时时间&lt;/p>
+&lt;p>1.打开&lt;a href="http://0.0.0.0/#/governance/config">服务治理控制台&lt;/a>，点击”创建“，填入服务名和配置，这个配置将所有消费（side:consumer）DemoService服务（org.apache.dubbo.samples.governance.api.DemoService）的应用实例（addresses:[0.0.0.0]），超时时间修改为300ms&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.governance.api.DemoService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">0.0.0.0&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">300&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行BasicConsumer类，发现BasicConSumer抛异常无法调用远程方法，如图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/config-rule/service_timeout.png" alt="service_timeout">&lt;/p>
+&lt;h2 id="规则详解">规则详解&lt;/h2>
+&lt;h4 id="配置模板">配置模板&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application/service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: app-name/group+service+version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">providerAddresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;1.1.1.1:20880&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;2.2.2.2:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadbalance&lt;/span>: random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threadpool&lt;/span>: fixed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threads&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">iothreads&lt;/span>: &lt;span style="color:#2aa198">4&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dispatcher&lt;/span>: all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;code>configVersion&lt;/code> 表示 dubbo 的版本&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>scope&lt;/code>表示配置作用范围，分别是应用（application）或服务（service）粒度。&lt;strong>必填&lt;/strong>。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>key&lt;/code>指定规则体作用在哪个服务或应用。&lt;strong>必填&lt;/strong>。&lt;/p>
+&lt;ul>
+&lt;li>scope=service时，key取值为[{group}:]{service}[:{version}]的组合&lt;/li>
+&lt;li>scope=application时，key取值为application名称&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>enabled=true&lt;/code> 覆盖规则是否生效，可不填，缺省生效。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>configs&lt;/code>定义具体的覆盖规则内容，可以指定n（n&amp;gt;=1）个规则体。&lt;strong>必填&lt;/strong>。&lt;/p>
+&lt;ul>
+&lt;li>side: 消费者端/提供者端&lt;/li>
+&lt;li>applications: 对应用覆盖规则&lt;/li>
+&lt;li>services: 对服务覆盖规则&lt;/li>
+&lt;li>parameters: 参数列表&lt;/li>
+&lt;li>addresses: 地址值&lt;/li>
+&lt;li>providerAddresses: 提供者地址值&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>对于绝大多数配置场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改整个应用的配置还是某个服务的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;li>服务：&lt;code>scope: service, key:group+service+version &lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>修改是作用到消费者端还是提供者端。
+&lt;ul>
+&lt;li>消费者：&lt;code>side: consumer&lt;/code> ，作用到消费端时（你还可以进一步使用&lt;code>providerAddress&lt;/code>, &lt;code>applications&lt;/code>选定特定的提供者示例或应用）。&lt;/li>
+&lt;li>提供者：&lt;code>side: provider&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的属性是哪个。&lt;/li>
+&lt;/ol>
+&lt;h4 id="示例">示例&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>禁用提供者：(通常用于临时踢除某台提供者机器，相似的，禁止消费者访问请使用路由规则)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">disabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>调整权重：(通常用于容量评估，缺省权重为 200)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>调整负载均衡策略：(缺省负载均衡策略为 random)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadbalance&lt;/span>: random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol></description></item></channel></rss>

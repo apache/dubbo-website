@@ -1,0 +1,45 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 案例介绍</title><link>https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/</link><description>Recent content in 案例介绍 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Http Proxy 案例介绍</title><link>https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/</guid><description>
+&lt;h3 id="http-代理">HTTP 代理&lt;/h3>
+&lt;p>HTTP 代理案例展示了 Pixiu 接收外界 HTTP 请求然后转发给背后的 HTTP Server 的功能。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/user/samples/http_proxy.png" alt="">&lt;/p>
+&lt;p>案例代码具体查看 &lt;code>/samples/http/simple&lt;/code>。案例中的目录结构和作用如下所示：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>- pixiu # pixiu 配置文件
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- server # http server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- test # client or unit test
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们来具体看一下有关 pixiu 的具体配置文件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>static_resources:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> listeners:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: &amp;#34;net/http&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol_type: &amp;#34;HTTP&amp;#34; # 使用 HTTP Listener
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> socket_address:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: &amp;#34;0.0.0.0&amp;#34; # 监听地址设置为 0.0.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: 8888 # 端口设置为 8888
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filter_chains:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filters:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: dgp.filter.httpconnectionmanager # NetworkFilter 设置为 httpconnectionmanager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> route_config:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> routes:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - match:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prefix: &amp;#34;/user&amp;#34; # 设置路由规则，将 /user 前缀的请求转发给名称为 user 的 cluster 集群
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> route:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cluster: &amp;#34;user&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cluster_not_found_response_code: 505
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> http_filters:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: dgp.filter.http.httpproxy # 使用 dgp.filter.http.httpproxy 这个 HttpFilter 来进行转发
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> clusters:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: &amp;#34;user&amp;#34; # 配置一个名称为 user 的 集群，其中有一个实例，地址是 127.0.0.1:1314
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> lb_policy: &amp;#34;random&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> endpoints:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - id: 1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> socket_address:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: 127.0.0.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: 1314
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以先启动 &lt;code>Server&lt;/code> 文件夹下的 Http Server，然后再使用如下命令启动 &lt;code>Pixiu&lt;/code>，最后执行 test 文件夹下的单元测试。注意，-c 后是本地配置文件的绝对路径。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>pixiu gateway start -c /pixiu/conf.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Http to Dubbo 案例介绍</title><link>https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/http_to_dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/http_to_dubbo/</guid><description>
+&lt;p>欢迎认领补充此文档。&lt;/p></description></item><item><title>Docs3-V2: Https 案例介绍</title><link>https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/https/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/dubbo-go-pixiu/user/samples/https/</guid><description>
+&lt;p>欢迎认领补充此文档。&lt;/p></description></item></channel></rss>

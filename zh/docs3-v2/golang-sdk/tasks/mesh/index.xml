@@ -1,0 +1,665 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 服务网格</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/</link><description>Recent content in 服务网格 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: 部署 Istio 环境</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/build/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/build/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>docker、helm、kubectl 环境已安装。&lt;/li>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-部署-istio-环境">2. 部署 Istio 环境&lt;/h2>
+&lt;ol>
+&lt;li>使用helm 安装 istio 基础 CRD 和 istiod 组件。也可以参考 &lt;a href="https://istio.io/">Istio 文档&lt;/a> 使用 istioctl 安装。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ helm repo add istio https://istio-release.storage.googleapis.com/charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ kubectl create namespace istio-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istio-base istio/base -n istio-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istiod istio/istiod --namespace istio-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>
+&lt;p>删除istio 水平扩展资源&lt;/p>
+&lt;p>*目前 dubbo-go 依赖单个 istiod 实例进行服务发现。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl delete hpa istiod -n istio-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装完成后，可以在 istio-system 命名空间下看到一个 istiod pod 在正常运行。&lt;/p></description></item><item><title>Docs3-V2: Istio 环境部署 Dubbo-go 应用</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/app/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/app/</guid><description>
+&lt;p>在本章节中，我们将使用应用模板快速创建一组 Dubbo-go Server和 Client 端应用，部署在 Istio 集群中；观察、调试和验证服务发现和调用成功。&lt;/p>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。&lt;/li>
+&lt;li>docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）&lt;/li>
+&lt;li>&lt;a href="../build/">任务【istio 环境部署】&lt;/a> 已完成&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-开发-server-端-dubbo-go-应用">2. 开发 server 端 Dubbo-go 应用&lt;/h2>
+&lt;h3 id="21-使用-dubbogo-cli-创建项目模板">2.1 使用 dubbogo-cli 创建项目模板&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>$ mkdir mesh-app-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd mesh-app-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ tree .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── chart
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── serviceaccount.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── nacos_env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── app.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── conf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── dubbogo.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── pkg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service.go
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>生成项目包括几个目录：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>api：放置接口文件：proto文件和生成的pb.go文件&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>build：放置构建相关文件&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>chart：放置发布用 chart 仓库、基础环境chart 仓库：nacos、mesh（开发中）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>cmd：程序入口&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>conf：框架配置&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>pkg/service：RPC 服务实现&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Makefile：&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>镜像、Helm 安装名称：&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE = $(your_repo)/$(namespace)/$(image_name)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-app
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>提供脚本，例如：&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>
+&lt;ul>
+&lt;li>make build # 打包镜像并推送&lt;/li>
+&lt;li>make buildx-publish # arm架构本地打包amd64镜像并推送，依赖buildx&lt;/li>
+&lt;li>make deploy # 通过 helm 发布应用&lt;/li>
+&lt;li>make remove # 删除已经发布的 helm 应用&lt;/li>
+&lt;li>make proto-gen # api下生成 pb.go 文件&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="22-开发和部署-dubbo-go-应用">2.2 开发和部署 Dubbo-go 应用：&lt;/h3>
+&lt;h4 id="开发应用">开发应用&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>编译接口&lt;/p>
+&lt;p>开发人员需要修改 proto 文件，本任务中直接使用默认接口即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make proto-gen
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>protoc --go_out&lt;span style="color:#719e07">=&lt;/span>./api --go-triple_out&lt;span style="color:#719e07">=&lt;/span>./api ./api/api.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>拉取依赖&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ go get dubbo.apache.org/dubbo-go/v3@3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ make tidy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go mod tidy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>编写业务逻辑&lt;/p>
+&lt;p>修改 pkg/service/service.go 实现函数, 返回字符串中显示版本为 v1.0.0&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterServerImpl) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>修改配置如下字段，从而使用xds协议作为注册中心&lt;/p>
+&lt;p>conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">xds&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: xds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: istiod.istio-system.svc.cluster.local:15010
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterServerImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from stub&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，应用开发完成。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="配置构建和部署参数">配置构建和部署参数&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>指定需要构建的镜像：&lt;/p>
+&lt;p>修改 Makefile 如下字段，指定好需要构建的镜像地址和版本。&lt;/p>
+&lt;p>指定好需要通过 helm 安装的名称。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE = xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-server-v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>指定需要部署的应用和镜像：&lt;/p>
+&lt;p>修改 chart/app/Chart.yaml 如下字段，指定当前应用名为 &lt;code>dubbo-go-server&lt;/code>，部署时会创建一个名为 dubbo-go-server 的 service ，关联当前应用的所有版本。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">description&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改 chart/app/values.yaml 如下字段，指定需要部署的镜像以及当前开发的应用版本 dubbogoAppVersion 为 v1。&lt;/p>
+&lt;p>部署的镜像需要和上述构建的镜像一致。当前应用版本用于 mesh 流量规则控制。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">image&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repository&lt;/span>: xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pullPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tag&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo-go-mesh version control labels&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">version&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，构建参数和发布参数都已指定好，可以进行构建和部署了。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="使用模板构建和部署-dubbo-go-应用">使用模板构建和部署 Dubbo-go 应用&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>构建、推送镜像&lt;/p>
+&lt;p>&lt;code>$ make build &lt;/code> (本地为 amd64机器)&lt;/p>
+&lt;p>或者&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (本地为 arm64机器，依赖 docker buildx 命令)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>发布 Dubbo-go 应用至集群&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make deploy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install dubbo-go-server-v1 ./chart/app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME: dubbo-go-server-v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LAST DEPLOYED: Thu Apr &lt;span style="color:#2aa198">7&lt;/span> 11:19:42 &lt;span style="color:#2aa198">2022&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAMESPACE: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>STATUS: deployed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REVISION: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TEST SUITE: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm list
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME NAMESPACE REVISION UPDATED STATUS CHART APP VERSION
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:19:42.350553 +0800 CST deployed dubbo-go-server-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到通过 helm 部署成功&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="23-验证应用">2.3 验证应用&lt;/h3>
+&lt;h4 id="查看资源部署情况">查看资源部署情况&lt;/h4>
+&lt;p>查看部署好的 deployment ，版本为 v1。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME READY UP-TO-DATE AVAILABLE AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 26s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看部署好的 service。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get svc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server ClusterIP 192.168.216.253 &amp;lt;none&amp;gt; 20000/TCP 70s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="可选本地调试部署好的-dubbo-go-应用">（*可选）本地调试部署好的 Dubbo-go 应用&lt;/h4>
+&lt;p>使用 kubectl port-forward Dubbo-go 应用到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl port-forward svc/dubbo-go-server &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Forwarding from 127.0.0.1:20000 -&amp;gt; &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Forwarding from &lt;span style="color:#719e07">[&lt;/span>::1&lt;span style="color:#719e07">]&lt;/span>:20000 -&amp;gt; &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>使用 grpc_cli 调试集群内的应用，参考任务&lt;a href="../../debug/grpc_cli/">【使用 grpc_cli 调试 Dubbo-go 应用】&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ grpc_cli ls localhost:20000 -l
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>filename: api/api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>package: api;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service Greeter &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHello&lt;span style="color:#719e07">(&lt;/span>api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHelloStream&lt;span style="color:#719e07">(&lt;/span>stream api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>stream api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>使用 grpc_cli 发起调用，测试接口&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ grpc_cli call localhost:20000 SayHello &lt;span style="color:#2aa198">&amp;#34;name: &amp;#39;laurence&amp;#39;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>connecting to localhost:20000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>name: &lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>id: &lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Received trailing metadata from server:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept-encoding : identity,gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-accept-encoding : identity,deflate,gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Rpc succeeded with OK status
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，我们成功开发了一个应用，把它部署在了 istio 集群内。&lt;/p>
+&lt;h2 id="3-开发-client-端-dubbo-go-应用">3. 开发 Client 端 Dubbo-go 应用&lt;/h2>
+&lt;h3 id="31-使用-dubbogo-cli-创建另一个项目模板">3.1 使用 dubbogo-cli 创建另一个项目模板&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-开发和部署客户端-dubbo-go-应用">3.2 开发和部署客户端 Dubbo-go 应用：&lt;/h3>
+&lt;h4 id="编写业务逻辑">编写业务逻辑&lt;/h4>
+&lt;ul>
+&lt;li>修改 cmd/app.go 的 main 方法，针对下游接口每秒钟发起一次调用&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.GreeterClientImpl{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(client)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> request &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> rsp, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), request); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server error = %s&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }&lt;span style="color:#719e07">else&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server response = %+v&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Second)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>修改如下配置文件，使用xds协议作为注册中心，加载名为 GreeterClientImpl 的客户端服务。&lt;/p>
+&lt;p>conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">xds&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: xds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: istiod.istio-system.svc.cluster.local:15010
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from stub&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，应用开发完成。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="配置构建和部署参数-1">配置构建和部署参数&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>指定需要构建的镜像：&lt;/p>
+&lt;p>修改 Makefile 如下字段，指定好需要构建的镜像地址和版本。&lt;/p>
+&lt;p>指定好需要通过 helm 安装的名称。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE = xxx/dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-client
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>指定需要部署的应用和镜像：&lt;/p>
+&lt;p>修改 chart/app/Chart.yaml 如下字段，指定当前应用名为 &lt;code>dubbo-go-client&lt;/code>，部署时会创建一个名为 dubbo-go-client 的 service ，关联当前应用的所有版本。对于一个只有客户端的应用，可以不创建sevice，可以由开发者在模板中修改，本教程中我们默认创建。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">description&lt;/span>: dubbo-go-client
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改 chart/app/values.yaml 如下字段，指定需要部署的镜像以及当前开发的应用版本 dubbogoAppVersion 为 v1。&lt;/p>
+&lt;p>部署的镜像需要和上述构建的镜像一致。当前应用版本用于 mesh 流量规则控制。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">image&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repository&lt;/span>: xxx/dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pullPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tag&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo-go-mesh version control labels&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">version&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，构建参数和发布参数都已指定好，可以进行构建和部署了。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="使用模板构建和部署-dubbo-go-应用-1">使用模板构建和部署 Dubbo-go 应用&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>构建、推送镜像&lt;/p>
+&lt;p>&lt;code>$ make build &lt;/code> (本地为 amd64机器)&lt;/p>
+&lt;p>或者&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (本地为 arm64机器，依赖 docker buildx 命令)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>发布 Dubbo-go Client 应用至集群&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make deploy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install dubbo-go-client ./chart/app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME: dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LAST DEPLOYED: Thu Apr &lt;span style="color:#2aa198">7&lt;/span> 11:49:55 &lt;span style="color:#2aa198">2022&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAMESPACE: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>STATUS: deployed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REVISION: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TEST SUITE: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm list
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME NAMESPACE REVISION UPDATED STATUS CHART APP VERSION
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:49:55.517898 +0800 CST deployed dubbo-go-client-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:23:18.397658 +0800 CST deployed dubbo-go-server-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到通过 helm 部署成功, 目前已经在集群中存在 Client 和 Server 两个应用。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="33-验证应用">3.3 验证应用&lt;/h3>
+&lt;h4 id="查看资源部署情况-1">查看资源部署情况&lt;/h4>
+&lt;p>查看部署好的 client 和 server 两个 deployment。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME READY UP-TO-DATE AVAILABLE AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 22m
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 49m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看客户端调用日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:55.777Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:56.778Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:57.779Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:58.781Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:59.782Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:14:00.784Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:14:01.785Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>验证调用成功&lt;/p>
+&lt;h2 id="4-小结">4. 小结&lt;/h2>
+&lt;p>dubbogo-cli 提供的应用模板可以方便地支持开发者进行镜像的构建、推送、部署。&lt;/p>
+&lt;p>在 Istio 环境中，server 应用将自身服务信息注册在 Isito 上，由客户端监听 xds 资源，查询 istio debug 端口进行接口级别的服务发现。开发人员无需关心 service名、主机名、集群名等概念，只需要引入接口，发起调用即可。&lt;/p></description></item><item><title>Docs3-V2: 流量管理</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/traffic_management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/traffic_management/</guid><description>
+&lt;p>在本节中，我们将延续上一个任务&lt;a href="../app/">【在 Istio 环境部署 Dubbo-go 应用】&lt;/a>。&lt;/p>
+&lt;p>在之前的任务中，我们在集群中部署了一组 Dubbo-go Server和 Client 端应用，验证了服务发现和调用成功。在本节中，我们将创建新版本的 Server 端应用。通过配置 VirtualService 和 DestinationRule ，实现路由管理，和流量转移能力&lt;/p>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。&lt;/li>
+&lt;li>docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）&lt;/li>
+&lt;li>任务&lt;a href="../app/">【在 Istio 环境部署 Dubbo-go 应用】&lt;/a>已完成&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-开发多版本dubbo-go-应用">2. 开发多版本Dubbo-go 应用。&lt;/h2>
+&lt;h3 id="21-使用-dubbogo-cli-创建另一个项目模板">2.1 使用 dubbogo-cli 创建另一个项目模板&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-开发和部署客户端-dubbo-go-应用-v2">2.2 开发和部署客户端 Dubbo-go 应用 v2：&lt;/h3>
+&lt;h4 id="编写业务逻辑">编写业务逻辑&lt;/h4>
+&lt;ul>
+&lt;li>修改 package/service/service.go 的实现方法，返回版本号为 v2.0.0&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterServerImpl) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>修改如下配置文件，使用xds协议作为注册中心，加载名为 GreeterServerImpl 的服务结构。&lt;/p>
+&lt;p>conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">xds&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: xds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: istiod.istio-system.svc.cluster.local:15010
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterServerImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from stub&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，应用开发完成。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="配置构建和部署参数">配置构建和部署参数&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>指定需要构建的镜像：&lt;/p>
+&lt;p>修改 Makefile 如下字段，指定好需要构建的镜像地址和版本，我们把镜像 tag 改为 2.0.0。&lt;/p>
+&lt;p>指定好需要通过 helm 安装的名称。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE = xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 2.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>指定需要部署的应用和镜像：&lt;/p>
+&lt;p>修改 chart/app/Chart.yaml 如下字段，指定当前应用名为 &lt;code>dubbo-go-server&lt;/code>，我们在创建v1版本服务的时候，已经有了该应用的 service，这次部署时模板将不会创建 service。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">description&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改 chart/app/values.yaml 如下字段，指定需要部署的镜像为2.0.0，以及当前开发的应用版本 dubbogoAppVersion 为 v2。&lt;/p>
+&lt;p>部署的镜像需要和上述构建的镜像一致。当前应用版本用于 mesh 流量规则控制。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">image&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repository&lt;/span>: xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pullPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tag&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo-go-mesh version control labels&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">version&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，构建参数和发布参数都已指定好，可以进行构建和部署了。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="使用模板构建和部署-dubbo-go-应用">使用模板构建和部署 Dubbo-go 应用&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>构建、推送镜像&lt;/p>
+&lt;p>&lt;code>$ make build &lt;/code> (本地为 amd64机器)&lt;/p>
+&lt;p>或者&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (本地为 arm64机器，依赖 docker buildx 命令)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>发布 Dubbo-go Server v2 至集群&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make deploy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME: dubbo-go-server-v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LAST DEPLOYED: Thu Apr &lt;span style="color:#2aa198">7&lt;/span> 12:29:28 &lt;span style="color:#2aa198">2022&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAMESPACE: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>STATUS: deployed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REVISION: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TEST SUITE: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm list
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME NAMESPACE REVISION UPDATED STATUS CHART dubbo-go-client default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:49:55.517898 +0800 CST deployed dubbo-go-client-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:23:18.397658 +0800 CST deployed dubbo-go-server-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v2 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 12:29:28.497476 +0800 CST deployed dubbo-go-client-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到通过 helm 部署成功, 目前已经在集群中存在一个 Client 应用，和 Server 的两个版本。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="23-验证应用">2.3 验证应用&lt;/h3>
+&lt;h4 id="查看资源部署情况">查看资源部署情况&lt;/h4>
+&lt;p>查看部署好的 deployment ，server 包含了两个版本。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME READY UP-TO-DATE AVAILABLE AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 40m
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v2 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 77s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 67m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看部署好的 service。两个版本的deployment 共用同一个 service。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get svc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client ClusterIP 192.168.8.176 &amp;lt;none&amp;gt; 20000/TCP 41m
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server ClusterIP 192.168.216.253 &amp;lt;none&amp;gt; 20000/TCP 67m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看 Client 应用日志，验证请求调用到了两个版本的应用上。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:40.384Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:41.386Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:42.388Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:43.389Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:44.390Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:45.392Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:46.393Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:47.394Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:48.396Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:49.397Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，我们开发并且部署成功了多版本应用。&lt;/p>
+&lt;h2 id="3-配置请求路由">3. 配置请求路由&lt;/h2>
+&lt;h3 id="31-配置目标规则">3.1 配置目标规则&lt;/h3>
+&lt;p>执行以下命令以创建目标规则，该目标规则将 dubbo-go-server 细分为两个子集。v1和 v2&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f destinationrule.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>destinationrule.yaml 内容：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DestinationRule
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subsets&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v1 &lt;span style="color:#586e75"># 对应应用模板中 chart/app/values.yaml 中指定的版本标签&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-应用-virtual-service">3.2 应用 Virtual Service&lt;/h3>
+&lt;p>执行以下命令以创建路由，该路由将所有流量都路由至v1 版本应用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f virtualservice.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>virtualservice.yaml 内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-验证路由生效">3.3 验证路由生效&lt;/h3>
+&lt;p>所有流量将流向 v1 版本应用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:44.353Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:45.354Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:46.356Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:47.357Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:48.359Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:49.361Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-基于用户身份的路由">4. 基于用户身份的路由&lt;/h2>
+&lt;p>有了上述多版本应用路由的基础，我们可以通过一些策略，来进行灵活的流量管理。&lt;/p>
+&lt;h3 id="41-为客户端应用增加用户身份标识">4.1 为客户端应用增加用户身份标识&lt;/h3>
+&lt;p>我们希望拥有 user: admin 标识的流量都可以体验 v2 新版本应用。&lt;/p>
+&lt;p>回到之前创建的 dubbo-go-client 项目，修改 cmd/app.go 的 main 函数，增加调用标识：&lt;code>user: admin&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.GreeterClientImpl{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(client)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> request &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ctx &lt;span style="color:#719e07">:=&lt;/span> context.&lt;span style="color:#268bd2">Background&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ctx = context.&lt;span style="color:#268bd2">WithValue&lt;/span>(ctx, constant.AttachmentKey, &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#dc322f">string&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;user&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;admin&amp;#34;&lt;/span>, &lt;span style="color:#586e75">// 使用上下文 context 为调用增加标识
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> })
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> rsp, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">SayHello&lt;/span>(ctx, request); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server error = %s&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }&lt;span style="color:#719e07">else&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server response = %+v&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Second)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>构建、推送镜像，覆盖之前的提交。您也可以升级一下发布的镜像版本。&lt;/p>
+&lt;p>&lt;code>$ make build &lt;/code> (本地为 amd64机器)&lt;/p>
+&lt;p>或者&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (本地为 arm64机器，依赖 docker buildx 命令)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>删除 dubbo-go-client 应用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>$ make remove
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm uninstall dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>release &amp;#34;dubbo-go-client&amp;#34; uninstalled
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>重新发布应用。&lt;/p>
+&lt;p>&lt;code>$ make deploy&lt;/code>&lt;/p>
+&lt;p>发布后，验证调用成功，由于前面进行了路由配置。所有流量都流向 v1 版本。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:44.353Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:45.354Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:46.356Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:47.357Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:48.359Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:49.361Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h3 id="42-创建基于用户身份的路由">4.2 创建基于用户身份的路由&lt;/h3>
+&lt;p>执行以下命令以修改/创建路由，该路由将所有请求头存在 user: admin 标识的流量都路由至 v2 版本。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f virtualservice.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>virtualservice.yaml 内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">headers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">user&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: admin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="43-验证路由生效">4.3 验证路由生效&lt;/h3>
+&lt;p>所有流量将流向 v2 版本应用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:18.714Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:19.716Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:20.717Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:21.718Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:22.720Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:23.722Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:24.723Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="5-基于权重的路由">5. 基于权重的路由&lt;/h2>
+&lt;h3 id="51-创建基于权重的路由">5.1 创建基于权重的路由&lt;/h3>
+&lt;p>延续上述任务，我们执行以下命令以修改/创建路由，该路由将流量的 10% 导入新版本应用，进行灰度测试。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f virtualservice.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>virtualservice.yaml 内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">90&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="52-验证路由生效">5.2 验证路由生效&lt;/h3>
+&lt;p>少数流量将流向 v2 版本。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:52.035Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:53.036Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:54.037Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:55.039Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:56.041Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:57.043Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:58.045Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:59.047Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:00.049Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:01.050Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:02.053Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:03.055Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: 使用 pixiu 网关接入 ingress 流量</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/ingress/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/tasks/mesh/ingress/</guid><description/></item></channel></rss>

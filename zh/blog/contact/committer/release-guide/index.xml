@@ -1,0 +1,454 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 如何准备 Apache Release</title><link>https://dubbo.apache.org/zh/blog/contact/committer/release-guide/</link><description>Recent content in 如何准备 Apache Release on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/blog/contact/committer/release-guide/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 通用 Release 流程</title><link>https://dubbo.apache.org/zh/blog/1/01/01/%E9%80%9A%E7%94%A8-release-%E6%B5%81%E7%A8%8B/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/1/01/01/%E9%80%9A%E7%94%A8-release-%E6%B5%81%E7%A8%8B/</guid><description>
+&lt;h2 id="理解-apache-发布的内容和流程">理解 Apache 发布的内容和流程&lt;/h2>
+&lt;p>总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。&lt;/p>
+&lt;p>请参考以下链接，找到更多关于 ASF 的发布指南:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="http://www.apache.org/dev/release-publishing">Apache Release Guide&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://www.apache.org/dev/release.html">Apache Release Policy&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://www.apache.org/dev/publishing-maven-artifacts.html">Maven Release Info&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="发布流程">发布流程&lt;/h2>
+&lt;h3 id="1-准备分支">1. 准备分支&lt;/h3>
+&lt;p>从主干分支拉取新分支作为发布分支，如现在要发布 &lt;code>${release_version}&lt;/code> 版本，则从开发分支拉出新分支 &lt;code>${release_version}-release&lt;/code>，此后&lt;code>${release_version}&lt;/code> Release Candidates 涉及的修改及打标签等都在&lt;code>${release_version}-release&lt;/code>分支进行，最终发布完成后合入主干分支。&lt;/p>
+&lt;p>例：如 Java SDK 需要发布 &lt;code>3.0.10&lt;/code> 版本，从 &lt;code>3.0&lt;/code> 分支拉出新分支 &lt;code>3.0.10-release&lt;/code>，并在此分支提交从 Snapshot 替换为 &lt;code>3.0.10&lt;/code> 版本号的 commit。&lt;/p>
+&lt;h3 id="2-github-打标签并发布-pre-release-状态">2. Github 打标签并发布 Pre Release 状态&lt;/h3>
+&lt;p>在对应 GitHub 仓库中基于 &lt;code>${release_version}-release&lt;/code> 分支，打标签 &lt;code>${release_version}-release&lt;/code>，填写 Release Note 并发布 Pre Release 状态。（&lt;strong>不允许在投票流程正式通过前把 Release 状态置为正式发布状态&lt;/strong>）&lt;/p>
+&lt;p>注：打完标签之后此分支不允许再提交任何 commit，需要保证分支中最后一个 commit 就是标签的 commit 和投票中的 commit。&lt;/p>
+&lt;h3 id="3-预发布二进制包可选">3. 预发布二进制包（可选）&lt;/h3>
+&lt;p>通过构建工具推送二进制包到托管平台，如 Java SDK 发布到 Maven 仓库，状态为 Staging。&lt;/p>
+&lt;p>注：如果托管平台不支持预发布功能，则需要在投票正式通过后再发布。&lt;/p>
+&lt;h3 id="4-构建-source-release-文件">4. 构建 Source Release 文件&lt;/h3>
+&lt;p>将源码使用 zip 格式进行打包，使用个人 gpg 证书进行签名得到 asc 文件以及使用 shasum 工具生成 sha512 文件。&lt;/p>
+&lt;p>例：如 Java SDK 发布 &lt;code>3.0.10&lt;/code> 版本，需要构建 &lt;code>apache-dubbo-3.0.10-src.zip&lt;/code> 、 &lt;code>apache-dubbo-3.0.10-src.zip.asc&lt;/code> 和 &lt;code>apache-dubbo-3.0.10-src.zip.sha512&lt;/code> 三个文件。&lt;/p>
+&lt;h3 id="5-提交-source-release-文件到-apache-svn-仓库">5. 提交 Source Release 文件到 Apache SVN 仓库&lt;/h3>
+&lt;p>将 Source Release 文件推送到 &lt;code>https://dist.apache.org/repos/dist/dev/dubbo/&lt;/code> 仓库中，文件存储到 &lt;code>https://dist.apache.org/repos/dist/dev/dubbo/${component_name}/${release_version}/&lt;/code> 目录下。（需要 Committer 权限才能推送）&lt;/p>
+&lt;h3 id="6-发送投票邮件">6. 发送投票邮件&lt;/h3>
+&lt;p>使用 Apache 邮箱发送投票邮件，投票邮件的标题为：&lt;code>[VOTE] Release ${component_name} ${release_version} RC1&lt;/code>，邮件内容需要包含以下内容：&lt;/p>
+&lt;ul>
+&lt;li>Source Release 的链接&lt;/li>
+&lt;li>二进制包预发布的链接（如有）&lt;/li>
+&lt;li>GitHub Tag 标签&lt;/li>
+&lt;li>最后一个 Commit 的 Hash&lt;/li>
+&lt;li>Release Note 链接&lt;/li>
+&lt;li>Source Release 使用的签名文件&lt;/li>
+&lt;/ul>
+&lt;p>以上的 Source Release、Tag、Hash、Release Note 必须完全对应&lt;/p>
+&lt;p>例：如 Java SDK 发布 &lt;code>3.0.10&lt;/code> 版本，发送的邮件如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Project: [VOTE] Release Apache Dubbo 3.0.10 RC1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello Community,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>This is a call for vote to release Apache Dubbo version 3.0.10
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The release candidates:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://dist.apache.org/repos/dist/dev/dubbo/dubbo/3.0.10/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The staging repo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://repository.apache.org/content/repositories/orgapachedubbo-1216/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Git tag for the release:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://github.com/apache/dubbo/tree/dubbo-3.0.10
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hash for the release tag:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>e7894ca374e966a1d807e34b2744f276b843f39f
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Release Notes:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://github.com/apache/dubbo/releases/tag/dubbo-3.0.10
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The artifacts have been signed with Key 2B249EDD, which can be
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>found in the keys file:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://dist.apache.org/repos/dist/dev/dubbo/KEYS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The vote will be open for at least 72 hours or until the necessary number of
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>votes are reached.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please vote accordingly:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ ] +1 approve
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ ] +0 no opinion
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ ] -1 disapprove with the reason
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Thanks,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The Apache Dubbo Team
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="7-pmc-检查版本信息并进行投票">7. PMC 检查版本信息，并进行投票&lt;/h3>
+&lt;p>详细的检查列表请参考官方的 &lt;a href="https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist">check list&lt;/a>&lt;/p>
+&lt;h3 id="8-投票通过发布投票结果">8. 投票通过，发布投票结果&lt;/h3>
+&lt;p>在至少等待 72 小时且至少 3 位 PMC 投 +1 approve 票之后，可以发送邮件宣布投票结果。
+投票结果邮件的标题为：&lt;code>[RESULT] [VOTE] Release ${component_name} ${release_version} RC1&lt;/code>，邮件内容需要包含投票的 PMC 信息和投票的 thread。
+（可以通过 &lt;a href="https://lists.apache.org/list.html?dev@dubbo.apache.org">https://lists.apache.org/list.html?dev@dubbo.apache.org&lt;/a> 找到）&lt;/p>
+&lt;p>例：如 Java SDK 发布 &lt;code>2.7.16&lt;/code> 版本，发送的邮件如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Project: [RESULT] [VOTE] Release Apache Dubbo 2.7.16 RC1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello Dubbo Community,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The release vote finished, We’ve received
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+1 binding, Jun Liu
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+1 binding, Laurence
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+1 binding, Hao Guo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The vote and result thread:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://lists.apache.org/thread/o4hk0b0rok78kw7ftqh0ly49wg8whgps
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The vote passed. I am working on the further release process, thanks.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Best regards,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The Apache Dubbo Team
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="9-github-标记正式-release">9. Github 标记正式 Release&lt;/h3>
+&lt;p>在 GitHub 上正式把前面第 2 步打的标签更新为正式发布状态。&lt;/p>
+&lt;h3 id="10-合并-release-分支回主干">10. 合并 Release 分支回主干&lt;/h3>
+&lt;p>将 &lt;code>${release_version}-release&lt;/code> 合并回开发主干，并更新最新 snapshot 版本号。（&lt;code>${release_version}-release&lt;/code> 可以不保留）&lt;/p>
+&lt;h3 id="11-移动-source-release-到-release-仓库重要">11. 移动 Source Release 到 release 仓库（重要）&lt;/h3>
+&lt;p>将 &lt;code>https://dist.apache.org/repos/dist/dev/dubbo/&lt;/code> 仓库中存储的 Source Release 文件移动到 &lt;code>https://dist.apache.org/repos/dist/release/dubbo/&lt;/code> 仓库中。（仅 PMC 有权限）
+同时删除之前的 Source Release 文件。（会被自动存放在 Archive 仓库）&lt;/p>
+&lt;h3 id="12-正式发布二进制包如有">12. 正式发布二进制包（如有）&lt;/h3>
+&lt;p>将前面第 3 步发布的预发布状态的二进制包更新为正式发布状态。&lt;/p>
+&lt;h3 id="13-更新-dubbo-website-文档">13. 更新 Dubbo Website 文档&lt;/h3>
+&lt;p>更新最新的 Source Release 等信息到 &lt;code>dubbo-website&lt;/code> 对应文件中，至少包括 Source Release 的下载方式和二进制包的引用方式（如有），同时将历史的发布的链接更新到 archive 的域名下。&lt;/p>
+&lt;h3 id="14-发布正式发布结果通知">14. 发布正式发布结果通知&lt;/h3>
+&lt;p>投票结果邮件的标题为：&lt;code>[Announce] Release ${component_name} ${release_version} released&lt;/code>。&lt;/p>
+&lt;p>注：最好等二进制包发布正式同步生效后发布此邮件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Project: [Announce] Apache Dubbo 3.0.9 released
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello Dubbo Community,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>I am glad to announce that Apache Dubbo 3.0.9 was released.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You can check detailed release notes here:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://github.com/apache/dubbo/releases/tag/dubbo-3.0.9
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>If you have any questions using this version, please send mail to here or
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>report the issue &amp;lt;https://github.com/apache/dubbo/issues&amp;gt; on Github.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Best regards,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Dubbo Team
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Blog: Java SDK Release 流程</title><link>https://dubbo.apache.org/zh/blog/1/01/01/java-sdk-release-%E6%B5%81%E7%A8%8B/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/1/01/01/java-sdk-release-%E6%B5%81%E7%A8%8B/</guid><description>
+&lt;h2 id="理解-apache-发布的内容和流程">理解 Apache 发布的内容和流程&lt;/h2>
+&lt;p>总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。&lt;/p>
+&lt;p>请参考以下链接，找到更多关于 ASF 的发布指南:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="http://www.apache.org/dev/release-publishing">Apache Release Guide&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://www.apache.org/dev/release.html">Apache Release Policy&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://www.apache.org/dev/publishing-maven-artifacts.html">Maven Release Info&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="本地构建环境准备">本地构建环境准备&lt;/h2>
+&lt;p>主要包括签名工具、Maven 仓库认证相关准备&lt;/p>
+&lt;h3 id="安装gpg">安装GPG&lt;/h3>
+&lt;p>详细文档请参见&lt;a href="https://www.gnupg.org/download/index.html">这里&lt;/a>, Mac OS 下配置如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ brew install gpg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ gpg --version &lt;span style="color:#586e75">#检查版本，应该为2.x&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="用gpg生成key">用gpg生成key&lt;/h3>
+&lt;p>根据提示，生成 key&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ gpg --full-gen-key
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>gpg &lt;span style="color:#719e07">(&lt;/span>GnuPG&lt;span style="color:#719e07">)&lt;/span> 2.0.12; Copyright &lt;span style="color:#719e07">(&lt;/span>C&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#2aa198">2009&lt;/span> Free Software Foundation, Inc.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>This is free software: you are free to change and redistribute it.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>There is NO WARRANTY, to the extent permitted by law.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please &lt;span style="color:#719e07">select&lt;/span> what kind of key you want:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>1&lt;span style="color:#719e07">)&lt;/span> RSA and RSA &lt;span style="color:#719e07">(&lt;/span>default&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>2&lt;span style="color:#719e07">)&lt;/span> DSA and Elgamal
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>3&lt;span style="color:#719e07">)&lt;/span> DSA &lt;span style="color:#719e07">(&lt;/span>sign only&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>4&lt;span style="color:#719e07">)&lt;/span> RSA &lt;span style="color:#719e07">(&lt;/span>sign only&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Your selection? &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>RSA keys may be between &lt;span style="color:#2aa198">1024&lt;/span> and &lt;span style="color:#2aa198">4096&lt;/span> bits long.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>What keysize &lt;span style="color:#719e07">do&lt;/span> you want? &lt;span style="color:#719e07">(&lt;/span>2048&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#2aa198">4096&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Requested keysize is &lt;span style="color:#2aa198">4096&lt;/span> bits
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please specify how long the key should be valid.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">0&lt;/span> &lt;span style="color:#719e07">=&lt;/span> key does not expire
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt; &lt;span style="color:#719e07">=&lt;/span> key expires in n days
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt;w &lt;span style="color:#719e07">=&lt;/span> key expires in n weeks
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt;m &lt;span style="color:#719e07">=&lt;/span> key expires in n months
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt;y &lt;span style="color:#719e07">=&lt;/span> key expires in n years
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key is valid &lt;span style="color:#719e07">for&lt;/span>? &lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key does not expire at all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Is this correct? &lt;span style="color:#719e07">(&lt;/span>y/N&lt;span style="color:#719e07">)&lt;/span> y
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GnuPG needs to construct a user ID to identify your key.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Real name: Robert Burrell Donkin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Email address: rdonkin@apache.org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Comment: CODE SIGNING KEY
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You selected this USER-ID:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Robert Burrell Donkin (CODE SIGNING KEY) &amp;lt;rdonkin@apache.org&amp;gt;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Change &lt;span style="color:#719e07">(&lt;/span>N&lt;span style="color:#719e07">)&lt;/span>ame, &lt;span style="color:#719e07">(&lt;/span>C&lt;span style="color:#719e07">)&lt;/span>omment, &lt;span style="color:#719e07">(&lt;/span>E&lt;span style="color:#719e07">)&lt;/span>mail or &lt;span style="color:#719e07">(&lt;/span>O&lt;span style="color:#719e07">)&lt;/span>kay/&lt;span style="color:#719e07">(&lt;/span>Q&lt;span style="color:#719e07">)&lt;/span>uit? O
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You need a Passphrase to protect your secret key. &lt;span style="color:#586e75"># 填入密码，以后打包过程中会经常用到&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="查看-key-id">查看 key id&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ gpg --list-keys
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>pub rsa4096/28681CB1 2018-04-26 &lt;span style="color:#586e75"># 28681CB1就是key id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>uid &lt;span style="color:#719e07">[&lt;/span>ultimate&lt;span style="color:#719e07">]&lt;/span> liujun &lt;span style="color:#719e07">(&lt;/span>apache-dubbo&lt;span style="color:#719e07">)&lt;/span> &amp;lt;liujun@apache.org&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sub rsa4096/D3D6984B 2018-04-26
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 通过key id发送public key到keyserver&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，为相互之间是自动同步的，选任意一个都可以。&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果有多个 public key，设置默认 key。修改&lt;code>~/.gnupg/gpg.conf&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># If you have more than 1 secret key in your keyring, you may want to&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># uncomment the following option and set your preferred keyid.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>default-key 28681CB1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果有多个 public key, 也可以删除无用的 key：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">### 先删除私钥，再删除公钥&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ gpg --yes --delete-secret-keys shenglicao2@gmail.com &lt;span style="color:#586e75">###老的私钥，指明邮箱即可&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>PS: 最新版本经过实测，本地没有gpg.conf这个文件，因此如果在执行过程中遇到签名失败，可以参考这个文章：https://blog.csdn.net/wenbo20182/article/details/72850810 或 &lt;a href="https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors">https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;p>由于公钥服务器没有检查机制，任何人都可以用你的名义上传公钥，所以没有办法保证服务器上的公钥的可靠性。
+通常，你可以在网站上公布一个公钥指纹，让其他人核对下载到的公钥是否为真。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># fingerprint参数生成公钥指纹：&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ gpg --fingerprint liujun
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>pub rsa4096 2019-10-17 &lt;span style="color:#719e07">[&lt;/span>SC&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">1376&lt;/span> A2FF 67E4 C477 &lt;span style="color:#2aa198">5739&lt;/span> 09BD 7DB6 &lt;span style="color:#2aa198">8550&lt;/span> D366 E4C0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>uid &lt;span style="color:#719e07">[&lt;/span>ultimate&lt;span style="color:#719e07">]&lt;/span> liujun &lt;span style="color:#719e07">(&lt;/span>CODE SIGNING KEY&lt;span style="color:#719e07">)&lt;/span> &amp;lt;liujun@apache.org&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sub rsa4096 2019-10-17 &lt;span style="color:#719e07">[&lt;/span>E&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>登录 &lt;a href="https://id.apache.org">https://id.apache.org&lt;/a>, 将上面的 fingerprint （即 1376 A2FF 67E4 C477 5739 09BD 7DB6 8550 D366 E4C0）
+粘贴到自己的用户信息中 OpenPGP Public Key Primary Fingerprint&lt;/p>
+&lt;h3 id="设置-apache-中央仓库">设置 Apache 中央仓库&lt;/h3>
+&lt;p>Dubbo 项目的父 pom 为 Apache pom(2.7.0 以上版本需要，2.6.x 发布版本不需要此操作)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;parent&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>apache&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>19&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/parent&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>添加以下内容到 .m2/settings.xml
+所有密码请使用 &lt;a href="http://maven.apache.org/guides/mini/guide-encryption.html">maven-encryption-plugin&lt;/a>加密后再填入&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;settings&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- To publish a snapshot of some part of Maven --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;server&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>apache.snapshots.https&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;username&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- YOUR APACHE LDAP USERNAME --&amp;gt;&lt;/span> &lt;span style="color:#268bd2">&amp;lt;/username&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;password&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- YOUR APACHE LDAP PASSWORD (encrypted) --&amp;gt;&lt;/span> &lt;span style="color:#268bd2">&amp;lt;/password&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/server&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- To stage a release of some part of Maven --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;server&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>apache.releases.https&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;username&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- YOUR APACHE LDAP USERNAME --&amp;gt;&lt;/span> &lt;span style="color:#268bd2">&amp;lt;/username&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;password&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- YOUR APACHE LDAP PASSWORD (encrypted) --&amp;gt;&lt;/span> &lt;span style="color:#268bd2">&amp;lt;/password&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/server&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- gpg passphrase used when generate key --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;server&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>gpg.passphrase&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;passphrase&amp;gt;&lt;/span>&lt;span style="color:#586e75">&amp;lt;!-- yourKeyPassword --&amp;gt;&lt;/span>&lt;span style="color:#268bd2">&amp;lt;/passphrase&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/server&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/settings&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="打包上传">打包&amp;amp;上传&lt;/h2>
+&lt;h3 id="准备分支">准备分支&lt;/h3>
+&lt;p>从主干分支拉取新分支作为发布分支，如现在要发布$&lt;code>{release_version}&lt;/code>版本，则从2.6.x拉出新分支&lt;code>${release_version}-release&lt;/code>，此后&lt;code>${release_version}&lt;/code> Release Candidates涉及的修改及打标签等都在&lt;code>${release_version}-release&lt;/code>分支进行，最终发布完成后合入主干分支。&lt;/p>
+&lt;h3 id="编译打包">编译打包&lt;/h3>
+&lt;p>首先，在&lt;code>${release_version}-release&lt;/code>分支验证maven组件打包、source源码打包、签名等是否都正常工作。&lt;strong>2.6.x记得要使用1.6进行编译打包&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn clean install -Prelease
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mvn deploy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上述命令将snapshot包推送到maven中央仓库&lt;/p>
+&lt;h3 id="使用mvn-deploy进行deploy">使用mvn deploy进行deploy&lt;/h3>
+&lt;blockquote>
+&lt;p>要求：maven 3.5+&lt;/p>
+&lt;/blockquote>
+&lt;p>修改pom文件中的版本号，从2.7.x-SNAPSHOT改为2.7.x， 目前有3个地方需要修改。建议全文搜索。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn clean install -Prelease
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mvn deploy -Prelease -DskipTests
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>所有被deploy到远程&lt;a href="http://repository.apache.org">maven仓库&lt;/a>的Artifacts都会处于staging状态&lt;/p>
+&lt;h4 id="注意点">注意点&lt;/h4>
+&lt;ul>
+&lt;li>在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，可以重新开始执行。&lt;/li>
+&lt;li>deploy执行到maven仓库的时候，请确认下包的总量是否正确。多次出现了包丢失的情况，特别是dubbo-parent包。&lt;/li>
+&lt;/ul>
+&lt;h2 id="准备apache发布">准备Apache发布&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>准备svn本机环境（Apache使用svn托管项目的发布内容）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>将dubbo checkout到本地目录&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ svn checkout https://dist.apache.org/repos/dist/dev/dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 假定本地目录为 ~/apache/dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>当前发布版本为${release_version}，新建目录&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> ~/apache/dubbo &lt;span style="color:#586e75"># dubbo svn根目录&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mkdir &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">release_version&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加public key到&lt;a href="https://dist.apache.org/repos/dist/dev/dubbo/KEYS">KEYS&lt;/a>文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#719e07">(&lt;/span>gpg --list-sigs &amp;lt;your name&amp;gt; &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> gpg --armor --export &amp;lt;your name&amp;gt;&lt;span style="color:#719e07">)&lt;/span> &amp;gt;&amp;gt; KEYS
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>拷贝&lt;code>dubbo-distribution/dubbo-apache-release/target&lt;/code>下的source相关的包到svn本地仓库&lt;code>dubbo/${release_version}&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>生成sha512签名&lt;/p>
+&lt;p>针对&lt;code>src.zip&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ shasum -a &lt;span style="color:#2aa198">512&lt;/span> apache-dubbo-&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">release_version&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>-src.zip &amp;gt;&amp;gt; apache-dubbo-&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">release_version&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>-src.zip.sha512
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>针对&lt;code>bin-release.zip&lt;/code>，需要增加&lt;code>-b&lt;/code>参数，表明是一个二进制文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ shasum -b -a &lt;span style="color:#2aa198">512&lt;/span> apache-dubbo-&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">release_version&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>-bin.zip &amp;gt;&amp;gt; apache-dubbo-&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">release_version&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>-bin.zip.sha512
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>如果有binary release要同时发布&lt;/p>
+&lt;p>在&lt;code>dubbo-distribution/dubbo-apache-release/target&lt;/code>目录下，拷贝&lt;code>bin.zip&lt;/code>以及&lt;code>bin.zip.asc&lt;/code>到svn本地仓库&lt;code>dubbo/${release_version}&lt;/code>，参考第6步，生成sha512签名。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>提交到Apache svn&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ svn status
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ svn commit -m &lt;span style="color:#2aa198">&amp;#39;prepare for ${release_version} RC1&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>关闭Maven的staging仓库&lt;/p>
+&lt;p>此步骤为发布2.7.0及以上版本必须要的步骤。在此之前请先确保所有的artifact都是ok的。登录http://repository.apache.org，点击左侧的&lt;code>Staging repositories&lt;/code>，然后搜索Dubbo关键字，会出现一系列的仓库，选择你最近上传的仓库，然后点击上方的Close按钮，这个过程会进行一系列检查，检查通过以后，在下方的Summary标签页上出现一个连接，请保存好这个链接，需要放在接下来的投票邮件当中。链接应该是类似这样的: &lt;code>https://repository.apache.org/content/repositories/orgapachedubbo-1015&lt;/code>&lt;/p>
+&lt;blockquote>
+&lt;p>请注意点击Close可能会出现失败，通常是网络原因，只要重试几次就可以了。可以点击Summary旁边的Activity标签来确认。&lt;/p>
+&lt;/blockquote>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="验证release-candidates">验证Release Candidates&lt;/h2>
+&lt;p>详细的检查列表请参考官方的&lt;a href="https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist">check list&lt;/a>&lt;/p>
+&lt;p>首先，从一下地址下载要发布的Release Candidate到本地环境：&lt;/p>
+&lt;pre>
+https://dist.apache.org/repos/dist/dev/dubbo/${release_version}/
+&lt;/pre>
+&lt;p>然后，开始验证环节，验证包含但不限于以下内容和形式&lt;/p>
+&lt;h3 id="检查签名和hash等信息">检查签名和hash等信息&lt;/h3>
+&lt;h4 id="检查sha512哈希">检查sha512哈希&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ shasum -c apache-dubbo-&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">release_version&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>-src.zip.sha512
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ shasum -c apache-dubbo-&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">release_version&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>-bin.zip.sha512
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="检查gpg签名">检查gpg签名&lt;/h4>
+&lt;p>如果是第一次检查，需要首先导入公钥。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span> $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS &amp;gt;&amp;gt; KEYS &lt;span style="color:#586e75"># download public keys to local directory&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> $ gpg --import KEYS &lt;span style="color:#586e75"># import keys&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> $ gpg —-edit-key liujun
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;gt; trust &lt;span style="color:#586e75"># type trust command&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后使用如下命令检查签名&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>gpg --verify apache-dubbo-3.0.4-src.zip.asc apache-dubbo-3.0.4-src.zip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>gpg --verify apache-dubbo-3.0.4-bin.zip.asc apache-dubbo-3.0.4-bin.zip
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="检查源码包的文件内容">检查源码包的文件内容&lt;/h3>
+&lt;p>解压缩&lt;code>apache-dubbo-${release_version}-src.zip&lt;/code>，进行如下检查:&lt;/p>
+&lt;ul>
+&lt;li>DISCLAIMER exists&lt;/li>
+&lt;li>LICENSE and NOTICE exists and contents are good&lt;/li>
+&lt;li>All files and no binary files exist&lt;/li>
+&lt;li>All files has standard ASF License header&lt;/li>
+&lt;li>Can compile from source&lt;/li>
+&lt;li>All unit tests can pass
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>mvn clean &lt;span style="color:#b58900">test&lt;/span> &lt;span style="color:#586e75"># This will run all unit tests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># you can also open rat and style plugin to check if every file meets requirements.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mvn clean &lt;span style="color:#b58900">test&lt;/span> -Drat.skip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span> -Dcheckstyle.skip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>Release candidates match with corresponding tags, you can find tag link and hash in vote email.
+&lt;ul>
+&lt;li>check the version number in pom.xml are the same&lt;/li>
+&lt;li>check there are no extra files or directories in the source package, for example, no empty directories or useless log files，这里需要注意换行符是否一致&lt;br>
+&lt;code>diff -r a rc_dir tag_dir&lt;/code>&lt;/li>
+&lt;li>check the top n tag commits, dive into the related files and check if the source package has the same changes&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="检查三方依赖的合规性">检查三方依赖的合规性&lt;/h3>
+&lt;p>按照Apache基金会合规性规定，源码或者是二进制分发包中均不能包含Category X的依赖，其中就常见的是包含了GPL/LGPL的依赖，即使是传递依赖也不行。因此在发版的时候需要通过以下的命令进行检查：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>mvn license:add-third-party -Dlicense.useMissingFile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>find . -name THIRD-PARTY.txt | xargs grep -E &lt;span style="color:#2aa198">&amp;#39;GPL|General Public License&amp;#39;&lt;/span> | grep -v Apache | grep -v MIT | grep -v CDDL
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果一个依赖提供了双协议或多重协议，可以选择与Apache最兼容的一个协议。&lt;/p>
+&lt;p>你可以参考此文章：&lt;a href="https://apache.org/legal/resolved.html">ASF第三方许可证策&lt;/a>&lt;/p>
+&lt;h3 id="检查二进制包的文件内容">检查二进制包的文件内容&lt;/h3>
+&lt;p>解压缩&lt;code>apache-dubbo-${release_version}-bin.zip&lt;/code>，进行如下检查:&lt;/p>
+&lt;ul>
+&lt;li>Check signatures are good&lt;/li>
+&lt;li>LICENSE and NOTICE exists and contents are good&lt;/li>
+&lt;/ul>
+&lt;p>注意，如果二进制包里面引入了第三方依赖，则需要更新LICENSE，加入第三方依赖的LICENSE，如果第三方依赖的LICENSE是Apache 2.0，并且对应的项目中包含了NOTICE，还需要更新NOTICE文件&lt;/p>
+&lt;h2 id="进入投票">进入投票&lt;/h2>
+&lt;p>dubbo毕业之后，投票分只需要一次：&lt;/p>
+&lt;ol>
+&lt;li>Dubbo社区投票，发起投票邮件到dev@dubbo.apache.org。在社区开发者Review，经过至少72小时并统计到3个同意发版的binding票后（只有PMC的票才是binding），即可进入下一阶段的投票。&lt;/li>
+&lt;/ol>
+&lt;p>Dubbo社区投票邮件模板：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>Hello Dubbo Community,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>This is a call for vote to release Apache Dubbo version 2.7.2.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The release candidates:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://dist.apache.org/repos/dist/dev/dubbo/2.7.2/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The staging repo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://repository.apache.org/content/repositories/orgapachedubbo-1005
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Git tag for the release:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://github.com/apache/dubbo/tree/dubbo-2.7.2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hash for the release tag:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>afab04c53edab38d52275d2a198ea1aff7a4f41e
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Release Notes:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://github.com/apache/dubbo/releases/tag/untagged-4775c0a22c60fca55118
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://dist.apache.org/repos/dist/dev/dubbo/KEYS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The vote will be open for at least 72 hours or until necessary number of votes are reached.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please vote accordingly:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ ] +1 approve
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ ] +0 no opinion
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ ] -1 disapprove with the reason
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Thanks,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The Apache Dubbo Team
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>宣布投票结果模板：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>We’ve received 3 +1 binding votes and one +1 non-binding vote:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+1 binding, Ian Luo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+1 binding, Huxing Zhang
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+1 binding, Jun Liu
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+1 non-binding, Jerrick
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>I will start to release today.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Best regards,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The Apache Dubbo Team
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="正式发布">正式发布&lt;/h2>
+&lt;ol>
+&lt;li>将&lt;a href="https://dist.apache.org/repos/dist/dev/dubbo">dev&lt;/a>目录下的发布包添加到&lt;a href="https://dist.apache.org/repos/dist/release/dubbo">release&lt;/a>目录下，KEYS有更新的，也需要同步更新。&lt;/li>
+&lt;li>删除&lt;a href="https://dist.apache.org/repos/dist/dev/dubbo">dev&lt;/a>目录下的发布包&lt;/li>
+&lt;li>删除&lt;a href="https://dist.apache.org/repos/dist/release/dubbo">release&lt;/a>目录下上一个版本的发布包，这些包会被自动保存在&lt;a href="https://archive.apache.org/dist/dubbo">这里&lt;/a>&lt;/li>
+&lt;li>此步骤为发布2.7.0及以上版本必须要的步骤。在此之前请先确保所有的artifact都是ok的。登录http://repository.apache.org，点击左侧的&lt;code>Staging repositories&lt;/code>，然后搜索Dubbo关键字，会出现一系列的仓库，选择你最近上传的仓库，然后点击上方的Release按钮.&lt;/li>
+&lt;li>发布GitHub上的&lt;a href="https://github.com/apache/dubbo/releases">release notes&lt;/a>&lt;/li>
+&lt;li>修改GitHub的Readme文件，将版本号更新到最新发布的版本&lt;/li>
+&lt;li>在官网下载&lt;a href="https://dubbo.apache.org/en/blog/2020/05/18/past-releases/">页面&lt;/a>上添加最新版本的下载链接。最新的下载链接应该类似&lt;a href="https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip">这样&lt;/a>. 同时更新以前版本的下载链接，改为类似&lt;code>https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip&lt;/code>. 具体可以参考过往的&lt;a href="https://dubbo.apache.org/en/blog/2020/05/18/past-releases/">下载链接&lt;/a> [可以参考] (&lt;a href="https://github.com/apache/dubbo-website/pull/887">https://github.com/apache/dubbo-website/pull/887&lt;/a>)&lt;/li>
+&lt;li>合并&lt;code>${release-version}-release&lt;/code>分支到对应的主干分支， 然后删除相应的release分支，例如: &lt;code>git push origin --delete 2.7.0-release&lt;/code>&lt;/li>
+&lt;li>发邮件到 &lt;code>dev@dubbo.apache.org&lt;/code>
+宣布release邮件模板：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>Hello Community,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The Apache Dubbo team is pleased to announce that the
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2.6.6 has just been released.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Apache Dubbo™ is a high-performance, java based, open source
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>RPC framework. Dubbo offers three key functionalities, which include
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface based remote call, fault tolerance &amp;amp; load balancing, and
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>automatic service registration &amp;amp; discovery.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Both the source release[1] and the maven binary release[2] are available
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>now, you can also find the detailed release notes here[3].
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>If you have any usage questions, or have problems when upgrading or find
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>any problems about enhancements included in this release, please don’t
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>hesitate to let us know by sending feedback to this mailing list or filing
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>an issue on GitHub[4].
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[1] https://dubbo.apache.org/en/blog/2020/05/18/past-releases/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[2] https://repo1.maven.org/maven2/org/apache/dubbo/dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[3] https://github.com/apache/dubbo/releases
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[4] https://github.com/apache/dubbo/issues
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="完成maven-convenient-binary发布可选">完成Maven Convenient Binary发布（可选）&lt;/h2>
+&lt;p>&lt;strong>repository.apache.org&lt;/strong> nexus仓库的权限已经申请，参见&lt;a href="https://issues.apache.org/jira/browse/INFRA-16451">jira&lt;/a>&lt;/p>
+&lt;p>发布jar包到maven仓库，首先访问&lt;a href="https://repository.apache.org">repository.apache.org&lt;/a>, 选择&lt;code>staging repository&lt;/code>, 点击&lt;code>release&lt;/code>按钮。等待一段时间之后，在&lt;a href="https://repository.apache.org/content/repositories/releases/org/apache/dubbo/">这里&lt;/a>确认完整性和正确性. 发布到Maven中央仓库则还需要等待一段时间。可以在&lt;a href="https://repo.maven.apache.org/maven2/org/apache/dubbo">这里&lt;/a>进行确认。&lt;/p>
+&lt;h2 id="faq">FAQ&lt;/h2>
+&lt;h4 id="gpg-signing-failed-inappropriate-ioctl-for-device">gpg: signing failed: Inappropriate ioctl for device&lt;/h4>
+&lt;p>If you&amp;rsquo;ve encountered this error, try the following commands:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>export GPG_TTY=$(tty)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

@@ -1,0 +1,194 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 服务治理</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/</link><description>Recent content in 服务治理 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: AOP 与可扩展机制</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/aop_and_extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/aop_and_extension/</guid><description>
+&lt;h2 id="1-extension-模块与-init-方法">1. extension 模块与 init 方法&lt;/h2>
+&lt;h3 id="11-接口与实现">1.1 接口与实现&lt;/h3>
+&lt;p>golang 中的一个接口往往伴随多个实现类，dubbo-go 提供了针对接口实现类的可插拔可扩展机制。降低模块之间的耦合性，方便开发者引入、自定义组件。&lt;/p>
+&lt;h3 id="12-golang-中的-init-方法">1.2 golang 中的 init 方法&lt;/h3>
+&lt;p>init 方法作为 golang 中特殊的方法，用户引入一组模块后，会在程序启动时率先执行这些模块内的init 方法，进行加载逻辑，该方法是dubbogo注册扩展组件的重要方式。&lt;/p>
+&lt;h3 id="13-extension-模块">1.3 extension 模块&lt;/h3>
+&lt;p>在框架源码中，有一个特殊的模块: common/extension ，这一模块负责缓存所有可扩展组件的实现。&lt;/p>
+&lt;p>以负载均衡模块为例：common/extension/loadbalance.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> extension
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> loadbalances = &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">func&lt;/span>() loadbalance.LoadBalance)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// SetLoadbalance sets the loadbalance extension with @name
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// For example: random/round_robin/consistent_hash/least_active/...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">SetLoadbalance&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>, fcn &lt;span style="color:#268bd2">func&lt;/span>() loadbalance.LoadBalance) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> loadbalances[name] = fcn
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// GetLoadbalance finds the loadbalance extension with @name
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">GetLoadbalance&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>) loadbalance.LoadBalance {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> loadbalances[name] &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;loadbalance for &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; is not existing, make sure you have import the package.&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> loadbalances[name]()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该模块包含Get 方法和Set方法。Get 返回实例化的 LoadBalance 接口，Set 方法用于注册工厂函数，map 用于缓存工厂函数。&lt;/p>
+&lt;p>当用户引入 _ &amp;ldquo;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance/random&amp;rdquo; 时，将会加载对应模块的init函数，调用 Set 方法注册唯一key和工厂函数和到上述map中。&lt;/p>
+&lt;p>cluster/loadbalance/random/loadbalance.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;math/rand&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/constant&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/extension&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/protocol&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> extension.&lt;span style="color:#268bd2">SetLoadbalance&lt;/span>(constant.LoadBalanceKeyRandom, NewRandomLoadBalance)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，当所有init方法执行完毕，可以通过 extension 模块 Get 方法来获取实例化对象。&lt;/p>
+&lt;h3 id="14-imports-模块">1.4 imports 模块&lt;/h3>
+&lt;p>dubbogo 将所有内置的模块全部放置在 imports/imports.go 内，用户在使用框架时，需要引入该模块，从而使用框架提供的基础能力。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-组件加载流程">2. 组件加载流程&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>用户在代码中引入 _ &amp;ldquo;dubbo.apache.org/dubbo-go/v3/imports&amp;rdquo;&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>程序启动，init 函数被依次执行，注册工厂函数/实例化对象到 extension 模块。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>框架启动，加载配置，配置中获取需要加载的模块key，根据key获取实例化对象。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>用户也可以手动调用 extension 的 Get 方法，获取实例化对象并直接使用。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="3-自定义组件">3. 自定义组件&lt;/h2>
+&lt;p>在上述介绍的基础之上，开发人员可以效仿内置模块，编写自定义扩展组件。&lt;/p>
+&lt;p>可参考任务&lt;a href="../../../tasks/service_management/aop/">【自定义服务调用中间件】&lt;/a>，该例子以Filter 接口为例，基于面向切面编程的思路，提供给用户介入调用链路进行过滤的能力。&lt;/p>
+&lt;h2 id="4-面向切面编程的设计aop">4. 面向切面编程的设计（AOP）&lt;/h2>
+&lt;p>在 Dubbo-go 服务框架中，许多接口是基于 AOP 的思路进行设计的。例如 Invoker、Filter、LoadBalance、Router。&lt;/p>
+&lt;p>这些接口的多种实现往往组成一组调用链，单个实现类只处理自己所关注的逻辑。&lt;/p>
+&lt;p>相关阅读：&lt;a href="https://en.wikipedia.org/wiki/Aspect-oriented_programming">【AOP wikipedia】&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: 服务注册发现</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/registry/</guid><description>
+&lt;h2 id="1-dubbo-的注册中心">1. Dubbo 的注册中心&lt;/h2>
+&lt;p>注册中心在 RPC 场景下负责保存服务端应用的信息。&lt;/p>
+&lt;p>服务端注册接口信息和到自身地址到注册中心，客户端从注册中心读取和订阅需要调用的地址列表。整个架构如图所示：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/architecture.png" alt="img">&lt;/p>
+&lt;p>关于 Dubbo 服务发现细节，详情可参考 &lt;a href="https://dubbo.apache.org/zh/docs/concepts/service-discovery/">Dubbo 官网的概念介绍&lt;/a>&lt;/p>
+&lt;h2 id="2-服务发现概念">2. 服务发现概念&lt;/h2>
+&lt;p>Dubbo 生态中，服务发现有以下主要概念：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>应用 Application&lt;/p>
+&lt;p>应用是一个 dubbo 服务进程，对应一个应用名。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>接口（服务）&lt;/p>
+&lt;p>接口是一个 RPC 接口类，例如一个通过 proto 定义的 Service，再例如一个 Java Interface 类。一个 dubbo 进程可以包含多个服务/接口。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>方法&lt;/p>
+&lt;p>方法在接口中定义，一个接口可以包含多个方法。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>参数列表&lt;/p>
+&lt;p>参数列表在方法中定义。由于 Java 支持重载，一个方法可以包含多个参数列表。对于 Go 是一对一的关系。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>注册信息&lt;/p>
+&lt;p>在“接口级服务发现”的场景下，注册信息主要包含应用名、接口列表、元数据信息、以及服务端的IP地址等。以 URL 的形式保存在注册中心，供客户端发起调用前查询。&lt;/p>
+&lt;p>在“应用级服务发现”的场景下，注册信息只包含应用名、应用名到接口的映射等少量应用级别的信息，接口级别的信息作为元数据保存在元数据中心。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>元数据&lt;/p>
+&lt;p>元数据指接口信息，例如接口名、包含的方法、方法对应的参数、序列化方式、协议等等信息。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>注册中心&lt;/p>
+&lt;p>注册中心用于保存服务端的信息。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>元数据中心&lt;/p>
+&lt;p>元数据中心用于保存服务端的元数据信息，在“应用级服务发现”场景中，作为“服务自省”阶段的依赖。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo-go 最的服务网格能力，引入以下几个概念&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>主机名&lt;/p>
+&lt;p>主机名当前应用在 k8s 上注册的 Service 名。其他应用可以通过主机名访问本应用实例。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>端点&lt;/p>
+&lt;p>端点包含实例的 IP 地址、端口。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>集群&lt;/p>
+&lt;p>集群 ID 保存了从{主机名、集群子集名、端口}&lt;/p>
+&lt;p>集群保存集群 ID 到所有其包含端点的映射关系。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>服务网格元数据&lt;/p>
+&lt;p>服务网格元数据是接口名到主机名到映射，用于客户端查询所需接口的主机名信息。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-dubbo-go-注册中心">3. Dubbo-go 注册中心&lt;/h2>
+&lt;p>Dubbo-go 支持的注册中心类型如下：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>注册中心&lt;/th>
+&lt;th>注册中心名（用于配置）&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Zookeeper&lt;/td>
+&lt;td>zookeeper&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Nacos&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Etcd&lt;/td>
+&lt;td>etcd&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Consul&lt;/td>
+&lt;td>consul&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>相关阅读：&lt;a href="https://developer.aliyun.com/article/764173">【应用级服务发现解析】&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: 可视化</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/visualization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/visualization/</guid><description>
+&lt;h1 id="可视化">可视化&lt;/h1></description></item><item><title>Docs3-V2: 柔性负载均衡</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/adaptive_lb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/adaptive_lb/</guid><description>
+&lt;h3 id="柔性服务">柔性服务&lt;/h3>
+&lt;p>柔性服务是一种去中心化的智能负载均衡组件，同时也是 Dubbo-go 3.0 版本中重磅新特性之一。柔性服务尚处于早期实验阶段，该特性将在后续版本中持续优化，与 Dubbo 社区共同探索出一套适合微服务场景的最佳实践。&lt;/p>
+&lt;p>传统的负载均衡算法是由随机节点、RoundRobin 等算法实现，他们的局限性在于不知道当前服务提供者的负载情况，算法总是以尽可能公平的概率调用不同的服务提供者。在实践中，公平不等于高性能，集群服务性能还与服务负载、任务复杂度等多因素相关。为解决传统负载均衡算法的不足，Dubbo-go 在 3.0 版本中引入了柔性服务，实现了容量动态评估和分流功能。&lt;/p>
+&lt;h3 id="容量评估">容量评估&lt;/h3>
+&lt;p>容量评估是柔性服务的核心，它能动态评估服务端容量水平。在容量评估的过程中，两个核心指标是 TPS 和响应时间，要平衡系统利用率和系统性能两者之间的关系，使整体处于最佳的状态。&lt;/p>
+&lt;ul>
+&lt;li>TPS 从服务提供者的角度反映系统利用率。在系统压力未饱和前，请求数越大则系统利用率越高，但是进一步加大请求量直至系统过饱和后，出现过载的问题，导致整体效率呈下降趋势。&lt;/li>
+&lt;li>响应时间是从服务调用者的角度反映系统性能。在系统压力未饱和前，响应时间与请求数成线性增长的关系，但是进一步加大请求量直至系统过饱和后，响应时间与请求数成指数级增长。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/samples/adaptive-service/adaptive.png" alt="img">&lt;/p>
+&lt;blockquote>
+&lt;p>柔性服务则在调用过程中收集&lt;/p>
+&lt;/blockquote>
+&lt;p>在 Dubbo-go 3.0 版本中，支持服务柔性负载均衡。在微服务场景下，客户端会在调用过程中收集该服务下游 server 实例的硬件资源消耗情况，通过容量评估与筛选策略，选择最合适的下游实例进行调用，从而提升系统整体的性能。&lt;/p>
+&lt;p>服务柔性将在之后的迭代中持续优化，追求与 Dubbo 社区共同探索出最佳实践。&lt;/p></description></item><item><title>Docs3-V2: 优雅上下线</title><link>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-v2/golang-sdk/concept/service_management/graceful_shutdown/</guid><description>
+&lt;h1 id="优雅上下线">优雅上下线&lt;/h1>
+&lt;h2 id="简介">简介&lt;/h2>
+&lt;p>在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者阔缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。&lt;/p>
+&lt;p>因此，优雅上下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力，传统服务治理能力的基础之上，应当提供服务上下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。&lt;/p>
+&lt;h2 id="期望效果">期望效果&lt;/h2>
+&lt;p>理想状态下优雅上下线的效果，是在一个承载大量流量的分布式系统内，所有组件实例都可以随意地扩容、缩容、滚动更新，在这种情况下需要保证更新过程中稳定的 tps 和 rt，保证不因为应用的上下线造成请求错误。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>Dubbo-go 应用默认开启优雅上下线能力。&lt;/p>
+&lt;p>相关阅读：&lt;a href="https://developer.aliyun.com/article/860775">【Dubbo-go 优雅上下线的设计与实践】&lt;/a>&lt;/p></description></item></channel></rss>

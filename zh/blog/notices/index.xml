@@ -1,0 +1,57 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 公告栏</title><link>https://dubbo.apache.org/zh/blog/notices/</link><description>Recent content in 公告栏 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/blog/notices/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 序列化协议安全</title><link>https://dubbo.apache.org/zh/blog/1/01/01/%E5%BA%8F%E5%88%97%E5%8C%96%E5%8D%8F%E8%AE%AE%E5%AE%89%E5%85%A8/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/1/01/01/%E5%BA%8F%E5%88%97%E5%8C%96%E5%8D%8F%E8%AE%AE%E5%AE%89%E5%85%A8/</guid><description>
+&lt;p>Dubbo3.0在序列化协议安全方面进行了升级加固，推荐使用Tripe协议非Wrapper模式。
+该协议默认安全，但需要开发人员编写IDL文件。&lt;/p>
+&lt;p>Triple协议Wrapper模式下，允许兼容其它序列化数据，提供了良好的兼容性。但其它协议可能存在反序列化安全缺陷，对于Hession2协议，高安全属性用户应当按照samples代码指示，开启白名单模式，框架默认会开启黑名单模式，拦截恶意调用。&lt;/p>
+&lt;p>不建议使用其它序列化协议，当攻击者可访问Provider接口时，其它序列化协议的安全缺陷，可能导致 Povider 接口命令执行。&lt;/p>
+&lt;p>若必须使用其它序列化协议，同时希望具备一定安全性。应当开启Token鉴权机制，防止未鉴权的不可信请求来源威胁Provider的安全性。开启Token鉴权机制时，应当同步开启注册中心的鉴权功能。&lt;/p></description></item><item><title>Blog: 安全漏洞</title><link>https://dubbo.apache.org/zh/blog/1/01/01/%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/1/01/01/%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E/</guid><description>
+&lt;h2 id="1-log4j-cve-2021-44228-漏洞">1. Log4j CVE-2021-44228 漏洞&lt;/h2>
+&lt;p>最近，主流日志组件 &lt;a href="https://logging.apache.org/log4j/2.x/">log4j2&lt;/a> 爆出&lt;a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228">安全漏洞 CVE-2021-44228&lt;/a>。&lt;/p>
+&lt;p>以下是漏洞 CVE-2021-44228 对 Apache Dubbo 框架的影响总结及用户应对指南。&lt;/p>
+&lt;h2 id="dubbo-影响范围">Dubbo 影响范围&lt;/h2>
+&lt;p>&lt;strong>该漏洞对 Dubbo 框架使用安全并无影响。&lt;/strong>&lt;/p>
+&lt;p>Dubbo 本身不强依赖 log4j2 框架，也不会通过依赖传递将 log4j2 带到业务工程中去，因此，正在使用 Dubbo 2.7.x、3.0.x 等版本的用户均无需强制升级 Dubbo 版本。&lt;/p>
+&lt;p>以下是 Dubbo 各组件对 log4j2 的依赖分析，涉及 &lt;code>dubbo-common&lt;/code>、&lt;code>dubbo-spring-boot-starter&lt;/code>、&lt;code>dubbo-spring-boot-actuator&lt;/code>：&lt;/p>
+&lt;ul>
+&lt;li>dubbo-common 包含对 &lt;code>log4j-core&lt;/code> 的可选依赖，请检查项目自身是否启用了 log4j 依赖，如启用则对应升级即可。&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ dubbo-common ---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] org.apache.dubbo:dubbo-common:jar:2.7.14-SNAPSHOT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] +- org.apache.logging.log4j:log4j-api:jar:2.11.1:provided
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-core:jar:2.11.1:provided
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>dubbo-spring-boot-starter 通过 spring-boot 组件传递了 log4j-api 依赖，log4j-api 本身并无安全问题，升级 log4j-core 组件时注意与 log4j-api 的兼容性&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ dubbo-spring-boot-starter ---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] org.apache.dubbo:dubbo-spring-boot-starter:jar:2.7.14-SNAPSHOT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile (optional)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>dubbo-spring-boot-actuator 通过 spring-boot 组件传递了 log4j-api 依赖，log4j-api 本身并无安全问题，升级 log4j-core 组件时应注意与 log4j-api 的兼容性&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>[INFO] org.apache.dubbo:dubbo-spring-boot-actuator:jar:2.7.14-SNAPSHOT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-序列化">2. 序列化&lt;/h2>
+&lt;p>Dubbo 支持序列化协议的扩展，理论上用户可以基于该扩展机制启用任意的序列化协议，这带来了极大的灵活的，但同时也要意识到其中潜藏的安全性风险。
+数据反序列化是最容易被被攻击者利用的一个环节，攻击者利用它执行 RCE 攻击等窃取或破坏服务端数据，用户在切换序列化协议或实现前，
+应充分调研目标序列化协议及其框架实现的安全性保障，并提前设置相应的安全措施（如设置黑/白名单）。Dubbo 框架自身并不能保证目标序列化机制的安全性。&lt;/p>
+&lt;p>Dubbo 2.7 官方版本提供的序列化协议有如下几种：&lt;/p>
+&lt;ul>
+&lt;li>Hessian2&lt;/li>
+&lt;li>Fastjson&lt;/li>
+&lt;li>Kryo&lt;/li>
+&lt;li>FST&lt;/li>
+&lt;li>JDK&lt;/li>
+&lt;li>Protostuff/Protobuf&lt;/li>
+&lt;li>Avro&lt;/li>
+&lt;li>Gson&lt;/li>
+&lt;/ul>
+&lt;p>针对以上序列化扩展，在发现或收到相关的漏洞报告之后，Dubbo 官方会跟进并升级依赖到最新的安全版本，但最终的漏洞修复方案取决于序列化的框架实现。&lt;/p>
+&lt;blockquote>
+&lt;p>针对使用 &lt;a href="https://github.com/apache/dubbo-hessian-lite/releases">dubbo hessian2&lt;/a> 版本的用户，Dubbo 官方会保证hessian2序列化机制的安全性并尽可能的修复上报的安全漏洞&lt;/p>
+&lt;/blockquote></description></item></channel></rss>

@@ -1,0 +1,197 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 可观测性类特性</title><link>https://dubbo.apache.org/zh/docs3-building/java-sdk/advanced-features-and-usage/observability/</link><description>Recent content in 可观测性类特性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs3-building/java-sdk/advanced-features-and-usage/observability/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-Building: 请求耗时采样</title><link>https://dubbo.apache.org/zh/docs3-building/java-sdk/advanced-features-and-usage/observability/profiler/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/java-sdk/advanced-features-and-usage/observability/profiler/</guid><description>
+&lt;h2 id="功能说明">功能说明&lt;/h2>
+&lt;p>性能采样功能可以对 Dubbo 处理链路上的各处耗时进行检测，在出现超时的时候 &lt;code>( usageTime / timeout &amp;gt; profilerWarnPercent * 100 )&lt;/code> 通过日志记录调用的耗时。&lt;/p>
+&lt;p>此功能分为 &lt;code>simple profiler&lt;/code> 和 &lt;code>detail profiler&lt;/code> 两个模式，其中 &lt;code>simple profiler&lt;/code> 模式默认开启，&lt;code>detail profiler&lt;/code> 模式默认关闭。
+&lt;code>detail profiler&lt;/code> 相较 &lt;code>simple profiler&lt;/code> 模式多采集了每个 filter 的处理耗时、协议上的具体耗时等。
+在 &lt;code>simple profiler&lt;/code> 模式下如果发现 Dubbo 框架内部存在耗时长的情况，可以开启 &lt;code>detail profiler&lt;/code> 模式，以便更好地排查问题。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>需要对 Dubbo 请求的精确耗时进行采集分析的场景，如服务不明原因的超时等&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>&lt;code>simple profiler&lt;/code> 默认自动开启，对于请求处理时间超过超时时间 3/4 的，都会通过日志打印出慢调用信息。如果需要开启 &lt;code>detail profiler&lt;/code> 模式或者修改超时告警比例，可以参考&lt;a href="../../../reference-manual/qos/profiler/">性能采样命令&lt;/a>文档。&lt;/p>
+&lt;h3 id="输出示例">输出示例&lt;/h3>
+&lt;h4 id="日志说明">日志说明&lt;/h4>
+&lt;p>日志中各字段的含义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[Dubbo-Consumer] execute service 接口#方法 cost 实际耗时, this invocation almost (maybe already) timeout. Timeout: 超时时间
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>请求上下文
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 开始请求时间（nano 时间）
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 当前节点开始时间; Usage: 当前节点使用总耗时, 当前节点耗时比例 ] 当前节点描述
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 当前节点开始时间; Usage: 当前节点使用总耗时, 当前节点耗时比例 ] 当前节点描述
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>对于请求耗时这里以两个例子进行介绍：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>methodA() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (1)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodB (2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (3)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodB() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (4)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodC (5)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (6)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodC() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (7)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0 ms; Usage: (1) + (2) + (3) ms] execute methodA
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) ms; Usage: (4) + (5) + (6) = (2) ms ] execute methodB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (4) ms; Usage: (7) = (5) ms ] execute methodC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(1) (2) (3) ... 均为时间占位符
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>methodA() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (1)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodB (2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodE (3)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (4)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodB() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (5)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodC (6)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodD (7)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (8)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodC() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (9)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodD() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (10)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodE() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (11)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0 ms; Usage: (1) + (2) + (3) + (4) ms] execute methodA
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) ms; Usage: (5) + (6) + (7) + (8) = (2) ms ] execute methodB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (5) ms; Usage: (9) = (6) ms ] execute methodC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (5) + (6) ms; Usage: (10) = (7) ms ] execute methodD
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (2) ms; Usage: (11) = (3) ms ] execute methodE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(1) (2) (3) ... 均为时间占位符
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="simple-profiler">simple profiler&lt;/h4>
+&lt;p>Consumer 侧：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:08:35:035 CST] main WARN proxy.InvokerInvocationHandler: [DUBBO] [Dubbo-Consumer] execute service org.apache.dubbo.samples.api.GreetingsService#sayHi cost 1003.015746 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285821581299853
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 1003.015746ms, 100% ] Receive request. Client invoke begin. ServiceKey: org.apache.dubbo.samples.api.GreetingsService MethodName:sayHi
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 7.987015ms; Usage: 994.207928ms, 99% ] Invoker invoke. Target Address: xx.xx.xx.xx:20880, dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Provider 侧：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:08:35:035 CST] DubboServerHandler-30.227.64.173:20880-thread-2 WARN filter.ProfilerServerFilter: [DUBBO] [Dubbo-Provider] execute service org.apache.dubbo.samples.api.GreetingsService:0.0.0#sayHi cost 808.494672 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>client: xx.xx.xx.xx:51604
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>input=281;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo=2.0.2;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285821754461125
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 808.494672ms, 100% ] Receive request. Server invoke begin.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.030912ms; Usage: 804.236342ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="detail-profiler">detail profiler&lt;/h4>
+&lt;p>Consumer 侧：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:10:59:059 CST] main WARN proxy.InvokerInvocationHandler: [DUBBO] [Dubbo-Consumer] execute service org.apache.dubbo.samples.api.GreetingsService#sayHi cost 990.828336 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285965458479241
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 990.828336ms, 100% ] Receive request. Client invoke begin. ServiceKey: org.apache.dubbo.samples.api.GreetingsService MethodName:sayHi
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 0.852044ms; Usage: 989.899439ms, 99% ] Filter org.apache.dubbo.rpc.cluster.filter.support.ConsumerContextFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.814858ms; Usage: 988.924876ms, 99% ] Filter org.apache.dubbo.rpc.protocol.dubbo.filter.FutureFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.853211ms; Usage: 988.877928ms, 99% ] Filter org.apache.dubbo.monitor.support.MonitorClusterFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.873243ms; Usage: 988.661708ms, 99% ] Filter org.apache.dubbo.rpc.cluster.router.RouterSnapshotFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 2.159140ms; Usage: 0.504939ms, 0% ] Router route.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 8.125823ms; Usage: 981.748366ms, 99% ] Cluster org.apache.dubbo.rpc.cluster.support.FailoverClusterInvoker invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 8.258359ms; Usage: 981.612033ms, 99% ] Invoker invoke. Target Address: xx.xx.xx.xx:20880, dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Provider 侧：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:10:59:059 CST] DubboServerHandler-30.227.64.173:20880-thread-2 WARN filter.ProfilerServerFilter: [DUBBO] [Dubbo-Provider] execute service org.apache.dubbo.samples.api.GreetingsService:0.0.0#sayHi cost 811.017347 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>client: xx.xx.xx.xx:52019
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>input=281;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo=2.0.2;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285965612316294
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 811.017347ms, 100% ] Receive request. Server invoke begin.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.096880ms; Usage: 809.916668ms, 99% ] Filter org.apache.dubbo.rpc.filter.EchoFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.133478ms; Usage: 809.866204ms, 99% ] Filter org.apache.dubbo.rpc.filter.ClassLoaderFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.157563ms; Usage: 809.838572ms, 99% ] Filter org.apache.dubbo.rpc.filter.GenericFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.202075ms; Usage: 809.736843ms, 99% ] Filter org.apache.dubbo.rpc.filter.ContextFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.433193ms; Usage: 809.504401ms, 99% ] Filter org.apache.dubbo.auth.filter.ProviderAuthFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.470760ms; Usage: 809.464291ms, 99% ] Filter org.apache.dubbo.rpc.filter.ExceptionFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.489103ms; Usage: 809.440183ms, 99% ] Filter org.apache.dubbo.monitor.support.MonitorFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.515757ms; Usage: 809.381893ms, 99% ] Filter org.apache.dubbo.rpc.filter.TimeoutFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.526632ms; Usage: 809.366553ms, 99% ] Filter org.apache.dubbo.rpc.protocol.dubbo.filter.TraceFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.536964ms; Usage: 809.335907ms, 99% ] Filter org.apache.dubbo.rpc.filter.ClassLoaderCallbackFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.558545ms; Usage: 804.276436ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：由于日志框架不匹配导致的日志为空可以参考&lt;a href="../../others/logger-management/">日志框架适配及运行时管理&lt;/a>动态修改日志输出框架。&lt;/p></description></item><item><title>Docs3-Building: 路由状态采集</title><link>https://dubbo.apache.org/zh/docs3-building/java-sdk/advanced-features-and-usage/observability/router-snapshot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/java-sdk/advanced-features-and-usage/observability/router-snapshot/</guid><description>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环境中，如果出现流量结果不符合预期的情况，可以通过路由状态命令来查看路由的状态，以此来定位可能存在的问题。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="查看路由缓存状态">查看路由缓存状态&lt;/h3>
+&lt;p>Dubbo 在收到地址变更的时候，会将地址信息推送给所有的 &lt;code>Router&lt;/code>，这些 &lt;code>Router&lt;/code> 可以在此阶段提前计算路由的分组，缓存起来，以避免在调用时需要遍历所有的提供者计算分组参数。
+在 Dubbo 3 中引入的 &lt;code>StateRouter&lt;/code> 提供了通过 qos 命令工具实时获取每个路由的状态的能力。&lt;/p>
+&lt;p>运维人员可以通过 &lt;code>getRouterSnapshot&lt;/code> 命令获取路由的状态。具体命令使用方式可以参考&lt;a href="../../..//reference-manual/qos/router-snapshot/#getroutersnapshot-%E5%91%BD%E4%BB%A4">getRouterSnapshot 命令&lt;/a>文档。&lt;/p>
+&lt;p>注：此功能仅支持 &lt;code>StateRoute&lt;/code>，且 &lt;code>StateRouter&lt;/code> 需要基于 &lt;code>AbstractStateRouter&lt;/code> 实现 &lt;code>doBuildSnapshot&lt;/code> 接口。&lt;/p>
+&lt;h3 id="查看实际请求的路由计算结果">查看实际请求的路由计算结果&lt;/h3>
+&lt;p>Dubbo 3 中默认在路由筛选后为空的时候打印路由计算的节点状态。运维人员可以通过日志判断每个路由的计算结果是否符合预期。&lt;/p>
+&lt;h4 id="日志格式">日志格式&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>No provider available after route for the service 服务 from registry 注册中心地址 on the consumer 消费端IP using the dubbo version 3.0.7. Router snapshot is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: 当前节点输入地址数) (Current Node Output: 当前节点计算结果数) (Chain Node Output: 当前节点和后级节点交集结果数) ] Input: 输入的地址示例（显示最多 5 个） -&amp;gt; Chain Node Output: 当前节点输出的地址示例（显示最多 5 个）
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ 路由名称 (Input: 当前节点输入地址数) (Current Node Output: 当前节点计算结果数) (Chain Node Output: 当前节点和后级节点交集结果数) Router message: 路由日志 ] Current Node Output: 当前节点输出的地址示例（显示最多 5 个）
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ 路由名称 (Input: 当前节点输入地址数) (Current Node Output: 当前节点计算结果数) (Chain Node Output: 当前节点和后级节点交集结果数) Router message: 路由日志 ] Current Node Output: 当前输入的地址示例（显示最多 5 个）
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：&lt;/p>
+&lt;ul>
+&lt;li>路由日志需要依赖路由实现判断 &lt;code>needToPrintMessage&lt;/code> 参数，并在需要时写入 &lt;code>messageHolder&lt;/code> 路由日志&lt;/li>
+&lt;li>由于多级路由结果是结果取交集的，所以当前节点计算结果数可能和后级取交后为空&lt;/li>
+&lt;/ul>
+&lt;h4 id="日志示例">日志示例&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:42:46:046 CST] main WARN cluster.RouterChain: [DUBBO] No provider available after route for the service org.apache.dubbo.samples.governance.api.DemoService from registry 30.227.64.173 on the consumer 30.227.64.173 using the dubbo version 3.0.7. Router snapshot is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: 2) (Current Node Output: 2) (Chain Node Output: 0) ] Input: 30.227.64.173:20881,30.227.64.173:20880 -&amp;gt; Chain Node Output: Empty
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ MockInvokersSelector (Input: 2) (Current Node Output: 2) (Chain Node Output: 0) Router message: invocation.need.mock not set. Return normal Invokers. ] Current Node Output: 30.227.64.173:20881,30.227.64.173:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ StandardMeshRuleRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 0) Router message: MeshRuleCache has not been built. Skip route. ] Current Node Output: 30.227.64.173:20881,30.227.64.173:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ TagStateRouter (Input: 2) (Current Node Output: 0) (Chain Node Output: 0) Router message: FAILOVER: return all Providers without any tags ] Current Node Output: Empty, dubbo version: 3.0.7, current host: 30.227.64.173
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="开启路由全采样">开启路由全采样&lt;/h4>
+&lt;p>在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以&lt;a href="../../..//reference-manual/qos/router-snapshot/">通过 qos 开启路由全采样&lt;/a>。通过 qos 的 &lt;code>getRecentRouterSnapshot&lt;/code> 命令可以远程获取最近的路由快照。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;getRecentRouterSnapshot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1658224330156 - Router snapshot service com.dubbo.dubbointegration.BackendService from registry 172.18.111.184 on the consumer 172.18.111.184 using the dubbo version 3.0.9 is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) ] Input: 172.18.111.187:20880,172.18.111.183:20880 -&amp;gt; Chain Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ MockInvokersSelector (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: invocation.need.mock not set. Return normal Invokers. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ StandardMeshRuleRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: MeshRuleCache has not been built. Skip route. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ TagStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Disable Tag Router. Reason: tagRouterRule is invalid or disabled ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ ServiceStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ AppStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1658224330156 - Router snapshot service com.dubbo.dubbointegration.BackendService from registry 172.18.111.184 on the consumer 172.18.111.184 using the dubbo version 3.0.9 is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) ] Input: 172.18.111.187:20880,172.18.111.183:20880 -&amp;gt; Chain Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ MockInvokersSelector (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: invocation.need.mock not set. Return normal Invokers. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ StandardMeshRuleRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: MeshRuleCache has not been built. Skip route. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ TagStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Disable Tag Router. Reason: tagRouterRule is invalid or disabled ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ ServiceStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ AppStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>···
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：由于日志框架不匹配导致的日志为空可以参考&lt;a href="../../others/logger-management/">日志框架适配及运行时管理&lt;/a>动态修改日志输出框架。&lt;/p></description></item></channel></rss>

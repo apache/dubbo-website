@@ -1,0 +1,140 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Align with Kubernetes Lifecycle</title><link>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/</link><description>Recent content in Align with Kubernetes Lifecycle on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Brief</title><link>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/brief/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/brief/</guid><description>
+&lt;p>&lt;a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle&lt;/a> is closely related to micro-service scheduling. Through the implementation of official Kubernetes probes, the life cycle of Dubbo and even the entire application can be aligned with the Pod Lifecycle.
+Using Dubbo&amp;rsquo;s SPI mechanism, a variety of &amp;ldquo;probes&amp;rdquo; are implemented internally. Based on the HTTP service of the Dubbo QOS operation and maintenance module, the container probe can obtain the status of the corresponding probe in the application. In addition, the implementation mechanism of SPI is also conducive to users to expand their own internal &amp;ldquo;probes&amp;rdquo;, so that the entire application life cycle can be more effectively controlled.&lt;/p>
+&lt;h2 id="usage">Usage&lt;/h2>
+&lt;p>Example （For details, please refer to the configuration file of the Kubernetes Registry in dubbo-samples）&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">livenessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /live
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">readinessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /ready
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">startupProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /startup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">failureThreshold&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At present, the three probes have corresponding interfaces. The &lt;code>path&lt;/code> section is the command in Dubbo QOS. Please modify the &lt;code>port&lt;/code> section according to the QOS configuration ( default port is 22222 ). For other     parameters, please refer to the &lt;a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">official documentation&lt;/a>.&lt;/p>
+&lt;p>Note: In order to enable the Kubernetes cluster to access the probe correctlly, you need to enable allow remote access for Dubbo QOS. This operation may bring security risks. Please carefully evaluate and then open it.&lt;/p>
+&lt;h2 id="implementation-details">Implementation details&lt;/h2>
+&lt;p>The SPI interfaces corresponding to the three probes in Kubernetes are as follows：&lt;/p>
+&lt;ul>
+&lt;li>livenessProbe: &lt;code>org.apache.dubbo.qos.probe.LivenessProbe&lt;/code>&lt;/li>
+&lt;li>readinessProbe: &lt;code>org.apache.dubbo.qos.probe.ReadinessProbe&lt;/code>&lt;/li>
+&lt;li>startupProbe: &lt;code>org.apache.dubbo.qos.probe.StartupProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>The QOS command will automatically obtain all SPI implementations of the current application. When all of the SPI implementations of the corresponding interfaces are in ready mode, and the command will returns success.&lt;/p>
+&lt;h4 id="liveness">Liveness&lt;/h4>
+&lt;p>For livenessProbe, because the Dubbo framework itself cannot obtain the liveness status of the application, there is no default implementation of this interface and it will always return success by default. Developers can expand this SPI interface according to the SPI definition and judge whether it is alive at the application level.&lt;/p>
+&lt;h4 id="readiness">Readiness&lt;/h4>
+&lt;p>For readinessProbe, Dubbo currently provides two detection dimensions by default. One is to judge whether the Dubbo service itself is started or stopped, and the other is to determine whether all services have registered interfaces. If all services have been offline from the registry ( you can offline them through Dubbo QOS ) will return to not ready state.&lt;/p>
+&lt;h4 id="startup">Startup&lt;/h4>
+&lt;p>For startupProbe, Dubbo currently provides one detection dimension by default, which is to return to the ready state after all startup processes (interface exposure, registry writing, etc.) are completed.&lt;/p></description></item><item><title>Docs: Liveness Probe</title><link>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/liveness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/liveness/</guid><description>
+&lt;h2 id="summary">Summary&lt;/h2>
+&lt;p>Extend the detection point of application survival.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.probe.LivenessProbe&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;p>Dubbo QOS &lt;code>live&lt;/code> command will automaticly discovery.&lt;/p>
+&lt;h2 id="existing-extensions">Existing Extensions&lt;/h2>
+&lt;p>No default implementation&lt;/p>
+&lt;h2 id="extension-guide">Extension Guide&lt;/h2>
+&lt;p>Directory layout:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxLivenessProbe.java (LivenessProbe implementation)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.qos.probe.LivenessProbe (plain text file with the content：xxx=com.xxx.XxxLivenessProbe)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxLivenessProbe.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxLivenessProbe&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> LivenessProbe &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">check&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.qos.probe.LivenessProbe：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>xxx=com.xxx.XxxLivenessProbe
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: Readiness Probe</title><link>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/readiness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/readiness/</guid><description>
+&lt;h2 id="summary">Summary&lt;/h2>
+&lt;p>Extend the detection point of application readiness.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.probe.ReadinessProbe&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;p>Dubbo QOS &lt;code>ready&lt;/code> command will automaticly discovery.&lt;/p>
+&lt;h2 id="existing-extensions">Existing Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.qos.probe.impl.BootstrapReadinessProbe&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.qos.probe.impl.ProviderReadinessProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-guide">Extension Guide&lt;/h2>
+&lt;p>Directory layout:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxReadinessProbe.java (ReadinessProbe implementation)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.qos.probe.ReadinessProbe (plain text file with the content：xxx=com.xxx.XxxReadinessProbe)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxReadinessProbe.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxReadinessProbe&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ReadinessProbe &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">check&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.qos.probe.ReadinessProbe：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>xxx=com.xxx.XxxReadinessProbe
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: Startup Probe</title><link>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/startup/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/references/lifecycle/startup/</guid><description>
+&lt;h2 id="summary">Summary&lt;/h2>
+&lt;p>Extend the detection point of application startup.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.probe.StartupProbe&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;p>Dubbo QOS &lt;code>startup&lt;/code> command will automaticly discovery.&lt;/p>
+&lt;h2 id="existing-extensions">Existing Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.qos.probe.impl.BootstrapStartupProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-guide">Extension Guide&lt;/h2>
+&lt;p>Directory layout:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxStartupProbe.java (StartupProbe implementation)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.qos.probe.StartupProbe (plain text file with the content：xxx=com.xxx.XxxStartupProbe)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxStartupProbe.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxStartupProbe&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> StartupProbe &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">check&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.qos.probe.StartupProbe：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>xxx=com.xxx.XxxStartupProbe
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

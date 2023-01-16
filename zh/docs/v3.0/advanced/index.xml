@@ -1,0 +1,384 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 高级用法</title><link>https://dubbo.apache.org/zh/docs/v3.0/advanced/</link><description>Recent content in 高级用法 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs/v3.0/advanced/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Protobuf与Interface对比</title><link>https://dubbo.apache.org/zh/docs/v3.0/advanced/protobufinterface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/advanced/protobufinterface/</guid><description>
+&lt;h1 id="protobuf与interface这2种idl的差异">Protobuf与Interface这2种IDL的差异&lt;/h1>
+&lt;h2 id="1-数据类型">1. 数据类型&lt;/h2>
+&lt;h3 id="11-基本类型">1.1. 基本类型&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>ptoto类型&lt;/th>
+&lt;th>java类型&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>double&lt;/td>
+&lt;td>double&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>float&lt;/td>
+&lt;td>float&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint32&lt;/td>
+&lt;td>int[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint64&lt;/td>
+&lt;td>long[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed32&lt;/td>
+&lt;td>int[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed64&lt;/td>
+&lt;td>long[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bool&lt;/td>
+&lt;td>boolean&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>string&lt;/td>
+&lt;td>String&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bytes&lt;/td>
+&lt;td>ByteString&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;blockquote>
+&lt;p>[注]在Java中，无符号的32位和64位整数使用它们的有符号对数来表示，顶部位只存储在符号位中。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="12-复合类型">1.2. 复合类型&lt;/h3>
+&lt;h4 id="121-枚举">1.2.1. 枚举&lt;/h4>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">enum TrafficLightColor {
+TRAFFIC_LIGHT_COLOR_INVALID = 0;
+TRAFFIC_LIGHT_COLOR_UNSET = 1;
+TRAFFIC_LIGHT_COLOR_GREEN = 2;
+TRAFFIC_LIGHT_COLOR_YELLOW = 3;
+TRAFFIC_LIGHT_COLOR_RED = 4;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://user-images.githubusercontent.com/22830937/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>枚举是常量，因此采用大写&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="122-数组">1.2.2. 数组&lt;/h3>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">message VipIDToRidReq &lt;span style="color:#719e07">{&lt;/span>
+repeated uint32 vipID &lt;span style="color:#719e07">=&lt;/span> 1&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://user-images.githubusercontent.com/22830937/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>底层实际上是1个ArrayList&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="223-集合">2.2.3. 集合&lt;/h3>
+&lt;p>PB不支持无序、不重复的集合，只能 &lt;code>借用数组实现&lt;/code>，需要 &lt;code>自行去重&lt;/code>。&lt;/p>
+&lt;h3 id="224-字典">2.2.4. 字典&lt;/h3>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">message BatchOnlineRes &lt;span style="color:#719e07">{&lt;/span>
+map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32&lt;span style="color:#719e07">,&lt;/span> uint32&lt;span style="color:#719e07">&amp;gt;&lt;/span> onlineMap &lt;span style="color:#719e07">=&lt;/span> 1&lt;span style="color:#719e07">;&lt;/span>&lt;span style="color:#586e75">//在线状态
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://user-images.githubusercontent.com/22830937/124234654-e4568080-db46-11eb-9700-b30022ebee21.png" alt="image">&lt;/p>
+&lt;h3 id="225-嵌套">2.2.5. 嵌套&lt;/h3>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">message BatchAnchorInfoRes &lt;span style="color:#719e07">{&lt;/span>
+map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32&lt;span style="color:#719e07">,&lt;/span> AnchorInfo&lt;span style="color:#719e07">&amp;gt;&lt;/span> list &lt;span style="color:#719e07">=&lt;/span> 1&lt;span style="color:#719e07">;&lt;/span> &lt;span style="color:#586e75">//用户信息map列表
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#586e75">/*
+&lt;/span>&lt;span style="color:#586e75">* 对应接口的功能: 批量或单个获取用户信息
+&lt;/span>&lt;span style="color:#586e75">*/&lt;/span>
+message AnchorInfo &lt;span style="color:#719e07">{&lt;/span>
+uint32 ownerUid &lt;span style="color:#719e07">=&lt;/span> 1 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;uid&amp;#34;&lt;/span>&lt;span style="color:#719e07">];&lt;/span> &lt;span style="color:#586e75">//用户id
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> string nickName &lt;span style="color:#719e07">=&lt;/span> 2 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nn&amp;#34;&lt;/span>&lt;span style="color:#719e07">];&lt;/span> &lt;span style="color:#586e75">//用户昵称
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> string smallAvatar &lt;span style="color:#719e07">=&lt;/span> 3 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;savt&amp;#34;&lt;/span>&lt;span style="color:#719e07">];&lt;/span> &lt;span style="color:#586e75">//用户头像全路径-小
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> string middleAvatar &lt;span style="color:#719e07">=&lt;/span> 4 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">];&lt;/span> &lt;span style="color:#586e75">//用户头像全路径-中
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> string bigAvatar &lt;span style="color:#719e07">=&lt;/span> 5 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;bavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">];&lt;/span> &lt;span style="color:#586e75">//用户头像全路径-大
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> string avatar &lt;span style="color:#719e07">=&lt;/span> 6 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;avt&amp;#34;&lt;/span>&lt;span style="color:#719e07">];&lt;/span> &lt;span style="color:#586e75">//用户头像
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://user-images.githubusercontent.com/22830937/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png" alt="image">&lt;/p>
+&lt;h2 id="3-字段默认值">3. 字段默认值&lt;/h2>
+&lt;ul>
+&lt;li>对于字符串，默认值为空字符串。&lt;/li>
+&lt;li>对于字节，默认值为空字节。&lt;/li>
+&lt;li>对于bools，默认值为false。&lt;/li>
+&lt;li>对于数字类型，默认值为零。&lt;/li>
+&lt;li>对于枚举，默认值为第一个定义的枚举值，它必须为0。&lt;/li>
+&lt;li>对于消息字段，未设置字段。 它的确切值是语言相关的。 有关详细信息，请参阅生成的代码指南。&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-整体结构">4. 整体结构&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Feature&lt;/th>
+&lt;th>Java Interface&lt;/th>
+&lt;th>Protobuf&lt;/th>
+&lt;th>备注&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>方法重载&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>泛型/模板化&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>方法继承&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>嵌套定义&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>部分支持&lt;/td>
+&lt;td>PB仅支持message和enum嵌套&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>import文件&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>字段为null&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>多个入参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB仅支持单入参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0个入参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB必须有入参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0个出参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB必须有出参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为抽象类&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为具象类&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为接口&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为具象类&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为基础类型&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为结构体&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="5-社区资料">5. 社区资料&lt;/h2>
+&lt;ul>
+&lt;li>社区主页地址：https://developers.google.cn/protocol-buffers/&lt;/li>
+&lt;li>社区开源地址：https://github.com/google/protobuf&lt;/li>
+&lt;li>相关jar的maven：http://mvnrepository.com/artifact/com.google.protobuf&lt;/li>
+&lt;/ul></description></item><item><title>Docs: 地址迁移规则说明</title><link>https://dubbo.apache.org/zh/docs/v3.0/advanced/migration-invoker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/advanced/migration-invoker/</guid><description>
+&lt;h2 id="状态模型">状态模型&lt;/h2>
+&lt;p>在 Dubbo 3 之前地址注册模型是以接口级粒度注册到注册中心的，而 Dubbo 3 全新的应用级注册模型注册到注册中心的粒度是应用级的。从注册中心的实现上来说是几乎不一样的，这导致了对于从接口级注册模型获取到的 invokers 是无法与从应用级注册模型获取到的 invokers 进行合并的。为了帮助用户从接口级往应用级迁移，Dubbo 3 设计了 Migration 机制，基于三个状态的切换实现实际调用中地址模型的切换。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-1.png" alt="//imgs/v3/migration/migration-1.png">&lt;/p>
+&lt;p>当前共存在三种状态，FORCE_INTERFACE（强制接口级），APPLICATION_FIRST（应用级优先）、FORCE_APPLICATION（强制应用级）。&lt;/p>
+&lt;p>FORCE_INTERFACE：只启用兼容模式下接口级服务发现的注册中心逻辑，调用流量 100% 走原有流程
+APPLICATION_FIRST：开启接口级、应用级双订阅，运行时根据阈值和灰度流量比例动态决定调用流量走向
+FORCE_APPLICATION：只启用新模式下应用级服务发现的注册中心逻辑，调用流量 100% 走应用级订阅的地址&lt;/p>
+&lt;h2 id="规则体说明">规则体说明&lt;/h2>
+&lt;p>规则采用 yaml 格式配置，具体配置下参考如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">key&lt;/span>: 消费者应用名（必填）
+&lt;span style="color:#268bd2">step&lt;/span>: 状态名（必填）
+&lt;span style="color:#268bd2">threshold&lt;/span>: 决策阈值（默认1.0）
+&lt;span style="color:#268bd2">proportion&lt;/span>: 灰度比例（默认100）
+&lt;span style="color:#268bd2">delay&lt;/span>: 延迟决策时间（默认0）
+&lt;span style="color:#268bd2">force&lt;/span>: 强制切换（默认 false）
+&lt;span style="color:#268bd2">interfaces&lt;/span>: 接口粒度配置（可选）
+- &lt;span style="color:#268bd2">serviceKey: 接口名（接口 + &lt;/span>: + 版本号）（必填）
+&lt;span style="color:#268bd2">threshold&lt;/span>: 决策阈值
+&lt;span style="color:#268bd2">proportion&lt;/span>: 灰度比例
+&lt;span style="color:#268bd2">delay&lt;/span>: 延迟决策时间
+&lt;span style="color:#268bd2">force&lt;/span>: 强制切换
+&lt;span style="color:#268bd2">step&lt;/span>: 状态名（必填）
+- &lt;span style="color:#268bd2">serviceKey: 接口名（接口 + &lt;/span>: + 版本号）
+&lt;span style="color:#268bd2">step&lt;/span>: 状态名
+&lt;span style="color:#268bd2">applications&lt;/span>: 应用粒度配置（可选）
+- &lt;span style="color:#268bd2">serviceKey&lt;/span>: 应用名（消费的上游应用名）（必填）
+&lt;span style="color:#268bd2">threshold&lt;/span>: 决策阈值
+&lt;span style="color:#268bd2">proportion&lt;/span>: 灰度比例
+&lt;span style="color:#268bd2">delay&lt;/span>: 延迟决策时间
+&lt;span style="color:#268bd2">force&lt;/span>: 强制切换
+&lt;span style="color:#268bd2">step&lt;/span>: 状态名（必填）
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>key: 消费者应用名&lt;/li>
+&lt;li>step: 状态名（FORCE_INTERFACE、APPLICATION_FIRST、FORCE_APPLICATION）&lt;/li>
+&lt;li>threshold: 决策阈值（浮点数，具体含义参考后文）&lt;/li>
+&lt;li>proportion: 灰度比例（0～100，决定调用次数比例）&lt;/li>
+&lt;li>delay: 延迟决策时间（延迟决策的时间，实际等待时间为 1～2 倍 delay 时间，取决于注册中心第一次通知的时间，对于目前 Dubbo 的注册中心实现次配置项保留 0 即可）&lt;/li>
+&lt;li>force: 强制切换（对于 FORCE_INTERFACE、FORCE_APPLICATION 是否不考虑决策直接切换，可能导致无地址调用失败问题）&lt;/li>
+&lt;li>interfaces: 接口粒度配置&lt;/li>
+&lt;/ul>
+&lt;p>参考配置示例如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#268bd2">key&lt;/span>: demo-consumer
+&lt;span style="color:#268bd2">step&lt;/span>: APPLICATION_FIRST
+&lt;span style="color:#268bd2">threshold&lt;/span>: &lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;span style="color:#268bd2">proportion&lt;/span>: &lt;span style="color:#2aa198">60&lt;/span>
+&lt;span style="color:#268bd2">delay&lt;/span>: &lt;span style="color:#2aa198">0&lt;/span>
+&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;span style="color:#268bd2">interfaces&lt;/span>:
+- &lt;span style="color:#268bd2">serviceKey&lt;/span>: DemoService:1.0.0
+&lt;span style="color:#268bd2">threshold&lt;/span>: &lt;span style="color:#2aa198">0.5&lt;/span>
+&lt;span style="color:#268bd2">proportion&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;span style="color:#268bd2">delay&lt;/span>: &lt;span style="color:#2aa198">0&lt;/span>
+&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;span style="color:#268bd2">step&lt;/span>: APPLICATION_FIRST
+- &lt;span style="color:#268bd2">serviceKey&lt;/span>: GreetingService:1.0.0
+&lt;span style="color:#268bd2">step&lt;/span>: FORCE_APPLICATION
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置方式说明">配置方式说明&lt;/h2>
+&lt;h3 id="1-配置中心配置文件下发推荐">1. 配置中心配置文件下发（推荐）&lt;/h3>
+&lt;ul>
+&lt;li>Key: 消费者应用名 + &amp;ldquo;.migration&amp;rdquo;&lt;/li>
+&lt;li>Group: DUBBO_SERVICEDISCOVERY_MIGRATION&lt;/li>
+&lt;/ul>
+&lt;p>�
+配置项内容参考上一节&lt;/p>
+&lt;p>程序启动时会拉取此配置作为最高优先级启动项，当配置项为启动项时不执行检查操作，直接按状态信息达到终态。
+程序运行过程中收到新配置项将执行迁移操作，过程中根据配置信息进行检查，如果检查失败将回滚为迁移前状态。迁移是按接口粒度执行的，也即是如果一个应用有 10 个接口，其中 8 个迁移成功，2 个失败，那终态 8 个迁移成功的接口将执行新的行为，2 个失败的仍为旧状态。如果需要重新触发迁移可以通过重新下发规则达到。&lt;/p>
+&lt;p>注：如果程序在迁移时由于检查失败会滚了，由于程序无回写配置项行为，所以如果此时程序重启了，那么程序会直接按照新的行为不检查直接初始化。&lt;/p>
+&lt;h3 id="2-启动参数配置">2. 启动参数配置&lt;/h3>
+&lt;ul>
+&lt;li>配置项名：dubbo.application.service-discovery.migration&lt;/li>
+&lt;li>允许值范围：FORCE_INTERFACE、APPLICATION_FIRST、FORCE_APPLICATION&lt;/li>
+&lt;/ul>
+&lt;p>此配置项可以通过环境变量或者配置中心传入，启动时优先级比配置文件低，也即是当配置中心的配置文件不存在时读取此配置项作为启动状态。&lt;/p>
+&lt;h3 id="3-本地文件配置">3. 本地文件配置&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>配置项名&lt;/th>
+&lt;th>默认值&lt;/th>
+&lt;th>说明&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>dubbo.migration.file&lt;/td>
+&lt;td>dubbo-migration.yaml&lt;/td>
+&lt;td>本地配置文件路径&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>dubbo.application.migration.delay&lt;/td>
+&lt;td>60000&lt;/td>
+&lt;td>配置文件延迟生效时间（毫秒）&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>配置文件中格式与前文提到的规则一致&lt;/p>
+&lt;p>本地文件配置方式本质上是一个延时配置通知的方式，本地文件不会影响默认启动方式，当达到延时时间后触发推送一条内容和本地文件一致的通知。这里的延时时间与规则体中的 delay 字段无关联。
+本地文件配置方式可以保证启动以默认行为初始化，当达到延时时触发迁移操作，执行对应的检查，避免启动时就以终态方式启动。&lt;/p>
+&lt;h2 id="决策说明">决策说明&lt;/h2>
+&lt;h3 id="1-阈值探测">1. 阈值探测&lt;/h3>
+&lt;p>阈值机制旨在进行流量切换前的地址数检查，如果应用级的可使用地址数与接口级的可用地址数对比后没达到阈值将检查失败。&lt;/p>
+&lt;p>核心代码如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(((&lt;/span>&lt;span style="color:#dc322f">float&lt;/span>&lt;span style="color:#719e07">)&lt;/span> newAddressSize &lt;span style="color:#719e07">/&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">float&lt;/span>&lt;span style="color:#719e07">)&lt;/span> oldAddressSize&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;gt;=&lt;/span> threshold&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>同时 MigrationAddressComparator 也是一个 SPI 拓展点，用户可以自行拓展，所有检查的结果取交集。&lt;/p>
+&lt;h3 id="2-灰度比例">2. 灰度比例&lt;/h3>
+&lt;p>灰度比例功能仅在应用级优先状态下生效。此功能可以让用户自行决定调用往新模式应用级注册中心地址的调用数比例。灰度生效的前提是满足了阈值探测，在应用级优先状态下，如果阈值探测通过，&lt;code>currentAvailableInvoker&lt;/code> 将被切换为对应应用级地址的 invoker；如果探测失败 &lt;code>currentAvailableInvoker&lt;/code> 仍为原有接口级地址的 invoker。&lt;/p>
+&lt;p>流程图如下：
+探测阶段
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-2.png" alt="//imgs/v3/migration/migration-2.png">
+调用阶段
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-3.png" alt="//imgs/v3/migration/migration-3.png">&lt;/p>
+&lt;p>核心代码如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#586e75">// currentAvailableInvoker is based on MigrationAddressComparator&amp;#39;s result
+&lt;/span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>currentAvailableInvoker &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>step &lt;span style="color:#719e07">==&lt;/span> APPLICATION_FIRST&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#586e75">// call ratio calculation based on random value
+&lt;/span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>ThreadLocalRandom&lt;span style="color:#719e07">.&lt;/span>current&lt;span style="color:#719e07">().&lt;/span>nextDouble&lt;span style="color:#719e07">(&lt;/span>100&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;gt;&lt;/span> promotion&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> invoker&lt;span style="color:#719e07">.&lt;/span>invoke&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> currentAvailableInvoker&lt;span style="color:#719e07">.&lt;/span>invoke&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="切换过程说明">切换过程说明&lt;/h2>
+&lt;p>地址迁移过程中涉及到了三种状态的切换，为了保证平滑迁移，共有 6 条切换路径需要支持，可以总结为从强制接口级、强制应用级往应用级优先切换；应用级优先往强制接口级、强制应用级切换；还有强制接口级和强制应用级互相切换。
+对于同一接口切换的过程总是同步的，如果前一个规则还未处理完就收到新规则则回进行等待。&lt;/p>
+&lt;h3 id="1-切换到应用级优先">1. 切换到应用级优先&lt;/h3>
+&lt;p>从强制接口级、强制应用级往应用级优先切换本质上是从某一单订阅往双订阅切换，保留原有的订阅并创建另外一种订阅的过程。这个切换模式下规则体中配置的 delay 配置不会生效，也即是创建完订阅后马上进行阈值探测并决策选择某一组订阅进行实际优先调用。由于应用级优先模式是支持运行时动态进行阈值探测，所以对于部分注册中心无法启动时即获取全量地址的场景在全部地址通知完也会重新计算阈值并切换。
+应用级优先模式下的动态切换是基于服务目录（Directory）的地址监听器实现的。
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-4.png" alt="//imgs/v3/migration/migration-4.png">&lt;/p>
+&lt;h3 id="2-应用级优先切换到强制">2. 应用级优先切换到强制&lt;/h3>
+&lt;p>应用级优先往强制接口级、强制应用级切换的过程是对双订阅的地址进行检查，如果满足则对另外一份订阅进行销毁，如果不满足则回滚保留原来的应用级优先状态。
+如果用户希望这个切换过程不经过检查直接切换可以通过配置 force 参数实现。
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-5.png" alt="//imgs/v3/migration/migration-5.png">&lt;/p>
+&lt;h3 id="3-强制接口级和强制应用级互相切换">3. 强制接口级和强制应用级互相切换&lt;/h3>
+&lt;p>强制接口级和强制应用级互相切换需要临时创建一份新的订阅，判断新的订阅（即阈值计算时使用新订阅的地址数去除旧订阅的地址数）是否达标，如果达标则进行切换，如果不达标会销毁这份新的订阅并且回滚到之前的状态。
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-6.png" alt="//imgs/v3/migration/migration-6.png">&lt;/p></description></item></channel></rss>

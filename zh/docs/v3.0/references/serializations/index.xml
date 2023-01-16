@@ -1,0 +1,256 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 序列化协议</title><link>https://dubbo.apache.org/zh/docs/v3.0/references/serializations/</link><description>Recent content in 序列化协议 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs/v3.0/references/serializations/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Kryo 和 FST 序列化</title><link>https://dubbo.apache.org/zh/docs/v3.0/references/serializations/serialization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/references/serializations/serialization/</guid><description>
+&lt;h2 id="目录">目录&lt;/h2>
+&lt;ul>
+&lt;li>序列化漫谈&lt;/li>
+&lt;li>启用Kryo和FST&lt;/li>
+&lt;li>注册被序列化类&lt;/li>
+&lt;li>无参构造函数和Serializable接口&lt;/li>
+&lt;li>序列化性能分析与测试
+&lt;ul>
+&lt;li>测试环境&lt;/li>
+&lt;li>测试脚本&lt;/li>
+&lt;li>Dubbo RPC中不同序列化生成字节大小比较&lt;/li>
+&lt;li>Dubbo RPC中不同序列化响应时间和吞吐量对比&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>未来&lt;/li>
+&lt;/ul>
+&lt;h2 id="序列化漫谈">序列化漫谈&lt;/h2>
+&lt;p>dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用，简单的说：&lt;/p>
+&lt;ul>
+&lt;li>长连接：避免了每次调用新建TCP连接，提高了调用的响应速度&lt;/li>
+&lt;li>多路复用：单个TCP连接可交替传输多个请求和响应的消息，降低了连接的等待闲置时间，从而减少了同样并发数下的网络连接数，提高了系统吞吐量。&lt;/li>
+&lt;/ul>
+&lt;p>dubbo RPC主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。&lt;/p>
+&lt;p>而序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。&lt;/p>
+&lt;p>在dubbo RPC中，同时支持多种序列化方式，例如：&lt;/p>
+&lt;ol>
+&lt;li>dubbo序列化：阿里尚未开发成熟的高效java序列化实现，阿里不建议在生产环境使用它&lt;/li>
+&lt;li>hessian2序列化：hessian是一种跨语言的高效二进制序列化方式。但这里实际不是原生的hessian2序列化，而是阿里修改过的hessian lite，它是dubbo RPC默认启用的序列化方式&lt;/li>
+&lt;li>json序列化：目前有两种实现，一种是采用的阿里的fastjson库，另一种是采用dubbo中自己实现的简单json库，但其实现都不是特别成熟，而且json这种文本序列化性能一般不如上面两种二进制序列化。&lt;/li>
+&lt;li>java序列化：主要是采用JDK自带的Java序列化实现，性能很不理想。&lt;/li>
+&lt;/ol>
+&lt;p>在通常情况下，这四种主要序列化方式的性能从上到下依次递减。对于dubbo RPC这种追求高性能的远程调用方式来说，实际上只有1、2两种高效序列化方式比较般配，而第1个dubbo序列化由于还不成熟，所以实际只剩下2可用，所以dubbo RPC默认采用hessian2序列化。&lt;/p>
+&lt;p>但hessian是一个比较老的序列化实现了，而且它是跨语言的，所以不是单独针对java进行优化的。而dubbo RPC实际上完全是一种Java to Java的远程调用，其实没有必要采用跨语言的序列化方式（当然肯定也不排斥跨语言的序列化）。&lt;/p>
+&lt;p>最近几年，各种新的高效序列化方式层出不穷，不断刷新序列化性能的上限，最典型的包括：&lt;/p>
+&lt;ul>
+&lt;li>专门针对Java语言的：Kryo，FST等等&lt;/li>
+&lt;li>跨语言的：Protostuff，ProtoBuf，Thrift，Avro，MsgPack等等&lt;/li>
+&lt;/ul>
+&lt;p>这些序列化方式的性能多数都显著优于hessian2（甚至包括尚未成熟的dubbo序列化）。&lt;/p>
+&lt;p>有鉴于此，我们为dubbo引入Kryo和FST这两种高效Java序列化实现，来逐步取代hessian2。&lt;/p>
+&lt;p>其中，Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。而FST是一种较新的序列化实现，目前还缺乏足够多的成熟使用案例，但我认为它还是非常有前途的。&lt;/p>
+&lt;p>在面向生产环境的应用中，我建议目前更优先选择Kryo。&lt;/p>
+&lt;h2 id="启用kryo和fst">启用Kryo和FST&lt;/h2>
+&lt;p>使用Kryo和FST非常简单，只需要在dubbo RPC的XML配置中添加一个属性即可：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fst&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="注册被序列化类">注册被序列化类&lt;/h2>
+&lt;p>要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，例如，我们可以实现如下回调接口：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">SerializationOptimizerImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> SerializationOptimizer &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> Collection&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getSerializableClasses&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> classes &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> LinkedList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;();&lt;/span>
+classes&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>BidRequest&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+classes&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>BidResponse&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+classes&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>Device&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+classes&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>Geo&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+classes&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>Impression&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+classes&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>SeatBid&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> classes&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在XML配置中添加：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span> optimizer=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.SerializationOptimizerImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>在注册这些类后，序列化的性能可能被大大提升，特别针对小数量的嵌套对象的时候。&lt;/p>
+&lt;p>当然，在对一个类做序列化的时候，可能还级联引用到很多类，比如Java集合类。针对这种情况，我们已经自动将JDK中的常用类进行了注册，所以你不需要重复注册它们（当然你重复注册了也没有任何影响），包括：&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">GregorianCalendar
+InvocationHandler
+BigDecimal
+BigInteger
+Pattern
+BitSet
+URI
+UUID
+HashMap
+ArrayList
+LinkedList
+HashSet
+TreeSet
+Hashtable
+Date
+Calendar
+ConcurrentHashMap
+SimpleDateFormat
+Vector
+BitSet
+StringBuffer
+StringBuilder
+Object
+Object[]
+String[]
+byte[]
+char[]
+int[]
+float[]
+double[]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于注册被序列化的类仅仅是出于性能优化的目的，所以即使你忘记注册某些类也没有关系。事实上，即使不注册任何类，Kryo和FST的性能依然普遍优于hessian和dubbo序列化。&lt;/p>
+&lt;blockquote>
+&lt;p>当然，有人可能会问为什么不用配置文件来注册这些类？这是因为要注册的类往往数量较多，导致配置文件冗长；而且在没有好的IDE支持的情况下，配置文件的编写和重构都比java类麻烦得多；最后，这些注册的类一般是不需要在项目编译打包后还需要做动态修改的。&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>另外，有人也会觉得手工注册被序列化的类是一种相对繁琐的工作，是不是可以用annotation来标注，然后系统来自动发现并注册。但这里annotation的局限是，它只能用来标注你可以修改的类，而很多序列化中引用的类很可能是你没法做修改的（比如第三方库或者JDK系统类或者其他项目的类）。另外，添加annotation毕竟稍微的“污染”了一下代码，使应用代码对框架增加了一点点的依赖性。&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>除了annotation，我们还可以考虑用其它方式来自动注册被序列化的类，例如扫描类路径，自动发现实现Serializable接口（甚至包括Externalizable）的类并将它们注册。当然，我们知道类路径上能找到Serializable类可能是非常多的，所以也可以考虑用package前缀之类来一定程度限定扫描范围。&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>当然，在自动注册机制中，特别需要考虑如何保证服务提供端和消费端都以同样的顺序（或者ID）来注册类，避免错位，毕竟两端可被发现然后注册的类的数量可能都是不一样的。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="无参构造函数和serializable接口">无参构造函数和Serializable接口&lt;/h2>
+&lt;p>如果被序列化的类中不包含无参的构造函数，则在Kryo的序列化中，性能将会大打折扣，因为此时我们在底层将用Java的序列化来透明的取代Kryo序列化。所以，尽可能为每一个被序列化的类添加无参构造函数是一种最佳实践（当然一个java类如果不自定义构造函数，默认就有无参构造函数）。&lt;/p>
+&lt;p>另外，Kryo和FST本来都不需要被序列化的类实现Serializable接口，但我们还是建议每个被序列化类都去实现它，因为这样可以保持和Java序列化以及dubbo序列化的兼容性，另外也使我们未来采用上述某些自动注册机制带来可能。&lt;/p>
+&lt;h2 id="序列化性能分析与测试">序列化性能分析与测试&lt;/h2>
+&lt;p>本文我们主要讨论的是序列化，但在做性能分析和测试的时候我们并不单独处理每种序列化方式，而是把它们放到dubbo RPC中加以对比，因为这样更有现实意义。&lt;/p>
+&lt;h3 id="测试环境">测试环境&lt;/h3>
+&lt;p>粗略如下：&lt;/p>
+&lt;ul>
+&lt;li>两台独立服务器&lt;/li>
+&lt;li>4核Intel(R) Xeon(R) CPU E5-2603 0 @ 1.80GHz&lt;/li>
+&lt;li>8G内存&lt;/li>
+&lt;li>虚拟机之间网络通过百兆交换机&lt;/li>
+&lt;li>CentOS 5&lt;/li>
+&lt;li>JDK 7&lt;/li>
+&lt;li>Tomcat 7&lt;/li>
+&lt;li>JVM参数-server -Xms1g -Xmx1g -XX:PermSize=64M -XX:+UseConcMarkSweepGC&lt;/li>
+&lt;/ul>
+&lt;p>当然这个测试环境较有局限，故当前测试结果未必有非常权威的代表性。&lt;/p>
+&lt;h3 id="测试脚本">测试脚本&lt;/h3>
+&lt;p>和dubbo自身的基准测试保持接近：&lt;/p>
+&lt;p>10个并发客户端持续不断发出请求：&lt;/p>
+&lt;ul>
+&lt;li>传入嵌套复杂对象（但单个数据量很小），不做任何处理，原样返回&lt;/li>
+&lt;li>传入50K字符串，不做任何处理，原样返回（TODO：结果尚未列出）&lt;/li>
+&lt;/ul>
+&lt;p>进行5分钟性能测试。（引用dubbo自身测试的考虑：“主要考察序列化和网络IO的性能，因此服务端无任何业务逻辑。取10并发是考虑到rpc协议在高并发下对CPU的使用率较高可能会先打到瓶颈。”）&lt;/p>
+&lt;h3 id="dubbo-rpc中不同序列化生成字节大小比较">Dubbo RPC中不同序列化生成字节大小比较&lt;/h3>
+&lt;p>序列化生成字节码的大小是一个比较有确定性的指标，它决定了远程调用的网络传输时间和带宽占用。&lt;/p>
+&lt;p>针对复杂对象的结果如下（数值越小越好）：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>序列化实现&lt;/th>
+&lt;th>请求字节数&lt;/th>
+&lt;th>响应字节数&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Kryo&lt;/td>
+&lt;td>272&lt;/td>
+&lt;td>90&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>FST&lt;/td>
+&lt;td>288&lt;/td>
+&lt;td>96&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo Serialization&lt;/td>
+&lt;td>430&lt;/td>
+&lt;td>186&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Hessian&lt;/td>
+&lt;td>546&lt;/td>
+&lt;td>329&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>FastJson&lt;/td>
+&lt;td>461&lt;/td>
+&lt;td>218&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Json&lt;/td>
+&lt;td>657&lt;/td>
+&lt;td>409&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Java Serialization&lt;/td>
+&lt;td>963&lt;/td>
+&lt;td>630&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="dubbo-rpc中不同序列化响应时间和吞吐量对比">Dubbo RPC中不同序列化响应时间和吞吐量对比&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>远程调用方式&lt;/th>
+&lt;th>平均响应时间&lt;/th>
+&lt;th>平均TPS（每秒事务数）&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>REST: Jetty + JSON&lt;/td>
+&lt;td>7.806&lt;/td>
+&lt;td>1280&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Jetty + JSON + GZIP&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Jetty + XML&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Jetty + XML + GZIP&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Tomcat + JSON&lt;/td>
+&lt;td>2.082&lt;/td>
+&lt;td>4796&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Netty + JSON&lt;/td>
+&lt;td>2.182&lt;/td>
+&lt;td>4576&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: FST&lt;/td>
+&lt;td>1.211&lt;/td>
+&lt;td>8244&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: kyro&lt;/td>
+&lt;td>1.182&lt;/td>
+&lt;td>8444&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: dubbo serialization&lt;/td>
+&lt;td>1.43&lt;/td>
+&lt;td>6982&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: hessian2&lt;/td>
+&lt;td>1.49&lt;/td>
+&lt;td>6701&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: fastjson&lt;/td>
+&lt;td>1.572&lt;/td>
+&lt;td>6352&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/rt.png" alt="rt">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/tps.png" alt="tps">&lt;/p>
+&lt;h3 id="测试总结">测试总结&lt;/h3>
+&lt;p>就目前结果而言，我们可以看到不管从生成字节的大小，还是平均响应时间和平均TPS，Kryo和FST相比Dubbo RPC中原有的序列化方式都有非常显著的改进。&lt;/p>
+&lt;h2 id="未来">未来&lt;/h2>
+&lt;p>未来，当Kryo或者FST在dubbo中当应用足够成熟之后，我们很可能会将dubbo RPC的默认序列化从hessian2改为它们中间的某一个。&lt;/p></description></item></channel></rss>

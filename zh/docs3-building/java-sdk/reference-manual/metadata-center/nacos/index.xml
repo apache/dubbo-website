@@ -1,0 +1,360 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Nacos</title><link>https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/metadata-center/nacos/</link><description>Recent content in Nacos on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/metadata-center/nacos/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-Building: 概述</title><link>https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/metadata-center/nacos/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/metadata-center/nacos/overview/</guid><description/></item><item><title>Docs3-Building: 使用说明</title><link>https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/metadata-center/nacos/guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs3-building/java-sdk/reference-manual/metadata-center/nacos/guide/</guid><description>
+&lt;p>#简单介绍
+Dubbo provider中的服务配置项有接近&lt;a href="https://dubbo.apache.org/zh/docs/references/xml/dubbo-provider/">30个配置项&lt;/a> 。 排除注册中心服务治理需要之外，很大一部分配置项是provider自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以key-value形式持久化存储。&lt;/p>
+&lt;p>Dubbo consumer中的配置项也有&lt;a href="https://dubbo.apache.org/zh/docs/references/xml/dubbo-consumer/">20+个配置项&lt;/a> 。在注册中心之中，服务消费者列表中只需要关注application、version、group、ip、dubbo版本等少量配置，其他配置也可以以key-value形式持久化存储。&lt;/p>
+&lt;p>这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心(如nacos)的网络开销增大，性能降低。&lt;/p>
+&lt;p>除了上述配置项的存储之外，Dubbo服务元数据信息也需要被存储下来。元数据信息包括服务接口列表和接口的方法信息，这些信息将被用于服务mock和服务测试。&lt;/p>
+&lt;p>使用Dubbo&lt;code>3.0.0&lt;/code>及以上版本时，引入了应用元数据的概念，并且引入了服务自省映射，用于应用级别的服务发现。&lt;/p>
+&lt;h1 id="预备工作">预备工作&lt;/h1>
+&lt;p>Dubbo使用nacos注册中心之前，需先成功启动nacos server，操作步骤请参考&lt;a href="https://nacos.io/zh-cn/docs/quick-start.html">nacos快速入门&lt;/a>。&lt;/p>
+&lt;blockquote>
+&lt;p>当Dubbo使用&lt;code>3.0.0&lt;/code>及以上版本时，需要使用Nacos &lt;code>2.0.0&lt;/code>及以上版本&lt;/p>
+&lt;/blockquote>
+&lt;h1 id="快速上手">快速上手&lt;/h1>
+&lt;p>Dubbo 融合 Nacos 成为元数据中心的操作步骤非常简单，大致分为“增加 Maven 依赖”以及“配置元数据中心”两步。&lt;/p>
+&lt;blockquote>
+&lt;p>如果元数据地址(dubbo.metadata-report.address)也不进行配置，会使用注册中心的地址来用作元数据中心。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="增加maven依赖">增加Maven依赖&lt;/h2>
+&lt;p>只需要将dubbo-metadata-report-nacos的Maven依赖添加到pom.xml文件中即可。&lt;/p>
+&lt;p>引入dubbo-metadata-report-nacos会自动引入dubbo-configcenter-nacos，将元数据放到配置中心。&lt;/p>
+&lt;p>Dubbo&lt;code>3.0.0&lt;/code>及以上版本，dubbo-metadata-report-nacos引入nacos-client版本为&lt;code>2.0.0&lt;/code>及以上版本。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Dubbo Nacos Metadata Report dependency --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metadata-report-nacos&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.0.7&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Dubbo dependency --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.0.7&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置元数据中心">配置元数据中心&lt;/h2>
+&lt;p>如果Dubbo使用 Spring Framework 装配，有三种配置方法分别为：Dubbo Spring 外部化配置、Spring XML 配置文件和API配置，推荐使用第一种配置方式。&lt;/p>
+&lt;h3 id="dubbo-spring外部化配置">Dubbo Spring外部化配置&lt;/h3>
+&lt;p>Dubbo Spring 外部化配置是由 Dubbo 2.5.8引入的新特性，可通过 Spring Environment 属性自动地生成并绑定 Dubbo 配置 Bean，实现配置简化，并且降低微服务开发门槛。&lt;/p>
+&lt;p>当Dubbo使用Nacos为注册中心，假设启动服务器IP为：10.20.153.10，端口号为：8848，则在Dubbo外部化配置文件中添加以下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>## application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name=your-dubbo-application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>## Nacos Metadata Report address
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.metadata-report.address=nacos://10.20.153.10:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>##如果要使用其他参数，可以使用以下2种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#第一种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#dubbo.metadata-report.address=nacos://10.20.153.10:8848?username=nacos&amp;amp;password=nacos&amp;amp;namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932&amp;amp;group=demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#第二种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#dubbo.metadata-report.address=nacos://10.20.153.10:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#dubbo.metadata-report.username=nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#dubbo.metadata-report.password=nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#dubbo.metadata-report.parameters.namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>#dubbo.metadata-report.group=demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可配置的参数参考完整配置项说明&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo&lt;code>3.0.0&lt;/code>版本以后，增加了是否注册消费者的元数据，如果需要将消费者元数据存放到nacos元数据中心上，需要将参数(report-consumer-definition)设置为true，默认是false。&lt;/p>
+&lt;/blockquote>
+&lt;p>设置方式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> ##设置是否注册消费者的参数，可以使用以下2种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #第一种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #dubbo.registry.address=nacos://10.20.153.10:8848?report-consumer-definition=true
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #第二种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #dubbo.registry.address=nacos://10.20.153.10:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #dubbo.registry.parameters.report-consumer-definition=true
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>随后，重启Dubbo应用，在Nacos的控制台上可看到服务提供者和消费者的应用级别以及接口级别元数据信息：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-1.png" alt="image-dubbo-metadata-nacos-1.png">&lt;/p>
+&lt;h4 id="应用级别元数据">应用级别元数据&lt;/h4>
+&lt;p>应用级别元数据只有当一个应用定义服务之后，才会进行暴露。会根据当前应用的自身信息，以及接口信息，去计算出该应用的 revision 修订值，用于保存应用级别元数据。&lt;/p>
+&lt;blockquote>
+&lt;p>在Dubbo&lt;code>3.0.0&lt;/code>及以上版本中，引入了应用元数据的概念，应用元数据描述的是整个应用的信息概览。如需暴露应用级别元数据，需要将配置参数metadata-type设置为remote(默认为local)，或将参数reportMetadata设置为true(默认为false)。&lt;/p>
+&lt;/blockquote>
+&lt;p>设置方式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> #设置是否暴露应用级别元数据，可以使用以下2种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #第一种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubbo.metadata-report.address=nacos://10.20.153.10:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubbo.application.metadata-type=remote
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #第二种方式
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #dubbo.metadata-report.address=nacos://10.20.153.10:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #dubbo.metadata-report.report-metadata=true
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #或
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #dubbo.metadata-report.address=nacos://10.20.153.10:8848?report-metadata=true
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>元数据信息详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-2.png" alt="image-dubbo-metadata-nacos-2.png">&lt;/p>
+&lt;h4 id="接口级别元数据">接口级别元数据&lt;/h4>
+&lt;p>在 Nacos 中，本身就存在配置中心这个概念，正好用于元数据存储。在配置中心的场景下，存在命名空间- namespace 的概念，在 namespace 之下，还存在 group 概念。即通过 namespace 和 group 以及 dataId 去定位一个配置项，在不指定 namespace 的情况下，默认使用 &lt;code>public&lt;/code> 作为默认的命名空间。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Provider: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:{version}:{group}:provider:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Consumer: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:{version}:{group}:consumer:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当 version 或者 group 不存在时&lt;code>:&lt;/code> 依然保留:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Provider: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:::provider:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Consumer: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:::consumer:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Providers接口元数据详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-3.png" alt="image-dubbo-metadata-nacos-3.png">&lt;/p>
+&lt;p>Consumers接口元信息详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-4.png" alt="image-dubbo-metadata-nacos-4.png">&lt;/p>
+&lt;h3 id="spring-xml配置文件">Spring XML配置文件&lt;/h3>
+&lt;p>同样，当Dubbo使用Nacos为注册中心，假设启动服务器IP为：10.20.153.10，端口号为：8848，则在Spring Bean在XML文件中添加以下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 提供方应用信息 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;your-dubbo-application&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 使用 Nacos 元数据中心 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:metadata-report&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;nacos://10.20.153.10:8848&amp;#34;&lt;/span> username=&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> password=&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 如果要使用其他参数可以使用下面方式 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 当参数在xsd中有定义时，可用以下方式 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- &amp;lt;dubbo:metadata-report address=&amp;#34;nacos:// 10.20.153.10:8848&amp;#34; username=&amp;#34;nacos&amp;#34; password=&amp;#34;nacos&amp;#34; group=&amp;#34;demo&amp;#34; /&amp;gt; --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 或者使用以下方式，将参数配置在address中 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- &amp;lt;dubbo:metadata-report address=&amp;#34;nacos://10.20.153.10:8848?namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932&amp;#34; username=&amp;#34;nacos&amp;#34; password=&amp;#34;nacos&amp;#34; /&amp;gt; --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可配置的参数参考完整配置项说明&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo&lt;code>3.0.0&lt;/code>版本以后，增加了是否注册消费者的元数据，如果需要将消费者元数据存放到nacos元数据中心上，需要将参数(report-consumer-definition)设置为true，默认是false。&lt;/p>
+&lt;/blockquote>
+&lt;p>设置方式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 使用 Nacos 元数据中心 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:metadata-report&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;nacos://10.20.153.10:8848?report-consumer-definition=true&amp;#34;&lt;/span> username=&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> password=&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>随后，重启Dubbo应用，在Nacos的控制台上可看到服务提供者和消费者的应用级别以及接口级别元数据信息：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-1.png" alt="image-dubbo-metadata-nacos-1.png">&lt;/p>
+&lt;h4 id="应用级别元数据-1">应用级别元数据&lt;/h4>
+&lt;p>应用级别元数据只有当一个应用定义服务之后，才会进行暴露。会根据当前应用的自身信息，以及接口信息，去计算出该应用的 revision 修订值，用于保存应用级别元数据。&lt;/p>
+&lt;blockquote>
+&lt;p>在Dubbo&lt;code>3.0.0&lt;/code>及以上版本中，引入了应用元数据的概念，应用元数据描述的是整个应用的信息概览。如需暴露应用级别元数据，需要将配置参数metadata-type设置为remote(默认为local)，或将参数reportMetadata设置为true(默认为false)。&lt;/p>
+&lt;/blockquote>
+&lt;p>设置方式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">http://dubbo.apache.org/schema/dubbo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 设置是否暴露应用级别元数据，可以使用以下两种方式--&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 第一种方式 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;your-dubbo-application&amp;#34;&lt;/span> metadata-type=&lt;span style="color:#2aa198">&amp;#34;remote&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 第二种方式 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:metadata-report&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;nacos://10.20.153.10:8848&amp;#34;&lt;/span> username=&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> password=&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> report-metadata=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>元数据信息详情：
+&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-2.png" alt="image-dubbo-metadata-nacos-2.png">&lt;/p>
+&lt;h4 id="接口级别元数据-1">接口级别元数据&lt;/h4>
+&lt;p>在 Nacos 中，本身就存在配置中心这个概念，正好用于元数据存储。在配置中心的场景下，存在命名空间- namespace 的概念，在 namespace 之下，还存在 group 概念。即通过 namespace 和 group 以及 dataId 去定位一个配置项，在不指定 namespace 的情况下，默认使用 &lt;code>public&lt;/code> 作为默认的命名空间。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Provider: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:{version}:{group}:provider:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Consumer: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:{version}:{group}:consumer:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当 version 或者 group 不存在时&lt;code>:&lt;/code> 依然保留:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Provider: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:::provider:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Consumer: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:::consumer:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Providers接口元数据详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-3.png" alt="image-dubbo-metadata-nacos-3.png">&lt;/p>
+&lt;p>Consumers接口元信息详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-4.png" alt="image-dubbo-metadata-nacos-4.png">&lt;/p>
+&lt;h3 id="api配置">API配置&lt;/h3>
+&lt;p>同样，当Dubbo使用Nacos为注册中心，假设启动服务器IP为：10.20.153.10，端口号为：8848，则在Spring Bean在XML文件中添加以下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderBootstrap&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> MetadataReportConfig &lt;span style="color:#268bd2">metadataReportConfig&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetadataReportConfig metadataReportConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetadataReportConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 使用 Nacos 元数据中心
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> metadataReportConfig&lt;span style="color:#719e07">.&lt;/span>setAddress&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos://10.20.153.10:8848?username=nacos&amp;amp;password=nacos&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//如果要使用其他参数可以使用下面方式
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//作为地址参数传入
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//metadataReportConfig.setAddress(&amp;#34;nacos://localhost:8848?username=nacos&amp;amp;password=nacos&amp;amp;namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932&amp;#34;);
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//直接set值，如果set没有找到相关参数，可以放入parameters中
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//metadataReportConfig.setAddress(&amp;#34;nacos://localhost:8848&amp;#34;);
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//metadataReportConfig.setUsername(&amp;#34;nacos&amp;#34;);
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//metadataReportConfig.setPassword(&amp;#34;nacos&amp;#34;);
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//Map&amp;lt;String, String&amp;gt; map = new HashMap();
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//map.put(&amp;#34;namespace&amp;#34;,&amp;#34;5cbb70a5-xxx-xxx-xxx-d43479ae0932&amp;#34;);
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//metadataReportConfig.setParameters(map);
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> metadataReportConfig&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可配置的参数参考完整配置项说明&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo&lt;code>3.0.0&lt;/code>版本以后，增加了是否注册消费者的元数据，如果需要将消费者元数据存放到nacos元数据中心上，需要将参数(report-consumer-definition)设置为true，默认是false。&lt;/p>
+&lt;/blockquote>
+&lt;p>设置方式如下：&lt;/p>
+&lt;blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ConsumerBootstrap&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> MetadataReportConfig &lt;span style="color:#268bd2">metadataReportConfig&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetadataReportConfig metadataReportConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetadataReportConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadataReportConfig&lt;span style="color:#719e07">.&lt;/span>setAddress&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos://localhost:8848?username=nacos&amp;amp;password=nacos&amp;amp;report-consumer-definition=true&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> metadataReportConfig&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/blockquote>
+&lt;p>随后，重启Dubbo应用，在Nacos的控制台上可看到服务提供者和消费者的应用级别以及接口级别元数据信息：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-1.png" alt="image-dubbo-metadata-nacos-1.png">&lt;/p>
+&lt;h4 id="应用级别元数据-2">应用级别元数据&lt;/h4>
+&lt;p>应用级别元数据只有当一个应用定义服务之后，才会进行暴露。会根据当前应用的自身信息，以及接口信息，去计算出该应用的 revision 修订值，用于保存应用级别元数据。&lt;/p>
+&lt;blockquote>
+&lt;p>在Dubbo&lt;code>3.0.0&lt;/code>及以上版本中，引入了应用元数据的概念，应用元数据描述的是整个应用的信息概览。如需暴露应用级别元数据，需要将配置参数metadata-type设置为remote(默认为local)，或将参数reportMetadata设置为true(默认为false)。&lt;/p>
+&lt;/blockquote>
+&lt;p>设置方式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderBootstrap&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//设置是否暴露应用级别元数据，可以使用以下两种方式
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//第一种方式
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> MetadataReportConfig &lt;span style="color:#268bd2">metadataReportConfig&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetadataReportConfig metadataReportConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetadataReportConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadataReportConfig&lt;span style="color:#719e07">.&lt;/span>setAddress&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos://localhost:8848?username=nacos&amp;amp;password=nacos&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadataReportConfig&lt;span style="color:#719e07">.&lt;/span>setReportMetadata&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> metadataReportConfig&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//第二种方式
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ApplicationConfig &lt;span style="color:#268bd2">applicationConfig&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig&lt;span style="color:#719e07">.&lt;/span>setName&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos-metadata-demo-provider-annotation&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig&lt;span style="color:#719e07">.&lt;/span>setMetadataType&lt;span style="color:#719e07">(&lt;/span>REMOTE_METADATA_STORAGE_TYPE&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationConfig&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>元数据信息详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-2.png" alt="image-dubbo-metadata-nacos-2.png">&lt;/p>
+&lt;h4 id="接口级别元数据-2">接口级别元数据&lt;/h4>
+&lt;p>在 Nacos 中，本身就存在配置中心这个概念，正好用于元数据存储。在配置中心的场景下，存在命名空间- namespace 的概念，在 namespace 之下，还存在 group 概念。即通过 namespace 和 group 以及 dataId 去定位一个配置项，在不指定 namespace 的情况下，默认使用 &lt;code>public&lt;/code> 作为默认的命名空间。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Provider: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:{version}:{group}:provider:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Consumer: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:{version}:{group}:consumer:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当 version 或者 group 不存在时&lt;code>:&lt;/code> 依然保留:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Provider: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:::provider:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Consumer: namespace: &amp;#39;public&amp;#39;, dataId: &amp;#39;{service name}:::consumer:{application name}&amp;#39;, group: &amp;#39;dubbo&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Providers接口元数据详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-3.png" alt="image-dubbo-metadata-nacos-3.png">&lt;/p>
+&lt;p>Consumers接口元信息详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-metadata-nacos-4.png" alt="image-dubbo-metadata-nacos-4.png">&lt;/p>
+&lt;h1 id="服务自省映射---service-name-mapping">服务自省映射 - Service Name Mapping&lt;/h1>
+&lt;p>Dubbo&lt;code>3.0.0&lt;/code>及以上版本中，默认使用了服务自省机制去实现服务发现，关于服务自省可以查看&lt;a href="https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">服务自省&lt;/a>&lt;/p>
+&lt;p>简而言之，服务自省机制需要能够通过 interface name 去找到对应的 application name，这个关系可以是一对多的，即一个 service name 可能会对应多个不同的 application name。在 3.0 中，元数据中心提供此项映射的能力。&lt;/p>
+&lt;p>在上面提到，service name 和 application name 可能是一对多的，在 nacos 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号,隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 nacos 中 publishConfigCas 的能力去解决该问题。在 nacos 中，使用 publishConfigCas 会让用户传递一个参数 casMd5，该值的含义是之前配置内容的 md5 值。不同客户端在更新之前，先去查一次 nacos 的 content 的值，计算出 md5 值，当作本地凭证。在更新时，把凭证 md5 传到服务端比对 md5 值, 如果不一致说明在次期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。&lt;/p>
+&lt;p>Nacos api:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>ConfigService configService = ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>configService.publishConfigCas(key, group, content, ticket);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>映射信息位于 &lt;code>namespace: ‘public’, dataId: ‘{service name}’, group: ‘mapping’&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-servicenamemapping.png" alt="image-dubbo-servicenamemapping.png">&lt;/p>
+&lt;h1 id="完整配置项">完整配置项&lt;/h1>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>参数名&lt;/th>
+&lt;th>中文描述&lt;/th>
+&lt;th>默认值&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>username&lt;/td>
+&lt;td>连接Nacos Server的用户名&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>paasword&lt;/td>
+&lt;td>连接Nacos Server的密码&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>backup&lt;/td>
+&lt;td>访问Nacos备用地址&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namespace&lt;/td>
+&lt;td>命名空间的ID&lt;/td>
+&lt;td>public&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>group&lt;/td>
+&lt;td>分组名称&lt;/td>
+&lt;td>DEFAULT_GROUP&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>timeout&lt;/td>
+&lt;td>连接元数据中心超时时间（ms）&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>retry-time&lt;/td>
+&lt;td>重试次数&lt;/td>
+&lt;td>100&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>retry-period&lt;/td>
+&lt;td>重试间隔时间(ms)&lt;/td>
+&lt;td>3000&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>cycle-report&lt;/td>
+&lt;td>是否每天上报元数据&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sync-report&lt;/td>
+&lt;td>是否同步上报元数据&lt;/td>
+&lt;td>false&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>file&lt;/td>
+&lt;td>保存元数据中心动态列表的文件&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>report-metadata&lt;/td>
+&lt;td>当metadataType为local时是否上报应用元数据&lt;/td>
+&lt;td>false&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>report-definition&lt;/td>
+&lt;td>是否上报接口级别元数据&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>report-consumer-definition&lt;/td>
+&lt;td>是否上报消费端&lt;/td>
+&lt;td>false&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table></description></item></channel></rss>

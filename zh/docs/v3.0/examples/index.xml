@@ -1,0 +1,86 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 基本功能介绍与示例</title><link>https://dubbo.apache.org/zh/docs/v3.0/examples/</link><description>Recent content in 基本功能介绍与示例 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/docs/v3.0/examples/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: 快速开始</title><link>https://dubbo.apache.org/zh/docs/v3.0/examples/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/examples/quick-start/</guid><description>
+&lt;h2 id="定义服务">定义服务&lt;/h2>
+&lt;p>Dubbo3 推荐使用 IDL 定义跨语言服务，如期望使用特定语言的服务定义方式请移步&lt;a href="../../languages">多语言&lt;/a>模块。&lt;/p>
+&lt;p>服务是 Dubbo 中的核心概念，一个服务代表一组 RPC 方法的集合，服务是面向用户编程、服务发现机制等的基本单位。基本流程是，用户定义 RPC 服务，通过约定的配置
+方式将 RPC 声明为 Dubbo 服务，然后就可以基于服务进行编程了，对服务提供者来说，是提供 RPC 服务的具体实现，对服务消费者来说，则是使用特定数据发起服务调用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">syntax = &amp;#34;proto3&amp;#34;;
+option java_multiple_files = true;
+option java_package = &amp;#34;org.apache.dubbo.demo&amp;#34;;
+option java_outer_classname = &amp;#34;DemoServiceProto&amp;#34;;
+option objc_class_prefix = &amp;#34;DEMOSRV&amp;#34;;
+package demoservice;
+// The demo service definition.
+service DemoService {
+rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+// The request message containing the user&amp;#39;s name.
+message HelloRequest {
+string name = 1;
+}
+// The response message containing the greetings
+message HelloReply {
+string message = 1;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下是使用 IDL 定义服务的一个简单示例，我们可以把它命名为 &lt;code>DemoService.proto&lt;/code>，proto 文件中定义了 RPC 服务名称 &lt;code>DemoService&lt;/code> 与方法签名
+&lt;code>SayHello (HelloRequest) returns (HelloReply) {}&lt;/code>，同时还定义了方法的入参结构体、出参结构体 &lt;code>HelloRequest&lt;/code> 与 &lt;code>HelloResponse&lt;/code>。
+IDL 格式的服务依赖 Protobuf 编译器，用来生成可以被用户调用的客户端与服务端编程 API，Dubbo 在原生 Protobuf Compiler 的基础上提供了适配多种语言的特有插件，用于适配 Dubbo 框架特有的 API 与编程模型。&lt;/p>
+&lt;blockquote>
+&lt;p>使用 Dubbo3 IDL 定义的服务只允许一个入参与出参，这更有利于多语言实现与向后兼容性，支持依赖 Protobuf 序列化的向后兼容性透明的增删字段。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="编译服务">编译服务&lt;/h2>
+&lt;p>根据当前采用的语言，配置配套的 Protobuf 插件，编译后将生产语言相关的服务定义 stub。&lt;/p>
+&lt;h3 id="java">Java&lt;/h3>
+&lt;p>Java 语言生成的 stub 如下，核心是一个接口定义&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">@javax.annotation.Generated&lt;/span>&lt;span style="color:#719e07">(&lt;/span>
+value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;by Dubbo generator&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span>
+comments &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Source: DemoService.proto&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String JAVA_SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;demoservice.DemoService&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloReply &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloRequest request&lt;span style="color:#719e07">);&lt;/span>
+CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>&lt;span style="color:#719e07">(&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>demo&lt;span style="color:#719e07">.&lt;/span>HelloRequest request&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="golang">Golang&lt;/h3>
+&lt;h2 id="配置并加载服务">配置并加载服务&lt;/h2>
+&lt;p>提供端负责提供具体的 Dubbo 服务实现，也就是遵循 RPC 签名所约束的格式，去实现具体的业务逻辑代码。在实现服务之后，要将服务实现注册为标准的 Dubbo 服务，
+之后 Dubbo 框架就能根据接收到的请求转发给服务实现，执行方法，并将结果返回。&lt;/p>
+&lt;p>消费端的配置会更简单一些，只需要声明 IDL 定义的服务为标准的 Dubbo 服务，框架就可以帮助开发者生成相应的 proxy，开发者将完全面向 proxy 编程，
+基本上 Dubbo 所有语言的实现都保证了 proxy 依据 IDL 服务定义暴露标准化的接口。&lt;/p>
+&lt;h3 id="java-1">Java&lt;/h3>
+&lt;p>提供端，实现服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Logger logger &lt;span style="color:#719e07">=&lt;/span> LoggerFactory&lt;span style="color:#719e07">.&lt;/span>getLogger&lt;span style="color:#719e07">(&lt;/span>DemoServiceImpl&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> HelloReply &lt;span style="color:#268bd2">sayHello&lt;/span>&lt;span style="color:#719e07">(&lt;/span>HelloRequest request&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+logger&lt;span style="color:#719e07">.&lt;/span>info&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request&lt;span style="color:#719e07">.&lt;/span>getName&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, request from consumer: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">().&lt;/span>getRemoteAddress&lt;span style="color:#719e07">());&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> HelloReply&lt;span style="color:#719e07">.&lt;/span>newBuilder&lt;span style="color:#719e07">()&lt;/span>
+&lt;span style="color:#719e07">.&lt;/span>setMessage&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request&lt;span style="color:#719e07">.&lt;/span>getName&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, response from provider: &amp;#34;&lt;/span>
+&lt;span style="color:#719e07">+&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">().&lt;/span>getLocalAddress&lt;span style="color:#719e07">())&lt;/span>
+&lt;span style="color:#719e07">.&lt;/span>build&lt;span style="color:#719e07">();&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>HelloReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>&lt;span style="color:#719e07">(&lt;/span>HelloRequest request&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#719e07">return&lt;/span> CompletableFuture&lt;span style="color:#719e07">.&lt;/span>completedFuture&lt;span style="color:#719e07">(&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>request&lt;span style="color:#719e07">));&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>提供端，注册服务(以 Spring XML 为例)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoServiceImpl&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.provider.DemoServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;protobuf&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>消费端，引用服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-xml" data-lang="xml">&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> scope=&lt;span style="color:#2aa198">&amp;#34;remote&amp;#34;&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>消费端，使用服务 proxy&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-java" data-lang="java">&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">callService&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> Exception &lt;span style="color:#719e07">{&lt;/span>
+&lt;span style="color:#719e07">...&lt;/span>
+DemoService demoService &lt;span style="color:#719e07">=&lt;/span> context&lt;span style="color:#719e07">.&lt;/span>getBean&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> DemoService&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+HelloRequest request &lt;span style="color:#719e07">=&lt;/span> HelloRequest&lt;span style="color:#719e07">.&lt;/span>newBuilder&lt;span style="color:#719e07">().&lt;/span>setName&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Hello&amp;#34;&lt;/span>&lt;span style="color:#719e07">).&lt;/span>build&lt;span style="color:#719e07">();&lt;/span>
+HelloReply reply &lt;span style="color:#719e07">=&lt;/span> demoService&lt;span style="color:#719e07">.&lt;/span>sayHello&lt;span style="color:#719e07">(&lt;/span>request&lt;span style="color:#719e07">);&lt;/span>
+System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;result: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> reply&lt;span style="color:#719e07">.&lt;/span>getMessage&lt;span style="color:#719e07">());&lt;/span>
+&lt;span style="color:#719e07">}&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="golang-1">Golang&lt;/h3>
+&lt;h2 id="查看完整示例">查看完整示例&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="../../languages/java/quick-start">Java IDL Quick Start&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../languages/golang/quick-start">Golang IDL Quick Start&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../languages/java/java-specific">Java 语言特定用法&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../languages/golang/go-specific">Golang 语言特定用法&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Docs: 路由规则</title><link>https://dubbo.apache.org/zh/docs/v3.0/examples/routing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/examples/routing/</guid><description/></item><item><title>Docs: 应用级服务发现</title><link>https://dubbo.apache.org/zh/docs/v3.0/examples/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/examples/service-discovery/</guid><description/></item><item><title>Docs: 动态修改运行态配置项</title><link>https://dubbo.apache.org/zh/docs/v3.0/examples/configuration-override/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/docs/v3.0/examples/configuration-override/</guid><description/></item></channel></rss>

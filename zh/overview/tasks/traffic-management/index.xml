@@ -1,0 +1,430 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 流量治理</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/</link><description>Recent content in 流量治理 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/overview/tasks/traffic-management/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 动态调整服务超时时间</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/timeout/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/overview/tasks/traffic-management/timeout/</guid><description>
+&lt;p>Dubbo提供动态调整超时时间的服务治理能力，可以在无需重启应用的情况下，动态调整服务超时时间。&lt;/p>
+&lt;p>Dubbo可以通过XML配置，注解配置，动态配置实现动态调整超时时间，这里主要介绍动态配置的方式，其他配置方式请参考旧文档&lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/configuration/">配置&lt;/a>&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>请确保成功运行Dubbo-Admin&lt;/p>
+&lt;h2 id="背景信息">背景信息&lt;/h2>
+&lt;p>在日常工作中会遇到各类超时配置，业务逻辑变更后，已有调用关系随着业务发展可能需要不断调整，相应服务接口响应时间的变化可能需要上线后才能确定。Dubbo-Admin提供了动态的超时配置能力，能够帮助您快速动态调整接口超时时间，提高服务的可用性。&lt;/p>
+&lt;h2 id="操作步骤">操作步骤&lt;/h2>
+&lt;h3 id="动态配置">动态配置&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 动态配置。&lt;/li>
+&lt;li>点击创建按钮，在创建动态配置面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解">规则详解&lt;/h4>
+&lt;h5 id="配置模板">配置模板&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application/service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: app-name/group+service+version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">providerAddresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;1.1.1.1:20880&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;2.2.2.2:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadbalance&lt;/span>: random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threadpool&lt;/span>: fixed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threads&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">iothreads&lt;/span>: &lt;span style="color:#2aa198">4&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dispatcher&lt;/span>: all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>对于动态调整超时时间场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改整个应用的配置还是某个服务的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;li>服务：&lt;code>scope: service, key:group+service+version &lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>修改是作用到消费者端还是提供者端。
+&lt;ul>
+&lt;li>消费者：&lt;code>side: consumer&lt;/code> ，作用到消费端时，你还可以进一步使用&lt;code>providerAddress&lt;/code>, &lt;code>applications&lt;/code>选定特定的提供者示例或应用，如果同时配置消费者和提供者，消费者会覆盖提供者。&lt;/li>
+&lt;li>提供者：&lt;code>side: provider&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的超时时间。&lt;/li>
+&lt;/ol>
+&lt;h2 id="结果验证">结果验证&lt;/h2>
+&lt;p>选择和超时配置相关的应用，触发该调用验证。&lt;/p></description></item><item><title>Overview: 临时踢除问题服务实例</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/isolation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/overview/tasks/traffic-management/isolation/</guid><description>
+&lt;p>Dubbo提供临时踢除问题服务实例的服务治理能力，可以在无需重启应用的情况下，临时踢除问题服务实例。&lt;/p>
+&lt;p>Dubbo可以通过XML配置，注解配置，动态配置实现临时踢除问题服务实例，这里主要介绍动态配置的方式，其他配置方式请参考旧文档&lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/configuration/">配置&lt;/a>&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>请确保成功运行Dubbo-Admin&lt;/p>
+&lt;h2 id="背景信息">背景信息&lt;/h2>
+&lt;p>服务在线上运行的过程中，难免遇到某些节点有问题，为了不影响整体服务的正常运行，需要临时下线问题的服务实例。Dubbo-Admin提供了临时踢除问题服务实例能力，能够帮助您临时下线问题服务实例，不影响整体服务的运行。&lt;/p>
+&lt;h2 id="操作步骤">操作步骤&lt;/h2>
+&lt;h3 id="动态配置">动态配置&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 动态配置。&lt;/li>
+&lt;li>点击创建按钮，在创建动态配置面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解">规则详解&lt;/h4>
+&lt;h5 id="配置模板">配置模板&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application/service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: app-name/group+service+version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">providerAddresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;1.1.1.1:20880&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;2.2.2.2:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadbalance&lt;/span>: random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threadpool&lt;/span>: fixed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threads&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">iothreads&lt;/span>: &lt;span style="color:#2aa198">4&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dispatcher&lt;/span>: all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>对于临时踢除问题服务实例场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改整个应用的配置还是某个服务的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;li>服务：&lt;code>scope: service, key:group+service+version &lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>修改是作用到提供者端。
+&lt;ul>
+&lt;li>提供者：&lt;code>side: provider&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的disabled参数。&lt;/li>
+&lt;/ol>
+&lt;h2 id="结果验证">结果验证&lt;/h2>
+&lt;p>选择和临时踢除问题服务实例配置相关的应用，触发该调用验证。&lt;/p></description></item><item><title>Overview: 流量隔离</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/traffic-condition/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/overview/tasks/traffic-management/traffic-condition/</guid><description>
+&lt;p>Dubbo提供动态流量隔离的服务治理能力，可以在无需重启应用的情况下，动态进行流量隔离。&lt;/p>
+&lt;p>Dubbo可以通过XML配置，注解配置，动态配置实现流量隔离，这里主要介绍动态配置的方式，其他配置方式请参考旧文档&lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/configuration/">配置&lt;/a>&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>请确保成功运行Dubbo-Admin&lt;/p>
+&lt;h2 id="背景信息">背景信息&lt;/h2>
+&lt;p>如果一个应用有多个版本在线上同时运行，部署在不同环境中，如日常环境和特殊环境，则可以使用标签路由对不同环境中的不同版本进行流量隔离，将秒杀订单流量或不同渠道订单流量路由到特殊环境，将正常的流量路由到日常环境。即使特殊环境异常，本应进入特殊环境的流量也不会进入日常环境，不影响日常环境的使用。&lt;/p>
+&lt;h2 id="操作步骤">操作步骤&lt;/h2>
+&lt;h3 id="标签路由">标签路由&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 标签路由。&lt;/li>
+&lt;li>点击创建按钮，在创建新标签规则面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解">规则详解&lt;/h4>
+&lt;h5 id="配置模板">配置模板&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">key&lt;/span>: governance-tagrouter-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tags&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>对于流量隔离场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改服务所属提供者应用的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>当路由结果为空，是否强制返回。
+&lt;ul>
+&lt;li>force=false: 当路由结果为空，降级请求tag为空的提供者。&lt;/li>
+&lt;li>force=true: 当路由结果为空，直接返回异常。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>路由规则的优先级
+&lt;ul>
+&lt;li>priority=1: 路由规则的优先级，用于排序，优先级越大越靠前执行，可不填，缺省为 0。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的标签名。&lt;/li>
+&lt;/ol>
+&lt;h2 id="结果验证">结果验证&lt;/h2>
+&lt;p>选择和流量隔离配置相关的应用，触发该调用验证。&lt;/p></description></item><item><title>Overview: 流量灰度</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/traffic-gray/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/overview/tasks/traffic-management/traffic-gray/</guid><description>
+&lt;p>Dubbo提供流量灰度的服务治理能力，可以在无需重启应用的情况下，配置标签路由规则和条件路由实现灰度发布。&lt;/p>
+&lt;p>Dubbo可以通过XML配置，注解配置，动态配置实现流量灰度，这里主要介绍动态配置的方式，其他配置方式请参考旧文档&lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/configuration/">配置&lt;/a>&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>请确保成功运行Dubbo-Admin&lt;/p>
+&lt;h2 id="背景信息">背景信息&lt;/h2>
+&lt;p>在产品开发中会遇到需求变化、版本迭代的场景，为了兼顾需求变化和系统稳定，发布要尽可能平滑，影响人群要由少到多，一旦有问题马上回滚。Dubbo-Admin提供了动态的流量灰度能力，能够帮助您对新服务作标，服务平滑发布，提高服务的稳定和可用性。&lt;/p>
+&lt;h2 id="操作步骤">操作步骤&lt;/h2>
+&lt;h3 id="条件路由">条件路由&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 条件路由。&lt;/li>
+&lt;li>点击创建按钮，在创建新路由规则面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解">规则详解&lt;/h4>
+&lt;h5 id="配置模板">配置模板&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application/service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: app-name/group+service+version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - application=app1 =&amp;gt; address=*:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=sayHello =&amp;gt; address=*:20880
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>对于流量灰度场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改消费者应用的配置还是某个服务的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;li>服务：&lt;code>scope: service, key:group+service+version &lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>当路由结果为空，是否强制返回。
+&lt;ul>
+&lt;li>force=false: 当路由结果为空，降级请求tag为空的提供者。&lt;/li>
+&lt;li>force=true: 当路由结果为空，直接返回异常。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>路由规则的优先级
+&lt;ul>
+&lt;li>priority=1: 路由规则的优先级，用于排序，优先级越大越靠前执行，可不填，缺省为 0。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的条件规则。
+&lt;ul>
+&lt;li>=&amp;gt; 之前的为消费者匹配条件，所有参数和消费者的 URL 进行对比，当消费者满足匹配条件时，对该消费者执行后面的过滤规则。&lt;/li>
+&lt;li>=&amp;gt; 之后为提供者地址列表的过滤条件，所有参数和提供者的 URL 进行对比，消费者最终只拿到过滤后的地址列表。&lt;/li>
+&lt;li>如果匹配条件为空，表示对所有消费方应用，如：=&amp;gt; host != 10.20.153.11&lt;/li>
+&lt;li>如果过滤条件为空，表示禁止访问，如：host = 10.20.153.10 =&amp;gt;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="标签路由">标签路由&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 标签路由。&lt;/li>
+&lt;li>点击创建按钮，在创建新标签规则面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解-1">规则详解&lt;/h4>
+&lt;h5 id="配置模板-1">配置模板&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">key&lt;/span>: governance-tagrouter-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tags&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>对于流量灰度场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改服务所属提供者应用的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>当路由结果为空，是否强制返回。
+&lt;ul>
+&lt;li>force=false: 当路由结果为空，降级请求tag为空的提供者。&lt;/li>
+&lt;li>force=true: 当路由结果为空，直接返回异常。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>路由规则的优先级
+&lt;ul>
+&lt;li>priority=1: 路由规则的优先级，用于排序，优先级越大越靠前执行，可不填，缺省为 0。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的标签名。&lt;/li>
+&lt;/ol>
+&lt;h2 id="结果验证">结果验证&lt;/h2>
+&lt;p>选择和流量灰度配置相关的应用，触发该调用验证。&lt;/p></description></item><item><title>Overview: 请求路由</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/traffic-routing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/overview/tasks/traffic-management/traffic-routing/</guid><description>
+&lt;p>Dubbo提供动态创建条件路由的服务治理能力，可以在无需重启应用的情况下，根据请求发起方、请求的方法条件路由。&lt;/p>
+&lt;p>Dubbo可以通过XML配置，注解配置，动态配置实现动态根据请求条件路由，这里主要介绍动态配置的方式，其他配置方式请参考旧文档&lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/configuration/">配置&lt;/a>&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>请确保成功运行Dubbo-Admin&lt;/p>
+&lt;h2 id="背景信息">背景信息&lt;/h2>
+&lt;p>在业务场景如黑白名单，排除预发布机，只暴露部分机器，分环境隔离等，需要路由规则在发起RPC调用前过滤目标服务器地址，过滤后的地址作为最终发起RPC调用的备选地址。Dubbo-Admin提供条件路由的能力，能够帮助您配置路由规则，满足业务场景。&lt;/p>
+&lt;h2 id="操作步骤">操作步骤&lt;/h2>
+&lt;h3 id="条件路由">条件路由&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 条件路由。&lt;/li>
+&lt;li>点击创建按钮，在创建新路由规则面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解">规则详解&lt;/h4>
+&lt;h5 id="配置模板">配置模板&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application/service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: app-name/group+service+version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - application=app1 =&amp;gt; address=*:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=sayHello =&amp;gt; address=*:20880
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>对于条件路由场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改消费者应用的配置还是某个服务的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;li>服务：&lt;code>scope: service, key:group+service+version &lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>当路由结果为空，是否强制返回。
+&lt;ul>
+&lt;li>force=false: 当路由结果为空，降级请求tag为空的提供者。&lt;/li>
+&lt;li>force=true: 当路由结果为空，直接返回异常。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>路由规则的优先级
+&lt;ul>
+&lt;li>priority=1: 路由规则的优先级，用于排序，优先级越大越靠前执行，可不填，缺省为 0。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的条件规则。
+&lt;ul>
+&lt;li>=&amp;gt; 之前的为消费者匹配条件，所有参数和消费者的 URL 进行对比，当消费者满足匹配条件时，对该消费者执行后面的过滤规则。&lt;/li>
+&lt;li>=&amp;gt; 之后为提供者地址列表的过滤条件，所有参数和提供者的 URL 进行对比，消费者最终只拿到过滤后的地址列表。&lt;/li>
+&lt;li>如果匹配条件为空，表示对所有消费方应用，如：=&amp;gt; host != 10.20.153.11&lt;/li>
+&lt;li>如果过滤条件为空，表示禁止访问，如：host = 10.20.153.10 =&amp;gt;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="结果验证">结果验证&lt;/h2>
+&lt;p>选择和条件路由配置相关的应用，触发该调用验证。&lt;/p></description></item><item><title>Overview: 通过权重调整流量分布</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/weight/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/overview/tasks/traffic-management/weight/</guid><description>
+&lt;p>Dubbo提供通过权重调整流量分布的服务治理能力，可以在无需重启应用的情况下，通过权重动态调整流量分布。&lt;/p>
+&lt;p>Dubbo可以通过XML配置，注解配置，动态配置实现通过权重调整流量分布，这里主要介绍动态配置的方式，其他配置方式请参考旧文档&lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/configuration/">配置&lt;/a>&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>请确保成功运行Dubbo-Admin&lt;/p>
+&lt;h2 id="背景信息">背景信息&lt;/h2>
+&lt;p>在机器性能差异的场景下，不同机器的负载需要进行系统评估，需要对某些机器降级。通过权重调整机器的流量比例，可以合理地评估机器性能。
+某些服务会面临流量冲击，为了保证核心服务的可用性，需要对某些服务降级。通过权重调整流量分布，避免流量冲击引发的故障。&lt;/p>
+&lt;h2 id="操作步骤">操作步骤&lt;/h2>
+&lt;h3 id="权重调整">权重调整&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 权重调整。&lt;/li>
+&lt;li>点击创建按钮，在新建权重规则面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解">规则详解&lt;/h4>
+&lt;p>&lt;strong>对于通过权重动态调整流量分布场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改整个应用的配置还是某个服务的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;li>服务：&lt;code>scope: service, key:group+service+version &lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>地址列表配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的权重。&lt;/li>
+&lt;/ol>
+&lt;h2 id="结果验证">结果验证&lt;/h2>
+&lt;p>选择和权重配置相关的应用，触发该调用验证。&lt;/p></description></item><item><title>Overview: 同机房/区域优先</title><link>https://dubbo.apache.org/zh/overview/tasks/traffic-management/zone/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/overview/tasks/traffic-management/zone/</guid><description>
+&lt;p>Dubbo提供动态配置同机房/区域优先的服务治理能力，可以在无需重启应用的情况下，动态配置同机房/区域优先。&lt;/p>
+&lt;p>Dubbo可以通过XML配置，注解配置，动态配置同机房/区域优先，这里主要介绍动态配置的方式，其他配置方式请参考旧文档&lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/configuration/">配置&lt;/a>&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>请确保成功运行Dubbo-Admin&lt;/p>
+&lt;h2 id="背景信息">背景信息&lt;/h2>
+&lt;p>当应用部署在多个不同机房/区域的时候，应用之间相互调用会出现跨区域的情况，跨区域调用会增加响应时间。同机房/区域优先是指应用调用服务时，优先调用同机房/区域的服务提供者。Dubbo-Admin提供了动态的同机房/区域优先能力，能够帮助您快速动态配置同机房/区域优先，避免了跨区域带来的网络延时，从而减少了调用的响应时间。&lt;/p>
+&lt;h2 id="操作步骤">操作步骤&lt;/h2>
+&lt;h3 id="标签路由">标签路由&lt;/h3>
+&lt;ol>
+&lt;li>登录Dubbo-Admin控制台&lt;/li>
+&lt;li>在左侧导航栏选择服务治理 &amp;gt; 标签路由。&lt;/li>
+&lt;li>点击创建按钮，在创建新标签规则面板中，填写规则内容，然后单击保存。&lt;/li>
+&lt;/ol>
+&lt;h4 id="规则详解">规则详解&lt;/h4>
+&lt;h5 id="配置模板">配置模板&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">key&lt;/span>: governance-tagrouter-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tags&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>对于同机房/区域优先场景，只需要理清楚以下问题基本就知道配置该怎么写了：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>要修改服务所属提供者应用的配置。
+&lt;ul>
+&lt;li>应用：&lt;code>scope: application, key: app-name&lt;/code>（还可使用&lt;code>services&lt;/code>指定某几个服务）。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>当路由结果为空，是否强制返回。
+&lt;ul>
+&lt;li>force=false: 当路由结果为空，降级请求tag为空的提供者。&lt;/li>
+&lt;li>force=true: 当路由结果为空，直接返回异常。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>路由规则的优先级
+&lt;ul>
+&lt;li>priority=1: 路由规则的优先级，用于排序，优先级越大越靠前执行，可不填，缺省为 0。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>配置是否只对某几个特定实例生效。
+&lt;ul>
+&lt;li>所有实例：&lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;] &lt;/code>或&lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;] &lt;/code>具体由side值决定。&lt;/li>
+&lt;li>指定实例：&lt;code>addersses[实例地址列表]&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>要修改的标签名。&lt;/li>
+&lt;/ol>
+&lt;h2 id="结果验证">结果验证&lt;/h2>
+&lt;p>选择和同机房/区域优先配置相关的应用，触发该调用验证。&lt;/p></description></item></channel></rss>
