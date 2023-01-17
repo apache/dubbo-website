@@ -15,6 +15,27 @@ Please click to learn about each [version details and upgrade notes](/zh/docsv2.
 > Release notes: https://github.com/apache/dubbo/releases
 >
 
+### 2.7.20 (2022-12-30)
+
+#### Source Release
+
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.20/apache-dubbo-2.7.20-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.20/apache-dubbo-2.7.20-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.20/apache-dubbo-2.7.20-src.zip.sha512)
+
+
+#### Maven Release
+
+* [org.apache.dubbo:dubbo:2.7.20](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.20/jar)
+
+```xml
+<dependency>
+  <groupId>org.apache.dubbo</groupId>
+  <artifactId>dubbo</artifactId>
+  <version>2.7.20</version>
+</dependency>
+```
+
 ### 3.2.0-beta.3 (2022-12-22)
 
 #### Source Release
@@ -52,6 +73,27 @@ Please click to learn about each [version details and upgrade notes](/zh/docsv2.
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
   <version>3.1.4</version>
+</dependency>
+```
+
+### 2.7.19 (2022-12-13)
+
+#### Source Release
+
+* [source](https://archive.apache.org/dist/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip) |
+  [asc](https://archive.apache.org/dist/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.asc) |
+  [sha512](https://archive.apache.org/dist/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.sha512)
+
+
+#### Maven Release
+
+* [org.apache.dubbo:dubbo:2.7.19](https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.19/jar)
+
+```xml
+<dependency>
+  <groupId>org.apache.dubbo</groupId>
+  <artifactId>dubbo</artifactId>
+  <version>2.7.19</version>
 </dependency>
 ```
 
