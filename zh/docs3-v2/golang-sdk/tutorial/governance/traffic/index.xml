@@ -105,13 +105,45 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env-sign&lt;/span>: zzz &lt;span style="color:#586e75"># server label, 对应 destination Rule中的testing，即兜底逻辑&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="3-运行方法">3. 运行方法&lt;/h4>
 &lt;p>直接使用goland运行本示例&lt;/p>
-&lt;p>运行后，可观测到所有客户端流量都路由至 server，根据source label，没有命中的virtualService，因此路由至兜底testing。&lt;/p></description></item><item><title>Docs3-V2: 优雅上下线</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</guid><description>
-&lt;h1 id="优雅上下线">优雅上下线&lt;/h1>
-&lt;h2 id="简介">简介&lt;/h2>
-&lt;p>在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者阔缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。&lt;/p>
-&lt;p>因此，优雅上下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力，传统服务治理能力的基础之上，应当提供服务上下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。&lt;/p>
-&lt;h2 id="期望效果">期望效果&lt;/h2>
-&lt;p>理想状态下优雅上下线的效果，是在一个承载大量流量的分布式系统内，所有组件实例都可以随意地扩容、缩容、滚动更新，在这种情况下需要保证更新过程中稳定的 tps 和 rt，保证不因为应用的上下线造成请求错误。&lt;/p>
+&lt;p>运行后，可观测到所有客户端流量都路由至 server，根据source label，没有命中的virtualService，因此路由至兜底testing。&lt;/p></description></item><item><title>Docs3-V2: 优雅下线</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</guid><description>
+&lt;h1 id="优雅下线">优雅下线&lt;/h1>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者扩缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。
+因此，优雅下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力、传统服务治理能力的基础之上，应当提供服务下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。&lt;/p>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>在一次完整的RPC调用过程中，中间服务往往充当服务提供者和服务消费者两个角色。中间服务在接收到来自上游服务的请求之后，处理请求得到结果返回给上游服务，然后根据需要调用下游服务提供的接口使用下游服务。因此优雅下线功能需要兼顾服务作为服务提供者和服务消费者两侧的稳定性，具体可以分为以下几步：&lt;/p>
+&lt;ol>
+&lt;li>向注册中心进行反注册，销毁在注册中心注册的服务信息&lt;/li>
+&lt;li>作为服务提供者，要等待一段时间，保证客户端成功更新服务信息以及上游任务请求处理完毕，然后拒绝接收新的请求&lt;/li>
+&lt;li>作为服务消费者，要等待一段时间，保证使用下游服务的请求得到响应，然后取消对注册中心的订阅&lt;/li>
+&lt;li>销毁对下游任务的引用，销毁对外提供服务暴露的端口&lt;/li>
+&lt;li>执行用户的自定义回调操作&lt;/li>
+&lt;/ol>
+&lt;p>通过以上步骤，可以保证dubbo-go服务实例安全平稳停止，不对进行中的业务产生影响。&lt;/p>
+&lt;blockquote>
+&lt;p>注意：取消对注册中心的订阅不能在步骤1中执行，这是因为中间服务对下游服务发送请求的时候可能存在下游服务信息的变动&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>对dubbo-go实例使用&lt;code>kill pid&lt;/code>命令停止实例&lt;/p>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>Dubbo-go 应用默认开启优雅上下线能力。&lt;/p>
-&lt;p>相关阅读：&lt;a href="https://developer.aliyun.com/article/860775">【Dubbo-go 优雅上下线的设计与实践】&lt;/a>&lt;/p></description></item></channel></rss>
+&lt;p>以下是在yaml配置文件中，用户可以自定义的配置&lt;/p>
+&lt;ul>
+&lt;li>作为服务提供者，dubbo-go实例下线时需要等待客户端成功更新服务信息，这段时间在配置中对应的字段为consumer-update-wait-time，默认3s&lt;/li>
+&lt;li>作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求暂未处理完毕，需要等待上游任务请求处理完毕。作为服务消费者，dubbo-go实例需要等待对下游的请求收到回复。这段时间在配置中对应的字段为step-timeout，默认3s&lt;/li>
+&lt;li>作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求已经处理完毕，需要等待一段窗口时间，如果在窗口时间内没有接收到新的请求，再执行后续步骤。这段时间在配置中对应的字段为offline-request-window-timeout，默认0s&lt;/li>
+&lt;li>用户可以自定义是否开启优雅下线功能，在配置中对应的字段为internal-signal，默认开启。&lt;/li>
+&lt;li>dubbo-go实例在优雅下线过程中可能因为异常导致卡死，在配置中可以配置超时时间，实例在超时之后强制关闭。这在配置中对应的字段为timeout，默认60s&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout:60
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> step-timeout:3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> consumer-update-wait-time:3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> internal-signal:true
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> offline-request-window-timeout:0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>此外，如果用户希望在下线逻辑彻底结束后，执行一些自定义的回调操作，可以使用如下代码&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>extension.&lt;span style="color:#268bd2">AddCustomShutdownCallback&lt;/span>(&lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 用户自定义操作
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> })
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;p>&lt;a href="https://developer.aliyun.com/article/860775">【Dubbo-go 优雅上下线的设计与实践】&lt;/a>&lt;/p></description></item></channel></rss>
