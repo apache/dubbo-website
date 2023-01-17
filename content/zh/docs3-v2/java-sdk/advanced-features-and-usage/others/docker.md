@@ -23,7 +23,7 @@ Some deployment scenarios need to dynamically specify the address of service reg
 > * If set`PORT_TO_BIND=20881` `IP_TO_BIND=30.5.97.6`，then `PORT_TO_REGISTRY=20881` `IP_TO_REGISTRY=30.5.97.6` by default.
 >
 
-[dubbo-docker-sample](https://github.com/dubbo/dubbo-docker-sample) local operation process：
+[dubbo-docker-sample](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker) local operation process：
 
 1. clone project to local
 ```sh
