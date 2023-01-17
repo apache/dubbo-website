@@ -273,4 +273,69 @@ dubbo supports multiple protocols. If an application exposes multiple different 
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
 &lt;p>QOS When the computing node detects memory pressure, kuberentes will BestEffort -&amp;gt; Burstable -&amp;gt; Guaranteed to evict Pods in sequence.&lt;/p>
 &lt;/blockquote>
-&lt;p>At present, all three probes have corresponding interfaces, and the path is the command in QOS. Please modify the port information according to the QOS configuration (the default port is 22222). For other parameters, please refer to &lt;a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes official documentation&lt;/a>.&lt;/p></description></item></channel></rss>
+&lt;p>At present, all three probes have corresponding interfaces, and the path is the command in QOS. Please modify the port information according to the QOS configuration (the default port is 22222). For other parameters, please refer to &lt;a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes official documentation&lt;/a>.&lt;/p></description></item><item><title>Docs3-V2: take Dubbo Deploy to Docker environment</title><link>https://cn.dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/docker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/docker/</guid><description>
+&lt;p>Some deployment scenarios need to dynamically specify the address of service registration. For example, docker bridge network mode need to specify a registered host IP for external network communication. Dubbo provides two pairs of system attributes in the startup phase, which are used to set the IP and port addresses of external communication.&lt;/p>
+&lt;ul>
+&lt;li>DUBBO_IP_TO_REGISTRY &amp;mdash; Registering to the IP address of the registration center&lt;/li>
+&lt;li>DUBBO_PORT_TO_REGISTRY &amp;mdash; Registering to the port of the registration center&lt;/li>
+&lt;li>DUBBO_IP_TO_BIND &amp;mdash; Listening IP addresses  &lt;/li>
+&lt;li>DUBBO_PORT_TO_BIND &amp;mdash; Listening ports&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;ol>
+&lt;li>The above four configurations are optional. Dubbo will automatically get IP and port if there is no configuration. Please choose them flexibly according to deployment scenarios.&lt;/li>
+&lt;li>Dubbo supports multi-protocol. &lt;strong>If an application exposes multiple different protocol services simultaneously and need to specify IP or port separately for each service. Please add the protocol prefix before the above attributes separately.&lt;/strong> For example:&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>HESSIAN_DUBBO_PORT_TO_BIND hessian protocol bound port&lt;/li>
+&lt;li>DUBBO_DUBBO_PORT_TO_BIND   dubbo protocol bound port&lt;/li>
+&lt;li>HESSIAN_DUBBO_IP_TO_REGISTRY hessian protocol registered IP&lt;/li>
+&lt;li>DUBBO_DUBBO_IP_TO_REGISTRY     dubbo protocol registered IP&lt;/li>
+&lt;/ul>
+&lt;ol start="3">
+&lt;li>&lt;code>PORT_TO_REGISTRY&lt;/code> or &lt;code>IP_TO_REGISTRY&lt;/code>won’t be used as default &lt;code>PORT_TO_BIND&lt;/code> or &lt;code>IP_TO_BIND&lt;/code>，But the reverse is true.&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>If set&lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>，then &lt;code>PORT_TO_BIND&lt;/code> &lt;code>IP_TO_BIND&lt;/code>won’t be affected.&lt;/li>
+&lt;li>If set&lt;code>PORT_TO_BIND=20881&lt;/code> &lt;code>IP_TO_BIND=30.5.97.6&lt;/code>，then &lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code> by default.&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo-docker-sample&lt;/a> local operation process：&lt;/p>
+&lt;ol>
+&lt;li>clone project to local&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>git clone git@github.com:dubbo/dubbo-docker-sample.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>package local maven&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>mvn clean install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>build a mirror by docker build&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-docker-sample .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dockerfile&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD target/dubbo-docker-sample-0.0.1-SNAPSHOT.jar app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENV &lt;span style="color:#268bd2">JAVA_OPTS&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT &lt;span style="color:#b58900">exec&lt;/span> java &lt;span style="color:#268bd2">$JAVA_OPTS&lt;/span> -jar /app.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>Create and run containers from mirroring&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Since we use the zk registration center, we start zk container first&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --name zkserver --restart always -d zookeeper:3.4.9
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker run -e &lt;span style="color:#268bd2">DUBBO_IP_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>30.5.97.6 -e &lt;span style="color:#268bd2">DUBBO_PORT_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span> -p 30.5.97.6:20881:20880 --link zkserver:zkserver -it --rm dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Suppose the host IP is 30.5.97.6.
+set the provider to register the IP address and port of the registration center by environment variables &lt;code>DUBBO_IP_TO_REGISTRY=30.5.97.6&lt;/code> &lt;code>DUBBO_PORT_TO_REGISTRY=20881&lt;/code>  
+Implement the port mapping by&lt;code>-p 30.5.97.6:20881:20880&lt;/code>, where 20880 is the listening port automatically selected by dubbo. There is no monitoring IP configuration, so it will listen 0.0.0.0 (all IP).
+After startup, the registered address of provider is 30.5.97.6:20881, and the listening address of the container is: 0.0.0.0:20880 &lt;/p>
+&lt;/blockquote>
+&lt;ol start="5">
+&lt;li>Test
+Execute from another host or container&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>telnet 30.5.97.6 &lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invoke org.apache.dubbo.test.docker.DemoService.hello&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>
