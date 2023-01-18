@@ -58,6 +58,7 @@ Detail 应用和 Comment 应用都有双区域部署，其中 Detail v1 与 Comm
 configVersion: v3.0
 enabled: true
 force: false
+key: org.apache.dubbo.samples.CommentService
 conditions:
   - '=> region = $region'
 ```

@@ -70,7 +70,7 @@ Dubbo Mesh 本身并不绑定任何控制面产品实现，你可以使用 Istio
 
 如果你已经完整的体验了 [基于 Istio 的 Dubbo Mesh]() 示例任务，并且发现 Istio 很好的满足了你的 Dubbo Mesh 治理诉求，那么采用 Istio 作为你的控制面是首选的解决方案。
 
-如果你发现 Istio 模式下 Dubbo 部分能力受限，而这部分能力正好是你需要的，那么你需要考虑接入 Dubbo 控制面，用 Dubbo 控制面来替代 Istio，以获得更多 Dubbo 体系原生能力支持、更好的性能体验。具体请参见 [基于 Dubbo 定制控制面 的 Dubbo Mesh]()  示例任务。
+如果你发现 Istio 模式下 Dubbo 部分能力受限，而这部分能力正好是你需要的，那么你需要考虑接入 Dubbo 控制面，用 Dubbo 控制面来替代 Istio，以获得更多 Dubbo 体系原生能力支持、更好的性能体验。具体请参见 [基于 Dubbo 定制控制面的 Dubbo Mesh 示例任务]()。
 
 > 简单来讲，这是 Dubbo 社区发布的一款基于 Istio 的定制版本控制面，Dubbo 控制面安装与能力差异请参见上面的示例任务链接。
 

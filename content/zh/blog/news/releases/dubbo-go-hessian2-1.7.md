@@ -1,7 +1,8 @@
 ---
-title: "dubbo-go-hessian2 v1.7.0"
+title: "Dubbo Go Hessian2 v1.7.0"
 linkTitle: "dubbo-go-hessian2 v1.7.0"
-date: 2021-01-14
+date: 2021-6-12
+weight: 70
 description: >
     What's new in Dubbo-go-hessian2 v1.7.0
 ---

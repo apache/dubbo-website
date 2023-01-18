@@ -10,89 +10,73 @@ feature:
     支持基于 TLS 的传输链路认证与加密通信、基于 token 的请求级别认证，支持基于服务来源和目的地的鉴权检查，可结合证书分发等分布式组件构建零信任分布式体系。
 ---
 
-Breaking down a monolithic application into atomic services offers various benefits, including better agility, better scalability and better ability to reuse services. However, microservices also have particular security needs:
+Dubbo 提供了构建安全微服务通信体系 (零信任体系) 的完善机制，这包括：
+* 避免通信过程中的中间人攻击，Dubbo 提供了身份认证 (Authentication) 和基于 TLS 的通信链路加密能力
+* 控制服务间的访问鉴权 (Authorization)，Dubbo 提供了 mTLS 和权限检查机制
 
-* To defend against man-in-the-middle attacks, they need traffic encryption.
-* To provide flexible service access control, they need mutual TLS and fine-grained access policies.
-* To determine who did what at what time, they need auditing tools.
+通过这篇文档，你将了解如果使用 Dubbo 的安全机制构建微服务零信任体系，实现身份认证、透明链路加密、鉴权、审计等能力。由于构建零信任是一套系统的工作，而 Dubbo 只是其中数据通信层的一环，因此你可能需要一系列基础设施的配合，包括证书生成、分发、安全策略管控等。
 
-Istio Security provides a comprehensive security solution to solve these issues. This page gives an overview on how you can use Istio security features to secure your services, wherever you run them. In particular, Istio security mitigates both insider and external threats against your data, endpoints, communication, and platform.
+> **证书的生成和分发不在本文讨论范围，我们假设您已经有完善的基础设施解决了证书管理问题，因此，我们将更专注在讲解 Dubbo 体系的认证和鉴权机制与流程。** 如果您并没有这些证书管理设施，我们推荐您使用服务网格架构 (具体请参见 [Dubbo Mesh 服务网格](../service-mesh/) 文档说明)，借助 [Istio](https://istio.io/latest/docs/concepts/security/) 等服务网格控制面的证书管理机制和安全策略，您可以很容易将 Dubbo 集群的认证和鉴权能力实施起来。
 
-The Istio security features provide strong identity, powerful policy, transparent TLS encryption, and authentication, authorization and audit (AAA) tools to protect your services and data.
+> 另外，以下默认讲的都是 Dubbo Proxyless Mesh 模式下的 Dubbo 数据面行为，对于部署 Envoy 的场景，由于 Dubbo 只是作为通信和编程 sdk，因此 Envoy 场景下认证鉴权能力请完全参考标准 Istio 文档即可。
 
 ## 架构
 
-Security in Istio involves multiple components:
+一套完整的零信任体系包含多个组成部分：
 
-* A Certificate Authority (CA) for key and certificate management
-* The configuration API server distributes to the proxies:
-    * authentication policies
-    * authorization policies
-    * secure naming information
-* Sidecar and perimeter proxies work as Policy Enforcement Points (PEPs) to secure communication between clients and servers.
-* A set of Envoy proxy extensions to manage telemetry and auditing
+* 一个根证书机构 (CA) 来负责管理 key 和 certificate
+* 一个安全策略的管理和分发中心，来负责将安全策略实时下发给数据面组件：
+    * 认证策略
+    * 鉴权策略
+    * 安全命名信息 (Secure Naming Information)
+* 数据面组件 (Dubbo) 负责识别和执行身份认证、加密、策略解析等动作
+* 一系列的工具和生态，配合完成安全审计、数据链路监控等工作
 
-The control plane handles configuration from the API server and configures the PEPs in the data plane. The PEPs are implemented using Envoy. The following diagram shows the architecture.
+在服务网格 (Istio) 部署模式下，控制面通常负责安全策略、证书等的管理，控制面负责与基础设施如 Kubernetes API Server 等交互，将配置数据下发给 Dubbo 或者 Envoy 等数据面组件。但如我们前面提到的，我们假设控制面产品已经就绪，因此不会涉及控制面如何签发证书、定义认证鉴权策略的讨论，我们将专注在 Dubbo 作为数据面的职责及与控制面的交互流程上。
+
+以下是完整的 Dubbo 零信任架构图
 
 ![Authentication](/imgs/v3/feature/security/arch.png)
 
-> **证书的生成和分发不在本文讨论范围，我们假设您已经有完善的基础设施解决了证书管理问题，因此，我们将更专注在讲解 Dubbo 体系的认证和鉴权机制与流程。** 如果您并没有这些证书管理设施，我们推荐您使用服务网格架构 (具体请参见 [Dubbo Mesh 服务网格]() 文档说明)，借助 [Istio](https://istio.io/latest/docs/concepts/security/) 等服务网格控制面的证书管理机制和安全策略，您可以很容易将 Dubbo 集群的认证和鉴权能力实施起来。
-
 ## Authentication 认证
 
-Istio provides two types of authentication:
+Dubbo 提供了两种认证模式：
 
-* Peer authentication: used for service-to-service authentication to verify the client making the connection. Istio offers mutual TLS as a full stack solution for transport authentication, which can be enabled without requiring service code changes. This solution:
-    * Provides each service with a strong identity representing its role to enable interoperability across clusters and clouds.
-    * Secures service-to-service communication.
-    * Provides a key management system to automate key and certificate generation, distribution, and rotation.
-* Request authentication: Used for end-user authentication to verify the credential attached to the request. Istio enables request-level authentication with JSON Web Token (JWT) validation and a streamlined developer experience using a custom authentication provider or any OpenID Connect providers, for example:
-    * ORY Hydra
-    * Keycloak
-    * Auth0
-    * Firebase Auth
-    * Google Auth
-
-In all cases, Istio stores the authentication policies in the Istio config store via a custom Kubernetes API. Istiod keeps them up-to-date for each proxy, along with the keys where appropriate. Additionally, Istio supports authentication in permissive mode to help you understand how a policy change can affect your security posture before it is enforced.
+* **传输通道认证 (Channel Authentication)**：Dubbo 支持基于 TLS 的 HTTP/2 和 TCP 通信，通过 Channel Authentication API 或者控制面认证策略可以开启 TLS，实现 Server 身份端认证以及数据链路加密。另外，还可以开启 mTLS 实现 Client、Server 双向认证。Channel Authentication 是 service-to-service 模式的认证，代表的是服务或实例的身份认证。
+* **请求认证 (Request Authentication)**：Dubbo 提供了 API 用来在用户请求上下文中放入代表用户身份的 credential (如 JSON Web Token)，Dubbo 框架将自动识别请求中的身份信息并进行权限校验。另外，你也可以定制请求上下文中的身份，如放入 Access Token 的如 OAuth2 tokens。Request Authentication 是 end-user 模式的认证，代表登录系统的用户身份的认证。
 
 ### 架构图
-You can specify authentication requirements for workloads receiving requests in an Istio mesh using peer and request authentication policies. The mesh operator uses .yaml files to specify the policies. The policies are saved in the Istio configuration storage once deployed. The Istio controller watches the configuration storage.
 
-Upon any policy changes, the new policy is translated to the appropriate configuration telling the PEP how to perform the required authentication mechanisms. The control plane may fetch the public key and attach it to the configuration for JWT validation. Alternatively, Istiod provides the path to the keys and certificates the Istio system manages and installs them to the application pod for mutual TLS. You can find more info in the Identity and certificate management section.
+你可以使用 Istio 控制面管理证书、认证策略等，不同的认证策略会影响 Dubbo 数据面的认证行为，如是否开启 mTLS、是否允许迁移阶段的 Plaintext 请求等。
 
-Istio sends configurations to the targeted endpoints asynchronously. Once the proxy receives the configuration, the new authentication requirement takes effect immediately on that pod.
+在 Istio 模式下，Dubbo 认证机制通过 xDS 实现了和 Istio 控制面的自动对接，即 Istio 控制面生成的证书、认证策略配置会自动的下发到 Dubbo 数据面，Dubbo 数据面通过 Authentication API 接收配置并将它们应用到后续的所有数据通信环节，如启用新的证书、执行新的认证策略等。
 
-Client services, those that send requests, are responsible for following the necessary authentication mechanism. For request authentication, the application is responsible for acquiring and attaching the JWT credential to the request. For peer authentication, Istio automatically upgrades all traffic between two PEPs to mutual TLS. If authentication policies disable mutual TLS mode, Istio continues to use plain text between PEPs. To override this behavior explicitly disable mutual TLS mode with destination rules. You can find out more about how mutual TLS works in the Mutual TLS authentication section.
+如果认证策略开启了 Request Authentication，则 Dubbo 数据面要负责 JWT token 的读取与填充，即 token 要在请求发起前附加到请求上下文中。Request Authentication 使用的前提一定是开启了 Channel Authentication，否则 Request Authentication 无法生效。
 
 ![Authentication](/imgs/v3/feature/security/auth-1.png)
 
-#### TLS
+#### Dubbo mTLS 流程
 
-#### mutual TLS
-Istio tunnels service-to-service communication through the client- and server-side PEPs, which are implemented as Envoy proxies. When a workload sends a request to another workload using mutual TLS authentication, the request is handled as follows:
+在 Istio 部署架构下，可以通过控制面认证策略开启或关闭 Channel Authentication 的双向认证，双向认证的工作流程如下：
 
-1. Istio re-routes the outbound traffic from a client to the client’s local sidecar Envoy.
-2. The client side Envoy starts a mutual TLS handshake with the server side Envoy. During the handshake, the client side Envoy also does a secure naming check to verify that the service account presented in the server certificate is authorized to run the target service.
-3. The client side Envoy and the server side Envoy establish a mutual TLS connection, and Istio forwards the traffic from the client side Envoy to the server side Envoy.
-4. The server side Envoy authorizes the request. If authorized, it forwards the traffic to the backend service through local TCP connections.
+1. 通过 Istio 下发认证策略，开启双向认证
+2. Dubbo 客户端同服务端开启双向 TLS 握手，在此期间，Dubbo 客户端会做 secure naming check 以检查服务端的身份（它被证实是有运行这个服务的合法身份）。
+3. 客户端和服务端之间建立一条双向的 mTLS 链接，随后发起正常的加密通信。
+4. Dubbo 服务端收到请求后，识别客户端身份并检查其是否有权限访问响应的资源。
 
 ### 认证策略
+具体请查看 Istio 官方支持的认证规则，Dubbo 完全支持 Istio 定义的认证策略。
 
 https://istio.io/latest/docs/concepts/security/#authentication-policies
 
 ## Authorization 鉴权
 
-Istio’s authorization features provide mesh-, namespace-, and workload-wide access control for your workloads in the mesh. This level of control provides the following benefits:
-
-* Workload-to-workload and end-user-to-workload authorization.
-* A simple API: it includes a single AuthorizationPolicy CRD, which is easy to use and maintain.
-* Flexible semantics: operators can define custom conditions on Istio attributes, and use CUSTOM, DENY and ALLOW actions.
-* High performance: Istio authorization (ALLOW and DENY) is enforced natively on Envoy.
-* High compatibility: supports gRPC, HTTP, HTTPS and HTTP/2 natively, as well as any plain TCP protocols.
+Dubbo 抽象了一套鉴权的扩展机制，但当前在具体实现上只支持 Istio 体系，因此其鉴权能力与 Istio 官方描述对等。具体可参见
+[Istio 鉴权文档](https://istio.io/latest/docs/concepts/security/#authorization)
 
 ### 架构图
 
-The authorization policy enforces access control to the inbound traffic in the server side Envoy proxy. Each Envoy proxy runs an authorization engine that authorizes requests at runtime. When a request comes to the proxy, the authorization engine evaluates the request context against the current authorization policies, and returns the authorization result, either ALLOW or DENY. Operators specify Istio authorization policies using .yaml files.
+Dubbo 通过 xDS 与 Istio 控制面的数据通道，接收用户配置的鉴权策略，当一个请求到达 Dubbo 实例时，Dubbo SDK 使用内置的鉴权策略引擎将请求参数和用户身份与鉴权策略进行匹配，如果匹配成功则允许访问，否则拒绝访问。
 
 ![Authorization](/imgs/v3/feature/security/authz-1.png)
 
@@ -101,10 +85,22 @@ Dubbo 完整的鉴权工作流程如下：
 ![Authorization](/imgs/v3/feature/security/authz-2.png)
 
 ### 鉴权策略
-鉴权策略
+具体请查看 Istio 官方支持的鉴权规则，Dubbo 完全支持 Istio 定义的鉴权策略。
 
 https://istio.io/latest/docs/concepts/security/#authorization-policies
 
+
+## Dubbo 认证 API
+Dubbo 定义了一套认证 API，对于常规使用的场景，开发者可以通过这套 API 启用 TLS/mTLS 通信；但对于 Istio 控制面部署的场景，Dubbo 会自动识别 Istio 控制面下发的证书和认证策略，因此只需要与 Istio 控制面交互即可，不需要 Dubbo 侧的特别配置。
+
+不论是否使用 Istio 控制面，对于 Request Authentication，JWT token 仍需要在 Dubbo 侧编程指定。
+
+每种语言实现的认证 API 定义略有差异，具体定义请参考各 SDK 文档：
+* [Java]()
+* [Go]()
+* [Rust]()
+* [Node.js]()
+
 ## 示例任务
 
-访问如下 [示例]() 进行安全策略动手实践。
+访问如下 [Dubbo 任务示例]() 进行安全策略动手实践。
