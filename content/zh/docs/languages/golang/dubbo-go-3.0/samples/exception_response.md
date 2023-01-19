@@ -6,7 +6,7 @@ description: dubbogo 3.0 异常回传
 linkTitle: Triple 异常回传
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/samples/exception_response/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh/docs3-v2/golang-sdk/tutorial/develop/protocol/exception_response/)。
 {{% /pageinfo %}}
 
 # Triple 协议异常回传
@@ -120,5 +120,3 @@ dubbo.apache.org/dubbo-go/v3/common/proxy/proxy_factory.(*ProxyInvoker).Invoke
 ```
 
 可看到报错信息和堆栈
-
-下一章: [【日志】](../custom-logger/)

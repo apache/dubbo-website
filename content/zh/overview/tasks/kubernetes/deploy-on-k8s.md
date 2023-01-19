@@ -9,7 +9,7 @@ description: "该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo
 该方案无需授予 Dubbo 应用访问 API-SERVER 的权限，也无需为 API-SERVER 引连接过多数据面造成的稳定性而担心。"
 ---
 
-可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 [完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-kubernetes/)
+可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 [完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes)
 
 ## 1 总体目标
 
@@ -20,7 +20,7 @@ description: "该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo
 ## 2 基本流程
 
 1. 创建一个 Dubbo
-   应用( [dubbo-samples-kubernetes](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-kubernetes) )
+   应用( [dubbo-samples-kubernetes](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes) )
 2. 构建容器镜像并推送到镜像仓库（ [dubbo-demo 示例例镜像](https://hub.docker.com/r/apache/dubbo-demo) ）
 3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes
 4. 验证服务发现与调用正常
@@ -119,7 +119,7 @@ kubectl logs your-pod-id
 
 ### 3.4 修改项目并打包（可跳过）
 
-示例项目及相关镜像均已就绪，此小节仅面向需要修改示例并查看部署效果的用户。在此查看[完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-kubernetes/)
+示例项目及相关镜像均已就绪，此小节仅面向需要修改示例并查看部署效果的用户。在此查看[完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes)
 
 设置 Dubbo 项目使用 Kubernetes 作为注册中心，这里通过 DEFAULT_MASTER_HOST指定使用默认 API-SERVER 集群地址 kubernetes.default.srv，同时还指定了
 namespace、trustCerts 两个参数

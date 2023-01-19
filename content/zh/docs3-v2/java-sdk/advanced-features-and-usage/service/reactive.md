@@ -24,6 +24,8 @@ Dubbo + Reactive Stream Stub 的组合模式可以给用户带来最方便的流
 
 ## 使用场景
 
+系统需要处理大量并发请求而不会使任何服务器过载。大量用户提供实时数据的系统，希望确保系统能够处理负载而不会崩溃或变慢。
+
 ## 使用方式
 
 Triple 使用及配置可参考 [IDL 方式使用 Triple](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/protocol/triple/idl/)，并确保 Dubbo 版本 >= 3.1.0。

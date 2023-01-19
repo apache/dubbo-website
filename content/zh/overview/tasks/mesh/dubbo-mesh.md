@@ -6,7 +6,7 @@ weight: 1
 description: "本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署模式开发 Dubbo3 服务。Dubbo3 服务使用 Triple 作为通信协议，通信过程经过 Envoy 数据面拦截，同时使用标准 Istio 的流量治理能力治理 Dubbo。"
 ---
 
-遵循以下步骤，可以轻松掌握如何开发符合 Service Mesh 架构的 Dubbo 服务，并将其部署到 Kubernetes 并接入 Istio 的流量治理体系。在此查看 [完整示例源码](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-mesh-k8s)
+遵循以下步骤，可以轻松掌握如何开发符合 Service Mesh 架构的 Dubbo 服务，并将其部署到 Kubernetes 并接入 Istio 的流量治理体系。在此查看 [完整示例源码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s)
 
 ## 1 总体目标
 
@@ -21,7 +21,7 @@ description: "本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署
 
 完成示例将需要的步骤如下：
 
-1. 创建一个 Dubbo 应用( [dubbo-samples-mesh-k8s](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-mesh-k8s) )
+1. 创建一个 Dubbo 应用( [dubbo-samples-mesh-k8s](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s) )
 2. 构建容器镜像并推送到镜像仓库（ [本示例官方镜像](https://hub.docker.com/r/apache/dubbo-demo) ）
 3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes 并验证 Envoy 代理注入成功
 4. 验证 Envoy 发现服务地址、正常拦截 RPC 流量并实现负载均衡
@@ -57,7 +57,7 @@ kubectl cluster-info
 
 ```shell
 # 初始化命名空间
-kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-mesh-k8s/deploy/Namespace.yml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/Namespace.yml
 
 # 切换命名空间
 kubens dubbo-demo
@@ -73,10 +73,10 @@ kubectl label namespace dubbo-demo istio-injection=enabled
 
 ```shell
 # 部署 Service
-kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-mesh-k8s/deploy/provider/Service.yml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Service.yml
 
 # 部署 Deployment
-kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-mesh-k8s/deploy/provider/Deployment.yml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Deployment.yml
 ```
 
 以上命令创建了一个名为 `dubbo-samples-mesh-provider` 的 Service，注意这里的 service name 与项目中的 dubbo 应用名是一样的。
@@ -99,13 +99,13 @@ kubectl logs your-pod-id
 
 ```shell
 # 部署 Service
-kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-mesh-k8s/deploy/consumer/Service.yml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/consumer/Service.yml
 
 # 部署 Deployment
-kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-mesh-k8s/deploy/consumer/Deployment.yml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/consumer/Deployment.yml
 ```
 
-部署 consumer 与 provider 是一样的，这里也保持了 K8S Service 与 Dubbo consumer application name(在 [dubbo.properties](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-mesh-k8s/dubbo-samples-mesh-consumer/src/main/resources/spring/dubbo-consumer.properties) 中定义) 一致： `dubbo.application.name=dubbo-samples-mesh-consumer`。
+部署 consumer 与 provider 是一样的，这里也保持了 K8S Service 与 Dubbo consumer application name(在 [dubbo.properties](https://github.com/apache/dubbo-samples/blob/master/3-extensions/registry//dubbo-samples-mesh-k8s/dubbo-samples-mesh-consumer/src/main/resources/spring/dubbo-consumer.properties) 中定义) 一致： `dubbo.application.name=dubbo-samples-mesh-consumer`。
 
 > Dubbo Consumer 服务声明中还指定了消费的 Provider 服务（应用）名 `@DubboReference(version = "1.0.0", providedBy = "dubbo-samples-mesh-provider", lazy = true)`
 
@@ -166,12 +166,12 @@ provider istio-proxy 日志输出如下:
 
 部署 v2 版本的 demo provider
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-mesh-k8s/deploy/provider/Deployment-v2.yml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Deployment-v2.yml
 ```
 
 设置 VirtualService 与 DestinationRule，观察流量按照 4:1 的比例分别被引导到 provider v1 与 provider v2 版本。
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-mesh-k8s/deploy/traffic/virtual-service.yml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/traffic/virtual-service.yml
 ```
 
 从消费端日志输出中，观察流量分布效果如下图：

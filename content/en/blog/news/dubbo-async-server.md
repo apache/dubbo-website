@@ -63,7 +63,7 @@ __In the default Dubbo thread strategy, there are worker thread pools to execute
 
 ## The sample
 
-Use an example to experience the Dubbo server-side asynchronous interface. For Demo code, visit [https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)。
+Use an example to experience the Dubbo server-side asynchronous interface. For Demo code, visit [https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)。
 
 ```java
 public class AsyncServiceImpl implements AsyncService {

@@ -16,7 +16,7 @@ description: "以API 配置的方式来配置你的 Dubbo 应用"
 > API使用范围说明：API 仅用于 OpenAPI, ESB, Test, Mock, Gateway 等系统集成，普通服务提供方或消费方，请采用[XML 配置](../xml) 或
 > [注解配置](../annotation) 或 [属性配置](../properties) 方式使用 Dubbo
 
-> 参考[API示例](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api)
+> 参考[API示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api)
 
 ## 服务提供者
 

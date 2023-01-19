@@ -79,7 +79,7 @@ In the above code, `DemoServiceImpl` prints the received `httpRequestContext` an
 
 #### Operation steps
 
-1. Start [`dubbo-samples`](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-tengine#install-dubbo).
+1. Start [`dubbo-samples`](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-tengine#install-dubbo).
 2. Enable the `dubbo-proxy` plugin in the `config.yaml` file.
 
 ```yaml

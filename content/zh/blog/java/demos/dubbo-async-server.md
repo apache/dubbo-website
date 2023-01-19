@@ -60,7 +60,7 @@ Dubbo支持多种NIO框架来做Remoting的协议实现，无论是Netty，Mina�
 __在默认的Dubbo线程策略中，是有worker线程池来执行业务逻辑，但也常常会发生ThreadPool Full的问题，为了尽快释放worker线程，在业务服务的实现中会另起线程。代价是再次增加线程上下文切换，同时需要考虑链路级别的数据传送(比如tracing信息)和流控的出口控制等等。当然，如果Dubbo能够切换到Same-thread策略，再配合协程库的支持，服务端异步是一种值得推荐的使用方式。__
 
 ## 示例
-通过示例来体验下Dubbo服务端异步接口。Demo代码请访问github之[https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/dubbo-samples-notify)。
+通过示例来体验下Dubbo服务端异步接口。Demo代码请访问github之[https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)。
 ```java
 public class AsyncServiceImpl implements AsyncService {
 
