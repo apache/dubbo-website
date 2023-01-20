@@ -21,8 +21,9 @@ description: "了解 Dubbo3 与 Kubernetes 生命周期对齐探针的扩展与�
 Dubbo3 SPI 更多扩展的介绍见 [Dubbo SPI扩展](/zh/docs3-v2/java-sdk/reference-manual/spi/description/)
 
 ## 使用场景
-- kubelet 使用 `liveness probe` 来确定你的应用程序是否正在运行，查看是否存活。一般来说，如果你的程序一旦崩溃了， Kubernetes 就会立刻知道这个程序已经终止了，然后就会重启这个程序。而我们的 liveness probe 的目的就是来捕获到当前应用程序还没有终止，还没有崩溃，如果出现了这些情况，那么就重启处于该状态下的容器，使应用程序在存在 bug 的情况下依然能够继续运行下去。
-- kubelet 使用 `readiness probe` 来确定容器是否已经就绪可以接收流量过来。是否准备就绪，现在是否可以开始工作。只有当 Pod 中的容器都处于就绪状态的时候 kubelet 才会认定该 Pod 处于就绪状态，因为一个 Pod 下面可能会有多个容器。 Pod 如果处于非就绪状态，那么我们就会将他从 Service 的 Endpoints 列表中移除出来，这样我们的流量就不会被路由到这个 Pod 里面。
+`liveness probe` 来确定你的应用程序是否正在运行，查看是否存活。
+ 
+`readiness probe` 来确定容器是否已经就绪可以接收流量过来,是否准备就绪,是否可以开始工作。
  
 ## 使用方式
 
