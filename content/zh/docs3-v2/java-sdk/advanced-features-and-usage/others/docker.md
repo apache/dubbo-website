@@ -23,6 +23,7 @@ description: "将 Dubbo 部署到 Docker 环境"
 > * 如果设置`PORT_TO_BIND=20881` `IP_TO_BIND=30.5.97.6`，那么 `PORT_TO_REGISTRY=20881` `IP_TO_REGISTRY=30.5.97.6` 默认情况下。
 
 ## 使用场景
+提供隔离的环境，从而确保在开发和部署过程中服务不会受到彼此的影响,对于微服务的开发和部署有很大帮助。
 
 ## 使用方式
 [dubbo-docker-sample](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker) 本地操作过程：
