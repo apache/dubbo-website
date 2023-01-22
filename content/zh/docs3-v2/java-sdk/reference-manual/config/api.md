@@ -200,13 +200,9 @@ public class DemoConsumer {
 
 ## 其它配置
 
-- 基本配置
-- 方法级配置
-- 点对点直连
-
 API 提供了最灵活丰富的配置能力，以下是一些可配置组件示例。
 
-#### 基本配置
+### 基本配置
 
 可以在 DubboBootstrap 中设置全局基本配置，包括应用配置、协议配置、注册中心、配置中心、元数据中心、模块、监控、SSL、provider 配置、consumer 配置等。
 
@@ -273,7 +269,7 @@ DubboBootstrap.getInstance()
 
 ```
 
-#### 方法级设置
+### 方法级设置
 
 ```java
 ...
@@ -294,7 +290,7 @@ reference.setMethods(methods); // 设置方法级配置
 ...
 ```
 
-#### 点对点直连
+### 点对点直连
 
 ```java
 
