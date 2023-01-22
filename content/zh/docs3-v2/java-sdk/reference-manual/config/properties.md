@@ -6,11 +6,12 @@ weight: 6
 description: "包含 Dubbo 支持的所有配置组件及每个配置组件支持的所有配置项"
 ---
 
-## 配置详情
-
+## 配置选项
 ### application
 
-每个应用必须要有且只有一个 application 配置，对应的配置类：`org.apache.dubbo.config.ApplicationConfig`
+每个应用必须要有且只有一个 application 配置
+
+> 对应的配置类：`org.apache.dubbo.config.ApplicationConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -46,7 +47,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### service
 
-服务提供者暴露服务配置。对应的配置类：`org.apache.dubbo.config.ServiceConfig`
+服务提供者暴露服务配置。
+
+> 对应的配置类：`org.apache.dubbo.config.ServiceConfig`
 
 |  属性 |  对应URL参数 |  类型 |  是否必填 |  缺省值 |  作用 |  描述 |  兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -88,7 +91,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 ### reference
 
 
-服务消费者引用服务配置。对应的配置类： `org.apache.dubbo.config.ReferenceConfig`
+服务消费者引用服务配置。
+
+> 对应的配置类： `org.apache.dubbo.config.ReferenceConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -130,7 +135,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### registry
 
-注册中心配置。对应的配置类： `org.apache.dubbo.config.RegistryConfig`。同时如果有多个不同的注册中心，可以声明多个 `<dubbo:registry>` 标签，并在 `<dubbo:service>` 或 `<dubbo:reference>` 的 `registry` 属性指定使用的注册中心。
+注册中心配置。
+
+> 对应的配置类： `org.apache.dubbo.config.RegistryConfig`。同时如果有多个不同的注册中心，可以声明多个 `<dubbo:registry>` 标签，并在 `<dubbo:service>` 或 `<dubbo:reference>` 的 `registry` 属性指定使用的注册中心。
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -165,7 +172,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### config-center
 
-配置中心。对应的配置类：`org.apache.dubbo.config.ConfigCenterConfig`
+配置中心。
+
+> 对应的配置类：`org.apache.dubbo.config.ConfigCenterConfig`
 
 | 属性             | 对应URL参数            | 类型                | 是否必填 | 缺省值           | 描述                                                         | 兼容性 |
 | ---------------- | ---------------------- | ------------------- | -------- | ---------------- | ------------------------------------------------------------ | ------ |
@@ -186,7 +195,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### metadata-report-config
 
-元数据中心。对应的配置类：`org.apache.dubbo.config.MetadataReportConfig`
+元数据中心。
+
+> 对应的配置类：`org.apache.dubbo.config.MetadataReportConfig`
 
 | 属性            | 对应URL参数 | 类型   | 是否必填 | 缺省值     | 描述                                                         | 兼容性 |
 | --------------- | --------- | ------ | -------- | --------- | ------------------------------------------------------------ | ------ |
@@ -211,7 +222,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### protocol
 
-服务提供者协议配置。对应的配置类： `org.apache.dubbo.config.ProtocolConfig`。同时，如果需要支持多协议，可以声明多个 `<dubbo:protocol>` 标签，并在 `<dubbo:service>` 中通过 `protocol` 属性指定使用的协议。
+服务提供者协议配置。
+
+> 对应的配置类： `org.apache.dubbo.config.ProtocolConfig`。同时，如果需要支持多协议，可以声明多个 `<dubbo:protocol>` 标签，并在 `<dubbo:service>` 中通过 `protocol` 属性指定使用的协议。
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -246,7 +259,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### provider
 
-服务提供者缺省值配置。对应的配置类： `org.apache.dubbo.config.ProviderConfig`。同时该标签为 `<dubbo:service>` 和 `<dubbo:protocol>` 标签的缺省值设置。
+服务提供者缺省值配置。
+
+> 对应的配置类： `org.apache.dubbo.config.ProviderConfig`。同时该标签为 `<dubbo:service>` 和 `<dubbo:protocol>` 标签的缺省值设置。
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -303,7 +318,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### consumer
 
-服务消费者缺省值配置。配置类： `org.apache.dubbo.config.ConsumerConfig` 。同时该标签为 `<dubbo:reference>` 标签的缺省值设置。
+服务消费者缺省值配置。
+
+> 配置类： `org.apache.dubbo.config.ConsumerConfig` 。同时该标签为 `<dubbo:reference>` 标签的缺省值设置。
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -339,7 +356,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### metrics
 
-指标配置。配置类： `org.apache.dubbo.config.MetricsConfig`
+指标配置。
+
+> 配置类： `org.apache.dubbo.config.MetricsConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -373,7 +392,9 @@ description: "包含 Dubbo 支持的所有配置组件及每个配置组件支�
 
 ### ssl
 
-TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
+TLS认证配置。
+
+> 配置类： `org.apache.dubbo.config.SslConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -388,7 +409,9 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 
 ### module
 
-模块信息配置。对应的配置类 `org.apache.dubbo.config.ModuleConfig`
+模块信息配置。
+
+> 对应的配置类 `org.apache.dubbo.config.ModuleConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -404,7 +427,9 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 
 ### monitor
 
-监控中心配置。对应的配置类： `org.apache.dubbo.config.MonitorConfig`
+监控中心配置。
+
+> 对应的配置类： `org.apache.dubbo.config.MonitorConfig`
 
 | 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
@@ -419,7 +444,9 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 
 ### method
 
-方法级配置。对应的配置类： `org.apache.dubbo.config.MethodConfig`。同时该标签为 `service` 或 `reference` 的子标签，用于控制到方法级。
+方法级配置。
+
+> 对应的配置类： `org.apache.dubbo.config.MethodConfig`。同时该标签为 `service` 或 `reference` 的子标签，用于控制到方法级。
 
 比如:
 
@@ -453,7 +480,9 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 
 ### argument
 
-方法参数配置。对应的配置类： `org.apache.dubbo.config.ArgumentConfig`。该标签为 `method` 的子标签，用于方法参数的特征描述，比如 XML 格式：
+方法参数配置。
+
+> 对应的配置类： `org.apache.dubbo.config.ArgumentConfig`。该标签为 `method` 的子标签，用于方法参数的特征描述，比如 XML 格式：
 
 ```xml
 <dubbo:method name="findXxx" timeout="3000" retries="2">
@@ -469,7 +498,9 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 
 ### parameter
 
-选项参数配置。对应的配置类：`java.util.Map`。同时该标签为 `protocol` 或 `service` 或 `provider` 或 `reference` 或 `consumer` 或 `monitor` 或 `registry` 或 `metadata-config` 或 `config-center` 的子标签，用于配置自定义参数，该配置项将作为扩展点设置自定义参数使用。
+选项参数配置。
+
+> 对应的配置类：`java.util.Map`。同时该标签为 `protocol` 或 `service` 或 `provider` 或 `reference` 或 `consumer` 或 `monitor` 或 `registry` 或 `metadata-config` 或 `config-center` 的子标签，用于配置自定义参数，该配置项将作为扩展点设置自定义参数使用。
 
 比如：
 
@@ -479,7 +510,7 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 </dubbo:protocol>
 ```
 
-也可以：
+或：
 
 ```xml
 <dubbo:protocol name="jms" p:queue="xxx" />
@@ -490,34 +521,37 @@ TLS认证配置。配置类： `org.apache.dubbo.config.SslConfig`
 | key | key | string | <b>必填</b> | | 服务治理 | 路由参数键 | 2.0.0以上版本 |
 | value | value | string | <b>必填</b> | | 服务治理 | 路由参数值 | 2.0.0以上版本 |
 
-### 环境变量
+### environment variable
 支持的 key 有以下两个：
 
 1. `dubbo.labels`，指定一些列配置到 URL 中的键值对，通常通过 JVM -D 或系统环境变量指定。
 
-   增加以下配置：
+增加以下配置：
 
-    ```properties
-    # JVM
-    -Ddubbo.labels = "tag1=value1; tag2=value2"
-    # 环境变量
-    DUBBO_LABELS = "tag1=value1; tag2=value2"
-    ```
+```properties
+# JVM
+-Ddubbo.labels = "tag1=value1; tag2=value2"
+
+# 环境变量
+DUBBO_LABELS = "tag1=value1; tag2=value2"
+```
 
    最终生成的 URL 会包含 tag1、tag2 两个 key: `dubbo://xxx?tag1=value1&tag2=value2`
 
 2. `dubbo.env.keys`，指定环境变量 key 值，Dubbo 会尝试从环境变量加载每个 key
 
-    ```properties
-    # JVM
-    -Ddubbo.env.keys = "DUBBO_TAG1, DUBBO_TAG2"
-    # 环境变量
-    DUBBO_ENV_KEYS = "DUBBO_TAG1, DUBBO_TAG2"
-    ```
+```properties
+# JVM
+-Ddubbo.env.keys = "DUBBO_TAG1, DUBBO_TAG2"
+
+# 环境变量
+DUBBO_ENV_KEYS = "DUBBO_TAG1, DUBBO_TAG2"
+```
 
    最终生成的 URL 会包含 DUBBO_TAG1、DUBBO_TAG2 两个 key: `dubbo://xxx?DUBBO_TAG1=value1&DUBBO_TAG2=value2`
-### 其他配置
-#### config-mode
+
+## 其他配置
+### config-mode
 **背景**
 
 在每个dubbo应用中某些种类的配置类实例只能出现一次（比如`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`），有些能出现多次（比如`RegistryConfig`、`ProtocolConfig`等）。
