@@ -14,7 +14,7 @@ description: "性能采样命令"
 
 参考链接：[请求耗时采样](../../../advanced-features-and-usage/performance/profiler/)
 
-## enableSimpleProfiler 命令
+### enableSimpleProfiler 命令
 
 开启 `simple profiler` 模式，默认开启
 
@@ -25,7 +25,7 @@ OK
 dubbo>
 ```
 
-## disableSimpleProfiler 命令
+### disableSimpleProfiler 命令
 
 关闭 `simple profiler` 模式，关闭后 `detail profiler` 也将不启用
 
@@ -36,7 +36,7 @@ OK
 dubbo>
 ```
 
-## enableDetailProfiler 命令
+### enableDetailProfiler 命令
 
 开启 `detail profiler` 模式，默认关闭，需要开启 `simple profiler` 模式才会真实开启
 
@@ -47,7 +47,7 @@ OK. This will cause performance degradation, please be careful!
 dubbo>
 ```
 
-## disableDetailProfiler 命令
+### disableDetailProfiler 命令
 
 关闭 `detail profiler` 模式，关闭后不影响 `simple profiler`
 
@@ -58,7 +58,7 @@ OK
 dubbo>
 ```
 
-## setProfilerWarnPercent 命令
+### setProfilerWarnPercent 命令
 
 设置超时时间的警告百分比
 
