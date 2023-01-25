@@ -12,49 +12,36 @@ no_list: true
 <div class="td-content list-page">
     <div class="lead"></div><header class="article-meta">
     </header><div class="row">
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./dubbo-mesh/" >}}'>Istio + Sidecar + Thin SDK</a>
+                    <a href='{{< relref "./bookinfo-sidecar/" >}}'>Istio & Envoy Bookinfo 示例</a>
                 </h4>
-                <p>演示 Dubbo3 的 Sidecar Mesh 形态，可完整接入 Istio 的服务治理能力，此方案限定 Dubbo3 应用级服务发现。</p>
+                <p>演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系。</p>
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./dubbo-mesh/" >}}'>Istio + Proxyless</a>
+                    <a href='{{< relref "./bookinfo-proxyless/" >}}'>Istio & Proxyless Bookinfo 示例</a>
                 </h4>
-                <p>无 Sidecar 的 Dubbo3 Proxyless Mesh 形态，可完整接入 Istio 的服务治理能力，此方案限定 Dubbo3 应用级服务发现。</p>
+                <p>演示 Dubbo Proxyless 接入 Istio 服务网格体系。</p>
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-<!--                     <a href='{{< relref "./dubbo-mesh/" >}}'>Dubbo Control Plane + Thin SDK (TBD)</a> -->
-                    <p>Dubbo Control Plane + Thin SDK (文档建设中)</p>
+                    <a href='{{< relref "./migration/" >}}'>老集群平滑迁移</a>
                 </h4>
-                <p></p>
+                <p>演示传统 Dubbo 微服务集群如何平滑迁移到 Istio 服务网格</p>
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
-        <div class="h-100 card shadow">
-            <div class="card-body">
-                <h4 class="card-title">
-<!--                     <a href='{{< relref "./dubbo-mesh/" >}}'>Dubbo Control Plane + Proxyless (TBD)</a> -->
-                    <p>Dubbo Control Plane + Proxyless (文档建设中)</p>
-                </h4>
-                <p></p>
-            </div>
-        </div>
-    </div>
-
 </div>
 <hr>
 </div>

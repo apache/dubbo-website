@@ -1,5 +1,5 @@
 ---
-title: "dubbo-go 1.4.0"
+title: "Dubbo Go 1.4.0"
 linkTitle: "dubbo-go 1.4.0"
 date: 2021-01-12
 description: >

@@ -1,7 +1,7 @@
 ---
 type: docs
 title: "与 gRPC、Spring Cloud、Istio 的关系"
-linkTitle: "对比 gRPC、Spring Cloud、Istio"
+linkTitle: "与 gRPC、Spring Cloud、Istio 关系"
 weight: 20
 description: ""
 ---
