@@ -3,6 +3,7 @@ type: docs
 title: "代码架构"
 linkTitle: "代码架构"
 weight: 2
+description: "本文将介绍 Dubbo 代码架构。"
 ---
 
 
