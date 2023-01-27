@@ -9,7 +9,7 @@ hide_summary: true
 
 # Overview
 
-Apache Dubbo has inbuilt tracing through [Micrometer Observations](https://micrometer.io/docs/observation) and [Micrometer Tracing](https://micrometer.io/docs/tracing). 
+Apache Dubbo has inbuilt tracing through [Micrometer Observations](https://micrometer.io/) and [Micrometer Tracing](https://github.com/micrometer-metrics/tracing). 
 
 ## 1. Adding Micrometer Observation To Your Project
 
@@ -22,7 +22,7 @@ In order to add Micrometer to the classpath and add metrics for Dubbo you need t
         </dependency>
 ```
 
-Thanks to the usage of [Micrometer Observations](https://micrometer.io/docs/observation) Dubbo got instrumented once, but depending on the setup will allow emission of metrics, tracer or other signals via custom `ObservationHandlers`. Please read this [this documentation](https://micrometer.io/docs/observation) for more information.
+Thanks to the usage of [Micrometer Observations](https://micrometer.io/) Dubbo got instrumented once, but depending on the setup will allow emission of metrics, tracer or other signals via custom `ObservationHandlers`. Please read the [documentation under docs/observation](https://micrometer.io) for more information.
 
 ## 2. Adding Micrometer Tracing Bridge To Your Project
 
@@ -87,7 +87,7 @@ An OpenZipkin URL sender dependency to send out spans to Zipkin via a URLConnect
 </dependency>
 ```
 
-You can read more about tracing setup [this documentation](https://micrometer.io/docs/tracing).
+You can read more about tracing setup [this documentation, under docs/tracing](https://micrometer.io/).
 
 ## 4. Setting Up The Observation Registry
 
@@ -97,7 +97,7 @@ To use Micrometer Observation an `ObservationRegistry` needs setting up. In esse
 * `TracingObservationHandler` - tracing related handlers (coming from `micrometer-tracing`)
 * `ObservationHandler` - any other handler 
 
-`ObservationRegistry` will iterate over all handlers and will pick all of the matching ones. It's good practice to put all `MeterObservationHandler`s into one `FirstMatchingCompositeObservationHandler` and all `TracingObservationHandler`s into another composite so that only one gets executed respectively. Example of such setup can be found below (an up to date copy is maintained [here](https://micrometer.io/docs/tracing#_micrometer_tracing_brave_setup)).
+`ObservationRegistry` will iterate over all handlers and will pick all of the matching ones. It's good practice to put all `MeterObservationHandler`s into one `FirstMatchingCompositeObservationHandler` and all `TracingObservationHandler`s into another composite so that only one gets executed respectively. Example of such setup can be found below (an up to date copy is maintained [here under docs/tracing](https://micrometer.io)).
 
 
 ```java
