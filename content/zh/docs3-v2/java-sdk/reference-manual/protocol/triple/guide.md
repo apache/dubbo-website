@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "使用说明"
-linkTitle: "使用说明"
+title: "协议使用方式"
+linkTitle: "协议使用方式"
 weight: 2
 ---
 
@@ -11,7 +11,7 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 
 
 
-### Protobuf
+### Protobuf 方式
 
 1. 编写 IDL 文件
     ```protobuf
@@ -68,7 +68,7 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 
 3. 构建/ 编译生成 protobuf Message 类
     ```shell
-    $ mvn clean install
+    mvn clean install
     ```
 
 ### Unary 方式
@@ -135,8 +135,10 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
     }
     ```
 
-7. 运行 Provider 和 Consumer ,可以看到请求正常返回了
+7. 运行 Provider 和 Consumer ,可以看到请求正常返回
+    ```java
    > Reply:message: "name"
+    ```
 
 ### stream 方式
 
@@ -265,17 +267,18 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
     ```
 
 12. 运行 Provider 和 Consumer ,可以看到请求正常返回了
+    ```java
     > onNext\
     > receive name:tony\
     > onNext\
     > receive name:nick\
     > onCompleted
+    ```
 
 ### 其他序列化方式
 省略上文中的 1-3 步，指定 Provider 和 Consumer 使用的协议即可完成协议升级。
 
-### 示例程序
-本文的示例程序可以在 [triple-samples](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple) 找到
+> 本文的示例可以在 [triple-samples](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple) 找到
 
 
    
