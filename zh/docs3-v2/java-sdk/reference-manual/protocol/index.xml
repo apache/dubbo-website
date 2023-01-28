@@ -292,6 +292,11 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;p>为什么采用异步单一长连接?&lt;/p>
 &lt;p>因为服务的现状大都是服务提供者少，通常只有几台机器，而服务的消费者多，可能整个网站都在访问该服务，比如 Morgan 的提供者只有 6 台提供者，却有上百台消费者，每天有 1.5 亿次调用，如果采用常规的 hessian 服务，服务提供者很容易就被压跨，通过单一连接，保证单一消费者不会压死提供者，长连接，减少连接握手验证等，并使用异步 IO，复用线程池，防止 C10K 问题。&lt;/p></description></item><item><title>Docs3-V2: Triple协议</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/protocol/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/protocol/triple/</guid><description/></item><item><title>Docs3-V2: Rest协议</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/protocol/rest/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/protocol/rest/</guid><description>
 &lt;p>基于标准的 Java REST API——JAX-RS 2.0（Java API for RESTful Web Services 的简写）实现的 REST 调用支持&lt;/p>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>此协议提供通过 web 访问服务的简单方式，将服务与其他基于 web 的应用程序集成。
+支持 JSON、XML 和 Text 格式的请求和响应，发布和使用服务的便捷方式,也提供了服务版本控制、服务过滤、服务元数据和服务参数, 实现 Dubbo 框架的灵活性和可伸缩性。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
 &lt;h3 id="快速入门">快速入门&lt;/h3>
 &lt;p>在 dubbo 中开发一个 REST 风格的服务会比较简单，下面以一个注册用户的简单服务为例说明。&lt;/p>
 &lt;p>这个服务要实现的功能是提供如下 URL（注：这个URL不是完全符合 REST 的风格，但是更简单实用）&lt;/p>
@@ -326,7 +331,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- 和本地bean一样实现服务 --&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;xxx.UserServiceImpl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="rest-服务提供端详解">REST 服务提供端详解&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="rest-服务提供端">REST 服务提供端&lt;/h3>
 &lt;p>下面我们扩充“快速入门”中的UserService，进一步展示在dubbo中REST服务提供端的开发要点。&lt;/p>
 &lt;h3 id="http-postget-的实现">HTTP POST/GET 的实现&lt;/h3>
 &lt;p>REST 服务中虽然建议使用 HTTP 协议中四种标准方法 POST、DELETE、PUT、GET 来分别实现常见的“增删改查”，但实际中，我们一般情况直接用POST来实现“增改”，GET 来实现“删查”即可（DELETE 和 PUT 甚至会被一些防火墙阻挡）。&lt;/p>
@@ -347,7 +352,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>@GET：指定用 HTTP GET 方法访问&lt;/p>
 &lt;p>@Path(&amp;quot;{id : \d+}&amp;quot;)：根据上面的功能需求，访问 getUser() 的 URL 应当是 “http://localhost:8080/users/ + 任意数字&amp;quot;，并且这个数字要被做为参数传入 getUser() 方法。 这里的 annotation 配置中，@Path中间的 {id: xxx} 指定 URL 相对路径中包含了名为id参数，而它的值也将被自动传递给下面用 @PathParam(&amp;ldquo;id&amp;rdquo;) 修饰的方法参数 id。{id:后面紧跟的\d+ 是一个正则表达式，指定了 id 参数必须是数字。&lt;/p>
 &lt;p>@Produces({MediaType.APPLICATION_JSON})：指定getUser()输出JSON格式的数据。框架会自动将User对象序列化为JSON数据。&lt;/p>
-&lt;h3 id="annotation-放在接口类还是实现类">Annotation 放在接口类还是实现类&lt;/h3>
+&lt;h3 id="annotation">Annotation&lt;/h3>
 &lt;p>在 Dubbo 中开发 REST 服务主要都是通过 JAX-RS的annotation 来完成配置的，在上面的示例中，我们都是将 annotation 放在服务的实现类中。但其实，我们完全也可以将 annotation 放到服务的接口上，这两种方式是完全等价的，例如：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
@@ -360,7 +365,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在一般应用中，我们建议将 annotation 放到服务实现类，这样 annotation 和 java 实现代码位置更接近，更便于开发和维护。另外更重要的是，我们一般倾向于避免对接口的污染，保持接口的纯净性和广泛适用性。&lt;/p>
 &lt;p>但是，如后文所述，如果我们要用 dubbo 直接开发的消费端来访问此服务，则 annotation 必须放到接口上。&lt;/p>
 &lt;p>如果接口和实现类都同时添加了 annotation，则实现类的 annotation 配置会生效，接口上的 annotation 被直接忽略。&lt;/p>
-&lt;h3 id="jsonxml-等多数据格式的支持">JSON、XML 等多数据格式的支持&lt;/h3>
+&lt;h3 id="多数据格式支持">多数据格式支持&lt;/h3>
 &lt;p>在 dubbo 中开发的 REST 服务可以同时支持传输多种格式的数据，以给客户端提供最大的灵活性。其中我们目前对最常用的 JSON 和 XML 格式特别添加了额外的功能。&lt;/p>
 &lt;p>比如，我们要让上例中的getUser()方法支持分别返回 JSON 和 XML 格式的数据，只需要在 annotation 中同时包含两种格式即可&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>&lt;span style="color:#719e07">({&lt;/span>MediaType&lt;span style="color:#719e07">.&lt;/span>APPLICATION_JSON&lt;span style="color:#719e07">,&lt;/span> MediaType&lt;span style="color:#719e07">.&lt;/span>TEXT_XML&lt;span style="color:#719e07">})&lt;/span>
@@ -389,7 +394,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为了方便用户，我们在 dubbo REST 中直接添加了一个支持类，来定义以上的常量，可以直接使用，减少出错的可能性。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>&lt;span style="color:#719e07">({&lt;/span>ContentType&lt;span style="color:#719e07">.&lt;/span>APPLICATION_JSON_UTF_8&lt;span style="color:#719e07">,&lt;/span> ContentType&lt;span style="color:#719e07">.&lt;/span>TEXT_XML_UTF_8&lt;span style="color:#719e07">})&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#268bd2">@PathParam&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span> Long id&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="xml-数据格式的额外要求">XML 数据格式的额外要求&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="xml-数据格式">XML 数据格式&lt;/h3>
 &lt;p>由于 JAX-RS 的实现一般都用标准的 JAXB（Java API for XML Binding）来序列化和反序列化 XML 格式数据，所以我们需要为每一个要用 XML 传输的对象添加一个类级别的 JAXB annotation，否则序列化将报错。例如为 getUser() 中返回的 User 添加如下&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlRootElement&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable &lt;span style="color:#719e07">{&lt;/span>
@@ -448,7 +453,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>更多资料请参考 JAXB 和 Jackson 的官方文档，或自行 google。&lt;/p>
-&lt;h3 id="配置-rest-server-的实现">配置 REST Server 的实现&lt;/h3>
+&lt;h3 id="rest-server-的实现">REST Server 的实现&lt;/h3>
 &lt;p>目前在 dubbo 中，我们支持5种嵌入式 rest server 的实现，并同时支持采用外部应用服务器来做 rest server 的实现。rest server 可以通过如下配置实现：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上配置选用了嵌入式的 jetty 来做 rest server，同时，如果不配置 server 属性，rest 协议默认也是选用 jetty。jetty 是非常成熟的 java servlet 容器，并和 dubbo 已经有较好的集成（目前5种嵌入式 server 中只有 jetty 和后面所述的 tomcat、tjws，与 dubbo 监控系统等完成了无缝的集成），所以，如果你的 dubbo 系统是单独启动的进程，你可以直接默认采用 jetty 即可。&lt;/p>
@@ -492,7 +497,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;p>注意：如果你是用 spring 的 ContextLoaderListener 来加载 spring，则必须保证 BootstrapListener 配置在 ContextLoaderListener 之前，否则 dubbo 初始化会出错。&lt;/p>
 &lt;/blockquote>
 &lt;p>其实，这种场景下你依然可以坚持用嵌入式 server，但外部应用服务器的 servlet 容器往往比嵌入式 server 更加强大（特别是如果你是部署到更健壮更可伸缩的 WebLogic，WebSphere 等），另外有时也便于在应用服务器做统一管理、监控等等。&lt;/p>
-&lt;h3 id="获取上下文context信息">获取上下文（Context）信息&lt;/h3>
+&lt;h3 id="获取-context-信息">获取 Context 信息&lt;/h3>
 &lt;p>在远程调用中，值得获取的上下文信息可能有很多种，这里特别以获取客户端 IP 为例。&lt;/p>
 &lt;p>在 dubbo 的 REST 中，我们有两种方式获取客户端 IP。&lt;/p>
 &lt;p>第一种方式，用 JAX-RS 标准的 @Context annotation&lt;/p>
@@ -534,7 +539,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Response object from RpcContext: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">().&lt;/span>getResponse&lt;span style="color:#719e07">(&lt;/span>HttpServletResponse&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">));&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果 request/response 不符合指定的类型，这里也会返回 null。&lt;/p>
-&lt;h3 id="配置端口号和-context-path">配置端口号和 Context Path&lt;/h3>
+&lt;h3 id="端口号和-context-path">端口号和 Context Path&lt;/h3>
 &lt;p>dubbo 中的 rest 协议默认将采用80端口，如果想修改端口，直接配置：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>另外，如前所述，我们可以用 @Path 来配置单个 rest 服务的 URL 相对路径。但其实，我们还可以设置一个所有 rest 服务都适用的基础相对路径，即 java web 应用中常说的 context path。&lt;/p>
@@ -560,7 +565,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/services/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置线程数和-io-线程数">配置线程数和 IO 线程数&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="线程数和-io-线程数">线程数和 IO 线程数&lt;/h3>
 &lt;p>可以为 rest 服务配置线程池大小&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> threads=&lt;span style="color:#2aa198">&amp;#34;500&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
@@ -574,13 +579,13 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
 &lt;p>注意：这个配置目前只对 server=&amp;ldquo;netty&amp;quot;和server=&amp;ldquo;tomcat&amp;rdquo; 才能生效。&lt;/p>
 &lt;/blockquote>
-&lt;h3 id="配置最大的-http-连接数">配置最大的 HTTP 连接数&lt;/h3>
+&lt;h3 id="最大-http-连接数">最大 HTTP 连接数&lt;/h3>
 &lt;p>可以配置服务器提供端所能同时接收的最大 HTTP 连接数，防止 REST server 被过多连接撑爆，以作为一种最基本的自我保护机制&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;500&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tomcat/&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
 &lt;p>注意：这个配置目前只对server=&amp;ldquo;tomcat&amp;quot;才能生效。&lt;/p>
 &lt;/blockquote>
-&lt;h3 id="配置每个消费端的超时时间和-http-连接数">配置每个消费端的超时时间和 HTTP 连接数&lt;/h3>
+&lt;h3 id="每个消费端的超时时间和-http-连接数">每个消费端的超时时间和 HTTP 连接数&lt;/h3>
 &lt;p>如果 rest 服务的消费端也是 dubbo 系统，可以像其他 dubbo RPC 机制一样，配置消费端调用此 rest 服务的最大超时时间以及每个消费端所能启动的最大 HTTP 连接数。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，由于这个配置针对消费端生效的，所以也可以在消费端配置&lt;/p>
@@ -589,7 +594,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;blockquote>
 &lt;p>注意：如果 dubbo 的 REST 服务是发布给非 dubbo 的客户端使用，则这里 &lt;code>&amp;lt;dubbo:service/&amp;gt;&lt;/code> 上的配置完全无效，因为这种客户端不受 dubbo 控制。&lt;/p>
 &lt;/blockquote>
-&lt;h3 id="用-annotation-取代部分-spring-xml-配置">用 Annotation 取代部分 Spring XML 配置&lt;/h3>
+&lt;h3 id="annotation-取代部分-spring-xml-配置">Annotation 取代部分 Spring XML 配置&lt;/h3>
 &lt;p>以上所有的讨论都是基于 dubbo 在 spring 中的 xml 配置。但是，dubbo/spring 本身也支持用 annotation 来作配置，所以我们也可以按dubbo官方文档中的步骤，把相关 annotation 加到 REST 服务的实现中，取代一些 xml 配置，例如&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>&lt;span style="color:#719e07">(&lt;/span>protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
@@ -608,7 +613,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>annotation 的配置更简单更精确，通常也更便于维护（当然现代IDE都可以在xml中支持比如类名重构，所以就这里的特定用例而言，xml 的维护性也很好）。而 xml 对代码的侵入性更小一些，尤其有利于动态修改配置，特别是比如你要针对单个服务配置连接超时时间、每客户端最大连接数、集群策略、权重等等。另外，特别对复杂应用或者模块来说，xml 提供了一个中心点来涵盖的所有组件和配置，更一目了然，一般更便于项目长时期的维护。&lt;/p>
 &lt;p>当然，选择哪种配置方式没有绝对的优劣，和个人的偏好也不无关系。&lt;/p>
-&lt;h3 id="添加自定义的-filterinterceptor-等">添加自定义的 Filter、Interceptor 等&lt;/h3>
+&lt;h3 id="添加自定义的-filterinterceptor">添加自定义的 Filter、Interceptor&lt;/h3>
 &lt;p>Dubbo 的 REST 也支持 JAX-RS 标准的 Filter 和 Interceptor，以方便对 REST 的请求与响应过程做定制化的拦截处理。&lt;/p>
 &lt;p>其中，Filter 主要用于访问和设置 HTTP 请求和响应的参数、URI 等等。例如，设置 HTTP 响应的 cache header：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">CacheControlFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ContainerResponseFilter &lt;span style="color:#719e07">{&lt;/span>
@@ -666,7 +671,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>和 Interceptor、Filter 类似，将其添加到 XML 配置文件中即可启用&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.CustomExceptionMapper&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置-http-日志输出">配置 HTTP 日志输出&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="http-日志输出">HTTP 日志输出&lt;/h3>
 &lt;p>Dubbo rest 支持输出所有 HTTP 请求/响应中的 header 字段和 body 消息体。&lt;/p>
 &lt;p>在 XML 配置中添加如下自带的 REST filter：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.rpc.protocol.rest.support.LoggingFilter&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
