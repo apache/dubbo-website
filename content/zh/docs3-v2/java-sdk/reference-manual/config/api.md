@@ -180,7 +180,7 @@ public class DemoConsumer {
         bootstrap.application("demo-consumer") // 应用配置
                 .registry(new RegistryConfig("zookeeper://127.0.0.1:2181")) // 注册中心配置
                 .reference(demoServiceReference) // 添加ReferenceConfig
-                .service(fooServiceReference)
+                .reference(fooServiceReference)
                 .start();    // 启动Dubbo
 
         ...
