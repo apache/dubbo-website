@@ -37,7 +37,7 @@ description: >
 ​	我们在其中使用了native-image的maven插件，并定制了一些native-image的启动参数，用户只需要对应在provider以及consumer模块下执行maven的编译打包命令：
 
 ```
-mvn -U clean package -Dmaven.test.skip=true
+mvn -U clean package -P native -Dmaven.test.skip=true
 ```
 
 ​	编译成功可以看到如下输出：
