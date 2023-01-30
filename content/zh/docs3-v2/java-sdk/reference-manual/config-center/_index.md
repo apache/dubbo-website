@@ -3,7 +3,7 @@ type: docs
 title: "配置中心"
 linkTitle: "配置中心"
 weight: 7
-description: ""
+description: "Dubbo 配置中心的基本使用和工作原理"
 ---
 
 配置中心 (config-center) 在 Dubbo 中可承担两类职责：
