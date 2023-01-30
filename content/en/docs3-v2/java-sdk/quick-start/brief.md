@@ -6,7 +6,7 @@ weight: 1
 description: "This article will demonstrate how to quickly build and deploy a microservice application based on Dubbo Samples."
 ---
 
-## background
+## Background
 
 ![arch-service-discovery](/imgs/architecture.png)
 
@@ -75,7 +75,7 @@ As shown in the above table, [apache/dubbo-samples](https://github.com/apache/du
 
 Starting from this section, a microservice application will be formally deployed through three commands.
 
-From the [Background](#Background) section, we can see that a major prerequisite for running Dubbo applications is to deploy a registry. In order to make this tutorial easier to use, we provide a simple starter based on the Apache Zookeeper registry. If You need to deploy the registration center in the production environment. Please refer to [Production Environment Initialization]() to deploy a highly available registration center.
+From the [Background](#Background) section, we can see that a major prerequisite for running Dubbo applications is to deploy a registry. In order to make this tutorial easier to use, we provide a simple starter based on the Apache Zookeeper registry. If You need to deploy the registration center in the production environment. Please refer to [Production Environment Initialization](/) to deploy a highly available registration center.
 
 ```bash
 Windows:
