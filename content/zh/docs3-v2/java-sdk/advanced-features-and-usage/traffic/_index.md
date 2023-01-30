@@ -37,5 +37,10 @@ Dubbo 将整个流量管理分成 [VirtualService](./mesh-style/virtualservice/)
 
 这种设计理念很好的解决流量分流和目标地址之间的耦合问题。不仅将配置规则进行了简化有效避免配置冗余的问题，还支持 [VirtualService](./mesh-style/virtualservice/) 和 [DestinationRule](./mesh-style/destination-rule/) 的任意组合，可以非常灵活的支持各种业务使用场景。
 
+### 流量治理
+- [路由规则](./routing-rule/)
+- [配置规则](./config-rule/)
+- [Mesh 路由规则](./mesh-style)
+
 
 

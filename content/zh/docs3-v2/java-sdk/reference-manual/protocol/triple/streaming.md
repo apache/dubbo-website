@@ -4,7 +4,7 @@ title: "Streaming 通信"
 linkTitle: "Streaming 通信"
 weight: 10
 ---
-## 流的实现原理
+## 流实现原理
 
 `Triple`协议的流模式
 
@@ -12,7 +12,8 @@ weight: 10
 
 - 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
 
-## 开启 Triple 新特性 
+## 流使用方式 
+
 ### Stream 流
 Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
 
@@ -40,7 +41,26 @@ Stream 分为以下三种:
 - 全双工，发送不需要等待
 - 支持取消和超时
 
-## 非 PB 序列化的流
+### Protobuf 序列化的流
+
+对于 `Protobuf` 序列化方式，推荐编写 `IDL` 使用 `compiler` 插件进行编译生成。生成的代码大致如下:
+```java
+public interface PbGreeter {
+
+    static final String JAVA_SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
+    static final String SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
+
+    static final boolean inited = PbGreeterDubbo.init();
+    
+    //...
+
+    void greetServerStream(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
+
+    org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterRequest> greetStream(org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
+}
+```
+
+## 非 Protobuf 序列化的流
 ### api
 ```java
 public interface IWrapperGreeter {
@@ -131,23 +151,4 @@ for (int i = 0; i < n; i++) {
     request.onNext("stream request" + i);
 }
 request.onCompleted();
-```
-
-## 使用 Protobuf 序列化的流
-
-对于 `Protobuf` 序列化方式，推荐编写 `IDL` 使用 `compiler` 插件进行编译生成。生成的代码大致如下:
-```java
-public interface PbGreeter {
-
-    static final String JAVA_SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
-    static final String SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
-
-    static final boolean inited = PbGreeterDubbo.init();
-    
-    //...
-
-    void greetServerStream(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
-
-    org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterRequest> greetStream(org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
-}
 ```

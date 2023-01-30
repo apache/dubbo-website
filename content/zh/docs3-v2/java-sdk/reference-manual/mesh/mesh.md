@@ -22,7 +22,7 @@ https://docs.docker.com/desktop/install/mac-install/
 目前 Dubbo 仅支持在 Kubernetes 环境下的 Mesh 部署，所以在运行启动本示例前需要先搭Kubernetes 环境。(建议采用docker desktop进行搭建，直接就可以运行一个kubernetes环境)
 https://docs.docker.com/desktop/install/mac-install/
 
-## 搭建 Kubernetes 环境
+## 搭建 Istio 环境
 
 搭建 Istio 环境参考文档：
 Istio 安装文档(https://istio.io/latest/docs/setup/getting-started/)
@@ -36,7 +36,7 @@ export PATH=$PWD/bin:$PATH
 istioctl install --set profile=demo --set values.global.jwtPolicy=first-party-jwt -y
 ```
 
-## 开始构建dubbo和dubbo-samples环境
+## 构建dubbo和dubbo-samples环境
 
 进入dubbo-dependencies-bom，更改grpc版本为1.41.0
 

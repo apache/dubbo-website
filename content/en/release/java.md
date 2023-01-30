@@ -37,43 +37,43 @@ Please click to learn about each [version details and upgrade notes](/zh/docsv2.
 </dependency>
 ```
 
-### 3.2.0-beta.3 (2022-12-22)
+### 3.2.0-beta.4 (2023-01-27)
 
 #### Source Release
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.4/apache-dubbo-3.2.0-beta.4-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.4/apache-dubbo-3.2.0-beta.4-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.4/apache-dubbo-3.2.0-beta.4-src.zip.sha512)
 
 #### Maven Release
 
-* [org.apache.dubbo:dubbo:3.2.0-beta.3](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.2.0-beta.3/jar)
+* [org.apache.dubbo:dubbo:3.2.0-beta.4](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.2.0-beta.4/jar)
 
 ```xml
 <dependency>
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
-  <version>3.2.0-beta.</version>
+  <version>3.2.0-beta.4</version>
 </dependency>
 ```
 
-### 3.0.12 (2022-09-29)
+### 3.0.13 (2023-01-27)
 
 #### Source Release
 
-* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip.sha512)
+* [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.13/apache-dubbo-3.0.13-src.zip) |
+  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.13/apache-dubbo-3.0.13-src.zip.asc) |
+  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.0.13/apache-dubbo-3.0.13-src.zip.sha512)
 
 #### Maven Release
 
-* [org.apache.dubbo:dubbo:3.0.12](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.0.12/jar)
+* [org.apache.dubbo:dubbo:3.0.13](https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.0.13/jar)
 
 ```xml
 <dependency>
   <groupId>org.apache.dubbo</groupId>
   <artifactId>dubbo</artifactId>
-  <version>3.0.12</version>
+  <version>3.0.13</version>
 </dependency>
 ```
 
