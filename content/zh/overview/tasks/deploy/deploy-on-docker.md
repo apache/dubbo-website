@@ -163,7 +163,7 @@ mvn clean package
 
 #### Producer
 
-切换到目标服务
+切换至目标服务
 ```
 cd dubbo-samples-spring-boot-provider/target
 ```
@@ -189,7 +189,7 @@ docker run --name provider -d dubbo-springboot-provider:alpine
 
 #### Consumer
 
-切换到目标服务
+切换至目标服务
 ```
 cd dubbo-samples-spring-boot-consumer/target
 ```
