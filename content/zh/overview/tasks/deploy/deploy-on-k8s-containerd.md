@@ -88,6 +88,7 @@ kubectl --namespace dubbo-demo port-forward service/dubbo-admin 38080:38080
 ```
 git clone https://github.com/apache/dubbo-samples.git && cd dubbo-samples/1-basic/dubbo-samples-spring-boot
 ```
+
 打包编译
 ```
 mvn clean package
@@ -144,10 +145,12 @@ dubbo:
   metadata-report:
     address: zookeeper://zookeeper:2181
 ```
-切换到示例
+
+切换到服务示例
 ```
 cd && cd dubbo-samples/1-basic/dubbo-samples-spring-boot
 ```
+
 打包编译
 ```
 mvn clean package
@@ -155,7 +158,7 @@ mvn clean package
 
 #### Producer
 
-切换到目标服务
+切换至目标服务
 ```
 cd dubbo-samples-spring-boot-provider/target
 ```
@@ -195,7 +198,7 @@ kubectl create -f provider.yaml
 
 #### Consumer
 
-切换到目标服务
+切换至目标服务
 ```
 cd dubbo-samples-spring-boot-consumer/target
 ```
@@ -210,7 +213,7 @@ EOF
 
 编译服务
 ```
-docker build --no-cache -t dubbo-springboot-consumer:alpine -f Dockerfile .
+nerdctl build --no-cache -t dubbo-springboot-consumer:alpine -f Dockerfile .
 ```
 
 导入服务
@@ -227,10 +230,12 @@ spec:
     image: dubbo-springboot-consumer:alpine
 EOF
 ```
+
 创建服务
 ```
 kubectl create -f consumer.yaml
 ```
+
 查看服务
 ![](/imgs/v3/tasks/deploy/consumer-provider.jpg)
 

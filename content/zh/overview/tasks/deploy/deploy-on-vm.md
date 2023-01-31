@@ -31,18 +31,22 @@ wget https://dlcdn.apache.org/zookeeper/zookeeper-x.x.x/apache-zookeeper-x.x.x-b
 ```
 tar zxvf apache-zookeeper-x.x.x-bin.tar.gz -C /usr/local/ && cd /usr/local
 ```
+
 移动项目修改为 zookeeper 并切换至 zookeeper
 ```
 mv apache-zookeeper-x.x.x-bin zookeeper && cd zookeeper
 ```
+
 创建目录并切换此目录导入内容
 ```
 mkdir data && cd data && echo 1 > myid
 ```
+
 切换至 zookeeper 配置文件
 ```
 cd .. && cp conf/zoo_sample.cfg conf/zoo.cfg && vim conf/zoo.cfg
 ```
+
 配置
 ```
 # zoo.cfg
@@ -53,14 +57,17 @@ dataDir=/usr/local/zookeeper/data
 clientPort=2181
 admin.serverPort=2182
 ```
+
 启动 zookeeper
 ```
 ./bin/zkServer.sh start
 ```
+
 克隆项目到本地
 ```
 git clone https://github.com/apache/dubbo-samples.git && cd dubbo-samples/1-basic/dubbo-samples-spring-boot
 ```
+
 打包编译
 ```
 mvn clean package
@@ -120,10 +127,12 @@ cd dubbo-admin/dubbo-admin-server/target
 ```
 nohup java -jar dubbo-admin-server-0.5.0-SNAPSHOT.jar > /dev/null 2>&1 &
 ```
+
 进入服务
 ```
 http://<IP>:38080
 ```
+
 登录页面
 ![](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
 
@@ -136,6 +145,7 @@ http://<IP>:38080
 ```
 git clone https://github.com/apache/dubbo-samples.git && cd dubbo-samples/1-basic/dubbo-samples-spring-boot
 ```
+
 打包编译
 ```
 mvn clean package
@@ -180,6 +190,7 @@ cd dubbo-samples-spring-boot-consumer/target
 ```
 nohup java -jar dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar > /dev/null 2>&1 &
 ```
+
 查看服务
 ![](/imgs/v3/tasks/deploy/consumer-provider.jpg)
 
