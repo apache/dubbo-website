@@ -2,7 +2,7 @@
 type: docs
 title: "Spring Boot Development Services"
 linkTitle: "Spring Boot"
-weight: 1
+weight: 10
 description: "The sample demonstrates how to use Spring Boot to quickly develop Dubbo applications."
 ---
 

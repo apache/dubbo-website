@@ -1,6 +1,6 @@
 ---
 type: docs
-title: "Rapidly deploy a microservice application"
+title: "1 - Rapidly deploy a microservice application"
 linkTitle: "Quickly deploy a microservice application"
 weight: 1
 description: "This article will demonstrate how to quickly build and deploy a microservice application based on Dubbo Samples."

@@ -1,6 +1,6 @@
 ---
 type: docs
-title: "快速部署一个微服务应用"
+title: "1 - 快速部署一个微服务应用"
 linkTitle: "快速部署一个微服务应用"
 weight: 1
 description: "本文将基于 Dubbo Samples 示例演示如何快速搭建并部署一个微服务应用。"

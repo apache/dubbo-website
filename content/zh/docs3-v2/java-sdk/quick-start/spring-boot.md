@@ -3,7 +3,7 @@
 type: docs
 title: "Spring Boot"
 linkTitle: "Spring Boot 开发服务"
-weight: 1
+weight: 10
 description: "示例演示了如何使用 Spring Boot 方式快速开发 Dubbo 应用。"
 ---
 
