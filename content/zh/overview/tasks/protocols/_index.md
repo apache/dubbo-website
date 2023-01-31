@@ -4,7 +4,7 @@ type: docs
 title: "通信协议"
 linkTitle: "通信协议"
 description: "演示 Dubbo 多协议的应用场景"
-weight: 40
+weight: 50
 hide: true
 no_list: true
 ---

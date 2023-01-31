@@ -51,7 +51,7 @@ Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注
 
 完整工作流程如上图所示，首先，消费者从注册中心接收到地址 (ip:port) 信息，然后与提供者建立连接并通过元数据服务读取到对端的元数据配置信息，两部分信息共同组装成 Dubbo 消费端有效的面向服务的地址列表。以上两个步骤都是在实际的 RPC 服务调用发生之前。
 
-> 关于 MetadataService 的定义及完整服务发现流程分析，请查看 [应用级服务发现详解]()。
+> 关于 MetadataService 的定义及完整服务发现流程分析，请查看 [应用级服务发现详解]({{< relref "../../../blog/proposals/service-discovery/" >}})。
 
 > 对于微服务间服务发现模型的数据同步，REST 定义了一套非常有意思的成熟度模型，感兴趣的朋友可以参考这里的链接 https://www.martinfowler.com/articles/richardsonMaturityModel.html， 按照文章中的 4 级成熟度定义，Dubbo 当前基于接口粒度的模型可以对应到最高的 L4 级别。
 
