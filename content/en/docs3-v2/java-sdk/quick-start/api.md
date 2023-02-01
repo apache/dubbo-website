@@ -34,7 +34,7 @@ This chapter will teach you how to develop a microservice application from scrat
 
 For a microservice application, the registry is an indispensable component. Only through the registration center, the consumer can successfully discover the address information of the server, and then make a call.
 
-To make this tutorial easier to use, we provide a simple starter based on the Apache Zookeeper registry. If you need to deploy the registry in a production environment, please refer to [Production Environment Initialization](https://cn.dubbo.apache. org/) to deploy a highly available registry.
+To make this tutorial easier to use, we provide a simple starter based on the Apache Zookeeper registry. If you need to deploy the registry in a production environment, please refer to [Production Environment Initialization](/) to deploy a highly available registry.
 
 ```bash
 Windows:
