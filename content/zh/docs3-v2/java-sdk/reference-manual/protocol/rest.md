@@ -8,6 +8,14 @@ weight: 4
 
 基于标准的 Java REST API——JAX-RS 2.0（Java API for RESTful Web Services 的简写）实现的 REST 调用支持
 
+## 特性说明
+此协议提供通过 web 访问服务的简单方式，将服务与其他基于 web 的应用程序集成。
+支持 JSON、XML 和 Text 格式的请求和响应，发布和使用服务的便捷方式,也提供了服务版本控制、服务过滤、服务元数据和服务参数, 实现 Dubbo 框架的灵活性和可伸缩性。
+
+## 使用场景
+
+## 使用方式
+
 ### 快速入门
 
 在 dubbo 中开发一个 REST 风格的服务会比较简单，下面以一个注册用户的简单服务为例说明。
@@ -63,7 +71,7 @@ public class UserServiceImpl implements UserService {
 <bean id="userService" class="xxx.UserServiceImpl" />
 ``` 
 
-### REST 服务提供端详解
+### REST 服务提供端
 
 下面我们扩充“快速入门”中的UserService，进一步展示在dubbo中REST服务提供端的开发要点。
 
@@ -104,7 +112,7 @@ public User getUser(@PathParam("id") Long id) {
 
 @Produces({MediaType.APPLICATION_JSON})：指定getUser()输出JSON格式的数据。框架会自动将User对象序列化为JSON数据。
 
-### Annotation 放在接口类还是实现类
+### Annotation
 
 在 Dubbo 中开发 REST 服务主要都是通过 JAX-RS的annotation 来完成配置的，在上面的示例中，我们都是将 annotation 放在服务的实现类中。但其实，我们完全也可以将 annotation 放到服务的接口上，这两种方式是完全等价的，例如：
 
@@ -125,7 +133,7 @@ public interface UserService {
 
 如果接口和实现类都同时添加了 annotation，则实现类的 annotation 配置会生效，接口上的 annotation 被直接忽略。
 
-### JSON、XML 等多数据格式的支持
+### 多数据格式支持
 
 在 dubbo 中开发的 REST 服务可以同时支持传输多种格式的数据，以给客户端提供最大的灵活性。其中我们目前对最常用的 JSON 和 XML 格式特别添加了额外的功能。
 
@@ -180,7 +188,7 @@ User getUser(@PathParam("id") Long id);
 User getUser(@PathParam("id") Long id);
 ```
 
-### XML 数据格式的额外要求
+### XML 数据格式
 
 由于 JAX-RS 的实现一般都用标准的 JAXB（Java API for XML Binding）来序列化和反序列化 XML 格式数据，所以我们需要为每一个要用 XML 传输的对象添加一个类级别的 JAXB annotation，否则序列化将报错。例如为 getUser() 中返回的 User 添加如下
 
@@ -282,7 +290,7 @@ public class User implements Serializable {
 
 更多资料请参考 JAXB 和 Jackson 的官方文档，或自行 google。
 
-### 配置 REST Server 的实现
+### REST Server 的实现
 
 目前在 dubbo 中，我们支持5种嵌入式 rest server 的实现，并同时支持采用外部应用服务器来做 rest server 的实现。rest server 可以通过如下配置实现：
 
@@ -354,7 +362,7 @@ public class User implements Serializable {
 
 其实，这种场景下你依然可以坚持用嵌入式 server，但外部应用服务器的 servlet 容器往往比嵌入式 server 更加强大（特别是如果你是部署到更健壮更可伸缩的 WebLogic，WebSphere 等），另外有时也便于在应用服务器做统一管理、监控等等。
 
-### 获取上下文（Context）信息
+### 获取 Context 信息
 
 在远程调用中，值得获取的上下文信息可能有很多种，这里特别以获取客户端 IP 为例。
 
@@ -414,7 +422,7 @@ if (RpcContext.getContext().getResponse(HttpServletResponse.class) != null) {
 
 如果 request/response 不符合指定的类型，这里也会返回 null。
 
-### 配置端口号和 Context Path
+### 端口号和 Context Path
 
 dubbo 中的 rest 协议默认将采用80端口，如果想修改端口，直接配置：
 
@@ -466,7 +474,7 @@ http://localhost:8888/services/users/register
 </servlet-mapping>
 ```
 
-### 配置线程数和 IO 线程数
+### 线程数和 IO 线程数
 
 可以为 rest 服务配置线程池大小
 
@@ -492,7 +500,7 @@ Dubbo 中的 rest 服务默认都是采用 http 长连接来访问，如果想�
 
 > 注意：这个配置目前只对 server="netty"和server="tomcat" 才能生效。
 
-### 配置最大的 HTTP 连接数
+### 最大 HTTP 连接数
 
 可以配置服务器提供端所能同时接收的最大 HTTP 连接数，防止 REST server 被过多连接撑爆，以作为一种最基本的自我保护机制
 
@@ -502,7 +510,7 @@ Dubbo 中的 rest 服务默认都是采用 http 长连接来访问，如果想�
 
 > 注意：这个配置目前只对server="tomcat"才能生效。
 
-### 配置每个消费端的超时时间和 HTTP 连接数
+### 每个消费端的超时时间和 HTTP 连接数
 
 如果 rest 服务的消费端也是 dubbo 系统，可以像其他 dubbo RPC 机制一样，配置消费端调用此 rest 服务的最大超时时间以及每个消费端所能启动的最大 HTTP 连接数。
 
@@ -521,7 +529,7 @@ Dubbo 中的 rest 服务默认都是采用 http 长连接来访问，如果想�
 > 注意：如果 dubbo 的 REST 服务是发布给非 dubbo 的客户端使用，则这里 `<dubbo:service/>` 上的配置完全无效，因为这种客户端不受 dubbo 控制。
 
 
-### 用 Annotation 取代部分 Spring XML 配置
+### Annotation 取代部分 Spring XML 配置
 
 以上所有的讨论都是基于 dubbo 在 spring 中的 xml 配置。但是，dubbo/spring 本身也支持用 annotation 来作配置，所以我们也可以按dubbo官方文档中的步骤，把相关 annotation 加到 REST 服务的实现中，取代一些 xml 配置，例如
 
@@ -547,7 +555,7 @@ annotation 的配置更简单更精确，通常也更便于维护（当然现代
 
 当然，选择哪种配置方式没有绝对的优劣，和个人的偏好也不无关系。
 
-### 添加自定义的 Filter、Interceptor 等
+### 添加自定义的 Filter、Interceptor
 
 Dubbo 的 REST 也支持 JAX-RS 标准的 Filter 和 Interceptor，以方便对 REST 的请求与响应过程做定制化的拦截处理。
 
@@ -633,7 +641,7 @@ public class CustomExceptionMapper implements ExceptionMapper<NotFoundException>
 <dubbo:protocol name="rest" port="8888" extension="xxx.CustomExceptionMapper"/>
 ```
 
-### 配置 HTTP 日志输出
+### HTTP 日志输出
 
 Dubbo rest 支持输出所有 HTTP 请求/响应中的 header 字段和 body 消息体。
 

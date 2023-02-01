@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "take Dubbo Deploy to Docker environment"
+title: "Dubbo deploy to Docker environment"
 linkTitle: "Docker Deploy"
 weight: 6
-description: ""
+description: "take Dubbo deploy to Docker environment"
 ---
 
 Some deployment scenarios need to dynamically specify the address of service registration. For example, docker bridge network mode need to specify a registered host IP for external network communication. Dubbo provides two pairs of system attributes in the startup phase, which are used to set the IP and port addresses of external communication.

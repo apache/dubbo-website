@@ -2,7 +2,7 @@
 title: 选择使用的网络协议
 keywords: 选择使用的网络协议
 description: 选择使用的网络协议
-
+type: docs
 ---
 
 # 修改使用的协议

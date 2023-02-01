@@ -3,7 +3,7 @@ type: docs
 title: "支持 Graal VM"
 linkTitle: "支持 Graal VM"
 weight: 40
-description: ""
+description: "Dubbo 支持 Graal VM"
 ---
 
 Dubbo3.0 支持 Native-Image 文档
