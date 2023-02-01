@@ -2,7 +2,7 @@
 type: docs
 title: "IDL 定义跨语言服务"
 linkTitle: "IDL 定义跨语言服务"
-weight: 2
+weight: 11
 description: "从零演示如何基于 IDL 方式来定义 Dubbo 服务并使用 Triple 协议"
 ---
 
