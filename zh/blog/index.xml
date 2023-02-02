@@ -1,4 +1,155 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo 博客</title><link>https://dubbo.apache.org/zh/blog/</link><description>Recent content in Apache Dubbo 博客 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Dubbo 3.1.5、3.2.0-beta.4 正式发布</title><link>https://dubbo.apache.org/zh/blog/2023/01/30/dubbo-3.1.53.2.0-beta.4-%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/2023/01/30/dubbo-3.1.53.2.0-beta.4-%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo 博客</title><link>https://dubbo.apache.org/zh/blog/</link><description>Recent content in Apache Dubbo 博客 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Dubbo 在 Proxyless Mesh 模式下的探索与改进</title><link>https://dubbo.apache.org/zh/blog/2023/02/02/dubbo-%E5%9C%A8-proxyless-mesh-%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E6%8E%A2%E7%B4%A2%E4%B8%8E%E6%94%B9%E8%BF%9B/</link><pubDate>Thu, 02 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/2023/02/02/dubbo-%E5%9C%A8-proxyless-mesh-%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E6%8E%A2%E7%B4%A2%E4%B8%8E%E6%94%B9%E8%BF%9B/</guid><description>
+&lt;h2 id="一背景">一、背景&lt;/h2>
+&lt;p>随着 Docker 和 Kubernetes 的出现，一个庞大的单体应用可以被拆分成多个独立部署的微服务，并被打包运行于对应的容器中。不同应用之间相互通信，以共同完成某一功能模块。微服务架构与容器化部署带来的好处是显而易见的，它降低了服务间的耦合性，利于开发和维护，能更有效地利用计算资源。当然，微服务架构也存在相应的缺点：&lt;/p>
+&lt;ul>
+&lt;li>强依赖于 SDK，业务模块与治理模块耦合较为严重。 除了相关依赖，往往还需要在业务代码中嵌入SDK代码或配置。&lt;/li>
+&lt;li>统一治理难。每次框架升级都需要修改 SDK 版本，并重新进行回归测试，确认功能正常后再对每一台机器重新部署上线。不同服务引用的 SDK 版本不统一、能力参差不齐，增大了统一治理的难度。&lt;/li>
+&lt;li>缺少一套统一解决方案。目前市场不存在一整套功能完善、无死角的微服务治理与解决方案。在实际生产环境往往还需要引入多个治理组件来完成像灰度发布、故障注入等功能。&lt;/li>
+&lt;/ul>
+&lt;p>为解决这些痛点，Service Mesh诞生了。以经典的 Sidecar 模式为例，它通过在业务 Pod 中注入 Sidecar 容器，对代理流量实施治理和管控，将框架的治理能力下层到 Sidecar 容器中，与业务系统解耦，从而轻松实现多语言、多协议的统一流量管控、监控等需求。通过剥离SDK能力并拆解为独立进程，从而解决了强依赖于SDK的问题，从而使开发人员可以更加专注于业务本身，实现了基础框架能力的下沉，如下图所示（源自dubbo官网）：
+&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/2/1.png" alt="image.png">&lt;/p>
+&lt;p>经典的 Sidecar Mesh 部署架构有很多优势，如减少SDK耦合、业务侵入小等，但增加了一层代理，也带来了一些额外的问题，比如:&lt;/p>
+&lt;ul>
+&lt;li>Sidecar 代理会损耗一部分性能，当网络结构层级比较复杂时尤其明显，对性能要求很高的业务造成了一定的困扰。&lt;/li>
+&lt;li>架构更加复杂，对运维人员要求高。&lt;/li>
+&lt;li>对部署环境有一定的要求，需要其能支持 Sidecar 代理的运行。&lt;/li>
+&lt;/ul>
+&lt;p>为解决这些痛点，Proxyless Service Mesh 模式诞生了。传统服务网格通过代理的方式拦截所有的业务网络流量，代理需要感知到控制平面下发的配置资源，从而按照要求控制网络流量的走向。以istio为例，Proxyless 模式是指应用直接与负责控制平面的 istiod 进程通信，istiod 进程通过监听并获取 Kubernetes 的资源，例如 Service、Endpoint 等，并将这些资源统一通过 xDS 协议下发到不同的 RPC 框架，由 RPC 框架进行请求转发，从而实现服务发现和服务治理等能力。
+Dubbo 社区是国内最早开始对 Proxyless Service Mesh 模式进行探索的社区，这是由于相比于 Service Mesh，Proxyless 模式落地成本较低，对于中小企业来说是一个较好的选择。Dubbo 在 3.1 版本中通过对 xDS 协议进行解析，新增了对 Proxyless 的支持。xDS 是一类发现服务的总称，应用通过 xDS API 可以动态获取 Listener(监听器)、Route(路由)、Cluster(集群)、Endpoint(集群成员) 以及 Secret(证书)配置。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/2/2.jpeg" alt="image.png">&lt;/p>
+&lt;p>通过 Proxyless 模式，Dubbo 与 Control Plane 直接建立通信，进而实现控制面对流量管控、服务治理、可观测性、安全等的统一管控，从而规避 Sidecar 模式带来的性能损耗与部署架构复杂性。&lt;/p>
+&lt;h2 id="二dubbo-xds-推送机制详解">二、Dubbo xDS 推送机制详解&lt;/h2>
+&lt;p>从整体上看，istio control plane 和 dubbo 的交互时序图如上。Dubbo 里 xDS 处理的主要逻辑在 PilotExchanger 和各个 DS (LDS、RDS、CDS、EDS) 的对应协议的具体实现里。PilotExchanger 统一负责串联逻辑，主要有三大逻辑：&lt;/p>
+&lt;ul>
+&lt;li>获取授信证书。&lt;/li>
+&lt;li>调用不同 protocol 的 getResource 获取资源。&lt;/li>
+&lt;li>调用不同 protocol 得 observeResource 方法监听资源变更。&lt;/li>
+&lt;/ul>
+&lt;p>例如对于 lds 和 rds，PilotExchanger 会调用 lds 的 getResource 方法与 istio 建立通信连接，发送数据并解析来自 istio 的响应，解析完成后的 resource 资源会作 为rds 调用 getResource 方法的入参，并由 rds 发送数据给 istio。当 lds 发生变更时，则由 lds 的 observeResource 方法去触发自身与 rds 的变更。上述关系对于 rds 和 eds 同样如此。现有交互如下，上述过程对应图里红线的流程：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/2/3.jpeg" alt="image.png">&lt;/p>
+&lt;p>在第一次成功获取资源之后，各个DS会通过定时任务去不断发送请求给 istio，并解析响应结果和保持与 istio 之间的交互，进而实现控制面对流量管控、服务治理、可观测性方面的管控，其流程对应上图蓝线部分。&lt;/p>
+&lt;h2 id="三当前dubbo-proxyless实现存在的不足">三、当前Dubbo Proxyless实现存在的不足&lt;/h2>
+&lt;p>Dubbo Proxyless 模式经过验证之后，已经证明了其可靠性。现有 Dubbo proxyless 的实现方案存在以下问题：&lt;/p>
+&lt;ul>
+&lt;li>目前与 istio 交互的逻辑是推送模式。getResource 和 observeResource 是两条不同的 stream 流，每次发送新请求都需要重新建立连接。但我们建立的 stream 流是双向流动的，istio 在监听到资源变化后由主动推送即可，LDS、RDS、EDS 分别只需要维护一条 stream 流。&lt;/li>
+&lt;li>Stream 流模式改为建立持久化连接之后，需要设计一个本地的缓存池，去存储已经存在的资源。当 istio 主动推送更新后，需要去刷新缓存池的数据。&lt;/li>
+&lt;li>现有observeResource 逻辑是通过定时任务去轮询istio。现在 observeResource 不再需要定时去轮询，只需要将需要监听的资源加入到缓存池，等 istio 自动推送即可，且 istio 推送回来的数据需要按照 app 切分好，实现多点监听，后续 dubbo 支持其他 DS 模式，也可复用相应的逻辑。&lt;/li>
+&lt;li>目前由 istio 托管的 dubbo 应用在 istio 掉线后会抛出异常，断线后无法重新连接，只能重新部署应用，增加了运维和管理的复杂度。我们需增加断线重连的功能，等 istio 恢复正常后无需重新部署即可重连。&lt;/li>
+&lt;/ul>
+&lt;p>改造完成后的交互逻辑：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/2/4.jpeg" alt="image.png">&lt;/p>
+&lt;h2 id="四xds-监听模式实现方案">四、Xds 监听模式实现方案&lt;/h2>
+&lt;h3 id="41-资源缓存池">4.1 资源缓存池&lt;/h3>
+&lt;p>目前 Dubbo 的资源类型有LDS，RDS，EDS。对于同一个进程，三种资源监听的所有资源都与 istio 对该进程所缓存的资源监听列表一一对应。因此针对这三种资源，我们应该设计分别对应的本地的资源缓存池，dubbo 尝试资源的时候先去缓存池查询，若有结果则直接返回；否则将本地缓存池的资源列表与想要发送的资源聚合后，发送给 istio 让其更新自身的监听列表。缓存池如下，其中 key 代表单个资源，T 为不同 DS 的返回结果：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> resourcesMap &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>有了缓存池我们必须有一个监听缓存池的结构或者容器，在这里我们设计为 Map 的形式，如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">protected&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>Set&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Consumer&lt;span style="color:#719e07">&amp;lt;&lt;/span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span> consumerObserveMap &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中key为想要监听的资源，value 为一个 List, 之所以设计为 List 是为了可以支持重复订阅。 List 存储的 item 为 jdk8 中的 Consumer 类型，它可以用于传递一个函数或者行为，其入参为 Map&amp;lt;String, T&amp;gt;，其 key 对应所要监听的单个资源，便于从缓存池中获取。如上文所述，PilotExchanger 负责串联整个流程，不同 DS 之间的更新关系可以用 Consumer 进行传递。以监听 LDS observeResource 为例, 大致代码如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 监听
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">observeResource&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Set&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> resourceNames&lt;span style="color:#719e07">,&lt;/span> Consumer&lt;span style="color:#719e07">&amp;lt;&lt;/span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> consumer&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> isReConnect&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Observe LDS updated
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>ldsProtocol&lt;span style="color:#719e07">.&lt;/span>observeResource&lt;span style="color:#719e07">(&lt;/span>ldsResourcesName&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#719e07">(&lt;/span>newListener&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// LDS数据不一致
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>newListener&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>listenerResult&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//更新LDS数据
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>listenerResult &lt;span style="color:#719e07">=&lt;/span> newListener&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 触发RDS监听
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>isRdsObserve&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> createRouteObserve&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">},&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Stream流模式改为建立持久化连接之后，我们也需要把这个 Consumer 的行为存储在本地的缓存池中。Istio 收到来自 dubbo 的推送请求后，刷新自身缓存的资源列表并返回响应。此时 istio 返回的响应内容是聚合后的结果，Dubbo 收到响应后，将响应资源拆分为更小的资源粒度，再推送给对应的 Dubbo应用通知其进行变更。&lt;/p>
+&lt;p>踩坑点：&lt;/p>
+&lt;ul>
+&lt;li>istio推送的数据可能为空字符串，此时缓存池子无需存储，直接跳过即可。否则dubbo会绕过缓冲池，不断向istio发送请求。&lt;/li>
+&lt;li>考虑以下场景，dubbo应用同时订阅了两个接口，分别由app1和app2提供。为避免监听之间的相互覆盖，因此向istio发送数据时，需要聚合所有监听的资源名一次性发起。&lt;/li>
+&lt;/ul>
+&lt;h3 id="42-多点独立监听">4.2 多点独立监听&lt;/h3>
+&lt;p>在第一次向istio发送请求时会调用getResource方法先去cache查询，缺失了再聚合数据去istio请求数据，istio再返回相应的结果给dubbo。我们处理istio的响应有两种实现方案：&lt;/p>
+&lt;ol>
+&lt;li>由用户在getResource方案中new 一个completeFuture，由cache分析是否是需要的数据，若确认是新数据则由该future回调传递结果。&lt;/li>
+&lt;li>getResource建立资源的监听器consumerObserveMap，定义一个consumer并把取到的数据同步到原来的线程，cache 收到来自istio的推送后会做两件事：将数据推送所有监听器和将数据发送给该资源的监听器。
+以上两种方案都能实现，但最大的区别就是用户调用onNext发送数据给istio的时候需不需要感知getResource 的存在。综上，最终选择方案2进行实现。具体实现逻辑是让dubbo与istio建立连接后，istio会推送自身监听到资源列表给dubbo，dubbo解析响应，并根据监听的不同app切分数据，并刷新本地缓存池的数据，并发送ACK响应给istio，大致流程如下：&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/2/5.svg" alt="image.png">&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ResponseObserver&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> XXX &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>&lt;span style="color:#719e07">(&lt;/span>DiscoveryResponse value&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//接受来自istio的数据并切分
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> newResult &lt;span style="color:#719e07">=&lt;/span> decodeDiscoveryResponse&lt;span style="color:#719e07">(&lt;/span>value&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//本地缓存池数据
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> oldResource &lt;span style="color:#719e07">=&lt;/span> resourcesMap&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//刷新缓存池数据
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> discoveryResponseListener&lt;span style="color:#719e07">(&lt;/span>oldResource&lt;span style="color:#719e07">,&lt;/span> newResult&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> resourcesMap &lt;span style="color:#719e07">=&lt;/span> newResult&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// for ACK
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> requestObserver&lt;span style="color:#719e07">.&lt;/span>onNext&lt;span style="color:#719e07">(&lt;/span>buildDiscoveryRequest&lt;span style="color:#719e07">(&lt;/span>Collections&lt;span style="color:#719e07">.&lt;/span>emptySet&lt;span style="color:#719e07">(),&lt;/span> value&lt;span style="color:#719e07">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">discoveryResponseListener&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> oldResult&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> newResult&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">....&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//具体实现交由LDS、RDS、EDS自身
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#268bd2">abstract&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">decodeDiscoveryResponse&lt;/span>&lt;span style="color:#719e07">(&lt;/span>DiscoveryResponse response&lt;span style="color:#719e07">){&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//比对新数据和缓存池的资源，并将不同时存在于两种池子的资源取出
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Map&lt;span style="color:#719e07">.&lt;/span>Entry&lt;span style="color:#719e07">&amp;lt;&lt;/span>Set&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Consumer&lt;span style="color:#719e07">&amp;lt;&lt;/span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span> entry &lt;span style="color:#719e07">:&lt;/span> consumerObserveMap&lt;span style="color:#719e07">.&lt;/span>entrySet&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 本地缓存池不存在则跳过
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//聚合资源
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> dsResultMap &lt;span style="color:#719e07">=&lt;/span> entry&lt;span style="color:#719e07">.&lt;/span>getKey&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>stream&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>collect&lt;span style="color:#719e07">(&lt;/span>Collectors&lt;span style="color:#719e07">.&lt;/span>toMap&lt;span style="color:#719e07">(&lt;/span>k &lt;span style="color:#719e07">-&amp;gt;&lt;/span> k&lt;span style="color:#719e07">,&lt;/span> v &lt;span style="color:#719e07">-&amp;gt;&lt;/span> newResult&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>v&lt;span style="color:#719e07">)));&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//刷新缓存池数据
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> entry&lt;span style="color:#719e07">.&lt;/span>getValue&lt;span style="color:#719e07">().&lt;/span>forEach&lt;span style="color:#719e07">(&lt;/span>o &lt;span style="color:#719e07">-&amp;gt;&lt;/span> o&lt;span style="color:#719e07">.&lt;/span>accept&lt;span style="color:#719e07">(&lt;/span>dsResultMap&lt;span style="color:#719e07">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>踩坑点：&lt;/p>
+&lt;ul>
+&lt;li>原本多个stream流的情况下，会用递增的requestId来复用stream流，改成持久化连接之后，一种resource会有多个requestid，可能会相互覆盖，因此必须去掉这个机制。&lt;/li>
+&lt;li>初始实现方案并没有对资源进行切分，而是一把梭，考虑到后续对其他DS的支持，对istio返回的数据进行切分，也导致consumerObserveMap有点奇形怪状。&lt;/li>
+&lt;li>三种DS在发送数据时可以共享同一channel，但监听所用到的必须是同一channel，否则数据变更时istio不会进行推送。&lt;/li>
+&lt;li>建立双向stream流之后，初始方案future为全局共享。但可能有这样的场景：相同的ds两次相邻时间的onNext事件，记为A事件和B事件，可能是A事件先发送，B随后；但可能是B事件的结果先返回，不确定istio推送的时间，因此future必须是局部变量而不是全局共享。&lt;/li>
+&lt;/ul>
+&lt;h3 id="43-采用读写锁避免并发冲突">4.3 采用读写锁避免并发冲突&lt;/h3>
+&lt;p>监听器consumerObserveMap和缓存池resourcesMap均可能产生并发冲突。对于resourcemap，由于put操作都集中在getResource方法，因此可以采用悲观锁就能锁住相应的资源，避免资源的并发监听。对于consumerObserveMap，同时存在put、remove和遍历操作，从时序上，采用读写锁可规避冲突，对于遍历操作加读锁，对于put和remove操作加写锁，即可避免并发冲突。综上，resourcesMap加悲观锁即可，consumerObserveMap涉及的操作场景如下：&lt;/p>
+&lt;ul>
+&lt;li>远程请求istio时候会往consumerObserveMap 新增数据，加写锁。&lt;/li>
+&lt;li>CompleteFuture跨线程返回数据后，去掉监听future，加写锁。&lt;/li>
+&lt;li>监听缓存池时会往consumerObserveMap新增监听，加写锁。&lt;/li>
+&lt;li>断线重连时会往consumerObserveMap新增监听，加写锁。&lt;/li>
+&lt;li>解析istio返回的数据，遍历缓存池并刷新数据，加读锁。&lt;/li>
+&lt;/ul>
+&lt;p>踩坑点：&lt;/p>
+&lt;ul>
+&lt;li>由于dubbo和istio建立的是是双向stream流，相同的ds两次相邻时间的onNext事件，记为A事件和B事件，可能是A事件先发送，B随后；但可能是B事件的结果先返回，不确定istio推送的时间。因此需要加锁。&lt;/li>
+&lt;/ul>
+&lt;h3 id="44-断线重连">4.4 断线重连&lt;/h3>
+&lt;p>断线重连只需要用定时任务去定时与istio交互，尝试获取授信证书，证书获取成功即可视为istio成功重新上线，dubbo会聚合本地的资源去istio请求数据，并解析响应和刷新本地缓存池数据，最后再关闭定时任务。
+踩坑点：&lt;/p>
+&lt;ul>
+&lt;li>采用全局共享的定时任务池，不能进行关闭，否则会影响其他业务。&lt;/li>
+&lt;li>&lt;/li>
+&lt;/ul>
+&lt;h2 id="五感想与总结">五、感想与总结&lt;/h2>
+&lt;p>在这次功能的改造中，笔者着实掉了一波头发，怎么找bug也找不到的情形不在少数。除了上述提到的坑点之外，其他的坑点包括但不局限于：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>dubbo在某一次迭代里更改了获取k8s证书的方式，授权失败。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>原本的功能没问题，merge了下master代码，grpc版本与envoy版本不兼容，各种报错，最后靠降低版本成功解决。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>原本的功能没问题，merge了下master代码，最新分支代码里metadataservice发成了triple，然而在Proxyless模式下只支持dubbo协议，debug了三四天，最后发现需要增加配置。&lt;/p>
+&lt;p>&amp;hellip;&amp;hellip;
+但不得不承认，Proxyless Service Mesh确实有它自身的优势和广阔的市场前景。自dubbo3.1.0 release版本之后，dubbo已经实现了Proxyless Service Mesh能力，未来dubbo社区将深度联动业务，解决更多实际生产环境中的痛点，更好地完善service mesh能力。&lt;/p>
+&lt;/li>
+&lt;/ul></description></item><item><title>Blog: Dubbo 3.1.5、3.2.0-beta.4 正式发布</title><link>https://dubbo.apache.org/zh/blog/2023/01/30/dubbo-3.1.53.2.0-beta.4-%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/2023/01/30/dubbo-3.1.53.2.0-beta.4-%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</guid><description>
 &lt;p>Dubbo 3.1.5 版本是目前 Dubbo 3 的最新稳定版本，我们建议所有的用户都升级到最新的稳定版本。Dubbo 3.2.0-beta.4 版本是目前 Dubbo 3 的最新特性版本，包括了如 Spring Boot 3、JDK 17、服务粒度的线程池隔离等新特性的支持，欢迎大家尝鲜使用。&lt;/p>
 &lt;h1 id="dubbo-315">Dubbo 3.1.5&lt;/h1>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/release/3-1-5.png" alt="image.png">&lt;/p>
@@ -14388,35 +14539,4 @@ HTTP 协议与 dubbo 协议之间的映射关系。&lt;/p>
 &lt;p>dubbo-go 社区钉钉群 :23331795 ,欢迎你的加入。&lt;/p>
 &lt;blockquote>
 &lt;p>作者信息： 王翔，GithubID: sxllwx，就职于成都达闼科技有限公司，golang开发工程师。&lt;/p>
-&lt;/blockquote></description></item><item><title>Blog: dubbo-go-hessian2 v1.6.0</title><link>https://dubbo.apache.org/zh/blog/2021/01/14/dubbo-go-hessian2-v1.6.0/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh/blog/2021/01/14/dubbo-go-hessian2-v1.6.0/</guid><description>
-&lt;h2 id="1-增加缓存优化">1. 增加缓存优化&lt;/h2>
-&lt;p>dubbo-go-hessian2 在解析数据的数据大量使用到了 struct 的结构信息，这部分信息可以缓存起来反复利用，使得性能提升了一倍。优化过程记录可以详细阅读&lt;a href="https://mp.weixin.qq.com/s/ouVxldQAt0_4BET7srjJ6Q">《记一次对 dubbo-go-hessian2 的性能优化》&lt;/a>.&lt;/p>
-&lt;p>对应 pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/179">#179&lt;/a>，作者 &lt;a href="https://github.com/micln">micln&lt;/a>。&lt;/p>
-&lt;h2 id="2-string-解析性能优化">2. string 解析性能优化&lt;/h2>
-&lt;p>由于 hessian （ dubbo 序列化协议，下称：hessian ）对 string 的定义是16 bit 的 unicode 的 UTF-8 表示形式，字符长度表示是16 bit 的字符数。这是仅针对 java 制定的规范，java 中一个字符是16 bit，对应到 UTF-16. hessian 库也是对每一个字符进行转码序列化。但 golang 里面字符是和 UTF-8 对应的，dubbo-go-hessian2 里面的 rune 是 32bit，和 unicode一一映射。对于 U+10000 ~ U+10FFFF 的字符，需按照 UTF16 的规范，将字符转换为 2 个字节的代理字符，再做转换，才能和 java 的序列化方式对应起来。&lt;/p>
-&lt;p>原来不管是编码还是解析都是一个字符一个字符处理，特别是解析的时候，从流里面一个字节一个字节读取并组装成 rune，然后再转换为 string，这样效率特别低。我们的优化方案是，批次读取字节流到 buffer 中，对 buffer 进行解析转为 UTF-8 数组，并统计字符数量。其中需要对代理对字符将其转换为标准 UTF-8 子节数组。如果统计的字符数量不足，再进一步读取流种的数据进行解析。通过此方式提升一倍的解析效率。&lt;/p>
-&lt;p>对应 pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/188">#188&lt;/a>，作者 &lt;a href="https://github.com/zonghaishang">zonghaishang&lt;/a>。&lt;/p>
-&lt;h2 id="3-解析忽略不存在的字段">3. 解析忽略不存在的字段&lt;/h2>
-&lt;p>hessian 库在解析数据的时候，对于一个 class 字段，如果不存在，则直接忽略掉。但 v1.6.0 版本之前 dubbo-go-hessian2 解析数据，如果遇到不存在的字段，会返回 error。从 v1.6.0 开始，与 hessian 一样，忽略不存在的字段。&lt;strong>因为这是一个特性的变更，所以升级的同学一定要注意了。&lt;/strong>&lt;/p>
-&lt;p>对应 pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/201">#201&lt;/a>，作者 &lt;a href="https://github.com/micln">micln&lt;/a> &amp;amp; &lt;a href="https://github.com/fangyincheng">fangyincheng&lt;/a>。&lt;/p>
-&lt;h2 id="4-解决浮点数精度丢失问题">4. 解决浮点数精度丢失问题&lt;/h2>
-&lt;p>在对 float32 类型进行序列化时，我们一律强制转换为 float64 再进行序列化操作。由于浮点数的精度问题，在这个转换过程中可能出现小数点后出现多余的尾数，例如 (float32)99.8&amp;ndash;&amp;gt;(float64)99.80000305175781。&lt;/p>
-&lt;p>1.6.0 版本对 float32 的序列化进行了优化：&lt;/p>
-&lt;ul>
-&lt;li>如果小数尾数小于 3 位，根据 hessian2 协议序列化为 double 32-bit 格式&lt;/li>
-&lt;li>否则先转换为 string 类型，再转换为 float64 类型，这样做可以避免由于浮点数精度问题产生多余的尾数，最后对 float64 进行序列化。&lt;/li>
-&lt;/ul>
-&lt;p>虽然对 float32 类型进行了优化，但是依然建议使用浮点数的时候优先使用 float64 类型。&lt;/p>
-&lt;p>对应 pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/196">#196&lt;/a>，作者 &lt;a href="https://github.com/willson-chen">willson-chen&lt;/a>。&lt;/p>
-&lt;h2 id="5-解决-attachment-空值丢失问题">5. 解决 attachment 空值丢失问题&lt;/h2>
-&lt;p>dubbo 请求中包含 attachment 信息，之前如果 attachment 里面含有如 &lt;code>&amp;quot;key1&amp;quot;:&amp;quot;&amp;quot;&lt;/code>，这种 value 为空的情况，解析出来的结果会直接丢失这个属性 key1 ，v1.6.0 修复了此问题，现在解析出来的 attachment 会正确解析出空 value 的属性。&lt;/p>
-&lt;p>对应 pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/191">#191&lt;/a>，作者 &lt;a href="https://github.com/champly">champly&lt;/a>。&lt;/p>
-&lt;h2 id="6-支持-继承-和忽略冗余字段">6. 支持 ‘继承’ 和忽略冗余字段&lt;/h2>
-&lt;p>由于 go 没有继承的概念，所以在之前的版本，Java 父类的字段不被 dubbo-go-hessian2 所支持。新版本中，dubbo-go-hessian2 将Java来自父类的字段用匿名结构体对应，如：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Dog &lt;span style="color:#268bd2">struct&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Animal
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Gender &lt;span style="color:#dc322f">string&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DogName &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`hessian:&amp;#34;-&amp;#34;`&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>同时，就像 json 编码中通过 immediately 可以在序列化中忽略该字段，同理，通过 hessian:&amp;quot;-&amp;quot; 用户也可以让冗余字段不参与 hessian 序列化。&lt;/p>
-&lt;p>对应pr &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/154">#154&lt;/a>，作者 &lt;a href="https://github.com/micln">micln&lt;/a>&lt;/p></description></item></channel></rss>
+&lt;/blockquote></description></item></channel></rss>
