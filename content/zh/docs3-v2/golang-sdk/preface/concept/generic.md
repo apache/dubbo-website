@@ -2,6 +2,7 @@
 type: docs
 title: 泛化调用
 keywords: 泛化调用
+description: "泛化调用"
 ---
 
 泛化调用是一种 Dubbo-Go 的特殊调用方式，它允许中间节点在没有接口信息的情况下传递调用信息，常被用于测试、网关的场景下。泛化调用支持 Dubbo 和 Triple 协议，但是目前序列化方案只支持 Hessian。
