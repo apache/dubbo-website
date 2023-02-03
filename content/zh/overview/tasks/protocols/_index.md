@@ -3,8 +3,8 @@
 type: docs
 title: "通信协议"
 linkTitle: "通信协议"
-description: "演示 Dubbo 支持的通信协议"
-weight: 40
+description: "演示 Dubbo 多协议的应用场景"
+weight: 50
 hide: true
 no_list: true
 ---
@@ -17,9 +17,9 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./triple/" >}}'>基于 HTTP/2 的 Dubbo3 通信协议</a>
+                    <a href='{{< relref "./grpc/" >}}'>使用 Dubbo 开发 gRPC 服务</a>
                 </h4>
-                <p>使用 IDL 定义跨语言服务</p>
+                <p>演示 Dubbo 如何简化 gRPC 服务开发。</p>
             </div>
         </div>
     </div>
@@ -27,9 +27,9 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./triple/" >}}'>基于 TCP 的 Dubbo2 通信协议</a>
+                     <a href='{{< relref "./grpc/" >}}'>使用 Dubbo 开发 Web 应用</a>
                 </h4>
-                <p>Pojo 序列化兼容模式</p>
+                <p>演示使用 Dubbo 对外暴露 HTTP 接口，支持 Spring Web 标准开发方式。</p>
             </div>
         </div>
     </div>
@@ -37,9 +37,9 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./triple/" >}}'>HTTP 通信协议</a>
+                     <a href='{{< relref "./grpc/" >}}'>与 Spring Cloud 互调</a>
                 </h4>
-                <p>Stream 通信模式</p>
+                <p>演示如何使用 Dubbo 作为消费端调用 Spring Cloud 服务</p>
             </div>
         </div>
     </div>
@@ -47,9 +47,9 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./triple/" >}}'>gRPC 通信协议</a>
+                     <a href='{{< relref "./grpc/" >}}'>单端口多协议发布服务</a>
                 </h4>
-                <p>Stream 通信模式</p>
+                <p>演示如何在一个应用内发布多个使用不同协议的服务，并通过唯一的一个端口对外发布。</p>
             </div>
         </div>
     </div>

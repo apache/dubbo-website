@@ -72,16 +72,6 @@ no_list: true
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4">
-        <div class="h-100 card shadow" href="#">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <a href='{{< relref "./protocols/" >}}'>通信协议</a>
-                </h4>
-                <p></p>
-            </div>
-        </div>
-    </div>
 </div>
 <hr>
 </div>

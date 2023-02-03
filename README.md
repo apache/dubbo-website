@@ -31,7 +31,12 @@ $ npm install --save-dev postcss-cli
 ```
 
 ## Run server locally
-1. Run
+1. Clear up your local module cache
+```sh
+hugo mod clean
+```
+
+2. Start the server
 ```sh
 hugo server --disableFastRender
 ```

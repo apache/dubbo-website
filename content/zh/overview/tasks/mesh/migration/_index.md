@@ -2,7 +2,7 @@
 ---
 type: docs
 title: "传统 Dubbo 微服务集群如何平滑迁移到 Istio 服务网格体系"
-linkTitle: "迁移到服务网格"
+linkTitle: "Dubbo2 平滑迁移"
 description: "演示 Dubbo Mesh 如何帮助用户实现架构的平滑迁移。"
 weight: 70
 no_list: true
