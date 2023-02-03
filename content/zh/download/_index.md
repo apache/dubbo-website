@@ -6,7 +6,7 @@ layout: basic
 no_list: true
 menu:
   main:
-    weight: 100
+    weight: 30
 ---
 下载 Apache Dubbo Release 归档.
 

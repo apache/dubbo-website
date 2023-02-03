@@ -6,7 +6,7 @@ linkTitle: "联系社区"
 description: "联系社区，Dubbo 社区贡献指南"
 menu:
   main:
-    weight: 20
+    weight: 40
 ---
 
 ## 为 Dubbo 做贡献
@@ -14,6 +14,45 @@ menu:
 Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Github 开发流程，使用Github追踪处理问题，并将 pull request 合并到 master 中。如果您想为 Dubbo 做贡献（即便是一些微小的），请不要犹豫，遵循下面的指导方针。
 
 ### 联系我们
+
+#### 社交媒体
+{{< cardpane >}}
+  {{< card header="微信公众号" >}}
+<div class="community-resource">
+   <a href="">
+       <img src="/imgs/contacts/wechat-account.jpg" alt="Wechat">
+   </a>
+   <p>官方微信公众号（Apache Dubbo）</p>
+</div>
+  {{< /card >}}
+  {{< card header="钉钉群组" >}}
+<div id="slack" class="community-resource">
+    <a href="">
+        <img src="/imgs/contacts/dingtalk.jpg" alt="Dingtalk">
+    </a>
+    <p>定期举办线上社区会议或开发者双周会</p>
+</div>
+  {{< /card >}}
+  {{< card header="Twitter" >}}
+<div id="twitter" class="community-resource">
+    <a href="https://twitter.com/apachedubbo">
+        <img src="/imgs/contacts/twitter.png" alt="Twitter">
+    </a>
+    <a href="https://twitter.com/apachedubbo">Twitter&nbsp;&#9654;</a>
+    <p><em>#apachedubbo</em></p>
+    <p>关于 Apache Dubbo 项目的国际社区动态与业界国际资讯</p>
+</div>
+  {{< /card >}}
+  {{< card header="Github" >}}
+<div id="github" class="community-resource">
+    <a href="https://github.com/apache/dubbo-awesome">
+        <img src="/imgs/contacts/github.png" alt="GitHub">
+    </a>
+    <a href="../github/">GitHub&nbsp;&#9654;</a>
+    <p>找到对应语言实现或生态项目的 GitHub 地址，即刻参与 Dubbo 项目源码贡献</p>
+</div>
+  {{< /card >}}
+{{< /cardpane >}}
 
 #### 邮件列表
 
