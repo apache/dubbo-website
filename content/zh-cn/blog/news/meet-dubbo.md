@@ -2,6 +2,7 @@
 title: "遇见Dubbo"
 linkTitle: "遇见Dubbo"
 date: 2019-01-26
+tags: ["News"]
 description: >
     本文记录了一个小白成长为Dubbo committer的过程。
 ---

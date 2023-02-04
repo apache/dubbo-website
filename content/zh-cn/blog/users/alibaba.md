@@ -1,8 +1,7 @@
 ---
 title: "阿里巴巴升级 Dubbo3 全面取代 HSF2"
 linkTitle: "阿里巴巴"
-tags: ["use-case"]
-categories: ["use-case"]
+tags: ["用户案例"]
 date: 2023-01-16
 weight: 1
 ---

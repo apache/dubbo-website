@@ -2,6 +2,7 @@
 date: 2023-01-15
 title: "平安健康的 Dubbo3 迁移历程"
 linkTitle: "平安健康"
+tags: ["用户案例"]
 weight: 5
 ---
 # 1 背景

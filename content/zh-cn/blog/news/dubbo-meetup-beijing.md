@@ -2,6 +2,7 @@
 title: "首届Dubbo开发者沙龙在北京成功举办"
 linkTitle: "首届Dubbo开发者沙龙在北京成功举办"
 date: 2018-05-12
+tags: ["News"]
 description: 首届Dubbo开发者沙龙在北京成功举办
 ---
 

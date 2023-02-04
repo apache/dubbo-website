@@ -2,6 +2,7 @@
 title: "Dubbo3 应用级服务发现设计"
 linkTitle: "Dubbo3 应用级服务发现设计"
 date: 2023-01-30
+tags: ["Proposals"]
 author: Jun Liu
 description: >
     当前版本的Dubbo Admin包含了之前版本中的绝大部分功能，包括服务治理，服务查询等，同时支持了Dubbo2.7中服务治理的新特性
