@@ -2,6 +2,7 @@
 title: "第五届Dubbo开发者沙龙在杭州成功举办"
 linkTitle: "第五届Dubbo开发者沙龙在杭州成功举办"
 date: 2018-12-10
+tags: ["News"]
 description: 第五届Dubbo开发者沙龙在杭州成功举办。
 ---
 

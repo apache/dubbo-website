@@ -2,6 +2,7 @@
 title: "第三届Dubbo开发者沙龙在深圳成功举办"
 linkTitle: "第三届Dubbo开发者沙龙在深圳成功举办"
 date: 2018-07-30
+tags: ["News"]
 description: 第三届Dubbo开发者沙龙在深圳成功举办
 ---
 

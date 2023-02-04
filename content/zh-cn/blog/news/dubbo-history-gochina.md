@@ -2,6 +2,7 @@
 title: "Dubbo Go 回顾与展望"
 linkTitle: "Dubbo Go 回顾与展望"
 date: 2021-01-11
+tags: ["News"]
 description: 本文记录了发表在 gochina 上的 Dubbo Go 的回顾与展望
 ---
 
