@@ -1302,7 +1302,130 @@ If not discussed in the community (mailing list), just as it did not happen.&lt;
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Run seata-server, after success, run your own service dubbo provider&amp;amp;consumer&lt;/p>
 &lt;h3 id="the-eighth-step-is-to-build-a-highly-available-seata-server">&lt;strong>The eighth step is to build a highly available Seata-server&lt;/strong>&lt;/h3>
 &lt;p>Since seata-server supports the separation mode of computing and storage, and supports exposing service addresses to multiple registration centers, it only needs to be configured according to the sixth step and then expanded horizontally&lt;/p>
-&lt;p>For details, please visit: &lt;a href="https://seata.io/">https://seata.io/&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: Dubbo SPI Overview</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/overview/</guid><description>
+&lt;p>For details, please visit: &lt;a href="https://seata.io/">https://seata.io/&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: Dubbo Class Inspection Mechanism</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/</guid><description>
+&lt;h2 id="supported-versions">Supported versions&lt;/h2>
+&lt;p>Dubbo &amp;gt;= 3.1.6&lt;/p>
+&lt;h2 id="scope-of-application">Scope of application&lt;/h2>
+&lt;p>Currently, the serialization check supports Hessian2, Fastjson2 serialization and generalized calls. Other serialization methods are not currently supported.&lt;/p>
+&lt;h2 id="configuration-method">configuration method&lt;/h2>
+&lt;h3 id="1-check-mode">1. Check mode&lt;/h3>
+&lt;p>The inspection mode is divided into three levels: &lt;code>STRICT&lt;/code> strict inspection, &lt;code>WARN&lt;/code> warning, &lt;code>DISABLED&lt;/code> disabled.
+&lt;code>STRICT&lt;/code> Strict checks: disallow deserialization of all classes that are not in the allowed serialization list (whitelist).
+&lt;code>WARN&lt;/code> warning: only prohibits serialization of all classes in the disallowed serialization list (blacklist), and alerts through logs when deserializing classes that are not in the allowed serialization list (whitelist).
+&lt;code>DISABLED&lt;/code> Disabled: Do not do any checks.&lt;/p>
+&lt;p>Version 3.1 defaults to &lt;code>WARN&lt;/code> warning level, and version 3.2 defaults to &lt;code>STRICT&lt;/code> strict checking level.&lt;/p>
+&lt;p>Configuration via ApplicationConfig:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>applicationConfig&lt;span style="color:#719e07">.&lt;/span>setSerializeCheckStatus&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;STRICT&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configuration via Spring XML:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span> serialize-check-status=&lt;span style="color:#2aa198">&amp;#34;STRICT&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configure via Spring Properties / dubbo.properties:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.serialize-check-status&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">STRICT&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configure via System Property:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.serialize-check-status&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">STRICT&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the configuration is successful, you can see the following prompts in the log:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO utils.SerializeSecurityManager: [DUBBO] Serialize check level: STRICT
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note: If multiple applications under the same process (Dubbo Framework Model) are configured with different inspection modes at the same time, the &amp;ldquo;loosenest&amp;rdquo; level will eventually take effect. If two Spring Contexts are started at the same time, one is configured as &lt;code>STRICT&lt;/code> and the other is configured as &lt;code>WARN&lt;/code>, the &lt;code>WARN&lt;/code> level configuration will finally take effect.&lt;/p>
+&lt;h3 id="2-serializable-interface-check">2. Serializable interface check&lt;/h3>
+&lt;p>The Serializable interface check mode is divided into two levels: &lt;code>true&lt;/code> is enabled, and &lt;code>false&lt;/code> is disabled. When the check is turned on, it will refuse to deserialize all classes that do not implement &lt;code>Serializable&lt;/code>.&lt;/p>
+&lt;p>The default configuration in Dubbo is &lt;code>true&lt;/code> to enable the check.&lt;/p>
+&lt;p>Configuration via ApplicationConfig:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>applicationConfig&lt;span style="color:#719e07">.&lt;/span>setCheckSerializable&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configuration via Spring XML:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span> check-serializable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configure via Spring Properties / dubbo.properties:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.check-serializable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configure via System Property:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.check-serializable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the configuration is successful, you can see the following prompts in the log:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO utils.SerializeSecurityManager: [DUBBO] Serialize check serializable: true
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note 1: If multiple applications under the same process (Dubbo Framework Model) are configured with different Serializable interface inspection modes at the same time, the &amp;ldquo;loosenest&amp;rdquo; level will eventually take effect. If two Spring Contexts are started at the same time, one configured as &lt;code>true&lt;/code> and the other configured as &lt;code>false&lt;/code>, the &lt;code>false&lt;/code> level configuration will finally take effect.
+Note 2: At present, the built-in &lt;code>Serializable&lt;/code> check configuration of Hessian2 and Fastjson2 has not been opened. For generalized calls, you only need to configure &lt;code>dubbo.application.check-serializable&lt;/code> to modify the check configuration; for Hessian2 serialization, you need to modify &lt;code>dubbo.application.check-serializable&lt;/code> and &lt;code>dubbo.hessian.allowNonSerializable&lt;/code> at the same time&lt;/p>
+&lt;h3 id="3-automatically-scan-related-configurations">3. Automatically scan related configurations&lt;/h3>
+&lt;p>There are two configuration items in the Dubbo class automatic scanning mechanism: `AutoTrustSerializeClass&lt;/p>
+&lt;p>To put it simply, after automatic class scanning is enabled, Dubbo will automatically scan all related classes that may be used by the interface through &lt;code>ReferenceConfig&lt;/code> and &lt;code>ServiceConfig&lt;/code>, and recursively trust its package. `TrustSerializeClassLevel&lt;/p>
+&lt;p>The default configuration in Dubbo is `AutoTrustSerializeClass&lt;/p>
+&lt;p>Configuration via ApplicationConfig:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>applicationConfig&lt;span style="color:#719e07">.&lt;/span>setAutoTrustSerializeClass&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>applicationConfig&lt;span style="color:#719e07">.&lt;/span>setTrustSerializeClassLevel&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configuration via Spring XML:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span> auto-trust-serialize-class=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> trust-serialize-class-level=&lt;span style="color:#2aa198">&amp;#34;3&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configure via Spring Properties / dubbo.properties:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.auto-trust-serialize-class&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.trust-serialize-class-level&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configure via System Property:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.auto-trust-serialize-class&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-Ddubbo.application.trust-serialize-class-level&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the configuration is successful, you can use the QoS command to check whether the results of the currently loaded trusted classes meet expectations.&lt;/p>
+&lt;p>Note: After the check is enabled, there will be a certain performance loss during the startup process.&lt;/p>
+&lt;h3 id="4-custom-configuration-of-trusteduntrusted-classes">4. Custom configuration of trusted/untrusted classes&lt;/h3>
+&lt;p>In addition to Dubbo&amp;rsquo;s automatic scanning classes, it also supports configuration of trusted/untrusted class lists through resource files.&lt;/p>
+&lt;p>Configuration method: define the following files under the resource directory (resource).&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># security/serialize.allowlist&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>io.dubbo.test
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># security/serialize.blockedlist&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>io.dubbo.block
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the configuration is successful, you can see the following prompts in the log:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>INFO &lt;span style="color:#2aa198">utils.SerializeSecurityConfigurator: [DUBBO] Read serialize allow list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.allowlist&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO &lt;span style="color:#2aa198">utils.SerializeSecurityConfigurator: [DUBBO] Read serialize blocked list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.blockedlist&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The configuration priority is: user-defined trusted class = built-in trusted class of the framework &amp;gt; user-defined untrusted class = built-in untrusted class of the framework &amp;gt; automatic class scanning trusted class.&lt;/p>
+&lt;h2 id="audit-method">Audit method&lt;/h2>
+&lt;p>Dubbo supports real-time viewing of current configuration information and trusted/untrusted class lists through QoS commands. Currently supports two commands: &lt;code>serializeCheckStatus&lt;/code> to view the current configuration information, &lt;code>serializeWarnedClasses&lt;/code> to view the real-time alarm list.&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>serializeCheckStatus&lt;/code> View the current configuration information&lt;/li>
+&lt;/ol>
+&lt;p>Access directly through the console:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;serializeCheckStatus
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>CheckStatus: WARN
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>CheckSerializable: &lt;span style="color:#b58900">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>AllowedPrefix:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DisAllowedPrefix:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Request the result in json format via http:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; curl http://127.0.0.1:22222/serializeCheckStatus
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;checkStatus&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;allowedPrefix&amp;#34;&lt;/span>:&lt;span style="color:#719e07">[&lt;/span>...&lt;span style="color:#719e07">]&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;checkSerializable&amp;#34;&lt;/span>:true,&lt;span style="color:#2aa198">&amp;#34;disAllowedPrefix&amp;#34;&lt;/span>:&lt;span style="color:#719e07">[&lt;/span>...&lt;span style="color:#719e07">]}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>&lt;code>serializeWarnedClasses&lt;/code> view real-time warning list&lt;/li>
+&lt;/ol>
+&lt;p>Access directly through the console:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;serializeWarnedClasses
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Warned Classes:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>io.dubbo.test.NotSerializable
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>io.dubbo.test2.NotSerializable
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>io.dubbo.test2.OthersSerializable
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>org.apache.dubbo.samples.NotSerializable
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Request the result in json format via http:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; curl http://127.0.0.1:22222/serializeWarnedClasses
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;warnedClasses&amp;#34;&lt;/span>:&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test2.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test2.OthersSerializable&amp;#34;&lt;/span>&lt;span style="color:#719e07">]}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note: It is recommended to pay attention to the result of &lt;code>serializeWarnedClasses&lt;/code> in time, and judge whether it is attacked by whether the returned result is not empty.&lt;/p></description></item><item><title>Docs3-V2: Dubbo SPI Overview</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/overview/</guid><description>
 &lt;h2 id="extended-design-ideas">Extended Design Ideas&lt;/h2>
 &lt;p>Scalability is what any system pursues, and it is equally applicable to Dubbo.&lt;/p>
 &lt;h3 id="what-is-scalability">What is scalability&lt;/h3>
@@ -3951,77 +4074,4 @@ After the consumer initiates a call to the service method, the Dubbo framework i
 &lt;/ol>
 &lt;p>In order to solve the related cost problems introduced by Sidecar, Dubbo introduced and implemented a new Proxyless Mesh architecture. As the name suggests, Proxyless Mesh refers to the deployment without Sidecar, and the Dubbo SDK directly interacts with the control plane. The architecture diagram is as follows&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/mesh/dubbo-proxyless.png" alt="dubbo-proxyless">&lt;/p>
-&lt;p>It can be imagined that in different organizations and different development stages, microservices built with Dubbo will allow three deployment architectures in the future: traditional SDK, Sidecar-based Service Mesh, and Proxyless Mesh without Sidecar. Based on Sidecar&amp;rsquo;s Service Mesh, that is, the classic Mesh architecture, the independent sidecar runtime takes over all the traffic, separate from the Sidecar&amp;rsquo;s Proxyless Mesh, and the secondary SDK directly communicates with the control plane through xDS. Dubbo microservices allow deployment on physical machines, containers, and Kubernetes platforms, and can use Admin as the control plane and manage them with unified traffic governance rules.&lt;/p></description></item><item><title>Docs3-V2: Introduction to Configuration Center</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/config-center/desc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/config-center/desc/</guid><description/></item><item><title>Overview: Java SDK</title><link>https://dubbo.apache.org/en/overview/mannual/java/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java/</guid><description/></item><item><title>Release: Java SDK</title><link>https://dubbo.apache.org/en/release/java/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/release/java/</guid><description>
-&lt;h2 id="verify">Verify&lt;/h2>
-&lt;p>You can follow the &lt;a href="https://www.apache.org/info/verification">steps&lt;/a> here, and use the &lt;a href="https://downloads.apache.org/dubbo/KEYS">KEYS&lt;/a> file to verify the download.&lt;/p>
-&lt;h2 id="apache-dubbo">Apache Dubbo&lt;/h2>
-&lt;p>Please click to learn about each &lt;a href="https://dubbo.apache.org/zh/docsv2.7/user/versions/">version details and upgrade notes&lt;/a>&lt;/p>
-&lt;blockquote>
-&lt;p>GitHub: &lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a> &lt;br>
-Release notes: &lt;a href="https://github.com/apache/dubbo/releases">https://github.com/apache/dubbo/releases&lt;/a>&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="315-2023-01-21">3.1.5 (2023-01-21)&lt;/h3>
-&lt;h4 id="source-release">Source Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.1.5/apache-dubbo-3.1.5-src.zip">source&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.1.5/apache-dubbo-3.1.5-src.zip.asc">asc&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.1.5/apache-dubbo-3.1.5-src.zip.sha512">sha512&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h4 id="maven-release">Maven Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.1.5/jar">org.apache.dubbo:dubbo:3.1.5&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.1.5&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="320-beta4-2023-01-27">3.2.0-beta.4 (2023-01-27)&lt;/h3>
-&lt;h4 id="source-release-1">Source Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.4/apache-dubbo-3.2.0-beta.4-src.zip">source&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.4/apache-dubbo-3.2.0-beta.4-src.zip.asc">asc&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.4/apache-dubbo-3.2.0-beta.4-src.zip.sha512">sha512&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h4 id="maven-release-1">Maven Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.2.0-beta.4/jar">org.apache.dubbo:dubbo:3.2.0-beta.4&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0-beta.4&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3013-2023-01-27">3.0.13 (2023-01-27)&lt;/h3>
-&lt;h4 id="source-release-2">Source Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.0.13/apache-dubbo-3.0.13-src.zip">source&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.0.13/apache-dubbo-3.0.13-src.zip.asc">asc&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/3.0.13/apache-dubbo-3.0.13-src.zip.sha512">sha512&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h4 id="maven-release-2">Maven Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://search.maven.org/artifact/org.apache.dubbo/dubbo/3.0.13/jar">org.apache.dubbo:dubbo:3.0.13&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.0.13&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2721-2023-01-21">2.7.21 (2023-01-21)&lt;/h3>
-&lt;h4 id="source-release-3">Source Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/2.7.21/apache-dubbo-2.7.21-src.zip">source&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/2.7.21/apache-dubbo-2.7.21-src.zip.asc">asc&lt;/a> |
-&lt;a href="https://www.apache.org/dyn/closer.lua/dubbo/2.7.21/apache-dubbo-2.7.21-src.zip.sha512">sha512&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h4 id="maven-release-3">Maven Release&lt;/h4>
-&lt;ul>
-&lt;li>&lt;a href="https://search.maven.org/artifact/org.apache.dubbo/dubbo/2.7.21/jar">org.apache.dubbo:dubbo:2.7.21&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.7.21&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>
+&lt;p>It can be imagined that in different organizations and different development stages, microservices built with Dubbo will allow three deployment architectures in the future: traditional SDK, Sidecar-based Service Mesh, and Proxyless Mesh without Sidecar. Based on Sidecar&amp;rsquo;s Service Mesh, that is, the classic Mesh architecture, the independent sidecar runtime takes over all the traffic, separate from the Sidecar&amp;rsquo;s Proxyless Mesh, and the secondary SDK directly communicates with the control plane through xDS. Dubbo microservices allow deployment on physical machines, containers, and Kubernetes platforms, and can use Admin as the control plane and manage them with unified traffic governance rules.&lt;/p></description></item><item><title>Docs3-V2: Introduction to Configuration Center</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/config-center/desc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/config-center/desc/</guid><description/></item><item><title>Overview: Java SDK</title><link>https://dubbo.apache.org/en/overview/mannual/java/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java/</guid><description/></item></channel></rss>
