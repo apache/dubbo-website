@@ -30,13 +30,13 @@ Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个
 ## 使用方式
 在同一主机上部署多个服务或需要通过负载均衡器访问多个服务。
 
-## 参考用例
+> 参考用例
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-port-unification)
 
 
-## 配置方式
 
-关于Dubbo支持的配置方式，可以参考[配置说明](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/)
+
+> 关于Dubbo支持的配置方式，可以参考[配置说明](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/)
 
 ### 服务多协议导出
 
@@ -95,7 +95,7 @@ dubbo.protocol.port=20880
 
 默认情况下，基于端口复用的Qos服务在模块导入后是启动的。
 
-## 使用方式
+
 
 ### Qos使用
 
