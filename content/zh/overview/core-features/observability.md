@@ -18,13 +18,31 @@ Dubbo 内部维护了多个纬度的可观测指标，并且支持多种方式�
 
 * **Logging。** Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹。
 
-## Metrics
-Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数，失败原因统计等在内的核心服务指标，同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如线程池数量、服务健康状态等。
+# 指标
+## 指标模块简介
+Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 ["四大黄金信号"](https://sre.google/sre-book/monitoring-distributed-systems/) 并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。 
 
-可以通过 Dubbo Admin 可视化的查看 Metrics 指标
+Dubbo的关键指标包含:**延迟（Latency）**、**流量（Traffic）**、**错误（Errors）**和**饱和度（Saturation）**等内容 。同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如线程池数量、服务健康状态等。
 
-![Admin 效果图](/imgs/v3/advantages/observability-grafana.png)
+Dubbo目前推荐使用Prometheus来进行服务监控，Grafana来展示指标数据。接下来就通过案例来快速入门Dubbo的指标监控吧。
 
+## 快速入门
+### 环境
+
+- 系统：Windows、Linux、MacOS
+- JDK 8 及以上
+- Git
+- Maven
+
+### 参考案例
+Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获取案例源码：
+- Spring项目参考案例：
+  - [https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus)
+- SpringBoot项目参考案例:
+  - [https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot)
+
+
+### 可视化页面
 也可以使用 Grafana、Prometheus 等实现可视化指标监测，具体请参考以下可视化任务示例：
 
 * [Admin 任务链接]()
