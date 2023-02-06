@@ -58,11 +58,12 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
     <dubbo:prometheus-exporter enabled="true"  metrics-port="20888"/>
 </dubbo:metrics>
 ```
-关于指标的配置可以参考配置项中的指标配置信息，在这里引入的配置中enable-jvm-metrics是对JVM指标的埋点，
-如果不需要这些配置项可以将其删除或者设置为false，
-aggregation配置是针对指标数据的聚合处理使监控指标更平滑，
-prometheus-exporter配置为指标数据导出器，这里配置指标服务的端口号为20888，
-启动服务后，普罗米修斯监控服务通过访问：[http://localhost:20888](http://localhost:20888) 即可拉取数据
+关于指标的配置可以参考配置项中的指标配置信息，在这里引入的配置中:
+- enable-jvm-metrics是对JVM指标的埋点， 如果不需要这些配置项可以将其删除或者设置为false，
+- aggregation配置是针对指标数据的聚合处理使监控指标更平滑，
+- prometheus-exporter配置为指标数据导出器，这里配置指标服务的端口号为20888，
+
+- 启动服务后，普罗米修斯监控服务通过访问：[http://localhost:20888](http://localhost:20888) 即可拉取数据
 
 
 ### 可视化页面
