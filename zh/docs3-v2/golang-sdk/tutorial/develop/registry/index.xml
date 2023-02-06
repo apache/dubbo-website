@@ -319,8 +319,115 @@ CallUserStruct参数定义：&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req:&amp;amp;main.CallUserStruct{ID:&amp;#34;A000&amp;#34;, Male:true, SubInfo:main.SubInfo{SubID:&amp;#34;A001&amp;#34;, SubMale:false, SubAge:18}}
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>=======================
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可见接收到了来自cli的数据&lt;/p></description></item><item><title>Docs3-V2: 使用 Zookeeper 作为注册中心</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/zookeeper/</guid><description>
-&lt;p>TBD&lt;/p></description></item><item><title>Docs3-V2: 使用 Polaris 作为注册中心</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/polaris/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/polaris/</guid><description>
-&lt;p>TBD&lt;/p></description></item><item><title>Docs3-V2: 多注册中心</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;li>准备 Zookeeper 实例&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-配置注册中心">2. 配置注册中心&lt;/h2>
+&lt;p>修改服务端配置 go-server/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup &lt;span style="color:#586e75"># default is dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: interface
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># dubbo interface version must be same with client&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># dubbo interface group must be same with client&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改客户端配置 go-client/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: interface
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter2 &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># dubbo interface group must be same with server&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># dubbo interface version must be same with server&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-使用-zookeeper-进行服务发现">3. 使用 Zookeeper 进行服务发现&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>启动go-server/cmd，查看日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>INFO zookeeper/registry.go:217 &lt;span style="color:#719e07">[&lt;/span>Zookeeper Registry&lt;span style="color:#719e07">]&lt;/span> Registry instance with &lt;span style="color:#268bd2">root&lt;/span> &lt;span style="color:#719e07">=&lt;/span> /myGroup/com.apache.dubbo.sample.basic.IGreeter/providers
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>日志中包含 Zookeeper 注册信息，将当前服务接口注册在 Zookeeper&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>启动 go-client/cmd 查看日志&lt;/p>
+&lt;p>日志中包含 Zookeeper 注册组件的订阅事件信息，获取到服务端 IP 和端口号，显示调用成功。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> zookeeper/registry.go:217 [Zookeeper Registry] Registry instance with root = /myGroup/com.apache.dubbo.sample.basic.IGreeter/consumers, node = consumer%3A%2F%2F172.22.91.1%2Fcom.apache.dubbo.sample.basic.IGreeter%3Fapp.version%3D%26application%3Ddubbo.io%26async%3Dfalse%26bean.name%3DGreeterClientImpl%26cluster%3Dfailover%26config.tracing%3D%26environment%3D%26generic%3D%26group%3D%26interface%3Dcom.apache.dubbo.sample.basic.IGreeter%26loadbalance%3D%26metadata-type%3Dlocal%26module%3Dsample%26name%3Ddubbo.io%26organization%3Ddubbo-go%26owner%3Ddubbo-go%26protocol%3Dtri%26provided-by%3D%26reference.filter%3Dcshutdown%26registry.role%3D0%26release%3Ddubbo-golang-3.0.4%26retries%3D%26serialization%3D%26side%3Dconsumer%26sticky%3Dfalse%26timestamp%3D1675407574%26version%3D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cmd/client.go:54 start to test dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cmd/client.go:62 client response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cmd/client.go:68 client response result: name:&amp;#34;Hello laurence from UserProviderWithCustomRegistryGroupAndVersion&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>同时，我们可以直接查看zk中的数据如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 6&lt;span style="color:#719e07">]&lt;/span> ls /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zookeeper, myGroup&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 7&lt;span style="color:#719e07">]&lt;/span> ls /myGroup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>com.apache.dubbo.sample.basic.IGreeter2, com.apache.dubbo.sample.basic.IGreeter&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-更多支持的注册中心">4. 更多支持的注册中心&lt;/h2>
+&lt;p>参考 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/master/registry">dubbo-go-samples/registry&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: 使用 Polaris 作为注册中心</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/polaris/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/polaris/</guid><description>
+&lt;h2 id="1准备工作">1.准备工作&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>假设您已经准备好demo工程，如果不清楚，可以参考前面的文章&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>北极星服务端安装&lt;/p>
+&lt;p>&lt;a href="https://polarismesh.cn/docs/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%89%E8%A3%85/%E5%8D%95%E6%9C%BA%E7%89%88%E5%AE%89%E8%A3%85/">北极星服务端单机版本安装文档&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://polarismesh.cn/docs/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%89%E8%A3%85/%E9%9B%86%E7%BE%A4%E7%89%88%E5%AE%89%E8%A3%85/">北极星服务端集群版本安装文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="2使用polaris作为注册中心">2.使用Polaris作为注册中心&lt;/h2>
+&lt;h3 id="21dubbogoyaml-配置文件">2.1dubbogo.yaml 配置文件&lt;/h3>
+&lt;p>当前 PolarisMesh 已实现了 dubbogo 的注册发现扩展点，因此你只需要调整你的 dubbogo.yaml 文件中的 registries 配置项，新增 protocol 为 polaris 的注册中心配置即可，可以参考下面的样例。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">polarisMesh&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: polaris
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: ${北极星服务端IP}:8091
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: ${北极星命名空间信息}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">token&lt;/span>: ${北极星资源鉴权 token} &lt;span style="color:#586e75"># 如果北极星服务端开启了针对客户端的鉴权，则需要配置该参数&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22运行服务提供者">2.2运行服务提供者&lt;/h3>
+&lt;p>进入 go-server 的 cmd 目录，执行以下命令&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> export DUBBO_GO_CONFIG_PATH=&amp;#34;../conf/dubbogo.yml&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当看到以下日志时即表示 server 端启动成功&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO dubbo/dubbo_protocol.go:84 [DUBBO Protocol] Export service:
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23运行服务调用者">2.3运行服务调用者&lt;/h3>
+&lt;p>进入 go-client 的 cmd 目录，执行以下命令&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> export DUBBO_GO_CONFIG_PATH=&amp;#34;../conf/dubbogo.yml&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当看到以下日志时即表示 go-client 成功发现 go-server 并发起了 RPC 调用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO cmd/main.go:75 response: &amp;amp;{A001 Alex Stocks 18 2022-11-19 12:52:38.092 +0800 CST}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3使用polaris作为注册中心">3.使用Polaris作为注册中心&lt;/h2>
+&lt;p>相关源码：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/master/polaris/registry">示例源码&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: 多注册中心</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/</guid><description>
 &lt;p>一个 Dubbo-go 应用可以配置的多个接口维度的注册中心。&lt;/p>
 &lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
 &lt;ul>
