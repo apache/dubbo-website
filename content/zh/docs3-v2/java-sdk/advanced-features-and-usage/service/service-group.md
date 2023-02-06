@@ -12,8 +12,7 @@ description: "使用服务分组区分服务接口的不同实现"
 ## 使用场景
 当一个接口有多种实现时，可以用 group 区分。
 
-## 参考用例
-
+> 参考用例
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-group)
 
 ## 使用方式
