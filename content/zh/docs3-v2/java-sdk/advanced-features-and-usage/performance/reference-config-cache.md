@@ -6,16 +6,18 @@ linkTitle: "服务引用配置对象缓存"
 weight: 2  
 description: "在 Dubbo3 中缓存 ReferenceConfig"
 ---   
-## 特性说明
+## 功能说明
 
 `ReferenceConfig` 实例很重，封装了与注册中心的连接以及与提供者的连接，需要缓存。否则重复生成 `ReferenceConfig` 可能造成性能问题并且会有内存和连接泄漏。在 API 方式编程时，容易忽略此问题。
 
 因此，自 `2.4.0` 版本开始， dubbo 提供了简单的工具类 `ReferenceConfigCache`用于缓存 `ReferenceConfig` 实例。
+
 ## 使用场景
 
 网关等存在动态创建订阅的场景，由于 ReferenceConfig 本身很重，会创建特别多的中间对象，而 proxy 本身是可以复用的，所以通过 ReferenceConfigCache 可以缓存这部分的属性。
 
 ## 使用方式
+
 ### 消除并销毁
 消除 Cache 中的 `ReferenceConfig`，将销毁 `ReferenceConfig` 并释放对应的资源。
 ```java  
