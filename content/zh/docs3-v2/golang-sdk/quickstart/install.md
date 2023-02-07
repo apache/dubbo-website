@@ -2,6 +2,7 @@
 type: docs
 title: 安装 Dubbo-go 开发环境
 weight: 1
+description: 安装 Dubbo-go 开发环境
 ---
 ### 1. 安装Go语言环境
 
