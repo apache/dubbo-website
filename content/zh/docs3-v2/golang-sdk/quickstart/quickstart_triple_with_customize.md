@@ -1,7 +1,8 @@
 ---
 type: docs
-title: 完成一次 RPC 调用（自己定义接口的版本）
+title: 完成一次自己定义接口的版本 RPC 调用
 weight: 3
+description: 完成一次 RPC 调用自己定义接口的版本
 ---
 
 ## 1.概述
