@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "什么是 Dubbo-go"
-linkTitle: "什么是 Dubbo-go"
-description: 介绍 Dubbo-go 框架
+title: "框架介绍"
+linkTitle: "框架介绍"
+description: Dubbo-go 框架
 weight: 1
 ---
 
