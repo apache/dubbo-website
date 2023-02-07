@@ -3,7 +3,7 @@ type: docs
 title: "TLS支持"
 linkTitle: "TLS支持"
 weight: 1
-description: " 了解在 dubbo3 的 TLS 保证传输安全"
+description: " 了解在 dubbo 的 TLS 保证传输安全"
 ---
 ## 特性说明
 
@@ -15,8 +15,7 @@ TLS 的配置都有统一的入口。
 
 对全链路有加密需求的用户可以使用 TLS。
 
-## 参考用例
-
+> 参考用例
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
 
 ## 使用方式
