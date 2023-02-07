@@ -1,13 +1,13 @@
 ---
 type: docs
-title: "Dubbo-go Samples"
-linkTitle: "Dubbo-go Samples"
-description: 一文介绍 Dubbo-go Samples 使用方式
+title: "快速入门"
+linkTitle: "快速入门"
+description: Dubbo-go 示例使用方式
 weight: 5
 ---
 
 
-为了方便 Dubbogo 框架用户的使用，我们提供了 Samples 仓库以供用户参考：
+为了方便 Dubbo-go 框架用户的使用，我们提供了 Samples 仓库以供用户参考：
 
 [【Dubbo-go-samples 仓库地址】](https://github.com/apache/dubbo-go-samples)
 
