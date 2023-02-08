@@ -226,7 +226,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 Starting from this section, the project will be built and tested based on IntelliJ IDEA.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-25-27-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-25-27-image.png)
 
 As shown above, a basic project can be built.
 
@@ -236,15 +236,15 @@ After building the basic project, we need to create three submodules `dubbo-spri
 
 
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-27-17-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-17-image.png)
 
 
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-26-57-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-26-57-image.png)
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-27-45-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-45-image.png)
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-28-26-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-28-26-image.png)
 
 
 
@@ -258,7 +258,7 @@ After creating the three submodules, you need to create the following folders:
 
 
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-32-50-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-32-50-image.png)
 
 
 
@@ -278,7 +278,7 @@ For multi-module projects, you first need to configure dependency information in
 
 
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-53-18-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-53-18-image.png)
 
 
 
@@ -344,7 +344,7 @@ Then configure specific dependencies in the two modules `pom.xml` of `dubbo-spri
 
 
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-52-53-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-52-53-image.png)
 
 
 
@@ -398,7 +398,7 @@ After adding the above configuration, you can refresh dependencies through IDEA'
 
 The service interface is a bridge between the consumer and the server in Dubbo.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-57-29-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-57-29-image.png)
 
 Create `DemoService` interface under `org.apache.dubbo.samples.api` of `dubbo-spring-boot-demo-interface` module, defined as follows:
 
@@ -419,7 +419,7 @@ In `GreetingsService`, the `sayHi` method is defined. Subsequent services publis
 
 After defining the service interface, you can define the corresponding implementation on the server side. Compared with the consumer side, this part of the implementation is a remote implementation, and there is no relevant information locally.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-17-59-46-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-59-46-image.png)
 
 Create `DemoServiceImpl` class under `org.apache.dubbo.samples.provider` of `dubbo-spring-boot-demo-provider` module, defined as follows:
 
@@ -457,7 +457,7 @@ From this step to step 7, some basic information of Dubbo will be configured thr
 
 First, let's create a configuration file for the server.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-18-00-24-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-00-24-image.png)
 
 Create `application.yml` file under `resources` resource folder of `dubbo-spring-boot-demo-provider` module, defined as follows:
 
@@ -480,7 +480,7 @@ In this configuration file, the Dubbo application name, Dubbo protocol informati
 
 Similarly, we need to create a configuration file for the consumer.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-18-01-03-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-03-image.png)
 
 Create `application.yml` file under `resources` resource folder of `dubbo-spring-boot-demo-consumer` module, defined as follows:
 
@@ -505,7 +505,7 @@ In addition to configuring the Yaml configuration file, we also need to create a
 
 First of all, we first create the startup class of the server.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-18-01-38-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-38-image.png)
 
 Create `Application` class under `org.apache.dubbo.springboot.demo.provider` of `dubbo-spring-boot-demo-provider` module, defined as follows:
 
@@ -534,7 +534,7 @@ In this startup class, a `ProviderApplication` is configured to read the `applic
 
 Similarly, we need to create a startup class for the consumer.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-18-02-11-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-11-image.png)
 
 Create `Application` class under `org.apache.dubbo.springboot.demo.consumer` of `dubbo-spring-boot-demo-consumer` module, defined as follows:
 
@@ -566,7 +566,7 @@ In addition to configuring the startup class of the consumer side, we can also c
 
 
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-18-02-33-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-33-image.png)
 
 Create a `Task` class under `org.apache.dubbo.springboot.demo.consumer` of `dubbo-spring-boot-demo-consumer` module, defined as follows:
 
@@ -616,7 +616,7 @@ In the `Task` class, an RPC subscription is obtained from Dubbo through `@DubboR
 
 As of step 10, the code has been developed, and this section will start the entire project and verify it.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-18-03-59-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-03-59-image.png)
 
 The first is to start `org.apache.dubbo.samples.provider.Application`, wait for a while to appear the log as shown in the figure below (`Current Spring Boot Application is await`), which means that the service provider has started, marking that the service provides can provide services externally.
 
@@ -626,7 +626,7 @@ The first is to start `org.apache.dubbo.samples.provider.Application`, wait for 
 
 Then start `org.apache.dubbo.samples.client.Application`, and wait for a while to see the log (`Hello world`) as shown in the figure below, which means that the service consumer is started and the call to the server is successfully obtained.
 
-![](/Users/albumen/Library/Application%20Support/marktext/images/2023-02-08-18-05-02-image.png)
+![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-05-02-image.png)
 
 ``` log
 Receive result ======> Hello world
