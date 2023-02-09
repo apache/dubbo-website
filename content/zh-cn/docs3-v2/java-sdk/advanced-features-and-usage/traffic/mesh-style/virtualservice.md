@@ -2,7 +2,7 @@
 type: docs
 title: "VirtualService"
 linkTitle: "VirtualService"
-weight: 30
+weight: 1
 description: "入站流量的规则"
 ---
 
