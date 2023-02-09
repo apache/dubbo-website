@@ -26,17 +26,14 @@ Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个
 - 可以用于负载平衡。这允许应用程序在多个远程服务或服务集群之间平衡负载，有助于提高服务的可扩展性、可靠性和可用性。
 
 - 可以用于服务监控。这允许应用程序监视远程服务的运行状况，并在服务出现故障或变得不可用时发出警报，有助于确保服务的可用性并减少停机时间。
+ 
+> 参考用例
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-port-unification)
 
 ## 使用方式
 在同一主机上部署多个服务或需要通过负载均衡器访问多个服务。
 
-> 参考用例
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-port-unification)
-
-
-
-
-> 关于Dubbo支持的配置方式，可以参考[配置说明](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/)
+> 关于Dubbo支持的配置方式 [配置说明](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/)
 
 ### 服务多协议导出
 
