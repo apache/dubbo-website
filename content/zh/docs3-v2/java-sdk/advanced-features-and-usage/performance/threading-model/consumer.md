@@ -5,16 +5,19 @@ linkTitle: "消费端线程模型"
 weight: 2
 description: "Dubbo 消费端线程池模型用法"
 ---
-
+## 功能说明
 2.7.5 版本对整个调用链路做了全面的优化，根据压测结果显示，总体 QPS 性能提升将近 30%，同时也减少了调用过程中的内存分配开销。其中一个值得提及的设计点是 2.7.5 引入了 Servicerepository 的概念，在服务注册阶段提前生成 ServiceDescriptor 和 MethodDescriptor，以减少 RPC 调用阶段计算 Service 原信息带来的资源消耗。
 
-## 消费端线程池模型优化
+## 使用场景
+
+## 实现方式
+### 消费端线程池模型优化
 
 对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 [Need a limited Threadpool in consumer side #2013](https://github.com/apache/dubbo/issues/2013)
 
 改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。
 
-## 老的线程池模型
+### 老的线程池模型
 
 ![消费端线程池.png](/imgs/user/consumer-threadpool0.png)
 
@@ -27,7 +30,7 @@ description: "Dubbo 消费端线程池模型用法"
 
 
 
-## 2.7.5 版本引入的线程池模型
+### 2.7.5 版本引入的线程池模型
 
 ![消费端线程池新.png](/imgs/user/consumer-threadpool1.png)
 
