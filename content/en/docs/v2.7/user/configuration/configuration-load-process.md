@@ -92,7 +92,7 @@ Next, let's look at the changes corresponding to `ServiceConfig, ReferenceConfig
 
 - XML
 
-Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-basic)
+Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
 
 ```xml
   <!-- dubbo-provier.xml -->

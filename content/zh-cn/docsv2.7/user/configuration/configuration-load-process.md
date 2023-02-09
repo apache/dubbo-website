@@ -89,7 +89,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:valu
 
 #### Spring XML
 
-> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-basic)
+> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
 
 ```xml
   <!-- dubbo-provier.xml -->
