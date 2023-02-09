@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "Dubbo 类检查机制"
-linkTitle: "Dubbo 类检查机制"
+title: "类检查机制"
+linkTitle: "类检查机制"
 weight: 1
 description: "了解 Dubbo 类检查机制"
 ---
