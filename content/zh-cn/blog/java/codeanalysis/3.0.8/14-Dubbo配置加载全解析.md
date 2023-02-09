@@ -431,7 +431,7 @@ public class InmemoryConfiguration implements Configuration {
 
 ### 14.3.7 Dubbo迁移新版本的配置文件加载dubbo-migration.yaml
 
-关于配置迁移文件的用法可以看下这个Dubbo官方的[地址迁移规则说明](/zh-cn/docs/v3.0/advanced/migration-invoker/)
+关于配置迁移文件的用法可以看下这个Dubbo官方的[地址迁移规则说明](/zh-cn/docs/advanced/migration-invoker/)
 
 这个配置文件的文件名字为:dubbo-migration.yaml
 

@@ -66,7 +66,7 @@ description: >
     }
 ```
 
-关于这个igrationRule的文可以直接看官方的文档比较详细：[地址迁移规则说明](/zh-cn/docs/v3.0/advanced/migration-invoker/#1-%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%8B%E5%8F%91%E6%8E%A8%E8%8D%90)
+关于这个igrationRule的文可以直接看官方的文档比较详细：[地址迁移规则说明](/zh-cn/docs/advanced/migration-invoker/#1-%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%8B%E5%8F%91%E6%8E%A8%E8%8D%90)
 
 
 这个迁移规则是为了更细粒度的迁移决策：

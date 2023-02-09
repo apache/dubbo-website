@@ -29,7 +29,7 @@ description: >
 
 该图中不配备配置中心，意味着可以不需要全局管理配置的能力。该图中不配备注册中心，意味着可能采用了Dubbo mesh的方案，也可能不需要进行服务注册，仅仅接收直连模式的服务调用。
 官网参考文章地址:
-- [部署架构（注册中心 配置中心 元数据中心](/zh-cn/docs/v3.0/concepts/registry-configcenter-metadata/)
+- [部署架构（注册中心 配置中心 元数据中心](/zh-cn/docs/concepts/registry-configcenter-metadata/)
 - [元数据参考手册](/zh-cn/docs/references/metadata/)
 
 
@@ -172,7 +172,7 @@ private void useRegistryAsMetadataCenterIfNecessary() {
 	- 注册中心配置RegistryConfig映射转换为元数据中心配置类型MetadataReportConfig  映射就是获取需要的配置
 	- 将元数据中心配置存储在配置缓存中方便后续使用
  
- 元数据的配置可以参考官网:[元数据参考手册](/zh-cn/docs/v3.0/references/metadata/)
+ 元数据的配置可以参考官网:[元数据参考手册](/zh-cn/docs/references/metadata/)
  
  这里主要看下可配置项有哪些 对应类型为MetadataReportConfig 在官网暂时未找到合适的文档,这里整理下属性列表方便后续配置说明查看:
  
