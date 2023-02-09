@@ -92,4 +92,4 @@ Blocked
 Blocked
 ```
 
-> 关于 Sentinel 的更多使用方式可以参考：[Sentinel 为 Dubbo 服务保驾护航](/zh/blog/2018/07/27/sentinel-为-dubbo-服务保驾护航/)，[Sentinel 官网](https://sentinelguard.io/zh-cn/index.html)
+> 关于 Sentinel 的更多使用方式可以参考：[Sentinel 为 Dubbo 服务保驾护航](/zh-cn/blog/2018/07/27/sentinel-为-dubbo-服务保驾护航/)，[Sentinel 官网](https://sentinelguard.io/zh-cn/index.html)

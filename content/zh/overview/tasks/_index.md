@@ -1,10 +1,10 @@
 
 ---
 type: docs
-title: "示例实践"
-linkTitle: "示例实践"
+title: "跟随示例任务学习 Dubbo"
+linkTitle: "任务"
 description: ""
-weight: 4
+weight: 40
 ---
 
 
