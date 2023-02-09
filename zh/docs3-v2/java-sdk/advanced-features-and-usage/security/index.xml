@@ -1,10 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 提升服务安全性</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/</link><description>Recent content in 提升服务安全性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Dubbo 类检查机制</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/</guid><description>
-&lt;h2 id="支持版本">支持版本&lt;/h2>
-&lt;p>Dubbo &amp;gt;= 3.1.6&lt;/p>
-&lt;h2 id="适用范围">适用范围&lt;/h2>
-&lt;p>目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用。其他的序列化方式暂不支持。&lt;/p>
-&lt;h2 id="配置方式">配置方式&lt;/h2>
-&lt;h3 id="1-检查模式">1. 检查模式&lt;/h3>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>支持版本
+Dubbo &amp;gt;= 3.1.6&lt;/p>
+&lt;p>适用范围
+目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用。其他的序列化方式暂不支持。&lt;/p>
+&lt;h3 id="检查模式">检查模式&lt;/h3>
 &lt;p>检查模式分为三个级别：&lt;code>STRICT&lt;/code> 严格检查，&lt;code>WARN&lt;/code> 告警，&lt;code>DISABLED&lt;/code> 禁用。
 &lt;code>STRICT&lt;/code> 严格检查：禁止反序列化所有不在允许序列化列表（白名单）中的类。
 &lt;code>WARN&lt;/code> 告警：仅禁止序列化所有在不允许序列化列表中（黑名单）的类，同时在反序列化不在允许序列化列表（白名单）中类的时候通过日志进行告警。
@@ -22,7 +24,7 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置成功后可以在日志中看到如下的提示：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO utils.SerializeSecurityManager: [DUBBO] Serialize check level: STRICT
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 &lt;code>STRICT&lt;/code>，另外一个配置为 &lt;code>WARN&lt;/code>，则最终生效 &lt;code>WARN&lt;/code> 级别的配置。&lt;/p>
-&lt;h3 id="2-serializable-接口检查">2. Serializable 接口检查&lt;/h3>
+&lt;h3 id="serializable-接口检查">Serializable 接口检查&lt;/h3>
 &lt;p>Serializable 接口检查模式分为两个级别：&lt;code>true&lt;/code> 开启，&lt;code>false&lt;/code> 关闭。开启检查后会拒绝反序列化所有未实现 &lt;code>Serializable&lt;/code> 的类。&lt;/p>
 &lt;p>Dubbo 中默认配置为 &lt;code>true&lt;/code> 开启检查。&lt;/p>
 &lt;p>通过 ApplicationConfig 配置：&lt;/p>
@@ -38,7 +40,7 @@
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO utils.SerializeSecurityManager: [DUBBO] Serialize check serializable: true
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注 1：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的 Serializable 接口检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 &lt;code>true&lt;/code>，另外一个配置为 &lt;code>false&lt;/code>，则最终生效 &lt;code>false&lt;/code> 级别的配置。
 注 2：目前暂未打通 Hessian2、Fastjson2 内置的 &lt;code>Serializable&lt;/code> 检查配置。对于泛化调用，仅需要配置 &lt;code>dubbo.application.check-serializable&lt;/code> 即可修改检查配置；对于 Hessian2 序列化，需要同时修改 &lt;code>dubbo.application.check-serializable&lt;/code> 和 &lt;code>dubbo.hessian.allowNonSerializable�&lt;/code> 两个配置；对于 Fastjson2 序列化，目前暂不支持修改。&lt;/p>
-&lt;h3 id="3-自动扫描相关配置">3. 自动扫描相关配置&lt;/h3>
+&lt;h3 id="自动扫描相关配置">自动扫描相关配置&lt;/h3>
 &lt;p>Dubbo 类自动扫描机制共有两个配置项：&lt;code>AutoTrustSerializeClass�&lt;/code> 是否启用自动扫描和 &lt;code>TrustSerializeClassLevel�&lt;/code> 类信任层级。&lt;/p>
 &lt;p>简单来说，在开启类自动扫描之后，Dubbo 会通过 &lt;code>ReferenceConfig&lt;/code> 和 &lt;code>ServiceConfig&lt;/code> 自动扫描接口所有可能会用到的相关类，并且递归信任其所在的 package。 &lt;code>TrustSerializeClassLevel�&lt;/code> 类信任层级可以用来限制最终信任的 package 层级。如 &lt;code>io.dubbo.test.pojo.User&lt;/code> 在 &lt;code>TrustSerializeClassLevel�&lt;/code> 配置为 &lt;code>3&lt;/code> 的时候，最终会信任 &lt;code>io.dubbo.test&lt;/code> 这个 package 下所有的类。&lt;/p>
 &lt;p>Dubbo 中默认配置 &lt;code>AutoTrustSerializeClass�&lt;/code> 为 &lt;code>true&lt;/code> 启用扫描， &lt;code>TrustSerializeClassLevel�&lt;/code> 为 &lt;code>3&lt;/code>。&lt;/p>
@@ -56,7 +58,7 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-Ddubbo.application.trust-serialize-class-level&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置成功后可以通过 QoS 命令检查当前已经加载的可信类结果是否符合预期。&lt;/p>
 &lt;p>注：开启检查之后在启动的过程中会有一定的性能损耗。&lt;/p>
-&lt;h3 id="4-可信不可信类自定义配置">4. 可信/不可信类自定义配置&lt;/h3>
+&lt;h3 id="可信不可信类自定义配置">可信/不可信类自定义配置&lt;/h3>
 &lt;p>除了 Dubbo 自动扫描类之外，也支持通过资源文件的方式配置可信/不可信类列表。&lt;/p>
 &lt;p>配置方式：在资源目录（resource）下定义以下文件。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># security/serialize.allowlist&lt;/span>
@@ -67,7 +69,7 @@
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>INFO &lt;span style="color:#2aa198">utils.SerializeSecurityConfigurator: [DUBBO] Read serialize allow list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.allowlist&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO &lt;span style="color:#2aa198">utils.SerializeSecurityConfigurator: [DUBBO] Read serialize blocked list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.blockedlist&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置优先级为：用户自定义可信类 = 框架内置可信类 &amp;gt; 用户自定义不可信类 = 框架内置不可信类 &amp;gt; 自动类扫描可信类。&lt;/p>
-&lt;h2 id="审计方式">审计方式&lt;/h2>
+&lt;h3 id="审计方式">审计方式&lt;/h3>
 &lt;p>Dubbo 支持通过 QoS 命令实时查看当前的配置信息以及可信/不可信类列表。目前共支持两个命令：&lt;code>serializeCheckStatus&lt;/code> 查看当前配置信息，&lt;code>serializeWarnedClasses&lt;/code> 查看实时的告警列表。&lt;/p>
 &lt;ol>
 &lt;li>&lt;code>serializeCheckStatus&lt;/code> 查看当前配置信息&lt;/li>
@@ -121,14 +123,18 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 http 请求 json 格式结果：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; curl http://127.0.0.1:22222/serializeWarnedClasses
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;warnedClasses&amp;#34;&lt;/span>:&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test2.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test2.OthersSerializable&amp;#34;&lt;/span>&lt;span style="color:#719e07">]}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：建议及时关注 &lt;code>serializeWarnedClasses&lt;/code> 的结果，通过返回结果是否非空来判断是否受到攻击。&lt;/p></description></item><item><title>Docs3-V2: TLS支持</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/</guid><description>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>建议及时关注 &lt;code>serializeWarnedClasses&lt;/code> 的结果，通过返回结果是否非空来判断是否受到攻击。&lt;/p>
+&lt;/blockquote></description></item><item><title>Docs3-V2: TLS支持</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/</guid><description>
 &lt;h2 id="特性说明">特性说明&lt;/h2>
 &lt;p>内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。&lt;/p>
 &lt;p>TLS 的配置都有统一的入口。&lt;/p>
 &lt;h2 id="使用场景">使用场景&lt;/h2>
 &lt;p>对全链路有加密需求的用户可以使用 TLS。&lt;/p>
-&lt;h2 id="参考用例">参考用例&lt;/h2>
-&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl">https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>参考用例
+&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl">https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl&lt;/a>&lt;/p>
+&lt;/blockquote>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
 &lt;h3 id="provider-端">Provider 端&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>SslConfig sslConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SslConfig&lt;span style="color:#719e07">();&lt;/span>
