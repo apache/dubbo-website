@@ -123,11 +123,14 @@
 &lt;li>Message Only Dispatcher: message&lt;/li>
 &lt;li>Connection Ordered Dispatcher: connection&lt;/li>
 &lt;/ul></description></item><item><title>Docs3-V2: 消费端线程模型</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</guid><description>
+&lt;h2 id="功能说明">功能说明&lt;/h2>
 &lt;p>2.7.5 版本对整个调用链路做了全面的优化，根据压测结果显示，总体 QPS 性能提升将近 30%，同时也减少了调用过程中的内存分配开销。其中一个值得提及的设计点是 2.7.5 引入了 Servicerepository 的概念，在服务注册阶段提前生成 ServiceDescriptor 和 MethodDescriptor，以减少 RPC 调用阶段计算 Service 原信息带来的资源消耗。&lt;/p>
-&lt;h2 id="消费端线程池模型优化">消费端线程池模型优化&lt;/h2>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;h2 id="实现方式">实现方式&lt;/h2>
+&lt;h3 id="消费端线程池模型优化">消费端线程池模型优化&lt;/h3>
 &lt;p>对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 &lt;a href="https://github.com/apache/dubbo/issues/2013">Need a limited Threadpool in consumer side #2013&lt;/a>&lt;/p>
 &lt;p>改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。&lt;/p>
-&lt;h2 id="老的线程池模型">老的线程池模型&lt;/h2>
+&lt;h3 id="老的线程池模型">老的线程池模型&lt;/h3>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/user/consumer-threadpool0.png" alt="消费端线程池.png">&lt;/p>
 &lt;p>我们重点关注 Consumer 部分：&lt;/p>
 &lt;ol>
@@ -136,7 +139,7 @@
 &lt;li>当业务数据返回后，交由独立的 Consumer 端线程池进行反序列化等处理，并调用 future.set 将反序列化后的业务结果置回。&lt;/li>
 &lt;li>业务线程拿到结果直接返回&lt;/li>
 &lt;/ol>
-&lt;h2 id="275-版本引入的线程池模型">2.7.5 版本引入的线程池模型&lt;/h2>
+&lt;h3 id="275-版本引入的线程池模型">2.7.5 版本引入的线程池模型&lt;/h3>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/user/consumer-threadpool1.png" alt="消费端线程池新.png">&lt;/p>
 &lt;ol>
 &lt;li>业务线程发出请求，拿到一个 Future 实例。&lt;/li>
