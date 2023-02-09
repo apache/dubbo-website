@@ -5,14 +5,14 @@ linkTitle: "负载均衡"
 weight: 3
 description: "Dubbo 提供的集群负载均衡策略"
 ---
-
+## 功能说明
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `random` 随机调用。
 
 具体实现上，Dubbo 提供的是客户端负载均衡，即由 Consumer 通过负载均衡算法得出需要将请求提交到哪个 Provider 实例。
 
 可以自行扩展负载均衡策略，参见：[负载均衡扩展](../../../reference-manual/spi/description/load-balance)
 
-## 负载均衡策略
+### 负载均衡策略
 目前 Dubbo 内置了如下负载均衡算法，用户可直接配置使用：
 
 | 算法                        | 特性                    | 备注                                            |
@@ -74,7 +74,9 @@ description: "Dubbo 提供的集群负载均衡策略"
 * 缺省只对第一个参数 Hash，如果要修改，请配置 `<dubbo:parameter key="hash.arguments" value="0,1" />`
 * 缺省用 160 份虚拟节点，如果要修改，请配置 `<dubbo:parameter key="hash.nodes" value="320" />`
 
-## 配置
+## 使用场景
+
+## 使用方式
 
 ### 服务端服务级别
 
