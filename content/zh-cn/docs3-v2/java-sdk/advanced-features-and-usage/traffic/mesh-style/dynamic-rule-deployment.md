@@ -2,7 +2,7 @@
 type: docs
 title: "动态路由"
 linkTitle: "动态路由"
-weight: 15
+weight: 3 
 description: "类groovy脚本动态路由。"
 ---
 
