@@ -5,12 +5,10 @@ linkTitle: "服务端线程模型"
 weight: 1
 description: "Dubbo 服务提供端端线程池模型和用法"
 ---
-
-
-
+## 功能说明
 Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。
 
-# Dubbo协议——Provider端线程模型
+### Dubbo协议—Provider端线程模型
 
 介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：
 
@@ -21,6 +19,14 @@ Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分
 - 异常捕获：caught，用于处理在channel上发生的各类异常。
 
 Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Provider线程模型可以分为五类，也就是AllDispatcher、DirectDispatcher、MessageOnlyDispatcher、ExecutionDispatcher、ConnectionOrderedDispatcher。
+
+### Triple协议—Provider端线程模型
+
+下图为Triple协议 Provider端的线程模型
+
+![triple-provider](/imgs/v3/feature/performance/threading-model/triple-provider.png)
+
+Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。
 
 ### All Dispatcher
 
@@ -87,17 +93,21 @@ Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Prov
   1. received、connected、disconnected、caught都是在Dubbo线程上执行的。但是connected和disconnected两个行为是与其他两个行为通过线程池隔离开的。并且在Dubbo connected thread pool中提供了链接限制、告警灯能力。
   2. 反序列化请求的行为在Dubbo中做的。
 
-# Triple协议——Provider端线程模型
-
-下图为Triple协议 Provider端的线程模型
-
-![triple-provider](/imgs/v3/feature/performance/threading-model/triple-provider.png)
-
-Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。
 
 
+## 使用场景
 
-# 如何调整线程模型
+## 使用方式
+
+| 线程模型  | 配置 |
+| ---- | -- |
+All Dispatcher | all
+Direct Dispatcher | direct
+Execution Dispatcher | execution
+Message Only Dispatcher | message
+Connection Ordered Dispatcher | connection
+
+### 线程模型示例
 
 拿yaml的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher
 
@@ -118,10 +128,3 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-各线程模型的配置值：
-
-- All Dispatcher all
-- Direct Dispatcher direct
-- Execution Dispatcher execution
-- Message Only Dispatcher: message
-- Connection Ordered Dispatcher: connection

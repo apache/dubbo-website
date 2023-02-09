@@ -7,16 +7,19 @@ description: "了解 Dubbo 类检查机制"
 ---
 
 
-## 支持版本
+## 特性说明
 
+## 使用场景
+
+## 使用方式
+
+支持版本
 Dubbo >= 3.1.6
 
-## 适用范围
+适用范围
 目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用。其他的序列化方式暂不支持。
 
-## 配置方式
-
-### 1. 检查模式
+### 检查模式
 检查模式分为三个级别：`STRICT` 严格检查，`WARN` 告警，`DISABLED` 禁用。
 `STRICT` 严格检查：禁止反序列化所有不在允许序列化列表（白名单）中的类。
 `WARN` 告警：仅禁止序列化所有在不允许序列化列表中（黑名单）的类，同时在反序列化不在允许序列化列表（白名单）中类的时候通过日志进行告警。
@@ -52,7 +55,7 @@ INFO utils.SerializeSecurityManager:  [DUBBO] Serialize check level: STRICT
 
 注：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 `STRICT`，另外一个配置为 `WARN`，则最终生效 `WARN` 级别的配置。
 
-### 2. Serializable 接口检查
+### Serializable 接口检查
 
 Serializable 接口检查模式分为两个级别：`true` 开启，`false` 关闭。开启检查后会拒绝反序列化所有未实现 `Serializable` 的类。
 
@@ -87,7 +90,7 @@ INFO utils.SerializeSecurityManager:  [DUBBO] Serialize check serializable: true
 注 1：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的 Serializable 接口检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 `true`，另外一个配置为 `false`，则最终生效 `false` 级别的配置。
 注 2：目前暂未打通 Hessian2、Fastjson2 内置的 `Serializable` 检查配置。对于泛化调用，仅需要配置 `dubbo.application.check-serializable` 即可修改检查配置；对于 Hessian2 序列化，需要同时修改 `dubbo.application.check-serializable` 和 `dubbo.hessian.allowNonSerializable�` 两个配置；对于 Fastjson2 序列化，目前暂不支持修改。
 
-### 3. 自动扫描相关配置
+### 自动扫描相关配置
 
 Dubbo 类自动扫描机制共有两个配置项：`AutoTrustSerializeClass�` 是否启用自动扫描和 `TrustSerializeClassLevel�` 类信任层级。
 
@@ -123,7 +126,7 @@ dubbo.application.trust-serialize-class-level=3
 
 注：开启检查之后在启动的过程中会有一定的性能损耗。
 
-### 4. 可信/不可信类自定义配置
+### 可信/不可信类自定义配置
 
 除了 Dubbo 自动扫描类之外，也支持通过资源文件的方式配置可信/不可信类列表。
 
@@ -147,7 +150,7 @@ INFO utils.SerializeSecurityConfigurator:  [DUBBO] Read serialize blocked list f
 
 配置优先级为：用户自定义可信类 = 框架内置可信类 > 用户自定义不可信类 = 框架内置不可信类 > 自动类扫描可信类。
 
-## 审计方式
+### 审计方式
 
 Dubbo 支持通过 QoS 命令实时查看当前的配置信息以及可信/不可信类列表。目前共支持两个命令：`serializeCheckStatus` 查看当前配置信息，`serializeWarnedClasses` 查看实时的告警列表。
 
@@ -213,4 +216,4 @@ dubbo>
 {"warnedClasses":["io.dubbo.test2.NotSerializable","org.apache.dubbo.samples.NotSerializable","io.dubbo.test.NotSerializable","io.dubbo.test2.OthersSerializable"]}
 ```
 
-注：建议及时关注 `serializeWarnedClasses` 的结果，通过返回结果是否非空来判断是否受到攻击。
+> 建议及时关注 `serializeWarnedClasses` 的结果，通过返回结果是否非空来判断是否受到攻击。

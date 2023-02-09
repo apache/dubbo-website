@@ -5,6 +5,7 @@ linkTitle: "Kryo 和 FST 序列化"
 weight: 46
 description: "在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）" 
 ---
+## 功能说明
 ### 序列化漫谈
 #### 漫谈一
 
@@ -50,6 +51,9 @@ dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调
 
 在面向生产环境的应用中，我建议目前更优先选择Kryo。
 
+## 使用场景
+
+## 实现方式
 ### 启用Kryo和FST
 
 使用Kryo和FST非常简单，只需要先增加对应的依赖。
