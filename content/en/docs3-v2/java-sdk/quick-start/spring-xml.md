@@ -384,7 +384,7 @@ Receive result ======> hi, dubbo
 
 ### 1. Dubbo XML configuration introduction
 
-The main configuration entries of Dubbo include `dubbo:application`, `dubbo:registry`, `dubbo:reference` and `dubbo:service`, etc. For more details, please refer to [XML configuration | Apache Dubbo](/zh/docs3- v2/java-sdk/reference-manual/config/xml/) article.
+The main configuration entries of Dubbo include `dubbo:application`, `dubbo:registry`, `dubbo:reference` and `dubbo:service`, etc. For more details, please refer to [XML configuration | Apache Dubbo](/zh-cn/docs3- v2/java-sdk/reference-manual/config/xml/) article.
 
 ## More
 

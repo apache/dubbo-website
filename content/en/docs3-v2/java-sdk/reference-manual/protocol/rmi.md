@@ -30,7 +30,7 @@ It is a set of Java APIs that supports the development of distributed applicatio
 
 ### Import dependencies
 
-Starting from Dubbo 3, the RMI protocol is no longer embedded in Dubbo, and an independent [module](/zh/release/dubbo-spi-extensions/#dubbo-rpc) needs to be introduced separately.
+Starting from Dubbo 3, the RMI protocol is no longer embedded in Dubbo, and an independent [module](/zh-cn/release/dubbo-spi-extensions/#dubbo-rpc) needs to be introduced separately.
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

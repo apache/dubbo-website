@@ -10,7 +10,7 @@ description: "Dynamic adjustment of service timeout in Dubbo-Admin"
 
 Dubbo provides the service governance capability of dynamically adjusting the timeout period, which can dynamically adjust the service timeout period without restarting the application.
 
-Dubbo can dynamically adjust the timeout time through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh/docsv2.7/user/configuration/)
+Dubbo can dynamically adjust the timeout time through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](/zh-cn/docsv2.7/user/configuration/)
 
 ## before the start
 

@@ -43,8 +43,8 @@ The Mesh architecture of the ThinSDK + Sidecar mode has many advantages, such as
 * The deployment environment is limited, not all environments can meet the requirements of Sidecar deployment and request interception.
 
 For detailed scheme design and examples, please refer to
-* [Dubbo ThinSDK Proposal](/zh/overview/tasks/mesh/dubbo-mesh)
-* [Example of use](/zh/overview/tasks/mesh/dubbo-mesh)
+* [Dubbo ThinSDK Proposal](/zh-cn/overview/tasks/mesh/dubbo-mesh)
+* [Example of use](/zh-cn/overview/tasks/mesh/dubbo-mesh)
 
 ### Dubbo Proxyless Mesh
 As a supplement to the ThinSDK + Sidecar model, the Dubbo community has conceived and thought about the direct connection of Dubbo to the control plane since a long time ago, which is currently called the Proxyless Mesh model. The Proxyless mode brings microservices back to the deployment architecture of the 2.x era. As shown in the figure below, it is very similar to the Dubbo classic service governance model we saw above, so this model is not new. Dubbo has been such a design model from the very beginning. However, compared with the Mesh architecture, Dubbo2 does not emphasize the unified management and control of the control plane, which is exactly what Service Mesh emphasizes. It emphasizes the standardized management, control and governance of traffic, observability, certificates, etc., which is also an advanced part of the Mesh concept. .
@@ -62,8 +62,8 @@ In the Dubbo3 Proxyless architecture mode, the Dubbo process will directly commu
 * Suitable for almost all deployment environments
 
 For detailed scheme design and examples, please refer to
-* [Dubbo Proxyless Mesh](/zh/overview/tasks/mesh/dubbo-mesh)
-* [Example of use](/zh/overview/tasks/mesh/dubbo-mesh)
+* [Dubbo Proxyless Mesh](/zh-cn/overview/tasks/mesh/dubbo-mesh)
+* [Example of use](/zh-cn/overview/tasks/mesh/dubbo-mesh)
 
 ### Dubbo Control Plane Governance Rules
 TBD

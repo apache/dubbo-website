@@ -8,9 +8,9 @@ description: "Learn about dubbo3 to reduce the registration data of services on 
 
 ## Feature description
 
-There are nearly [30 configuration items](/zh/docs/references/xml/dubbo-parameter) in the service configuration items in Dubbo provider. Excluding the need for registry service governance, a large part of configuration items are used by the provider itself and do not need to be transparently passed to consumers. This part of data does not need to enter the registry, but only needs to be stored persistently in the form of key-value.
+There are nearly [30 configuration items](/zh-cn/docs/references/xml/dubbo-parameter) in the service configuration items in Dubbo provider. Excluding the need for registry service governance, a large part of configuration items are used by the provider itself and do not need to be transparently passed to consumers. This part of data does not need to enter the registry, but only needs to be stored persistently in the form of key-value.
 
-The configuration items in Dubbo consumer also have [20+ configuration items](/zh/docs/references/xml/dubbo-consumer). In the registration center, only a small amount of configuration such as application, version, group, ip, and dubbo version need to be concerned in the service consumer list, and other configurations can also be stored persistently in the form of key-value.
+The configuration items in Dubbo consumer also have [20+ configuration items](/zh-cn/docs/references/xml/dubbo-consumer). In the registration center, only a small amount of configuration such as application, version, group, ip, and dubbo version need to be concerned in the service consumer list, and other configurations can also be stored persistently in the form of key-value.
 These data are registered into the registration center in the dimension of service, which leads to the expansion of the data volume, which in turn leads to an increase in the network overhead of the registration center (such as zookeeper) and a decrease in performance.
 
 #### Design goals and objectives

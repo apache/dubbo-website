@@ -636,7 +636,7 @@ Receive result ======> Hello world
 
 ### 1. Dubbo's Spring configuration introduction
 
-The main configuration entries of Dubbo include yaml configuration content, `@DubboReference` and `@DubboService`, etc. For more details, please refer to [Annotation Configuration | Apache Dubbo](/zh/docs3-v2/java-sdk/reference-manual /config/annotation/) article.
+The main configuration entries of Dubbo include yaml configuration content, `@DubboReference` and `@DubboService`, etc. For more details, please refer to [Annotation Configuration | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual /config/annotation/) article.
 
 ## More
 

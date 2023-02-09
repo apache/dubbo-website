@@ -8,7 +8,7 @@ description: "Dynamic traffic isolation in Dubbo-Admin"
 
 Dubbo provides the service management capability of dynamic traffic isolation, which can dynamically isolate traffic without restarting the application.
 
-Dubbo can implement traffic isolation through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh/docsv2.7/user/configuration/)
+Dubbo can implement traffic isolation through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](/zh-cn/docsv2.7/user/configuration/)
 
 ## before the start
 

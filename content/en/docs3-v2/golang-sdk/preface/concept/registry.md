@@ -13,7 +13,7 @@ The server registers the interface information and sends its own address to the 
 
 ![img](/imgs/architecture.png)
 
-For details about Dubbo service discovery, please refer to [Dubbo Official Website Concept Introduction](/zh/docs/concepts/service-discovery/)
+For details about Dubbo service discovery, please refer to [Dubbo Official Website Concept Introduction](/zh-cn/docs/concepts/service-discovery/)
 
 ## 2. Service discovery concept
 

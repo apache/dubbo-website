@@ -58,7 +58,7 @@ In production-oriented applications, I recommend Kryo as the preferred choice fo
 ## Enable Kryo and FST
 
 Using Kryo and FST is very simple, just add the corresponding dependencies first:
-More plugins: [Dubbo SPI Extensions](https://dubbo.apache.org/zh/release/dubbo-spi-extensions)
+More plugins: [Dubbo SPI Extensions](/zh-cn/release/dubbo-spi-extensions)
 
 ```xml
 <dependency>

@@ -30,7 +30,7 @@ The figure below shows the priority of configuration override, decreasing from t
 
 ![Override Priority](/imgs/blog/configuration.jpg)
 
-click here to view [Externalize configuration details](/zh/docsv2.7/user/configuration/config-center/)
+click here to view [Externalize configuration details](/zh-cn/docsv2.7/user/configuration/config-center/)
 
 
 ## Configuration Format
@@ -92,7 +92,7 @@ Next, let's look at the changes corresponding to `ServiceConfig, ReferenceConfig
 
 - XML
 
-Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-basic)
+Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
 
 ```xml
   <!-- dubbo-provier.xml -->
