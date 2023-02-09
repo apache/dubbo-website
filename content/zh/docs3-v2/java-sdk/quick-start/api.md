@@ -274,4 +274,4 @@ Dubbo 除了 API 方式还支持 Spring XML、Annotation、Spring Boot 等配置
 
 ## 更多
 
-本教程介绍了如何基于 Dubbo 的纯 API 开发一个微服务应用。下一个教程中，将介绍如何基于 Spring Boot 开发微服务项目。
+本教程介绍了如何基于 Dubbo 的纯 API 开发一个微服务应用。下一个教程中，将介绍[如何基于 Spring Boot 开发微服务项目](../spring-boot/)。
