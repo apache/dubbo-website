@@ -1,6 +1,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 线程模型</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/</link><description>Recent content in 线程模型 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: 服务端线程模型</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/provider/</guid><description>
+&lt;h2 id="功能说明">功能说明&lt;/h2>
 &lt;p>Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。&lt;/p>
-&lt;h1 id="dubbo协议provider端线程模型">Dubbo协议——Provider端线程模型&lt;/h1>
+&lt;h3 id="dubbo协议provider端线程模型">Dubbo协议—Provider端线程模型&lt;/h3>
 &lt;p>介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：&lt;/p>
 &lt;ul>
 &lt;li>建立连接：connected，主要是的职责是在channel记录read、write的时间，以及处理建立连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（onconnect），即在该操作中执行。&lt;/li>
@@ -10,6 +11,10 @@
 &lt;li>异常捕获：caught，用于处理在channel上发生的各类异常。&lt;/li>
 &lt;/ul>
 &lt;p>Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Provider线程模型可以分为五类，也就是AllDispatcher、DirectDispatcher、MessageOnlyDispatcher、ExecutionDispatcher、ConnectionOrderedDispatcher。&lt;/p>
+&lt;h3 id="triple协议provider端线程模型">Triple协议—Provider端线程模型&lt;/h3>
+&lt;p>下图为Triple协议 Provider端的线程模型&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/feature/performance/threading-model/triple-provider.png" alt="triple-provider">&lt;/p>
+&lt;p>Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。&lt;/p>
 &lt;h3 id="all-dispatcher">All Dispatcher&lt;/h3>
 &lt;p>下图是All Dispatcher的线程模型说明图：&lt;/p>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-alldispatcher.png" alt="dubbo-provider-alldispatcher">&lt;/p>
@@ -95,11 +100,39 @@
 &lt;/ol>
 &lt;/li>
 &lt;/ul>
-&lt;h1 id="triple协议provider端线程模型">Triple协议——Provider端线程模型&lt;/h1>
-&lt;p>下图为Triple协议 Provider端的线程模型&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/feature/performance/threading-model/triple-provider.png" alt="triple-provider">&lt;/p>
-&lt;p>Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。&lt;/p>
-&lt;h1 id="如何调整线程模型">如何调整线程模型&lt;/h1>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>线程模型&lt;/th>
+&lt;th>配置&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>All Dispatcher&lt;/td>
+&lt;td>all&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Direct Dispatcher&lt;/td>
+&lt;td>direct&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Execution Dispatcher&lt;/td>
+&lt;td>execution&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Message Only Dispatcher&lt;/td>
+&lt;td>message&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Connection Ordered Dispatcher&lt;/td>
+&lt;td>connection&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="线程模型示例">线程模型示例&lt;/h3>
 &lt;p>拿yaml的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
@@ -115,14 +148,7 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>各线程模型的配置值：&lt;/p>
-&lt;ul>
-&lt;li>All Dispatcher all&lt;/li>
-&lt;li>Direct Dispatcher direct&lt;/li>
-&lt;li>Execution Dispatcher execution&lt;/li>
-&lt;li>Message Only Dispatcher: message&lt;/li>
-&lt;li>Connection Ordered Dispatcher: connection&lt;/li>
-&lt;/ul></description></item><item><title>Docs3-V2: 消费端线程模型</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</guid><description>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: 消费端线程模型</title><link>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</guid><description>
 &lt;h2 id="功能说明">功能说明&lt;/h2>
 &lt;p>2.7.5 版本对整个调用链路做了全面的优化，根据压测结果显示，总体 QPS 性能提升将近 30%，同时也减少了调用过程中的内存分配开销。其中一个值得提及的设计点是 2.7.5 引入了 Servicerepository 的概念，在服务注册阶段提前生成 ServiceDescriptor 和 MethodDescriptor，以减少 RPC 调用阶段计算 Service 原信息带来的资源消耗。&lt;/p>
 &lt;h2 id="使用场景">使用场景&lt;/h2>
