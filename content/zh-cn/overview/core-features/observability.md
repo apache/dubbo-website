@@ -12,12 +12,12 @@ feature:
 
 Dubbo 内部维护了多个纬度的可观测指标，并且支持多种方式的可视化监测。可观测性指标从总体上来说分为三个度量纬度：
 
-* **Metrics。** Dubbo 统计了一系列的流量指标如 QPS、RT、成功请求数、失败请求数等，还包括一系列的内部组件状态如线程池数、服务健康状态等。
-* **Tracing。** Dubbo 与业界主流的链路追踪工作做了适配，包括 Skywalking、Zipkin、Jaeger 都支持 Dubbo 服务的链路追踪。
-* **Logging。** Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹。
+* **Metrics** Dubbo 统计了一系列的流量指标如 QPS、RT、成功请求数、失败请求数等，还包括一系列的内部组件状态如线程池数、服务健康状态等。
+* **Tracing** Dubbo 与业界主流的链路追踪工作做了适配，包括 Skywalking、Zipkin、Jaeger 都支持 Dubbo 服务的链路追踪。
+* **Logging** Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹等日志的分层。
 # 指标
 ## 指标模块简介
-Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 ["四大黄金信号"](https://sre.google/sre-book/monitoring-distributed-systems/)、*RED方法*、*USE方法*等理论并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。 
+Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 *[四个黄金信号](https://sre.google/sre-book/monitoring-distributed-systems/)*、*RED方法*、*USE方法*等理论并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。 
 
 Dubbo的关键指标包含：**延迟（Latency）**、**流量（Traffic）**、 **错误（Errors）** 和 **饱和度（Saturation）** 等内容 。同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如Dubbo应用信息、线程池信息、三大中心交互的指标数据等。
 
@@ -34,13 +34,12 @@ Dubbo目前推荐使用Prometheus来进行服务监控，Grafana来展示指标�
 
 ### 参考案例
 Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获取案例源码：
-- Spring项目参考案例：
-  - [https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus)
-- SpringBoot项目参考案例:
-  - [https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot)
+- Spring项目参考案例：  [dubbo-samples-metrics-prometheus](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus)
+- SpringBoot项目参考案例: [dubbo-samples-metrics-spring-boot](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot)
 
 ### 依赖
-目前Dubbo的指标埋点仅支持3.2及以上版本，同时需要引入dubbo-metrics-prometheus依赖如下所示：
+目前Dubbo的指标埋点仅支持3.2及以上版本，同时需要额外引入dubbo-metrics-prometheus依赖如下所示：
+
 ```xml
 <dependency>
     <groupId>org.apache.dubbo</groupId>
@@ -66,12 +65,16 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 
 ### 指标获取
 
-前面的例子中提供了指标服务，接下来我们可以通过普罗米修斯来获取数据。
-普罗米修斯监控服务通过访问：[http://localhost:20888](http://localhost:20888) 即可拉取数据
-指标数据如下所示：
+前面的例子中提供了指标服务，下面就来看下如何将指标上报到普罗米修斯系统中。
+如果需要测试指标数据可以直接在服务器上面执行如下命令：
+```bash
+curl http://localhost:20888
+```
+为了使演示结果更清晰下面是使用浏览器发起的GET请求获取到的指标数据：
 ![metrics.png](/imgs/v3/advantages/metrics.png)
 
-普罗米修斯获取数据的配置参考如下：
+接下来我们可以通过普罗米修斯来获取数据。普罗米修斯通过服务发现的形式来获取数据，下面演示普罗米修斯拉取指标数据的方式：
+普罗米修斯配置静态服务发现，获取指标数据的配置参考如下：
 ```yaml
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
@@ -85,17 +88,16 @@ scrape_configs:
     static_configs:
     - targets: ['IP:20888']
 ```
-当然在实际企业应用中这个服务发现的地址并不会使用这个静态配置，需要改成动态配置。
+上面仅仅以单台机器演示，将IP关键词替换为实际IP即可，当然在实际企业应用中可以根据实际情况配置为动态服务发现地址这样可以获取所有服务的指标数据。
 
-
-也可以使用普罗米修斯的图形界面来查询指标数据如下图所示：
+使用普罗米修斯的图形界面来查询指标数据如下图所示：
 ![prometheus.png](/imgs/v3/advantages/prometheus.png)
 
 ### 可视化页面
-也可以使用 Grafana可视化指标监测，下面以Grafana可视化为例：
+可视化页面目前推荐的方式是使用Grafana来配置Dubbo的可观测性监控大盘，下面以Grafana可视化为例来看下如何通过Dubbo可观测性大盘来监测Dubbo服务：
+
 Dubbo可观测性面板可以在Grafana官网的模板库中可以找到，您可以直接导入如下模版，并配置好数据源即可。
 [https://grafana.com/grafana/dashboards/18051](https://grafana.com/grafana/dashboards/18051)
-
 
 ![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
 ![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
