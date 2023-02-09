@@ -11,7 +11,7 @@ You can follow the [steps](https://www.apache.org/info/verification) here, and u
 
 ## Apache Dubbo
 
-Please click to learn about each [version details and upgrade notes](/zh/docsv2.7/user/versions/)
+Please click to learn about each [version details and upgrade notes](/zh-cn/docsv2.7/user/versions/)
 
 > GitHub: https://github.com/apache/dubbo \
 > Release notes: https://github.com/apache/dubbo/releases

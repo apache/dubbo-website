@@ -8,7 +8,7 @@ description: "Triple Protocol Migration Guide"
 
 ## Triple Introduction
 
-For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/zh/docs/concepts/rpc-protocol/)
+For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/zh-cn/docs/concepts/rpc-protocol/)
 
 According to the goals of Triple design, the `Triple` protocol has the following advantages:
 
@@ -322,8 +322,8 @@ How does the streaming mode of the `Triple` protocol support it?
 
 The application-level service registration and discovery of the Triple protocol is consistent with other languages, and you can learn more about it through the following content.
 
-- [Service Discovery](/zh/docs/concepts/service-discovery/)
-- [Application-level address discovery migration guide](/zh/docs/migration/migration-service-discovery/)
+- [Service Discovery](/zh-cn/docs/concepts/service-discovery/)
+- [Application-level address discovery migration guide](/zh-cn/docs/migration/migration-service-discovery/)
 
 ## Intercommunicate with GRPC
 

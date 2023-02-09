@@ -7,7 +7,7 @@ description: "Downgrade Dubbo service"
 ---
 
 ## Feature description
-It is recommended to use relevant current limiting and downgrading components (such as [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)) to achieve the best experience. Reference example practice: [Microservice Governance/Limit and Downgrade](/zh/overview/tasks/ecosystem/rate-limit/)
+It is recommended to use relevant current limiting and downgrading components (such as [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)) to achieve the best experience. Reference example practice: [Microservice Governance/Limit and Downgrade](/zh-cn/overview/tasks/ecosystem/rate-limit/)
 
 Service degradation refers to the emergency treatment of service degradation under abnormal circumstances.
 

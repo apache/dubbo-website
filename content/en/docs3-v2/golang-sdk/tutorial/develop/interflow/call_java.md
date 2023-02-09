@@ -153,7 +153,7 @@ Reference [dubbo-go-samples/helloworld](https://github.com/apache/dubbo-go-sampl
 
 #### Java-Server start
 
-1. Define Java PB file, please refer to [Dubbo Quick Start](/zh/docs/quick-start/)
+1. Define Java PB file, please refer to [Dubbo Quick Start](/zh-cn/docs/quick-start/)
 
 ```protobuf
 syntax = "proto3";
@@ -448,7 +448,7 @@ Reference [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-sample
 
 #### Java-Server start
 
-1. Define the Java interface, parameters and return values, please refer to [Dubbo Quick Start](/zh/docs/quick-start/)
+1. Define the Java interface, parameters and return values, please refer to [Dubbo Quick Start](/zh-cn/docs/quick-start/)
 
 ```java
 package org.apache.dubbo;
