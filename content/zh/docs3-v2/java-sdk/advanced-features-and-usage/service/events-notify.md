@@ -8,13 +8,13 @@ description: "在调用前后出现异常时的事件通知"
 ## 特性说明
 在调用之前、调用之后、出现异常时，会触发 `oninvoke`、`onreturn`、`onthrow` 三个事件，可以配置当事件发生时，通知哪个类的哪个方法。
 
-## 参考用例
-
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)
 
 ## 使用场景
 
 调用服务方法前我们可以记录开始时间，调用结束后统计整个调用耗费，发生异常时我们可以告警或打印错误日志或者调用服务前后记录请求日志、响应日志等。
+
+>参考用例
+[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify)
 
 ## 使用方式
 

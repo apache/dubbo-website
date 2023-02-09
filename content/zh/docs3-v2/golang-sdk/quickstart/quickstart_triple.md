@@ -2,6 +2,7 @@
 type: docs
 title: 完成一次 RPC 调用
 weight: 2
+description: 完成一次 RPC 调用
 ---
 
 
@@ -117,6 +118,3 @@ client response result: name:"Hello laurence" id:"12345" age:21
 ## 3. 更多
 
 细心的读者可以发现，以上例子编写的的服务端可以接受来自客户端的普通RPC、流式RPC调用请求。目前只编写了普通调用的Client，读者可以根据 samples 库中的例子来尝试编写流式客户端和服务端。
-
-更多samples可以参阅 [【dubbo-go-samples】](../../samples/samples_repo/)
-

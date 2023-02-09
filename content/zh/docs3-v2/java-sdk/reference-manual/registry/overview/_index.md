@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "概述"
-linkTitle: "概述"
+title: "注册中心概述"
+linkTitle: "注册中心概述"
 weight: 1
 description: ""
 ---

@@ -7,8 +7,9 @@ description: "基础命令手册"
 ---
 
 
-## help 命令
+### help 命令
 
+显示更多命令
 ```
 //列出所有命令
 dubbo>help
@@ -25,7 +26,7 @@ dubbo>help online
 dubbo>
 ```
 
-## version 命令
+### version 命令
 
 显示当前运行的 Dubbo 的版本号
 
@@ -36,7 +37,7 @@ dubbo version "3.0.10-SNAPSHOT"
 dubbo>
 ```
 
-## quit 命令
+### quit 命令
 
 退出命令状态
 

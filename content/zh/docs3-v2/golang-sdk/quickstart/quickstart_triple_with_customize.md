@@ -1,7 +1,8 @@
 ---
 type: docs
-title: 完成一次 RPC 调用（自己定义接口的版本）
+title: 完成一次自己定义接口的版本 RPC 调用
 weight: 3
+description: 完成一次 RPC 调用自己定义接口的版本
 ---
 
 ## 1.概述
@@ -204,5 +205,5 @@ go run cmd/client.go
 ```
 ## 3. 更多
 
-可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考samples [【dubbo-go-samples】](../../samples/samples_repo/)
+可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考[注册中心](/zh/docs3-v2/golang-sdk/tutorial/develop/registry/)
 

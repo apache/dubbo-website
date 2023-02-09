@@ -3,6 +3,7 @@ type: docs
 title: "Dubbo Mesh"
 linkTitle: "Dubbo Mesh"
 weight: 5
+description: "本文将介绍 Dubbo Mesh 架构设计。"
 ---
 
 Dubbo Mesh 从设计理念上更强调控制面的统一管控、标准化与治理能力，而在数据面给出了更多的选择，包括 Sidecar Mesh 与 Proxyless Mesh 等部署模式。多种部署模型给企业提供了更多选择，通过混合部署的模型，在实现服务治理控制面的共享的同时，可以更好的应对不同场景的部署要求（性能、部署复杂性等），适应复杂的基础设施环境并从总体上提升架构的可用性。

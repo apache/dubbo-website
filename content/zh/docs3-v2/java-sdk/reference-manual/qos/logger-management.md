@@ -6,13 +6,11 @@ weight: 5
 description: "在 Dubbo 中运行时动态切换使用的日志框架"
 ---
 
-## 日志框架运行时管理
-
 自 `3.0.10` 开始，dubbo-qos 运行时管控支持查询日志配置以及动态修改使用的日志框架和日志级别。
 
-注：通过 dubbo-qos 修改的日志配置不进行持久化存储，在应用重启后将会失效。
+> 通过 dubbo-qos 修改的日志配置不进行持久化存储，在应用重启后将会失效。
 
-### 1. 查询日志配置
+### 查询日志配置
 
 命令：`loggerInfo`
 
@@ -35,7 +33,7 @@ dubbo>loggerInfo
 Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
 ```
 
-### 2. 修改日志级别
+### 修改日志级别
 
 命令：`switchLogLevel {level}`
 
@@ -64,7 +62,7 @@ dubbo>loggerInfo
 Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: WARN```
 ```
 
-### 3. 修改日志输出框架
+### 修改日志输出框架
 
 命令：`switchLogger {loggerAdapterName}`
 

@@ -2,7 +2,7 @@
 type: docs
 title: "IDL defines cross-language services"
 linkTitle: "IDL Defines"
-weight: 2
+weight: 11
 description: "Demo from zero how to define Dubbo service based on IDL and use Triple protocol"
 ---
 

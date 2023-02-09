@@ -10,7 +10,7 @@ Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环
 
 参考链接：[路由状态采集](../../../advanced-features-and-usage/performance/router-snapshot/)
 
-## getRouterSnapshot 命令
+### getRouterSnapshot 命令
 
 获取当前的每层路由的分组状态。（仅支持 StateRouter）
 
@@ -41,7 +41,7 @@ TailStateRouter End
 dubbo>
 ```
 
-## enableRouterSnapshot 命令
+### enableRouterSnapshot 命令
 
 开启路由结果采集模式
 
@@ -56,7 +56,7 @@ OK. Found service count: 1. This will cause performance degradation, please be c
 dubbo>
 ```
 
-## disableRouterSnapshot 命令
+### disableRouterSnapshot 命令
 
 关闭路由结果采集模式
 
@@ -71,7 +71,7 @@ OK. Found service count: 1
 dubbo>
 ```
 
-## getEnabledRouterSnapshot 命令
+### getEnabledRouterSnapshot 命令
 
 获取当前已经开启采集的服务
 
@@ -82,7 +82,7 @@ com.dubbo.dubbointegration.BackendService
 dubbo>
 ```
 
-## getRecentRouterSnapshot 命令
+### getRecentRouterSnapshot 命令
 
 通过 qos 命令获取历史的路由状态。（最多存储 32 个结果）
 

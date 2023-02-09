@@ -12,14 +12,13 @@ description: "使用 Reactive API 操作 Triple 流式调用"
 
 有四种调用模式，分别是 OneToOne、OneToMany、ManyToOne、ManyToMany，分别对应 Unary调用、服务端流、客户端流、双向流。在 Reactor 的实现中，One 对应 Mono，Many 对应 Flux。
 
-#### 背景
+
 
 Reactive Stream 提供了一套标准的异步流处理 API， 在能够让应用写出事件驱动的程序的同时，也通过 BackPressure 的方式保证了节点的稳定。Triple 协议在通信协议层面为 Dubbo 框架增加了流式场景的支持，在此基础上能够实现上层包括大文件传输和推送机制的业务需求。
 
 Dubbo + Reactive Stream Stub 的组合模式可以给用户带来最方便的流式使用方式以及全链路异步性能提升。
 
-## 参考用例
-
+> 参考用例
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-triple-reactor](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple-reactor)
 
 ## 使用场景
