@@ -9,7 +9,7 @@ description: "Temporarily kick out problematic service instances in Dubbo-Admin"
 
 Dubbo provides the service management capability of temporarily removing problematic service instances, which can temporarily remove problematic service instances without restarting the application.
 
-Dubbo can temporarily remove problem service instances through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh/docsv2.7/user/configuration/)
+Dubbo can temporarily remove problem service instances through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
 
 
 ## before the start

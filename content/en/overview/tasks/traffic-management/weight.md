@@ -10,7 +10,7 @@ description: "Adjust traffic distribution by weight in Dubbo-Admin"
 
 Dubbo provides the service governance capability of adjusting traffic distribution by weight, and can dynamically adjust traffic distribution by weight without restarting the application.
 
-Dubbo can adjust traffic distribution by weight through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh/docsv2.7/user/configuration/)
+Dubbo can adjust traffic distribution by weight through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
 
 ## before the start
 

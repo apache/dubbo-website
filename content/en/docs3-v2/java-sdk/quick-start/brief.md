@@ -156,7 +156,7 @@ The following is an example of data on Zookeeper:
 {"name":"first-dubbo-provider","id":"30.221.146.35:20880","address":"30.221.146.35","port":20880,"sslPort":null,"payload" :{"@class":"org.apache.dubbo.registry.zookeeper.ZookeeperInstance","id":"30.221.146.35:20880","name":"first-dubbo-provider","metadata":{ "dubbo.endpoints":"[{\"port\":20880,\"protocol\":\"dubbo\"}]", "dubbo.metadata-service.url-params": "{\"connections\ ":\"1\",\"version\":\"1.0.0\",\"dubbo\":\"2.0.2\",\"release\":\"3.1.4\", \"side\":\"provider\",\"ipv6\":\"fd00:1:5:5200:3218:774a:4f67:2341\",\"port\":\"20880\", \"protocol\":\"dubbo\"}","dubbo.metadata.revision":"871fbc9cb2730caea9b0d858852d5ede","dubbo.metadata.storage-type":"local","ipv6":"fd00:1:5 :5200:3218:774a:4f67:2341","timestamp":"1674960780647"}},"registrationTimeUTC":1674960781893,"serviceType":"DYNAMIC","uriSpec":null}
 ```
 
-For more details about Dubbo's service discovery model, please refer to [Service Discovery](/zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/).
+For more details about Dubbo's service discovery model, please refer to [Service Discovery](/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/).
 
 ### 2. How does the consumer initiate the request?
 

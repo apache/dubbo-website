@@ -30,7 +30,7 @@ To publish a service (internal/external), regardless of client type or performan
 ## How to use
 ### Dependencies
 
-Starting from Dubbo 3, the Webservice protocol is no longer embedded in Dubbo, and an independent [module](/zh/release/dubbo-spi-extensions/#dubbo-rpc) needs to be introduced separately.
+Starting from Dubbo 3, the Webservice protocol is no longer embedded in Dubbo, and an independent [module](/zh-cn/release/dubbo-spi-extensions/#dubbo-rpc) needs to be introduced separately.
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

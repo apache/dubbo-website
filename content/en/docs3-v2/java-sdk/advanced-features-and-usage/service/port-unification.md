@@ -27,7 +27,7 @@ It can be used for service protocol migration, which is processed by the server,
 
 ## configuration method
 
-For the configuration method supported by Dubbo, please refer to [Configuration Instructions](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/config/)
+For the configuration method supported by Dubbo, please refer to [Configuration Instructions](https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/reference-manual/config/)
 
 ### Service multi-protocol export
 
@@ -82,7 +82,7 @@ dubbo.protocol.port=20880
 </dependency>
 ```
 
-After importing the Qos module, related configuration items can be configured by referring to [Qos Operation Manual](https://dubbo.apache.org/zh/docs3-v2/java-sdk/reference-manual/qos/overview/) .
+After importing the Qos module, related configuration items can be configured by referring to [Qos Operation Manual](https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/reference-manual/qos/overview/) .
 
 By default, the Qos service based on port multiplexing is started after the module is imported.
 

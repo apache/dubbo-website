@@ -8,7 +8,7 @@ description: "Dynamic configuration in Dubbo-Admin The priority of the same comp
 
 Dubbo provides the service management capability of dynamically configuring the priority of the same computer room/region, and can dynamically configure the priority of the same computer room/region without restarting the application.
 
-Dubbo can be configured through XML, annotation configuration, and dynamic configuration in the same computer room/area first. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh/docsv2.7/user/configuration/)
+Dubbo can be configured through XML, annotation configuration, and dynamic configuration in the same computer room/area first. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
 
 ## before the start
 
