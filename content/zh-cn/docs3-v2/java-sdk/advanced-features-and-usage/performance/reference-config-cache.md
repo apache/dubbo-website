@@ -4,7 +4,7 @@ type: docs
 title: "服务引用配置对象缓存"  
 linkTitle: "服务引用配置对象缓存"  
 weight: 2  
-description: "在 Dubbo3 中缓存 ReferenceConfig"
+description: "在 Dubbo 中缓存 ReferenceConfig"
 ---   
 ## 功能说明
 
