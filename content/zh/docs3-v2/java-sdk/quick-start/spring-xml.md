@@ -390,4 +390,4 @@ Dubbo 的主要配置入口有`dubbo:application` 、`dubbo:registry` 、 `dubbo
 
 本教程介绍了如何基于 Dubbo x Spring XML 开发一个微服务应用。至此，Dubbo 基于 API、Spring Boot、Spring XML 三种主要的启动方式都已经介绍完毕。
 
-在下一节中，将介绍基于 Protobuf IDL 配置的微服务开发方式。
+在下一节中，将介绍[基于 Protobuf IDL 配置的微服务开发方式](../idl/)。

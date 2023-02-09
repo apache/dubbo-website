@@ -553,4 +553,4 @@ Dubbo 的主要配置入口有 yaml 的配置内容、`@DubboReference` 和`@Dub
 
 ## 更多
 
-本教程介绍了如何基于 Dubbo x Spring Boot 开发一个微服务应用。在下一节中，将介绍另外一种 Dubbo 的配置方式—— Dubbo x Spring XML。
+本教程介绍了如何基于 Dubbo x Spring Boot 开发一个微服务应用。在下一节中，将介绍[另外一种 Dubbo 的配置方式 —— Dubbo x Spring XML](../spring-xml/)。
