@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 一致性Hash负载均衡实现剖析"
 linkTitle: "Dubbo 一致性Hash负载均衡实现剖析"
+tags: ["Java"]
 date: 2019-05-01
 description: >
     本文以一般的一致性Hash实现作为引子，详细剖析了Dubbo一致性Hash负载均衡算法的实现

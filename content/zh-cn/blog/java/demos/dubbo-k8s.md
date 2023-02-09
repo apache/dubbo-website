@@ -1,6 +1,7 @@
 ---
 title: "Dubbo与Kubernetes集成"
 linkTitle: "Dubbo与Kubernetes集成"
+tags: ["Java"]
 date: 2018-09-30
 description: >
     本文主要尝试将Dubbo服务注册到Kubernetes，同时无缝融入Kubernetes的多租户安全体系。

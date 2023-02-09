@@ -2,6 +2,7 @@
 title: "当Dubbo遇上Arthas：排查问题的实践"
 linkTitle: "当Dubbo遇上Arthas：排查问题的实践"
 date: 2019-02-02
+tags: ["生态", "Java"]
 description: >
     使用Alibaba开源的应用诊断利器Arthas来排查Dubbo应用的问题。
 ---

@@ -2,7 +2,7 @@
 title: "聚焦稳定性，Dubbo Java 发版规划公布"
 linkTitle: "Dubbo Java 发版规划"
 date: 2022-10-22
-tags: ["News"]
+tags: ["新闻动态"]
 weight: 10
 description: >
   聚焦稳定性，Dubbo 发版规划公布

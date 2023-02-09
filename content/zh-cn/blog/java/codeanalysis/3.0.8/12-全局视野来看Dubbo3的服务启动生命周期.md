@@ -3,6 +3,7 @@ title: "12 全局视野来看Dubbo3的服务启动生命周期"
 linkTitle: "12 全局视野来看Dubbo3的服务启动生命周期"
 date: 2022-08-12
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析]  全局视野来看Dubbo3的服务启动生命周期，了解了Dubbo3的启动生命周期，可以有效的了解整个Dubbo应用的启动阶段。
 ---

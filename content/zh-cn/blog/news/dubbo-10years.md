@@ -2,7 +2,7 @@
 title: "都已经十岁的 Apache Dubbo，还能再乘风破浪吗？"
 linkTitle: "都已经十岁的 Apache Dubbo，还能再乘风破浪吗？"
 date: 2021-01-14
-tags: ["News"]
+tags: ["新闻动态"]
 description: >
     在云原生时代，Apache Dubbo 将如何延续当前光芒？
 ---

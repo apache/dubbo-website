@@ -1,6 +1,7 @@
 ---
 title: "在 Dubbo 中使用 REST"
 linkTitle: "在 Dubbo 中使用 REST"
+tags: ["Java"]
 date: 2019-07-26
 description: 本文介绍了如何在 Dubbo 中发布 RESTful 服务
 ---

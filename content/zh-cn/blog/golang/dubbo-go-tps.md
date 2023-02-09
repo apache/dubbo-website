@@ -1,6 +1,7 @@
 ---
 title: "Dubbo Go 中的 TPS Limit 设计与实现"
 linkTitle: "dubbo-go tps limit"
+tags: ["Go"]
 date: 2021-01-11
 description: 本文记录了 flycash 对 Dubbo Go 中 TPS Limit 的设计与实现，原文出处：https://www.jianshu.com/p/5e4d490f163c
 ---

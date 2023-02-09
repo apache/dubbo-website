@@ -1,6 +1,7 @@
 ---
 title: "使用 Dubbo 连接异构微服务体系"
 linkTitle: "使用 Dubbo 连接异构微服务体系"
+tags: ["Java"]
 date: 2019-06-22
 description: >
   在这篇文章中，我们将探索如何利用 Dubbo 对多协议、多服务发现模型的支持，来实现异构微服务体系间的互联互通

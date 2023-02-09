@@ -2,7 +2,7 @@
 title: "在DockerHub发布Dubbo Admin镜像"
 linkTitle: "在DockerHub发布Dubbo Admin镜像"
 date: 2018-04-23
-tags: ["News"]
+tags: ["新闻动态"]
 description: >
   本文将介绍如何在Dockerhub上发布Dubbo Admin镜像。
 ---

@@ -1,6 +1,7 @@
 ---
 title: "dubbo-go 白话文"
 linkTitle: "dubbo-go 白话文"
+tags: ["Go"]
 date: 2021-02-20
 description: >
     本文手把手教你使用 dubbogo 调用 dubbogo 或 dubbo 提供的服务提供方

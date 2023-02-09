@@ -1,6 +1,7 @@
 ---
 title: "Dubbo-go应用维度注册模型"
 linkTitle: "Dubbo-go应用维度注册模型"
+tags: ["Go"]
 date: 2021-01-14
 description: >
     Dubbo-go 中的应用维度注册模型

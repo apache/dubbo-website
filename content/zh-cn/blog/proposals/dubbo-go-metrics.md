@@ -1,6 +1,7 @@
 ---
 title: "Dubbo Go 中 metrics 的设计"
 linkTitle: "Dubbo Go 中 metrics 的设计"
+tags: ["Go", "Proposals"]
 date: 2021-01-11 
 description: eBay 邓明：dubbo-go 中 metrics 的设计
 ---

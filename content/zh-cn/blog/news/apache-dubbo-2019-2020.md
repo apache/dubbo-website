@@ -2,7 +2,7 @@
 title: "从 2019 到 2020，Apache Dubbo 年度回顾与总结"
 linkTitle: "从 2019 到 2020，Apache Dubbo 年度回顾与总结"
 date: 2020-05-11
-tags: ["News"]
+tags: ["新闻动态"]
 description: >
     通过这篇文章我们将：总结过去一年 Dubbo 社区取得的成绩
 ---

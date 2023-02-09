@@ -2,7 +2,7 @@
 title: "第四届Dubbo开发者沙龙于8月26日在成都举行"
 linkTitle: "第四届Dubbo开发者沙龙于8月26日在成都举行"
 date: 2018-08-26
-tags: ["News"]
+tags: ["新闻动态"]
 description: 第四届Dubbo开发者沙龙于8月26日在成都举行。
 ---
 

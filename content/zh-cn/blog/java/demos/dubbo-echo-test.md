@@ -1,6 +1,7 @@
 ---
 title: "回声测试"
 linkTitle: "回声测试"
+tags: ["Java"]
 date: 2018-06-26
 description: >
     回声测试用于检测服务是否可用

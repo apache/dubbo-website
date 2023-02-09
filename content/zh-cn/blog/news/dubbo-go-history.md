@@ -1,6 +1,7 @@
 ---
 title: "Dubbo Go 的前世今生"
 linkTitle: "Dubbo Go 的前世今生"
+tags: ["Go", "新闻动态"]
 date: 2021-01-11
 description: 本文记录了 Dubbo Go 的发展历程
 ---

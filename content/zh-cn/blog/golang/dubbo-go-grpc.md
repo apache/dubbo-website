@@ -1,6 +1,7 @@
 ---
 title: "无缝衔接 gRPC 与 dubbo-go"
 linkTitle: "无缝衔接 gRPC 与 dubbo-go"
+tags: ["Go"]
 date: 2021-01-11
 description: 本文介绍了如何在 dubbo go 中如何支持 gRPC
 ---

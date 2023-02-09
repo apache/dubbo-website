@@ -1,6 +1,7 @@
 ---
 title: "Dubbo服务分组和版本聚合"
 linkTitle: "Dubbo服务分组和版本聚合"
+tags: ["Java"]
 date: 2018-10-27
 description: >
     本文主要介绍了 Dubbo 中服务分组和版本聚合的概念和用法

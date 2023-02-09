@@ -1,8 +1,8 @@
 ---
-type: docs
 title: "序列化协议安全"
 linkTitle: "序列化协议安全"
 weight: 1
+tags: ["安全漏洞"]
 description: "在 Dubbo 中更安全的使用序列化协议"
 ---
 

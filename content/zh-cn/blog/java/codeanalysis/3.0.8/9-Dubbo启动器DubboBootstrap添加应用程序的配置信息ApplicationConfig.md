@@ -3,6 +3,7 @@ title: "9-Dubbo启动器DubboBootstrap添加应用程序的配置信息Applicati
 linkTitle: "9-Dubbo启动器DubboBootstrap添加应用程序的配置信息ApplicationConfig"
 date: 2022-08-09
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] ApplicationConfig应用配置包含了一些比较基础的配置信息。
 ---

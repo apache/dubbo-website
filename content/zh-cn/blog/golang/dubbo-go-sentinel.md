@@ -1,6 +1,7 @@
 ---
 title: "在dubbo-go中使用sentinel"
 linkTitle: "在dubbo-go中使用sentinel"
+tags: ["Go"]
 date: 2021-01-11
 description: 本文介绍了如何在 dubbo-go 中使用限流组件 sentinel
 ---

@@ -2,6 +2,7 @@
 title: "在 Dubbo 中使用 Zipkin"
 linkTitle: "在 Dubbo 中使用 Zipkin"
 date: 2018-06-17
+tags: ["生态", "Java"]
 description: > 
    本文介绍如何在 Dubbo 中使用 Zipkin 进行全链路追踪
 ---

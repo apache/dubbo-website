@@ -2,6 +2,7 @@
 title: "新版 Dubbo Admin 介绍"
 linkTitle: "新版 Dubbo Admin 介绍"
 date: 2019-01-07
+tags: ["生态", "Java"]
 description: >
     当前版本的Dubbo Admin包含了之前版本中的绝大部分功能，包括服务治理，服务查询等，同时支持了Dubbo2.7中服务治理的新特性
 ---

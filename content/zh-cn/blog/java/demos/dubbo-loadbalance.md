@@ -1,6 +1,7 @@
 ---
 title: "Dubbo的负载均衡"
 linkTitle: "Dubbo的负载均衡"
+tags: ["Java"]
 date: 2018-08-10
 description: >
     本文介绍了负载均衡的相关概念以及 Dubbo 中的负载均衡策略实现。

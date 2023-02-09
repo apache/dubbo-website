@@ -3,7 +3,8 @@ title: Dubbo 跨语言调用神兽：dubbo-go-pixiu
 keywords: Pixiu 介绍
 description: dubbo-go-pixiu 项目是一个基于 dubbo-go 发展起来的项目，目前接口协议层支持的是七层的 HTTP 请求调用
 author: 冯振宇,于雨
-date: 2021-8-25
+tags: ["Go", "Pixiu", "网关"]
+date: 2021-08-25
 ---
 
 ## Pixiu 是什么

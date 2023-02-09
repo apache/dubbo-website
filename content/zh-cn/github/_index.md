@@ -1,4 +1,5 @@
 ---
+type: docs
 title: "Github"
 linkTitle: "Github"
 menu:
@@ -7,18 +8,14 @@ menu:
     weight: 70
 ---
 
-<section id="github" class="row td-cover-block td-cover-block--height-sm js-td-cover td-overlay  -bg-primary">
-</section>
+<!-- <section id="github" class="row td-cover-block td-cover-block--height-sm js-td-cover td-overlay  -bg-primary"> -->
+<!-- </section> -->
 
 <div class="container l-container--padded">
 
 <div class="row">
-{{< page/toc collapsed=true placement="inline" >}}
-</div>
-
-<div class="row">
 <div class="col-12 col-lg-12">
-<p class="my-4">
+<p class="my-2">
 Apache Dubbo 项目覆盖 Java、Go、Node.js、Rust、Python、PHP 等多语言 SDK 实现，同时提供了项目脚手架、Admin 可视化控制台等一系列生态扩展实现，以下是部分项目仓库列表。
 
 也可以在 [Apache Dubbo GitHub Repos](https://github.com/apache?q=dubbo&type=all&language=&sort=) 了解更多项目详情。

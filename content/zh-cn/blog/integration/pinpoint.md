@@ -2,6 +2,7 @@
 title: "使用Pinpoint做分布式跟踪"
 linkTitle: "使用Pinpoint做分布式跟踪"
 date: 2018-07-12
+tags: ["生态", "Java"]
 description: > 
     本文介绍了利用Pinpoint对Dubbo分布式应用进行调用链跟踪与性能监控。
 ---

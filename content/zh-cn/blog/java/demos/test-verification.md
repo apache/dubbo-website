@@ -1,6 +1,7 @@
 ---
 title: "Dubbo测试验证"
 linkTitle: "Dubbo测试验证"
+tags: ["Java"]
 date: 2019-12-02
 description: >
     对正在开发的功能进行验证测试，或者单独调用某台机器的服务

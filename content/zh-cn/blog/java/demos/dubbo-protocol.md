@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 协议详解"
 linkTitle: "Dubbo 协议详解"
+tags: ["Java"]
 date: 2018-10-05
 description: 本文介绍了 Dubbo 协议的设计
 ---

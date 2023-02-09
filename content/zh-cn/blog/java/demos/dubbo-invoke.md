@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 关于同步/异步调用的几种方式"
 linkTitle: "Dubbo 关于同步/异步调用的几种方式"
+tags: ["Java"]
 date: 2018-08-14
 description: >
     本文介绍了Dubbo基于异步通讯机制实现的几种同步和异步调用方式。

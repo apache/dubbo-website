@@ -17,33 +17,33 @@ feature:
     <div class="lead"></div>
     <header class="article-meta"></header>
     <div class="row">
-        <div class="col-sm col-md-6 mb-4 mb-md-0">
+        <div class="col-sm col-md-6 mb-4">
             <div class="h-100 card shadow" href="#">
                 <div class="card-body">
                     <h4 class="card-title">
                         <a target="_blank" href='{{< relref "../../docs3-v2/java-sdk/home/" >}}'>Java SDK</a>
                     </h4>
-                    <p>Java SDK</p>
+                    <p>Java 实现使用方式、架构原理及参考手册</p>
                 </div>
             </div>
         </div>
-        <div class="col-sm col-md-6 mb-4 mb-md-0">
+        <div class="col-sm col-md-6 mb-4">
             <div class="h-100 card shadow">
                 <div class="card-body">
                     <h4 class="card-title">
                         <a target="_blank" href='{{< relref "../../docs3-v2/golang-sdk" >}}'>Golang SDK</a>
                     </h4>
-                    <p>Golang SDK</p>
+                    <p>Golang 实现使用方式、架构原理及参考手册</p>
                 </div>
             </div>
         </div>
-        <div class="col-sm col-md-6 mb-4 mb-md-0">
+        <div class="col-sm col-md-6 mb-4">
             <div class="h-100 card shadow">
                 <div class="card-body">
                     <h4 class="card-title">
                             <a target="_blank" href='{{< relref "../../docs3-v2/rust-sdk" >}}'>Rust SDK</a>
                         </h4>
-                        <p>Rust SDK</p>
+                        <p>Rust 实现使用方式、架构原理及参考手册</p>
                 </div>
             </div>
         </div>

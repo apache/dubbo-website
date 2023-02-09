@@ -2,6 +2,7 @@
 title: "从跨语言调用到dubbo2.js"
 linkTitle: "从跨语言调用到dubbo2.js"
 date: 2018-08-14
+tags: ["Node.js"]
 description: >
     本文介绍了如何使用 dubbo2.js 进行跨语言的 dubbo 调用。
 ---

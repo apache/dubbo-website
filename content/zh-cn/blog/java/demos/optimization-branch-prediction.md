@@ -1,6 +1,7 @@
 ---
 title: "提前if判断帮助CPU分支预测"
 linkTitle: "提前if判断帮助CPU分支预测"
+tags: ["Java"]
 date: 2019-02-03
 description: >
     本文介绍了通过提前if判断帮助CPU分支预测的优化技巧

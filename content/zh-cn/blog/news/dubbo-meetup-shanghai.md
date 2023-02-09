@@ -2,7 +2,7 @@
 title: "第二届Dubbo开发者沙龙在上海成功举办"
 linkTitle: "第二届Dubbo开发者沙龙在上海成功举办"
 date: 2018-06-23
-tags: ["News"]
+tags: ["新闻动态"]
 description: 第二届Dubbo开发者沙龙在上海成功举办。
 ---
 

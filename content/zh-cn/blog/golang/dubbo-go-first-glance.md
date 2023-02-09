@@ -1,6 +1,7 @@
 ---
 title: "Dubbo Go 踩坑记"
 linkTitle: "Dubbo Go 踩坑记"
+tags: ["Go"]
 date: 2021-01-11
 description: 本文记录了一个用户第一次接入 Dubbo Go 的体验
 ---

@@ -1,6 +1,7 @@
 ---
 title: "Dubbo可扩展机制源码解析"
 linkTitle: "Dubbo可扩展机制源码解析"
+tags: ["Java"]
 date: 2019-05-02
 description: >
     本文介绍了SPI扩展机制的实现原理与细节。

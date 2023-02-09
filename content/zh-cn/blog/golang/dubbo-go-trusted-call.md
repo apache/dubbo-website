@@ -1,6 +1,7 @@
 ---
 title: "dubbo-go 可信调用实现"
 linkTitle: "dubbo-go 可信调用实现"
+tags: ["Go"]
 date: 2021-01-14
 description: >
   本文将讲解如何在 Dubbo/Dubbo-Go 中实现灵活，安全和高效的身份验证和授权方案。

@@ -1,6 +1,7 @@
 ---
 title: "涂鸦智能 dubbo-go 亿级流量的实践与探索"
 linkTitle: "涂鸦智能 dubbo-go 亿级流量的实践与探索"
+tags: ["Go", "用户案例"]
 date: 2021-01-14
 description: >
   本文分为实践和快速接入两部分，分享在涂鸦智能的 dubbo-go 实战经验

@@ -1,6 +1,7 @@
 ---
 title: "浅谈 RPC"
 linkTitle: "浅谈 RPC"
+tags: ["Java"]
 date: 2019-01-07
 description: >
     RPC-远程过程调用，它是一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议。

@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 上下文信息"
 linkTitle: "Dubbo 上下文信息"
+tags: ["Java"]
 date: 2018-07-12
 description: >
     介绍Dubbo上下文信息的作用、应用场景、使用方式以及注意事项

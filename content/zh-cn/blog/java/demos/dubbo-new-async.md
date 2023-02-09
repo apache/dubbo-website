@@ -1,6 +1,7 @@
 ---
 title: "如何基于Dubbo实现全异步调用链"
 linkTitle: "如何基于Dubbo实现全异步调用链"
+tags: ["Java"]
 date: 2018-09-02
 description: >
     本文回顾了 2.6.x 版本的异步实现，然后引出了 2.7.0 版本基于 CompletableFuture 的异步编程方式。

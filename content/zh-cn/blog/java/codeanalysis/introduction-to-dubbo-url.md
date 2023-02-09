@@ -2,6 +2,7 @@
 title: "Dubbo 中的 URL 统一模型"
 linkTitle: "Dubbo 中的 URL 统一模型"
 date: 2019-10-17
+tags: ["源码解析", "Java"]
 description: >
     URL 是 Dubbo 中一个重要的领域模型，了解它可以更加轻松的理解 Dubbo 的设计理念。
 ---

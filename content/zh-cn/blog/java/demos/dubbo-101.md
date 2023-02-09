@@ -1,6 +1,7 @@
 ---
 title: "第一个 Dubbo 应用"
 linkTitle: "第一个 Dubbo 应用"
+tags: ["Java"]
 slug: dubbo-101
 date: 2018-08-07
 description: >

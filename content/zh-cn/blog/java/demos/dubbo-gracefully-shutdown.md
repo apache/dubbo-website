@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 优雅停机"
 linkTitle: "Dubbo 优雅停机"
+tags: ["Java"]
 date: 2018-08-14
 description: > 
     本文介绍了Dubbo优雅停机的原理和使用方式

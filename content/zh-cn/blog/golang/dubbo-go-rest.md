@@ -1,6 +1,7 @@
 ---
 title: "dubbo-go 中 REST 协议实现"
 linkTitle: "dubbo-go 中 REST 协议实现"
+tags: ["Go"]
 date: 2021-01-14 
 description: >
     在社区小伙伴们的努力下，Apache/dubbo-go 在 v1.4.0 中支持 REST 协议了。

@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 基础用法 - Provider 配置"
 linkTitle: "Dubbo 基础用法 - Provider 配置"
+tags: ["Java"]
 date: 2018-08-14
 description: >
     主要讲述如何配置dubbo，按照配置方式上可以分为：XML配置，properties方式配置，注解方式配置，API调用方式配置。

@@ -2,7 +2,7 @@
 title: "如何准备Apache Release"
 linkTitle: "如何准备Apache Release"
 date: 2018-09-02
-tags: ["News"]
+tags: ["新闻动态"]
 description: >
     本文介绍了Apache如何发布内容和流程
 ---

@@ -1,6 +1,7 @@
 ---
 title: "使用jdk17编译运行dubbo 2.7.14项目"
 linkTitle: "使用jdk17编译运行dubbo 2.7.14项目"
+tags: ["Java"]
 date: 2018-08-07
 description: > 
     本文介绍了如何在jdk17环境下编译运行dubbo 2.7.14项目。

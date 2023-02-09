@@ -2,6 +2,7 @@
 title: "在 Dubbo 应用中使用 Zookeeper"
 linkTitle: "在 Dubbo 应用中使用 Zookeeper"
 date: 2018-08-07
+tags: ["生态", "Java"]
 description: > 
     本文介绍了 Zookeeper 的基本概念、用法，以及如何在 Dubbo 应用中使用 Zookeeper 作为注册中心。
 ---

@@ -11,7 +11,9 @@ menu:
 
 ## 为 Dubbo 做贡献
 
-Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Github 开发流程，使用Github追踪处理问题，并将 pull request 合并到 master 中。如果您想为 Dubbo 做贡献（即便是一些微小的），请不要犹豫，遵循下面的指导方针。
+Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Github 开发流程，使用 Github 追踪处理问题，并将 pull request 合并到对应仓库中。
+
+如果您想为 Dubbo 做贡献（即便是一些微小的），请不要犹豫，尝试通过以下方式联系我们并阅读贡献指导方针。
 
 ### 联系我们
 

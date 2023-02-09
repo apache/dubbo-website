@@ -2,7 +2,7 @@
 title: "ApacheCon NA 大会议程公布"
 linkTitle: "ApacheCon NA 大会议程公布"
 date: 2018-05-02
-tags: ["News"]
+tags: ["新闻动态"]
 description: >
   本文将向你介绍在ApacheCon大会议程公布上相关Dubbo议题演讲。
 ---

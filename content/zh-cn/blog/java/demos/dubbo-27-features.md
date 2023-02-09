@@ -1,6 +1,7 @@
 ---
 title: "Dubbo2.7 三大新特性详解"
 linkTitle: "Dubbo2.7 三大新特性详解"
+tags: ["Java"]
 date: 2018-08-15
 description: >
     异步化改造,三大中心改造,服务治理增强

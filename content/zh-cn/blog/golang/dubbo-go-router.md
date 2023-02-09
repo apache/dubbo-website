@@ -1,6 +1,7 @@
 ---
 title: "dubbo-go 中如何实现路由规则功能"
 linkTitle: "dubbo-go 中如何实现路由规则功能"
+tags: ["Go"]
 date: 2021-01-12
 description: >
     本文介绍了在 dubbo-go 中路由规则功能的设计与实现

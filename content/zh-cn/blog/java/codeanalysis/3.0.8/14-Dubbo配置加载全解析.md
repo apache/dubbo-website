@@ -3,6 +3,7 @@ title: "14-Dubbo配置加载全解析"
 linkTitle: "14-Dubbo配置加载全解析"
 date: 2022-08-14
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析]  Dubbo框架的配置项比较繁多，为了更好地管理各种配置，将其按照用途划分为不同的组件，最终所有配置项都会汇聚到URL中，传递给后续处理模块。
 ---

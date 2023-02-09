@@ -1,6 +1,7 @@
 ---
 title: "记一次在 mosn 对 dubbo、dubbo-go-hessian2 的性能优化"
 linkTitle: "记一次在 mosn 对 dubbo、dubbo-go-hessian2 的性能优化"
+tags: ["Go"]
 date: 2021-01-14
 description: >
     本文介绍在 mosn 对 dubbo、dubbo-go-hessian2 性能优化的全过程

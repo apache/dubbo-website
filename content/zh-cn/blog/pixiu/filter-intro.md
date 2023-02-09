@@ -2,6 +2,7 @@
 title: 谈谈Pixiu的Filter
 keywords: Pixiu 介绍
 description: Filter通常是网关最重要的一部分，那Pixiu的过滤器链是如何运行的呢
+tags: ["Go", "Pixiu"]
 author: mark4z
 date: 2022-02-19
 ---

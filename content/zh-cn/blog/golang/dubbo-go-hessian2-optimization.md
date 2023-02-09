@@ -1,6 +1,7 @@
 ---
 title: "记一次对 dubbo-go-hessian2 的性能优化"
 linkTitle: "记一次对 dubbo-go-hessian2 的性能优化"
+tags: ["Go"]
 date: 2021-01-12
 description: >
     本文介绍了在 dubbo-go-hessian2 中的一次性能调优

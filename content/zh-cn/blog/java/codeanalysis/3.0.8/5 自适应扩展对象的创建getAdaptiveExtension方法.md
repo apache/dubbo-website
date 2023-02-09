@@ -3,6 +3,7 @@ title: "05-自适应扩展对象的创建getAdaptiveExtension方法"
 linkTitle: "5-自适应扩展对象的创建getAdaptiveExtension方法"
 date: 2022-08-05
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] Dubbo是一个微内核框架，所有的实现都是通过扩展机制来实现的，了解扩展加载机制可以有效的逻辑代码的抽象与具体逻辑
 ---

@@ -2,6 +2,7 @@
 title: "Spring应用快速集成Dubbo + Hystrix"
 linkTitle: "Spring应用快速集成Dubbo + Hystrix"
 date: 2018-08-22
+tags: ["生态", "Java"]
 description: >
     本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。
 ---

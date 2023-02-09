@@ -3,6 +3,7 @@ title: "21-Dubbo3消费者引用服务入口 "
 linkTitle: "21-Dubbo3消费者引用服务入口 "
 date: 2022-08-21
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] Dubbo3消费者引用服务入口 。
 ---

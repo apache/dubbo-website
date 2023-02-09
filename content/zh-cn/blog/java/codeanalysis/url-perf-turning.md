@@ -2,6 +2,7 @@
 title: "浅析 Dubbo 3.0 中接口级地址推送性能的优化"
 linkTitle: "浅析 Dubbo 3.0 中接口级地址推送性能的优化"
 date: 2022-06-23
+tags: ["源码解析", "Java"]
 description: >
   Dubbo URL 的基本工作原理以及在地址推送链路的优化过程。
 ---

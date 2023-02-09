@@ -1,6 +1,7 @@
 ---
 title: "dubbo-go 中将 Kubernets 原⽣作为注册中⼼的设计和实现"
 linkTitle: "dubbo-go 中将 Kubernets 原⽣作为注册中⼼的设计和实现"
+tags: ["Go"]
 date: 2021-01-14
 description: >
     随着云原⽣的推⼴，越来越多的公司或组织将服务容器化，并将容器化后的服务部署在 Kubernetes 集群中。

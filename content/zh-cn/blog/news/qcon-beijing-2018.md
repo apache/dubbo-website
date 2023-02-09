@@ -2,7 +2,7 @@
 title: "Dubbo路线图在QCon Beijing 2018上公布"
 linkTitle: "Dubbo路线图在QCon Beijing 2018上公布"
 date: 2018-04-22
-tags: ["News"]
+tags: ["新闻动态"]
 description: >
     本文将向你介绍在QCon Beijing 2018上公布Dubbo路线图。
 ---

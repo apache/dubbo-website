@@ -1,6 +1,7 @@
 ---
 title: "Dubbo Go Getty 开发日志"
 linkTitle: "getty 开发日志"
+tags: ["Go"]
 date: 2021-01-11 
 description: 本文记录了于雨开发 dubbo-go 网络库 getty 的历程
 ---

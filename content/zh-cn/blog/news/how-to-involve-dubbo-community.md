@@ -2,7 +2,7 @@
 title: "如何参与贡献Dubbo社区"
 linkTitle: "如何参与贡献Dubbo社区"
 date: 2018-03-11
-tags: ["News"]
+tags: ["新闻动态"]
 description: >
   本文介绍了如何以Apache Way的方式参与Dubbo社区并做贡献
 ---

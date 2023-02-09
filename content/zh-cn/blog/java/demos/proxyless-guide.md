@@ -1,6 +1,7 @@
 ---
 title: "Proxyless Mesh在Dubbo中的实践"
 linkTitle: "Proxyless Mesh在Dubbo中的实践"
+tags: ["Java"]
 date: 2022-09-05
 description: >
     Proxyless 模式是指 Dubbo 直接与 Istiod 通信，通过 xDS 协议实现服务发现和服务治理等能力。本文将带领大家熟悉 Dubbo Proxyless Mesh。

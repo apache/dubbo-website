@@ -1,6 +1,7 @@
 ---
 title: "dubbo-go 中如何实现远程配置管理？"
 linkTitle: "dubbo-go 中如何实现远程配置管理？"
+tags: ["Go"]
 date: 2021-01-11
 description: 本文介绍了如何在 dubbo-go 中使用配置中心进行远程配置管理
 ---

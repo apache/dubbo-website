@@ -1,6 +1,7 @@
 ---
 title: "Go 版本入 Dubbo 生态一周年"
 linkTitle: "Go 版本入 Dubbo 生态一周年"
+tags: ["Go", "新闻动态"]
 date: 2021-01-14
 description: >
     Go 版本入 Dubbo 生态一周年：已和 Spring Cloud、gRPC 互通
