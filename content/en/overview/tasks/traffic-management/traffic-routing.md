@@ -8,7 +8,7 @@ description: "Routing according to request conditions in Dubbo-Admin"
 
 Dubbo provides the service governance capability of dynamically creating conditional routing, which can route according to the request initiator and method without restarting the application.
 
-Dubbo can implement dynamic routing according to request conditions through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
+Dubbo can implement dynamic routing according to request conditions through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](/zh-cn/docsv2.7/user/configuration/)
 
 ## before the start
 

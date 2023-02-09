@@ -28,7 +28,7 @@ The system needs to handle a large number of concurrent requests without overloa
 
 ## How to use
 
-For Triple usage and configuration, please refer to [Using Triple in IDL](https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/idl/), and ensure that the Dubbo version> = 3.1.0.
+For Triple usage and configuration, please refer to [Using Triple in IDL](/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/idl/), and ensure that the Dubbo version> = 3.1.0.
 
 ### Add the necessary dependencies
 

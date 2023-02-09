@@ -30,7 +30,7 @@ description: >
 
 关于Dubbo的配置中心这里我来贴个官网的图:
 ![在这里插入图片描述](/imgs/v3/concepts/centers-config.png)
-关于官网的介绍可以自行去官网看详细内容: [部署架构(注册中心、配置中心、元数据中心](https://dubbo.apache.org/zh-cn/docs/concepts/registry-configcenter-metadata/)
+关于官网的介绍可以自行去官网看详细内容: [部署架构(注册中心、配置中心、元数据中心](/zh-cn/docs/concepts/registry-configcenter-metadata/)
 
 
 ## 13.2 启动配置中心

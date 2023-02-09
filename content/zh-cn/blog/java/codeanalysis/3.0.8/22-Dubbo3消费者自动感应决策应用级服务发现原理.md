@@ -11,7 +11,7 @@ description: >
 ## 22.1 简介
 这里要说的内容对Dubbo2迁移到Dubbo3的应用比较有帮助，消费者应用级服务发现做了一些自动决策的逻辑来决定当前消费者是应用级发现还是接口级服务发现，这里与前面说的提供者双注册的原理是对等的，提供者默认同时进行应用级注册和接口级注册，消费者对提供者注册的数据来决定使用应用级发现或者接口级发现。这些都是默认的行为，当然对于消费者来说还可以自定义其他的迁移规则，具体的需要我们详细来看逻辑。
 
-如果说对于迁移过程比较感兴趣可以直接去官网看文档相对来说还是比较清晰:[https://dubbo.apache.org/zh-cn/docs/migration/migration-service-discovery/](https://dubbo.apache.org/zh-cn/docs/migration/migration-service-discovery/)
+如果说对于迁移过程比较感兴趣可以直接去官网看文档相对来说还是比较清晰:[https://dubbo.apache.org/zh-cn/docs/migration/migration-service-discovery/](/zh-cn/docs/migration/migration-service-discovery/)
 
 这里再借官网的图来用用，迁移过程主要如下所示：
 第一个图是提供者双注册的图：
@@ -66,7 +66,7 @@ description: >
     }
 ```
 
-关于这个igrationRule的文可以直接看官方的文档比较详细：[地址迁移规则说明](https://dubbo.apache.org/zh-cn/docs/v3.0/advanced/migration-invoker/#1-%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%8B%E5%8F%91%E6%8E%A8%E8%8D%90)
+关于这个igrationRule的文可以直接看官方的文档比较详细：[地址迁移规则说明](/zh-cn/docs/v3.0/advanced/migration-invoker/#1-%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%8B%E5%8F%91%E6%8E%A8%E8%8D%90)
 
 
 这个迁移规则是为了更细粒度的迁移决策：

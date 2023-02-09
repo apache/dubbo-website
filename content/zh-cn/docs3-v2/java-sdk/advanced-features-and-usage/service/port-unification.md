@@ -36,7 +36,7 @@ Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个
 
 
 
-> 关于Dubbo支持的配置方式，可以参考[配置说明](https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/reference-manual/config/)
+> 关于Dubbo支持的配置方式，可以参考[配置说明](/zh-cn/docs3-v2/java-sdk/reference-manual/config/)
 
 ### 服务多协议导出
 
@@ -91,7 +91,7 @@ dubbo.protocol.port=20880
 </dependency>
 ```
 
-完成Qos模块的导入之后，相关的配置项可参考[Qos操作手册](https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/reference-manual/qos/overview/)进行配置。
+完成Qos模块的导入之后，相关的配置项可参考[Qos操作手册](/zh-cn/docs3-v2/java-sdk/reference-manual/qos/overview/)进行配置。
 
 默认情况下，基于端口复用的Qos服务在模块导入后是启动的。
 

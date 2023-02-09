@@ -8,7 +8,7 @@ description: "在 Dubbo-Admin 动态配置同机房/区域优先"
 
 Dubbo提供动态配置同机房/区域优先的服务治理能力，可以在无需重启应用的情况下，动态配置同机房/区域优先。
 
-Dubbo可以通过XML配置，注解配置，动态配置同机房/区域优先，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
+Dubbo可以通过XML配置，注解配置，动态配置同机房/区域优先，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](/zh-cn/docsv2.7/user/configuration/)
 
 ## 开始之前
 

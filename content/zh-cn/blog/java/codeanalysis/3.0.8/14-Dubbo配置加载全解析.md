@@ -44,7 +44,7 @@ description: >
 
 
 初始化过程中会先启动配置中心配置信息处理,然后 调用加载初始化应用程序配置方法loadApplicationConfigs();进行配置加载
-关于配置的官方文档链接为 [配置概述](https://dubbo.apache.org/zh-cn/docs/references/configuration/overview/)
+关于配置的官方文档链接为 [配置概述](/zh-cn/docs/references/configuration/overview/)
 
 Dubbo框架的配置项比较繁多，为了更好地管理各种配置，将其按照用途划分为不同的组件，最终所有配置项都会汇聚到URL中，传递给后续处理模块。
 
@@ -431,7 +431,7 @@ public class InmemoryConfiguration implements Configuration {
 
 ### 14.3.7 Dubbo迁移新版本的配置文件加载dubbo-migration.yaml
 
-关于配置迁移文件的用法可以看下这个Dubbo官方的[地址迁移规则说明](https://dubbo.apache.org/zh-cn/docs/v3.0/advanced/migration-invoker/)
+关于配置迁移文件的用法可以看下这个Dubbo官方的[地址迁移规则说明](/zh-cn/docs/v3.0/advanced/migration-invoker/)
 
 这个配置文件的文件名字为:dubbo-migration.yaml
 

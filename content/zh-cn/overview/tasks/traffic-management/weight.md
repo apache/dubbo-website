@@ -10,7 +10,7 @@ description: "在 Dubbo-Admin 通过权重调整流量分布"
 
 Dubbo提供通过权重调整流量分布的服务治理能力，可以在无需重启应用的情况下，通过权重动态调整流量分布。
 
-Dubbo可以通过XML配置，注解配置，动态配置实现通过权重调整流量分布，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
+Dubbo可以通过XML配置，注解配置，动态配置实现通过权重调整流量分布，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](/zh-cn/docsv2.7/user/configuration/)
 
 ## 开始之前
 

@@ -8,7 +8,7 @@ description: "在 Dubbo-Admin 根据请求条件路由"
 
 Dubbo提供动态创建条件路由的服务治理能力，可以在无需重启应用的情况下，根据请求发起方、请求的方法条件路由。
 
-Dubbo可以通过XML配置，注解配置，动态配置实现动态根据请求条件路由，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
+Dubbo可以通过XML配置，注解配置，动态配置实现动态根据请求条件路由，这里主要介绍动态配置的方式，其他配置方式请参考旧文档[配置](/zh-cn/docsv2.7/user/configuration/)
 
 ## 开始之前
 

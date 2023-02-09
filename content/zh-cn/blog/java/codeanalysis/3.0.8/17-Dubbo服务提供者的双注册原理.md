@@ -18,7 +18,7 @@ Dubbo3 比较有特色也是会直接使用到的功能就是**应用级服务�
 
 对于直接使用Dubbo3的用户还好，可以仅仅开启应用级注册，但是对于Dubbo2.x的用户升级到Dubbo3的用户来说前期都是要开启双注册来慢慢迁移的，既注册传统的接口信息到注册中心，又注册应用信息到注册中心，同时注册应用与接口关系的元数据信息。
 关于双注册与服务迁移的过程的使用可以参考官网：
-[应用级地址发现迁移指南](https://dubbo.apache.org/zh-cn/docs/migration/migration-service-discovery/)
+[应用级地址发现迁移指南](/zh-cn/docs/migration/migration-service-discovery/)
 
 关于官网提供者双注册的图我这里贴一下，方便了解：
 ![在这里插入图片描述](/imgs/v3/migration/provider-registration.png)

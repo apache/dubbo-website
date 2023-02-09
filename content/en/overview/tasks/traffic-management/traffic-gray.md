@@ -8,7 +8,7 @@ description: "Configure label routing rules in Dubbo-Admin to achieve gray scale
 
 Dubbo provides traffic grayscale service management capabilities, and can configure label routing rules and conditional routing to achieve grayscale publishing without restarting the application.
 
-Dubbo can achieve traffic grayscale through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/)
+Dubbo can achieve traffic grayscale through XML configuration, annotation configuration, and dynamic configuration. Here we mainly introduce the dynamic configuration method. For other configuration methods, please refer to the old document [Configuration](/zh-cn/docsv2.7/user/configuration/)
 
 ## before the start
 
