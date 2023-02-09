@@ -15,13 +15,13 @@ description: >
 
 这里再借官网的图来用用，迁移过程主要如下所示：
 第一个图是提供者双注册的图：
-![在这里插入图片描述](https://dubbo.apache.org/imgs/v3/migration/provider-registration.png)
+![在这里插入图片描述](/imgs/v3/migration/provider-registration.png)
 
 第二个图是消费者订阅决策的图：
-![在这里插入图片描述](https://dubbo.apache.org/imgs/v3/migration/consumer-subscription.png)
+![在这里插入图片描述](/imgs/v3/migration/consumer-subscription.png)
 
 第三个图就是精确到消费者订阅的代码层的逻辑了，消费者服务间调用通过一个Invoker类型对象来进行对象，如下图所示消费者代理对象通过创建一个迁移容错的调用器对象来对应用级或者接口级订阅进行适配如下所示
-![在这里插入图片描述](https://dubbo.apache.org/imgs/v3/migration/migration-cluster-invoker.png)
+![在这里插入图片描述](/imgs/v3/migration/migration-cluster-invoker.png)
 
 第二个图和第三个图是重点要关注的这一个文章的内容主要就是说这里的逻辑。
 
