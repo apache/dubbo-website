@@ -16,6 +16,11 @@ no_list: true
                 <h4 class="card-title">
                     <a href='{{< relref "./java/" >}}'>Java 微服务开发入门</a>
                 </h4>
+                    <p> </p>
+                    <p><a href='{{< relref "./java/brief" >}}'>1 - 快速部署</a></p>
+                    <p><a href='{{< relref "./java/api" >}}'>2 - 基于 Dubbo API 开发</a></p>
+                    <p><a href='{{< relref "./java/spring-boot" >}}'>3 - 基于 Dubbo x Spring Boot 开发</a></p>
+                    <p><a href='{{< relref "./java/spring-xml" >}}'>4 - 基于 Dubbo x Spring XML 开发</a></p>
                 <p></p>
             </div>
         </div>
