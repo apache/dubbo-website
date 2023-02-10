@@ -4,7 +4,7 @@ type: docs
 title: "注册信息简化"  
 linkTitle: "注册信息简化"  
 weight: 3  
-description: "了解 dubbo3 减少注册中心上服务的注册数据"
+description: "了解 Dubbo 减少注册中心上服务的注册数据"
 ---  
 
 ## 功能说明
