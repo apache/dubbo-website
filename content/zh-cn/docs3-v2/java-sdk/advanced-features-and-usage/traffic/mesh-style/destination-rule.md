@@ -2,7 +2,7 @@
 type: docs
 title: "DestinationRule"
 linkTitle: "DestinationRule"
-weight: 40
+weight: 2
 description: "目标地址规则"
 ---
 
