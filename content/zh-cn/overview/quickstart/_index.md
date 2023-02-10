@@ -16,12 +16,11 @@ no_list: true
                 <h4 class="card-title">
                     <a href='{{< relref "./java/" >}}'>Java 微服务开发入门</a>
                 </h4>
-                    <p> </p>
+                    <p>通过以下教程快速上手 Dubbo Java 开发：</p>
                     <p><a href='{{< relref "./java/brief" >}}'>1 - 快速部署</a></p>
                     <p><a href='{{< relref "./java/api" >}}'>2 - 基于 Dubbo API 开发</a></p>
                     <p><a href='{{< relref "./java/spring-boot" >}}'>3 - 基于 Dubbo x Spring Boot 开发</a></p>
                     <p><a href='{{< relref "./java/spring-xml" >}}'>4 - 基于 Dubbo x Spring XML 开发</a></p>
-                <p></p>
             </div>
         </div>
     </div>
@@ -31,7 +30,10 @@ no_list: true
                 <h4 class="card-title">
                     <a href='{{< relref "./go/" >}}'>Go 微服务开发入门</a>
                 </h4>
-                <p>在服务初次调用失败后，通过重试能有效的提升总体调用成功率。</p>
+                    <p>通过以下教程快速上手 Dubbo Go 开发：</p>
+                    <p><a href='{{< relref "./go/install" >}}'>1 - 安装 Dubbo-go 开发环境</a></p>
+                    <p><a href='{{< relref "./go/quickstart_triple" >}}'>2 - 完成一次 RPC 调用</a></p>
+                    <p><a href='{{< relref "./go/quickstart_triple_with_customize" >}}'>3 - 完成一次自己定义接口的 RPC 调用</a></p>
             </div>
         </div>
     </div>
