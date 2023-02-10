@@ -19,6 +19,7 @@ no_list: true
                 </h4>
                     <p>Dubbo 提供以下协议类型的支持：</p>
                     <p><a href='{{< relref "./protocol/dubbo" >}}'>Dubbo 协议</a></p>
+                    <p><a href='{{< relref "./protocol/triple" >}}'>Triple 协议</a></p>
                     <p><a href='{{< relref "./protocol/gRPC" >}}'>gRPC 协议</a></p>
                     <p><a href='{{< relref "./protocol/http" >}}'>HTTP / Rest 协议</a></p>
                     <p><a href='{{< relref "./protocol/thrift" >}}'>Thrift 协议</a></p>
