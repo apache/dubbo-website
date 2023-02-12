@@ -35,7 +35,9 @@ $ tree .
 
 可看到生成的项目中包含一个 client 项目和一个 server 项目，以及相关的配置文件。
 
-### 1.1 查看接口描述文件 helloworld.proto
+### 1.1 查看接口描述文件 
+
+`helloworld.proto`
 
 ```protobuf
 syntax = "proto3";
@@ -115,6 +117,5 @@ client response result: name:"Hello laurence" id:"12345" age:21
 
 获得调用结果成功
 
-## 3. 更多
-
-细心的读者可以发现，以上例子编写的的服务端可以接受来自客户端的普通RPC、流式RPC调用请求。目前只编写了普通调用的Client，读者可以根据 samples 库中的例子来尝试编写流式客户端和服务端。
+> ## 更多
+> 细心的读者可以发现，以上例子编写的的服务端可以接受来自客户端的普通RPC、流式RPC调用请求。目前只编写了普通调用的Client，读者可以根据 samples 库中的例子来尝试编写流式客户端和服务端。
