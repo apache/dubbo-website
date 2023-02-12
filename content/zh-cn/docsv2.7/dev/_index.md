@@ -1,6 +1,6 @@
 ---
 type: docs
-title: "Dubbo 开发指南"
+title: "开发指南"
 linkTitle: "开发指南"
 weight: 20
 description: "Dubbo 开发者的指南"
