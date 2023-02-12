@@ -6,11 +6,14 @@ weight: 5
 description: "Dubbo 中点对点的直连方式"
 ---
 
+## 背景
 在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者，这时候可能需要点对点直连，点对点直连方式，将以服务接口为单位，忽略注册中心的提供者列表，A 接口配置点对点，不影响 B 接口从注册中心获取列表。
 
 ![/user-guide/images/dubbo-directly.jpg](/imgs/user/dubbo-directly.jpg)
 
-## 通过 XML 配置
+## 示例
+
+### 通过 XML 配置
 
 如果是线上需求需要点对点，可在 `<dubbo:reference>` 中配置 url 指向提供者，将绕过注册中心，多个地址用分号隔开，配置如下：
 
@@ -22,7 +25,7 @@ description: "Dubbo 中点对点的直连方式"
 `1.0.6` 及以上版本支持
 {{% /alert %}}
 
-## 通过 -D 参数指定
+### 通过 -D 参数指定
 
 在 JVM 启动参数中加入-D参数映射服务地址，如：
 
@@ -34,7 +37,7 @@ java -Dcom.alibaba.xxx.XxxService=dubbo://localhost:20890
 key 为服务名，value 为服务提供者 url，此配置优先级最高，`1.0.15` 及以上版本支持
 {{% /alert %}}
 
-## 通过文件映射
+### 通过文件映射
 
 如果服务比较多，也可以用文件映射，用 `-Ddubbo.resolve.file` 指定映射文件路径，此配置优先级高于 `<dubbo:reference>` 中的配置 [^3]，如：
 
