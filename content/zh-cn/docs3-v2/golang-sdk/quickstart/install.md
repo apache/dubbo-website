@@ -6,9 +6,7 @@ description: 安装 Dubbo-go 开发环境
 ---
 ### 1. 安装Go语言环境
 
-建议使用最新版 go 1.17
-
-go version >= go 1.15
+> go version >= go 1.15。建议使用最新版 go 1.19
 
 [【Go 语言官网下载地址】](https://golang.google.cn/)
 
