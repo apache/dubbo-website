@@ -14,12 +14,17 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Set up Go 1.18.3
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.3
       - name: Setup Docsy
-        run: git submodule update --init --recursive && sudo npm install -D --save autoprefixer && sudo npm install -D --save postcss-cli
+        run: sudo npm install -D --save autoprefixer && sudo npm install -D postcss && sudo npm install -D --save postcss-cli
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
@@ -30,7 +35,7 @@ jobs:
           HUGO_ENV: production
         run: hugo --minify
       - name: Copy other files
-        run: cp .htaccess ./public
+        run: cp .htaccess ./public & cp 404.html ./public
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/refactor/next'
@@ -38,4 +43,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: next-asf-site
           publish_dir: ./public
-          keep_files: true
+          keep_files: false
