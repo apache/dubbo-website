@@ -5,7 +5,7 @@ linkTitle: "msgpack序列化"
 weight: 15
 description: "在Dubbo中使用msgpack序列化"
 ---
-
+## 背景
 MessagePack是一种高效的二进制序列化格式。它允许您在多种语言(如JSON)之间交换数据。但它更快更小。短整型被编码成一个字节，而典型的短字符串除了字符串本身只需要一个额外的字节。
 
 
@@ -13,7 +13,7 @@ MessagePack是一种高效的二进制序列化格式。它允许您在多种语
 支持版本：`2.7.12` 之后
 {{% /alert %}}
 
-## msgpack使用示例
+## 示例
 
 - 1. provider与consumer引入msgpack依赖
 
