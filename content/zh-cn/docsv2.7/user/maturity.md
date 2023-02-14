@@ -6,7 +6,7 @@ weight: 4
 description: "介绍 Dubbo 各个功能、策略的成熟度" 
 ---
 
-## 功能成熟度
+### 功能成熟度
 
 |Feature | Maturity | Strength | Problem | Advise | User |
 | -------- |---------|---------|---------|---------|---------|
@@ -35,7 +35,7 @@ description: "介绍 Dubbo 各个功能、策略的成熟度"
 |访问日志 | Tested | 访问日志，用于记录调用信息 | 本地存储，影响性能，受磁盘大小限制 | 试用 | | 
 |分布式事务 | Research | JTA/XA三阶段提交事务 | 不稳定 | 不可用 | |
  
-## 策略成熟度
+### 策略成熟度
 
 |Feature | Maturity | Strength | Problem | Advise | User|
 | -------- |---------|---------|---------|---------|---------|
