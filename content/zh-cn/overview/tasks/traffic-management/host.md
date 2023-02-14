@@ -32,12 +32,15 @@ $ kubectl get pods -n dubbo-demo
 
 #### 操作步骤
 1. 打开 Dubbo Admin 控制台
-2. 在左侧导航栏选择【流量管控】>【指定机器导流】
+2. 在左侧导航栏选择【服务治理】>【条件路由】
 3. 点击 "创建"，输入服务 `org.apache.dubbo.samples.UserService` 。
 
-![Admin 指定机器导流配置截图]()
+![Admin 指定机器导流配置截图](/imgs/v3/tasks/host/host_admin.png)
 
-打开机器日志，刷新页面多触发机器用户详情服务调用，可以看到只有规则中指定实例中的日志在持续更新。
+打开机器日志，刷新页面多触发机器用户详情服务调用，可以看到只有规则中指定的实例中在持续刷新以下日志：
+```text
+Received getInfo request......
+```
 
 #### 规则详解
 

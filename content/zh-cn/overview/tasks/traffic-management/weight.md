@@ -35,10 +35,10 @@ Dubbo 提供了基于权重的负载均衡算法，可以实现按比例的流�
 
 #### 操作步骤
 1. 打开 Dubbo Admin 控制台
-2. 在左侧导航栏选择【流量管控】>【权重比例】
+2. 在左侧导航栏选择【服务治理】>【动态配置】
 3. 点击 "创建"，输入要调整的 `org.apache.dubbo.samples.OrderService` 、目标实例匹配条件和权重值。
 
-![Admin 权重比例设置截图]()
+![Admin 权重比例设置截图](/imgs/v3/tasks/weight/weight_admin.png)
 
 再次疯狂点击 "Buy Now" 尝试多次创建订单，现在大概只有 20% 的机会看到 v2 版本的订单详情信息
 

@@ -34,11 +34,13 @@ description: ""
 2. 在左侧导航栏选择【流量管控】>【服务降级】
 3. 点击 "创建"，输入服务 `org.apache.dubbo.samples.CommentService` 和降级规则。
 
-![Admin 服务降级规则配置截图]()
+![Admin 服务降级规则配置截图](/imgs/v3/tasks/mock/mock_admin.png)
 
 等待降级规则推送完成之后，刷新商品详情页面，发现商品评论信息已经变为我们预先设置的 "Mock Comment"，因为商品详情页的 Comment 服务调用已经在本地短路，并没有真正的发送到后端服务提供者机器上。
 
 ![mock2.png](/imgs/v3/tasks/mock/mock2.png)
+
+再次刷新页面
 
 #### 规则详解
 

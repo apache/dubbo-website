@@ -38,10 +38,10 @@ Detail 应用和 Comment 应用都有双区域部署，其中 Detail v1 与 Comm
 
 #### 操作步骤
 1. 登录 Dubbo Admin 控制台
-2. 在左侧导航栏选择【流量管控】 > 【同区域优先】。
+2. 在左侧导航栏选择【服务治理】 > 【条件路由】。
 3. 点击 "创建" 按钮，填入要启用同区域优先的服务如 `org.apache.dubbo.samples.CommentService` 与 `区域标识` 如 `region` 即可。
 
-![Admin 同区域优先设置截图]()
+![Admin 同区域优先设置截图](/imgs/v3/tasks/region/region_admin.png)
 
 同区域优先开启后，此时再尝试刷新商品详情页面，可以看到 description 与 comment 始终保持 v1 或 v2 的同步。
 

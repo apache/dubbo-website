@@ -37,10 +37,10 @@ kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/1
 #### 操作步骤
 
 1. 打开 Dubbo Admin 控制台
-2. 在左侧导航栏选择【流量管控】>【流量隔离】
+2. 在左侧导航栏选择【服务治理】>【标签路由】
 3. 点击 "创建"，输入 `shop-detail` 和流量隔离条件保存即可；重复为 `shop-comment`、`shop-order` 创建相同的隔离规则。
 
-![Admin 灰度隔离环境设置截图]()
+![Admin 灰度隔离环境设置截图](/imgs/v3/tasks/gray/gray_admin.png)
 
 以上规则为每个应用隔离出了一套独立的灰度环境，所有带有 `env=gray` 的标签都属于灰度环境。等待一小会确保规则下发完成，接下来就可以验证灰度流量在隔离环境中运行。
 
@@ -48,7 +48,9 @@ kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/1
 
 ![gray2](/imgs/v3/tasks/gray/gray2.png)
 
-通过 `Login To Gray` 登录后，之后所有请求 Detail、Comment、Order、User 服务的流量都会自动带有 `dubbo.tag=gray` 的标识，Dubbo 标签路由组件会识别这个标识，并将流量路由到刚才圈定的灰度环境（即所有 `env=gray` 的实例）。
+通过 `Login To Gray` 登录后，之后所有请求 Detail、Comment、Order、User 服务的流量都会自动带有 `dubbo.tag=gray` 的标识，Dubbo 标签路由组件会识别这个标识，并将流量路由到刚才圈定的灰度环境（即所有 `env=gray` 的实例）。系统运行效果如下：
+
+![Admin 灰度隔离环境设置截图](/imgs/v3/tasks/gray/gray3.png)
 
 #### 规则详解
 

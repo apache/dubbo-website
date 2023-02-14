@@ -44,7 +44,7 @@ public interface DetailService {
 2. 在左侧导航栏选择【服务治理】 > 【参数路由】
 3. 点击 "创建" 按钮，输入。
 
-![Admin 参数路由设置截图]()
+![Admin 参数路由设置截图](/imgs/v3/tasks/arguments/arguments_admin.png)
 
 方法参数的索引从 `0` 开始，我们上面填入 `1` 表示根据第二个参数进行流量转发。
 
@@ -61,18 +61,18 @@ force: false
 enabled: true
 priority: 1
 conditions:
-  - method=getItem & arguments[1]=dubbo => orderVersion=v2
+  - method=getItem & arguments[1]=dubbo => detailVersion=v2
 ```
 
 * `method=getItem & arguments[1]=dubbo` 表示流量规则匹配 `getItem` 方法调用的第二个参数，当参数值为 `dubbo` 时做进一步的地址子集筛选。
-* `orderVersion=v2` 将过滤出所有带有 `orderVersion=v2` 标识的 URL 地址子集（在示例部署中，我们所有 detail v2 的实例都已经打上了 `orderVersion=v2` 标签）。
+* `detailVersion=v2` 将过滤出所有带有 `detailVersion=v2` 标识的 URL 地址子集（在示例部署中，我们所有 detail v2 的实例都已经打上了 `detailVersion=v2` 标签）。
 
 ```yaml
 conditions:
-  - method=getItem & arguments[1]=dubbo => orderVersion=v2
+  - method=getItem & arguments[1]=dubbo => detailVersion=v2
 ```
 
-`force: false` 表示如果没有 `type=vip` 的地址，则随机访问所有可用地址。
+`force: false` 表示如果没有 `detailVersion=v2` 的地址，则随机访问所有可用地址。
 
 ## 其他事项
 本示例只是 Dubbo 条件路由的一种使用场景，除了根据方法名、参数匹配进行流量转发，条件路由还可以根据附加参数 Attachments、URL 中的数据等进行流量转发，同时匹配条件也支持范围、通配符等，比如：
