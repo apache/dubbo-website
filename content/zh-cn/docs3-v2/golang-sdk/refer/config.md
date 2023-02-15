@@ -2,6 +2,7 @@
 title: 配置项参考
 type: docs
 weight: 1
+description: Dubbo-go 配置项
 ---
 
 ## 根配置
