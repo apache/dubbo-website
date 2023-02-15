@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "启动命令和配置详解"
-linkTitle: "启动命令和配置详解"
+title: "启动和配置"
+linkTitle: "启动和配置"
 weight: 20
 ---
 
