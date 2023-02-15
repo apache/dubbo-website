@@ -2,6 +2,7 @@
 title: Dubbogo 生态组件
 type: docs
 weight: 3
+description: Dubbo-go 生态组件
 ---
 
 ### Dubbo-go / Dubbo-go 3.0 
