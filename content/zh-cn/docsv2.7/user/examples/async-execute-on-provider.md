@@ -5,8 +5,7 @@ linkTitle: "异步执行"
 weight: 21
 description: "Dubbo 服务提供方的异步执行"
 ---
-
-
+## 背景
 Provider端异步执行将阻塞的业务从Dubbo内部线程池切换到业务自定义线程，避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。异步执行无异于节省资源或提升RPC响应性能，因为如果业务执行需要阻塞，则始终还是要有线程来负责执行。
 
 {{% alert title="注意" color="warning" %}}
@@ -17,8 +16,9 @@ Provider 端异步执行和 Consumer 端异步调用是相互独立的，你可�
 - Consumer异步 - Provider异步
 {{% /alert %}}
 
+## 示例
 
-## 定义 CompletableFuture 签名的接口
+### 定义 CompletableFuture 签名的接口
 
 服务接口定义：
 
@@ -53,7 +53,7 @@ public class AsyncServiceImpl implements AsyncService {
 
 
 
-## 使用AsyncContext
+### 使用AsyncContext
 
 Dubbo 提供了一个类似 Serverlet 3.0 的异步接口`AsyncContext`，在没有 CompletableFuture 签名接口的情况下，也可以实现 Provider 端的异步执行。
 
