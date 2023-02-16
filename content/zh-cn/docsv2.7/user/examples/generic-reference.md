@@ -5,10 +5,13 @@ linkTitle: "使用泛化调用"
 weight: 16
 description: "实现一个通用的服务测试框架，可通过 `GenericService` 调用所有服务实现"
 ---
-
+## 背景
 泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参数及返回值中的所有 POJO 均用 `Map` 表示，通常用于框架集成，比如：实现一个通用的服务测试框架，可通过 `GenericService` 调用所有服务实现。
 
-## 通过 Spring 使用泛化调用
+
+## 示例
+
+### 通过 Spring 使用泛化调用
 
 在 Spring 配置申明 `generic="true"`：
 
@@ -23,7 +26,7 @@ GenericService barService = (GenericService) applicationContext.getBean("barServ
 Object result = barService.$invoke("sayHello", new String[] { "java.lang.String" }, new Object[] { "World" });
 ```
 
-## 通过 API 方式使用泛化调用
+### 通过 API 方式使用泛化调用
 
 ```java
 import org.apache.dubbo.rpc.service.GenericService; 
@@ -55,7 +58,7 @@ Object result = genericService.$invoke("findPerson", new String[]
 ...
 ```
 
-## 有关泛化类型的进一步解释
+### 有关泛化类型的进一步解释
 
 假设存在 POJO 如：
 
