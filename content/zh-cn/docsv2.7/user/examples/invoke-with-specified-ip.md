@@ -5,14 +5,14 @@ linkTitle: "指定IP"
 weight: 15
 description: "对于Provider集群中注册的多个实例，指定Ip:Port进行调用"
 ---
-
+## 背景
 当多个Provider注册到注册中心时，可以通过在RpcContext中动态的指定其中一个实例的Ip，Port进行Dubbo调用。
 
 {{% alert title="提示" color="primary" %}}
 支持版本：`2.7.12` 之后
 {{% /alert %}}
 
-## 用法示例
+## 示例
 
 - provider demo
 
