@@ -3,7 +3,7 @@ type: docs
 title: "调用信息记录"
 linkTitle: "调用信息记录"
 weight: 13
-description: "了解 dubbo3 调用信息记录通过访问日志来配置和使用"
+description: "了解 Dubbo 调用信息记录通过访问日志来配置和使用"
 ---
 ## 特性说明
 
