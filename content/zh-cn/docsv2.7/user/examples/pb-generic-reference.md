@@ -5,13 +5,14 @@ linkTitle: "Protobuf 泛化调用"
 weight: 17
 description: "对 Google Protobuf 对象进行泛化调用"
 ---
-
+## 背景
 泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参考 [泛化调用](../generic-reference)。
 一般泛化调用只能用于生成的服务参数为POJO的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常POJO，可以通过 protobuf-json 泛化调用。  
 
 GoogleProtobuf 序列化相关的Demo可以参考 [protobuf-demo](https://github.com/apache/dubbo-samples/tree/master/3-extensions/serialization/dubbo-samples-protobuf)
 
-## 通过Spring对Google Protobuf对象泛化调用
+## 示例
+### 通过Spring对Google Protobuf对象泛化调用
 
 在 Spring 中配置声明 generic = "protobuf-json"
 
@@ -26,7 +27,7 @@ GenericService barService = (GenericService) applicationContext.getBean("barServ
 Object result = barService.$invoke("sayHello",new String[]{"org.apache.dubbo.protobuf.GooglePbBasic$CDubboGooglePBRequestType"}, new Object[]{"{\"double\":0.0,\"float\":0.0,\"bytesType\":\"Base64String\",\"int32\":0}"});
 ```
 
-## 通过 API 方式对 Google Protobuf 对象泛化调用
+### 通过 API 方式对 Google Protobuf 对象泛化调用
 
 ```java
 ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
@@ -49,7 +50,7 @@ Object result = genericService.$invoke("sayHello", new String[] {
     new Object[] {requestString});
 ```
 
-## GoogleProtobuf 对象的处理
+### GoogleProtobuf 对象的处理
 
 GoogleProtobuf 对象是由 Protocol 契约生成,相关知识请参考 [ProtocolBuffers 文档](https://developers.google.com/protocol-buffers/?hl=zh-CN)。假如有如下Protobuf 契约
 
