@@ -3,7 +3,7 @@ type: docs
 title: "本地伪装"
 linkTitle: "本地伪装"
 weight: 10
-description: "了解如何在 Dubbo3 中利用本地伪装实现服务降级"
+description: "了解如何在 Dubbo 中利用本地伪装实现服务降级"
 ---
 
 ## 特性说明
