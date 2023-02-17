@@ -5,14 +5,15 @@ linkTitle: "事件通知"
 weight: 24
 description: "在调用之前、调用之后、出现异常时的事件通知"
 ---
-
+## 背景
 在调用之前、调用之后、出现异常时，会触发 `oninvoke`、`onreturn`、`onthrow` 三个事件，可以配置当事件发生时，通知哪个类的哪个方法。
 
 {{% alert title="提示" color="primary" %}}
 支持版本：`2.0.7` 之后
 {{% /alert %}}
 
-#### 服务提供者与消费者共享服务接口
+## 示例
+### 服务提供者与消费者共享服务接口
 
 ```java
 interface IDemoService {
@@ -20,7 +21,7 @@ interface IDemoService {
 }
 ```
 
-#### 服务提供者实现
+### 服务提供者实现
 
 ```java
 class NormalDemoService implements IDemoService {
@@ -30,7 +31,7 @@ class NormalDemoService implements IDemoService {
 }
 ```
 
-#### 服务提供者配置
+### 服务提供者配置
 
 ```xml
 <dubbo:application name="rpc-callback-demo" />
@@ -39,7 +40,7 @@ class NormalDemoService implements IDemoService {
 <dubbo:service interface="org.apache.dubbo.callback.implicit.IDemoService" ref="demoService" version="1.0.0" group="cn"/>
 ```
 
-#### 服务消费者 Callback 接口
+### 服务消费者 Callback 接口
 
 ```java
 interface Notify {
@@ -48,7 +49,7 @@ interface Notify {
 }
 ```
 
-#### 服务消费者 Callback 实现
+### 服务消费者 Callback 实现
 
 ```java
 class NotifyImpl implements Notify {
@@ -66,7 +67,7 @@ class NotifyImpl implements Notify {
 }
 ```
 
-#### 服务消费者 Callback 配置
+### 服务消费者 Callback 配置
 
 ```xml
 <bean id ="demoCallback" class = "org.apache.dubbo.callback.implicit.NotifyImpl" />
@@ -88,7 +89,7 @@ class NotifyImpl implements Notify {
 `async=false` 默认
 {{% /alert %}}
 
-#### 测试代码
+### 测试代码
 
 ```java
 IDemoService demoService = (IDemoService) context.getBean("demoService");
