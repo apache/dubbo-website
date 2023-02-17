@@ -5,7 +5,7 @@ linkTitle: "异步调用"
 weight: 21
 description: "在 Dubbo 中发起异步调用"
 ---
-
+## 背景
 
 从 2.7.0 开始，Dubbo 的所有异步编程接口开始以 [CompletableFuture](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html) 为基础
 
@@ -13,8 +13,9 @@ description: "在 Dubbo 中发起异步调用"
 
 ![/user-guide/images/future.jpg](/imgs/user/future.jpg)
 
+## 示例
 
-## 使用 CompletableFuture 签名的接口
+### 使用 CompletableFuture 签名的接口
 
 需要服务提供者事先定义 CompletableFuture 签名的服务，具体参见[服务端异步执行](../async-execute-on-provider)接口定义：
 
@@ -49,7 +50,7 @@ future.whenComplete((v, t) -> {
 System.out.println("Executed before response return.");
 ```
 
-## 使用 RpcContext
+### 使用 RpcContext
 
 在 consumer.xml 中配置：
 
@@ -90,7 +91,7 @@ future.get();
 
 
 
-## 重载服务接口
+### 重载服务接口
 
 如果你只有这样的同步服务定义，而又不喜欢 RpcContext 的异步使用方式。
 
