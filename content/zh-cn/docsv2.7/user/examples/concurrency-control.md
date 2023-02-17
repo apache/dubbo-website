@@ -6,7 +6,7 @@ weight: 28
 description: "Dubbo 中的并发控制"
 ---
 
-## 配置样例
+## 示例
 
 ### 样例 1
 
