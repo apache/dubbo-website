@@ -50,7 +50,7 @@ public class DevelopProviderServiceV2 implements DevelopService{
 ```
 
 启动服务后，可以在注册中心看到对应的服务列表，如下：
-![serviceList](/imgs/v3/develop/develop-service-list.png)
+`![serviceList](/imgs/v3/develop/develop-service-list.png)`
 
 
 客户端接口调用：

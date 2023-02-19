@@ -11,7 +11,7 @@ description: "通过示例简单展示一个Dubbo服务的发布和调用"
 本文将基于 Dubbo Samples 示例演示如何快速搭建并部署一个微服务应用。
 代码地址：[dubbo-samples-develop](https://github.com/apache/dubbo-samples/10-task/dubbo-samples-develop)
 代码分为三个模块，如下图：
-![project](/imgs/v3/develop/develop-project.png)
+`![project](/imgs/v3/develop/develop-project.png)`
 
 ## 准备
 本示例代码基于Springboot 3.0
@@ -97,7 +97,7 @@ public class DevelopApplication {
 
 ```
 启动成功后，在注册中心可以看到对应的服务列表，如图：
-![serviceList](/imgs/v3/develop/develop-service-list.png)
+`![serviceList](/imgs/v3/develop/develop-service-list.png)`
 
 ## 调用服务
 
