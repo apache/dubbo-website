@@ -14,7 +14,7 @@ Dubbo 框架提供了自定义的高性能 RPC 通信协议：基于 HTTP/2 的 
 
 **Dubbo 框架不绑定任何通信协议，在实现上 Dubbo 对多协议的支持也非常灵活，它可以让你在一个应用内发布多个使用不同协议的服务，并且支持用同一个 port 端口对外发布所有协议。**
 
-![protocols](/imgs/v3/feature/protocols/protocols1.png)
+![protocols](/imgs/v3/feature/protocols/protocol1.png)
 
 通过 Dubbo 框架的多协议支持，你可以做到：
 * 将任意通信协议无缝地接入 Dubbo 服务治理体系。Dubbo 体系下的所有通信协议，都可以享受到 Dubbo 的编程模型、服务发现、流量管控等优势。比如 gRPC over Dubbo 的模式，服务治理、编程 API 都能够零成本接入 Dubbo 体系。
@@ -67,7 +67,7 @@ gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 [产品�
 * JsonRPC
 
 ## 异构微服务体系互通
-关于协议迁移、多协议技术栈共存的实践方案，请参考本篇[博客文章](../../../blog/java/demos/multiple-protocols-registries.md)。
+关于协议迁移、多协议技术栈共存的实践方案，请参考本篇[博客文章](/zh-cn/blog/2023/01/05/dubbo-连接异构微服务体系-多协议多注册中心/)。
 
 ## 配置方式
 以上协议的配置和使用方式，包括如何配置 `单端口多协议` 支持等，请参照以下 sdk 示例文档：

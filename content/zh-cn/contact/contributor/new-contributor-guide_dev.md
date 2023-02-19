@@ -12,7 +12,7 @@ weight: 2
 
 邮件列表是 Dubbo 官方推荐的讨论方式，所有与 Dubbo 相关的内容都可以在这里讨论，请点击 [Issue](https://github.com/apache/dubbo/issues/1393) 了解更多关于邮件列表订阅的内容
 
-如需订阅如下邮件列表，请参考 [邮件列表订阅向导](/zh-cn/blog/1/01/01/邮件列表订阅向导/)
+如需订阅如下邮件列表，请参考 [邮件列表订阅向导](../mailing-list-subscription-guide_dev)
 
 * dev@dubbo.apache.org：开发邮件列表，您在使用或者开发 Dubbo 的过程中遇到的任何问题，都可以在这里进行提问。
 * commits@dubbo.apache.org：所有的提交内容都会推送到这个邮件列表，如果您对 Dubbo 的进展感兴趣，可以订阅这个邮件列表。
@@ -20,7 +20,7 @@ weight: 2
 
 ### 报告问题
 * 非安全问题直接在 GitHub Issue 中提出，另请参考 [Issue Template](https://github.com/apache/dubbo/blob/master/.github/ISSUE_TEMPLATE/dubbo-issue-report-template.md) 。
-* 安全问题请参考 [“反馈漏洞”](../报告安全问题) 。
+* 安全问题请参考 [“反馈漏洞”](../reporting-security-issues_dev) 。
 
 ### 贡献代码流程
 此贡献流程适用于所有的 Apache Dubbo 社区内容，包括但不限于 dubbo（主干仓库）、dubbo-admin、dubbo-website。
