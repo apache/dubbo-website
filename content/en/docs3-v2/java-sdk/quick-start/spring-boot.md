@@ -476,7 +476,7 @@ In this configuration file, the Dubbo application name, Dubbo protocol informati
 
 
 
-### 7. Configure the consumer XML configuration file
+### 7. Configure the consumer Yaml configuration file
 
 Similarly, we need to create a configuration file for the consumer.
 
