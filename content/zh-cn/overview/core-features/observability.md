@@ -102,6 +102,15 @@ Dubbo可观测性面板可以在Grafana官网的模板库中可以找到，您�
 ![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
 ![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
 
+### Dubbo 指标含义
+
+### jvm metrics
+
+### provider metrics
+
+### consumer metrics
+
+
 
 ## Tracing
 全链路追踪对于监测分布式系统运行状态具有非常重要的价值，Dubbo 通过 Filter 拦截器实现了请求运行时的埋点跟踪，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等，可以实现全链路跟踪数据的分析与可视化展示。
