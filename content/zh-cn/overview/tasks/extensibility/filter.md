@@ -46,7 +46,7 @@ no_list: true
     # 启用Kubernetes中部署的nacos的地址
     dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
     ```
-* 部署[Extensibility Filter Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/App.yml)
+* 部署`[Extensibility Filter Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/App.yml)`
 
 ### 使用本地IDE
 * 部署[Nacos](https://nacos.io/zh-cn/docs/quick-start.html)2.2.0版本
