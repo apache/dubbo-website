@@ -91,8 +91,8 @@ public class Consumer {
 Dubbo 原生服务可打包部署到 Docker 容器、Kubernetes、服务网格 等云原生基础设施和微服务架构。
 
 关于不同环境的部署示例，可参考：
-* [部署 Dubbo 服务到 Docker 容器](../../task/deploy/deploy-on-docker)
-* [部署 Dubbo 服务到 Kubernetes](../../task/deploy/deploy-on-k8s-containerd)
+* [部署 Dubbo 服务到 Docker 容器](../../tasks/deploy/deploy-on-docker)
+* [部署 Dubbo 服务到 Kubernetes](../../tasks/deploy/deploy-on-k8s-containerd)
 
 ## 治理
 对于服务治理，绝大多数应用只需要增加以下配置即可，Dubbo 应用将具备地址发现和负载均衡能力。
@@ -103,7 +103,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-部署并打开 [Dubbo Admin 控制台](../../task/deploy)，可以看到集群的服务部署和调用数据
+部署并打开 [Dubbo Admin 控制台](../../tasks/deploy)，可以看到集群的服务部署和调用数据
 
 ![Admin](/imgs/v3/what/admin.png)
 

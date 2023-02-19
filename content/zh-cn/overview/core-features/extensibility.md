@@ -102,7 +102,7 @@ Dubbo 官方提供了加权随机、加权轮询、一致性哈希、最小活�
 通过对 Consul、Eureka 的支持，Dubbo 也实现了与 Spring Cloud 体系在地址和通信层面的互通，让用户同时部署 Dubbo 与 Spring Cloud，或者从 Spring Cloud 迁移到 Dubbo 变得更容易。
 
 ### Config Center
-配置中心是用户实现动态控制 Dubbo 行为的关键组件，我们在 [流量管控](../../task/traffic-management) 任务中下发的所有规则，都是先下发到配置中心保存起来，进而 Dubbo 实例通过监听配置中心的变化，收到路由规则并达到控制流量的行为。
+配置中心是用户实现动态控制 Dubbo 行为的关键组件，我们在 [流量管控](../../tasks/traffic-management) 任务中下发的所有规则，都是先下发到配置中心保存起来，进而 Dubbo 实例通过监听配置中心的变化，收到路由规则并达到控制流量的行为。
 
 Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis、Apollo 等配置中心实现。
 
