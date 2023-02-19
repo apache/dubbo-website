@@ -69,9 +69,9 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 ### 可视化页面
 也可以使用 Grafana、Prometheus 等实现可视化指标监测，具体请参考以下可视化任务示例：
 
-* [Admin 任务链接]()
-* [Grafana 任务链接]()
-* [Prometheus 任务链接]()
+* [Admin 任务链接](../../task/deploy)
+* [Grafana 任务链接](../../task/observability)
+* [Prometheus 任务链接](../../task/observability)
 
 ## Tracing
 全链路追踪对于监测分布式系统运行状态具有非常重要的价值，Dubbo 通过 Filter 拦截器实现了请求运行时的埋点跟踪，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等，可以实现全链路跟踪数据的分析与可视化展示。
@@ -80,10 +80,10 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 
 只需要简单的一行配置即可切换链路跟踪的后端实现，并且，你可以随时通过 Dubbo Admin 等治理平台动态调整 Dubbo 的链路追踪采样率，对于问题排查都非常有价值。
 
-* [基于 Skywalking 实现全链路追踪]()
-* [基于 Zipkin 实现全链路追踪]()
+* [基于 Skywalking 实现全链路追踪](/)
+* [基于 Zipkin 实现全链路追踪](/)
 
 ## Logging
 访问日志可以帮助分析系统的流量情况，在有些场景下，开启访问日志对于排查问题也非常有帮助。
 
-* [开启 Access Log]()
+* [开启 Access Log](../../task/traffic-management/accesslog)

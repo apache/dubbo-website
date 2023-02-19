@@ -37,28 +37,28 @@ Triple 协议的核心特性如下：
 * 双向流式通信（Bidirectional Streaming）
 
 开发实践
-* [Triple 协议使用]() 请参见具体语言 sdk 文档
-* [Triple 协议规范]()
+* [Triple 协议使用](/) 请参见具体语言 sdk 文档
+* [Triple 协议规范](/)
 
 ## Dubbo2
 Dubbo2 协议是基于 TCP 传输层协议之上构建的一套 RPC 通信协议，由于其紧凑、灵活、高性能的特点，在 Dubbo2 时代取得了非常广泛的应用，是企业构建高性能、大规模微服务集群的关键通信方案。在云原生时代，我们更推荐使用通用性、穿透性更好的 Triple 协议。
 
-[Dubbo2 协议规范]()
+[Dubbo2 协议规范](/)
 
 ## gRPC
 你可以用 Dubbo 开发和治理微服务，然后设置使用 gRPC 协议进行底层通信。但为什么要这么做那，与直接使用 gRPC 框架对比有什么优势？简单的答案是，这是使用 gRPC 进行微服务开发的常用模式，具体请往下看。
 
-gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 [产品对比]() 文档中提到的，gRPC 的定位是通信协议与实现，是一款纯粹的 RPC 框架，而 Dubbo 定位是一款微服务框架，为微服务实践提供解决方案。因此，相比于 Dubbo，gRPC 相对欠缺了微服务编程模型、服务治理等能力的抽象。
+gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 [产品对比](../../what/xyz-difference) 文档中提到的，gRPC 的定位是通信协议与实现，是一款纯粹的 RPC 框架，而 Dubbo 定位是一款微服务框架，为微服务实践提供解决方案。因此，相比于 Dubbo，gRPC 相对欠缺了微服务编程模型、服务治理等能力的抽象。
 
 在 Dubbo 体系下使用 gRPC 协议 (gRPC over Dubbo Framework) 是一个非常高效和轻量的选择，它让你既能使用原生的 gRPC 协议通信，又避免了基于 gRPC 进行二次定制与开发的复杂度 (二次开发与定制 gRPC，是很多企业规模化实践后证实不可避免的环节，Dubbo 框架替开发者完成了这一步，让开发者可以直接以最简单的方式使用 gRPC)。
 
-[gRPC over Dubbo 示例]()
+[gRPC over Dubbo 示例](/)
 
 ## REST
 微服务领域常用的一种通信模式是 HTTP + JSON，包括 Spring Cloud、Microprofile 等一些主流的微服务框架都默认使用的这种通信模式，Dubbo 同样提供了对基于 HTTP 的编程、通信模式的支持。
 
-* [HTTP over Dubbo 示例]()
-* [Dubbo 与 Spring Cloud 体系互通]()
+* [HTTP over Dubbo 示例](/)
+* [Dubbo 与 Spring Cloud 体系互通](/)
 
 ## 其他通信协议
 除了以上介绍的几种协议之外，你还可以将以下协议运行在 Dubbo 之上。对 Dubbo 而言，只需要修改一行简单的配置，就可以切换底层服务的通信协议，其他外围 API 和治理能力不受影响。
@@ -72,10 +72,10 @@ gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 [产品�
 ## 配置方式
 以上协议的配置和使用方式，包括如何配置 `单端口多协议` 支持等，请参照以下 sdk 示例文档：
 
-* [Java]()
-* [Golang]()
-* [Rust]()
-* [Node.js]()
+* [Java](/)
+* [Golang](/)
+* [Rust](/)
+* [Node.js](/)
 
 ## 自定义扩展
 除了以上官方版本支持的通信协议，Dubbo 支持扩展新协议支持，具体请参见 [Dubbo 可扩展性](../extensibility)

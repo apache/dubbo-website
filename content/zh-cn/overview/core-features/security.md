@@ -96,11 +96,11 @@ Dubbo 定义了一套认证 API，对于常规使用的场景，开发者可以�
 不论是否使用 Istio 控制面，对于 Request Authentication，JWT token 仍需要在 Dubbo 侧编程指定。
 
 每种语言实现的认证 API 定义略有差异，具体定义请参考各 SDK 文档：
-* [Java]()
-* [Go]()
-* [Rust]()
-* [Node.js]()
+* [Java](/)
+* [Go](/)
+* [Rust](/)
+* [Node.js](/)
 
 ## 示例任务
 
-访问如下 [Dubbo 任务示例]() 进行安全策略动手实践。
+访问如下 [Dubbo 任务示例](/) 进行安全策略动手实践。

@@ -14,7 +14,7 @@ Dubbo 解决企业微服务从开发、部署到治理运维的一系列挑战�
 接下来以 Java 体系 Spring Boot 项目为例讲解 Dubbo 应用开发的基本步骤，整个过程非常直观简单，其他语言开发过程类似。
 
 ### 创建项目
-[Dubbo 微服务项目脚手架]()（支持浏览器页面、命令行和 IDE）可用于快速创建微服务项目，只需要告诉脚手架期望包含的功能或组件，脚手架最终可以帮助开发者生成具有必要依赖的微服务工程。
+[Dubbo 微服务项目脚手架](/)（支持浏览器页面、命令行和 IDE）可用于快速创建微服务项目，只需要告诉脚手架期望包含的功能或组件，脚手架最终可以帮助开发者生成具有必要依赖的微服务工程。
 
 ![脚手架示例图](/imgs/v3/advantages/initializer.png)
 
@@ -82,18 +82,17 @@ public class Consumer {
 ```
 
 以上是 Dubbo 微服务开发的流程性说明，实际开发的详细指导步骤请参见：
-* [Java 微服务开发入门]()
-* [Go 微服务开发入门]()
-* [Rust 微服务开发入门]()
-* [Node.js 微服务开发入门]()
+* [Java 微服务开发入门](../../quickstart/java)
+* [Go 微服务开发入门](../../quickstart/go)
+* [Rust 微服务开发入门](../../quickstart/rust)
+* [Node.js 微服务开发入门](../../quickstart/nodejs)
 
 ## 部署
 Dubbo 原生服务可打包部署到 Docker 容器、Kubernetes、服务网格 等云原生基础设施和微服务架构。
 
 关于不同环境的部署示例，可参考：
-* [部署 Dubbo 服务到 Docker 容器]()
-* [部署 Dubbo 服务到 Kubernetes]()
-* [部署 Dubbo 服务到 Service Mesh]()
+* [部署 Dubbo 服务到 Docker 容器](../../task/deploy/deploy-on-docker)
+* [部署 Dubbo 服务到 Kubernetes](../../task/deploy/deploy-on-k8s-containerd)
 
 ## 治理
 对于服务治理，绝大多数应用只需要增加以下配置即可，Dubbo 应用将具备地址发现和负载均衡能力。
@@ -104,7 +103,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-部署并打开 [Dubbo Admin 控制台]()，可以看到集群的服务部署和调用数据
+部署并打开 [Dubbo Admin 控制台](../../task/deploy)，可以看到集群的服务部署和调用数据
 
 ![Admin](/imgs/v3/what/admin.png)
 
