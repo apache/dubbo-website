@@ -80,9 +80,9 @@ kubectl port-forward -n dubbo-system service/skywalking-oap-dashboard 8082:8082
 ```
 
 此时，打开浏览器，即可通过以下地址访问：
-* 商城首页 [http://localhost:8080/](http://localhost:8080/)
-* Dubbo Admin 控制台 [http://localhost:38080/](http://localhost:38080/)
-* Skywalking 控制台 [http://localhost:8082/](http://localhost:8082/)
+* 商城首页 `http://localhost:8080`
+* Dubbo Admin 控制台 `http://localhost:38080`
+* Skywalking 控制台 `http://localhost:8082`
 
 ## 任务项
 接下来，试着通过如下任务项给商城增加一些流量管控规则吧。
