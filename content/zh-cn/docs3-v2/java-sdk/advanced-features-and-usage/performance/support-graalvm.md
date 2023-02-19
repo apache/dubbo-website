@@ -6,10 +6,10 @@ weight: 40
 description: "Dubbo 支持 Graal VM"
 ---
 
-Dubbo3.0 支持 Native-Image 文档
+
 
 ## 功能说明
-本文档将介绍将 dubbo3.0 项目接入 GraalVM，进行 native-image 编译为二进制的流程。
+Dubbo3.0 支持 Native-Image 文档, 本文档将介绍将 dubbo3.0 项目接入 GraalVM，进行 native-image 编译为二进制的流程。
 
 关于 GraalVm 的更多信息可以阅读 https://www.graalvm.org/docs/getting-started/container-images/ 此文档。
 

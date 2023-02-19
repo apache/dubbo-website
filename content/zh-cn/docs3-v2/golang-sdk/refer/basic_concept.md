@@ -2,6 +2,7 @@
 type: docs
 title: 配置基本概念
 keywords: 配置基本概念
+description: 配置基本概念
 ---
 
 ## 1. 框架配置

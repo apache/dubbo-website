@@ -2,6 +2,7 @@
 title: 依赖适配版本号
 type: docs
 weight: 4
+description: 依赖适配版本号
 ---
 
 Dubbo-go 发布新版本时更新当前依赖的的版本。

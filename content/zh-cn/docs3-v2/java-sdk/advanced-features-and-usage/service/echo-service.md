@@ -25,7 +25,7 @@ echo 测试是验证 Dubbo 服务基本功能的一种简单有效的方法，�
 <dubbo:reference id="memberService" interface="com.xxx.MemberService" />
 ```
 
-### 代码
+### 代码示例
 ```java
 // 远程服务引用
 MemberService memberService = ctx.getBean("memberService"); 

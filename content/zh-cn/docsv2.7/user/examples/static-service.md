@@ -5,8 +5,10 @@ linkTitle: "静态服务"
 weight: 11
 description: "将 Dubbo 服务标识为非动态管理模式"
 ---
-
+## 背景
 有时候希望人工管理服务提供者的上线和下线，此时需将注册中心标识为非动态管理模式。
+
+## 示例
 
 ```xml
 <dubbo:registry address="10.20.141.150:9090" dynamic="false" />

@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "部署"
-linkTitle: "部署"
+title: "部署操作"
+linkTitle: "部署操作"
 weight: 30
 ---
 

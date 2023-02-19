@@ -5,7 +5,7 @@ weight: 3
 description: 完成一次 RPC 调用自己定义接口的版本
 ---
 
-## 1.概述
+## 1.实现概述
 我们本章来实现一个简单的小需求，实现一个分布式ID生成服务，通过该服务可以获取分布式ID
 （假设的分布式ID，我们不探讨ID的生成方案和算法，这里直接使用uuid代替，只为演示自定义服务的创建）
 
@@ -203,7 +203,6 @@ go run cmd/client.go
 2022-12-30T20:59:19.982+0800    INFO    cmd/client.go:52        get id result: aafd9c73-4014-4d67-a67f-5d107105647b
 
 ```
-## 3. 更多
-
-可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考[注册中心](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/)
+> ## 更多
+> 可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考[注册中心](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/)
 

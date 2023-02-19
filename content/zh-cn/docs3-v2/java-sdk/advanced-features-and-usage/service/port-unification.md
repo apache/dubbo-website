@@ -3,7 +3,7 @@ type: docs
 title: "端口协议复用"
 linkTitle: "端口协议复用"
 weight: 1
-description: "dubbo3 端口协议复用, 单端口多协议支持"
+description: "Dubbo 端口协议复用, 单端口多协议支持"
 ---
 ## 特性说明
 通过对protocol进行配置，dubbo3可以支持端口的协议复用。

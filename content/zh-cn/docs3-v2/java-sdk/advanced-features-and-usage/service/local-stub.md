@@ -3,7 +3,7 @@ type: docs
 title: "本地存根"
 linkTitle: "本地存根"
 weight: 11
-description: "了解 Dubbo3 中本地存根在客户端执行部分逻辑的使用"
+description: "了解 Dubbo 中本地存根在客户端执行部分逻辑的使用"
 ---
 ## 特性说明：
 

@@ -2,7 +2,7 @@
 type: docs
 title: "使用案例"
 linkTitle: "使用案例"
-weight: 18
+weight: 8
 description: "基于实际情况来制定路由规则。"
 ---
 

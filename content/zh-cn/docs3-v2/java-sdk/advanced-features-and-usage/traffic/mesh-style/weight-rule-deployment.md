@@ -3,7 +3,7 @@
 type: docs
 title: "权重路由"
 linkTitle: "权重路由"
-weight: 16
+weight: 4
 description: "基于用户自定权重实现路由功能。"
 ---
 

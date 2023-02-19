@@ -5,14 +5,14 @@ linkTitle: "收集广播响应"
 weight: 15
 description: "Dubbo broadcast2 广播模式收集所有服务提供者的接口响应"
 ---
-
+## 背景
 适用场景：对于一个dubbo消费者，广播调用多个dubbo 提供者，该消费者可以收集所有服务提供者的响应结果。
 
 {{% alert title="提示" color="primary" %}}
 支持版本：`2.7.12` 之后
 {{% /alert %}}
 
-## 使用示例
+## 示例
 
 - consumer demo
 

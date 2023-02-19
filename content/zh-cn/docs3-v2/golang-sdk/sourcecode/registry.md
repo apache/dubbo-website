@@ -2,6 +2,7 @@
 title: 注册中心
 type: docs
 weight: 1
+description: 注册中心源码解读
 ---
 
 Dubbogo 为注册中心抽象了一套接口如下：

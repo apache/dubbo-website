@@ -1,15 +1,15 @@
 ---
 type: docs
-title: "依赖"
-linkTitle: "依赖"
+title: "基本依赖"
+linkTitle: "基本依赖"
 weight: 3
 description: "Dubbo 依赖基本介绍" 
 ---
 
-## 必须依赖
+### 必须依赖
 JDK 1.6+ [^1]
 
-## 缺省依赖
+### 缺省依赖
 通过 `mvn dependency:tree > dep.log` 命令分析，Dubbo 缺省依赖以下三方库：
 
 ```
@@ -25,7 +25,7 @@ JDK 1.6+ [^1]
 * spring-context.jar [^4]: 如果用 `ServiceConfig` 和 `ReferenceConfig` 的 API 调用，则不需要。
 * netty.jar [^5]: 如果 `<dubbo:protocol server="mina"/>` 或 `<dubbo:protocol server="grizzly"/>`，则换成 mina.jar 或 grizzly.jar。如果 `<protocol name="rmi"/>`，则不需要。
     
-## 可选依赖
+### 可选依赖
 以下依赖，在主动配置使用相应实现策略时用到，需自行加入依赖。
 
 * netty-all 4.0.35.Final 
