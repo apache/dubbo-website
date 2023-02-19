@@ -57,7 +57,7 @@ dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调
 ### 启用Kryo和FST
 
 使用Kryo和FST非常简单，只需要先增加对应的依赖。
-更多插件： [Dubbo SPI Extensions](/zh-cn/download/dubbo-spi-extensions)
+更多插件： [Dubbo SPI Extensions](/zh-cn/download/spi-extensions)
 
 ```xml
 <dependency>
