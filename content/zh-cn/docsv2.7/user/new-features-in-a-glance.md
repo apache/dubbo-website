@@ -36,11 +36,11 @@ Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，
 * 实例级服务发现
 * [服务鉴权](../examples/auth/)
 * 性能优化
-    * [调用链路提升 30%](/zh-cn/blog/2020/05/18/2.7.5-功能解析/)
+    * [调用链路提升 30%](/zh-cn/blog/2020/05/18/dubbo-java-2.7.5-功能解析/)
     * [消费端线程模型](../examples/consumer-threadpool/)
     * 地址推送链路
     
 ## 热门文章列表
 [从 2019 到 2020，Apache Dubbo 年度总结](/zh-cn/blog/2020/05/11/从-2019-到-2020apache-dubbo-年度回顾与总结/)  
-[Dubbo 2.7.5 里程碑版本发布](/zh-cn/blog/2020/05/18/2.7.5-功能解析/)  
+[Dubbo 2.7.5 里程碑版本发布](/zh-cn/blog/2020/05/18/dubbo-java-2.7.5-功能解析/)  
 [Dubbo 在协议与多语言方向的探索：支持 gRPC、Protobuf](/zh-cn/blog/2019/10/28/dubbo-在跨语言和协议穿透性方向上的探索支持-http/2-grpc-和-protobuf/)
