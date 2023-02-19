@@ -1,8 +1,8 @@
 ---
 type: docs
-title: "Prometheus"
+title: "从 Prometheus 查询 Metrics 监控指标"
 linkTitle: "Prometheus"
-description: "演示如何将 Dubbo 部署到 Kubernetes 并复用 Kubernetes Native Service。"
-weight: 60
+description: ""
+weight: 30
 no_list: true
 ---
