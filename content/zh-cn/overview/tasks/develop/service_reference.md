@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "开发服务"
-linkTitle: "发布和调用 Dubbo 服务"
+title: "发布和调用 Dubbo 服务"
+linkTitle: "发布和调用"
 weight: 2
 description: "通过示例简单展示一个Dubbo服务的发布和调用"
 ---
