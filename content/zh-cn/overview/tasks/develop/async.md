@@ -1,7 +1,7 @@
 ---
 type: docs
 title: "异步调用"
-linkTitle: "Provider端和Consumer端异步调用"
+linkTitle: "异步调用"
 weight: 3
 description: "某些情况下希望dubbo接口异步调用，避免不必要的等待。"
 ---
