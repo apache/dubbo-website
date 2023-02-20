@@ -1,7 +1,7 @@
 ---
 type: docs
 title: "上下文参数传递"
-linkTitle: "上下文参数传递"
+linkTitle: "上下文参数"
 weight: 5
 description: "通过 Dubbo 中的 Attachment 在服务消费方和提供方之间传递参数"
 ---
