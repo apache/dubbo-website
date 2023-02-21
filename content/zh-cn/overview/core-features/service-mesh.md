@@ -7,7 +7,7 @@ description: ""
 feature:
   title: 服务网格(Service Mesh)
   description: >
-    多种形态数据面支持，包括以 Thin SDK 模式与 Envoy 等一起部署或以 Proxyless 模式独立部署，所有模式均可以开源标准方式无缝接入 Istio、Consul 等服务治理体系。
+    灵活的数据面 (Proxy & Proxyless) 部署形态支持，无缝接入 Istio 控制面治理体系。
 ---
 
 Dubbo Mesh 是 Dubbo 在云原生背景的微服务整体解决方案，它帮助开发者实现 Dubbo 服务与标准的 Kubernetes Native Service 体系的打通，让 Dubbo 应用能够无缝接入 Istio 等业界主流服务网格产品。

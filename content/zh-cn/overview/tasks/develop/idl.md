@@ -1,9 +1,9 @@
 ---
 type: docs
-title: "使用 IDL + Protobuf 跨语言定义服务"
-linkTitle: "开发 gRPC 服务"
-weight: 1
+title: "使用 IDL 定义与开发服务"
+linkTitle: "IDL开发服务"
 description: ""
+weight: 70
 ---
 
 服务是 Dubbo 中的核心概念，一个服务代表一组 RPC 方法的集合，服务是面向用户编程、服务发现机制等的基本单位。Dubbo 开发的基本流程是：用户定义 RPC 服务，通过约定的配置

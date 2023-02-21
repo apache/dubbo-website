@@ -1,6 +1,7 @@
 ---
 title: "Dubbo的泛化调用"
 linkTitle: "Dubbo的泛化调用"
+tags: ["Java"]
 date: 2018-08-14
 description: > 
     本文介绍了 Dubbo 泛化调用的使用场景及相关示例

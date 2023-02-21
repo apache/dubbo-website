@@ -2,7 +2,8 @@
 title: "Dubbo3 应用级服务发现"
 linkTitle: "应用级服务发现"
 date: 2021-06-02
-description: > 
+tags: ["源码解析", "Java"]
+description: >
    本文介绍了 Dubbo3 应用级服务发现的实现原理
 ---
 

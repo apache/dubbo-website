@@ -1,6 +1,7 @@
 ---
 title: "快速上手 dubbo-go"
 linkTitle: "快速上手 dubbo-go"
+tags: ["Go"]
 date: 2021-01-14
 description: >
     今天上手实战一把，告诉你如何快速用 go 上手 dubbo

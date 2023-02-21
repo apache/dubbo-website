@@ -8,29 +8,12 @@ weight: 60
 no_list: true
 ---
 
-## 扩展设计理念
-
-可扩展性是任何一个系统所追求的，对于 Dubbo 来说是同样适用。
-
-### 什么是可扩展性
-
-可扩展性是一种设计理念，代表了我们对未来的一种预想，我们希望在现有的架构或设计基础上，当未来某些方面发生变化的时候，我们能够以最小的改动来适应这种变化。
-
-### 可扩展性的优点
-
-可扩展性的优点主要表现模块之间解耦，它符合开闭原则，对扩展开放，对修改关闭。当系统增加新功能时，不需要对现有系统的结构和代码进行修改，仅仅新增一个扩展即可。
-
-### 扩展实现方式
-
-一般来说，系统会采用 Factory、IoC、OSGI 等方式管理扩展(插件)生命周期。考虑到 Dubbo 的适用面，不想强依赖 Spring 等 IoC 容器。
-而自己造一个小的 IoC 容器，也觉得有点过度设计，所以选择最简单的 Factory 方式管理扩展(插件)。在 Dubbo 中，所有内部实现和第三方实现都是平等的。
-
-### Dubbo 中的可扩展性
+## Dubbo 扩展设计理念
 
 * 平等对待第三方的实现。在 Dubbo 中，所有内部实现和第三方实现都是平等的，用户可以基于自身业务需求，替换 Dubbo 提供的原生实现。
 * 每个扩展点只封装一个变化因子，最大化复用。每个扩展点的实现者，往往都只是关心一件事。如果用户有需求需要进行扩展，那么只需要对其关注的扩展点进行扩展就好，极大的减少用户的工作量。
 
-## Dubbo 扩展的特性
+## 基于 Java SPI 的扩展能力设计
 
 Dubbo 中的扩展能力是从 JDK 标准的 SPI 扩展点发现机制加强而来，它改进了 JDK 标准的 SPI 以下问题：
 
@@ -48,7 +31,7 @@ Dubbo 中的扩展能力是从 JDK 标准的 SPI 扩展点发现机制加强而�
 
 从 Dubbo 扩展的设计目标可以看出，Dubbo 实现的一些例如动态选择扩展实现、IOC、AOP 等特性，能够为用户提供非常灵活的扩展能力。
 
-## Dubbo 扩展加载流程
+### 扩展点加载流程
 
 Dubbo 加载扩展的整个流程如下：
 
@@ -114,39 +97,4 @@ Dubbo 加载扩展的整个流程如下：
 <hr>
 </div>
 
-<<<<<<<< HEAD:content/zh/overview/tasks/extensibility/_index.md
 {{< /blocks/section >}}
-========
-(2) 实现类内容
-```java
-@Activate
-public class TripleHttp2Protocol extends Http2WireProtocol {
-    // ...
-}
-```
-
-说明下：Http2WireProtocol 实现了 WireProtocol 接口
-
-(3) Dubbo 配置模块中，扩展点均有对应配置属性或标签，通过配置指定使用哪个扩展实现。比如：
-```text
-<dubbo:protocol name="tri" />
-```
-
-从上面的扩展步骤可以看出，用户基本在黑盒下就完成了扩展。
-
-## Dubbo 扩展的应用
-
-Dubbo 的扩展能力非常灵活，在自身功能的实现上无处不在。
-
-![//imgs/v3/concepts/extension-use.png](/imgs/v3/concepts/extension-use.png)
-
-Dubbo 扩展能力使得 Dubbo 项目很方便的切分成一个一个的子模块，实现热插拔特性。用户完全可以基于自身需求，替换 Dubbo 原生实现，来满足自身业务需求。
-
-## 使用场景
-
-* 如果你需要自定义负载均衡策略，你可以使用 Dubbo 扩展能力。
-* 如果你需要实现自定义的注册中心，你可以使用 Dubbo 扩展能力。
-* 如果你需要实现自定义的过滤器，你可以使用 Dubbo 扩展能力。
-
-Dubbo 扩展平等的对待内部实现和第三方实现。更多使用场景，参见 [SPI 扩展实现](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/)
->>>>>>>> master:content/zh-cn/overview/what/extensibility.md

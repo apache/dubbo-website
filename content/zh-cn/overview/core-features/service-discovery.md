@@ -7,7 +7,7 @@ description: ""
 feature:
   title: 服务发现
   description: >
-     服务地址注册与发现是构建微服务体系的关键，Dubbo 默认提供 Nacos、Zookeeper 等注册中心并支持自定义扩展；Dubbo3 应用级服务发现模型解决 Dubbo2 规模瓶颈问题的同时，实现了与 Kubernetes Native Service 及 Spring Cloud 等微服务体系的互通。
+     Dubbo 提供了高性能、可伸缩的服务发现机制，面向百万集群实例规模设计，默认提供 Nacos、Zookeeper 等注册中心适配并支持自定义扩展。
 ---
 
 Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持常用的注册中心如 Nacos、Consul、Zookeeper 等。

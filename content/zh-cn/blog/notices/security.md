@@ -1,9 +1,9 @@
 
 ---
-type: docs
 title: "安全漏洞"
 linkTitle: "安全漏洞"
 description: "安全漏洞说明"
+tags: ["安全漏洞"]
 weight: 90
 ---
 

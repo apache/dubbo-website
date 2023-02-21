@@ -1,6 +1,7 @@
 ---
 title: "Dubbo客户端异步接口的实现背景和实践"
 linkTitle: "Dubbo客户端异步接口的实现背景和实践"
+tags: ["Java"]
 date: 2019-11-01
 description: > 
     本文介绍了 Dubbo 客户端异步接口的实现背景和实践 

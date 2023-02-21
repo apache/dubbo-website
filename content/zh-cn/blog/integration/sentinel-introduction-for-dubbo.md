@@ -2,6 +2,7 @@
 title: "Sentinel 为 Dubbo 服务保驾护航"
 linkTitle: "Sentinel 为 Dubbo 服务保驾护航"
 date: 2018-07-27
+tags: ["生态", "Java"]
 description: >
     本文主要介绍了面向分布式服务架构的轻量级流量控制组件 Sentinel 以及在 Dubbo 中整合使用 Sentinel 的最佳实践。
 ---

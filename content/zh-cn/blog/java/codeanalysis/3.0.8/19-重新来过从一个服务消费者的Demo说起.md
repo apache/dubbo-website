@@ -3,6 +3,7 @@ title: "19 重新来过从一个服务消费者的Demo说起"
 linkTitle: "19 重新来过从一个服务消费者的Demo说起"
 date: 2022-08-19
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] 重新来过从一个服务消费者的Demo说起。
 ---

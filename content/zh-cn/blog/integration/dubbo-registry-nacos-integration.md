@@ -2,6 +2,7 @@
 title: "Dubbo 融合 Nacos 成为注册中心"
 linkTitle: "Dubbo 融合 Nacos 成为注册中心"
 date: 2018-11-07
+tags: ["生态", "Java"]
 description: 本文介绍了如何在 Dubbo 中使用 Nacos 作为服务注册中心
 ---
 

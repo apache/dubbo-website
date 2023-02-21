@@ -28,7 +28,7 @@ content:
         - "[Java 微服务开发](../quickstart/java/)"
         - "[Go 微服务开发](../quickstart/go/)"
         - "[Rust 微服务开发](../quickstart/rust/)"
-        - "[Node.js 微服务开发](../quickstart/nodejs/)"
+        - "[Node.js 微服务开发](https://github.com/apache/dubbo-js)"
     - name: "SDK 参考手册"
       description: aaa
       links:

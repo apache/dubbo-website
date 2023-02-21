@@ -27,7 +27,7 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./grpc/" >}}'>使用 Dubbo 开发 Web 应用</a>
+                     <a href='{{< relref "./web/" >}}'>使用 Dubbo 开发 Web 应用</a>
                 </h4>
                 <p>演示使用 Dubbo 对外暴露 HTTP 接口，支持 Spring Web 标准开发方式。</p>
             </div>
@@ -37,7 +37,7 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./grpc/" >}}'>与 Spring Cloud 互调</a>
+                     <a href='{{< relref "./springcloud/" >}}'>与 Spring Cloud 互调</a>
                 </h4>
                 <p>演示如何使用 Dubbo 作为消费端调用 Spring Cloud 服务</p>
             </div>
@@ -47,7 +47,7 @@ no_list: true
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./grpc/" >}}'>单端口多协议发布服务</a>
+                     <a href='{{< relref "./multi-protocols/" >}}'>单端口多协议发布服务</a>
                 </h4>
                 <p>演示如何在一个应用内发布多个使用不同协议的服务，并通过唯一的一个端口对外发布。</p>
             </div>

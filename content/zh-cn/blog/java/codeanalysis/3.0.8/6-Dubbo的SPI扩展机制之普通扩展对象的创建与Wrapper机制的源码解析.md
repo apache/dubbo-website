@@ -3,6 +3,7 @@ title: "06-Dubbo的SPI扩展机制之普通扩展对象的创建与Wrapper机制
 linkTitle: "6-Dubbo的SPI扩展机制之普通扩展对象的创建与Wrapper机制的源码解析"
 date: 2022-08-06
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] 了解Spring的同学可能比较熟悉AOP机制的逻辑，Dubbo Wrapper机制就是类似AOP这样的切面机制用来增强扩展方法，Wrapper机制，即扩展点自动包装。Wrapper 类同样实现了扩展点接口，但是 Wrapper 不是扩展点的真正实现。它的用途主要是用于从 ExtensionLoader 返回扩展点时，包装在真正的扩展点实现外
 ---

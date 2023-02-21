@@ -2,6 +2,7 @@
 title: "Dubbo Go 1.4.0"
 linkTitle: "dubbo-go 1.4.0"
 date: 2021-01-12
+tags: ["Release Notes"]
 description: >
     dubbo-go 1.4.0 版本发布，支持 K8s 注册中心、rest 协议
 ---

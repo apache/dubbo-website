@@ -3,6 +3,7 @@ title: "10-Dubbo启动器DubboBootstrap添加注册中心配置信息RegistryCon
 linkTitle: "10-Dubbo启动器DubboBootstrap添加注册中心配置信息RegistryConfig"
 date: 2022-08-10
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] RegistryConfig注册中心配置包含了一些比较基础的注册信息相关的配置信息，注册中心是服务在分布式场景下的基础服务。
 ---

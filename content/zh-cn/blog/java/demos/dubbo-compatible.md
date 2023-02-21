@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 2.7.x repackage 后的兼容实现方案"
 linkTitle: "Dubbo 2.7.x repackage 后的兼容实现方案"
+tags: ["Java"]
 date: 2018-07-22
 description: >
     本文简单描述了2.7.x repackage后对老版本的兼容性实现方案。

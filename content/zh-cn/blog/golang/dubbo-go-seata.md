@@ -1,6 +1,7 @@
 ---
 title: "分布式事务框架 seata-golang 通信模型详解"
 linkTitle: "分布式事务框架 seata-golang 通信模型详解"
+tags: ["Go", "生态"]
 date: 2021-01-15
 description: >
     本文介绍了 seata 的 go 语言客户端通信模型的实现

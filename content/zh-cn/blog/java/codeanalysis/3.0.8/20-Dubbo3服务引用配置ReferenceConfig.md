@@ -3,6 +3,7 @@ title: "20-Dubbo3服务引用配置ReferenceConfig"
 linkTitle: "20-Dubbo3服务引用配置ReferenceConfig"
 date: 2022-08-20
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] 消费者创建的第一步就是先进行消费者信息的配置对应类型为ReferenceConfig，这里详细来看ReferenceConfig包含哪些信息？。
 ---

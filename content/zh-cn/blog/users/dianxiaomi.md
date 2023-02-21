@@ -1,6 +1,7 @@
 ---
 title: "店小蜜升级 Triple 协议"
 linkTitle: "达摩院云小蜜"
+tags: ["用户案例"]
 date: 2023-01-15
 weight: 4
 ---
