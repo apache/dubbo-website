@@ -36,7 +36,7 @@ no_list: true
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                    <a href='{{< relref "./rate-limit/" >}}'>网关接入</a>
+                    <a href='{{< relref "./gateway/" >}}'>网关接入</a>
                  </h4>
                  <p>通过网关 http 到 dubbo 协议转换，实现前端流量接入后端 dubbo 服务。</p>
              </div>
@@ -46,9 +46,9 @@ no_list: true
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a href='{{< relref "./rate-limit/" >}}'>全链路追踪 Tracing</a>
+                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/registry/" >}}'>服务发现</a>
                  </h4>
-                 <p></p>
+                 <p>Dubbo 官方支持的常见注册中心扩展实现及其使用方式。</p>
              </div>
          </div>
      </div>
@@ -56,9 +56,9 @@ no_list: true
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a href='{{< relref "./rate-limit/" >}}'>异步消息</a>
+                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/config-center/" >}}'>配置中心</a>
                  </h4>
-                 <p></p>
+                 <p>Dubbo 官方支持的常见配置中心扩展实现及其使用方式。</p>
              </div>
          </div>
      </div>
@@ -66,49 +66,9 @@ no_list: true
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a href='{{< relref "./rate-limit/" >}}'>控制台 Admin</a>
+                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/metadata-center/" >}}'>元数据中心</a>
                  </h4>
-                 <p></p>
-             </div>
-         </div>
-     </div>
-    <div class="col-sm col-md-6 mb-4">
-         <div class="h-100 card shadow">
-             <div class="card-body">
-                 <h4 class="card-title">
-                 <a href='{{< relref "./rate-limit/" >}}'>服务发现</a>
-                 </h4>
-                 <p></p>
-             </div>
-         </div>
-     </div>
-    <div class="col-sm col-md-6 mb-4">
-         <div class="h-100 card shadow">
-             <div class="card-body">
-                 <h4 class="card-title">
-                 <a href='{{< relref "./rate-limit/" >}}'>配置中心</a>
-                 </h4>
-                 <p></p>
-             </div>
-         </div>
-     </div>
-    <div class="col-sm col-md-6 mb-4">
-         <div class="h-100 card shadow">
-             <div class="card-body">
-                 <h4 class="card-title">
-                 <a href='{{< relref "./rate-limit/" >}}'>元数据中心</a>
-                 </h4>
-                 <p></p>
-             </div>
-         </div>
-     </div>
-    <div class="col-sm col-md-6 mb-4">
-         <div class="h-100 card shadow">
-             <div class="card-body">
-                 <h4 class="card-title">
-                 <a href='{{< relref "./rate-limit/" >}}'>Spring Cloud 体系互通</a>
-                 </h4>
-                 <p>演示如何通过 Dubbo3 应用级服务发现机制，实现和 Spring Cloud 的 rest 协议互通。</p>
+                 <p>Dubbo 官方支持的常见元数据中心扩展实现及其使用方式。</p>
              </div>
          </div>
      </div>
