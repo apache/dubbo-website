@@ -521,4 +521,4 @@ protected void push(PushGateway pushGateway, String job) {
 ```
 
 ## 可视化展示
-目前推荐使用 Prometheus 来进行服务监控，Grafana 来展示指标数据。可以通过案例来快速入门 [Dubbo 可视化监控](../../overview/tasks/observability/grafana/)。
+目前推荐使用 Prometheus 来进行服务监控，Grafana 来展示指标数据。可以通过案例来快速入门 [Dubbo 可视化监控](../../../overview/tasks/observability/grafana/)。

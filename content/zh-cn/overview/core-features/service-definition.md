@@ -85,7 +85,7 @@ public class Consumer {
 * [Java 微服务开发入门](../../quickstart/java)
 * [Go 微服务开发入门](../../quickstart/go)
 * [Rust 微服务开发入门](../../quickstart/rust)
-* [Node.js 微服务开发入门](../../quickstart/nodejs)
+* [Node.js 微服务开发入门](https://github.com/apache/dubbo-js)
 
 ## 部署
 Dubbo 原生服务可打包部署到 Docker 容器、Kubernetes、服务网格 等云原生基础设施和微服务架构。

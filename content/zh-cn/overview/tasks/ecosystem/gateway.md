@@ -7,7 +7,7 @@ description: >
     本文为大家介绍了如何借助 Apache APISIX 实现 Dubbo Service 的代理，通过引入 dubbo-proxy 插件便可为 Dubbo 框架的后端系统构建更简单更高效的流量链路
 ---
 
-更多网关接入案例，请参考[官方博客](../../../../blog/integration/how-to-proxy-dubbo-in-apache-shenyu)
+更多网关接入案例，请参考[官方博客](/zh-cn/blog/integration/how-to-proxy-dubbo-in-apache-shenyu)
 
 ## 背景
 
