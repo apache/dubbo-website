@@ -3,7 +3,7 @@
 type: docs
 title: "观测服务"
 linkTitle: "观测服务"
-description: ""
+description: "基于 Admin、Metrics、Grafana 等可视化的观测集群状态。"
 weight: 40
 no_list: true
 ---
