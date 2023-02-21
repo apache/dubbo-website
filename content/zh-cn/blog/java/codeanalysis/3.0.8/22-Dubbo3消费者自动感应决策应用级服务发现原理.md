@@ -3,6 +3,7 @@ title: "22-Dubbo3消费者自动感应决策应用级服务发现原理 "
 linkTitle: "22-Dubbo3消费者自动感应决策应用级服务发现原理 "
 date: 2022-08-22
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] Dubbo3消费者自动感应决策应用级服务发现原理 。
 ---

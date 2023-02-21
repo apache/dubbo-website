@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 基本用法 - Dubbo Consumer 配置"
 linkTitle: "Dubbo 基本用法 - Dubbo Consumer 配置"
+tags: ["Java"]
 date: 2018-08-14
 description: >
     XML配置，API调用方式配置，注解方式配置

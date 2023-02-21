@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 在跨语言和协议穿透性方向上的探索：支持 HTTP/2 gRPC 和 Protobuf"
 linkTitle: "支持 HTTP/2 gRPC 和 Protobuf"
+tags: ["Java"]
 date: 2019-10-28
 description: > 
     本文整理自刘军在 Dubbo 成都 meetup 上分享的《Dubbo 在多语言和协议穿透性方向上的探索》。

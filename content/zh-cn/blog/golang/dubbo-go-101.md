@@ -1,6 +1,7 @@
 ---
 title: "Dubbo Go 快速开始"
 linkTitle: "Dubbo Go 快速开始"
+tags: ["Go"]
 date: 2021-01-11
 description: 本文介绍了如何通过一个 `hellowworld` 例子带领大家快速上手 Dubbo Go 框架
 ---

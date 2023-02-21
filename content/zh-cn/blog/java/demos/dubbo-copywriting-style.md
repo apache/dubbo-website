@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 博客文档中文排版指南"
 linkTitle: "Dubbo 博客文档中文排版指南"
+tags: ["Java"]
 date: 2018-01-01
 description: >
     统一中文文案、排版的相关用法，降低团队成员之间的沟通成本，增强网站气质。

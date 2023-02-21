@@ -2,6 +2,7 @@
 date: 2023-01-15
 title: "工商银行 Dubbo3 应用级服务发现实践"
 linkTitle: "工商银行"
+tags: ["用户案例"]
 weight: 2
 ---
 

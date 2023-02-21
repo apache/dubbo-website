@@ -2,7 +2,8 @@
 title: "使用Apache Skywalking (Incubator) 做分布式跟踪"
 linkTitle: "使用Apache Skywalking (Incubator) 做分布式跟踪"
 date: 2019-08-11
-description: > 
+tags: ["生态", "Java"]
+description: >
    本文介绍如何使用 Apache Skywalking 对 Dubbo 应用做分布式链路追踪。
 ---
 

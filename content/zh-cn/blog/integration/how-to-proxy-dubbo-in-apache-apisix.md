@@ -2,6 +2,7 @@
 title: "从原理到操作，让你在 Apache APISIX 中代理 Dubbo 服务更便捷"
 linkTitle: "从原理到操作，让你在 Apache APISIX 中代理 Dubbo 服务更便捷"
 date: 2022-01-18
+tags: ["网关", "生态", "Java"]
 description: >
     本文为大家介绍了如何借助 Apache APISIX 实现 Dubbo Service 的代理，通过引入 dubbo-proxy 插件便可为 Dubbo 框架的后端系统构建更简单更高效的流量链路
 ---

@@ -2,6 +2,7 @@
 title: "饿了么全站成功升级 Dubbo3 "
 linkTitle: "饿了么"
 date: 2023-01-15
+tags: ["用户案例"]
 weight: 3
 ---
 ### 升级目标

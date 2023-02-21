@@ -1,6 +1,7 @@
 ---
 title: "Dubbo服务端异步接口的实现背景和实践"
 linkTitle: "Dubbo服务端异步接口的实现背景和实践"
+tags: ["Java"]
 date: 2019-11-02
 description: > 
     本文介绍了 Dubbo 服务端异步接口的实现背景和实践
