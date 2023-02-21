@@ -27,10 +27,10 @@ Dubbo目前推荐使用Prometheus来进行服务监控，Grafana来展示指标�
 ### 环境
 - 系统：Windows、Linux、MacOS
 - JDK 8 及以上
-- Git
-- Maven
-- Prometheus
-- Grafana
+- Git  
+- Maven   
+- Prometheus [安装教程](../install/prometheus-install)
+- Grafana [安装教程](../install/grafana-install)
 
 ### 参考案例
 Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获取案例源码：
@@ -49,7 +49,7 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 ```
 
 ### 配置
-开启Dubbo的指标埋点只需要引入以下配置即可。
+目前Dubbo支持推和拉两种模式获取指标数据，下面以普罗米修斯拉取指标数据的方式来作为演示，开启Dubbo的指标埋点只需要引入以下配置即可。
 ```xml
 <dubbo:metrics protocol="prometheus" enable-jvm-metrics="true">
     <dubbo:aggregation enabled="true"/>
@@ -96,19 +96,73 @@ scrape_configs:
 ### 可视化页面
 可视化页面目前推荐的方式是使用Grafana来配置Dubbo的可观测性监控大盘，下面以Grafana可视化为例来看下如何通过Dubbo可观测性大盘来监测Dubbo服务：
 
-Dubbo可观测性面板可以在Grafana官网的模板库中可以找到，您可以直接导入如下模版，并配置好数据源即可。
-[https://grafana.com/grafana/dashboards/18051](https://grafana.com/grafana/dashboards/18051)
-
 ![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
 ![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
 
+
+
+Dubbo提供了丰富的指标面板，这些面板均可以在Grafana官方面板库中找到：您可以直接导入如下模版，并配置好数据源即可。
+
+**Apache Dubbo Observability Dashboard：**  [https://grafana.com/grafana/dashboards/18051](https://grafana.com/grafana/dashboards/18051)
+
+**JVM (Micrometer) Dashboard：** [https://grafana.com/grafana/dashboards/4701](https://grafana.com/grafana/dashboards/4701)
+
+
+
 ### Dubbo 指标含义
+#### Provider Metrics
 
-### jvm metrics
+| 指标                                      | 含义                                      |
+| ----------------------------------------- | ----------------------------------------- |
+| dubbo_provider_qps_seconds                | 提供者每秒接收的请求数                    |
+| dubbo_provider_requests_total             | 提供者总的接收请求数                      |
+| dubbo_provider_requests_processing        | 提供者正在处理的接收的请求数              |
+| dubbo_provider_requests_succeed_total     | 提供者请求成功接收的请求数                |
+| dubbo_provider_requests_total_aggregate   | 滑动窗口下的提供者总的接收请求数          |
+| dubbo_provider_requests_succeed_aggregate | 滑动窗口下的提供者成功的接收请求数        |
+| dubbo_provider_rt_seconds_min             | 提供者处理请求中最小的响应时间            |
+| dubbo_provider_rt_seconds_avg             | 提供者处理请求的平均响应时间              |
+| dubbo_provider_rt_seconds_sum             | 提供者处理请求的时间总和                  |
+| dubbo_provider_rt_seconds_max             | 提供者处理请求中最大的响应时间            |
+| dubbo_provider_rt_seconds_last            | 提供者处理请求中当前的响应时间            |
+| dubbo_provider_rt_seconds_p95             | 提供者处理请求中95%的请求耗费的总响应时间 |
+| dubbo_provider_rt_seconds_p99             | 提供者处理请求中99%的请求耗费的总响应时间 |
 
-### provider metrics
 
-### consumer metrics
+
+#### Consumer Metrics
+
+#### 
+
+| 指标                                      | 含义                                      |
+| ----------------------------------------- | ----------------------------------------- |
+| dubbo_consumer_qps_seconds                | 消费者每秒发送的请求数                    |
+| dubbo_consumer_requests_total             | 消费者总的发送请求数                      |
+| dubbo_consumer_requests_processing        | 消费者正在处理的发送的请求数              |
+| dubbo_provider_requests_succeed_total     | 消费者请求成功发送的请求数                |
+| dubbo_consumer_requests_total_aggregate   | 滑动窗口下的消费者总的发送请求数          |
+| dubbo_consumer_requests_succeed_aggregate | 滑动窗口下的消费者成功的发送请求数        |
+| dubbo_consumer_rt_seconds_min             | 消费者处理请求中最小的响应时间            |
+| dubbo_consumer_rt_seconds_avg             | 消费者处理请求的平均响应时间              |
+| dubbo_consumer_rt_seconds_sum             | 消费者处理请求的时间总和                  |
+| dubbo_consumer_rt_seconds_max             | 消费者处理请求中最大的响应时间            |
+| dubbo_consumer_rt_seconds_last            | 消费者处理请求中当前的响应时间            |
+| dubbo_consumer_rt_seconds_p95             | 消费者处理请求中95%的请求耗费的总响应时间 |
+| dubbo_consumer_rt_seconds_p99             | 消费者处理请求中99%的请求耗费的总响应时间 |
+
+#### ThreadPoll Metrics
+
+
+
+#### Registration Center Metrics
+
+#### Metadata Center Metrics
+
+#### Configuration Center Metrics
+
+
+
+
 
 
 
