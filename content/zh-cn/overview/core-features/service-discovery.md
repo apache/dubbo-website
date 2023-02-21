@@ -32,7 +32,7 @@ Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注
 从注册中心视角来看，它负责以应用名 (dubbo.application.name) 对整个集群的实例地址进行聚合，每个对外提供服务的实例将自身的应用名、实例ip:port 地址信息 (通常还包含少量的实例元数据，如机器所在区域、环境等) 注册到注册中心。
 
 > Dubbo2 版本注册中心以服务粒度聚合实例地址，比应用粒度更细，也就意味着传输的数据量更大，因此在大规模集群下也遇到一些性能问题。
-> 针对 Dubbo2 与 Dubbo3 跨版本数据模型不统一的问题，Dubbo3 给出了[平滑迁移方案]()，可做到模型变更对用户无感。
+> 针对 Dubbo2 与 Dubbo3 跨版本数据模型不统一的问题，Dubbo3 给出了[平滑迁移方案](/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/)，可做到模型变更对用户无感。
 
 ![service-discovery](/imgs/v3/feature/service-discovery/registry-data.png)
 
@@ -58,12 +58,12 @@ Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注
 ## 配置方式
 Dubbo 服务发现扩展了多种注册中心组件支持，如 Nacos、Zookeeper、Consul、Redis、kubernetes 等，可以通过配置切换不通实现，同时还支持鉴权、命名空间隔离等配置。具体配置方式请查看 SDK 文档
 
-* [Java]()
-* [Golang]()
-* [Rust]()
-* [Node.js]()
+* [Java](/)
+* [Golang](/)
+* [Rust](/)
+* [Node.js](/)
 
-Dubbo 还支持一个应用内配置多注册中心的情形如双注册、双订阅等，这对于实现不同集群地址数据互通、集群迁移等场景非常有用处，[最佳实践]() 任务里有关于这部分的示例说明。
+Dubbo 还支持一个应用内配置多注册中心的情形如双注册、双订阅等，这对于实现不同集群地址数据互通、集群迁移等场景非常有用处，[最佳实践](/) 任务里有关于这部分的示例说明。
 
 ## 自定义扩展
 注册中心适配支持自定义扩展实现，具体请参见 [Dubbo 可扩展性](../extensibility)

@@ -2,6 +2,7 @@
 title: 使用 dubbogo-cli 工具
 type: docs
 weight: 2
+description: 使用 dubbogo-cli 工具
 ---
 
 ## 1. 安装

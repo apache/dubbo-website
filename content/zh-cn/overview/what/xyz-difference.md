@@ -65,7 +65,7 @@ Dubbo 不绑定特定的通信协议，即 Dubbo 服务间可通过多种 RPC �
 如果我们忽略 gRPC 在应用开发框架侧的空白，只考虑如何给 gRPC 带来服务治理能力，则另一种可以采用的模式就是在 Service Mesh 架构下使用 gRPC，这就引出了我们下一小节要讨论的内容：Dubbo 与 Service Mesh 架构的关系。
 
 ## Dubbo 与 Istio
-Service Mesh 是近年来在云原生背景下诞生的一种微服务架构，在 Kubernetes 体系下，让微服务开发中的更多能力如流量拦截、服务治理等下沉并成为基础设施，让微服务开发、升级更轻量。Istio 是 Service Mesh 的开源代表实现，它从部署架构上分为数据面与控制面，从这一点上与 [Dubbo 总体架构](./overview) 是基本一致的，Istio 带来的主要变化在于：
+Service Mesh 是近年来在云原生背景下诞生的一种微服务架构，在 Kubernetes 体系下，让微服务开发中的更多能力如流量拦截、服务治理等下沉并成为基础设施，让微服务开发、升级更轻量。Istio 是 Service Mesh 的开源代表实现，它从部署架构上分为数据面与控制面，从这一点上与 [Dubbo 总体架构](../overview) 是基本一致的，Istio 带来的主要变化在于：
 * 数据面，Istio 通过引入 Sidecar 实现了对服务流量的透明拦截，Sidecar 通常是与 Dubbo 等开发的传统微服务组件部署在一起
 * 控制面，将之前抽象的服务治理中心聚合为一个具有统一实现的具体组件，并实现了与底层基础设施如 Kubernetes 无缝适配
 
@@ -77,4 +77,4 @@ Service Mesh 是近年来在云原生背景下诞生的一种微服务架构，�
 * Proxy 模式，Dubbo 与 Envoy 一起部署，Dubbo 作为编程框架 & 协议通信组件存在，流量管控由 Envoy 与 Istio 控制面交互实现。
 * Proxyless 模式，Dubbo 进程保持独立部署，Dubbo 通过标准 xDS 协议直接接入 Istio 等控制面组件。
 
-从**控制面**视角，Dubbo 可接入原生 Istio 标准控制面和规则体系，而对于一些 Dubbo 老版本用户，Dubbo Mesh 提供了平滑迁移方案，具体请查看 [Dubbo Mesh 服务网格]()。
+从**控制面**视角，Dubbo 可接入原生 Istio 标准控制面和规则体系，而对于一些 Dubbo 老版本用户，Dubbo Mesh 提供了平滑迁移方案，具体请查看 [Dubbo Mesh 服务网格](../../tasks/mesh/)。

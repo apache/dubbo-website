@@ -26,4 +26,4 @@ Dubbo 社区和众多优秀的开源项目一起围绕 Dubbo 建立了丰富的�
 
 <!-- ![ecosystem](/imgs/v3/feature/ecosystem/ecosystem.png) -->
 
-可通过 [微服务生态]() 任务，了解更多 Dubbo 生态能力和使用方式。
+可通过 [微服务生态](../../what/ecosystem) ，了解更多 Dubbo 生态能力和使用方式。

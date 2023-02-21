@@ -3,7 +3,7 @@ type: docs
 title: "TLS支持"
 linkTitle: "TLS支持"
 weight: 1
-description: " 了解在 dubbo 的 TLS 保证传输安全"
+description: " 了解在 Dubbo 的 TLS 保证传输安全"
 ---
 ## 特性说明
 

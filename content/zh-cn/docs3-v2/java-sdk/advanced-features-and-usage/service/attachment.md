@@ -80,7 +80,7 @@ String result = RpcContext.getServerContext().getAttachment("result");
 // ...
 ```
 
-## 参数透传问题
+> 参数透传问题
 
 在 Dubbo 2.7 中，在 A 端设置的参数，调用 B 以后，如果 B 继续调用了 C，原来在 A 中设置的参数也会被带到 C 端过去，造成参数污染的问题。
 Dubbo 3 对 RpcContext 进行了重构，支持可选参数透传，默认开启参数透传。

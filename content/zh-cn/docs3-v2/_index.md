@@ -5,6 +5,9 @@ title: "SDK 手册"
 linkTitle: "SDK 手册"
 no_list: true
 hide_summary: true
+menu:
+  main:
+    weight: 10
 ---
 > 本文档基于 Dubbo3 编写，由于 Dubbo3 完全兼容 2.7 版本用法，因此文档中的通用功能（除 3.x 版本特有功能外）同样适用于 2.7 版本用户。
 >

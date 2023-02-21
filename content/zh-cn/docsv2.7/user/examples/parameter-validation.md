@@ -5,10 +5,13 @@ linkTitle: "参数验证"
 weight: 14
 description: "在 Dubbo 中进行参数验证"
 ---
-
+## 背景
 参数验证功能是基于 [JSR303](https://jcp.org/en/jsr/detail?id=303) 实现的，用户只需标识 JSR303 标准的验证 annotation，并通过声明 filter 来实现验证。
 
-## Maven 依赖
+
+## 示例
+
+### Maven 依赖
 
 ```xml
 <dependency>
@@ -22,8 +25,6 @@ description: "在 Dubbo 中进行参数验证"
     <version>4.2.0.Final</version>
 </dependency>
 ```
-
-## 示例
 
 ### 参数标注示例
 

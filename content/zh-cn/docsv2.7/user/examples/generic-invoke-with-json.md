@@ -1,18 +1,20 @@
 ---
 type: docs
-title: "json泛化调用"
-linkTitle: "json泛化调用"
+title: "JSON泛化调用"
+linkTitle: "JSON泛化调用"
 weight: 15
 description: "支持Json字符串参数的泛化调用"
 ---
-
+## 背景
 {{% alert title="提示" color="primary" %}}
 支持版本：`2.7.12` 之后
 {{% /alert %}}
 
 对于Dubbo泛化调用，提供一种新的方式：直接传递字符串来完成一次调用。即用户可以直接传递参数对象的json字符串来完成一次Dubbo泛化调用。
 
-## 通过API方式使用json泛化调用
+## 示例
+
+### 通过API方式使用json泛化调用
 
 对于以下provider：
 

@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "概述"
-linkTitle: "概述"
+title: "入门概述"
+linkTitle: "入门概述"
 weight: 10
 ---
 

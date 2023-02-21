@@ -5,12 +5,12 @@ linkTitle: "分组聚合"
 weight: 13
 description: "通过分组对结果进行聚合并返回聚合后的结果"
 ---
-
+## 背景
 通过分组对结果进行聚合并返回聚合后的结果，比如菜单服务，用group区分同一接口的多种实现，现在消费方需从每种group中调用一次并返回结果，对结果进行合并之后返回，这样就可以实现聚合菜单项。  
 
 相关代码可以参考 [dubbo 项目中的示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge)
 
-## 配置
+## 示例
 
 搜索所有分组
 

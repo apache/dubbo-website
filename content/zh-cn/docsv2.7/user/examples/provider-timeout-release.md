@@ -5,7 +5,7 @@ linkTitle: "provider超时打断"
 weight: 15
 description: "Dubbo provider执行超时释放执行线程"
 ---
-
+## 背景
 支持provider根据超时时间进行业务打断
 
 适用场景：对于一个provider，如果某个操作执行超时，则打断(释放)该执行线程，而不是仅仅打印超时日志。
@@ -14,7 +14,7 @@ description: "Dubbo provider执行超时释放执行线程"
 支持版本：`2.7.12` 之后
 {{% /alert %}}
 
-## 核心处理逻辑
+#### 核心处理逻辑
 
 ```java
 public class AllChannelHandler2 extends AllChannelHandler {
@@ -57,7 +57,7 @@ public class AllChannelHandler2 extends AllChannelHandler {
 }
 ```
 
-## 使用示例
+## 示例
 
 - 设置Dubbo ProtocolConfig 线程分发策略为"all2"。
 

@@ -122,8 +122,6 @@ Dubbo 目前所支持的协议包括 Dubbo、REST、Thrift、gRPC、JsonRPC、He
 
 关于对 gRPC (HTTP/2) 协议的支持，请参阅上期文档
 
-https://yuque.antfin-inc.com/ken.lj/xga6e2/dxgrn4
-
 ![3](/imgs/blog/2023/01/protocols/img_3.png)
 
 #### 多协议能解决的问题
@@ -289,9 +287,7 @@ Dubbo 体系内的部分应用作为透明的联通两个体系的关键节点�
 
 ### 自建体系迁移到 Dubbo 体系（共存）
 
-这个场景和上一节中讲到的的 SpringCloud 迁移有些类似，最大的区别在于 rest 协议是 Dubbo 官方默认提供支持的，而对于已有的微服务体系内的私有通信协议，则需要先要自己去扩展 Dubbo Protocol 来提供协议层面的支持，关于 Protocol 如何扩展请参见以下官方文档：
-
-http://dubbo.apache.org/zh-cn/docs/dev/impls/protocol.html
+这个场景和上一节中讲到的的 SpringCloud 迁移有些类似，最大的区别在于 rest 协议是 Dubbo 官方默认提供支持的，而对于已有的微服务体系内的私有通信协议，则需要先要自己去扩展 Dubbo Protocol 来提供协议层面的支持。
 
 ## 总结与展望
 

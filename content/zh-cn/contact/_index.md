@@ -19,7 +19,7 @@ Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Gith
 {{< cardpane >}}
   {{< card header="微信公众号" >}}
 <div class="community-resource">
-   <a href="">
+   <a href="/">
        <img src="/imgs/contacts/wechat-account.jpg" alt="Wechat">
    </a>
    <p>官方微信公众号（Apache Dubbo）</p>
@@ -27,7 +27,7 @@ Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Gith
   {{< /card >}}
   {{< card header="钉钉群组" >}}
 <div id="slack" class="community-resource">
-    <a href="">
+    <a href="/">
         <img src="/imgs/contacts/dingtalk.jpg" alt="Dingtalk">
     </a>
     <p>定期举办线上社区会议或开发者双周会</p>

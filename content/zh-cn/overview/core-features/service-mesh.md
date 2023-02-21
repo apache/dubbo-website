@@ -58,19 +58,19 @@ Proxy 模式很好的实现了治理能力与有很多优势，如平滑升级�
 * 适用于几乎所有的部署环境
 
 ## 示例任务
-了解了足够多的原理知识，我们推荐你访问如下 [示例]() 进行动手实践。
+了解了足够多的原理知识，我们推荐你访问如下 [示例](../../tasks/mesh) 进行动手实践。
 
 ## 可视化
-推荐使用 [Dubbo Admin]() 作为您 Dubbo 集群的可视化控制台，它兼容所有 Kubernetes、Mesh 和非 Mesh 架构的部署。
+推荐使用 [Dubbo Admin](../../tasks/deploy) 作为您 Dubbo 集群的可视化控制台，它兼容所有 Kubernetes、Mesh 和非 Mesh 架构的部署。
 
 除此之外，你也可以使用 [Istio 官方推荐的可视化工具](https://istio.io/latest/docs/tasks/observability/kiali/) 来管理您的 Dubbo Mesh 集群。
 
 ## 接入非 Istio 控制面
 Dubbo Mesh 本身并不绑定任何控制面产品实现，你可以使用 Istio、Linkerd、Kuma 或者任一支持 xDS 协议的控制面产品，对于 Sidecar 亦是如此。
 
-如果你已经完整的体验了 [基于 Istio 的 Dubbo Mesh]() 示例任务，并且发现 Istio 很好的满足了你的 Dubbo Mesh 治理诉求，那么采用 Istio 作为你的控制面是首选的解决方案。
+如果你已经完整的体验了 [基于 Istio 的 Dubbo Mesh](/) 示例任务，并且发现 Istio 很好的满足了你的 Dubbo Mesh 治理诉求，那么采用 Istio 作为你的控制面是首选的解决方案。
 
-如果你发现 Istio 模式下 Dubbo 部分能力受限，而这部分能力正好是你需要的，那么你需要考虑接入 Dubbo 控制面，用 Dubbo 控制面来替代 Istio，以获得更多 Dubbo 体系原生能力支持、更好的性能体验。具体请参见 [基于 Dubbo 定制控制面的 Dubbo Mesh 示例任务]()。
+如果你发现 Istio 模式下 Dubbo 部分能力受限，而这部分能力正好是你需要的，那么你需要考虑接入 Dubbo 控制面，用 Dubbo 控制面来替代 Istio，以获得更多 Dubbo 体系原生能力支持、更好的性能体验。具体请参见 [基于 Dubbo 定制控制面的 Dubbo Mesh 示例任务](/)。
 
 > 简单来讲，这是 Dubbo 社区发布的一款基于 Istio 的定制版本控制面，Dubbo 控制面安装与能力差异请参见上面的示例任务链接。
 
