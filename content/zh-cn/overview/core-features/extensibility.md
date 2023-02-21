@@ -7,7 +7,7 @@ description: ""
 feature:
   title: 可扩展性
   description: >
-    以插件形式定义所有关键微服务组件，用户可基于 Filter、Router、Service Discovery、Configuration 等扩展点对接、适配自建或开源微服务生态。
+    一切皆可扩展，通过扩展 (Filter、Router、Service Discovery、Configuration 等) 自定义调用、管控行为，适配开源微服务生态。
 ---
 
 Dubbo 从设计上是高度可扩展的，通过这些扩展点你可以做到：

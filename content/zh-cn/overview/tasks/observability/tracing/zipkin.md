@@ -47,7 +47,7 @@ Start `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication` directly f
 
 Open [http://localhost:9411/zipkin/](http://localhost:9411/zipkin/) in browser.
 
-![zipkin.png](static/zipkin.png)
+![zipkin.png](/imgs/v3/tasks/observability/tracing/zipkin.png)
 
 ## How To Use Dubbo Tracing In Your Project
 

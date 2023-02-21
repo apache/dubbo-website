@@ -7,21 +7,17 @@ weight: 20
 no_list: true
 ---
 
-# 指标
-## 指标模块简介
-Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 ["四大黄金信号"](https://sre.google/sre-book/monitoring-distributed-systems/) 并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。
+这个示例演示了如何使用 Grafana 可视化的展示 Metrics 监控指标
 
-Dubbo的关键指标包含：**延迟（Latency）**、**流量（Traffic）**、 **错误（Errors）** 和 **饱和度（Saturation）** 等内容 。同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如线程池数量、三大中心交互的指标数据等。
+## 开始之前
+* 安装 Prometheus
+* 安装 Grafana
+* 部署示例项目
 
-Dubbo目前推荐使用Prometheus来进行服务监控，Grafana来展示指标数据。接下来就通过案例来快速入门Dubbo的指标监控吧。
+## 查看 Grafana 面板
 
-## 快速入门
-### 环境
-- 系统：Windows、Linux、MacOS
-- JDK 8 及以上
-- Git
-- Maven
 
+## 示例详解
 ### 参考案例
 Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获取案例源码：
 - Spring项目参考案例：
@@ -48,17 +44,46 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 </dubbo:metrics>
 ```
 关于指标的配置可以参考配置项中的指标配置信息，在这里引入的配置中:
-- enable-jvm-metrics是对JVM指标的埋点， 如果不需要这些配置项可以将其删除或者设置为false，
-- aggregation配置是针对指标数据的聚合处理使监控指标更平滑，
-- prometheus-exporter配置为指标数据导出器，这里配置指标服务的端口号为20888，
+- **enable-jvm-metrics：** 是对JVM指标的埋点， 如果不需要这些配置项可以将其删除或者设置为false。
+- **aggregation：** 针对指标数据的聚合处理使监控指标更平滑。
+- **prometheus-exporter：** 指标数据导出器，这里配置指标服务的端口号为20888。
 
-- 启动服务后，普罗米修斯监控服务通过访问：[http://localhost:20888](http://localhost:20888) 即可拉取数据
+配置完成后即可启动服务。
 
+### 指标获取
+
+前面的例子中提供了指标服务，接下来我们可以通过普罗米修斯来获取数据。
+普罗米修斯监控服务通过访问：[http://localhost:20888](http://localhost:20888) 即可拉取数据
+指标数据如下所示：
+![metrics.png](/imgs/v3/advantages/metrics.png)
+
+普罗米修斯获取数据的配置参考如下：
+```yaml
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+  - job_name: 'dubbo'
+    static_configs:
+    - targets: ['IP:20888']
+```
+当然在实际企业应用中这个服务发现的地址并不会使用这个静态配置，需要改成动态配置。
+
+
+也可以使用普罗米修斯的图形界面来查询指标数据如下图所示：
+![prometheus.png](/imgs/v3/advantages/prometheus.png)
 
 ### 可视化页面
-也可以使用 Grafana、Prometheus 等实现可视化指标监测，具体请参考以下可视化任务示例：
+也可以使用 Grafana可视化指标监测，下面以Grafana可视化为例：
+Dubbo可观测性面板可以在Grafana官网的模板库中可以找到，您可以直接导入如下模版，并配置好数据源即可。
+[https://grafana.com/grafana/dashboards/18051](https://grafana.com/grafana/dashboards/18051)
 
-* [Admin 任务链接]()
-* [Grafana 任务链接]()
-* [Prometheus 任务链接]()
+
+![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
+![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
+
 

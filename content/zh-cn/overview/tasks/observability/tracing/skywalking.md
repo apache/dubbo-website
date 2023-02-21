@@ -69,6 +69,6 @@ java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-sample
 ## 6. Result
 Open [skywalking-webapp](http://localhost:8080/) in browser.
 
-![skywalking-trace-result-1](skywalking-trace-result-1.png)
-![skywalking-trace-result-2](skywalking-trace-result-2.png)
-![skywalking-trace-result-2](skywalking-trace-result-3.png)
+![skywalking-trace-result-1](/imgs/v3/tasks/observability/tracing/skywalking-trace-result-1.png)
+![skywalking-trace-result-2](/imgs/v3/tasks/observability/tracing/skywalking-trace-result-2.png)
+![skywalking-trace-result-2](/imgs/v3/tasks/observability/tracing/skywalking-trace-result-3.png)

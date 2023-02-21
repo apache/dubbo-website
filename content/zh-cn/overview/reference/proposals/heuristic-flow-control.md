@@ -1,9 +1,11 @@
 ---
-title: "Dubbo3 应用级服务发现设计"
-linkTitle: "Dubbo3 应用级服务发现设计"
+type: docs
+title: "自适应负载均衡与限流"
+linkTitle: "服务柔性"
 date: 2023-01-30
 author: Quanlu Liu
 description: >
+
 ---
 
 # 整体介绍

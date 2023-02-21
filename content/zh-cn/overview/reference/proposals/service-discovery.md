@@ -1,9 +1,11 @@
 ---
+type: docs
 title: "Dubbo3 应用级服务发现设计"
-linkTitle: "Dubbo3 应用级服务发现设计"
+linkTitle: "应用级服务发现"
 date: 2023-01-30
 author: Jun Liu
 description: >
+
 ---
 
 ## Objective

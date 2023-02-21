@@ -5,9 +5,9 @@ linkTitle: "通信协议"
 weight: 40
 description: ""
 feature:
-  title: 多种通信协议
+  title: 通信协议
   description: >
-    根据技术栈与业务需求选择合适的通信协议，如 gRPC/Triple (HTTP/2)、TCP 二进制、HTTP+JSON 等，切换协议只需要修改一行配置，同时支持单个端口上的多协议发布
+    支持 HTTP/2、gRPC、TCP、REST 等任意通信协议，切换协议只需要修改一行配置，支持单个端口上的多协议发布。
 ---
 
 Dubbo 框架提供了自定义的高性能 RPC 通信协议：基于 HTTP/2 的 Triple 协议 和 基于 TCP 的 Dubbo2 协议。除此之外，Dubbo 框架支持任意第三方通信协议，如官方支持的 gRPC、Thrift、REST、JsonRPC、Hessian2 等，更多协议可以通过自定义扩展实现。这对于微服务实践中经常要处理的多协议通信场景非常有用。
