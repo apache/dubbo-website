@@ -211,6 +211,6 @@ dubbo.consumer.router=stickfirst
 ```
 
 ## 运行结果
-以[使用本地IDE](#使用本地IDE)的方式来运行任务，结果如下：
+以**使用本地IDE**的方式来运行任务，结果如下：
 
 ![dubbo-samples-extensibility-router-output.png](/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-router-output.png)
