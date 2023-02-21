@@ -29,7 +29,7 @@ docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
 
 Then you can verify zipkin server works by access [http://localhost:9411](http://localhost:9411)
 
-![zipkin_home](/imgs/v3/tasks/observability/zipkin_home.png)
+![zipkin_home](/imgs/v3/tasks/observability/tracing/zipkin_home.png)
 
 ### Install & Start Nacos
 

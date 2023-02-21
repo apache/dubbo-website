@@ -37,7 +37,7 @@ Dubbo 作为服务开发框架包含的具体内容如下：
 * [Java](/zh-cn/overview/quickstart/java/)
 * [Golang](/zh-cn/overview/quickstart/go/)
 * [Rust](/zh-cn/overview/quickstart/rust/)
-* [Node](/zh-cn/overview/quickstart/nodejs/)
+* [Node](https://github.com/apache/dubbo-js)
 
 ### 通信协议
 **Dubbo 从设计上不绑定任何一款特定通信协议，HTTP/2、REST、gRPC、JsonRPC、Thrift、Hessian2 等几乎所有主流的通信协议，Dubbo 框架都可以提供支持。** 这样的 Protocol 设计模式给构建微服务带来了最大的灵活性，开发者可以根据需要如性能、通用型等选择不同的通信协议，不再需要任何的代理来实现协议转换，甚至你还可以通过 Dubbo 实现不同协议间的迁移。
