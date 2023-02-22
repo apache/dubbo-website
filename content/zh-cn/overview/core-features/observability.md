@@ -49,14 +49,50 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 ```
 
 ### 配置
-目前Dubbo支持推和拉两种模式获取指标数据，下面以普罗米修斯拉取指标数据的方式来作为演示，开启Dubbo的指标埋点只需要引入以下配置即可。
+目前Dubbo支持推和拉两种模式获取指标数据，下面以普罗米修斯拉取指标数据的方式来作为演示，开启Dubbo的指标埋点只需要引入以下对应配置即可。下面介绍两种开启的方式分别为Spring文件中配置和dubbo.properties配置文件中配置，您可以选择其中一种适合自己方式即可。
+
+**Spring配置文件中的指标配置**
+
 ```xml
-<dubbo:metrics protocol="prometheus" enable-jvm-metrics="true">
-    <dubbo:aggregation enabled="true"/>
-    <dubbo:prometheus-exporter enabled="true"  metrics-port="20888"/>
-</dubbo:metrics>
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:property-placeholder/>
+
+    <dubbo:application name="metrics-provider"/>
+
+    <dubbo:registry address="zookeeper://${zookeeper.address:127.0.0.1}:2181"/>
+    <dubbo:config-center address="zookeeper://${zookeeper.address:127.0.0.1}:2181" />
+    <dubbo:metadata-report address="zookeeper://${zookeeper.address:127.0.0.1}:2181" />
+
+    <dubbo:metrics protocol="prometheus" enable-jvm-metrics="true">
+        <dubbo:aggregation enabled="true"/>
+        <dubbo:prometheus-exporter enabled="true"  metrics-port="20888"/>
+    </dubbo:metrics>
+</beans>
+
 ```
+**dubbo.properties配置文件中的指标配置**
+
+当然您也可以通过在dubbo.properties这样的配置文件中新增如下配置：
+
+```bash
+dubbo.application.name=metrics-provider
+dubbo.metrics.protocol=prometheus
+dubbo.metrics.enable-jvm-metrics=true
+dubbo.metrics.aggregation.enabled=true
+dubbo.metrics.prometheus.exporter.enabled=true
+dubbo.metrics.prometheus.exporter.metrics-port=20888
+dubbo.registry.address=zookeeper://${zookeeper.address:127.0.0.1}:2181
+```
+
 关于指标的配置可以参考配置项中的指标配置信息，在这里引入的配置中:
+
+- **protocol：** 当前指标体系类型，这里是普罗米修斯。
+
 - **enable-jvm-metrics：** 是对JVM指标的埋点， 如果不需要这些配置项可以将其删除或者设置为false。
 - **aggregation：** 针对指标数据的聚合处理使监控指标更平滑。
 - **prometheus-exporter：** 指标数据导出器，这里配置指标服务的端口号为20888。
@@ -100,13 +136,11 @@ scrape_configs:
 ![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
 
 
-
 Dubbo提供了丰富的指标面板，这些面板均可以在Grafana官方面板库中找到：您可以直接导入如下模版，并配置好数据源即可。
 
 **Apache Dubbo Observability Dashboard：**  [https://grafana.com/grafana/dashboards/18051](https://grafana.com/grafana/dashboards/18051)
 
 **JVM (Micrometer) Dashboard：** [https://grafana.com/grafana/dashboards/4701](https://grafana.com/grafana/dashboards/4701)
-
 
 
 ### Dubbo 指标含义
@@ -129,10 +163,7 @@ Dubbo提供了丰富的指标面板，这些面板均可以在Grafana官方面�
 | dubbo_provider_rt_seconds_p99             | 提供者处理请求中99%的请求耗费的总响应时间 |
 
 
-
 #### Consumer Metrics
-
-#### 
 
 | 指标                                      | 含义                                      |
 | ----------------------------------------- | ----------------------------------------- |
@@ -150,9 +181,7 @@ Dubbo提供了丰富的指标面板，这些面板均可以在Grafana官方面�
 | dubbo_consumer_rt_seconds_p95             | 消费者处理请求中95%的请求耗费的总响应时间 |
 | dubbo_consumer_rt_seconds_p99             | 消费者处理请求中99%的请求耗费的总响应时间 |
 
-#### ThreadPoll Metrics
-
-
+#### ThreadPool Metrics
 
 #### Registration Center Metrics
 
