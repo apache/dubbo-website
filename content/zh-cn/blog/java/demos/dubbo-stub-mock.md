@@ -1,6 +1,7 @@
 ---
 title: "本地存根和本地伪装"
 linkTitle: "本地存根和本地伪装"
+tags: ["Java"]
 date: 2019-10-22
 description: 本文介绍了 Dubbo 中本地存根和本地伪装的用法
 ---

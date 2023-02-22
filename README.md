@@ -7,48 +7,40 @@ This project keeps all sources used for building up Dubbo official website which
 ## Overview
 
 The Apache Dubbo docs are built using [Hugo](https://gohugo.io/) with the [Docsy](https://docsy.dev) theme.
-This project contains the hugo project, markdown files, and theme configurations.
+
+This project contains the markdown source files of the Dubbo documentation.
 
 ## Pre-requisites
 
 - [Hugo extended version](https://gohugo.io/getting-started/installing)
+- [Go](https://go.dev/learn/)
 - [Node.js](https://nodejs.org/en/)
 
 ## Environment setup
-
-You can directly start working on this repository even from your browser by just clicking on the following button
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/apache/dubbo-website)
-
-Or, you can follow the manual steps given below.
-
 1. Ensure pre-requisites are installed
 2. Clone this repository
 ```sh
 git clone https://github.com/apache/dubbo-website.git
 ```
-3. Change to root directory: 
+3. Install `PostCSS` required by Docsy by running the following commands from the root directory of your project:
+
 ```sh
-cd dubbo-website
-```
-4. Add Docsy submodule:
-```sh
-git submodule add https://github.com/google/docsy.git themes/docsy
-```
-5. Update submodules: 
-```sh
-git submodule update --init --recursive
-```
-6. Install npm packages: 
-```sh
-npm install
+$ npm install --save-dev autoprefixer
+$ npm install -D postcss
+$ npm install --save-dev postcss-cli
 ```
 
-## Run local server
-1. Run 
+## Run server locally
+1. Clear up your local module cache
+```sh
+hugo mod clean
+```
+
+2. Start the server
 ```sh
 hugo server --disableFastRender
 ```
+
 2. Navigate to `http://localhost:1313`
 
 ## Update docs

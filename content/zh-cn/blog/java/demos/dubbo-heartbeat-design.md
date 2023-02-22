@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 现有心跳方案总结以及改进建议"
 linkTitle: "Dubbo 现有心跳方案总结以及改进建议"
+tags: ["Java"]
 date: 2018-08-19
 description: > 
     本文介绍了一种心跳，两种设计

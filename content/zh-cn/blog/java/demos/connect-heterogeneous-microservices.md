@@ -1,6 +1,7 @@
 ---
 title: "使用 Dubbo 连接异构微服务体系"
 linkTitle: "使用 Dubbo 连接异构微服务体系"
+tags: ["Java"]
 date: 2019-06-22
 description: >
   在这篇文章中，我们将探索如何利用 Dubbo 对多协议、多服务发现模型的支持，来实现异构微服务体系间的互联互通
@@ -287,9 +288,7 @@ Dubbo 体系内的部分应用作为透明的联通两个体系的关键节点�
 
 ### 自建体系迁移到 Dubbo 体系（共存）
 
-这个场景和上一节中讲到的的 SpringCloud 迁移有些类似，最大的区别在于 rest 协议是 Dubbo 官方默认提供支持的，而对于已有的微服务体系内的私有通信协议，则需要先要自己去扩展 Dubbo Protocol 来提供协议层面的支持，关于 Protocol 如何扩展请参见以下官方文档：
-
-/zh-cn/docs/dev/impls/protocol.html
+这个场景和上一节中讲到的的 SpringCloud 迁移有些类似，最大的区别在于 rest 协议是 Dubbo 官方默认提供支持的，而对于已有的微服务体系内的私有通信协议，则需要先要自己去扩展 Dubbo Protocol 来提供协议层面的支持。
 
 ## 总结与展望
 

@@ -3,6 +3,7 @@ title: "7-Dubbo的SPI扩展机制之自动激活扩展Activate源码解析"
 linkTitle: "7-Dubbo的SPI扩展机制之自动激活扩展Activate源码解析"
 date: 2022-08-07
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] @Activate可用于在有多个实现时加载某些筛选器扩展，一般带有同种类型多个扩展都要执行的情况，比如过滤器。
 ---

@@ -3,6 +3,7 @@ title: "18-Dubbo3元数据服务MetadataService的导出"
 linkTitle: "18-Dubbo3元数据服务MetadataService的导出"
 date: 2022-08-18
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] 使用者查询提供者的元数据信息，以列出接口和每个接口的配置，控制台（dubbo admin）查询特定进程的元数据，或聚合所有进程的数据。在Dubbo2.x的时候，所有的服务数据都是以接口的形式注册在注册中心。
 ---

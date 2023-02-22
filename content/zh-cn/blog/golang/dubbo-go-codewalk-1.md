@@ -1,6 +1,7 @@
 ---
 title: "Dubbo-go 源码笔记（一）Server 端开启服务过程"
 linkTitle: "Dubbo-go 源码笔记（一）Server 端开启服务过程"
+tags: ["Go", "源码解析"]
 date: 2021-01-14
 description: >
     随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。

@@ -1,5 +1,5 @@
 ---
-title: "dubbo-go-hessian2 v1.6.0"
+title: "Dubbo Go Hessian2 v1.6.0"
 linkTitle: "dubbo-go-hessian2 v1.6.0"
 date: 2021-01-14
 description: >

@@ -1,6 +1,7 @@
 ---
 title: "以 Dubbo 为例，聊聊如何向开源项目做贡献"
 linkTitle: "以 Dubbo 为例，聊聊如何向开源项目做贡献"
+tags: ["Java"]
 date: 2018-06-03
 description: >
     本文将会以 dubbo 项目为例向你阐释，给开源项目做贡献并不是一件难事

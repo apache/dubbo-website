@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 注解驱动"
 linkTitle: "Dubbo 注解驱动"
+tags: ["Java"]
 date: 2018-08-07
 description: >
     介绍了 Dubbo 中新引入的注解驱动支持

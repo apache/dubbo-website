@@ -1,6 +1,7 @@
 ---
 title: "Dubbo 外部化配置"
 linkTitle: "Dubbo 外部化配置"
+tags: ["Java"]
 date: 2018-05-21
 description: >
 ---

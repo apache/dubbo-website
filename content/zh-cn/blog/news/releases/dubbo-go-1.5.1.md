@@ -1,7 +1,8 @@
 ---
-title: "dubbo-go 1.5.1"
+title: "Dubbo Go 1.5.1"
 linkTitle: "dubbo-go 1.5.1"
-date: 2021-01-14
+date: 2021-6-12
+weight: 60
 description: >
     Dubbo-go 团队近期发布了 Dubbo-go v1.5.1，Dubbo-go 是 Apache Dubbo 项目的 Go 实现。
 ---

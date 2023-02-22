@@ -1,6 +1,7 @@
 ---
 title: "冲上云原生，Dubbo 发布 Go 版本"
 linkTitle: "Dubbo Go 发布"
+tags: ["Go"]
 date: 2021-01-11
 description: 本文记录了 OSCHINA 对何鑫铭的采访，原文出处：https://www.oschina.net/question/3820517_2306822
 ---

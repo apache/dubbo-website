@@ -3,6 +3,7 @@ title: "11-Dubbo启动器DubboBootstrap添加协议配置信息ProtocolConfig"
 linkTitle: "11-Dubbo启动器DubboBootstrap添加协议配置信息ProtocolConfig"
 date: 2022-08-11
 author: 宋小生
+tags: ["源码解析", "Java"]
 description: >
     [Dubbo 3.0.8源码解析] ProtocolConfig协议配置是RPC调用过程中一些必要信息的基础。
 ---

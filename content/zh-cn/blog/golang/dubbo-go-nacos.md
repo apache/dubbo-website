@@ -1,6 +1,7 @@
 ---
 title: "解构 Dubbo-go 的核心注册引擎 Nacos"
 linkTitle: "解构 Dubbo-go 的核心注册引擎 Nacos"
+tags: ["Go"]
 date: 2021-01-14
 description: >
     dubbo-go 选择 Nacos 作为注册中心的原因

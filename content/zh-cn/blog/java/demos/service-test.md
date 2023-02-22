@@ -1,6 +1,7 @@
 ---
 title: "Dubbo Admin服务测试功能"
 linkTitle: "Dubbo Admin服务测试功能"
+tags: ["Java"]
 date: 2019-08-26
 slug: service-test
 description: >

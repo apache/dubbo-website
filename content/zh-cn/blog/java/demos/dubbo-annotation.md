@@ -1,6 +1,7 @@
 ---
 title: "在 Dubbo 中使用注解"
 linkTitle: "在 Dubbo 中使用注解"
+tags: ["Java"]
 date: 2018-08-07
 description: >
     介绍了如何使用注解方式而非 XML 方式来开发 Dubbo 应用，可以学习到如何使用 @EnableDubbo、@Service、@Reference 的用法。

@@ -1,6 +1,7 @@
 ---
 title: "Spring Boot Dubbo应用启停源码分析"
 linkTitle: "Spring Boot Dubbo应用启停源码分析"
+tags: ["Java"]
 date: 2018-08-14
 description: >
     本文分析 `dubbo-spring-boot-project` 中 Dubbo 启停源码的实现原理。

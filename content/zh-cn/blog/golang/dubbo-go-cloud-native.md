@@ -1,6 +1,7 @@
 ---
 title: "dubbogo 3.0：牵手 gRPC 走向云原生时代"
 linkTitle: "dubbogo 3.0：牵手 gRPC 走向云原生时代"
+tags: ["Go"]
 date: 2021-01-15
 description: >
     本文介绍了 dubbo-go 3.0 对云原生的支持和规划

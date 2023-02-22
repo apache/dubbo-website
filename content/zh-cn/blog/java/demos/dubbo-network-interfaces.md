@@ -1,6 +1,7 @@
 ---
 title: "研究 Dubbo 网卡地址注册时的一点思考"
 linkTitle: "研究 Dubbo 网卡地址注册时的一点思考"
+tags: ["Java"]
 date: 2019-10-01
 description: 研究 Dubbo 网卡地址注册时的一点思考
 ---
