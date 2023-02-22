@@ -99,18 +99,31 @@ dubbo.registry.address=zookeeper://${zookeeper.address:127.0.0.1}:2181
 
 配置完成后即可启动服务。
 
-### 指标获取
+### 从普罗米修斯查询指标
 
-前面的例子中提供了指标服务，下面就来看下如何将指标上报到普罗米修斯系统中。
+前面的例子中提供了Dubbo应用的指标服务配置，下面就来看下如何将查询指标，并采集指标到普罗米修斯系统中。
+
+#### 在您开始之前
+
+- 安装[普罗米修斯服务](../install/prometheus-install)
+
+#### 查询Apache Dubbo指标
+
+
 如果需要测试指标数据可以直接在服务器上面执行如下命令：
+
 ```bash
 curl http://localhost:20888
 ```
+
 为了使演示结果更清晰下面是使用浏览器发起的GET请求获取到的指标数据：
 ![metrics.png](/imgs/v3/advantages/metrics.png)
 
-接下来我们可以通过普罗米修斯来获取数据。普罗米修斯通过服务发现的形式来获取数据，下面演示普罗米修斯拉取指标数据的方式：
+#### 普罗米修斯采集与查询指标
+
+接下来我们可以通过普罗米修斯服务来获取指标数据。普罗米修斯通过服务发现的形式来获取数据，下面演示普罗米修斯拉取指标数据的方式：
 普罗米修斯配置静态服务发现，获取指标数据的配置参考如下：
+
 ```yaml
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
@@ -129,18 +142,26 @@ scrape_configs:
 使用普罗米修斯的图形界面来查询指标数据如下图所示：
 ![prometheus.png](/imgs/v3/advantages/prometheus.png)
 
-### 可视化页面
-可视化页面目前推荐的方式是使用Grafana来配置Dubbo的可观测性监控大盘，下面以Grafana可视化为例来看下如何通过Dubbo可观测性大盘来监测Dubbo服务：
+### 使用Grafana可视化指标
+指标可视化页面目前推荐的方式是使用Grafana来配置Dubbo的可观测性监控大盘。
 
-![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
-![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
+#### 在您开始之前
 
+- 安装[普罗米修斯服务](../install/prometheus-install)
+- 安装[Grafana](../install/grafana-install)
+
+#### 查看Dubbo指标面板
 
 Dubbo提供了丰富的指标面板，这些面板均可以在Grafana官方面板库中找到：您可以直接导入如下模版，并配置好数据源即可。
 
 **Apache Dubbo Observability Dashboard：**  [https://grafana.com/grafana/dashboards/18051](https://grafana.com/grafana/dashboards/18051)
 
 **JVM (Micrometer) Dashboard：** [https://grafana.com/grafana/dashboards/4701](https://grafana.com/grafana/dashboards/4701)
+
+下面以Grafana可视化为例来看下如何通过Dubbo可观测性大盘来监测Dubbo服务：
+
+![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
+![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
 
 
 ### Dubbo 指标含义
@@ -188,10 +209,6 @@ Dubbo提供了丰富的指标面板，这些面板均可以在Grafana官方面�
 #### Metadata Center Metrics
 
 #### Configuration Center Metrics
-
-
-
-
 
 
 
