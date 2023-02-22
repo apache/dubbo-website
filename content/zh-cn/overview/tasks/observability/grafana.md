@@ -53,7 +53,7 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 ### 指标获取
 
 前面的例子中提供了指标服务，接下来我们可以通过普罗米修斯来获取数据。
-普罗米修斯监控服务通过访问：[http://localhost:20888](http://localhost:20888) 即可拉取数据
+普罗米修斯监控服务通过访问：`http://localhost:20888` 即可拉取数据
 指标数据如下所示：
 ![metrics.png](/imgs/v3/advantages/metrics.png)
 

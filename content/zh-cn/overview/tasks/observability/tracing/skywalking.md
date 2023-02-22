@@ -67,7 +67,7 @@ java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-sample
 java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-samples-spring-boot-tracing-skwalking-consumer-1.0-SNAPSHOT.jar
 ```
 ## 6. Result
-Open [skywalking-webapp](http://localhost:8080/) in browser.
+Open `[skywalking-webapp](http://localhost:8080/)` in browser.
 
 ![skywalking-trace-result-1](/imgs/v3/tasks/observability/tracing/skywalking-trace-result-1.png)
 ![skywalking-trace-result-2](/imgs/v3/tasks/observability/tracing/skywalking-trace-result-2.png)

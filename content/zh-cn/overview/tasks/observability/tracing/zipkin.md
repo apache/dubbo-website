@@ -27,7 +27,7 @@ Here we use docker to quickly start a zipkin server.
 docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
 ```
 
-Then you can verify zipkin server works by access [http://localhost:9411](http://localhost:9411)
+Then you can verify zipkin server works by access `[http://localhost:9411](http://localhost:9411)`
 
 ![zipkin_home](/imgs/v3/tasks/observability/tracing/zipkin_home.png)
 
@@ -45,7 +45,7 @@ Start `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication` directly f
 
 ### Check Result
 
-Open [http://localhost:9411/zipkin/](http://localhost:9411/zipkin/) in browser.
+Open `[http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)` in browser.
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/zipkin.png)
 
