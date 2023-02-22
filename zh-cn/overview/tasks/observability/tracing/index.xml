@@ -1,0 +1,152 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 全链路追踪</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</link><description>Recent content in 全链路追踪 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Zipkin</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</guid><description>
+&lt;h1 id="overview">Overview&lt;/h1>
+&lt;p>This example demonstrates the basic usage of tracing in Dubbo application and report tracing information to zipkin. This
+example contains three parts, &lt;code>dubbo-samples-spring-boot3-tracing-provider&lt;/code>
+, &lt;code>dubbo-samples-spring-boot3-tracing-consumer&lt;/code> and &lt;code>dubbo-samples-spring-boot3-tracing-interface&lt;/code>.&lt;/p>
+&lt;p>Apache Dubbo has inbuilt tracing through &lt;a href="https://micrometer.io/">Micrometer Observations&lt;/a> and &lt;a href="https://github.com/micrometer-metrics/tracing">Micrometer Tracing&lt;/a>.&lt;/p>
+&lt;h2 id="quick-start">Quick Start&lt;/h2>
+&lt;h3 id="install--start-zipkin">Install &amp;amp; Start Zipkin&lt;/h3>
+&lt;p>Follow &lt;a href="https://zipkin.io/pages/quickstart.html">Zipkin&amp;rsquo;s quick start&lt;/a> to install zipkin.&lt;/p>
+&lt;p>Here we use docker to quickly start a zipkin server.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then you can verify zipkin server works by access &lt;code>[http://localhost:9411](http://localhost:9411)&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/zipkin_home.png" alt="zipkin_home">&lt;/p>
+&lt;h3 id="install--start-nacos">Install &amp;amp; Start Nacos&lt;/h3>
+&lt;p>Follow &lt;a href="https://nacos.io/zh-cn/docs/v2/quickstart/quick-start.html">Nacos&amp;rsquo;s quick start&lt;/a> to install and start nacos.&lt;/p>
+&lt;h3 id="start-provider">Start Provider&lt;/h3>
+&lt;p>Start &lt;code>org.apache.dubbo.springboot.demo.provider.ProviderApplication&lt;/code> directly from IDE.&lt;/p>
+&lt;h3 id="start-consumer">Start Consumer&lt;/h3>
+&lt;p>Start &lt;code>org.apache.dubbo.springboot.demo.consumer.ConsumerApplication&lt;/code> directly from IDE.&lt;/p>
+&lt;h3 id="check-result">Check Result&lt;/h3>
+&lt;p>Open &lt;code>[http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)&lt;/code> in browser.&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/zipkin.png" alt="zipkin.png">&lt;/p>
+&lt;h2 id="how-to-use-dubbo-tracing-in-your-project">How To Use Dubbo Tracing In Your Project&lt;/h2>
+&lt;h3 id="1-adding-micrometer-observation-to-your-project">1. Adding Micrometer Observation To Your Project&lt;/h3>
+&lt;p>In order to add Micrometer to the classpath and add metrics for Dubbo you need to add the &lt;code>dubbo-metrics-api&lt;/code> dependency
+as shown below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metrics-api&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Thanks to the usage of &lt;a href="https://micrometer.io/">Micrometer Observations&lt;/a> Dubbo got instrumented once, but depending on
+the setup will allow emission of metrics, tracer or other signals via custom &lt;code>ObservationHandlers&lt;/code>. Please read
+the &lt;a href="https://micrometer.io">documentation under docs/observation&lt;/a> for more information.&lt;/p>
+&lt;h3 id="2-adding-micrometer-tracing-bridge-to-your-project">2. Adding Micrometer Tracing Bridge To Your Project&lt;/h3>
+&lt;p>In order to start creating spans for Dubbo based projects a &lt;code>bridge&lt;/code> between Micrometer Tracing and an actual Tracer is
+required.&lt;/p>
+&lt;blockquote>
+&lt;p>NOTE: Tracer is a library that handles lifecycle of spans (e.g. it can create, start, stop, sample, report spans).&lt;/p>
+&lt;/blockquote>
+&lt;p>Micrometer Tracing supports &lt;a href="https://github.com/open-telemetry/opentelemetry-java">OpenTelemetry&lt;/a> and &lt;a href="https://github.com/openzipkin/brave">Brave&lt;/a> as Tracers. Dubbo recommends using OpenTelemetry as the protocol of tracing, you can add dependency as shown below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- OpenTelemetry Tracer --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-otel&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-adding-micrometer-tracing-exporter-to-your-project">3. Adding Micrometer Tracing Exporter To Your Project&lt;/h3>
+&lt;p>After having added the Tracer, an exporter (also known as a reporter) is required. It&amp;rsquo;s a component that will export the
+finished span and send it to a reporting system. Micrometer Tracer natively supports Tanzu Observability by Wavefront
+and Zipkin. Let&amp;rsquo;s take zipkin as an example as shown below:&lt;/p>
+&lt;p>OpenZipkin Zipkin with OpenTelemetry&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.opentelemetry&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>opentelemetry-exporter-zipkin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can read more about tracing setup &lt;a href="https://micrometer.io/">this documentation, under docs/tracing&lt;/a>.&lt;/p>
+&lt;h3 id="4-configuration-observationregistry">4. Configuration ObservationRegistry&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ObservationConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// reuse the applicationModel in your system
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel &lt;span style="color:#268bd2">applicationModel&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ObservationRegistry observationRegistry&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel applicationModel &lt;span style="color:#719e07">=&lt;/span> ApplicationModel&lt;span style="color:#719e07">.&lt;/span>defaultModel&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>registerBean&lt;span style="color:#719e07">(&lt;/span>observationRegistry&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationModel&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// zipkin endpoint url
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpanExporter &lt;span style="color:#268bd2">spanExporter&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ZipkinSpanExporterBuilder&lt;span style="color:#719e07">().&lt;/span>setEndpoint&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;http://localhost:9411/api/v2/spans&amp;#34;&lt;/span>&lt;span style="color:#719e07">).&lt;/span>build&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="5-customizing-observation-filters">5. Customizing Observation Filters&lt;/h3>
+&lt;p>To customize the tags present in metrics (low cardinality tags) and in spans (low and high cardinality tags) you should
+create your own versions of &lt;code>DubboServerObservationConvention&lt;/code> (server side) and &lt;code>DubboClientObservationConvention&lt;/code> (
+client side) and register them in the &lt;code>ApplicationModel&lt;/code>&amp;rsquo;s &lt;code>BeanFactory&lt;/code>. To reuse the existing ones
+check &lt;code>DefaultDubboServerObservationConvention&lt;/code> (server side) and &lt;code>DefaultDubboClientObservationConvention&lt;/code> (client
+side).&lt;/p>
+&lt;h2 id="extension">Extension&lt;/h2>
+&lt;h3 id="other-micrometer-tracing-bridge">Other Micrometer Tracing Bridge&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Brave Tracer --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-brave&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="other-micrometer-tracing-exporter">Other Micrometer Tracing Exporter&lt;/h3>
+&lt;p>Tanzu Observability by Wavefront&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-reporter-wavefront&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>OpenZipkin Zipkin with Brave&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.zipkin.reporter2&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>zipkin-reporter-brave&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>An OpenZipkin URL sender dependency to send out spans to Zipkin via a URLConnectionSender&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.zipkin.reporter2&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>zipkin-sender-urlconnection&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Skywalking</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</guid><description>
+&lt;h1 id="overview">Overview&lt;/h1>
+&lt;p>Apache Dubbo has inbuilt tracing through &lt;a href="https://micrometer.io/">Micrometer Observations&lt;/a>
+and &lt;a href="https://github.com/micrometer-metrics/tracing">Micrometer Tracing&lt;/a>.
+And the micrometer can integrate with skywalking by &lt;a href="https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/">skywalking micrometer-1.10 api&lt;/a>.&lt;/p>
+&lt;h2 id="1-adding-micrometer-observation-to-your-project">1. Adding Micrometer Observation To Your Project&lt;/h2>
+&lt;p>In order to add Micrometer to the classpath and add metrics for Dubbo you need to add the &lt;code>dubbo-metrics-api&lt;/code> dependency
+as shown below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metrics-api&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-add-skywalking-micrometer-110-api-to-your-project">2. Add Skywalking Micrometer-1.10 Api To Your Project&lt;/h2>
+&lt;p>To integrate the dubbo&amp;rsquo;s micrometer tracing data to skywalking, you should add this toolkit dependency.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.skywalking&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>apm-toolkit-micrometer-1.10&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-configuration-observationregistry">3. Configuration ObservationRegistry&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ObservationConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel &lt;span style="color:#268bd2">applicationModel&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ObservationRegistry observationRegistry&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel applicationModel &lt;span style="color:#719e07">=&lt;/span> ApplicationModel&lt;span style="color:#719e07">.&lt;/span>defaultModel&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> observationRegistry&lt;span style="color:#719e07">.&lt;/span>observationConfig&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>observationHandler&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ObservationHandler&lt;span style="color:#719e07">.&lt;/span>FirstMatchingCompositeObservationHandler&lt;span style="color:#719e07">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingSenderTracingHandler&lt;span style="color:#719e07">(),&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingReceiverTracingHandler&lt;span style="color:#719e07">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingDefaultTracingHandler&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>registerBean&lt;span style="color:#719e07">(&lt;/span>observationRegistry&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationModel&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-start-the-skywalking-oap">4. Start the Skywalking OAP&lt;/h2>
+&lt;p>&lt;a href="https://skywalking.apache.org/docs/main/v9.3.0/en/setup/backend/backend-setup/">skywalking oap setup&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>bash startup.sh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="5-start-provider-and-application-with-skywalking-agent">5. Start Provider and Application With Skywalking Agent&lt;/h2>
+&lt;p>After starting the registration center, we start provider and Consumer with skywalking agent, so skywalking can report trace data.
+And because skywalking java agent have instrumented the dubbo and spring framework, to verify dubbo integrates with skywalking by micrometer,
+&lt;strong>we should delete plugin jars in &amp;ldquo;plugins&amp;rdquo; directory&lt;/strong>.
+To connect the skywalking oap, we should config the backend address in /path/to/skywalking-agent/agent.config.
+The relevant field is &lt;strong>collector.backend_service&lt;/strong>.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-samples-spring-boot-tracing-skwalking-provider-1.0-SNAPSHOT.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-samples-spring-boot-tracing-skwalking-consumer-1.0-SNAPSHOT.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="6-result">6. Result&lt;/h2>
+&lt;p>Open &lt;code>[skywalking-webapp](http://localhost:8080/)&lt;/code> in browser.&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-1.png" alt="skywalking-trace-result-1">
+&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-2.png" alt="skywalking-trace-result-2">
+&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-3.png" alt="skywalking-trace-result-2">&lt;/p></description></item></channel></rss>
