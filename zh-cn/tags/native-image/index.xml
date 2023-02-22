@@ -1,0 +1,257 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Native Image</title><link>https://dubbo.apache.org/zh-cn/tags/native-image/</link><description>Recent content in Native Image on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 14 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/native-image/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 使用 GraalVM 构建 Native Image</title><link>https://dubbo.apache.org/zh-cn/blog/2021/01/14/%E4%BD%BF%E7%94%A8-graalvm-%E6%9E%84%E5%BB%BA-native-image/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/01/14/%E4%BD%BF%E7%94%A8-graalvm-%E6%9E%84%E5%BB%BA-native-image/</guid><description>
+&lt;h1 id="dubbo项目支持native-image">dubbo项目支持native-image&lt;/h1>
+&lt;h2 id="概述">概述&lt;/h2>
+&lt;p>​ 本文档将介绍将dubbo项目接入GraalVM，进行native-image编译为二进制的方式，以及我们为了达到这个目的做了哪些工作。&lt;/p>
+&lt;p>​ GraalVM的核心就是Graal编译器，一款优秀的JIT编译器。它即可以当作JIT编译器使用，也可以用作提前编译的静态编译器。它将完成编译的主要工作。&lt;/p>
+&lt;p>​ 关于GraalVm的更多信息可以阅读 &lt;a href="https://www.graalvm.org/docs/getting-started/container-images/">https://www.graalvm.org/docs/getting-started/container-images/&lt;/a> 此文档。&lt;/p>
+&lt;h2 id="准备工作">准备工作&lt;/h2>
+&lt;p>​ 在编译我们的dubbo项目之前，需要确保我们正基于graalVm的环境。&lt;/p>
+&lt;p>​ 安装GraalVM的工作这里不做介绍，可以进入https://www.graalvm.org/ 官网选取最新版本安装，安装完成后查看本地jdk可以看到如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-graalvm-support/graalvm_env.png" alt="">&lt;/p>
+&lt;p>​ 这里我们使用的基于jdk1.8版本的GraalVM。&lt;/p>
+&lt;h2 id="快速上手">快速上手&lt;/h2>
+&lt;p>​ 为了便于用户快速上手，我们在 Dubbo 仓库中，提供了如下demo。&lt;/p>
+&lt;p>​ 模块名dubbo-demo-native，该模块中提供了简易版本的dubbo的provider以及consumer:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-graalvm-support/demo_path.png" alt="">&lt;/p>
+&lt;p>​ 我们在其中使用了native-image的maven插件，并定制了一些native-image的启动参数，用户只需要对应在provider以及consumer模块下执行maven的编译打包命令：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>mvn &lt;span style="color:#719e07">-&lt;/span>U clean &lt;span style="color:#719e07">package&lt;/span> &lt;span style="color:#719e07">-&lt;/span>P native &lt;span style="color:#719e07">-&lt;/span>Dmaven.test.skip=&lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 编译成功可以看到如下输出：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-graalvm-support/consumer_compiler.png" alt="">&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-graalvm-support/provider_compiler.png" alt="">&lt;/p>
+&lt;p>​ 在target目录中可以看到已经生成的二进制文件：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-graalvm-support/compile_result.png" alt="">&lt;/p>
+&lt;p>​ 查看该二进制文件大小大约在40M左右：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>MacdeMacBook-pro-3:target mac$ du -m demo-native-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>40 demo-native-provider
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>(注：本例子基于zookeeper进行的服务注册和发现，所以用户需要在本地先启动一个zk，再执行二进制启动。)&lt;/p>
+&lt;p>​ 直接运行启动该二进制：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>MacdeMacBook-pro-3:target mac$ ./demo-native-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: [DUBBO] DubboBootstrap is ready., dubbo version: 2.7.12-SNAPSHOT, current host: 10.220.186.228
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Jun 15, 2021 2:29:14 PM org.apache.dubbo.common.logger.jdk.JdkLogger info
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: [DUBBO] DubboBootstrap has started., dubbo version: 2.7.12-SNAPSHOT, current host: 10.220.186.228
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Jun 15, 2021 2:29:14 PM org.apache.dubbo.common.logger.jdk.JdkLogger info
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: [DUBBO] DubboBootstrap awaiting ..., dubbo version: 2.7.12-SNAPSHOT, current host: 10.220.186.228
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 再进入consumer的target目录，执行该二进制：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>MacdeMacBook-pro-3:target mac$ ./demo-native-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello dubbo, response from provider: 10.220.186.228:20880
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 以上启动以及调用均在零点几秒内完成。&lt;/p>
+&lt;h2 id="我们做了哪些工作">我们做了哪些工作&lt;/h2>
+&lt;h3 id="项目中的准备">项目中的准备&lt;/h3>
+&lt;h4 id="类初始化的辅助配置">类初始化的辅助配置&lt;/h4>
+&lt;p>由于native-image是在runtime之前构建的，它的构建依赖于对哪些代码可访问的静态分析。但是，这种分析不能总是完全预测 Java 本地接口 (JNI)、Java 反射、动态代理对象或类路径资源的所有用法。需要以native-image配置文件的形式向工具提供这些动态功能未被检测到的用法。&lt;/p>
+&lt;p>这里我们在jvm参数中加入：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>-agentlib:native-image-agent=config-output-dir=/path/to/config-dir/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上参数将引入agent，再将项目已常规方式运行，agent将与JVM交互，拦截所有查找类、方法、字段、资源或请求代理访问的调用。然后，agent将在指定的目录中生成文件一下文件：&lt;/p>
+&lt;p>jni-config.json，reflect-config.json，proxy-config.json以及resource-config.json&amp;hellip;&amp;hellip;&lt;/p>
+&lt;p>将以上文件拷入项目的 resource/META-INF/native-image文件夹下，native-image编译时对于jni、反射、动态代理以及资源相关的操作将从这些json文件中找到类的信息进行加载。&lt;/p>
+&lt;p>（注:实际上由于该agent是在运行时检测以上几类操作，而运行时势必无法走遍所有逻辑分支，所以会有些类的json信息无法生成。然而native-image编译时会对所有类进行编译，所以会导致一些预料不到的错误发生，目前只能是在发生错误时进行判断确实的类信息，手动补充到json文件中。）&lt;/p>
+&lt;h4 id="native-image插件引入">native-image插件引入&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>&amp;lt;plugin&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.graalvm.nativeimage&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;native-image-maven-plugin&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;21.0.0.2&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;executions&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;execution&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;goals&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;goal&amp;gt;native-image&amp;lt;/goal&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/goals&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;phase&amp;gt;package&amp;lt;/phase&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/execution&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/executions&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;configuration&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;skip&amp;gt;false&amp;lt;/skip&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;imageName&amp;gt;demo-native-provider&amp;lt;/imageName&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;mainClass&amp;gt;org.apache.dubbo.demo.graalvm.provider.Application&amp;lt;/mainClass&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;buildArgs&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --no-fallback
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.MDC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.LoggerFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.helpers.Loader
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.Logger
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.helpers.LogLog
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.LogManager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.spi.LoggingEvent
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.Log4jLoggerFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.Log4jLoggerAdapter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.Epoll
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.Native
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.EpollEventLoop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.EpollEventArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.DefaultFileRegion
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventLoop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.Native
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Errors
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.IovArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Limits
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.util.internal.logging.Log4JLogger
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Socket
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.ChannelHandlerMask
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --report-unsupported-elements-at-runtime
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --allow-incomplete-classpath
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --enable-url-protocols=http
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> -H:+ReportExceptionStackTraces
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/buildArgs&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/configuration&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/plugin&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 引入该插件后执行maven的打包等命令时就能自动执行native-image的命令。&lt;/p>
+&lt;h4 id="引入生成的spi代码依赖包">引入生成的SPI代码依赖包&lt;/h4>
+&lt;p>​ 由于dubbo项目基于SPI的模式开放了极高的可扩展性，而该模式依赖了一些扩展适配的生成代码，在常规模式下运行的项目是没有问题的，但编译为二进制的映像无法支持动态生成编译代码，这里我们是这么解决的：&lt;/p>
+&lt;ul>
+&lt;li>将生成的源码导出：&lt;/li>
+&lt;/ul>
+&lt;p>（注:这里我们一定程度上改动了dubbo-common中compiler的代码，后续会细说）&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>public Class&amp;lt;?&amp;gt; doCompile(String name, String source) throws Throwable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.*out*.println(&amp;#34;---&amp;gt;write code:&amp;#34; + name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Files.*write*(Paths.*get*(&amp;#34;/tmp/sources/&amp;#34; + name), source.getBytes());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>将导出的源码拷入dubbo-graalvm模块中：&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-graalvm-support/graalvm.png" alt="">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>在新项目中引入该模块：&lt;/p>
+&lt;p>pom依赖如下：&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>&amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;dubbo-graalvm&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;2.7.12-SNAPSHOT&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>（注：基于本分支版本的dubbo可以直接依赖该包，后续其他版本若有新增SPI的话需要再导出一遍源码进行更新）&lt;/p>
+&lt;p>引入该依赖后，在doCompiler的过程中我们便能够通过类名直接找到该class，无需再动态生成：&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>@Override
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public Class&amp;lt;?&amp;gt; doCompile(String name, String sourceCode) throws Throwable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> try {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Class&amp;lt;?&amp;gt; res = Class.*forName*(name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> return res;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } catch (Throwable ex) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //ignore
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 到这里项目关于native-image编译所需的依赖就配置完成了，直接打包即可生成二进制文件。&lt;/p>
+&lt;h2 id="对dubbo源码的改动">对dubbo源码的改动&lt;/h2>
+&lt;p>​ 本分支名为：native_dubbo_0611，基于tag &lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.12">dubbo-2.7.12&lt;/a>版本进行修改。这里对我们进行的主要的改动做一些说明。&lt;/p>
+&lt;ul>
+&lt;li>规避动态生成代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>//dubbo-common/src/main/java/org/apache/dubbo/common/compiler/support/JavassistCompiler.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@Override
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public Class&amp;lt;?&amp;gt; doCompile(String name, String source) throws Throwable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> try {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Class&amp;lt;?&amp;gt; res = Class.*forName*(name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> return res;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } catch (Throwable ex) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //ignore
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CtClassBuilder builder = new CtClassBuilder();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> builder.setClassName(name)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>//dubbo-common/src/main/java/org/apache/dubbo/common/compiler/support/JdkCompiler.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@Override
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public Class&amp;lt;?&amp;gt; doCompile(String name, String sourceCode) throws Throwable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> try {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Class&amp;lt;?&amp;gt; res = Class.*forName*(name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> return res;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } catch (Throwable ex) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //ignore
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> int i = name.lastIndexOf(&amp;#39;.&amp;#39;);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String packageName = i &amp;lt; 0 ? &amp;#34;&amp;#34; : name.substring(0, i);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 这里针对dubbo中的两类代码编译方式都做了修改，需要编译源码时先根据全类名反射查找本地是否已经加载了该类，实际上也就是我们引入的dubbo-graalvm中包含的生成代码，引入该包后这里将直接返回加载好的Class，无需动态进行编译。&lt;/p>
+&lt;ul>
+&lt;li>替换ExtensionLoader中的代码生成&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>//dubbo-common/src/main/java/org/apache/dubbo/common/extension/ExtensionLoader.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>private Class&amp;lt;?&amp;gt; createAdaptiveExtensionClass() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> try {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Class c = Class.*forName*(generatePackageInfo() + &amp;#34;.&amp;#34; + type.getSimpleName() + &amp;#34;$Adaptive&amp;#34;);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> return c;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } catch (Throwable e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //ignore
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String code = new AdaptiveClassCodeGenerator(type,cachedDefaultName).generate();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>private static final String *CODE_PACKAGE* = &amp;#34;%s&amp;#34;;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>private String generatePackageInfo() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> return String.*format*(*CODE_PACKAGE*, type.getPackage().getName());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ ExtensionLoader是整个扩展机制的主要逻辑类，在这个类里面实现了配置的加载、扩展类缓存、自适应对象生成等所有工作。&lt;/p>
+&lt;p>​ 在getAdaptiveExtension()方法中，会为扩展点接口自动生成实现类字符串。而这里同第一个变更一样，由于我们直接引入了生成好的SPI代码包，这里边不再需要进行代码生成，直接根据类名获取本地的Class即可，这里注意生成的扩展类名都以 $Adaptive 为后缀，查找类时需要拼接。找到实现类直接返回。&lt;/p>
+&lt;ul>
+&lt;li>Reference/ServiceConfig中替换Wrapper的用法&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>//dubbo-config/dubbo-config-api/src/main/java/org/apache/dubbo/config/ReferenceConfig.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>// String[] methods = Wrapper.getWrapper(interfaceClass).getMethodNames();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String[] methods = Arrays.*stream*(interfaceClass.getMethods()).map(it-&amp;gt;it.getName()).toArray(String[]::new);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> if (methods.length == 0) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> l*ogger*.warn(&amp;#34;No method found in service interface &amp;#34; + interfaceClass.getName());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map.put(*METHODS_KEY*, *ANY_VALUE*);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>//dubbo-config/dubbo-config-api/src/main/java/org/apache/dubbo/config/ServiceConfig.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>// String[] methods = Wrapper.getWrapper(interfaceClass).getMethodNames();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String[] methods = Arrays.*stream*(interfaceClass.getMethods()).map(it-&amp;gt;it.getName()).toArray(String[]::new);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> if (methods.length == 0) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> l*ogger*.warn(&amp;#34;No method found in service interface &amp;#34; + interfaceClass.getName());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map.put(*METHODS_KEY*, *ANY_VALUE*);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 这里由于Wrapper的getWrapper需要进行动态的代码生成，所以直接换成反射的getMethods。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>加入dubbo-graalvm模块&lt;/p>
+&lt;p>该模块用处上面已经说明。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>替换fastjson为gson&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>//dubbo-registry/dubbo-registry-api/src/main/java/org/apache/dubbo/registry/client/metadata/store/InMemoryWritableMetadataService.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@Override
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public void publishServiceDefinition(URL providerUrl) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> try {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> if (!ProtocolUtils.*isGeneric*(providerUrl.getParameter(*GENERIC_KEY*))) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String interfaceName = providerUrl.getParameter(*INTERFACE_KEY*);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> if (StringUtils.*isNotEmpty*(interfaceName)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Class interfaceClass = Class.*forName*(interfaceName);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServiceDefinition serviceDefinition = ServiceDefinitionBuilder.*build*(interfaceClass);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String data = new Gson().toJson(serviceDefinition);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceDefinitions.put(providerUrl.getServiceKey(), data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> return;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 由于fastjson中使用要了cglib进行动态代理，而native-image编译目前还不支持cglib，所以这里换成gson。&lt;/p>
+&lt;ul>
+&lt;li>多接口proxy调用替换set为list&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>//dubbo-rpc/dubbo-rpc-api/src/main/java/org/apache/dubbo/rpc/proxy/AbstractProxyFactory.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@Override
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public &amp;lt;T&amp;gt; T getProxy(Invoker&amp;lt;T&amp;gt; invoker, boolean generic) throws RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&amp;lt;Class&amp;lt;?&amp;gt;&amp;gt; interfaces = new ArrayList&amp;lt;&amp;gt;();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String config = invoker.getUrl().getParameter(*INTERFACES*);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> if (config != null &amp;amp;&amp;amp; config.length() &amp;gt; 0) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String[] types = *COMMA_SPLIT_PATTERN*.split(config);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> for (String type : types) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> // *TODO can we load successfully for a different classloader?.*
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> interfaces.add(ReflectUtils.*forName*(type));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> //......
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 这里由于该service拥有多个接口获取proxy时需要是有序的，原先使用的set不满足需求，这里用ArrayList替代。&lt;/p>
+&lt;p>​ 以上就是为了支持graalvm对dubbo源码的主要改动点。&lt;/p></description></item></channel></rss>
