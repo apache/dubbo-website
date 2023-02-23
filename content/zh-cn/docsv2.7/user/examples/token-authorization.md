@@ -5,11 +5,12 @@ linkTitle: "令牌验证"
 weight: 32
 description: "通过令牌验证在注册中心控制权限"
 ---
-
+## 背景
 通过令牌验证在注册中心控制权限，以决定要不要下发令牌给消费者，可以防止消费者绕过注册中心访问提供者，另外通过注册中心可灵活改变授权方式，而不需修改或升级提供者
 
 ![/user-guide/images/dubbo-token.jpg](/imgs/user/dubbo-token.jpg)
 
+## 示例
 可以全局设置开启令牌验证：
 
 ```xml
