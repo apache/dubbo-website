@@ -10136,6 +10136,7 @@ MetadataService 通过标准的 Dubbo 协议暴露，根据查询条件，会将
 &lt;/blockquote>
 &lt;h2 id="5-总结与展望">5 总结与展望&lt;/h2>
 &lt;p>应用级服务发现机制是 Dubbo 面向云原生走出的重要一步，它帮 Dubbo 打通了与其他微服务体系之间在地址发现层面的鸿沟，也成为 Dubbo 适配 Kubernetes Native Service 等基础设施的基础。我们期望 Dubbo 在新模型基础上，能继续保留在编程易用性、服务治理能力等方面强大的优势。但是我们也应该看到应用粒度的模型一方面带来了新的复杂性，需要我们继续去优化与增强；另一方面，除了地址存储与推送之外，应用粒度在帮助 Dubbo 选址层面也有进一步挖掘的潜力。&lt;/p></description></item><item><title>Blog: dubbo-go源码笔记（二）客户端调用过程</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/15/dubbo-go%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%BA%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B/</guid><description>
+&lt;p>随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。&lt;/p>
 &lt;h2 id="前言">前言&lt;/h2>
 &lt;p>有了上一篇文章&lt;a href="https://cn.dubbo.apache.org/zh-cn/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/" title="">《dubbo-go 源码笔记（一）Server服务暴露过程详解》&lt;/a> 的铺垫，可以大致上类比客户端服务类似于服务端启动过程。其中最大的区别是服务端通过zk注册服务，发布自己的ivkURL并订阅事件开启监听；而服务端应该是通过zk注册组件，&lt;strong>拿到需要调用的serviceURL&lt;/strong>，&lt;strong>更新invoker&lt;/strong>并&lt;strong>重写用户的RPCService&lt;/strong>，从而实现对远程过程调用细节的封装。&lt;/p>
 &lt;h2 id="1-配置文件和客户端源码">1. 配置文件和客户端源码&lt;/h2>
@@ -10561,6 +10562,7 @@ client.go: main()&lt;/li>
 &lt;blockquote>
 &lt;p>作者简介 李志信 (GitHubID LaurenceLiZhixin)，中山大学软件工程专业在校学生，擅长使用 Java/Go 语言，专注于云原生和微服务等技术方向。&lt;/p>
 &lt;/blockquote></description></item><item><title>Blog: Dubbo-go 源码笔记（一）Server 端开启服务过程</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/</link><pubDate>Thu, 14 Jan 2021 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/14/dubbo-go-%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0%E4%B8%80server-%E7%AB%AF%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E8%BF%87%E7%A8%8B/</guid><description>
+&lt;p>随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。&lt;/p>
 &lt;p>当拿到一款框架之后，一种不错的源码阅读方式大致如下：从运行最基础的 helloworld demo 源码开始 —&amp;gt; 再查看配置文件 —&amp;gt; 开启各种依赖服务（比如zk、consul） —&amp;gt; 开启服务端 —&amp;gt; 再到通过 client 调用服务端 —&amp;gt; 打印完整请求日志和回包。调用成功之后，再根据框架的设计模型，从配置文件解析开始，自顶向下递阅读整个框架的调用栈。&lt;/p>
 &lt;p>对于 C/S 模式的 rpc 请求来说，整个调用栈被拆成了 client 和 server 两部分，所以可以分别从 server 端的配置文件解析阅读到 server 端的监听启动，从 client 端的配置文件解析阅读到一次 invoker Call 调用。这样一次完整请求就明晰了起来。&lt;/p>
 &lt;h2 id="运行官网提供的-helloworld-demo">运行官网提供的 helloworld-demo&lt;/h2>
