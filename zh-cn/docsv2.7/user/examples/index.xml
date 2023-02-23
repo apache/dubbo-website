@@ -2426,11 +2426,13 @@ Dubbo 从 &lt;code>2.2.0&lt;/code> 每个服务默认都会在本地暴露，无
 &lt;h4 class="alert-heading">提示&lt;/h4>
 &lt;code>2.2.0&lt;/code> 以上版本支持
 &lt;/div></description></item><item><title>Docsv2.7: 消费端线程池模型</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/consumer-threadpool/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/consumer-threadpool/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
 &lt;p>2.7.5 版本对整个调用链路做了全面的优化，根据压测结果显示，总体 QPS 性能提升将近 30%，同时也减少了调用过程中的内存分配开销。其中一个值得提及的设计点是 2.7.5 引入了 Servicerepository 的概念，在服务注册阶段提前生成 ServiceDescriptor 和 MethodDescriptor，以减少 RPC 调用阶段计算 Service 原信息带来的资源消耗。&lt;/p>
-&lt;h2 id="消费端线程池模型优化">消费端线程池模型优化&lt;/h2>
+&lt;h2 id="示例">示例&lt;/h2>
+&lt;h3 id="消费端线程池模型优化">消费端线程池模型优化&lt;/h3>
 &lt;p>对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 &lt;a href="https://github.com/apache/dubbo/issues/2013">Need a limited Threadpool in consumer side #2013&lt;/a>&lt;/p>
 &lt;p>改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。&lt;/p>
-&lt;h4 id="老的线程池模型">老的线程池模型&lt;/h4>
+&lt;h3 id="老的线程池模型">老的线程池模型&lt;/h3>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/user/consumer-threadpool0.png" alt="消费端线程池.png">&lt;/p>
 &lt;p>我们重点关注 Consumer 部分：&lt;/p>
 &lt;ol>
@@ -2439,7 +2441,7 @@ Dubbo 从 &lt;code>2.2.0&lt;/code> 每个服务默认都会在本地暴露，无
 &lt;li>当业务数据返回后，交由独立的 Consumer 端线程池进行反序列化等处理，并调用 future.set 将反序列化后的业务结果置回。&lt;/li>
 &lt;li>业务线程拿到结果直接返回&lt;/li>
 &lt;/ol>
-&lt;p>&lt;strong>2.7.5 版本引入的线程池模型&lt;/strong>&lt;/p>
+&lt;h3 id="275-版本引入的线程池模型">2.7.5 版本引入的线程池模型&lt;/h3>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/user/consumer-threadpool1.png" alt="消费端线程池新.png">&lt;/p>
 &lt;ol>
 &lt;li>业务线程发出请求，拿到一个 Future 实例。&lt;/li>
@@ -2454,8 +2456,9 @@ Dubbo 从 &lt;code>2.2.0&lt;/code> 每个服务默认都会在本地暴露，无
 &lt;li>RPC 调用链路。目前能看到的点包括：进一步减少执行链路的内存分配、在保证协议兼容性的前提下提高协议传输效率、提高 Filter、Router 等计算效率。&lt;/li>
 &lt;li>服务治理链路。进一步减少地址推送、服务治理规则推送等造成的内存、cpu 资源消耗。&lt;/li>
 &lt;/ol></description></item><item><title>Docsv2.7: 优雅停机</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/graceful-shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/graceful-shutdown/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
 &lt;p>Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用户使用 &lt;code>kill -9 PID&lt;/code> 等强制关闭指令，是不会执行优雅停机的，只有通过 &lt;code>kill PID&lt;/code> 时，才会执行。&lt;/p>
-&lt;h2 id="原理">原理&lt;/h2>
+&lt;h2 id="示例">示例&lt;/h2>
 &lt;p>服务提供方&lt;/p>
 &lt;ul>
 &lt;li>停止时，先标记为不接收新请求，新请求过来时直接报错，让客户端重试其它机器。&lt;/li>
@@ -2466,7 +2469,7 @@ Dubbo 从 &lt;code>2.2.0&lt;/code> 每个服务默认都会在本地暴露，无
 &lt;li>停止时，不再发起新的调用请求，所有新的调用在客户端即报错。&lt;/li>
 &lt;li>然后，检测有没有请求的响应还没有返回，等待响应返回，除非超时，则强制关闭。&lt;/li>
 &lt;/ul>
-&lt;h2 id="设置方式">设置方式&lt;/h2>
+&lt;h3 id="设置方式">设置方式&lt;/h3>
 &lt;p>设置优雅停机超时时间，缺省超时时间是 10 秒，如果超时则强制关闭。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.service.shutdown.wait&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">15000&lt;/span>
@@ -2477,13 +2480,15 @@ Dubbo 从 &lt;code>2.2.0&lt;/code> 每个服务默认都会在本地暴露，无
 &lt;h4 class="alert-heading">建议&lt;/h4>
 使用 tomcat 等容器部署的场景，建议通过扩展 ContextListener 等自行调用以下代码实现优雅停机
 &lt;/div></description></item><item><title>Docsv2.7: 主机绑定</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/hostname-binding/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/hostname-binding/</guid><description>
-&lt;h2 id="查找顺序">查找顺序&lt;/h2>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;h2 id="示例">示例&lt;/h2>
+&lt;h3 id="查找顺序">查找顺序&lt;/h3>
 &lt;p>缺省主机 IP 查找顺序：&lt;/p>
 &lt;ul>
 &lt;li>通过 &lt;code>LocalHost.getLocalHost()&lt;/code> 获取本机地址。&lt;/li>
 &lt;li>如果是 &lt;code>127.*&lt;/code> 等 loopback 地址，则扫描各网卡，获取网卡 IP。&lt;/li>
 &lt;/ul>
-&lt;h2 id="主机配置">主机配置&lt;/h2>
+&lt;h3 id="主机配置">主机配置&lt;/h3>
 &lt;p>注册的地址如果获取不正确，比如需要注册公网地址，可以：&lt;/p>
 &lt;ol>
 &lt;li>
@@ -2499,7 +2504,7 @@ Dubbo 从 &lt;code>2.2.0&lt;/code> 每个服务默认都会在本地暴露，无
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.protocol.host&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">205.182.23.201&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;/ol>
-&lt;h2 id="端口配置">端口配置&lt;/h2>
+&lt;h3 id="端口配置">端口配置&lt;/h3>
 &lt;p>缺省主机端口与协议相关：&lt;/p>
 &lt;table>
 &lt;thead>
