@@ -3,8 +3,7 @@ title: "dubbogo 3.0：牵手 gRPC 走向云原生时代"
 linkTitle: "dubbogo 3.0：牵手 gRPC 走向云原生时代"
 tags: ["Go"]
 date: 2021-01-15
-description: >
-    本文介绍了 dubbo-go 3.0 对云原生的支持和规划
+description: 本文介绍了 dubbo-go 3.0 对云原生的支持和规划
 ---
 
 自从 2011 年 Dubbo 开源之后，被大量中小公司采用，一直是国内最受欢迎的 RPC 框架。2014 年，由于阿里内部组织架构调整，Dubbo 暂停维护了一段时间，之后随着 Spring Cloud 的面世，两个体系在融合中一起助推了微服务的火热。

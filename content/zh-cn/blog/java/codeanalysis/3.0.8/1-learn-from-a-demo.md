@@ -4,8 +4,7 @@ linkTitle: "1-从一个服务提供者的Demo说起"
 date: 2022-08-01
 author: 宋小生
 tags: ["源码解析", "Java"]
-description: >
-    为了更方便了解Dubbo提供者原理,我们先来编写一个Demo,从例子中来看源码实现
+description: Dubbo 源码解析之从一个服务提供者的Demo说起
 ---
 
 # 1 从一个服务提供者的Demo说起

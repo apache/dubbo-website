@@ -4,8 +4,7 @@ linkTitle: "2-ServiceConfig类型是如何初始化的?"
 date: 2022-08-02
 author: 宋小生
 tags: ["源码解析", "Java"]
-description: >
-    [Dubbo 3.0.8源码解析] 了解一下服务配置的设计原理，有助于理解后面的服务治理的原理
+description: Dubbo 源码解析之 ServiceConfig 类型是如何初始化的?
 ---
 
 

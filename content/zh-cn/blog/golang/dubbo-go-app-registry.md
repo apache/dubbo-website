@@ -3,8 +3,7 @@ title: "Dubbo-go应用维度注册模型"
 linkTitle: "Dubbo-go应用维度注册模型"
 tags: ["Go"]
 date: 2021-01-14
-description: >
-    Dubbo-go 中的应用维度注册模型
+description: Dubbo-go 中的应用维度注册模型
 ---
 
 Dubbo 3.0 将至。其最重要的一点就是服务自省，其基础即是应用维度的注册模型，作为目前与 Dubbo 在功能上完全对齐的 Dubbo-go，已于 本年【2020 年】7 月份发布了其 v1.5.0 版本，实现了该模型，为年底实现与 Dubbo 3.0 对齐的新版本奠定了基础。
