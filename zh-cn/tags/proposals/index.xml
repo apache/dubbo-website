@@ -72,10 +72,10 @@ metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/Metr
 &lt;p>要想理解 metrics 的设计，首先要理解，我们需要收集一些什么数据。我们可以轻易列举出来在 RPC 领域里面我们所关心的各种指标，诸如每个服务的调用次数，响应时间；如果更加细致一点，还有各种响应时间的分布，平均响应时间，999线……&lt;/p>
 &lt;p>但是上面列举的是从数据的内容上划分的。 metrics 在抽象上，则是摒弃了这种划分方式，而是结合了数据的特性和表现形式综合划分的。&lt;/p>
 &lt;p>从源码里面很容易找到这种划分的抽象。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p1.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p1.png" alt="img">&lt;/p>
 &lt;p>metrics 设计了 Metric 接口作为所有数据的顶级抽象：&lt;/p>
 &lt;p>在 Dubbo 里面，其比较关键的子接口是：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p2.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p2.webp" alt="img">&lt;/p>
 &lt;p>为了大家理解，这里我抄一下这些接口的用途：&lt;/p>
 &lt;ul>
 &lt;li>Gauge: 一种实时数据的度量，反映的是瞬态的数据，不具有累加性，例如当前 JVM 的线程数；&lt;/li>
@@ -85,7 +85,7 @@ metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/Metr
 &lt;li>Timer: Timer相当于Meter+Histogram的组合，同时统计一段代码，一个方法的qps，以及执行时间的分布情况；&lt;/li>
 &lt;/ul>
 &lt;p>目前 dubbo-go 只实现了 FastCompass ，它也是 Metric 的子类：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p3.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p3.webp" alt="img">&lt;/p>
 &lt;p>这个接口功能很简单，就是用于收集一段时间之内的 subCategory 执行的次数和响应时间。 subCategory 是一个比较宽泛的概念，无论是在 Dubbo 还是在 dubbo-go 里面，一个典型的 subCategory
 就会是某个服务。&lt;/p>
 &lt;p>这里的设计要点在于，它是从什么角度上去做这些数据的抽象的。&lt;/p>
@@ -94,14 +94,14 @@ metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/Metr
 &lt;h3 id="metricmanager">MetricManager&lt;/h3>
 &lt;p>在我们定义了 Metric 之后，很容易就想到，我要有一个东西来管理这些 Metric 。这就是 MetricManager ——对应到 Dubbo 里面的 IMetricManager 接口。&lt;/p>
 &lt;p>MetricManager 接口目前在 dubbo-go 里面还很简单：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p4.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p4.webp" alt="img">&lt;/p>
 &lt;p>本质上来说，我在前面提到的那些 Metric 的子类，都可以从这个 MetricManager 里面拿到。它是对外的唯一入口。&lt;/p>
 &lt;p>因此无论是上报采集的数据，还是某些功能要用这些采集的数据，最重要的就是获得一个 MetricManager 的实例。例如我们最近正在开发的接入 Prometheus 就是拿到这个 MetriManger 实例，而后从里面拿到
 FastCompass 的实例，而后采集这些数据：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p5.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p5.webp" alt="img">&lt;/p>
 &lt;h3 id="metricregistry">MetricRegistry&lt;/h3>
 &lt;p>MetricRegistry 是一个对 Metric 集合的抽象。 MetricManager 的默认实现里面，就是使用 MetricRegistry 来管理 Metric 的:&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p6.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p6.webp" alt="img">&lt;/p>
 &lt;p>所以，本质上它就是提供了一些注册 Metric 然后再从里面捞出来的方法。&lt;/p>
 &lt;p>于是，这就有一个问题了：为什么我在有了 MetricManager 之后，还有有一个MetricRegistry？似乎这两个功能有些重叠？&lt;/p>
 &lt;p>答案大概是两个方面：&lt;/p>
@@ -110,10 +110,10 @@ FastCompass 的实例，而后采集这些数据：&lt;/p>
 &lt;p>metrics 的 group 说起来也很简单。比如在 Dubbo 框架里面采集的数据，都会归属于 Dubbo 这个 group 。也就是说，如果我想将非框架层面采集的数据——比如纯粹的业务数据——分隔出来，就可以借用一个 business
 group 。又或者我采集到的机器自身的数据，可以将其归类到 system 这个 group 下。&lt;/p>
 &lt;p>所以 MetricManger 和 MetricRegistry 的关系是：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p7.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p7.webp" alt="img">&lt;/p>
 &lt;h3 id="clock">Clock&lt;/h3>
 &lt;p>Clock 抽象是一个初看没什么用，再看会觉得其抽象的很好。Clock 里面就两个方法：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p8.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p8.webp" alt="img">&lt;/p>
 &lt;p>一个是获得时间戳，另外一个则是获得时间周期(Tick)。比如通常采集数据可能是每一分钟采集一次，所以你得知道现在处在哪个时间周期里面。Clock 就提供了这种抽象。&lt;/p>
 &lt;p>很多人在实现自己的这种 metrics 的框架的时候，大多数都是直接使用系统的时钟，也就是系统的时间戳。于是所有的 Metic 在采集数据或者上报数据的时候，不得不自己去处理这种时钟方面的问题。&lt;/p>
 &lt;p>这样不同的 Metric 之间就很难做到时钟的同步。比如说可能在某个 Metric1 里面，采集周期是当前这一分钟，而 Metric2 是当前这一分钟的第三十秒到下一分钟的第三十秒。虽然它们都是一分钟采集一次，但是这个周期就对不上了。&lt;/p>
@@ -121,14 +121,14 @@ group 。又或者我采集到的机器自身的数据，可以将其归类到 s
 &lt;h2 id="例子">例子&lt;/h2>
 &lt;p>就用这一次 PR 的内容来展示一下这个设计。&lt;/p>
 &lt;p>在 dubbo-go 里面这次实现了 metricsFilter ，它主要就是收集调用次数和响应时间，其核心是：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p9.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p9.webp" alt="img">&lt;/p>
 &lt;p>report 其实就是把 metrics reports 给 MetricManager ：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p10.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p10.webp" alt="img">&lt;/p>
 &lt;p>所以，这里面可以看出来，如果我们要收集什么数据，也是要先获得 MetricManager 的实例。&lt;/p>
 &lt;p>FastCompass 的实现里面会将这一次调用的服务及其响应时间保存下来。而后在需要的时候再取出来。&lt;/p>
 &lt;p>所谓的需要的时候，通常就是上报给监控系统的时候。比如前面的提到的上报给 Prometheus。&lt;/p>
 &lt;p>所以这个流程可以抽象表达为：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p11.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p11.webp" alt="img">&lt;/p>
 &lt;p>这是一个更加宽泛的抽象。也就是意味着，我们除了可以从这个 metricFilter 里面收集数据，也可以从自身的业务里面去收集数据。比如说统计某段代码的执行时间，一样可以使用 FastCompass 。&lt;/p>
 &lt;p>而除了 Prometheus ，如果用户自己的公司里面有监控框架，那么他们可以自己实现自己的上报逻辑。而上报的数据则只需要拿到 MetricManager 实例就能拿到。&lt;/p>
 &lt;h2 id="总结">总结&lt;/h2>
@@ -138,7 +138,7 @@ group 。又或者我采集到的机器自身的数据，可以将其归类到 s
 &lt;p>1、实时采集。如我上面举例的 metricsFilter ，一次调用过来，它的数据就被采集了；&lt;/p>
 &lt;p>2、另外一个则是如同 Prometheus 。每次 Prometheus 触发了 collect 方法，那么它就会把每种（如 Meter, Gauge ）里面的数据收集过来，然后上报，可以称为是定时采集；&lt;/p>
 &lt;p>Dubbo 里面采集了非常多的数据：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p12.webp" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p12.webp" alt="img">&lt;/p>
 &lt;p>这些具体的实现，我就不一一讨论了，大家有兴趣可以去看看源码。这些数据，也是我们 dubbo-go 后面要陆续实现的东西，欢迎大家持续关注，或者来贡献代码。&lt;/p>
 &lt;h2 id="作者信息">作者信息&lt;/h2>
 &lt;p>邓明，毕业于南京大学，就职于 eBay Payment 部门，负责退款业务开发。&lt;/p></description></item></channel></rss>

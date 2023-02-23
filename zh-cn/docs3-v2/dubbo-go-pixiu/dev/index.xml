@@ -324,7 +324,7 @@
 &lt;p>优先级规则只是冲突解决策略的一种，才同时匹配多个url描述时，优先级更高的那一种将会生效，然而优先级策略并不能涵盖所有的情况。&lt;br />如果强行配置两条 resource path 完全相同，但是转发到不同的下游服务，这时候就会冲突。pixiu 下应对冲突的方案是 failfast，在 pixiu 初始化阶段，发现配置文件中有冲突的两项规则，则启动失败，让开发者今早发现问题并处理。&lt;/p>
 &lt;h1 id="原理介绍">原理介绍&lt;/h1>
 &lt;p>技术选型之初，以及确定使用pixiu后为了处理一些突发情况，以及应付一些pixiu自身可能存在的bug，开发者需要对pixiu 的路由原理有更深刻的了解。&lt;br />下面，我们将详细介绍路由引擎的相关原理和实现，供感兴趣的同学了解。&lt;br />相信阅读这部分内容的同学一定会有人下意识联想到字典树这个结构。使用字典树这个结构能实现存量规则数无关的匹配性能优化。&lt;/p>
-&lt;p>一个存放字符串作为node的字典树，具有表达url 的能力。&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-2.png" alt="">&lt;br />如上图描述等价于URL集合 &amp;lsquo;/api/v1&amp;rsquo; ，&amp;rsquo;/api/v2&amp;rsquo; ，&amp;rsquo;/web&amp;rsquo;&lt;/p>
+&lt;p>一个存放字符串作为node的字典树，具有表达url 的能力。&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-2.png" alt="img">&lt;br />如上图描述等价于URL集合 &amp;lsquo;/api/v1&amp;rsquo; ，&amp;rsquo;/api/v2&amp;rsquo; ，&amp;rsquo;/web&amp;rsquo;&lt;/p>
 &lt;p>维护一个标准字典树有几个关键的操作&lt;/p>
 &lt;ol>
 &lt;li>字典树指定节点的查找（find）: 从root 开始遍历字典书，&amp;rsquo;/api/v2&amp;rsquo; 称之为路径，在当前层级寻找指定路径，如果存在就继续在子树下完成剩下的路径匹配。&amp;rsquo;/api/v2&amp;rsquo; 先从 logic root 找到 &amp;lsquo;/api&amp;rsquo; ，并在 &amp;lsquo;/api&amp;rsquo; 的子树下继续查找剩下的路径 &amp;lsquo;/v2&amp;rsquo; 。&lt;/li>
@@ -338,8 +338,8 @@
 &lt;li>重建字典树（rebuild）：遍历所有节点，添加到新树，如果 isdeleted为 true 则不添加到新树，通过rebuild 操作创建副本。&lt;/li>
 &lt;/ol>
 &lt;p>由上可知，标准字典树结构距离通用的路由引擎底层数据结构能力还有一定差距，缺乏统配描述能力，缺乏变量表达的能力，下面我们来看一下如何进行改进。&lt;/p>
-&lt;p>添加 描述统配逻辑的子树，作为子树中默认存在的一部分&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-3.png" alt="">&lt;br />现在我们的变种字典树多了变量表达能力&lt;br />&amp;rsquo;/web/:appname/test/*&amp;rsquo; 这样的url 在图中应该怎么表达？&lt;br />没错就是这个路径&lt;br />&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-4.png" alt="">&lt;/p>
+&lt;p>添加 描述统配逻辑的子树，作为子树中默认存在的一部分&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-3.png" alt="img">&lt;br />现在我们的变种字典树多了变量表达能力&lt;br />&amp;rsquo;/web/:appname/test/*&amp;rsquo; 这样的url 在图中应该怎么表达？&lt;br />没错就是这个路径&lt;br />&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-4.png" alt="img">&lt;/p>
 &lt;p>继续分析字典树几个关键的操作是否需要做变化？&lt;/p>
 &lt;ol>
 &lt;li>字典树指定节点的查找 ：
@@ -361,12 +361,12 @@
 &lt;/ol>
 &lt;/li>
 &lt;/ol>
-&lt;p>但是我们目前还是缺乏 &amp;lsquo;/&lt;strong>&amp;rsquo; 这种通配的表达能力代表了多级通配，可以分析需求得到结论，这种通配符，一定不存在子树，是一种特殊的叶子结点，仅用于 match 逻辑回朔时做特殊判断。继续加点特殊 node 后演化为：&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-5.png" alt="">&lt;br />好了至此，需求都能满足了。&lt;br />&amp;rsquo;/api/&lt;/strong>&amp;rsquo; 等价路径为：&lt;br />&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/dubbo-go-pixiu/dev/trie/1642993180981-51a0df19-bb03-49c8-9128-a6e95dbabfcd.png" alt="">&lt;br />其他逻辑大同小异，match 逻辑回朔再多一级判断，如果一级通配子树也匹配不到结果，则再看一下多级通配子树是否为空（其实留一个标位就可以，为了统一模型好理解，还是用一个子树去描述）&lt;/p>
+&lt;p>但是我们目前还是缺乏 &amp;lsquo;/&lt;strong>&amp;rsquo; 这种通配的表达能力代表了多级通配，可以分析需求得到结论，这种通配符，一定不存在子树，是一种特殊的叶子结点，仅用于 match 逻辑回朔时做特殊判断。继续加点特殊 node 后演化为：&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-5.png" alt="img">&lt;br />好了至此，需求都能满足了。&lt;br />&amp;rsquo;/api/&lt;/strong>&amp;rsquo; 等价路径为：&lt;br />&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/dubbo-go-pixiu/dev/trie/1642993180981-51a0df19-bb03-49c8-9128-a6e95dbabfcd.png" alt="img">&lt;br />其他逻辑大同小异，match 逻辑回朔再多一级判断，如果一级通配子树也匹配不到结果，则再看一下多级通配子树是否为空（其实留一个标位就可以，为了统一模型好理解，还是用一个子树去描述）&lt;/p>
 &lt;p>到目前这个版本所有上文提到的能力已经都能有效支撑，回头分析一下时间复杂读。&lt;br />url 被 &amp;lsquo;/&amp;rsquo; 分割出一个一个的段，容易理解在匹配一个url 过程中复杂度是 O(n) n= url 段数。与树中存有的规则数量无关。再分析 n 的范围，n 其实不是一个可以无限大的数字，一部分浏览器甚至约束 url 长度必须小于 2000，按照一个单词长度为 5 来计算，可以大概估计段数最多会在 400 左右，n 如果可以被视为一个常数，那么复杂读可以看作是 O（1）。&lt;/p>
 &lt;p>稍微解释一下find 和 match 有什么不同，为什么需要两种查找节点的方法。看下这个例子 :假设树中已经add 了 &amp;lsquo;/api/v1/:name/add&amp;rsquo; 这个 path，那么&lt;br />find（&amp;quot;/api/v1/:name/add&amp;quot;），find（&amp;quot;/api/v1/*/add&amp;quot;）两个调用应该能够拿到结果，在add 的过程中用于冲突判断。&lt;br />假设有请求进来url 为 &amp;lsquo;/api/v1/:name/add&amp;rsquo; 那么match（&amp;quot;/api/v1/:name/list&amp;quot;）也应该能 match 到结果且变量name 为 :name。&lt;br />再假设有请求进来 url 为 &amp;lsquo;/api/v1/yq/add&amp;rsquo; 那么match（&amp;quot;/api/v1/yq/list&amp;quot;）也应该能 match 到结果且变量name 为 yq 。find（&amp;quot;/api/v1/yq/add&amp;quot; ） 则不会匹配到结果。&lt;/p>
 &lt;h1 id="后续改进">后续改进&lt;/h1>
-&lt;p>目前实现在读树和写树之前，竞争一把全局锁，竞争失败后自旋直到竞争成功，然后完成读写。&lt;br />解释一下为什么读都需要上锁，因为代码中大量运用了go 的 map 结构。这个结构只要并发读写直接会报如下错误：concurrent map read and map write&lt;br />目前实现如下&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-6.png" alt="">&lt;br />引入 command 队列，所有对 trie 的用户写操作先入列，同时做读写分离，分为读树和写树，维护一个线程负责追 log 把 command 写入到写树，读树因为只读，没有写入线程操作读树所以可以不加锁。写树因为只有一条线程向树内写入，没有竞争问题，也可以不加锁。（写入操作并不会很频繁单线程完全能负荷）&lt;br />定义一个配置延迟生效的时间，比如3s&lt;br />每3秒，读树和写树角色切换，每个 trie 分别维护一个 command 队列的游标，游标代表当前这个 trie，追 log 追到了哪条记录，写入线程每3s 切换写游标引用。&lt;br />&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-7.png" alt="">&lt;/p>
+&lt;p>目前实现在读树和写树之前，竞争一把全局锁，竞争失败后自旋直到竞争成功，然后完成读写。&lt;br />解释一下为什么读都需要上锁，因为代码中大量运用了go 的 map 结构。这个结构只要并发读写直接会报如下错误：concurrent map read and map write&lt;br />目前实现如下&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-6.png" alt="img">&lt;br />引入 command 队列，所有对 trie 的用户写操作先入列，同时做读写分离，分为读树和写树，维护一个线程负责追 log 把 command 写入到写树，读树因为只读，没有写入线程操作读树所以可以不加锁。写树因为只有一条线程向树内写入，没有竞争问题，也可以不加锁。（写入操作并不会很频繁单线程完全能负荷）&lt;br />定义一个配置延迟生效的时间，比如3s&lt;br />每3秒，读树和写树角色切换，每个 trie 分别维护一个 command 队列的游标，游标代表当前这个 trie，追 log 追到了哪条记录，写入线程每3s 切换写游标引用。&lt;br />&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-7.png" alt="img">&lt;/p>
 &lt;p>如上图，最上面部分是一个先进先出的 command 队列，追 log 线程从这个队列中读取用户写操作，这个队列维护了两个游标 index1，index2，index1 代表了trie1 追 log 追到了 index1 的位置，index2 代表了 trie2 追 log 追到了 index2 的位置。追 log 线程同一时间内只会使用一个引用进行写操作，每次写完树对应的 index 游标下移一格，另一个 trie 引用将被用于读操作，一切读请求将从读引用对应的树中读取。因为追的是同一份 log ，最终一致性是能保证的。&lt;/p>
 &lt;p>切换逻辑：&lt;/p>
 &lt;ol>

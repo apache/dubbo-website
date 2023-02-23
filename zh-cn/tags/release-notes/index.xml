@@ -539,7 +539,7 @@
 &lt;p>最后一个令人心动的改进是，我们支持了 REST 协议。&lt;/p>
 &lt;h2 id="1-k8s-注册中心">1. K8s 注册中心&lt;/h2>
 &lt;p>dubbo-go 注册中心的本质为K/V型的数据存储。当前版本实现了以 Endpoint 为维度在 k8s API Server 进行服务注册和发现的方案【下文简称 Endpoint 方案】，架构图如下。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/k8s.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/k8s.png" alt="img">&lt;/p>
 &lt;p>Endpoint 方案，首先将每个 dubbo-go 进程自身服务信息序列化后，通过 Kubernetes 提供的 Patch 的接口写入在自身 Pod 对象的 Annotation 中。其次，通过 Kubernetes 的 Watch 接口观察集群中本 Namespace 内带有某些固定lable [见上图] Pod 的Annotation 信息的更新，处理服务健康检查、服务上下线等情况并实时更新本地缓存。整体流程仅使用 Kubernetes 原生 API 完成将 Kubernetes 作为注册中心的功能特性。&lt;/p>
 &lt;p>这个方案非常简洁，不需要实现额外的第三方模块，也不需要对 Dubbo 业务作出改动，仅仅把 k8s 当做部署平台，依赖其容器管理能力，没有使用其 label selector 和 service 等服务治理特性。如果站在 k8s Operator 的角度来看，Operator 方案的优点即 Endpoint 方案的缺点，Endpoint 方案无法使用 k8s 的健康检查能力，亦没有使用 k8s service 的事件监听能力，每个 consumer 冗余监听一些不必要监听的事件，当 Endpoint 过多时会加大 API Server 的网络压力。&lt;/p>
 &lt;p>目前 dubbo-go 社区其实已经有了 operator 版本注册中心的技术方案， 后续版本【计划版本是 v1.6】的 dubbo-go 会给出其实现。相比当前实现，operator 方案开发和线上维护成本当然上升很多。二者如同硬币的两面，社区会让两种方式会共存，以满足不同 level 的使用者。&lt;/p>
@@ -548,14 +548,14 @@
 &lt;h2 id="2-tracing-和-metric">2. tracing 和 metric&lt;/h2>
 &lt;p>可观测性是微服务重要的一环，也是我们1.4版本着力支持的部分。在1.4版本中，我们主要在 tracing 和 metric 两个方向提供了支持。&lt;/p>
 &lt;p>为了支持 tracing 和 metric，关键的一点是支持context在整个调用过程中传递。为此我们解决了context跨端传递的问题。目前用户可以在接口中声明 context 并且设置值，dubbo-go 在底层完成 context 内容从 client 传递到 server 的任务。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/context.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/context.png" alt="img">&lt;/p>
 &lt;p>在 metric 方面，dubbo-go 开始支持 Prometheus 采集数据了。目前支持 Prometheus中 的 Histogram 和 Summary。用户也可以通过扩展 Reporter 接口来自定义数据采集。&lt;/p>
 &lt;p>在 tracing 方面，目前 dubbo-go 的设计是采用 opentracing 作为统一的 API，在该 API 的基础上，通过在 client 和 server 之中传递 context，从而将整个链路串起来。用户可以采用任何支持 opentracing API 的监控框架来作为实现，例如 zipkin，jaeger 等。&lt;/p>
 &lt;h2 id="3-rest协议支持">3. rest协议支持&lt;/h2>
 &lt;p>Dubbo 生态的应用与其他生态的应用互联互通，一直是 dubbo-go 社区追求的目标。dubbo-go v1.3 版本已经实现了 dubbo-go 与 grpc 生态应用的互联互通，若想与其他生态如 Spring 生态互联互通，借助 rest 协议无疑是一个很好的技术手段。&lt;/p>
 &lt;p>Rest 协议是一个很强大并且社区呼声很高的特性，它能够有效解决 open API，前端通信，异构系统通信等问题。比如，如果你的公司里面有一些陈年代码是通过 http 接口来提供服务的，那么使用我们的 rest 协议就可以无缝集成了。&lt;/p>
 &lt;p>通过在 dubbo-go 中发布 RESTful 的接口的应用可以调用任意的 RESTful 的接口，也可以被任何客户端以 http 的形式调用，框架图如下：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/rest.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/rest.png" alt="img">&lt;/p>
 &lt;p>在设计过程中，考虑到不同的公司内部使用的 web 框架并不相同，所以我们允许用户扩展自己 rest server （ web 框架在 dubbo-go的封装）的实现，当然，与 rest server 相关的，诸如 filter 等，都可以在自己的 rest server 实现内部扩展。&lt;/p>
 &lt;h2 id="4-路由功能增强">4. 路由功能增强&lt;/h2>
 &lt;p>路由规则在发起一次 RPC 调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起 RPC 调用的备选地址。v1.4 版本的 dubbo-go 实现了 Condition Router 和 Health Instance First Router，将在后面版本中陆续给出诸如 Tag Router 等剩余 Router 的实现。&lt;/p>
@@ -592,12 +592,12 @@
 &lt;p>目前，上述四个特性已被某 Go 版本的 sidecar 集成到其商业版本中提供商业服务。&lt;/p>
 &lt;h2 id="6-nacos-配置中心">6. Nacos 配置中心&lt;/h2>
 &lt;p>配置中心是现代微服务架构里面的核心组件，现在 dubbo-go 提供了对配置中心的支持。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/config-center.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/config-center.png" alt="img">&lt;/p>
 &lt;p>Nacos 作为一个易于构建云原生应用的动态服务发现、配置管理和服务管理平台，在该版本终于作为配置中心而得到了支持。&lt;/p>
 &lt;p>参考范例&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>.&lt;/p>
 &lt;h2 id="7-接口级签名认证">7. 接口级签名认证&lt;/h2>
 &lt;p>Dubbo 鉴权认证是为了避免敏感接口被匿名用户调用而在 SDK 层面提供的额外保障。用户可以在接口级别进行定义是否允许匿名调用，并对调用方进行验签操作，对于验签不通过的消费端，禁止调用。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/acl.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/1.4/acl.png" alt="img">&lt;/p>
 &lt;p>如上图，总体实现基于 AK/SK 机制，应用通过 HTTPS 通信，启动时向鉴权服务拉取，定期更新。且允许用户自定义获取 AK/SK 的源，在 RPC 层面保障安全性。&lt;/p>
 &lt;h2 id="8-回顾与展望">8. 回顾与展望&lt;/h2>
 &lt;p>目前 dubbo-go 已经到了一个比较稳定成熟的状态。在接下来的版本里面，我们将集中精力在云原生上。下一个版本，我们将首先实现应用维度的服务注册，这是一个和现有注册模型完全不同的新的注册模型。也是我们朝着云原生努力的一个关键版本。&lt;/p>
