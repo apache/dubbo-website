@@ -14,6 +14,7 @@ description: "自定义 Dubbo 服务对外暴露的主机地址"
 2. 那在`dubbo`中如何指定服务的`host`,我们是否可以用hostname或domain代替IP地址作为`host`?
 3. 在使用docker时,有时需要设置端口映射,此时,启动server时绑定的socket和向注册中心注册的socket使用不同的端口号,此时又该如何设置?
 
+## 示例
 #### dubbo 中不设置 host 时默认 host 是什么
 
 一般的 dubbo 协议配置如下:
