@@ -590,7 +590,7 @@ dubbo2.7.3默认开启qos功能，导致一些混部在物理机的dubbo服务�
 &lt;p>dubbo 是一个基于 Java 开发的高性能的轻量级 RPC 框架，dubbo 提供了丰富的服务治理功能和优秀的扩展能力。而 dubbo-go 在 java 与 golang 之间提供统一的服务化能力与标准，是涂鸦智能目前最需要解决的主要问题。本文分为实践和快速接入两部分，分享在涂鸦智能的 &lt;a href="http://github.com/apache/dubbo-go">dubbo-go&lt;/a> 实战经验，意在帮助用户快速接入 dubbo-go RPC 框架，希望能让大家少走些弯路。&lt;/p>
 &lt;p>另外，文中的测试代码基于 dubbo-go版本 &lt;a href="https://github.com/apache/dubbo-go/releases/tag/v1.4.0">v1.4.0&lt;/a>。&lt;/p>
 &lt;h2 id="dubbo-go-网关实践">dubbo-go 网关实践&lt;/h2>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/tuya/p1.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/tuya/p1.png" alt="img">&lt;/p>
 &lt;p>dubbo-go 在涂鸦智能的使用情况如上图，接下来会为大家详细介绍落地细节，希望这些在生产环境中总结的经验能够帮助到大家。&lt;/p>
 &lt;h3 id="背景">背景&lt;/h3>
 &lt;p>在涂鸦智能，dubbo-go 已经作为了 golang 服务与原有 dubbo 集群打通的首选 RPC 框架。其中比较有代表性的 open-gateway 网关系统（下文统一称 gateway，开源版本见 &lt;a href="https://github.com/dubbogo/dubbo-go-proxy">https://github.com/dubbogo/dubbo-go-proxy&lt;/a>）。该 gateway 动态加载内部 dubbo 接口信息，以HTTP API 的形式对外暴露。该网关意在解决上一代网关的以下痛点。&lt;/p>
@@ -602,7 +602,7 @@ dubbo2.7.3默认开启qos功能，导致一些混部在物理机的dubbo服务�
 &lt;/ul>
 &lt;h3 id="架构设计">架构设计&lt;/h3>
 &lt;p>针对如上痛点，随即着手准备设计新的 gateway 架构。首先就是语言选型，golang 的协程调用模型使得 golang 非常适合构建 IO 密集型的应用，且应用部署上也较 java 简单。经过调研后我们敲定使用 golang 作为 proxy 的编码语言，并使用 dubbo-go 用于连接 dubbo provider 集群。provider 端的业务应用通过使用 java 的插件，以注解形式配置 API 配置信息，该插件会将配置信息和 dubbo 接口元数据更新到元数据注册中心（下图中的 redis ）。这样一来，配置从管理后台页面转移到了程序代码中。开发人员在编码时，非常方便地看到 dubbo 接口对外的 API 描述，无需从另外一个管理后台配置 API 的使用方式。&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/tuya/p2.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/tuya/p2.png" alt="img">&lt;/p>
 &lt;h3 id="实践">实践&lt;/h3>
 &lt;p>从上图可以看到，网关能动态加载 dubbo 接口信息，调用 dubbo 接口是基于 dubbo 泛化调用。泛化调用使 client 不需要构建 provider 的 interface 代码，在 dubbo-go 中表现为无需调用 config.SetConsumerService 和 hessian.RegisterPOJO 方法，而是将请求模型纯参数完成，这使得 client 动态新增、修改接口成为可能。在 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/master/generic/default/go-client">apache/dubbo-sample/golang/generic/default/go-client&lt;/a> 中的有泛化调用的演示代码。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">test&lt;/span>() {
@@ -650,7 +650,7 @@ dubbo2.7.3默认开启qos功能，导致一些混部在物理机的dubbo服务�
 &lt;p>从上面代码可以看到，泛化调用实际需要动态构建的内容有 4 个，ReferenceConfig 中需要的 InterfaceName 、参数中的 method 、ParameterTypes、实际入参 requestParams。&lt;/p>
 &lt;p>&lt;strong>那么这些参数是如何从 HTTP API 匹配获取到的呢？&lt;/strong>&lt;/p>
 &lt;p>这里就会用到上文提到的 provider 用于收集元数据的插件。引入插件后，应用在启动时会扫描需要暴露的 dubbo 接口，将 dubbo 元数据和 HTTP API 关联。插件使用方法大致如下，这里调了几个简单的配置作为示例，实际生产时注解内容会更多。&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/tuya/p3.png" alt="">&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/tuya/p3.png" alt="img">&lt;/p>
 &lt;p>最终获得的 dubbo 元数据如下:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;key&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;POST:/hello/{uid}/add&amp;#34;&lt;/span>,
