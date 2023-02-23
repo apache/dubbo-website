@@ -1,7 +1,7 @@
 ---
 title: "2022 年度总结与 2023 新年规划"
 linkTitle: "2022 年度总结与 2023 新年规划"
-date: 2023-d02-23
+date: 2023-02-23
 description: >
     Apache Dubbo 社区 2022 年度总结，与 2023 年规划暨 Roadmap 发布。
 ---
