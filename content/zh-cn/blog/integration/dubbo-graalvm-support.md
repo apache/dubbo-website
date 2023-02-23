@@ -23,7 +23,7 @@ description: >
 
 ​	安装GraalVM的工作这里不做介绍，可以进入https://www.graalvm.org/ 官网选取最新版本安装，安装完成后查看本地jdk可以看到如下：
 
-![](/imgs/blog/dubbo-graalvm-support/graalvm_env.png)
+![img](/imgs/blog/dubbo-graalvm-support/graalvm_env.png)
 
 ​	这里我们使用的基于jdk1.8版本的GraalVM。
 
@@ -33,7 +33,7 @@ description: >
 
 ​	模块名dubbo-demo-native，该模块中提供了简易版本的dubbo的provider以及consumer:
 
-![](/imgs/blog/dubbo-graalvm-support/demo_path.png)
+![img](/imgs/blog/dubbo-graalvm-support/demo_path.png)
 
 ​	我们在其中使用了native-image的maven插件，并定制了一些native-image的启动参数，用户只需要对应在provider以及consumer模块下执行maven的编译打包命令：
 
@@ -43,11 +43,11 @@ mvn -U clean package -P native -Dmaven.test.skip=true
 
 ​	编译成功可以看到如下输出：
 
-![](/imgs/blog/dubbo-graalvm-support/consumer_compiler.png)![](/imgs/blog/dubbo-graalvm-support/provider_compiler.png)
+![img](/imgs/blog/dubbo-graalvm-support/consumer_compiler.png)![img](/imgs/blog/dubbo-graalvm-support/provider_compiler.png)
 
 ​	在target目录中可以看到已经生成的二进制文件：
 
-![](/imgs/blog/dubbo-graalvm-support/compile_result.png)
+![img](/imgs/blog/dubbo-graalvm-support/compile_result.png)
 
 ​	查看该二进制文件大小大约在40M左右：
 
@@ -175,7 +175,7 @@ public Class<?> doCompile(String name, String source) throws Throwable {
 
 - 将导出的源码拷入dubbo-graalvm模块中：
 
-![](/imgs/blog/dubbo-graalvm-support/graalvm.png)
+![img](/imgs/blog/dubbo-graalvm-support/graalvm.png)
 
 - 在新项目中引入该模块：
 

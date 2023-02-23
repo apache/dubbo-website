@@ -46,7 +46,7 @@ go tool pprof -seconds 60 http://benchmark-server-ip:34902/debug/pprof/profile
 go tool pprof -http=:8000 mosnd pprof.mosn.samples.cpu.001.pb.gz
 ```
 
-![](/imgs/blog/dubbo-go/moson-optimize/p1.png)
+![img](/imgs/blog/dubbo-go/moson-optimize/p1.png)
 
 图 1-1 mosn 性能压测火焰图
 
@@ -57,11 +57,11 @@ go tool pprof -http=:8000 mosnd pprof.mosn.samples.cpu.001.pb.gz
 
 可以点击火焰图任意横条，进去查看长方块耗时和堆栈明细（请参考图 1-2 和 1-3 所示）：
 
-![](/imgs/blog/dubbo-go/moson-optimize/p2.png)
+![img](/imgs/blog/dubbo-go/moson-optimize/p2.png)
 
 图 1-2 Dispatch 火焰图明细
 
-![](/imgs/blog/dubbo-go/moson-optimize/p3.png)
+![img](/imgs/blog/dubbo-go/moson-optimize/p3.png)
 
 图 1-3 Receive 火焰图明细
 
@@ -480,7 +480,7 @@ mosn 中在做路由前，需要做大量的 header 的 map 访问，比如 IDC�
 
 作为结束，给出了最终优化后的火焰图 ，大部分卡点都在系统调用和网络读写, 请参考图 1-4。
 
-![](/imgs/blog/dubbo-go/moson-optimize/p4.png)
+![img](/imgs/blog/dubbo-go/moson-optimize/p4.png)
 
 图 1-4 优化版本 mosn + dubbo 火线图
 

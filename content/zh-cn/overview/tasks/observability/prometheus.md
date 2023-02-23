@@ -69,7 +69,7 @@ $ kubectl port-forward service/prometheus ${port}:${port}
 
 **1. 在 “Expression” 一览，输入 `dubbo_requests_total`，返回以下结果**
 
-![](/imgs/v3/tasks/observability/prometheus.png)
+![img](/imgs/v3/tasks/observability/prometheus.png)
 
 **2. 在 “Expression” 一览，输入 `dubbo_requests_total`，返回以下结果**
 

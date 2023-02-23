@@ -14,7 +14,7 @@ description: ""
 
 ## 基本流程与工作原理
 
-![](/imgs/v3/tasks/deploy/linux.jpg)
+![img](/imgs/v3/tasks/deploy/linux.jpg)
 
 ## 详细步骤
 
@@ -134,10 +134,10 @@ http://<IP>:38080
 ```
 
 登录页面
-![](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
+![img](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
 
 服务查询
-![](/imgs/v3/tasks/deploy/dubbo-admin-page.jpg)
+![img](/imgs/v3/tasks/deploy/dubbo-admin-page.jpg)
 
 ### dubbo
 
@@ -192,6 +192,6 @@ nohup java -jar dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar > /dev/null 
 ```
 
 查看服务
-![](/imgs/v3/tasks/deploy/consumer-provider.jpg)
+![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
 
 

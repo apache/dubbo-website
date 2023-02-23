@@ -6,14 +6,14 @@ weight: 20
 description: ""
 ---
 
-![](/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png)
+![img](/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png)
 
 
 ## 1. 介绍
 
 - Apache ShenYu
 
-![](/imgs/blog/shenyu-dubbo/shenyu.png)
+![img](/imgs/blog/shenyu-dubbo/shenyu.png)
 
 
 [Apache ShenYu(Incubating)](https://shenyu.apache.org/zh/docs/index) 是一个异步的，高性能的，跨语言的，响应式的 `API` 网关。兼容各种主流框架体系，支持热插拔，用户可以定制化开发，满足用户各种场景的现状和未来需求，经历过大规模场景的锤炼。
@@ -35,7 +35,7 @@ description: ""
 
 `shenyu-admin`是`Apache ShenYu`后台管理系统， 启动的方式有多种，本文通过 `[本地部署](https://shenyu.apache.org/zh/docs/deployment/deployment-local)` 的方式启动。启动成功后，需要在基础配置`->`插件管理中，把`dubbo` 插件设置为开启，并设置你的注册地址，请确保注册中心已经开启。
 
-![](/imgs/blog/shenyu-dubbo/dubbo-enable-zh.png)
+![img](/imgs/blog/shenyu-dubbo/dubbo-enable-zh.png)
 
 
 ### 2.2 启动shenyu网关
@@ -160,15 +160,15 @@ shenyu:
 打开 `插件列表 -> Proxy -> dubbo` 可以看到插件规则配置列表：
 
 
-![](/imgs/blog/shenyu-dubbo/dubbo-service-list-zh.png)
+![img](/imgs/blog/shenyu-dubbo/dubbo-service-list-zh.png)
 
 注册成功的选择器信息：
 
-![](/imgs/blog/shenyu-dubbo/dubbo-selector-zh.png)
+![img](/imgs/blog/shenyu-dubbo/dubbo-selector-zh.png)
 
 注册成功的规则信息：
 
-![](/imgs/blog/shenyu-dubbo/dubbo-rule-zh.png)
+![img](/imgs/blog/shenyu-dubbo/dubbo-rule-zh.png)
 
 > 选择器和规则是 `Apache ShenYu` 网关中最灵魂的东西。掌握好它，你可以对任何流量进行管理。对应为选择器与规则里面的匹配条件(conditions)，根据不同的流量筛选规则，我们可以处理各种复杂的场景。流量筛选可以从`Header`, `URI`, `Query`, `Cookie` 等等Http请求获取数据。
 >
@@ -216,7 +216,7 @@ Accept: application/json
 
 #### 3.1.1 客户端注册
 
-![](/imgs/blog/shenyu-dubbo/register-client.png)
+![img](/imgs/blog/shenyu-dubbo/register-client.png)
 
 在你的微服务配置中声明注册中心客户端类型，如`Http`或`Zookeeper`。
 应用程序启动时使用`SPI`方式加载并初始化对应注册中心客户端，通过实现`Spring Bean`相关的后置处理器接口，在其中获取需要进行注册的服务接口信息，将获取的信息放入`Disruptor`中。
@@ -225,7 +225,7 @@ Accept: application/json
 
 #### 3.1.2 服务端注册
 
-![](/imgs/blog/shenyu-dubbo/register-server.png)
+![img](/imgs/blog/shenyu-dubbo/register-server.png)
 
 在`shenyu-admin`配置中声明注册中心服务端类型，如`Http`或`Zookeeper`。当`shenyu-admin`启动时，读取配置类型，加载并初始化对应的注册中心服务端，注册中心服务端收到`shenyu-client`注册的接口信息后，将其放入`Disruptor`中，然后会触发注册处理逻辑，将服务接口信息更新并发布同步事件。
 
@@ -253,7 +253,7 @@ Accept: application/json
 
 下图展示了 `Apache ShenYu` 数据同步的流程，`Apache ShenYu` 网关在启动时，会从配置服务同步配置数据，并且支持推拉模式获取配置变更信息，然后更新本地缓存。管理员可以在管理后台（`shenyu-admin`），变更用户权限、规则、插件、流量配置，通过推拉模式将变更信息同步给 `Apache ShenYu` 网关，具体是 `push` 模式，还是 `pull` 模式取决于使用哪种同步方式。
 
-![](/imgs/blog/shenyu-dubbo/data-sync.png)
+![img](/imgs/blog/shenyu-dubbo/data-sync.png)
 
 在最初的版本中，配置服务依赖 `Zookeeper` 实现，管理后台将变更信息 `push` 给网关。而现在可以支持 `WebSocket`、`Http长轮询`、`Zookeeper`、`Nacos`、`Etcd` 和 `Consul`，通过在配置文件中设置 `shenyu.sync.${strategy}` 指定对应的同步策略，默认使用 `webosocket` 同步策略，可以做到秒级数据同步。但是，有一点需要注意的是，`Apache ShenYu`网关 和 `shenyu-admin` 必须使用相同的同步策略。
 
@@ -282,7 +282,7 @@ Accept: application/json
 
 客户端通过注册中心注册的元数据和`URI`数据，在`shenyu-admin`端进行处理，负责存储到数据库和同步给`shenyu`网关。`Dubbo`插件的客户端注册处理逻辑在`ShenyuClientRegisterDubboServiceImpl`中。继承关系如下：
 
-![](/imgs/blog/shenyu-dubbo/ShenyuClientRegisterDubboServiceImpl.png)
+![img](/imgs/blog/shenyu-dubbo/ShenyuClientRegisterDubboServiceImpl.png)
 
 - ShenyuClientRegisterService：客户端注册服务，顶层接口；
 - FallbackShenyuClientRegisterService：注册失败，提供重试操作；
@@ -294,7 +294,7 @@ Accept: application/json
 
 整体的`dubbo`服务注册流程如下：
 
-![](/imgs/blog/shenyu-dubbo/dubbo-register-zh.png)
+![img](/imgs/blog/shenyu-dubbo/dubbo-register-zh.png)
 
 #### 3.3.2 数据同步流程
 
@@ -322,13 +322,13 @@ Accept: application/json
 
 上述逻辑用流程图表示如下：
 
-![](/imgs/blog/shenyu-dubbo/data-sync-seq-zh.png)
+![img](/imgs/blog/shenyu-dubbo/data-sync-seq-zh.png)
 
 #### 3.3.3 服务调用流程
 
 在`Dubbo`插件体系中，类继承关系如下：
 
-![](/imgs/blog/shenyu-dubbo/ApacheDubboPlugin.png)
+![img](/imgs/blog/shenyu-dubbo/ApacheDubboPlugin.png)
 
 > ShenyuPlugin：顶层接口，定义接口方法；
 >
@@ -374,7 +374,7 @@ Accept: application/json
 
 最后被执行的是`ResponsePlugin` ，它统一处理网关的响应结果信息。处理类型由`MessageWriter`决定，类继承关系如下：
 
-![](/imgs/blog/shenyu-dubbo/MessageWriter.png)
+![img](/imgs/blog/shenyu-dubbo/MessageWriter.png)
 
 > MessageWriter：接口，定义消息处理方法；
 >
@@ -391,7 +391,7 @@ Accept: application/json
 
 分析至此，关于`Dubbo`插件的源码分析就完成了，分析流程图如下：
 
-![](/imgs/blog/shenyu-dubbo/dubbo-execute-zh.png)
+![img](/imgs/blog/shenyu-dubbo/dubbo-execute-zh.png)
 
 
 ## 4. 小结

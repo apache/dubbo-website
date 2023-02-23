@@ -12,25 +12,25 @@ Dubbo 是阿里于 2011 年开源的一款高性能 RPC 框架，在 Java 生态
 
 先介绍一下 dubbogo 的缘起，先看下面这幅图：
 
-![](/imgs/blog/dubbo-go/gochina/p1.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p1.jpeg)
 
 最右边的 service0 和 service1 是 Dubbo 的服务端，左边的 gateway 是网关，HTTP  请求从网关进来，必须转化成 Dubbo 的协议才能到后面的服务，所以中间加了一层proxy 完成相关功能。基本上每个 service 都需要一个 proxy 去转化协议和请求，所以这个时候 dubbogo 的项目需求就出来了。最初的实现就是以 Dubbo 的 Go 版本作为目标，实现与 Java 版本 Dubbo 的互调。
 
 ### Dubbogo 目标
 
-![](/imgs/blog/dubbo-go/gochina/p2.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p2.jpeg)
 
 然后这个图是 dubbogo 的现在达到的目标：用一份 Go 客户端的代码能够在没有任何代理和其他中间件的情况下直接调用其他语言端，主要是Java 服务端的服务和 Go 服务端的服务，而 Go 作为服务端的时候，Java 客户端也可以直接调用 Go 服务端的服务。
 
 ### Dubbogo 发展历程
 
-![](/imgs/blog/dubbo-go/gochina/p3.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p3.jpeg)
 
 下面介绍 dubbogo 的整个发展历程，在2016年8月份的时候是于雨构建了 dubbogo 项目，那个时候的 dubbogo 只支持通过 jsonrpc 2.0 协议 进行 HTTP 通信，到 2018 年2 月份支持 hessian2 协议进行 TCP 通信，到 2018 年 5 月项目被 dubbo 官方关注后开始从零重构，于雨 2018 年 8 月份初步重构出一个 0.1 版本。由于我们携程这边的一些需求，2019 年初我和我的同事何鑫铭也开始参与了 dubbogo 项目的重构，同时和于雨一起开始组建社区，在 2019 年 6 月份的时候 dubbogo1.0 版本上线，这个版本的重构是参照了 Dubbo 的整体设计，主体功能都在这个版本里面有呈现，同期该项目进入了 Apache 组织。今年 8 月份由社区同学望哥负责的 Dubbo-go-hessian2 的项目也进了 Apache 组织。到目前为止我们社区有些工作已经和 dubbo 齐头并进，例如对 grpc 和 k8s 的支持，相关代码正在 review 中，年底发布的 v1.3 版本会包含 grpc 支持。预计到2020年，也是明年的目标，希望项目能以全新姿态融入云原生时代。
 
 ### Dubbogo 整体设计
 
-![](/imgs/blog/dubbo-go/gochina/p4.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p4.jpeg)
 
 这个图大家是不是看着很熟悉，是 Dubbo 的整个分层设计图，但是少了 Dubbo 里面的很多东西，因为我们是借鉴了 Dubbo 的分层设计和易拓展性的思想，但是由于 Go 语言和 Java 语言的本质差别决定了我们项目设计不可能完全照搬它，有一些东西就给它简化了，特别是协议层这一块。比如说 Dubbo 里面 SPI 的拓展，在 Go 里面我们是借用了 Go 的非侵入式接口的方式去实现的，由于 Go 禁止 package 循环引用，所以 dubbogo 在代码的分包分层上面也是有严格的规定，这正好跟它的易拓展性的特性结合了起来。
 
@@ -38,19 +38,19 @@ Dubbo 是阿里于 2011 年开源的一款高性能 RPC 框架，在 Java 生态
 
 ### Dubbogo 能力大图
 
-![](/imgs/blog/dubbo-go/gochina/p5.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p5.jpeg)
 
 上面的图是我们当前 dubbogo 项目实现的能力大图，最上层是当前实现的一些注册中心有 zk、etcd、nacos、consul，现在与 k8s 关联的功能正在开发中。配置中心目前是支持 Apollo 和 zookeeper。左边是消费端，消费端这边实现的是有 cluster 的，策略上基本上实现了 dubbo 支持的所有策略。然后还有负载均衡策略，fillter 主要是有一个 tps 的限流还有泛化调用，这两个后面会讲到。编码层现在就是 jsonrpc 2.0 和 hessian2，protobuf v3 正在加紧 review 中。目前社区正在开发中的支持，包括 trace、grpc、k8s注册中心，以及对 restful 的支持。
 
 ### 关键项目
 
-![](/imgs/blog/dubbo-go/gochina/p6.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p6.jpeg)
 
 目前 dubbogo 项目整体由 4 个组成部分。第一个是 getty，一个异步网络 IO 库，是实现 tcp 通信协议最坚实的基础；第二个是 dubbo-go-hessian2，这个是与当前 java hessian2 高度兼容的项目；第三个是 gost，是 dubbogo 的 基础库；最后是 dubbogo 的示例库，目前已经迁移到 https://github.com/apache/dubbo-samples，和 Java 示例合并了。这些都是当前 dubbogo 主要的组成项目。
 
 ## 二 协议实现
 
-![](/imgs/blog/dubbo-go/gochina/p7.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p7.jpeg)
 
 接下来讲一些具体的实现和部分的功能，上图是 dubbo-go-hessian2 实现，列出来是一些主要的功能列表，第一个是 Java 的 JDK Exceptions 的实现，里面实现了 40 多种的 Java JDK 主要的异常，可以与 Java 的 hessian2 版本互相解编码的支持，支持自动扩展自己实现 exceptions，或者是不常见的 Exceptions；第二个是支持字段名的联名，Go 可序列化的字段是大写字母开头，但是 Java 默认是小写开头的，所以有编码的字段名不一致的问题，这就有别名识别和支持自定义命名。
 
@@ -58,17 +58,17 @@ go-hessian2 还支持 Java 的 bigdecimal、Date、Time、基本类型的包装�
 
 go-hessian2 里面如果要解码和编码用户自定义类型，用户需要自己把它注册进去，前提是支持 go-hessian2 的 POJO interface，才能跟 JAVA 对应类互相解编码。
 
-![](/imgs/blog/dubbo-go/gochina/p8.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p8.jpeg)
 
 上面是 go-hessian2 的类型对应表，需要特别点出的是 int，go 这边的 int 类型在不同字长系统下是有不同的大小，可能是 32 位也可能 64位的，而 Java 的 int 是 32 位的，所以我们以 go 语言的 int32 类型对应 Java int 类型。
 
 刚才提到了 Java 的 Class 和 go struct 的对应。上图有一个 go-hessian2 的 POJO 接口定义，每个 Java class 对应到 go struct，则 struct 需要给出 Java ClassName。
 
-![](/imgs/blog/dubbo-go/gochina/p9.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p9.jpeg)
 
 你也可以加 hessian 标签，解析的时候会把这个字段名用别名写进去，实现自定义 fieldName。默认情况下，go-hessian2 中会自动把 struct field 首字母变成小写作为其 fieldName。
 
-![](/imgs/blog/dubbo-go/gochina/p10.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p10.jpeg)
 
 
 泛化引用，是 dubbogo 里面比较重要的功能。社区一位同学需要基于 dubbogo 实现网关，收集外部的请求，然后通过泛化引用的形式调用其他 Dubbo 服务，最后自己动手把它实现了。使用时，首先需要在项目里内置一个 GenericService 服务，调用Load，然后就像正常的调用服务一样直接调用，跟 Java 是类似的，Go 客户端可以不知道 Java 的接口定义和类定义，把方法名、参数类型、参数数组以一个 map 的形式传输到 Java 服务端，Java 服务端收到请求后进行识别，把它转换成 POJO 类。
@@ -79,15 +79,15 @@ go-hessian2 里面如果要解码和编码用户自定义类型，用户需要�
 
 dubbogo 的网络引擎里面分为三层， 如下图所示：
 
-![](/imgs/blog/dubbo-go/gochina/p11.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p11.jpeg)
 
 最底层 streaming 处理二进制流，第二层 codec层，进行协议的序列化和反序列化，第三层是 Eventlistener，提供应用使用接口。streaming 层能支持 websocket、TCP、UDP 三种网络通讯协议，这层具有一定的灵活性，今年年初上海有一个同学今年把 KCP 也加进去了，当时说要开源贡献出来，我还在期待中。codec 层可以适用不同协议，用户自定义即可。
 
-![](/imgs/blog/dubbo-go/gochina/p12.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p12.jpeg)
 
 EventListener 对上层暴露了 4 个回调接口。第一个是 OnOpen，网络连接初建成功时被调用，应用层如果判定其为正常连接，则可以把连接 session 存储下来，如果用户判断当前连接过多则返回一个非空的 error，则这个连接会被 dubbogo 关闭。其次是 OnError 事件，当网络连接出错，就会回调到这个接口，在 dubbogo 关闭这个连接之前允许用户做相应处理，如把网络连接 session 从应用层的 session 池中删除。第三个是 OnCron，处理定时任务，如心跳，dubbogo 针对 websocket 协议在底层直接把心跳热任务处理了，针对 tcp 和 udp 协议需要用户在这个回调函数中自己实现。第四个接口是 OnMessage，用作处理一个完整的网络包。可以看到整个回调接口风格跟 websocket 的接口很像。
 
-![](/imgs/blog/dubbo-go/gochina/p13.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p13.jpeg)
 
 ### 协程池
 
@@ -107,7 +107,7 @@ dubbogo 的 goroutine pool 里有 worker channel 【数量为 M】和逻辑处�
 
 优化改进主要从三个方面入手， 如下图所示：
 
-![](/imgs/blog/dubbo-go/gochina/p14.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p14.jpeg)
 
 1. 内存池。goroutine pool 是管理对 CPU 资源的分配，内存池就是管理内存资源的分配。我个人反对纯粹为了炫技没有目的地写内存池，其实 Go 的内存管理这块目前优化的很好了。Go 语言初始版本的内存管理使用了谷歌自家的 tcmalloc 库，这个库把应用释放的内存自己先缓存住，待失效期后才释放，那这样造成的结果是什么呢？就是早期的 Go 程序的内存成本很高。假设程序一个 sidecar 程序的资源限制是内存2G，CPU 核数是 2 核，用这样一个内存管理库，内存用完不释放给操作系统，那么没人敢用这个项目，当然最新的 Go 内存管理器是经过完全重构的，虽然也区分不同大小 span 的内存在 P 级别和全局级别进行缓存，但是基本上不用考虑这种内存膨胀不可控的问题了。那么什么情况下使用内存池呢？你确定你的业务有一些对象是频繁的复用则可以尝试使用。 目前大部分内存池技术底层依赖的底座都是 sync.Pool，自己写一个也不难。而且 Go 1.13 之后的 sync.Pool 已经可以做到跨 GC span 不释放缓存对象，非常之好。
 2. 定时器。Go 语言早期定时器因为整体使用一把大锁的缘故效率极差，当然最新的就相当好了，通过每个 CPU 核下一个定时器的方法【类似于分片锁】分散了竞争压力，但是很多情况下还是有竞争压力，如果对时间精度要求不高个人建议在自己的应用中自己写一个简单的时间轮实现一个定时器，释放 CPU 压力。
@@ -127,37 +127,37 @@ Go 语言是一个适合处理 IO 密集型任务的语言，不擅长处理 CPU
 
 Dubbo 的限流接口源码如下：
 
-![](/imgs/blog/dubbo-go/gochina/p15.png)
+![img](/imgs/blog/dubbo-go/gochina/p15.png)
 
 这个接口抽象是非常漂亮的，第一个是限流 url，第二个服务调用。下面是 Dubbo 的固定窗口限流源码：
 
-![](/imgs/blog/dubbo-go/gochina/p16.png)
+![img](/imgs/blog/dubbo-go/gochina/p16.png)
 
 上面的代码很明显，"private final" 决定了 Dubbo 使用者只能使用期给定的固定窗口限流限算法，无法扩展。
 
 以下是 dubbogo 的限流接口：
 
-![](/imgs/blog/dubbo-go/gochina/p17.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p17.jpeg)
 
 TpsLimiter 是限流对象，TpsLimitStrategy 是限流算法，RejectedExecutionHandle 是限流动作。
 
 接下来是一个固定窗口算法实现：
 
-![](/imgs/blog/dubbo-go/gochina/p18.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p18.jpeg)
 
 上图是 dubbogo 的固定窗口算法实现，其非线程安全，大家看一下代码就可以了，不推荐大家用。下图是 dubbogo 的滑动窗口算法实现：
 
-![](/imgs/blog/dubbo-go/gochina/p19.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p19.jpeg)
 
 其基本原理是用一个队列存储一段时间内的请求，然后根据队列长度判定即可。
 
 不管是固定窗口还是滑动窗口，其判定算法简单，麻烦的是其参数设置，如下图：
 
-![](/imgs/blog/dubbo-go/gochina/p20.png)
+![img](/imgs/blog/dubbo-go/gochina/p20.png)
 
 固定窗口时长精度很难控制。比如说限流一秒 QPS 值 1000，前 100 毫秒来了一千个请求，然后判定算法把请求放过了，而其后 900 毫秒 任何请求都无法处理。一般的处理方法是把时间粒度更精细一些，dubbogo 的时间窗口最小单位是一毫秒，则用户可以把时间窗口设定为 100 毫秒，总体来说一段时间内是很平稳的。下面这个图是我们社区的 commiter 邓明写完博客发出来，行业大佬微信评论如下：
 
-![](/imgs/blog/dubbo-go/gochina/p21.png)
+![img](/imgs/blog/dubbo-go/gochina/p21.png)
 
 图中第一个问题是 qps 和 tps 每个请求成本不同，这个问题怎么处理呢？个人觉得这是一个分级限流问题，在同一个服务下针对不同的请求做不同的分级处理。第二个问题 ”配置了 qps 1000，但是请求过来是10万你还是死“，这个就需要更上层的运维能力进行应对，譬如判定为恶意流量攻击就应该在网关层拦截掉，如果是服务能力不行就扩容。
 
@@ -165,7 +165,7 @@ TpsLimiter 是限流对象，TpsLimitStrategy 是限流算法，RejectedExecutio
 
 dubbogo 的单机熔断是基于 hystrix-go 实现的，其判定参数有最大并发请求数、超时时间、错误率；其次是保护窗口，是熔断时长，熔断多久后进行服务恢复；第三个是保护性动作，就是在保护时间窗口之内执行什么样的动作，具体实现用户自定义。
 
-![](/imgs/blog/dubbo-go/gochina/p22.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p22.jpeg)
 
 ### 优雅退出
 
@@ -176,11 +176,11 @@ dubbogo 的单机熔断是基于 hystrix-go 实现的，其判定参数有最大
 3. 节点处理完所有接收到的请求并且返回响应后，释放作为服务端相关的组件和资源；
 4. 节点释放作为客户端的组件和资源。
 
-![](/imgs/blog/dubbo-go/gochina/p23.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p23.jpeg)
 
 所以每一步基本上都要给程序一定的时间进行等待，所以等的时间窗口是多少呢？dubbogo 默认每个步骤大概花2秒，总体一个时间窗口是10秒。
 
-![](/imgs/blog/dubbo-go/gochina/p24.png)
+![img](/imgs/blog/dubbo-go/gochina/p24.png)
 
 基本上在别的 RPC 框架里面，可能不太常见到这种处理。
 
@@ -188,7 +188,7 @@ dubbogo 的单机熔断是基于 hystrix-go 实现的，其判定参数有最大
 
 dubbogo 作为微服务框架如何适配 k8s，如何部署？dubbogo 本身是一个 RPC 框架，但是其又有了服务治理能力，这部分能力与 k8s 的部分能力有些重合，不可能为了适配 k8s 就彻底抛弃。目前 Dubbo 官方也没有很好的解决方案供我们参考，所以这里我们 dubbogo 先给出一个简单的常识性的实践方案。下面先分析下 dubbogo 的 interface/service 和 k8s service 两者直接的差别。
 
-![](/imgs/blog/dubbo-go/gochina/p25.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p25.jpeg)
 
 k8s service 是许多具有相同服务能力 pod 资源的聚合，它自己的负载均衡算法以及健康检查等功能。而 Dubbo 里面的 interface/service 仅仅是服务 provider 集合，服务治理能力依赖 dubbo 的 directory、router 和 loadbalace 等额外的功能模块。并且Dubbo 服务区分 group/version，还有 provider、consumer 角色等等。Dubbo interface/service 无法与 k8s service 对标，Dubbo interface/service 和其整体服务治理能力才能对标成 k8s service。二者差异这么大，如何将 dubbo 集成到 k8s 中呢？
 
@@ -200,7 +200,7 @@ k8s 提供了 pod/endpoint/service 三层维度的资源。简单的做法，可
 
 下面左边 dubbogo 的代码生成器工具根据 grpc 的 pb 服务定义文件自动生成的适配 dubbogo 的代码，右边是对应的使用示例。不同于 k8s service 的复杂性，grpc 整体仅仅具有 rpc 能力，没有服务治理能力，所以原始的 grpc 就可以很好的嵌入到 dubbogo 里面，grpc server 的 methodhandler 对我们 dubbogo 来说就是 dubbo invoker，grpc 的一些相关的接口直接跟我们的接口嵌套起来，两个生态就对接起来了。
 
-![](/imgs/blog/dubbo-go/gochina/p26.jpeg)
+![img](/imgs/blog/dubbo-go/gochina/p26.jpeg)
 
 
 ## 七 展望未来

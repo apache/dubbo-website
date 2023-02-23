@@ -67,7 +67,7 @@ invocation 结构中新增 attribute 属性支持，用于流程内部的属性�
 
 在 1.5 版本之前，Router 模型中属性是包含：优先级与路由属性，Router Chain 只包含路由属性。从中能识别出其实 Router Chain 也是一种特殊 Router。1.5 版本之后，使 Router 更抽象，分离出其优先级属性，新增 Priority Router、Chain 继承 Router 使其变为特殊的 Router，使关系上看起来更加清晰。如下图：
 
-![](/imgs/blog/dubbo-go/1.5/router.png)
+![img](/imgs/blog/dubbo-go/1.5/router.png)
 
 # 回顾与展望
 
@@ -81,12 +81,12 @@ Dubbo-go 处于一个比较稳定成熟的状态。目前新版本正处于往�
 
 **注册中心模型**上，支持多注册中心集群负载均衡。业务部署假设是双注册中心（图 1 ），从原来双注册中心中所有 Provider 一起选址。优化成选址时的多了一层注册中心集群间的负载均衡（图 2 ）。
 
-![](/imgs/blog/dubbo-go/1.5/multi-registry.png)
+![img](/imgs/blog/dubbo-go/1.5/multi-registry.png)
 
 
 （图 1 ）
 
-![](/imgs/blog/dubbo-go/1.5/loadbalance.png)
+![img](/imgs/blog/dubbo-go/1.5/loadbalance.png)
 
 （图 2 ）
 

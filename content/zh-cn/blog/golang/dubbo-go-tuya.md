@@ -13,7 +13,7 @@ dubbo 是一个基于 Java 开发的高性能的轻量级 RPC 框架，dubbo 提
 
 ## dubbo-go 网关实践
 
-![](/imgs/blog/dubbo-go/tuya/p1.png)
+![img](/imgs/blog/dubbo-go/tuya/p1.png)
 
 dubbo-go 在涂鸦智能的使用情况如上图，接下来会为大家详细介绍落地细节，希望这些在生产环境中总结的经验能够帮助到大家。
 
@@ -30,7 +30,7 @@ dubbo-go 在涂鸦智能的使用情况如上图，接下来会为大家详细�
 
 针对如上痛点，随即着手准备设计新的 gateway 架构。首先就是语言选型，golang 的协程调用模型使得 golang 非常适合构建 IO 密集型的应用，且应用部署上也较 java 简单。经过调研后我们敲定使用 golang 作为 proxy 的编码语言，并使用 dubbo-go 用于连接 dubbo provider 集群。provider 端的业务应用通过使用 java 的插件，以注解形式配置 API 配置信息，该插件会将配置信息和 dubbo 接口元数据更新到元数据注册中心（下图中的 redis ）。这样一来，配置从管理后台页面转移到了程序代码中。开发人员在编码时，非常方便地看到 dubbo 接口对外的 API 描述，无需从另外一个管理后台配置 API 的使用方式。
 
-![](/imgs/blog/dubbo-go/tuya/p2.png)
+![img](/imgs/blog/dubbo-go/tuya/p2.png)
 
 ### 实践
 
@@ -92,7 +92,7 @@ Generic Filter 将用户请求的结构体参数转化为统一格式的 map（�
 
 这里就会用到上文提到的 provider 用于收集元数据的插件。引入插件后，应用在启动时会扫描需要暴露的 dubbo 接口，将 dubbo 元数据和 HTTP API 关联。插件使用方法大致如下，这里调了几个简单的配置作为示例，实际生产时注解内容会更多。
 
-![](/imgs/blog/dubbo-go/tuya/p3.png)
+![img](/imgs/blog/dubbo-go/tuya/p3.png)
 
 最终获得的 dubbo 元数据如下:
 

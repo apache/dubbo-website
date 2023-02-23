@@ -18,7 +18,7 @@ description: 本文记录了 flycash 对 Dubbo Go 中 TPS Limit 的设计与实�
 
 `DefaultTPSLimiter`是在服务级别上进行限流。虽然`dubbo`的官方文档里面声称可以在`method`级别上进行限流，但是我看了一下它的源码，实际上这个是做不到的。当然，如果自己通过实现`Filter`接口来实现`method`级别的限流，那么自然是可以的——这样暴露了`dubbo`Java版本实现的另外一个问题，就是`dubbo`的`TpsLimitFilter`实现，是不允许接入自己`TpsLimiter`的实现的。这从它的源码也可以看出来：
 
-![](/imgs/blog/dubbo-go/tps-limit-filter.png)
+![img](/imgs/blog/dubbo-go/tps-limit-filter.png)
 
 它直接写死了`TpsLimiter`的实现。
 
@@ -32,7 +32,7 @@ Github: [https://github.com/apache/dubbo-go/pull/237](https://links.jianshu.com/
 
 `dubbo`里面的核心抽象是`TpsLimiter`接口。`TpsLimitFilter`只是简单调用了一下这个接口的方法而已：
 
-![](/imgs/blog/dubbo-go/tps-limiter.png)
+![img](/imgs/blog/dubbo-go/tps-limiter.png)
 
 这个抽象是很棒的。但是还欠缺了一些抽象。
 
@@ -89,7 +89,7 @@ type RejectedExecutionHandler interface {
 
 `FixedWindow`直接对应到Java的`DefaultTpsLimiter`。它采用的是`fixed-window`算法：比如说配置了一分钟内只能调用100次。假如从00:00开始计时，那么00:00-01:00内，只能调用100次。只有到达01:00，才会开启新的窗口01:00-02:00。如图：
 
-![](/imgs/blog/dubbo-go/fixed-window.png)
+![img](/imgs/blog/dubbo-go/fixed-window.png)
 
 Fixed-Window 实现
 
@@ -131,7 +131,7 @@ func (impl *FixedWindowTpsLimitStrategyImpl) IsAllowable() bool {
 
 这是我比较喜欢的实现。它跟网络协议里面的滑动窗口算法在理念上是比较接近的。
 
-![](/imgs/blog/dubbo-go/sliding-window.png)
+![img](/imgs/blog/dubbo-go/sliding-window.png)
 
 具体来说，假如我设置的同样是一分钟1000次，它统计的永远是从当前时间点往前回溯一分钟内，已经被调用了多少次。如果这一分钟内，调用次数没超过1000，请求会被处理，如果已经超过，那么就会拒绝。
 
@@ -194,7 +194,7 @@ func (impl *SlidingWindowTpsLimitStrategyImpl) IsAllowable() bool {
 
 我们设想一下，假如说我们把时间窗口设置为一分钟，允许1000次调用。然而，在前十秒的时候就调用了1000次。在后面的五十秒，服务器虽然将所有的请求都处理完了，然是因为窗口还没到新窗口，所以这个时间段过来的请求，全部会被拒绝。
 
-![](/imgs/blog/dubbo-go/busy-idle-time-window.png)
+![img](/imgs/blog/dubbo-go/busy-idle-time-window.png)
 
 解决的方案就是调小时间窗口，比如调整到一秒。但是时间窗口的缩小，会导致`FixedWindow`算法的`raise condition`情况加剧。`SlidingWindow`也会受影响，但是影响要小很多。
 

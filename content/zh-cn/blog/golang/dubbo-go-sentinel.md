@@ -17,11 +17,11 @@ description: 本文介绍了如何在 dubbo-go 中使用限流组件 sentinel
 
 我们以其中的provider filter适配为例:
 
-![](/imgs/blog/dubbo-go/sentinel/dubbo-go-sentinel-provider-filter.png)
+![img](/imgs/blog/dubbo-go/sentinel/dubbo-go-sentinel-provider-filter.png)
 
 此 filter 实现了 dubbo-go的filter接口，只要用户在服务启动时将此filter加载到dubbo-go中，即可使用此filter。 
 
-![](/imgs/blog/dubbo-go/sentinel/sentinel-golang.png)
+![img](/imgs/blog/dubbo-go/sentinel/sentinel-golang.png)
 
 sentinel实现原理与其他限流、熔断库大同小异，底层是用的滑动窗口算法。与hystrix等框架相比不同点是设计理念，Sentinel 的设计理念是让您自由选择控制的角度，并进行灵活组合，从而达到想要的效果。
 

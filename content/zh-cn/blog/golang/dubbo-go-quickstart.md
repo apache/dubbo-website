@@ -23,7 +23,7 @@ PS：以下的学习方式适用于很多新技术
 
 大致浏览了背景、需求、架构之后基本上有一个大致概念
 
-![](/imgs/blog/dubbo-architecture.png)
+![img](/imgs/blog/dubbo-architecture.png)
 
 其实整体架构和很多微服务的架构都是类似的，就是有一个注册中心管理所有的服务列表，服务提供方先向注册中心注册，而消费方向注册中心请求服务列表，通过服务列表调用最终的服务。总的来说 dubbo 将整个过程封装在了里面，而作为使用者的我们来说更加关心业务实现，它帮我们做好了治理的工作。
 
@@ -117,7 +117,7 @@ sh ./bin/load_user_info_client.sh start
 
 启动过程中会出现一些警告，问题不大，如果成功，那么客户端会有一个调用服务端的请求，并在控制台中以白色底色进行打印
 
-![](/imgs/blog/dubbo-go/quickstart/console.png)
+![img](/imgs/blog/dubbo-go/quickstart/console.png)
 
 java 的服务也有相对应的启动方式，按照 README 中所说明的也可以进行注册和调用，并且 java 和 go 之间是可以互相调用的
 
@@ -125,7 +125,7 @@ java 的服务也有相对应的启动方式，按照 README 中所说明的也�
 
 因为我们部署的时候有一个 dubbo-admin 用于管理 zk 上注册的服务，我们可以访问本地的 8080 端口看到对应的服务情况
 
-![](/imgs/blog/dubbo-go/quickstart/admin.png)
+![img](/imgs/blog/dubbo-go/quickstart/admin.png)
 
 image.png
 

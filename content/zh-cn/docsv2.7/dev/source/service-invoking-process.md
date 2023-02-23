@@ -13,7 +13,7 @@ description: "本文介绍了服务调用过程的原理和实现细节"
 
 在进行源码分析之前，我们先来通过一张图了解 Dubbo 服务调用过程。
 
-![](/imgs/dev/send-request-process.jpg)
+![img](/imgs/dev/send-request-process.jpg)
 
 首先服务消费者通过代理对象 Proxy 发起远程调用，接着通过网络客户端 Client 将编码后的请求发送给服务提供方的网络层上，也就是 Server。Server 在收到请求后，首先要做的事情是对数据包进行解码。然后将解码后的请求发送至分发器 Dispatcher，再由分发器将请求派发到指定的线程池上，最后由线程池调用具体的服务。这就是一个远程调用请求的发送与接收过程。至于响应的发送与接收过程，这张图中没有表现出来。对于这两个过程，我们也会进行详细分析。
 
@@ -377,7 +377,7 @@ public class DefaultFuture implements ResponseFuture {
 
 本节我们来看一下同步调用模式下，服务消费方是如何发送调用请求的。在深入分析源码前，我们先来看一张图。
 
-![](/imgs/dev/send-request-thread-stack.jpg)
+![img](/imgs/dev/send-request-thread-stack.jpg)
 
 这张图展示了服务消费方发送请求过程的部分调用栈，略为复杂。从上图可以看出，经过多次调用后，才将请求数据送至 Netty NioClientSocketChannel。这样做的原因是通过 Exchange 层为框架引入 Request 和 Response 语义，这一点会在接下来的源码分析过程中会看到。其他的就不多说了，下面开始进行分析。首先分析 ReferenceCountExchangeClient 的源码。
 
@@ -729,7 +729,7 @@ proxy0#sayHello(String)
 
 在分析请求编码逻辑之前，我们先来看一下 Dubbo 数据包结构。
 
-![](/imgs/dev/data-format.jpg)
+![img](/imgs/dev/data-format.jpg)
 
 Dubbo 数据包分为消息头和消息体，消息头用于存储一些元信息，比如魔数（Magic），数据包类型（Request/Response），消息体长度（Data Length）等。消息体中用于存储具体的调用消息，比如方法名称，参数列表等。下面简单列举一下消息头的内容。
 
@@ -1165,7 +1165,7 @@ Dubbo 将底层通信框架中接收请求的线程称为 IO 线程。如果一�
 
 以上就是线程派发的背景，下面我们再来通过 Dubbo 调用图，看一下线程派发器所处的位置。
 
-![](/imgs/dev/dispatcher-location.jpg)
+![img](/imgs/dev/dispatcher-location.jpg)
 
 如上图，红框中的 Dispatcher 就是线程派发器。需要说明的是，Dispatcher 真实的职责创建具有线程派发能力的 ChannelHandler，比如 AllChannelHandler、MessageOnlyChannelHandler 和 ExecutionChannelHandler 等，其本身并不具备线程派发能力。Dubbo 支持 5 种不同的线程派发策略，下面通过一个表格列举一下。
 
@@ -1967,7 +1967,7 @@ public class DefaultFuture implements ResponseFuture {
 
 本篇文章在多个地方都强调过调用编号很重要，但一直没有解释原因，这里简单说明一下。一般情况下，服务消费方会并发调用多个服务，每个用户线程发送请求后，会调用不同 DefaultFuture 对象的 get 方法进行等待。 一段时间后，服务消费方的线程池会收到多个响应对象。这个时候要考虑一个问题，如何将每个响应对象传递给相应的 DefaultFuture 对象，且不出错。答案是通过调用编号。DefaultFuture 被创建时，会要求传入一个 Request 对象。此时 DefaultFuture 可从 Request 对象中获取调用编号，并将 \<调用编号, DefaultFuture 对象> 映射关系存入到静态 Map 中，即 FUTURES。线程池中的线程在收到 Response 对象后，会根据 Response 对象中的调用编号到 FUTURES 集合中取出相应的 DefaultFuture 对象，然后再将 Response 对象设置到 DefaultFuture 对象中。最后再唤醒用户线程，这样用户线程即可从 DefaultFuture 对象中获取调用结果了。整个过程大致如下图：
 
-![](/imgs/dev/request-id-application.jpg)
+![img](/imgs/dev/request-id-application.jpg)
 
 ## 3. 总结
 

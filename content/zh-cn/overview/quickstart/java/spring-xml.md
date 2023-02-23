@@ -128,11 +128,11 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 从本小节开始，将基于 IntelliJ IDEA 进行工程的搭建以及测试。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-32-16-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-32-16-image.png)
 
 如上图所示，可以建立一个基础的项目。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-33-20-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-33-20-image.png)
 
 在初始化完项目之后，需要在 `src/main/java` 目录下创建 `org.apache.dubbo.samples.api` 、`org.apache.dubbo.samples.client`  和 `org.apache.dubbo.samples.provider`  三个 package。
 
@@ -144,7 +144,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 在初始化完项目以后，我们需要先添加 Dubbo 相关的 maven 依赖。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-36-57-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-36-57-image.png)
 
 编辑 `pom.xml` 这个文件，添加下列配置。
 
@@ -177,7 +177,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 在这份配置中，定义了 dubbo 和 zookeeper（以及对应的连接器 curator）的依赖。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-36-31-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-36-31-image.png)
 
 添加了上述的配置以后，可以通过 IDEA 的 `Maven - Reload All Maven Projects` 刷新依赖。
 
@@ -185,7 +185,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 服务接口 Dubbo 中沟通消费端和服务端的桥梁。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-37-31-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-37-31-image.png)
 
 在 `org.apache.dubbo.samples.api` 下建立 `GreetingsService` 接口，定义如下：
 
@@ -204,7 +204,7 @@ public interface GreetingsService {
 
 定义了服务接口之后，可以在服务端这一侧定义对应的实现，这部分的实现相对于消费端来说是远端的实现，本地没有相关的信息。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-38-04-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-38-04-image.png)
 
 在 `org.apache.dubbo.samples.provider` 下建立 `GreetingsServiceImpl` 类，定义如下：
 
@@ -229,7 +229,7 @@ public class GreetingsServiceImpl implements GreetingsService {
 
 首先，我们先创建服务端的配置文件。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-40-07-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-40-07-image.png)
 
 在 `resources` 资源文件夹下建立 `dubbo-demo-provider.xml` 文件，定义如下：
 
@@ -262,7 +262,7 @@ public class GreetingsServiceImpl implements GreetingsService {
 
 同样的，我们需要创建消费端的配置文件。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-40-59-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-40-59-image.png)
 
 在 `resources` 资源文件夹下建立 `dubbo-demo-consumer.xml` 文件，定义如下：
 
@@ -296,7 +296,7 @@ public class GreetingsServiceImpl implements GreetingsService {
 
 首先，我们先创建服务端的启动类。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-46-49-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-46-49-image.png)
 
 在 `org.apache.dubbo.samples.provider` 下建立 `Application` 类，定义如下：
 
@@ -325,7 +325,7 @@ public class Application {
 
 同样的，我们需要创建消费端的启动类。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-48-26-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-15-48-26-image.png)
 
 在 `org.apache.dubbo.samples.client` 下建立 `Application` 类，定义如下：
 
@@ -364,7 +364,7 @@ public class Application {
 
 截止第 9 步，代码就已经开发完成了，本小节将启动整个项目并进行验证。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-16-01-29-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-16-01-29-image.png)
 
 首先是启动 `org.apache.dubbo.samples.provider.Application` ，等待一会出现如下图所示的日志（`Dubbo Application[1.1](demo-provider) is ready`）即代表服务提供者启动完毕，标志着该服务提供者可以对外提供服务了。
 
@@ -374,7 +374,7 @@ public class Application {
 
 然后是启动`org.apache.dubbo.samples.client.Application` ，等待一会出现如下图所示的日志（`hi, dubbo` ）即代表服务消费端启动完毕并调用到服务端成功获取结果。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-16-02-50-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-16-02-50-image.png)
 
 ```log
 Receive result ======> hi, dubbo

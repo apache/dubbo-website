@@ -57,7 +57,7 @@ description: 本文介绍了如何在 dubbo-go 中使用配置中心进行远程
 **2、配置中心的配置加载阶段在什么时候？**
 
 应在读取配置文件阶段后，读取并解析本地配置文件中配置中心信息。初始化配置中心链接，读取 /dubbo/config/dubbo/dubbo.properties 与 /dubbo/config/dubbo/应用名/dubbo.properties ，并将其加载到内存之中覆盖原有配置，监听其变更，实时更新至内存，如下图蓝色部分:
-![](/imgs/blog/dubbo-go/config-center/config-center-class.jpg)
+![img](/imgs/blog/dubbo-go/config-center/config-center-class.jpg)
 
 #### ConfigCenterFactory
 
@@ -165,7 +165,7 @@ type DynamicConfiguration interface {
 
 ### 实现
 
-![](/imgs/blog/dubbo-go/config-center/design.png)
+![img](/imgs/blog/dubbo-go/config-center/design.png)
 
 优先考虑与现有 Dubbo 设计兼容，从而降低使用者的学习成本，dubbo-admin 作为服务提供者实现应用级配置管理， dubbo-go 作为消费端实现配置下发管理功能。下面以 ZooKeeper 为例，对服务提供者与服务消费者进行整体流程分析。
 
@@ -178,7 +178,7 @@ dubbo-admin 配置管理中增加 global 配置，ZooKeeper 中会自动生成�
 
 ##### 节点路径
 
-![](/imgs/blog/dubbo-go/config-center/key-struct.png)
+![img](/imgs/blog/dubbo-go/config-center/key-struct.png)
 
 上图展示了 dubbo.properties 文件在 ZooKeeper 和 Apollo 中的存储结构：
 
@@ -260,7 +260,7 @@ func newApolloConfiguration(url *common.URL) (*apolloConfiguration, error) {
 
 从上面的设计里面，也能大概猜到怎么使用了：
 
-![](/imgs/blog/dubbo-go/config-center/zookeeper-usercase.png)
+![img](/imgs/blog/dubbo-go/config-center/zookeeper-usercase.png)
 
 很显然，使用配置中心并不复杂，只需要把对应的依赖引入进来。在包初始化的时候，会创建出来对应的配置中心的实现。比如说加载 ZooKeeper 或者 Apollo 作为配置中心：
 

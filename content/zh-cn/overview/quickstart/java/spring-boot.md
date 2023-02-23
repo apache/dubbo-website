@@ -202,19 +202,19 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 从本小节开始，将基于 IntelliJ IDEA 进行工程的搭建以及测试。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-25-27-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-25-27-image.png)
 
 如上图所示，可以建立一个基础的项目。
 
 搭建了基础项目之后，我们还需要创建 `dubbo-spring-boot-demo-interface` 、`dubbo-spring-boot-demo-provider` 和 `dubbo-spring-boot-demo-consumer` 三个子模块。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-17-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-17-image.png)
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-26-57-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-26-57-image.png)
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-45-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-45-image.png)
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-28-26-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-28-26-image.png)
 
 创建了三个子模块之后，需要创建一下几个文件夹：
 
@@ -224,7 +224,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 3. 在 `dubbo-spring-boot-demo-provider/src/main/java` 下创建 `org.apache.dubbo.springboot.demo.provider`  package
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-32-50-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-32-50-image.png)
 
 最终的文件夹参考如上图所示。
 
@@ -234,7 +234,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 对于多模块项目，首先需要在父项目的 `pom.xml` 里面配置依赖信息。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-53-18-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-53-18-image.png)
 
 编辑 `./pom.xml` 这个文件，添加下列配置。
 
@@ -292,7 +292,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 然后在 `dubbo-spring-boot-consumer` 和 `dubbo-spring-boot-provider` 两个模块 `pom.xml` 中进行具体依赖的配置。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-52-53-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-52-53-image.png)
 
 编辑 `./dubbo-spring-boot-consumer/pom.xml` 和 `./dubbo-spring-boot-provider/pom.xml` 这两文件，都添加下列配置。
 
@@ -338,7 +338,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 
 服务接口 Dubbo 中沟通消费端和服务端的桥梁。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-57-29-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-57-29-image.png)
 
 在 `dubbo-spring-boot-demo-interface` 模块的 `org.apache.dubbo.samples.api` 下建立 `DemoService` 接口，定义如下：
 
@@ -357,7 +357,7 @@ public interface DemoService {
 
 定义了服务接口之后，可以在服务端这一侧定义对应的实现，这部分的实现相对于消费端来说是远端的实现，本地没有相关的信息。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-59-46-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-59-46-image.png)
 
 在`dubbo-spring-boot-demo-provider` 模块的 `org.apache.dubbo.samples.provider` 下建立 `DemoServiceImpl` 类，定义如下：
 
@@ -387,7 +387,7 @@ public class DemoServiceImpl implements DemoService {
 
 首先，我们先创建服务端的配置文件。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-00-24-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-00-24-image.png)
 
 在 `dubbo-spring-boot-demo-provider` 模块的 `resources` 资源文件夹下建立 `application.yml` 文件，定义如下：
 
@@ -408,7 +408,7 @@ dubbo:
 
 同样的，我们需要创建消费端的配置文件。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-03-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-03-image.png)
 
 在 `dubbo-spring-boot-demo-consumer` 模块的 `resources` 资源文件夹下建立 `application.yml` 文件，定义如下：
 
@@ -431,7 +431,7 @@ dubbo:
 
 首先，我们先创建服务端的启动类。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-38-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-38-image.png)
 
 在 `dubbo-spring-boot-demo-provider` 模块的 `org.apache.dubbo.springboot.demo.provider` 下建立 `Application` 类，定义如下：
 
@@ -457,7 +457,7 @@ public class ProviderApplication {
 
 同样的，我们需要创建消费端的启动类。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-11-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-11-image.png)
 
 在 `dubbo-spring-boot-demo-consumer` 模块的 `org.apache.dubbo.springboot.demo.consumer` 下建立 `Application` 类，定义如下：
 
@@ -484,7 +484,7 @@ public class ConsumerApplication {
 
 除了配置消费端的启动类，我们在 Spring Boot 模式下还可以基于 `CommandLineRunner`去创建
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-33-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-33-image.png)
 
 在 `dubbo-spring-boot-demo-consumer` 模块的 `org.apache.dubbo.springboot.demo.consumer` 下建立 `Task` 类，定义如下：
 
@@ -529,7 +529,7 @@ public class Task implements CommandLineRunner {
 
 截止第 10 步，代码就已经开发完成了，本小节将启动整个项目并进行验证。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-03-59-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-03-59-image.png)
 
 首先是启动 `org.apache.dubbo.samples.provider.Application` ，等待一会出现如下图所示的日志（`Current Spring Boot Application is await`）即代表服务提供者启动完毕，标志着该服务提供者可以对外提供服务了。
 
@@ -539,7 +539,7 @@ public class Task implements CommandLineRunner {
 
 然后是启动`org.apache.dubbo.samples.client.Application` ，等待一会出现如下图所示的日志（`Hello world` ）即代表服务消费端启动完毕并调用到服务端成功获取结果。
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-05-02-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-05-02-image.png)
 
 ```log
 Receive result ======> Hello world

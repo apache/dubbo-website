@@ -8,7 +8,7 @@ description: 本文记录了 OSCHINA 对何鑫铭的采访，原文出处：http
 
 5 月 21 日，经过一年多的孵化，Apache Dubbo 从 Apache 软件基金会毕业，成为 Apache 顶级项目。
 
-![](/imgs/blog/dubbo-go/dubbo-tlp-twitter.jpg)
+![img](/imgs/blog/dubbo-go/dubbo-tlp-twitter.jpg)
 
 
 Dubbo 是阿里于 2011 年开源的一款高性能 RPC 框架，在 Java 生态中具有不小的影响力。当初经历过一段被外界诟病的“停止维护”灰暗时光，后来在 2017 年 Dubbo 浪子回头，官方宣布重新重点维护。
@@ -23,11 +23,11 @@ Dubbo 是阿里于 2011 年开源的一款高性能 RPC 框架，在 Java 生态
 
 然后，Dubbo 毕业了。毕业后的 Dubbo 近期有什么消息呢？生态还在发展，Dubbo 社区在前几日公开了 [Dubbo Roadmap 2019](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201905@beijing/DUBBO%20ROADMAP%202019.pdf)，计划在 2020 年 2 月份发布 Dubbo 3.0 正式版，感兴趣的同学可以详细查阅。
 
-![](/imgs/blog/dubbo-go/dubbo-roadmap-2019.jpg)
+![img](/imgs/blog/dubbo-go/dubbo-roadmap-2019.jpg)
 
 而最近官方又**宣布 Go 语言加入 Dubbo 生态**，发布了 [dubbo-go](https://github.com/dubbo/go-for-apache-dubbo) 项目。
 
-![](/imgs/blog/dubbo-go/dubbo-go-logo.jpg)
+![img](/imgs/blog/dubbo-go/dubbo-go-logo.jpg)
 
 在此之前 Dubbo 的跨语言可扩展性已经有一些实现，支持的语言包括 PHP、Node.js 与 Python，同时也基于标准 Java REST API - JAX-RS 2.0 实现了 REST 的调用支持，具体情况如下：
 

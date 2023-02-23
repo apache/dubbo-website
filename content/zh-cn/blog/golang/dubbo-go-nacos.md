@@ -9,7 +9,7 @@ description: >
 
 近几年，随着Go语言社区逐渐发展和壮大，越来越多的公司开始尝试采用Go搭建微服务体系，也涌现了一批Go的微服务框架，如go-micro、go-kit、Dubbo-go等，跟微服务治理相关的组件也逐渐开始在Go生态发力，如Sentinel、Hystrix等都推出了Go语言版本，而作为微服务框架的核心引擎--注册中心，也是必不可缺少的组件，市面已经有多款注册中心支持Go语言，应该如何选择呢？我们可以对目前主流的支持Go语言的注册中心做个对比。
 
-![](/imgs/blog/dubbo-go/nacos/p1.png)
+![img](/imgs/blog/dubbo-go/nacos/p1.png)
 
 根据上表的对比我们可以从以下几个维度得出结论：
 
@@ -28,22 +28,22 @@ Dubbo-go目前是Dubbo多语言生态中最火热的一个项目，从2016年发
 
 从架构中，我们可以看到，与接口级别的服务注册发现不同的是，Dubbo-go的provider启动后会调用Nacos-go-sdk的RegisterInstance接口向Nacos注册服务实例，注册的服务名即为应用名称，而不是接口名称。Conusmer启动后则会调用Subscribe接口订阅该应用的服务实例变化，并对的实例发起服务调用。
 
-![](/imgs/blog/dubbo-go/nacos/p2.png)
+![img](/imgs/blog/dubbo-go/nacos/p2.png)
 
 ## 服务模型
 
 图3是我们Dubbo-go的应用维度服务发现模型，主要有服务和实例两个层级关系，服务实例的属性主要包含实例Id、主机地址、服务端口、激活状态和元数据。图4为Nacos的服务分级存储模型，包含服务、集群和实例三个层次。两者对比，多了一个集群维度的层级，而且实例属性信息能够完全匹配。所以在Dubbo-go将应用服务实例注册到Nacos时，我们只需要将集群设置为默认集群，再填充服务和实例的相关属性，即可完成服务模型上的匹配。此外Nacos可以将服务注册到不同的Namespace下，实现多租户的隔离。 
 
-![](/imgs/blog/dubbo-go/nacos/p3.png)
+![img](/imgs/blog/dubbo-go/nacos/p3.png)
 
 !
-![](/imgs/blog/dubbo-go/nacos/p4.png)
+![img](/imgs/blog/dubbo-go/nacos/p4.png)
 
 ## 服务实例心跳维持
 
 Dubbo-go的Provider在向Nacos注册应用服务实例信息后，需要主动上报心跳，让Nacos服务端感知实例的存活与否，以判断是否将该节点从实例列表中移除。维护心跳的工作是在Nacos-SDK-go完成的，从图5代码中可以看到，当Dubbo-go调用RegisterInstance注册一个服务实例时，SDK除了调用Nacos的Register API之外，还会调用AddBeatInfo，将服务实例信息添加到本地缓存，通过后台协程定期向Nacos发送服务实例信息，保持心跳。当服务下线时，可以通过调用DeRegisterInstance执行反注册，并移除本地的心跳保持任务，Nacos实例列表中也会将该实例移除。
 
-![](/imgs/blog/dubbo-go/nacos/p5.png)
+![img](/imgs/blog/dubbo-go/nacos/p5.png)
 
 # 订阅服务实例变化
 
@@ -53,7 +53,7 @@ Dubbo-go的Consumer在启动的时候会调用Nacos-SDK-go的Subscribe接口，�
 
 - Nacos-SDK-go定期查询，SDK会对订阅的服务实例定时调用查询接口，如果查询有变化则通过回调接口通知Dubbo-go。作为兜底策略保证Nacos服务端推送失败后，仍能感知到变化。
 
-![](/imgs/blog/dubbo-go/nacos/p6.png)
+![img](/imgs/blog/dubbo-go/nacos/p6.png)
 
 此外Nacos-SDK-go还支持推空保护，当Nacos推送的实例列表为空时，不更新本地缓存，也不通知Dubbo-go变更，避免Consumer无可用实例调用，造成故障。同时，SDK还支持服务实例信息本地持久化存储，可以保证在Nacos服务故障过程中，Consumer重启也能获取到可用实例，具备容灾效果。
 
@@ -63,7 +63,7 @@ Dubbo-go的Consumer在启动的时候会调用Nacos-SDK-go的Subscribe接口，�
 
 dubbo-go samples代码下载：https://github.com/apache/dubbo-go-samples/tree/master，基于Nacos注册中心的应用级服务发现的hello world代码目录在 registry/servicediscovery/nacos。
 
-![](/imgs/blog/dubbo-go/nacos/p7.png)
+![img](/imgs/blog/dubbo-go/nacos/p7.png)
 
 Nacos服务端搭建，参考官方文档：https://nacos.io/zh-cn/docs/quick-start.html，或者使用官方提供的公共Nacos服务：http://console.nacos.io/nacos(账号密码:nacos，仅供测试)，或者购买阿里云服务：https://help.aliyun.com/document_detail/139460.html?spm=a2c4g.11186623.6.559.d7e264b7bLpZIs
 
@@ -97,7 +97,7 @@ export APP_LOG_CONF_FILE=server端的log.yml文件路径
 
 看到，应用user-info-server已经注册成功。
 
-![](/imgs/blog/dubbo-go/nacos/p8.png)
+![img](/imgs/blog/dubbo-go/nacos/p8.png)
 
 ## Client端搭建
 
@@ -112,6 +112,6 @@ export APP_LOG_CONF_FILE=client端的log.yml文件路径
 
 进入registry/servicediscovery/nacos/go-client/app，运行client.go的main方法，看到如下日志输出，表示调用server端成功。
 
-![](/imgs/blog/dubbo-go/nacos/p9.png)
+![img](/imgs/blog/dubbo-go/nacos/p9.png)
 
 > 作者：李志鹏 Github账号：Lzp0412，Nacos-SDK-go作者，Apache/Dubbo-go Contributor。现就职于阿里云云原生应用平台，主要参与服务发现、CoreDNS、ServiceMesh相关工作，负责推动Nacos Go微服务生态建设。

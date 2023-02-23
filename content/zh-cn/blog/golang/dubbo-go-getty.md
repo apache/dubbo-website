@@ -24,7 +24,7 @@ session），至2016年8月份（又添加了websocket）其与原始实现已�
 
 UDP自身分为unconnected UDP和connected UDP两种，connected UDP的底层原理见下图。
 
-![](/imgs/blog/dubbo-go/connected_udp_socket.gif)
+![img](/imgs/blog/dubbo-go/connected_udp_socket.gif)
 
 当一端的UDP endpoint调用connect之后，os就会在内部的routing table上把udp socket和另一个endpoint的地址关联起来，在发起connect的udp
 endpoint端建立起一个单向的连接四元组：发出的datagram packet只能发往这个endpoint（不管sendto的时候是否指定了地址）且只能接收这个endpoint发来的udp datagram
@@ -37,7 +37,7 @@ unreachable” 错误。
 
 如果一个POSIX系统的进程发起UDP write时没有指定peer UDP address，则会收到ENOTCONN错误，而非EDESTADDRREQ。
 
-![](/imgs/blog/dubbo-go/dns_udp.gif)
+![img](/imgs/blog/dubbo-go/dns_udp.gif)
 
 一般发起connect的为 UDP client，典型的场景是DNS系统，DNS client根据/etc/resolv.conf里面指定的DNS server进行connect动作。
 

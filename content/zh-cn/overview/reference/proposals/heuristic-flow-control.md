@@ -30,7 +30,7 @@ Power of Two Choice算法简单但是经典，主要思路如下：
 [代码的github地址](https://github.com/apache/dubbo/pull/10745)
 #### 相关指标
 1.cpuLoad
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/26808016bc7f1ee83ab425e308074f17.svg#card=math&code=cpuLoad%20%3D%20cpu%E4%B8%80%E5%88%86%E9%92%9F%E5%B9%B3%E5%9D%87%E8%B4%9F%E8%BD%BD%20%2A%20100%20%2F%20%E5%8F%AF%E7%94%A8cpu%E6%95%B0%E9%87%8F&id=DLuwW)。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/26808016bc7f1ee83ab425e308074f17.svg#card=math&code=cpuLoad%20%3D%20cpu%E4%B8%80%E5%88%86%E9%92%9F%E5%B9%B3%E5%9D%87%E8%B4%9F%E8%BD%BD%20%2A%20100%20%2F%20%E5%8F%AF%E7%94%A8cpu%E6%95%B0%E9%87%8F&id=DLuwW)。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。
 2.rt
 rt为一次rpc调用所用的时间，单位为毫秒。
 3.timeout
@@ -42,20 +42,20 @@ provider端在计算cpuLoad时的时间，单位是毫秒
 6.currentTime
 currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。
 7.multiple
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/b60f036bd026b92129df8a6476922cc8.svg#card=math&code=multiple%3D%28%E5%BD%93%E5%89%8D%E6%97%B6%E9%97%B4%20-%20currentTime%29%2Ftimeout%20%2B%201&id=VpE3k)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/b60f036bd026b92129df8a6476922cc8.svg#card=math&code=multiple%3D%28%E5%BD%93%E5%89%8D%E6%97%B6%E9%97%B4%20-%20currentTime%29%2Ftimeout%20%2B%201&id=VpE3k)
 8.lastLatency
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/f2abbc771049cf4f3e492e93a258d699.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cend%7Balign%2A%7D%0A%0A&id=ynJBf)![](https://intranetproxy.alipay.com/skylark/lark/__latex/8fb1af970b995232ebed2764a5706aab.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AlastLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%202%2Atimeout%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20currentTime%3D%3DcurrentProviderTime%5C%5C%0A%20%0A%20%20%20%20lastLatency%20%3E%3E%20multiple%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=xAu3F)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/f2abbc771049cf4f3e492e93a258d699.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cend%7Balign%2A%7D%0A%0A&id=ynJBf)![img](https://intranetproxy.alipay.com/skylark/lark/__latex/8fb1af970b995232ebed2764a5706aab.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AlastLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%202%2Atimeout%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20currentTime%3D%3DcurrentProviderTime%5C%5C%0A%20%0A%20%20%20%20lastLatency%20%3E%3E%20multiple%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=xAu3F)
 9.beta
 平滑参数，默认为0.5
 10.ewma
-lastLatency的平滑值![](https://intranetproxy.alipay.com/skylark/lark/__latex/c26fdbae56f3a06c46434ae91185a3d6.svg#card=math&code=lastLatency%3Dbeta%20%2A%20lastLatency%20%2B%20%281%20-%20beta%29%20%2A%20lastLatency&id=absgN)
+lastLatency的平滑值![img](https://intranetproxy.alipay.com/skylark/lark/__latex/c26fdbae56f3a06c46434ae91185a3d6.svg#card=math&code=lastLatency%3Dbeta%20%2A%20lastLatency%20%2B%20%281%20-%20beta%29%20%2A%20lastLatency&id=absgN)
 11.inflight
 inflight为consumer端还未返回的请求的数量。
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/f429c4726dec484e70ee73e6a37c88dd.svg#card=math&code=inflight%3DconsumerReq%20-%20consumerSuccess%20-%20errorReq&id=UZIcf)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/f429c4726dec484e70ee73e6a37c88dd.svg#card=math&code=inflight%3DconsumerReq%20-%20consumerSuccess%20-%20errorReq&id=UZIcf)
 12.load
 对于备选后端机器x来说，若距离上次被调用的时间大于2*timeout，则其load值为0。
 否则
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/0f56746b3643dc3ed0e019c24ad5f377.svg#card=math&code=load%20%3D%20CpuLoad%20%2A%20%28sqrt%28ewma%29%20%2B%201%29%20%2A%20%28inflight%20%2B%201%29%2F%28%28%28consumerSuccess%20%2F%20%28consumerReq%20%2B1%29%20%29%20%2A%20weight%29%2B1%29&id=TCYWX)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/0f56746b3643dc3ed0e019c24ad5f377.svg#card=math&code=load%20%3D%20CpuLoad%20%2A%20%28sqrt%28ewma%29%20%2B%201%29%20%2A%20%28inflight%20%2B%201%29%2F%28%28%28consumerSuccess%20%2F%20%28consumerReq%20%2B1%29%20%29%20%2A%20weight%29%2B1%29&id=TCYWX)
 #### 算法实现
 依然是基于P2C算法。
 1.从备选列表中做两次随机选择，得到providerA和providerB
@@ -94,7 +94,7 @@ noLoadLatency是单纯处理任务的延时，不包括排队时间。这是服�
 一个时间窗口周期内的Latency的平均值，单位为毫秒。
 6.maxConcurrency
 计算得到的当前服务提供端的最大并发值。
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/f40e48ebdb49648cf942714609808c52.svg#card=math&code=maxConcurrency%3Dceil%28maxQPS%20%2A%20%28%282%20%2B%20alpha%29%20%2A%20noLoadLatency%20-%20avgLatency%29%29&id=xO1h8)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/f40e48ebdb49648cf942714609808c52.svg#card=math&code=maxConcurrency%3Dceil%28maxQPS%20%2A%20%28%282%20%2B%20alpha%29%20%2A%20noLoadLatency%20-%20avgLatency%29%29&id=xO1h8)
 #### 算法实现
 当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从HeuristicSmoothingFlowControl算法中获得当前的maxConcurrency值。如果当前正在处理的请求数量超过了maxConcurrency，则拒绝该请求。
 
@@ -121,17 +121,17 @@ exploreRatio=max(MinExploreRatio,exploreRatio-0.02)
 
 8.maxQPS
 窗口周期内QPS的最大值。
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/d5cf045bc17267befc176f3d76273267.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AmaxQPS%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20qps%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20qps%20%3E%20maxQPS%5C%5C%0A%20%0A%20%20%20%20qps%2AemaFactor%20%2B%20maxQPS%2A%281-emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=VbdUd)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/d5cf045bc17267befc176f3d76273267.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AmaxQPS%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20qps%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20qps%20%3E%20maxQPS%5C%5C%0A%20%0A%20%20%20%20qps%2AemaFactor%20%2B%20maxQPS%2A%281-emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=VbdUd)
 9.noLoadLatency
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/8c700211f5c7a13403e3088df9cd9f43.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AnoLoadLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20avgLatency%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20noLoadLatency%20%3C%3D%200%5C%5C%0A%20%0A%20%20%20%20avgLatency%2AemaFactor%20%2B%20noLoadLatency%2A%281%20-%20emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=hB7ED)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/8c700211f5c7a13403e3088df9cd9f43.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AnoLoadLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20avgLatency%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20noLoadLatency%20%3C%3D%200%5C%5C%0A%20%0A%20%20%20%20avgLatency%2AemaFactor%20%2B%20noLoadLatency%2A%281%20-%20emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=hB7ED)
 10.halfSampleIntervalMs
 半采样区间。默认为25000毫秒。
 11.resetLatencyUs
 下一次重置所有值的时间戳，这里的重置包括窗口内值和noLoadLatency。单位是微秒。初始为0.
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/1af4a6134ede96985302ee8a27f93df7.svg#card=math&code=resetLatencyUs%3DsamplingTimeUs%2B2%2AavgLatency%2C%0Aif%28remeasureStartUs%3C%3DsamplingTimeUs%29&id=vJHLa)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/1af4a6134ede96985302ee8a27f93df7.svg#card=math&code=resetLatencyUs%3DsamplingTimeUs%2B2%2AavgLatency%2C%0Aif%28remeasureStartUs%3C%3DsamplingTimeUs%29&id=vJHLa)
 12.remeasureStartUs
 下一次重置窗口的开始时间。
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/c7da904b9a4c890456499b09d01938d3.svg#card=math&code=remeasureStartUs%3DsamplingTimeUs%2B%28halfSampleIntervalMS%20%2B%20%E9%9A%8F%E6%9C%BA%E5%80%BC%29%2A1000&id=ket08)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/c7da904b9a4c890456499b09d01938d3.svg#card=math&code=remeasureStartUs%3DsamplingTimeUs%2B%28halfSampleIntervalMS%20%2B%20%E9%9A%8F%E6%9C%BA%E5%80%BC%29%2A1000&id=ket08)
 13.startSampleTimeUs
 开始采样的时间。单位为微秒。
 14.sampleCount
@@ -146,15 +146,15 @@ exploreRatio=max(MinExploreRatio,exploreRatio-0.02)
 当前请求的latency。
 19.qps
 在该时间窗口内的qps值。
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/c0e8b30fc1ecf9438bc2d574fb3da8b6.svg#card=math&code=qps%3DtotalReqCount%2A1000000%2F%28samplingTimeUs%20-%20startSampleTimeUs%29&id=tzGm6)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/c0e8b30fc1ecf9438bc2d574fb3da8b6.svg#card=math&code=qps%3DtotalReqCount%2A1000000%2F%28samplingTimeUs%20-%20startSampleTimeUs%29&id=tzGm6)
 20.avgLatency
 窗口内的平均latency。
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/3a3acfdb05be7d3985835d43e492d3b9.svg#card=math&code=avgLatency%3DtotalSampleUs%20%2F%20sampleCount&id=gTnsb)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/3a3acfdb05be7d3985835d43e492d3b9.svg#card=math&code=avgLatency%3DtotalSampleUs%20%2F%20sampleCount&id=gTnsb)
 21.maxConcurrency
 上一个窗口计算得到当前周期的最大并发值。
 22.nextMaxConcurrency
 当前窗口计算出的下一个周期的最大并发值。
-![](https://intranetproxy.alipay.com/skylark/lark/__latex/09852cc0ef125b43a37719796cb8baae.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AnextMaxConcurrency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20ceil%28maxQPS%2AnoLoadLatency%2A0.9%2F1000000%29%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20remeasureStartUs%20%3C%3D%20samplingTimeUs%5C%5C%0A%20%0A%20%20%20%20ceil%28noLoadLatency%2AmaxQPS%2A%281%2BexploreRatio%29%2F1000000%29%2C%20%20%20%20%20%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=kLKle)
+![img](https://intranetproxy.alipay.com/skylark/lark/__latex/09852cc0ef125b43a37719796cb8baae.svg#card=math&code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AnextMaxConcurrency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20ceil%28maxQPS%2AnoLoadLatency%2A0.9%2F1000000%29%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20remeasureStartUs%20%3C%3D%20samplingTimeUs%5C%5C%0A%20%0A%20%20%20%20ceil%28noLoadLatency%2AmaxQPS%2A%281%2BexploreRatio%29%2F1000000%29%2C%20%20%20%20%20%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&id=kLKle)
 #### Little's Law
 当服务处于稳定状态时：concurrency=latency*qps。这是自适应限流理论的基础。
 当请求没有导致机器超载时，latency基本稳定，qps和concurrency处于线性关系。

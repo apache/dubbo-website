@@ -14,7 +14,7 @@ description: "部署 Dubbo 应用到 Kubernetes + Docker 示例"
 
 ## 基本流程与工作原理
 
-![](/imgs/v3/tasks/deploy/dubbo-k8s-docker.jpg)
+![img](/imgs/v3/tasks/deploy/dubbo-k8s-docker.jpg)
 
 ## 详细步骤
 
@@ -77,10 +77,10 @@ kubectl --namespace dubbo-demo port-forward service/dubbo-admin 38080:38080
 ```
 
 登录页面
-![](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
+![img](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
 
 服务查询
-![](/imgs/v3/tasks/deploy/dubbo-admin-page.jpg)
+![img](/imgs/v3/tasks/deploy/dubbo-admin-page.jpg)
 
 ### dubbo
 
@@ -239,5 +239,5 @@ kubectl create -f consumer.yaml
 ```
 
 查看服务
-![](/imgs/v3/tasks/deploy/consumer-provider.jpg)
+![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
 

@@ -78,11 +78,11 @@ BenchmarkDecode-8 64914    19595 ns/op    7448 B/op 224 allocs/op
 
 pprof 工具的用法可以参考官网文档。本文测试时直接使用了 Goland 内置 `CPU Profiler` 的测试工具：测试函数左边的 `Run xx with 'CPU Profiler'`。
 
-![](/imgs/blog/dubbo-go/hessian/p2.png)
+![img](/imgs/blog/dubbo-go/hessian/p2.png)
 
 测试跑完后， Goland 直接显示火焰图如下：
 
-![](/imgs/blog/dubbo-go/hessian/p3.png)
+![img](/imgs/blog/dubbo-go/hessian/p3.png)
 
 从这个图里可以看到，测试代码大概占用了左边的70%，右边30%是运行时的一些消耗，运行时部分一般包括 gc、schedule 两大块，一般不能直接优化。图上左边可以清晰地看到 `encObject` 里 `RegisterPOJO` 和 `Encode` 各占了小一半。
 
@@ -106,7 +106,7 @@ BenchmarkEncode-8 197593   5601 ns/op   1771 B/op   51 allocs/op
 
 非常惊讶地看到，吞吐量大概是原来的 200%。与上面的火焰图对比，可以粗略的计算，`RegiserPOJO` 大概占了整体的30%，改进后应该也只有原来的 `1 / 0.7 * 100% = 140%` 才对。答案也可以在火焰图里找到：
 
-![](/imgs/blog/dubbo-go/hessian/p4.png)
+![img](/imgs/blog/dubbo-go/hessian/p4.png)
 
 除了 `RegisterPOJO` 被干掉以外，与上图对比，还有哪些区别呢？可以看到，原来占用将近 20% 的 `GC` 也几乎看不到了。所以真实的 CPU 利用率也要加上这部分的增长，大约 `1 / 0.5 * 100% = 200%`。
 
@@ -118,15 +118,15 @@ BenchmarkEncode-8 197593   5601 ns/op   1771 B/op   51 allocs/op
 
 看完了 `Encode` ，再来看看 `Decode` ，方法类似，直接看 Goland 生成的火焰图：
 
-![](/imgs/blog/dubbo-go/hessian/p5.png)
+![img](/imgs/blog/dubbo-go/hessian/p5.png)
 
 这个图有点迷惑性，好像也被分成差不多的小格子了。可以点开 `decObject` 这一层：
 
-![](/imgs/blog/dubbo-go/hessian/p6.png)
+![img](/imgs/blog/dubbo-go/hessian/p6.png)
 
 这个时候原来小的 `...` 会显示具体内容，需要注意的是里面有两个 `findField` ，在复杂的调用里经常会遇到这种情况：一个耗资源的函数被分到了许多函数里，导致在看火焰图时并不能直观地看到它就是瓶颈。比较常见的有序列化、日志、网络请求等每个模块都会干一点却又没有一个全局的函数只干他一件事。这个时候除了肉眼去找以外也可以借助于另外一个工具：
 
-![](/imgs/blog/dubbo-go/hessian/p7.png)
+![img](/imgs/blog/dubbo-go/hessian/p7.png)
 
 在这个 `Method List` 里可以明显看到 `findField` 已经被合并到一起了，总占用接近 CPU 的一半，看到这里你大概就知道它应该是个优化点了。
 
@@ -155,7 +155,7 @@ func findField(name string, typ reflect.Type) (indexes []int, err error) {
 
 可以看到，结果并不如预期的那样提升一倍效果。这个代码乍看起来，好像除了有一些啰嗦的断言，好像也没别的东西了，为什么只有60%的提升呢，我们还是借助下工具
 
-![](/imgs/blog/dubbo-go/hessian/p8.png)
+![img](/imgs/blog/dubbo-go/hessian/p8.png)
 
 可以看到：读缓存耗费了 7% 的资源。其中，`sync.(*Map)` 不便优化，但 `newobejct` 是哪里来的呢？代码里可以看到，唯一定义新对象的地方就是函数第一行的 `&sync.Map` ，我抱着试一试的心态把 `LoadOrStore` 拆成了两步
 

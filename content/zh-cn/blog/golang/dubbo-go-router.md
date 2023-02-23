@@ -34,7 +34,7 @@ description: >
 
 有些读者可能会有点困惑，我连架构图都不知道，如何考虑在哪个阶段？不怕，下图马上给你解惑。
 
-![](/imgs/blog/dubbo-go/dubbo-go-arch-2.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-arch-2.png)
 
 可以看到图中的 Router 就是路由规则插入的位置，目前路由规则主要用于控制 Consumer 到 Provider 之间的网络流量的路由路径。
 
@@ -124,7 +124,7 @@ type RouterFactory interface {
 
 ## 实现
 
-![](/imgs/blog/dubbo-go/router/router-design.png)
+![img](/imgs/blog/dubbo-go/router/router-design.png)
 
 实现路由规则以兼容 dubbo 为首要目标，降低使用者的学习成本为辅助目标。与配置中心模块相结合，实现路由规则远程统一管理与下发。
 
@@ -275,9 +275,9 @@ _ "github.com/apache/dubbo-go/config_center/zookeeper"
 
 目前仅支持 zookeeper 配置中心，与 dubbo-admin 结合即可使用。配置方式如下：
 
-![](/imgs/blog/dubbo-go/router/dubbo-admin-1.png)
+![img](/imgs/blog/dubbo-go/router/dubbo-admin-1.png)
 
-![](/imgs/blog/dubbo-go/router/dubbo-admin-2.png)
+![img](/imgs/blog/dubbo-go/router/dubbo-admin-2.png)
 
 ## 总结
 

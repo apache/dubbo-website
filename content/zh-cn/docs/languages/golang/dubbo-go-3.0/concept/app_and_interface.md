@@ -15,7 +15,7 @@ Dubbo-go 服务层级为两个级别：分别是应用级别(App Level)和接口
 
 如下图所示，可以看到，应用级别的组件以浅红色标注，接建立如下文件目录口级别的组件以浅蓝色标注：
 
-![](/imgs/golang/3.0/dubbogo-concept.png)
+![img](/imgs/golang/3.0/dubbogo-concept.png)
 
 ## 1. 应用级别组件
 

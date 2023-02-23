@@ -20,7 +20,7 @@ server 端
 
 在 Go 里面，server 端的用法是：
 
-![](/imgs/blog/dubbo-go/grpc/p1.webp)
+![img](/imgs/blog/dubbo-go/grpc/p1.webp)
 
 它的关键部分是：s := grpc.NewServer()和pb.RegisterGreeterServer(s, &server{})两个步骤。第一个步骤很容易，唯独第二个步骤RegisterGreeterServer有点麻烦。为什么呢？
 
@@ -28,7 +28,7 @@ server 端
 
 好在，这个编译出来的方法，本质上是：
 
-![](/imgs/blog/dubbo-go/grpc/p2.webp)
+![img](/imgs/blog/dubbo-go/grpc/p2.webp)
 
 也就是说，如果我们在 dubbo-go 里面拿到这个 _Greeter_serviceDesc ，就可以实现这个 server 的注册。因此，可以看到，在 dubbo-go 里面，要解决的一个关键问题就是如何拿到这个 serviceDesc 。
 
@@ -36,7 +36,7 @@ server 端
 
 Client 端的用法是：
 
-![](/imgs/blog/dubbo-go/grpc/p3.webp)
+![img](/imgs/blog/dubbo-go/grpc/p3.webp)
 
 这个东西要复杂一点：1、创建连接：conn, err := grpc.Dial(address)2、创建client：c := pb.NewGreeterClient(conn)3、调用方法：r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
 
@@ -46,7 +46,7 @@ Client 端的用法是：
 
 而第三个问题，乍一看是用反射就能解决，但是我们打开 SayHello 就能看到：
 
-![](/imgs/blog/dubbo-go/grpc/p4.webp)
+![img](/imgs/blog/dubbo-go/grpc/p4.webp)
 
 结合 greetClient 的定义，很容易看到，我们的关键就在于 err := c.cc.Invoke ( ctx, "/helloworld.Greeter/SayHello", in, out, opts... )。换言之，我们只需要创建出来连接，并且拿到方法、参数就能通过类似的调用来模拟出 c.SayHello 。
 
@@ -56,7 +56,7 @@ Client 端的用法是：
 
 我们先来看一下 dubbo-go 的整体设计，思考一下，如果我们要做 gRPC 的适配，应该是在哪个层次上做适配。
 
-![](/imgs/blog/dubbo-go/grpc/p5.webp)
+![img](/imgs/blog/dubbo-go/grpc/p5.webp)
 
 我们根据前面介绍的 gRPC 的相关特性可以看出来，gRPC 已经解决了 codec 和 transport 两层的问题。
 
@@ -64,19 +64,19 @@ Client 端的用法是：
 
 这个 gRPC protocol 大体上相当于一个适配器，将底层的 gRPC 的实现和我们自身的 dubbo-go 连接在一起。
 
-![](/imgs/blog/dubbo-go/grpc/p6.webp)
+![img](/imgs/blog/dubbo-go/grpc/p6.webp)
 
 ## 实现
 
 在 dubbo-go 里面，和 gRPC 相关的主要是：
 
-![](/imgs/blog/dubbo-go/grpc/p7.webp)
+![img](/imgs/blog/dubbo-go/grpc/p7.webp)
 
 我们直接进去看看在 gRPC 小节里面提到的要点是如何实现的。
 
 ### server端
 
-![](/imgs/blog/dubbo-go/grpc/p8.webp)
+![img](/imgs/blog/dubbo-go/grpc/p8.webp)
 
 这样看起来，还是很清晰的。如同 dubbo- go 其它的 protocol 一样，先拿到 service ，而后通过 service 来拿到 serviceDesc ，完成服务的注册。
 
@@ -84,7 +84,7 @@ Client 端的用法是：
 
 为什么我说这个地方有点奇怪呢？是因为理论上来说，我们这里注册的这个 service 实际上就是 protobuf 编译之后生成的 gRPC 服务端的那个 service ——很显然，单纯的编译一个 protobuf 接口，它肯定不会实现 DubboGrpcService 接口：
 
-![](/imgs/blog/dubbo-go/grpc/p9.webp)
+![img](/imgs/blog/dubbo-go/grpc/p9.webp)
 
 那么 ds, ok := service.(DubboGrpcService) 这一句，究竟怎么才能让它能够执行成功呢？
 
@@ -94,7 +94,7 @@ Client 端的用法是：
 
 dubbo-go 设计了自身的 Client ，作为对 gRPC 里面 Client 的一种模拟与封装：
 
-![](/imgs/blog/dubbo-go/grpc/p10.webp)
+![img](/imgs/blog/dubbo-go/grpc/p10.webp)
 
 注意看，这个 Client 的定义与前面 greetClient 的定义及其相似。再看下面的 NewClient 方法，里面也无非就是创建了连接 conn ，而后利用 conn 里创建了一个 Client 实例。
 
@@ -102,7 +102,7 @@ dubbo-go 设计了自身的 Client ，作为对 gRPC 里面 Client 的一种模�
 
 当真正发起调用的时候：
 
-![](/imgs/blog/dubbo-go/grpc/p11.webp)
+![img](/imgs/blog/dubbo-go/grpc/p11.webp)
 
 红色框框框住的就是关键步骤。利用反射从 invoker ——也就是 stub ——里面拿到调用的方法，而后通过反射调用。
 
@@ -118,14 +118,14 @@ dubbo-go 设计了自身的 Client ，作为对 gRPC 里面 Client 的一种模�
 
 所以我们只需要注册一个我们自己的插件：
 
-![](/imgs/blog/dubbo-go/grpc/p12.webp)
+![img](/imgs/blog/dubbo-go/grpc/p12.webp)
 
 然后这个插件会把我们所需要的代码给嵌入进去。比如说嵌入GetDubboStub方法：
 
-![](/imgs/blog/dubbo-go/grpc/p13.webp)
+![img](/imgs/blog/dubbo-go/grpc/p13.webp)
 
 还有DubboGrpcService接口：
 
-![](/imgs/blog/dubbo-go/grpc/p14.webp)
+![img](/imgs/blog/dubbo-go/grpc/p14.webp)
 
 这个东西，属于难者不会会者不难。就是如果你不知道可以通过plugin的形式来修改生成的代码，那就是真难；但是如果知道了，这个东西就很简单了——无非就是水磨工夫罢了。

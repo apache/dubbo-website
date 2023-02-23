@@ -10,7 +10,7 @@ description: "Understand dubbo3 service authentication"
 
 Security-sensitive businesses like payments may have a need to limit anonymous calls. In terms of security enhancement, 2.7.5 introduces the authentication and authentication mechanism based on the AK/SK mechanism, and introduces the authentication service center. The main principle is that when the consumer requests a service that requires authentication, it will pass SK, request Data, timestamps, parameters and other information to generate the corresponding request signature, which is carried to the peer end through Dubbo's Attahcment mechanism for signature verification, and business logic processing is performed only after the signature verification is passed. As shown below:
 
-![](/imgs/docsv2.7/user/examples/auth/auth.png)
+![img](/imgs/docsv2.7/user/examples/auth/auth.png)
 
 
 ## scenes to be used

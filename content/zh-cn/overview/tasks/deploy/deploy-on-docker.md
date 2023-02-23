@@ -14,7 +14,7 @@ description: "部署 Dubbo 应用到 Docker 示例"
 
 ## 基本流程与工作原理
 
-![](/imgs/v3/tasks/deploy/docker.jpg)
+![img](/imgs/v3/tasks/deploy/docker.jpg)
 
 ## 详细步骤
 
@@ -88,10 +88,10 @@ http://<IP>:38080
 ```
 
 登录页面
-![](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
+![img](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
 
 服务查询
-![](/imgs/v3/tasks/deploy/dubbo-admin-page.jpg)
+![img](/imgs/v3/tasks/deploy/dubbo-admin-page.jpg)
 
 ### dubbo
 
@@ -214,5 +214,5 @@ docker run --name consumer -d dubbo-springboot-consumer:alpine
 ```
 
 查看服务
-![](/imgs/v3/tasks/deploy/consumer-provider.jpg)
+![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
 

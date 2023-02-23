@@ -25,11 +25,11 @@ dubbogo 的天然使命是：Bridging the gap between Java and Go。保持 Go �
 
 gRPC 协议，简单来说就是 http2 协议的基础之上，增加了特定的协议 header：“grpc-” 开头的 header 字段，采用特定的打解包工具（protobuf）对数据进行序列化，从而实现 RPC 调用。
 
-![](/imgs/blog/dubbo-go/3.0-plan/p1.webp)
+![img](/imgs/blog/dubbo-go/3.0-plan/p1.webp)
 
 众所周知，gRPC 几乎没有服务治理能力，而阿里云现有 dubbo 框架兼具 RPC 和服务治理能力，整体实力不逊于 gRPC。但在“大家都用 gRPC” 这样的背景之下，dubbogo 3.0 的新通信协议就必须**完美兼容 gRPC**，对开发者已部署的服务完全兼容，并在此基础之上延续已有 dubbo 协议和服务治理能力，进而推出一系列新策略：比如 mesh 支持、应用级服务注册等。
 
-![](/imgs/blog/dubbo-go/3.0-plan/p2.webp)
+![img](/imgs/blog/dubbo-go/3.0-plan/p2.webp)
 
 ## dubbogo 3.0 vs dubbogo 1.5
 
@@ -68,7 +68,7 @@ gRPC 一次基于 HTTP2 的 unary rpc 调用传输主要流程如下：
 
 其中包含 gRPC 调用信息的 HTTP2 Header 帧如下图：
 
-![](/imgs/blog/dubbo-go/3.0-plan/p3.webp)
+![img](/imgs/blog/dubbo-go/3.0-plan/p3.webp)
 
 另外，在 gRPC 的 stream 调用中，可在 server 端回传的过程中发送多次 Data，调用结束后再发送 Header 终止 RPC 过程，并汇报状态信息。
 
@@ -80,7 +80,7 @@ dubbogo 3.0 的通信层将在 HTTP2 通信协议之上采用同样的通信流�
 
 目前设计的 dubbogo 3.0 传输模型如下：
 
-![](/imgs/blog/dubbo-go/3.0-plan/p4.webp)
+![img](/imgs/blog/dubbo-go/3.0-plan/p4.webp)
 
 - 为保证同时支持 unary RPC 和 stream RPC，在 server 端和 client 端增加数据流结构，以异步调用的形式完成数据传递；
 - 继续支持原有的 TCP 通信能力；
@@ -114,7 +114,7 @@ dubbogo 3.0 使用的新一代服务注册发现体系，将摒弃旧版的“�
 
 为了使整个开发流程对老的 dubbo-go 用户更透明，同时避免指定 provider 对可扩展性带来的影响），我们设计了一套 RPC服务到应用名的映射关系，以尝试在 consumer 自动完成 RPC 服务到 provider 应用名的转换。
 
-![](/imgs/blog/dubbo-go/3.0-plan/p5.webp)
+![img](/imgs/blog/dubbo-go/3.0-plan/p5.webp)
 
 这套设计可以让 dubbogo 3.0 中同时保持对 dubbo v2.6.x、dubbo v2.7.x 和 dubbo v3.0.x 三个大版的互联互通。
 
@@ -124,11 +124,11 @@ dubbogo 3.0 使用的新一代服务注册发现体系，将摒弃旧版的“�
 
 #### 1. 路由链
 
-![](/imgs/blog/dubbo-go/3.0-plan/p6.webp)
+![img](/imgs/blog/dubbo-go/3.0-plan/p6.webp)
 
 可以把路由链的逻辑简单理解为 target = rn(...r3(r2(r1(src))))。对于每一个 router 内部的逻辑，可以抽象为输入地址 addrs-in 与 router 中按全量地址 addrs-all 实现切分好的 n 个**互不相交**的地址池 addrs-pool-1 ... addrs-pool-n 按实现定义好的规则取交集作为输出地址。以此类推，完成整个路由链的计算。
 
-![](/imgs/blog/dubbo-go/3.0-plan/p7.webp)
+![img](/imgs/blog/dubbo-go/3.0-plan/p7.webp)
 
 #### 2. failover
 

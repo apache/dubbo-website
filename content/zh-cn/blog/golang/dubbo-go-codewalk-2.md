@@ -102,7 +102,7 @@ func Load() {
 
 在loadConsumerConfig函数中，进行了三步操作：
 
-![](/imgs/blog/dubbo-go/code2/p1.png)
+![img](/imgs/blog/dubbo-go/code2/p1.png)
 
 1. 检查配置文件并将配置写入内存
 2. **在for循环内部**，依次引用（refer）并且实例化（implement）每个被调reference。
@@ -118,7 +118,7 @@ func Load() {
 
 图（一）
 
-![](/imgs/blog/dubbo-go/code2/p2.png)
+![img](/imgs/blog/dubbo-go/code2/p2.png)
 
 ##### 2.2.1 构造注册url
 
@@ -173,7 +173,7 @@ func (c *ReferenceConfig) Refer(_ interface{}) {
 
 这个函数中，已经处理完从Register配置到RegisterURL的转换,即图（一）中部分：
 
-![](/imgs/blog/dubbo-go/code2/p3.png)
+![img](/imgs/blog/dubbo-go/code2/p3.png)
 
 接下来，已经拿到的url将被传递给RegistryProtocol，进一步refer。
 
@@ -240,7 +240,7 @@ func (proto *registryProtocol) Refer(url common.URL) protocol.Invoker {
 
 ##### 2.2.3 构造directory（包含较复杂的异步操作）
 
-![](/imgs/blog/dubbo-go/code2/p4.png)
+![img](/imgs/blog/dubbo-go/code2/p4.png)
 
 图（二）
 
@@ -304,7 +304,7 @@ func (dir *RegistryDirectory) subscribe(url *common.URL) {
 
 完成了图（一）中的部分：
 
-![](/imgs/blog/dubbo-go/code2/p5.png)
+![img](/imgs/blog/dubbo-go/code2/p5.png)
 
 ##### 2.2.4 构造带有集群策略的clusterinvoker
 
@@ -396,7 +396,7 @@ func (invoker *failoverClusterInvoker) Invoke(ctx context.Context, invocation pr
 
 已完成图（一）中的：
 
-![](/imgs/blog/dubbo-go/code2/p6.png)
+![img](/imgs/blog/dubbo-go/code2/p6.png)
 
 ##### 2.2.5 在zookeeper上注册当前client
 
@@ -435,7 +435,7 @@ config/refrence_config.go: Refer()函数了。
 
 至此，完成了图（一）中最后的操作
 
-![](/imgs/blog/dubbo-go/code2/p7.png)
+![img](/imgs/blog/dubbo-go/code2/p7.png)
 
 ### 2.3 将调用逻辑以代理函数的形式写入rpc-service
 
@@ -443,7 +443,7 @@ config/refrence_config.go: Refer()函数了。
 
 回到config/config_loader.go: loadConsumerConfig()
 
-![](/imgs/blog/dubbo-go/code2/p8.png)
+![img](/imgs/blog/dubbo-go/code2/p8.png)
 
 下一个重要的函数是Implement，他完的操作较为简单：旨在使用上面生成的c.proxy代理，链接用户自己定义的rpcService到clusterInvoker的信息传输。
 
@@ -555,6 +555,6 @@ func (p *Proxy) Implement(v common.RPCService) {
 
 在阅读dubbo-go源码的过程中，我能发现一条清晰的invoker-proxy嵌套链，我希望通过图的形式来展现：
 
-![](/imgs/blog/dubbo-go/code2/p9.png)
+![img](/imgs/blog/dubbo-go/code2/p9.png)
 
 > 作者简介 李志信 (GitHubID LaurenceLiZhixin)，中山大学软件工程专业在校学生，擅长使用 Java/Go 语言，专注于云原生和微服务等技术方向。

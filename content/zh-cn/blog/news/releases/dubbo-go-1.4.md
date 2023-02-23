@@ -19,7 +19,7 @@ description: >
 
 dubbo-go 注册中心的本质为K/V型的数据存储。当前版本实现了以 Endpoint 为维度在 k8s API Server 进行服务注册和发现的方案【下文简称 Endpoint 方案】，架构图如下。
 
-![](/imgs/blog/dubbo-go/1.4/k8s.png)
+![img](/imgs/blog/dubbo-go/1.4/k8s.png)
 
 Endpoint 方案，首先将每个 dubbo-go 进程自身服务信息序列化后，通过 Kubernetes 提供的 Patch 的接口写入在自身 Pod 对象的 Annotation 中。其次，通过 Kubernetes 的 Watch 接口观察集群中本 Namespace 内带有某些固定lable [见上图] Pod 的Annotation 信息的更新，处理服务健康检查、服务上下线等情况并实时更新本地缓存。整体流程仅使用 Kubernetes 原生 API 完成将 Kubernetes 作为注册中心的功能特性。
 
@@ -37,7 +37,7 @@ Endpoint 方案，首先将每个 dubbo-go 进程自身服务信息序列化后�
 
 为了支持 tracing 和 metric，关键的一点是支持context在整个调用过程中传递。为此我们解决了context跨端传递的问题。目前用户可以在接口中声明 context 并且设置值，dubbo-go 在底层完成 context 内容从 client 传递到 server 的任务。
 
-![](/imgs/blog/dubbo-go/1.4/context.png)
+![img](/imgs/blog/dubbo-go/1.4/context.png)
 
 在 metric 方面，dubbo-go 开始支持 Prometheus 采集数据了。目前支持 Prometheus中 的 Histogram 和 Summary。用户也可以通过扩展 Reporter 接口来自定义数据采集。
 
@@ -51,7 +51,7 @@ Rest 协议是一个很强大并且社区呼声很高的特性，它能够有效
 
 通过在 dubbo-go 中发布 RESTful 的接口的应用可以调用任意的 RESTful 的接口，也可以被任何客户端以 http 的形式调用，框架图如下：
 
-![](/imgs/blog/dubbo-go/1.4/rest.png)
+![img](/imgs/blog/dubbo-go/1.4/rest.png)
 
 在设计过程中，考虑到不同的公司内部使用的 web 框架并不相同，所以我们允许用户扩展自己 rest server （ web 框架在 dubbo-go的封装）的实现，当然，与 rest server 相关的，诸如 filter 等，都可以在自己的 rest server 实现内部扩展。
 
@@ -123,7 +123,7 @@ type Dog struct {
 
 配置中心是现代微服务架构里面的核心组件，现在 dubbo-go 提供了对配置中心的支持。
 
-![](/imgs/blog/dubbo-go/1.4/config-center.png)
+![img](/imgs/blog/dubbo-go/1.4/config-center.png)
 
 Nacos 作为一个易于构建云原生应用的动态服务发现、配置管理和服务管理平台，在该版本终于作为配置中心而得到了支持。
 
@@ -133,7 +133,7 @@ Nacos 作为一个易于构建云原生应用的动态服务发现、配置管�
 
 Dubbo 鉴权认证是为了避免敏感接口被匿名用户调用而在 SDK 层面提供的额外保障。用户可以在接口级别进行定义是否允许匿名调用，并对调用方进行验签操作，对于验签不通过的消费端，禁止调用。
 
-![](/imgs/blog/dubbo-go/1.4/acl.png)
+![img](/imgs/blog/dubbo-go/1.4/acl.png)
 
 如上图，总体实现基于 AK/SK 机制，应用通过 HTTPS 通信，启动时向鉴权服务拉取，定期更新。且允许用户自定义获取 AK/SK 的源，在 RPC 层面保障安全性。
 

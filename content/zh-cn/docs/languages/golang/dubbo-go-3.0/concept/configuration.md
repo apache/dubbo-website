@@ -17,15 +17,15 @@ description: Dubbo-go的配置
 
 - 根配置
 
-![](/imgs/golang/3.0/config-root-config.png)
+![img](/imgs/golang/3.0/config-root-config.png)
 
 - ProviderConfig
 
-![](/imgs/golang/3.0/config-provider-config.png)
+![img](/imgs/golang/3.0/config-provider-config.png)
 
 - ConsumerConfig
 
-![](/imgs/golang/3.0/config-consumer-config.png)
+![img](/imgs/golang/3.0/config-consumer-config.png)
 
 ### 1.2 配置例子
 

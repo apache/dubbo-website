@@ -24,11 +24,11 @@ Before compiling our dubbo project, we need to make sure that we are based on th
 
 Go to https://www.graalvm.org/ official website and select the latest version to install according to your own system:
 
-![](/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg)
 
 After the installation is complete, modify the path to configure JAVA_HOME, and check the local jdk after it takes effect, you can see the following:
 
-![](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
 Here we use GraalVM based on jdk1.8 version.
 
 - To install native-image, just execute gu install native-image.
@@ -38,7 +38,7 @@ Here we use GraalVM based on jdk1.8 version.
 
 Since the current compilation of native-image does not support code dynamic generation and compilation, the part related to code dynamic generation needs to be generated manually. Here is a tool function:
 
-![](/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg)
 Execute CodeGenerator to generate SPI code under the dubbo-native module.
 
 1. Execute install in the root directory
@@ -61,13 +61,13 @@ Here we provide a sample project that can be directly compiled, dubbo-demo/dubbo
 
 Here, since we have introduced the native-image plug-in in maven, the plug-in can be executed directly -P native.
 
-![](/imgs/blog/dubbo3.0-graalvm-support/native_image_build.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/native_image_build.jpg)
 After the compilation is successful, you can see the generated binary file under the target, start a zookeeper locally, and execute the binary directly. It can be seen that the startup is successful as follows:
 
-![](/imgs/blog/dubbo3.0-graalvm-support/run_provider.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/run_provider.jpg)
 The consumer side also executes compilation, and a binary file is also generated under the consumer target: demo-native-consumer. Execute this binary and you can see the result of the call as follows:
 
-![](/imgs/blog/dubbo3.0-graalvm-support/run_consumer.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/run_consumer.jpg)
 ### Specific steps
 
 In fact, we have done some work under this demo to ensure that the project can be compiled and executed. There are mainly the following steps
@@ -208,7 +208,7 @@ In the startup parameters add:
 
 Start in the normal way, create a folder META-INF.native-image under the resources of the project, and paste the files generated in the local directory:
 
-![](/imgs/blog/dubbo3.0-graalvm-support/resources.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/resources.jpg)
 (There may be missing class information that is not generated, which needs to be added manually according to the error message when compiling or running.)
 
 

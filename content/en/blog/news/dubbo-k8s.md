@@ -114,12 +114,12 @@ The following is a demo deployment through Kubernetes service in Alibaba Cloud's
 4. Application Management -> Create  application, type Kubernetes application and specify the image in the container registry . As shown below.
    ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1_YywtDCWBKNjSZFtXXaC3FXa-1737-588.png)
 
-   ![](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
+   ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
 
 
 
 5.  After creation , then deploy applications. As shown below.
-   ![](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
+   ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
 
 - The supplementary application name cannot have uppercase letters, all lowercase, otherwise there is a problem of deployment failure.
 

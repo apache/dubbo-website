@@ -67,7 +67,7 @@ public class JavaSPITest {
 
 最后来看一下测试结果，如下：
 
-![](/imgs/dev/java-spi-result.jpg)
+![img](/imgs/dev/java-spi-result.jpg)
 
 从测试结果可以看出，我们的两个实现类被成功的加载，并输出了相应的内容。关于 Java SPI 的演示先到这里，接下来演示 Dubbo SPI。
 
@@ -99,7 +99,7 @@ public class DubboSPITest {
 
 测试结果如下：
 
-![](/imgs/dev/dubbo-spi-result.jpg)
+![img](/imgs/dev/dubbo-spi-result.jpg)
 
 Dubbo SPI 除了支持按需加载接口实现类，还增加了 IOC 和 AOP 等特性，这些特性将会在接下来的源码分析章节中一一进行介绍。
 

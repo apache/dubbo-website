@@ -9,7 +9,7 @@ weight: 10
 
 HTTP 代理案例展示了 Pixiu 接收外界 HTTP 请求然后转发给背后的 HTTP Server 的功能。
 
-![](/imgs/pixiu/user/samples/http_proxy.png)
+![img](/imgs/pixiu/user/samples/http_proxy.png)
 
 案例代码具体查看 `/samples/http/simple`。案例中的目录结构和作用如下所示：
 

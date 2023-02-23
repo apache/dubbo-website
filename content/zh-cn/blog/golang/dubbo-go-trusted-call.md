@@ -46,7 +46,7 @@ Apache Dubbo/Dubbo-Go 作为阿里巴巴开源的一款服务治理框架，因�
 
 结合上面的这些需求和方案，整个接入和鉴权流程图如下所示：
 
-![](/imgs/blog/dubbo-go/trusted-call/process.png)
+![img](/imgs/blog/dubbo-go/trusted-call/process.png)
 
 整体流程如下：
 

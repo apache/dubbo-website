@@ -20,14 +20,14 @@ Before compiling the dubbo project, make sure that we are programming based on t
 
 GraalVM's installation process won't be introduced in this document. You can visit https://www.graalvm.org/ and select the latest version to install. After installation you will be able to see the following in local jdk:
 
-![](/imgs/blog/dubbo-graalvm-support/graalvm_env.png)
+![graalvm_env.png](/imgs/blog/dubbo-graalvm-support/graalvm_env.png)
 GraalVM we use here is based on jdk version 1.8.
 
 ## Get Started
 
 For user's convenience, we provide the following demo in the [apache dubbo](https://github.com/apache/dubbo/) branch. In module dubbo-demo-native, dubbo's provider and consumer demos are given:
 
-![](/imgs/blog/dubbo-graalvm-support/demo_path.png)
+![demo_path.png](/imgs/blog/dubbo-graalvm-support/demo_path.png)
 
 We used native-image's maven plug-in and customized several native-image starting parameters. Users only need to run maven's compile and package command in consumers' and providers' modules:
 
@@ -37,11 +37,11 @@ mvn -U clean package -Dmaven.test.skip=true
 
 You can see the following output after compilation:
 
-![](/imgs/blog/dubbo-graalvm-support/consumer_compiler.png)![](/imgs/blog/dubbo-graalvm-support/provider_compiler.png)
+![provider_compiler.png](/imgs/blog/dubbo-graalvm-support/consumer_compiler.png)![img](/imgs/blog/dubbo-graalvm-support/provider_compiler.png)
 
 Binary executable file generated can be found in the target catalog:
 
-![](/imgs/blog/dubbo-graalvm-support/compile_result.png)
+![compile_result.png](/imgs/blog/dubbo-graalvm-support/compile_result.png)
 
 Size of the binary executable file is around 40M:
 
@@ -164,7 +164,7 @@ public Class<?> doCompile(String name, String source) throws Throwable {
 ```
 
 - Copy the exported code into dubbo-graalvm module
-![](/imgs/blog/dubbo-graalvm-support/graalvm.png)
+![graalvm.png](/imgs/blog/dubbo-graalvm-support/graalvm.png)
 
 - Import module in new project
 

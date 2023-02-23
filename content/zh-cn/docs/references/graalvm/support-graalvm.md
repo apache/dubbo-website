@@ -24,11 +24,11 @@ dubbo3.0支持native-image文档
 
 进入https://www.graalvm.org/ 官网根据自己的系统选取最新版本安装：
 
-![](/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg)
 
 安装完成后，修改配置JAVA_HOME的路径，生效后查看本地jdk可以看到如下：
 
-![](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
 这里我们使用的基于jdk1.8版本的GraalVM。
 
 - 安装native-image，只需执行gu install native-image即可。
@@ -38,7 +38,7 @@ dubbo3.0支持native-image文档
 
 由于目前编译native-image不支持代码动态生成编译，所以有关代码动态生成的部分需要我们手动先生成，这里提供了工具函数：
 
-![](/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg)
 执行CodeGenerator即可在dubbo-native模块下生成SPI代码。
 
 1. 在根目录下执行install
@@ -61,13 +61,13 @@ MacdeMacBook-pro-3:incubator-dubbo mac$ mvn clean package install -Dmaven.test.s
 
 这里由于我们在maven中引入了native-image插件，所以直接-P native即可执行该插件。
 
-![](/imgs/blog/dubbo3.0-graalvm-support/native_image_build.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/native_image_build.jpg)
 编译成功后可以在target下看到已经生成的二进制文件，本地启动一个zookeeper，直接执行该二进制，可见启动成功如下：
 
-![](/imgs/blog/dubbo3.0-graalvm-support/run_provider.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/run_provider.jpg)
 consumer端同样执行编译，在consumer的target下也会生成二进制文件：demo-native-consumer,执行该二进制可以看到调用结果如下：
 
-![](/imgs/blog/dubbo3.0-graalvm-support/run_consumer.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/run_consumer.jpg)
 ### 具体步骤
 
 实际上在这个demo下我们做了一些工作来确保项目可以编译执行，主要有以下几个步骤
@@ -208,7 +208,7 @@ consumer端同样执行编译，在consumer的target下也会生成二进制文�
 
 以正常方式启动，在项目的resources下建立文件夹META-INF.native-image，把在本地目录中生成的文件粘进去：
 
-![](/imgs/blog/dubbo3.0-graalvm-support/resources.jpg)
+![img](/imgs/blog/dubbo3.0-graalvm-support/resources.jpg)
 （可能会有缺漏没有生成的类信息，需要根据编译或运行时的报错信息手动添加。）
 
 

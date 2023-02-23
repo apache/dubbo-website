@@ -133,7 +133,7 @@ export CONF_CONSUMER_FILE_PATH="../profiles/dev/client.yml"
 
 dubbo-go 框架的 example 提供的目录如下：
 
-![](/imgs/blog/dubbo-go/code1/p1.png)
+![img](/imgs/blog/dubbo-go/code1/p1.png)
 
 - app/ 文件夹下存放源码，可以自己编写环境变量配置脚本 buliddev.sh
 - assembly/ 文件夹下存放不同平台的构建脚本
@@ -169,7 +169,7 @@ func (u *UserProvider) GetUser(ctx context.Context, req []interface{}) (*User, e
 
 **可以查看 dubbo 官方文档提供的设计图：**
 
-![](/imgs/blog/dubbo-go/code1/p2.png)
+![img](/imgs/blog/dubbo-go/code1/p2.png)
 
 service 层下面就是 config 层，用户服务会逐层向下注册，最终实现服务端的暴露。
 
@@ -288,7 +288,7 @@ func main() {
 
 服务暴露过程涉及到多次原始 rpcService 的封装、暴露，网上其他文章的图感觉太过笼统，在此，简要地绘制了一个用户定义服务的数据流图：
 
-![](/imgs/blog/dubbo-go/code1/p3.png)
+![img](/imgs/blog/dubbo-go/code1/p3.png)
 
 ### 1. 加载配置
 
@@ -420,7 +420,7 @@ func Load() {
 
 对于 provider 端，可以看到 loadProviderConfig() 函数代码如下：
 
-![](/imgs/blog/dubbo-go/code1/p4.png)
+![img](/imgs/blog/dubbo-go/code1/p4.png)
 
 前半部分是配置的读入和检查，进入 for 循环后，是单个 service 的暴露起始点。
 
@@ -428,13 +428,13 @@ func Load() {
 
 for 循环的第一行，根据 key 调用 GetProviderService 函数，拿到注册的 rpcService 实例，这里对应上述提到的 init 函数中，用户手动注册的自己实现的 rpc-service 实例：
 
-![](/imgs/blog/dubbo-go/code1/p5.png)
+![img](/imgs/blog/dubbo-go/code1/p5.png)
 
 这个对象也就成为了 for 循环中的 rpcService 变量，将这个对象注册通过 Implement 函数写到 sys（ServiceConfig 类型）上，设置好 sys 的 key 和协议组，最终调用了 sys 的 Export 方法。
 
 此处对应流程图的部分：
 
-![](/imgs/blog/dubbo-go/code1/p6.png)
+![img](/imgs/blog/dubbo-go/code1/p6.png)
 
 至此，框架配置结构体已经拿到了所有 service 有关的配置，以及用户定义好的 rpc-service 实例，它触发了 Export 方法，旨在将自己的实例暴露出去。这是 Export 调用链的起始点。
 
@@ -448,7 +448,7 @@ for 循环的第一行，根据 key 调用 GetProviderService 函数，拿到注
 
 #### 1）首先通过配置生成对应 registryUrl 和 serviceUrl
 
-![](/imgs/blog/dubbo-go/code1/p7.png)
+![img](/imgs/blog/dubbo-go/code1/p7.png)
 
 registryUrl 是用来向中心注册组件发起注册请求的，对于 zookeeper 的话，会传入其 ip 和端口号，以及附加的用户名密码等信息。
 
@@ -456,7 +456,7 @@ registryUrl 是用来向中心注册组件发起注册请求的，对于 zookeep
 
 #### 2）对于一个注册协议，将传入的 rpc-service 实例注册在 common.ServiceMap
 
-![](/imgs/blog/dubbo-go/code1/p8.png)
+![img](/imgs/blog/dubbo-go/code1/p8.png)
 
 这个 Register 函数将服务实例注册了两次，一次是以 Interface 为 key 写入接口服务组内，一次是以 interface 和 proto 为 key 写入特定的一个唯一的服务。
 
@@ -478,7 +478,7 @@ exporter = c.cacheProtocol.Export(invoker)
 
 可以进入 common/proxy/proxy_factory/default.go::ProxyInvoker.Invoke() 函数里，看到对于 common.Map 取用为 svc 的部分，以及关于 svc 对应 Method 的实际调用 Call 的函数如下：
 
-![](/imgs/blog/dubbo-go/code1/p9.png)
+![img](/imgs/blog/dubbo-go/code1/p9.png)
 
 到这里，上面 GetInvoker(*regUrl) 返回的 invoker 即为 proxy_invoker，它封装好了用户定义的 rpc_service，并将具体的调用逻辑封装入了 Invoke 函数内。
 
@@ -488,7 +488,7 @@ exporter = c.cacheProtocol.Export(invoker)
 >
 > 至此，实现了图中对应的部分：
 
-![](/imgs/blog/dubbo-go/code1/p10.png)
+![img](/imgs/blog/dubbo-go/code1/p10.png)
 
 ### 3. registry 协议在 zkRegistry 上暴露上面的 proxy_invoker
 
@@ -504,11 +504,11 @@ exporter = c.cacheProtocol.Export(invoker)
 
 #### 1）获取注册 url 和服务 url
 
-![](/imgs/blog/dubbo-go/code1/p11.png)
+![img](/imgs/blog/dubbo-go/code1/p11.png)
 
 #### 2）获取注册中心实例 zkRegistry
 
-![](/imgs/blog/dubbo-go/code1/p12.png)
+![img](/imgs/blog/dubbo-go/code1/p12.png)
 
 一层缓存操作，如果 cache 没有需要从 common 里面重新拿 zkRegistry。
 
@@ -516,7 +516,7 @@ exporter = c.cacheProtocol.Export(invoker)
 
 上述拿到了具体的 zkRegistry 实例，该实例的定义在：registry/zookeeper/registry.go。
 
-![](/imgs/blog/dubbo-go/code1/p13.png)
+![img](/imgs/blog/dubbo-go/code1/p13.png)
 
 该结构体组合了 registry.BaseRegistry 结构，base 结构定义了注册器基础的功能函数，比如 Registry、Subscribe 等，但在这些默认定义的函数内部，还是会调用 facade 层（zkRegistry 层）的具体实现函数，这一设计模型能在保证已有功能函数不需要重复定义的同时，引入外层函数的实现，类似于结构体继承却又复用了代码。这一设计模式值得学习。
 
@@ -531,11 +531,11 @@ exporter = c.cacheProtocol.Export(invoker)
 
 这一步调用了 baseRegistry 的 Register 函数，进而调用 zkRegister 的 DoRegister 函数，进而调用：
 
-![](/imgs/blog/dubbo-go/code1/p14.png)
+![img](/imgs/blog/dubbo-go/code1/p14.png)
 
 在这个函数里，将对应 root 创造一个新的节点。
 
-![](/imgs/blog/dubbo-go/code1/p15.png)
+![img](/imgs/blog/dubbo-go/code1/p15.png)
 
 并且写入具体 node 信息，node 为 url 经过 encode 的结果，**包含了服务端的调用方式。**
 
@@ -559,17 +559,17 @@ exporter = c.cacheProtocol.Export(invoker)
 
 > protocol/protocolwrapped/protocol_filter_wrapper.go:Export()
 
-![](/imgs/blog/dubbo-go/code1/p16.png)
+![img](/imgs/blog/dubbo-go/code1/p16.png)
 
 > protocol/protocolwrapped/protocol_filter_wrapper.go:buildInvokerChain
 
-![](/imgs/blog/dubbo-go/code1/p17.png)
+![img](/imgs/blog/dubbo-go/code1/p17.png)
 
 可见，根据配置的内容，通过链式调用的构造，将 proxy_invoker 层层包裹在调用链的最底部，最终返回一个调用链 invoker。
 
 对应图中部分：
 
-![](/imgs/blog/dubbo-go/code1/p18.png)
+![img](/imgs/blog/dubbo-go/code1/p18.png)
 
 至此，我们已经拿到 filter 调用链，期待将这个 chain 暴露到特定端口，用于相应请求事件。
 
@@ -586,26 +586,26 @@ exporter = c.cacheProtocol.Export(invoker)
 
 该 Export 方法的具体实现在：protocol/dubbo/dubbo_protocol.go: Export()。
 
-![](/imgs/blog/dubbo-go/code1/p19.png)
+![img](/imgs/blog/dubbo-go/code1/p19.png)
 
 这一函数做了两个事情：构造触发器、启动服务。
 
 - 将传入的 Invoker 调用 chain 进一步封装，封装成一个 exporter，再将这个 export 放入 map 保存。**注意！这里把 exporter 放入了 SetExporterMap中，在下面服务启动的时候，会以注册事件监听器的形式将这个 exporter 取出！**
 - 调用 dubboProtocol 的 openServer 方法，开启一个针对特定端口的监听。
 
-![](/imgs/blog/dubbo-go/code1/p20.png)
+![img](/imgs/blog/dubbo-go/code1/p20.png)
 
 如上图所示，一个 Session 被传入，开启对应端口的事件监听。
 
 至此构造出了 exporter，完成图中部分：
 
-![](/imgs/blog/dubbo-go/code1/p21.png)
+![img](/imgs/blog/dubbo-go/code1/p21.png)
 
 ### 4. 注册触发动作
 
 上述只是启动了服务，但还没有看到触发事件的细节，点进上面的 s.newSession 可以看到，dubbo 协议为一个 getty 的 session 默认使用了如下配置：
 
-![](/imgs/blog/dubbo-go/code1/p22.png)
+![img](/imgs/blog/dubbo-go/code1/p22.png)
 
 其中很重要的一个配置是 EventListener，传入的是 dubboServer 的默认 rpcHandler。
 
@@ -622,31 +622,31 @@ func (h *RpcServerHandler) OnMessage(session getty.Session, pkg interface{}) {
 
 - 传入包的解析
 
-![](/imgs/blog/dubbo-go/code1/p23.png)
+![img](/imgs/blog/dubbo-go/code1/p23.png)
 
 - 根据请求包构造请求 url
 
-![](/imgs/blog/dubbo-go/code1/p24.png)
+![img](/imgs/blog/dubbo-go/code1/p24.png)
 
 - 拿到对应请求 key，找到要被调用的 exporter
 
-![](/imgs/blog/dubbo-go/code1/p25.png)
+![img](/imgs/blog/dubbo-go/code1/p25.png)
 
 - 拿到对应的 Invoker
 
-![](/imgs/blog/dubbo-go/code1/p26.png)
+![img](/imgs/blog/dubbo-go/code1/p26.png)
 
 - 构造 invocation
 
-![](/imgs/blog/dubbo-go/code1/p27.png)
+![img](/imgs/blog/dubbo-go/code1/p27.png)
 
 - 调用
 
-![](/imgs/blog/dubbo-go/code1/p28.png)
+![img](/imgs/blog/dubbo-go/code1/p28.png)
 
 - 返回
 
-![](/imgs/blog/dubbo-go/code1/p29.png)
+![img](/imgs/blog/dubbo-go/code1/p29.png)
 
 整个被调过程一气呵成。实现了从 getty.Session 的调用事件，到经过层层封装的 invoker 的调用。
 

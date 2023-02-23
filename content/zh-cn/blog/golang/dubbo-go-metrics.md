@@ -25,13 +25,13 @@ metrics ，见 https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter �
 
 从源码里面很容易找到这种划分的抽象。
 
-![](/imgs/blog/dubbo-go/metrics/p1.png)
+![img](/imgs/blog/dubbo-go/metrics/p1.png)
 
 metrics 设计了 Metric 接口作为所有数据的顶级抽象：
 
 在 Dubbo 里面，其比较关键的子接口是：
 
-![](/imgs/blog/dubbo-go/metrics/p2.webp)
+![img](/imgs/blog/dubbo-go/metrics/p2.webp)
 
 为了大家理解，这里我抄一下这些接口的用途：
 
@@ -43,7 +43,7 @@ metrics 设计了 Metric 接口作为所有数据的顶级抽象：
 
 目前 dubbo-go 只实现了 FastCompass ，它也是 Metric 的子类：
 
-![](/imgs/blog/dubbo-go/metrics/p3.webp)
+![img](/imgs/blog/dubbo-go/metrics/p3.webp)
 
 这个接口功能很简单，就是用于收集一段时间之内的 subCategory 执行的次数和响应时间。 subCategory 是一个比较宽泛的概念，无论是在 Dubbo 还是在 dubbo-go 里面，一个典型的 subCategory
 就会是某个服务。
@@ -60,20 +60,20 @@ metrics 设计了 Metric 接口作为所有数据的顶级抽象：
 
 MetricManager 接口目前在 dubbo-go 里面还很简单：
 
-![](/imgs/blog/dubbo-go/metrics/p4.webp)
+![img](/imgs/blog/dubbo-go/metrics/p4.webp)
 
 本质上来说，我在前面提到的那些 Metric 的子类，都可以从这个 MetricManager 里面拿到。它是对外的唯一入口。
 
 因此无论是上报采集的数据，还是某些功能要用这些采集的数据，最重要的就是获得一个 MetricManager 的实例。例如我们最近正在开发的接入 Prometheus 就是拿到这个 MetriManger 实例，而后从里面拿到
 FastCompass 的实例，而后采集这些数据：
 
-![](/imgs/blog/dubbo-go/metrics/p5.webp)
+![img](/imgs/blog/dubbo-go/metrics/p5.webp)
 
 ### MetricRegistry
 
 MetricRegistry 是一个对 Metric 集合的抽象。 MetricManager 的默认实现里面，就是使用 MetricRegistry 来管理 Metric 的:
 
-![](/imgs/blog/dubbo-go/metrics/p6.webp)
+![img](/imgs/blog/dubbo-go/metrics/p6.webp)
 
 所以，本质上它就是提供了一些注册 Metric 然后再从里面捞出来的方法。
 
@@ -90,13 +90,13 @@ group 。又或者我采集到的机器自身的数据，可以将其归类到 s
 
 所以 MetricManger 和 MetricRegistry 的关系是：
 
-![](/imgs/blog/dubbo-go/metrics/p7.webp)
+![img](/imgs/blog/dubbo-go/metrics/p7.webp)
 
 ### Clock
 
 Clock 抽象是一个初看没什么用，再看会觉得其抽象的很好。Clock 里面就两个方法：
 
-![](/imgs/blog/dubbo-go/metrics/p8.webp)
+![img](/imgs/blog/dubbo-go/metrics/p8.webp)
 
 一个是获得时间戳，另外一个则是获得时间周期(Tick)。比如通常采集数据可能是每一分钟采集一次，所以你得知道现在处在哪个时间周期里面。Clock 就提供了这种抽象。
 
@@ -112,11 +112,11 @@ Clock 抽象是一个初看没什么用，再看会觉得其抽象的很好。Cl
 
 在 dubbo-go 里面这次实现了 metricsFilter ，它主要就是收集调用次数和响应时间，其核心是：
 
-![](/imgs/blog/dubbo-go/metrics/p9.webp)
+![img](/imgs/blog/dubbo-go/metrics/p9.webp)
 
 report 其实就是把 metrics reports 给 MetricManager ：
 
-![](/imgs/blog/dubbo-go/metrics/p10.webp)
+![img](/imgs/blog/dubbo-go/metrics/p10.webp)
 
 所以，这里面可以看出来，如果我们要收集什么数据，也是要先获得 MetricManager 的实例。
 
@@ -126,7 +126,7 @@ FastCompass 的实现里面会将这一次调用的服务及其响应时间保�
 
 所以这个流程可以抽象表达为：
 
-![](/imgs/blog/dubbo-go/metrics/p11.webp)
+![img](/imgs/blog/dubbo-go/metrics/p11.webp)
 
 这是一个更加宽泛的抽象。也就是意味着，我们除了可以从这个 metricFilter 里面收集数据，也可以从自身的业务里面去收集数据。比如说统计某段代码的执行时间，一样可以使用 FastCompass 。
 
@@ -146,7 +146,7 @@ FastCompass 的实现里面会将这一次调用的服务及其响应时间保�
 
 Dubbo 里面采集了非常多的数据：
 
-![](/imgs/blog/dubbo-go/metrics/p12.webp)
+![img](/imgs/blog/dubbo-go/metrics/p12.webp)
 
 这些具体的实现，我就不一一讨论了，大家有兴趣可以去看看源码。这些数据，也是我们 dubbo-go 后面要陆续实现的东西，欢迎大家持续关注，或者来贡献代码。
 

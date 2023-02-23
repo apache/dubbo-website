@@ -27,7 +27,7 @@ Dubbo-go 近期还实现了 REST 协议以及 gRPC 的支持，打通了 Spring 
 
 实际上，在 Dubbo-go 加入 Dubbo 官方生态之前，已经发展了两年。它最早由其创始人于雨在 2016 年 5 月构建，同年 9 月发布并开源的。如下时间轴图清晰记录了 Dubbo-go 的前世今生。
 
-![](/imgs/blog/dubbo-go/1year/dubbo-go-events.png)
+![img](/imgs/blog/dubbo-go/1year/dubbo-go-events.png)
 
 **OSCHINA：** 在去年项目刚加入 Dubbo 官方生态的时候，有开发团队成员说，Dubbo-go 当时还没能发挥出 Go 语言的优势，功能完整性还要完善。作为一个为解决 Go 项目与 Java & Dubbo 项目互通的项目，经过一年的发展，项目现在能发挥出 Go 语言的优势了吗，为什么？
 
@@ -55,7 +55,7 @@ Dubbo v2.7.5 之后开始支持应用维度的服务注册，这也是 v1.5.0 �
 
 Dubbo-go 在支持了 REST 协议之后，已经可以做到跟绝大部分基于 HTTP 协议的微服务框架进行通信。
 
-![](/imgs/blog/dubbo-go/1year/dubbo-go-rest.png)
+![img](/imgs/blog/dubbo-go/1year/dubbo-go-rest.png)
 
 
 另外一个突出优点是，支持了 gRPC 和 REST 之后，Dubbo-go 就可以考虑和一些公司内部自研的框架进行通信了。通常一些比较大的公司会自研框架，或者深度定制某些开源框架。而只要它们支持 gRPC 或者 HTTP 协议，Dubbo-go 就可以保证与这些框架的无缝衔接。
@@ -68,7 +68,7 @@ Dubbo-go 在支持了 REST 协议之后，已经可以做到跟绝大部分基�
 
 可观测性是衡量一个微服务框架的重要方面。一般可观测性分成 tracing、metric 和 log 三个部分。
 
-![](/imgs/blog/dubbo-go/1year/dubbo-go-observe.png)
+![img](/imgs/blog/dubbo-go/1year/dubbo-go-observe.png)
 
 在 v1.4 Dubbo-go 之前，tracing 和 metric 是 Dubbo-go 的薄弱环节。为了支持这两个，我们考察了比较多的开源框架的做法。我们发现，因为要考虑对接非常多诸如 zipkin/cat 等监控框架，所以它们往往会设计一整套监控和度量的 API。
 
@@ -102,7 +102,7 @@ Dubbo-go 这一年的进步很大，实现了非常多非常重要的特性。
 
 第四则是现在正在进行的应用注册模型，它能让我们更好地拥抱 k8s 和 servise mesh。为了支持应用注册模型，我们还实现了一个元数据中心，这个元数据中心非常有利于做网关。此外还实现了很多功能，如新的限流算法，负载均衡算法和路由策略等。具体内容，欢迎大家去看我们的 release log。
 
-![](/imgs/blog/dubbo-go/1year/dubbo-go-arch.png)
+![img](/imgs/blog/dubbo-go/1year/dubbo-go-arch.png)
 
 
 **OSCHINA：** 上个月，Go 官方公布的最新调查报告显示，Go 语言的主要用途包括编写 RPC 服务，其次库和框架方面增量巨大。“竞争对手”变多会影响到 Dubbo-go 原本的计划实施吗，Dubbo-go 和其他同类项目比有什么不同？
@@ -139,7 +139,7 @@ Dubbo-go 这一年的进步很大，实现了非常多非常重要的特性。
 
 这两个功能点形成了冲突，在无法调和两者的情况下，我们放弃了这个计划，并且提出了现在这个随 1.4.0 版本发布使用的模型。
 
-![](/imgs/blog/dubbo-go/1year/dubbo-go-k8s.png)
+![img](/imgs/blog/dubbo-go/1year/dubbo-go-k8s.png)
 
 后续，我们将主要考虑 k8s 本身提供的 CRD + Operator 的方案，毕竟越来越多的 k8s 周边的项目都在以 Operator 作为切入点。Dubbo-go 社区后续的方案将会以 CRD 的形式在 k8s 内注册和发现服务。这样做的原因有很多，首先是为了减少 Dubbo-go 对 kube-apiserver 的直接依赖。其次是为了标准化注册模型，当服务模型以 CRD 的形式存在在 k8s 集群中之后，其他围绕 k8s 的项目可以直接使用这些资源二次开发和拓展。而这种方式更加 CloudNative。
 

@@ -22,7 +22,7 @@ Kubernetes 作为容器集群化管理⽅案管理资源的维度可主观的分
 
 为了明确 K8s 在服务接入管理提供的解决方案，我们以 kube-apiserver 提供的 API(HTTPS) 服务为例。K8s 集群为该服务分配了一个集群内有效的 ClusterIP ，并通过 CoreDNS 为其分配了唯一的域名 kubernetes 。如果集群内的 Pod 需要访问该服务时直接通过 https://kubernetes:443 即可完成。
 
-![](/imgs/blog/dubbo-go/k8s/k8s-service-discovery.png)
+![img](/imgs/blog/dubbo-go/k8s/k8s-service-discovery.png)
 
 具体流程如上图所示 ( 红⾊为客户端，绿⾊为 kube-apiserver )：
 
@@ -37,7 +37,7 @@ Kubernetes 作为容器集群化管理⽅案管理资源的维度可主观的分
 
 同样为了明确 dubbo 服务发现的模型，以⼀个简单的 dubbo-consumer 发现并访问 Provider 的具体流程为例。
 
-![](/imgs/blog/dubbo-go/k8s/dubbo-service-discovery.png)
+![img](/imgs/blog/dubbo-go/k8s/dubbo-service-discovery.png)
 
 具体流程如上图所示：
 
@@ -88,7 +88,7 @@ Jib2dvLWNvbnN1bWVyLTIuNi4wJTI2cHJvdG9jb2wlM0RkdWJibyIsInYiOiIifV0=
 
 ### 总体设计图
 
-![](/imgs/blog/dubbo-go/k8s/design.png)
+![img](/imgs/blog/dubbo-go/k8s/design.png)
 
 具体流程如上图所示：
 

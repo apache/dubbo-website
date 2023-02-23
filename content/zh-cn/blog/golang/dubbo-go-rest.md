@@ -25,7 +25,7 @@ REST 是 **RE**presentational **S**tate **T**ransfer（表述性状态转移）�
 
 上述问题，就是 REST 协议解决的核心问题。现在我们很多应用场景都是需要与异构的系统进行交互，而 REST 采用的 HTTP 通信协议非常适合用来打通异构系统，如图：
 
-![](/imgs/blog/dubbo-go/rest/rest-call.webp)
+![img](/imgs/blog/dubbo-go/rest/rest-call.webp)
 
 ## REST 协议没那么简单
 
@@ -124,7 +124,7 @@ services:
 
 ## REST协议的调用过程
 
-![](/imgs/blog/dubbo-go/rest/rest-call-process.webp)
+![img](/imgs/blog/dubbo-go/rest/rest-call-process.webp)
 
 上图展示了用户在 Consumer 端调用 `GetUser` 方法到 Provdier 端 `GetUser` 方法被执行的整个过程，在 `RestClient` 和 `RestServer` 中分别**实现了 Go 方法参数到 HTTP
 请求的转换和 HTTP 请求到 Go 方法的转换，这是最为核心和复杂的部分。**换言之，我们在这里实现了前面提到的 Go 方法和 HTTP 请求的双向映射。

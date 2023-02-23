@@ -60,13 +60,13 @@ Dubbo-go 作为 Dubbo 的 Go 语言版本，因跨语言之故，二者针对同
 
 由此，Dubbo-go 的应用维度注册模型就变为：
 
-![](/imgs/blog/dubbo-go/app-registry/app-registry-model.png)
+![img](/imgs/blog/dubbo-go/app-registry/app-registry-model.png)
 
 ### 2.1 ServiceNameMapping
 
 ServiceNameMapping 并不复杂。考虑到一般人在 Consumer 侧想要调用一个服务，其十有八九是知道这个服务是哪个应用提供的，于是 Dubbo-go 引入了新的配置项 `provideBy`
 
-![](/imgs/blog/dubbo-go/app-registry/provideby.png)
+![img](/imgs/blog/dubbo-go/app-registry/provideby.png)
 
 当然，所谓 “十有八九”就是说有些时候确实不知道是服务是谁提供的，所以 Dubbo-go 还支持了基于配置中心的 ServiceNameMapping 实现。Dubbo-go 会用服务名作为 Key 从配置中心里面读出对应的应用名。这意味着, Provider 启动的时候，也会在配置中心将自身的 服务-应用名映射 写入配置中心。
 
@@ -78,7 +78,7 @@ MetadataService 稍微要复杂一点，有 `remote` 和 `local` 两种模式。
 
 另外一种模式是 `local` 模式。Dubbo-go 可以直接将 MetadataService 看做是一个普通的微服务，而后由 `Provider` 所提供。类似于：
 
-![](/imgs/blog/dubbo-go/app-registry/local-metadata-service.png)
+![img](/imgs/blog/dubbo-go/app-registry/local-metadata-service.png)
 
 由此带来一个问题：
 
@@ -88,7 +88,7 @@ Dubbo-go 的方案非常简单粗暴，Provider 启动的时候，不仅仅往�
 
 这是一个应用的注册信息：
 
-![](/imgs/blog/dubbo-go/app-registry/registry-info.png)
+![img](/imgs/blog/dubbo-go/app-registry/registry-info.png)
 
 本质上来说，应用维度注册信息 + 服务元数据 = 服务维度注册信息。或者说，应用维度注册，只是一种重新组织这些信息的方式。
 

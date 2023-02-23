@@ -7,7 +7,7 @@ description: >
     在云原生时代，Apache Dubbo 将如何延续当前光芒？
 ---
 
-![](/imgs/blog/dubbo-go/10years/dubbo-home.png)
+![img](/imgs/blog/dubbo-go/10years/dubbo-home.png)
 
 纵观中国开源历史，你真的没法找到第二个像 Dubbo 一样自带争议和讨论热度的开源项目。
 
@@ -63,7 +63,7 @@ Dubbo 社区组织了超过 10 场线下 meetup 活动，基本覆盖了国内�
 
 下面通过一个简要分层模块图，回顾过去一段时间 Dubbo 的技术架构演进，从编程模型、服务治理、传输协议、性能优化等角度切入：
 
-![](/imgs/blog/dubbo-go/10years/dubbo-layer.png)
+![img](/imgs/blog/dubbo-go/10years/dubbo-layer.png)
 
 
 以上很多功能都已被各大厂商落地，用于解决具体的业务问题。我们也期待，接下来这些厂商带来更多关于 Dubbo 实践经验的深度总结。
@@ -74,7 +74,7 @@ Dubbo 社区组织了超过 10 场线下 meetup 活动，基本覆盖了国内�
 
 Dubbo-go 项目最早由于雨在 2016 年 5 月构建，同年 9 月发布并开源，如下时间轴图清晰记录了 Dubbo-go 的前世今生。
 
-![](/imgs/blog/dubbo-go/10years/dubbo-go-events.png)
+![img](/imgs/blog/dubbo-go/10years/dubbo-go-events.png)
 
 秉承 "bridge the gap between Java and Go" 天然使命的 Dubbo-go，已经进入第五个年头，也走出了自己独特的发展路径：
 
@@ -145,7 +145,7 @@ Dubbo-go 社区 2020 年 Q2 主要目标有：
 
 听起来似乎有些矛盾。其实到底是面向接口，还是面向应用，只是从不同的角度看 Dubbo。我们所聊的“面向接口 -> 面向应用”的改造，主要体现在服务注册、发现层面：
 
-![](/imgs/blog/dubbo-go/10years/dubbo-triangle.png)
+![img](/imgs/blog/dubbo-go/10years/dubbo-triangle.png)
 
 而我们说的面向应用的新模型，主要对第 2 点，即注册中心的数据组织转变为 “面向应用/实例” 粒度。这为我们解决两个问题：
 

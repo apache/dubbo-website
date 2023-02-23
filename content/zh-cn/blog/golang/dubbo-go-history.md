@@ -6,7 +6,7 @@ date: 2021-01-11
 description: 本文记录了 Dubbo Go 的发展历程
 ---
 
-![](/imgs/blog/dubbo-go/dubbo-go-history.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-history.png)
 
 dubbo-go 是目前 Dubbo 多语言生态最火热的项目。dubbo-go 最早的版本应该要追溯到 2016 年，由社区于雨同学编写 dubbo-go 的初版。当时很多东西没有现成的轮子，如 Go 语言没有像 netty 一样的基于事件的网络处理引擎、 hessian2 协议没有 Go 语言版本实现，加上当时 Dubbo 也没有开始重新维护。所以从协议库到网络引擎，再到上层 dubbo-go ，其实都是从零开始写的。
 
@@ -20,19 +20,19 @@ dubbo-go 是目前 Dubbo 多语言生态最火热的项目。dubbo-go 最早的�
 
 这边简单介绍一下用法，写一个 hello world 的例子。
 
-![](/imgs/blog/dubbo-go/java-provider.png)
+![img](/imgs/blog/dubbo-go/java-provider.png)
 
 上图是一个简单的 java service ，注册为一个 Dubbo 服务，是一个简单的获取用户信息的例子。
 
-![](/imgs/blog/dubbo-go/go-consumer.png)
+![img](/imgs/blog/dubbo-go/go-consumer.png)
 
 上图是 dubbo-go 的客户端，来订阅和调用这个 Java 的 Dubbo 服务。Go 语言客户端需要显式调用 SetConsumerService 来注册需要订阅的服务，然后通过调用 dubbo-go-hessian2 库的 registerPOJO 方法来注册 user 对象，做 Java 和 Go 语言之间的自定义 pojo 类型转换。具体的服务调用方法就是声明一个的 GetUser 闭包，便可直接调用。
 
-![](/imgs/blog/dubbo-go/go-provider.png)
+![img](/imgs/blog/dubbo-go/go-provider.png)
 
 上图，同样的可以基于 dubbo-go 发布一个 GetUser 的服务端，使用方式类似，发布完后可以被 dubbo java 的客户端调用。
 
-![](/imgs/blog/dubbo-go/java-go-interop.png)
+![img](/imgs/blog/dubbo-go/java-go-interop.png)
 
 如上图所示，现在已经做到了这样一个程度，同样一份 dubbo-go 客户端代码，可以去调用 dubbo-go 的服务端，也可以去调用 Dubbo Java 的服务端；同样一份 dubbo-go 的服务端代码，可以被 dubbo-go 客户端和 Java 客户端调用，所以基本上使用 Dubbo 作为 PPC 框架的 Go 语言应用跟 Java 应用是没有什么阻碍的，是完全的跨语言 RPC 调用。更重要的是 dubbo-go 继承了 Dubbo 的许多优点，如易于扩展、服务治理功能强大，大家在用 Go 语言开发应用的过程中，如果也遇到类似需要与 Dubbo Java 打通的需求，或者需要找一个服务治理功能完备的 Go 微服务框架，可以看下我们 dubbo-go 项目。
 
@@ -62,7 +62,7 @@ dubbo-go 异步网络 I/O 库，将网络处理层解耦。
 
 ##### apache/dubbo-go-hessian2
 
-![](/imgs/blog/dubbo-go/dubbo-go-hessian2.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-hessian2.png)
 
 先简单介绍一下 dubbo-go-hessian2 项目。该项目就是 hessian2 协议的 Go 语言实现，最基本的可以将 Java 的基本数据类型和复杂数据类型（如一些包装类和list接口实现类）与 golang 这边对应。
 
@@ -80,7 +80,7 @@ dubbo-go 异步网络 I/O 库，将网络处理层解耦。
 
 ##### dubbo-go/getty
 
-![](/imgs/blog/dubbo-go/dubbo-go-getty.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-getty.png)
 
 Go 语言天生就是一个异步网络 I/O 模型，在 linux 上 Go 语言写的网络服务器也是采用的 epoll 作为最底层的数据收发驱动,这跟 java 在 linux 的 nio 实现是一样的。所以 Go 语言的网络处理天生就是异步的。我们需要封装的其实是基于 Go 的异步网络读写以及之后的处理中间层。getty 将网络数据处理分为三层，入向方向分别经过对网络 i/o 封装的 streaming 层、根据不同协议对数据进行序列化反序列化的 codec 层，以及最后数据上升到需要上层消费的 handler 层。出向方向基本与入向经过的相反。每个链接的 IO 协程是成对出现的，比如读协程负责读取、 codec 逻辑然后数据到 listener 层，然后最后的事件由业务协程池来处理。
 
@@ -88,7 +88,7 @@ Go 语言天生就是一个异步网络 I/O 模型，在 linux 上 Go 语言写�
 
 ##### apache/dubbo-go
 
-![](/imgs/blog/dubbo-go/dubbo-go-arch.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-arch.png)
 
 dubbo-go 主项目，我们重构的这一版主要是基于 Dubbo 的分层代码设计，上图是 dubbo-go 的代码分层。基本上与 Java 版本 Dubbo 现有的分层一致，所以 dubbo－go 也继承了 Dubbo 的一些优良特性，比如整洁的代码架构、易于扩展、完善的服务治理功能。
 
@@ -104,7 +104,7 @@ dubbo-go 主项目，我们重构的这一版主要是基于 Dubbo 的分层代�
 
 ##### dubbo-go 功能介绍之泛化调用
 
-![](/imgs/blog/dubbo-go/dubbo-go-generic-invoke.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-generic-invoke.png)
 
 这里详细做几个重点功能的介绍。首先是泛化调用，如上图，这个也是社区同学提的需求。该同学公司内部有很多 Dubbo 服务，他们用 Go 做了一个 api gateway 网关，想要把 Dubbo 服务暴露成外网 http 接口。因为内部的 Dubbo 服务比较多，不可能每一个 Dubbo 服务都去做一个消费端接口去做适配，这样的话一旦服务端改动，客户端也要改。所以他这边的思路是做基于 dubbo-go 做泛化调用， api-gateway 解析出外网请求的地址，解析出想要调用的 Dubbo 服务的目标。基于dubbo-go consumer 泛化调用指定 service、method ，以及调用参数。
 
@@ -112,7 +112,7 @@ dubbo-go 主项目，我们重构的这一版主要是基于 Dubbo 的分层代�
 
 ##### dubbo-go 功能介绍之降级熔断
 
-![](/imgs/blog/dubbo-go/dubbo-go-curcuit-breaker.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-curcuit-breaker.png)
 
 降级熔断这边是基于的是大家比较熟悉的 hystrix 的 Go 语言版本，基于 hystrix ，用户可以定义熔断规则和降级触发的代码段。降级熔断支持是作为一个独立的 dubbo-go filter ，可以灵活选择是否启用，如果不启用就可以在打包的时候不将依赖引入。Filter 层是 dubbo-go 中对于请求链路的一个责任链模式抽象，目前有许多功能都是基于动态扩展 filter 链来实现的，包括 trace、leastactive load balacne、log 等。降级熔断设计成一个服务调用端独立的filter可以灵活满足调用端视角对于微服务架构中“防雪崩“的服务治理需求。
 
@@ -122,7 +122,7 @@ dubbo-go 主项目，我们重构的这一版主要是基于 Dubbo 的分层代�
 
 ### dubbo-go roadmap 2019-2020
 
-![](/imgs/blog/dubbo-go/dubbo-go-roadmap-2019.png)
+![img](/imgs/blog/dubbo-go/dubbo-go-roadmap-2019.png)
 
 最后是大家比较关注的，社区关于 dubbo-go 2019 年下半年的计划，目前来看主要还是现有功能的补齐和一些问题的修复，我们的目标就是首先做到 Java 和 Go 在运行时的兼容互通和功能的一致，其次是查漏补缺 dubbo-go 作为一个完整 Go 语言微服务框架在功能上的可以改进之处。
 

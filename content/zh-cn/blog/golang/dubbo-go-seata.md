@@ -19,7 +19,7 @@ Java 的世界里，大家广泛使用一个高性能网络通信框架 —— n
 
 getty 框架的整体模型图如下：
 
-![](/imgs/blog/dubbo-go/seata/p1.webp)
+![img](/imgs/blog/dubbo-go/seata/p1.webp)
 
 下面结合相关代码，详述 seata-golang 的 RPC 通信过程。
 
@@ -380,7 +380,7 @@ type EventListener interface {
 
 下面是 seata 协议的定义：
 
-![](/imgs/blog/dubbo-go/seata/p2.webp)
+![img](/imgs/blog/dubbo-go/seata/p2.webp)
 
 在 ReadWriter 接口的实现 `RpcPackageHandler` 中，调用 Codec 方法对消息体按照上面的格式编解码：
 
@@ -641,7 +641,7 @@ var (
 
 seata-golang 从今年 4 月份开始开发，到 8 月份基本实现和 java 版 seata 1.2 协议的互通，对 mysql 数据库实现了 AT 模式（自动协调分布式事务的提交回滚），实现了 TCC 模式，TC 端使用 mysql 存储数据，使 TC 变成一个无状态应用支持高可用部署。下图展示了 AT 模式的原理：
 
-![](/imgs/blog/dubbo-go/seata/p3.webp)
+![img](/imgs/blog/dubbo-go/seata/p3.webp)
 
 后续，还有许多工作可以做，比如：对注册中心的支持、对配置中心的支持、和 java 版 seata 1.4 的协议互通、其他数据库的支持、raft transaction coordinator 的实现等，希望对分布式事务问题感兴趣的开发者可以加入进来一起来打造一个完善的 golang 的分布式事务框架。如果你有任何疑问，欢迎钉钉扫码加入交流群【钉钉群号 33069364】：
 

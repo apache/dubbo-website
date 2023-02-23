@@ -19,7 +19,7 @@ Dubbo3 HTTP 协议支持仍在建设中，目前最新的 3.3 开发分支已经
 * 支持 SpringCloud 体系的服务发现地址格式
 * 支持 HTTP+JSON 的数据传输格式
 
-![](/imgs/v3/tasks/protocol/http-usecase-1.png)
+![img](/imgs/v3/tasks/protocol/http-usecase-1.png)
 
 基于以上分析，当我们需要调用 Spring Cloud 体系的服务时，只需要在 Dubbo 侧编写标准的 Dubbo Reference 服务引用就可以。同时，为了简化开发工作，**Dubbo 支持标准的 Spring Web 注解**，因此，如果你可以直接在 Dubbo 中复用 Spring Cloud 中的接口定义：
 
@@ -42,7 +42,7 @@ private SpringCloudRestService restService;
 
 ## 多协议发布
 
-![](/imgs/v3/tasks/protocol/http-usecase-1.png)
+![img](/imgs/v3/tasks/protocol/http-usecase-1.png)
 
 
 
