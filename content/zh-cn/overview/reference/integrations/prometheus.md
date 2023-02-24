@@ -1,21 +1,41 @@
 ---
 type: docs
-title: "How to configure Prometheus to work with Dubbo"
-linkTitle: "Prometheus Configuration"
-description: ""
-weight: 30
-no_list: true
+title: "Prometheus"
+linkTitle: "Prometheus"
+description: "配置 Prometheus 与 Dubbo 一起工作"
+weight: 2
 ---
-
-// 文档完善中
-
 ## 安装
-### 选项一：Kubernetes 环境安装
 
-### 选项二：普通安装
+### Linux
+下载项目至本地到切换指定项目
+```bash
+wget https://github.com/prometheus/prometheus/releases/download/v2.42.0/prometheus-2.42.0.linux-amd64.tar.gz && tar zxvf prometheus-2.42.0.linux-amd64.tar.gz && mv prometheus-2.42.0.linux-amd64 prometheus && cd prometheus
+```
 
-## 配置
-### 选项一
+后台运行
+```bash
+nohup ./prometheus > /dev/null 2>&1 &
+```
 
-### 选项二
+访问页面
+`http://localhost:9090`
+![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
+
+
+### Kubernetes
+下载项目至本地到切换指定项目
+```bash
+git clone https://github.com/apache/dubbo-admin.git && cd dubbo-admin/kubernetes/prometheus
+```
+
+创建项目
+```bash
+kubectl create -f .
+```
+
+访问页面
+`http://localhost:9090`
+![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
+
 
