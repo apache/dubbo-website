@@ -150,7 +150,7 @@ Windows:
 ./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider -Dexec.mainClass="org.apache.dubbo.springboot.demo.provider .ProviderApplication"
 
 Linux / MacOS:
-./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider -Dexec.mainClass="org.apache.dubbo.springboot.demo.provider.ProviderApplication "
+./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider -Dexec.mainClass="org.apache.dubbo.springboot.demo.provider.ProviderApplication"
 
 Note: You need to open an independent terminal to run, and the command will keep executing.
 ```
@@ -172,7 +172,7 @@ Windows:
 ./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer -Dexec.mainClass="org.apache.dubbo.springboot.demo.consumer .ConsumerApplication"
 
 Linux / MacOS:
-./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer -Dexec.mainClass="org.apache.dubbo.springboot.demo.consumer.ConsumerApplication "
+./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer -Dexec.mainClass="org.apache.dubbo.springboot.demo.consumer.ConsumerApplication"
 
 
 ```
