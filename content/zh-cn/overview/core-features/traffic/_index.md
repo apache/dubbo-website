@@ -4,7 +4,7 @@ type: docs
 title: "流量管控"
 linkTitle: "流量管控"
 weight: 30
-no_list: true
+description: "Dubbo 流量管控"
 feature:
   title: 流量管控
   description: >
