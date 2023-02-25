@@ -3,7 +3,7 @@ type: docs
 title: "服务发现"
 linkTitle: "服务发现"
 weight: 10
-description: ""
+description: "Dubbo 服务发现"
 feature:
   title: 服务发现
   description: >
