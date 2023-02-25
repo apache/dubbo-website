@@ -1,7 +1,7 @@
 
 ---
 type: docs
-title: "SDK 用户手册"
+title: "Dubbo SDK 用户手册"
 linkTitle: "SDK"
 weight: 60
 no_list: true
