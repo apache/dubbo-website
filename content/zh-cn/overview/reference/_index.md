@@ -1,8 +1,8 @@
 
 ---
 type: docs
-title: "参考"
-linkTitle: "参考"
+title: "Dubbo 指南"
+linkTitle: "其他"
 description: ""
 weight: 50
 no_list: true
