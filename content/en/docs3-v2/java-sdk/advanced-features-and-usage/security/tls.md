@@ -49,7 +49,7 @@ if (!mutualTls) {}
 }
 ```
 
-In order to ensure the flexibility of application startup as much as possible, the specification of TLS Cert can also be dynamically specified during the startup phase according to the deployment environment through -D parameters or environment variables. Refer to Dubbo [Configuration Read Rules](/zh/docs/advanced /config-rule)
+In order to ensure the flexibility of application startup as much as possible, the specification of TLS Cert can also be dynamically specified during the startup phase according to the deployment environment through -D parameters or environment variables. Refer to Dubbo [Configuration Read Rules](/zh-cn/docs/advanced /config-rule)
 
 
 > On the security of service calls, Dubbo will continue to invest in subsequent versions, and the authentication mechanism for service discovery/calling is expected to meet you in the next version.

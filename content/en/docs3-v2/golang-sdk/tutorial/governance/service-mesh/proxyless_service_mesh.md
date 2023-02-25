@@ -26,7 +26,7 @@ Service provides a good idea for service governance, decoupling infrastructure f
 
 Agentless service grid is a new concept proposed in recent years. Open source communities such as isito, gRPC, and brpc have all explored and practiced in this direction. The agentless service grid framework is introduced by business applications in the form of SDK, and is responsible for communication and governance between services. The configuration from the control plane is directly sent to the service framework, and the service framework replaces the functions of the above sidecar.
 
-![](/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/894c0e52-9d34-4490-b49b-24973ef4aabc.png)
+![img](/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/894c0e52-9d34-4490-b49b-24973ef4aabc.png)
 
 The main capabilities of the service framework (SDK) can be summarized as the following three points:
 
@@ -58,7 +58,7 @@ Generally speaking, the Proxyless architecture is more suitable for use in produ
 
 Dubbo-go itself has scalable service registration and discovery capabilities, and we have adapted the implementation of the registration center for the service mesh scenario. Developers can register dubbo-go application information on the istiod control plane. The client application can query the registered interface data to complete the service discovery process.
 
-![](/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/454d1e31-0be3-41fe-97ec-f52673ebf74f.png)
+![img](/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/454d1e31-0be3-41fe-97ec-f52673ebf74f.png)
 
 1. Developers use the dubbogo-cli tool to create application templates and publish Deployment / Service to the cluster.
 2. The server pulls the full amount of CDS and EDS, compares the local IP, and gets the host name of the current application. And register all the mappings from interface names to host names of this application on Istiod.

@@ -12,4 +12,4 @@ Distributed transactions are implemented based on the JTA/XA specification.
 
 ![/user-guide/images/jta-xa.jpg](/imgs/user/jta-xa.jpg)
 
-In Dubbo, you can use [seata](/zh/blog/2019/01/17/How to use seata to ensure the consistency between dubbo microservices/) to complete the support for distributed transactions.
+In Dubbo, you can use [seata](/zh-cn/blog/2019/01/17/How to use seata to ensure the consistency between dubbo microservices/) to complete the support for distributed transactions.

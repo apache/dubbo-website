@@ -18,7 +18,7 @@ cd dubbo-admin-distribution/target
 java -jar dubbo-admin-0.1.jar
 ```
 * visit  
-http://localhost:8080
+`http://localhost:8080`
 
 
 ### Deploy frontend and backend separately

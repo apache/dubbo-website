@@ -11,7 +11,7 @@ Dubbogo has two service levels: App Level and Interface Level, which are closely
 
 As shown in the figure below, you can see that the components at the application level are marked in light red, and the components at the interface level are marked in light blue:
 
-![](/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png)
+![img](/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png)
 
 ## 1. Application level components
 

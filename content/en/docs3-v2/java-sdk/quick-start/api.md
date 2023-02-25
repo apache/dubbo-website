@@ -55,11 +55,11 @@ docker run --name some-zookeeper --restart always -d zookeeper
 
 Starting from this section, the project will be built and tested based on IntelliJ IDEA.
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-10-50-33-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-10-50-33-image.png)
 
 As shown above, a basic project can be built.
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-42-11-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-42-11-image.png)
 
 After initializing the project, you need to create `org.apache.dubbo.samples.api`, `org.apache.dubbo.samples.client` and `org.apache.dubbo.samples` in the `src/main/java` directory .provider` three packages.
 
@@ -77,7 +77,7 @@ The above three packages respectively correspond to the APIs that the applicatio
 
 After initializing the project, we need to add Dubbo-related maven dependencies first.
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-10-51-06-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-10-51-06-image.png)
 
 Edit the `pom.xml` file and add the following configuration.
 
@@ -114,7 +114,7 @@ Edit the `pom.xml` file and add the following configuration.
 
 In this configuration, the dependencies of dubbo and zookeeper (and the corresponding connector curator) are defined.
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-16-06-15-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-16-06-15-image.png)
 
 After adding the above configuration, you can refresh dependencies through IDEA's `Maven - Reload All Maven Projects`.
 
@@ -122,7 +122,7 @@ After adding the above configuration, you can refresh dependencies through IDEA'
 
 The service interface is a bridge between the consumer and the server in Dubbo.
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-42-43-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-42-43-image.png)
 
 Create `GreetingsService` interface under `org.apache.dubbo.samples.api`, defined as follows:
 
@@ -141,7 +141,7 @@ In `GreetingsService`, the `sayHi` method is defined. Subsequent services publis
 
 After defining the service interface, you can define the corresponding implementation on the server side. Compared with the consumer side, this part of the implementation is a remote implementation, and there is no relevant information locally.
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-43-34-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-43-34-image.png)
 
 Create `GreetingsServiceImpl` class under `org.apache.dubbo.samples.provider`, defined as follows:
 
@@ -170,7 +170,7 @@ After implementing the service, this section will publish the service on the net
 
 
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-44-22-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-44-22-image.png)
 
 
 
@@ -224,7 +224,7 @@ For the consumer side, you can subscribe to the consumer side through Dubbo's AP
 
 
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-55-09-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-55-09-image.png)
 
 
 
@@ -284,7 +284,7 @@ As of step 7, the code has been developed, and this section will start the entir
 
 
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-52-26-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-52-26-image.png)
 
 
 
@@ -302,7 +302,7 @@ Then start `org.apache.dubbo.samples.client.Application`, and wait for a while t
 
 
 
-![](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-54-42-image.png)
+![img](/imgs/docs3-v2/java-sdk/quickstart/2023-01-31-15-54-42-image.png)
 
 
 

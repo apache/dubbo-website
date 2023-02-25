@@ -72,4 +72,4 @@ Request the result in json format via http:
 
 Note: It is recommended to pay attention to the result of `serializeWarnedClasses` in time, and judge whether it is attacked by whether the returned result is not empty.
 
-> For more configuration details, please refer to [Dubbo Class Check Mechanism](/zh/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/).
+> For more configuration details, please refer to [Dubbo Class Check Mechanism](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/).

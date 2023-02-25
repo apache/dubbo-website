@@ -7,7 +7,7 @@ description: "Address selection based on consistent hash in the load balancing p
 ---
 ## Feature description
 
-[Analysis of Dubbo Consistent Hash Load Balancing Implementation](/zh/blog/2019/05/01/dubbo-%E4%B8%80%E8%87%B4%E6%80%A7hash%E8%B4%9F%E8 %BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0%E5%89%96%E6%9E%90/)
+[Analysis of Dubbo Consistent Hash Load Balancing Implementation](/zh-cn/blog/2019/05/01/dubbo-%E4%B8%80%E8%87%B4%E6%80%A7hash%E8%B4%9F%E8 %BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0%E5%89%96%E6%9E%90/)
 
 ## scenes to be used
 

@@ -32,7 +32,7 @@ The overall architecture of Apache Dubbo can well meet the large-scale microserv
   * Extension of microservice governance components, such as Registry, Config Center, Metadata Center, etc.
 * Enterprise-level microservice governance capabilities
   * The de facto standard service framework supported by domestic public cloud vendors
-  * Years of enterprise practical experience test, refer to [user practice case](../../../users)
+  * Years of enterprise practical experience test
 
 ### Dubbo basic workflow
 

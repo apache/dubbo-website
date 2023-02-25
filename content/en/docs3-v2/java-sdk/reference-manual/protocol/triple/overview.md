@@ -7,7 +7,7 @@ weight: 1
 
 ## Triple overview
 
-For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/zh/docs/concepts/rpc-protocol/)
+For the format and principle of the `Triple` protocol, please refer to [RPC Communication Protocol](/zh-cn/docs/concepts/rpc-protocol/)
 
 According to the goal of Triple design, the `Triple` protocol has the following advantages
 
