@@ -107,7 +107,7 @@ curl -L https://dubbo.apache.org/installer.sh | VERSION=0.1.0 sh -
 
 将 dubboctl 放入可执行路径
 ```shell
-ln -s dubbo-admin-0.1.0/bin/dubboctl /usr/local/bin/dubboctl
+ln -s dubbo-admin-0.1.0/bin/dubbo-admin /usr/local/bin/dubbo-admin
 ```
 ### Run
 ```shell
@@ -206,8 +206,5 @@ external-services:
 # 更多配置
 ```
 ### 打开 Admin 控制台
-```shell
-kubectl port-forward svc/dubbo-admin -n dubbo-system 38080:38080
-```
 
 打开浏览器，访问： `http://127.0.0.1:38080/`
