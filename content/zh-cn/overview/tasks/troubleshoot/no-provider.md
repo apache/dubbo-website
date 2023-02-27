@@ -21,16 +21,16 @@ Exception in thread "main" org.apache.dubbo.rpc.RpcException: No provider availa
 
 ## 排查思路全览
 
-![img](/imgs/docs3-v2/troubleshoot/1676536783437-2e3853cf-68bd-43b1-bc66-81dfc1c4585b.jpeg)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1676536783437-2e3853cf-68bd-43b1-bc66-81dfc1c4585b.jpeg)
 
 ## 详细教程
 ### 1 识别异常的服务以及订阅模式
 为了后续正确定位排查的方向，第一步需要先确认有报错的服务名。
 
-![img](/imgs/docs3-v2/troubleshoot/1676616010488-a31451e7-e34e-44b8-ba16-bf6e3f162e33.png)
-![img](/imgs/docs3-v2/troubleshoot/1676615807014-5413111b-109e-4976-a25b-d15fe75b314d.png)
-![img](/imgs/docs3-v2/troubleshoot/1676616273793-f0bd82b5-bbc6-483f-b945-abe707556b37.png)
-![img](/imgs/docs3-v2/troubleshoot/1676616314724-042f1157-cdee-4aaa-b1ac-355c6f1b53e4.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1676616010488-a31451e7-e34e-44b8-ba16-bf6e3f162e33.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1676615807014-5413111b-109e-4976-a25b-d15fe75b314d.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1676616273793-f0bd82b5-bbc6-483f-b945-abe707556b37.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1676616314724-042f1157-cdee-4aaa-b1ac-355c6f1b53e4.png)
 
 如上图所示，常见的地址找不到异常报错中会包括对应的服务名，格式有以下两种。
 
@@ -65,8 +65,8 @@ ${group}/${interfaceName}:${version}
 ### 2 查询注册中心是否存在服务
 #### 2.1 通过 Dubbo Admin 查询（推荐）
 如果您的集群中部署了 Dubbo Admin，可以直接 Dubbo Admin 的控制台中的“服务查询”模块查询该服务的注册情况。
-![img](/imgs/docs3-v2/troubleshoot/1676619545350-62c71bca-44c2-4d28-8660-969e2a24dccb.png)
-![img](/imgs/docs3-v2/troubleshoot/1676620038647-54bcbafb-1ee1-470f-8e48-8017dd7321dc.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1676619545350-62c71bca-44c2-4d28-8660-969e2a24dccb.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1676620038647-54bcbafb-1ee1-470f-8e48-8017dd7321dc.png)
 
 如上图所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
 如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。
@@ -80,7 +80,7 @@ ${group}/${interfaceName}:${version}
 
 注：Nacos 注册中心下，Dubbo 服务名与 Nacos 服务名映射关系为 `providers:${interfaceName}:${version}:${group}`，如 `dev/com.example.DemoService:1.0.0` 映射为 `providers:com.example.DemoService:1.0.0:dev`。
 
-![img](/imgs/docs3-v2/troubleshoot/1677399028899-c36dbb0e-a6a9-42f1-85f8-a746410588ec.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1677399028899-c36dbb0e-a6a9-42f1-85f8-a746410588ec.png)
 
 如上图所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
 如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。
@@ -90,9 +90,9 @@ ${group}/${interfaceName}:${version}
 
 注：查询服务映射时 Data ID 为接口名，不需要填写分组、版本号。
 
-![img](/imgs/docs3-v2/troubleshoot/1677399521159-399758bd-09c9-4365-a2e3-960fadbf93a8.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1677399521159-399758bd-09c9-4365-a2e3-960fadbf93a8.png)
 
-![img](/imgs/docs3-v2/troubleshoot/1677399582939-a92dbc6a-e197-418d-899e-a13cbd958ec2.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1677399582939-a92dbc6a-e197-418d-899e-a13cbd958ec2.png)
 
 如上图所示，查询该配置的配置内容中是否存在预期的应用名。
 如果能查到，请以该应用名为服务名称继续排查，如果不能查到请跳转到第 3 步进行排查。
@@ -101,7 +101,7 @@ ${group}/${interfaceName}:${version}
 
 注：此处的服务名称为上一步查询出的应用名，非接口名。
 
-![img](/imgs/docs3-v2/troubleshoot/1677399702538-0d198aa5-dd40-49ec-a5ad-b3615c4e9d6a.png)
+![img](/imgs/docs3-v2/java-sdk/troubleshoot/1677399702538-0d198aa5-dd40-49ec-a5ad-b3615c4e9d6a.png)
 
 如上图所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
 如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。
