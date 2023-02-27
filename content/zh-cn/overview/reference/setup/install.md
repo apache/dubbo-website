@@ -73,13 +73,9 @@ helm install dubbo-admin-zookeeper dubbo/dubbo-stack -n dubbo-system
 ```
 
 ```shell
-helm install dubbo-admin dubbo/dubbo-stack -n dubbo-system
+helm install dubbo-admin-grafana dubbo/dubbo-stack -n dubbo-system
 
-helm install dubbo-admin-nacos dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-zookeeper dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-all dubbo/dubbo-stack -n dubbo-system
+helm install dubbo-admin-prometheus dubbo/dubbo-stack -n dubbo-system
 ```
 #### 安装方式二
 ```shell
