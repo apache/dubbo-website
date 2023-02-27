@@ -593,6 +593,6 @@ dubbo>
 ```
 
 注：采集路由信息会消耗一定的性能，排查完毕后请及时关闭。
-参考文档：(路由状态命令)[/zh-cn/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/]
+参考文档：[路由状态命令](/zh-cn/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/)
 
 
