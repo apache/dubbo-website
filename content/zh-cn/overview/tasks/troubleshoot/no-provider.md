@@ -2,7 +2,7 @@
 type: docs
 title: "地址找不到异常"
 linkTitle: "地址找不到异常"
-weight: 1
+weight: 20
 description: "在 Dubbo 抛出地址找不到异常的时候的排查思路"
 ---
 
