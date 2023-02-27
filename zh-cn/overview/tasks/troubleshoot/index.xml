@@ -1,0 +1,424 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 故障排查</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/</link><description>Recent content in 故障排查 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 地址找不到异常</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/no-provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/no-provider/</guid><description>
+&lt;p>在开发与生产部署过程中，由于 Dubbo 是一个需要基于服务发现功能进行调用的框架，很容易由于各种客观原因出现 &lt;code>No Provder&lt;/code> 的异常，本文旨在通过体系化的排查思路，让您能够在异常的时候快速定位原因并解决。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>java.lang.IllegalStateException: Failed to check the status of the service org.apache.dubbo.samples.api.GreetingsService. No provider available for the service org.apache.dubbo.samples.api.GreetingsService from the url consumer://*** to the consumer 30.221.146.226 use dubbo version 3.2.0-beta.4
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Exception in thread &amp;#34;main&amp;#34; org.apache.dubbo.rpc.RpcException: No provider available from registry 127.0.0.1:2181 for service org.apache.dubbo.samples.api.GreetingsService on consumer 30.221.146.226 use dubbo version 3.2.0-beta.4, please check status of providers(disabled, not registered or in blacklist).
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="一句话总结">一句话总结&lt;/h2>
+&lt;p>服务找不到时先自查服务是否已经开发完部署了，然后在注册中心中确认是否已经注册，如果注册检查服务端发布情况、如果未注册检查消费端订阅情况，中间任何一步出问题都会导致异常。&lt;/p>
+&lt;h2 id="排查思路全览">排查思路全览&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1676536783437-2e3853cf-68bd-43b1-bc66-81dfc1c4585b.jpeg" alt="img">&lt;/p>
+&lt;h2 id="详细教程">详细教程&lt;/h2>
+&lt;h3 id="1-识别异常的服务以及订阅模式">1 识别异常的服务以及订阅模式&lt;/h3>
+&lt;p>为了后续正确定位排查的方向，第一步需要先确认有报错的服务名。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1676616010488-a31451e7-e34e-44b8-ba16-bf6e3f162e33.png" alt="img">
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1676615807014-5413111b-109e-4976-a25b-d15fe75b314d.png" alt="img">
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1676616273793-f0bd82b5-bbc6-483f-b945-abe707556b37.png" alt="img">
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1676616314724-042f1157-cdee-4aaa-b1ac-355c6f1b53e4.png" alt="img">&lt;/p>
+&lt;p>如上图所示，常见的地址找不到异常报错中会包括对应的服务名，格式有以下两种。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>No provider available for the service ${serviceName}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>No provider available from registry ${registryAddress} for service ${serviceName}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在这个报错日志中可以提取出报错对应的服务名。此处需要注意关注对应的分组与版本号，通常格式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>${group}/${interfaceName}:${version}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>除了获取报错对应的服务名外，还需要获取该服务的订阅模式。（默认通常为 &lt;code>APPLICATION_FIRST&lt;/code> 也即是双订阅模式）&lt;/p>
+&lt;p>如一下日志所示，可以在 Dubbo 的日志中搜索 &lt;code>[DUBBO] Succeed Migrated to&lt;/code> 关键字，获取对应的订阅模式。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[26/02/23 03:27:07:007 CST] main INFO migration.MigrationRuleHandler: [DUBBO] Succeed Migrated to APPLICATION_FIRST mode. Service Name: org.apache.dubbo.samples.api.GreetingsService, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 192.168.31.5
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当前 Dubbo 共有三种订阅模式：&lt;/p>
+&lt;ul>
+&lt;li>FORCE_INTERFACE：仅订阅接口级服务发现模型的数据，这种数据为 2.7.x 及之前的 Dubbo 版本发布的数据模型。&lt;/li>
+&lt;li>FORCE_APPLICATION：仅应用级服务发现模型的数据，这种数据为 3.x 版本开始 Dubbo 为云原生大规模部署的应用所设计的数据模型。&lt;/li>
+&lt;li>APPLICATION_FIRST：同时订阅接口级服务发现模型和应用级服务发现模型的数据，任何一种模型下有数据都可以调用，默认优先使用应用级服务发现模型的数据。&lt;/li>
+&lt;/ul>
+&lt;p>如果该有问题的服务的订阅模式为 FORCE_INTERFACE，则后续排查中需要检查接口级的地址是否正常发布；如果为 FORCE_APPLICATION 则需要检查应用级地址是否正常发布；如果为 APPLICATION_FIRST 则任意一种地址模型发布都可以。&lt;/p>
+&lt;h3 id="2-查询注册中心是否存在服务">2 查询注册中心是否存在服务&lt;/h3>
+&lt;h4 id="21-通过-dubbo-admin-查询推荐">2.1 通过 Dubbo Admin 查询（推荐）&lt;/h4>
+&lt;p>如果您的集群中部署了 Dubbo Admin，可以直接 Dubbo Admin 的控制台中的“服务查询”模块查询该服务的注册情况。
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1676619545350-62c71bca-44c2-4d28-8660-969e2a24dccb.png" alt="img">
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1676620038647-54bcbafb-1ee1-470f-8e48-8017dd7321dc.png" alt="img">&lt;/p>
+&lt;p>如上图所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
+如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。&lt;/p>
+&lt;h4 id="22-通过注册中心查询">2.2 通过注册中心查询&lt;/h4>
+&lt;p>如果您没有部署 Dubbo Admin，则可以通过注册中心直接查询原始数据。&lt;/p>
+&lt;h4 id="221-nacos-注册中心">2.2.1 Nacos 注册中心&lt;/h4>
+&lt;p>1）接口级服务发现
+在接口级服务发现模型下，可以直接通过 Nacos 控制台查询服务信息，入口为 &amp;ldquo;服务管理&amp;rdquo; - &amp;ldquo;服务列表&amp;rdquo;，输入服务名在服务名称一栏搜索即可查询。&lt;/p>
+&lt;p>注：Nacos 注册中心下，Dubbo 服务名与 Nacos 服务名映射关系为 &lt;code>providers:${interfaceName}:${version}:${group}&lt;/code>，如 &lt;code>dev/com.example.DemoService:1.0.0&lt;/code> 映射为 &lt;code>providers:com.example.DemoService:1.0.0:dev&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1677399028899-c36dbb0e-a6a9-42f1-85f8-a746410588ec.png" alt="img">&lt;/p>
+&lt;p>如上图所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
+如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。&lt;/p>
+&lt;p>2）应用级服务发现
+在应用级服务发现模型下，需要先查询服务映射的信息，入口为 &amp;ldquo;配置管理&amp;rdquo; - &amp;ldquo;配置列表&amp;rdquo;，Data ID 为接口名，Group 为 &lt;code>mapping&lt;/code>。&lt;/p>
+&lt;p>注：查询服务映射时 Data ID 为接口名，不需要填写分组、版本号。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1677399521159-399758bd-09c9-4365-a2e3-960fadbf93a8.png" alt="img">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1677399582939-a92dbc6a-e197-418d-899e-a13cbd958ec2.png" alt="img">&lt;/p>
+&lt;p>如上图所示，查询该配置的配置内容中是否存在预期的应用名。
+如果能查到，请以该应用名为服务名称继续排查，如果不能查到请跳转到第 3 步进行排查。&lt;/p>
+&lt;p>在查询到应用名以后，需要进一步查询服务信息，入口为 &amp;ldquo;服务管理&amp;rdquo; - &amp;ldquo;服务列表&amp;rdquo;，输入服务名在服务名称一栏搜索即可查询。&lt;/p>
+&lt;p>注：此处的服务名称为上一步查询出的应用名，非接口名。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/troubleshoot/1677399702538-0d198aa5-dd40-49ec-a5ad-b3615c4e9d6a.png" alt="img">&lt;/p>
+&lt;p>如上图所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
+如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。&lt;/p>
+&lt;h4 id="222-通过-zookeeper-注册中心查询">2.2.2 通过 Zookeeper 注册中心查询&lt;/h4>
+&lt;p>1）接口级服务发现
+在接口级服务发现模型下，可以直接通过 Zookeeper 命令行查询服务信息，路径为 &lt;code>/dubbo/${interfaceName}/providers&lt;/code>。&lt;/p>
+&lt;p>注：Zookeeper 注册中心中路径上为接口名，分组和版本号在地址参数上，如果您指定了服务的分组或版本号，需要检查每个地址的参数。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 1&lt;span style="color:#719e07">]&lt;/span> ls /dubbo/org.apache.dubbo.samples.api.GreetingsService/providers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>dubbo%3A%2F%2F30.221.144.195%3A20880%2Forg.apache.dubbo.samples.api.GreetingsService%3Fanyhost%3Dtrue%26application%3Dfirst-dubbo-provider%26background%3Dfalse%26deprecated%3Dfalse%26dubbo%3D2.0.2%26dynamic%3Dtrue%26environment%3Dproduct%26executor-management-mode%3Ddefault%26file-cache%3Dtrue%26generic%3Dfalse%26interface%3Dorg.apache.dubbo.samples.api.GreetingsService%26methods%3DsayHi%26pid%3D37828%26prefer.serialization%3Dfastjson2%2Chessian2%26release%3D3.2.0-beta.6-SNAPSHOT%26service-name-mapping%3Dtrue%26side%3Dprovider%26timestamp%3D1677463548624&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
+如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。&lt;/p>
+&lt;p>2）应用级服务发现
+在应用级服务发现模型下，需要先查询服务映射的信息，可以通过 Zookeeper 的命令行工具查询，路径为 &lt;code>/dubbo/mapping/${interfaceName}&lt;/code>&lt;/p>
+&lt;p>注：查询服务映射时 interfaceName 为接口名，不需要填写分组、版本号。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 6&lt;span style="color:#719e07">]&lt;/span> get /dubbo/mapping/org.apache.dubbo.samples.api.GreetingsService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>first-dubbo-provider
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，查询该配置的配置内容中是否存在预期的应用名。
+如果能查到，请以该应用名为服务名称继续排查，如果不能查到请跳转到第 3 步进行排查。&lt;/p>
+&lt;p>在查询到应用名以后，需要进一步查询服务信息，可以直接通过 Zookeeper 命令行查询服务信息，路径为 &lt;code>/services/${interfaceName}&lt;/code>。&lt;/p>
+&lt;p>注：此处的服务名称为上一步查询出的应用名，非接口名。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 7&lt;span style="color:#719e07">]&lt;/span> ls /services/first-dubbo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>30.221.144.195:20880&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上图所示，请结合前述第 1 步中服务发现模型确认是否能查询到预期的服务端。
+如果能查到，请跳转到第 x 步继续排查，如果不能查到请跳转到第 3 步进行排查。&lt;/p>
+&lt;p>注：如果采用了应用级服务发现模型后检查消费端地址仍找不到则可能是该服务端没有发布对应的服务，请从第 3 步开始排查。&lt;/p>
+&lt;h3 id="3-检查服务端是否已经发布服务">3 检查服务端是否已经发布服务&lt;/h3>
+&lt;h4 id="31-通过-dubbo-qos-查询推荐">3.1 通过 Dubbo QoS 查询（推荐）&lt;/h4>
+&lt;p>在 Dubbo 应用启动的时候，默认会在本地的 22222 端口发布一个 QoS 服务，可以用于运行时查询节点的状态。通常，如果没有独立配置 &lt;code>dubbo.application.qos-enable&lt;/code> 或者 &lt;code>dubbo.application.qos-port&lt;/code> 都可以基于本方法查询服务的信息。&lt;/p>
+&lt;p>找到预期发布该服务的机器，登陆到其控制台，执行 &lt;code>telnet 127.0.0.1 22222&lt;/code> 和 &lt;code>ls&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>➜ telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\ &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Provider side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Provider Service Name | PUB |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| org.apache.dubbo.samples.api.GreetingsService |nacos-A&lt;span style="color:#719e07">(&lt;/span>Y&lt;span style="color:#719e07">)&lt;/span>/nacos-I&lt;span style="color:#719e07">(&lt;/span>Y&lt;span style="color:#719e07">)&lt;/span>|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|DubboInternal - first-dubbo-provider/org.apache.dubbo.metadata.MetadataService:1.0.0| |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Consumer side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|Consumer Service Name|NUM|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果机器上没有 &lt;code>telnet&lt;/code> 也可以通过 &lt;code>cURL&lt;/code> 发起调用，请求地址为 &lt;code>http://127.0.0.1:22222/ls&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>➜ curl http://127.0.0.1:22222/ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Provider side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Provider Service Name | PUB |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| org.apache.dubbo.samples.api.GreetingsService |nacos-A&lt;span style="color:#719e07">(&lt;/span>Y&lt;span style="color:#719e07">)&lt;/span>/nacos-I&lt;span style="color:#719e07">(&lt;/span>Y&lt;span style="color:#719e07">)&lt;/span>|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|DubboInternal - first-dubbo-provider/org.apache.dubbo.metadata.MetadataService:1.0.0| |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Consumer side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|Consumer Service Name|NUM|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：默认情况下 &lt;code>ls&lt;/code> 命令仅允许本机调用，如果您无法登陆对应的机器，请参考 3.2 通过日志进行检查。&lt;/p>
+&lt;p>如上结果所示，请检查在 &lt;code>As Provider side&lt;/code> 一栏中是否存在您所发布的服务名，如果存在则代表该服务已经发布。
+第二列 &lt;code>PUB&lt;/code> 中的信息为该服务的注册情况，格式为 &lt;code>${registryName}-${registerType}(${status})&lt;/code>。&lt;code>registerType&lt;/code> 有两种情况，分别是 &lt;code>A&lt;/code> 和 &lt;code>I&lt;/code> 代表着应用级服务发现模型和接口级服务发现模型。可以通过该信息判断服务发布的情况。&lt;/p>
+&lt;p>如果您无法找到您所发布的服务，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>该服务是否已经添加到该机器所对应的运行代码中&lt;/li>
+&lt;li>该服务是否已经正确配置到 Dubbo 环境中，请检查如 &lt;code>@EnableDubbo&lt;/code>、&lt;code>@DubboService&lt;/code> 或者 XML 等配置是否正确&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所发布的服务，但是服务状态是 &lt;code>N&lt;/code>，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>该服务配置了 &lt;code>register=false&lt;/code>&lt;/li>
+&lt;li>是否有外部的命令调用了 &lt;code>offline&lt;/code>&lt;/li>
+&lt;li>应用是否启动成功（包括但不限于如 Tomcat、Spring 的启动状态）&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所发布的服务，但是对应的服务发现模型错误，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>注册中心地址是否配置了 &lt;code>registry-type=service&lt;/code>&lt;/li>
+&lt;li>是否配置了应用级的注册模式，如 &lt;code>dubbo.application.register-type&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所发布的服务，且对应的服务发现模型下服务状态是 &lt;code>Y&lt;/code>，请跳转到第 4 步进行排查。&lt;/p>
+&lt;h4 id="32-通过日志检查">3.2 通过日志检查&lt;/h4>
+&lt;p>如果您由于各种原因无法使用 Dubbo QoS，可以在对应机器的日志上搜索 &lt;code>[DUBBO] Export dubbo service ${serviceName}&lt;/code> 来检查服务是否已经发布。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>26/02/23 04:34:41:041 CST&lt;span style="color:#719e07">]&lt;/span> main INFO config.ServiceConfig: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> Export dubbo service org.apache.dubbo.samples.api.GreetingsService to &lt;span style="color:#b58900">local&lt;/span> registry url : injvm://***, dubbo version: 3.1.7, current host: 192.168.31.5
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，则代表着该服务已经发布，如果您无法找到您所发布的服务，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>该服务是否已经添加到该机器所对应的运行代码中&lt;/li>
+&lt;li>该服务是否已经正确配置到 Dubbo 环境中，请检查如 &lt;code>@EnableDubbo&lt;/code>、&lt;code>@DubboService&lt;/code> 或者 XML 等配置是否正确&lt;/li>
+&lt;/ol>
+&lt;p>在确定了服务已经发布了以后，可以在对应机器的日志上搜索 &lt;code>[DUBBO] Register dubbo service ${serviceName} to registry ${registryAddress}&lt;/code> 来检查服务是否已经注册。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>26/02/23 04:34:41:041 CST&lt;span style="color:#719e07">]&lt;/span> main INFO config.ServiceConfig: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> Register dubbo service org.apache.dubbo.samples.api.GreetingsService url dubbo://*** to registry 127.0.0.1:8848, dubbo version: 3.1.7, current host: 192.168.31.5
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，则代表着该服务已经注册，如果您无法找到相关日志，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>该服务配置了 &lt;code>register=false&lt;/code>&lt;/li>
+&lt;li>是否有外部的命令调用了 &lt;code>offline&lt;/code>&lt;/li>
+&lt;li>应用是否启动成功（包括但不限于如 Tomcat、Spring 的启动状态）&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所注册的服务，请跳转到第 4 步进行排查。&lt;/p>
+&lt;h3 id="4-检查服务端注册中心配置">4 检查服务端注册中心配置&lt;/h3>
+&lt;h4 id="41-通过-dubbo-admin-查询推荐">4.1 通过 Dubbo Admin 查询（推荐）&lt;/h4>
+&lt;p>注：Dubbo 3.2.0 及以上版本支持&lt;/p>
+&lt;p>在 Dubbo 应用启动的时候，默认会在本地的 22222 端口发布一个 QoS 服务，可以用于运行时查询节点的状态。通常，如果没有独立配置 &lt;code>dubbo.application.qos-enable&lt;/code> 或者 &lt;code>dubbo.application.qos-port&lt;/code> 都可以基于本方法查询服务的信息。&lt;/p>
+&lt;p>找到预期发布该服务的机器，登陆到其控制台，执行 &lt;code>telnet 127.0.0.1 22222&lt;/code> 和 &lt;code>getConfig RegistryConfig&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>➜ telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\ &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;getConfig RegistryConfig
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ApplicationModel: Dubbo Application&lt;span style="color:#719e07">[&lt;/span>1.1&lt;span style="color:#719e07">](&lt;/span>first-dubbo-provider&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>RegistryConfig: null
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;dubbo:registry &lt;span style="color:#268bd2">address&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span> &lt;span style="color:#268bd2">protocol&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> &lt;span style="color:#268bd2">port&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;8848&amp;#34;&lt;/span> /&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上述结果所示，请检查对应的注册中心配置是否符合预期，如果不符合请修改对应的配置。
+如果第 3 步和第 4 步检查均符合预期，则该服务应该可以在第 2 步的注册中心中查询到，如果查询不到请检查注册中心是否工作正常。&lt;/p>
+&lt;p>注：&lt;code>getConfig&lt;/code> 命令仅允许本机调用，如果您无法登陆对应的机器，请参考 4.2 通过日志进行检查。&lt;/p>
+&lt;h4 id="42-通过日志检查">4.2 通过日志检查&lt;/h4>
+&lt;p>如果您由于各种原因无法使用 Dubbo QoS，可以在对应机器的日志上搜索 &lt;code>[DUBBO] &amp;lt;dubbo:registry address=&lt;/code> 来检查注册中心的配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>27/02/23 09:36:46:046 CST&lt;span style="color:#719e07">]&lt;/span> main INFO context.ConfigManager: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> &amp;lt;dubbo:registry &lt;span style="color:#268bd2">address&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span> &lt;span style="color:#268bd2">protocol&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> &lt;span style="color:#268bd2">port&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;8848&amp;#34;&lt;/span> /&amp;gt;, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上述结果所示，请检查对应的注册中心配置是否符合预期，如果不符合请修改对应的配置。
+如果第 3 步和第 4 步检查均符合预期，则该服务应该可以在第 2 步的注册中心中查询到，如果查询不到请检查注册中心是否工作正常。&lt;/p>
+&lt;h3 id="5-检查服务端网络配置">5 检查服务端网络配置&lt;/h3>
+&lt;p>在服务端发布了服务以后，请检查网络防火墙（iptables、ACL 等）是否允许 Dubbo 端口进行通信，默认 Dubbo 协议端口号为 20880、Triple 协议端口号为 50051。具体端口号可以从第 2 步注册中心中的信息获取。&lt;/p>
+&lt;p>测试方式：在消费端机器直接 telnet 远程的端口。&lt;/p>
+&lt;h3 id="6-检查消费端是否订阅服务">6 检查消费端是否订阅服务&lt;/h3>
+&lt;h4 id="61-通过-dubbo-qos-查询推荐">6.1 通过 Dubbo QoS 查询（推荐）&lt;/h4>
+&lt;p>在 Dubbo 应用启动的时候，默认会在本地的 22222 端口发布一个 QoS 服务，可以用于运行时查询节点的状态。通常，如果没有独立配置 &lt;code>dubbo.application.qos-enable&lt;/code> 或者 &lt;code>dubbo.application.qos-port&lt;/code> 都可以基于本方法查询服务的信息。&lt;/p>
+&lt;p>找到预期发布该服务的机器，登陆到其控制台，执行 &lt;code>telnet 127.0.0.1 22222&lt;/code> 和 &lt;code>ls&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>➜ telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\ &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Provider side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Provider Service Name |PUB|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|DubboInternal - first-dubbo-consumer/org.apache.dubbo.metadata.MetadataService:1.0.0| |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Consumer side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Consumer Service Name | NUM |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|org.apache.dubbo.samples.api.GreetingsService|zookeeper-AF&lt;span style="color:#719e07">(&lt;/span>I-1,A-1&lt;span style="color:#719e07">)&lt;/span>|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果机器上没有 &lt;code>telnet&lt;/code> 也可以通过 &lt;code>cURL&lt;/code> 发起调用，请求地址为 &lt;code>http://127.0.0.1:22222/ls&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>➜ curl http://127.0.0.1:22222/ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Provider side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Provider Service Name |PUB|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|DubboInternal - first-dubbo-consumer/org.apache.dubbo.metadata.MetadataService:1.0.0| |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+------------------------------------------------------------------------------------+---+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Consumer side:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Consumer Service Name | NUM |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|org.apache.dubbo.samples.api.GreetingsService|zookeeper-AF&lt;span style="color:#719e07">(&lt;/span>I-1,A-1&lt;span style="color:#719e07">)&lt;/span>|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------------------------------+---------------------+
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：默认情况下 &lt;code>ls&lt;/code> 命令仅允许本机调用，如果您无法登陆对应的机器，请参考 3.2 通过日志进行检查。&lt;/p>
+&lt;p>如上结果所示，请检查在 &lt;code>As Consumer side&lt;/code> 一栏中是否存在您所发布的服务名，如果存在则代表该服务已经发布。
+第二列 &lt;code>NUM&lt;/code> 中的信息为该服务的注册情况，格式为 &lt;code>${registryName}-${migrationType}(${level}-${count})&lt;/code>。&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>migrationType&lt;/code> 有三种情况，分别是 &lt;code>AF&lt;/code>、&lt;code>FA&lt;/code> 和 &lt;code>FI&lt;/code> 代表着订阅的模式。&lt;code>AF&lt;/code> 会优先使用应用级模型下的地址，如果应用级地址找不到会自动使用接口级模型的地址。&lt;code>FA&lt;/code> 和 &lt;code>FI&lt;/code> 则会只使用应用级模型的地址和接口级模型的地址。&lt;/li>
+&lt;li>&lt;code>level&lt;/code> 有两种情况，分别是 &lt;code>I&lt;/code> 和 &lt;code>A&lt;/code>，代表着接口级模型下的地址和应用级模型下的地址。&lt;/li>
+&lt;/ol>
+&lt;p>如果您无法找到您所发布的服务，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>该服务是否已经添加到该机器所对应的运行代码中&lt;/li>
+&lt;li>该服务是否已经正确配置到 Dubbo 环境中，请检查如 &lt;code>@EnableDubbo&lt;/code>、&lt;code>@DubboReference&lt;/code> 或者 XML 等配置是否正确&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所发布的服务，但是服务的地址数是 &lt;code>0&lt;/code>，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>注册中心的工作状态&lt;/li>
+&lt;li>从第 2 步重新排查&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所发布的服务，但是对应的服务发现模型错误，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>是否配置的订阅迁移规则，如 &lt;code>dubbo-migration.yaml&lt;/code> 或动态配置，请参考 &lt;a href="https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/">应用级服务发现地址迁移规则说明&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所发布的服务，且对应的服务发现模型下地址数非 &lt;code>0&lt;/code>，请跳转到第 7 步进行排查。&lt;/p>
+&lt;h4 id="62-通过日志检查">6.2 通过日志检查&lt;/h4>
+&lt;p>如果您由于各种原因无法使用 Dubbo QoS，可以在对应机器的日志上搜索 &lt;code>[DUBBO] Subscribe: &lt;/code> 来检查服务是否已经订阅。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>27/02/23 11:02:05:005 CST&lt;span style="color:#719e07">]&lt;/span> main INFO zookeeper.ZookeeperRegistry: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> Subscribe: consumer://***/org.apache.dubbo.samples.api.GreetingsService?***, dubbo version: 3.2.0-beta.6, current host: 30.221.144.195
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，则代表着该服务已经发布，如果您无法找到您所发布的服务，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>该服务是否已经添加到该机器所对应的运行代码中&lt;/li>
+&lt;li>该服务是否已经正确配置到 Dubbo 环境中，请检查如 &lt;code>@EnableDubbo&lt;/code>、&lt;code>@DubboReference&lt;/code> 或者 XML 等配置是否正确&lt;/li>
+&lt;/ol>
+&lt;p>在确定了服务已经订阅了以后，可以在对应机器的日志上搜索 &lt;code>[DUBBO] Received invokers changed event from registry. &lt;/code> 来检查服务是否已经推送。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>27/02/23 11:02:05:005 CST&lt;span style="color:#719e07">]&lt;/span> main INFO integration.RegistryDirectory: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> Received invokers changed event from registry. Registry type: interface. Service Key: org.apache.dubbo.samples.api.GreetingsService. Urls Size : 1. Invokers Size : 1. Available Size: 1. Available Invokers : 30.221.144.195:20880, dubbo version: 3.2.0-beta.6, current host: 30.221.144.195
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，则代表着该服务已经推送，如果您无法找到相关日志，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>注册中心的工作状态&lt;/li>
+&lt;li>从第 2 步重新排查&lt;/li>
+&lt;/ol>
+&lt;p>如果您找到了您所注册的服务，请跳转到第 7 步进行排查。&lt;/p>
+&lt;p>注：推送日志仅 3.2.0 及以上版本支持&lt;/p>
+&lt;h3 id="7-检查消费端注册中心配置">7 检查消费端注册中心配置&lt;/h3>
+&lt;p>注：本小节排查思路与第 4 步检查服务端注册中心配置类似。&lt;/p>
+&lt;h4 id="71-通过-dubbo-admin-查询推荐">7.1 通过 Dubbo Admin 查询（推荐）&lt;/h4>
+&lt;p>注：Dubbo 3.2.0 及以上版本支持&lt;/p>
+&lt;p>在 Dubbo 应用启动的时候，默认会在本地的 22222 端口发布一个 QoS 服务，可以用于运行时查询节点的状态。通常，如果没有独立配置 &lt;code>dubbo.application.qos-enable&lt;/code> 或者 &lt;code>dubbo.application.qos-port&lt;/code> 都可以基于本方法查询服务的信息。&lt;/p>
+&lt;p>找到预期发布该服务的机器，登陆到其控制台，执行 &lt;code>telnet 127.0.0.1 22222&lt;/code> 和 &lt;code>getConfig RegistryConfig&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>➜ telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\ &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;getConfig RegistryConfig
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ApplicationModel: Dubbo Application&lt;span style="color:#719e07">[&lt;/span>1.1&lt;span style="color:#719e07">](&lt;/span>first-dubbo-provider&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>RegistryConfig: null
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;dubbo:registry &lt;span style="color:#268bd2">address&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span> &lt;span style="color:#268bd2">protocol&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> &lt;span style="color:#268bd2">port&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;8848&amp;#34;&lt;/span> /&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上述结果所示，请检查对应的注册中心配置是否符合预期，如果不符合请修改对应的配置。
+如果第 6 步和第 7 步检查均符合预期，则该服务应该可以在第 2 步的注册中心中查询到，如果查询不到请检查注册中心是否工作正常。&lt;/p>
+&lt;p>注：&lt;code>getConfig&lt;/code> 命令仅允许本机调用，如果您无法登陆对应的机器，请参考 4.2 通过日志进行检查。&lt;/p>
+&lt;h4 id="72-通过日志检查">7.2 通过日志检查&lt;/h4>
+&lt;p>如果您由于各种原因无法使用 Dubbo QoS，可以在对应机器的日志上搜索 &lt;code>[DUBBO] &amp;lt;dubbo:registry address=&lt;/code> 来检查注册中心的配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>27/02/23 09:36:46:046 CST&lt;span style="color:#719e07">]&lt;/span> main INFO context.ConfigManager: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> &amp;lt;dubbo:registry &lt;span style="color:#268bd2">address&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span> &lt;span style="color:#268bd2">protocol&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span> &lt;span style="color:#268bd2">port&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;8848&amp;#34;&lt;/span> /&amp;gt;, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上述结果所示，请检查对应的注册中心配置是否符合预期，如果不符合请修改对应的配置。
+如果第 3 步和第 4 步检查均符合预期，则该服务应该可以在第 2 步的注册中心中查询到，如果查询不到请检查注册中心是否工作正常。&lt;/p>
+&lt;h3 id="8-检查注册中心推送的地址信息">8 检查注册中心推送的地址信息&lt;/h3>
+&lt;p>注：本小节中使用的查询命令 Dubbo 3.2.0 及以上版本支持&lt;/p>
+&lt;p>在 Dubbo 应用启动的时候，默认会在本地的 22222 端口发布一个 QoS 服务，可以用于运行时查询节点的状态。通常，如果没有独立配置 &lt;code>dubbo.application.qos-enable&lt;/code> 或者 &lt;code>dubbo.application.qos-port&lt;/code> 都可以基于本方法查询服务的信息。&lt;/p>
+&lt;p>找到预期发布该服务的机器，登陆到其控制台，执行 &lt;code>telnet 127.0.0.1 22222&lt;/code> 和 &lt;code>getAddress ${serviceName}&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>➜ telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\ &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;getAddress org.apache.dubbo.samples.api.GreetingsService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ConsumerModel: org.apache.dubbo.samples.api.GreetingsService@38b2d161
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Registry: zookeeper://127.0.0.1:2181/org.apache.dubbo.registry.RegistryService?application&lt;span style="color:#719e07">=&lt;/span>first-dubbo-consumer&amp;amp;&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;&lt;span style="color:#268bd2">environment&lt;/span>&lt;span style="color:#719e07">=&lt;/span>product&amp;amp;executor-management-mode&lt;span style="color:#719e07">=&lt;/span>default&amp;amp;file-cache&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.registry.RegistryService&amp;amp;&lt;span style="color:#268bd2">pid&lt;/span>&lt;span style="color:#719e07">=&lt;/span>44482&amp;amp;&lt;span style="color:#268bd2">release&lt;/span>&lt;span style="color:#719e07">=&lt;/span>3.2.0-beta.6-SNAPSHOT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>MigrationStep: APPLICATION_FIRST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Interface-Level:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>All Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo://30.221.144.195:20880/org.apache.dubbo.samples.api.GreetingsService?anyhost&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>first-dubbo-provider&amp;amp;&lt;span style="color:#268bd2">background&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">check&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">deprecated&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;&lt;span style="color:#268bd2">dynamic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;executor-management-mode&lt;span style="color:#719e07">=&lt;/span>default&amp;amp;file-cache&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">generic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.api.GreetingsService&amp;amp;&lt;span style="color:#268bd2">methods&lt;/span>&lt;span style="color:#719e07">=&lt;/span>sayHi&amp;amp;prefer.serialization&lt;span style="color:#719e07">=&lt;/span>fastjson2,hessian2&amp;amp;&lt;span style="color:#268bd2">release&lt;/span>&lt;span style="color:#719e07">=&lt;/span>3.2.0-beta.6-SNAPSHOT&amp;amp;service-name-mapping&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">side&lt;/span>&lt;span style="color:#719e07">=&lt;/span>provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Valid Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo://30.221.144.195:20880/org.apache.dubbo.samples.api.GreetingsService?anyhost&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>first-dubbo-provider&amp;amp;&lt;span style="color:#268bd2">background&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">check&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">deprecated&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;&lt;span style="color:#268bd2">dynamic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;executor-management-mode&lt;span style="color:#719e07">=&lt;/span>default&amp;amp;file-cache&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">generic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.api.GreetingsService&amp;amp;&lt;span style="color:#268bd2">methods&lt;/span>&lt;span style="color:#719e07">=&lt;/span>sayHi&amp;amp;prefer.serialization&lt;span style="color:#719e07">=&lt;/span>fastjson2,hessian2&amp;amp;&lt;span style="color:#268bd2">release&lt;/span>&lt;span style="color:#719e07">=&lt;/span>3.2.0-beta.6-SNAPSHOT&amp;amp;service-name-mapping&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">side&lt;/span>&lt;span style="color:#719e07">=&lt;/span>provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Disabled Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Application-Level:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>All Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo://30.221.144.195:20880/org.apache.dubbo.samples.api.GreetingsService?anyhost&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>first-dubbo-consumer&amp;amp;&lt;span style="color:#268bd2">background&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">deprecated&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;dubbo.endpoints&lt;span style="color:#719e07">=[{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;port&amp;#34;&lt;/span>:20880,&lt;span style="color:#2aa198">&amp;#34;protocol&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>&lt;span style="color:#719e07">}]&lt;/span>&amp;amp;dubbo.metadata-service.url-params&lt;span style="color:#719e07">={&lt;/span>&lt;span style="color:#2aa198">&amp;#34;prefer.serialization&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;fastjson2,hessian2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;version&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;2.0.2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;release&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;3.2.0-beta.6-SNAPSHOT&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;side&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;provider&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;port&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;protocol&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>&amp;amp;dubbo.metadata.revision&lt;span style="color:#719e07">=&lt;/span>e37fc5748b33c325056556550d33dde7&amp;amp;dubbo.metadata.storage-type&lt;span style="color:#719e07">=&lt;/span>local&amp;amp;&lt;span style="color:#268bd2">dynamic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">environment&lt;/span>&lt;span style="color:#719e07">=&lt;/span>product&amp;amp;executor-management-mode&lt;span style="color:#719e07">=&lt;/span>default&amp;amp;file-cache&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">generic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.api.GreetingsService&amp;amp;&lt;span style="color:#268bd2">methods&lt;/span>&lt;span style="color:#719e07">=&lt;/span>sayHi&amp;amp;&lt;span style="color:#268bd2">pid&lt;/span>&lt;span style="color:#719e07">=&lt;/span>44482&amp;amp;prefer.serialization&lt;span style="color:#719e07">=&lt;/span>fastjson2,hessian2&amp;amp;register.ip&lt;span style="color:#719e07">=&lt;/span>30.221.144.195&amp;amp;&lt;span style="color:#268bd2">release&lt;/span>&lt;span style="color:#719e07">=&lt;/span>3.2.0-beta.6-SNAPSHOT&amp;amp;service-name-mapping&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">side&lt;/span>&lt;span style="color:#719e07">=&lt;/span>consumer&amp;amp;&lt;span style="color:#268bd2">sticky&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">timestamp&lt;/span>&lt;span style="color:#719e07">=&lt;/span>1677466879396&amp;amp;&lt;span style="color:#268bd2">unloadClusterRelated&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Valid Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo://30.221.144.195:20880/org.apache.dubbo.samples.api.GreetingsService?anyhost&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>first-dubbo-consumer&amp;amp;&lt;span style="color:#268bd2">background&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">deprecated&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;dubbo.endpoints&lt;span style="color:#719e07">=[{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;port&amp;#34;&lt;/span>:20880,&lt;span style="color:#2aa198">&amp;#34;protocol&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>&lt;span style="color:#719e07">}]&lt;/span>&amp;amp;dubbo.metadata-service.url-params&lt;span style="color:#719e07">={&lt;/span>&lt;span style="color:#2aa198">&amp;#34;prefer.serialization&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;fastjson2,hessian2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;version&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;2.0.2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;release&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;3.2.0-beta.6-SNAPSHOT&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;side&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;provider&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;port&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;protocol&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>&amp;amp;dubbo.metadata.revision&lt;span style="color:#719e07">=&lt;/span>e37fc5748b33c325056556550d33dde7&amp;amp;dubbo.metadata.storage-type&lt;span style="color:#719e07">=&lt;/span>local&amp;amp;&lt;span style="color:#268bd2">dynamic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">environment&lt;/span>&lt;span style="color:#719e07">=&lt;/span>product&amp;amp;executor-management-mode&lt;span style="color:#719e07">=&lt;/span>default&amp;amp;file-cache&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">generic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.api.GreetingsService&amp;amp;&lt;span style="color:#268bd2">methods&lt;/span>&lt;span style="color:#719e07">=&lt;/span>sayHi&amp;amp;&lt;span style="color:#268bd2">pid&lt;/span>&lt;span style="color:#719e07">=&lt;/span>44482&amp;amp;prefer.serialization&lt;span style="color:#719e07">=&lt;/span>fastjson2,hessian2&amp;amp;register.ip&lt;span style="color:#719e07">=&lt;/span>30.221.144.195&amp;amp;&lt;span style="color:#268bd2">release&lt;/span>&lt;span style="color:#719e07">=&lt;/span>3.2.0-beta.6-SNAPSHOT&amp;amp;service-name-mapping&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">side&lt;/span>&lt;span style="color:#719e07">=&lt;/span>consumer&amp;amp;&lt;span style="color:#268bd2">sticky&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">timestamp&lt;/span>&lt;span style="color:#719e07">=&lt;/span>1677466879396&amp;amp;&lt;span style="color:#268bd2">unloadClusterRelated&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Disabled Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上述结果所示，格式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>ConsumerModel: 订阅的信息
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Registry: 注册中心地址
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>MigrationStep: 迁移模型（FORCE_APPLICATION, APPLCATION_FIRST, FORCE_INTERFACE&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Interface-Level: 接口级服务发现模型下地址
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>All Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>从注册中心推送的所有地址
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Valid Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>所有可用地址
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Disabled Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>所有被拉黑的地址（通常是主动下线）
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Application-Level: 应用级服务发现模型下地址
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>All Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>从注册中心推送的所有地址
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Valid Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>所有可用地址
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Disabled Invokers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>所有被拉黑的地址（通常是主动下线）
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>请检查对应迁移模型是否符合预期，默认为 &lt;code>APPLCATION_FIRST&lt;/code>，如果对应的服务发现模型错误，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>是否配置的订阅迁移规则，如 &lt;code>dubbo-migration.yaml&lt;/code> 或动态配置，请参考 &lt;a href="https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/">应用级服务发现地址迁移规则说明&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;p>如果迁移模型正确，请检查对应模型下的&lt;strong>所有&lt;/strong>地址是否符合预期，如果不符合预期，请检查以下清单：&lt;/p>
+&lt;ol>
+&lt;li>注册中心的工作状态&lt;/li>
+&lt;li>从第 2 步重新排查&lt;/li>
+&lt;/ol>
+&lt;p>如果注册中心推送的地址符合预期，请检查&lt;strong>可用&lt;/strong>地址是否符合预期，如果不符合预期，一般为连接异常导致的自动拉黑，通常在四层网络不通或者机房断网等情况下出现，请跳转到第 9 步进行排查。&lt;/p>
+&lt;p>如果&lt;strong>可用&lt;/strong>地址符合预期，请跳转到第 10 步进行检查。&lt;/p>
+&lt;p>注：&lt;code>getAddress&lt;/code> 命令仅允许本机调用。&lt;/p>
+&lt;h3 id="9-检查消费端与服务端网络连通性">9 检查消费端与服务端网络连通性&lt;/h3>
+&lt;p>在服务端发布了服务以后，请检查网络防火墙（iptables、ACL 等）是否允许 Dubbo 端口进行通信，默认 Dubbo 协议端口号为 20880、Triple 协议端口号为 50051。具体端口号可以从第 2 步注册中心中的信息获取。&lt;/p>
+&lt;p>测试方式：在消费端机器直接 telnet 远程的端口。&lt;/p>
+&lt;p>常见异常场景：&lt;/p>
+&lt;ol>
+&lt;li>服务端消费端多集群部署，但是底层网络未打通&lt;/li>
+&lt;li>生产与测试共用注册中心，但是测试环境无法调用生产服务（&lt;strong>Dubbo 极其不推荐测试与生产环境混用&lt;/strong>）&lt;/li>
+&lt;li>单机调试，但是网络与大测试网不通&lt;/li>
+&lt;li>机房断网导致的节点断连&lt;/li>
+&lt;li>四层网络 ACL 规则未开放 Dubbo 端口访问&lt;/li>
+&lt;li>网络质量低、服务端负载过高等导致的网络连接质量差&lt;/li>
+&lt;/ol>
+&lt;h3 id="10-检查路由信息">10 检查路由信息&lt;/h3>
+&lt;p>注：Dubbo 3.1.0 及以上版本支持&lt;/p>
+&lt;h4 id="101-报错时检查日志">10.1 报错时检查日志&lt;/h4>
+&lt;p>在 Dubbo 出现调用异常的时候，可以在对应机器的日志上搜索 &lt;code>[DUBBO] No provider available after route for the service&lt;/code> 来检查路由的状态。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>27/02/23 11:33:16:016 CST&lt;span style="color:#719e07">]&lt;/span> main WARN cluster.SingleRouterChain: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> No provider available after route &lt;span style="color:#719e07">for&lt;/span> the service org.apache.dubbo.samples.api.GreetingsService from registry 30.221.144.195 on the consumer 30.221.144.195 using the dubbo version 3.2.0-beta.6-SNAPSHOT. Router snapshot is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span> Parent &lt;span style="color:#719e07">(&lt;/span>Input: 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 0&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">]&lt;/span> Input: 30.221.144.195:20880 -&amp;gt; Chain Node Output: Empty
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> MockInvokersSelector &lt;span style="color:#719e07">(&lt;/span>Input: 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 0&lt;span style="color:#719e07">)&lt;/span> Router message: invocation.need.mock not set. Return normal Invokers. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 30.221.144.195:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> StandardMeshRuleRouter &lt;span style="color:#719e07">(&lt;/span>Input: 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 0&lt;span style="color:#719e07">)&lt;/span> Router message: MeshRuleCache has not been built. Skip route. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 30.221.144.195:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> TagStateRouter &lt;span style="color:#719e07">(&lt;/span>Input: 1&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 0&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 0&lt;span style="color:#719e07">)&lt;/span> Router message: Disable Tag Router. Reason: tagRouterRule is invalid or disabled &lt;span style="color:#719e07">]&lt;/span> Current Node Output: Empty, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 2-2. This may be caused by No provider available after route &lt;span style="color:#719e07">for&lt;/span> the service, go to https://dubbo.apache.org/faq/2/2 to find instructions
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>请检查对应的 &lt;code>Current Node Output: 0&lt;/code> 所在的日志行，通常为该级路由导致的地址为空。&lt;/p>
+&lt;h4 id="102-通过-dubbo-admin-采样查询">10.2 通过 Dubbo Admin 采样查询&lt;/h4>
+&lt;p>对于线上运行的机器，Dubbo 提供了路由结果动态采样的能力，可以通过 Dubbo QoS 开启。&lt;/p>
+&lt;p>开启采样的方式：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;enableRouterSnapshot com.dubbo.*
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK. Found service count: 1. This will cause performance degradation, please be careful!
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>获取采样结果：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;getRecentRouterSnapshot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">1658224330156&lt;/span> - Router snapshot service com.dubbo.dubbointegration.BackendService from registry 172.18.111.184 on the consumer 172.18.111.184 using the dubbo version 3.0.9 is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span> Parent &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">]&lt;/span> Input: 172.18.111.187:20880,172.18.111.183:20880 -&amp;gt; Chain Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> MockInvokersSelector &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: invocation.need.mock not set. Return normal Invokers. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> StandardMeshRuleRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: MeshRuleCache has not been built. Skip route. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> TagStateRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: Disable Tag Router. Reason: tagRouterRule is invalid or disabled &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> ServiceStateRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: Directly &lt;span style="color:#719e07">return&lt;/span>. Reason: Invokers from previous router is empty or conditionRouters is empty. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> AppStateRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: Directly &lt;span style="color:#719e07">return&lt;/span>. Reason: Invokers from previous router is empty or conditionRouters is empty. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">1658224330156&lt;/span> - Router snapshot service com.dubbo.dubbointegration.BackendService from registry 172.18.111.184 on the consumer 172.18.111.184 using the dubbo version 3.0.9 is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span> Parent &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">]&lt;/span> Input: 172.18.111.187:20880,172.18.111.183:20880 -&amp;gt; Chain Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> MockInvokersSelector &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: invocation.need.mock not set. Return normal Invokers. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> StandardMeshRuleRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: MeshRuleCache has not been built. Skip route. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> TagStateRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: Disable Tag Router. Reason: tagRouterRule is invalid or disabled &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> ServiceStateRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: Directly &lt;span style="color:#719e07">return&lt;/span>. Reason: Invokers from previous router is empty or conditionRouters is empty. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span> AppStateRouter &lt;span style="color:#719e07">(&lt;/span>Input: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Current Node Output: 2&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Chain Node Output: 2&lt;span style="color:#719e07">)&lt;/span> Router message: Directly &lt;span style="color:#719e07">return&lt;/span>. Reason: Invokers from previous router is empty or conditionRouters is empty. &lt;span style="color:#719e07">]&lt;/span> Current Node Output: 172.18.111.187:20880,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>···
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>关闭采样的方式：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;disableRouterSnapshot com.dubbo.*
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK. Found service count: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：采集路由信息会消耗一定的性能，排查完毕后请及时关闭。
+参考文档：(路由状态命令)[/zh-cn/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/]&lt;/p></description></item></channel></rss>
