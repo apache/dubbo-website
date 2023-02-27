@@ -1,4 +1,197 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 故障排查</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/</link><description>Recent content in 故障排查 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 地址找不到异常</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/no-provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/no-provider/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 故障排查</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/</link><description>Recent content in 故障排查 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 应用启动失败</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/start-failed/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/start-failed/</guid><description>
+&lt;p>在开发与生产部署过程中，由于各种非预期的变更，可能会出现应用无法启动的情况。对于 Dubbo 来说，通常启动失败时都会有类似以下的报错信息。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Caused by: java.lang.IllegalStateException: Dubbo Module&lt;span style="color:#719e07">[&lt;/span>1.1.1&lt;span style="color:#719e07">]&lt;/span> is stopping or stopped, can not start again
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> Dubbo Application&lt;span style="color:#719e07">[&lt;/span>1.1&lt;span style="color:#719e07">](&lt;/span>first-dubbo-consumer&lt;span style="color:#719e07">)&lt;/span> start failure
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="一句话总结">一句话总结&lt;/h2>
+&lt;p>正确配置日志输出，往前翻到第一个报错的位置并进行处理。&lt;/p>
+&lt;h2 id="排查方式">排查方式&lt;/h2>
+&lt;h3 id="1-配置日志输出">1 配置日志输出&lt;/h3>
+&lt;p>目前 Dubbo 支持多种日志框架，如果环境中存在多种日志框架的支持（如 log4j 和 logback），Dubbo 会按照 （log4j &amp;gt; slf4j &amp;gt; log4j2 &amp;gt; jcl）的顺序输出日志框架。&lt;/p>
+&lt;p>如果与预期的日志框架不同时，会出现日志无法输出的问题。此时可以通过以下的配置进行调整：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.logger&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">slf4j&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：3.2.0 及以上的版本中将自动分析日志框架是否存在配置，优选日志框架输出。&lt;/p>
+&lt;h3 id="2-找到真正的报错信息">2 找到真正的报错信息&lt;/h3>
+&lt;p>在正确配置日志输出之后，可以在日志中搜索 &lt;code>[DUBBO] Model start failed&lt;/code> 或者 &lt;code>start failure&lt;/code> 关键字，查看真正导致 Dubbo 启动失败的原因。&lt;/p>
+&lt;p>如下所示，启动失败的原因为有服务订阅找不到提供者。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[27/02/23 12:49:18:018 CST] main ERROR deploy.DefaultModuleDeployer: [DUBBO] Model start failed: Dubbo Module[1.1.1] start failed: java.lang.IllegalStateException: Failed to check the status of the service org.apache.dubbo.samples.api.GreetingsService. No provider available for the service org.apache.dubbo.samples.api.GreetingsService from the url consumer://30.221.144.195/org.apache.dubbo.samples.api.GreetingsService?application=first-dubbo-consumer&amp;amp;background=false&amp;amp;dubbo=2.0.2&amp;amp;environment=product&amp;amp;executor-management-mode=default&amp;amp;file-cache=true&amp;amp;interface=org.apache.dubbo.samples.api.GreetingsService&amp;amp;methods=sayHi&amp;amp;pid=54580&amp;amp;register.ip=30.221.144.195&amp;amp;release=3.2.0-beta.6-SNAPSHOT&amp;amp;side=consumer&amp;amp;sticky=false&amp;amp;timestamp=1677473358611&amp;amp;unloadClusterRelated=false to the consumer 30.221.144.195 use dubbo version 3.2.0-beta.6-SNAPSHOT, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>java.lang.IllegalStateException: Failed to check the status of the service org.apache.dubbo.samples.api.GreetingsService. No provider available for the service org.apache.dubbo.samples.api.GreetingsService from the url consumer://30.221.144.195/org.apache.dubbo.samples.api.GreetingsService?application=first-dubbo-consumer&amp;amp;background=false&amp;amp;dubbo=2.0.2&amp;amp;environment=product&amp;amp;executor-management-mode=default&amp;amp;file-cache=true&amp;amp;interface=org.apache.dubbo.samples.api.GreetingsService&amp;amp;methods=sayHi&amp;amp;pid=54580&amp;amp;register.ip=30.221.144.195&amp;amp;release=3.2.0-beta.6-SNAPSHOT&amp;amp;side=consumer&amp;amp;sticky=false&amp;amp;timestamp=1677473358611&amp;amp;unloadClusterRelated=false to the consumer 30.221.144.195 use dubbo version 3.2.0-beta.6-SNAPSHOT
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="常见的原因">常见的原因&lt;/h2>
+&lt;p>本章将介绍 Dubbo 中常见的启动失败原因。&lt;/p>
+&lt;h3 id="1-消费端地址找不到">1 消费端地址找不到&lt;/h3>
+&lt;p>消费端地址找不到的日志特征如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Failed to check the status of the service ***. No provider available for the service *** from the url
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>解决方案：服务找不到时先自查服务是否已经开发完部署了，然后在注册中心中确认是否已经注册，如果注册检查服务端发布情况、如果未注册检查消费端订阅情况，中间任何一步出问题都会导致异常。&lt;/p>
+&lt;p>更多关于地址找不到的排查思路可以参考&lt;a href="../no-provider">地址找不到异常&lt;/a>一文。&lt;/p>
+&lt;h3 id="2-配置异常">2 配置异常&lt;/h3>
+&lt;h4 id="21-应用名未配置">2.1 应用名未配置&lt;/h4>
+&lt;p>应用名未配置的日志特征如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[27/02/23 02:23:14:014 CST] main ERROR deploy.DefaultApplicationDeployer: [DUBBO] Dubbo Application[1.1](unknown) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>java.lang.IllegalStateException: There&amp;#39;s no ApplicationConfig specified.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.context.ConfigManager.lambda$getApplicationOrElseThrow$0(ConfigManager.java:85)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>典型的日志内容为 &lt;code>There's no ApplicationConfig specified&lt;/code>。&lt;/p>
+&lt;p>解决方案：&lt;/p>
+&lt;ol>
+&lt;li>Spring Boot 项目配置 &lt;code>dubbo.application.name&lt;/code> 应用名并重新启动&lt;/li>
+&lt;li>Spring 项目配置 &lt;code>&amp;lt;dubbo:application name=&amp;quot;xxx&amp;quot;&amp;gt;&lt;/code> 属性并重新启动&lt;/li>
+&lt;li>直接使用 Dubbo API 的项目需要注入 &lt;code>ApplicationConfig applicationConfig = new ApplicationConfig(&amp;quot;xxx&amp;quot;);&lt;/code> 属性并重新启动&lt;/li>
+&lt;/ol>
+&lt;h4 id="22-重复配置覆盖">2.2 重复配置覆盖&lt;/h4>
+&lt;p>重复配置覆盖的日志特征如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Exception in thread &amp;#34;main&amp;#34; java.lang.IllegalStateException: Duplicate Configs found for ApplicationConfig, only one unique ApplicationConfig is allowed for one application. previous: &amp;lt;dubbo:application environment=&amp;#34;product&amp;#34; name=&amp;#34;first-dubbo-consumer&amp;#34; /&amp;gt;, later: &amp;lt;dubbo:application environment=&amp;#34;product&amp;#34; name=&amp;#34;second-dubbo-consumer&amp;#34; /&amp;gt;. According to config mode [STRICT], please remove redundant configs and keep only one.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>典型的日志内容为 &lt;code>Duplicate Configs found for&lt;/code>。&lt;/p>
+&lt;p>解决方案：&lt;/p>
+&lt;ol>
+&lt;li>Spring 项目中通常为注入了多个 Config 导致的，请按照日志提示删除到仅剩下一个并重新启动&lt;/li>
+&lt;li>Spring XML 项目中通常引入了多个互斥的属性导致的，请按照日志提示删除到仅剩下一个并重新启动&lt;/li>
+&lt;li>直接使用 Dubbo API 的项目通常是注入了多个相同维度的配置导致的，请按照日志提示删除到仅剩下一个并重新启动&lt;/li>
+&lt;li>对于无法修改重复属性的用户，可以在启动参数中指定 &lt;code>dubbo.config.mode&lt;/code> 为 &lt;code>OVERRIDE&lt;/code> 或 &lt;code>IGNORE&lt;/code> 分别代表着覆盖原配置或忽略新配置。&lt;/li>
+&lt;/ol>
+&lt;p>注：此异常为 3.x 中新检查行为，2.7.x 及以前版本中存在任意覆盖的问题。&lt;/p>
+&lt;h3 id="3-类找不到">3 类找不到&lt;/h3>
+&lt;p>类找不到的日志特征如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[27/02/23 02:44:50:050 CST] main ERROR deploy.DefaultApplicationDeployer: [DUBBO] Dubbo Application[1.1](first-dubbo-consumer) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>java.lang.IllegalStateException: org.apache.dubbo.samples.api.Greetings
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.ReferenceConfig.checkAndUpdateSubConfigs(ReferenceConfig.java:706)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.ReferenceConfig.postProcessRefresh(ReferenceConfig.java:721)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.AbstractConfig.refresh(AbstractConfig.java:693)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.concurrent.ConcurrentHashMap$ValuesView.forEach(ConcurrentHashMap.java:4707)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.context.ModuleConfigManager.refreshAll(ModuleConfigManager.java:180)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultModuleDeployer.loadConfigs(DefaultModuleDeployer.java:317)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultModuleDeployer.initialize(DefaultModuleDeployer.java:113)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.initModuleDeployers(DefaultApplicationDeployer.java:238)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.initialize(DefaultApplicationDeployer.java:211)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.start(DefaultApplicationDeployer.java:616)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.bootstrap.DubboBootstrap.start(DubboBootstrap.java:226)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.bootstrap.DubboBootstrap.start(DubboBootstrap.java:215)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.samples.client.Application.main(Application.java:50)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Caused by: java.lang.ClassNotFoundException: org.apache.dubbo.samples.api.Greetings
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.lang.ClassLoader.loadClass(ClassLoader.java:418)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:355)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.lang.ClassLoader.loadClass(ClassLoader.java:351)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.lang.Class.forName0(Native Method)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.lang.Class.forName(Class.java:348)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.ReferenceConfig.checkAndUpdateSubConfigs(ReferenceConfig.java:702)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ... 12 more
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>典型的日志内容为 &lt;code>java.lang.ClassNotFoundException&lt;/code>。&lt;/p>
+&lt;p>解决方案：&lt;/p>
+&lt;ol>
+&lt;li>检查是否正确打包，是否存在依赖包丢失的情况。（可以结合 arthas 进行诊断）&lt;/li>
+&lt;li>对于确实不需要使用类对象的（如网关场景），可以配置 &lt;code>generic&lt;/code> 属性开启泛化调用，会自动忽略类检查&lt;/li>
+&lt;/ol>
+&lt;h3 id="4-方法找不到">4 方法找不到&lt;/h3>
+&lt;p>方法找不到的日志特征如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[27/02/23 02:49:31:031 CST] main ERROR deploy.DefaultApplicationDeployer: [DUBBO] Dubbo Application[1.1](first-dubbo-consumer) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>java.lang.IllegalStateException: Failed to override field value of config bean: &amp;lt;dubbo:reference sticky=&amp;#34;false&amp;#34; interface=&amp;#34;org.apache.dubbo.samples.api.GreetingsService&amp;#34; /&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.AbstractConfig.refresh(AbstractConfig.java:690)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.concurrent.ConcurrentHashMap$ValuesView.forEach(ConcurrentHashMap.java:4707)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.context.ModuleConfigManager.refreshAll(ModuleConfigManager.java:180)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultModuleDeployer.loadConfigs(DefaultModuleDeployer.java:317)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultModuleDeployer.initialize(DefaultModuleDeployer.java:113)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.initModuleDeployers(DefaultApplicationDeployer.java:238)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.initialize(DefaultApplicationDeployer.java:211)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.start(DefaultApplicationDeployer.java:616)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.bootstrap.DubboBootstrap.start(DubboBootstrap.java:226)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.bootstrap.DubboBootstrap.start(DubboBootstrap.java:215)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.samples.client.Application.main(Application.java:56)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Caused by: java.lang.IllegalStateException: Found invalid method config, the interface org.apache.dubbo.samples.api.GreetingsService not found method &amp;#34;sayHi123&amp;#34; : [&amp;lt;dubbo:method return=&amp;#34;true&amp;#34; name=&amp;#34;sayHi123&amp;#34; sent=&amp;#34;true&amp;#34; timeout=&amp;#34;1000&amp;#34; /&amp;gt;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.AbstractInterfaceConfig.verifyMethodConfig(AbstractInterfaceConfig.java:399)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.AbstractInterfaceConfig.lambda$processExtraRefresh$2(AbstractInterfaceConfig.java:369)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:174)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1384)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:482)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:708)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:499)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.AbstractInterfaceConfig.processExtraRefresh(AbstractInterfaceConfig.java:370)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.AbstractConfig.refreshWithPrefixes(AbstractConfig.java:735)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.ReferenceConfigBase.preProcessRefresh(ReferenceConfigBase.java:140)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.config.AbstractConfig.refresh(AbstractConfig.java:686)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>典型的日志内容为 &lt;code>Found invalid method config&lt;/code>。&lt;/p>
+&lt;p>解决方案：&lt;/p>
+&lt;ol>
+&lt;li>检查是否正确打包，是否存在依赖包丢失的情况。（可以结合 arthas 进行诊断）&lt;/li>
+&lt;li>如果确定该方法已经删除，请删除对应的 &lt;code>MethodConfig&lt;/code> 并重新启动&lt;/li>
+&lt;li>对于确实不需要使用类对象的（如网关场景），可以配置 &lt;code>generic&lt;/code> 属性开启泛化调用，会自动忽略类检查&lt;/li>
+&lt;/ol>
+&lt;h3 id="5-端口冲突">5 端口冲突&lt;/h3>
+&lt;p>端口冲突的日志特征如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[27/02/23 02:52:00:000 CST] main ERROR deploy.DefaultApplicationDeployer: [DUBBO] Dubbo Application[1.1](first-dubbo-provider) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>org.apache.dubbo.rpc.RpcException: Fail to start server(url: dubbo://30.221.144.195:20880/org.apache.dubbo.samples.api.GreetingsService?anyhost=true&amp;amp;application=first-dubbo-provider&amp;amp;background=false&amp;amp;bind.ip=30.221.144.195&amp;amp;bind.port=20880&amp;amp;channel.readonly.sent=true&amp;amp;codec=dubbo&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dubbo.tag=dev&amp;amp;dynamic=true&amp;amp;executor-management-mode=default&amp;amp;file-cache=true&amp;amp;generic=false&amp;amp;heartbeat=60000&amp;amp;interface=org.apache.dubbo.samples.api.GreetingsService&amp;amp;methods=sayHi&amp;amp;pid=63841&amp;amp;prefer.serialization=fastjson2,hessian2&amp;amp;qos.port=22223&amp;amp;release=3.2.0-beta.6-SNAPSHOT&amp;amp;service-name-mapping=true&amp;amp;side=provider&amp;amp;timestamp=1677480719543) Failed to bind NettyServer on /0.0.0.0:20880, cause: Address already in use
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol.createServer(DubboProtocol.java:385)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol.openServer(DubboProtocol.java:350)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol.export(DubboProtocol.java:331)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.qos.protocol.QosProtocolWrapper.export(QosProtocolWrapper.java:79)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.ProtocolSecurityWrapper.export(ProtocolSecurityWrapper.java:80)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper.export(ProtocolListenerWrapper.java:66)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.cluster.filter.ProtocolFilterWrapper.export(ProtocolFilterWrapper.java:61)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.ProtocolSerializationWrapper.export(ProtocolSerializationWrapper.java:47)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.Protocol$Adaptive.export(Protocol$Adaptive.java)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.registry.integration.RegistryProtocol.lambda$doLocalExport$3(RegistryProtocol.java:305)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at java.util.concurrent.ConcurrentHashMap.computeIfAbsent(ConcurrentHashMap.java:1660)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.registry.integration.RegistryProtocol.doLocalExport(RegistryProtocol.java:303)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.registry.integration.RegistryProtocol.export(RegistryProtocol.java:249)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.qos.protocol.QosProtocolWrapper.export(QosProtocolWrapper.java:79)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.ProtocolSecurityWrapper.export(ProtocolSecurityWrapper.java:80)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper.export(ProtocolListenerWrapper.java:64)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.cluster.filter.ProtocolFilterWrapper.export(ProtocolFilterWrapper.java:58)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.ProtocolSerializationWrapper.export(ProtocolSerializationWrapper.java:47)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.Protocol$Adaptive.export(Protocol$Adaptive.java)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.ServiceConfig.doExportUrl(ServiceConfig.java:739)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.ServiceConfig.exportRemote(ServiceConfig.java:717)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.ServiceConfig.exportUrl(ServiceConfig.java:658)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.ServiceConfig.doExportUrlsFor1Protocol(ServiceConfig.java:451)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.ServiceConfig.doExportUrls(ServiceConfig.java:433)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.ServiceConfig.doExport(ServiceConfig.java:395)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.ServiceConfig.export(ServiceConfig.java:247)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.deploy.DefaultModuleDeployer.exportServiceInternal(DefaultModuleDeployer.java:350)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.deploy.DefaultModuleDeployer.exportServices(DefaultModuleDeployer.java:322)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.deploy.DefaultModuleDeployer.startSync(DefaultModuleDeployer.java:158)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.deploy.DefaultModuleDeployer.start(DefaultModuleDeployer.java:139)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.startModules(DefaultApplicationDeployer.java:681)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.doStart(DefaultApplicationDeployer.java:645)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.deploy.DefaultApplicationDeployer.start(DefaultApplicationDeployer.java:618)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.bootstrap.DubboBootstrap.start(DubboBootstrap.java:226)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.config.bootstrap.DubboBootstrap.start(DubboBootstrap.java:215)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.samples.provider.Application.main(Application.java:52)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Caused by: org.apache.dubbo.remoting.RemotingException: Failed to bind NettyServer on /0.0.0.0:20880, cause: Address already in use
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.remoting.transport.AbstractServer.&amp;lt;init&amp;gt;(AbstractServer.java:75)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.remoting.transport.netty4.NettyServer.&amp;lt;init&amp;gt;(NettyServer.java:85)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.remoting.transport.netty4.NettyTransporter.bind(NettyTransporter.java:35)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.remoting.Transporter$Adaptive.bind(Transporter$Adaptive.java)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.remoting.Transporters.bind(Transporters.java:55)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.remoting.exchange.support.header.HeaderExchanger.bind(HeaderExchanger.java:52)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.remoting.exchange.Exchangers.bind(Exchangers.java:69)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol.createServer(DubboProtocol.java:383)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>... 35 more
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Caused by: java.net.BindException: Address already in use
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at sun.nio.ch.Net.bind0(Native Method)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at sun.nio.ch.Net.bind(Net.java:444)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at sun.nio.ch.Net.bind(Net.java:436)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:225)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:141)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:562)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1334)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:600)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:579)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:973)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.AbstractChannel.bind(AbstractChannel.java:260)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:356)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:174)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:167)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:569)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>at java.lang.Thread.run(Thread.java:748)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>典型的日志内容为 &lt;code>Address already in use&lt;/code>。&lt;/p>
+&lt;p>解决方案：&lt;/p>
+&lt;ol>
+&lt;li>检查本地是否有其他进程已经占用了端口（可以基于 &lt;code>lsof -i:20880&lt;/code> 、&lt;code>netstat -ano | grep 20880&lt;/code> 等命令排查）&lt;/li>
+&lt;li>如果本地启动多个 Dubbo 进程，请给不同的进程指定不同的 &lt;code>dubbo.protocol.port&lt;/code> 。或者指定为 &lt;code>-1&lt;/code>，Dubbo 将自动寻找一个可以使用的端口进行绑定。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 地址找不到异常</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/no-provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/troubleshoot/no-provider/</guid><description>
 &lt;p>在开发与生产部署过程中，由于 Dubbo 是一个需要基于服务发现功能进行调用的框架，很容易由于各种客观原因出现 &lt;code>No Provder&lt;/code> 的异常，本文旨在通过体系化的排查思路，让您能够在异常的时候快速定位原因并解决。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>java.lang.IllegalStateException: Failed to check the status of the service org.apache.dubbo.samples.api.GreetingsService. No provider available for the service org.apache.dubbo.samples.api.GreetingsService from the url consumer://*** to the consumer 30.221.146.226 use dubbo version 3.2.0-beta.4
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Exception in thread &amp;#34;main&amp;#34; org.apache.dubbo.rpc.RpcException: No provider available from registry 127.0.0.1:2181 for service org.apache.dubbo.samples.api.GreetingsService on consumer 30.221.146.226 use dubbo version 3.2.0-beta.4, please check status of providers(disabled, not registered or in blacklist).
