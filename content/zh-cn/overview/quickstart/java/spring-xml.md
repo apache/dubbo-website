@@ -277,7 +277,7 @@ public class GreetingsServiceImpl implements GreetingsService {
     <context:property-placeholder/>
 
     <!-- 定义应用名 -->
-    <dubbo:application name="demo-provider"/>
+    <dubbo:application name="demo-consumer"/>
 
     <!-- 定义注册中心地址 -->
     <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
