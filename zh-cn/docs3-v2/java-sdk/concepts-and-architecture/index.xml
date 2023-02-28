@@ -386,7 +386,564 @@ Dubbo 的路由主要需要实现 3 个接口，分别是负责每次调用筛�
 &lt;/ul>
 &lt;h3 id="dubbo-控制面治理规则">Dubbo 控制面治理规则&lt;/h3>
 &lt;p>TBD&lt;/p>
-&lt;p>Dubbo SDK 提供了非常灵活的配置来控制服务治理行为，如接口粒度的服务地址发现能力、接口粒度的配置同步等，这些能力让应用的开发和部署更加灵活。而在通用的 Mesh 部署方案或产品下一些高级功能可能受限，从总体上影响了易用性与灵活性。为此 Dubbo 计划提供自研控制面产品，以最大化的在 Mesh 体系发挥 Dubbo3 能力。&lt;/p></description></item><item><title>Docs3-V2: Triple 协议</title><link>https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/triple/</guid><description>
+&lt;p>Dubbo SDK 提供了非常灵活的配置来控制服务治理行为，如接口粒度的服务地址发现能力、接口粒度的配置同步等，这些能力让应用的开发和部署更加灵活。而在通用的 Mesh 部署方案或产品下一些高级功能可能受限，从总体上影响了易用性与灵活性。为此 Dubbo 计划提供自研控制面产品，以最大化的在 Mesh 体系发挥 Dubbo3 能力。&lt;/p></description></item><item><title>Docs3-V2: Rest 协议</title><link>https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/v3.2_rest_protocol_design/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/v3.2_rest_protocol_design/</guid><description>
+&lt;h1 id="dubborestprotocol设计文档">Dubbo RestProtocol 设计文档&lt;/h1>
+&lt;h2 id="原版本dubborest">原版本dubbo rest&lt;/h2>
+&lt;p>consumer&lt;/p>
+&lt;p>restClient支持 依赖resteasy 不支持spring mvc &lt;/p>
+&lt;p>provider(较重)&lt;/p>
+&lt;p>依赖web container   (tomcat,jetty，)servlet 模式，jaxrs netty server&lt;/p>
+&lt;h3 id="改版dubborest">改版dubbo rest &lt;/h3>
+&lt;p>方向：&lt;/p>
+&lt;p>更加轻量，具有dubbo风格的rest，微服务体系互通（Springcloud Alibaba）&lt;/p>
+&lt;p>1.注解解析&lt;/p>
+&lt;p>2.报文编解码&lt;/p>
+&lt;p>3.restClient&lt;/p>
+&lt;p>4.restServer(netty)&lt;/p>
+&lt;p>支持程度：&lt;/p>
+&lt;p>content-type   text json xml form(后续会扩展)&lt;/p>
+&lt;p>注解&lt;/p>
+&lt;p>param,header,body,pathvaribale （spring mvc &amp;amp; resteasy）&lt;/p>
+&lt;h2 id="http协议报文">Http 协议报文&lt;/h2>
+&lt;pre>&lt;code>POST /test/path? HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-type: application/json
+{&amp;quot;name&amp;quot;:&amp;quot;dubbo&amp;quot;,&amp;quot;age&amp;quot;:10,&amp;quot;address&amp;quot;:&amp;quot;hangzhou&amp;quot;}
+&lt;/code>&lt;/pre>
+&lt;h3 id="dubbohttpheader">dubbo http(header)&lt;/h3>
+&lt;pre>&lt;code>// service key header
+path: com.demo.TestInterface
+group: demo
+port: 80
+version: 1.0.0
+// 保证长连接
+Keep-Alive,Connection: keep-alive
+Keep-alive: 60
+// RPCContext Attachment
+userId: 123456
+&lt;/code>&lt;/pre>
+&lt;h2 id="目前支持粒度">目前支持粒度：&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>数据位置&lt;/th>
+&lt;th>content-type&lt;/th>
+&lt;th>spring注解&lt;/th>
+&lt;th>resteasy注解&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>body&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>ReuqestBody&lt;/td>
+&lt;td> 无注解即为body&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>querystring(?test=demo)&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>RequestParam&lt;/td>
+&lt;td>QueryParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>header&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>RequestHeader&lt;/td>
+&lt;td>PathParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>form&lt;/td>
+&lt;td>application/x-www-form-urlencoded&lt;/td>
+&lt;td>RequestParam ReuqestBody&lt;/td>
+&lt;td>FormParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>path&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>PathVariable&lt;/td>
+&lt;td>PathParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>method&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>PostMapping GetMapping&lt;/td>
+&lt;td>GET POST&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>url&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping path属性&lt;/td>
+&lt;td>Path&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>content-type&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping consumers属性&lt;/td>
+&lt;td>Consumers&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Accept&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping produces属性&lt;/td>
+&lt;td>Produces&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="rest注解解析servicerestmetadataresolver">rest注解解析（ServiceRestMetadataResolver）&lt;/h2>
+&lt;pre>&lt;code>JAXRSServiceRestMetadataResolver
+SpringMvcServiceRestMetadataResolver
+&lt;/code>&lt;/pre>
+&lt;p>ServiceRestMetadata&lt;/p>
+&lt;pre>&lt;code>public class ServiceRestMetadata implements Serializable {
+private String serviceInterface; // com.demo.TestInterface
+private String version;// 1.0.0
+private String group;// demo
+private Set&amp;lt;RestMethodMetadata&amp;gt; meta;// method 元信息
+private int port;// 端口 for provider service key
+private boolean consumer;// consumer 标志
+/**
+* make a distinction between mvc &amp;amp; resteasy
+*/
+private Class codeStyle;//
+/**
+* for provider
+*/
+private Map&amp;lt;PathMatcher, RestMethodMetadata&amp;gt; pathToServiceMap;
+/**
+* for consumer
+*/
+private Map&amp;lt;String, Map&amp;lt;ParameterTypesComparator, RestMethodMetadata&amp;gt;&amp;gt; methodToServiceMa
+&lt;/code>&lt;/pre>
+&lt;p>RestMethodMetadata&lt;/p>
+&lt;pre>&lt;code>public class RestMethodMetadata implements Serializable {
+private MethodDefinition method; // method 定义信息（name ,pramType,returnType）
+private RequestMetadata request;// 请求元信息
+private Integer urlIndex;
+private Integer bodyIndex;
+private Integer headerMapIndex;
+private String bodyType;
+private Map&amp;lt;Integer, Collection&amp;lt;String&amp;gt;&amp;gt; indexToName;
+private List&amp;lt;String&amp;gt; formParams;
+private Map&amp;lt;Integer, Boolean&amp;gt; indexToEncoded;
+private ServiceRestMetadata serviceRestMetadata;
+private List&amp;lt;ArgInfo&amp;gt; argInfos;
+private Method reflectMethod;
+/**
+* make a distinction between mvc &amp;amp; resteasy
+*/
+private Class codeStyle;
+&lt;/code>&lt;/pre>
+&lt;p>ArgInfo&lt;/p>
+&lt;pre>&lt;code>public class ArgInfo {
+/**
+* method arg index 0,1,2,3
+*/
+private int index;
+/**
+* method annotation name or name
+*/
+private String annotationNameAttribute;
+/**
+* param annotation type
+*/
+private Class paramAnnotationType;
+/**
+* param Type
+*/
+private Class paramType;
+/**
+* param name
+*/
+private String paramName;
+/**
+* url split(&amp;quot;/&amp;quot;) String[n] index
+*/
+private int urlSplitIndex;
+private Object defaultValue;
+private boolean formContentType;
+&lt;/code>&lt;/pre>
+&lt;p>RequestMeatadata&lt;/p>
+&lt;pre>&lt;code>public class RequestMetadata implements Serializable {
+private static final long serialVersionUID = -240099840085329958L;
+private String method;// 请求method
+private String path;// 请求url
+private Map&amp;lt;String, List&amp;lt;String&amp;gt;&amp;gt; params // param参数?拼接
+private Map&amp;lt;String, List&amp;lt;String&amp;gt;&amp;gt; headers// header;
+private Set&amp;lt;String&amp;gt; consumes // content-type;
+private Set&amp;lt;String&amp;gt; produces // Accept;
+&lt;/code>&lt;/pre>
+&lt;h3 id="consumer代码">Consumer 代码：&lt;/h3>
+&lt;p>refer:&lt;/p>
+&lt;pre>&lt;code> @Override
+protected &amp;lt;T&amp;gt; Invoker&amp;lt;T&amp;gt; protocolBindingRefer(final Class&amp;lt;T&amp;gt; type, final URL url) throws RpcException {
+// restClient spi创建
+ReferenceCountedClient&amp;lt;? extends RestClient&amp;gt; refClient =
+clients.computeIfAbsent(url.getAddress(), key -&amp;gt; createReferenceCountedClient(url, clients));
+refClient.retain();
+// resolve metadata
+Map&amp;lt;String, Map&amp;lt;ParameterTypesComparator, RestMethodMetadata&amp;gt;&amp;gt; metadataMap = MetadataResolver.resolveConsumerServiceMetadata(type, url);
+ReferenceCountedClient&amp;lt;? extends RestClient&amp;gt; finalRefClient = refClient;
+Invoker&amp;lt;T&amp;gt; invoker = new AbstractInvoker&amp;lt;T&amp;gt;(type, url, new String[]{INTERFACE_KEY, GROUP_KEY, TOKEN_KEY}) {
+@Override
+protected Result doInvoke(Invocation invocation) {
+try {
+// 获取 method的元信息
+RestMethodMetadata restMethodMetadata = metadataMap.get(invocation.getMethodName()).get(ParameterTypesComparator.getInstance(invocation.getParameterTypes()));
+RequestTemplate requestTemplate = new RequestTemplate(invocation, restMethodMetadata.getRequest().getMethod(), url.getAddress(), getContextPath(url));
+HttpConnectionCreateContext httpConnectionCreateContext = new HttpConnectionCreateContext();
+// TODO dynamic load config
+httpConnectionCreateContext.setConnectionConfig(new HttpConnectionConfig());
+httpConnectionCreateContext.setRequestTemplate(requestTemplate);
+httpConnectionCreateContext.setRestMethodMetadata(restMethodMetadata);
+httpConnectionCreateContext.setInvocation(invocation);
+httpConnectionCreateContext.setUrl(url);
+// http 信息构建拦截器
+for (HttpConnectionPreBuildIntercept intercept : httpConnectionPreBuildIntercepts) {
+intercept.intercept(httpConnectionCreateContext);
+}
+CompletableFuture&amp;lt;RestResult&amp;gt; future = finalRefClient.getClient().send(requestTemplate);
+CompletableFuture&amp;lt;AppResponse&amp;gt; responseFuture = new CompletableFuture&amp;lt;&amp;gt;();
+AsyncRpcResult asyncRpcResult = new AsyncRpcResult(responseFuture, invocation);
+// response 处理
+future.whenComplete((r, t) -&amp;gt; {
+if (t != null) {
+responseFuture.completeExceptionally(t);
+} else {
+AppResponse appResponse = new AppResponse();
+try {
+int responseCode = r.getResponseCode();
+MediaType mediaType = MediaType.TEXT_PLAIN;
+if (400 &amp;lt; responseCode &amp;amp;&amp;amp; responseCode &amp;lt; 500) {
+throw new HttpClientException(r.getMessage());
+} else if (responseCode &amp;gt;= 500) {
+throw new RemoteServerInternalException(r.getMessage());
+} else if (responseCode &amp;lt; 400) {
+mediaType = MediaTypeUtil.convertMediaType(r.getContentType());
+}
+Object value = HttpMessageCodecManager.httpMessageDecode(r.getBody(),
+restMethodMetadata.getReflectMethod().getReturnType(), mediaType);
+appResponse.setValue(value);
+Map&amp;lt;String, String&amp;gt; headers = r.headers()
+.entrySet()
+.stream()
+.collect(Collectors.toMap(Map.Entry::getKey, e -&amp;gt; e.getValue().get(0)));
+appResponse.setAttachments(headers);
+responseFuture.complete(appResponse);
+} catch (Exception e) {
+responseFuture.completeExceptionally(e);
+}
+}
+});
+return asyncRpcResult;
+} catch (RpcException e) {
+if (e.getCode() == RpcException.UNKNOWN_EXCEPTION) {
+e.setCode(getErrorCode(e.getCause()));
+}
+throw e;
+}
+}
+@Override
+public void destroy() {
+super.destroy();
+invokers.remove(this);
+destroyInternal(url);
+}
+};
+invokers.add(invoker);
+return invoker;
+&lt;/code>&lt;/pre>
+&lt;h3 id="provider代码">provider 代码：&lt;/h3>
+&lt;p>export:&lt;/p>
+&lt;pre>&lt;code> public &amp;lt;T&amp;gt; Exporter&amp;lt;T&amp;gt; export(final Invoker&amp;lt;T&amp;gt; invoker) throws RpcException {
+URL url = invoker.getUrl();
+final String uri = serviceKey(url);
+Exporter&amp;lt;T&amp;gt; exporter = (Exporter&amp;lt;T&amp;gt;) exporterMap.get(uri);
+if (exporter != null) {
+// When modifying the configuration through override, you need to re-expose the newly modified service.
+if (Objects.equals(exporter.getInvoker().getUrl(), invoker.getUrl())) {
+return exporter;
+}
+}
+// TODO addAll metadataMap to RPCInvocationBuilder metadataMap
+Map&amp;lt;PathMatcher, RestMethodMetadata&amp;gt; metadataMap = MetadataResolver.resolveProviderServiceMetadata(url.getServiceModel().getProxyObject().getClass(),url);
+PathAndInvokerMapper.addPathAndInvoker(metadataMap, invoker);
+final Runnable runnable = doExport(proxyFactory.getProxy(invoker, true), invoker.getInterface(), invoker.getUrl());
+exporter = new AbstractExporter&amp;lt;T&amp;gt;(invoker) {
+@Override
+public void afterUnExport() {
+exporterMap.remove(uri);
+if (runnable != null) {
+try {
+runnable.run();
+} catch (Throwable t) {
+logger.warn(PROTOCOL_UNSUPPORTED, &amp;quot;&amp;quot;, &amp;quot;&amp;quot;, t.getMessage(), t);
+}
+}
+}
+};
+exporterMap.put(uri, exporter);
+return exporter;
+}
+&lt;/code>&lt;/pre>
+&lt;p>RestHandler&lt;/p>
+&lt;pre>&lt;code> private class RestHandler implements HttpHandler&amp;lt;HttpServletRequest, HttpServletResponse&amp;gt; {
+@Override
+public void handle(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws IOException, ServletException {
+// 有servlet reuqest 和nettyRequest
+RequestFacade request = RequestFacadeFactory.createRequestFacade(servletRequest);
+RpcContext.getServiceContext().setRemoteAddress(request.getRemoteAddr(), request.getRemotePort());
+// dispatcher.service(request, servletResponse);
+Pair&amp;lt;RpcInvocation, Invoker&amp;gt; build = null;
+try {
+// 根据请求信息创建 RPCInvocation
+build = RPCInvocationBuilder.build(request, servletRequest, servletResponse);
+} catch (PathNoFoundException e) {
+servletResponse.setStatus(404);
+}
+Invoker invoker = build.getSecond();
+Result invoke = invoker.invoke(build.getFirst());
+// TODO handling exceptions
+if (invoke.hasException()) {
+servletResponse.setStatus(500);
+} else {
+try {
+Object value = invoke.getValue();
+String accept = request.getHeader(RestConstant.ACCEPT);
+MediaType mediaType = MediaTypeUtil.convertMediaType(accept);
+// TODO write response
+HttpMessageCodecManager.httpMessageEncode(servletResponse.getOutputStream(), value, invoker.getUrl(), mediaType);
+servletResponse.setStatus(200);
+} catch (Exception e) {
+servletResponse.setStatus(500);
+}
+}
+// TODO add Attachment header
+}
+}
+&lt;/code>&lt;/pre>
+&lt;p>RPCInvocationBuilder&lt;/p>
+&lt;pre>&lt;code>{
+private static final ParamParserManager paramParser = new ParamParserManager();
+public static Pair&amp;lt;RpcInvocation, Invoker&amp;gt; build(RequestFacade request, Object servletRequest, Object servletResponse) {
+// 获取invoker
+Pair&amp;lt;Invoker, RestMethodMetadata&amp;gt; invokerRestMethodMetadataPair = getRestMethodMetadata(request);
+RpcInvocation rpcInvocation = createBaseRpcInvocation(request, invokerRestMethodMetadataPair.getSecond());
+ProviderParseContext parseContext = createParseContext(request, servletRequest, servletResponse, invokerRestMethodMetadataPair.getSecond());
+// 参数构建
+Object[] args = paramParser.providerParamParse(parseContext);
+rpcInvocation.setArguments(args);
+return Pair.make(rpcInvocation, invokerRestMethodMetadataPair.getFirst());
+}
+private static ProviderParseContext createParseContext(RequestFacade request, Object servletRequest, Object servletResponse, RestMethodMetadata restMethodMetadata) {
+ProviderParseContext parseContext = new ProviderParseContext(request);
+parseContext.setResponse(servletResponse);
+parseContext.setRequest(servletRequest);
+Object[] objects = new Object[restMethodMetadata.getArgInfos().size()];
+parseContext.setArgs(Arrays.asList(objects));
+parseContext.setArgInfos(restMethodMetadata.getArgInfos());
+return parseContext;
+}
+private static RpcInvocation createBaseRpcInvocation(RequestFacade request, RestMethodMetadata restMethodMetadata) {
+RpcInvocation rpcInvocation = new RpcInvocation();
+int localPort = request.getLocalPort();
+String localAddr = request.getLocalAddr();
+int remotePort = request.getRemotePort();
+String remoteAddr = request.getRemoteAddr();
+String HOST = request.getHeader(RestConstant.HOST);
+String GROUP = request.getHeader(RestConstant.GROUP);
+String PATH = request.getHeader(RestConstant.PATH);
+String VERSION = request.getHeader(RestConstant.VERSION);
+String METHOD = restMethodMetadata.getMethod().getName();
+String[] PARAMETER_TYPES_DESC = restMethodMetadata.getMethod().getParameterTypes();
+rpcInvocation.setParameterTypes(restMethodMetadata.getReflectMethod().getParameterTypes());
+rpcInvocation.setMethodName(METHOD);
+rpcInvocation.setAttachment(RestConstant.GROUP, GROUP);
+rpcInvocation.setAttachment(RestConstant.METHOD, METHOD);
+rpcInvocation.setAttachment(RestConstant.PARAMETER_TYPES_DESC, PARAMETER_TYPES_DESC);
+rpcInvocation.setAttachment(RestConstant.PATH, PATH);
+rpcInvocation.setAttachment(RestConstant.VERSION, VERSION);
+rpcInvocation.setAttachment(RestConstant.HOST, HOST);
+rpcInvocation.setAttachment(RestConstant.REMOTE_ADDR, remoteAddr);
+rpcInvocation.setAttachment(RestConstant.LOCAL_ADDR, localAddr);
+rpcInvocation.setAttachment(RestConstant.REMOTE_PORT, remotePort);
+rpcInvocation.setAttachment(RestConstant.LOCAL_PORT, localPort);
+Enumeration&amp;lt;String&amp;gt; attachments = request.getHeaders(RestConstant.DUBBO_ATTACHMENT_HEADER);
+while (attachments != null &amp;amp;&amp;amp; attachments.hasMoreElements()) {
+String s = attachments.nextElement();
+String[] split = s.split(&amp;quot;=&amp;quot;);
+rpcInvocation.setAttachment(split[0], split[1]);
+}
+// TODO set path,version,group and so on
+return rpcInvocation;
+}
+private static Pair&amp;lt;Invoker, RestMethodMetadata&amp;gt; getRestMethodMetadata(RequestFacade request) {
+String path = request.getRequestURI();
+String version = request.getHeader(RestConstant.VERSION);
+String group = request.getHeader(RestConstant.GROUP);
+int port = request.getIntHeader(RestConstant.REST_PORT);
+return PathAndInvokerMapper.getRestMethodMetadata(path, version, group, port);
+}
+}
+&lt;/code>&lt;/pre>
+&lt;h2 id="编码示例">编码示例&lt;/h2>
+&lt;p>API&lt;/p>
+&lt;p>mvc:&lt;/p>
+&lt;pre>&lt;code>@RestController()
+@RequestMapping(&amp;quot;/demoService&amp;quot;)
+public interface DemoService {
+@RequestMapping(value = &amp;quot;/hello&amp;quot;, method = RequestMethod.GET)
+Integer hello(@RequestParam Integer a, @RequestParam Integer b);
+@RequestMapping(value = &amp;quot;/error&amp;quot;, method = RequestMethod.GET)
+String error();
+@RequestMapping(value = &amp;quot;/say&amp;quot;, method = RequestMethod.POST, consumes = MediaType.TEXT_PLAIN_VALUE)
+String sayHello(@RequestBody String name);
+}
+&lt;/code>&lt;/pre>
+&lt;p>resteasy:&lt;/p>
+&lt;pre>&lt;code>@Path(&amp;quot;/demoService&amp;quot;)
+public interface RestDemoService {
+@GET
+@Path(&amp;quot;/hello&amp;quot;)
+Integer hello(@QueryParam(&amp;quot;a&amp;quot;)Integer a,@QueryParam(&amp;quot;b&amp;quot;) Integer b);
+@GET
+@Path(&amp;quot;/error&amp;quot;)
+String error();
+@POST
+@Path(&amp;quot;/say&amp;quot;)
+@Consumes({MediaType.TEXT_PLAIN})
+String sayHello(String name);
+boolean isCalled();
+}
+&lt;/code>&lt;/pre>
+&lt;p>impl(service)&lt;/p>
+&lt;pre>&lt;code>@DubboService()
+public class RestDemoServiceImpl implements RestDemoService {
+private static Map&amp;lt;String, Object&amp;gt; context;
+private boolean called;
+@Override
+public String sayHello(String name) {
+called = true;
+return &amp;quot;Hello, &amp;quot; + name;
+}
+public boolean isCalled() {
+return called;
+}
+@Override
+public Integer hello(Integer a, Integer b) {
+context = RpcContext.getServerAttachment().getObjectAttachments();
+return a + b;
+}
+@Override
+public String error() {
+throw new RuntimeException();
+}
+public static Map&amp;lt;String, Object&amp;gt; getAttachments() {
+return context;
+}
+}
+&lt;/code>&lt;/pre>
+&lt;h2 id="流程图">流程图&lt;/h2>
+&lt;p>&lt;strong>Consumer&lt;/strong>  &lt;/p>
+&lt;p>&lt;img src="https://static.dingtalk.com/media/lQLPJxLOtqTxs9TNA5rNBQCwci8F2QYiGAYD5sSyd4BVAA_1280_922.png" alt="image">&lt;/p>
+&lt;p>&lt;strong>Provider(RestServer)&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://static.dingtalk.com/media/lQLPJxZcNUm4M9TNA1_NBMuwZUu6IC3FeYAD5sSydYADAA_1227_863.png" alt="image">&lt;/p>
+&lt;h2 id="场景">场景 :&lt;/h2>
+&lt;p>&lt;strong>非dubbo体系互通（Springcloud alibaba  互通）&lt;/strong>&lt;/p>
+&lt;p>互通条件：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>协议&lt;/th>
+&lt;th>Dubbo&lt;/th>
+&lt;th>SpringCloud Alibaba&lt;/th>
+&lt;th>互通&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>通信协议&lt;/td>
+&lt;td>rest&lt;/td>
+&lt;td>spring web/resteasy  编码风格&lt;/td>
+&lt;td>集成feignclient，ribbon (spring web 编码风格)&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>triple&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>dubbo&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>grpc&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>hessian&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>注册中心&lt;/td>
+&lt;td>zookeeper&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;td>支持&lt;/td>
+&lt;td>支持&lt;/td>
+&lt;td>应用级别注册&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="2dubbo双注册">2.dubbo 双注册 &lt;/h3>
+&lt;p> 完成应用级别注册，（dubo2-dubbo3 过度），dubbo版本升级&lt;/p>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/0ceca951-f467-4ab3-9b71-8e7d52e5e7d1.png" alt="image">&lt;/p>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/6bcc7aed-1d22-470f-b185-efbab32df1e5.png" alt="image">&lt;/p>
+&lt;h3 id="3多协议发布">3.多协议发布&lt;/h3>
+&lt;p>配置：&lt;/p>
+&lt;pre>&lt;code>&amp;lt;dubbo:service interface=&amp;quot;org.apache.dubbo.samples.DemoService&amp;quot; protocol=&amp;quot;dubbo, grpc,rest&amp;quot;/&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;h3 id="4跨语言">4.跨语言&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/1bdf8f91-9666-4c20-9aea-8396c745f554.png" alt="image">&lt;/p>
+&lt;h3 id="5多协议交互">5.多协议交互&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/af72e3df-05d5-42a2-a333-618be7ec6cb8.png" alt="image">&lt;/p>
+&lt;h3 id="6协议迁移">6.协议迁移&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/36d30183-8d5f-494c-8ebb-b57403c88661.png" alt="image">&lt;/p>
+&lt;p>rest编码风格&lt;/p>
+&lt;p>Http协议更通用跨语言调用&lt;/p>
+&lt;p>dubbo rest 对其他http服务 进行调用&lt;/p>
+&lt;p>其他httpclient 对dubbo rest进行调用&lt;/p>
+&lt;p>dubbo restServer 可以与其他web服务，浏览器等客户端直接进行http交互&lt;/p>
+&lt;h2 id="consumertodolist功能已经初步实现可以调通解析response">consumer TODOLIST（功能已经初步实现，可以调通解析response）&lt;/h2>
+&lt;p>1. org/apache/dubbo/rpc/protocol/rest/RestProtocol.java:157  dynamic load config&lt;/p>
+&lt;p>2.org/apache/dubbo/remoting/http/factory/AbstractHttpClientFactory.java:50 load config  HttpClientConfig&lt;/p>
+&lt;p>3.org/apache/dubbo/rpc/protocol/rest/annotation/metadata/MetadataResolver.java:52  support Dubbo style service&lt;/p>
+&lt;p>4.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:120  TODO config&lt;/p>
+&lt;p>5.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:140 TODO close judge&lt;/p>
+&lt;p>6.org/apache/dubbo/rpc/protocol/rest/message/decode/MultiValueCodec.java:35  TODO java bean  get set convert&lt;/p>
+&lt;h2 id="providertodolist待实现">provider TODOLIST(待实现)&lt;/h2>
+&lt;p>基于netty实现支持http协议的NettyServer&lt;/p>
+&lt;p>无注解协议定义&lt;/p>
+&lt;p>官网场景补充&lt;/p>
+&lt;h2 id="rest使用说明文档及demo">Rest使用说明文档及demo：&lt;/h2></description></item><item><title>Docs3-V2: Triple 协议</title><link>https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/triple/</guid><description>
 &lt;h3 id="协议说明">协议说明&lt;/h3>
 &lt;p>Triple 是 Dubbo3 提出的基于 HTTP2 的开放协议，旨在解决 Dubbo2 私有协议带来的互通性问题。相比于原有 Dubbo2 协议，Triple 有以下优势:&lt;/p>
 &lt;ol>
