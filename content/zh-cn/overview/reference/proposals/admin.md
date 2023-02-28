@@ -5,7 +5,7 @@ linkTitle: "Admin 架构设计"
 date: 2023-02-28
 author: Jun Liu
 description: >
-
+    本文描述了 Dubbo Admin 作为控制面的总体架构设计与抽象。
 ---
 
 ## 1 Dubbo 整体架构
@@ -17,8 +17,11 @@ description: >
 - **Dubbo 数据面**。数据面代表集群部署的所有 Dubbo 进程，进程之间通过 RPC 协议实现数据交换，并与控制面进行治理策略交互。
 
 **进一步解释：**https://cn.dubbo.apache.org/zh-cn/overview/what/overview/
+
 ## Dubbo Admin 的整体定位与解释
+
 **Dubbo Admin 是对微服务治理体系的统一定义与抽象，通过自定义核心组件与一系列配套工具，为不同部署架构和基础设施环境下部署的微服务集群带来统一的开发与运维差异。**
+
 ## 2 面向用户的开发步骤
 ### 第一步：安装 Dubbo Stack/Admin
 > 核心思路是，屏蔽架构差异，通过统一入口将治理组件的安装和配置纳入成为 Dubbo 体系中的前置步骤
@@ -26,7 +29,9 @@ description: >
 ```shell
 dubboctl install dubbo-stack
 ```
-安装请参见:
+
+安装请参见: [Dubbo Admin 安装指南](../../setup/install/)
+
 ### 第二步：服务框架开发
 
 - [Java](https://cn.dubbo.apache.org/zh-cn/overview/quickstart/java/)
@@ -54,6 +59,7 @@ dubboctl install dubbo-stack
 
 1. 数据面通过配置先与 admin 组件进行交互，admin 返回当前部署架构下的实际注册中心、配置中心等组件地址，如图中的 `nacos://host:port`。
 2. 数据面组件接收到新的组件地址后，直接与 Nacos 建立通信，此后依赖 Nacos 完成服务发现等功能。
+
 ### 3.3 在不同场景下如何兑现这些核心能力？
 #### 场景一：传统微服务体系 (VM & Kubernetes)
 
