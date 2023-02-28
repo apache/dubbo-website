@@ -1,8 +1,9 @@
 ---
 type: docs
-title: "Dubbo 微服务开发"
+title: "微服务开发"
 linkTitle: "微服务开发"
 weight: 1
+description: Dubbo 微服务开发
 ---
 Dubbo 解决企业微服务从开发、部署到治理运维的一系列挑战，Dubbo 为开发者提供从项目创建、开发测试，到部署、可视化监测、流量治理，再到生态集成的全套服务。
 * **开发层面**，Dubbo 提供了 Java、Go、Rust、Node.js 等语言实现并定义了一套微服务开发范式，配套脚手架可用于快速创建微服务项目骨架
