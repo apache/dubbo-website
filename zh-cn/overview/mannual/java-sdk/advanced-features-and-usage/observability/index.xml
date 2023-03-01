@@ -1,0 +1,632 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 可观测性</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/</link><description>Recent content in 可观测性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 指标埋点</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/meter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/meter/</guid><description>
+&lt;h1 id="概述">概述&lt;/h1>
+&lt;h2 id="1-指标接入说明">1. 指标接入说明&lt;/h2>
+&lt;h2 id="2-指标体系设计">2. 指标体系设计&lt;/h2>
+&lt;p>Dubbo的指标体系，总共涉及三块，指标收集、本地聚合、指标推送
+指标收集：将Dubbo内部需要监控的指标推送至统一的Collector中进行存储
+本地聚合：指标收集获取的均为基础指标，而一些分位数指标则需通过本地聚合计算得出
+指标推送：收集和聚合后的指标通过一定的方式推送至第三方服务器，目前只涉及Prometheus&lt;/p>
+&lt;h2 id="3-结构设计">3. 结构设计&lt;/h2>
+&lt;ul>
+&lt;li>移除原来与 Metrics 相关的类&lt;/li>
+&lt;li>创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类&lt;/li>
+&lt;li>使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-数据流转">4. 数据流转&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dataflow.png" alt="img.png">&lt;/p>
+&lt;h2 id="5-目标">5. 目标&lt;/h2>
+&lt;p>指标接口将提供一个 MetricsService，该 Service 不仅提供柔性服务所的接口级数据，也提供所有指标的查询方式，其中方法级指标的查询的接口可按如下方式声明&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Default {@link MetricsService} extension name.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String DEFAULT_EXTENSION_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;default&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * The contract version of {@link MetricsService}, the future update must make sure compatible.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String VERSION &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>&lt;span style="color:#719e07">(&lt;/span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface and prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String serviceUniqueName&lt;span style="color:#719e07">,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface、method and prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param methodName methodName
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param parameterTypes method parameter types
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String serviceUniqueName&lt;span style="color:#719e07">,&lt;/span> String methodName&lt;span style="color:#719e07">,&lt;/span> Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;[]&lt;/span> parameterTypes&lt;span style="color:#719e07">,&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 MetricsCategory 设计如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">enum&lt;/span> MetricsCategory &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RT&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> QPS&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> REQUESTS&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>MetricsEntity 设计如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsEntity&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> String&lt;span style="color:#719e07">&amp;gt;&lt;/span> tags&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> MetricsCategory category&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Object value&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标收集">指标收集&lt;/h1>
+&lt;h2 id="1-嵌入位置">1. 嵌入位置&lt;/h2>
+&lt;p>Dubbo 架构图如下
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dubbo.png" alt="img.png">&lt;/p>
+&lt;p>在 provider 中添加一层 MetricsFilter 重写 invoke 方法嵌入调用链路用于收集指标，用 try-catch-finally 处理，核心代码如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>&lt;span style="color:#719e07">(&lt;/span>group &lt;span style="color:#719e07">=&lt;/span> PROVIDER&lt;span style="color:#719e07">,&lt;/span> order &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Filter&lt;span style="color:#719e07">,&lt;/span> ScopeModelAware &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Result &lt;span style="color:#268bd2">invoke&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker&lt;span style="color:#719e07">,&lt;/span> Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> RpcException &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector&lt;span style="color:#719e07">.&lt;/span>increaseTotalRequests&lt;span style="color:#719e07">(&lt;/span>interfaceName&lt;span style="color:#719e07">,&lt;/span> methodName&lt;span style="color:#719e07">,&lt;/span> group&lt;span style="color:#719e07">,&lt;/span> version&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector&lt;span style="color:#719e07">.&lt;/span>increaseProcessingRequests&lt;span style="color:#719e07">(&lt;/span>interfaceName&lt;span style="color:#719e07">,&lt;/span> methodName&lt;span style="color:#719e07">,&lt;/span> group&lt;span style="color:#719e07">,&lt;/span> version&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long startTime &lt;span style="color:#719e07">=&lt;/span> System&lt;span style="color:#719e07">.&lt;/span>currentTimeMillis&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Result invoke &lt;span style="color:#719e07">=&lt;/span> invoker&lt;span style="color:#719e07">.&lt;/span>invoke&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector&lt;span style="color:#719e07">.&lt;/span>increaseSucceedRequests&lt;span style="color:#719e07">(&lt;/span>interfaceName&lt;span style="color:#719e07">,&lt;/span> methodName&lt;span style="color:#719e07">,&lt;/span> group&lt;span style="color:#719e07">,&lt;/span> version&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invoke&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>RpcException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector&lt;span style="color:#719e07">.&lt;/span>increaseFailedRequests&lt;span style="color:#719e07">(&lt;/span>interfaceName&lt;span style="color:#719e07">,&lt;/span> methodName&lt;span style="color:#719e07">,&lt;/span> group&lt;span style="color:#719e07">,&lt;/span> version&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">finally&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long endTime &lt;span style="color:#719e07">=&lt;/span> System&lt;span style="color:#719e07">.&lt;/span>currentTimeMillis&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long rt &lt;span style="color:#719e07">=&lt;/span> endTime &lt;span style="color:#719e07">-&lt;/span> startTime&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector&lt;span style="color:#719e07">.&lt;/span>addRT&lt;span style="color:#719e07">(&lt;/span>interfaceName&lt;span style="color:#719e07">,&lt;/span> methodName&lt;span style="color:#719e07">,&lt;/span> group&lt;span style="color:#719e07">,&lt;/span> version&lt;span style="color:#719e07">,&lt;/span> rt&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector&lt;span style="color:#719e07">.&lt;/span>decreaseProcessingRequests&lt;span style="color:#719e07">(&lt;/span>interfaceName&lt;span style="color:#719e07">,&lt;/span> methodName&lt;span style="color:#719e07">,&lt;/span> group&lt;span style="color:#719e07">,&lt;/span> version&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-指标标识">2. 指标标识&lt;/h2>
+&lt;p>用以下五个属性作为隔离级别区分标识不同方法，也是各个 ConcurrentHashMap 的 key&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MethodMetric&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String applicationName&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String interfaceName&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String methodName&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String group&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String version&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-基础指标">3. 基础指标&lt;/h2>
+&lt;p>指标通过 common 模块下的 MetricsCollector 存储所有指标数据&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Boolean collectEnabled &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> listeners &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ApplicationModel applicationModel&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String applicationName&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> succeedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> failedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> processingRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> lastRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> LongAccumulator&lt;span style="color:#719e07">&amp;gt;&lt;/span> minRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> LongAccumulator&lt;span style="color:#719e07">&amp;gt;&lt;/span> maxRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> avgRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> rtCount &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="本地聚合">本地聚合&lt;/h1>
+&lt;p>本地聚合指将一些简单的指标通过计算获取各分位数指标的过程&lt;/p>
+&lt;h2 id="1-参数设计">1. 参数设计&lt;/h2>
+&lt;p>收集指标时，默认只收集基础指标，而一些单机聚合指标则需要开启服务柔性或者本地聚合后另起线程计算。此处若开启服务柔性，则本地聚合默认开启&lt;/p>
+&lt;h3 id="11-本地聚合开启方式">1.1 本地聚合开启方式&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-指标聚合参数">1.2 指标聚合参数&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> bucket-num=&lt;span style="color:#2aa198">&amp;#34;5&amp;#34;&lt;/span> time-window-seconds=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-具体指标">2. 具体指标&lt;/h2>
+&lt;p>四个需要监控的关键指标。他们称之为“四个黄金信号”：延迟（Latency），流量（Traffic），错误（Errors）和饱和度（Saturation）。
+在Dubbo中主要包含如下监控指标：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">&lt;/th>
+&lt;th style="text-align:left">基础设施&lt;/th>
+&lt;th style="text-align:left">业务监控&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">延迟类&lt;/td>
+&lt;td style="text-align:left">IO 等待； 网络延迟；&lt;/td>
+&lt;td style="text-align:left">接口、服务的平均耗时、TP90、TP99、TP999 等&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">流量类&lt;/td>
+&lt;td style="text-align:left">网络和磁盘 IO；&lt;/td>
+&lt;td style="text-align:left">服务层面的 QPS、&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">错误类&lt;/td>
+&lt;td style="text-align:left">宕机； 磁盘（坏盘或文件系统错误）； 进程或端口挂掉； 网络丢包；&lt;/td>
+&lt;td style="text-align:left">错误日志;业务状态码、错误码走势;&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">饱和度类&lt;/td>
+&lt;td style="text-align:left">系统资源利用率： CPU、内存、磁盘、网络等； 饱和度：等待线程数，队列积压长度；&lt;/td>
+&lt;td style="text-align:left">这里主要包含JVM、线程池等&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;ul>
+&lt;li>qps: 基于滑动窗口获取动态qps&lt;/li>
+&lt;li>rt: 基于滑动窗口获取动态rt&lt;/li>
+&lt;li>失败请求数: 基于滑动窗口获取最近时间内的失败请求数&lt;/li>
+&lt;li>成功请求数: 基于滑动窗口获取最近时间内的成功请求数&lt;/li>
+&lt;li>处理中请求数: 前后增加Filter简单统计&lt;/li>
+&lt;li>具体指标依赖滑动窗口，额外使用 AggregateMetricsCollector 收集&lt;/li>
+&lt;/ul>
+&lt;p>输出到普罗米修斯的相关指标可以参考的内容如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_live_data_size_bytes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_live_data_size_bytes 1.6086528E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_succeed_aggregate Aggregated Succeed Requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_succeed_aggregate gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed_aggregate{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 39.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_buffer_memory_used_bytes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id=&amp;#34;direct&amp;#34;,} 1.679975E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id=&amp;#34;mapped&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_memory_allocated_bytes_total Incremented for an increase in the size of the (young) heap memory pool after one GC to before the next
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_memory_allocated_bytes_total counter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_allocated_bytes_total 2.9884416E9
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_total_aggregate Aggregated Total Requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_total_aggregate gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total_aggregate{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 39.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE system_load_average_1m gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_load_average_1m 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP system_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the whole system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE system_cpu_usage gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_usage 0.015802269043760128
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_peak_threads gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_peak_threads 40.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_processing Processing Requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_processing gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_processing{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_memory_max_bytes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;,} 1.22912768E8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Survivor Space&amp;#34;,} -1.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Old Gen&amp;#34;,} 9.52107008E8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Metaspace&amp;#34;,} -1.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Eden Space&amp;#34;,} -1.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;,} 5828608.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Compressed Class Space&amp;#34;,} 1.073741824E9
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;,} 1.22916864E8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_states_threads The current number of threads having BLOCKED state
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_states_threads gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;blocked&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;runnable&amp;#34;,} 10.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;waiting&amp;#34;,} 16.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;timed-waiting&amp;#34;,} 13.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;new&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;terminated&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_buffer_total_capacity_bytes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id=&amp;#34;direct&amp;#34;,} 1.6799749E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id=&amp;#34;mapped&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_p99 Response Time P99
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_p99 gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p99{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 1.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_memory_used_bytes The amount of used memory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_memory_used_bytes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Survivor Space&amp;#34;,} 1048576.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;,} 1.462464E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Old Gen&amp;#34;,} 1.6098728E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Metaspace&amp;#34;,} 4.0126952E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Eden Space&amp;#34;,} 8.2837504E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;,} 1372032.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Compressed Class Space&amp;#34;,} 4519248.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;,} 5697408.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP qps Query Per Seconds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE qps gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>qps{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.3333333333333333
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_min Min Response Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_min gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_min{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_buffer_count_buffers An estimate of the number of buffers in the pool
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_buffer_count_buffers gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id=&amp;#34;mapped&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id=&amp;#34;direct&amp;#34;,} 10.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP system_cpu_count The number of processors available to the Java virtual machine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE system_cpu_count gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_count 2.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_classes_loaded_classes The number of classes that are currently loaded in the Java virtual machine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_classes_loaded_classes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_loaded_classes 7325.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_total Total Response Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_total gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_total{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 2783.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_last Last Response Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_last gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_last{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_memory_promoted_bytes_total counter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_promoted_bytes_total 1.4450952E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_pause_seconds Time spent in GC pause
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_pause_seconds summary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;Metadata GC Threshold&amp;#34;,} 2.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;Metadata GC Threshold&amp;#34;,} 0.026
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;G1 Evacuation Pause&amp;#34;,} 37.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;G1 Evacuation Pause&amp;#34;,} 0.156
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_pause_seconds_max Time spent in GC pause
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_pause_seconds_max gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;Metadata GC Threshold&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;G1 Evacuation Pause&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_p95 Response Time P95
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_p95 gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p95{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_total Total Requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_total gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 27738.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP process_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the Java Virtual Machine process
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE process_cpu_usage gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>process_cpu_usage 8.103727714748784E-4
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_max Max Response Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_max gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_max{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 4.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_max_data_size_bytes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_max_data_size_bytes 9.52107008E8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_live_threads gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_live_threads 39.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_daemon_threads The current number of live daemon threads
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_daemon_threads gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_daemon_threads 36.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_classes_unloaded_classes_total The total number of classes unloaded since the Java virtual machine has started execution
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_classes_unloaded_classes_total counter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_unloaded_classes_total 0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_memory_committed_bytes gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;,} 1.4680064E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Survivor Space&amp;#34;,} 1048576.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Old Gen&amp;#34;,} 5.24288E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Metaspace&amp;#34;,} 4.1623552E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Eden Space&amp;#34;,} 9.0177536E7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;,} 2555904.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Compressed Class Space&amp;#34;,} 5111808.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;,} 5701632.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_succeed Succeed Requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_succeed gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 27738.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_avg Average Response Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_avg gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_avg{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="聚合收集器">聚合收集器&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector&lt;span style="color:#719e07">,&lt;/span> MetricsListener &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> bucketNum&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> timeWindowSeconds&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> succeedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> failedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> qps &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> TimeWindowQuantile&lt;span style="color:#719e07">&amp;gt;&lt;/span> rt &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ApplicationModel applicationModel&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_COMPRESSION &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">100&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_BUCKET_NUM &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">10&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_TIME_WINDOW_SECONDS &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">120&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//在构造函数中解析配置信息
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ApplicationModel applicationModel&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>applicationModel &lt;span style="color:#719e07">=&lt;/span> applicationModel&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigManager configManager &lt;span style="color:#719e07">=&lt;/span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getApplicationConfigManager&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsConfig config &lt;span style="color:#719e07">=&lt;/span> configManager&lt;span style="color:#719e07">.&lt;/span>getMetrics&lt;span style="color:#719e07">().&lt;/span>orElse&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>config &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> config&lt;span style="color:#719e07">.&lt;/span>getAggregation&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> Boolean&lt;span style="color:#719e07">.&lt;/span>TRUE&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>config&lt;span style="color:#719e07">.&lt;/span>getAggregation&lt;span style="color:#719e07">().&lt;/span>getEnabled&lt;span style="color:#719e07">()))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// only registered when aggregation is enabled.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> registerListener&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AggregationConfig aggregation &lt;span style="color:#719e07">=&lt;/span> config&lt;span style="color:#719e07">.&lt;/span>getAggregation&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>bucketNum &lt;span style="color:#719e07">=&lt;/span> aggregation&lt;span style="color:#719e07">.&lt;/span>getBucketNum&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> DEFAULT_BUCKET_NUM &lt;span style="color:#719e07">:&lt;/span> aggregation&lt;span style="color:#719e07">.&lt;/span>getBucketNum&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>timeWindowSeconds &lt;span style="color:#719e07">=&lt;/span> aggregation&lt;span style="color:#719e07">.&lt;/span>getTimeWindowSeconds&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> DEFAULT_TIME_WINDOW_SECONDS &lt;span style="color:#719e07">:&lt;/span> aggregation&lt;span style="color:#719e07">.&lt;/span>getTimeWindowSeconds&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果开启了本地聚合，则通过 spring 的 BeanFactory 添加监听，将 AggregateMetricsCollector 与 DefaultMetricsCollector 绑定，实现一种生存者消费者的模式，DefaultMetricsCollector 中使用监听器列表，方便扩展&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerListener&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>getBean&lt;span style="color:#719e07">(&lt;/span>DefaultMetricsCollector&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">).&lt;/span>addListener&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-指标聚合">3. 指标聚合&lt;/h2>
+&lt;p>滑动窗口
+假设我们初始有6个bucket，每个窗口时间设置为2分钟
+每次写入指标数据时，会将数据分别写入6个bucket内，每隔两分钟移动一个bucket并且清除原来bucket内的数据
+读取指标时，读取当前current指向的bucket，以达到滑动窗口的效果
+具体如下图所示，实现了当前 bucket 内存储了配置中设置的 bucket 生命周期内的数据，即近期数据
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/aggre.png" alt="img_1.png">&lt;/p>
+&lt;p>在每个bucket内，使用&lt;strong>TDigest 算法&lt;/strong>计算分位数指标&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>TDigest 算法&lt;/strong>（极端分位精确度高，如p1 p99，中间分位精确度低，如p50），相关资料如下&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://op8867555.github.io/posts/2018-04-09-tdigest.html">https://op8867555.github.io/posts/2018-04-09-tdigest.html&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://blog.csdn.net/csdnnews/article/details/116246540">https://blog.csdn.net/csdnnews/article/details/116246540&lt;/a>&lt;/li>
+&lt;li>开源实现：https://github.com/tdunning/t-digest&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;p>代码实现如下，除了 TimeWindowQuantile 用来计算分位数指标外，另外提供了 TimeWindowCounter 来收集时间区间内的指标数量&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TimeWindowQuantile&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> compression&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> TDigest&lt;span style="color:#719e07">[]&lt;/span> ringBuffer&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> currentBucket&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> lastRotateTimestampMillis&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> durationBetweenRotatesMillis&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">TimeWindowQuantile&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">double&lt;/span> compression&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> bucketNum&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> timeWindowSeconds&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>compression &lt;span style="color:#719e07">=&lt;/span> compression&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>ringBuffer &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TDigest&lt;span style="color:#719e07">[&lt;/span>bucketNum&lt;span style="color:#719e07">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> bucketNum&lt;span style="color:#719e07">;&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>ringBuffer&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> TDigest&lt;span style="color:#719e07">.&lt;/span>createDigest&lt;span style="color:#719e07">(&lt;/span>compression&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>currentBucket &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>lastRotateTimestampMillis &lt;span style="color:#719e07">=&lt;/span> System&lt;span style="color:#719e07">.&lt;/span>currentTimeMillis&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>durationBetweenRotatesMillis &lt;span style="color:#719e07">=&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>SECONDS&lt;span style="color:#719e07">.&lt;/span>toMillis&lt;span style="color:#719e07">(&lt;/span>timeWindowSeconds&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">/&lt;/span> bucketNum&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> &lt;span style="color:#268bd2">quantile&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">double&lt;/span> q&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TDigest currentBucket &lt;span style="color:#719e07">=&lt;/span> rotate&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> currentBucket&lt;span style="color:#719e07">.&lt;/span>quantile&lt;span style="color:#719e07">(&lt;/span>q&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">add&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">double&lt;/span> value&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rotate&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>TDigest bucket &lt;span style="color:#719e07">:&lt;/span> ringBuffer&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bucket&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>value&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> TDigest &lt;span style="color:#268bd2">rotate&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> timeSinceLastRotateMillis &lt;span style="color:#719e07">=&lt;/span> System&lt;span style="color:#719e07">.&lt;/span>currentTimeMillis&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">-&lt;/span> lastRotateTimestampMillis&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">while&lt;/span> &lt;span style="color:#719e07">(&lt;/span>timeSinceLastRotateMillis &lt;span style="color:#719e07">&amp;gt;&lt;/span> durationBetweenRotatesMillis&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ringBuffer&lt;span style="color:#719e07">[&lt;/span>currentBucket&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> TDigest&lt;span style="color:#719e07">.&lt;/span>createDigest&lt;span style="color:#719e07">(&lt;/span>compression&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(++&lt;/span>currentBucket &lt;span style="color:#719e07">&amp;gt;=&lt;/span> ringBuffer&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> currentBucket &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeSinceLastRotateMillis &lt;span style="color:#719e07">-=&lt;/span> durationBetweenRotatesMillis&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> lastRotateTimestampMillis &lt;span style="color:#719e07">+=&lt;/span> durationBetweenRotatesMillis&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> ringBuffer&lt;span style="color:#719e07">[&lt;/span>currentBucket&lt;span style="color:#719e07">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标推送">指标推送&lt;/h1>
+&lt;p>指标推送只有用户在设置了&amp;lt;dubbo:metrics /&amp;gt;配置且配置protocol参数后才开启，若只开启指标聚合，则默认不推送指标。&lt;/p>
+&lt;h2 id="1-promehteus-pull-servicediscovery">1. Promehteus Pull ServiceDiscovery&lt;/h2>
+&lt;p>使用dubbo-admin等类似的中间层，启动时根据配置将本机 IP、Port、MetricsURL 推送地址信息至dubbo-admin（或任意中间层）的方式，暴露HTTP ServiceDiscovery供prometheus读取，配置方式如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;pull&amp;rdquo; address=&amp;quot;${dubbo-admin.address}&amp;quot; port=&amp;ldquo;20888&amp;rdquo; url=&amp;quot;/metrics&amp;quot;/&amp;gt;，其中在pull模式下address为可选参数，若不填则需用户手动在Prometheus配置文件中配置地址&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">exportHttpServer&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> exporterEnabled &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_EXPORTER_ENABLED_KEY&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>exporterEnabled&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> port &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_EXPORTER_METRICS_PORT_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_METRICS_PORT&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String path &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_EXPORTER_METRICS_PATH_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_METRICS_PATH&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>path&lt;span style="color:#719e07">.&lt;/span>startsWith&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> path&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer &lt;span style="color:#719e07">=&lt;/span> HttpServer&lt;span style="color:#719e07">.&lt;/span>create&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> InetSocketAddress&lt;span style="color:#719e07">(&lt;/span>port&lt;span style="color:#719e07">),&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer&lt;span style="color:#719e07">.&lt;/span>createContext&lt;span style="color:#719e07">(&lt;/span>path&lt;span style="color:#719e07">,&lt;/span> httpExchange &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String response &lt;span style="color:#719e07">=&lt;/span> prometheusRegistry&lt;span style="color:#719e07">.&lt;/span>scrape&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpExchange&lt;span style="color:#719e07">.&lt;/span>sendResponseHeaders&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">200&lt;/span>&lt;span style="color:#719e07">,&lt;/span> response&lt;span style="color:#719e07">.&lt;/span>getBytes&lt;span style="color:#719e07">().&lt;/span>length&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">(&lt;/span>OutputStream os &lt;span style="color:#719e07">=&lt;/span> httpExchange&lt;span style="color:#719e07">.&lt;/span>getResponseBody&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> os&lt;span style="color:#719e07">.&lt;/span>write&lt;span style="color:#719e07">(&lt;/span>response&lt;span style="color:#719e07">.&lt;/span>getBytes&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Thread&lt;span style="color:#719e07">(&lt;/span>prometheusExporterHttpServer&lt;span style="color:#719e07">::&lt;/span>start&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread&lt;span style="color:#719e07">.&lt;/span>start&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>IOException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException&lt;span style="color:#719e07">(&lt;/span>e&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-prometheus-push-pushgateway">2. Prometheus Push Pushgateway&lt;/h2>
+&lt;p>用户直接在Dubbo配置文件中配置Prometheus Pushgateway的地址即可，如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;push&amp;rdquo; address=&amp;quot;${prometheus.pushgateway-url}&amp;quot; interval=&amp;ldquo;5&amp;rdquo; /&amp;gt;，其中interval代表推送间隔&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">schedulePushJob&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> pushEnabled &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_ENABLED_KEY&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>pushEnabled&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String baseUrl &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_BASE_URL_KEY&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String job &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_JOB_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_JOB_NAME&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> pushInterval &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_PUSH_INTERVAL_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_PUSH_INTERVAL&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String username &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_USERNAME_KEY&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String password &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_PASSWORD_KEY&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> NamedThreadFactory threadFactory &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> NamedThreadFactory&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;prometheus-push-job&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor &lt;span style="color:#719e07">=&lt;/span> Executors&lt;span style="color:#719e07">.&lt;/span>newScheduledThreadPool&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">,&lt;/span> threadFactory&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PushGateway pushGateway &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> PushGateway&lt;span style="color:#719e07">(&lt;/span>baseUrl&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>StringUtils&lt;span style="color:#719e07">.&lt;/span>isBlank&lt;span style="color:#719e07">(&lt;/span>username&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway&lt;span style="color:#719e07">.&lt;/span>setConnectionFactory&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> BasicAuthHttpConnectionFactory&lt;span style="color:#719e07">(&lt;/span>username&lt;span style="color:#719e07">,&lt;/span> password&lt;span style="color:#719e07">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor&lt;span style="color:#719e07">.&lt;/span>scheduleWithFixedDelay&lt;span style="color:#719e07">(()&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> push&lt;span style="color:#719e07">(&lt;/span>pushGateway&lt;span style="color:#719e07">,&lt;/span> job&lt;span style="color:#719e07">),&lt;/span> pushInterval&lt;span style="color:#719e07">,&lt;/span> pushInterval&lt;span style="color:#719e07">,&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>SECONDS&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">push&lt;/span>&lt;span style="color:#719e07">(&lt;/span>PushGateway pushGateway&lt;span style="color:#719e07">,&lt;/span> String job&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway&lt;span style="color:#719e07">.&lt;/span>pushAdd&lt;span style="color:#719e07">(&lt;/span>prometheusRegistry&lt;span style="color:#719e07">.&lt;/span>getPrometheusRegistry&lt;span style="color:#719e07">(),&lt;/span> job&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>IOException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Error occurred when pushing metrics to prometheus: &amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> e&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/tracing/</guid><description/></item><item><title>Overview: 日志管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/logging/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/logging/</guid><description>
+&lt;p>在 Dubbo 框架内所有的日志输出都是通过 LoggerFactory 这个静态工厂类来获得 Logger 的对象实体，并且抽离了一个 LoggerAdapter 用于对接第三方日志框架，所以就有了JDKLoggerAdapter, Log4jLoggerAdapter, SLF4JLoggerAdapter等一些实现子类，分别对接了不同 Log 第三方实现。既然 Dubbo 能够支持这么多log实现，那么这些实现在 Dubbo 中优先级是在呢么样的呢？这里的优先级是只未配置指定的 logger 提供方的情况下，由 Dubbo 框架自己选择。优先级如下：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>第三方日志框架&lt;/th>
+&lt;th>优先级&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Log4j&lt;/td>
+&lt;td>最高（默认就用这个）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>SLF4J&lt;/td>
+&lt;td>次高（上面没有采用这个）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Common Logging(jcl就是common logging)&lt;/td>
+&lt;td>次低（Log4j和SLF4J在项目中均没有就用这个）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>JDK log&lt;/td>
+&lt;td>最低（最后的选择）&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Dubbo 日志的调用方式，针对不同的日志打印系统，采用统一的 API 调用及输出，如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * ChannelListenerDispatcher
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ChannelHandlerDispatcher&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ChannelHandler &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ErrorTypeAwareLogger logger &lt;span style="color:#719e07">=&lt;/span> LoggerFactory&lt;span style="color:#719e07">.&lt;/span>getErrorTypeAwareLogger&lt;span style="color:#719e07">(&lt;/span>ChannelHandlerDispatcher&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 采用的日志输出方式是首先从 dubbo.application.logger 系统变量中获取属性值，来判断到底采用哪种日志输出方式，如果没设置则按照默认的加载顺序加载相应的日志输出类，直到成功加载：&lt;/p>
+&lt;p>顺序为：log4jLogger &amp;gt; slf4jLogger &amp;gt; JclLogger &amp;gt; JdkLogger&lt;/p>
+&lt;p>LoggerFactory 在类加载过程中变量的初始化过程：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// search common-used logging frameworks
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String logger &lt;span style="color:#719e07">=&lt;/span> System&lt;span style="color:#719e07">.&lt;/span>getProperty&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;dubbo.application.logger&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">switch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>logger&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> Slf4jLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>NAME&lt;span style="color:#719e07">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> Slf4jLoggerAdapter&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> JclLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>NAME&lt;span style="color:#719e07">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> JclLoggerAdapter&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> Log4jLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>NAME&lt;span style="color:#719e07">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> Log4jLoggerAdapter&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> JdkLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>NAME&lt;span style="color:#719e07">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> JdkLoggerAdapter&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> Log4j2LoggerAdapter&lt;span style="color:#719e07">.&lt;/span>NAME&lt;span style="color:#719e07">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> Log4j2LoggerAdapter&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span>&lt;span style="color:#719e07">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> LoggerAdapter&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> candidates &lt;span style="color:#719e07">=&lt;/span> Arrays&lt;span style="color:#719e07">.&lt;/span>asList&lt;span style="color:#719e07">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Log4jLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Slf4jLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Log4j2LoggerAdapter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> JclLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> JdkLoggerAdapter&lt;span style="color:#719e07">.&lt;/span>class
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> found &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// try to use the first available adapter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> LoggerAdapter&lt;span style="color:#719e07">&amp;gt;&lt;/span> clazz &lt;span style="color:#719e07">:&lt;/span> candidates&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LoggerAdapter loggerAdapter &lt;span style="color:#719e07">=&lt;/span> clazz&lt;span style="color:#719e07">.&lt;/span>getConstructor&lt;span style="color:#719e07">().&lt;/span>newInstance&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> loggerAdapter&lt;span style="color:#719e07">.&lt;/span>getLogger&lt;span style="color:#719e07">(&lt;/span>LoggerFactory&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>loggerAdapter&lt;span style="color:#719e07">.&lt;/span>isConfigured&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter&lt;span style="color:#719e07">(&lt;/span>loggerAdapter&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> found &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Exception &lt;span style="color:#719e07">|&lt;/span> LinkageError ignored&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>found&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System&lt;span style="color:#719e07">.&lt;/span>err&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Dubbo: Unable to find a proper configured logger to log out.&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> LoggerAdapter&lt;span style="color:#719e07">&amp;gt;&lt;/span> clazz &lt;span style="color:#719e07">:&lt;/span> candidates&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LoggerAdapter loggerAdapter &lt;span style="color:#719e07">=&lt;/span> clazz&lt;span style="color:#719e07">.&lt;/span>getConstructor&lt;span style="color:#719e07">().&lt;/span>newInstance&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> loggerAdapter&lt;span style="color:#719e07">.&lt;/span>getLogger&lt;span style="color:#719e07">(&lt;/span>LoggerFactory&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter&lt;span style="color:#719e07">(&lt;/span>loggerAdapter&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> found &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Throwable ignored&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>found&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System&lt;span style="color:#719e07">.&lt;/span>err&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Dubbo: Using default logger: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> loggerAdapter&lt;span style="color:#719e07">.&lt;/span>getClass&lt;span style="color:#719e07">().&lt;/span>getName&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;. &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;If you cannot see any log, please configure -Ddubbo.application.logger property to your preferred logging framework.&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System&lt;span style="color:#719e07">.&lt;/span>err&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Dubbo: Unable to find any available logger adapter to log out. Dubbo logs will be ignored. &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Please configure -Ddubbo.application.logger property and add corresponding logging library to classpath.&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面这段静态块是在LoggerFactory里面，说明只要LoggerFactory类一加载就会去选择对应的日志提供方。大家可能会发现对日志的提供方其实是可以通过配置来指定的，因为静态块一开始是从当前jvm环境中获取dubbo.application.logger，这个参数是同java -Ddubbo.application.logger=xxxx去指定的，如果是放在容器里面，就需要配置在容器启动的jvm参数里面。&lt;/p>
+&lt;h2 id="使用log4j来提供日志输出">使用Log4j来提供日志输出&lt;/h2>
+&lt;p>你不用做过多的处理就可以开启dubbo的日志，因为dubbo默认就是使用log4j。你唯一需要做的就是配置一个name是&amp;quot;com.alibaba.dubbo&amp;quot;的logger就可以了，然后关联到对应的appender。如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;appender&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubboAppender&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.log4j.DailyRollingFileAppender&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;File&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;E:/dubbo.log&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;DatePattern&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;&amp;#39;.&amp;#39;yyyy-MM-dd&amp;#39;.log&amp;#39;&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;layout&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.log4j.PatternLayout&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;ConversionPattern&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> value=&lt;span style="color:#2aa198">&amp;#34;[%d{MMdd HH:mm:ss SSS\} %-5p] [%t] %c{3\} - %m%n&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/layout&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/appender&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;logger&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo&amp;#34;&lt;/span> additivity=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;priority&lt;/span> value =&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;dubboAppender&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/logger&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="使用logback来提供日志输出">使用logback来提供日志输出&lt;/h2>
+&lt;p>这种情况，默认是看不到dubbo的日志输出的，除非出现异常，被你当前系统的日志框架拦截住了。我这里就拿当前使用最多的日志框架logback来做示例。我们知道logback天生和slf4j进行了集成，所以要在项目里面使用logback，调用slf4j暴露的接口就可以。所以要把dubbo的日志输出切换到logback，也就变成了切换到slf4j了。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;timestamp&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;byDate&amp;#34;&lt;/span> datePattern=&lt;span style="color:#2aa198">&amp;#34;yyyyMMdd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- dubbo log --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubboRolling&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;ch.qos.logback.core.rolling.RollingFileAppender&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Encoding&amp;gt;&lt;/span>UTF-8&lt;span style="color:#268bd2">&amp;lt;/Encoding&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;file&amp;gt;&lt;/span>${LOG_HOME_DUBBO}/MTP-DUBBO.log&lt;span style="color:#268bd2">&amp;lt;/file&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;rollingPolicy&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;ch.qos.logback.core.rolling.TimeBasedRollingPolicy&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;fileNamePattern&amp;gt;&lt;/span>${LOG_HOME_DUBBO}/DEMO-%d{yyyy-MM-dd}.%i-DUBBO.zip&lt;span style="color:#268bd2">&amp;lt;/fileNamePattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;maxHistory&amp;gt;&lt;/span>30&lt;span style="color:#268bd2">&amp;lt;/maxHistory&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;TimeBasedFileNamingAndTriggeringPolicy&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;MaxFileSize&amp;gt;&lt;/span>100MB&lt;span style="color:#268bd2">&amp;lt;/MaxFileSize&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/TimeBasedFileNamingAndTriggeringPolicy&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/rollingPolicy&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;pattern&amp;gt;&lt;/span>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n&lt;span style="color:#268bd2">&amp;lt;/pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;immediateFlush&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/immediateFlush&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/appender&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;logger&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo&amp;#34;&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;DEBUG&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;dubboRolling&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/logger&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 也可以将日志信息记录或者保存到文件中。&lt;/p>
+&lt;ol>
+&lt;li>使用&lt;code>accesslog&lt;/code>输出到&lt;code>log4j&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>输出到文件&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;http://localhost/log.txt&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;http://localhost/log2.txt&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 健康检查</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/health-information/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/health-information/</guid><description/></item><item><title>Overview: K8S探测器</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/kubernetes-probes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/kubernetes-probes/</guid><description/></item><item><title>Overview: 文档案例</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/doc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/doc/</guid><description/></item></channel></rss>
