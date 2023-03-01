@@ -1,8 +1,6 @@
 ---
 _build:
     render: link
-aliases:
-    - /zh/overview/tasks/ecosystem/configuration/
 description: ""
 icon: fas fa-external-link-alt
 linkTitle: 配置中心

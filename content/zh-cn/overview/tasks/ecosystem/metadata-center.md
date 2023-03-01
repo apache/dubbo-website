@@ -1,8 +1,6 @@
 ---
 _build:
     render: link
-aliases:
-    - /zh/overview/tasks/ecosystem/metadata-center/
 description: ""
 icon: fas fa-external-link-alt
 linkTitle: 元数据中心

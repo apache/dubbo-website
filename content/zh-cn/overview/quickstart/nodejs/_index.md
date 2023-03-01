@@ -1,8 +1,6 @@
 ---
 _build:
     render: link
-aliases:
-    - /zh/overview/quickstart/nodejs/
 description: Node.js 微服务开发入门
 icon: fas fa-external-link-alt
 linkTitle: Node.js

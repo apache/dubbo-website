@@ -1,8 +1,6 @@
 ---
 _build:
     render: link
-aliases:
-    - /zh/download/go/
 description: Go
 manualLinkRelref: ./#go
 title: Go

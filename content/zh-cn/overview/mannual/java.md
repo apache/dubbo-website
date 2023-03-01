@@ -1,8 +1,6 @@
 ---
 _build:
     render: link
-aliases:
-    - /zh/overview/mannual/java/
 description: ""
 linkTitle: Java
 manualLinkRelref: ../../docs3-v2/java-sdk/

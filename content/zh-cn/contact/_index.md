@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/contact/
+    - /zh/contribution-guidelines/
 description: 联系社区，Dubbo 社区贡献指南
 linkTitle: 联系社区
 menu:
