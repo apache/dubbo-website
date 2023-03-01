@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/languages/erlang/service/
+description: 在 erlang 中配置服务提供者
+linkTitle: 提供者配置
+title: 提供者配置
 type: docs
-title: "提供者配置"
-linkTitle: "提供者配置"
 weight: 3
-description: "在 erlang 中配置服务提供者"
 ---
+
+
 
 ## 基本配置
 

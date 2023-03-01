@@ -1,9 +1,9 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/
+description: Dubbo SPI 扩展使用指南
+linkTitle: SPI 扩展使用手册
+title: SPI 扩展使用手册
 type: docs
-title: "SPI 扩展使用手册"
-linkTitle: "SPI 扩展使用手册"
 weight: 9
-description: "Dubbo SPI 扩展使用指南"
 ---
-

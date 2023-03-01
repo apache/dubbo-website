@@ -1,10 +1,14 @@
 ---
-type: docs
-title: Dubbo-go 数据上报
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/samples/metrics/
+description: 提示用户dubbo使用的数据上报方式
 keywords: Dubbo-go 数据上报
 linkTitle: Metrics 数据上报
-description: 提示用户dubbo使用的数据上报方式
+title: Dubbo-go 数据上报
+type: docs
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/governance/monitor/)。
 {{% /pageinfo %}}
@@ -210,7 +214,3 @@ dubbo_test_summary_with_label{summarylabel1="value1",summarylabel2="value2",quan
 dubbo_test_summary_with_label_sum{summarylabel1="value1",summarylabel2="value2"} 233.609026131067
 dubbo_test_summary_with_label_count{summarylabel1="value1",summarylabel2="value2"} 463
 ```
-
-
-
-

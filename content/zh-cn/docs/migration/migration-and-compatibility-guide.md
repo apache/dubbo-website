@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/migration/migration-and-compatibility-guide/
+description: 快速了解 Dubbo3 的升级步骤与兼容性
+linkTitle: 总结
+title: 3.x 升级与兼容性指南
 type: docs
-title: "3.x 升级与兼容性指南"
-linkTitle: "总结"
 weight: 1
-description: "快速了解 Dubbo3 的升级步骤与兼容性"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/2.x-to-3.x-compatibility-guide/)。
 {{% /pageinfo %}}

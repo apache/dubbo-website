@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/local-stub/
+description: 了解 Dubbo 中本地存根在客户端执行部分逻辑的使用
+linkTitle: 本地存根
+title: 本地存根
 type: docs
-title: "本地存根"
-linkTitle: "本地存根"
 weight: 11
-description: "了解 Dubbo 中本地存根在客户端执行部分逻辑的使用"
 ---
+
+
 ## 特性说明：
 
 远程服务后，客户端通常只剩下接口，而实现全在服务器端，但提供方有些时候想在客户端也执行部分逻辑。

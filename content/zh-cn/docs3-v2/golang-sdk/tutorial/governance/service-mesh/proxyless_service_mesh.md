@@ -1,8 +1,13 @@
 ---
-type: docs
-title: 无代理服务网格
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/proxyless_service_mesh/
+description: 无代理服务网格
 keywords: 无代理服务网格
+title: 无代理服务网格
+type: docs
 ---
+
+
 
 ## 1. 什么是 Proxyless Service-Mesh (无代理服务网格) ?
 

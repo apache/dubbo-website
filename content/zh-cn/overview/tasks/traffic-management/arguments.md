@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "根据请求参数引导流量分布"
-linkTitle: "参数路由"
-weight: 6
+aliases:
+    - /zh/overview/tasks/traffic-management/arguments/
 description: ""
+linkTitle: 参数路由
+title: 根据请求参数引导流量分布
+type: docs
+weight: 6
 ---
+
+
 
 根据请求参数值转发流量，是一种非常灵活且实用的流量管控策略。比如微服务实践中，根据参数（如用户 ID）路由流量，将一小部分用户请求转发到最新发布的产品版本，以验证新版本的稳定性、获取用户的产品体验反馈等，是生产实践中常用的一种有效的灰度机制。
 

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/preflight-check/
+description: 在启动时检查依赖的服务是否可用
+linkTitle: 启动时检查
+title: 启动时检查
 type: docs
-title: "启动时检查"
-linkTitle: "启动时检查"
 weight: 1
-description: "在启动时检查依赖的服务是否可用"
 ---
+
+
 ## 背景
 Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会抛出异常，阻止 Spring 初始化完成，以便上线时，能及早发现问题，默认  `check="true"`。  
 

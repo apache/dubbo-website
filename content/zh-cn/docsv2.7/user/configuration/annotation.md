@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/configuration/annotation/
+description: 以注解配置的方式来配置你的 Dubbo 应用
+linkTitle: 注解配置
+title: 注解配置
 type: docs
-title: "注解配置"
-linkTitle: "注解配置"
 weight: 4
-description: "以注解配置的方式来配置你的 Dubbo 应用"
 ---
+
+
 
 {{% alert title="提示" color="primary" %}}
 需要 `2.6.3` 及以上版本支持。 点此查看 [完整示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)

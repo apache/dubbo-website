@@ -1,12 +1,15 @@
-
 ---
-type: docs
-title: "Envoy Bookinfo 示例"
-linkTitle: "Envoy Bookinfo"
-description: "通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系。"
-weight: 70
+aliases:
+    - /zh/overview/tasks/mesh/bookinfo-sidecar/
+description: 通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系。
+linkTitle: Envoy Bookinfo
 no_list: true
+title: Envoy Bookinfo 示例
+type: docs
+weight: 70
 ---
+
+
 
 通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系。
 

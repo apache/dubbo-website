@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/refer/ecology/
+description: Dubbo-go 生态组件
 title: Dubbogo 生态组件
 type: docs
 weight: 3
-description: Dubbo-go 生态组件
 ---
+
+
 
 ### Dubbo-go / Dubbo-go 3.0 
 

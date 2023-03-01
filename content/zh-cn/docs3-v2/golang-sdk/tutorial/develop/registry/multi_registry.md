@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
+description: 多注册中心
 title: 多注册中心
 type: docs
 weight: 100
 ---
+
+
 
 一个 Dubbo-go 应用可以配置的多个接口维度的注册中心。
 
@@ -114,5 +119,3 @@ INFO    cmd/client.go:55        nacos server response result: name:"Hello lauren
 INFO    cmd/client.go:61        zk server response result: name:"Hello laurence" id:"12345" age:21
 
 ```
-
-

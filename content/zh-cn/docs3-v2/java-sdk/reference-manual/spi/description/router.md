@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/router/
+description: 路由扩展
+linkTitle: 路由扩展
+title: 路由扩展
 type: docs
-title: "路由扩展"
-linkTitle: "路由扩展"
 weight: 6
 ---
+
+
 
 ## 扩展说明
 
@@ -65,5 +70,3 @@ META-INF/dubbo/org.apache.dubbo.rpc.cluster.RouterFactory：
 ```properties
 xxx=com.xxx.XxxRouterFactory
 ```
-
-

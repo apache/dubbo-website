@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/http/
+description: http:// 协议参考手册
+linkTitle: http://
+title: http 协议
 type: docs
-title: "http 协议"
-linkTitle: "http://"
 weight: 3
-description: "http:// 协议参考手册"
 ---
+
+
 
 基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现
 

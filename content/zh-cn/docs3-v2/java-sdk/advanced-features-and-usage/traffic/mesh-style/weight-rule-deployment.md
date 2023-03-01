@@ -1,11 +1,14 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/weight-rule-deployment/
+description: 基于用户自定权重实现路由功能。
+linkTitle: 权重路由
+title: 权重路由
 type: docs
-title: "权重路由"
-linkTitle: "权重路由"
 weight: 4
-description: "基于用户自定权重实现路由功能。"
 ---
+
+
 
 ```yaml
 apiVersion: service.dubbo.apache.org/v1alpha1

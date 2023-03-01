@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
+description: Dubbo 中的并发控制
+linkTitle: 并发控制
+title: 并发控制
 type: docs
-title: "并发控制"
-linkTitle: "并发控制"
 weight: 28
-description: "Dubbo 中的并发控制"
 ---
+
+
 ## 功能说明
 多种并发控制功能，帮助用户管理其应用程序和服务。
 

@@ -1,11 +1,15 @@
 ---
-type: docs
-title: "从 Prometheus 查询 Metrics 监控指标"
-linkTitle: "Prometheus"
+aliases:
+    - /zh/overview/tasks/observability/prometheus/
 description: ""
-weight: 30
+linkTitle: Prometheus
 no_list: true
+title: 从 Prometheus 查询 Metrics 监控指标
+type: docs
+weight: 30
 ---
+
+
 
 ## 准备条件
 本文演示在如何 Kubernetes 环境下部署的 Prometheus 并实现对 Dubbo 集群的监控数据统计与查询，你需要完成或具备以下内容：
@@ -72,8 +76,3 @@ $ kubectl port-forward service/prometheus ${port}:${port}
 ![img](/imgs/v3/tasks/observability/prometheus.png)
 
 **2. 在 “Expression” 一览，输入 `dubbo_requests_total`，返回以下结果**
-
-
-
-
-

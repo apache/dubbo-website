@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/idl/
+description: IDL 方式使用 Triple
+linkTitle: IDL 方式使用 Triple
+title: IDL 方式使用 Triple
 type: docs
-title: "IDL 方式使用 Triple"
-linkTitle: "IDL 方式使用 Triple"
 weight: 2
 ---
+
+
 
 这篇教程会通过从零构建一个简单的工程来演示如何基于 IDL 方式使用 Dubbo Triple
 

@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "RPC 协议 Triple&Dubbo 基准测试"
-linkTitle: "RPC 基准"
-weight: 1
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/performance/rpc-benchmarking/
 description: ""
+linkTitle: RPC 基准
+title: RPC 协议 Triple&Dubbo 基准测试
+type: docs
+weight: 1
 ---
+
+
 
 - Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。
 - 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。

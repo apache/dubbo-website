@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/coding/
+description: Dubbo 工程中的编码约定
+linkTitle: 编码约定
+title: 编码约定
 type: docs
-title: "编码约定"
-linkTitle: "编码约定"
 weight: 12
-description: "Dubbo 工程中的编码约定"
 ---
+
+
 
 ## 代码风格
 

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-argument/
+description: dubbo:argument 配置
+linkTitle: dubbo:argument
+title: dubbo:argument
 type: docs
-title: "dubbo:argument"
-linkTitle: "dubbo:argument"
 weight: 1
-description: "dubbo:argument 配置"
 ---
+
+
 
 方法参数配置。对应的配置类： `org.apache.dubbo.config.ArgumentConfig`。该标签为 `<dubbo:method>` 的子标签，用于方法参数的特征描述，比如： 
  

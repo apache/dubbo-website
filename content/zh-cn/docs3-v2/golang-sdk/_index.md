@@ -1,6 +1,9 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/
+description: Golang
+linkTitle: Golang
+title: Golang
 type: docs
-title: "Golang"
-linkTitle: "Golang"
 weight: 20
 ---

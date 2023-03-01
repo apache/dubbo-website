@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/redis/
+description: Redis 元数据中心基本使用与工作原理
+linkTitle: Redis
+title: Redis
 type: docs
-title: "Redis"
-linkTitle: "Redis"
 weight: 4
-description: "Redis 元数据中心基本使用与工作原理"
 ---
+
+
 暂未支持

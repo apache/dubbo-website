@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/source/router/
+description: 本文介绍了服务路由的原理和实现细节
+linkTitle: 服务路由
+title: 服务路由
 type: docs
-title: "服务路由"
-linkTitle: "服务路由"
 weight: 1
-description: "本文介绍了服务路由的原理和实现细节"
 ---
+
+
 
 ## 1. 简介
 

@@ -1,10 +1,14 @@
 ---
-type: docs
-title: Dubbo-go 3.0 自定义日志
-keywords: Dubbo-go 3.0 自定义日志
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/samples/custom-logger/
 description: Dubbo-go 3.0 自定义日志
+keywords: Dubbo-go 3.0 自定义日志
 linkTitle: 日志
+title: Dubbo-go 3.0 自定义日志
+type: docs
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/custom-logger/)。
 {{% /pageinfo %}}
@@ -90,4 +94,3 @@ logger.SetLogger(myLogger)  // 在 main 函数中设置自定义logger
 ```
 
 - 日志API不可以在Init 阶段使用，否则可能会发生意料之外的问题。
-

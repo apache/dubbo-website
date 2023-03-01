@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Polaris"
-linkTitle: "Polaris"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/rate-limit/polaris/
 description: ""
+linkTitle: Polaris
+title: Polaris
+type: docs
+weight: 30
 ---

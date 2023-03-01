@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "基于权重值的比例流量转发"
-linkTitle: "权重比例"
-weight: 7
+aliases:
+    - /zh/overview/tasks/traffic-management/weight/
 description: ""
+linkTitle: 权重比例
+title: 基于权重值的比例流量转发
+type: docs
+weight: 7
 ---
+
+
 
 Dubbo 提供了基于权重的负载均衡算法，可以实现按比例的流量分布：权重高的提供者机器收到更多的请求流量，而权重低的机器收到相对更少的流量。
 

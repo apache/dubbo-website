@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/canary-deployment/
+description: 在原有版本可用的情况下，同时部署一个新版本应用作为“金丝雀”，测试新版本的性能和表现，在保障整体系统稳定的前提下，尽早发现、及时调整。
+linkTitle: 金丝雀部署
+title: 金丝雀部署
 type: docs
-title: "金丝雀部署"
-linkTitle: "金丝雀部署"
 weight: 7
-description: "在原有版本可用的情况下，同时部署一个新版本应用作为“金丝雀”，测试新版本的性能和表现，在保障整体系统稳定的前提下，尽早发现、及时调整。"
 ---
+
+
 
 
 ### 场景描述

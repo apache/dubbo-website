@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/service-container/
+description: 使用 Dubbo 中的服务容器
+linkTitle: 服务容器
+title: 服务容器
 type: docs
-title: "服务容器"
-linkTitle: "服务容器"
 weight: 40
-description: "使用 Dubbo 中的服务容器"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/service-container/)。
 {{% /pageinfo %}}

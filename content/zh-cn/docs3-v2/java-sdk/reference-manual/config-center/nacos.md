@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/config-center/nacos/
+description: Nacos 配置中心的基本使用和工作原理。
+linkTitle: Nacos
+title: Nacos
 type: docs
-title: "Nacos"
-linkTitle: "Nacos"
 weight: 3
-description: "Nacos 配置中心的基本使用和工作原理。"
 ---
+
+
 
 ## 1 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
@@ -109,5 +113,3 @@ dubbo
 
 - configurators [覆盖规则](../../../advanced-features-and-usage/traffic/config-rule/)
 - tag-router [标签路由](../../../advanced-features-and-usage/traffic/routing-rule/) 与 condition-router [条件路由](../../../advanced-features-and-usage/traffic/routing-rule/)
-
-

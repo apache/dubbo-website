@@ -1,10 +1,14 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/grpc/
+description: gRPC协议
+linkTitle: gRPC协议
+title: gRPC协议
 type: docs
-title: "gRPC协议"
-linkTitle: "gRPC协议"
 weight: 5
 ---
+
+
 
 
 ## 特性说明

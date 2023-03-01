@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/provider/
+description: Dubbo 服务提供端端线程池模型和用法
+linkTitle: 服务端线程模型
+title: 服务端线程模型
 type: docs
-title: "服务端线程模型"
-linkTitle: "服务端线程模型"
 weight: 1
-description: "Dubbo 服务提供端端线程池模型和用法"
 ---
+
+
 ## 功能说明
 Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。
 
@@ -127,4 +131,3 @@ dubbo:
   metadata-report:
     address: zookeeper://127.0.0.1:2181
 ```
-

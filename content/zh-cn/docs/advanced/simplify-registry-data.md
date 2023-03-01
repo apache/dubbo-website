@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/simplify-registry-data/
+description: 减少注册中心上服务的注册数据
+linkTitle: 注册信息简化
+title: 注册信息简化
 type: docs
-title: "注册信息简化"
-linkTitle: "注册信息简化"
 weight: 37
-description: "减少注册中心上服务的注册数据"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/)。
 {{% /pageinfo %}}

@@ -1,10 +1,14 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/http/
+description: HTTP协议
+linkTitle: HTTP协议
+title: HTTP协议
 type: docs
-title: "HTTP协议"
-linkTitle: "HTTP协议"
 weight: 6
 ---
+
+
 
 
 ## 特性说明

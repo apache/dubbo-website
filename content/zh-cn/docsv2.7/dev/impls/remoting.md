@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/remoting/
+description: 网络传输扩展
+linkTitle: 网络传输扩展
+title: 网络传输扩展
 type: docs
-title: "网络传输扩展"
-linkTitle: "网络传输扩展"
 weight: 17
 ---
+
+
 
 ## 扩展说明
 

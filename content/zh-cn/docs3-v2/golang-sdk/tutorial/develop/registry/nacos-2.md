@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
+description: 使用 Nacos 作为注册中心
 title: 使用 Nacos 作为注册中心
 type: docs
 weight: 10
 ---
+
+
 
 ## 1. 准备工作
 
@@ -76,5 +81,3 @@ dubbo:
 ## 4. 更多支持的注册中心
 
 参考 [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
-
-

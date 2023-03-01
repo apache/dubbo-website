@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/design/
+description: Dubbo 框架设计概览
+linkTitle: 框架设计
+title: 框架设计
 type: docs
-title: "框架设计"
-linkTitle: "框架设计"
 weight: 2
-description: "Dubbo 框架设计概览"
 ---
+
+
 
 ## 整体设计
 

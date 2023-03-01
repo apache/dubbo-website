@@ -1,11 +1,14 @@
-
 ---
-type: docs
-title: "书籍与资料"
-linkTitle: "书籍与资料"
+aliases:
+    - /zh/contact/books/
 description: ""
+linkTitle: 书籍与资料
+title: 书籍与资料
+type: docs
 weight: 1
 ---
+
+
 
 以下是 Apache Dubbo 社区及贡献者编写的部分书籍资料。
 
@@ -30,8 +33,3 @@ weight: 1
 </p>
 {{< /card >}}
 {{< /cardpane >}}
-
-
-
-
-

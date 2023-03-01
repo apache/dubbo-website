@@ -1,13 +1,17 @@
-
 ---
-type: docs
-title: "联系社区"
-linkTitle: "联系社区"
-description: "联系社区，Dubbo 社区贡献指南"
+aliases:
+    - /zh/contact/
+    - /zh/contribution-guidelines/
+description: 联系社区，Dubbo 社区贡献指南
+linkTitle: 联系社区
 menu:
-  main:
-    weight: 40
+    main:
+        weight: 40
+title: 联系社区
+type: docs
 ---
+
+
 
 ## 为 Dubbo 做贡献
 
@@ -126,7 +130,3 @@ git push origin your_awesome_patch
 3. 输入你的格式名称，方便在不同工程之间进行识别，最后别忘了 ⏎ 来保存更改.
 
 设置完成后，IDEA 会帮助你自动 reformat 代码
-
-
-
-

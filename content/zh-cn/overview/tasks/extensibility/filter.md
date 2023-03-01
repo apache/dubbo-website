@@ -1,11 +1,15 @@
 ---
-type: docs
-title: "Filter"
-linkTitle: "Filter"
-description: "自定义过滤器"
-weight: 25
+aliases:
+    - /zh/overview/tasks/extensibility/filter/
+description: 自定义过滤器
+linkTitle: Filter
 no_list: true
+title: Filter
+type: docs
+weight: 25
 ---
+
+
 
 通过自定义过滤器，可以对返回的结果进行统一的处理、验证等，减少对开发人员的打扰。
 

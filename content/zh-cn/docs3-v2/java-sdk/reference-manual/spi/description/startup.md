@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/startup/
+description: Startup 启动探针
+linkTitle: 启动探针
+title: Startup 启动探针
 type: docs
-title: "Startup 启动探针"
-linkTitle: "启动探针"
 weight: 12
 ---
+
+
 
 ## 扩展说明
 
@@ -71,5 +76,3 @@ META-INF/dubbo/org.apache.dubbo.qos.probe.StartupProbe：
 ```
 xxx=com.xxx.XxxStartupProbe
 ```
-
-

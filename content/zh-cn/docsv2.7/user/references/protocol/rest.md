@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/rest/
+description: rest:// 协议参考手册
+linkTitle: rest://
+title: rest 协议
 type: docs
-title: "rest 协议"
-linkTitle: "rest://"
 weight: 2
-description: "rest:// 协议参考手册"
 ---
+
+
 
 
 基于标准的Java REST API——JAX-RS 2.0（Java API for RESTful Web Services的简写）实现的REST调用支持

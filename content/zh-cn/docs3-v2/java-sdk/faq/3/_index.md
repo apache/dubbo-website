@@ -1,7 +1,9 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/faq/3/
+description: 3 - 动态代理层
+linkTitle: 3 - 动态代理层
+title: 3 - 动态代理层
 type: docs
-title: "3 - 动态代理层"
-linkTitle: "3 - 动态代理层"
 weight: 3
 ---

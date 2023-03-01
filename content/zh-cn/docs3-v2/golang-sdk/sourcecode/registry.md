@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/sourcecode/registry/
+description: 注册中心源码解读
 title: 注册中心
 type: docs
 weight: 1
-description: 注册中心源码解读
 ---
+
+
 
 Dubbogo 为注册中心抽象了一套接口如下：
 
@@ -50,4 +54,4 @@ type Registry interface {
 
 该接口主要包含四个方法，分别是注册、反注册、订阅、取消订阅。顾名思义，概括了客户端和服务端与注册中心交互的动作。针对普通接口级服务注册发现场景，在Provider 服务启动时，会将自身服务接口信息抽象为一个 url，该 url 包含了客户端发起调用所需的所有信息（ip、端口、协议等），服务端的注册中心组件会将该 url 写入注册中心（例如zk）。客户端启动后，在服务引用 Refer 步骤会通过注册中心组件订阅（Subscribe）需要的服务信息，获取到的服务信息以异步事件更新的形式写入客户端缓存，从而在服务发现成功后，可以根据拿到的服务 url 参数，向对应服务提供者发起调用。
 
-## 
+##

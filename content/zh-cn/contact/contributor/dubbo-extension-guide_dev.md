@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/contact/contributor/dubbo-extension-guide_dev/
+description: 扩展 Dubbo 向导
+linkTitle: 扩展 Dubbo
+title: 扩展 Dubbo 向导
 type: docs
-title: "扩展 Dubbo 向导"
-linkTitle: "扩展 Dubbo"
 weight: 5
 ---
+
+
 
 
 Dubbo 使用微内核+插件的设计模式。内核只负责组装插件，Dubbo 的功能都是由扩展点（插件）实现，这就意味着 Dubbo 的所有功能都可以被用户定制的扩展所替代。
@@ -46,8 +51,3 @@ Dubbo 使用微内核+插件的设计模式。内核只负责组装插件，Dubb
 2. dubbo 组的管理员会在 dubbo 组下新建一个项目并邀请您加入到这个项目。
 3. 一旦您接受邀请，您可以将您的项目转移到 dubbo 组下的新项目里。
 4. dubbo 组的成员会对您的项目进行代码审查。随后，您可以对这些代码进行改进。
-
-
-
-
-

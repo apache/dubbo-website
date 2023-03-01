@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Kryo"
-linkTitle: "Kryo"
-weight: 80
+aliases:
+    - /zh/overview/what/ecosystem/serialization/kryo/
 description: ""
+linkTitle: Kryo
+title: Kryo
+type: docs
+weight: 80
 ---
+
+
 
 
 ## 1 介绍

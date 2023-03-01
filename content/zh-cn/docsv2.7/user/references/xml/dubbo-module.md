@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-module/
+description: dubbo:module 配置
+linkTitle: dubbo:module
+title: dubbo:module
 type: docs
-title: "dubbo:module"
-linkTitle: "dubbo:module"
-weight: 1 
-description: "dubbo:module 配置"
+weight: 1
 ---
+
+
 
 模块信息配置。对应的配置类 `org.apache.dubbo.config.ModuleConfig`
 

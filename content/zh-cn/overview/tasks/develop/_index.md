@@ -1,12 +1,15 @@
-
 ---
-type: docs
-title: "开发服务"
-linkTitle: "开发服务"
-description: "演示 Dubbo 框架提供的微服务开发 API 与编程模式"
-weight: 5
+aliases:
+    - /zh/overview/tasks/develop/
+description: 演示 Dubbo 框架提供的微服务开发 API 与编程模式
+linkTitle: 开发服务
 no_list: true
+title: 开发服务
+type: docs
+weight: 5
 ---
+
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

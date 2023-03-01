@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "动态配置规则"
-linkTitle: "动态配置"
-weight: 40
+aliases:
+    - /zh/overview/core-features/traffic/configuration-rule/
 description: ""
+linkTitle: 动态配置
+title: 动态配置规则
+type: docs
+weight: 40
 ---
+
+
 动态配置规则 (ConfigurationRule) 是 Dubbo 设计的在无需重启应用的情况下，动态调整 RPC 调用行为的一种能力，也成为动态覆盖规则，因为它是通过在运行态覆盖 Dubbo 实例或者 Dubbo 实例中 URL 地址的各种参数值，实现改变 RPC 调用行为的能力。
 
 使用动态配置规则，有以下几条关键信息值得注意：

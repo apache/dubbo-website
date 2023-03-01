@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/exporter-listener/
+description: 暴露监听扩展
+linkTitle: 暴露监听扩展
+title: 暴露监听扩展
 type: docs
-title: "暴露监听扩展"
-linkTitle: "暴露监听扩展"
 weight: 4
 ---
+
+
 
 ## 扩展说明
 
@@ -68,4 +73,3 @@ META-INF/dubbo/org.apache.dubbo.rpc.ExporterListener：
 ```properties
 xxx=com.xxx.XxxExporterListener
 ```
-

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/multi-versions/
+description: 在 Dubbo 中为同一个服务配置多个版本
+linkTitle: 多版本
+title: 多版本
 type: docs
-title: "多版本"
-linkTitle: "多版本"
 weight: 12
-description: "在 Dubbo 中为同一个服务配置多个版本"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-versions/)。
 {{% /pageinfo %}}

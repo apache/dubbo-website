@@ -1,5 +1,8 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/tracing/opentelmentry/
+description: 使用 OpenTelmentry 协议
+title: 使用 OpenTelmentry 协议
 type: docs
-title: "使用 OpenTelmentry 协议"
 weight: 2
 ---

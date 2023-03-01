@@ -1,10 +1,13 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/listener/http2/
+description: Http2 Listener 介绍
+linkTitle: Http2 Listener 介绍
+title: Http2 Listener 介绍
 type: docs
-title: "Http2 Listener 介绍"
-linkTitle: "Http2 Listener 介绍"
 weight: 20
 ---
 
-欢迎认领补充此文档。
 
+
+欢迎认领补充此文档。

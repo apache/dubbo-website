@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-monitor/
+description: dubbo:monitor 配置
+linkTitle: dubbo:monitor
+title: dubbo:monitor
 type: docs
-title: "dubbo:monitor"
-linkTitle: "dubbo:monitor"
-weight: 1 
-description: "dubbo:monitor 配置"
+weight: 1
 ---
+
+
 
 监控中心配置。对应的配置类： `org.apache.dubbo.config.MonitorConfig`
 

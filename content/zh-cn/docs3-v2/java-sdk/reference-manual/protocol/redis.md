@@ -1,10 +1,14 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/redis/
+description: Redis协议
+linkTitle: Redis协议
+title: Redis协议
 type: docs
-title: "Redis协议"
-linkTitle: "Redis协议"
 weight: 9
 ---
+
+
 
 
 ## 特性说明

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/config/overview/
+description: 对 Dubbo 配置总体设计与工作原理进行了总体概述，包括配置组件、配置来源、配置方式及配置加载流程等。
+linkTitle: 配置概述
+title: 配置概述
 type: docs
-title: "配置概述"
-linkTitle: "配置概述"
 weight: 1
-description: "对 Dubbo 配置总体设计与工作原理进行了总体概述，包括配置组件、配置来源、配置方式及配置加载流程等。"
 ---
+
+
 
 * [使用 Spring Boot 快速开发 Dubbo 应用](../../../quick-start/spring-boot/)
 

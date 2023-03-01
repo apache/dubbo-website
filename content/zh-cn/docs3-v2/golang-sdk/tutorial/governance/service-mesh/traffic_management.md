@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/traffic_management/
+description: 流量管理
 title: 流量管理
 type: docs
 weight: 3
 ---
+
+
 
 在本节中，我们将延续上一个任务[【在 Istio 环境部署 Dubbo-go 应用】](../deploy/)。
 
@@ -414,4 +419,3 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 2022-04-07T05:56:02.053Z        INFO    cmd/app.go:35   call server response = name:"Hello laurence"  id:"v1.0.0"
 2022-04-07T05:56:03.055Z        INFO    cmd/app.go:35   call server response = name:"Hello laurence"  id:"v1.0.0"
 ```
-

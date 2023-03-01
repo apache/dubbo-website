@@ -1,11 +1,15 @@
 ---
-type: docs
-title: "Router"
-linkTitle: "Router"
-description: "自定义路由策略"
-weight: 60
+aliases:
+    - /zh/overview/tasks/extensibility/router/
+description: 自定义路由策略
+linkTitle: Router
 no_list: true
+title: Router
+type: docs
+weight: 60
 ---
+
+
 
 通过自定义路由，可以根据业务场景的特点来实现特定的路由方式。
 

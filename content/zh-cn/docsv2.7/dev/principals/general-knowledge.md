@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/principals/general-knowledge/
+description: 一些设计上的基本常识
+linkTitle: 一些设计上的基本常识
+title: 一些设计上的基本常识
 type: docs
-title: "一些设计上的基本常识"
-linkTitle: "一些设计上的基本常识"
 weight: 6
 ---
+
+
 
 
 最近给团队新人讲了一些设计上的常识，可能会对其它的新人也有些帮助，把暂时想到的几条，先记在这里。 

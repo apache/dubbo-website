@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/service-group/
+description: 使用服务分组区分服务接口的不同实现
+linkTitle: 服务分组
+title: 服务分组
 type: docs
-title: "服务分组"
-linkTitle: "服务分组"
 weight: 11
-description: "使用服务分组区分服务接口的不同实现"
 ---
+
+
 
 ## 背景
 当一个接口有多种实现时，可以用 group 区分。

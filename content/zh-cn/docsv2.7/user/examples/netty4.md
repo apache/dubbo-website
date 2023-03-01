@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/netty4/
+description: 在 Dubbo 中配置 Netty4
+linkTitle: Netty4
+title: Netty4 支持
 type: docs
-title: "Netty4 支持"
-linkTitle: "Netty4"
 weight: 44
-description: "在 Dubbo 中配置 Netty4"
 ---
+
+
 
 Dubbo 2.5.6 版本新增了对 netty4 通信模块的支持，启用方式如下
 
@@ -43,4 +47,3 @@ consumer 端：
 
 接下来我们会继续完善： 性能测试指标及与 netty3 版本的性能测试对比，我们会提供一份参考数据  
 {{% /alert %}}
-

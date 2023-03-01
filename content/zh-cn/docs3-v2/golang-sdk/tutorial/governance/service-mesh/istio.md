@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/istio/
+description: 部署 Istio 环境
 title: 部署 Istio 环境
 type: docs
 weight: 1
 ---
+
+
 
 ## 1. 准备工作
 
@@ -29,4 +34,3 @@ $ kubectl delete hpa istiod -n istio-system
 ```
 
 安装完成后，可以在 istio-system 命名空间下看到一个 istiod pod 在正常运行。
-

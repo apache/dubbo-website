@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/SPI/
+description: Dubbo 中的扩展点加载机制
+linkTitle: 扩展点加载
+title: 扩展点加载
 type: docs
-title: "扩展点加载"
-linkTitle: "扩展点加载"
 weight: 3
-description: "Dubbo 中的扩展点加载机制"
 ---
+
+
 
 ## 扩展点配置
 
@@ -239,4 +243,3 @@ public class XxxFilter implements Filter {
 
 [^1]: 注意：这里的配置文件是放在你自己的 jar 包内，不是 dubbo 本身的 jar 包内，Dubbo 会全 ClassPath 扫描所有 jar 包内同名的这个文件，然后进行合并
 [^2]: 注意：扩展点使用单一实例加载（请确保扩展实现的线程安全性），缓存在 `ExtensionLoader` 中
-

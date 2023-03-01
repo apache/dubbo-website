@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/local-mock/
+description: 了解如何在 Dubbo 中利用本地伪装实现服务降级
+linkTitle: 本地伪装
+title: 本地伪装
 type: docs
-title: "本地伪装"
-linkTitle: "本地伪装"
 weight: 10
-description: "了解如何在 Dubbo 中利用本地伪装实现服务降级"
 ---
+
+
 
 ## 特性说明
 

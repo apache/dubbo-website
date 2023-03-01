@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/service-group/
+description: 使用服务分组区分服务接口的不同实现
+linkTitle: 服务分组
+title: 服务分组
 type: docs
-title: "服务分组"
-linkTitle: "服务分组"
 weight: 11
-description: "使用服务分组区分服务接口的不同实现"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/service-group/)。
 {{% /pageinfo %}}

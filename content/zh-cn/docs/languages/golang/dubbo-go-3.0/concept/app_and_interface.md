@@ -1,10 +1,14 @@
 ---
-type: docs
-title: Dubbo-go 的应用和接口
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/concept/app_and_interface/
+description: Dubbo-go 的应用和接口
 keywords: Dubbo-go 的应用和接口
 linkTitle: 服务层级
-description: Dubbo-go 的应用和接口
+title: Dubbo-go 的应用和接口
+type: docs
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/preface/design/app_and_interface/)。
 {{% /pageinfo %}}

@@ -1,14 +1,15 @@
-
 ---
-type: docs
-title: "高级特性和用法"
-linkTitle: "高级特性和用法"
-weight: 4
-no_list: true
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/
+description: 以下是 Dubbo 支持的所有功能列表，在此页面直接浏览或通过左侧菜单分类查看。
 hide_summary: true
-description: "以下是 Dubbo 支持的所有功能列表，在此页面直接浏览或通过左侧菜单分类查看。"
+linkTitle: 高级特性和用法
+no_list: true
+title: 高级特性和用法
+type: docs
+weight: 4
 ---
+
+
 
 {{% docs/section_list %}}
-
-

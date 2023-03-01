@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Eureka"
-linkTitle: "Eureka"
-weight: 40
+aliases:
+    - /zh/overview/what/ecosystem/registry/eureka/
 description: ""
+linkTitle: Eureka
+title: Eureka
+type: docs
+weight: 40
 ---

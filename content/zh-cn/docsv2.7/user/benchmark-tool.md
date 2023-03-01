@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/benchmark-tool/
+description: 如何使用基准测试工具包进行压力测试
+linkTitle: 基准测试
+title: 基准测试工具包
 type: docs
-title: "基准测试工具包"
-linkTitle: "基准测试"
 weight: 18
-description: "如何使用基准测试工具包进行压力测试"
 ---
+
+
 
 * 下载源码： git clone https://github.com/apache/dubbo.git  
 * 编译benchmark: cd dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install  
@@ -30,5 +34,4 @@ description: "如何使用基准测试工具包进行压力测试"
 * 配置dubbo.properties
 * 运行run.bat(windows)或run.sh(linux)
 
-如想测试dubbo的不同版本，直接替换lib下的dubbo的jar包即可。 
- 
+如想测试dubbo的不同版本，直接替换lib下的dubbo的jar包即可。

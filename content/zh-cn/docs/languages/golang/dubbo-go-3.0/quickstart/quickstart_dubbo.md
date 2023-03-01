@@ -1,10 +1,14 @@
 ---
-type: docs
-title: Dubbo-go 协议快速开始
-keywords: 快速开始,helloworld,
-linkTitle: "Dubbo-go 协议快速开始"
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/quickstart/quickstart_dubbo/
 description: 快速上手dubbo-go3.0，编写一个简单的helloworld应用
+keywords: 快速开始,helloworld,
+linkTitle: Dubbo-go 协议快速开始
+title: Dubbo-go 协议快速开始
+type: docs
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/quickstart/quickstart_triple/)。
 {{% /pageinfo %}}

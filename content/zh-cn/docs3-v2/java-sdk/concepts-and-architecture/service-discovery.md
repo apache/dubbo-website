@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/
+description: 本文将介绍 Dubbo 服务发现。
+linkTitle: 服务发现
+title: 服务发现
 type: docs
-title: "服务发现"
-linkTitle: "服务发现"
 weight: 3
-description: "本文将介绍 Dubbo 服务发现。"
 ---
+
+
 服务发现，即消费端自动发现服务地址列表的能力，是微服务框架需要具备的关键能力，借助于自动化的服务发现，微服务之间可以在无需感知对端部署位置与 IP 地址的情况下实现通信。
 
 ### 实现方式

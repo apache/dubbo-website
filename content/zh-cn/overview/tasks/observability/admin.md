@@ -1,11 +1,15 @@
 ---
-type: docs
-title: "使用 Admin 可视化查看集群状态"
-linkTitle: "Admin"
+aliases:
+    - /zh/overview/tasks/observability/admin/
 description: ""
-weight: 10
+linkTitle: Admin
 no_list: true
+title: 使用 Admin 可视化查看集群状态
+type: docs
+weight: 10
 ---
+
+
 
 前面章节我们提到 Dubbo 框架提供了丰富的服务治理功能如流量控制、动态配置、服务 Mock、服务测试等，而 Dubbo Admin 控制台的一部分重要作用在于将 dubbo 框架提供的服务治理能力提供一个开箱即用的可视化平台。本文将介绍 Dubbo Admin 控制台所提供的功能，让大家快速了解和使用 Admin 并对 Dubbo 所提供的服务治理能力有个更直观的了解。
 

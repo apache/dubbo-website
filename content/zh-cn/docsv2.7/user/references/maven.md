@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/maven/
+description: Dubbo 的 Maven 插件
+linkTitle: Maven 插件参考手册
+title: Maven 插件参考手册
 type: docs
-title: "Maven 插件参考手册"
-linkTitle: "Maven 插件参考手册"
 weight: 12
-description: "Dubbo 的 Maven 插件"
 ---
+
+
 
 
 ## 启动一个简易注册中心

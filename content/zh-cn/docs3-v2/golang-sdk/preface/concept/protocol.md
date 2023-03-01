@@ -1,8 +1,12 @@
 ---
-type: docs
+aliases:
+    - /zh/docs3-v2/golang-sdk/preface/concept/protocol/
+description: 网络协议
 title: 网络协议
-description: "网络协议"
+type: docs
 ---
+
+
 
 ## 1. RPC 服务框架与网络协议
 

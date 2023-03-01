@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/versions/version-270/
+description: 升级到 2.7.x 的注意事项和兼容性问题总结
+linkTitle: 2.7.0
+title: 升级与可能的兼容性问题总结
 type: docs
-title: "升级与可能的兼容性问题总结"
-linkTitle: "2.7.0"
 weight: 10
-description: "升级到 2.7.x 的注意事项和兼容性问题总结"
 ---
+
+
 
 
 环境要求：需要**Java 8**及以上版本。
@@ -284,4 +288,3 @@ Maven坐标升级比较直观，只需要修改相应的pom文件就可以了；
 ## FAQ
 
 1. 升级后启动出现curator依赖报错
-

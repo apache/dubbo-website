@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/generic-reference/
+description: 实现一个通用的服务测试框架，可通过 `GenericService` 调用所有服务实现
+linkTitle: 使用泛化调用
+title: 使用泛化调用
 type: docs
-title: "使用泛化调用"
-linkTitle: "使用泛化调用"
 weight: 16
-description: "实现一个通用的服务测试框架，可通过 `GenericService` 调用所有服务实现"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-reference/)。
 {{% /pageinfo %}}

@@ -1,12 +1,16 @@
 ---
-type: docs
-title: "Dubbo 集成 Graalvm参考手册"
-linkTitle: "Dubbo 集成 Graalvm参考手册"
-toc_hide: true
-hide_summary: true
-weight: 9
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/graalvm/
 description: ""
+hide_summary: true
+linkTitle: Dubbo 集成 Graalvm参考手册
+title: Dubbo 集成 Graalvm参考手册
+toc_hide: true
+type: docs
+weight: 9
 ---
+
+
 
 dubbo3.0支持native-image文档
 

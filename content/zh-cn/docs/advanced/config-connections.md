@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/config-connections/
+description: Dubbo 中服务端和客户端的连接控制
+linkTitle: 连接控制
+title: 连接控制
 type: docs
-title: "连接控制"
-linkTitle: "连接控制"
 weight: 29
-description: "Dubbo 中服务端和客户端的连接控制"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/)。
 {{% /pageinfo %}}
@@ -41,4 +45,3 @@ description: "Dubbo 中服务端和客户端的连接控制"
 
 [^1]: 因为连接在 Server上，所以配置在 Provider 上
 [^2]: 如果是长连接，比如 Dubbo 协议，connections 表示该服务对每个提供者建立的长连接数
-

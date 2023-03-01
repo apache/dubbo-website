@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/debugging/grpc_cli/
+description: 使用 grpc_cli 调试 Dubbo-go 服务
 title: 使用 grpc_cli 调试 Dubbo-go 服务
 type: docs
 weight: 1
 ---
+
+
 
 grpc_cli 工具是 gRPC 生态用于调试服务的工具，在 server 开启[反射服务](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md)的前提下，可以获取到服务的 proto 文件、服务名、方法名、参数列表，以及发起 gRPC 调用。
 
@@ -73,5 +78,3 @@ Rpc succeeded with OK status
 ```shell
 Dubbo3 GreeterProvider get user name = laurence
 ```
-
-

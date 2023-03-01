@@ -1,10 +1,14 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/hessian/
+description: Hessian协议
+linkTitle: Hessian协议
+title: Hessian协议
 type: docs
-title: "Hessian协议"
-linkTitle: "Hessian协议"
 weight: 10
 ---
+
+
 
 
 ## 特性说明

@@ -1,5 +1,8 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/grafana/
+description: 基于 Grafana 的可视化监控教程
+title: 基于 Grafana 的可视化监控教程
 type: docs
-title: "基于 Grafana 的可视化监控教程"
 weight: 3
 ---

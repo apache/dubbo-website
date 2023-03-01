@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/memcached/
+description: memcached:// 协议参考手册
+linkTitle: memcached://
+title: memcached 协议
 type: docs
-title: "memcached 协议"
-linkTitle: "memcached://"
 weight: 5
-description: "memcached:// 协议参考手册"
 ---
+
+
 
 基于 memcached [^1] 实现的 RPC 协议。
 

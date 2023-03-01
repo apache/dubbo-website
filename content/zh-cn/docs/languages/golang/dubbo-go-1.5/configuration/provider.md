@@ -1,11 +1,14 @@
-
 ---
-type: docs
-title: service providers
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-1.5/configuration/provider/
+description: 提示用户配置服务提供
 keywords: 提供端，server provider
 linkTitle: service providers
-description: 提示用户配置服务提供
+title: service providers
+type: docs
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/quickstart/)。
 {{% /pageinfo %}}

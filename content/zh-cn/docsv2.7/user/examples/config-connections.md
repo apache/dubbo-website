@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/config-connections/
+description: Dubbo 中服务端和客户端的连接控制
+linkTitle: 连接控制
+title: 连接控制
 type: docs
-title: "连接控制"
-linkTitle: "连接控制"
 weight: 29
-description: "Dubbo 中服务端和客户端的连接控制"
 ---
+
+
 ## 背景
 
 ## 示例
@@ -40,4 +44,3 @@ description: "Dubbo 中服务端和客户端的连接控制"
 
 [^1]: 因为连接在 Server上，所以配置在 Provider 上
 [^2]: 如果是长连接，比如 Dubbo 协议，connections 表示该服务对每个提供者建立的长连接数
-

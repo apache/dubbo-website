@@ -1,9 +1,13 @@
 ---
-type: docs
-title: 安装 Dubbo-go 开发环境
-weight: 1
+aliases:
+    - /zh/overview/quickstart/go/install/
 description: 1 - 安装 Dubbo-go 开发环境
+title: 安装 Dubbo-go 开发环境
+type: docs
+weight: 1
 ---
+
+
 ### 1. 安装Go语言环境
 
 建议使用最新版 go 1.17
@@ -45,4 +49,3 @@ protoc-gen-go v1.26.0
 $ protoc-gen-go-triple --version
 protoc-gen-go-triple 1.0.8
 ```
-

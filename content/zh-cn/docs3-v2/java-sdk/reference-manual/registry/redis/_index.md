@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/registry/redis/
+description: Redis 注册中心的基本使用和工作原理。
+linkTitle: Redis
+title: Redis
 type: docs
-title: "Redis"
-linkTitle: "Redis"
 weight: 5
-description: "Redis 注册中心的基本使用和工作原理。"
 ---
+
+
 
 ## 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)

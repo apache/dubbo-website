@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/references/protocols/thrift/
+description: thrift:// 协议参考手册
+linkTitle: thrift://
+title: thrift 协议
 type: docs
-title: "thrift 协议"
-linkTitle: "thrift://"
 weight: 4
-description: "thrift:// 协议参考手册"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/thrift/)。
 {{% /pageinfo %}}

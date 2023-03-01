@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs/references/spis/compiler/
+description: 编译器扩展
+linkTitle: 编译器扩展
+title: 编译器扩展
 type: docs
-title: "编译器扩展"
-linkTitle: "编译器扩展"
 weight: 13
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/compiler/)。
 {{% /pageinfo %}}

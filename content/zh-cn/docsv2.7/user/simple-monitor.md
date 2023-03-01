@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/simple-monitor/
+description: Dubbo 中的简单监控服务
+linkTitle: 简单监控
+title: 简单监控
 type: docs
-title: "简单监控"
-linkTitle: "简单监控"
 weight: 20
-description: "Dubbo 中的简单监控服务"
 ---
+
+
 
 {{% alert title="Warning" color="warning" %}}
 监控中心也是一个标准的 Dubbo 服务，可以通过注册中心发现，也可以直连。
@@ -86,5 +90,3 @@ description: "Dubbo 中的简单监控服务"
     ```properties
     dubbo.monitor.address=127.0.0.1:7070
     ```
-
-

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/languages/erlang/serialization/
+description: 在 erlang 中配置序列化方式
+linkTitle: 序列化配置项
+title: 序列化配置项
 type: docs
-title: "序列化配置项"
-linkTitle: "序列化配置项"
 weight: 4
-description: "在 erlang 中配置序列化方式"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/erlang-sdk/serialization/)。
 {{% /pageinfo %}}
@@ -27,4 +31,3 @@ description: "在 erlang 中配置序列化方式"
 | ConfigName | Type | DefaultValue | Remarks |
 | --- | --- | --- | --- |
 | protocol | atom() | hessian | hessian,json |
- 

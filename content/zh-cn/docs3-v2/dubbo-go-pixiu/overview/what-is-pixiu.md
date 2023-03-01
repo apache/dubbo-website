@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Pixiu 是什么"
-linkTitle: "Pixiu 是什么"
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/overview/what-is-pixiu/
 description: Pixiu 是一款开源的 Dubbo 生态的 API 网关和 接入 dubbo 集群的语言解决方案。作为 API 网关形态。
+linkTitle: Pixiu 是什么
+title: Pixiu 是什么
+type: docs
 weight: 1
 ---
+
+
 
 ### Pixiu 说明
 

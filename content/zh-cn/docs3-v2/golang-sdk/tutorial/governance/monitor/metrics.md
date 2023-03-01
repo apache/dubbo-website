@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/metrics/
+description: Metrics 数据上报
 title: Metrics 数据上报
-weight: 7
 type: docs
+weight: 7
 ---
+
+
 
 参考Samples： [dubbo-go-samples/metrics](https://github.com/apache/dubbo-go-samples/tree/master/metrics)
 
@@ -203,5 +208,3 @@ dubbo_test_summary_with_label{summarylabel1="value1",summarylabel2="value2",quan
 dubbo_test_summary_with_label_sum{summarylabel1="value1",summarylabel2="value2"} 233.609026131067
 dubbo_test_summary_with_label_count{summarylabel1="value1",summarylabel2="value2"} 463
 ```
-
-

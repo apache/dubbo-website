@@ -1,13 +1,11 @@
 ---
-type: docs
-title: "Java SDK"
-linkTitle: "Java"
+_build:
+    render: link
 description: ""
-weight: 1
+linkTitle: Java
 manualLinkRelref: ../../docs3-v2/java-sdk/
 manualLinkTarget: _blank
-_build: { render: link }
+title: Java SDK
+type: docs
+weight: 1
 ---
-
-
-

@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/appendix/http-to-dubbo-default-stragety/
+description: HTTP to Dubbo 默认转换协议
+linkTitle: HTTP to Dubbo 默认转换协议
+title: HTTP to Dubbo 默认转换协议
 type: docs
-title: "HTTP to Dubbo 默认转换协议"
-linkTitle: "HTTP to Dubbo 默认转换协议"
 weight: 10
 ---
+
+
 
 # 背景
 
@@ -313,4 +318,4 @@ Triple协议将请求参数放在Body中，在triple中，如果服务中的方�
 | --------- | ---- | ---------------------------- |
 | 400       | 3    | argument type info not found |
 
-### 
+###

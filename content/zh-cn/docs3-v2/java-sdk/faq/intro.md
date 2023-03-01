@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/faq/intro/
+description: 错误码机制的介绍
+linkTitle: 错误码机制的介绍
+title: 错误码机制的介绍
 type: docs
-title: "错误码机制的介绍"
-linkTitle: "错误码机制的介绍"
 weight: 0
 ---
+
+
 
 ### 背景
 Dubbo 内部依赖的 Logger 抽象层提供了日志输出能力，但是大部分的异常日志都没有附带排查说明，导致用户看到异常后无法进行处理。

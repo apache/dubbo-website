@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/references/xml/dubbo-consumer/
+description: dubbo:consumer 配置
+linkTitle: dubbo:consumer
+title: dubbo:consumer
 type: docs
-title: "dubbo:consumer"
-linkTitle: "dubbo:consumer"
-weight: 1 
-description: "dubbo:consumer 配置"
+weight: 1
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/#consumer)。
 {{% /pageinfo %}}

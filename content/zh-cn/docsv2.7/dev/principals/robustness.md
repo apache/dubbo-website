@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/principals/robustness/
+description: 设计实现的健壮性
+linkTitle: 设计实现的健壮性
+title: 设计实现的健壮性
 type: docs
-title: "设计实现的健壮性"
-linkTitle: "设计实现的健壮性"
 weight: 7
 ---
+
+
 
 
 Dubbo 作为远程服务暴露、调用和治理的解决方案，是应用运转的经络，其本身实现健壮性的重要程度是不言而喻的。

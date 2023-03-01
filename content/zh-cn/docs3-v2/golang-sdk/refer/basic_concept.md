@@ -1,9 +1,13 @@
 ---
-type: docs
-title: 配置基本概念
-keywords: 配置基本概念
+aliases:
+    - /zh/docs3-v2/golang-sdk/refer/basic_concept/
 description: 配置基本概念
+keywords: 配置基本概念
+title: 配置基本概念
+type: docs
 ---
+
+
 
 ## 1. 框架配置
 

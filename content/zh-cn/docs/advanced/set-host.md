@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/set-host/
+description: 自定义 Dubbo 服务对外暴露的主机地址
+linkTitle: 主机配置
+title: 主机配置
 type: docs
-title: "主机配置"
-linkTitle: "主机配置"
 weight: 37
-description: "自定义 Dubbo 服务对外暴露的主机地址"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/set-host/)。
 {{% /pageinfo %}}

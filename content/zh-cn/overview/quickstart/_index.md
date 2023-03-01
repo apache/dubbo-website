@@ -1,10 +1,15 @@
 ---
-type: docs
-title: "Dubbo 入门"
-linkTitle: "入门"
-weight: 15
+aliases:
+    - /zh/overview/quickstart/
+description: Dubbo 入门
+linkTitle: 入门
 no_list: true
+title: Dubbo 入门
+type: docs
+weight: 15
 ---
+
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

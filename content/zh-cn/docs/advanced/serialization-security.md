@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/serialization-security/
+description: 在 Dubbo 中更安全的使用序列化协议
+linkTitle: 序列化协议安全
+title: 序列化协议安全
 type: docs
-title: "序列化协议安全"
-linkTitle: "序列化协议安全"
 weight: 1
-description: "在 Dubbo 中更安全的使用序列化协议"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/blog/1/01/01/序列化协议安全/)。
 {{% /pageinfo %}}

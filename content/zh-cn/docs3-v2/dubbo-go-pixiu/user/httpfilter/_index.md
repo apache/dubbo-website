@@ -1,8 +1,9 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/httpfilter/
+description: Http Filter 介绍
+linkTitle: Http Filter 介绍
+title: Http Filter 介绍
 type: docs
-title: "Http Filter 介绍"
-linkTitle: "Http Filter 介绍"
 weight: 60
 ---
-

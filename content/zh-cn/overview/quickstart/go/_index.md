@@ -1,10 +1,15 @@
 ---
-type: docs
-title: "Go 微服务开发入门"
-linkTitle: "Go"
-weight: 20
+aliases:
+    - /zh/overview/quickstart/go/
+description: Go 微服务开发入门
+linkTitle: Go
 no_list: true
+title: Go 微服务开发入门
+type: docs
+weight: 20
 ---
+
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -45,4 +50,3 @@ no_list: true
 </div>
 
 {{< /blocks/section >}}
-

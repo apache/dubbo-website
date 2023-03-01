@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/dev/dubbo-pilot/
+description: dubbo-pilot Control Plane 部署
+linkTitle: dubbo-pilot Control Plane 部署
+title: dubbo-pilot Control Plane 部署
 type: docs
-title: "dubbo-pilot Control Plane 部署"
-linkTitle: "dubbo-pilot Control Plane 部署"
 weight: 2
 ---
+
+
 
 * [1.总体目标](#target)
 * [2.基本流程](#basic)

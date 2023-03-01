@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/quickstart/java/api/
+description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo API 快速开发微服务应用。
+linkTitle: 基于 Dubbo API 开发微服务应用
+title: 2 - 基于 Dubbo API 开发微服务应用
 type: docs
-title: "2 - 基于 Dubbo API 开发微服务应用"
-linkTitle: "基于 Dubbo API 开发微服务应用"
 weight: 2
-description: "本文将基于 Dubbo Samples 示例演示如何通过 Dubbo API 快速开发微服务应用。"
 ---
+
+
 
 ## 目标
 

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/config/annotation/
+description: 以 Annotation、Spring Boot 开发 Dubbo 应用
+linkTitle: Annotation 配置
+title: Annotation 配置
 type: docs
-title: "Annotation 配置"
-linkTitle: "Annotation 配置"
 weight: 3
-description: "以 Annotation、Spring Boot 开发 Dubbo 应用"
 ---
+
+
 
 本文以 Spring Boot + Annotation 模式描述 Dubbo 应用开发，在此查看无 Spring Boot 的 Spring 注解开发模式 [完整示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
 

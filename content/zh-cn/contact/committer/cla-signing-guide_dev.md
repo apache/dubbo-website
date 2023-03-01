@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/contact/committer/cla-signing-guide_dev/
+description: CLA 签署向导
+linkTitle: CLA 签署向导
+title: CLA 签署向导
 type: docs
-title: "CLA 签署向导"
-linkTitle: "CLA 签署向导"
 weight: 2
 ---
+
+
 
 
 以下情况，需要您签署 Apache ICLA：

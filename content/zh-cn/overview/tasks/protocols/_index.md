@@ -1,13 +1,16 @@
-
 ---
-type: docs
-title: "通信协议"
-linkTitle: "通信协议"
-description: "演示 Dubbo 多协议的应用场景"
-weight: 50
+aliases:
+    - /zh/overview/tasks/protocols/
+description: 演示 Dubbo 多协议的应用场景
 hide: true
+linkTitle: 通信协议
 no_list: true
+title: 通信协议
+type: docs
+weight: 50
 ---
+
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

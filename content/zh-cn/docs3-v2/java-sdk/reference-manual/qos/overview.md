@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "QOS 概述"
-linkTitle: "QOS 概述"
-weight: 1
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/overview/
 description: dubbo 2.5.8 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
+linkTitle: QOS 概述
+title: QOS 概述
+type: docs
+weight: 1
 ---
+
+
 
 ## 参数说明
 QoS 提供了一些启动参数，来对启动进行配置，他们主要包括：

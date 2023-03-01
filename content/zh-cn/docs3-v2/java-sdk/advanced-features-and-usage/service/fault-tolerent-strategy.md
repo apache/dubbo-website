@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/fault-tolerent-strategy/
+description: 集群调用失败时，Dubbo 提供的容错方案
+linkTitle: 集群容错
+title: 集群容错
 type: docs
-title: "集群容错"
-linkTitle: "集群容错"
 weight: 2
-description: "集群调用失败时，Dubbo 提供的容错方案"
 ---
+
+
 ## 特性说明
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 

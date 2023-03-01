@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/gRPC/
+description: grpc:// 协议参考手册
+linkTitle: grpc://
+title: gRPC 协议
 type: docs
-title: "gRPC 协议"
-linkTitle: "grpc://"
 weight: 5
-description: "grpc:// 协议参考手册"
 ---
+
+
 
 Dubbo 自 2.7.5 版本开始支持 gRPC 协议，对于计划使用 HTTP/2 通信，或者想利用 gRPC 带来的 Stream、反压、Reactive 编程等能力的开发者来说，
 都可以考虑启用 gRPC 协议。
@@ -22,4 +26,3 @@ Dubbo 自 2.7.5 版本开始支持 gRPC 协议，对于计划使用 HTTP/2 通�
 具体可参见以下[示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc)
 
 除了原生 StreamObserver 接口类型之外，Dubbo 还支持 [RxJava](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava)、[Reactor](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-reactor) 编程风格的 API
-

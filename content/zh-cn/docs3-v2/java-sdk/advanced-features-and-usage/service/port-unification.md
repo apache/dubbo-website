@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/port-unification/
+description: Dubbo 端口协议复用, 单端口多协议支持
+linkTitle: 端口协议复用
+title: 端口协议复用
 type: docs
-title: "端口协议复用"
-linkTitle: "端口协议复用"
 weight: 1
-description: "Dubbo 端口协议复用, 单端口多协议支持"
 ---
+
+
 ## 特性说明
 通过对protocol进行配置，dubbo3可以支持端口的协议复用。
 比如使用Triple协议启动端口复用后，可以在相同的端口上为服务增加

@@ -1,11 +1,15 @@
 ---
-type: docs
-title: "使用 Grafana 可视化查看集群 Metrics 指标"
-linkTitle: "Grafana"
+aliases:
+    - /zh/overview/tasks/observability/grafana/
 description: ""
-weight: 20
+linkTitle: Grafana
 no_list: true
+title: 使用 Grafana 可视化查看集群 Metrics 指标
+type: docs
+weight: 20
 ---
+
+
 
 这个示例演示了如何使用 Grafana 可视化的展示 Metrics 监控指标
 
@@ -85,5 +89,3 @@ Dubbo可观测性面板可以在Grafana官网的模板库中可以找到，您�
 
 ![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
 ![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
-
-

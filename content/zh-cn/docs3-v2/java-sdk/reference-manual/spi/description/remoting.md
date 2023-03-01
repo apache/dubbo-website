@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/remoting/
+description: 网络传输扩展
+linkTitle: 网络传输扩展
+title: 网络传输扩展
 type: docs
-title: "网络传输扩展"
-linkTitle: "网络传输扩展"
 weight: 17
 ---
+
+
 
 ## 扩展说明
 

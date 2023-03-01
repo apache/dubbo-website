@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/reference/integrations/grafana/
+description: 配置 Grafana 与 Dubbo 一起工作
+linkTitle: Grafana
+title: Grafana
 type: docs
-title: "Grafana"
-linkTitle: "Grafana"
-description: "配置 Grafana 与 Dubbo 一起工作"
 weight: 3
 ---
+
+
 ### Linux
 下载项目至本地到切换指定项目
 ```bash

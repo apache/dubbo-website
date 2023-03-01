@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/best-practice/
+description: 分包, 粒度, 版本, 兼容性, 枚举, 序列化, 异常
+linkTitle: 服务化最佳实践
+title: 服务化最佳实践
 type: docs
-title: "服务化最佳实践"
-linkTitle: "服务化最佳实践"
 weight: 13
-description: "分包, 粒度, 版本, 兼容性, 枚举, 序列化, 异常"
 ---
+
+
 
 ## 分包
 

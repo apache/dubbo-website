@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/provider-timeout-release/
+description: Dubbo provider执行超时释放执行线程
+linkTitle: provider超时打断
+title: provider超时打断
 type: docs
-title: "provider超时打断"
-linkTitle: "provider超时打断"
 weight: 15
-description: "Dubbo provider执行超时释放执行线程"
 ---
+
+
 ## 背景
 支持provider根据超时时间进行业务打断
 

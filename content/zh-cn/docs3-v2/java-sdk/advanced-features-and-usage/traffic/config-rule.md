@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/config-rule/
+description: 在 Dubbo 中配置应用级治理规则和服务级治理规则
+linkTitle: 配置规则
+title: 配置规则
 type: docs
-title: "配置规则"
-linkTitle: "配置规则"
 weight: 34
-description: "在 Dubbo 中配置应用级治理规则和服务级治理规则"
 ---
+
+
 ## 配置规则概述
 覆盖规则是 Dubbo 设计的在无需重启应用的情况下，动态调整 RPC 调用行为的一种能力。2.7.0 版本开始，支持从**服务**和**应用**两个粒度来调整动态配置。
 

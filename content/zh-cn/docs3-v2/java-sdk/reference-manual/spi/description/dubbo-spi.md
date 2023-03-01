@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/dubbo-spi/
+description: 本文介绍了 Dubbo SPI 的原理和实现细节
+linkTitle: 扩展点开发指南
+title: 扩展点开发指南
 type: docs
-title: "扩展点开发指南"
-linkTitle: "扩展点开发指南"
 weight: 0
-description: "本文介绍了 Dubbo SPI 的原理和实现细节"
 ---
+
+
 
 ## 1.简介
 
@@ -703,4 +707,3 @@ public class DubboAdaptiveTest {
     }
 }
 ```
-

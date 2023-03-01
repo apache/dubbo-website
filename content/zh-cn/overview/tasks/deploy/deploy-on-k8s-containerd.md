@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/deploy/deploy-on-k8s-containerd/
+description: 部署 Dubbo 应用到 Kubernetes + Containerd 示例
+linkTitle: '部署到 Kubernetes + Containerd '
+title: 部署 Dubbo 应用到 Kubernetes + Containerd 环境
 type: docs
-title: "部署 Dubbo 应用到 Kubernetes + Containerd 环境"
-linkTitle: "部署到 Kubernetes + Containerd "
 weight: 3
-description: "部署 Dubbo 应用到 Kubernetes + Containerd 示例"
 ---
+
+
 ## 总体目标
 
 - [Kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/)
@@ -238,4 +242,3 @@ kubectl create -f consumer.yaml
 
 查看服务
 ![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
-

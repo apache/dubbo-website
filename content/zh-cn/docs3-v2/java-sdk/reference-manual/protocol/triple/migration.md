@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
+description: Dubbo2 协议迁移
+linkTitle: Dubbo2 协议迁移
+title: Dubbo2 协议迁移
 type: docs
-title: "Dubbo2 协议迁移"
-linkTitle: "Dubbo2 协议迁移"
 weight: 10
 ---
+
+
 
 ## 迁移流程说明
 
@@ -89,7 +94,3 @@ public class IGreeter2Impl implements IWrapperGreeter {
 输出如下:
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
-
-
-
-

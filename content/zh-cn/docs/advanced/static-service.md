@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/static-service/
+description: 将 Dubbo 服务标识为非动态管理模式
+linkTitle: 静态服务
+title: 静态服务
 type: docs
-title: "静态服务"
-linkTitle: "静态服务"
 weight: 11
-description: "将 Dubbo 服务标识为非动态管理模式"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/registry/simple/)。
 {{% /pageinfo %}}

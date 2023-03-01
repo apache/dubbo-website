@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "MessagePack"
-linkTitle: "MessagePack"
-weight: 80
+aliases:
+    - /zh/overview/what/ecosystem/serialization/msgpack/
 description: ""
+linkTitle: MessagePack
+title: MessagePack
+type: docs
+weight: 80
 ---
+
+
 
 ## 1 介绍
 

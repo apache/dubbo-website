@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/protocol/error/
+description: 异常信息回传
 title: 异常信息回传
 type: docs
 weight: 8
 ---
+
+
 
 ## 1. 准备工作
 
@@ -120,5 +125,3 @@ dubbo.apache.org/dubbo-go/v3/common/proxy/proxy_factory.(*ProxyInvoker).Invoke
 ```
 
 可看到报错信息和堆栈
-
-

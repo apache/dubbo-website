@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/deploy/deploy-on-docker/
+description: 部署 Dubbo 应用到 Docker 示例
+linkTitle: 部署到 Docker
+title: 部署 Dubbo 应用到 Docker 环境
 type: docs
-title: "部署 Dubbo 应用到 Docker 环境"
-linkTitle: "部署到 Docker"
 weight: 2
-description: "部署 Dubbo 应用到 Docker 示例"
 ---
+
+
 ## 总体目标
 
 - 部署 [Docker](https://docs.docker.com/engine/install/)
@@ -215,4 +219,3 @@ docker run --name consumer -d dubbo-springboot-consumer:alpine
 
 查看服务
 ![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
-

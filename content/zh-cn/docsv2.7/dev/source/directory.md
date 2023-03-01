@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/source/directory/
+description: 本文介绍了服务目录的原理和实现细节
+linkTitle: 服务目录
+title: 服务目录
 type: docs
-title: "服务目录"
-linkTitle: "服务目录"
 weight: 6
-description: "本文介绍了服务目录的原理和实现细节"
 ---
+
+
 
 ## 1. 简介
 

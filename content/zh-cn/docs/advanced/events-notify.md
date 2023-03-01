@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/events-notify/
+description: 在调用之前、调用之后、出现异常时的事件通知
+linkTitle: 事件通知
+title: 事件通知
 type: docs
-title: "事件通知"
-linkTitle: "事件通知"
 weight: 24
-description: "在调用之前、调用之后、出现异常时的事件通知"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/events-notify/)。
 {{% /pageinfo %}}

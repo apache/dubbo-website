@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/api/
+description: Dubbo API 参考手册
+linkTitle: API 参考手册
+title: API 参考手册
 type: docs
-title: "API 参考手册"
-linkTitle: "API 参考手册"
 weight: 7
-description: "Dubbo API 参考手册"
 ---
+
+
 
 Dubbo 的常规功能，都保持零侵入，但有些功能不得不用 API 侵入才能实现。  
 

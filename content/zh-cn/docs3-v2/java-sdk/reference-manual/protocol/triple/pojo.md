@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
+description: POJO 方式使用 Triple
+linkTitle: POJO 方式使用 Triple
+title: POJO 方式使用 Triple
 type: docs
-title: "POJO 方式使用 Triple"
-linkTitle: "POJO 方式使用 Triple"
 weight: 2
 ---
+
+
 
 这篇教程会通过从零构建一个简单的工程来演示如何基于 POJO 方式使用 Dubbo Triple, 在应用不改变已有接口定义的同时升级到 Triple 协议。
 

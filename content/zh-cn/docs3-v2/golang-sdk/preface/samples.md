@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "快速入门"
-linkTitle: "快速入门"
+aliases:
+    - /zh/docs3-v2/golang-sdk/preface/samples/
 description: Dubbo-go 示例使用方式
+linkTitle: 快速入门
+title: 快速入门
+type: docs
 weight: 5
 ---
+
+
 
 
 为了方便 Dubbo-go 框架用户的使用，我们提供了 Samples 仓库以供用户参考：

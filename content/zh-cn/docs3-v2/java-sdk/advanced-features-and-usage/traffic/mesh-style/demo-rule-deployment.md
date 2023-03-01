@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/demo-rule-deployment/
+description: 基于实际情况来制定路由规则。
+linkTitle: 使用案例
+title: 使用案例
 type: docs
-title: "使用案例"
-linkTitle: "使用案例"
 weight: 8
-description: "基于实际情况来制定路由规则。"
 ---
+
+
 
 ### 应用服务
 

@@ -1,11 +1,15 @@
 ---
-type: docs
-title: "生态"
-linkTitle: "生态"
-weight: 40
+aliases:
+    - /zh/overview/what/ecosystem/
 description: ""
+linkTitle: 生态
 no_list: true
+title: 生态
+type: docs
+weight: 40
 ---
+
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/registry/simple/
+description: Simple 注册中心参考手册
+linkTitle: Simple
+title: Simple 注册中心
 type: docs
-title: "Simple 注册中心"
-linkTitle: "Simple"
 weight: 7
-description: "Simple 注册中心参考手册"
 ---
+
+
 
 {{% pageinfo %}} 此功能在 Dubbo 2.7 中已移除，请迁移选择[其他注册中心](../)。
 {{% /pageinfo %}}

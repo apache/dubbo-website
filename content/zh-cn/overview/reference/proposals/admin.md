@@ -1,12 +1,15 @@
 ---
-type: docs
-title: "Dubbo Admin 控制面总体架构设计"
-linkTitle: "Admin 架构设计"
-date: 2023-02-28
+aliases:
+    - /zh/overview/reference/proposals/admin/
 author: Jun Liu
-description: >
+date: 2023-02-28T00:00:00Z
+description: |
     本文描述了 Dubbo Admin 作为控制面的总体架构设计与抽象。
+linkTitle: Admin 架构设计
+title: Dubbo Admin 控制面总体架构设计
+type: docs
 ---
+
 
 ## 1 Dubbo 整体架构
 ![DubboAdmin架构图.png](/imgs/v3/reference/admin/architecture.png)
@@ -103,6 +106,3 @@ dubboctl install dubbo-stack
 ![console-ui.png](/imgs/v3/reference/admin/console-ui.png)
 
 #### Dubboctl & Helm
-
-
-

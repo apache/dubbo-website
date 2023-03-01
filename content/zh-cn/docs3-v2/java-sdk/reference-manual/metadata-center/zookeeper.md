@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/zookeeper/
+description: Zookeeper 元数据中心基本使用与工作原理
+linkTitle: Zookeeper
+title: Zookeeper
 type: docs
-title: "Zookeeper"
-linkTitle: "Zookeeper"
 weight: 3
-description: "Zookeeper 元数据中心基本使用与工作原理"
 ---
+
+
 
 ## 1 预备工作
 - 了解 [Dubbo 基本开发步骤](/zh-cn/docs3-v2/java-sdk/quick-start/spring-boot/)
@@ -171,5 +175,3 @@ ephemeralOwner = 0x0
 dataLength = 1286
 numChildren = 0
 ```
-
-

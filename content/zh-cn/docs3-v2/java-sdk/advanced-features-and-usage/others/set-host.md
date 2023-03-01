@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/set-host/
+description: 自定义 Dubbo 服务对外暴露的主机地址
+linkTitle: 主机地址自定义暴露
+title: 主机地址自定义暴露
 type: docs
-title: "主机地址自定义暴露"
-linkTitle: "主机地址自定义暴露"
 weight: 3
-description: "自定义 Dubbo 服务对外暴露的主机地址"
 ---
+
+
 
 ## 特性说明
 

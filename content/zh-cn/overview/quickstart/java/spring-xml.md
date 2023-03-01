@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/quickstart/java/spring-xml/
+description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring XML 快速开发微服务应用。
+linkTitle: Dubbo x Spring XML 开发微服务应用
+title: 4 - Dubbo x Spring XML 开发微服务应用
 type: docs
-title: "4 - Dubbo x Spring XML 开发微服务应用"
-linkTitle: "Dubbo x Spring XML 开发微服务应用"
 weight: 4
-description: "本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring XML 快速开发微服务应用。"
 ---
+
+
 
 ## 目标
 

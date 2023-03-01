@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
+description: 让 Dubbo 服务完成优雅停机
+linkTitle: 优雅停机
+title: 优雅停机
 type: docs
-title: "优雅停机"
-linkTitle: "优雅停机"
 weight: 2
-description: "让 Dubbo 服务完成优雅停机"
 ---
+
+
 
 ## 特性说明
 

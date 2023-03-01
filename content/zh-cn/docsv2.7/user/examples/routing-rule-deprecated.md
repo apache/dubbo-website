@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/routing-rule-deprecated/
+description: 在 Dubbo `2.6.x` 版本以及更早的版本中配置路由规则
+linkTitle: 旧路由规则
+title: 旧路由规则
 type: docs
-title: "旧路由规则"
-linkTitle: "旧路由规则"
 weight: 34
-description: "在 Dubbo `2.6.x` 版本以及更早的版本中配置路由规则"
 ---
+
+
 ## 背景
 
 ## 示例

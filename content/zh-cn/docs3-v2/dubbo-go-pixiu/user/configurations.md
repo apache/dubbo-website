@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/configurations/
+description: 启动和配置
+linkTitle: 启动和配置
+title: 启动和配置
 type: docs
-title: "启动和配置"
-linkTitle: "启动和配置"
 weight: 20
 ---
+
+
 
 ### Pixiu 启动命令
 
@@ -147,4 +152,3 @@ route 可以用于对请求进行路由分发，以下面配置为例。具体�
 Adapter 代表 Pixiu 和外界元数据中心交互的能力。目前有两款，分别是 `dgp.adapter.dubboregistrycenter` 和 `dgp.adapter.springcloud`，分别代表从 Dubbo 集群注册中心和 Spring Cloud 集群注册中心获取服务实例信息，构建 Pixiu 转发 Http 请求路由规则的。
 
 更多的 Adapter 可以查看 [Adapter文档](../adapter/dubbo/)。
-

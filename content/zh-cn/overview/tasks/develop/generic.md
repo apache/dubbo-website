@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/develop/generic/
+description: 在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用
+linkTitle: 泛化调用
+title: 开发服务
 type: docs
-title: "开发服务"
-linkTitle: "泛化调用"
 weight: 6
-description: "在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用"
 ---
+
+
 ## 泛化调用
 泛化调用（客户端泛化调用）是指在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。
 

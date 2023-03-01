@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/principals/configuration/
+description: 配置设计
+linkTitle: 配置设计
+title: 配置设计
 type: docs
-title: "配置设计"
-linkTitle: "配置设计"
 weight: 2
 ---
+
+
 
 
 Dubbo 现在的设计是完全无侵入，也就是使用者只依赖于配置契约。经过多个版本的发展，为了满足各种需求场景，配置越来越多。为了保持兼容，配置只增不减，里面潜伏着各种风格，约定，规则。新版本也将配置做了一次调整，将想到的一些记在这，备忘。 

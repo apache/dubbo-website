@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/async-call/
+description: 在 Dubbo 中发起异步调用
+linkTitle: 异步调用
+title: 异步调用
 type: docs
-title: "异步调用"
-linkTitle: "异步调用"
 weight: 3
-description: "在 Dubbo 中发起异步调用"
 ---
+
+
 
 ## 特性说明
 #### 背景

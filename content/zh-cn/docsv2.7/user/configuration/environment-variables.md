@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/configuration/environment-variables/
+description: 在 Dubbo 中自动加载环境变量
+linkTitle: 自动加载环境变量
+title: 自动加载环境变量
 type: docs
-title: "自动加载环境变量"
-linkTitle: "自动加载环境变量"
 weight: 2
-description: "在 Dubbo 中自动加载环境变量"
 ---
+
+
 
 从 2.7.3 版本开始，Dubbo 会自动从约定 key 中读取配置，并将配置以 Key-Value 的形式写入到URL中。
 

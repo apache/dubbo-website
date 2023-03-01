@@ -1,11 +1,14 @@
 ---
-type: docs
-title: "安装 Dubbo Admin 及服务治理组件"
-linkTitle: "安装 Dubbo"
-description: "Dubbo 控制面是微服务治理的核心依赖，本文档描述了如何快速安装 Dubbo Admin 控制面、控制台以及服务发现、监控等组件。"
-weight: 50
+aliases:
+    - /zh/overview/reference/setup/install/
+description: Dubbo 控制面是微服务治理的核心依赖，本文档描述了如何快速安装 Dubbo Admin 控制面、控制台以及服务发现、监控等组件。
+linkTitle: 安装 Dubbo
+title: 安装 Dubbo Admin 及服务治理组件
 toc_hide: true
+type: docs
+weight: 50
 ---
+
 
 ## Dubboctl 安装
 ### Download

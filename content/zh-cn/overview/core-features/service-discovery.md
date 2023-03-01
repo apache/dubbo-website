@@ -1,14 +1,18 @@
 ---
-type: docs
-title: "服务发现"
-linkTitle: "服务发现"
-weight: 10
+aliases:
+    - /zh/overview/core-features/service-discovery/
 description: ""
 feature:
-  title: 服务发现
-  description: >
-     Dubbo 提供了高性能、可伸缩的服务发现机制，面向百万集群实例规模设计，默认提供 Nacos、Zookeeper 等注册中心适配并支持自定义扩展。
+    description: |
+        Dubbo 提供了高性能、可伸缩的服务发现机制，面向百万集群实例规模设计，默认提供 Nacos、Zookeeper 等注册中心适配并支持自定义扩展。
+    title: 服务发现
+linkTitle: 服务发现
+title: 服务发现
+type: docs
+weight: 10
 ---
+
+
 
 Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持常用的注册中心如 Nacos、Consul、Zookeeper 等。
 

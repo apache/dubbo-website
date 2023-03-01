@@ -1,5 +1,8 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/deployment/practice/
+description: 生产部署的最佳实践介绍
+title: 生产部署的最佳实践介绍
 type: docs
-title: "生产部署的最佳实践介绍"
 weight: 1
 ---

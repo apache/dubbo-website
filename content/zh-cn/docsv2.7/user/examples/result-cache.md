@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/result-cache/
+description: 通过缓存结果加速访问速度
+linkTitle: 结果缓存
+title: 结果缓存
 type: docs
-title: "结果缓存"
-linkTitle: "结果缓存"
 weight: 15
-description: "通过缓存结果加速访问速度"
 ---
+
+
 ## 背景
 
 结果缓存，用于加速热门数据的访问速度，Dubbo 提供声明式缓存，以减少用户加缓存的工作量。
@@ -36,4 +40,3 @@ description: "通过缓存结果加速访问速度"
 
 [示例代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
 {{% /alert %}}
-

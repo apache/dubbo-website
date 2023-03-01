@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/registry/zookeeper/
+description: Zookeeper 注册中心的基本使用和工作原理。
+linkTitle: Zookeeper
+title: Zookeeper
 type: docs
-title: "Zookeeper"
-linkTitle: "Zookeeper"
 weight: 2
-description: "Zookeeper 注册中心的基本使用和工作原理。"
 ---
+
+
 
 ## 1 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
@@ -131,4 +135,3 @@ Zookeeper 注册中心还支持其他一些控制参数，具体可参见[Regist
 * 支持 `*` 号通配符 `<dubbo:reference group="*" version="*" />`，可订阅服务的所有分组和所有版本的提供者
 
 ### 4.2 Dubbo3 节点结构
-

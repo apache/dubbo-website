@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs/references/spis/filter/
+description: 调用拦截扩展
+linkTitle: 调用拦截扩展
+title: 调用拦截扩展
 type: docs
-title: "调用拦截扩展"
-linkTitle: "调用拦截扩展"
 weight: 2
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/filter/)。
 {{% /pageinfo %}}

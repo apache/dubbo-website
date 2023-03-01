@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/registry/
+description: 注册中心配置
 title: 注册中心配置
-weight: 4
 type: docs
+weight: 4
 ---
+
+
 
 参考samples [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
 
@@ -107,4 +112,3 @@ dubbo:
       GreeterProvider:
         interface: com.apache.dubbo.sample.basic.IGreeter
 ```
-

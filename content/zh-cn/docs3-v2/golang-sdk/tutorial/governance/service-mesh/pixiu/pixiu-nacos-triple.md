@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/pixiu-nacos-triple/
+description: 使用 Pixiu 暴露 Dubbo-go 服务
 title: 使用 Pixiu 暴露 Dubbo-go 服务
-weight: 9
 type: docs
+weight: 9
 ---
+
+
 
 Dubbo-go-pixiu 网关支持调用 GO/Java 的 Dubbo 集群。在 Dubbo-go 3.0 的场景下，我们可以通过 Pixiu 网关，在集群外以 HTTP 协议请求 pixiu 网关，在网关层进行协议转换，进一步调用集群内的Dubbo-go 服务。
 
@@ -68,4 +73,3 @@ pixiu            LoadBalancer   192.168.156.175   30.XXX.XXX.XX   8881:30173/TCP
 $ curl -X POST -d '{"name":"laurence"}' http://30.XXX.XXX.XX:8881/dubbogoDemoServer/org.apache.dubbo.laurence.samples.UserProvider/SayHello
 {"name":"Hello laurence","id":"12345","age":21}
 ```
-

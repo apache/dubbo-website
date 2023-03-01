@@ -1,10 +1,14 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/webservice/
+description: Webservice协议
+linkTitle: Webservice协议
+title: Webservice协议
 type: docs
-title: "Webservice协议"
-linkTitle: "Webservice协议"
 weight: 11
 ---
+
+
 
 
 ## 特性说明

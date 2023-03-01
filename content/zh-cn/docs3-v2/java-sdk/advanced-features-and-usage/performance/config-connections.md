@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
+description: Dubbo 中服务端和客户端的连接控制
+linkTitle: 连接控制
+title: 连接控制
 type: docs
-title: "连接控制"
-linkTitle: "连接控制"
 weight: 29
-description: "Dubbo 中服务端和客户端的连接控制"
 ---
+
+
 ## 功能说明
 连接控制功能可以使用户能够控制和管理进出服务器连接数，限制连接数并设置超时，以确保 Dubbo 系统的稳定性和性能，还允许用户根据 IP 地址、端口和协议配置不同级别的访问控制，保护系统免受恶意流量的影响，并降低服务中断的风险，此外提供了一种监视当前流量和连接状态的方法。
 

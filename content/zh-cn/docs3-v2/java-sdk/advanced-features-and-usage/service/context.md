@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/context/
+description: 通过上下文存放当前调用过程中所需的环境信息
+linkTitle: RPC调用上下文
+title: RPC调用上下文
 type: docs
-title: "RPC调用上下文"
-linkTitle: "RPC调用上下文"
 weight: 6
-description: "通过上下文存放当前调用过程中所需的环境信息"
 ---
+
+
 ## 特性说明
 上下文中存放的是当前调用过程中所需的环境信息。所有配置信息都将转换为 URL 的参数，参见 [schema 配置参考手册](../../../reference-manual/config/properties/) 中的**对应URL参数**一列。
 

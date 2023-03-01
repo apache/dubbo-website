@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/registry/multicast/
+description: Multicast 广播注册中心（限开发阶段使用）。
+linkTitle: Multicast
+title: Multicast
 type: docs
-title: "Multicast"
-linkTitle: "Multicast"
 weight: 4
-description: "Multicast 广播注册中心（限开发阶段使用）。"
 ---
+
+
 
 Multicast 注册中心不需要启动任何中心节点，只要广播地址一样，就可以互相发现。
 

@@ -1,12 +1,15 @@
 ---
-type: docs
-title: "Dubbo3 应用级服务发现设计"
-linkTitle: "应用级服务发现"
-date: 2023-01-30
+aliases:
+    - /zh/overview/reference/proposals/service-discovery/
 author: Jun Liu
-description: >
-
+date: 2023-01-30T00:00:00Z
+description: ""
+linkTitle: 应用级服务发现
+title: Dubbo3 应用级服务发现设计
+type: docs
 ---
+
+
 
 ## Objective
 * 显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。
@@ -84,4 +87,3 @@ Dubbo3 的应用级服务发现方案设计本质上就是围绕以上两个问�
 这里我们个重点看消费端 Consumer 的地址订阅行为，消费端从分两步读取地址数据，首先是从注册中心收到精简后的地址，随后通过调用 MetadataService 元数据服务，读取对端的元数据信息。在收到这两部分数据之后，消费端会完成地址数据的聚合，最终在运行态还原出类似 Dubbo2 的 URL 地址格式。因此从最终结果而言，应用级地址模型同时兼顾了地址传输层面的性能与运行层面的功能性。
 
 以上就是的应用级服务发现背景、工作原理部分的所有内容，接下来我们看一下饿了么升级到 Dubbo3 尤其是应用级服务发现的过程。
-

@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Hystrix"
-linkTitle: "Hystrix"
-weight: 20
+aliases:
+    - /zh/overview/what/ecosystem/rate-limit/hystrix/
 description: ""
+linkTitle: Hystrix
+title: Hystrix
+type: docs
+weight: 20
 ---
+
+
 
 ## 背景
 

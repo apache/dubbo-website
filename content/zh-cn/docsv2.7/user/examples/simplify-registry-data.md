@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/simplify-registry-data/
+description: 减少注册中心上服务的注册数据
+linkTitle: 注册信息简化
+title: 注册信息简化
 type: docs
-title: "注册信息简化"
-linkTitle: "注册信息简化"
 weight: 37
-description: "减少注册中心上服务的注册数据"
 ---
+
+
 
 ## 背景
 

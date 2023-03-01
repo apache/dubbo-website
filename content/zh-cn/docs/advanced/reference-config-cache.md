@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/reference-config-cache/
+description: 在 Dubbo 中缓存 ReferenceConfig
+linkTitle: ReferenceConfig 缓存
+title: ReferenceConfig 缓存
 type: docs
-title: "ReferenceConfig 缓存"
-linkTitle: "ReferenceConfig 缓存"
 weight: 41
-description: "在 Dubbo 中缓存 ReferenceConfig"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/reference-config-cache/)。
 {{% /pageinfo %}}
@@ -43,4 +47,3 @@ cache.destroy(reference);
 KeyGenerator keyGenerator = new ...
 ReferenceConfigCache cache = ReferenceConfigCache.getCache(keyGenerator );
 ```
-

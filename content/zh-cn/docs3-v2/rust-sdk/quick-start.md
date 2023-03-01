@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/rust-sdk/quick-start/
+description: 使用 Rust 快速开发 Dubbo 服务。
+linkTitle: 快速开始
+title: 快速开始
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
 weight: 1
-description: "使用 Rust 快速开发 Dubbo 服务。"
 ---
+
+
 
 请在此查看完整 [示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
 

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/protobuf-idl/
+description: 使用 IDL 定义服务
+linkTitle: Protobuf
+title: Protobuf
 type: docs
-title: "Protobuf"
-linkTitle: "Protobuf"
 weight: 17
-description: "使用 IDL 定义服务"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/#多语言用户-正在使用-protobuf)。
 {{% /pageinfo %}}

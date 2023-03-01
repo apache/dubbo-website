@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Gson"
-linkTitle: "Gson"
-weight: 70
+aliases:
+    - /zh/overview/what/ecosystem/serialization/gson/
 description: ""
+linkTitle: Gson
+title: Gson
+type: docs
+weight: 70
 ---
+
+
 
 ## 1 介绍
 

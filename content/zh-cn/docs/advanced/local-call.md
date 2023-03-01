@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/local-call/
+description: 在 Dubbo 中进行本地调用
+linkTitle: 本地调用
+title: 本地调用
 type: docs
-title: "本地调用"
-linkTitle: "本地调用"
 weight: 22
-description: "在 Dubbo 中进行本地调用"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/local-call/)。
 {{% /pageinfo %}}

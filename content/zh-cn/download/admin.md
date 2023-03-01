@@ -1,9 +1,9 @@
 ---
-type: docs
-title: "Admin"
-weight: 50
-#no_list: true
-#hide_summary: true
+_build:
+    render: link
+description: Admin
 manualLinkRelref: ./#admin
-_build: { render: link }
+title: Admin
+type: docs
+weight: 50
 ---

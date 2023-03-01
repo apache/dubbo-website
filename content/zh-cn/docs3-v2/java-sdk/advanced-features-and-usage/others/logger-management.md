@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-management/
+description: 在 Dubbo 中适配日志框架并支持运行时动态切换使用的日志框架
+linkTitle: 日志框架适配及运行时管理
+title: 日志框架适配及运行时管理
 type: docs
-title: "日志框架适配及运行时管理"
-linkTitle: "日志框架适配及运行时管理"
 weight: 4
-description: "在 Dubbo 中适配日志框架并支持运行时动态切换使用的日志框架"
 ---
+
+
 ## 特性说明
 日志框架适配，自 `2.2.1` 开始，dubbo 开始内置 log4j、slf4j、jcl、jdk 这些日志框架的适配。
 

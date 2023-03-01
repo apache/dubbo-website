@@ -1,9 +1,13 @@
 ---
-type: docs
-title: 多语言 RPC
+aliases:
+    - /zh/docs3-v2/golang-sdk/preface/concept/multi_language/
+description: 多语言 RPC
 keywords: 多语言 RPC
-description: "多语言 RPC"
+title: 多语言 RPC
+type: docs
 ---
+
+
 
 
 ![img](/imgs/docs3-v2/golang-sdk/concept/rpc/multi_language/dubbogo-3.0-invocation.png)

@@ -1,11 +1,14 @@
 ---
+aliases:
+    - /zh/docs/Introduction/
+description: 这篇文档是关于 Dubbo 的简单介绍，涵盖 Dubbo 的核心概念、基本使用方式以及 Dubbo3 核心功能，无论你是 Dubbo 的老用户还是新用户，都可以通过这篇 文档快速了解 Dubbo 及新版本带来的变化。
+linkTitle: 简介
+title: Dubbo3 简介
 type: docs
-title: "Dubbo3 简介"
-linkTitle: "简介"
 weight: 1
-description: "这篇文档是关于 Dubbo 的简单介绍，涵盖 Dubbo 的核心概念、基本使用方式以及 Dubbo3 核心功能，无论你是 Dubbo 的老用户还是新用户，都可以通过这篇
-文档快速了解 Dubbo 及新版本带来的变化。"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/what/overview/)。
 {{% /pageinfo %}}
@@ -116,5 +119,3 @@ Service Mesh 在业界得到了广泛的传播与认可，并被认为是下一�
 [体验 Dubbo3](../quick-start)
 
 [迁移到 Dubbo3](../migration)
-
-

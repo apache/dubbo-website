@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/registry/nacos/
+description: Nacos 注册中心的基本使用和工作原理。
+linkTitle: Nacos
+title: Nacos
 type: docs
-title: "Nacos"
-linkTitle: "Nacos"
 weight: 3
-description: "Nacos 注册中心的基本使用和工作原理。"
 ---
+
+
 
 ## 1 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)

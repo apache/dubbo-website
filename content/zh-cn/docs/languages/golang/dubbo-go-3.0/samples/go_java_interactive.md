@@ -1,10 +1,14 @@
 ---
-type: docs
-title: go-java 3.0 互通示例
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/samples/go_java_interactive/
+description: go-java 3.0 互通示例
 keywords: go-java 3.0 互通示例
 linkTitle: Go-Java 互通
-description: go-java 3.0 互通示例
+title: go-java 3.0 互通示例
+type: docs
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/)。
 {{% /pageinfo %}}
@@ -852,5 +856,3 @@ public class Consumer {
     }
 }
 ```
-
-

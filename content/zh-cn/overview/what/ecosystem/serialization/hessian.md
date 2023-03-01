@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Hessian"
-linkTitle: "Hessian"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/serialization/hessian/
 description: ""
+linkTitle: Hessian
+title: Hessian
+type: docs
+weight: 10
 ---
+
+
 
 ## 1 介绍
 

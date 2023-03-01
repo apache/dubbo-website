@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/explicit-target/
+description: Dubbo 中点对点的直连方式
+linkTitle: 直连提供者
+title: 直连提供者
 type: docs
-title: "直连提供者"
-linkTitle: "直连提供者"
 weight: 5
-description: "Dubbo 中点对点的直连方式"
 ---
+
+
 
 ## 背景
 在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者，这时候可能需要点对点直连，点对点直连方式，将以服务接口为单位，忽略注册中心的提供者列表，A 接口配置点对点，不影响 B 接口从注册中心获取列表。
@@ -58,4 +62,3 @@ com.alibaba.xxx.XxxService=dubbo://localhost:20890
 {{% alert title="注意" color="warning" %}}
 为了避免复杂化线上环境，不要在线上使用这个功能，只应在测试阶段使用。
 {{% /alert %}}
-

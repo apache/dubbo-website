@@ -1,9 +1,13 @@
 ---
-type: docs
-title: 优雅下线
-keywords: 优雅下线
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/
 description: 本文主要介绍优雅下线的基本步骤和使用说明
+keywords: 优雅下线
+title: 优雅下线
+type: docs
 ---
+
+
 # 优雅下线
 
 ## 背景
@@ -60,7 +64,3 @@ extension.AddCustomShutdownCallback(func() {
 ## 参考资料
 
 [【Dubbo-go 优雅上下线的设计与实践】](https://developer.aliyun.com/article/860775)
-
-
-
-

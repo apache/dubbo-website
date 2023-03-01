@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/dev/trie/
+description: Trie 前缀树介绍
+linkTitle: Trie 前缀树介绍
+title: Trie 前缀树介绍
 type: docs
-title: "Trie 前缀树介绍"
-linkTitle: "Trie 前缀树介绍"
 weight: 2
 ---
+
+
 # 简介
 
 ![image.png](/imgs/pixiu/trie-1.png)<br />网关的核心之一是路由逻辑，决定一个请求需要经过怎样的加工，被转发到哪个下行服务。<br />其中 80% 的路由需求表达都以 URL 为基础。需要描述清楚具有某个特征的 URL 或者 URL 集合对应怎样的一系列下游处理策略。
@@ -134,6 +139,3 @@ path: '/api/v1/test-dubbo/user/name/:name'
 1. 恢复追 log 线程
 
 pr：<br />[https://github.com/apache/dubbo-go-pixiu/pull/262](https://github.com/apache/dubbo-go-pixiu/pull/262)<br />pkg/common/router/trie/trie.go:26
-
-
-

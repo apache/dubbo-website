@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/async-execute-on-provider/
+description: Dubbo 服务提供方的异步执行
+linkTitle: 异步执行
+title: 异步执行
 type: docs
-title: "异步执行"
-linkTitle: "异步执行"
 weight: 21
-description: "Dubbo 服务提供方的异步执行"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/)。
 {{% /pageinfo %}}
@@ -95,10 +99,3 @@ public class AsyncServiceImpl implements AsyncService {
     }
 }
 ```
-
-
-
-
-
-
-

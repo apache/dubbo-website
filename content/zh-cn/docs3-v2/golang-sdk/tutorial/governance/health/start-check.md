@@ -1,10 +1,14 @@
 ---
-title: dubbogo 3.0  启动时检查
-keywords: dubbogo 3.0 启动时检查
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
 description: dubbogo 3.0 启动时检查
-weight: 4
+keywords: dubbogo 3.0 启动时检查
+title: dubbogo 3.0  启动时检查
 type: docs
+weight: 4
 ---
+
+
 
 # 启动时检查
 
@@ -27,5 +31,3 @@ dubbo:
       myserivce:
        check: true 
 ```
-
-

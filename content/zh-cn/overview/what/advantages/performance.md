@@ -1,10 +1,14 @@
-
 ---
+aliases:
+    - /zh/overview/what/advantages/performance/
+description: 超高性能
+linkTitle: 超高性能
+title: 超高性能
 type: docs
-title: "超高性能"
-linkTitle: "超高性能"
 weight: 30
 ---
+
+
 Dubbo 被设计用于解决阿里巴巴超大规模的电商微服务集群实践，并在各个行业头部企业经过多年的十万、百万规模的微服务实践检验，因此，Dubbo 在通信性能、稳定性方面具有无可比拟的优势，非常适合构建近乎无限水平伸缩的微服务集群，这也是 Dubbo 从实践层面优于业界很多同类的产品的巨大优势。
 
 ## 高性能数据传输

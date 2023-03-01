@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/echo-service/
+description: 通过回声测试检测 Dubbo 服务是否可用
+linkTitle: 回声测试
+title: 回声测试
 type: docs
-title: "回声测试"
-linkTitle: "回声测试"
 weight: 12
-description: "通过回声测试检测 Dubbo 服务是否可用"
 ---
+
+
 
 ## 特性说明
 回声测试用于检测服务是否可用，回声测试按照正常请求流程执行，能够测试整个调用是否通畅，可用于监控。执行回声测试，客户端发送一个包含特定值（如字符串）的请求。服务器应使用相同的值进行响应，从而验证请求是否已成功接收和处理。如果响应与请求不匹配，则表示服务运行不正常，应进一步调查。要求 Dubbo 服务器正在运行，并且服务器和客户端之间具有网络连接。在客户端，必须配置 Dubbo 客户端以连接到服务器，客户端将向服务器发送请求，然后服务器应返回与请求相同的响应。

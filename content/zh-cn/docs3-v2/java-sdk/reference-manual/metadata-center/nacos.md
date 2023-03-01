@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/nacos/
+description: Nacos 元数据中心基本使用与工作原理
+linkTitle: Nacos
+title: Nacos
 type: docs
-title: "Nacos"
-linkTitle: "Nacos"
 weight: 2
-description: "Nacos 元数据中心基本使用与工作原理"
 ---
+
+
 
 ## 1 预备工作
 - 了解 [Dubbo 基本开发步骤](/zh-cn/docs3-v2/java-sdk/quick-start/spring-boot/)
@@ -112,4 +116,3 @@ dubbo.metadata-report.report-metadata=true
 Nacos server 中的元数据信息详情如下：
 
 ![image-dubbo-metadata-nacos-2.png](/imgs/blog/dubbo-metadata-nacos-2.png)
-

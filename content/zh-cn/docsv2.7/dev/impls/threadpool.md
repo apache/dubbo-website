@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/threadpool/
+description: 线程池扩展
+linkTitle: 线程池扩展
+title: 线程池扩展
 type: docs
-title: "线程池扩展"
-linkTitle: "线程池扩展"
 weight: 15
 ---
+
+
 
 ## 扩展说明
 
@@ -63,4 +68,3 @@ META-INF/dubbo/org.apache.dubbo.common.threadpool.ThreadPool：
 ```properties
 xxx=com.xxx.XxxThreadPool
 ```
-

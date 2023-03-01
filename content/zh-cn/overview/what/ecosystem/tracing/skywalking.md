@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Skywalking"
-linkTitle: "Skywalking"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/tracing/skywalking/
 description: ""
+linkTitle: Skywalking
+title: Skywalking
+type: docs
+weight: 10
 ---

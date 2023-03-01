@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs/references/spis/config-center/
+description: 配置中心扩展
+linkTitle: 配置中心扩展
+title: 配置中心扩展
 type: docs
-title: "配置中心扩展"
-linkTitle: "配置中心扩展"
 weight: 13
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/config-center/)。
 {{% /pageinfo %}}
@@ -103,4 +108,3 @@ Etcd 和 Consul 本质上也是一种类似 zookeeper 的树状存储结构，�
 ### Apollo
 
 Apollo 与 Nacos 类似，请参考动态配置中心使用文档中关于 Apollo 部分的描述。
-

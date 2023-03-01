@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs/advanced/context/
+description: 通过上下文存放当前调用过程中所需的环境信息
+linkTitle: 上下文信息
+title: 上下文信息
 type: docs
-title: "上下文信息"
-linkTitle: "上下文信息"
 weight: 19
-description: "通过上下文存放当前调用过程中所需的环境信息"
 ---
+
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/context/)。
 {{% /pageinfo %}}

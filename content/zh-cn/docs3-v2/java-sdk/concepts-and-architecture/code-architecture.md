@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/concepts-and-architecture/code-architecture/
+description: 本文将介绍 Dubbo 代码架构。
+linkTitle: 代码架构
+title: 代码架构
 type: docs
-title: "代码架构"
-linkTitle: "代码架构"
 weight: 2
-description: "本文将介绍 Dubbo 代码架构。"
 ---
+
+
 
 
 ## 整体设计

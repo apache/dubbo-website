@@ -1,14 +1,11 @@
-
 ---
-type: docs
-title: "Golang SDK"
-linkTitle: "Golang"
-description: ""
-weight: 2
-manualLinkTarget: _blank
+_build:
+    render: link
+description: Golang SDK
+linkTitle: Golang
 manualLinkRelref: ../../docs3-v2/golang-sdk/
-_build: { render: link }
+manualLinkTarget: _blank
+title: Golang SDK
+type: docs
+weight: 2
 ---
-
-
-

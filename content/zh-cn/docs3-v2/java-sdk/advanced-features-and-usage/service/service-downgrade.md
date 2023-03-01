@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
+description: 降级 Dubbo 服务
+linkTitle: 服务降级
+title: 服务降级
 type: docs
-title: "服务降级"
-linkTitle: "服务降级"
 weight: 3
-description: "降级 Dubbo 服务"
 ---
+
+
 
 ## 特性说明
 推荐使用相关限流降级组件（如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)）以达到最佳体验。参考示例实践：[微服务治理/限流降级](/zh-cn/overview/tasks/ecosystem/rate-limit/)

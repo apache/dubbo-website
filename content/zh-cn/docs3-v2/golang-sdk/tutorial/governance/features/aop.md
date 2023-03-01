@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/features/aop/
+description: 自定义服务调用中间件
 title: 自定义服务调用中间件
 type: docs
 weight: 1
 ---
+
+
 
 参考samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/master/filter)
 
@@ -62,6 +67,3 @@ func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result,
 }
 
 ```
-
-
-

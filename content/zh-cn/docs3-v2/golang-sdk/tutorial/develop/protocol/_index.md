@@ -1,5 +1,8 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/protocol/
+description: 协议配置
+title: 协议配置
 type: docs
-title: "协议配置"
 weight: 3
 ---

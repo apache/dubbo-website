@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/profiler/
+description: 性能采样命令
+linkTitle: 性能采样命令
+title: 性能采样命令
 type: docs
-title: "性能采样命令"
-linkTitle: "性能采样命令"
 weight: 7
-description: "性能采样命令"
 ---
+
+
 
 性能采样功能可以对 Dubbo 处理链路上的各处耗时进行检测，在出现超时的时候 `( usageTime / timeout > profilerWarnPercent * 100 )` 通过日志记录调用的耗时。
 

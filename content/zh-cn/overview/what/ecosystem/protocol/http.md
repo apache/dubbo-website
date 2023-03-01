@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "http"
-linkTitle: "http"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/protocol/http/
 description: ""
+linkTitle: http
+title: http
+type: docs
+weight: 30
 ---
+
+
 
 基于标准的 Java REST API——JAX-RS 2.0（Java API for RESTful Web Services 的简写）实现的 REST 调用支持
 

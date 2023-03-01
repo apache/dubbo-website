@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "istio"
-linkTitle: "istio"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/service-mesh/istio/
 description: ""
+linkTitle: istio
+title: istio
+type: docs
+weight: 10
 ---

@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/contact/committer/label-an-issue-guide_dev/
+description: 给问题打标签
+linkTitle: 问题标签
+title: 给问题打标签
 type: docs
-title: "给问题打标签"
-linkTitle: "问题标签"
 weight: 3
 ---
+
+
 
 如果您正在处理一个问题，请记得**给这个问题标记一个或者多个您认为有意义的标签**。有了标签，其他开发人员就会很轻松地识别出问题，以便对其进行分类并跟踪进度。
 

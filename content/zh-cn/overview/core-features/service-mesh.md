@@ -1,14 +1,18 @@
 ---
-type: docs
-title: "服务网格"
-linkTitle: "服务网格"
-weight: 80
+aliases:
+    - /zh/overview/core-features/service-mesh/
 description: ""
 feature:
-  title: 服务网格(Service Mesh)
-  description: >
-    灵活的数据面 (Proxy & Proxyless) 部署形态支持，无缝接入 Istio 控制面治理体系。
+    description: |
+        灵活的数据面 (Proxy & Proxyless) 部署形态支持，无缝接入 Istio 控制面治理体系。
+    title: 服务网格(Service Mesh)
+linkTitle: 服务网格
+title: 服务网格
+type: docs
+weight: 80
 ---
+
+
 
 Dubbo Mesh 是 Dubbo 在云原生背景的微服务整体解决方案，它帮助开发者实现 Dubbo 服务与标准的 Kubernetes Native Service 体系的打通，让 Dubbo 应用能够无缝接入 Istio 等业界主流服务网格产品。
 
@@ -81,11 +85,3 @@ Address Synchronization
 ### 如何解决 Dubbo2 协议通信的问题？
 
 Aeraki Mesh
-
-
-
-
-
-
-
-

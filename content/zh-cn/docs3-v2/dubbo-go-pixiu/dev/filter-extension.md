@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/dev/filter-extension/
+description: Pixiu Filter体系介绍
+linkTitle: Pixiu Filter体系介绍
+title: Pixiu Filter体系介绍
 type: docs
-title: "Pixiu Filter体系介绍"
-linkTitle: "Pixiu Filter体系介绍"
 weight: 1
 ---
+
+
 
 ## **怎样编写一个Filter**
 `更详细的信息，请移步Blog《谈谈Pixiu的Filter》`
@@ -130,4 +135,3 @@ c’est la vie%
 2022-02-19T20:20:11.900+0800    INFO    demo/demo.go:62 request body: eiv al tse’c
 2022-02-19T20:20:11.900+0800    INFO    demo/demo.go:71 : eiv al tse’c
 ```
-

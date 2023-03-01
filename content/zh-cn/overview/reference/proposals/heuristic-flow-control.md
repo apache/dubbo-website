@@ -1,12 +1,15 @@
 ---
-type: docs
-title: "自适应负载均衡与限流"
-linkTitle: "服务柔性"
-date: 2023-01-30
+aliases:
+    - /zh/overview/reference/proposals/heuristic-flow-control/
 author: Quanlu Liu
-description: >
-    本文所说的“柔性服务”主要是指consumer端的负载均衡和provider端的限流两个功能。在之前的dubbo版本中，负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。而限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。我们针对这些存在的问题进行了改进。
+date: 2023-01-30T00:00:00Z
+description: 本文所说的“柔性服务”主要是指consumer端的负载均衡和provider端的限流两个功能。在之前的dubbo版本中，负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。而限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。我们针对这些存在的问题进行了改进。
+linkTitle: 服务柔性
+title: 自适应负载均衡与限流
+type: docs
 ---
+
+
 
 # 整体介绍
 本文所说的“柔性服务”主要是指consumer端的负载均衡和provider端的限流两个功能。在之前的dubbo版本中，负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。而限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。我们针对这些存在的问题进行了改进。
@@ -165,4 +168,3 @@ AutoConcurrencyLimier的算法使用过程和HeuristicSmoothingFlowControl类似
 其次，利用exploreRatio来对剩余的容量进行探索。
 另外，每隔一段时间都会自动缩小max_concurrency并持续一段时间，以处理noLoadLatency上涨的情况。因为估计noLoadLatency时必须先让服务处于低负载的状态，因此对maxConcurrency的缩小是难以避免的。
 由于max_concurrency<concurrency时，服务会拒绝掉所有的请求，限流算法将"排空所有的经历过排队的等待请求的时间"设置为2*latency，以确保minLatency的样本绝大部分时没有经过排队等待的。
-

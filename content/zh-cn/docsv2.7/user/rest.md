@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/rest/
+description: 在 Dubbo 中开发 REST 风格的远程调用
+linkTitle: REST 支持
+title: 开发 REST 应用
 type: docs
-title: "开发 REST 应用"
-linkTitle: "REST 支持"
 weight: 19
-description: "在 Dubbo 中开发 REST 风格的远程调用" 
 ---
+
+
 
 {{% pageinfo %}}
 作者：沈理
@@ -1240,4 +1244,3 @@ TODO
 * 异步调用
 * 完善gzip
 * 最大payload限制
-
