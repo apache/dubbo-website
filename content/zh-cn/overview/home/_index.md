@@ -19,10 +19,10 @@ content:
           name: 尝试使用 Dubbo 开发微服务
         - description: aaa
           links:
-            - '[Java 参考手册](../../docs3-v2/java-sdk/)'
-            - '[Golang 参考手册](../../docs3-v2/golang-sdk/)'
-            - '[Rust 参考手册](../../docs3-v2/rust-sdk/)'
-            - '[Node 参考手册](../../docs3-v2/)'
+            - '[Java 参考手册](../mannual/java-sdk/)'
+            - '[Golang 参考手册](../mannual/golang-sdk/)'
+            - '[Rust 参考手册](../mannual/rust-sdk/)'
+            - '[Node 参考手册](../mannual/)'
           name: SDK 参考手册
 description: Apache Dubbo 是一款支持多语言的、易用的 web 和 rpc 框架，同时为构建企业级微服务提供服务发现、流量治理、可观测、认证鉴权等能力、工具与最佳实践。
 hide_feedback: true

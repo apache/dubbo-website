@@ -81,4 +81,4 @@ conditions:
 
 ## 其他事项
 
-我们上面的示例并未纳入多区域之间注册中心的复杂性，如果每个区域部署有独立的注册中心，则多区域间的地址同步就是一个需要考虑的问题。对于这种场景，Dubbo 通过多注册&多订阅机制也提供了同区域优先的支持，具体可以参见[多注册&多订阅](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-registry/)相关文档。
+我们上面的示例并未纳入多区域之间注册中心的复杂性，如果每个区域部署有独立的注册中心，则多区域间的地址同步就是一个需要考虑的问题。对于这种场景，Dubbo 通过多注册&多订阅机制也提供了同区域优先的支持，具体可以参见[多注册&多订阅](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-registry/)相关文档。

@@ -268,13 +268,13 @@ Receive result ======> hi, dubbo
 
 ### 1. Dubbo 的配置介绍
 
-Dubbo 的主要配置入口有`ReferenceConfig` 、`ServiceConfig` 和 `DubboBootstrap` ，更多的细节可以参考 [API 配置 | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual/config/api/) 一文。
+Dubbo 的主要配置入口有`ReferenceConfig` 、`ServiceConfig` 和 `DubboBootstrap` ，更多的细节可以参考 [API 配置 | Apache Dubbo](/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/) 一文。
 
 ### 2. 除了 API 方式其他的使用方式
 
 Dubbo 除了 API 方式还支持 Spring XML、Annotation、Spring Boot 等配置方式，在下一个教程中将就 Spring Boot 配置方式讲解如何进行快速开发。
 
-关于 XML 和 Annotation 的细节可以参考 [XML 配置 | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual/config/xml/)、[Annotation 配置 | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual/config/annotation/) 疑问。
+关于 XML 和 Annotation 的细节可以参考 [XML 配置 | Apache Dubbo](/zh-cn/overview/mannual/java-sdk/reference-manual/config/xml/)、[Annotation 配置 | Apache Dubbo](/zh-cn/overview/mannual/java-sdk/reference-manual/config/annotation/) 疑问。
 
 ## 更多
 

@@ -553,7 +553,7 @@ Receive result ======> Hello world
 
 ### 1. Dubbo 的 Spring 配置介绍
 
-Dubbo 的主要配置入口有 yaml 的配置内容、`@DubboReference` 和`@DubboService` 等，更多的细节可以参考 [Annotation 配置 | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual/config/annotation/) 一文。
+Dubbo 的主要配置入口有 yaml 的配置内容、`@DubboReference` 和`@DubboService` 等，更多的细节可以参考 [Annotation 配置 | Apache Dubbo](/zh-cn/overview/mannual/java-sdk/reference-manual/config/annotation/) 一文。
 
 ## 更多
 

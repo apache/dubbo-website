@@ -388,7 +388,7 @@ Receive result ======> hi, dubbo
 
 ### 1. Dubbo 的 XML 配置介绍
 
-Dubbo 的主要配置入口有`dubbo:application` 、`dubbo:registry` 、 `dubbo:reference`  和 `dubbo:service` 等，更多的细节可以参考 [XML 配置 | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual/config/xml/) 一文。
+Dubbo 的主要配置入口有`dubbo:application` 、`dubbo:registry` 、 `dubbo:reference`  和 `dubbo:service` 等，更多的细节可以参考 [XML 配置 | Apache Dubbo](/zh-cn/overview/mannual/java-sdk/reference-manual/config/xml/) 一文。
 
 ## 更多
 

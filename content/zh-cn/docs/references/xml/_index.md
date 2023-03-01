@@ -10,7 +10,7 @@ weight: 1
 
 
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/xml/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/config/xml/)。
 {{% /pageinfo %}}
 
 这里以 XML Config [^1] 为准，列举所有配置项 [^2]。其它配置方式，请参见相应转换关系：[属性配置](../../../docsv2.7/user/configuration/properties)，[注解配置](../../../docsv2.7/user/configuration/annotation)，[API 配置](../../../docsv2.7/user/configuration/api)。
