@@ -54,5 +54,5 @@ Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数�
 ## Logging
 访问日志可以帮助分析系统的流量情况，在有些场景下，开启访问日志对于排查问题也非常有帮助。
 
-* [开启 Access Log](../../../docs3-v2/java-sdk/advanced-features-and-usage/service/accesslog/)
+* [开启 Access Log](../../mannual/java-sdk/advanced-features-and-usage/service/accesslog/)
 * [你还在运行态开启 Access Log](../../tasks/traffic-management/accesslog/)

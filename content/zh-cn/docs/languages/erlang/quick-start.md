@@ -10,7 +10,7 @@ weight: 1
 
 
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/erlang-sdk/quick-start/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/erlang-sdk/quick-start/)。
 {{% /pageinfo %}}
 
 建议先使用 java 定义接口 jar，并使用 [erlanalysis](https://github.com/apache/dubbo-erlang/tree/master/tools/erlanalysis) 工具解析java接口至Erlang lib

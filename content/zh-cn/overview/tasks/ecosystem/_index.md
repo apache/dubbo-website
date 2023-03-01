@@ -49,7 +49,7 @@ weight: 30
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/registry/" >}}'>服务发现</a>
+                 <a target="_blank" href='{{< relref "../../mannual/java-sdk/reference-manual/registry/" >}}'>服务发现</a>
                  </h4>
                  <p>Dubbo 官方支持的常见注册中心扩展实现及其使用方式。</p>
              </div>
@@ -59,7 +59,7 @@ weight: 30
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/config-center/" >}}'>配置中心</a>
+                 <a target="_blank" href='{{< relref "../../mannual/java-sdk/reference-manual/config-center/" >}}'>配置中心</a>
                  </h4>
                  <p>Dubbo 官方支持的常见配置中心扩展实现及其使用方式。</p>
              </div>
@@ -69,7 +69,7 @@ weight: 30
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/metadata-center/" >}}'>元数据中心</a>
+                 <a target="_blank" href='{{< relref "../../mannual/java-sdk/reference-manual/metadata-center/" >}}'>元数据中心</a>
                  </h4>
                  <p>Dubbo 官方支持的常见元数据中心扩展实现及其使用方式。</p>
              </div>

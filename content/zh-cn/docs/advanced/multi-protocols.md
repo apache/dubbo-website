@@ -10,7 +10,7 @@ weight: 9
 
 
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-protocols/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-protocols/)。
 {{% /pageinfo %}}
 
 Dubbo 允许配置多协议，在不同服务上支持不同协议或者同一服务上同时支持多种协议。

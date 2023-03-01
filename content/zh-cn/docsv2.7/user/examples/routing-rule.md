@@ -258,5 +258,5 @@ RpcContext.getContext().setAttachment(CommonConstants.TAG_KEY,"tag1");
 {{% alert title="提示" color="primary" %}}
 `2.6.x` 版本以及更早的版本请使用[老版本路由规则](../routing-rule-deprecated)
 
-自定义路由参考[路由扩展](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/router/)
+自定义路由参考[路由扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)
 {{% /alert %}}

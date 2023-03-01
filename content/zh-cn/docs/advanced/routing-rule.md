@@ -10,7 +10,7 @@ weight: 33
 
 
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/routing-rule/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/traffic/routing-rule/)。
 {{% /pageinfo %}}
 
 路由规则在发起一次RPC调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起RPC调用的备选地址。
@@ -259,5 +259,5 @@ RpcContext.getContext().setAttachment(Constants.TAG_KEY,"tag1");
 {{% alert title="提示" color="primary" %}}
 `2.6.x` 版本以及更早的版本请使用[老版本路由规则](../routing-rule-deprecated)
 
-自定义路由参考[路由扩展](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/router/)
+自定义路由参考[路由扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)
 {{% /alert %}}
