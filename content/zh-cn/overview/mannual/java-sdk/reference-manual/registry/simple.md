@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/registry/simple/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/registry/
 description: Simple 注册中心参考手册
 linkTitle: Simple
 title: Simple 注册中心
 type: docs
 weight: 7
 ---
+
+
 
 
 

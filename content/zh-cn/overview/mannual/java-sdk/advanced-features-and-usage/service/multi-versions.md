@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-versions/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 在 Dubbo 中为同一个服务配置多个版本
 linkTitle: 服务分版本
 title: 服务分版本
 type: docs
 weight: 1
 ---
+
+
 
 
 

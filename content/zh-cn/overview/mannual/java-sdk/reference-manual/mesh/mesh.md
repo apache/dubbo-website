@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/mesh/mesh/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/mesh/
 description: 描述如何对Dubbo mesh proxyless模式进行debug。
 linkTitle: Debug参考文档
 title: Debug参考文档
 type: docs
 weight: 2
 ---
+
+
 
 
 

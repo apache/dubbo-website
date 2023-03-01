@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/service-group/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 使用服务分组区分服务接口的不同实现
 linkTitle: 服务分组
 title: 服务分组
 type: docs
 weight: 2
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/registry-only/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 只注册不订阅
 linkTitle: 只注册
 title: 只注册
 type: docs
 weight: 41
 ---
+
+
 
 
 ## 特性说明

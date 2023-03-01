@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/concepts-and-architecture/service-invocation/
+    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/
 description: 本文将介绍如何在 Dubbo 3 中自定义调用链路上核心的扩展点以满足您的需求。
 linkTitle: 服务调用
 title: 服务调用扩展点
 type: docs
 weight: 4
 ---
+
+
 
 
 

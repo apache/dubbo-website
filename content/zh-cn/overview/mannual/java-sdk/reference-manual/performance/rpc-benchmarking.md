@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/performance/rpc-benchmarking/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/performance/
 description: ""
 linkTitle: RPC 基准
 title: RPC 协议 Triple&Dubbo 基准测试
 type: docs
 weight: 1
 ---
+
+
 
 
 

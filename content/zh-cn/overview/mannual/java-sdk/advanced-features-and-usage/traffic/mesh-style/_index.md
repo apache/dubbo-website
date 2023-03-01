@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/
 description: Dubbo 支持 Mesh 路由类型及配合方式
 linkTitle: Mesh 路由规则
 title: Mesh 路由规则
 type: docs
 weight: 40
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求
 linkTitle: 泛化调用
 title: 实现泛化实现（服务端泛化）
 type: docs
 weight: 17
 ---
+
+
 
 
 ## 特性说明

@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/interflow/call_grpc/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/interflow/
 description: 与 gRPC 应用互通
 title: 与 gRPC 应用互通
 type: docs
 weight: 5
 ---
+
+
 
 
 

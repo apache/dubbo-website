@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/quick-start/idl/
+    - /zh-cn/docs3-v2/java-sdk/quick-start/
 description: 从零演示如何基于 IDL 方式来定义 Dubbo 服务并使用 Triple 协议
 linkTitle: IDL 定义跨语言服务
 title: IDL 定义跨语言服务
 type: docs
 weight: 11
 ---
+
+
 
 
 

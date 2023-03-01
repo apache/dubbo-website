@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/features/context/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/
 description: 使用 ctx 传递上下文信息
 title: 使用 ctx 传递上下文信息
 type: docs
 weight: 6
 ---
+
+
 
 
 

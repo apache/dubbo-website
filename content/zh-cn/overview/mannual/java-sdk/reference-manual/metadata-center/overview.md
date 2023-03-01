@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/overview/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/metadata-center/
 description: 元数据中心概述
 linkTitle: 元数据中心概述
 title: 元数据中心概述
 type: docs
 weight: 1
 ---
+
+
 
 
 

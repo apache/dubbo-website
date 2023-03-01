@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
 description: Dubbo 提供的集群负载均衡策略
 linkTitle: 负载均衡
 title: 负载均衡
 type: docs
 weight: 3
 ---
+
+
 
 
 ## 功能说明

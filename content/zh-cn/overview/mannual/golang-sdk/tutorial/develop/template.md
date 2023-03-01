@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/template/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/
 description: 应用模板
 title: 应用模板
 type: docs
 weight: 1
 ---
+
+
 
 
 

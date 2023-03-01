@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/refer/compatible_version/
+    - /zh-cn/docs3-v2/golang-sdk/refer/
 description: 依赖适配版本号
 title: 依赖适配版本号
 type: docs
 weight: 4
 ---
+
+
 
 
 

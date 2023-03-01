@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/protobuf&interface/
+    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/
 description: Protobuf 与 Interface 差异对比指南
 linkTitle: Protobuf vs Interface
 title: Protobuf 与 Interface
 type: docs
 weight: 6
 ---
+
+
 
 
 本文对比了Protobuf和Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。

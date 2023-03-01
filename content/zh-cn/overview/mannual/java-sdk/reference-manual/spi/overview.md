@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/overview/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/
 description: Dubbo 通过 SPI 机制提供了非常灵活的可扩展性
 linkTitle: Dubbo SPI 概述
 title: Dubbo SPI 概述
 type: docs
 weight: 1
 ---
+
+
 
 
 

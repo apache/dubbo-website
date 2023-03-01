@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/security/token-authorization/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/
 description: 了解 Dubbo 权限控制的配置和使用
 linkTitle: 权限控制
 title: 权限控制
 type: docs
 weight: 2
 ---
+
+
 
 
 

@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/debugging/grpc_cli/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/debugging/
 description: 使用 grpc_cli 调试 Dubbo-go 服务
 title: 使用 grpc_cli 调试 Dubbo-go 服务
 type: docs
 weight: 1
 ---
+
+
 
 
 

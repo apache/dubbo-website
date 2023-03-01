@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/pixiu-nacos-triple/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/
 description: 使用 Pixiu 暴露 Dubbo-go 服务
 title: 使用 Pixiu 暴露 Dubbo-go 服务
 type: docs
 weight: 9
 ---
+
+
 
 
 

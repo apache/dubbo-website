@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/preface/concept/multi_language/
+    - /zh-cn/docs3-v2/golang-sdk/preface/concept/
 description: 多语言 RPC
 keywords: 多语言 RPC
 title: 多语言 RPC
 type: docs
 ---
+
+
 
 
 

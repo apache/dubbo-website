@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/rest/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/
 description: Rest协议
 linkTitle: Rest协议
 title: Rest协议
 type: docs
 weight: 4
 ---
+
+
 
 
 

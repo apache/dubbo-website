@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/user/listener/http/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/listener/
 description: Http Listener 介绍
 linkTitle: Http Listener 介绍
 title: Http Listener 介绍
 type: docs
 weight: 10
 ---
+
+
 
 
 

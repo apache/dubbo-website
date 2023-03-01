@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/idl/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/
 description: IDL 方式使用 Triple
 linkTitle: IDL 方式使用 Triple
 title: IDL 方式使用 Triple
 type: docs
 weight: 2
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/dev/dubbo-pilot/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/
 description: dubbo-pilot Control Plane 部署
 linkTitle: dubbo-pilot Control Plane 部署
 title: dubbo-pilot Control Plane 部署
 type: docs
 weight: 2
 ---
+
+
 
 
 

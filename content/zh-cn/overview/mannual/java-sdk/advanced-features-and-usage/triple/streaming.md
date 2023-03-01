@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/triple/streaming/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/triple/
 description: ""
 linkTitle: Streaming 通信模式
 title: Streaming 通信模式
 type: docs
 weight: 3
 ---
+
+
 
 
 

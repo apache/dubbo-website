@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/invoker-listener/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
 description: 引用监听扩展
 linkTitle: 引用监听扩展
 title: 引用监听扩展
 type: docs
 weight: 3
 ---
+
+
 
 
 

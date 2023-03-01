@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/istio/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/
 description: 部署 Istio 环境
 title: 部署 Istio 环境
 type: docs
 weight: 1
 ---
+
+
 
 
 

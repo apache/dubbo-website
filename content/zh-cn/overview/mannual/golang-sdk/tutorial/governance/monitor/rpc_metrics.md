@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/monitor/
 description: 查看 RPC 调用的监控信息
 title: 查看 RPC 调用的监控信息
 type: docs
 weight: 1
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/destination-rule/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/
 description: 目标地址规则
 linkTitle: DestinationRule
 title: DestinationRule
 type: docs
 weight: 2
 ---
+
+
 
 
 

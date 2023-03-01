@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/readiness/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
 description: Readiness 就绪探针
 linkTitle: 就绪探针
 title: Readiness 就绪探针
 type: docs
 weight: 12
 ---
+
+
 
 
 

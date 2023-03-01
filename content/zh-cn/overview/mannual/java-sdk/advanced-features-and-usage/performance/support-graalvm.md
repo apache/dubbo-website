@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
 description: Dubbo 支持 Graal VM
 linkTitle: 支持 Graal VM
 title: 支持 Graal VM
 type: docs
 weight: 40
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/async-call/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 在 Dubbo 中发起异步调用
 linkTitle: 异步调用
 title: 异步调用
 type: docs
 weight: 3
 ---
+
+
 
 
 

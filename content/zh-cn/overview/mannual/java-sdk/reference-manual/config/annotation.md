@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/annotation/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/
 description: 以 Annotation、Spring Boot 开发 Dubbo 应用
 linkTitle: Annotation 配置
 title: Annotation 配置
 type: docs
 weight: 3
 ---
+
+
 
 
 

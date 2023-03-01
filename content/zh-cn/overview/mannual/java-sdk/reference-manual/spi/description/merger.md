@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/merger/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
 description: 合并结果扩展
 linkTitle: 合并结果扩展
 title: 合并结果扩展
 type: docs
 weight: 8
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/delay-publish/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 延迟暴露 Dubbo 服务
 linkTitle: 延迟暴露
 title: 延迟暴露
 type: docs
 weight: 27
 ---
+
+
 
 
 

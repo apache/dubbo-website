@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
+    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/
 description: 本文具体说明了用户在升级到 Dubbo 3.0 之后如何快速开启应用级服务发现新特性。
 linkTitle: 应用级服务发现迁移示例
 title: 应用级服务发现迁移示例
 type: docs
 weight: 5
 ---
+
+
 
 
 

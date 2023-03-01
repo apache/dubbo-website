@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/docker/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/
 description: 将 Dubbo 部署到 Docker 环境
 linkTitle: Dubbo 部署 Docker 环境
 title: Dubbo 部署 Docker 环境
 type: docs
 weight: 6
 ---
+
+
 
 
 ## 特性说明

@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/config-center/
 description: 远程加载配置启动
 title: 远程加载配置启动
 type: docs
 weight: 3
 ---
+
+
 
 
 

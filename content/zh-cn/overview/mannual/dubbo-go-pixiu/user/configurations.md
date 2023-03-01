@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/user/configurations/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/
 description: 启动和配置
 linkTitle: 启动和配置
 title: 启动和配置
 type: docs
 weight: 20
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/user/deployment/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/
 description: 部署操作
 linkTitle: 部署操作
 title: 部署操作
 type: docs
 weight: 30
 ---
+
+
 
 
 

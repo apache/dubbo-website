@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/parameter-validation/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 在 Dubbo 中进行参数校验
 linkTitle: 参数校验
 title: 参数校验
 type: docs
 weight: 2
 ---
+
+
 
 
 ## 特性说明

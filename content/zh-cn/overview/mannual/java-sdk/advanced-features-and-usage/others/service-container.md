@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/service-container/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/
 description: 了解 Dubbo 中服务自定义容器类型和使用
 linkTitle: 自定义服务容器
 title: 自定义服务容器
 type: docs
 weight: 1
 ---
+
+
 
 
 

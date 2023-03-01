@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/
+    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/
 description: 本文将介绍 Dubbo Mesh 架构设计。
 linkTitle: Dubbo Mesh
 title: Dubbo Mesh
 type: docs
 weight: 5
 ---
+
+
 
 
 

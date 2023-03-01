@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/preface/concept/generic/
+    - /zh-cn/docs3-v2/golang-sdk/preface/concept/
 description: 泛化调用
 keywords: 泛化调用
 title: 泛化调用
 type: docs
 ---
+
+
 
 
 

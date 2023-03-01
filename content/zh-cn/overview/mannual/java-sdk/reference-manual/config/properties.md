@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/properties/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/
 description: 包含 Dubbo 支持的所有配置组件及每个配置组件支持的所有配置项
 linkTitle: 配置项手册
 title: 配置项参考手册
 type: docs
 weight: 6
 ---
+
+
 
 
 

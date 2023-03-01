@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/quick-start/api/
+    - /zh-cn/docs3-v2/java-sdk/quick-start/
 description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo API 快速开发微服务应用。
 linkTitle: 基于 Dubbo API 开发微服务应用
 title: 2 - 基于 Dubbo API 开发微服务应用
 type: docs
 weight: 2
 ---
+
+
 
 
 

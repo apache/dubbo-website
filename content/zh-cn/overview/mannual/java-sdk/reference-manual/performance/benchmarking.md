@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/performance/benchmarking/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/performance/
 description: ""
 linkTitle: 应用级服务发现基准
 title: 应用级服务发现基准测试
 type: docs
 weight: 1
 ---
+
+
 
 
 

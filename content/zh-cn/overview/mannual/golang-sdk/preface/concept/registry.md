@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/preface/concept/registry/
+    - /zh-cn/docs3-v2/golang-sdk/preface/concept/
 description: 服务注册发现
 keywords: 服务注册发现
 title: 服务注册发现
 type: docs
 ---
+
+
 
 
 

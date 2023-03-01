@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/virtualservice/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/
 description: 入站流量的规则
 linkTitle: VirtualService
 title: VirtualService
 type: docs
 weight: 1
 ---
+
+
 
 
 

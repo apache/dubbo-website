@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
 description: Dubbo 中服务端和客户端的连接控制
 linkTitle: 连接控制
 title: 连接控制
 type: docs
 weight: 29
 ---
+
+
 
 
 ## 功能说明

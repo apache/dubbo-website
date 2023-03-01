@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/dev/filter-extension/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/
 description: Pixiu Filter体系介绍
 linkTitle: Pixiu Filter体系介绍
 title: Pixiu Filter体系介绍
 type: docs
 weight: 1
 ---
+
+
 
 
 

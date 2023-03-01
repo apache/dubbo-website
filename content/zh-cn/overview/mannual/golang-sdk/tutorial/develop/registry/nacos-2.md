@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/
 description: 使用 Nacos 作为注册中心
 title: 使用 Nacos 作为注册中心
 type: docs
 weight: 10
 ---
+
+
 
 
 

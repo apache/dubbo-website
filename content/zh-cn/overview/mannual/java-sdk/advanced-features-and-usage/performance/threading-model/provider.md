@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/provider/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/
 description: Dubbo 服务提供端端线程池模型和用法
 linkTitle: 服务端线程模型
 title: 服务端线程模型
 type: docs
 weight: 1
 ---
+
+
 
 
 ## 功能说明

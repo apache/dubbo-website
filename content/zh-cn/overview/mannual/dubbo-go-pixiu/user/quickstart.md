@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/user/quickstart/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/
 description: 快速开始
 linkTitle: 快速开始
 title: 快速开始
 type: docs
 weight: 10
 ---
+
+
 
 
 

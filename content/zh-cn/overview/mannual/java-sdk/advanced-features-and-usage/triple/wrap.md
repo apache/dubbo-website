@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/triple/wrap/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/triple/
 description: ""
 linkTitle: Pojo 序列化兼容模式
 title: Pojo 序列化兼容模式
 type: docs
 weight: 2
 ---
+
+
 
 
 

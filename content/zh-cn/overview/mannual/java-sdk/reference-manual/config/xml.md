@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/xml/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/
 description: 以 Spring XML 开发 Dubbo 应用
 linkTitle: XML 配置
 title: XML 配置
 type: docs
 weight: 4
 ---
+
+
 
 
 

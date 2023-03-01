@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
 description: Dubbo 请求耗时采样
 linkTitle: 请求耗时采样
 title: 请求耗时采样
 type: docs
 weight: 1
 ---
+
+
 
 
 

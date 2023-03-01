@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/distributed-transaction/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: Dubbo 中分布式事务的支持
 linkTitle: 分布式事务支持
 title: 分布式事务支持
 type: docs
 weight: 42
 ---
+
+
 
 
 ## 特性说明

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/validation/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
 description: 验证扩展
 linkTitle: 验证扩展
 title: 验证扩展
 type: docs
 weight: 25
 ---
+
+
 
 
 

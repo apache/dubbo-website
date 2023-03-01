@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/fault-tolerent-strategy/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 集群调用失败时，Dubbo 提供的容错方案
 linkTitle: 集群容错
 title: 集群容错
 type: docs
 weight: 2
 ---
+
+
 
 
 ## 特性说明

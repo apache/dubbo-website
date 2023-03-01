@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/service-discovery/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/
 description: 应用级服务发现
 title: 应用级服务发现
 type: docs
 weight: 2
 ---
+
+
 
 
 

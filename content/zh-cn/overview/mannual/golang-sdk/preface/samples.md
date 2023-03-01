@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/preface/samples/
+    - /zh-cn/docs3-v2/golang-sdk/preface/
 description: Dubbo-go 示例使用方式
 linkTitle: 快速入门
 title: 快速入门
 type: docs
 weight: 5
 ---
+
+
 
 
 

@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/version/
+    - /zh-cn/docs3-v2/java-sdk/version/
 description: 查看历史版本文档
 linkTitle: 查看历史版本文档
 title: 查看历史版本文档
 type: docs
 weight: 100
 ---
+
+
 
 
 {{< blocks/section color="white" height="auto">}}

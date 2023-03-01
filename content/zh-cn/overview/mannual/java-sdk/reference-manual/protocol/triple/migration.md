@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/
 description: Dubbo2 协议迁移
 linkTitle: Dubbo2 协议迁移
 title: Dubbo2 协议迁移
 type: docs
 weight: 10
 ---
+
+
 
 
 

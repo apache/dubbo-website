@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/port-unification/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: Dubbo 端口协议复用, 单端口多协议支持
 linkTitle: 端口协议复用
 title: 端口协议复用
 type: docs
 weight: 1
 ---
+
+
 
 
 ## 特性说明

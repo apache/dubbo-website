@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/
 description: 流量治理规则
 hide_summary: true
 linkTitle: 流量治理
@@ -9,6 +10,8 @@ title: 流量治理规则
 type: docs
 weight: 2
 ---
+
+
 
 
 

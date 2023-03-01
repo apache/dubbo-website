@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/cluster/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
 description: 集群扩展
 linkTitle: 集群扩展
 title: 集群扩展
 type: docs
 weight: 5
 ---
+
+
 
 
 

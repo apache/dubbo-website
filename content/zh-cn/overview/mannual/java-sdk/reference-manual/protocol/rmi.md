@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/rmi/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/
 description: Rmi协议
 linkTitle: Rmi协议
 title: Rmi协议
 type: docs
 weight: 8
 ---
+
+
 
 
 

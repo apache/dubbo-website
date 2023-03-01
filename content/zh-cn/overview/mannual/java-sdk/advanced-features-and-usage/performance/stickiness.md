@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/stickiness/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
 description: 为有状态服务配置粘滞连接
 linkTitle: 粘滞连接
 title: 粘滞连接
 type: docs
 weight: 31
 ---
+
+
 
 
 ## 功能说明

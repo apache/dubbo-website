@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/isolation-executor/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 提供一种新的线程池管理方式，用于隔离服务之间的线程池
 linkTitle: 线程池隔离
 title: 线程池隔离
 type: docs
 weight: 4
 ---
+
+
 
 
 

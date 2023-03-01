@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/local-stub/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
 description: 了解 Dubbo 中本地存根在客户端执行部分逻辑的使用
 linkTitle: 本地存根
 title: 本地存根
 type: docs
 weight: 11
 ---
+
+
 
 
 ## 特性说明：

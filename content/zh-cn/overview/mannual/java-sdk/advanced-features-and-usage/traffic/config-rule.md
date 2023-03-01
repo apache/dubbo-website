@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/config-rule/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/
 description: 在 Dubbo 中配置应用级治理规则和服务级治理规则
 linkTitle: 配置规则
 title: 配置规则
 type: docs
 weight: 34
 ---
+
+
 
 
 ## 配置规则概述

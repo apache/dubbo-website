@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/
 description: Http Proxy 案例介绍
 linkTitle: Http Proxy 案例介绍
 title: Http Proxy 案例介绍
 type: docs
 weight: 10
 ---
+
+
 
 
 

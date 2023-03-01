@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/router-snapshot/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
 description: 路由状态采集
 linkTitle: 路由状态采集
 title: 路由状态采集
 type: docs
 weight: 2
 ---
+
+
 
 
 ## 功能说明

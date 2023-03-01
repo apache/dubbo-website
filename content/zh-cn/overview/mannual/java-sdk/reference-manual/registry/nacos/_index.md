@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/registry/nacos/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/registry/nacos/
 description: Nacos 注册中心的基本使用和工作原理。
 linkTitle: Nacos
 title: Nacos
 type: docs
 weight: 3
 ---
+
+
 
 
 

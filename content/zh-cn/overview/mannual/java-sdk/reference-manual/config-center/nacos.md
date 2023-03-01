@@ -1,12 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config-center/nacos/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/
 description: Nacos 配置中心的基本使用和工作原理。
 linkTitle: Nacos
 title: Nacos
 type: docs
 weight: 3
 ---
+
+
 
 
 

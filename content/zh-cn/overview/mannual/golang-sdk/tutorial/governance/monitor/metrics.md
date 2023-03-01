@@ -1,11 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/metrics/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/monitor/
 description: Metrics 数据上报
 title: Metrics 数据上报
 type: docs
 weight: 7
 ---
+
+
 
 
 
