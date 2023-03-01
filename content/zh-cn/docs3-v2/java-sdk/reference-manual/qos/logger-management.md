@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/logger-management/
+description: 在 Dubbo 中运行时动态切换使用的日志框架
+linkTitle: 日志框架运行时管理
+title: 日志框架运行时管理
 type: docs
-title: "日志框架运行时管理"
-linkTitle: "日志框架运行时管理"
 weight: 5
-description: "在 Dubbo 中运行时动态切换使用的日志框架"
 ---
+
 
 自 `3.0.10` 开始，dubbo-qos 运行时管控支持查询日志配置以及动态修改使用的日志框架和日志级别。
 

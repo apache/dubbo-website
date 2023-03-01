@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
+description: Zookeeper 配置中心的基本使用和工作原理。
+linkTitle: Zookeeper
+title: Zookeeper
 type: docs
-title: "Zookeeper"
-linkTitle: "Zookeeper"
 weight: 2
-description: "Zookeeper 配置中心的基本使用和工作原理。"
 ---
+
 
 ## 1 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)

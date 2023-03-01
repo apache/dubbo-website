@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/dispatcher/
+description: 消息派发扩展
+linkTitle: 消息派发扩展
+title: 消息派发扩展
 type: docs
-title: "消息派发扩展"
-linkTitle: "消息派发扩展"
 weight: 14
 ---
+
 
 ## 扩展说明
 

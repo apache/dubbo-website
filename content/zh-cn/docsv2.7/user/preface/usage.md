@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/preface/usage/
+description: Dubbo 的简单实用入门
+linkTitle: 用法
+title: 用法
 type: docs
-title: "用法"
-linkTitle: "用法"
 weight: 4
-description: "Dubbo 的简单实用入门"
 ---
+
 
 ### 本地服务 Spring 配置
 

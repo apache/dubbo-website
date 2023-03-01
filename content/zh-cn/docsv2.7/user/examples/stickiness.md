@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/stickiness/
+description: 为有状态服务配置粘滞连接
+linkTitle: 粘滞连接
+title: 粘滞连接
 type: docs
-title: "粘滞连接"
-linkTitle: "粘滞连接"
 weight: 31
-description: "为有状态服务配置粘滞连接"
 ---
+
 ## 背景
 粘滞连接用于有状态服务，尽可能让客户端总是向同一提供者发起调用，除非该提供者挂了，再连另一台。
 
@@ -22,4 +25,3 @@ Dubbo 支持方法级别的粘滞连接，如果你想进行更细粒度的控�
     <dubbo:method name="sayHello" sticky="true" />
 </dubbo:reference>
 ```
-

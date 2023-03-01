@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "全局事务"
-linkTitle: "全局事务"
-weight: 90
+aliases:
+    - /zh/overview/what/ecosystem/transaction/
 description: ""
+linkTitle: 全局事务
+title: 全局事务
+type: docs
+weight: 90
 ---

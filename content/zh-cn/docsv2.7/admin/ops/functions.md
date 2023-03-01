@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/ops/functions/
+description: 管理控制台运维
+linkTitle: 管理控制台运维
+title: 管理控制台运维
 type: docs
-title: "管理控制台运维"
-linkTitle: "管理控制台运维"
 weight: 1
 ---
+
 
 ## 搜索页面
 

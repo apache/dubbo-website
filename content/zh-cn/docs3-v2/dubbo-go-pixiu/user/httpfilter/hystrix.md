@@ -1,9 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/httpfilter/hystrix/
+description: 断路器介绍
+linkTitle: 断路器介绍
+title: 断路器介绍
 type: docs
-title: "断路器介绍"
-linkTitle: "断路器介绍"
 weight: 30
 ---
 
-欢迎认领补充此文档。
 
+欢迎认领补充此文档。

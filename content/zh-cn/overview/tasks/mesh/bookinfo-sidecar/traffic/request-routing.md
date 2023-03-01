@@ -1,11 +1,14 @@
 ---
-type: docs
-title: "Request Routing"
-linkTitle: "Request Routing"
-weight: 1
+aliases:
+    - /zh/overview/tasks/mesh/bookinfo-sidecar/traffic/request-routing/
+description: This task shows you how to route requests dynamically to multiple versions of a microservice.
+linkTitle: Request Routing
+title: Request Routing
 toc_hide: true
-description: "This task shows you how to route requests dynamically to multiple versions of a microservice."
+type: docs
+weight: 1
 ---
+
 
 Before you begin
 Setup Istio by following the instructions in the Installation guide.

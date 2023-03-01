@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/filter/
+description: 调用拦截扩展
+linkTitle: 调用拦截扩展
+title: 调用拦截扩展
 type: docs
-title: "调用拦截扩展"
-linkTitle: "调用拦截扩展"
 weight: 2
 ---
+
 
 ## 扩展说明
 

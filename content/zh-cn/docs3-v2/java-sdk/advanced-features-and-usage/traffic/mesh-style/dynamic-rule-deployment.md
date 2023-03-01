@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/dynamic-rule-deployment/
+description: 类groovy脚本动态路由。
+linkTitle: 动态路由
+title: 动态路由
 type: docs
-title: "动态路由"
-linkTitle: "动态路由"
-weight: 3 
-description: "类groovy脚本动态路由。"
+weight: 3
 ---
+
 
 ```yaml
 apiVersion: service.dubbo.apache.org/v1alpha1

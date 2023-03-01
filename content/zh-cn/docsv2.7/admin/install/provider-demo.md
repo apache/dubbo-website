@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/install/provider-demo/
+description: 示例提供者安装
+linkTitle: 示例提供者安装
+title: 示例提供者安装
 type: docs
-title: "示例提供者安装"
-linkTitle: "示例提供者安装"
 weight: 2
 ---
+
 
 安装：
 
@@ -21,4 +25,3 @@ resources/spring/dubbo-provider.xml
 修改其中的dubbo:registry，替换成真实的注册中心地址，推荐使用zookeeper，如：
 <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
 ```
-

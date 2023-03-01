@@ -1,12 +1,14 @@
-
 ---
-type: docs
-title: "微服务生态"
-linkTitle: "微服务生态"
-description: "围绕 Dubbo 生态的限流降级、全链路追踪、分布式一致性等解决方案"
-weight: 30
+aliases:
+    - /zh/overview/tasks/ecosystem/
+description: 围绕 Dubbo 生态的限流降级、全链路追踪、分布式一致性等解决方案
+linkTitle: 微服务生态
 no_list: true
+title: 微服务生态
+type: docs
+weight: 30
 ---
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

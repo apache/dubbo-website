@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Pojo 序列化兼容模式"
-linkTitle: "Pojo 序列化兼容模式"
-weight: 2
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/triple/wrap/
 description: ""
+linkTitle: Pojo 序列化兼容模式
+title: Pojo 序列化兼容模式
+type: docs
+weight: 2
 ---
+
 
 这篇教程会通过从零构建一个简单的工程来演示如何基于 POJO 方式使用 Dubbo Triple, 在应用不改变已有接口定义的同时升级到 Triple 协议。**此模式下 Triple 使用方式与 Dubbo 协议一样。**
 

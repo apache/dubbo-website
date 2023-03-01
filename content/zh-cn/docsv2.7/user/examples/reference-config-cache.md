@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/reference-config-cache/
+description: 在 Dubbo 中缓存 ReferenceConfig
+linkTitle: ReferenceConfig 缓存
+title: ReferenceConfig 缓存
 type: docs
-title: "ReferenceConfig 缓存"
-linkTitle: "ReferenceConfig 缓存"
 weight: 41
-description: "在 Dubbo 中缓存 ReferenceConfig"
 ---
+
 
 `ReferenceConfig` 实例很重，封装了与注册中心的连接以及与提供者的连接，需要缓存。否则重复生成 `ReferenceConfig` 可能造成性能问题并且会有内存和连接泄漏。在 API 方式编程时，容易忽略此问题。
 
@@ -40,4 +43,3 @@ cache.destroy(reference);
 KeyGenerator keyGenerator = new ...
 ReferenceConfigCache cache = ReferenceConfigCache.getCache(keyGenerator );
 ```
-

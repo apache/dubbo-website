@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/erlang-sdk/serialization/
+description: 在 erlang 中配置序列化方式
+linkTitle: 序列化配置项
+title: 序列化配置项
 type: docs
-title: "序列化配置项"
-linkTitle: "序列化配置项"
 weight: 4
-description: "在 erlang 中配置序列化方式"
 ---
+
 
 当前该库只实现了 `dubbo://` 通讯协议。
 
@@ -24,4 +27,3 @@ description: "在 erlang 中配置序列化方式"
 | ConfigName | Type | DefaultValue | Remarks |
 | --- | --- | --- | --- |
 | protocol | atom() | hessian | hessian,json |
- 

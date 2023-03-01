@@ -1,9 +1,11 @@
 ---
-type: docs
-title: "Java"
-weight: 10
-#no_list: true
-#hide_summary: true
+_build:
+    render: link
+aliases:
+    - /zh/download/java/
+description: Java
 manualLinkRelref: ./#java
-_build: { render: link }
+title: Java
+type: docs
+weight: 10
 ---

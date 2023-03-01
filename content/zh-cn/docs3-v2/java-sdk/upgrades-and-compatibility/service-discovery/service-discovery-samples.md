@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
+description: 本文具体说明了用户在升级到 Dubbo 3.0 之后如何快速开启应用级服务发现新特性。
+linkTitle: 应用级服务发现迁移示例
+title: 应用级服务发现迁移示例
 type: docs
-title: "应用级服务发现迁移示例"
-linkTitle: "应用级服务发现迁移示例"
 weight: 5
-description: "本文具体说明了用户在升级到 Dubbo 3.0 之后如何快速开启应用级服务发现新特性。"
 ---
+
 
 应用级服务发现为应用间服务发现的协议，因此使用应用级服务发现需要消费端和服务端均升级到 Dubbo 3.0 版本并开启新特性（默认开启）才能在链路中使用应用级服务发现，真正发挥应用级服务发现的优点。
 ## 开启方式

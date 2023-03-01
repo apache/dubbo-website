@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/routing-rule-deprecated/
+description: 在 Dubbo `2.6.x` 版本以及更早的版本中配置路由规则
+linkTitle: 旧路由规则
+title: 旧路由规则
 type: docs
-title: "旧路由规则"
-linkTitle: "旧路由规则"
 weight: 34
-description: "在 Dubbo `2.6.x` 版本以及更早的版本中配置路由规则"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/routing-rule/)。
 {{% /pageinfo %}}

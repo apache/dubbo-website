@@ -1,13 +1,13 @@
 ---
-type: docs
-title: "Rust SDK"
-linkTitle: "Rust"
+_build:
+    render: link
+aliases:
+    - /zh/overview/mannual/rust/
 description: ""
-weight: 3
+linkTitle: Rust
 manualLinkRelref: ../../docs3-v2/rust-sdk/
 manualLinkTarget: _blank
-_build: { render: link }
+title: Rust SDK
+type: docs
+weight: 3
 ---
-
-
-

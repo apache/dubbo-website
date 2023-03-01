@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/validation/
+description: 验证扩展
+linkTitle: 验证扩展
+title: 验证扩展
 type: docs
-title: "验证扩展"
-linkTitle: "验证扩展"
 weight: 25
 ---
+
 
 ## 扩展说明
 

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/registry/zookeeper/
+description: Zookeeper 注册中心参考手册
+linkTitle: Zookeeper
+title: Zookeeper 注册中心
 type: docs
-title: "Zookeeper 注册中心"
-linkTitle: "Zookeeper"
 weight: 1
-description: "Zookeeper 注册中心参考手册"
 ---
+
 
 [Zookeeper](http://zookeeper.apache.org) 是 Apache Hadoop 的子项目，是一个树型的目录服务，支持变更推送，适合作为 Dubbo 服务的注册中心，工业强度较高，可用于生产环境，并推荐使用 [^1]。
 

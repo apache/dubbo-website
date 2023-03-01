@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/thread-model/
+description: 配置 Dubbo 中的线程模型
+linkTitle: 线程模型
+title: 线程模型
 type: docs
-title: "线程模型"
-linkTitle: "线程模型"
 weight: 4
-description: "配置 Dubbo 中的线程模型"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/)。
 {{% /pageinfo %}}

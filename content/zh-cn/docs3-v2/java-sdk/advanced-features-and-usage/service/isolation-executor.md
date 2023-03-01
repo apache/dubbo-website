@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/isolation-executor/
+description: 提供一种新的线程池管理方式，用于隔离服务之间的线程池
+linkTitle: 线程池隔离
+title: 线程池隔离
 type: docs
-linkTitle: "线程池隔离"
-title: "线程池隔离"
 weight: 4
-description: "提供一种新的线程池管理方式，用于隔离服务之间的线程池"
 ---
+
 
 ## 特性说明
 一种新的线程池管理方式，使得提供者应用内各个服务的线程池隔离开来，互相独立，某个服务的线程池资源耗尽不会影响其他正常服务。支持线程池可配置化，由用户手动指定。

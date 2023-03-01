@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-service/
+description: dubbo:service 配置
+linkTitle: dubbo:service
+title: dubbo:service
 type: docs
-title: "dubbo:service"
-linkTitle: "dubbo:service"
 weight: 1
-description: "dubbo:service 配置"
 ---
+
 
 服务提供者暴露服务配置。对应的配置类：`org.apache.dubbo.config.ServiceConfig`
 

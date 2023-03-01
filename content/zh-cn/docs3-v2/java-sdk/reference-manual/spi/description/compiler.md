@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/compiler/
+description: 编译器扩展
+linkTitle: 编译器扩展
+title: 编译器扩展
 type: docs
-title: "编译器扩展"
-linkTitle: "编译器扩展"
 weight: 13
 ---
+
 
 ## 扩展说明
 

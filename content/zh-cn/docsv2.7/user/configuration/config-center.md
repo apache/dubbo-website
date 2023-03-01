@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/configuration/config-center/
+description: Dubbo 2.7 中的动态配置中心
+linkTitle: 动态配置中心
+title: 动态配置中心
 type: docs
-title: "动态配置中心"
-linkTitle: "动态配置中心"
 weight: 2
-description: "Dubbo 2.7 中的动态配置中心"
 ---
+
 
 配置中心（v2.7.0）在 Dubbo 中承担两个职责：
 

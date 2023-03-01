@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "了解 Dubbo 核心概念和架构"
-linkTitle: "概念与架构"
-weight: 10
+aliases:
+    - /zh/overview/what/overview/
 description: ""
+linkTitle: 概念与架构
+title: 了解 Dubbo 核心概念和架构
+type: docs
+weight: 10
 ---
+
 
 ![architecture](/imgs/v3/concepts/architecture-2.png)
 
@@ -107,6 +110,3 @@ Admin 控制台提供了 Dubbo 集群的可视化视图，通过 Admin 你可以
 将 Dubbo 接入 Istio 等服务网格治理体系。
 
 ![Dubbo-Mesh](/imgs/v3/mesh/mix-mesh.png)
-
-
-

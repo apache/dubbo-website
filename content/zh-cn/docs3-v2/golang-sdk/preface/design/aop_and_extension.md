@@ -1,9 +1,12 @@
 ---
-type: docs
-title: AOP 与可扩展机制
-keywords: AOP 与可扩展机制
+aliases:
+    - /zh/docs3-v2/golang-sdk/preface/design/aop_and_extension/
 description: AOP 与可扩展机制
+keywords: AOP 与可扩展机制
+title: AOP 与可扩展机制
+type: docs
 ---
+
 
 ## 1. extension 模块与 init 方法
 

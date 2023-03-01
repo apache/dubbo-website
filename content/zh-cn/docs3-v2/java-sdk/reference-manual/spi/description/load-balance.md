@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/load-balance/
+description: 负载均衡扩展
+linkTitle: 负载均衡扩展
+title: 负载均衡扩展
 type: docs
-title: "负载均衡扩展"
-linkTitle: "负载均衡扩展"
 weight: 7
 ---
+
 
 ## 扩展说明
 

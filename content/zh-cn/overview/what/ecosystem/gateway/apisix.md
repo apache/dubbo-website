@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Apache APISIX"
-linkTitle: "Apache APISIX"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/gateway/apisix/
 description: ""
+linkTitle: Apache APISIX
+title: Apache APISIX
+type: docs
+weight: 10
 ---
+
 
 ## 背景
 

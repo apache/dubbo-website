@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/rmi/
+description: rmi:// 协议参考手册
+linkTitle: rmi://
+title: rmi 协议
 type: docs
-title: "rmi 协议"
-linkTitle: "rmi://"
 weight: 5
-description: "rmi:// 协议参考手册"
 ---
+
 
 
 RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和 JDK 标准序列化方式。

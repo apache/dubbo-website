@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/local-stub/
+description: 在 Dubbo 中利用本地存根在客户端执行部分逻辑
+linkTitle: 本地存根
+title: 本地存根
 type: docs
-title: "本地存根"
-linkTitle: "本地存根"
 weight: 25
-description: "在 Dubbo 中利用本地存根在客户端执行部分逻辑"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/local-stub/)。
 {{% /pageinfo %}}

@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
+description: Streaming 通信
+linkTitle: Streaming 通信
+title: Streaming 通信
 type: docs
-title: "Streaming 通信"
-linkTitle: "Streaming 通信"
 weight: 10
 ---
+
 ## 流实现原理
 
 `Triple`协议的流模式

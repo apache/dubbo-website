@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/quickstart/
+description: 快速开始
+linkTitle: 快速开始
+title: 快速开始
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
 weight: 10
 ---
+
 
 让我们从将 HTTP 请求转换为 Dubbo2 请求的案例来快速展示 Pixiu 的能力。
 

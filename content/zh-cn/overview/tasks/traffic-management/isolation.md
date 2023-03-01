@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "通过标签实现流量隔离环境（灰度、多套开发环境等）"
-linkTitle: "环境隔离"
-weight: 5
+aliases:
+    - /zh/overview/tasks/traffic-management/isolation/
 description: ""
+linkTitle: 环境隔离
+title: 通过标签实现流量隔离环境（灰度、多套开发环境等）
+type: docs
+weight: 5
 ---
+
 
 无论是在日常开发测试环境，还是在预发生产环境，我们经常都会遇到流量隔离环境的需求。
 * 在日常开发中，为了避免开发测试过程中互相干扰，我们有搭建多套独立测试环境的需求，但通过搭建物理集群的方式成本非常高且不够灵活

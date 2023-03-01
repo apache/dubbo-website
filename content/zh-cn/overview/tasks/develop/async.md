@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/tasks/develop/async/
+description: 某些情况下希望dubbo接口异步调用，避免不必要的等待。
+linkTitle: Provider端和Consumer端异步调用
+title: 异步调用
 type: docs
-title: "异步调用"
-linkTitle: "Provider端和Consumer端异步调用"
 weight: 3
-description: "某些情况下希望dubbo接口异步调用，避免不必要的等待。"
 ---
+
 ## 异步调用
 Dubbo异步调用分为Provider端异步调用和Consumer端异步调用。
 Provider端异步执行将阻塞的业务从Dubbo内部线程池切换到业务自定义线程，

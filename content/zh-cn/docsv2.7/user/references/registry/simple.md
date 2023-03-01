@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/registry/simple/
+description: Simple 注册中心参考手册
+linkTitle: Simple
+title: Simple 注册中心
 type: docs
-title: "Simple 注册中心"
-linkTitle: "Simple"
 weight: 4
-description: "Simple 注册中心参考手册"
 ---
+
 
 Simple 注册中心本身就是一个普通的 Dubbo 服务，可以减少第三方依赖，使整体通讯方式一致。
 

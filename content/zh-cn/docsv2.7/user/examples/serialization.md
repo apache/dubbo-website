@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/serialization/
+description: 在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）
+linkTitle: Kryo 和 FST 序列化
+title: Kryo 和 FST 序列化
 type: docs
-title: "Kryo 和 FST 序列化"
-linkTitle: "Kryo 和 FST 序列化"
 weight: 44
-description: "在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）"
 ---
+
 
 ## 启用 Kryo 和 FST
 
@@ -82,4 +85,3 @@ double[]
 ```
 
 由于注册被序列化的类仅仅是出于性能优化的目的，所以即使你忘记注册某些类也没有关系。事实上，即使不注册任何类，Kryo和FST的性能依然普遍优于 hessian 和 dubbo 序列化。
-

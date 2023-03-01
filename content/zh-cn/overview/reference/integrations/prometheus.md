@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/reference/integrations/prometheus/
+description: 配置 Prometheus 与 Dubbo 一起工作
+linkTitle: Prometheus
+title: Prometheus
 type: docs
-title: "Prometheus"
-linkTitle: "Prometheus"
-description: "配置 Prometheus 与 Dubbo 一起工作"
 weight: 2
 ---
+
 ## 安装
 
 ### Linux
@@ -37,5 +40,3 @@ kubectl create -f .
 访问页面
 `http://localhost:9090`
 ![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
-
-

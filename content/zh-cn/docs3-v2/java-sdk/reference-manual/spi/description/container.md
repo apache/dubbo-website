@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/container/
+description: 容器扩展
+linkTitle: 容器扩展
+title: 容器扩展
 type: docs
-title: "容器扩展"
-linkTitle: "容器扩展"
 weight: 22
 ---
+
 
 ## 扩展说明
 

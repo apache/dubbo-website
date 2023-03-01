@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/traffic/mesh_router/
+description: 路由规则
 title: 路由规则
-weight: 12
 type: docs
+weight: 12
 ---
+
 
 ## 路由规则介绍
 [《微服务Mesh路由方案草案V2》](https://www.yuque.com/docs/share/c132d5db-0dcb-487f-8833-7c7732964bd4?# )

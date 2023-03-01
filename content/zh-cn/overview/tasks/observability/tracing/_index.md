@@ -1,11 +1,14 @@
 ---
-type: docs
-title: "全链路追踪"
-linkTitle: "全链路追踪"
+aliases:
+    - /zh/overview/tasks/observability/tracing/
 description: ""
-weight: 40
+linkTitle: 全链路追踪
 no_list: true
+title: 全链路追踪
+type: docs
+weight: 40
 ---
+
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
 <div class="lead"></div>

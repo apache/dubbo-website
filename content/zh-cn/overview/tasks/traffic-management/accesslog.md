@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "通过动态开启访问日志跟踪服务调用情况"
-linkTitle: "访问日志"
-weight: 3
+aliases:
+    - /zh/overview/tasks/traffic-management/accesslog/
 description: ""
+linkTitle: 访问日志
+title: 通过动态开启访问日志跟踪服务调用情况
+type: docs
+weight: 3
 ---
+
 
 访问日志可以很好的记录某台机器在某段时间内处理的所有服务请求信息，包括请求接收时间、远端 IP、请求参数、响应结果等，运行态动态的开启访问日志对于排查问题非常有帮助。
 

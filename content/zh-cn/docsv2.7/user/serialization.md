@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/serialization/
+description: 在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）
+linkTitle: Kryo 和 FST 序列化
+title: Kryo 和 FST 序列化
 type: docs
-title: "Kryo 和 FST 序列化"
-linkTitle: "Kryo 和 FST 序列化"
 weight: 46
-description: "在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）" 
 ---
+
 
 ## 目录
 

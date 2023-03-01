@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/explicit-target/
+description: Dubbo 中点对点的直连方式
+linkTitle: 直连提供者
+title: 直连提供者
 type: docs
-title: "直连提供者"
-linkTitle: "直连提供者"
 weight: 5
-description: "Dubbo 中点对点的直连方式"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/)。
 {{% /pageinfo %}}
@@ -58,4 +61,3 @@ com.alibaba.xxx.XxxService=dubbo://localhost:20890
 {{% alert title="注意" color="warning" %}}
 为了避免复杂化线上环境，不要在线上使用这个功能，只应在测试阶段使用。
 {{% /alert %}}
-

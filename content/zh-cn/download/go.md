@@ -1,9 +1,11 @@
 ---
-type: docs
-title: "Go"
-weight: 20
-#no_list: true
-#hide_summary: true
+_build:
+    render: link
+aliases:
+    - /zh/download/go/
+description: Go
 manualLinkRelref: ./#go
-_build: { render: link }
+title: Go
+type: docs
+weight: 20
 ---

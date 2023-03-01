@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/async-execute-on-provider/
+description: Dubbo 服务提供方的异步执行
+linkTitle: 异步执行
+title: 异步执行
 type: docs
-title: "异步执行"
-linkTitle: "异步执行"
 weight: 21
-description: "Dubbo 服务提供方的异步执行"
 ---
+
 ## 背景
 Provider端异步执行将阻塞的业务从Dubbo内部线程池切换到业务自定义线程，避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。异步执行无异于节省资源或提升RPC响应性能，因为如果业务执行需要阻塞，则始终还是要有线程来负责执行。
 
@@ -93,10 +96,3 @@ public class AsyncServiceImpl implements AsyncService {
     }
 }
 ```
-
-
-
-
-
-
-

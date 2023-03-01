@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Nacos"
-linkTitle: "Nacos"
-weight: 20
+aliases:
+    - /zh/overview/what/ecosystem/registry/nacos/
 description: ""
+linkTitle: Nacos
+title: Nacos
+type: docs
+weight: 20
 ---
+
 
 ## 1 介绍
 

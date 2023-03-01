@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/hostname-binding/
+description: 在 Dubbo 中绑定主机名
+linkTitle: 主机绑定
+title: 主机绑定
 type: docs
-title: "主机绑定"
-linkTitle: "主机绑定"
 weight: 37
-description: "在 Dubbo 中绑定主机名"
 ---
+
 ## 背景
 ## 示例
 ### 查找顺序

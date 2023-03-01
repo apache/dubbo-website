@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/concepts/
+description: 了解 Dubbo3 的核心架构，快速掌握基本概念与特性。
+linkTitle: 概念&架构
+title: 概念与架构
 type: docs
-title: "概念与架构"
-linkTitle: "概念&架构"
 weight: 10
-description: "了解 Dubbo3 的核心架构，快速掌握基本概念与特性。"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/)。
 {{% /pageinfo %}}

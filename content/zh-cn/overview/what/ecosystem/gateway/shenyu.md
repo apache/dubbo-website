@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Apache Shenyu"
-linkTitle: "Apache Shenyu"
-weight: 20
+aliases:
+    - /zh/overview/what/ecosystem/gateway/shenyu/
 description: ""
+linkTitle: Apache Shenyu
+title: Apache Shenyu
+type: docs
+weight: 20
 ---
+
 
 ![img](/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png)
 

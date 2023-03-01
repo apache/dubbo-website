@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/registry/multiple-registry/
+description: 本文介绍了 Dubbo 的多注册中心支持及使用场景，如何通过多注册/多订阅实现跨区域服务部署、服务迁移等，也描述了同机房有限等跨机房流量调度的实现方式。
+linkTitle: 多注册中心
+title: 多注册中心
 type: docs
-title: "多注册中心"
-linkTitle: "多注册中心"
 weight: 6
-description: "本文介绍了 Dubbo 的多注册中心支持及使用场景，如何通过多注册/多订阅实现跨区域服务部署、服务迁移等，也描述了同机房有限等跨机房流量调度的实现方式。"
 ---
+
 
 ## 1 关联服务与多注册中心
 
@@ -185,8 +188,3 @@ CRM 需同时调用中文站和国际站的 PC2 服务，PC2 在中文站和国�
 <!-- 引用服务 -->
 <dubbo:reference id="helloService" interface="com.alibaba.hello.api.HelloService" version="1.0.0" />
 ```
-
-
-
-
-

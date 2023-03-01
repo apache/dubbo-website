@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/contributor/test-coverage-guide_dev/
+description: 测试覆盖率向导
+linkTitle: 测试覆盖率向导
+title: 测试覆盖率向导
 type: docs
-title: "测试覆盖率向导"
-linkTitle: "测试覆盖率向导"
 weight: 7
 ---
+
 
 ### 写单元测试的收益 
 * 单元测试能帮助每个人深入代码细节，了解代码的功能。

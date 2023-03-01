@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "与 gRPC、Spring Cloud、Istio 的关系"
-linkTitle: "与 gRPC、Spring Cloud、Istio 关系"
-weight: 20
+aliases:
+    - /zh/overview/what/xyz-difference/
 description: ""
+linkTitle: 与 gRPC、Spring Cloud、Istio 关系
+title: 与 gRPC、Spring Cloud、Istio 的关系
+type: docs
+weight: 20
 ---
+
 
 很多开发者经常会问到 Apache Dubbo 与 Spring Cloud、gRPC 以及一些 Service Mesh 项目如 Istio 的关系，要解释清楚它们的关系并不困难，你只需要跟随这篇文章和 Dubbo 文档做一些更深入的了解，但总的来说，它们之间有些能力是重合的，但在一些场景你可以把它们放在一起使用。
 

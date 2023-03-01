@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Apollo"
-linkTitle: "Apollo"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/config-center/apollo/
 description: ""
+linkTitle: Apollo
+title: Apollo
+type: docs
+weight: 30
 ---
+
 
 ## 1 介绍
 

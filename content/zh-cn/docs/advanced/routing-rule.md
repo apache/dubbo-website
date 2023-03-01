@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/routing-rule/
+description: 通过 Dubbo 中的路由规则做服务治理
+linkTitle: 路由规则
+title: 路由规则
 type: docs
-title: "路由规则"
-linkTitle: "路由规则"
 weight: 33
-description: "通过 Dubbo 中的路由规则做服务治理"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/routing-rule/)。
 {{% /pageinfo %}}
@@ -257,4 +260,3 @@ RpcContext.getContext().setAttachment(Constants.TAG_KEY,"tag1");
 
 自定义路由参考[路由扩展](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/router/)
 {{% /alert %}}
-

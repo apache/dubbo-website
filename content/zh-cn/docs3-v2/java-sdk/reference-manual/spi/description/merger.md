@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/merger/
+description: 合并结果扩展
+linkTitle: 合并结果扩展
+title: 合并结果扩展
 type: docs
-title: "合并结果扩展"
-linkTitle: "合并结果扩展"
 weight: 8
 ---
+
 
 ## 扩展说明
 
@@ -70,4 +74,3 @@ META-INF/dubbo/org.apache.dubbo.rpc.cluster.Merger：
 ```properties
 xxx=com.xxx.XxxMerger
 ```
-

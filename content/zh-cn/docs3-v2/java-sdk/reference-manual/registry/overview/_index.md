@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "注册中心概述"
-linkTitle: "注册中心概述"
-weight: 1
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/registry/overview/
 description: ""
+linkTitle: 注册中心概述
+title: 注册中心概述
+type: docs
+weight: 1
 ---
+
 
 注册中心是 Dubbo 服务治理的核心组件，Dubbo 依赖注册中心的协调实现服务（地址）发现，自动化的服务发现是微服务实现动态扩缩容、负载均衡、、流量治理的基础。Dubbo 的服务发现机制经历了 Dubbo2 时代的接口级服务发现、Dubbo3 时代的应用级服务发现，具体可参见 [服务发现机制](/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) 解析了解具体演进过程。
 
@@ -74,6 +77,3 @@ Dubbo 主干目前支持的主流注册中心实现包括
 另外，[Dubbo 扩展生态](https://github.com/apache/dubbo-spi-extensions) 还提供了 Consul、Eureka、Etcd 等注册中心扩展实现。也欢迎通过 [registry spi 扩展](../../spi/) 贡献更多的注册中心实现到 Dubbo 生态。
 
 Dubbo 还支持在一个应用中 [指定多个注册中心](../multiple-registry/)，并将服务根据注册中心分组，这样做使得服务分组管理或服务迁移变得更容易。
-
-
-

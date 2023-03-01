@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/ops/governance/
+description: 服务治理和配置管理
+linkTitle: 服务治理和配置管理
+title: 服务治理和配置管理
 type: docs
-title: "服务治理和配置管理"
-linkTitle: "服务治理和配置管理"
 weight: 4
 ---
+
 
 ## 服务治理
 

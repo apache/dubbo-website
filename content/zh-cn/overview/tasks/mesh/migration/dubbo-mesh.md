@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/tasks/mesh/migration/dubbo-mesh/
+description: 本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署模式开发 Dubbo3 服务。Dubbo3 服务使用 Triple 作为通信协议，通信过程经过 Envoy 数据面拦截，同时使用标准 Istio 的流量治理能力治理 Dubbo。
+linkTitle: 地址同步
+title: 地址同步
 type: docs
-title: "地址同步"
-linkTitle: "地址同步"
 weight: 1
-description: "本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署模式开发 Dubbo3 服务。Dubbo3 服务使用 Triple 作为通信协议，通信过程经过 Envoy 数据面拦截，同时使用标准 Istio 的流量治理能力治理 Dubbo。"
 ---
+
 
 遵循以下步骤，可以轻松掌握如何开发符合 Service Mesh 架构的 Dubbo 服务，并将其部署到 Kubernetes 并接入 Istio 的流量治理体系。在此查看 [完整示例源码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s)
 

@@ -1,9 +1,11 @@
 ---
-type: docs
-title: "Pixiu"
-weight: 70
-#no_list: true
-#hide_summary: true
+_build:
+    render: link
+aliases:
+    - /zh/download/pixiu/
+description: Pixiu
 manualLinkRelref: ./#pixiu
-_build: { render: link }
+title: Pixiu
+type: docs
+weight: 70
 ---

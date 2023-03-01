@@ -1,9 +1,10 @@
-
 ---
-type: docs
-title: "参考"
-linkTitle: "参考"
+aliases:
+    - /zh/overview/reference/
 description: ""
-weight: 50
+linkTitle: 参考
 no_list: true
+title: 参考
+type: docs
+weight: 50
 ---

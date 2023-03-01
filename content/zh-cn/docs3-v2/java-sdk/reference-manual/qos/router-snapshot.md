@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/
+description: 路由状态命令
+linkTitle: 路由状态命令
+title: 路由状态命令
 type: docs
-title: "路由状态命令"
-linkTitle: "路由状态命令"
 weight: 8
-description: "路由状态命令"
 ---
+
 
 Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环境中，如果出现流量结果不符合预期的情况，可以通过路由状态命令来查看路由的状态，以此来定位可能存在的问题。
 

@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs/references/spis/load-balance/
+description: 负载均衡扩展
+linkTitle: 负载均衡扩展
+title: 负载均衡扩展
 type: docs
-title: "负载均衡扩展"
-linkTitle: "负载均衡扩展"
 weight: 7
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/load-balance/)。
 {{% /pageinfo %}}

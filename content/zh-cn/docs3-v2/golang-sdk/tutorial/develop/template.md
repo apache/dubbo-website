@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/template/
+description: 应用模板
+title: 应用模板
 type: docs
-title: "应用模板"
 weight: 1
 ---
+
 
 
 ## 1. 准备工作

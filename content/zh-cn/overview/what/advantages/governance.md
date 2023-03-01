@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/overview/what/advantages/governance/
+description: 服务治理
+linkTitle: 服务治理
+title: 服务治理
 type: docs
-title: "服务治理"
-linkTitle: "服务治理"
 weight: 40
 ---
+
 
 
 ## 流量管控

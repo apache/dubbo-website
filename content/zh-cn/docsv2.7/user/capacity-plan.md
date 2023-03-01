@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/capacity-plan/
+description: Dubbo 应用容量规划参考
+linkTitle: 容量规划
+title: 容量规划
 type: docs
-title: "容量规划"
-linkTitle: "容量规划"
 weight: 15
-description: "Dubbo 应用容量规划参考"
 ---
+
 
 以下数据供参考：
 

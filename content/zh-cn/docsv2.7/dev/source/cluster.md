@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/source/cluster/
+description: 本文介绍了集群的原理和实现细节
+linkTitle: 集群
+title: 集群
 type: docs
-title: "集群"
-linkTitle: "集群"
 weight: 7
-description: "本文介绍了集群的原理和实现细节"
 ---
+
 
 ## 1.简介
 

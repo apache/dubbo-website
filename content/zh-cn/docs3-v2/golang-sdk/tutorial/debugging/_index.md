@@ -1,6 +1,8 @@
 ---
-type: docs
-title: "服务调试"
-weight: 2
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/debugging/
 description: Dubbo-go 服务调试
+title: 服务调试
+type: docs
+weight: 2
 ---

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/source/loadbalance/
+description: 本文介绍了负载均衡的原理和实现细节
+linkTitle: 负载均衡
+title: 负载均衡
 type: docs
-title: "负载均衡"
-linkTitle: "负载均衡"
 weight: 8
-description: "本文介绍了负载均衡的原理和实现细节"
 ---
+
 
 
 ## 1.简介

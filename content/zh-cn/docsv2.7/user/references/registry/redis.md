@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/registry/redis/
+description: Redis 注册中心参考手册
+linkTitle: Redis
+title: Redis 注册中心
 type: docs
-title: "Redis 注册中心"
-linkTitle: "Redis"
 weight: 3
-description: "Redis 注册中心参考手册"
 ---
+
 
 基于 Redis [^1] 实现的注册中心。
 

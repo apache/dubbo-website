@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/examples/service-discovery/
+description: 应用级服务发现
+linkTitle: 服务发现
+title: 应用级服务发现
 type: docs
-title: "应用级服务发现"
-linkTitle: "服务发现"
 weight: 30
-description: "应用级服务发现"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/)。
 {{% /pageinfo %}}

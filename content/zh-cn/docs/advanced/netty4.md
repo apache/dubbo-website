@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/netty4/
+description: 在 Dubbo 中配置 Netty4
+linkTitle: Netty4
+title: Netty4 支持
 type: docs
-title: "Netty4 支持"
-linkTitle: "Netty4"
 weight: 44
-description: "在 Dubbo 中配置 Netty4"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/#protocol)。
 {{% /pageinfo %}}
@@ -46,4 +49,3 @@ consumer 端：
 
 接下来我们会继续完善： 性能测试指标及与 netty3 版本的性能测试对比，我们会提供一份参考数据  
 {{% /alert %}}
-

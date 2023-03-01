@@ -1,8 +1,9 @@
 ---
-type: docs
-title: "集成适配"
-linkTitle: "集成适配"
+aliases:
+    - /zh/overview/reference/integrations/
 description: ""
+linkTitle: 集成适配
+title: 集成适配
+type: docs
 weight: 1
 ---
-

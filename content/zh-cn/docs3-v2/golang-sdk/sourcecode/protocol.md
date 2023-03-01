@@ -1,9 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/sourcecode/protocol/
+description: 网络协议源码解读
 title: 网络协议
 type: docs
 weight: 1
-description: 网络协议源码解读
 ---
+
 
 对于 Dubbogo 微服务框架，网络协议为远程过程调用中负责网络通信的模块，负责应用层到网络层的数据序列化、打包、请求发起、网络端口监听等功能。Dubbogo 为协议抽象了一套接口如下：
 

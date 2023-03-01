@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/config-center/config-center-dynamic/
+description: Dubbogo 3.0 配置中心和配置监听
 title: Dubbogo 3.0 配置中心和配置监听
-weight: 2
 type: docs
+weight: 2
 ---
+
 
 ## 1. 配置中心概念
 
@@ -145,6 +149,3 @@ func (l listener) Process(event *config_center.ConfigChangeEvent) {
 // todo 
 
 正在开发中ing
-
-
-

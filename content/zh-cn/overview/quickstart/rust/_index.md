@@ -1,11 +1,15 @@
 ---
-type: docs
-title: "Rust 微服务开发入门"
-linkTitle: "Rust"
-weight: 40
+aliases:
+    - /zh/overview/quickstart/rust/
+description: Rust 微服务开发入门
 hide: true
+linkTitle: Rust
 no_list: true
+title: Rust 微服务开发入门
+type: docs
+weight: 40
 ---
+
 
 
 请在此查看完整 [示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。

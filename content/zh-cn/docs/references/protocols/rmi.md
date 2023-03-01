@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/references/protocols/rmi/
+description: rmi:// 协议参考手册
+linkTitle: rmi://
+title: rmi 协议
 type: docs
-title: "rmi 协议"
-linkTitle: "rmi://"
 weight: 5
-description: "rmi:// 协议参考手册"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/rmi/)。
 {{% /pageinfo %}}

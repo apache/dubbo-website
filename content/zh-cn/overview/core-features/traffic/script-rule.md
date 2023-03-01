@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "脚本路由规则"
-linkTitle: "脚本路由"
-weight: 30
+aliases:
+    - /zh/overview/core-features/traffic/script-rule/
 description: ""
+linkTitle: 脚本路由
+title: 脚本路由规则
+type: docs
+weight: 30
 ---
+
 
 脚本路由为流量管理提供了最大的灵活性，所有流量在执行负载均衡选址之前，都会动态的执行一遍规则脚本，根据脚本执行的结果确定可用的地址子集。
 
@@ -57,6 +60,3 @@ script: |
       return result;
   } (invokers, invocation, context)); // 表示立即执行方法
 ```
-
-
-

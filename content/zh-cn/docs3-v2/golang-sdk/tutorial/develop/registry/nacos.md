@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/
+description: 使用 Nacos 作为注册中心
 title: 使用 Nacos 作为注册中心
 type: docs
 weight: 10
 ---
+
 
 ## 1. 准备工作
 
@@ -139,8 +143,3 @@ req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001"
 =======================
 ```
 可见接收到了来自cli的数据
-
-
-
-
-

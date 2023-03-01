@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Avro"
-linkTitle: "Avro"
-weight: 50
+aliases:
+    - /zh/overview/what/ecosystem/serialization/avro/
 description: ""
+linkTitle: Avro
+title: Avro
+type: docs
+weight: 50
 ---
+
 
 ## 1 介绍
 

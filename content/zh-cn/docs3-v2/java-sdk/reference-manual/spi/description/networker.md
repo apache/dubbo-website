@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/networker/
+description: 组网扩展
+linkTitle: 组网扩展
+title: 组网扩展
 type: docs
-title: "组网扩展"
-linkTitle: "组网扩展"
 weight: 19
 ---
+
 
 ## 扩展说明
 

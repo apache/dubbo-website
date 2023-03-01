@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/extension-factory/
+description: 扩展点加载扩展
+linkTitle: 扩展点加载扩展
+title: 扩展点加载扩展
 type: docs
-title: "扩展点加载扩展"
-linkTitle: "扩展点加载扩展"
 weight: 11
 ---
+
 
 ## 扩展说明
 

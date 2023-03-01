@@ -1,11 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/
+description: 通过缓存结果加速访问速度
+linkTitle: 调用结果缓存
+title: 调用结果缓存
 type: docs
-title: "调用结果缓存"
-linkTitle: "调用结果缓存"
 weight: 7
-description: "通过缓存结果加速访问速度"
-
 ---
+
 
 ## 功能说明
 
@@ -117,4 +119,4 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-## 
+##

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/service-management/
+description: 服务管理命令
+linkTitle: 服务管理命令
+title: 服务管理命令
 type: docs
-title: "服务管理命令"
-linkTitle: "服务管理命令"
 weight: 3
-description: "服务管理命令"
 ---
+
 
 ## 服务管理
 

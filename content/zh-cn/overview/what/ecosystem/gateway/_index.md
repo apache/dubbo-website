@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "网关"
-linkTitle: "网关"
-weight: 60
+aliases:
+    - /zh/overview/what/ecosystem/gateway/
 description: ""
+linkTitle: 网关
+title: 网关
+type: docs
+weight: 60
 ---

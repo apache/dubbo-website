@@ -1,13 +1,15 @@
-
 ---
-type: docs
-title: "服务网格"
-linkTitle: "服务网格"
-description: "演示多种部署形态的 Dubbo Mesh 解决方案，以及 Dubbo Mesh 如何帮助用户实现架构的平滑迁移。 "
-weight: 70
+aliases:
+    - /zh/overview/tasks/mesh/
+description: '演示多种部署形态的 Dubbo Mesh 解决方案，以及 Dubbo Mesh 如何帮助用户实现架构的平滑迁移。 '
+linkTitle: 服务网格
 no_list: true
+title: 服务网格
 toc_hide: true
+type: docs
+weight: 70
 ---
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

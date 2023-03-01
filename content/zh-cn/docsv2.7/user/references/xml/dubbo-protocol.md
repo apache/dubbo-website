@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-protocol/
+description: dubbo:protocol 配置
+linkTitle: dubbo:protocol
+title: dubbo:protocol
 type: docs
-title: "dubbo:protocol"
-linkTitle: "dubbo:protocol"
 weight: 1
-description: "dubbo:protocol 配置"
 ---
+
 
 服务提供者协议配置。对应的配置类： `org.apache.dubbo.config.ProtocolConfig`。同时，如果需要支持多协议，可以声明多个 `<dubbo:protocol>` 标签，并在 `<dubbo:service>` 中通过 `protocol` 属性指定使用的协议。
 

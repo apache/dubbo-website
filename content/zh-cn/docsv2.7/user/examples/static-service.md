@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/static-service/
+description: 将 Dubbo 服务标识为非动态管理模式
+linkTitle: 静态服务
+title: 静态服务
 type: docs
-title: "静态服务"
-linkTitle: "静态服务"
 weight: 11
-description: "将 Dubbo 服务标识为非动态管理模式"
 ---
+
 ## 背景
 有时候希望人工管理服务提供者的上线和下线，此时需将注册中心标识为非动态管理模式。
 

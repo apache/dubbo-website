@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/committer/release-guide/common/
+description: 通用 Release 流程
+linkTitle: 通用 Release
+title: 通用 Release 流程
 type: docs
-title: "通用 Release 流程"
-linkTitle: "通用 Release"
 weight: 1
 ---
+
 
 ## 理解 Apache 发布的内容和流程
 

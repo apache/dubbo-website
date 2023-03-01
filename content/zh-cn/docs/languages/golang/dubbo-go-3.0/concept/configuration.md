@@ -1,10 +1,13 @@
 ---
-type: docs
-title: Dubbo-go的配置
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/concept/configuration/
+description: Dubbo-go的配置
 keywords: Dubbo-go的配置
 linkTitle: 框架配置
-description: Dubbo-go的配置
+title: Dubbo-go的配置
+type: docs
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/config-center/)。
 {{% /pageinfo %}}

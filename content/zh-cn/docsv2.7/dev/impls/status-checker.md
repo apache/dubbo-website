@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/status-checker/
+description: 状态检查扩展
+linkTitle: 状态检查扩展
+title: 状态检查扩展
 type: docs
-title: "状态检查扩展"
-linkTitle: "状态检查扩展"
 weight: 21
 ---
+
 
 ## 扩展说明
 

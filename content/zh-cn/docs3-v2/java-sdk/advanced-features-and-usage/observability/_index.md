@@ -1,10 +1,13 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/observability/
+description: 可观测性
+linkTitle: 可观测性
+title: 可观测性
 type: docs
-title: "可观测性"
-linkTitle: "可观测性"
 weight: 2
 ---
+
 
 ### 什么是可观测性
 可观测性是从外部观察正在运行的系统的内部状态的能力。它由日志记录、指标和跟踪三大支柱组成。
@@ -18,6 +21,4 @@ weight: 2
 - [日志管理](./logging/) 
 - [健康检查](./health-information/)  
 - [K8S探测器](./kubernetes-probes/)
-- [文档案例](./doc/) 
- 
-
+- [文档案例](./doc/)

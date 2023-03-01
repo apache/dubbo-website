@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/monitor/
+description: 监控中心扩展
+linkTitle: 监控中心扩展
+title: 监控中心扩展
 type: docs
-title: "监控中心扩展"
-linkTitle: "监控中心扩展"
 weight: 10
 ---
+
 
 ## 扩展说明
 

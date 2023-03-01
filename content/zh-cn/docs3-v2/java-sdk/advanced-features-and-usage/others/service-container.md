@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/service-container/
+description: 了解 Dubbo 中服务自定义容器类型和使用
+linkTitle: 自定义服务容器
+title: 自定义服务容器
 type: docs
-title: "自定义服务容器"
-linkTitle: "自定义服务容器"
 weight: 1
-description: "了解 Dubbo 中服务自定义容器类型和使用"
 ---
+
 
 ## 特性说明
 Dubbo 3 的服务容器是一个 standalone 的启动程序，因为后台服务不需要 Tomcat 或 JBoss 等 Web 容器的功能，如果硬要用 Web 容器去加载服务提供方，增加复杂性，也浪费资源。所以服务通常不需要 Tomcat/JBoss 等 Web 容器的特性，没必要用 Web 容器去加载服务。

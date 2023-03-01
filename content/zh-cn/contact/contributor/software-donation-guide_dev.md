@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/contributor/software-donation-guide_dev/
+description: 软件捐献向导
+linkTitle: 捐献向导
+title: 软件捐献向导
 type: docs
-title: "软件捐献向导"
-linkTitle: "捐献向导"
 weight: 4
 ---
+
 
 在您阅读这篇指南之前，请确保您已经向PMC确认了实际需要的 SGA。
 
@@ -109,4 +113,3 @@ List of software and other intellectual property covered by this agreement:
 * Github address where your code is hosted
 * Pull request link
 ```
-

@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/ops/skywalking/
+description: 使用 Apache Skywalking 做分布式跟踪
+linkTitle: 使用 Apache Skywalking 做分布式跟踪
+title: 使用 Apache Skywalking 做分布式跟踪
 type: docs
-title: "使用 Apache Skywalking 做分布式跟踪"
-linkTitle: "使用 Apache Skywalking 做分布式跟踪"
 weight: 5
 ---
+
 
 ## Apache Skywalking 简介
 

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/multi-registry/
+description: 在 Dubbo 中把同一个服务注册到多个注册中心上
+linkTitle: 多注册中心
+title: 多注册中心
 type: docs
-title: "多注册中心"
-linkTitle: "多注册中心"
 weight: 10
-description: "在 Dubbo 中把同一个服务注册到多个注册中心上"
 ---
+
 
 ## 背景
 Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分别注册到不同的注册中心上去，甚至可以同时引用注册在不同注册中心上的同名服务。另外，注册中心是支持自定义扩展的 [^1]。
@@ -89,4 +92,3 @@ Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分�
 ```
 
 [^1]: 可以自行扩展注册中心，参见：[注册中心扩展](../../../dev/impls/registry)
-

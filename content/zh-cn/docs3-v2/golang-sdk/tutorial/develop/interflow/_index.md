@@ -1,5 +1,8 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/interflow/
+description: 异构体系互通
+title: 异构体系互通
 type: docs
-title: "异构体系互通"
 weight: 4
 ---

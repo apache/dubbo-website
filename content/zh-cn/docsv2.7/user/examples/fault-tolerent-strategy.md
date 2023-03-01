@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/fault-tolerent-strategy/
+description: 集群调用失败时，Dubbo 提供的容错方案
+linkTitle: 集群容错
+title: 集群容错
 type: docs
-title: "集群容错"
-linkTitle: "集群容错"
 weight: 2
-description: "集群调用失败时，Dubbo 提供的容错方案"
 ---
+
 
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 
@@ -101,4 +104,3 @@ broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常�
 ```xml
 <dubbo:reference cluster="failsafe" />
 ```
-

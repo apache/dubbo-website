@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/echo-service/
+description: 通过回声测试检测 Dubbo 服务是否可用
+linkTitle: 回声测试
+title: 回声测试
 type: docs
-title: "回声测试"
-linkTitle: "回声测试"
 weight: 18
-description: "通过回声测试检测 Dubbo 服务是否可用"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/echo-service/)。
 {{% /pageinfo %}}

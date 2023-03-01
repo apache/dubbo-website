@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/tasks/deploy/deploy-on-k8s-docker/
+description: 部署 Dubbo 应用到 Kubernetes + Docker 示例
+linkTitle: 部署到 Kubernetes + Docker
+title: 部署 Dubbo 应用到 Kubernetes + Docker 环境
 type: docs
-title: "部署 Dubbo 应用到 Kubernetes + Docker 环境"
-linkTitle: "部署到 Kubernetes + Docker"
 weight: 3
-description: "部署 Dubbo 应用到 Kubernetes + Docker 示例"
 ---
+
 ## 总体目标
 
 - [Kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/)
@@ -240,4 +243,3 @@ kubectl create -f consumer.yaml
 
 查看服务
 ![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
-

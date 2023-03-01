@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/committer/new-committer-guide_dev/
+description: Apache 提交者注册流程
+linkTitle: 注册流程
+title: Apache 提交者注册流程
 type: docs
-title: "Apache 提交者注册流程"
-linkTitle: "注册流程"
 weight: 1
 ---
+
 
 
 ## 一、Apache 提交者的产生

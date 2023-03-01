@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/install/admin-console/
+description: 管理控制台安装
+linkTitle: 管理控制台安装
+title: 管理控制台安装
 type: docs
-title: "管理控制台安装"
-linkTitle: "管理控制台安装"
 weight: 1
 ---
+
 
 目前版本的管理控制台正在开发中，已经完成了服务查询和服务治理的功能，采用前后端分离的模式，具体的安装和使用步骤如下：
 

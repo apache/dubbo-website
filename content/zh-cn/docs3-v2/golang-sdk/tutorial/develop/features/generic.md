@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/features/generic/
+description: 泛化调用
 title: 泛化调用
 type: docs
 weight: 7
 ---
+
 
 ## 1. Dubbo-go 泛化调用 Java Server
 
@@ -96,7 +100,3 @@ GenericService 的 Invoke 方法包括三个参数：context.Context, []string, 
 ```
 INFO    cmd/client.go:89        GetUser1(userId string) res: map[age:48 class:org.apache.dubbo.User id:A003 name:Joe sex:MAN time:2021-10-04 14:03:03.37 +0800 CST]
 ```
-
-
-
-

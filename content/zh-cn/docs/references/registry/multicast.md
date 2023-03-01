@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/references/registry/multicast/
+description: Multicast 注册中心参考手册
+linkTitle: Multicast
+title: Multicast 注册中心
 type: docs
-title: "Multicast 注册中心"
-linkTitle: "Multicast"
 weight: 2
-description: "Multicast 注册中心参考手册"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/registry/multicast/)。
 {{% /pageinfo %}}

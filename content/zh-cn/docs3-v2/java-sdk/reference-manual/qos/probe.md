@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/probe/
+description: 框架状态命令
+linkTitle: 框架状态命令
+title: 框架状态命令
 type: docs
-title: "框架状态命令"
-linkTitle: "框架状态命令"
 weight: 4
-description: "框架状态命令"
 ---
+
 
 参考文档：[Kubernetes 生命周期探针](../../../advanced-features-and-usage/others/dubbo-kubernetes-probe/)
 

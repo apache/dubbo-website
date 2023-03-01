@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/
+description: Http Proxy 案例介绍
+linkTitle: Http Proxy 案例介绍
+title: Http Proxy 案例介绍
 type: docs
-title: "Http Proxy 案例介绍"
-linkTitle: "Http Proxy 案例介绍"
 weight: 10
 ---
+
 
 ### HTTP 代理
 
@@ -62,4 +66,3 @@ static_resources:
 ```
 pixiu gateway start -c /pixiu/conf.yaml
 ```
-

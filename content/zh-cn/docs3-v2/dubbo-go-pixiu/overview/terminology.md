@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Pixiu 术语"
-linkTitle: "Pixiu 术语"
-weight: 2
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/overview/terminology/
 description: Pixiu 术语
+linkTitle: Pixiu 术语
+title: Pixiu 术语
+type: docs
+weight: 2
 ---
+
 
 
 ![img](/imgs/pixiu/overview/terminology.png)

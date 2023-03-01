@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/dependencies/
+description: Dubbo 依赖基本介绍
+linkTitle: 基本依赖
+title: 基本依赖
 type: docs
-title: "基本依赖"
-linkTitle: "基本依赖"
 weight: 3
-description: "Dubbo 依赖基本介绍" 
 ---
+
 
 ### 必须依赖
 JDK 1.6+ [^1]
@@ -61,4 +64,4 @@ JDK 1.6+ [^1]
 [^3]: 字节码生成  
 [^4]: 配置解析  
 [^5]: 网络传输  
-[^6]: JEE  
+[^6]: JEE

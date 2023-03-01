@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/features/custom-logger/
+description: 日志
 title: 日志
-weight: 6
 type: docs
+weight: 6
 ---
+
 
 参考samples [dubbo-go-samples/logger](https://github.com/apache/dubbo-go-samples/tree/master/logger)
 
@@ -83,5 +87,3 @@ logger.SetLogger(myLogger)  // 在 main 函数中设置自定义logger
 ```
 
 - 日志API不可以在Init 阶段使用，否则可能会发生意料之外的问题。
-
-

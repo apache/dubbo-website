@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-registry/
+description: dubbo:registry 配置
+linkTitle: dubbo:registry
+title: dubbo:registry
 type: docs
-title: "dubbo:registry"
-linkTitle: "dubbo:registry"
 weight: 1
-description: "dubbo:registry 配置"
 ---
+
 
 注册中心配置。对应的配置类： `org.apache.dubbo.config.RegistryConfig`。同时如果有多个不同的注册中心，可以声明多个 `<dubbo:registry>` 标签，并在 `<dubbo:service>` 或 `<dubbo:reference>` 的 `registry` 属性指定使用的注册中心。
 

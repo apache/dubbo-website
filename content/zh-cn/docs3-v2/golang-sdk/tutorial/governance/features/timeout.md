@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/features/timeout/
+description: 配置调用的超时
 title: 配置调用的超时
 type: docs
 weight: 1
 ---
+
 
 ## 1. 准备工作
 
@@ -55,7 +59,3 @@ Dubbo-go 应用默认 RPC 超时为 3s，请求超时后，客户端将会返回
    ```bash
    client response result: name:"Hello laurence" id:"12345" age:21
    ```
-
-
-
-

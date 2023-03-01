@@ -1,8 +1,11 @@
 ---
-type: docs
-title: "通过模板生成项目脚手架"
-linkTitle: "生成项目"
-weight: 1
+aliases:
+    - /zh/overview/tasks/develop/template/
 description: ""
+linkTitle: 生成项目
+title: 通过模板生成项目脚手架
+type: docs
+weight: 1
 ---
+
 // Project Initializer will be available soon.

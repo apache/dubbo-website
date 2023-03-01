@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
+description: Dubbo 消费端线程池模型用法
+linkTitle: 消费端线程模型
+title: 消费端线程模型
 type: docs
-title: "消费端线程模型"
-linkTitle: "消费端线程模型"
 weight: 2
-description: "Dubbo 消费端线程池模型用法"
 ---
+
 ## 功能说明
 2.7.5 版本对整个调用链路做了全面的优化，根据压测结果显示，总体 QPS 性能提升将近 30%，同时也减少了调用过程中的内存分配开销。其中一个值得提及的设计点是 2.7.5 引入了 Servicerepository 的概念，在服务注册阶段提前生成 ServiceDescriptor 和 MethodDescriptor，以减少 RPC 调用阶段计算 Service 原信息带来的资源消耗。
 

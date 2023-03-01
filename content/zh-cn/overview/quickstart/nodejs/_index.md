@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Node.js 微服务开发入门"
-linkTitle: "Node.js"
-weight: 40
-icon: "fas fa-external-link-alt"
-manualLink: "https://github.com/apache/dubbo-js"
-_build: { render: link }
+_build:
+    render: link
+aliases:
+    - /zh/overview/quickstart/nodejs/
+description: Node.js 微服务开发入门
+icon: fas fa-external-link-alt
+linkTitle: Node.js
+manualLink: https://github.com/apache/dubbo-js
 manualLinkTarget: _blank
+title: Node.js 微服务开发入门
+type: docs
+weight: 40
 ---

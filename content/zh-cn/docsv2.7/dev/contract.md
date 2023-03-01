@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/contract/
+description: 这里记录的是 Dubbo 公共契约，希望所有扩展点遵守。
+linkTitle: 公共契约
+title: 公共契约
 type: docs
-title: "公共契约"
-linkTitle: "公共契约"
 weight: 6
-description: "这里记录的是 Dubbo 公共契约，希望所有扩展点遵守。"
 ---
+
 
 ## URL
 

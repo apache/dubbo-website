@@ -1,15 +1,18 @@
-
 ---
-type: docs
-title: "流量管控"
-linkTitle: "流量管控"
-weight: 30
-no_list: true
+aliases:
+    - /zh/overview/core-features/traffic/
+description: 流量管控
 feature:
-  title: 流量管控
-  description: >
-    Dubbo 提供的基于路由规则的流量管控策略，可以帮助实现全链路灰度、金丝雀发布、按比例流量转发、动态调整调试时间、设置重试次数等服务治理能力。
+    description: |
+        Dubbo 提供的基于路由规则的流量管控策略，可以帮助实现全链路灰度、金丝雀发布、按比例流量转发、动态调整调试时间、设置重试次数等服务治理能力。
+    title: 流量管控
+linkTitle: 流量管控
+no_list: true
+title: 流量管控
+type: docs
+weight: 30
 ---
+
 
 Dubbo 提供了丰富的流量管控策略
 * **地址发现与负载均衡**，地址发现支持服务实例动态上下线，负载均衡确保流量均匀的分布到每个实例上。

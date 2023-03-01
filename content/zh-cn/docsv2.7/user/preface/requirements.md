@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/preface/requirements/
+description: 本文介绍了 Dubbo 要解决的需求
+linkTitle: 需求
+title: 需求
 type: docs
-title: "需求"
-linkTitle: "需求"
 weight: 1
-description: "本文介绍了 Dubbo 要解决的需求"
 ---
+
 
 ![image](/imgs/user/dubbo-service-governance.jpg)
 

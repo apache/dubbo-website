@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Higress"
-linkTitle: "Higress"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/gateway/higress/
 description: ""
+linkTitle: Higress
+title: Higress
+type: docs
+weight: 30
 ---

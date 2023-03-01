@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/transaction/
+description: 在 Dubbo 中使用分布式事务
+linkTitle: 分布式事务
+title: 分布式事务
 type: docs
-title: "分布式事务"
-linkTitle: "分布式事务"
 weight: 1
-description: "在 Dubbo 中使用分布式事务"
 ---
+
 ## 特性说明
 分布式事务提供对补偿事务的支持，能够在事务失败时回滚事务的影响，支持全局事务超时，能够指定事务完成的超时时间，对日志提供支持，能够查看分布式应用程序中所有服务中发生的事务的历史记录，能够轻松地调试和排除事务。
 

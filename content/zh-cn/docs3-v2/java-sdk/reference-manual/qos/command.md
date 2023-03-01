@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/command/
+description: 基础命令手册
+linkTitle: 基础命令手册
+title: 基础命令手册
 type: docs
-title: "基础命令手册"
-linkTitle: "基础命令手册"
 weight: 2
-description: "基础命令手册"
 ---
+
 
 
 ### help 命令

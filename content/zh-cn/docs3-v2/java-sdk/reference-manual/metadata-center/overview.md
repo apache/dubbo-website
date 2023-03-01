@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/overview/
+description: 元数据中心概述
+linkTitle: 元数据中心概述
+title: 元数据中心概述
 type: docs
-title: "元数据中心概述"
-linkTitle: "元数据中心概述"
 weight: 1
 ---
+
 
 元数据中心为 Dubbo 中的两类元数据提供了存取能力：
 - 1 地址发现元数据
@@ -210,4 +214,3 @@ dubbo.metadata-report.sync.report=false    ##非必须,default值为false
 
 ## 4 了解如何扩展
 请参见 [扩展 metadata-report](../../spi/description/metadata-report/) 了解如何扩展自定义第三方实现。
-

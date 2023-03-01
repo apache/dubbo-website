@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/quick-start/
+description: 快速开始使用 Dubbo
+linkTitle: 快速开始
+title: 快速开始
 type: docs
-title: "快速开始"
-linkTitle: "快速开始"
 weight: 2
-description: "快速开始使用 Dubbo" 
 ---
+
 
 Dubbo 采用全 Spring 配置方式，透明化接入应用，对应用没有任何 API 侵入，只需用 Spring 加载 Dubbo 的配置即可，Dubbo 基于 [Spring 的 Schema 扩展](https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/xsd-configuration.html) 进行加载。
 

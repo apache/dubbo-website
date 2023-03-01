@@ -1,9 +1,11 @@
 ---
-type: docs
-title: "Node.js"
-weight: 40
-#no_list: true
-#hide_summary: true
+_build:
+    render: link
+aliases:
+    - /zh/download/nodejs/
+description: Node.js
 manualLinkRelref: ./#nodejs
-_build: { render: link }
+title: Node.js
+type: docs
+weight: 40
 ---

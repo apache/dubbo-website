@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/desc/
+description: 了解注册中心
+title: 了解注册中心
 type: docs
-title: "了解注册中心"
 weight: 1
 ---
+
 
 ## 什么是注册中心
 

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/implementation/
+description: Dubbo 代码中的一些实现细节
+linkTitle: 实现细节
+title: 实现细节
 type: docs
-title: "实现细节"
-linkTitle: "实现细节"
 weight: 4
-description: "Dubbo 代码中的一些实现细节"
 ---
+
 
 ## 初始化过程细节
 
@@ -226,6 +229,3 @@ Service name bytes  (换行符)
 [^3]: 即：`<dubbo:reference url="dubbo://service-host/com.foo.FooService?version=1.0.0" />`
 [^4]: 即：`<dubbo:registry address="zookeeper://10.20.153.10:2181" />`
 [^5]: `DubboInvoker`、 `HessianRpcInvoker`、 `InjvmInvoker`、 `RmiInvoker`、 `WebServiceInvoker` 中的任何一个
-
-
-

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/delay-publish/
+description: 延迟暴露 Dubbo 服务
+linkTitle: 延迟暴露
+title: 延迟暴露
 type: docs
-title: "延迟暴露"
-linkTitle: "延迟暴露"
 weight: 27
-description: "延迟暴露 Dubbo 服务"
 ---
+
 
 ## 特性说明
 如果你的服务需要预热时间，比如初始化缓存，等待相关资源就位等，可以使用 delay 进行延迟暴露。我们在 Dubbo 2.6.5 版本中对服务延迟暴露逻辑进行了细微的调整，将需要延迟暴露（delay > 0）服务的倒计时动作推迟到了 Spring 初始化完成后进行。你在使用 Dubbo 的过程中，并不会感知到此变化，因此请放心使用。

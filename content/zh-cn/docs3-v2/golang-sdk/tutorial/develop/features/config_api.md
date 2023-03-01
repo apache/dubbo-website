@@ -1,8 +1,12 @@
 ---
-type: docs
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/features/config_api/
+description: 使用配置 API 启动应用
 title: 使用配置 API 启动应用
+type: docs
 weight: 2
 ---
+
 
 ## 1. 准备工作
 
@@ -96,5 +100,3 @@ func main() {
 ```
 INFO    cmd/client.go:62  client response result: name:"Hello laurence"  id:"12345"  age:21
 ```
-
-

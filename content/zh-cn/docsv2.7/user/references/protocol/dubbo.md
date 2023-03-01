@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/dubbo/
+description: dubbo:// 协议参考手册
+linkTitle: dubbo://
+title: dubbo 协议
 type: docs
-title: "dubbo 协议"
-linkTitle: "dubbo://"
 weight: 1
-description: "dubbo:// 协议参考手册"
 ---
+
 
 Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。
 
@@ -125,5 +128,3 @@ dubbo.service.protocol=dubbo
 [^1]: 由吴亚军提供
 [^2]: 总结：会抛异常的情况：枚举值一边多一种，一边少一种，正好使用了差别的那种，或者属性名相同，类型不同
 [^3]: 1024Mbit=128MByte
-
-

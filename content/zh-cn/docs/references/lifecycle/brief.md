@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs/references/lifecycle/brief/
+description: 使用方法
+linkTitle: 使用方法
+title: 使用方法
 type: docs
-title: "使用方法"
-linkTitle: "使用方法"
 weight: 9
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/)。
 {{% /pageinfo %}}
@@ -71,4 +75,3 @@ startupProbe:
 
 #### 启动检测
 对于 startupProbe 启动检测，目前Dubbo 默认提供了一个检测维度，即是在所有启动流程（接口暴露、注册中心写入等）均结束后返回已就绪状态。
-

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/perf-test/
+description: Dubbo 2.0 性能测试报告
+linkTitle: 性能测试报告
+title: 性能测试报告
 type: docs
-title: "性能测试报告"
-linkTitle: "性能测试报告"
 weight: 16
-description: "Dubbo 2.0 性能测试报告" 
 ---
+
 
 ## 测试说明
 

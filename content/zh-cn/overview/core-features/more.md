@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "更多高级功能"
-linkTitle: "更多高级功能"
-weight: 100
+aliases:
+    - /zh/overview/core-features/more/
 description: ""
+linkTitle: 更多高级功能
+title: 更多高级功能
+type: docs
+weight: 100
 ---
+
 作为一款与应用开发紧密相关的微服务框架，同时旨在为微服务集群提供企业级服务治理能力，Dubbo 还提供了很多高级功能，涵盖服务调用行为控制、服务诊断与调优、服务治理等。
 
 多种语言 sdk 在功能实现、配置方式上会略有差异，具体功能列表和使用方式可参考如下文档：
@@ -67,5 +70,3 @@ description: ""
 * 一致性哈希选址
 * 日志框架适配及运行时管理
 * Kubernetes 生命周期探针
-
-

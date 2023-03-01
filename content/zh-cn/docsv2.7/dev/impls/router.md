@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/router/
+description: 路由扩展
+linkTitle: 路由扩展
+title: 路由扩展
 type: docs
-title: "路由扩展"
-linkTitle: "路由扩展"
 weight: 6
 ---
+
 
 ## 扩展说明
 
@@ -65,5 +69,3 @@ META-INF/dubbo/org.apache.dubbo.rpc.cluster.RouterFactory：
 ```properties
 xxx=com.xxx.XxxRouterFactory
 ```
-
-

@@ -1,10 +1,13 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/rmi/
+description: Rmi协议
+linkTitle: Rmi协议
+title: Rmi协议
 type: docs
-title: "Rmi协议"
-linkTitle: "Rmi协议"
 weight: 8
 ---
+
 
 ## 特性说明
 RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和 JDK 标准序列化方式。

@@ -1,5 +1,8 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/traffic/
+description: 流量管理
+title: 流量管理
 type: docs
-title: "流量管理"
 weight: 3
 ---

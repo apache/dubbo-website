@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/dump/
+description: 在 Dubbo 自动导出线程堆栈来保留现场
+linkTitle: 导出线程堆栈
+title: 导出线程堆栈
 type: docs
-title: "导出线程堆栈"
-linkTitle: "导出线程堆栈"
 weight: 43
-description: "在 Dubbo 自动导出线程堆栈来保留现场"
 ---
+
 ## 功能说明
 dubbo 通过 Jstack 自动导出线程堆栈来保留现场，方便排查问题。
 
@@ -54,4 +57,3 @@ dubbo:
     name: dubbo-springboot-demo-provider
     dump-directory: /tmp
 ```
-

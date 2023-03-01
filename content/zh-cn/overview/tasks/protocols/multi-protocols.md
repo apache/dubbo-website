@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "发布使用不同协议的多个服务，通过单端口监听"
-linkTitle: "单端口多协议"
+aliases:
+    - /zh/overview/tasks/protocols/multi-protocols/
 description: ""
+linkTitle: 单端口多协议
+title: 发布使用不同协议的多个服务，通过单端口监听
+type: docs
 weight: 40
 ---
+
 
 ## 特性说明
 通过对protocol进行配置，dubbo3可以支持端口的协议复用。

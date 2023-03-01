@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/concepts/configuration/
+description: 描述 Dubbo 支持的配置，Dubbo 的动态配置能力。
+linkTitle: 配置
+title: 配置管理
 type: docs
-title: "配置管理"
-linkTitle: "配置"
 weight: 4
-description: "描述 Dubbo 支持的配置，Dubbo 的动态配置能力。"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/)。
 {{% /pageinfo %}}
@@ -60,4 +63,3 @@ Dubbo启动后监听动态配置项，当配置发生变化时，会自动进行
 | -----| ---- |  ----|
 | dubbo.application.migration.threshold |  |  |
 | dubbo.application.service-discovery.migration |  |  |
-

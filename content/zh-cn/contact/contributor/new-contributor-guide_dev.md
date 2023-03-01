@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/contributor/new-contributor-guide_dev/
+description: 新贡献者向导
+linkTitle: 新手向导
+title: 新贡献者向导
 type: docs
-title: "新贡献者向导"
-linkTitle: "新手向导"
 weight: 2
 ---
+
 
 
 这篇向导旨在给正在准备向 Dubbo 提交贡献的新手提供指导。

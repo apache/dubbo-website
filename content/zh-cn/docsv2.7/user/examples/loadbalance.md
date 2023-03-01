@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/loadbalance/
+description: Dubbo 提供的集群负载均衡策略
+linkTitle: 负载均衡
+title: 负载均衡
 type: docs
-title: "负载均衡"
-linkTitle: "负载均衡"
 weight: 3
-description: "Dubbo 提供的集群负载均衡策略"
 ---
+
 
 ## 背景
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `random` 随机调用。

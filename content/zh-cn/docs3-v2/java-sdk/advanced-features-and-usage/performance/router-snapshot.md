@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/router-snapshot/
+description: 路由状态采集
+linkTitle: 路由状态采集
+title: 路由状态采集
 type: docs
-title: "路由状态采集"
-linkTitle: "路由状态采集"
 weight: 2
-description: "路由状态采集"
 ---
+
 ## 功能说明
 路由状态收集功能可用于识别可能影响服务性能的任何潜在问题，识别可能阻碍服务尽可能高效使用的任何潜在瓶颈或问题，确保服务平稳运行，用户在尝试访问服务时不会遇到任何问题，允许用户检查路由的状态是启用还是禁用，确保仅使用授权的服务，并且访问仅限于具有适当授权的人员。
 

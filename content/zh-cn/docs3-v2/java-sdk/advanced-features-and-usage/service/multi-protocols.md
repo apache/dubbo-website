@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-protocols/
+description: 在 Dubbo 中配置多协议
+linkTitle: 多协议
+title: 多协议
 type: docs
-title: "多协议"
-linkTitle: "多协议"
 weight: 9
-description: "在 Dubbo 中配置多协议"
 ---
+
 ## 特性说明
 Dubbo 允许配置多协议，在不同服务上支持不同协议或者同一服务上同时支持多种协议。
 

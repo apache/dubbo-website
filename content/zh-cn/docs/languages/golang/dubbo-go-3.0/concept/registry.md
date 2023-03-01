@@ -1,10 +1,13 @@
 ---
-type: docs
-title: Dubbo-go 的注册中心
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/concept/registry/
+description: Dubbo-go 的注册中心
 keywords: Dubbo-go 的注册中心
 linkTitle: 注册中心
-description: Dubbo-go 的注册中心
+title: Dubbo-go 的注册中心
+type: docs
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/)。
 {{% /pageinfo %}}

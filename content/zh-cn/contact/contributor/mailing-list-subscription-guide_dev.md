@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/contributor/mailing-list-subscription-guide_dev/
+description: 邮件列表订阅向导
+linkTitle: 邮件组向导
+title: 邮件列表订阅向导
 type: docs
-title: "邮件列表订阅向导"
-linkTitle: "邮件组向导"
 weight: 3
 ---
+
 
 
 Apache incubator 的 Dubbo 开发者邮件列表（dev@dubbo.apache.org）已经建立，请随时订阅并参考[^1]获取更多细节。
@@ -84,4 +88,3 @@ subscription address.
 > 请注意：dev@dubbo.apache.org是有效的。dev@dubbo.incubator.apache.org已经不再使用。
 
 [^1] https://apache.org/foundation/mailinglists.html#subscribing
-

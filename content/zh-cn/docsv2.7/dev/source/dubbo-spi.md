@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/source/dubbo-spi/
+description: 本文介绍了 Dubbo SPI 的原理和实现细节
+linkTitle: Dubbo SPI
+title: Dubbo SPI
 type: docs
-title: "Dubbo SPI"
-linkTitle: "Dubbo SPI"
 weight: 1
-description: "本文介绍了 Dubbo SPI 的原理和实现细节"
 ---
+
 
 ## 1.简介
 

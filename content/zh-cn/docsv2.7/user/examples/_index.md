@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/
+description: 通过示例学习 Dubbo 的用法
+linkTitle: 用法示例
+title: 用法示例
 type: docs
-title: "用法示例"
-linkTitle: "用法示例"
 weight: 6
-description: "通过示例学习 Dubbo 的用法"
 ---
+
 
 {{% alert title="Tips" color="primary" %}}
 想完整的运行起来，请参见：[快速启动](../quick-start)，这里只列出各种场景的配置方式。

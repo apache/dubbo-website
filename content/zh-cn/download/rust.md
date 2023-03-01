@@ -1,9 +1,11 @@
 ---
-type: docs
-title: "Rust"
-weight: 30
-#no_list: true
-#hide_summary: true
+_build:
+    render: link
+aliases:
+    - /zh/download/rust/
+description: Rust
 manualLinkRelref: ./#rust
-_build: { render: link }
+title: Rust
+type: docs
+weight: 30
 ---

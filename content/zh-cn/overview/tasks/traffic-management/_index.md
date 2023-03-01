@@ -1,12 +1,14 @@
-
 ---
-type: docs
-title: "流量管控"
-linkTitle: "流量管控"
-description: "演示 Dubbo 流量治理特性的使用方式。"
-weight: 20
+aliases:
+    - /zh/overview/tasks/traffic-management/
+description: 演示 Dubbo 流量治理特性的使用方式。
+linkTitle: 流量管控
 no_list: true
+title: 流量管控
+type: docs
+weight: 20
 ---
+
 
 此任务基于一个简单的线上商城微服务系统演示了 Dubbo 的流量管控能力。
 

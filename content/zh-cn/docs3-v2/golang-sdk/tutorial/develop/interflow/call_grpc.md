@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/interflow/call_grpc/
+description: 与 gRPC 应用互通
 title: 与 gRPC 应用互通
 type: docs
 weight: 5
 ---
+
 
 ## 1. 准备工作
 
@@ -12,5 +16,3 @@ weight: 5
 ## 2. Dubbo-go 应用与 gRPC 应用互通
 
 参考 [dubbo-go-samples/rpc/triple/pb/dubbogo-grpc](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc)
-
-

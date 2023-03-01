@@ -1,12 +1,15 @@
-
 ---
-type: docs
-title: "流量治理规则"
-linkTitle: "流量治理"
-weight: 2
-no_list: true
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/
+description: 流量治理规则
 hide_summary: true
+linkTitle: 流量治理
+no_list: true
+title: 流量治理规则
+type: docs
+weight: 2
 ---
+
 
 
 
@@ -41,6 +44,3 @@ Dubbo 将整个流量管理分成 [VirtualService](./mesh-style/virtualservice/)
 - [路由规则](./routing-rule/)
 - [配置规则](./config-rule/)
 - [Mesh 路由规则](./mesh-style)
-
-
-

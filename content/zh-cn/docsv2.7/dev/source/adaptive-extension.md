@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/source/adaptive-extension/
+description: 本文介绍了自适应拓展的原理和实现细节
+linkTitle: SPI 自适应拓展
+title: SPI 自适应拓展
 type: docs
-title: "SPI 自适应拓展"
-linkTitle: "SPI 自适应拓展"
 weight: 2
-description: "本文介绍了自适应拓展的原理和实现细节"
 ---
+
 
 ## 1.原理
 

@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/cache/
+description: 缓存扩展
+linkTitle: 缓存扩展
+title: 缓存扩展
 type: docs
-title: "缓存扩展"
-linkTitle: "缓存扩展"
 weight: 24
 ---
+
 
 ## 扩展说明
 

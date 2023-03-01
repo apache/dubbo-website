@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/features/custom-filter/
+description: 自定义Filter组件
 title: 自定义Filter组件
-weight: 3
 type: docs
+weight: 3
 ---
+
 
 参考samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/master/filter)
 
@@ -109,6 +113,3 @@ func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result,
 }
 
 ```
-
-
-

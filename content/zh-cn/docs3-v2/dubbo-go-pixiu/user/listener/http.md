@@ -1,10 +1,13 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/listener/http/
+description: Http Listener 介绍
+linkTitle: Http Listener 介绍
+title: Http Listener 介绍
 type: docs
-title: "Http Listener 介绍"
-linkTitle: "Http Listener 介绍"
 weight: 10
 ---
+
 
 Http Listener 是专门负载接收 HTTP 请求的 Listener，它可以设置 HTTP 监听的地址和端口。它可以通过如下配置进行引入。
 
@@ -41,9 +44,3 @@ Http Listener 的具体实现可以参考 `pkg/listener/http`。
 ```
 
 具体案例可以查看 [案例](/zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/https/)
-
-
-
-
-
-

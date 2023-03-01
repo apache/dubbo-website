@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/config-center/
+description: Dubbo 配置中心的基本使用和工作原理
+linkTitle: 配置中心
+title: 配置中心
 type: docs
-title: "配置中心"
-linkTitle: "配置中心"
 weight: 7
-description: "Dubbo 配置中心的基本使用和工作原理"
 ---
+
 
 配置中心 (config-center) 在 Dubbo 中可承担两类职责：
 
@@ -20,4 +23,3 @@ description: "Dubbo 配置中心的基本使用和工作原理"
 参考 [配置说明 - 配置项手册](../config/properties/#config-center) 了解 namespace 和 group 之外 config-center 开放的更多配置项。
 
 > 为了兼容 2.6.x 版本配置，在使用 Zookeeper 作为注册中心，且没有显式配置配置中心的情况下，Dubbo 框架会默认将此 Zookeeper 用作配置中心，但将只作服务治理用途。
-

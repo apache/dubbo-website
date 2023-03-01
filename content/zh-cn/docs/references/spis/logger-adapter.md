@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs/references/spis/logger-adapter/
+description: 日志适配扩展
+linkTitle: 日志适配扩展
+title: 日志适配扩展
 type: docs
-title: "日志适配扩展"
-linkTitle: "日志适配扩展"
 weight: 26
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/logger-adapter/)。
 {{% /pageinfo %}}

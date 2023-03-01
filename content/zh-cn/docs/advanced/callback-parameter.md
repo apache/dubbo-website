@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/callback-parameter/
+description: 通过参数回调从服务器端调用客户端逻辑
+linkTitle: 参数回调
+title: 参数回调
 type: docs
-title: "参数回调"
-linkTitle: "参数回调"
 weight: 23
-description: "通过参数回调从服务器端调用客户端逻辑"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/callback-parameter/)。
 {{% /pageinfo %}}

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/async-call/
+description: 在 Dubbo 中发起异步调用
+linkTitle: 异步调用
+title: 异步调用
 type: docs
-title: "异步调用"
-linkTitle: "异步调用"
 weight: 21
-description: "在 Dubbo 中发起异步调用"
 ---
+
 ## 背景
 
 从 2.7.0 开始，Dubbo 的所有异步编程接口开始以 [CompletableFuture](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html) 为基础

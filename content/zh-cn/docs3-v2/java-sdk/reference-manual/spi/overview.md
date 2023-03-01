@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/overview/
+description: Dubbo 通过 SPI 机制提供了非常灵活的可扩展性
+linkTitle: Dubbo SPI 概述
+title: Dubbo SPI 概述
 type: docs
-title: "Dubbo SPI 概述"
-linkTitle: "Dubbo SPI 概述"
 weight: 1
-description: "Dubbo 通过 SPI 机制提供了非常灵活的可扩展性"
 ---
+
 
 ## 扩展设计理念
 

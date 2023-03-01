@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/service-downgrade/
+description: 降级 Dubbo 服务
+linkTitle: 服务降级
+title: 服务降级
 type: docs
-title: "服务降级"
-linkTitle: "服务降级"
 weight: 35
-description: "降级 Dubbo 服务"
 ---
+
 ## 背景
 可以通过服务降级功能临时屏蔽某个出错的非关键服务，并定义降级后的返回策略。
 
@@ -25,4 +28,3 @@ registry.register(URL.valueOf("override://0.0.0.0/com.foo.BarService?category=co
 {{% alert title="提示" color="primary" %}}
 `2.2.0` 以上版本支持
 {{% /alert %}}
-

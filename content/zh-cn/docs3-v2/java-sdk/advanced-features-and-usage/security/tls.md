@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
+description: ' 了解在 Dubbo 的 TLS 保证传输安全'
+linkTitle: TLS支持
+title: TLS支持
 type: docs
-title: "TLS支持"
-linkTitle: "TLS支持"
 weight: 1
-description: " 了解在 Dubbo 的 TLS 保证传输安全"
 ---
+
 ## 特性说明
 
 内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。

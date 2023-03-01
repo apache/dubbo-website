@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/users/
+description: 用户案例
+linkTitle: 用户案例
+title: 用户案例
 type: docs
-title: "用户案例"
-linkTitle: "用户案例"
 ---
+
 
 Apache Dubbo 是一款有着数以万计企业用户的国际化开源项目，经过了多年大规模集群生产环境的检验，影响了数百万开发者，带动了大量微服务开源生态发展。Dubbo 从企业实践中孵化并走向开源，又迅速在开源社区获得了成功，大量的生产实践用户是 Dubbo 长期保持先进性、稳定性和活跃度的核心驱动力。
 
@@ -26,4 +30,3 @@ Dubbo3 吸取了 HSF2 框架所有大规模微服务集群的治理经验，解�
 
 
 {{< about/testimonials >}}
-

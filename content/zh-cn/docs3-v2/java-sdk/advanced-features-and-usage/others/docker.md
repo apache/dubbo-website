@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/docker/
+description: 将 Dubbo 部署到 Docker 环境
+linkTitle: Dubbo 部署 Docker 环境
+title: Dubbo 部署 Docker 环境
 type: docs
-title: "Dubbo 部署 Docker 环境"
-linkTitle: "Dubbo 部署 Docker 环境"
 weight: 6
-description: "将 Dubbo 部署到 Docker 环境"
 ---
+
 ## 特性说明
 一些部署场景需要动态地指定服务注册地址。例如，docker bridge网络模式需要为外部网络通信指定一个注册主机IP。Dubbo在启动阶段提供了两对系统属性，用于设置外部通信的IP和端口地址。
 * DUBBO_IP_TO_REGISTRY --- 注册到注册中心的IP地址

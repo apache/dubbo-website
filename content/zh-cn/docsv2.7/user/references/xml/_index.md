@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/
+description: Dubbo 的 XML Schema 配置参考手册
+linkTitle: XML 配置
+title: Schema 配置参考手册
 type: docs
-title: "Schema 配置参考手册"
-linkTitle: "XML 配置"
 weight: 1
-description: "Dubbo 的 XML Schema 配置参考手册"
 ---
+
 
 这里以 XML Config [^1] 为准，列举所有配置项 [^2]。其它配置方式，请参见相应转换关系：[属性配置](../../configuration/properties)，[注解配置](../../configuration/annotation)，[API 配置](../../configuration/api)。
 

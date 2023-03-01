@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/coveragence/
+description: Dubbo 初始的测试覆盖率报告，和现在基于 Codecov 的报告
+linkTitle: 测试覆盖率报告
+title: 测试覆盖率报告
 type: docs
-title: "测试覆盖率报告"
-linkTitle: "测试覆盖率报告"
 weight: 17
-description: "Dubbo 初始的测试覆盖率报告，和现在基于 Codecov 的报告"
 ---
+
 
 * v2.0   Codecov报表 , 从 2017-12-29 后开始统计
   测试覆盖率为 : [![codecov](https://codecov.io/gh/apache/dubbo/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/dubbo) , 可以从 https://codecov.io/gh/apache/dubbo 页面得到覆盖率报表

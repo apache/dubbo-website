@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/hessian/
+description: hessian:// 协议参考手册
+linkTitle: hessian://
+title: hessian 协议
 type: docs
-title: "hessian 协议"
-linkTitle: "hessian://"
 weight: 4
-description: "hessian:// 协议参考手册"
 ---
+
 
 Hessian [^1] 协议用于集成 Hessian 的服务，Hessian 底层采用 Http 通讯，采用 Servlet 暴露服务，Dubbo 缺省内嵌 Jetty 作为服务器实现。
 

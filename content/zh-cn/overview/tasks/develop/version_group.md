@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "版本与分组"
-linkTitle: "版本与分组"
-weight: 4
+aliases:
+    - /zh/overview/tasks/develop/version_group/
 description: ""
+linkTitle: 版本与分组
+title: 版本与分组
+type: docs
+weight: 4
 ---
+
 ## 版本与分组
 Dubbo服务中，接口并不能唯一确定一个服务，只有接口+分组+版本号才能唯一确定一个服务。
 
@@ -72,4 +75,3 @@ public void run(String... args) throws Exception {
     System.out.println("Dubbo Remote Return ======> " + developServiceV2.invoke("2"));
 }
 ```
-

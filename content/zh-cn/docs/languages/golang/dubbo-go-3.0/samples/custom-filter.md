@@ -1,10 +1,13 @@
 ---
-type: docs
-title: Dubbo-go 3.0 自定义filter
-keywords: Dubbo-go 3.0 自定义filter
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/samples/custom-filter/
 description: Dubbo-go 3.0 自定义filter
+keywords: Dubbo-go 3.0 自定义filter
 linkTitle: Filter
+title: Dubbo-go 3.0 自定义filter
+type: docs
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/custom-filter/)。
 {{% /pageinfo %}}
@@ -116,7 +119,3 @@ func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result,
 }
 
 ```
-
-
-
-

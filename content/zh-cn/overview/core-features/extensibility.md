@@ -1,14 +1,17 @@
 ---
-type: docs
-title: "扩展适配"
-linkTitle: "扩展适配"
-weight: 50
+aliases:
+    - /zh/overview/core-features/extensibility/
 description: ""
 feature:
-  title: 可扩展性
-  description: >
-    一切皆可扩展，通过扩展 (Filter、Router、Service Discovery、Configuration 等) 自定义调用、管控行为，适配开源微服务生态。
+    description: |
+        一切皆可扩展，通过扩展 (Filter、Router、Service Discovery、Configuration 等) 自定义调用、管控行为，适配开源微服务生态。
+    title: 可扩展性
+linkTitle: 扩展适配
+title: 扩展适配
+type: docs
+weight: 50
 ---
+
 
 Dubbo 从设计上是高度可扩展的，通过这些扩展点你可以做到：
 * 拦截流量并控制流量行为
@@ -118,6 +121,3 @@ Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis 等元数据中心实现。
 * [Go 扩展点手册](/)
 * [Rust 扩展点手册](/)
 * [Node.js 扩展点手册](/)
-
-
-

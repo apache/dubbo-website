@@ -1,9 +1,9 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/
+description: Dubbo Go Pixiu
+linkTitle: Dubbo Go Pixiu
+title: Dubbo Go Pixiu
 type: docs
-title: "Dubbo Go Pixiu"
-linkTitle: "Dubbo Go Pixiu"
 weight: 30
-description: "Dubbo Go Pixiu"
 ---
-

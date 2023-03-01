@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/distributed-transaction/
+description: Dubbo 中分布式事务的支持
+linkTitle: 分布式事务支持
+title: 分布式事务支持
 type: docs
-title: "分布式事务支持"
-linkTitle: "分布式事务支持"
 weight: 42
-description: "Dubbo 中分布式事务的支持"
 ---
+
 ## 特性说明
 分布式事务基于 JTA/XA 规范实现。
 

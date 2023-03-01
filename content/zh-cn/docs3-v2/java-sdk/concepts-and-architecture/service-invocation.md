@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/concepts-and-architecture/service-invocation/
+description: 本文将介绍如何在 Dubbo 3 中自定义调用链路上核心的扩展点以满足您的需求。
+linkTitle: 服务调用
+title: 服务调用扩展点
 type: docs
-title: "服务调用扩展点"
-linkTitle: "服务调用"
 weight: 4
-description: "本文将介绍如何在 Dubbo 3 中自定义调用链路上核心的扩展点以满足您的需求。"
 ---
+
 
 ![dubbo-architucture](/imgs/v3/concepts/invoke-arch.jpg)
 
@@ -153,4 +156,3 @@ public interface LoadBalance {
 ```
 
 具体调用拦截扩展方式请[参考](../../reference-manual/spi/description/load-balance/)
-

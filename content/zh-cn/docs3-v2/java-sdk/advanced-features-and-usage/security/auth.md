@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/
+description: 了解 Dubbo 服务鉴权
+linkTitle: 服务鉴权
+title: 服务鉴权
 type: docs
-title: "服务鉴权"
-linkTitle: "服务鉴权"
 weight: 23
-description: "了解 Dubbo 服务鉴权"
 ---
+
 
 ## 特性说明
 

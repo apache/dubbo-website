@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/virtualservice/
+description: 入站流量的规则
+linkTitle: VirtualService
+title: VirtualService
 type: docs
-title: "VirtualService"
-linkTitle: "VirtualService"
 weight: 1
-description: "入站流量的规则"
 ---
+
 
 ### VirtualService
 `VirtualService`是用来处理入站流量的规则，也就是说用来描述哪些入站流量适用于该路由规则。
@@ -502,5 +505,3 @@ spec:
           port:
           fallback:
 ```
-
-

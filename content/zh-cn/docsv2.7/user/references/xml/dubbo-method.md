@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-method/
+description: dubbo:method 配置
+linkTitle: dubbo:method
+title: dubbo:method
 type: docs
-title: "dubbo:method"
-linkTitle: "dubbo:method"
-weight: 1 
-description: "dubbo:method 配置"
+weight: 1
 ---
+
 
 方法级配置。对应的配置类： `org.apache.dubbo.config.MethodConfig`。同时该标签为 `<dubbo:service>` 或 `<dubbo:reference>` 的子标签，用于控制到方法级。
 

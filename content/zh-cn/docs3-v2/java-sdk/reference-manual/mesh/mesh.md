@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/mesh/mesh/
+description: 描述如何对Dubbo mesh proxyless模式进行debug。
+linkTitle: Debug参考文档
+title: Debug参考文档
 type: docs
-title: "Debug参考文档"
-linkTitle: "Debug参考文档"
 weight: 2
-description: "描述如何对Dubbo mesh proxyless模式进行debug。"
 ---
+
 
 ## 前置环境准备
 
@@ -155,4 +158,3 @@ kubectl port-forward dubbo-samples-xds-consumer-64c6c6f444-kk2vr 31000:31000
 ![xds-debug-success.png](/imgs/user/xds-debug-success.png)
 此时查看k8s_server_dubbo-samples-xds-consumer-XXX的日志可以看到已经成功在运行：
 ![xds-consumer-debug-success-log.png](/imgs/user/xds-consumer-debug-success-log.png)
-

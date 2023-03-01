@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/limit/tps_limiter/
+description: 为服务端设置限流
 title: 为服务端设置限流
 type: docs
 weight: 3
 ---
+
 
 ## 1. 准备工作
 
@@ -101,5 +105,3 @@ INFO    cmd/client.go:62        Success rate = 0.6
 ```bash
 ERROR   tps/filter.go:84  The invocation was rejected due to over the limiter limitation...
 ```
-
-

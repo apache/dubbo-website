@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/config-rule-deprecated/
+description: Dubbo 中旧版本的规则配置方式
+linkTitle: 旧配置规则
+title: 旧配置规则
 type: docs
-title: "旧配置规则"
-linkTitle: "旧配置规则"
 weight: 35
-description: "Dubbo 中旧版本的规则配置方式"
 ---
+
 ## 背景
 向注册中心写入动态配置覆盖规则。该功能通常由监控中心或治理中心的页面完成。
 

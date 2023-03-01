@@ -1,9 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/quality/stability/
+description: 稳定性
+linkTitle: 稳定性
+title: 稳定性
 type: docs
-title: "稳定性"
-linkTitle: "稳定性"
 weight: 10
 ---
 
-欢迎认领补充此文档。
 
+欢迎认领补充此文档。

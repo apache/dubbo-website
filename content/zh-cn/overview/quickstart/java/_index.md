@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Java 微服务开发入门"
-linkTitle: "Java"
-weight: 10
+aliases:
+    - /zh/overview/quickstart/java/
+description: Java 微服务开发入门
+linkTitle: Java
 no_list: true
+title: Java 微服务开发入门
+type: docs
+weight: 10
 ---
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -55,4 +59,3 @@ no_list: true
 </div>
 
 {{< /blocks/section >}}
-

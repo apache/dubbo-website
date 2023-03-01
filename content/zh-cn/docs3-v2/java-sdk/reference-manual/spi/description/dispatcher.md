@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/dispatcher/
+description: 消息派发扩展
+linkTitle: 消息派发扩展
+title: 消息派发扩展
 type: docs
-title: "消息派发扩展"
-linkTitle: "消息派发扩展"
 weight: 14
 ---
+
 
 ## 扩展说明
 

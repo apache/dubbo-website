@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/ops/apidocs/
+description: API文档&测试
+linkTitle: API文档&测试
+title: API文档&测试
 type: docs
-title: "API文档&测试"
-linkTitle: "API文档&测试"
 weight: 4
 ---
+
 
 ## dubbo api docs
 

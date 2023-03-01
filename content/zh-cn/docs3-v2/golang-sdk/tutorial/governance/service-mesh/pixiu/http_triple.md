@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/http_triple/
+description: 接入 Ingress 流量
 title: 接入 Ingress 流量
 type: docs
 weight: 1
 ---
+
 
 ## 1. 准备工作
 

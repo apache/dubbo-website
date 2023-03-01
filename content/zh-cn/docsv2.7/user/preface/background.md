@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/preface/background/
+description: 本文介绍了网站应用的演进
+linkTitle: 背景
+title: 背景
 type: docs
-title: "背景"
-linkTitle: "背景"
 weight: 1
-description: "本文介绍了网站应用的演进"
 ---
+
 
 随着互联网的发展，网站应用的规模不断扩大，常规的垂直应用架构已无法应对，分布式服务架构以及流动计算架构势在必行，亟需一个治理系统确保架构有条不紊的演进。
 

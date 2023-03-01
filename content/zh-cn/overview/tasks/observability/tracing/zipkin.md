@@ -1,11 +1,14 @@
 ---
-type: docs
-title: "Zipkin"
-linkTitle: "Zipkin"
+aliases:
+    - /zh/overview/tasks/observability/tracing/zipkin/
 description: ""
-weight: 10
+linkTitle: Zipkin
 no_list: true
+title: Zipkin
+type: docs
+weight: 10
 ---
+
 
 # Overview
 

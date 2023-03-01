@@ -1,10 +1,13 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/thrift/
+description: Thrift协议
+linkTitle: Thrift协议
+title: Thrift协议
 type: docs
-title: "Thrift协议"
-linkTitle: "Thrift协议"
 weight: 7
 ---
+
 
 
 ## 特性说明

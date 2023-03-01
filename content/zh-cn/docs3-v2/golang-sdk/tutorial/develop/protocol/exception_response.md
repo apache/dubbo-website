@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/protocol/exception_response/
+description: Triple 异常回传
 title: Triple 异常回传
-weight: 5
 type: docs
+weight: 5
 ---
+
 
 参考samples [dubbo-go-samples/error](https://github.com/apache/dubbo-go-samples/tree/master/error)
 
@@ -113,4 +117,3 @@ dubbo.apache.org/dubbo-go/v3/common/proxy/proxy_factory.(*ProxyInvoker).Invoke
 ```
 
 可看到报错信息和堆栈
-

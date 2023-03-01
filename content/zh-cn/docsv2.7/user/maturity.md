@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/maturity/
+description: 介绍 Dubbo 各个功能、策略的成熟度
+linkTitle: 成熟度
+title: 成熟度
 type: docs
-title: "成熟度"
-linkTitle: "成熟度"
 weight: 4
-description: "介绍 Dubbo 各个功能、策略的成熟度" 
 ---
+
 
 ### 功能成熟度
 

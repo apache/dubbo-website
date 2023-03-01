@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/generic-invoke-with-json/
+description: 支持Json字符串参数的泛化调用
+linkTitle: JSON泛化调用
+title: JSON泛化调用
 type: docs
-title: "JSON泛化调用"
-linkTitle: "JSON泛化调用"
 weight: 15
-description: "支持Json字符串参数的泛化调用"
 ---
+
 ## 背景
 {{% alert title="提示" color="primary" %}}
 支持版本：`2.7.12` 之后
@@ -70,4 +73,3 @@ public class GenericInvoke {
     }
 }
 ```
-

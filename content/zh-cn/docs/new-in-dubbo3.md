@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/new-in-dubbo3/
+description: Dubbo3 相比 2.7 版本进行了全面的升级，以下是新增的一些核心特性
+linkTitle: 新版本特性速览
+title: What's New in Dubbo3
 type: docs
-title: "What's New in Dubbo3"
-linkTitle: "新版本特性速览"
 weight: 2
-description: "Dubbo3 相比 2.7 版本进行了全面的升级，以下是新增的一些核心特性"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/what/)。
 {{% /pageinfo %}}

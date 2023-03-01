@@ -1,10 +1,13 @@
-
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/memcached/
+description: Memcached协议
+linkTitle: Memcached协议
+title: Memcached协议
 type: docs
-title: "Memcached协议"
-linkTitle: "Memcached协议"
 weight: 12
 ---
+
 ## 特性说明
 基于 memcached 实现的 RPC 协议。 `2.3.0` 以上版本支持。
 

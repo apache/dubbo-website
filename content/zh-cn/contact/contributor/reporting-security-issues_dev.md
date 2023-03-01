@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/contributor/reporting-security-issues_dev/
+description: 报告安全问题
+linkTitle: 反馈漏洞
+title: 报告安全问题
 type: docs
-title: "报告安全问题"
-linkTitle: "反馈漏洞"
 weight: 4
 ---
+
 
 Apache Software Foundation 在消除其软件项目中的安全性问题方面采取严格的立场。Apache Dubbo 对与其功能和特性有关的问题非常敏感并很快提出。
 

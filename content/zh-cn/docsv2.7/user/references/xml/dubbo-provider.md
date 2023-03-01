@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-provider/
+description: dubbo:provider 配置
+linkTitle: dubbo:provider
+title: dubbo:provider
 type: docs
-title: "dubbo:provider"
-linkTitle: "dubbo:provider"
 weight: 1
-description: "dubbo:provider 配置"
 ---
+
 
 服务提供者缺省值配置。对应的配置类： `org.apache.dubbo.config.ProviderConfig`。同时该标签为 `<dubbo:service>` 和 `<dubbo:protocol>` 标签的缺省值设置。
 

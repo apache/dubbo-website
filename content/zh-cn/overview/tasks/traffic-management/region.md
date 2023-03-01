@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/tasks/traffic-management/region/
+description: 在 Dubbo-Admin 动态配置同机房/区域优先
+linkTitle: 同区域优先
+title: 同机房/区域优先
 type: docs
-title: "同机房/区域优先"
-linkTitle: "同区域优先"
 weight: 4
-description: "在 Dubbo-Admin 动态配置同机房/区域优先"
 ---
+
 
 为了保证服务的整体高可用，我们经常会采用把服务部署在多个可用区(机房)的策略，通过这样的冗余/容灾部署模式，当一个区域出现故障的时候，我们仍可以保证服务整体的可用性。
 

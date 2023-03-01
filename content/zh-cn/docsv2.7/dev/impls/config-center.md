@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/config-center/
+description: 配置中心扩展
+linkTitle: 配置中心扩展
+title: 配置中心扩展
 type: docs
-title: "配置中心扩展"
-linkTitle: "配置中心扩展"
 weight: 13
 ---
+
 
 ## 设计目的
 
@@ -100,4 +104,3 @@ Nacos 作为一个专业的第三方配置中心，拥有专门为配置中心�
 ### Apollo
 
 Apollo 与 Nacos 类似，请参考动态配置中心使用文档中关于 Apollo 部分的描述。
-

@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/contact/committer/release-guide/java-sdk/
+description: Java SDK Release 流程
+linkTitle: Java SDK Release
+title: Java SDK Release 流程
 type: docs
-title: "Java SDK Release 流程"
-linkTitle: "Java SDK Release"
 weight: 2
 ---
+
 
 
 ## 理解 Apache 发布的内容和流程

@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Seata"
-linkTitle: "Seata"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/transaction/seata/
 description: ""
+linkTitle: Seata
+title: Seata
+type: docs
+weight: 10
 ---
+
 
 ## 案例
 

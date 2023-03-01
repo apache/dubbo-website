@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Apache Dubbo Go Pixiu"
-linkTitle: "Apache Dubbo Go Pixiu"
-weight: 40
+aliases:
+    - /zh/overview/what/ecosystem/gateway/pixiu/
 description: ""
+linkTitle: Apache Dubbo Go Pixiu
+title: Apache Dubbo Go Pixiu
+type: docs
+weight: 40
 ---

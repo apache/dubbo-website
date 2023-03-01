@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/build/
+description: 从源码开始构建 Dubbo
+linkTitle: 源码构建
+title: 源码构建
 type: docs
-title: "源码构建"
-linkTitle: "源码构建"
 weight: 1
-description: "从源码开始构建 Dubbo"
 ---
+
 
 ## 代码签出
 
@@ -84,4 +87,3 @@ mvn eclipse:configure-workspace -Declipse.workspace=/path/to/the/workspace/
 
 [^1]: 也可以直接在 https://github.com/apache/dubbo 上浏览源代码
 [^2]: UNIX 下的路径是 ${HOME}/.m2/repository, Windows 下的路径是 C:\Documents and Settings\<user>\.m2\repository
-

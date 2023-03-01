@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/release/
+description: Dubbo 项目的版本管理
+linkTitle: 版本管理
+title: 版本管理
 type: docs
-title: "版本管理"
-linkTitle: "版本管理"
 weight: 9
-description: "Dubbo 项目的版本管理"
 ---
+
 
 **新功能的开发** 和 **稳定性的提高** 对产品都很重要。但是添加新功能会影响稳定性，Dubbo 使用如下的版本开发模式来保障两者。
 

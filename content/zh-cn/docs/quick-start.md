@@ -1,11 +1,13 @@
-
 ---
+aliases:
+    - /zh/docs/quick-start/
+description: 示例演示了如何使用 Dubbo Spring Boot Starter 方式快速开发 Dubbo 应用。
+linkTitle: 快速开始
+title: Spring Boot 快速开发 Dubbo 服务
 type: docs
-title: "Spring Boot 快速开发 Dubbo 服务"
-linkTitle: "快速开始"
 weight: 3
-description: "示例演示了如何使用 Dubbo Spring Boot Starter 方式快速开发 Dubbo 应用。"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/quickstart/)。
 {{% /pageinfo %}}

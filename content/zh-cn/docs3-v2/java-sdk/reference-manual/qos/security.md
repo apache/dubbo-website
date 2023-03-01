@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/qos/security/
+description: 序列化安全审计
+linkTitle: 序列化安全审计
+title: 序列化安全审计
 type: docs
-title: "序列化安全审计"
-linkTitle: "序列化安全审计"
 weight: 9
-description: "序列化安全审计"
 ---
+
 
 Dubbo 支持通过 QoS 命令实时查看当前的配置信息以及可信/不可信类列表。目前共支持两个命令：`serializeCheckStatus` 查看当前配置信息，`serializeWarnedClasses` 查看实时的告警列表。
 

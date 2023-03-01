@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/
+description: Dubbo 支持 Mesh 路由类型及配合方式
+linkTitle: Mesh 路由规则
+title: Mesh 路由规则
 type: docs
-title: "Mesh 路由规则"
-linkTitle: "Mesh 路由规则"
 weight: 40
-description: "Dubbo 支持 Mesh 路由类型及配合方式"
 ---
+
 
 ### 基本思想
 基于路由链，采用 Pipeline 的处理方式

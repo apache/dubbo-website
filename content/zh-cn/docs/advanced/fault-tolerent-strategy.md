@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/advanced/fault-tolerent-strategy/
+description: 集群调用失败时，Dubbo 提供的容错方案
+linkTitle: 集群容错
+title: 集群容错
 type: docs
-title: "集群容错"
-linkTitle: "集群容错"
 weight: 2
-description: "集群调用失败时，Dubbo 提供的容错方案"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/fault-tolerent-strategy/)。
 {{% /pageinfo %}}
@@ -138,4 +141,3 @@ broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常�
 ```xml
 <dubbo:reference cluster="failsafe" />
 ```
-

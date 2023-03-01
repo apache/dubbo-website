@@ -1,9 +1,12 @@
 ---
-type: docs
-title: 架构
-keywords: 架构
+aliases:
+    - /zh/docs3-v2/golang-sdk/preface/design/architecture/
 description: 架构
+keywords: 架构
+title: 架构
+type: docs
 ---
+
 
 ### 架构说明
 

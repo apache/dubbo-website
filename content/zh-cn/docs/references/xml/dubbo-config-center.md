@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs/references/xml/dubbo-config-center/
+description: dubbo:config-center 配置
+linkTitle: dubbo:config-center
+title: dubbo:config-center
 type: docs
-title: "dubbo:config-center"
-linkTitle: "dubbo:config-center"
 weight: 1
-description: "dubbo:config-center 配置"
 ---
+
 
 {{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/#config-center)。
 {{% /pageinfo %}}

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/group-merger/
+description: 通过分组对结果进行聚合并返回聚合后的结果
+linkTitle: 分组聚合
+title: 分组聚合
 type: docs
-title: "分组聚合"
-linkTitle: "分组聚合"
 weight: 1
-description: "通过分组对结果进行聚合并返回聚合后的结果"
 ---
+
 
 ## 特性说明
 通过分组对结果进行聚合并返回聚合后的结果，比如菜单服务，用 group 区分同一接口的多种实现，现在消费方需从每种 group 中调用一次并返回结果，对结果进行合并之后返回，这样就可以实现聚合菜单项。

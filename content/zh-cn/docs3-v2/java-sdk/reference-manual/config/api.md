@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/config/api/
+description: 以 API 的方式来配置你的 Dubbo 应用
+linkTitle: ' API 配置'
+title: API 配置
 type: docs
-title: "API 配置"
-linkTitle: " API 配置"
 weight: 2
-description: "以 API 的方式来配置你的 Dubbo 应用"
 ---
+
 
 通过 API 编码方式组装配置、启动 Dubbo、发布及订阅服务。此方式可以支持动态创建 ReferenceConfig/ServiceConfig，结合泛化调用可以满足 API Gateway 或测试平台的需要。
 

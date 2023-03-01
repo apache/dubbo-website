@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Pixiu 常见问题"
-linkTitle: "Pixiu 常见问题"
-weight: 3
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/overview/faq/
 description: Pixiu 常见问题
+linkTitle: Pixiu 常见问题
+title: Pixiu 常见问题
+type: docs
+weight: 3
 ---
+
 
 
 ### 常见问题 Q1

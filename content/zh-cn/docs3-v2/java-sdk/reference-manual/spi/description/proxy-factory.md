@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/proxy-factory/
+description: 动态代理扩展
+linkTitle: 动态代理扩展
+title: 动态代理扩展
 type: docs
-title: "动态代理扩展"
-linkTitle: "动态代理扩展"
 weight: 12
 ---
+
 
 ## 扩展说明
 

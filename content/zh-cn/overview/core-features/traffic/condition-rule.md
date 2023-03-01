@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "条件路由规则"
-linkTitle: "条件路由"
-weight: 10
+aliases:
+    - /zh/overview/core-features/traffic/condition-rule/
 description: ""
+linkTitle: 条件路由
+title: 条件路由规则
+type: docs
+weight: 10
 ---
+
 
 条件路由规则将符合特定条件的请求转发到特定的地址实例子集上。规则首先对发起流量的请求参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。
 

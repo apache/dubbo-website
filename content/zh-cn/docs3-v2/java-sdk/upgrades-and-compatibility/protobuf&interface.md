@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/protobuf&interface/
+description: Protobuf 与 Interface 差异对比指南
+linkTitle: Protobuf vs Interface
+title: Protobuf 与 Interface
 type: docs
-title: "Protobuf 与 Interface"
-linkTitle: "Protobuf vs Interface"
 weight: 6
-description: "Protobuf 与 Interface 差异对比指南"
 ---
+
 本文对比了Protobuf和Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。
 
 ## 1. 数据类型

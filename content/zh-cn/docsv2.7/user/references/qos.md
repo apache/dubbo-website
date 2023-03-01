@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/qos/
+description: 新版本 telnet 命令使用说明
+linkTitle: QOS 手册
+title: 在线运维命令参考手册
 type: docs
-title: "在线运维命令参考手册"
-linkTitle: "QOS 手册"
 weight: 11
-description: "新版本 telnet 命令使用说明"
 ---
+
 
 dubbo `2.5.8` 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
 
@@ -238,6 +241,3 @@ dubbo.application.qosEnable=true
 dubbo.application.qosPort=33333
 dubbo.application.qosAcceptForeignIp=false
 ```
-
-
-

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/rust-sdk/unix-transport/
+description: 介绍使用 Dubbo Rust Triple 协议使用 Unix 套接字连接器实现通信。
+linkTitle: 使用Unix套接字连接器通信
+title: 使用Unix套接字连接器通信
 type: docs
-title: "使用Unix套接字连接器通信"
-linkTitle: "使用Unix套接字连接器通信"
 weight: 3
-description: "介绍使用 Dubbo Rust Triple 协议使用 Unix 套接字连接器实现通信。"
 ---
+
 
 本文重点讲解 Dubbo Rust Triple 协议使用Unix 套接，请先查看 [Quick Start](../quick-start) 了解 Dubbo Rust 基本使用，在此查看本文的[完整示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
 

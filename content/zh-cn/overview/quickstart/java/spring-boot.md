@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/quickstart/java/spring-boot/
+description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring Boot 快速开发微服务应用。
+linkTitle: Dubbo x Spring Boot 开发微服务应用
+title: 3 - Dubbo x Spring Boot 开发微服务应用
 type: docs
-title: "3 - Dubbo x Spring Boot 开发微服务应用"
-linkTitle: "Dubbo x Spring Boot 开发微服务应用"
 weight: 3
-description: "本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring Boot 快速开发微服务应用。"
 ---
+
 
 ## 目标
 

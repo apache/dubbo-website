@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/version/
+description: 查看历史版本文档
+linkTitle: 查看历史版本文档
 title: 查看历史版本文档
 type: docs
-linkTitle: 查看历史版本文档
 weight: 100
-description: "查看历史版本文档"
 ---
+
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
     <div class="lead"></div><header class="article-meta">

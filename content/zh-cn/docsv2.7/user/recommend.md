@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/recommend/
+description: Dubbo 推荐用法举例
+linkTitle: 推荐用法
+title: 推荐用法
 type: docs
-title: "推荐用法"
-linkTitle: "推荐用法"
 weight: 14
-description: "Dubbo 推荐用法举例" 
 ---
+
 
 ## 在 Provider 端尽量多配置 Consumer 端属性
 

@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/context/
+description: 通过上下文存放当前调用过程中所需的环境信息
+linkTitle: 上下文信息
+title: 上下文信息
 type: docs
-title: "上下文信息"
-linkTitle: "上下文信息"
 weight: 19
-description: "通过上下文存放当前调用过程中所需的环境信息"
 ---
+
 ## 背景
 上下文中存放的是当前调用过程中所需的环境信息。所有配置信息都将转换为 URL 的参数，参见 [schema 配置参考手册](../../references/xml) 中的**对应URL参数**一列。
 

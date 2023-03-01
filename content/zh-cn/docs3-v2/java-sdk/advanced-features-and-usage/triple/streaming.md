@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "Streaming 通信模式"
-linkTitle: "Streaming 通信模式"
-weight: 3
+aliases:
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/triple/streaming/
 description: ""
+linkTitle: Streaming 通信模式
+title: Streaming 通信模式
+type: docs
+weight: 3
 ---
+
 
 具体用例可以参考：[dubbo-samples-triple/pojo](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo);
 

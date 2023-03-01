@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/tasks/develop/service_reference/
+description: 通过示例简单展示一个Dubbo服务的发布和调用
+linkTitle: 发布和调用 Dubbo 服务
+title: 开发服务
 type: docs
-title: "开发服务"
-linkTitle: "发布和调用 Dubbo 服务"
 weight: 2
-description: "通过示例简单展示一个Dubbo服务的发布和调用"
 ---
+
 ## 发布和调用
 通过一个简单的Springboot实例代码，展示Dubbo服务的发布和调用
 

@@ -1,11 +1,14 @@
 ---
-type: docs
-title: "Skywalking"
-linkTitle: "Skywalking"
+aliases:
+    - /zh/overview/tasks/observability/tracing/skywalking/
 description: ""
-weight: 20
+linkTitle: Skywalking
 no_list: true
+title: Skywalking
+type: docs
+weight: 20
 ---
+
 
 # Overview
 Apache Dubbo has inbuilt tracing through [Micrometer Observations](https://micrometer.io/)

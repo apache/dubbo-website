@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/overview/tasks/troubleshoot/no-provider/
+description: 在 Dubbo 抛出地址找不到异常的时候的排查思路
+linkTitle: 地址找不到异常
+title: 地址找不到异常
 type: docs
-title: "地址找不到异常"
-linkTitle: "地址找不到异常"
 weight: 20
-description: "在 Dubbo 抛出地址找不到异常的时候的排查思路"
 ---
+
 
 在开发与生产部署过程中，由于 Dubbo 是一个需要基于服务发现功能进行调用的框架，很容易由于各种客观原因出现 `No Provder` 的异常，本文旨在通过体系化的排查思路，让您能够在异常的时候快速定位原因并解决。
 
@@ -594,5 +597,3 @@ dubbo>
 
 注：采集路由信息会消耗一定的性能，排查完毕后请及时关闭。
 参考文档：[路由状态命令](/zh-cn/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/)
-
-

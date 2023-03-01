@@ -1,8 +1,12 @@
 ---
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
+description: 查看 RPC 调用的监控信息
 title: 查看 RPC 调用的监控信息
 type: docs
 weight: 1
 ---
+
 
 ## 1. 准备工作
 
@@ -47,5 +51,3 @@ dubbo_provider_service_rt{group="",method="SayHello",service="api.Greeter",timeo
 ```
 
 可看到当前最近一次请求 rt 为 41084 ns。
-
-

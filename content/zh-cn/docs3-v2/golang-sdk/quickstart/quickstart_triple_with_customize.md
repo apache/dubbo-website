@@ -1,9 +1,12 @@
 ---
-type: docs
-title: 完成一次自己定义接口的版本 RPC 调用
-weight: 3
+aliases:
+    - /zh/docs3-v2/golang-sdk/quickstart/quickstart_triple_with_customize/
 description: 完成一次 RPC 调用自己定义接口的版本
+title: 完成一次自己定义接口的版本 RPC 调用
+type: docs
+weight: 3
 ---
+
 
 ## 1.实现概述
 我们本章来实现一个简单的小需求，实现一个分布式ID生成服务，通过该服务可以获取分布式ID
@@ -205,4 +208,3 @@ go run cmd/client.go
 ```
 > ## 更多
 > 可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考[注册中心](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/)
-

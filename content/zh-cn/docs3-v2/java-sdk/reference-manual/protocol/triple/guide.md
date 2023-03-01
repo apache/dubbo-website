@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/guide/
+description: 协议使用方式
+linkTitle: 协议使用方式
+title: 协议使用方式
 type: docs
-title: "协议使用方式"
-linkTitle: "协议使用方式"
 weight: 2
 ---
+
 
 Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在协议层面扩展了负载均衡和流量控制相关机制。本文档旨在指导用户正确的使用 Triple 协议。
 
@@ -279,6 +283,3 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 省略上文中的 1-3 步，指定 Provider 和 Consumer 使用的协议即可完成协议升级。
 
 > 本文的示例可以在 [triple-samples](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple) 找到
-
-
-   

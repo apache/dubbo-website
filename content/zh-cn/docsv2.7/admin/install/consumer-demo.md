@@ -1,9 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/install/consumer-demo/
+description: 示例消费者安装
+linkTitle: 示例消费者安装
+title: 示例消费者安装
 type: docs
-title: "示例消费者安装"
-linkTitle: "示例消费者安装"
 weight: 3
 ---
+
 
 安装:
 

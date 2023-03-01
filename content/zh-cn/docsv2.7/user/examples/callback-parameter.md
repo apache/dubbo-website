@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/callback-parameter/
+description: 通过参数回调从服务器端调用客户端逻辑
+linkTitle: 参数回调
+title: 参数回调
 type: docs
-title: "参数回调"
-linkTitle: "参数回调"
 weight: 23
-description: "通过参数回调从服务器端调用客户端逻辑"
 ---
+
 ## 背景
 参数回调方式与调用本地 callback 或 listener 相同，只需要在 Spring 的配置文件中声明哪个参数是 callback 类型即可。Dubbo 将基于长连接生成反向代理，这样就可以从服务器端调用客户端逻辑。可以参考 [dubbo 项目中的示例代码](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-callback)。
 

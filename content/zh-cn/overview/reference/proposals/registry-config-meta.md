@@ -1,10 +1,13 @@
 ---
-type: docs
-title: "注册中心、配置中心和元数据中心"
-linkTitle: "注册&配置&元数据中心"
-weight: 31
+aliases:
+    - /zh/overview/reference/proposals/registry-config-meta/
 description: ""
+linkTitle: 注册&配置&元数据中心
+title: 注册中心、配置中心和元数据中心
+type: docs
+weight: 31
 ---
+
 ## 三中心逻辑架构
 > 本节侧重描述传统模式下的 Dubbo 部署架构，在云原生背景下的部署架构会有些变化，主要体现在基础设施（Kubernetes、Service Mesh等）会承担更多的职责，
 > 中心化组件如注册中心、元数据中心、配置中心等的职责被集成、运维变得更加简单，但通过强调这些中心化的组件能让我们更容易理解 Dubbo 的工作原理。

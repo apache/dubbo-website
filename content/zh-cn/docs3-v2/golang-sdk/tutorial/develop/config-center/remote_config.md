@@ -1,8 +1,12 @@
 ---
-type: docs
+aliases:
+    - /zh/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
+description: 远程加载配置启动
 title: 远程加载配置启动
+type: docs
 weight: 3
 ---
+
 
 # 远程加载配置启动
 
@@ -43,5 +47,3 @@ dubbo:
 #      GreeterProvider:
 #        interface: com.apache.dubbo.sample.basic.IGreeter # must be compatible with grpc or dubbo-java
 ```
-
-

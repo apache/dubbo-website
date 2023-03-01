@@ -1,10 +1,13 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/parameter-validation/
+description: 在 Dubbo 中进行参数验证
+linkTitle: 参数验证
+title: 参数验证
 type: docs
-title: "参数验证"
-linkTitle: "参数验证"
 weight: 14
-description: "在 Dubbo 中进行参数验证"
 ---
+
 ## 背景
 参数验证功能是基于 [JSR303](https://jcp.org/en/jsr/detail?id=303) 实现的，用户只需标识 JSR303 标准的验证 annotation，并通过声明 filter 来实现验证。
 
@@ -191,4 +194,3 @@ public class ValidationConsumer {
 
 验证方式可扩展，扩展方式参见开发者手册中的[验证扩展](../../../dev/impls/validation)
 {{% /alert %}}
-

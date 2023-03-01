@@ -1,11 +1,14 @@
 ---
-type: docs
-title: "通过网关将 http 流量接入 Dubbo 后端服务"
-linkTitle: "HTTP网关"
-weight: 2
-description: >
+aliases:
+    - /zh/overview/tasks/ecosystem/gateway/
+description: |
     本文为大家介绍了如何借助 Apache APISIX 实现 Dubbo Service 的代理，通过引入 dubbo-proxy 插件便可为 Dubbo 框架的后端系统构建更简单更高效的流量链路
+linkTitle: HTTP网关
+title: 通过网关将 http 流量接入 Dubbo 后端服务
+type: docs
+weight: 2
 ---
+
 
 更多网关接入案例，请参考 [官方博客]({{< relref "../../../../blog/integration/how-to-proxy-dubbo-in-apache-shenyu" >}})
 
