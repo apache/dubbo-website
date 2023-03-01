@@ -9,6 +9,7 @@ weight: 3
 ---
 
 
+
 API 属性与配置项一对一，各属性含义，请参见：[配置参考手册](../../references/xml/)，比如：`ApplicationConfig.setName("xxx")` 对应  `<dubbo:application name="xxx" />` [^1]
 
 ## 服务提供者

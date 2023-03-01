@@ -8,6 +8,7 @@ type: docs
 weight: 1
 ---
 
+
 ## 功能说明
 Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。
 

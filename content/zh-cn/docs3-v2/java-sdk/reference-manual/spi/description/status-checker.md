@@ -9,6 +9,7 @@ weight: 21
 ---
 
 
+
 ## 扩展说明
 
 检查服务依赖各种资源的状态，此状态检查可同时用于 telnet 的 status 命令和 hosting 的 status 页面。

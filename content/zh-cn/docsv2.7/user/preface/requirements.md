@@ -9,6 +9,7 @@ weight: 1
 ---
 
 
+
 ![image](/imgs/user/dubbo-service-governance.jpg)
 
 在大规模服务化之前，应用可能只是通过 RMI 或 Hessian 等工具，简单的暴露和引用远程服务，通过配置服务的URL地址进行调用，通过 F5 等硬件进行负载均衡。

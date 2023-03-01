@@ -9,6 +9,7 @@ weight: 4
 ---
 
 
+
 建议使用 `dubbo-2.3.3` 以上版本的 zookeeper [^1] 注册中心客户端。
 
 Dubbo 未对 Zookeeper 服务器端做任何侵入修改，只需安装原生的 Zookeeper 服务器即可，所有注册中心逻辑适配都在调用 Zookeeper 客户端时完成。

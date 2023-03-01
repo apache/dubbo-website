@@ -9,6 +9,7 @@ weight: 2
 
 
 
+
 ## 1. 生成 Demo 项目
 
 使用安装好的 dubbogo-cli 工具，创建demo工程。

@@ -10,6 +10,7 @@ weight: 11
 
 
 
+
 ## 特性说明
 基于 WebService 的远程调用协议，基于 [Apache CXF](http://cxf.apache.org) 的 `frontend-simple` 和 `transports-http` 实现。`2.3.0` 以上版本支持。
 

@@ -9,6 +9,7 @@ weight: 1
 ---
 
 
+
 遵循以下步骤，可以轻松掌握如何开发符合 Service Mesh 架构的 Dubbo 服务，并将其部署到 Kubernetes 并接入 Istio 的流量治理体系。在此查看 [完整示例源码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s)
 
 ## 1 总体目标

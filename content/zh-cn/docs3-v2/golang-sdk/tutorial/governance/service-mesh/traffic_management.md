@@ -8,6 +8,7 @@ weight: 3
 ---
 
 
+
 在本节中，我们将延续上一个任务[【在 Istio 环境部署 Dubbo-go 应用】](../deploy/)。
 
 在之前的任务中，我们在集群中部署了一组 Dubbo-go Server和 Client 端应用，验证了服务发现和调用成功。在本节中，我们将创建新版本的 Server 端应用。通过配置 VirtualService 和 DestinationRule ，实现路由管理，和流量转移能力

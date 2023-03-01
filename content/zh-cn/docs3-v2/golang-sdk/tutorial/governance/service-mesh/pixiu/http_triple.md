@@ -8,6 +8,7 @@ weight: 1
 ---
 
 
+
 ## 1. 准备工作
 
 - kubectl

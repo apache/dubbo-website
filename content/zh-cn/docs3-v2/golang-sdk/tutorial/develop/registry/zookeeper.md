@@ -9,6 +9,7 @@ weight: 11
 
 
 
+
 ## 1. 准备工作
 
 - dubbo-go cli 工具和依赖工具已安装

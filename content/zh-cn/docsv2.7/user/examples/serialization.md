@@ -9,6 +9,7 @@ weight: 44
 ---
 
 
+
 ## 启用 Kryo 和 FST
 
 使用 Kryo 和 FST 非常简单，只需要在 dubbo RPC 的 XML 配置中添加一个属性即可：

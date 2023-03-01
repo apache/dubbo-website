@@ -9,6 +9,7 @@ weight: 20
 ---
 
 
+
 {{% alert title="Warning" color="warning" %}}
 监控中心也是一个标准的 Dubbo 服务，可以通过注册中心发现，也可以直连。
 {{% /alert %}}

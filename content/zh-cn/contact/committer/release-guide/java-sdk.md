@@ -10,6 +10,7 @@ weight: 2
 
 
 
+
 ## 理解 Apache 发布的内容和流程
 
 总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。

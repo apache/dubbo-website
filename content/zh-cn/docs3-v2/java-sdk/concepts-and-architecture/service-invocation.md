@@ -9,6 +9,7 @@ weight: 4
 ---
 
 
+
 ![dubbo-architucture](/imgs/v3/concepts/invoke-arch.jpg)
 
 如上图所示，从服务调用的角度来看，Dubbo 在链路中提供了丰富的扩展点，覆盖了负载均衡方式、选址前后的拦截器、服务端处理拦截器等。

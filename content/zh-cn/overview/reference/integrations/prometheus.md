@@ -8,6 +8,7 @@ type: docs
 weight: 2
 ---
 
+
 ## 安装
 
 ### Linux

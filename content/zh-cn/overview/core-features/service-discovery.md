@@ -13,6 +13,7 @@ weight: 10
 ---
 
 
+
 Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持常用的注册中心如 Nacos、Consul、Zookeeper 等。
 
 以下是 Dubbo 服务发现机制的基本工作原理图：

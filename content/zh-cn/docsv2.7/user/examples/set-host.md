@@ -9,6 +9,7 @@ weight: 37
 ---
 
 
+
 ## 背景
 
 在 Dubbo 中， Provider 启动时主要做两个事情，一是启动 server，二是向注册中心注册服务。启动 server 时需要绑定 socket，向注册中心注册服务时也需要发送 socket 唯一标识服务地址。

@@ -10,6 +10,7 @@ weight: 60
 
 
 
+
 ## 1 介绍
 
 FST序列化全称是Fast Serialization，它是对Java序列化的替换实现。既然前文中提到Java序列化的两点严重不足，在FST中得到了较大的改善，FST的特征如下：

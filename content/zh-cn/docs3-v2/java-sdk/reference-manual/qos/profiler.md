@@ -9,6 +9,7 @@ weight: 7
 ---
 
 
+
 性能采样功能可以对 Dubbo 处理链路上的各处耗时进行检测，在出现超时的时候 `( usageTime / timeout > profilerWarnPercent * 100 )` 通过日志记录调用的耗时。
 
 此功能分为 `simple profiler` 和 `detail profiler` 两个模式，其中 `simple profiler` 模式默认开启，`detail profiler` 模式默认关闭。

@@ -8,6 +8,7 @@ type: docs
 weight: 2
 ---
 
+
 ## 发布和调用
 通过一个简单的Springboot实例代码，展示Dubbo服务的发布和调用
 

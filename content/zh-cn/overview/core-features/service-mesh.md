@@ -13,6 +13,7 @@ weight: 80
 ---
 
 
+
 Dubbo Mesh 是 Dubbo 在云原生背景的微服务整体解决方案，它帮助开发者实现 Dubbo 服务与标准的 Kubernetes Native Service 体系的打通，让 Dubbo 应用能够无缝接入 Istio 等业界主流服务网格产品。
 
 以下是 Dubbo Mesh 的部署架构图

@@ -8,6 +8,7 @@ type: docs
 weight: 34
 ---
 
+
 ## 背景
 {{% alert title="提示" color="primary" %}}
 本文描述的是新版本规则配置，而不是[老版本配置规则](../config-rule-deprecated) 

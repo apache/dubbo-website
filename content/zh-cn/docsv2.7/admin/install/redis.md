@@ -9,6 +9,7 @@ weight: 4
 ---
 
 
+
 Redis [^1] 使用方式参见: [Redis 注册中心参考手册](/zh-cn/docsv2.7/user/references/registry/redis/)。
 
 只需搭一个原生的 Redis 服务器，并将[快速启动](/zh-cn/docsv2.7/user/quick-start/)中 Provider 和 Consumer 里的 `conf/dubbo.properties` 中的 `dubbo.registry.address` 的值改为 `redis://127.0.0.1:6379` 即可使用。

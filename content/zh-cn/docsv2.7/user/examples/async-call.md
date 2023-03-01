@@ -8,6 +8,7 @@ type: docs
 weight: 21
 ---
 
+
 ## 背景
 
 从 2.7.0 开始，Dubbo 的所有异步编程接口开始以 [CompletableFuture](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html) 为基础

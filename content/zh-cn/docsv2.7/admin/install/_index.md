@@ -9,6 +9,7 @@ weight: 2
 ---
 
 
+
 你可以只运行 Demo Provider 和 Demo Consumer，它们缺省配置为通过 Multicast  [^1] 注册中心广播互相发现，建议在不同机器上运行，如果在同一机器上，需设置 `unicast=false`：即： `multicast://224.5.6.7:1234?unicast=false`，否则发给消费者的单播消息可能被提供者抢占，两个消费者在同一台机器也一样，只有 multicast 注册中心有此问题。
 
 你也可以运行多个 Demo Provider 和 Demo Consumer，来验证软负载均衡，Demo Consumer 可以直接启动多个实例，而多个 Demo Provider 因有端口冲突，可在不同机器上运行，或者修改 Demo Provider 安装目录下 `conf/dubbo.properties` 配置中的 `dubbo.protocol.port` 的值。

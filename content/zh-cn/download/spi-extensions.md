@@ -8,6 +8,7 @@ weight: 60
 ---
 
 
+
 ## 验证
 
 可以按照这里的[步骤](https://www.apache.org/info/verification), 利用[KEYS](https://downloads.apache.org/dubbo/KEYS)文件来验证下载。

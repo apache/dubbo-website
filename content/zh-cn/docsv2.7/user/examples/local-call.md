@@ -8,6 +8,7 @@ type: docs
 weight: 22
 ---
 
+
 ## 背景
 本地调用使用了 injvm 协议，是一个伪协议，它不开启端口，不发起远程调用，只在 JVM 内直接关联，但执行 Dubbo 的 Filter 链。
 

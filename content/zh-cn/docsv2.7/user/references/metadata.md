@@ -9,6 +9,7 @@ weight: 5
 ---
 
 
+
 ## 背景
 
 dubbo provider中的服务配置项有接近[30个配置项](/zh-cn/docsv2.7/user/references/xml/dubbo-provider/)。 排除注册中心服务治理需要之外，很大一部分配置项是provider自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以key-value形式持久化存储。

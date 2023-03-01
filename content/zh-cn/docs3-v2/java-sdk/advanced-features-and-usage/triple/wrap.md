@@ -9,6 +9,7 @@ weight: 2
 ---
 
 
+
 这篇教程会通过从零构建一个简单的工程来演示如何基于 POJO 方式使用 Dubbo Triple, 在应用不改变已有接口定义的同时升级到 Triple 协议。**此模式下 Triple 使用方式与 Dubbo 协议一样。**
 
 具体用例可以参考：[dubbo-samples-triple/pojo](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo);

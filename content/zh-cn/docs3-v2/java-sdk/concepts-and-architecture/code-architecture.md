@@ -10,6 +10,7 @@ weight: 2
 
 
 
+
 ## 整体设计
 
 ![/dev-guide/images/dubbo-framework.jpg](/imgs/dev/dubbo-framework.jpg)

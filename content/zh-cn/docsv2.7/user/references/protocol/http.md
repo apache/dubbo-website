@@ -9,6 +9,7 @@ weight: 3
 ---
 
 
+
 基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现
 
 {{% alert title="提示" color="primary" %}}

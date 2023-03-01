@@ -9,6 +9,7 @@ weight: 18
 ---
 
 
+
 * 下载源码： git clone https://github.com/apache/dubbo.git  
 * 编译benchmark: cd dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install  
 * 解压 benchmark压缩包： dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz 

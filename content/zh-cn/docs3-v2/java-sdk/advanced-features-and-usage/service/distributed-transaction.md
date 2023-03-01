@@ -8,6 +8,7 @@ type: docs
 weight: 42
 ---
 
+
 ## 特性说明
 分布式事务基于 JTA/XA 规范实现。
 

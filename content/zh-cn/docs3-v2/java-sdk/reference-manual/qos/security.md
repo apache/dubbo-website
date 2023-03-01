@@ -9,6 +9,7 @@ weight: 9
 ---
 
 
+
 Dubbo 支持通过 QoS 命令实时查看当前的配置信息以及可信/不可信类列表。目前共支持两个命令：`serializeCheckStatus` 查看当前配置信息，`serializeWarnedClasses` 查看实时的告警列表。
 
 ### `serializeCheckStatus` 命令

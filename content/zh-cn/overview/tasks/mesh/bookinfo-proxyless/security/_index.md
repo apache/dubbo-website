@@ -10,6 +10,7 @@ weight: 20
 ---
 
 
+
 通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系，如何配置认证鉴权体系。
 
 {{< blocks/section color="white" height="auto">}}

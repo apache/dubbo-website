@@ -9,6 +9,7 @@ weight: 10
 ---
 
 
+
 ![architecture](/imgs/v3/concepts/architecture-2.png)
 
 以上是 Dubbo 的工作原理图，从抽象架构上分为两层：**服务治理抽象控制面** 和 **Dubbo 数据面** 。

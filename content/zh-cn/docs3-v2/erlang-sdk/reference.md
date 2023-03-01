@@ -9,6 +9,7 @@ weight: 2
 ---
 
 
+
 ## 基础配置
 
 消费者配置项需要添加到 `sys.config` 文件 `dubboerl` 应用配置项里。

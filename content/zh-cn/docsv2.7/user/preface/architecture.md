@@ -9,6 +9,7 @@ weight: 3
 ---
 
 
+
 ![dubbo-architucture](/imgs/user/dubbo-architecture.jpg)
 
 ### 节点角色说明

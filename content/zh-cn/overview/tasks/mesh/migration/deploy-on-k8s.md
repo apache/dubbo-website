@@ -9,6 +9,7 @@ weight: 2
 ---
 
 
+
 可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 [完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes)
 
 ## 1 总体目标

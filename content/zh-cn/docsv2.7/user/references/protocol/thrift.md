@@ -10,6 +10,7 @@ weight: 4
 
 
 
+
 当前 dubbo 支持的 thrift 协议是对 thrift 原生协议 [^1] 的扩展，在原生协议的基础上添加了一些额外的头信息，比如 service name，magic number 等。
 
 {{% alert title="提示" color="primary" %}}

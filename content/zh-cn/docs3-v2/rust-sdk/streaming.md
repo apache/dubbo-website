@@ -9,6 +9,7 @@ weight: 3
 ---
 
 
+
 本文重点讲解 Dubbo Rust Streaming 通信模式，请先查看 [Quick Start](../quick-start) 了解 Dubbo Rust 基本使用，在此查看本文的[完整示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
 
 ## 1 IDL 中增加 Streaming 模型定义

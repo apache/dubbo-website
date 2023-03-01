@@ -9,6 +9,7 @@ weight: 1
 ---
 
 
+
 ## 特性说明
 
 此特性基于 Triple 协议和 Project Reactor 实现，`3.1.0` 版本以上支持。用户仅需编写 IDL 文件，并指定 protobuf 插件的相应 Generator，即可生成并使用支持响应式API的 Stub 代码。

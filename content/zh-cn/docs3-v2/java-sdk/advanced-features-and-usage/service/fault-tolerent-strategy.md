@@ -8,6 +8,7 @@ type: docs
 weight: 2
 ---
 
+
 ## 特性说明
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 

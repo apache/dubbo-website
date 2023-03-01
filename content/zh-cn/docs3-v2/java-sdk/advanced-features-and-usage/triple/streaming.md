@@ -9,6 +9,7 @@ weight: 3
 ---
 
 
+
 具体用例可以参考：[dubbo-samples-triple/pojo](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo);
 
 ## 开启 Triple 新特性 —— Stream (流)

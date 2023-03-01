@@ -8,6 +8,7 @@ type: docs
 weight: 4
 ---
 
+
 ## 特性说明
 日志框架适配，自 `2.2.1` 开始，dubbo 开始内置 log4j、slf4j、jcl、jdk 这些日志框架的适配。
 

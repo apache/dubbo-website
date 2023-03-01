@@ -10,6 +10,7 @@ weight: 80
 
 
 
+
 ## 1 介绍
 
 Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。

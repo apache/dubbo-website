@@ -8,6 +8,7 @@ type: docs
 weight: 1
 ---
 
+
 ## 特性说明
 通过对protocol进行配置，dubbo3可以支持端口的协议复用。
 比如使用Triple协议启动端口复用后，可以在相同的端口上为服务增加

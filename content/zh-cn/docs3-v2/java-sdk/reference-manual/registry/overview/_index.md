@@ -9,6 +9,7 @@ weight: 1
 ---
 
 
+
 注册中心是 Dubbo 服务治理的核心组件，Dubbo 依赖注册中心的协调实现服务（地址）发现，自动化的服务发现是微服务实现动态扩缩容、负载均衡、、流量治理的基础。Dubbo 的服务发现机制经历了 Dubbo2 时代的接口级服务发现、Dubbo3 时代的应用级服务发现，具体可参见 [服务发现机制](/zh-cn/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/) 解析了解具体演进过程。
 
 ## 基本使用

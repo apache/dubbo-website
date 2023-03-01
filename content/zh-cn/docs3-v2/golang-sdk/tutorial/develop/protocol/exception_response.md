@@ -8,6 +8,7 @@ weight: 5
 ---
 
 
+
 参考samples [dubbo-go-samples/error](https://github.com/apache/dubbo-go-samples/tree/master/error)
 
 ## 用户异常回传介绍

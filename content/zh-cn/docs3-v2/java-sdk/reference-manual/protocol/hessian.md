@@ -10,6 +10,7 @@ weight: 10
 
 
 
+
 ## 特性说明
 Hessian 协议用于集成 Hessian 的服务，Hessian 底层采用 Http 通讯，采用 Servlet 暴露服务，Dubbo 缺省内嵌 Jetty 作为服务器实现。
 

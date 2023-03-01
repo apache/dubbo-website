@@ -8,6 +8,7 @@ type: docs
 weight: 6
 ---
 
+
 本文对比了Protobuf和Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。
 
 ## 1. 数据类型

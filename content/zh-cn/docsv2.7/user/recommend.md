@@ -9,6 +9,7 @@ weight: 14
 ---
 
 
+
 ## 在 Provider 端尽量多配置 Consumer 端属性
 
 原因如下：

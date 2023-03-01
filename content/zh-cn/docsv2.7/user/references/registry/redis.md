@@ -9,6 +9,7 @@ weight: 3
 ---
 
 
+
 基于 Redis [^1] 实现的注册中心。
 
 {{% alert title="提示" color="primary" %}}

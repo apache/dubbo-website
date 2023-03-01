@@ -9,6 +9,7 @@ weight: 20
 ---
 
 
+
 ## 1 介绍
 
 Nacos /nɑ:kəʊs/ 是 Dynamic Naming and Configuration Service 的首字母简称，一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。

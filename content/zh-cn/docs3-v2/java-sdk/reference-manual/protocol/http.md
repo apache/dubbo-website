@@ -10,6 +10,7 @@ weight: 6
 
 
 
+
 ## 特性说明
 基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现，`2.3.0` 以上版本支持。
 

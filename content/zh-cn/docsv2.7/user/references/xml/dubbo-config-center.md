@@ -9,6 +9,7 @@ weight: 1
 ---
 
 
+
 配置中心。对应的配置类：`org.apache.dubbo.config.ConfigCenterConfig`
 
 | 属性             | 对应URL参数            | 类型                | 是否必填 | 缺省值           | 描述                                                         | 兼容性 |

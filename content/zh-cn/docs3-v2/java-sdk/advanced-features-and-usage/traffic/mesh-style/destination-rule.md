@@ -10,6 +10,7 @@ weight: 2
 
 
 
+
 ### DestinationRule
 `DestinationRule`用来处理目标地址的规则，与`DestinationRule`相关的`ServiceEntry`, `WorkloadEntry`等定义与开源保持一致
 

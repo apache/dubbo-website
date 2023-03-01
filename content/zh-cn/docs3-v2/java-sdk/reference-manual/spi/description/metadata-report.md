@@ -9,6 +9,7 @@ weight: 13
 ---
 
 
+
 ## 设计目的
 请参见 [元数据中心手册](../../../metadata-center/overview/)
 

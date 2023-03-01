@@ -8,6 +8,7 @@ type: docs
 weight: 6
 ---
 
+
 ### 协议说明
 Triple 是 Dubbo3 提出的基于 HTTP2 的开放协议，旨在解决 Dubbo2 私有协议带来的互通性问题。相比于原有 Dubbo2 协议，Triple 有以下优势:
 

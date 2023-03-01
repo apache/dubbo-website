@@ -9,6 +9,7 @@ weight: 20
 ---
 
 
+
 ## 1 介绍
 
 `FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，

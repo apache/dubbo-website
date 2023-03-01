@@ -9,6 +9,7 @@ weight: 5
 ---
 
 
+
 ## 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
 * 安装并启动 [Redis](http://redis.io) 服务

@@ -8,6 +8,7 @@ weight: 6
 ---
 
 
+
 参考samples [dubbo-go-samples/logger](https://github.com/apache/dubbo-go-samples/tree/master/logger)
 
 ## 1. 日志配置

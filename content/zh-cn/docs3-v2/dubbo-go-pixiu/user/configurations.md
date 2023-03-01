@@ -9,6 +9,7 @@ weight: 20
 ---
 
 
+
 ### Pixiu 启动命令
 
 Pixiu 分为两个形态 Gateway 和 Sidecar，目前 Pixiu 可执行程序的命令如下所示，其中 pixiu 是可执行文件名称。注意，-c 后是本地配置文件的绝对路径。

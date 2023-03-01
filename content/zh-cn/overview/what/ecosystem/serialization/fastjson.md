@@ -9,6 +9,7 @@ weight: 40
 ---
 
 
+
 ## 1 介绍
 
 Fastjson 是一个 Java 库，可用于将 Java 对象转换为其 JSON 表示形式。它还可用于将 JSON 字符串转换为等效的 Java 对象。 Fastjson 可以处理任意 Java 对象，包括您没有源代码的预先存在的对象。

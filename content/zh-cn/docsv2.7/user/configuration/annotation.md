@@ -9,6 +9,7 @@ weight: 4
 ---
 
 
+
 {{% alert title="提示" color="primary" %}}
 需要 `2.6.3` 及以上版本支持。 点此查看 [完整示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
 {{% /alert %}}

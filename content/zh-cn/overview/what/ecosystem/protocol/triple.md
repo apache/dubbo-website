@@ -9,6 +9,7 @@ weight: 20
 ---
 
 
+
 ## 概述说明
 
 Triple 协议是 Dubbo3 推出的主力协议。Triple 意为第三代，通过 Dubbo1.0/ Dubbo2.0 两代协议的演进，以及云原生带来的技术标准化浪潮，Dubbo3 新协议 Triple 应运而生。

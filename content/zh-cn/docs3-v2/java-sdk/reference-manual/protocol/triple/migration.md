@@ -9,6 +9,7 @@ weight: 10
 ---
 
 
+
 ## 迁移流程说明
 
 Dubbo2 的用户使用 dubbo 协议 + 自定义序列化，如 hessian2 完成远程调用。

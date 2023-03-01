@@ -9,6 +9,7 @@ weight: 3
 ---
 
 
+
 ## 基本配置
 
 提供者配置项需要添加到 `sys.config` 文件 `dubboerl` 应用配置项里。

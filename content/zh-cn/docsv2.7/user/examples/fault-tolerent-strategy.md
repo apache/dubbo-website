@@ -9,6 +9,7 @@ weight: 2
 ---
 
 
+
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 
 ![cluster](/imgs/user/cluster.jpg)

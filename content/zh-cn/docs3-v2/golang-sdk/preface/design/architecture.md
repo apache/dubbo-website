@@ -8,6 +8,7 @@ type: docs
 ---
 
 
+
 ### 架构说明
 
 ![architecture](/imgs/docs3-v2/golang-sdk/concept/more/architecture/architecture.png)

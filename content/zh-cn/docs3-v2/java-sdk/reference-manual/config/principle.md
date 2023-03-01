@@ -9,6 +9,7 @@ weight: 5
 ---
 
 
+
 以下是一个 Dubbo 属性配置的例子 [dubbo-spring-boot-samples](https://github.com/apache/dubbo-spring-boot-project/tree/master/dubbo-spring-boot-samples)
 
 ```properties

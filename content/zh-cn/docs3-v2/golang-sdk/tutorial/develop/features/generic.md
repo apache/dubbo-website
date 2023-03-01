@@ -8,6 +8,7 @@ weight: 7
 ---
 
 
+
 ## 1. Dubbo-go 泛化调用 Java Server
 
 使用 Triple 协议 + hessian2 序列化方案

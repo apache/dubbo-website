@@ -8,6 +8,7 @@ weight: 4
 ---
 
 
+
 Dubbo-go 发布新版本时更新当前依赖的的版本。
 
 | 依赖 | Dubbo-go     | Triple | protoc-gen-go-triple |

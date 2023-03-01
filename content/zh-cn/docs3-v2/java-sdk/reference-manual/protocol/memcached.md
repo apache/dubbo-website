@@ -8,6 +8,7 @@ type: docs
 weight: 12
 ---
 
+
 ## 特性说明
 基于 memcached 实现的 RPC 协议。 `2.3.0` 以上版本支持。
 

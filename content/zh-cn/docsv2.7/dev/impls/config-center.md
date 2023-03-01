@@ -9,6 +9,7 @@ weight: 13
 ---
 
 
+
 ## 设计目的
 
 配置中心的核心功能是作为 Key-Value 存储，Dubbo 框架告知配置中心其关心的 key，配置中心返回该key对应的 value 值。

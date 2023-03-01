@@ -9,6 +9,7 @@ weight: 2
 ---
 
 
+
 ## 1 预备工作
 - 了解 [Dubbo 基本开发步骤](/zh-cn/docs3-v2/java-sdk/quick-start/spring-boot/)
 - 参考 [Nacos快速入门](https://nacos.io/zh-cn/docs/quick-start.html) 启动 Nacos server

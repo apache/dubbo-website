@@ -8,6 +8,7 @@ type: docs
 ---
 
 
+
 ## 1. extension 模块与 init 方法
 
 ### 1.1 接口与实现

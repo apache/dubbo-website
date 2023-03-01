@@ -9,6 +9,7 @@ weight: 1
 ---
 
 
+
 ## 功能说明
 
 性能采样功能可以对 Dubbo 处理链路上的各处耗时进行检测，在出现超时的时候 `( usageTime / timeout > profilerWarnPercent * 100 )` 通过日志记录调用的耗时。

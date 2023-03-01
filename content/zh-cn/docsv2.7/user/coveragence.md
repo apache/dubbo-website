@@ -9,6 +9,7 @@ weight: 17
 ---
 
 
+
 * v2.0   Codecov报表 , 从 2017-12-29 后开始统计
   测试覆盖率为 : [![codecov](https://codecov.io/gh/apache/dubbo/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/dubbo) , 可以从 https://codecov.io/gh/apache/dubbo 页面得到覆盖率报表
 * v1.0   基于 `2.0.12` 版本，统计于 2012-02-03

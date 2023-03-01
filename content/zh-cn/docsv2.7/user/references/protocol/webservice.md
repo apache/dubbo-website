@@ -9,6 +9,7 @@ weight: 5
 ---
 
 
+
 基于 WebService 的远程调用协议，基于 [Apache CXF](http://cxf.apache.org) [^1] 的 `frontend-simple` 和 `transports-http` 实现。
 
 {{% alert title="提示" color="primary" %}}

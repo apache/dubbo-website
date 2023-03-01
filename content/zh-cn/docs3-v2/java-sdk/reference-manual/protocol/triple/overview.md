@@ -9,6 +9,7 @@ weight: 1
 ---
 
 
+
 ## 概述说明
 
 `Triple` 协议的格式和原理请参阅 [RPC 通信协议](/zh-cn/docs/concepts/rpc-protocol/)

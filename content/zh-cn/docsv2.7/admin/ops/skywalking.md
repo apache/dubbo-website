@@ -9,6 +9,7 @@ weight: 5
 ---
 
 
+
 ## Apache Skywalking 简介
 
 [Apache Skywalking](https://github.com/apache/skywalking) 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM系统。[Apache Skywalking](https://github.com/apache/skywalking) 通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。[Apache Skywalking](https://github.com/apache/skywalking) 目前支持多种语言，其中包括 [Java](https://github.com/apache/skywalking)，[.Net Core](https://github.com/SkyAPM/SkyAPM-dotnet)，[Node.js](https://github.com/apache/skywalking-nodejs) 和 [Go](https://github.com/SkyAPM/go2sky) 语言。

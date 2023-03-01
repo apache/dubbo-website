@@ -9,6 +9,7 @@ weight: 70
 ---
 
 
+
 ## 1 介绍
 
 Gson是Google公司发布的一个开放源代码的Java库，主要用途为序列化Java对象为JSON字符串，或反序列化JSON字符串成Java对象。

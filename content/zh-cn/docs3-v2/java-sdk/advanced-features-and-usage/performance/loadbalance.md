@@ -8,6 +8,7 @@ type: docs
 weight: 3
 ---
 
+
 ## 功能说明
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `random` 随机调用。
 
