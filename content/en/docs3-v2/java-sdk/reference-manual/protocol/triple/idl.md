@@ -35,7 +35,7 @@ Set JDK version in `pom.xml`
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <dubbo.version>3.1.7<dubbo.version>
+        <dubbo.version>3.1.7</dubbo.version>
     </properties>
    
     <dependencies>
