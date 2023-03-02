@@ -14,6 +14,7 @@ weight: 70
 通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系。
 
 {{< blocks/section color="white" height="auto">}}
+{{< /blocks/section >}}
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

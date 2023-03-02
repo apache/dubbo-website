@@ -71,3 +71,4 @@ weight: 40
 </div>
 <hr>
 </div>
+{{< /blocks/section >}}
