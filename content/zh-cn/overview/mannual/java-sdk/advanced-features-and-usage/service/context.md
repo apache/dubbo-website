@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/context/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/context/
 description: 通过上下文存放当前调用过程中所需的环境信息
 linkTitle: RPC调用上下文
 title: RPC调用上下文
 type: docs
 weight: 6
 ---
+
 
 
 

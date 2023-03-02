@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/router/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/router/
 description: 路由扩展
 linkTitle: 路由扩展
 title: 路由扩展
 type: docs
 weight: 6
 ---
+
 
 
 

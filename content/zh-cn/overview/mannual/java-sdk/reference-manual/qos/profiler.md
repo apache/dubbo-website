@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/qos/profiler/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/profiler/
 description: 性能采样命令
 linkTitle: 性能采样命令
 title: 性能采样命令
 type: docs
 weight: 7
 ---
+
 
 
 

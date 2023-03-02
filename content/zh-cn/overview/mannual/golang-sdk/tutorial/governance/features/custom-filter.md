@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/features/custom-filter/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/custom-filter/
 description: 自定义Filter组件
 title: 自定义Filter组件
 type: docs
 weight: 3
 ---
+
 
 
 

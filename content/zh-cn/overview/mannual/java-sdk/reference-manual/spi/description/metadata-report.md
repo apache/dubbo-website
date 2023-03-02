@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/metadata-report/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/metadata-report/
 description: 元数据中心扩展
 linkTitle: 元数据中心扩展
 title: 元数据中心扩展
 type: docs
 weight: 13
 ---
+
 
 
 

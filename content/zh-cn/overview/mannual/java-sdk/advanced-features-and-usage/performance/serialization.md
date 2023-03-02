@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
 description: 在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）
 linkTitle: Kryo 和 FST 序列化
 title: Kryo 和 FST 序列化
 type: docs
 weight: 46
 ---
+
 
 
 

@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/qos-permission/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/qos-permission/
 description: QoS匿名访问权限验证扩展
 linkTitle: QoS匿名访问权限验证扩展
 title: QoS匿名访问权限验证扩展
 type: docs
 weight: 27
 ---
+
 
 
 

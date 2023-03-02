@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/startup/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/startup/
 description: Startup 启动探针
 linkTitle: 启动探针
 title: Startup 启动探针
 type: docs
 weight: 12
 ---
+
 
 
 

@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/limit/tps_limiter/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/limit/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/limit/tps_limiter/
 description: 为服务端设置限流
 title: 为服务端设置限流
 type: docs
 weight: 3
 ---
+
 
 
 

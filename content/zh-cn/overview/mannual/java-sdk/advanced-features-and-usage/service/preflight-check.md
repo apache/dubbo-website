@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/preflight-check/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/preflight-check/
 description: 在启动时检查依赖的服务是否可用
 linkTitle: 启动时检查
 title: 启动时检查
 type: docs
 weight: 1
 ---
+
 
 
 

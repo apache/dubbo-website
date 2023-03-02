@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/rust-sdk/unix-transport/
-    - /zh-cn/docs3-v2/rust-sdk/
+    - /zh-cn/docs3-v2/rust-sdk/unix-transport/
 description: 介绍使用 Dubbo Rust Triple 协议使用 Unix 套接字连接器实现通信。
 linkTitle: 使用Unix套接字连接器通信
 title: 使用Unix套接字连接器通信
 type: docs
 weight: 3
 ---
+
 
 
 

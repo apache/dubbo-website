@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/qos/security/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/security/
 description: 序列化安全审计
 linkTitle: 序列化安全审计
 title: 序列化安全审计
 type: docs
 weight: 9
 ---
+
 
 
 

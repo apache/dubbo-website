@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/dev/trie/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/trie/
 description: Trie 前缀树介绍
 linkTitle: Trie 前缀树介绍
 title: Trie 前缀树介绍
 type: docs
 weight: 2
 ---
+
 
 
 

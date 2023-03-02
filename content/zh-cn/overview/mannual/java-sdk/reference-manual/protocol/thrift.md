@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/thrift/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/thrift/
 description: Thrift协议
 linkTitle: Thrift协议
 title: Thrift协议
 type: docs
 weight: 7
 ---
+
 
 
 

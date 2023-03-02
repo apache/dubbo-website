@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-protocols/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-protocols/
 description: 在 Dubbo 中配置多协议
 linkTitle: 多协议
 title: 多协议
 type: docs
 weight: 9
 ---
+
 
 
 

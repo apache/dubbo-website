@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
 description: Streaming 通信
 linkTitle: Streaming 通信
 title: Streaming 通信
 type: docs
 weight: 10
 ---
+
 
 
 

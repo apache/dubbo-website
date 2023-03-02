@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/desc/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/desc/
 description: 了解注册中心
 title: 了解注册中心
 type: docs
 weight: 1
 ---
+
 
 
 

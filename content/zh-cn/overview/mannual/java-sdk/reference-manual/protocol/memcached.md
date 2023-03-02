@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/memcached/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/memcached/
 description: Memcached协议
 linkTitle: Memcached协议
 title: Memcached协议
 type: docs
 weight: 12
 ---
+
 
 
 

@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/protocol/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/protocol/
 description: 协议扩展
 linkTitle: 协议扩展
 title: 协议扩展
 type: docs
 weight: 1
 ---
+
 
 
 

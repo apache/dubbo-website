@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/observability/logging/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/logging/
 description: 日志管理
 hide_summary: true
 linkTitle: 日志管理
@@ -10,6 +10,7 @@ title: 日志管理
 type: docs
 weight: 3
 ---
+
 
 
 

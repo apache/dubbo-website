@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
 description: Istio 环境部署 Dubbo-go 应用
 title: Istio 环境部署 Dubbo-go 应用
 type: docs
 weight: 2
 ---
+
 
 
 

@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/traffic_management/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/traffic_management/
 description: 流量管理
 title: 流量管理
 type: docs
 weight: 3
 ---
+
 
 
 

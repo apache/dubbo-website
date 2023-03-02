@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-reference/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-reference/
 description: 不需要服务端 API 的 RPC 调用
 linkTitle: 泛化调用
 title: 泛化调用（客户端泛化）
 type: docs
 weight: 4
 ---
+
 
 
 

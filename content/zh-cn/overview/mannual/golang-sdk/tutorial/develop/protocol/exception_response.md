@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/protocol/exception_response/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/protocol/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/protocol/exception_response/
 description: Triple 异常回传
 title: Triple 异常回传
 type: docs
 weight: 5
 ---
+
 
 
 

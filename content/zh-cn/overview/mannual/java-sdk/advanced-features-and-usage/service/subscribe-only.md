@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/subscribe-only/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/subscribe-only/
 description: 只订阅不注册
 linkTitle: 只订阅
 title: 只订阅
 type: docs
 weight: 6
 ---
+
 
 
 

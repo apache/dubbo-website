@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/dump/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/dump/
 description: 在 Dubbo 自动导出线程堆栈来保留现场
 linkTitle: 导出线程堆栈
 title: 导出线程堆栈
 type: docs
 weight: 43
 ---
+
 
 
 

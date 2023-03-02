@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/triple/idl/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/triple/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/triple/idl/
 description: ""
 linkTitle: 使用 IDL + Protobuf 跨语言定义服务
 title: 使用 IDL + Protobuf 跨语言定义服务
 type: docs
 weight: 1
 ---
+
 
 
 

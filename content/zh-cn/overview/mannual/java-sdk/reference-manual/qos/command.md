@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/qos/command/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/command/
 description: 基础命令手册
 linkTitle: 基础命令手册
 title: 基础命令手册
 type: docs
 weight: 2
 ---
+
 
 
 

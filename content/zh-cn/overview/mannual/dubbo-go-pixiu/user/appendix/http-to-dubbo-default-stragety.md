@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/user/appendix/http-to-dubbo-default-stragety/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/appendix/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/appendix/http-to-dubbo-default-stragety/
 description: HTTP to Dubbo 默认转换协议
 linkTitle: HTTP to Dubbo 默认转换协议
 title: HTTP to Dubbo 默认转换协议
 type: docs
 weight: 10
 ---
+
 
 
 

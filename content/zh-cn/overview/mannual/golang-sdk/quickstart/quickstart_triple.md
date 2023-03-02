@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/quickstart/quickstart_triple/
-    - /zh-cn/docs3-v2/golang-sdk/quickstart/
+    - /zh-cn/docs3-v2/golang-sdk/quickstart/quickstart_triple/
 description: 完成一次 RPC 调用
 title: 完成一次 RPC 调用
 type: docs
 weight: 2
 ---
+
 
 
 

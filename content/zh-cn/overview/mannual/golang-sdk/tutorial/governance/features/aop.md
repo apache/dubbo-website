@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/features/aop/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/aop/
 description: 自定义服务调用中间件
 title: 自定义服务调用中间件
 type: docs
 weight: 1
 ---
+
 
 
 

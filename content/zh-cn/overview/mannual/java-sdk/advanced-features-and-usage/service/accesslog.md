@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/accesslog/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/accesslog/
 description: 了解 Dubbo 调用信息记录通过访问日志来配置和使用
 linkTitle: 调用信息记录
 title: 调用信息记录
 type: docs
 weight: 13
 ---
+
 
 
 

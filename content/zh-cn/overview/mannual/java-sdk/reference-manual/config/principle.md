@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/principle/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/principle/
 description: Dubbo 配置方式和工作原理的深度解读，包括配置格式、设计思路、来源、加载流程等。
 linkTitle: 配置工作原理
 title: 配置工作原理
 type: docs
 weight: 5
 ---
+
 
 
 

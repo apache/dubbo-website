@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/health/triple-health-check/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/health/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/health/triple-health-check/
 description: 基于Grpc的健康检查
 title: 基于Grpc的健康检查
 type: docs
 weight: 2
 ---
+
 
 
 

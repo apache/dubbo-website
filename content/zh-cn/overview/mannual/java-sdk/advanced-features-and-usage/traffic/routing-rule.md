@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/traffic/routing-rule/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/traffic/routing-rule/
 description: 通过 Dubbo 中的路由规则做服务治理
 linkTitle: 路由规则
 title: 路由规则
 type: docs
 weight: 33
 ---
+
 
 
 

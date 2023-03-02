@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/qos/overview/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/overview/
 description: dubbo 2.5.8 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
 linkTitle: QOS 概述
 title: QOS 概述
 type: docs
 weight: 1
 ---
+
 
 
 

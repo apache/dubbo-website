@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/interflow/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
 description: 与 Java 应用跨语言互通
 title: 与 Java 应用跨语言互通
 type: docs
 weight: 4
 ---
+
 
 
 

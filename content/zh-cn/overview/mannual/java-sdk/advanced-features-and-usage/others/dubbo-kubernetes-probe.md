@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/
 description: 了解 Dubbo 与 Kubernetes 生命周期对齐探针的扩展与应用场景
 linkTitle: Kubernetes 生命周期探针
 title: Kubernetes 生命周期探针
 type: docs
 weight: 5
 ---
+
 
 
 

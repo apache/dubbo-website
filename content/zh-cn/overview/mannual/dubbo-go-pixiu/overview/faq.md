@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/overview/faq/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/overview/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/overview/faq/
 description: Pixiu 常见问题
 linkTitle: Pixiu 常见问题
 title: Pixiu 常见问题
 type: docs
 weight: 3
 ---
+
 
 
 

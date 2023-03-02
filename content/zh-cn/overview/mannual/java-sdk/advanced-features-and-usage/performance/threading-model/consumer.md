@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
 description: Dubbo 消费端线程池模型用法
 linkTitle: 消费端线程模型
 title: 消费端线程模型
 type: docs
 weight: 2
 ---
+
 
 
 

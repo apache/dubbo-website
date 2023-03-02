@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/group-merger/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/group-merger/
 description: 通过分组对结果进行聚合并返回聚合后的结果
 linkTitle: 分组聚合
 title: 分组聚合
 type: docs
 weight: 1
 ---
+
 
 
 

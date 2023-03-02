@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/sourcecode/registry/
-    - /zh-cn/docs3-v2/golang-sdk/sourcecode/
+    - /zh-cn/docs3-v2/golang-sdk/sourcecode/registry/
 description: 注册中心源码解读
 title: 注册中心
 type: docs
 weight: 1
 ---
+
 
 
 

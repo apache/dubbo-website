@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/features/timeout/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/timeout/
 description: 配置调用的超时
 title: 配置调用的超时
 type: docs
 weight: 1
 ---
+
 
 
 

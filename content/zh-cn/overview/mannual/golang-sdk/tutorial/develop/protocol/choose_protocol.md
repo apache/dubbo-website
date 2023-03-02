@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/protocol/choose_protocol/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/protocol/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/protocol/choose_protocol/
 description: 选择使用的网络协议
 keywords: 选择使用的网络协议
 title: 选择使用的网络协议
 type: docs
 ---
+
 
 
 

@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/
 description: 路由状态命令
 linkTitle: 路由状态命令
 title: 路由状态命令
 type: docs
 weight: 8
 ---
+
 
 
 

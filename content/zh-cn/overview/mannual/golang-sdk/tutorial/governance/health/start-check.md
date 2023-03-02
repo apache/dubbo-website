@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/health/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
 description: dubbogo 3.0 启动时检查
 keywords: dubbogo 3.0 启动时检查
 title: dubbogo 3.0  启动时检查
 type: docs
 weight: 4
 ---
+
 
 
 

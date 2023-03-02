@@ -20,12 +20,13 @@ content:
 description: Java SDK 手册
 hide_feedback: true
 hide_summary: true
-no_list: true
 linkTitle: Java SDK
+no_list: true
 title: Java SDK 手册
 type: docs
 weight: 10
 ---
+
 
 
 

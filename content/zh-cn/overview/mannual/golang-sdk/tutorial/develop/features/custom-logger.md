@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/features/custom-logger/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/custom-logger/
 description: 日志
 title: 日志
 type: docs
 weight: 6
 ---
+
 
 
 

@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
 description: ' 了解在 Dubbo 的 TLS 保证传输安全'
 linkTitle: TLS支持
 title: TLS支持
 type: docs
 weight: 1
 ---
+
 
 
 

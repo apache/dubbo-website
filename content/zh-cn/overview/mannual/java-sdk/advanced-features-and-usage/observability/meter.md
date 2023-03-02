@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
 description: 指标埋点
 hide_summary: true
 linkTitle: 指标埋点
@@ -10,6 +10,7 @@ title: 指标埋点
 type: docs
 weight: 1
 ---
+
 
 
 

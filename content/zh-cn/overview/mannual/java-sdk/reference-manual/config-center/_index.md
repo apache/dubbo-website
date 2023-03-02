@@ -13,6 +13,7 @@ weight: 7
 
 
 
+
 配置中心 (config-center) 在 Dubbo 中可承担两类职责：
 
 1. [外部化配置](../config/principle/#33-外部化配置)：启动配置的集中式存储 （简单理解为 dubbo.properties 的外部化存储）。
