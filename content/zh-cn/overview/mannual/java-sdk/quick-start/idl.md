@@ -44,6 +44,7 @@ weight: 11
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <dubbo.version>3.1.7</dubbo.version>
     </properties>
    
     <dependencies>
@@ -56,13 +57,13 @@ weight: 11
        <dependency>
            <groupId>org.apache.dubbo</groupId>
            <artifactId>dubbo</artifactId>
-           <version>3.0.8</version>
+           <version>${dubbo.version}</version>
        </dependency>
        <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo-dependencies-zookeeper-curator5</artifactId>
         <type>pom</type>
-        <version>3.0.8</version>
+        <version>${dubbo.version}</version>
        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
@@ -91,7 +92,7 @@ weight: 11
                             <id>dubbo</id>
                             <groupId>org.apache.dubbo</groupId>
                             <artifactId>dubbo-compiler</artifactId>
-                            <version>0.0.4.1-SNAPSHOT</version>
+                            <version>${dubbo.version}</version>
                             <mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
                         </protocPlugin>
                     </protocPlugins>
