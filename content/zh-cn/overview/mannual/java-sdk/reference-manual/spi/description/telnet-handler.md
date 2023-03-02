@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/telnet-handler/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/telnet-handler/
 description: Telnet 命令扩展
 linkTitle: Telnet 命令扩展
 title: Telnet 命令扩展
 type: docs
 weight: 20
 ---
+
 
 
 

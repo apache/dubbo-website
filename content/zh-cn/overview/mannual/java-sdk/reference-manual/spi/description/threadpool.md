@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/threadpool/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/threadpool/
 description: 线程池扩展
 linkTitle: 线程池扩展
 title: 线程池扩展
 type: docs
 weight: 15
 ---
+
 
 
 

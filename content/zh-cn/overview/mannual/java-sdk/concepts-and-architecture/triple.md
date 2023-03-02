@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/concepts-and-architecture/triple/
-    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/
+    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/triple/
 description: 本文将介绍 Dubbo 的 Triple 协议。
 linkTitle: Triple 协议
 title: Triple 协议
 type: docs
 weight: 6
 ---
+
 
 
 

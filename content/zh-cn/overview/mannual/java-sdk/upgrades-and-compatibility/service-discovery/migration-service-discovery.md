@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/
-    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/
+    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/
 description: 本文档专门针对使用 2.x 版本的老用户，详细阐述了升级到 3.x 后的默认地址注册与发现行为、如何平滑的迁移到新版本的地址模型。
 linkTitle: 接口级服务发现迁移至应用级服务发现指南
 title: 接口级服务发现迁移至应用级服务发现指南
 type: docs
 weight: 10
 ---
+
 
 
 

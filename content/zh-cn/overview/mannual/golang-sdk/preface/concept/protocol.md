@@ -1,11 +1,12 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/preface/concept/protocol/
-    - /zh-cn/docs3-v2/golang-sdk/preface/concept/
+    - /zh-cn/docs3-v2/golang-sdk/preface/concept/protocol/
 description: 网络协议
 title: 网络协议
 type: docs
 ---
+
 
 
 

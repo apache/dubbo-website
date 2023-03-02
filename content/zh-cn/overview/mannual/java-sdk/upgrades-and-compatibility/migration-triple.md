@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
-    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/
+    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
 description: Triple 协议迁移指南
 linkTitle: Dubbo 协议迁移至 Triple 协议
 title: Dubbo 协议迁移至 Triple 协议
 type: docs
 weight: 7
 ---
+
 
 
 

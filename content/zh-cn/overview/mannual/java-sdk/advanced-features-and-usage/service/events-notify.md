@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/events-notify/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/events-notify/
 description: 在调用前后出现异常时的事件通知
 linkTitle: 调用触发事件通知
 title: 调用触发事件通知
 type: docs
 weight: 8
 ---
+
 
 
 

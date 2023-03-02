@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/consistent-hash/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/consistent-hash/
 description: 在负载均衡阶段基于一致性哈希进行选址
 linkTitle: 一致性哈希选址
 title: 一致性哈希选址
 type: docs
 weight: 6
 ---
+
 
 
 

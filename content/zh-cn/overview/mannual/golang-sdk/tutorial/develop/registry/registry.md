@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/registry/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/registry/
 description: 注册中心配置
 title: 注册中心配置
 type: docs
 weight: 4
 ---
+
 
 
 

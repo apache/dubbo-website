@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/protocol/error/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/protocol/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/protocol/error/
 description: 异常信息回传
 title: 异常信息回传
 type: docs
 weight: 8
 ---
+
 
 
 

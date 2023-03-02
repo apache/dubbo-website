@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/rust-sdk/java-interoperability/
-    - /zh-cn/docs3-v2/rust-sdk/
+    - /zh-cn/docs3-v2/rust-sdk/java-interoperability/
 description: 使用 Rust 调用 Java 开发的 Dubbo 服务。
 linkTitle: Rust和Java互相调用
 title: Rust和Java互相调用
 type: docs
 weight: 2
 ---
+
 
 
 

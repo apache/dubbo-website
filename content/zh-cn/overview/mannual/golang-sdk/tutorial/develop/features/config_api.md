@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/features/config_api/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/config_api/
 description: 使用配置 API 启动应用
 title: 使用配置 API 启动应用
 type: docs
 weight: 2
 ---
+
 
 
 

@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/api/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/api/
 description: 以 API 的方式来配置你的 Dubbo 应用
 linkTitle: ' API 配置'
 title: API 配置
 type: docs
 weight: 2
 ---
+
 
 
 

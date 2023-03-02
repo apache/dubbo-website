@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
 description: 了解 Dubbo 减少注册中心上服务的注册数据
 linkTitle: 注册信息简化
 title: 注册信息简化
 type: docs
 weight: 3
 ---
+
 
 
 

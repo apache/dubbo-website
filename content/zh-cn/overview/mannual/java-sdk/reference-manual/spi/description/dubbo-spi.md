@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/dubbo-spi/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/dubbo-spi/
 description: 本文介绍了 Dubbo SPI 的原理和实现细节
 linkTitle: 扩展点开发指南
 title: 扩展点开发指南
 type: docs
 weight: 0
 ---
+
 
 
 

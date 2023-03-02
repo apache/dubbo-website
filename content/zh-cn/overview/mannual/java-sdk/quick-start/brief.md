@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/quick-start/brief/
-    - /zh-cn/docs3-v2/java-sdk/quick-start/
+    - /zh-cn/docs3-v2/java-sdk/quick-start/brief/
 description: 本文将基于 Dubbo Samples 示例演示如何快速搭建并部署一个微服务应用。
 linkTitle: 快速部署一个微服务应用
 title: 1 - 零基础快速部署一个微服务应用
 type: docs
 weight: 1
 ---
+
 
 
 

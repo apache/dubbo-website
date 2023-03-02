@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
 description: POJO 方式使用 Triple
 linkTitle: POJO 方式使用 Triple
 title: POJO 方式使用 Triple
 type: docs
 weight: 2
 ---
+
 
 
 

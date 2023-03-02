@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/echo-service/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/echo-service/
 description: 通过回声测试检测 Dubbo 服务是否可用
 linkTitle: 回声测试
 title: 回声测试
 type: docs
 weight: 12
 ---
+
 
 
 

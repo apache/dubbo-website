@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/config-center/config-center-dynamic/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/config-center/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/config-center/config-center-dynamic/
 description: Dubbogo 3.0 配置中心和配置监听
 title: Dubbogo 3.0 配置中心和配置监听
 type: docs
 weight: 2
 ---
+
 
 
 

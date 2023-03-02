@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/spi/description/status-checker/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/status-checker/
 description: 状态检查扩展
 linkTitle: 状态检查扩展
 title: 状态检查扩展
 type: docs
 weight: 21
 ---
+
 
 
 

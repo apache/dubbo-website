@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-registry/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-registry/
 description: 在 Dubbo 中把同一个服务注册到多个注册中心上
 linkTitle: 多注册中心
 title: 多注册中心
 type: docs
 weight: 10
 ---
+
 
 
 

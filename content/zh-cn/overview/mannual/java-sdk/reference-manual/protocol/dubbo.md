@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
 description: Dubbo协议
 linkTitle: Dubbo协议
 title: Dubbo协议
 type: docs
 weight: 2
 ---
+
 
 
 

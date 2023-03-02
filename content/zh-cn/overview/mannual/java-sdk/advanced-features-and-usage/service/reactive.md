@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/reactive/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/reactive/
 description: 使用 Reactive API 操作 Triple 流式调用
 linkTitle: 响应式编程
 title: 响应式编程
 type: docs
 weight: 1
 ---
+
 
 
 

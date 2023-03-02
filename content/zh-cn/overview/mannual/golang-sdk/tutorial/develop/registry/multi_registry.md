@@ -1,12 +1,13 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
 description: 多注册中心
 title: 多注册中心
 type: docs
 weight: 100
 ---
+
 
 
 

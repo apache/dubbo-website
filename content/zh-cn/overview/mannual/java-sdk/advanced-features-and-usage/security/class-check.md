@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/
 description: 了解 Dubbo 类检查机制
 linkTitle: 类检查机制
 title: 类检查机制
 type: docs
 weight: 1
 ---
+
 
 
 

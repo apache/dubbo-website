@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/local-call/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/local-call/
 description: 在 Dubbo 中进行本地调用
 linkTitle: 本地调用
 title: 本地调用
 type: docs
 weight: 22
 ---
+
 
 
 

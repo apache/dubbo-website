@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/overview/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/overview/
 description: 协议概述
 linkTitle: 协议概述
 title: 协议概述
 type: docs
 weight: 1
 ---
+
 
 
 

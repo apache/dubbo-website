@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/lazy-connect/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/lazy-connect/
 description: 在 Dubbo 中配置延迟连接
 linkTitle: 延迟连接
 title: 延迟连接
 type: docs
 weight: 30
 ---
+
 
 
 

@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/reference-config-cache/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/reference-config-cache/
 description: 在 Dubbo 中缓存 ReferenceConfig
 linkTitle: 服务引用配置对象缓存
 title: 服务引用配置对象缓存
 type: docs
 weight: 2
 ---
+
 
 
 

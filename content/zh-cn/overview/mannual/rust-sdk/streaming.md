@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/rust-sdk/streaming/
-    - /zh-cn/docs3-v2/rust-sdk/
+    - /zh-cn/docs3-v2/rust-sdk/streaming/
 description: 介绍使用 Dubbo Rust 快速开发 Client streaming、Server streaming、Bidirectional streaming 模型的服务。
 linkTitle: Streaming通信模型
 title: Streaming 通信模型
 type: docs
 weight: 3
 ---
+
 
 
 

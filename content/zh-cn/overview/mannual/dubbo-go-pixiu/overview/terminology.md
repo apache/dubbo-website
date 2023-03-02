@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/dubbo-go-pixiu/overview/terminology/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/overview/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/overview/terminology/
 description: Pixiu 术语
 linkTitle: Pixiu 术语
 title: Pixiu 术语
 type: docs
 weight: 2
 ---
+
 
 
 

@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
 description: Dubbo 服务提供方的异步执行
 linkTitle: 异步执行
 title: 异步执行
 type: docs
 weight: 21
 ---
+
 
 
 

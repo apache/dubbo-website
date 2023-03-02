@@ -1,13 +1,14 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/
 description: 通过缓存结果加速访问速度
 linkTitle: 调用结果缓存
 title: 调用结果缓存
 type: docs
 weight: 7
 ---
+
 
 
 
