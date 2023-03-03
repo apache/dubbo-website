@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/ecosystem/
-description: ""
+description: 微服务生态
 feature:
     description: |
         一站式微服务生态适配：注册中心、网关、限流降级、负载均衡、一致性事务、异步消息、Tracing 等。
