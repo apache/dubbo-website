@@ -1,9 +1,9 @@
 ---
 aliases:
     - /zh/overview/core-features/service-definition/
-description: Dubbo 微服务开发
+description: 微服务开发
 linkTitle: 微服务开发
-title: Dubbo 微服务开发
+title: 微服务开发
 type: docs
 weight: 1
 ---
