@@ -3,7 +3,7 @@ aliases:
     - /zh/overview/reference/proposals/metrics/
 author: Song Xiaosheng
 date: 2023-02-20T00:00:00Z
-description: ""
+description: 指标埋点
 linkTitle: 指标埋点
 title: 指标埋点
 type: docs
