@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/overview/reference/proposals/registry-config-meta/
-description: ""
+description: 本文介绍三中心架构设计
 linkTitle: 注册&配置&元数据中心
 title: 注册中心、配置中心和元数据中心
 type: docs
