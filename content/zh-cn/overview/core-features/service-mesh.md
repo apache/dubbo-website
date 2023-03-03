@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/service-mesh/
-description: ""
+description: 服务网格
 feature:
     description: |
         灵活的数据面 (Proxy & Proxyless) 部署形态支持，无缝接入 Istio 控制面治理体系。
