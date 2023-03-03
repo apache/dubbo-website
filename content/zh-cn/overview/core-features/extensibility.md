@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/extensibility/
-description: ""
+description: 扩展适配
 feature:
     description: |
         一切皆可扩展，通过扩展 (Filter、Router、Service Discovery、Configuration 等) 自定义调用、管控行为，适配开源微服务生态。
