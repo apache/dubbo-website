@@ -1,9 +1,9 @@
 
 ---
 type: docs
-title: "vulnerability"
-linkTitle: "vulnerability"
-description: "Vulnerability descriptions"
+title: "Security"
+linkTitle: "Security"
+description: "Dubbo Security information, such impact of vulnerabilities in upstream components"
 weight: 90
 ---
 
