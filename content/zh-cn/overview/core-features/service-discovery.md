@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/service-discovery/
-description: ""
+description: 服务发现
 feature:
     description: |
         Dubbo 提供了高性能、可伸缩的服务发现机制，面向百万集群实例规模设计，默认提供 Nacos、Zookeeper 等注册中心适配并支持自定义扩展。
