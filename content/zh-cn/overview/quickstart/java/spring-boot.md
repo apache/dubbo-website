@@ -304,7 +304,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
     <dependencies>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-samples-spring-boot-interface</artifactId>
+            <artifactId>dubbo-spring-boot-interface</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
