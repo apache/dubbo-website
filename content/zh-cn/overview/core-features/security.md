@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/security/
-description: ""
+description: 认证鉴权
 feature:
     description: |
         支持基于 TLS 的传输链路认证与加密通信以及基于请求身份的权限校验，帮助构建零信任分布式微服务体系。
