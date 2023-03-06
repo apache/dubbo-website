@@ -1,7 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/observability/
-description: ""
+description: 观测服务
 feature:
     description: |
         多维度的可观测指标（Metrics、Tracing、Accesslog）帮助了解服务运行状态，Admin 控制台、Grafana 等帮助实现数据指标可视化展示。
