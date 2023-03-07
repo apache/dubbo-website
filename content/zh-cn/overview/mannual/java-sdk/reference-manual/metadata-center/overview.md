@@ -32,7 +32,7 @@ Dubbo3 中引入了 [应用级服务发现机制](/zh-cn/overview/mannual/java-s
 Dubbo 一直以来都能做到精确的地址发现，即只订阅 Consumer 声明要关心的服务及相关的地址列表，相比于拉取/订阅全量地址列表，这样做有很好的性能优势。
 在应用级服务发现模型中，想做到精确地址订阅并不容易，因为 Dubbo Consumer 只声明了要消费的接口列表，Consumer 需要能够将接口转换为 Provider 应用名才能进行精准服务订阅，
 
-为此，Dubbo 需要在元数据中心维护这一份 `接口名->应用名` 的对应关系，Dubbo3 中通过 provider 启动的时主动向元数据中心上报实现。
+为此，Dubbo 需要在元数据中心维护这一份 `接口名->应用名` 的对应关系，Dubbo3 中通过 provider 启动的时候主动向元数据中心上报实现。
 接口 (service name) - 应用 (Provider application name) 的映射关系可以是一对多的，即一个 service name 可能会对应多个不同的 application name。
 
 以 zookeeper 为例，映射关系保存在以下位置:
