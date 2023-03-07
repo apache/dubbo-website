@@ -24,7 +24,7 @@ Dubbo3 的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 �
 
 所以，如果决定要升级到 Dubbo3 的 `Triple` 协议，只需要修改配置中的协议名称为 `tri` (注意: 不是 triple )即可。
 
-接下来我们我们以一个使用 Dubbo2 协议的[工程](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration)来举例，如何一步一步安全的升级。
+接下来我们以一个使用 Dubbo2 协议的[工程](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration)来举例，如何一步一步安全的升级。
 
 1. 仅使用 `dubbo` 协议启动 `provider` 和 `consumer`，并完成调用。
 2. 仅使用 `tri` 协议启动 `provider` 和 `consumer`，并完成调用。
