@@ -1,6 +1,6 @@
 ---
-title: "Dubbo3 应用级服务发现设计"
-linkTitle: "Dubbo3 应用级服务发现设计"
+title: "启发式流控制"
+linkTitle: "启发式流控制"
 date: 2023-01-30
 author: Quanlu Liu
 description: >
