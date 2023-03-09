@@ -3,7 +3,7 @@ aliases:
     - /zh/docs3-v2/golang-sdk/refer/use_dubbogo_cli/
     - /zh-cn/docs3-v2/golang-sdk/refer/use_dubbogo_cli/
 description: 使用 dubbogo-cli 工具
-title: 使用 dubbogo-cli 工具
+title: 使用生态工具
 type: docs
 weight: 2
 ---
