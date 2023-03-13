@@ -3,7 +3,7 @@ aliases:
     - /zh/docs3-v2/golang-sdk/refer/config/
     - /zh-cn/docs3-v2/golang-sdk/refer/config/
 description: Dubbo-go 配置项
-title: 配置项参考
+title: 配置项参考指南
 type: docs
 weight: 1
 ---
