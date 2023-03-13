@@ -6,7 +6,7 @@ linkTitle: 入门
 no_list: true
 title: Dubbo 入门
 type: docs
-weight: 15
+weight: 2
 ---
 
 
