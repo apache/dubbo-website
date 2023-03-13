@@ -10,7 +10,7 @@ linkTitle: 部署服务
 no_list: true
 title: 部署服务
 type: docs
-weight: 10
+weight: 2
 ---
 
 
