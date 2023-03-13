@@ -6,5 +6,5 @@ description: Dubbo Go Pixiu
 linkTitle: Dubbo Go Pixiu
 title: Dubbo Go Pixiu
 type: docs
-weight: 30
+weight: 3
 ---
