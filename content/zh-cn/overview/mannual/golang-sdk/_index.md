@@ -6,5 +6,5 @@ description: Golang SDK 手册
 linkTitle: Golang SDK
 title: Golang SDK 手册
 type: docs
-weight: 20
+weight: 2
 ---
