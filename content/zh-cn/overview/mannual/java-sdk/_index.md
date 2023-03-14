@@ -24,7 +24,7 @@ linkTitle: Java SDK
 no_list: true
 title: Java SDK 手册
 type: docs
-weight: 10
+weight: 1
 ---
 
 
