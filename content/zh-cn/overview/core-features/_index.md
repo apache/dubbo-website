@@ -5,5 +5,5 @@ description: Dubbo 核心特性
 linkTitle: 功能
 title: Dubbo 核心特性
 type: docs
-weight: 30
+weight: 4
 ---
