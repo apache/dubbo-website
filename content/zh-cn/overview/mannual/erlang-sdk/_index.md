@@ -6,5 +6,5 @@ description: Erlang 支持
 linkTitle: Erlang SDK
 title: Erlang SDK 手册
 type: docs
-weight: 500
+weight: 5
 ---
