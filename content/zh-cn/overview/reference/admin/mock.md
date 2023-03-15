@@ -58,7 +58,7 @@ Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用�
     </denpendency>
     ```
 
-    > 查看 [dubbo-mock-admin 的可用版本](/download/spi-extensions/)
+    > 查看 [dubbo-mock-admin 的可用版本](/zh-cn/download/spi-extensions/)
 
 2. 配置 `-Denable.dubbo.admin.mock=true` 参数开启 Mock 并重启进程
 3. 打开 Admin 配置 Mock 规则
