@@ -9,56 +9,51 @@ type: docs
 weight: 10
 ---
 
+这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，此示例共包含三部分内容：
+* dubbo-samples-spring-boot3-tracing-provider
+* dubbo-samples-spring-boot3-tracing-consumer
+* dubbo-samples-spring-boot3-tracing-interface
 
 
-# Overview
+## 快速开始
 
-This example demonstrates the basic usage of tracing in Dubbo application and report tracing information to zipkin. This
-example contains three parts, `dubbo-samples-spring-boot3-tracing-provider`
-, `dubbo-samples-spring-boot3-tracing-consumer` and `dubbo-samples-spring-boot3-tracing-interface`.
+### 安装 & 启动 Zipkin
 
-Apache Dubbo has inbuilt tracing through [Micrometer Observations](https://micrometer.io/) and [Micrometer Tracing](https://github.com/micrometer-metrics/tracing).
+参考 [Zipkin's quick start](https://zipkin.io/pages/quickstart.html) 安装 Zipkin。
 
-## Quick Start
-
-### Install & Start Zipkin
-
-Follow [Zipkin's quick start](https://zipkin.io/pages/quickstart.html) to install zipkin.
-
-Here we use docker to quickly start a zipkin server.
+这里我们使用 Docker 来掩饰如何快速的启动 Zipkin 服务。
 
 ```bash
 docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
 ```
 
-Then you can verify zipkin server works by access `[http://localhost:9411](http://localhost:9411)`
+紧接着，你可以通过如下链接确认 Zipkin 正常工作 `[http://localhost:9411](http://localhost:9411)`
 
 ![zipkin_home](/imgs/v3/tasks/observability/tracing/zipkin_home.png)
 
-### Install & Start Nacos
+### 安装 & 启动 Nacos
 
-Follow [Nacos's quick start](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start.html) to install and start nacos.
+跟随 [Nacos's quick start](https://nacos.io/zh-cn/docs/v2/quickstart/quick-start.html) 快速安装并启动 Nacos。
 
-### Start Provider
+### 启动示例 Provider
 
-Start `org.apache.dubbo.springboot.demo.provider.ProviderApplication` directly from IDE.
+在 IDE 中直接运行 `org.apache.dubbo.springboot.demo.provider.ProviderApplication`。
 
-### Start Consumer
+### 启动示例 Consumer
 
-Start `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication` directly from IDE.
+在 IDE 中直接运行 `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication`。
 
-### Check Result
+### 检查监控效果
 
-Open `[http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)` in browser.
+在浏览器中打开 `[http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)` 查看效果。
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/zipkin.png)
 
-## How To Use Dubbo Tracing In Your Project
+## 如何在项目中使用 Dubbo Tracing
 
-### 1. Adding Micrometer Observation To Your Project
+### 1. 添加 Micrometer Observation 依赖
 
-In order to add Micrometer to the classpath and add metrics for Dubbo you need to add the `dubbo-metrics-api` dependency
-as shown below:
+首先需要添加 `dubbo-metrics-api`  依赖将 Micrometer 和 Dubbo Metrics 引入项目中：
 
 ```xml
 <dependency>
@@ -67,18 +62,15 @@ as shown below:
 </dependency>
 ```
 
-Thanks to the usage of [Micrometer Observations](https://micrometer.io/) Dubbo got instrumented once, but depending on
-the setup will allow emission of metrics, tracer or other signals via custom `ObservationHandlers`. Please read
-the [documentation under docs/observation](https://micrometer.io) for more information.
+通过集成 [Micrometer Observations](https://micrometer.io/) Dubbo 可以在只被拦截一次的情况下，导出多种不同类型的监控指标如 Metrics、Tracer、其他一些信号等，这具体取决于你对 `ObservationHandlers` 的配置。 可以参考以下链接 [documentation under docs/observation](https://micrometer.io) 了解更多内容。
 
-### 2. Adding Micrometer Tracing Bridge To Your Project
+### 2. 配置 Micrometer Tracing Bridge
 
-In order to start creating spans for Dubbo based projects a `bridge` between Micrometer Tracing and an actual Tracer is
-required.
+为了启用 Dubbo 全链路追踪统计，需要为 Micrometer Tracing 和实际的 Tracer（本示例中的 Zipkin）间配置 `bridge`。
 
-> NOTE: Tracer is a library that handles lifecycle of spans (e.g. it can create, start, stop, sample, report spans).
+> 注意：Tracer 是一个管控 span 生命周期的二进制包，比如 span 的 创建、终止、采样、上报等。
 
-Micrometer Tracing supports  [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) and [Brave](https://github.com/openzipkin/brave) as Tracers. Dubbo recommends using OpenTelemetry as the protocol of tracing, you can add dependency as shown below:
+Micrometer Tracing 支持 [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) and [Brave](https://github.com/openzipkin/brave) 格式的 Tracer。Dubbo 推荐使 OpenTelemetry 作为标准的 tracing 协议，`bridge`  的具体配置如下:
 
 ```xml
 <!-- OpenTelemetry Tracer -->
@@ -88,13 +80,9 @@ Micrometer Tracing supports  [OpenTelemetry](https://github.com/open-telemetry/o
 </dependency>
 ```
 
-### 3. Adding Micrometer Tracing Exporter To Your Project
+### 3. 添加 Micrometer Tracing Exporter
 
-After having added the Tracer, an exporter (also known as a reporter) is required. It's a component that will export the
-finished span and send it to a reporting system. Micrometer Tracer natively supports Tanzu Observability by Wavefront
-and Zipkin. Let's take zipkin as an example as shown below:
-
-OpenZipkin Zipkin with OpenTelemetry
+添加 Tracer 后，需要继续配置 exporter（也称为 reporter）。exporter 负责导出完成 span 并将其发送到后端 reporter 系统。Micrometer Tracer 原生支持 Tanzu Observability by Wavefront 和 Zipkin。以 Zipkin 为例：
 
 ```xml
 <dependency>
@@ -103,9 +91,9 @@ OpenZipkin Zipkin with OpenTelemetry
 </dependency>
 ```
 
-You can read more about tracing setup [this documentation, under docs/tracing](https://micrometer.io/).
+你可以在此阅读更多关于 Tracing 的配置信息 [this documentation, under docs/tracing](https://micrometer.io/).
 
-### 4. Configuration ObservationRegistry
+### 4. 配置 ObservationRegistry
 
 ```java
 @Configuration
@@ -127,7 +115,7 @@ public class ObservationConfiguration {
 }
 ```
 
-### 5. Customizing Observation Filters
+### 5. 定制 Observation Filters
 
 To customize the tags present in metrics (low cardinality tags) and in spans (low and high cardinality tags) you should
 create your own versions of `DubboServerObservationConvention` (server side) and `DubboClientObservationConvention` (
@@ -139,7 +127,7 @@ side).
 
 ## Extension
 
-### Other Micrometer Tracing Bridge
+### 其他 Micrometer Tracing Bridge
 
 ```xml
 <!-- Brave Tracer -->
@@ -151,7 +139,7 @@ side).
 
 
 
-### Other Micrometer Tracing Exporter
+### 其他 Micrometer Tracing Exporter
 
 Tanzu Observability by Wavefront
 
