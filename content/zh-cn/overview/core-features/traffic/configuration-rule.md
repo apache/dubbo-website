@@ -5,7 +5,7 @@ description: ""
 linkTitle: 动态配置
 title: 动态配置规则
 type: docs
-weight: 40
+weight: 4
 ---
 
 
