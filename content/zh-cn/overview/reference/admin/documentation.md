@@ -5,7 +5,7 @@ no_list: true
 toc_hide: true
 title: Admin 文档管理功能介绍
 type: docs
-weight: 4
+weight: 6
 ---
 
 // TBD
