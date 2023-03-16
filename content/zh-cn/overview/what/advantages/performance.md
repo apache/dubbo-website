@@ -24,7 +24,9 @@ Triple benchmark 性能指标
 
 ![dubbo-http2-protobuf-benchmark](/imgs/v3/performance/rpc-triple.svg)
 
-了解 [更多通信协议](../../../core-features/protocols)。
+了解更多
+* [通信协议](../../../core-features/protocols)
+* [Benchmark 指标](../../../mannual/java-sdk/reference-manual/performance/rpc-benchmarking)
 
 ## 流式通信
 

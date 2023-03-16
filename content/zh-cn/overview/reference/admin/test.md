@@ -186,4 +186,4 @@ public class LocationDO {
 
 ### 泛化调用
 
-有了参数类型，下一个问题就是怎么能够调用到服务端，在传统的Dubbo RPC调用中，客户端需要依赖服务端的API jar包 (参考 [Quick Start](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer) 中的消费端示例，这对于 Dubbo Admin 来说不太可能，因为服务的上下线是动态的，Dubbo Admin 无法动态增加 jar 包依赖，因此需要用到 Dubbo 中的[**泛化调用**](../../../../mannual/java-sdk/advanced-features-and-usage/service/generic-reference/)，指的是在没有服务端API接口的情况下，客户端直接通过 `GenericService` 接口来发起服务调用，返回值中的数据对象都用Map来表示。泛化调用在服务端不需要做特殊处理，只需要客户端发起即可。
+有了参数类型，下一个问题就是怎么能够调用到服务端，在传统的Dubbo RPC调用中，客户端需要依赖服务端的API jar包 (参考 [Quick Start](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer) 中的消费端示例，这对于 Dubbo Admin 来说不太可能，因为服务的上下线是动态的，Dubbo Admin 无法动态增加 jar 包依赖，因此需要用到 Dubbo 中的[**泛化调用**](../../../mannual/java-sdk/advanced-features-and-usage/service/generic-reference/)，指的是在没有服务端API接口的情况下，客户端直接通过 `GenericService` 接口来发起服务调用，返回值中的数据对象都用Map来表示。泛化调用在服务端不需要做特殊处理，只需要客户端发起即可。
