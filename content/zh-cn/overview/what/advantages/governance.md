@@ -5,7 +5,7 @@ description: 服务治理
 linkTitle: 服务治理
 title: 服务治理
 type: docs
-weight: 40
+weight: 3
 ---
 
 
