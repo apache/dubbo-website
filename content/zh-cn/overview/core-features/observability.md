@@ -1,23 +1,14 @@
 ---
-aliases:
-    - /zh/overview/core-features/observability/
-description: 观测服务
-feature:
-<<<<<<< HEAD
-    description: |
-        多维度的可观测指标（Metrics、Tracing、Accesslog）帮助了解服务运行状态，Admin 控制台、Grafana 等帮助实现数据指标可视化展示。
-    title: 可观测性
-linkTitle: 观测服务
-title: 观测服务
 type: docs
+title: "观测服务"
+linkTitle: "观测服务"
 weight: 60
-=======
+description: ""
+feature:
     title: 可观测性
     description: >
         多维度的可观测指标（Metrics、Tracing、Accesslog）帮助了解服务运行状态，Admin 控制台、Grafana 等帮助实现数据指标可视化展示。
->>>>>>> 746e081d72577573ffa6acff04672049fc6d40f2
 ---
-
 
 
 Dubbo 内部维护了多个纬度的可观测指标，并且支持多种方式的可视化监测。可观测性指标从总体上来说分为三个度量纬度：
