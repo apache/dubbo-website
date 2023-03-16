@@ -5,7 +5,7 @@ description: ""
 linkTitle: 概念与架构
 title: 了解 Dubbo 核心概念和架构
 type: docs
-weight: 10
+weight: 1
 ---
 
 
