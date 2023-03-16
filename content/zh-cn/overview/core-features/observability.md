@@ -9,7 +9,7 @@ feature:
 linkTitle: 观测服务
 title: 观测服务
 type: docs
-weight: 60
+weight: 7
 ---
 
 
