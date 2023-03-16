@@ -6,7 +6,7 @@ linkTitle: Go
 no_list: true
 title: Go 微服务开发入门
 type: docs
-weight: 20
+weight: 2
 ---
 
 
