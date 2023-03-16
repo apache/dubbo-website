@@ -5,7 +5,7 @@ description: ""
 linkTitle: Triple
 title: Triple
 type: docs
-weight: 20
+weight: 2
 ---
 
 
