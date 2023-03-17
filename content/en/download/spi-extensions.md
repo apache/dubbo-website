@@ -1,9 +1,12 @@
 ---
+aliases:
+    - /zh/download/spi-extensions/
+description: SPI Extensions
+title: SPI Extensions
 type: docs
-title: "Dubbo SPI Extensions"
-linkTitle: "Dubbo SPI Extensions"
-weight: 5
+weight: 60
 ---
+
 
 ## Verify
 
@@ -166,4 +169,4 @@ You can follow the [steps](https://www.apache.org/info/verification) here, and u
 
 | Module | Version Number | Adapted to Dubbo Version |
 |----------------|-------|--------------|
-| dubbo-api-docs | 1.0.0 | 2.7.x |
+| dubbo-api-docs | 
