@@ -9,7 +9,7 @@ feature:
 linkTitle: 认证鉴权
 title: 认证鉴权
 type: docs
-weight: 70
+weight: 8
 ---
 
 

@@ -9,7 +9,7 @@ feature:
 linkTitle: 服务发现
 title: 服务发现
 type: docs
-weight: 10
+weight: 2
 ---
 
 

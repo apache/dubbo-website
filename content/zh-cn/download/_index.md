@@ -21,4 +21,4 @@ type: docs
 
 ## Releases
 
-{{< blocks/download >}}
+{{< blocks/download-zh >}}
