@@ -65,3 +65,21 @@ weight: 22
 ```xml
 <dubbo:reference ... scope="remote" />
 ```
+
+
+### 动态配置调用行为
+
+从`3.2`开始，Dubbo提供api可以让用户在使用中动态地去配置单一次调用时为本地调用或者远程调用，当没配置的时候将默认优先引用本地服务
+
+**配置单一次调用为远程调用**
+
+```java
+RpcContext.getServiceContext().setLocalInvoke(false);
+```
+
+**配置单一次调用为本地调用**
+
+```java
+RpcContext.getServiceContext().setLocalInvoker(true);
+```
+
