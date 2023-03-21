@@ -25,7 +25,7 @@
 
 ### 1.1 历史架构
 
-![dubbo-gw](/imgs/v3/users/zcy-1.png)
+![img](/imgs/v3/users/zcy-1.png)
 
 ​																		图一
 
