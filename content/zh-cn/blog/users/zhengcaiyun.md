@@ -36,7 +36,7 @@ weight: 10
 
 ![img](/imgs/v3/users/zcy-1.png)
 
-​																		图一
+​										图一
 
 自左向右、自下而上进行模块介绍：
 
@@ -53,7 +53,7 @@ weight: 10
 
 ![img](/imgs/v3/users/zcy-2.png)
 
-​																		 图二
+​										  图二
 
 **1.2.1 隧道机制**
 
@@ -61,11 +61,13 @@ weight: 10
 
 高速公路架构中，使用了隧道这个概念。两端（业务层）是 Dubbo 私有协议，跨网传输过程中，则使用了 http 协议，http 协议可以更好的被中间设备、网关识别转发。这个机制的最大便利在于对业务的低侵入性。对于业务集群的应用完全不需要修改。
 ![img](/imgs/v3/users/zcy-3.png)
+​										  图三
 
 
 除了路由标记，出口/入口 Dubbo 协议字节流没有任何业务外信息，所以可以路由任何 Dubbo 请求。
 
 ![img](/imgs/v3/users/zcy-4.png)
+​										  图四
 
 
 
@@ -134,15 +136,19 @@ weight: 10
 
 为了避免部署多余的应用，我们需要有一定的机制，直接把dubbo流量切换到远程。
 
-![img](/imgs/v3/users/zcy-5.png)
 
-​																		图三
+![img](/imgs/v3/users/zcy-5.png)
+​										  图五
+
+
 
 解决了切换问题后，本地的 APP2 不再需要，甚至zk也可以移除。当然，如果业务同时有本地和远程的调用需要，也可以继续存在。
 
-![img](/imgs/v3/users/zcy-6.png)
 
-​																		图四
+![img](/imgs/v3/users/zcy-6.png)
+​										  图六
+
+
 
 原先，我们准备通过Dubbo的Route自定义扩展，去实现动态切换地址的能力。查阅资料后，发现Dubbo已经提供了类似能力。
 
@@ -172,7 +178,7 @@ https://cn.dubbo.apache.org/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/
 ![img](/imgs/v3/users/zcy-7.png)
 
 
-​																	图五
+​										  图七
 
 针对以上问题，我们的设计中，需要加入 Dubbo 网关的角色，来实现以下目标。
 
@@ -198,55 +204,55 @@ Dubbo-Proxy 作为业务网关，可以减轻对业务端的侵入，起到类�
 首先，我们对 Dubbo 源码进行了调研，看 Provider 接收到陌生流量（无相应Service）后会如何处理，是否有扩展点可以拦截。发现在 Byte 流解析阶段，Dubbo 即对 Service 进行了检查，不存在直接抛异常返回。
 
 ![img](/imgs/v3/users/zcy-8.png)
-​																	图六
+​										  图八
 
 在 Provider 处理的生命周期中，Decode 出于非常早期的阶段，几乎没有什么扩展点可以拦截处理。因为快速失败的理念，早期的检测确实可以避免后面无谓的代码执行消耗。但是，对比 Spring ，Dubbo 在扩展性上是有不足的，即对于一个通用的异常，却没有相应的扩展机制。
 
 我们决定在 decode 的基础上，加上对这个异常的扩展。主要思路是，在 decode 被调用处，catch 住这块异常，通过 SPI 的形式，获取扩展实现，可以定制异常信息，也可以控制 decode 流程重试。这块修改难度并不大，私有版本上顺利通过测试，同时提交 PR 到社区。这个过程中，远云大佬帮忙发现了一个并发安全的 bug，并给了不少减少风险的建议。
 
-```java
-//解码结束后，无论是否异常，都将进入这个方法
-    void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
-        if (req.error != null) {
-            // Give ExceptionProcessors a chance to retry request handle or custom exception information.
-            String exPs = System.getProperty(EXCEPTION_PROCESSOR_KEY);
-            if (StringUtils.isNotBlank(exPs)) {
-                ExtensionLoader<ExceptionProcessor> extensionLoader = channel.getUrl().getOrDefaultFrameworkModel().getExtensionLoader(ExceptionProcessor.class);
-                ExceptionProcessor expProcessor = extensionLoader.getOrDefaultExtension(exPs);
-                boolean handleError = expProcessor.shouldHandleError(error);
-                if (handleError) {
-                    //获取异常扩展，执行wrapAndHandleException操作，需要重试的场景可以抛出retry异常
-                    msg = Optional.ofNullable(expProcessor.wrapAndHandleException(channel, req)).orElse(msg);
-                }
-            }
-        }
+  ```java
+  //解码结束后，无论是否异常，都将进入这个方法
+      void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
+          if (req.error != null) {
+              // Give ExceptionProcessors a chance to retry request handle or custom exception information.
+              String exPs = System.getProperty(EXCEPTION_PROCESSOR_KEY);
+              if (StringUtils.isNotBlank(exPs)) {
+                  ExtensionLoader<ExceptionProcessor> extensionLoader = channel.getUrl().getOrDefaultFrameworkModel().getExtensionLoader(ExceptionProcessor.class);
+                  ExceptionProcessor expProcessor = extensionLoader.getOrDefaultExtension(exPs);
+                  boolean handleError = expProcessor.shouldHandleError(error);
+                  if (handleError) {
+                      //获取异常扩展，执行wrapAndHandleException操作，需要重试的场景可以抛出retry异常
+                      msg = Optional.ofNullable(expProcessor.wrapAndHandleException(channel, req)).orElse(msg);
+                  }
+              }
+          }
 
-        res.setErrorMessage("Fail to decode request due to: " + msg);
-        res.setStatus(Response.BAD_REQUEST);
+          res.setErrorMessage("Fail to decode request due to: " + msg);
+          res.setStatus(Response.BAD_REQUEST);
 
-        channel.send(res);
-    }
+          channel.send(res);
+      }
 
 
-    //handleRequest过程中的retry控制
-    public void received(Channel channel, Object message) throws RemotingException {
-        //解码
-        decode(message);
-        try {
-            handler.handleRequest(channel, message);
-        } catch (RetryHandleException e) {
-            if (message instanceof Request) {
-                ErrorData errorData = (ErrorData) ((Request) message).getData();
-                //有定制，进行重试
-                retry(errorData.getData());
-            } else {
-                // Retry only once, and only Request will throw an RetryHandleException
-                throw new RemotingException(channel, "Unknown error encountered when retry handle: " + e.getMessage());
-            }
-            handler.received(channel, message);
-        }
-    }
-```
+      //handleRequest过程中的retry控制
+      public void received(Channel channel, Object message) throws RemotingException {
+          //解码
+          decode(message);
+          try {
+              handler.handleRequest(channel, message);
+          } catch (RetryHandleException e) {
+              if (message instanceof Request) {
+                  ErrorData errorData = (ErrorData) ((Request) message).getData();
+                  //有定制，进行重试
+                  retry(errorData.getData());
+              } else {
+                  // Retry only once, and only Request will throw an RetryHandleException
+                  throw new RemotingException(channel, "Unknown error encountered when retry handle: " + e.getMessage());
+              }
+              handler.received(channel, message);
+          }
+      }
+  ```
 
 关于ExceptionProcessor扩展，我们在官方扩展包Dubbo-Spi-Extensions中，提供了一个默认实现，允许控制重试解码，并自定义异常处理。
 
@@ -272,7 +278,7 @@ Dubbo-Proxy 作为业务网关，可以减轻对业务端的侵入，起到类�
 高速公路是一个基于 Dubbo 的跨网方案，在协议与框架层，与 Dubbo 的绑定比较深，但是它应该能做的更多。也许很快，会接入 Http、Mq 等应用协议的流量，或者 Python、Go 等语言的客户端，甚至是 Mysql 的数据互通。这个时候，要么对架构大改，要么各种兼容，这都不是我们想看到的。参考网络分层协议，我们也粗略地做了一个分层抽象规划。
 
 ![img](/imgs/v3/users/zcy-9.png)
-​																	图七
+​										  图九
 
 - 物理层打通：主要解决网络异构问题，即约定不同安全策略的子域如何通信。
 - 通讯协议层加速：前面讲到的应用层协议，需要做到允许独立扩展及切换。
