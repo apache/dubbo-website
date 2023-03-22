@@ -206,46 +206,46 @@ Dubbo-Proxy 作为业务网关，可以减轻对业务端的侵入，起到类�
 
 ```java
 //解码结束后，无论是否异常，都将进入这个方法
-void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
+    void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
         if (req.error != null) {
-        // Give ExceptionProcessors a chance to retry request handle or custom exception information.
-        String exPs = System.getProperty(EXCEPTION_PROCESSOR_KEY);
-        if (StringUtils.isNotBlank(exPs)) {
-        ExtensionLoader<ExceptionProcessor> extensionLoader = channel.getUrl().getOrDefaultFrameworkModel().getExtensionLoader(ExceptionProcessor.class);
-        ExceptionProcessor expProcessor = extensionLoader.getOrDefaultExtension(exPs);
-        boolean handleError = expProcessor.shouldHandleError(error);
-        if (handleError) {
-        //获取异常扩展，执行wrapAndHandleException操作，需要重试的场景可以抛出retry异常
-        msg = Optional.ofNullable(expProcessor.wrapAndHandleException(channel, req)).orElse(msg);
-        }
-        }
+            // Give ExceptionProcessors a chance to retry request handle or custom exception information.
+            String exPs = System.getProperty(EXCEPTION_PROCESSOR_KEY);
+            if (StringUtils.isNotBlank(exPs)) {
+                ExtensionLoader<ExceptionProcessor> extensionLoader = channel.getUrl().getOrDefaultFrameworkModel().getExtensionLoader(ExceptionProcessor.class);
+                ExceptionProcessor expProcessor = extensionLoader.getOrDefaultExtension(exPs);
+                boolean handleError = expProcessor.shouldHandleError(error);
+                if (handleError) {
+                    //获取异常扩展，执行wrapAndHandleException操作，需要重试的场景可以抛出retry异常
+                    msg = Optional.ofNullable(expProcessor.wrapAndHandleException(channel, req)).orElse(msg);
+                }
+            }
         }
 
         res.setErrorMessage("Fail to decode request due to: " + msg);
         res.setStatus(Response.BAD_REQUEST);
 
         channel.send(res);
-        }
-        }
+    }
 
-//handleRequest过程中的retry控制
-public void received(Channel channel, Object message) throws RemotingException {
-        //解码 
+
+    //handleRequest过程中的retry控制
+    public void received(Channel channel, Object message) throws RemotingException {
+        //解码
         decode(message);
         try {
-        handler.handleRequest(channel, message);
+            handler.handleRequest(channel, message);
         } catch (RetryHandleException e) {
-        if (message instanceof Request) {
-        ErrorData errorData = (ErrorData) ((Request) message).getData();
-        //有定制，进行重试
-        retry(errorData.getData());
-        } else {
-        // Retry only once, and only Request will throw an RetryHandleException
-        throw new RemotingException(channel, "Unknown error encountered when retry handle: " + e.getMessage());
+            if (message instanceof Request) {
+                ErrorData errorData = (ErrorData) ((Request) message).getData();
+                //有定制，进行重试
+                retry(errorData.getData());
+            } else {
+                // Retry only once, and only Request will throw an RetryHandleException
+                throw new RemotingException(channel, "Unknown error encountered when retry handle: " + e.getMessage());
+            }
+            handler.received(channel, message);
         }
-        handler.received(channel, message);
-        }
-        }
+    }
 ```
 
 关于ExceptionProcessor扩展，我们在官方扩展包Dubbo-Spi-Extensions中，提供了一个默认实现，允许控制重试解码，并自定义异常处理。
