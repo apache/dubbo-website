@@ -5,5 +5,5 @@ description: ""
 linkTitle: 服务网格
 title: 基于服务网格的路由规则
 type: docs
-weight: 50
+weight: 5
 ---

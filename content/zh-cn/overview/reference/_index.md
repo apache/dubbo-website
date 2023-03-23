@@ -2,9 +2,9 @@
 aliases:
     - /zh/overview/reference/
 description: ""
-linkTitle: 参考
+linkTitle: 其他
 no_list: true
-title: 参考
+title: 其他
 type: docs
-weight: 1000
+weight: 7
 ---

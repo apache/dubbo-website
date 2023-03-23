@@ -5,7 +5,7 @@ description: ""
 linkTitle: 脚本路由
 title: 脚本路由规则
 type: docs
-weight: 30
+weight: 3
 ---
 
 

@@ -3,21 +3,21 @@ aliases:
     - /zh/overview/home/
 content:
     - 快速开始:
-        - description: aaa
+        - description: ""
           links:
             - '[为什么需要 Dubbo](../what/)'
             - '[概念与架构](../what/overview/)'
             - '[对比 gRPC、Spring Cloud、Istio](../what/xyz-difference/)'
             - '[核心特性](../what/advantages/)'
           name: 了解 Dubbo
-        - description: aaa
+        - description: ""
           links:
             - '[Java 微服务开发](../quickstart/java/)'
             - '[Go 微服务开发](../quickstart/go/)'
             - '[Rust 微服务开发](../quickstart/rust/)'
             - '[Node.js 微服务开发](https://github.com/apache/dubbo-js)'
           name: 尝试使用 Dubbo 开发微服务
-        - description: aaa
+        - description: ""
           links:
             - '[Java 参考手册](../mannual/java-sdk/)'
             - '[Golang 参考手册](../mannual/golang-sdk/)'
@@ -37,7 +37,7 @@ no_list: true
 noedit: true
 title: Dubbo 文档
 type: docs
-weight: 10
+weight: 1
 ---
 
 

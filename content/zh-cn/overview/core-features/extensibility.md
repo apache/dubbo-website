@@ -9,7 +9,7 @@ feature:
 linkTitle: 扩展适配
 title: 扩展适配
 type: docs
-weight: 50
+weight: 6
 ---
 
 
