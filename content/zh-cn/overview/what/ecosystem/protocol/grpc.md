@@ -5,7 +5,7 @@ description: ""
 linkTitle: gRPC
 title: gRPC
 type: docs
-weight: 40
+weight: 4
 ---
 
 
