@@ -5,7 +5,7 @@ description: ""
 linkTitle: Thrift
 title: Thrift
 type: docs
-weight: 50
+weight: 5
 ---
 
 
