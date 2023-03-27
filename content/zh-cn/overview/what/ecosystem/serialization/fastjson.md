@@ -5,7 +5,7 @@ description: ""
 linkTitle: Fastjson
 title: Fastjson
 type: docs
-weight: 40
+weight: 4
 ---
 
 
