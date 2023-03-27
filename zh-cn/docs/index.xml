@@ -186,7 +186,136 @@
 &lt;blockquote>
 &lt;p>另请参阅
 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/">配置项手册&lt;/a>&lt;/p>
-&lt;/blockquote></description></item><item><title>Docsv2.7: Dubbo SPI</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</guid><description>
+&lt;/blockquote></description></item><item><title>Overview: Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/what/ecosystem/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/what/ecosystem/protocol/dubbo/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。&lt;/p>
+&lt;p>反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/user/dubbo-protocol.jpg" alt="dubbo-protocol.jpg">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Transporter: mina, netty, grizzy&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Serialization: dubbo, hessian2, java, json&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Dispatcher: all, direct, message, execution, connection&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ThreadPool: fixed, cached, &amp;hellip;&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>连接个数：单连接&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>连接方式：长连接&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>传输协议：TCP&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>传输方式：NIO 异步传输&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>序列化：Hessian 二进制序列化&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>适用范围：传入传出参数数据包较小（建议小于100K），消费者比提供者个数多，单一消费者无法压满提供者，尽量不要用 dubbo 协议传输大文件或超大字符串。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>适用场景：常规远程服务方法调用&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>约束&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>参数及返回值需实现 &lt;code>Serializable&lt;/code> 接口&lt;/li>
+&lt;li>参数及返回值不能自定义实现 &lt;code>List&lt;/code>, &lt;code>Map&lt;/code>, &lt;code>Number&lt;/code>, &lt;code>Date&lt;/code>, &lt;code>Calendar&lt;/code> 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。&lt;/li>
+&lt;li>Hessian 序列化，只传成员属性值和值的类型，不传方法或静态变量，兼容情况&lt;strong>吴亚军提供&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>数据通讯&lt;/th>
+&lt;th>情况&lt;/th>
+&lt;th>结果&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>类A多一种 属性（或者说类B少一种 属性）&lt;/td>
+&lt;td>不抛异常，A多的那 个属性的值，B没有，其他正常&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>枚举A多一种 枚举（或者说B少一种 枚举）&lt;/td>
+&lt;td>A使用多 出来的枚举进行传输&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>枚举A多一种 枚举（或者说B少一种 枚举）&lt;/td>
+&lt;td>A不使用 多出来的枚举进行传输&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>A和B的属性 名相同，但类型不相同&lt;/td>
+&lt;td>抛异常&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>serialId 不相同&lt;/td>
+&lt;td>正常传输&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>接口增加方法，对客户端无影响，如果该方法不是客户端需要的，客户端不需要重新部署。输入参数和结果集中增加属性，对客户端无影响，如果客户端并不需要新属性，不用重新部署。&lt;/p>
+&lt;p>输入参数和结果集属性名变化，对客户端序列化无影响，但是如果客户端不重新部署，不管输入还是输出，属性名变化的属性值是获取不到的。&lt;/p>
+&lt;p>&lt;strong>总结&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>服务器端和客户端对领域对象并不需要完全一致，而是按照最大匹配原则。&lt;/li>
+&lt;li>会抛异常的情况：枚举值一边多一种，一边少一种，正好使用了差别的那种，或者属性名相同，类型不同。&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>适合大并发小数据量的服务调用，服务消费者远大于服务提供者的情景。&lt;/p>
+&lt;h2 id="使用方式---java">使用方式 - Java&lt;/h2>
+&lt;h3 id="配置协议">配置协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="设置默认协议">设置默认协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="设置某个服务的协议">设置某个服务的协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="多端口">多端口&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;dubbo1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;dubbo2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20881&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置协议选项">配置协议选项&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">“dubbo”&lt;/span> port=&lt;span style="color:#2aa198">“9090”&lt;/span> server=&lt;span style="color:#2aa198">“netty”&lt;/span> client=&lt;span style="color:#2aa198">“netty”&lt;/span> codec=&lt;span style="color:#2aa198">“dubbo”&lt;/span> serialization=&lt;span style="color:#2aa198">“hessian2”&lt;/span> charset=&lt;span style="color:#2aa198">“UTF-8”&lt;/span> threadpool=&lt;span style="color:#2aa198">“fixed”&lt;/span> threads=&lt;span style="color:#2aa198">“100”&lt;/span> queues=&lt;span style="color:#2aa198">“0”&lt;/span> iothreads=&lt;span style="color:#2aa198">“9”&lt;/span> buffer=&lt;span style="color:#2aa198">“8192”&lt;/span> accepts=&lt;span style="color:#2aa198">“1000”&lt;/span> payload=&lt;span style="color:#2aa198">“8388608”&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="多连接配置">多连接配置&lt;/h3>
+&lt;p>Dubbo 协议缺省每服务每提供者每消费者使用单一长连接，如果数据量较大，可以使用多个连接。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;0&amp;quot;&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:reference connections=&amp;quot;0&amp;quot;&amp;gt;&lt;/code> 表示该服务使用 JVM 共享长连接。&lt;strong>缺省&lt;/strong>&lt;/li>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;1&amp;quot;&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:reference connections=&amp;quot;1&amp;quot;&amp;gt;&lt;/code> 表示该服务使用独立长连接。&lt;/li>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;2&amp;quot;&amp;gt;&lt;/code> 或&lt;code>&amp;lt;dubbo:reference connections=&amp;quot;2&amp;quot;&amp;gt;&lt;/code> 表示该服务使用独立两条长连接。&lt;/li>
+&lt;/ul>
+&lt;p>为防止被大量连接撑挂，可在服务提供方限制大接收连接数，以实现服务提供方自我保护。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;1000&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="使用方式---go">使用方式 - Go&lt;/h2>
+&lt;p>TBD&lt;/p>
+&lt;h2 id="使用方式---nodejs">使用方式 - Node.Js&lt;/h2>
+&lt;p>TBD&lt;/p>
+&lt;h2 id="使用方式---rust">使用方式 - Rust&lt;/h2>
+&lt;p>暂不支持&lt;/p>
+&lt;h2 id="常见问题">常见问题&lt;/h2>
+&lt;h3 id="q1">Q1&lt;/h3>
+&lt;p>为什么要消费者比提供者个数多?&lt;/p>
+&lt;p>因 dubbo 协议采用单一长连接，假设网络为千兆网卡 &lt;strong>1024Mbit=128MByte&lt;/strong>，根据测试经验数据每条连接最多只能压满 7MByte(不同的环境可能不一样，供参考)，理论上 1 个服务提供者需要 20 个服务消费者才能压满网卡。&lt;/p>
+&lt;h3 id="q2">Q2&lt;/h3>
+&lt;p>为什么不能传大包?&lt;/p>
+&lt;p>因 dubbo 协议采用单一长连接，如果每次请求的数据包大小为 500KByte，假设网络为千兆网卡 &lt;strong>1024Mbit=128MByte&lt;/strong>，每条连接最大 7MByte (不同的环境可能不一样)，单个服务提供者的 TPS(每秒处理事务数)最大为：128MByte / 500KByte = 262。单个消费者调用单个服务提供者的 TPS (每秒处理事务数)最大为：7MByte / 500KByte = 14。如果能接受，可以考虑使用，否则网络将成为瓶颈。&lt;/p>
+&lt;h3 id="q3">Q3&lt;/h3>
+&lt;p>为什么采用异步单一长连接?&lt;/p>
+&lt;p>因为服务的现状大都是服务提供者少，通常只有几台机器，而服务的消费者多，可能整个网站都在访问该服务，比如 Morgan 的提供者只有 6 台提供者，却有上百台消费者，每天有 1.5 亿次调用，如果采用常规的 hessian 服务，服务提供者很容易就被压跨，通过单一连接，保证单一消费者不会压死提供者，长连接，减少连接握手验证等，并使用异步 IO，复用线程池，防止 C10K 问题。&lt;/p></description></item><item><title>Docsv2.7: Dubbo SPI</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</guid><description>
 &lt;h2 id="1简介">1.简介&lt;/h2>
 &lt;p>SPI 全称为 Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件，加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过 SPI 机制为我们的程序提供拓展功能。SPI 机制在第三方框架中也有所应用，比如 Dubbo 就是通过 SPI 机制加载所有的组件。不过，Dubbo 并未使用 Java 原生的 SPI 机制，而是对其进行了增强，使其能够更好的满足需求。在 Dubbo 中，SPI 是一个非常重要的模块。基于 SPI，我们可以很容易的对 Dubbo 进行拓展。如果大家想要学习 Dubbo 的源码，SPI 机制务必弄懂。接下来，我们先来了解一下 Java SPI 与 Dubbo SPI 的用法，然后再来分析 Dubbo SPI 的源码。&lt;/p>
 &lt;p>需要特别说明的是，本篇文章以及本系列其他文章所分析的源码版本均为 &lt;strong>dubbo-2.6.4&lt;/strong>。因此大家在阅读文章的过程中，需注意将代码版本切换到 dubbo-2.6.4 tag 上。&lt;/p>
@@ -6235,152 +6364,6 @@ Pixiu 的整体设计遵守以下原则：&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-anonymous-access-permission-level=NONE
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Request Routing</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/mesh/bookinfo-proxyless/security/request-routing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/mesh/bookinfo-proxyless/security/request-routing/</guid><description>
-&lt;p>Before you begin
-Setup Istio by following the instructions in the Installation guide.&lt;/p>
-&lt;p>Deploy the Bookinfo sample application.&lt;/p>
-&lt;p>Review the Traffic Management concepts doc.&lt;/p>
-&lt;p>About this task
-The Istio Bookinfo sample consists of four separate microservices, each with multiple versions. Three different versions of one of the microservices, reviews, have been deployed and are running concurrently. To illustrate the problem this causes, access the Bookinfo app’s /productpage in a browser and refresh several times. The URL is http://$GATEWAY_URL/productpage, where $GATEWAY_URL is the External IP address of the ingress, as explained in the Bookinfo doc.&lt;/p>
-&lt;p>You’ll notice that sometimes the book review output contains star ratings and other times it does not. This is because without an explicit default service version to route to, Istio routes requests to all available versions in a round robin fashion.&lt;/p>
-&lt;p>The initial goal of this task is to apply rules that route all traffic to v1 (version 1) of the microservices. Later, you will apply a rule to route traffic based on the value of an HTTP request header.&lt;/p>
-&lt;p>Route to version 1
-To route to one version only, you configure route rules that send traffic to default versions for the microservices.&lt;/p>
-&lt;p>If you haven’t already, follow the instructions in define the service versions.
-Run the following command to create the route rules:
-Istio classicGateway API
-Istio uses virtual services to define route rules. Run the following command to apply virtual services that will route all traffic to v1 of each microservice:&lt;/p>
-&lt;p>$ kubectl apply -f @samples/bookinfo/networking/virtual-service-all-v1.yaml@
-Because configuration propagation is eventually consistent, wait a few seconds for the virtual services to take effect.&lt;/p>
-&lt;p>Display the defined routes with the following command:
-Istio classicGateway API
-$ kubectl get virtualservices -o yaml&lt;/p>
-&lt;ul>
-&lt;li>apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-&amp;hellip;
-spec:
-hosts:
-&lt;ul>
-&lt;li>details
-http:&lt;/li>
-&lt;li>route:
-&lt;ul>
-&lt;li>destination:
-host: details
-subset: v1&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-&amp;hellip;
-spec:
-hosts:
-&lt;ul>
-&lt;li>productpage
-http:&lt;/li>
-&lt;li>route:
-&lt;ul>
-&lt;li>destination:
-host: productpage
-subset: v1&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-&amp;hellip;
-spec:
-hosts:
-&lt;ul>
-&lt;li>ratings
-http:&lt;/li>
-&lt;li>route:
-&lt;ul>
-&lt;li>destination:
-host: ratings
-subset: v1&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-&amp;hellip;
-spec:
-hosts:
-&lt;ul>
-&lt;li>reviews
-http:&lt;/li>
-&lt;li>route:
-&lt;ul>
-&lt;li>destination:
-host: reviews
-subset: v1
-You can also display the corresponding subset definitions with the following command:&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;p>$ kubectl get destinationrules -o yaml
-You have configured Istio to route to the v1 version of the Bookinfo microservices, most importantly the reviews service version 1.&lt;/p>
-&lt;p>Test the new routing configuration
-You can easily test the new configuration by once again refreshing the /productpage of the Bookinfo app in your browser. Notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh. This is because you configured Istio to route all traffic for the reviews service to the version reviews:v1 and this version of the service does not access the star ratings service.&lt;/p>
-&lt;p>You have successfully accomplished the first part of this task: route traffic to one version of a service.&lt;/p>
-&lt;p>Route based on user identity
-Next, you will change the route configuration so that all traffic from a specific user is routed to a specific service version. In this case, all traffic from a user named Jason will be routed to the service reviews:v2.&lt;/p>
-&lt;p>This example is enabled by the fact that the productpage service adds a custom end-user header to all outbound HTTP requests to the reviews service.&lt;/p>
-&lt;p>Istio also supports routing based on strongly authenticated JWT on ingress gateway, refer to the JWT claim based routing for more details.&lt;/p>
-&lt;p>Remember, reviews:v2 is the version that includes the star ratings feature.&lt;/p>
-&lt;p>Run the following command to enable user-based routing:
-Istio classicGateway API
-$ kubectl apply -f @samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml@
-You can confirm the rule is created using the following command:&lt;/p>
-&lt;p>$ kubectl get virtualservice reviews -o yaml
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-&amp;hellip;
-spec:
-hosts:&lt;/p>
-&lt;ul>
-&lt;li>reviews
-http:&lt;/li>
-&lt;li>match:
-&lt;ul>
-&lt;li>headers:
-end-user:
-exact: jason
-route:&lt;/li>
-&lt;li>destination:
-host: reviews
-subset: v2&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>route:
-&lt;ul>
-&lt;li>destination:
-host: reviews
-subset: v1
-On the /productpage of the Bookinfo app, log in as user jason.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;p>Refresh the browser. What do you see? The star ratings appear next to each review.&lt;/p>
-&lt;p>Log in as another user (pick any name you wish).&lt;/p>
-&lt;p>Refresh the browser. Now the stars are gone. This is because traffic is routed to reviews:v1 for all users except Jason.&lt;/p>
-&lt;p>You have successfully configured Istio to route traffic based on user identity.&lt;/p>
-&lt;p>Understanding what happened
-In this task, you used Istio to send 100% of the traffic to the v1 version of each of the Bookinfo services. You then set a rule to selectively send traffic to version v2 of the reviews service based on a custom end-user header added to the request by the productpage service.&lt;/p>
-&lt;p>Note that Kubernetes services, like the Bookinfo ones used in this task, must adhere to certain restrictions to take advantage of Istio’s L7 routing features. Refer to the Requirements for Pods and Services for details.&lt;/p>
-&lt;p>In the traffic shifting task, you will follow the same basic pattern you learned here to configure route rules to gradually send traffic from one version of a service to another.&lt;/p>
-&lt;p>Cleanup
-Remove the application route rules:
-Istio classicGateway API
-$ kubectl delete -f @samples/bookinfo/networking/virtual-service-all-v1.yaml@
-If you are not planning to explore any follow-on tasks, refer to the Bookinfo cleanup instructions to shutdown the application.&lt;/p></description></item><item><title>Overview: Request Routing</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/mesh/bookinfo-proxyless/traffic/request-routing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/mesh/bookinfo-proxyless/traffic/request-routing/</guid><description>
 &lt;p>Before you begin
 Setup Istio by following the instructions in the Installation guide.&lt;/p>
 &lt;p>Deploy the Bookinfo sample application.&lt;/p>
