@@ -6,7 +6,7 @@ linkTitle: Grafana
 no_list: true
 title: 使用 Grafana 可视化查看集群 Metrics 指标
 type: docs
-weight: 20
+weight: 2
 ---
 
 
