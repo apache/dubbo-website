@@ -1,4 +1,50 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 全链路追踪</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</link><description>Recent content in 全链路追踪 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Zipkin</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 全链路追踪</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</link><description>Recent content in 全链路追踪 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Skywalking</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</guid><description>
+&lt;p>本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系，依赖的 Skywalking Agent 版本为 &lt;a href="https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/">skywalking micrometer-1.10 api&lt;/a>.&lt;/p>
+&lt;h2 id="1-添加-micrometer-observation-依赖到你的项目">1. 添加 Micrometer Observation 依赖到你的项目&lt;/h2>
+&lt;p>为了能够将 Micrometer 及相关 Metrics 依赖添加到 classpath，需要增加 &lt;code>dubbo-metrics-api&lt;/code> 依赖，如下所示：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metrics-api&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-添加-skywalking-micrometer-110-api-到项目">2. 添加 Skywalking Micrometer-1.10 Api 到项目&lt;/h2>
+&lt;p>为了将 Dubbo Micrometer tracing 数据集成到 Skywalking，需要添加以下依赖。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.skywalking&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>apm-toolkit-micrometer-1.10&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-配置-observationregistry">3. 配置 ObservationRegistry&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ObservationConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel &lt;span style="color:#268bd2">applicationModel&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ObservationRegistry observationRegistry&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel applicationModel &lt;span style="color:#719e07">=&lt;/span> ApplicationModel&lt;span style="color:#719e07">.&lt;/span>defaultModel&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> observationRegistry&lt;span style="color:#719e07">.&lt;/span>observationConfig&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>observationHandler&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ObservationHandler&lt;span style="color:#719e07">.&lt;/span>FirstMatchingCompositeObservationHandler&lt;span style="color:#719e07">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingSenderTracingHandler&lt;span style="color:#719e07">(),&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingReceiverTracingHandler&lt;span style="color:#719e07">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingDefaultTracingHandler&lt;span style="color:#719e07">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>registerBean&lt;span style="color:#719e07">(&lt;/span>observationRegistry&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationModel&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-启-skywalking-oap">4. 启 Skywalking OAP&lt;/h2>
+&lt;p>请参考这里了解如何 &lt;a href="https://skywalking.apache.org/docs/main/v9.3.0/en/setup/backend/backend-setup/">设置 Skywalking OAP&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>bash startup.sh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="5-启动示例-demo-skywalking-agent">5. 启动示例 Demo (skywalking-agent)&lt;/h2>
+&lt;p>首先，我们假设你已经有一个注册中心来协调地址发现，具体可参见示例里指向的注册中心配置。&lt;/p>
+&lt;p>之后，启动 Provider 和 Consumer 并确保 skywalking-agent 参数被正确设置，skywalking-agent 确保数据可以被正确的上报到后台系统。&lt;/p>
+&lt;ul>
+&lt;li>考虑到 skywalking-agent 本身也有内置的 Dubbo 拦截器，为了确保示例能使用 Dubbo 自带的 Micrometer 集成，我么你需要删除 skywalking-agent 自带的拦截器，直接将 &lt;code>plugins&lt;/code> 目录删除即可&lt;/li>
+&lt;li>配置 Skywalking OAP 服务器地址，在以下文件中配置 OAP 地址 &lt;code>/path/to/skywalking-agent/agent.config&lt;/code>，对应的参数项为 &lt;code>collector.backend_service&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-samples-spring-boot-tracing-skwalking-provider-1.0-SNAPSHOT.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-samples-spring-boot-tracing-skwalking-consumer-1.0-SNAPSHOT.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="6-示例效果">6. 示例效果&lt;/h2>
+&lt;p>在浏览器中打开 &lt;code>[skywalking-webapp](http://localhost:8080/)&lt;/code> 查看效果&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-1.png" alt="skywalking-trace-result-1">
+&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-2.png" alt="skywalking-trace-result-2">
+&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-3.png" alt="skywalking-trace-result-2">&lt;/p></description></item><item><title>Overview: Zipkin</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</guid><description>
 &lt;p>这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，此示例共包含三部分内容：&lt;/p>
 &lt;ul>
 &lt;li>dubbo-samples-spring-boot3-tracing-provider&lt;/li>
@@ -94,50 +140,4 @@ side).&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.zipkin.reporter2&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>zipkin-sender-urlconnection&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Skywalking</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</guid><description>
-&lt;p>本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系，依赖的 Skywalking Agent 版本为 &lt;a href="https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/">skywalking micrometer-1.10 api&lt;/a>.&lt;/p>
-&lt;h2 id="1-添加-micrometer-observation-依赖到你的项目">1. 添加 Micrometer Observation 依赖到你的项目&lt;/h2>
-&lt;p>为了能够将 Micrometer 及相关 Metrics 依赖添加到 classpath，需要增加 &lt;code>dubbo-metrics-api&lt;/code> 依赖，如下所示：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metrics-api&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-添加-skywalking-micrometer-110-api-到项目">2. 添加 Skywalking Micrometer-1.10 Api 到项目&lt;/h2>
-&lt;p>为了将 Dubbo Micrometer tracing 数据集成到 Skywalking，需要添加以下依赖。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.skywalking&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>apm-toolkit-micrometer-1.10&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-配置-observationregistry">3. 配置 ObservationRegistry&lt;/h2>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ObservationConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel &lt;span style="color:#268bd2">applicationModel&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ObservationRegistry observationRegistry&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel applicationModel &lt;span style="color:#719e07">=&lt;/span> ApplicationModel&lt;span style="color:#719e07">.&lt;/span>defaultModel&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> observationRegistry&lt;span style="color:#719e07">.&lt;/span>observationConfig&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>observationHandler&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> ObservationHandler&lt;span style="color:#719e07">.&lt;/span>FirstMatchingCompositeObservationHandler&lt;span style="color:#719e07">(&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingSenderTracingHandler&lt;span style="color:#719e07">(),&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingReceiverTracingHandler&lt;span style="color:#719e07">(),&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SkywalkingDefaultTracingHandler&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">));&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>registerBean&lt;span style="color:#719e07">(&lt;/span>observationRegistry&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationModel&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-启-skywalking-oap">4. 启 Skywalking OAP&lt;/h2>
-&lt;p>请参考这里了解如何 &lt;a href="https://skywalking.apache.org/docs/main/v9.3.0/en/setup/backend/backend-setup/">设置 Skywalking OAP&lt;/a>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>bash startup.sh
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="5-启动示例-demo-skywalking-agent">5. 启动示例 Demo (skywalking-agent)&lt;/h2>
-&lt;p>首先，我们假设你已经有一个注册中心来协调地址发现，具体可参见示例里指向的注册中心配置。&lt;/p>
-&lt;p>之后，启动 Provider 和 Consumer 并确保 skywalking-agent 参数被正确设置，skywalking-agent 确保数据可以被正确的上报到后台系统。&lt;/p>
-&lt;ul>
-&lt;li>考虑到 skywalking-agent 本身也有内置的 Dubbo 拦截器，为了确保示例能使用 Dubbo 自带的 Micrometer 集成，我么你需要删除 skywalking-agent 自带的拦截器，直接将 &lt;code>plugins&lt;/code> 目录删除即可&lt;/li>
-&lt;li>配置 Skywalking OAP 服务器地址，在以下文件中配置 OAP 地址 &lt;code>/path/to/skywalking-agent/agent.config&lt;/code>，对应的参数项为 &lt;code>collector.backend_service&lt;/code>。&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-samples-spring-boot-tracing-skwalking-provider-1.0-SNAPSHOT.jar
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -jar dubbo-samples-spring-boot-tracing-skwalking-consumer-1.0-SNAPSHOT.jar
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="6-示例效果">6. 示例效果&lt;/h2>
-&lt;p>在浏览器中打开 &lt;code>[skywalking-webapp](http://localhost:8080/)&lt;/code> 查看效果&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-1.png" alt="skywalking-trace-result-1">
-&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-2.png" alt="skywalking-trace-result-2">
-&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/tracing/skywalking-trace-result-3.png" alt="skywalking-trace-result-2">&lt;/p></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>
