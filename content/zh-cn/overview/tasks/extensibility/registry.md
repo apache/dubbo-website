@@ -6,5 +6,5 @@ linkTitle: Registry
 no_list: true
 title: Registry
 type: docs
-weight: 60
+weight: 3
 ---
