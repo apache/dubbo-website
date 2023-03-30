@@ -5,7 +5,7 @@ description: 在 Dubbo 抛出地址找不到异常的时候的排查思路
 linkTitle: 地址找不到异常
 title: 地址找不到异常
 type: docs
-weight: 20
+weight: 2
 ---
 
 
