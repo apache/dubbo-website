@@ -6,7 +6,7 @@ linkTitle: Skywalking
 no_list: true
 title: Skywalking
 type: docs
-weight: 20
+weight: 2
 ---
 
 本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系，依赖的 Skywalking Agent 版本为 [skywalking micrometer-1.10 api](https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/).
