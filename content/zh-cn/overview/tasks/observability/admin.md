@@ -14,7 +14,7 @@ weight: 10
 > Dubbo Admin 已经升级为 Dubbo 服务治理统一入口，涵盖的范围非常广泛，本文讲解的只是 Admin 可视化控制台部分。
 
 ## 安装 Admin
-首先，需要正确 [安装&配置 Dubbo Admin](https://github.com/apache/dubbo-admin#dubbo-admin) 控制台
+首先，需要正确 [安装&配置 Dubbo Admin](../../../reference/admin/architecture/) 控制台
 
 ## 功能介绍
 Admin 控制台提供了从开发、测试到流量治理等不同层面的丰富功能，功能总体上可分为以下几类：
