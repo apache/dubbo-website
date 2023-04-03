@@ -1,36 +1,59 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 集成适配</title><link>https://dubbo.apache.org/zh-cn/overview/reference/integrations/</link><description>Recent content in 集成适配 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/integrations/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Prometheus</title><link>https://dubbo.apache.org/zh-cn/overview/reference/integrations/prometheus/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/integrations/prometheus/</guid><description>
 &lt;h2 id="安装">安装&lt;/h2>
-&lt;h3 id="linux">Linux&lt;/h3>
-&lt;p>下载项目至本地到切换指定项目&lt;/p>
+&lt;h3 id="kubernetes">Kubernetes&lt;/h3>
+&lt;p>你可以使用 Dubbo 社区提供的示例配置快速安装 Prometheus。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl create -f .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>本安装仅适用于测试或体验使用，生产级别的安装请参考 Prometheus 官方安装文档。&lt;/p>
+&lt;/blockquote>
+&lt;p>访问页面 &lt;code>http://localhost:9090&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/prometheus.jpg" alt="Prometheus">&lt;/p>
+&lt;h3 id="vm">VM&lt;/h3>
+&lt;p>以 Linux 为例，下载项目至本地并切换指定项目&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wget https://github.com/prometheus/prometheus/releases/download/v2.42.0/prometheus-2.42.0.linux-amd64.tar.gz &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> tar zxvf prometheus-2.42.0.linux-amd64.tar.gz &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> mv prometheus-2.42.0.linux-amd64 prometheus &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#b58900">cd&lt;/span> prometheus
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>后台运行&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>nohup ./prometheus &amp;gt; /dev/null 2&amp;gt;&amp;amp;&lt;span style="color:#2aa198">1&lt;/span> &amp;amp;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>访问页面
-&lt;code>http://localhost:9090&lt;/code>
-&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/prometheus.jpg" alt="Prometheus">&lt;/p>
-&lt;h3 id="kubernetes">Kubernetes&lt;/h3>
-&lt;p>下载项目至本地到切换指定项目&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#b58900">cd&lt;/span> dubbo-admin/kubernetes/prometheus
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建项目&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>访问页面 &lt;code>http://localhost:9090&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/prometheus.jpg" alt="Prometheus">&lt;/p>
+&lt;blockquote>
+&lt;p>具体请参考 Prometheus 官方安装文档&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="scrape-配置">Scrape 配置&lt;/h2>
+&lt;p>Dubbo 的每个实例都会暴露一个 http 端口用于 Metrics 采集，Prometheus 通过 scraping 每个实例的 http 接口来采集统计数据。具体的 scraping 路径可以通过 Prometheus 配置文件进行调整，该文件控制 scraping 实例的端口、路径、TLS 设置等。&lt;/p>
+&lt;h3 id="kubernetes-注解约定">Kubernetes 注解约定&lt;/h3>
+&lt;p>在 Kubernetes 部署模式下，使用官方社区维护的 Helm Charts 安装 Prometheus，Prometheus 可以自动识别包含 &lt;code>prometheus.io&lt;/code> 注解的 Dubbo Pod 实例，并将它们列入 Scraping 实例列表。&lt;/p>
+&lt;p>Dubbo 官网给出的示例即是基于 &lt;code>prometheus.io&lt;/code> 注解实现了 scraping target 地址的自动发现，具体注解配置可参见示例中的 &lt;a href="https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml">Deployment 资源定义&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">annotations&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus.io/scrape&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus.io/path&lt;/span>: /management/prometheus
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus.io/port&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;22222&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在此模式下，Dubbo 实例默认提供的 Prometheus Metrics 采集路径是：&lt;code>/management/prometheus&lt;/code>。&lt;/p>
+&lt;h3 id="自定义配置">自定义配置&lt;/h3>
+&lt;p>对于已经安装好的 Prometheus 服务，可以通过 Dubbo Admin 提供的 Prometheus http_sd 服务发现接口来配置 Dubbo Metrics 采集的目标实例。可以参考 Admin 安装相关文档，安装完成后 Prometheus 侧的配置如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">job_name&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;dubbo&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http_sd_configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">url&lt;/span>: http://{admin-address}/api/dev/metrics/prometheus
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Grafana</title><link>https://dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</guid><description>
+&lt;h2 id="安装">安装&lt;/h2>
+&lt;h3 id="kubernetes-安装">Kubernetes 安装&lt;/h3>
+&lt;p>你可以使用 Dubbo 社区提供的示例配置快速安装 Grafana，安装后的 Grafana 提供了社区默认指标面板视图。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl create -f .
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>访问页面
-&lt;code>http://localhost:9090&lt;/code>
-&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/prometheus.jpg" alt="Prometheus">&lt;/p></description></item><item><title>Overview: Grafana</title><link>https://dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</guid><description>
-&lt;h3 id="linux">Linux&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>获得访问地址&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl port-forward service/grafana 3000:3000
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>访问页面 &lt;code>http://localhost:3000&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/grafana.jpg" alt="Grafana">&lt;/p>
+&lt;blockquote>
+&lt;p>获取登录信息&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl get secrets grafana -o &lt;span style="color:#268bd2">jsonpath&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;{.data.admin-user}&amp;#34;&lt;/span> | base64 --decode ; &lt;span style="color:#b58900">echo&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> kubectl get secrets grafana -o &lt;span style="color:#268bd2">jsonpath&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;{.data.admin-password}&amp;#34;&lt;/span> | base64 --decode ; &lt;span style="color:#b58900">echo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/blockquote>
+&lt;h3 id="vm-安装">VM 安装&lt;/h3>
 &lt;p>下载项目至本地到切换指定项目&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wget https://dl.grafana.com/oss/release/grafana-9.3.6-1.x86_64.rpm &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> yum install -y grafana-9.3.6-1.x86_64.rpm
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动服务&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>systemctl daemon-reload &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> systemctl &lt;span style="color:#b58900">enable&lt;/span> --now grafana-server
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>访问页面&lt;/p>
-&lt;p>&lt;code>http://localhost:3000&lt;/code> 默认用户名与密码为&lt;code>admin&lt;/code>
-&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/grafana.jpg" alt="Grafana">&lt;/p>
-&lt;h3 id="kubernetes">Kubernetes&lt;/h3>
-&lt;p>下载项目至本地到切换指定项目&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#b58900">cd&lt;/span> dubbo-admin/kubernetes/grafana
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建项目&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl create -f .
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>获取登录信息&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl get secrets grafana -o &lt;span style="color:#268bd2">jsonpath&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;{.data.admin-user}&amp;#34;&lt;/span> | base64 --decode ; &lt;span style="color:#b58900">echo&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> kubectl get secrets grafana -o &lt;span style="color:#268bd2">jsonpath&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;{.data.admin-password}&amp;#34;&lt;/span> | base64 --decode ; &lt;span style="color:#b58900">echo&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>访问页面&lt;/p>
-&lt;p>&lt;code>http://localhost:3000&lt;/code>
-&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/grafana.jpg" alt="Grafana">&lt;/p></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>访问页面 &lt;code>http://localhost:3000&lt;/code>，默认用户名与密码为&lt;code>admin&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/integrations/grafana.jpg" alt="Grafana">&lt;/p>
+&lt;h2 id="配置数据面板">配置数据面板&lt;/h2>
+&lt;p>以下是 Dubbo 社区提供的默认指标面板，您配置好数据源并直接导入使用即可。如果默认面板不能满足要求，您还可以自定义 Grafana 面板。&lt;/p>
+&lt;p>&lt;strong>Apache Dubbo Observability Dashboard：&lt;/strong> &lt;a href="https://grafana.com/grafana/dashboards/18051">https://grafana.com/grafana/dashboards/18051&lt;/a>&lt;/p>
+&lt;p>&lt;strong>JVM (Micrometer) Dashboard：&lt;/strong> &lt;a href="https://grafana.com/grafana/dashboards/4701">https://grafana.com/grafana/dashboards/4701&lt;/a>&lt;/p></description></item></channel></rss>
