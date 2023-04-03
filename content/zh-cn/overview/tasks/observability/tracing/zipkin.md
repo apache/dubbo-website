@@ -6,7 +6,7 @@ linkTitle: Zipkin
 no_list: true
 title: Zipkin
 type: docs
-weight: 10
+weight: 1
 ---
 
 这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，此示例共包含三部分内容：

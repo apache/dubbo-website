@@ -5,7 +5,7 @@ description: ""
 linkTitle: Dubbo
 title: Dubbo
 type: docs
-weight: 10
+weight: 1
 ---
 
 

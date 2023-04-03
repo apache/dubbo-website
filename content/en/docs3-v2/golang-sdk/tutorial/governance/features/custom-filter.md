@@ -25,7 +25,7 @@ Filter adopts the idea of aspect-oriented design. Through reasonable expansion o
 
 ## 2. Framework predefined Filter
 
-The framework predefines a series of filters, which can be used directly in the configuration, and its code implementation is located at [filter](https://github.com/apache/dubbo-go/tree/3.0/filter)
+The framework predefines a series of filters, which can be used directly in the configuration, and its code implementation is located at [filter](https://github.com/apache/dubbo-go/tree/release-3.0/filter)
 
 - accesslog
 - active
