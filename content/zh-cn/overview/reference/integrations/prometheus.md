@@ -8,7 +8,6 @@ type: docs
 weight: 2
 ---
 
-
 ## 安装
 ### Kubernetes
 你可以使用 Dubbo 社区提供的示例配置快速安装 Prometheus。
@@ -22,31 +21,13 @@ kubectl create -f .
 
 ![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
 
-### VM
-以 Linux 为例，下载项目至本地并切换指定项目
-
-```bash
-wget https://github.com/prometheus/prometheus/releases/download/v2.42.0/prometheus-2.42.0.linux-amd64.tar.gz && tar zxvf prometheus-2.42.0.linux-amd64.tar.gz && mv prometheus-2.42.0.linux-amd64 prometheus && cd prometheus
-```
-
-后台运行
-
-```bash
-nohup ./prometheus > /dev/null 2>&1 &
-```
-
-访问页面 `http://localhost:9090/graph` 并切换到 graph 视图。
-
-> 具体请参考 Prometheus 官方安装文档
-
-
 ## Scrape 配置
 
 Dubbo 的每个实例都会暴露一个 http 端口用于 Metrics 采集，Prometheus 通过 scraping 每个实例的 http 接口来采集统计数据。具体的 scraping 路径可以通过 Prometheus 配置文件进行调整，该文件控制 scraping 实例的端口、路径、TLS 设置等。
 
 ### Kubernetes 注解约定
 
-在 Kubernetes 部署模式下，使用官方社区维护的 Helm Charts 安装 Prometheus，Prometheus 可以自动识别包含 `prometheus.io` 注解的 Dubbo Pod 实例，并将它们列入 Scraping 实例列表。
+在 Kubernetes 部署模式下，使用官方社区维护的 [Helm Charts 安装 Prometheus](https://github.com/prometheus-community/helm-charts)，Prometheus 服务可以自动识别包含 `prometheus.io` 注解的 Dubbo Pod 实例，并将它们列入 Scraping 实例列表。
 
 Dubbo 官网给出的示例即是基于 `prometheus.io` 注解实现了 scraping target 地址的自动发现，具体注解配置可参见示例中的 [Deployment 资源定义](https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml)。
 
