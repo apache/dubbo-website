@@ -4,7 +4,7 @@
 &lt;p>Dubbo Admin 已经升级为 Dubbo 服务治理统一入口，涵盖的范围非常广泛，本文讲解的只是 Admin 可视化控制台部分。&lt;/p>
 &lt;/blockquote>
 &lt;h2 id="安装-admin">安装 Admin&lt;/h2>
-&lt;p>首先，需要正确 &lt;a href="https://github.com/apache/dubbo-admin#dubbo-admin">安装&amp;amp;配置 Dubbo Admin&lt;/a> 控制台&lt;/p>
+&lt;p>首先，需要正确 &lt;a href="../../../reference/admin/architecture/">安装&amp;amp;配置 Dubbo Admin&lt;/a> 控制台&lt;/p>
 &lt;h2 id="功能介绍">功能介绍&lt;/h2>
 &lt;p>Admin 控制台提供了从开发、测试到流量治理等不同层面的丰富功能，功能总体上可分为以下几类：&lt;/p>
 &lt;ul>
@@ -56,113 +56,7 @@ Consumer应用引入服务Mock依赖，添加JVM启动参数-Denable.dubbo.admin
 &lt;h4 id="条件路由">条件路由&lt;/h4>
 &lt;p>条件路由可以编写一些自定义路由规则实现服务治理的需求比如同区域优先、参数路由、黑白名单、读写分离等。路由规则在发起一次RPC调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起RPC调用的备选地址。&lt;/p>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/admin/4-traffic-management.png" alt="img">&lt;/p>
-&lt;p>请参考 &lt;a href="../../traffic-management/">流量管控任务&lt;/a> 中关于如何进行路由规则配置的更多详细描述。&lt;/p></description></item><item><title>Overview: 使用 Grafana 可视化查看集群 Metrics 指标</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</guid><description>
-&lt;p>这个示例演示了如何使用 Grafana 可视化的展示 Metrics 监控指标&lt;/p>
-&lt;h2 id="开始之前">开始之前&lt;/h2>
-&lt;ul>
-&lt;li>安装 Prometheus&lt;/li>
-&lt;li>安装 Grafana&lt;/li>
-&lt;li>部署示例项目&lt;/li>
-&lt;/ul>
-&lt;h2 id="查看-grafana-面板">查看 Grafana 面板&lt;/h2>
-&lt;h2 id="示例详解">示例详解&lt;/h2>
-&lt;h3 id="参考案例">参考案例&lt;/h3>
-&lt;p>Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获取案例源码：&lt;/p>
-&lt;ul>
-&lt;li>Spring项目参考案例：
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus">https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>SpringBoot项目参考案例:
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;h3 id="依赖">依赖&lt;/h3>
-&lt;p>目前Dubbo的指标埋点仅支持3.2及以上版本，同时需要引入dubbo-metrics-prometheus依赖如下所示：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metrics-prometheus&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2及以上版本&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置">配置&lt;/h3>
-&lt;p>开启Dubbo的指标埋点只需要引入以下配置即可。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;prometheus&amp;#34;&lt;/span> enable-jvm-metrics=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enabled=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:prometheus-exporter&lt;/span> enabled=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> metrics-port=&lt;span style="color:#2aa198">&amp;#34;20888&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>关于指标的配置可以参考配置项中的指标配置信息，在这里引入的配置中:&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>enable-jvm-metrics：&lt;/strong> 是对JVM指标的埋点， 如果不需要这些配置项可以将其删除或者设置为false。&lt;/li>
-&lt;li>&lt;strong>aggregation：&lt;/strong> 针对指标数据的聚合处理使监控指标更平滑。&lt;/li>
-&lt;li>&lt;strong>prometheus-exporter：&lt;/strong> 指标数据导出器，这里配置指标服务的端口号为20888。&lt;/li>
-&lt;/ul>
-&lt;p>配置完成后即可启动服务。&lt;/p>
-&lt;h3 id="指标获取">指标获取&lt;/h3>
-&lt;p>前面的例子中提供了指标服务，接下来我们可以通过普罗米修斯来获取数据。
-普罗米修斯监控服务通过访问：&lt;code>http://localhost:20888&lt;/code> 即可拉取数据
-指标数据如下所示：
-&lt;img src="https://cn.dubbo.apache.org/imgs/v3/advantages/metrics.png" alt="metrics.png">&lt;/p>
-&lt;p>普罗米修斯获取数据的配置参考如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># A scrape configuration containing exactly one endpoint to scrape:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Here it&amp;#39;s Prometheus itself.&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scrape_configs&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># The job name is added as a label `job=&amp;lt;job_name&amp;gt;` to any timeseries scraped from this config.&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">job_name&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;prometheus&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># metrics_path defaults to &amp;#39;/metrics&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># scheme defaults to &amp;#39;http&amp;#39;.&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">job_name&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;dubbo&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static_configs&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">targets&lt;/span>: [&lt;span style="color:#2aa198">&amp;#39;IP:20888&amp;#39;&lt;/span>]
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然在实际企业应用中这个服务发现的地址并不会使用这个静态配置，需要改成动态配置。&lt;/p>
-&lt;p>也可以使用普罗米修斯的图形界面来查询指标数据如下图所示：
-&lt;img src="https://cn.dubbo.apache.org/imgs/v3/advantages/prometheus.png" alt="prometheus.png">&lt;/p>
-&lt;h3 id="可视化页面">可视化页面&lt;/h3>
-&lt;p>也可以使用 Grafana可视化指标监测，下面以Grafana可视化为例：
-Dubbo可观测性面板可以在Grafana官网的模板库中可以找到，您可以直接导入如下模版，并配置好数据源即可。
-&lt;a href="https://grafana.com/grafana/dashboards/18051">https://grafana.com/grafana/dashboards/18051&lt;/a>&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-1.png" alt="grafana-dashboard-1.png">
-&lt;img src="https://cn.dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-2.png" alt="grafana-dashboard-2.png">&lt;/p></description></item><item><title>Overview: 从 Prometheus 查询 Metrics 监控指标</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/prometheus/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/prometheus/</guid><description>
-&lt;h2 id="准备条件">准备条件&lt;/h2>
-&lt;p>本文演示在如何 Kubernetes 环境下部署的 Prometheus 并实现对 Dubbo 集群的监控数据统计与查询，你需要完成或具备以下内容：&lt;/p>
-&lt;ul>
-&lt;li>本地或远端 Kubernetes 集群&lt;/li>
-&lt;li>Kubernetes 集群安装 Prometheus&lt;/li>
-&lt;li>部署示例应用&lt;/li>
-&lt;li>使用 Prometheus dashboard 查询数据指标&lt;/li>
-&lt;/ul>
-&lt;h2 id="部署与安装-prometheus">部署与安装 Prometheus&lt;/h2>
-&lt;h3 id="kubernetes-环境安装">Kubernetes 环境安装&lt;/h3>
-&lt;p>使用以下 Dubbo 社区准备好的 Prometheus 配置文件，可以快速的将 Prometheus 启动起来：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f dubbo-stack/prometheus.yaml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>验证 Prometheus 已经正确部署&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>$ kubectl get svc prometheus -n dubbo-system
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置-prometheus">配置 Prometheus&lt;/h3>
-&lt;p>Dubbo 的每个实例都会暴露一个 http 端口用于 Metrics 采集，Prometheus 通过 scraping 每个实例的 http 接口来采集统计数据。具体的 scraping 路径可以通过 Prometheus 配置文件进行调整，该文件控制 scraping 实例的端口、路径、TLS 设置等。&lt;/p>
-&lt;p>本示例基于 &lt;code>prometheus.io&lt;/code> 注解实现了 scraping target 地址的自动发现，具体注解配置可参见示例中的 Deployment 资源定义。在此模式下，Dubbo 实例默认提供的 Prometheus Metrics 采集路径是：&lt;code>20888/management/prometheus&lt;/code>。&lt;/p>
-&lt;blockquote>
-&lt;p>用户还可以自定义安装 Prometheus。此时，需要正确配置 Prometheus scraping 的目标动态地址路径，我们推荐配合 Dubbo Admin 作为 Prometheus 地址发现的目标地址，具体请参见 &lt;a href="../../../reference/integrations/prometheus/">【Dubbo 生态集成】-【Prometheus 安装】&lt;/a>。&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="部署示例项目">部署示例项目&lt;/h2>
-&lt;p>接下来，部署示例项目以模拟产生调用数据。完整的示例地址请在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">dubbo-samples-metrics-spring-boot&lt;/a>&lt;/p>
-&lt;p>&lt;strong>1. 下载示例源码&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>$ git clone https://github.com/apache/dubbo-samples.git
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>2. 部署示例&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>$ cd dubbo-samples/4-governance/dubbo-samples-metrics-spring-boot/deploy/k8s
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ kubectl apply -f ./
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>3. 查看示例启动成功&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>$ kubectl get pods -n dubbo-demo
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 服务开始模拟正常运行，接下来可以通过 Prometheus 查看统计数据了。&lt;/p>
-&lt;h2 id="查询-prometheus">查询 Prometheus&lt;/h2>
-&lt;p>获得 Prometheus dashboard 访问地址&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>$ kubectl port-forward service/prometheus ${port}:${port}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来，执行 Prometheus 查询命令。可以在此确认 &lt;a href="../../../reference/proposals/metrics/">Dubbo 支持的 Metrics 指标&lt;/a>。&lt;/p>
-&lt;p>&lt;strong>1. 在 “Expression” 一览，输入 &lt;code>dubbo_requests_total&lt;/code>，返回以下结果&lt;/strong>&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/prometheus.png" alt="img">&lt;/p>
-&lt;p>&lt;strong>2. 在 “Expression” 一览，输入 &lt;code>dubbo_requests_total&lt;/code>，返回以下结果&lt;/strong>&lt;/p></description></item><item><title>Overview: 全链路追踪</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</guid><description>
+&lt;p>请参考 &lt;a href="../../traffic-management/">流量管控任务&lt;/a> 中关于如何进行路由规则配置的更多详细描述。&lt;/p></description></item><item><title>Overview: 全链路追踪</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</guid><description>
 &lt;section id="section-0" style="">
 &lt;div class="td-content list-page">
 &lt;div class="lead">&lt;/div>
@@ -193,4 +87,78 @@ Dubbo可观测性面板可以在Grafana官网的模板库中可以找到，您�
 &lt;/div>
 &lt;hr>
 &lt;/div>
-&lt;/section></description></item></channel></rss>
+&lt;/section></description></item><item><title>Overview: 使用 Grafana 可视化查看集群 Metrics 指标</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</guid><description>
+&lt;p>指标可视化页面目前推荐的方式是使用 Grafana 来配置 Dubbo 的可观测性监控大盘。&lt;/p>
+&lt;h2 id="在您开始之前">在您开始之前&lt;/h2>
+&lt;ul>
+&lt;li>一个可以访问的 Kubernetes 集群&lt;/li>
+&lt;li>正确安装并配置 &lt;a href="../../../reference/integrations/prometheus">普罗米修斯服务&lt;/a>&lt;/li>
+&lt;li>安装 &lt;a href="../../../reference/integrations/grafana">Grafana&lt;/a>&lt;/li>
+&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="确认组件正常运行">确认组件正常运行&lt;/h2>
+&lt;h3 id="kubernetes">Kubernetes&lt;/h3>
+&lt;p>确保 Prometheus 正常运行&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl -n dubbo-system get svc prometheus
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus ClusterIP 10.0.250.230 &amp;lt;none&amp;gt; 9090/TCP 180s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>确保 Grafana 正常运行&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl -n dubbo-system get svc grafana
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grafana ClusterIP 10.0.244.130 &amp;lt;none&amp;gt; 3000/TCP 180s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="查看-grafana-可视化面板">查看 Grafana 可视化面板&lt;/h2>
+&lt;p>示例程序启动后会自动模拟服务调用，只需等待一会能在 Grafana 中可视化的看到 Metrics 指标。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>如果是通过 &lt;a href="../../../reference/admin/architecture/">Dubbo 控制面&lt;/a> 安装的 Grafana，则可以访问 Admin 控制台并在左侧菜单中找到 Grafana 可视化监控入口&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果是独立安装的 Grafana 组件，则可以直接访问 Grafana 可视化控制台地址：&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl port-forward service/grafana 3000:3000
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在浏览器打开 Grafana 控制台：http://localhost:3000&lt;/p>
+&lt;h3 id="服务统计视图">服务统计视图&lt;/h3>
+&lt;p>支持基于应用、实例粒度的统计视图，同时对于每一种指标统计粒度，你还可以进一步查看：&lt;/p>
+&lt;ol>
+&lt;li>提供者流量视图&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-1.png" alt="grafana-dashboard-1.png">&lt;/p>
+&lt;ol start="2">
+&lt;li>消费者流量视图&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-1.png" alt="grafana-dashboard-1.png">&lt;/p>
+&lt;ol start="3">
+&lt;li>注册中心视图&lt;/li>
+&lt;/ol>
+&lt;p>TBD&lt;/p>
+&lt;ol start="4">
+&lt;li>配置中心视图&lt;/li>
+&lt;/ol>
+&lt;p>TBD&lt;/p>
+&lt;h3 id="jvm-实例视图">JVM 实例视图&lt;/h3>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-2.png" alt="grafana-dashboard-2.png">&lt;/p>
+&lt;h3 id="关于-dubbo-官方提供的-grafana-dashboard">关于 Dubbo 官方提供的 Grafana Dashboard&lt;/h3>
+&lt;p>Dubbo 提供了丰富的指标面板，以上视图面板均可以在 Grafana 官方面板库中找到：您可以直接导入如下模版，并配置好数据源即可。&lt;/p>
+&lt;p>&lt;strong>Apache Dubbo Observability Dashboard：&lt;/strong> &lt;a href="https://grafana.com/grafana/dashboards/18051">https://grafana.com/grafana/dashboards/18051&lt;/a>&lt;/p>
+&lt;p>&lt;strong>JVM (Micrometer) Dashboard：&lt;/strong> &lt;a href="https://grafana.com/grafana/dashboards/4701">https://grafana.com/grafana/dashboards/4701&lt;/a>&lt;/p></description></item><item><title>Overview: 从 Prometheus 查询 Metrics 监控指标</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/prometheus/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/prometheus/</guid><description>
+&lt;h2 id="准备条件">准备条件&lt;/h2>
+&lt;p>本文演示如何在 Kubernetes 环境下部署 Prometheus 并实现对 Dubbo 集群的监控数据统计与查询，你需要完成或具备以下内容：&lt;/p>
+&lt;ul>
+&lt;li>本地或远端 Kubernetes 集群&lt;/li>
+&lt;li>确保 &lt;a href="../../../reference/integrations/prometheus#kubernetes">Prometheus 正确安装&lt;/a>&lt;/li>
+&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a>&lt;/li>
+&lt;li>使用 Prometheus dashboard 查询数据指标&lt;/li>
+&lt;/ul>
+&lt;h2 id="确保-prometheus-正确运行">确保 Prometheus 正确运行&lt;/h2>
+&lt;p>验证 Prometheus 已经正确部署&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>kubectl -n dubbo-system get svc prometheus
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus ClusterIP 10.109.160.254 &amp;lt;none&amp;gt; 9090/TCP 4m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="查询-prometheus">查询 Prometheus&lt;/h2>
+&lt;p>获得 Prometheus dashboard 访问地址&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>$ kubectl port-forward service/prometheus 9090:9090
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打开浏览器，访问 localhost:9090/graph 即可打开 Prometheus 控制台。&lt;/p>
+&lt;p>接下来，执行 Prometheus 查询命令。可以在此确认 &lt;a href="../../../reference/proposals/metrics/">Dubbo 支持的 Metrics 指标&lt;/a>。&lt;/p>
+&lt;p>&lt;strong>1. 在 “Expression” 一览，输入 &lt;code>dubbo_consumer_qps_total&lt;/code>，返回以下结果&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/observability/prometheus.png" alt="img">&lt;/p></description></item></channel></rss>
