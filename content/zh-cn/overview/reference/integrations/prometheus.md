@@ -18,7 +18,7 @@ kubectl create -f .
 ```
 > 本安装仅适用于测试或体验使用，生产级别的安装请参考 Prometheus 官方安装文档。
 
-访问页面 `http://localhost:9090`
+访问页面 `http://localhost:9090`，切换到 graph 视图。
 
 ![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
 
@@ -35,9 +35,7 @@ wget https://github.com/prometheus/prometheus/releases/download/v2.42.0/promethe
 nohup ./prometheus > /dev/null 2>&1 &
 ```
 
-访问页面 `http://localhost:9090`
-
-![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
+访问页面 `http://localhost:9090/graph` 并切换到 graph 视图。
 
 > 具体请参考 Prometheus 官方安装文档
 

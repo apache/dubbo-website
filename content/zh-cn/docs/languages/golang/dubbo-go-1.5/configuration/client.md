@@ -208,4 +208,4 @@ type: docs
    ```
 
 
-本文章源码详情见git：https://github.com/apache/dubbo-go-samples/tree/release-1.5/helloworld/go-client
+本文章源码详情见git：https://github.com/apache/dubbo-go-samples/tree/1.5/helloworld/go-client

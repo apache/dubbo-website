@@ -45,8 +45,6 @@ systemctl daemon-reload && systemctl enable --now grafana-server
 
 访问页面 `http://localhost:3000`，默认用户名与密码为`admin`
 
-![Grafana](/imgs/v3/reference/integrations/grafana.jpg)
-
 ## 配置数据面板
 
 以下是 Dubbo 社区提供的默认指标面板，您配置好数据源并直接导入使用即可。如果默认面板不能满足要求，您还可以自定义 Grafana 面板。

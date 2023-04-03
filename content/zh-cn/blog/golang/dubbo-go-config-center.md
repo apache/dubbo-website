@@ -254,7 +254,7 @@ func newApolloConfiguration(url *common.URL) (*apolloConfiguration, error) {
 
 而 Parser & SetParser 使用默认实现即可，默认为 Properties 转换器。
 
-更多信息，参考：dubbo-go-apollo ，详情参考： https://github.com/apache/dubbo-go/tree/release-1.5/config_center/apollo
+更多信息，参考：dubbo-go-apollo ，详情参考： https://github.com/apache/dubbo-go/tree/1.5/config_center/apollo
 
 ### 使用方法
 
