@@ -9,7 +9,6 @@ description: |
 
 ### Dubbo 指标含义
 #### Provider Metrics
-
 | 指标                                        | 含义                     |
 |-------------------------------------------|------------------------|
 | dubbo_provider_qps_total                  | 提供者每秒接收的请求数            |
@@ -28,7 +27,6 @@ description: |
 
 
 #### Consumer Metrics
-
 | 指标                                        | 含义                                      |
 |-------------------------------------------| ----------------------------------------- |
 | dubbo_consumer_qps_total                  | 消费者每秒发送的请求数                    |
@@ -47,7 +45,6 @@ description: |
 
 
 #### ThreadPool Metrics
-
 | Metrics Name                   | Description              |
 | ------------------------------ | ------------------------ |
 | dubbo_thread_pool_max_size     | Thread Pool Max Size     |
@@ -59,7 +56,6 @@ description: |
 |                                |                          |
 
 #### Registration Center Metrics
-
 | Metrics Name                                       | Description                             | 说明                                     |
 | -------------------------------------------------- | --------------------------------------- | ---------------------------------------- |
 | dubbo_register_rt_milliseconds_max                 | Max Response Time                       | **应用级:** 实例注册总的最大时间         |
@@ -77,9 +73,6 @@ description: |
 | dubbo.registry.subscribe.service.num.total         | Total Service-Level Subscribe Num       |                                          |
 | dubbo.registry.subscribe.service.num.succeed.total | Succeed Service-Level Num               |                                          |
 | dubbo.registry.subscribe.service.num.failed.total  | Failed Service-Level Num                |                                          |
-
-
-
 
 
 #### Metadata Center Metrics
