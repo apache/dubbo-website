@@ -23,19 +23,14 @@ weight: 30
 验证 Prometheus 已经正确部署
 
 ```yaml
-kubectl -n dubbo-system get svc prometheus
-NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-prometheus   ClusterIP   10.109.160.254   <none>        9090/TCP   4m
+kubectl -n dubbo-system get svc prometheus-server
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+prometheus-server   ClusterIP   10.109.160.254   <none>        9090/TCP   4m
 ```
 
 ## 查询 Prometheus
 
-获得 Prometheus dashboard 访问地址
-
-```yaml
-$ kubectl port-forward service/prometheus 9090:9090
-```
-
+获得 Prometheus 访问地址 `kubectl port-forward service/prometheus-server 9090:9090`，
 打开浏览器，访问 localhost:9090/graph 即可打开 Prometheus 控制台。
 
 接下来，执行 Prometheus 查询命令。可以在此确认 [Dubbo 支持的 Metrics 指标](../../../reference/proposals/metrics/)。
