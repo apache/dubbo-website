@@ -13,11 +13,11 @@ weight: 2
 你可以使用 Dubbo 社区提供的示例配置快速安装 Prometheus。
 
 ```bash
-kubectl create -f .
+kubectl create -f https://raw.githubusercontent.com/apache/dubbo-admin/refactor-with-go/deploy/addons/manifests/prometheus.yaml
 ```
 > 本安装仅适用于测试或体验使用，生产级别的安装请参考 Prometheus 官方安装文档。
 
-访问页面 `http://localhost:9090`，切换到 graph 视图。
+执行端口映射 `kubectl -n dubbo-system port-forward svc/prometheus-server 9090:9090`，访问页面 `http://localhost:9090`，切换到 graph 视图。
 
 ![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
 
@@ -42,7 +42,7 @@ annotations:
 
 ### 自定义配置
 
-对于已经安装好的 Prometheus 服务，可以通过 Dubbo Admin 提供的 Prometheus http_sd 服务发现接口来配置 Dubbo Metrics 采集的目标实例。可以参考 Admin 安装相关文档，安装完成后 Prometheus 侧的配置如下：
+对于已经安装好的 Prometheus 服务，可以通过 Dubbo Admin 提供的 Prometheus http_sd 服务发现接口来配置 Dubbo Metrics 采集的目标实例。可以参考 Admin 安装相关文档，安装完成后 Prometheus 侧需要调整的配置如下：
 
 ```yaml
 - job_name: 'dubbo'
