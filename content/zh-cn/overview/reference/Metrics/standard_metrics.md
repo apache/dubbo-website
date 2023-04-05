@@ -76,7 +76,7 @@ description: |
 
 
 #### Metadata Center Metrics
-元数据指标生效范围：当元数据为集中式配置时（report-metadata为true或者metadataType为remote）
+部分元数据指标生效范围：当元数据为集中式配置时（report-metadata为true或者metadataType为remote）
 | Metrics Name                               | Description                    | 说明                                                         |
 | ------------------------------------------ | ------------------------------ | ------------------------------------------------------------ |
 | dubbo_metadata_push_num_total              | Total Num                      | **提供者** 推送元数据到元数据中心的成功次数,当提供者元数据发生了变更时触发 |
