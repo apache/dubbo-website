@@ -59,14 +59,14 @@ description: |
 | Metrics Name                                       | Description                             | 说明                                     |
 | -------------------------------------------------- | --------------------------------------- | ---------------------------------------- |
 | dubbo_register_rt_milliseconds_max                 | Max Response Time                       | **应用级:** 实例注册总的最大时间         |
-| dubbo_register_rt_milliseconds_avg                 | Average Response Time                   | **应用级：**实例注册总的平均时间         |
-| dubbo_register_rt_milliseconds_sum                 | Sum Response Time                       | **应用级：**实例注册总的注册时间         |
-| dubbo_register_rt_milliseconds_min                 | Min Response Time                       | **应用级：**实例注册总的最小时间         |
-| dubbo_registry_register_requests_succeed_total     | Succeed Register Requests               | **应用级：**实例注册成功的次数           |
-| dubbo_registry_register_requests_total             | Total Register Requests                 | **应用级：**实例注册总次数包含成功与失败 |
-| dubbo_registry_register_requests_failed_total      | Failed Register Requests                | **应用级：**实例注册失败次数             |
-| dubbo_register_rt_milliseconds_last                | Last Response Time                      | **应用级：**实例注册最新响应时间         |
-| dubbo_registry_register_requests_failed_total      | Failed Register Requests                | **应用级：**实例注册失败次数             |
+| dubbo_register_rt_milliseconds_avg                 | Average Response Time                   | **应用级：** 实例注册总的平均时间         |
+| dubbo_register_rt_milliseconds_sum                 | Sum Response Time                       | **应用级：** 实例注册总的注册时间         |
+| dubbo_register_rt_milliseconds_min                 | Min Response Time                       | **应用级：** 实例注册总的最小时间         |
+| dubbo_registry_register_requests_succeed_total     | Succeed Register Requests               | **应用级：** 实例注册成功的次数           |
+| dubbo_registry_register_requests_total             | Total Register Requests                 | **应用级：** 实例注册总次数包含成功与失败 |
+| dubbo_registry_register_requests_failed_total      | Failed Register Requests                | **应用级：** 实例注册失败次数             |
+| dubbo_register_rt_milliseconds_last                | Last Response Time                      | **应用级：** 实例注册最新响应时间         |
+| dubbo_registry_register_requests_failed_total      | Failed Register Requests                | **应用级：** 实例注册失败次数             |
 | dubbo_registry_register_service_total              | Total Service-Level Register Requests   |                                          |
 | dubbo.registry.register.service.succeed.total      | Succeed Service-Level Register Requests |                                          |
 | dubbo.registry.register.service.failed.total       | Failed Service-Level Register Requests  |                                          |
@@ -85,16 +85,16 @@ description: |
 | dubbo_metadata_subscribe_num_total         | Total Metadata Subscribe Num   | **消费者** 获取元数据的总次数，当消费者启动时本地磁盘缓存无元数据获取元数据的次数 |
 | dubbo_metadata_subscribe_num_succeed_total | Succeed Metadata Subscribe Num | **消费者** 获取元数据的总次数，当消费者启动时本地磁盘缓存无元数据并且成功获取元数据的次数 |
 | dubbo_metadata_subscribe_num_failed_total  | Failed Metadata Subscribe Num  | **消费者** 获取元数据的总次数，当消费者启动时本地磁盘缓存无元数据并且获取元数据失败的次数 |
-| dubbo_push_rt_milliseconds_sum             | Sum Response Time              | **提供者：** 推送元数据到元数据中心的总时间                   |
-| dubbo_push_rt_milliseconds_last            | Last Response Time             | **提供者：** 推送元数据到元数据中心的最新耗时                 |
-| dubbo_push_rt_milliseconds_min             | Min Response Time              | **提供者：** 推送元数据到元数据中心的最小时间                 |
-| dubbo_push_rt_milliseconds_max             | Max Response Time              | **提供者：** 推送元数据到元数据中心的最大时间                 |
-| dubbo_push_rt_milliseconds_avg             | Average Response Time          | **提供者：** 推送元数据到元数据中心的平均时间                 |
-| dubbo_subscribe_rt_milliseconds_sum        | Sum Response Time              | **消费者：** 获取元数据从元数据中心的总时间                  |
-| dubbo_subscribe_rt_milliseconds_last       | Last Response Time             | **消费者：** 推送元数据到元数据中心的最新耗时                 |
-| dubbo_subscribe_rt_milliseconds_min        | Min Response Time              | **消费者：** 推送元数据到元数据中心的最小时间                 |
-| dubbo_subscribe_rt_milliseconds_max        | Max Response Time              | **消费者：** 推送元数据到元数据中心的最大时间                 |
-| dubbo_subscribe_rt_milliseconds_avg        | Average Response Time          | **消费者：** 推送元数据到元数据中心的平均时间                 |
+| dubbo_push_rt_milliseconds_sum             | Sum Response Time              | **提供者** 推送元数据到元数据中心的总时间                   |
+| dubbo_push_rt_milliseconds_last            | Last Response Time             | **提供者** 推送元数据到元数据中心的最新耗时                 |
+| dubbo_push_rt_milliseconds_min             | Min Response Time              | **提供者** 推送元数据到元数据中心的最小时间                 |
+| dubbo_push_rt_milliseconds_max             | Max Response Time              | **提供者** 推送元数据到元数据中心的最大时间                 |
+| dubbo_push_rt_milliseconds_avg             | Average Response Time          | **提供者** 推送元数据到元数据中心的平均时间                 |
+| dubbo_subscribe_rt_milliseconds_sum        | Sum Response Time              | **消费者** 获取元数据从元数据中心的总时间                  |
+| dubbo_subscribe_rt_milliseconds_last       | Last Response Time             | **消费者** 推送元数据到元数据中心的最新耗时                 |
+| dubbo_subscribe_rt_milliseconds_min        | Min Response Time              | **消费者** 推送元数据到元数据中心的最小时间                 |
+| dubbo_subscribe_rt_milliseconds_max        | Max Response Time              | **消费者** 推送元数据到元数据中心的最大时间                 |
+| dubbo_subscribe_rt_milliseconds_avg        | Average Response Time          | **消费者** 推送元数据到元数据中心的平均时间                 |
 
  
 ####  Consumer Or Provider Exception
