@@ -16,13 +16,13 @@ weight: 7
 
 Dubbo 内部维护了多个纬度的可观测指标，并且支持多种方式的可视化监测。可观测性指标从总体上来说分为三个度量纬度：
 
-* **Admin。** Admin 控制台可视化展示了集群中的应用、服务、实例及依赖关系，支持流量治理规则下发，同时还提供如服务测试、mock、文档管理等提升研发测试效率的工具。
+* **Admin** Admin 控制台可视化展示了集群中的应用、服务、实例及依赖关系，支持流量治理规则下发，同时还提供如服务测试、mock、文档管理等提升研发测试效率的工具。
 
-* **Metrics。** Dubbo 统计了一系列的流量指标如 QPS、RT、成功请求数、失败请求数等，还包括一系列的内部组件状态如线程池数、服务健康状态等。
+* **Metrics** Dubbo 统计了一系列的流量指标如 QPS、RT、成功请求数、失败请求数等，还包括一系列的内部组件状态如线程池数、服务健康状态等。
 
-* **Tracing。** Dubbo 与业界主流的链路追踪工作做了适配，包括 Skywalking、Zipkin、Jaeger 都支持 Dubbo 服务的链路追踪。
+* **Tracing** Dubbo 与业界主流的链路追踪工作做了适配，包括 Skywalking、Zipkin、Jaeger 都支持 Dubbo 服务的链路追踪。
 
-* **Logging。** Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹。
+* **Logging** Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹。
 
 ## Admin
 Admin 控制台可视化展示了集群中的应用、服务、实例及依赖关系，支持流量治理规则下发，同时还提供如服务测试、mock、文档管理等提升研发测试效率的工具
@@ -36,7 +36,9 @@ Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数�
 
 可以通过 Grafana 可视化的查看 Metrics 指标
 
-![Grafana 效果图](/imgs/v3/feature/observability/grafana.png)
+![Grafana 效果图](/imgs/v3/feature/observability/provider-stat.png)
+![Grafana 效果图](/imgs/v3/feature/observability/provider-rt.png)
+
 
 * [使用 Grafana 可视化展示 Metrics 指标](../../tasks/observability/grafana/)
 * [如何从 Prometheus 查询特定 Metrics 指标](../../tasks/observability/prometheus/)
