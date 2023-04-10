@@ -8,8 +8,7 @@ type: docs
 weight: 2
 ---
 
-
-
+## 背景
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 
 ![cluster](/imgs/user/cluster.jpg)
@@ -92,7 +91,7 @@ broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常�
 `2.1.0` 开始支持
 {{% /alert %}}
 
-## 集群模式配置
+### 集群模式配置
 
 按照以下示例在服务提供方和消费方配置集群模式
 
