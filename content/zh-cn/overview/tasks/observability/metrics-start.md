@@ -31,3 +31,67 @@ Dubbo指标监控目前推荐使用Prometheus来进行服务监控，Grafana来�
 Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获取案例源码：
 - Spring项目参考案例：  [dubbo-samples-metrics-prometheus](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus)
 - SpringBoot项目参考案例: [dubbo-samples-metrics-spring-boot](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot)
+
+### 依赖
+目前Dubbo的指标埋点仅支持3.2及以上版本，同时需要额外引入dubbo-metrics-prometheus依赖如下所示：
+```xml
+      <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-observability-starter</artifactId>
+            <version>3.2及以上的正式版本</version>
+        </dependency>
+```
+
+### 配置
+目前Dubbo支持推和拉两种模式获取指标数据，下面以普罗米修斯拉取指标数据的方式来作为演示，Dubbo的指标埋点服务端口复用了QOS的服务，拉取模式只需要开启QOS相关对应配置即可。下面介绍两种开启的方式分别为Spring文件中配置和dubbo.properties配置文件中配置，您可以选择其中一种适合自己方式即可。
+
+#### Spring XML配置
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:property-placeholder/>
+
+    <dubbo:application name="metrics-provider" qos-enable="true" qos-port="20888"  qos-accept-foreign-ip="false"
+                       qos-accept-foreign-ip-whitelist="192.168.1.169,47.96.183.43,192.168.1.9,121.199.25.64"/>
+
+    <dubbo:registry address="zookeeper://${zookeeper.address:127.0.0.1}:2181"/>
+    <dubbo:config-center address="zookeeper://${zookeeper.address:127.0.0.1}:2181" />
+    <dubbo:metadata-report address="zookeeper://${zookeeper.address:127.0.0.1}:2181" />
+
+    <dubbo:metrics protocol="prometheus">
+        <dubbo:aggregation enabled="true"/>
+    </dubbo:metrics>
+
+    <bean id="demoService" class="org.apache.dubbo.samples.metrics.prometheus.provider.impl.DemoServiceImpl"/>
+    <dubbo:service interface="org.apache.dubbo.samples.metrics.prometheus.api.DemoService" ref="demoService"/>
+
+
+    <bean id="demoService2" class="org.apache.dubbo.samples.metrics.prometheus.provider.impl.DemoServiceImpl2"/>
+    <dubbo:service interface="org.apache.dubbo.samples.metrics.prometheus.api.DemoService2" ref="demoService2"/>
+</beans>
+```
+
+#### dubbo.properties配置
+
+```
+dubbo.application.qos-port=20888
+dubbo.application.qos-accept-foreign-ip=false
+dubbo.application.qos-accept-foreign-ip-whitelist=8.131.79.126,114.55.147.139,121.199.25.64
+dubbo.metrics.aggregation.enabled=true
+dubbo.metrics.protocol=prometheus
+```
+
+### 查询Apache Dubbo指标
+
+如果需要测试指标数据可以直接在服务器上面执行如下命令：
+
+```bash
+curl http://localhost:20888
+```
+
+
+ 
