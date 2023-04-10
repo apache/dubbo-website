@@ -55,7 +55,7 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
        http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <context:property-placeholder/>
 
-    <dubbo:application name="metrics-provider" qos-enable="true" qos-port="20888"  qos-accept-foreign-ip="false"
+    <dubbo:application name="metrics-provider" qos-enable="true" qos-port="22222"  qos-accept-foreign-ip="false"
                        qos-accept-foreign-ip-whitelist="192.168.1.169,47.96.183.43,192.168.1.9,121.199.25.64"/>
 
     <dubbo:registry address="zookeeper://${zookeeper.address:127.0.0.1}:2181"/>
@@ -78,7 +78,7 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 #### dubbo.properties配置
 
 ```
-dubbo.application.qos-port=20888
+dubbo.application.qos-port=22222
 dubbo.application.qos-accept-foreign-ip=false
 dubbo.application.qos-accept-foreign-ip-whitelist=8.131.79.126,114.55.147.139,121.199.25.64
 dubbo.metrics.aggregation.enabled=true
@@ -90,7 +90,7 @@ dubbo.metrics.protocol=prometheus
 如果需要测试指标数据可以直接在服务器上面执行如下命令：
 
 ```bash
-curl http://localhost:20888
+curl http://localhost:22222
 ```
 
 
