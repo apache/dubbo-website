@@ -5,7 +5,7 @@ description: 在 Dubbo 应用启动失败时的排查思路
 linkTitle: 应用启动失败
 title: 应用启动失败
 type: docs
-weight: 10
+weight: 1
 ---
 
 
