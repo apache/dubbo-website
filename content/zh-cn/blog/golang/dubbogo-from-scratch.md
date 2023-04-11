@@ -842,7 +842,7 @@ dubbogo 主要有三个配置文件：
 
 
 
-篇幅有限，就介绍到这里。欢迎有兴趣的同学来参与 [dubbogo3.0](https://github.com/apache/dubbo-go/tree/3.0) 的建设，感谢阅读。
+篇幅有限，就介绍到这里。欢迎有兴趣的同学来参与 [dubbogo3.0](https://github.com/apache/dubbo-go/tree/release-3.0) 的建设，感谢阅读。
 
 
 

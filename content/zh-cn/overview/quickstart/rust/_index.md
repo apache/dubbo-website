@@ -7,7 +7,7 @@ linkTitle: Rust
 no_list: true
 title: Rust 微服务开发入门
 type: docs
-weight: 40
+weight: 3
 ---
 
 

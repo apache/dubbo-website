@@ -5,7 +5,7 @@ description: ""
 linkTitle: 调用 Spring Cloud
 title: 使用 Dubbo 作为消费端调用 Spring Cloud 服务
 type: docs
-weight: 30
+weight: 3
 ---
 
 

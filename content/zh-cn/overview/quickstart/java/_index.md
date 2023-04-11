@@ -6,7 +6,7 @@ linkTitle: Java
 no_list: true
 title: Java 微服务开发入门
 type: docs
-weight: 10
+weight: 1
 ---
 
 

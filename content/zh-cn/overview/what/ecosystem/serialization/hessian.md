@@ -5,7 +5,7 @@ description: ""
 linkTitle: Hessian
 title: Hessian
 type: docs
-weight: 10
+weight: 1
 ---
 
 
@@ -17,7 +17,7 @@ Hessian序列化是一种支持动态类型、跨语言、基于对象传输的�
 1. 自描述序列化类型。不依赖外部描述文件或者接口定义，用一个字节表示常用的基础类型，极大缩短二进制流。
 2. 语言无关，支持脚本语言
 3. 协议简单，比Java原生序列化高效
-4. 相比hessian1，hessian2中增加了压缩编码，其序列化二进制流大小事Java序列化的50%，序列化耗时是Java序列化的30%，反序列化耗时是Java序列化的20%。
+4. 相比hessian1，hessian2中增加了压缩编码，其序列化二进制流大小是Java序列化的50%，序列化耗时是Java序列化的30%，反序列化耗时是Java序列化的20%。
 
 ## 2 使用方式
 

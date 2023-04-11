@@ -5,7 +5,7 @@ description: ""
 linkTitle: 标签路由
 title: 标签路由规则
 type: docs
-weight: 20
+weight: 2
 ---
 
 

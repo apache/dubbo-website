@@ -5,7 +5,7 @@ description: 负载均衡
 linkTitle: 负载均衡
 title: 负载均衡
 type: docs
-weight: 20
+weight: 3
 ---
 
 

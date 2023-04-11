@@ -13,7 +13,7 @@ linkTitle: SDK 用户手册
 no_list: true
 title: Dubbo SDK 用户手册
 type: docs
-weight: 60
+weight: 6
 ---
 
 

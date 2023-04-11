@@ -5,7 +5,7 @@ description: 快速易用
 linkTitle: 快速易用
 title: 快速易用
 type: docs
-weight: 20
+weight: 1
 ---
 
 

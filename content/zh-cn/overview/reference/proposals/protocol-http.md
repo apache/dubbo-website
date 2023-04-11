@@ -7,32 +7,31 @@ title: Rest 协议
 type: docs
 weight: 6
 ---
+本文将介绍 Dubbo 的 REST/HTTP 协议设计。
 
-# Dubbo RestProtocol 设计文档
+## RestProtocol 设计
 
-## 原版本dubbo rest
+### 原版本dubbo rest
 
-consumer
+**consumer**
 
 restClient支持 依赖resteasy 不支持spring mvc 
 
-provider(较重)
+**provider(较重)**
 
 依赖web container   (tomcat,jetty，)servlet 模式，jaxrs netty server
 
-### 改版dubbo rest 
-
-方向：
+### 新版本dubbo rest 
 
 更加轻量，具有dubbo风格的rest，微服务体系互通（Springcloud Alibaba）
 
-1.注解解析
+**1.注解解析**
 
-2.报文编解码
+**2.报文编解码**
 
-3.restClient
+**3.restClient**
 
-4.restServer(netty)
+**4.restServer(netty)**
 
 支持程度：
 
@@ -70,7 +69,7 @@ param,header,body,pathvaribale （spring mvc & resteasy）
     userId: 123456
 
 
-## 目前支持粒度：
+## 支持粒度
 
 |  数据位置  |  content-type  |  spring注解  |  resteasy注解  |
 | --- | --- | --- | --- |
@@ -84,7 +83,8 @@ param,header,body,pathvaribale （spring mvc & resteasy）
 |  content-type  |   |  PostMapping GetMapping consumers属性  |  Consumers  |
 |  Accept  |   |  PostMapping GetMapping produces属性  |  Produces  |
 
-## rest注解解析（ServiceRestMetadataResolver）
+## rest注解解析
+ServiceRestMetadataResolver
 
     JAXRSServiceRestMetadataResolver
 
@@ -210,9 +210,9 @@ RequestMeatadata
 
         private Set<String> produces // Accept;
 
-### Consumer 代码：
+### Consumer 代码
 
-refer:
+refer
 
      @Override
         protected <T> Invoker<T> protocolBindingRefer(final Class<T> type, final URL url) throws RpcException {
@@ -305,9 +305,9 @@ refer:
             invokers.add(invoker);
             return invoker;
 
-### provider 代码：
+### provider 代码
 
-export:
+export
 
      public <T> Exporter<T> export(final Invoker<T> invoker) throws RpcException {
             URL url = invoker.getUrl();
@@ -494,9 +494,9 @@ RPCInvocationBuilder
 
 ## 编码示例
 
-API
+**API**
 
-mvc:
+mvc
 
     @RestController()
     @RequestMapping("/demoService")
@@ -577,7 +577,9 @@ impl(service)
 
 ![image](https://static.dingtalk.com/media/lQLPJxZcNUm4M9TNA1_NBMuwZUu6IC3FeYAD5sSydYADAA_1227_863.png)
 
-## 场景 :
+## 场景 
+
+### 1.体系互通
 
 **非dubbo体系互通（Springcloud alibaba  互通）**
 
@@ -629,7 +631,8 @@ dubbo rest 对其他http服务 进行调用
 
 dubbo restServer 可以与其他web服务，浏览器等客户端直接进行http交互
 
-## consumer TODOLIST（功能已经初步实现，可以调通解析response）
+## consumer TODOLIST
+> 功能已经初步实现，可以调通解析response
 
 1. org/apache/dubbo/rpc/protocol/rest/RestProtocol.java:157  dynamic load config
 
@@ -643,12 +646,13 @@ dubbo restServer 可以与其他web服务，浏览器等客户端直接进行h
 
 6.org/apache/dubbo/rpc/protocol/rest/message/decode/MultiValueCodec.java:35  TODO java bean  get set convert
 
-## provider TODOLIST(待实现)
-
+## provider TODOLIST
+> 待实现
+ 
 基于netty实现支持http协议的NettyServer
 
 无注解协议定义
 
 官网场景补充
 
-## Rest使用说明文档及demo：
+## Rest使用说明文档及demo

@@ -411,7 +411,7 @@ public interface DemoService {
 }
 ```
 
-In `GreetingsService`, the `sayHi` method is defined. Subsequent services published by the server and services subscribed by the consumer are all developed around the `GreetingsService` interface.
+In `DemoService`, the `sayHello` method is defined. Subsequent services published by the server and services subscribed by the consumer are all developed around the `DemoService` interface.
 
 
 

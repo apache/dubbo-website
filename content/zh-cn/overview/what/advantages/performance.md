@@ -5,7 +5,7 @@ description: 超高性能
 linkTitle: 超高性能
 title: 超高性能
 type: docs
-weight: 30
+weight: 2
 ---
 
 
@@ -16,15 +16,17 @@ Dubbo 内置支持 Dubbo2、Triple 两款高性能通信协议。其中
 * Dubbo2 是基于 TCP 传输协议之上构建的二进制私有 RPC 通信协议，是一款非常简单、紧凑、高效的通信协议。
 * Triple 是基于 HTTP/2 的新一代 RPC 通信协议，在网关穿透性、通用性以及 Streaming 通信上具备优势，Triple 完全兼容 gRPC 协议。
 
-Dubbo2 benchmark 性能指标
+Dubbo TCP Protocol benchmark 性能指标
 
-![Dubbo2](/)
+![dubbo-rpc-protocol-benchmark](/imgs/v3/performance/rpc-dubbo.svg)
 
 Triple benchmark 性能指标
 
-![Triple](/)
+![dubbo-http2-protobuf-benchmark](/imgs/v3/performance/rpc-triple.svg)
 
-了解 [更多通信协议](../../../core-features/protocols)。
+了解更多
+* [通信协议](../../../core-features/protocols)
+* [Benchmark 指标](../../../mannual/java-sdk/reference-manual/performance/rpc-benchmarking)
 
 ## 流式通信
 

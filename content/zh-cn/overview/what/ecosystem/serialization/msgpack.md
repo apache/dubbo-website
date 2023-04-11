@@ -5,7 +5,7 @@ description: ""
 linkTitle: MessagePack
 title: MessagePack
 type: docs
-weight: 80
+weight: 9
 ---
 
 

@@ -5,7 +5,7 @@ description: ""
 linkTitle: RMI
 title: RMI
 type: docs
-weight: 60
+weight: 6
 ---
 
 
