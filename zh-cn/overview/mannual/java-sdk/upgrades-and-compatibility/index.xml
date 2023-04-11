@@ -96,18 +96,31 @@
 &lt;li>请检查注册中心 URL 上是否已经配置了 group 属性，如果是的话需要检查服务端和消费端的 group 是否都一致，如果不一致请修改为一致&lt;/li>
 &lt;li>如果不希望 group 重新对齐到 Nacos 注册中心中的 group 分组，可以配置 &lt;code>dubbo.nacos-service-discovery.use-default-group=false&lt;/code> 全局属性值忽略该功能&lt;/li>
 &lt;/ol></description></item><item><title>Overview: 3.1 升级至 3.2</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.1-to-3.2-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.1-to-3.2-compatibility-guide/</guid><description>
-&lt;h1 id="功能修改点">功能修改点&lt;/h1>
-&lt;h2 id="1-传递依赖变更">1. 传递依赖变更&lt;/h2>
-&lt;ul>
-&lt;li>Dubbo 3.2.0 版本开始默认不再在 &lt;code>dubbo-all&lt;/code> 中 shade &lt;code>hessian-lite&lt;/code> 的代码，而是使用传递依赖传递。如果你的应用中不需要使用 &lt;code>hessian-lite&lt;/code>，可以将 &lt;code>hessian-lite&lt;/code> 从依赖中移除。&lt;/li>
-&lt;li>Dubbo 3.2.0 版本开始在 &lt;code>dubbo-all&lt;/code> 中不再传递 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code> 依赖，如果你的应用中需要使用 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code>，请手动将 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code> 依赖添加到应用中。&lt;/li>
-&lt;li>Dubbo 3.2.0 版本在 &lt;code>dubbo-all&lt;/code> 中传递 &lt;code>fastjson2&lt;/code> 依赖。&lt;/li>
-&lt;/ul>
+&lt;p>对于绝大多数的用户，升级到 Dubbo 3.2.0 是完全平滑的，仅需要修改依赖包版本即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="兼容性-checklist">兼容性 CheckList&lt;/h1>
+&lt;h2 id="1-序列化检查模式重要">1. 序列化检查模式（重要！！！）&lt;/h2>
+&lt;p>在 Dubbo 3.2.0 版本中，Dubbo 将默认开启序列化白名单的强校验，以提升 Dubbo 的安全性，避免远程命令执行的问题。
+对于一些使用了泛型等可能存在扫描不全或者是&lt;strong>服务规模较大&lt;/strong>的用户，我们建议您添加 &lt;code>-Ddubbo.application.serialize-check-status=WARN&lt;/code> 配置。
+观察一段时间后（通过日志、QoS 命令），如果没有触发安全告警，则可以配置强校验模式。&lt;/p>
+&lt;p>关于自定义白名单的配置，可以参考官网的 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/">文档 / SDK 手册 / Java SDK / 高级特性和用法 / 提升安全性 / 类检查机制&lt;/a> 一文进行配置。&lt;/p>
+&lt;h4 id="q1为什么要开启序列化白名单的强校验">Q1：为什么要开启序列化白名单的强校验？&lt;/h4>
+&lt;p>由于 Java 本身机制的问题，Dubbo 支持的非 IDL 序列化天然允许访问任意类，这将可能导致远程命令执行（RCE）风险。&lt;/p>
+&lt;h4 id="q2升级到-32-的最佳实践是什么">Q2：升级到 3.2 的最佳实践是什么？&lt;/h4>
+&lt;p>我们建议&lt;strong>所有用户&lt;/strong>在升级 Dubbo 3.2.0 版本前添加 &lt;code>-Ddubbo.application.serialize-check-status=WARN&lt;/code> 配置以保证最佳的兼容性。否则可能导致线上数据异常的情况！&lt;/p>
+&lt;hr>
 &lt;h2 id="2-默认序列化切换">2. 默认序列化切换&lt;/h2>
-&lt;ul>
-&lt;li>Dubbo 3.2.0 版本开始默认序列化方式从 &lt;code>hessian2&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>，对于升级到 3.2.0 的应用，Dubbo 会自动尝试采用 &lt;code>fastjson2&lt;/code> 进行序列化。&lt;/li>
-&lt;/ul>
-&lt;h4 id="faq">FAQ&lt;/h4>
+&lt;p>Dubbo 3.2.0 版本开始默认序列化方式从 &lt;code>hessian2&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>，对于升级到 3.2.0 的应用，Dubbo 会自动尝试采用 &lt;code>fastjson2&lt;/code> 进行序列化。&lt;/p>
 &lt;h4 id="q1会不会影响和低版本的-dubbo-互通">Q1：会不会影响和低版本的 Dubbo 互通？&lt;/h4>
 &lt;p>不会。与低版本互通仍使用 &lt;code>hessian-lite&lt;/code>。原理可参考&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/">序列化协议升级指南&lt;/a>一文。&lt;/p>
 &lt;h4 id="q2为什么要切换默认序列化方式">Q2：为什么要切换默认序列化方式？&lt;/h4>
@@ -118,29 +131,10 @@
 具体协议格式可以参考：&lt;a href="https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn">JSONB 格式&lt;/a>&lt;/p>
 &lt;h4 id="q4如果我不想使用-fastjson2怎么办">Q4：如果我不想使用 &lt;code>fastjson2&lt;/code>，怎么办？&lt;/h4>
 &lt;p>如果你不想使用 &lt;code>fastjson2&lt;/code>，可以配置 &lt;code>prefer-serialization&lt;/code> 为 &lt;code>hessian2&lt;/code> 覆盖默认配置。（如 &lt;code>dubbo.provider.prefer-serialization=fastjson2,hessian2&lt;/code>） 如果没有特殊的需求，我们不建议仍继续使用 &lt;code>hessian2&lt;/code>。&lt;/p>
-&lt;h2 id="3-默认内部序列化工具切换">3. 默认内部序列化工具切换&lt;/h2>
-&lt;ul>
-&lt;li>Dubbo 3.2.0 版本开始默认&lt;strong>内部&lt;/strong>序列化工具从 &lt;code>fastjson&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>。&lt;/li>
-&lt;/ul>
-&lt;h4 id="faq-1">FAQ&lt;/h4>
-&lt;h4 id="q1会不会影响-rpc-请求流量">Q1：会不会影响 RPC 请求流量？&lt;/h4>
-&lt;p>不会。内部序列化工具为 Dubbo 内部解析参数时使用，非 RPC 传输序列化协议。&lt;/p>
-&lt;h4 id="q2为什么要切换默认内部序列化工具">Q2：为什么要切换默认内部序列化工具？&lt;/h4>
-&lt;p>Dubbo 3.2.0 版本开始默认传递依赖不再传递 &lt;code>fastjson&lt;/code> 和 &lt;code>gson&lt;/code>。出于兼容性考虑，默认内部序列化工具切换为 &lt;code>fastjson2&lt;/code>。&lt;/p>
-&lt;h4 id="q3如果我的环境中没有-fastjson2怎么办">Q3：如果我的环境中没有 &lt;code>fastjson2&lt;/code>，怎么办？&lt;/h4>
-&lt;p>Dubbo 支持多种序列化框架自动切换，如果你的环境中没有 &lt;code>fastjson2&lt;/code>，Dubbo 会自动尝试切换到 &lt;code>fastsjon&lt;/code> 或 &lt;code>gson&lt;/code>。&lt;/p>
-&lt;h4 id="q4我想指定-dubbo-内部序列化工具怎么办">Q4：我想指定 Dubbo 内部序列化工具，怎么办？&lt;/h4>
-&lt;p>可以配置 &lt;code>dubbo.json-framework.prefer&lt;/code> 参数，如 &lt;code>-Ddubbo.json-framework.prefer=gson&lt;/code>。&lt;/p>
-&lt;h2 id="4-triple-协议支持传递自定义异常">4. Triple 协议支持传递自定义异常&lt;/h2>
-&lt;ul>
-&lt;li>Dubbo 3.2.0 版本开始 Triple 协议支持回传自定义异常，而不是只能回传 &lt;code>RpcException&lt;/code>。如果服务接口会抛出异常的，在 Dubbo 3.2.0 版本以后将默认按照 Dubbo 协议一样回传自定义异常对象。&lt;/li>
-&lt;/ul>
-&lt;h2 id="5-默认关闭推空保护">5. 默认关闭推空保护&lt;/h2>
-&lt;ul>
-&lt;li>Dubbo 3.2.0 版本开始默认关闭推空保护，即使注册中心推送空地址，Dubbo 也将不会保留最后一批 provider 信息。
-如果需要开启推空保护，可以配置 &lt;code>dubbo.application.enable-empty-protection&lt;/code> 为 &lt;code>true&lt;/code>。&lt;/li>
-&lt;/ul>
-&lt;h4 id="faq-2">FAQ&lt;/h4>
+&lt;hr>
+&lt;h2 id="3-默认关闭推空保护">3. 默认关闭推空保护&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始默认关闭推空保护，即使注册中心推送空地址，Dubbo 也将不会保留最后一批 provider 信息。
+如果需要开启推空保护，可以配置 &lt;code>dubbo.application.enable-empty-protection&lt;/code> 为 &lt;code>true&lt;/code>。&lt;/p>
 &lt;h4 id="q1关闭推空保护对我有什么影响">Q1：关闭推空保护对我有什么影响？&lt;/h4>
 &lt;p>在绝大部分场景下没有影响。
 推空保护的目的是在注册中心出现故障并且主动推送空地址的时候，Dubbo 保留最后一批 provider 信息，以保证服务可用。
@@ -149,7 +143,36 @@
 &lt;h4 id="q2我想开启推空保护怎么办">Q2：我想开启推空保护，怎么办？&lt;/h4>
 &lt;p>如果在生产上为了高可用，需要开启推空保护，可以配置 &lt;code>dubbo.application.enable-empty-protection&lt;/code> 为 &lt;code>true&lt;/code>。
 目前已知开启推空保护会导致服务端应用从 &lt;code>2.6.x&lt;/code>、&lt;code>2.7.x&lt;/code> 等仅支持接口级服务发现的版本升级到 &lt;code>3.x&lt;/code> 之后回滚到原来版本出现异常，极端场景下会导致服务调用失败。
-此外，开启推空保护后在服务端地址真的为空的时候出现较多的心跳异常、日志异常等。&lt;/p></description></item><item><title>Overview: 应用级服务发现</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/</guid><description/></item><item><title>Overview: 序列化协议升级</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/</guid><description>
+此外，开启推空保护后在服务端地址真的为空的时候出现较多的心跳异常、日志异常等。&lt;/p>
+&lt;hr>
+&lt;h2 id="4-传递依赖变更">4. 传递依赖变更&lt;/h2>
+&lt;ul>
+&lt;li>Dubbo 3.2.0 版本开始默认不再在 &lt;code>dubbo-all&lt;/code> 中 shade &lt;code>hessian-lite&lt;/code> 的代码，而是使用传递依赖传递。如果你的应用中不需要使用 &lt;code>hessian-lite&lt;/code>，可以将 &lt;code>hessian-lite&lt;/code> 从依赖中移除。&lt;/li>
+&lt;li>Dubbo 3.2.0 版本开始在 &lt;code>dubbo-all&lt;/code> 中不再传递 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code> 依赖，如果你的应用中需要使用 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code>，请手动将 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code> 依赖添加到应用中。&lt;/li>
+&lt;li>Dubbo 3.2.0 版本在 &lt;code>dubbo-all&lt;/code> 中传递 &lt;code>fastjson2&lt;/code> 依赖。&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="5-默认内部序列化工具切换">5. 默认内部序列化工具切换&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始默认&lt;strong>内部&lt;/strong>序列化工具从 &lt;code>fastjson&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>。&lt;/p>
+&lt;h4 id="q1会不会影响-rpc-请求流量">Q1：会不会影响 RPC 请求流量？&lt;/h4>
+&lt;p>不会。内部序列化工具为 Dubbo 内部解析参数时使用，非 RPC 传输序列化协议。&lt;/p>
+&lt;h4 id="q2为什么要切换默认内部序列化工具">Q2：为什么要切换默认内部序列化工具？&lt;/h4>
+&lt;p>Dubbo 3.2.0 版本开始默认传递依赖不再传递 &lt;code>fastjson&lt;/code> 和 &lt;code>gson&lt;/code>。出于兼容性考虑，默认内部序列化工具切换为 &lt;code>fastjson2&lt;/code>。&lt;/p>
+&lt;h4 id="q3如果我的环境中没有-fastjson2怎么办">Q3：如果我的环境中没有 &lt;code>fastjson2&lt;/code>，怎么办？&lt;/h4>
+&lt;p>Dubbo 支持多种序列化框架自动切换，如果你的环境中没有 &lt;code>fastjson2&lt;/code>，Dubbo 会自动尝试切换到 &lt;code>fastsjon&lt;/code> 或 &lt;code>gson&lt;/code>。&lt;/p>
+&lt;h4 id="q4我想指定-dubbo-内部序列化工具怎么办">Q4：我想指定 Dubbo 内部序列化工具，怎么办？&lt;/h4>
+&lt;p>可以配置 &lt;code>dubbo.json-framework.prefer&lt;/code> 参数，如 &lt;code>-Ddubbo.json-framework.prefer=gson&lt;/code>。&lt;/p>
+&lt;hr>
+&lt;h2 id="6-triple-协议支持传递自定义异常">6. Triple 协议支持传递自定义异常&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始 Triple 协议支持回传自定义异常，而不是只能回传 &lt;code>RpcException&lt;/code>。如果服务接口会抛出异常的，在 Dubbo 3.2.0 版本以后将默认按照 Dubbo 协议一样回传自定义异常对象。&lt;/p>
+&lt;hr>
+&lt;h2 id="7-triple-协议版本号对齐">7. Triple 协议版本号对齐&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始，Triple 协议的通信要求客户端和服务端的版本号和分组一致，否则会找不到服务。与原生 gRPC SDK 互通时，Dubbo 侧不能配置分组和版本号。&lt;/p>
+&lt;h4 id="q1dubbo-320-以前是怎么样的">Q1：Dubbo 3.2.0 以前是怎么样的？&lt;/h4>
+&lt;p>1）Triple 会认为空版本号和 1.0.0 版本号一致，如果您的服务端和客户端版本号不一致，但是都是空版本号或者都是 1.0.0 版本号，是可以正常通信的。
+2）对于没有匹配到版本号的服务，Triple 会尝试匹配任意版本号的服务，如果匹配到任意版本号的服务，也是可以正常通信的。&lt;/p>
+&lt;h4 id="q2如何保证和原来行为是对齐的">Q2：如何保证和原来行为是对齐的？&lt;/h4>
+&lt;p>通过配置 &lt;code>-Ddubbo.rpc.tri.ignore-1.0.0-version=true -Ddubbo.rpc.tri.resolve-fallback-to-default=true&lt;/code> 可以实现和 Dubbo 3.2.0 以前的行为。&lt;/p></description></item><item><title>Overview: 应用级服务发现</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/</guid><description/></item><item><title>Overview: 序列化协议升级</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/</guid><description>
 &lt;p>在 3.1.0 版本中，Dubbo 默认支持的序列化协议新增对 Fastjson2 的支持。部分用户可能会考虑在现有的系统中对序列化协议进行升级，但服务端和客户端版本的差异可能导致客户端并不支持服务端的序列化协议。而在 3.2.0 版本中 Dubbo 的服务端引入新的配置&lt;code>prefer-serialization&lt;/code>，该特性可以完美解决服务端序列化升级过程中可能带来的风险。&lt;/p>
 &lt;h3 id="最佳实践">最佳实践&lt;/h3>
 &lt;p>序列化协议升级，需要分两步走：&lt;/p>
