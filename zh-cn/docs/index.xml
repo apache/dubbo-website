@@ -5711,7 +5711,132 @@ Consumer应用引入服务Mock依赖，添加JVM启动参数-Denable.dubbo.admin
 &lt;td>2.0.8以上版本&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Overview: Hessian</title><link>https://cn.dubbo.apache.org/zh-cn/overview/what/ecosystem/serialization/hessian/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/what/ecosystem/serialization/hessian/</guid><description>
+&lt;/table></description></item><item><title>Overview: Filter</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/extensibility/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/extensibility/filter/</guid><description>
+&lt;p>通过自定义过滤器，可以对返回的结果进行统一的处理、验证等，减少对开发人员的打扰。&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>有两种部署运行方式，二选一&lt;/p>
+&lt;h3 id="基于kubernetes">基于Kubernetes&lt;/h3>
+&lt;ul>
+&lt;li>安装&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubernetes&lt;/a>环境&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用Kubernetes中部署的nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the port of Dubbo protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Apply AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">appended&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用Kubernetes中部署的nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>部署&lt;code>[Extensibility Filter Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h3 id="使用本地ide">使用本地IDE&lt;/h3>
+&lt;ul>
+&lt;li>部署&lt;a href="https://nacos.io/zh-cn/docs/quick-start.html">Nacos&lt;/a>2.2.0版本&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the port of Dubbo protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Apply AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">appended&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="任务详情">任务详情&lt;/h2>
+&lt;p>对所有调用Provider服务的请求在返回的结果的后面统一添加&lt;code>'s customized AppendedFilter&lt;/code>。&lt;/p>
+&lt;h2 id="实现方式">实现方式&lt;/h2>
+&lt;p>在Provider中自定义一个Filter，在Filter中修改返回结果。&lt;/p>
+&lt;h4 id="代码结构">代码结构&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-filter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-AppendedFilter.java &lt;span style="color:#2aa198">(实现Filter接口)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Provider配置文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.Filter &lt;span style="color:#2aa198">(纯文本文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="代码详情">代码详情&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.filter.provider&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Filter&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Result&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invocation&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.AsyncRpcResult&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AppendedFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Filter &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Result &lt;span style="color:#268bd2">invoke&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker&lt;span style="color:#719e07">,&lt;/span> Invocation invocation&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> RpcException &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Result result&lt;span style="color:#719e07">=&lt;/span> invoker&lt;span style="color:#719e07">.&lt;/span>invoke&lt;span style="color:#719e07">(&lt;/span>invocation&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Obtain the returned value
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Result appResponse &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">((&lt;/span>AsyncRpcResult&lt;span style="color:#719e07">)&lt;/span> result&lt;span style="color:#719e07">).&lt;/span>getAppResponse&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Appended value
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> appResponse&lt;span style="color:#719e07">.&lt;/span>setValue&lt;span style="color:#719e07">(&lt;/span>appResponse&lt;span style="color:#719e07">.&lt;/span>getValue&lt;span style="color:#719e07">()+&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#39;s customized AppendedFilter&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="spi配置">SPI配置&lt;/h4>
+&lt;p>在&lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.Filter&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>appended&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.filter.provider.AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="配置文件">配置文件&lt;/h4>
+&lt;p>在&lt;code>resources/application.properties&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Apply AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">appended&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="运行结果">运行结果&lt;/h2>
+&lt;p>以&lt;strong>使用本地IDE&lt;/strong>的方式来运行任务，结果如下：&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-filter-output.jpg" alt="dubbo-samples-extensibility-filter-output.jpg">&lt;/p></description></item><item><title>Overview: Hessian</title><link>https://cn.dubbo.apache.org/zh-cn/overview/what/ecosystem/serialization/hessian/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/what/ecosystem/serialization/hessian/</guid><description>
 &lt;h2 id="1-介绍">1 介绍&lt;/h2>
 &lt;p>Hessian序列化是一种支持动态类型、跨语言、基于对象传输的网络协议，Java对象序列化的二进制流可以被其他语言（如，c++，python）。特性如下：&lt;/p>
 &lt;ol>
@@ -6217,208 +6342,4 @@ Pixiu 的整体设计遵守以下原则：&lt;/p>
 &lt;p>所以 mesh 话或者 sidecar 的方案，也就是 service mesh 在16年时被提出。将服务发现，服务路由和负载均衡等逻辑放在 sidecar，服务使用轻量级 sdk 与之进行交互。&lt;/p>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/pixiu/overview/pixiu-sidecar.png" alt="img">&lt;/p>
 &lt;p>对于接入 dubbo 的多语言解决方案。首推的当然是 pixiu 作为 sidecar 和 服务进行同时部署。pixiu提供 服务发现，流量治理，路由能力，协议转换能力和通讯能力。如图的左侧部分，使用sidecar的服务可以和原生使用 dubbo 框架的服务组成集群，无感的进行相互调用。
-另外一种方案是 pixiu 只单单作为代理，将服务注册到dubbo集群中，如图右侧部分，这种方案部署和运维较为简单，比如适合中小规模的集群。&lt;/p></description></item><item><title>Overview: QOS 概述</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/qos/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/qos/overview/</guid><description>
-&lt;h2 id="参数说明">参数说明&lt;/h2>
-&lt;p>QoS 提供了一些启动参数，来对启动进行配置，他们主要包括：&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>参数&lt;/th>
-&lt;th>说明&lt;/th>
-&lt;th>默认值&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>qos-enable&lt;/td>
-&lt;td>是否启动QoS&lt;/td>
-&lt;td>true&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>qos-port&lt;/td>
-&lt;td>启动QoS绑定的端口&lt;/td>
-&lt;td>22222&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>qos-accept-foreign-ip&lt;/td>
-&lt;td>是否允许远程访问&lt;/td>
-&lt;td>false&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>qos-accept-foreign-ip-whitelist&lt;/td>
-&lt;td>支持的远端主机ip地址（段）&lt;/td>
-&lt;td>(无)&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>qos-anonymous-access-permission-level&lt;/td>
-&lt;td>支持的匿名访问的权限级别&lt;/td>
-&lt;td>PUBLIC(1)&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;blockquote>
-&lt;p>注意，从2.6.4/2.7.0开始，qos-accept-foreign-ip默认配置改为false，如果qos-accept-foreign-ip设置为true，有可能带来安全风险，请仔细评估后再打开。&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="协议">协议&lt;/h2>
-&lt;h3 id="telnet-与-http-协议">telnet 与 http 协议&lt;/h3>
-&lt;p>telnet 模块现在同时支持 http 协议和 telnet 协议，方便各种情况的使用
-示例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>➜ ~ telnet localhost 22222
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying ::1...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>telnet: connect to address ::1: Connection refused
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ████████▄ ███ █▄ ▀█████████▄ ▀█████████▄ ▄██████▄
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ███ ▀███ ███ ███ ███ ███ ███ ███ ███ ███
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ███ ███ ███ ███ ███ ███ ███ ███ ███ ███
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ███ ███ ███ ███ ▄███▄▄▄██▀ ▄███▄▄▄██▀ ███ ███
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ███ ███ ███ ███ ▀▀███▀▀▀██▄ ▀▀███▀▀▀██▄ ███ ███
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ███ ███ ███ ███ ███ ██▄ ███ ██▄ ███ ███
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ███ ▄███ ███ ███ ███ ███ ███ ███ ███ ███
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ████████▀ ████████▀ ▄█████████▀ ▄█████████▀ ▀██████▀
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;ls
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Provider side:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+----------------------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Provider Service Name |PUB|
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+----------------------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|org.apache.dubbo.demo.DemoService| N |
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+----------------------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Consumer side:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|Consumer Service Name|NUM|
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="其他方式">其他方式&lt;/h2>
-&lt;h3 id="端口">端口&lt;/h3>
-&lt;p>新版本的 telnet 端口 与 dubbo 协议的端口是不同的端口，默认为 &lt;code>22222&lt;/code>&lt;/p>
-&lt;p>可以通过配置文件&lt;code>dubbo.properties&lt;/code> 修改:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.qos-port=33333
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
-&lt;p>可以通过设置 JVM 参数:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-port=33333
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="安全">安全&lt;/h3>
-&lt;p>默认情况下，dubbo 接收任何主机发起的命令&lt;/p>
-&lt;p>可以通过配置文件&lt;code>dubbo.properties&lt;/code> 修改:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip=false
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
-&lt;p>可以通过设置 JVM 参数:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-accept-foreign-ip=false
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>拒绝远端主机发出的命令，只允许服务本机执行。&lt;/p>
-&lt;p>同时可以通过设置&lt;code>qos-accept-foreign-ip-whitelist&lt;/code>来指定支持的远端主机ip地址（段），多个ip地址（段）之间用&lt;strong>逗号&lt;/strong>分隔，如：&lt;/p>
-&lt;p>配置文件&lt;code>dubbo.properties&lt;/code>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>设置 JVM 参数:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13,132.12.10.13/24
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="权限">权限&lt;/h3>
-&lt;p>为了对生命周期探针的默认支持，QoS 提供了匿名访问的能力以及对权限级别的设置，目前支持的权限级别有：&lt;/p>
-&lt;ul>
-&lt;li>PUBLIC(1)&lt;br>
-默认支持匿名访问的命令权限级别，目前只支持生命周期探针相关的命令&lt;/li>
-&lt;li>PROTECTED(2)&lt;br>
-命令默认的权限级别&lt;/li>
-&lt;li>PRIVATE(3)&lt;br>
-保留的最高权限级别，目前未支持&lt;/li>
-&lt;li>NONE(4)
-最低权限级别，即不支持匿名访问&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>权限级别 &lt;code>PRIVATE&lt;/code>&amp;gt; &lt;code>PROTECTED&lt;/code>&amp;gt; &lt;code>PUBLIC&lt;/code>&amp;gt; &lt;code>NONE&lt;/code>, 高级别权限可访问同级别和低级别权限命令。
-当前以下命令权限为&lt;code>PUBLIC&lt;/code>, 其它命令默认权限别为&lt;code>PROTECTED&lt;/code>。&lt;/p>
-&lt;/blockquote>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>命令&lt;/th>
-&lt;th>权限等级&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>Live&lt;/td>
-&lt;td>PUBLIC (1)&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Startup&lt;/td>
-&lt;td>PUBLIC (1)&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Ready&lt;/td>
-&lt;td>PUBLIC (1)&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Quit&lt;/td>
-&lt;td>PUBLIC (1)&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>默认情况下，dubbo 允许匿名主机发起匿名访问，只有&lt;code>PUBLIC&lt;/code>权限级别的命令可以执行，其他更高权限的命令会被拒绝。&lt;/p>
-&lt;p>&lt;strong>关闭匿名访问&lt;/strong>&lt;br>
-可以通过设置&lt;code>qos-anonymous-access-permission-level=NONE&lt;/code>来关闭匿名访问。&lt;/p>
-&lt;p>&lt;strong>设置权限级别&lt;/strong>&lt;br>
-可以通过配置文件&lt;code>dubbo.properties&lt;/code> 修改:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.qos-anonymous-access-permission-level=PROTECTED
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
-&lt;p>可以通过设置 JVM 参数:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-anonymous-access-permission-level=PROTECTED
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>来允许匿名访问更高级别的权限的命令。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>➜ ~ curl &amp;#34;localhost:22222/ls?arg1=xxx&amp;amp;arg2=xxxx&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Provider side:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+----------------------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| Provider Service Name |PUB|
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+----------------------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|org.apache.dubbo.demo.DemoService| N |
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+----------------------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>As Consumer side:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>|Consumer Service Name|NUM|
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+---------------------+---+
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置方式">配置方式&lt;/h2>
-&lt;blockquote>
-&lt;p>优先顺序: &lt;strong>系统属性 &amp;gt; dubbo.properties &amp;gt; XML/Spring-boot 自动装配&lt;/strong>&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="系统属性">系统属性&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-enable=true
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-port=33333
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-accept-foreign-ip=false
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13,132.12.10.13/24
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-Ddubbo.application.qos-anonymous-access-permission-level=PUBLIC
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubboproperties">dubbo.properties&lt;/h3>
-&lt;p>在项目的&lt;code>src/main/resources&lt;/code>目录下添加 dubbo.properties文件，内容如下:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.qos-enable=true
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-port=33333
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip=false
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-anonymous-access-permission-level=PUBLIC
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="xml">XML&lt;/h3>
-&lt;p>如果要通过 XML 配置响应的QoS相关的参数，可以进行如下配置：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://www.springframework.org/schema/beans/spring-beans.xsd
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;qos-enable&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;qos-accept-foreign-ip&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;qos-accept-foreign-ip-whitelist&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;123.12.10.13,132.12.10.13/24&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;qos-anonymous-access-permission-level&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;NONE&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;qos-port&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;33333&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dubbo:application&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;multicast://224.5.6.7:1234&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.provider.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.provider.DemoServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="spring-boot-自动装配">spring-boot 自动装配&lt;/h3>
-&lt;p>如果是 spring-boot 的应用，可以在&lt;code>application.properties&lt;/code>或者&lt;code>application.yml&lt;/code>上配置:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.qos-enable=true
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-port=33333
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip=false
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-anonymous-access-permission-level=NONE
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>
+另外一种方案是 pixiu 只单单作为代理，将服务注册到dubbo集群中，如图右侧部分，这种方案部署和运维较为简单，比如适合中小规模的集群。&lt;/p></description></item></channel></rss>
