@@ -14,7 +14,7 @@ Grafana 是一种开源的监控解决方案，可用于为 Dubbo 配置可视�
 
 以下是 Dubbo 社区提供的默认指标面板，您配置好数据源并直接导入使用即可。如果默认面板不能满足要求，您还可以自定义 Grafana 面板。
 
-* [**Apache Dubbo Observability Dashboard：**](https://grafana.com/grafana/dashboards/18051)
+* [**Apache Dubbo Observability Dashboard：**](https://grafana.com/grafana/dashboards/18469)
 * [**JVM (Micrometer) Dashboard：**](https://grafana.com/grafana/dashboards/4701)
 
 您可以通过以下几种方式快速的导入 Grafana 监控面板。
@@ -50,7 +50,7 @@ $ GRAFANA_DATASOURCE="Prometheus"
 $ # The version of Dubbo to deploy
 $ VERSION=3.2.0
 $ # Import all Dubbo dashboards
-$ for DASHBOARD in 18051 4701; do
+$ for DASHBOARD in 18469 4701; do
 $     #REVISION="$(curl -s https://grafana.com/api/dashboards/${DASHBOARD}/revisions -s | jq ".items[] | select(.description | contains(\"${VERSION}\")) | .revision")"
 $     REVISION=1
 $     curl -s https://grafana.com/api/dashboards/${DASHBOARD}/revisions/${REVISION}/download > /tmp/dashboard.json
