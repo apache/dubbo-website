@@ -11,7 +11,7 @@ description: >-
 Dubbo目前提供了三个级别上的隔离：JVM级别、应用级别、服务(模块)级别，从而实现各个级别上的生命周期及配置信息的单独管理。这三个层次上的隔离由 FrameworkModel、ApplicationModel 和 ModuleModel 及它们对应的 Config 来完成。
 
 
-![image](https://user-images.githubusercontent.com/100946116/231193500-69bffad7-81ab-4ad6-85ed-1e3cc76b1cbd.png)
+![image](/imgs/blog/models.png)
 
 
 
