@@ -5,7 +5,7 @@ description: 部署 Dubbo 应用到 Kubernetes + Containerd 示例
 linkTitle: '部署到 Kubernetes + Containerd '
 title: 部署 Dubbo 应用到 Kubernetes + Containerd 环境
 type: docs
-weight: 3
+weight: 4
 ---
 
 
