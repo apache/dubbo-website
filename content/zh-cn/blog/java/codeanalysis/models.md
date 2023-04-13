@@ -1,6 +1,6 @@
 ---
-title: "Long Page Title"
-linkTitle: "Short Nav Title"
+title: "Dubbo 3 中的三层配置隔离"
+linkTitle: "配置隔离"
 weight: 100
 description: >-
      Dubbo 3 中的三层配置隔离
