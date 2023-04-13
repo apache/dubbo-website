@@ -5,7 +5,7 @@ description: 使用 Sentinel 保护您的应用，防止应用因个别服务的
 linkTitle: 限流降级
 title: 限流降级
 type: docs
-weight: 2
+weight: 3
 ---
 
 
