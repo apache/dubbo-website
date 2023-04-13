@@ -176,4 +176,4 @@ dubbo:
 
 ### 第六步：执行二进制文件即可
 
-二进制文件在taget/目录下，一般以工程名称为二进制包的名称，比如target/native-demo
+二进制文件在target/目录下，一般以工程名称为二进制包的名称，比如target/native-demo
