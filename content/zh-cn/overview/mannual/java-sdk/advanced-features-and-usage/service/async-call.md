@@ -113,7 +113,7 @@ public class AsyncServiceImpl implements AsyncService {
 }
 ```
 
-注意接口的返回类型是 `CompletableFuture<String>`。
+
 
 XML 引用服务
 ```xml
