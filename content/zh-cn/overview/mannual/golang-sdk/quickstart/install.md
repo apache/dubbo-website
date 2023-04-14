@@ -18,7 +18,7 @@ weight: 1
 
 [【Go 语言官网下载地址】](https://golang.google.cn/)
 
-将 $GOPATH/bin 加入环境变量
+安装成功后将 `$GOPATH/bin` 加入环境变量
 
 ### 2. 安装序列化工具protoc
 
@@ -26,7 +26,7 @@ weight: 1
 
 ### 3. 安装 dubbogo-cli 以及相关插件
 
-执行以下指令安装dubbogo-cli 至 $GOPATH/bin
+执行以下指令安装dubbogo-cli 至 `$GOPATH/bin`
 
 ```bash
 $ export GOPROXY="https://goproxy.cn"
