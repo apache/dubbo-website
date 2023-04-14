@@ -6,7 +6,7 @@ linkTitle: Protocol
 no_list: true
 title: Protocol
 type: docs
-weight: 60
+weight: 2
 ---
 
 Dubbo 通过协议扩展实现了很多内置的功能，同时也支持很多常用的协议。所有的自定义协议在`org.apache.dubbo.rpc.Protocol`文件中可以看到，以Dubbo 3为例，具体如下：

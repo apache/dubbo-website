@@ -21,7 +21,7 @@ weight: 34
 
 请在服务治理控制台查看或修改覆盖规则。
 
-应用粒度
+### 应用粒度
 
 ```yaml
 # 将应用demo（key:demo）在20880端口上提供（side:provider）的所有服务（scope:application）的权重修改为1000（weight:1000）。
@@ -38,7 +38,7 @@ configs:
   ...
 ```
 
-服务粒度
+### 服务粒度
 
 ```yaml
 # 所有消费（side:consumer）DemoService服务（key:org.apache.dubbo.samples.governance.api.DemoService）的应用实例（addresses:[0.0.0.0]），超时时间修改为6000ms
