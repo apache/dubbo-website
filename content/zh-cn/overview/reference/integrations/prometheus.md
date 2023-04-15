@@ -5,7 +5,7 @@ description: 配置 Prometheus 与 Dubbo 一起工作
 linkTitle: Prometheus
 title: Prometheus
 type: docs
-weight: 2
+weight: 1
 ---
 
 ## 安装
