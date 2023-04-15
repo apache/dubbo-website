@@ -8,6 +8,7 @@ description: |
 linkTitle: Admin 架构设计
 title: Dubbo Admin 控制面总体架构设计
 type: docs
+weight: 3
 ---
 
 
