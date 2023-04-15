@@ -5,7 +5,7 @@ description: 配置 Grafana 与 Dubbo 一起工作
 linkTitle: Grafana
 title: Grafana
 type: docs
-weight: 3
+weight: 2
 ---
 
 Grafana 是一种开源的监控解决方案，可用于为 Dubbo 配置可视化仪表板，您可以使用 Grafana 来监控 Dubbo 集群的运行状况。
