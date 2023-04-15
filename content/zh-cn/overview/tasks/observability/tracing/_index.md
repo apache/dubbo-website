@@ -6,7 +6,7 @@ linkTitle: 全链路追踪
 no_list: true
 title: 全链路追踪
 type: docs
-weight: 4
+weight: 2
 ---
 
 
