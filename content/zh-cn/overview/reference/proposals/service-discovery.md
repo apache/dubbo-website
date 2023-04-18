@@ -7,6 +7,7 @@ description: 应用级服务发现设计
 linkTitle: 应用级服务发现
 title: Dubbo3 应用级服务发现设计
 type: docs
+weight: 6
 ---
 
 

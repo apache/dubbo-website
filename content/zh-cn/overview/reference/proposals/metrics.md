@@ -7,6 +7,7 @@ description: 指标埋点
 linkTitle: 指标埋点
 title: 指标埋点
 type: docs
+weight: 4
 ---
 
 

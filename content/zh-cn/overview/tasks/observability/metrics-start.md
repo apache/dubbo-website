@@ -92,6 +92,3 @@ dubbo.metrics.protocol=prometheus
 ```bash
 curl http://localhost:22222/metrics
 ```
-
-
- 

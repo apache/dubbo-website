@@ -5,7 +5,7 @@ description: 本文将介绍 Dubbo 的 REST/HTTP 协议设计。
 linkTitle: Rest 协议
 title: Rest 协议
 type: docs
-weight: 6
+weight: 1
 ---
 本文将介绍 Dubbo 的 REST/HTTP 协议设计。
 

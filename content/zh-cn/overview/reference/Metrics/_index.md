@@ -3,5 +3,5 @@ description: ""
 linkTitle: Metrics
 title: Metrics
 type: docs
-weight: 20
+weight: 2
 ---

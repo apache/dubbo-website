@@ -211,5 +211,6 @@ go run cmd/client.go
 2022-12-30T20:59:19.982+0800    INFO    cmd/client.go:52        get id result: aafd9c73-4014-4d67-a67f-5d107105647b
 
 ```
-> ## 更多
+## 更多
+
 > 可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考[注册中心](/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/)

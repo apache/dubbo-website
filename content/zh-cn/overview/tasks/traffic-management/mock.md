@@ -5,7 +5,7 @@ description: ""
 linkTitle: 服务降级
 title: 在大促之前对弱依赖调用进行服务降级
 type: docs
-weight: 9
+weight: 8
 ---
 
 
