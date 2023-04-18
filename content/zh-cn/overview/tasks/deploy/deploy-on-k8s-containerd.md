@@ -29,7 +29,7 @@ kubectl create ns dubbo-demo
 
 ### zookeeper
 
-获取 zookeeper
+获取图表
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
