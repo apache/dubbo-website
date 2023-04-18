@@ -76,6 +76,6 @@ TBD
 
 Dubbo 提供了丰富的指标面板，以上视图面板均可以在 Grafana 官方面板库中找到：您可以直接导入如下模版，并配置好数据源即可。
 
-**Apache Dubbo Observability Dashboard：**  [https://grafana.com/grafana/dashboards/18051](https://grafana.com/grafana/dashboards/18051)
+**Apache Dubbo Observability Dashboard：**  [https://grafana.com/grafana/dashboards/18469](https://grafana.com/grafana/dashboards/18469)
 
 **JVM (Micrometer) Dashboard：** [https://grafana.com/grafana/dashboards/4701](https://grafana.com/grafana/dashboards/4701)
