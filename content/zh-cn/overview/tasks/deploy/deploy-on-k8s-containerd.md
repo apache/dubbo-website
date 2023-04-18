@@ -31,24 +31,12 @@ kubectl create ns dubbo-demo
 
 获取 zookeeper
 ```
-helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update && helm search repo bitnami/zookeeper
-```
-
-拉取 zookeeper
-```
-helm pull bitnami/zookeeper --untar --version x.x.x
-```
-
-关闭持久化存储
-```
-### values.yaml
-persistence:
-  enabled: false
+helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
 安装 zookeeper
 ```
-helm install zookeeper -f values.yaml --namespace dubbo-demo .
+helm install zookeeper bitnami/zookeeper --set persistence.enabled=false -n dubbo-demo
 ```
 
 查看 zookeeper
