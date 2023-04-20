@@ -6,7 +6,7 @@ linkTitle: 指标入门
 no_list: true
 title: 指标监控入门指南
 type: docs
-weight: 10
+weight: 2
 ---
 
 
@@ -33,7 +33,7 @@ Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获
 - SpringBoot项目参考案例: [dubbo-samples-metrics-spring-boot](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot)
 
 ### 依赖
-目前Dubbo的指标埋点仅支持3.2及以上版本，同时需要额外引入dubbo-metrics-prometheus依赖如下所示：
+目前Dubbo的指标埋点仅支持3.2及以上版本，同时需要额外引入dubbo-spring-boot-observability-starter依赖如下所示：
 ```xml
       <dependency>
             <groupId>org.apache.dubbo</groupId>
@@ -90,8 +90,5 @@ dubbo.metrics.protocol=prometheus
 如果需要测试指标数据可以直接在服务器上面执行如下命令：
 
 ```bash
-curl http://localhost:22222
+curl http://localhost:22222/metrics
 ```
-
-
- 
