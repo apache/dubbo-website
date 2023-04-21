@@ -6,7 +6,7 @@ description: 查看历史版本文档
 linkTitle: 查看历史版本文档
 title: 查看历史版本文档
 type: docs
-weight: 100
+weight: 7
 ---
 
 
