@@ -5,5 +5,5 @@ description: ""
 linkTitle: 集成适配
 title: 集成适配
 type: docs
-weight: 30
+weight: 3
 ---

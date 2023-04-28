@@ -32,7 +32,7 @@ description: |
 | dubbo_consumer_qps_total                  | 消费者每秒发送的请求数                    |
 | dubbo_consumer_requests_total             | 消费者总的发送请求数                      |
 | dubbo_consumer_requests_processing        | 消费者正在处理的发送的请求数              |
-| dubbo_provider_requests_succeed_total     | 消费者请求成功发送的请求数                |
+| dubbo_consumer_requests_succeed_total     | 消费者请求成功发送的请求数                |
 | dubbo_consumer_requests_total_aggregate   | 滑动窗口下的消费者总的发送请求数          |
 | dubbo_consumer_requests_succeed_aggregate | 滑动窗口下的消费者成功的发送请求数        |
 | dubbo_consumer_rt_milliseconds_min             | 消费者所有请求中最小的响应时间            |

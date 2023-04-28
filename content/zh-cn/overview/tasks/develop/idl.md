@@ -5,7 +5,7 @@ description: ""
 linkTitle: IDL开发服务
 title: 使用 IDL 定义与开发服务
 type: docs
-weight: 70
+weight: 7
 ---
 
 

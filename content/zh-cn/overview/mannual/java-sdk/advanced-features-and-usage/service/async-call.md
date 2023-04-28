@@ -73,7 +73,28 @@ public class AsyncServiceImpl implements AsyncService {
 
 通过 `return CompletableFuture.supplyAsync() `，业务执行已从 Dubbo 线程切换到业务线程，避免了对 Dubbo 线程池的阻塞。
 
+注意接口的返回类型是 `CompletableFuture<String>`。
 
+XML 引用服务
+```xml
+<dubbo:reference id="asyncService" timeout="10000" interface="com.alibaba.dubbo.samples.async.api.AsyncService"/>
+```
+
+调用远程服务
+```java
+// 调用直接返回CompletableFuture
+CompletableFuture<String> future = asyncService.sayHello("async call request");
+// 增加回调
+future.whenComplete((v, t) -> {
+    if (t != null) {
+        t.printStackTrace();
+    } else {
+        System.out.println("Response: " + v);
+    }
+});
+// 早于结果输出
+System.out.println("Executed before response return.");
+```
 
 ### 使用 AsyncContext
 
@@ -113,30 +134,7 @@ public class AsyncServiceImpl implements AsyncService {
 }
 ```
 
-注意接口的返回类型是 `CompletableFuture<String>`。
-
-XML 引用服务
-```xml
-<dubbo:reference id="asyncService" timeout="10000" interface="com.alibaba.dubbo.samples.async.api.AsyncService"/>
-```
-
-调用远程服务
-```java
-// 调用直接返回CompletableFuture
-CompletableFuture<String> future = asyncService.sayHello("async call request");
-// 增加回调
-future.whenComplete((v, t) -> {
-    if (t != null) {
-        t.printStackTrace();
-    } else {
-        System.out.println("Response: " + v);
-    }
-});
-// 早于结果输出
-System.out.println("Executed before response return.");
-```
-
-### 使用 RpcContext
+### 使用 RpcContext 实现消费端异步调用
 在 consumer.xml 中配置
 ```xml
 <dubbo:reference id="asyncService" interface="org.apache.dubbo.samples.governance.api.AsyncService">

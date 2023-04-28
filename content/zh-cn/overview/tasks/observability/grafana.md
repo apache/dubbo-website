@@ -6,7 +6,7 @@ linkTitle: Grafana
 no_list: true
 title: 使用 Grafana 可视化查看集群 Metrics 指标
 type: docs
-weight: 20
+weight: 3
 ---
 
 指标可视化页面目前推荐的方式是使用 Grafana 来配置 Dubbo 的可观测性监控大盘。
