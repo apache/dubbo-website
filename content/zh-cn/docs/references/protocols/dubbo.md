@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/protocols/dubbo/
+description: dubbo:// 协议参考手册
+linkTitle: dubbo://
+title: dubbo 协议
 type: docs
-title: "dubbo 协议"
-linkTitle: "dubbo://"
 weight: 1
-description: "dubbo:// 协议参考手册"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/dubbo/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/)。
 {{% /pageinfo %}}
 
 Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。
@@ -121,5 +125,3 @@ Dubbo 协议缺省每服务每提供者每消费者使用单一长连接，如�
 [^1]: 由吴亚军提供
 [^2]: 总结：会抛异常的情况：枚举值一边多一种，一边少一种，正好使用了差别的那种，或者属性名相同，类型不同
 [^3]: 1024Mbit=128MByte
-
-

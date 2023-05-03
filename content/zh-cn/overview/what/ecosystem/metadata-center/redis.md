@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Redis"
-linkTitle: "Redis"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/metadata-center/redis/
 description: ""
+linkTitle: Redis
+title: Redis
+type: docs
+weight: 30
 ---

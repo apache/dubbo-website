@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/configuration/properties/
+description: 以属性配置的方式来配置你的 Dubbo 应用
+linkTitle: 属性配置
+title: 属性配置
 type: docs
-title: "属性配置"
-linkTitle: "属性配置"
 weight: 2
-description: "以属性配置的方式来配置你的 Dubbo 应用"
 ---
+
+
 
 如果你的应用足够简单，例如，不需要多注册中心或多协议，并且需要在spring容器中共享配置，那么，我们可以直接使用 `dubbo.properties` 作为默认配置。
 

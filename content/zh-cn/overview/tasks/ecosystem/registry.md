@@ -1,11 +1,12 @@
 ---
-type: docs
-title: "注册中心"
-linkTitle: "注册中心"
-icon: "fas fa-external-link-alt"
-weight: 31
+_build:
+    render: link
 description: ""
-manualLinkRelref: ../../../docs3-v2/java-sdk/reference-manual/registry/
-_build: { render: link }
+icon: fas fa-external-link-alt
+linkTitle: 注册中心
+manualLinkRelref: ../../mannual/java-sdk/reference-manual/registry/
 manualLinkTarget: _blank
+title: 注册中心
+type: docs
+weight: 31
 ---

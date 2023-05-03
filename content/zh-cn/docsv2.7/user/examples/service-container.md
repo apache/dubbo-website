@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/service-container/
+description: 使用 Dubbo 中的服务容器
+linkTitle: 服务容器
+title: 服务容器
 type: docs
-title: "服务容器"
-linkTitle: "服务容器"
 weight: 40
-description: "使用 Dubbo 中的服务容器"
 ---
+
+
 
 服务容器是一个 standalone 的启动程序，因为后台服务不需要 Tomcat 或 JBoss 等 Web 容器的功能，如果硬要用 Web 容器去加载服务提供方，增加复杂性，也浪费资源。
 

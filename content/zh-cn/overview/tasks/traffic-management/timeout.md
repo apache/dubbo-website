@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/traffic-management/timeout/
+description: 在 Dubbo-Admin 动态调整服务超时时间
+linkTitle: 调整超时时间
+title: 动态调整服务超时时间
 type: docs
-title: "动态调整服务超时时间"
-linkTitle: "调整超时时间"
 weight: 1
-description: "在 Dubbo-Admin 动态调整服务超时时间"
 ---
+
+
 
 Dubbo 提供动态调整服务超时时间的能力，在无需重启应用的情况下调整服务的超时时间，这对于临时解决一些服务上下游依赖不稳定而导致的调用失败问题非常有效。
 
@@ -67,4 +71,3 @@ parameters:
 
 ## 清理
 为了不影响其他任务效果，通过 Admin 删除或者禁用刚刚配置的超时规则。
-

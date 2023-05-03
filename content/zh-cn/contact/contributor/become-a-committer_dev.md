@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/contact/contributor/become-a-committer_dev/
+description: 如何成为 Dubbo Committer
+linkTitle: 成为 Committer
+title: 如何成为 Dubbo Committer
 type: docs
-title: "如何成为 Dubbo Committer"
-linkTitle: "成为 Committer"
 weight: 1
 ---
+
+
 
 每个人都可以成为 Apache 项目的贡献者。作为一个贡献者只是意味着你对项目感兴趣并以某种方式做出贡献，从提出合理的问题（这些问题记录了项目并向开发人员提供反馈）到提供新的特性作为补丁。
 

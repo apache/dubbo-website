@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/serialize/
+description: 序列化扩展
+linkTitle: 序列化扩展
+title: 序列化扩展
 type: docs
-title: "序列化扩展"
-linkTitle: "序列化扩展"
 weight: 16
 ---
+
+
 
 ## 扩展说明
 

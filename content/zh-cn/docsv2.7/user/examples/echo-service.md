@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/echo-service/
+description: 通过回声测试检测 Dubbo 服务是否可用
+linkTitle: 回声测试
+title: 回声测试
 type: docs
-title: "回声测试"
-linkTitle: "回声测试"
 weight: 18
-description: "通过回声测试检测 Dubbo 服务是否可用"
 ---
+
+
 ## 背景
 
 回声测试用于检测服务是否可用，回声测试按照正常请求流程执行，能够测试整个调用是否通畅，可用于监控。

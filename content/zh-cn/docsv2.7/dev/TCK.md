@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/TCK/
+description: Dubbo 项目的技术兼容性测试
+linkTitle: TCK
+title: 技术兼容性测试
 type: docs
-title: "技术兼容性测试"
-linkTitle: "TCK"
 weight: 13
-description: "Dubbo 项目的技术兼容性测试"
 ---
+
+
 
 Dubbo 的协议，通讯，序列化，注册中心，负载均策等扩展点，都有多种可选策略，以应对不同应用场景，而我们的测试用例很分散，当用户自己需要加一种新的实现时，总是不确定能否满足扩展点的完整契约。
 

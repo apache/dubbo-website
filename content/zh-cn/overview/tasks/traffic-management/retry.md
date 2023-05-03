@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "通过重试提高服务调用成功率"
-linkTitle: "服务重试"
-weight: 2
+aliases:
+    - /zh/overview/tasks/traffic-management/retry/
 description: ""
+linkTitle: 服务重试
+title: 通过重试提高服务调用成功率
+type: docs
+weight: 2
 ---
+
+
 
 在服务初次调用失败后，通过重试能有效的提升总体调用成功率。但也要注意重试可能带来的响应时间增长，系统负载升高等，另外，重试一般适用于只读服务，或者具有幂等性保证的写服务。
 
@@ -69,4 +73,3 @@ parameters:
 
 ## 清理
 为了不影响其他任务效果，通过 Admin 删除或者禁用刚刚配置的重试规则。
-

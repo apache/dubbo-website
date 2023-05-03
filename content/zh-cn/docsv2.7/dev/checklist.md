@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/checklist/
+description: 版本发布前的检查列表
+linkTitle: 检查列表
+title: 检查列表
 type: docs
-title: "检查列表"
-linkTitle: "检查列表"
 weight: 11
-description: "版本发布前的检查列表"
 ---
+
+
 
 ## 发布前 checklist
 

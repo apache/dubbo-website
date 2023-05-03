@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/tls/
+description: 通过 TLS 保证传输安全
+linkTitle: TLS
+title: TLS
 type: docs
-title: "TLS"
-linkTitle: "TLS"
 weight: 32
-description: "通过 TLS 保证传输安全"
 ---
+
+
 ## 背景
 2.7.5 版本在传输链路的安全性上做了很多工作，对于内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。
 

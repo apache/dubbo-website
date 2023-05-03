@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/attachment/
+description: 通过 Dubbo 中的 Attachment 在服务消费方和提供方之间隐式传递参数
+linkTitle: 隐式参数
+title: 隐式参数
 type: docs
-title: "隐式参数"
-linkTitle: "隐式参数"
 weight: 20
-description: "通过 Dubbo 中的 Attachment 在服务消费方和提供方之间隐式传递参数"
 ---
+
+
 ## 背景
 
 可以通过 `RpcContext` 上的 `setAttachment` 和 `getAttachment` 在服务消费方和提供方之间进行参数的隐式传递。 
@@ -38,4 +42,3 @@ public class XxxServiceImpl implements XxxService {
     }
 }
 ```
-

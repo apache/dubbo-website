@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "协议"
-linkTitle: "协议"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/protocol/
 description: ""
+linkTitle: 协议
+title: 协议
+type: docs
+weight: 10
 ---

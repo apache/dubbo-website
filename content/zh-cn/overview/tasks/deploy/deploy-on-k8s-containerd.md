@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/deploy/deploy-on-k8s-containerd/
+description: 部署 Dubbo 应用到 Kubernetes + Containerd 示例
+linkTitle: '部署到 Kubernetes + Containerd '
+title: 部署 Dubbo 应用到 Kubernetes + Containerd 环境
 type: docs
-title: "部署 Dubbo 应用到 Kubernetes + Containerd 环境"
-linkTitle: "部署到 Kubernetes + Containerd "
-weight: 3
-description: "部署 Dubbo 应用到 Kubernetes + Containerd 示例"
+weight: 4
 ---
+
+
 ## 总体目标
 
 - [Kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/)
@@ -25,26 +29,14 @@ kubectl create ns dubbo-demo
 
 ### zookeeper
 
-获取 zookeeper
+获取图表
 ```
-helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update && helm search repo bitnami/zookeeper
-```
-
-拉取 zookeeper
-```
-helm pull bitnami/zookeeper --untar --version x.x.x
-```
-
-关闭持久化存储
-```
-### values.yaml
-persistence:
-  enabled: false
+helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
 安装 zookeeper
 ```
-helm install zookeeper -f values.yaml --namespace dubbo-demo .
+helm install zookeeper bitnami/zookeeper --set persistence.enabled=false -n dubbo-demo
 ```
 
 查看 zookeeper
@@ -238,4 +230,3 @@ kubectl create -f consumer.yaml
 
 查看服务
 ![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
-

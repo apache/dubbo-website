@@ -1,11 +1,16 @@
 ---
-type: docs
-title: "指标埋点"
-linkTitle: "指标埋点"
-date: 2023-02-20
+aliases:
+    - /zh/overview/reference/proposals/metrics/
 author: Song Xiaosheng
-description: ""
+date: 2023-02-20T00:00:00Z
+description: 指标埋点
+linkTitle: 指标埋点
+title: 指标埋点
+type: docs
+weight: 4
 ---
+
+
 
 # 概述
 

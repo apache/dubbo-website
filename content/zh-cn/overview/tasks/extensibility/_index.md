@@ -1,12 +1,15 @@
-
 ---
-type: docs
-title: "自定义扩展"
-linkTitle: "自定义扩展"
-description: "演示 Dubbo 扩展能力特性的使用方式。"
-weight: 60
+aliases:
+    - /zh/overview/tasks/extensibility/
+description: 演示 Dubbo 扩展能力特性的使用方式。
+linkTitle: 自定义扩展
 no_list: true
+title: 自定义扩展
+type: docs
+weight: 7
 ---
+
+
 
 ## Dubbo 扩展设计理念
 

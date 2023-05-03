@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Protobuf"
-linkTitle: "Protobuf"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/serialization/protobuf/
 description: ""
+linkTitle: Protobuf
+title: Protobuf
+type: docs
+weight: 3
 ---
+
+
 
 
 ## 1 介绍

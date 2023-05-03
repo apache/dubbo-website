@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/advanced/loadbalance/
+description: Dubbo 提供的集群负载均衡策略
+linkTitle: 负载均衡
+title: 负载均衡
 type: docs
-title: "负载均衡"
-linkTitle: "负载均衡"
 weight: 3
-description: "Dubbo 提供的集群负载均衡策略"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/)。
 {{% /pageinfo %}}
 
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `random` 随机调用。

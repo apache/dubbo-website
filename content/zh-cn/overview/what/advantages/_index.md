@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "核心优势"
-linkTitle: "核心优势"
-weight: 30
+aliases:
+    - /zh/overview/what/advantages/
 description: ""
+linkTitle: 核心优势
+title: 核心优势
+type: docs
+weight: 3
 ---

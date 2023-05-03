@@ -1,12 +1,16 @@
 ---
-type: docs
-title: "Go 快速开始"
-linkTitle: "Go 快速开始"
-weight: 10
+aliases:
+    - /zh/docs/languages/golang/quick-start/
 description: ""
+linkTitle: Go 快速开始
+title: Go 快速开始
+type: docs
+weight: 10
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/quickstart/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/golang-sdk/quickstart/)。
 {{% /pageinfo %}}
 
 推荐[使用 IDL](../dubbo-go-3.0/quickstart/quickstart_triple) 定义跨语言的服务与编码格式，以下展示的是 Golang 语言版本的服务定义与开发方式，如果你有遗留系统或无多语言开发需求，可参考以下使用方式。

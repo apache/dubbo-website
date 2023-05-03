@@ -1,12 +1,16 @@
 ---
-type: docs
-title: "Java 快速开始"
-linkTitle: "Java 快速开始"
-weight: 10
+aliases:
+    - /zh/docs/languages/java/quick-start/
 description: ""
+linkTitle: Java 快速开始
+title: Java 快速开始
+type: docs
+weight: 10
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/quick-start/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/quick-start/)。
 {{% /pageinfo %}}
 
 ## 下载示例代码

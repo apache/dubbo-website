@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/configuration/configuration-load-process/
+description: Dubbo 中的配置加载流程介绍
+linkTitle: 配置加载流程
+title: 配置加载流程
 type: docs
-title: "配置加载流程"
-linkTitle: "配置加载流程"
 weight: 5
-description: "Dubbo 中的配置加载流程介绍"
 ---
+
+
 
 此篇文档主要讲在**应用启动阶段，Dubbo框架如何将所需要的配置采集起来**（包括应用配置、注册中心配置、服务配置等），以完成服务的暴露和引用流程。
 
@@ -175,4 +179,3 @@ public static void main(String[] args) throws IOException {
     System.in.read();
 }
 ```
-

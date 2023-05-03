@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/install/zookeeper/
+description: Zookeeper 注册中心安装
+linkTitle: Zookeeper 注册中心安装
+title: Zookeeper 注册中心安装
 type: docs
-title: "Zookeeper 注册中心安装"
-linkTitle: "Zookeeper 注册中心安装"
 weight: 4
 ---
+
+
 
 建议使用 `dubbo-2.3.3` 以上版本的 zookeeper [^1] 注册中心客户端。
 

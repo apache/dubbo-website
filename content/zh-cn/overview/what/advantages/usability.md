@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/overview/what/advantages/usability/
+description: 快速易用
+linkTitle: 快速易用
+title: 快速易用
 type: docs
-title: "快速易用"
-linkTitle: "快速易用"
-weight: 20
+weight: 1
 ---
+
+
 
 无论你是计划采用微服务架构开发一套全新的业务系统，还是准备将已有业务从单体架构迁移到微服务架构，Dubbo 框架都可以帮助到你。Dubbo 让微服务开发变得非常容易，它允许你选择多种编程语言、使用任意通信协议，并且它还提供了一系列针对微服务场景的开发、测试工具帮助提升研发效率。
 
@@ -37,4 +42,3 @@ Dubbo 微服务间远程通信实现细节，支持 HTTP、HTTP/2、gRPC、TCP �
 Dubbo 从内核设计和实现阶段就考虑了如何解决开发、测试与运维问题，配合官方提供的生态工具，可以实现服务测试、服务 Mock、文档管理、单机运维等能力，并通过 Dubbo Admin 控制台将所有操作都可视化的展现出来。
 
 ![admin](/imgs/v3/what/admin.png)
-

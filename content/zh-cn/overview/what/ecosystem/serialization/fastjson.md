@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Fastjson"
-linkTitle: "Fastjson"
-weight: 40
+aliases:
+    - /zh/overview/what/ecosystem/serialization/fastjson/
 description: ""
+linkTitle: Fastjson
+title: Fastjson
+type: docs
+weight: 4
 ---
+
+
 
 ## 1 介绍
 

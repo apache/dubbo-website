@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/traffic-management/region/
+description: 在 Dubbo-Admin 动态配置同机房/区域优先
+linkTitle: 同区域优先
+title: 同机房/区域优先
 type: docs
-title: "同机房/区域优先"
-linkTitle: "同区域优先"
 weight: 4
-description: "在 Dubbo-Admin 动态配置同机房/区域优先"
 ---
+
+
 
 为了保证服务的整体高可用，我们经常会采用把服务部署在多个可用区(机房)的策略，通过这样的冗余/容灾部署模式，当一个区域出现故障的时候，我们仍可以保证服务整体的可用性。
 
@@ -77,4 +81,4 @@ conditions:
 
 ## 其他事项
 
-我们上面的示例并未纳入多区域之间注册中心的复杂性，如果每个区域部署有独立的注册中心，则多区域间的地址同步就是一个需要考虑的问题。对于这种场景，Dubbo 通过多注册&多订阅机制也提供了同区域优先的支持，具体可以参见[多注册&多订阅](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-registry/)相关文档。
+我们上面的示例并未纳入多区域之间注册中心的复杂性，如果每个区域部署有独立的注册中心，则多区域间的地址同步就是一个需要考虑的问题。对于这种场景，Dubbo 通过多注册&多订阅机制也提供了同区域优先的支持，具体可以参见[多注册&多订阅](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-registry/)相关文档。

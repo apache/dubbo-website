@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/quickstart/java/spring-boot/
+description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring Boot 快速开发微服务应用。
+linkTitle: Dubbo x Spring Boot 开发微服务应用
+title: 3 - Dubbo x Spring Boot 开发微服务应用
 type: docs
-title: "3 - Dubbo x Spring Boot 开发微服务应用"
-linkTitle: "Dubbo x Spring Boot 开发微服务应用"
 weight: 3
-description: "本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring Boot 快速开发微服务应用。"
 ---
+
+
 
 ## 目标
 
@@ -300,7 +304,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
     <dependencies>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-samples-spring-boot-interface</artifactId>
+            <artifactId>dubbo-spring-boot-interface</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -404,7 +408,7 @@ dubbo:
 
 在这个配置文件中，定义了 Dubbo 的应用名、Dubbo 协议信息、Dubbo 使用的注册中心地址。
 
-### 7. 配置消费端 XML 配置文件
+### 7. 配置消费端 YAML 配置文件
 
 同样的，我们需要创建消费端的配置文件。
 
@@ -549,7 +553,7 @@ Receive result ======> Hello world
 
 ### 1. Dubbo 的 Spring 配置介绍
 
-Dubbo 的主要配置入口有 yaml 的配置内容、`@DubboReference` 和`@DubboService` 等，更多的细节可以参考 [Annotation 配置 | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual/config/annotation/) 一文。
+Dubbo 的主要配置入口有 yaml 的配置内容、`@DubboReference` 和`@DubboService` 等，更多的细节可以参考 [Annotation 配置 | Apache Dubbo](/zh-cn/overview/mannual/java-sdk/reference-manual/config/annotation/) 一文。
 
 ## 更多
 

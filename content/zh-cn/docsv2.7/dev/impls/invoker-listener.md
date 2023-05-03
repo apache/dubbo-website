@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/invoker-listener/
+description: 引用监听扩展
+linkTitle: 引用监听扩展
+title: 引用监听扩展
 type: docs
-title: "引用监听扩展"
-linkTitle: "引用监听扩展"
 weight: 3
 ---
+
+
 
 ## 扩展说明
 

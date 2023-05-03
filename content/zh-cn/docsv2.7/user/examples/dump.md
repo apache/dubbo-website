@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/dump/
+description: 在 Dubbo 自动导出线程堆栈来保留现场
+linkTitle: 导出线程堆栈
+title: 导出线程堆栈
 type: docs
-title: "导出线程堆栈"
-linkTitle: "导出线程堆栈"
 weight: 43
-description: "在 Dubbo 自动导出线程堆栈来保留现场"
 ---
+
+
 
 当业务线程池满时，我们需要知道线程都在等待哪些资源、条件，以找到系统的瓶颈点或异常点。dubbo 通过 Jstack 自动导出线程堆栈来保留现场，方便排查问题。
 

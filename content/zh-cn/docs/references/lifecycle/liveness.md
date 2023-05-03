@@ -1,11 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/lifecycle/liveness/
+description: Liveness 存活探针
+linkTitle: 存活探针
+title: Liveness 存活探针
 type: docs
-title: "Liveness 存活探针"
-linkTitle: "存活探针"
 weight: 12
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/liveness/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/liveness/)。
 {{% /pageinfo %}}
 
 ## 扩展说明
@@ -73,5 +78,3 @@ META-INF/dubbo/org.apache.dubbo.qos.probe.LivenessProbe：
 ```
 xxx=com.xxx.XxxLivenessProbe
 ```
-
-

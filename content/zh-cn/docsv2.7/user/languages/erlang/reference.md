@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/languages/erlang/reference/
+description: 在 erlang 中配置消费者
+linkTitle: 消费者配置
+title: 消费者配置
 type: docs
-title: "消费者配置"
-linkTitle: "消费者配置"
 weight: 2
-description: "在 erlang 中配置消费者"
 ---
+
+
 
 ## 基础配置
 

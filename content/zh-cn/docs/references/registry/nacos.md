@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/registry/nacos/
+description: Nacos 注册中心参考手册
+linkTitle: Nacos
+title: Nacos 注册中心
 type: docs
-title: "Nacos 注册中心"
-linkTitle: "Nacos"
 weight: 1
-description: "Nacos 注册中心参考手册"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/registry/nacos/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/nacos/)。
 {{% /pageinfo %}}
 
 Nacos 是 Dubbo 生态系统中重要的注册中心实现，其中 [`dubbo-registry-nacos`](https://github.com/apache/incubator-dubbo/tree/master/dubbo-registry/dubbo-registry-nacos) 则是 Dubbo 融合 Nacos 注册中心的实现。
@@ -135,4 +139,3 @@ dubbo.registry.address = nacos://10.20.153.10:8848
 
 该功能将在Dubbo@`2.7.10`开始支持，通过在address中增加参数来进行配置.
 例如: `nacos://10.20.153.10:8848?preserved.heart.beat.timeout=15000&preserved.ip.delete.timeout=30000&preserved.heart.beat.interval=10000`
-

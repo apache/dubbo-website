@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Tengine"
-linkTitle: "Tengine"
-weight: 60
+aliases:
+    - /zh/overview/what/ecosystem/gateway/tengine/
 description: ""
+linkTitle: Tengine
+title: Tengine
+type: docs
+weight: 60
 ---

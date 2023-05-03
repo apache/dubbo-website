@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/source/refer-service/
+description: 本文介绍了 Dubbo 服务引用的过程和实现细节
+linkTitle: 服务引用
+title: 服务引用
 type: docs
-title: "服务引用"
-linkTitle: "服务引用"
 weight: 4
-description: "本文介绍了 Dubbo 服务引用的过程和实现细节"
 ---
+
+
 
 ## 1. 简介
 

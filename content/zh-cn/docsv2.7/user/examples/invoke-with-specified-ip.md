@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/invoke-with-specified-ip/
+description: 对于Provider集群中注册的多个实例，指定Ip:Port进行调用
+linkTitle: 指定IP
+title: 指定Ip Port调用Provider
 type: docs
-title: "指定Ip Port调用Provider"
-linkTitle: "指定IP"
 weight: 15
-description: "对于Provider集群中注册的多个实例，指定Ip:Port进行调用"
 ---
+
+
 ## 背景
 当多个Provider注册到注册中心时，可以通过在RpcContext中动态的指定其中一个实例的Ip，Port进行Dubbo调用。
 

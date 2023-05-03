@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/configuration/properties/
+description: 以属性配置的方式来配置你的 Dubbo 应用
+linkTitle: 属性配置
+title: 属性配置
 type: docs
-title: "属性配置"
-linkTitle: "属性配置"
 weight: 50
-description: "以属性配置的方式来配置你的 Dubbo 应用"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/)。
 {{% /pageinfo %}}
 
 Dubbo属性配置有两个职责：
@@ -301,4 +305,3 @@ dubbo.{config-type}.{config-item}={config-item-value}
 | reference                         | dubbo.reference.{interfaceName}.xxx=xxx                      | 无                                  |
 | method                            | dubbo.service.{interfaceName}.{methodName}.xxx=xxx <br/> dubbo.reference.{interfaceName}.{methodName}.xxx=xxx | 无                                  |
 | argument                          | dubbo.service.{interfaceName}.{methodName}.{arg-index}.xxx=xxx | 无                                  |
-

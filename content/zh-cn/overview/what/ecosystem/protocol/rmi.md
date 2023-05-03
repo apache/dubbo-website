@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "RMI"
-linkTitle: "RMI"
-weight: 60
+aliases:
+    - /zh/overview/what/ecosystem/protocol/rmi/
 description: ""
+linkTitle: RMI
+title: RMI
+type: docs
+weight: 6
 ---
+
+
 
 ## 特性说明
 RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和 JDK 标准序列化方式。

@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/ops/apidocs/
+description: API文档&测试
+linkTitle: API文档&测试
+title: API文档&测试
 type: docs
-title: "API文档&测试"
-linkTitle: "API文档&测试"
 weight: 4
 ---
+
+
 
 ## dubbo api docs
 
@@ -27,7 +32,8 @@ dubbo 接口文档、测试工具,根据注解生成文档,并提供测试功能
         * 为避免增加生产环境中的资源占用, 建议单独创建一个配制类用于启用Dubbo Api Docs, 并配合 @Profile("dev") 注解使用
         * 当然, Dubbo Api Docs 仅在项目启动时多消耗了点CPU资源, 并使用了一点点内存用于缓存, 将来会考虑将缓存中的内容放到元数据中心.
 
-### 当前版本: 同Dubbo版本号
+### 版本
+当前版本: 同Dubbo版本号
 
 ```
 <dependency>

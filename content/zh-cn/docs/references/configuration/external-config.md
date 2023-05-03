@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/configuration/external-config/
+description: 将Dubbo应用的配置放到外部集中管理
+linkTitle: 外部化配置
+title: 外部化配置
 type: docs
-title: "外部化配置"
-linkTitle: "外部化配置"
 weight: 60
-description: "将Dubbo应用的配置放到外部集中管理"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/principle/#33-外部化配置)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle/#33-外部化配置)。
 {{% /pageinfo %}}
 
 ### 外部化配置

@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/xml/dubbo-parameter/
+description: dubbo:parameter 配置
+linkTitle: dubbo:parameter
+title: dubbo:parameter
 type: docs
-title: "dubbo:parameter"
-linkTitle: "dubbo:parameter"
-weight: 1 
-description: "dubbo:parameter 配置"
+weight: 1
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/#parameter)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#parameter)。
 {{% /pageinfo %}}
 
 选项参数配置。对应的配置类：`java.util.Map`。同时该标签为`<dubbo:protocol>`或`<dubbo:service>`或`<dubbo:provider>`或`<dubbo:reference>`或`<dubbo:consumer>`的子标签，用于配置自定义参数，该配置项将作为扩展点设置自定义参数使用。

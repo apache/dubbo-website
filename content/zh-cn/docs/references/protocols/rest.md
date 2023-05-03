@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/protocols/rest/
+description: 在 Dubbo 中开发 REST 风格的远程调用
+linkTitle: REST 支持
+title: 开发 REST 应用
 type: docs
-title: "开发 REST 应用"
-linkTitle: "REST 支持"
 weight: 19
-description: "在 Dubbo 中开发 REST 风格的远程调用" 
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/rest/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rest/)。
 {{% /pageinfo %}}
 
 {{% pageinfo %}}
@@ -1243,4 +1247,3 @@ TODO
 * 异步调用
 * 完善gzip
 * 最大payload限制
-

@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "FST"
-linkTitle: "FST"
-weight: 60
+aliases:
+    - /zh/overview/what/ecosystem/serialization/fst/
 description: ""
+linkTitle: FST
+title: FST
+type: docs
+weight: 6
 ---
+
+
 
 
 ## 1 介绍

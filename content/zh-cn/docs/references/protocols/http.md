@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/protocols/http/
+description: http:// 协议参考手册
+linkTitle: http://
+title: http 协议
 type: docs
-title: "http 协议"
-linkTitle: "http://"
 weight: 3
-description: "http:// 协议参考手册"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/http/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/http/)。
 {{% /pageinfo %}}
 
 基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现

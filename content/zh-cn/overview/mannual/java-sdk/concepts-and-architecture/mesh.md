@@ -1,0 +1,80 @@
+---
+aliases:
+    - /zh/docs3-v2/java-sdk/concepts-and-architecture/mesh/
+    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/mesh/
+description: 本文将介绍 Dubbo Mesh 架构设计。
+linkTitle: Dubbo Mesh
+title: Dubbo Mesh
+type: docs
+weight: 5
+---
+
+
+
+
+
+
+Dubbo Mesh 从设计理念上更强调控制面的统一管控、标准化与治理能力，而在数据面给出了更多的选择，包括 Sidecar Mesh 与 Proxyless Mesh 等部署模式。多种部署模型给企业提供了更多选择，通过混合部署的模型，在实现服务治理控制面的共享的同时，可以更好的应对不同场景的部署要求（性能、部署复杂性等），适应复杂的基础设施环境并从总体上提升架构的可用性。
+
+## 背景
+在云原生背景下，如果我们将 Service Mesh 理解为底层基础设施，则在 Mesh 架构中，以往耦合在业务进程中的微服务治理部分能力正被 Mesh 接管，传统微服务框架更注重 RPC 协议与编程模型。以下是时下流行的 Mesh 产品 Istio 的架构图：
+
+![istio](/imgs/v3/mesh/istio.jpg)
+
+在 Mesh 架构下
+* 统一的控制面提供证书管理、可观测性、流量治理等能力
+* Sidecar 让 SDK 更轻量、侵入性更小，更好的实现透明升级、流量拦截等
+
+## Dubbo Mesh 总体架构
+
+![istio](/imgs/v3/mesh/dubbo-mesh-arc.png)
+
+* 数据面基于 Triple 协议进行 RPC 通信；
+* 地址发现模型采用应用级服务发现，支持超大规模实例集群的同时，提供更丰富的服务治理能力；
+* Dubbo Mesh 控制面基于业界主流 Istio 扩展，支持 Dubbo 服务发现定制方案，同时提供更丰富的流量管控能力，；
+* 数据面支持两种模式：ThinSDK + Sidecar(如 Envoy) 和 Proxyless；
+
+
+> 对于 Dubbo2 老用户或已升级 Dubbo3 但尚未迁移新特性的用户，可以考虑参考其他 Mesh 开源社区（如 Aeraki）提供的 Dubbo 方案。
+> 但部分功能可能受限，同时会有一定的性能和容量瓶颈。
+
+### Dubbo Sidecar Mesh
+Dubbo 提供了 ThinSDK 的部署模式，在此模式下，Dubbo ThinSDK 将只提供面向业务应用的编程 API、RPC 传输通信能力，其余服务治理
+包括地址发现、负载均衡、路由寻址等都统一下沉到 Sidecar，Sidecar 负责与控制面直接通信并接收各种流量管控规则。以下是基本部署架构图，Dubbo ThinSDK 与 Sidecar 部署在同一个 Pod 或容器中，通过在外围部署一个独立的控制平面，实现对流量和治理的统一管控。控制面与 Sicecar 之间通过图中虚线所示的 xDS 协议进行配置分发，而 Dubbo 进程间的通信不再是直连模式，转而通过 Sidecar 代理，Sidecar 拦截所有进出流量，并完成路由寻址等服务治理任务。
+
+![dubbo-sidecar](/imgs/v3/mesh/dubbo-sidecar.png)
+
+社区推荐选型 Envoy 作为 Sidecar，通信协议使用 Triple 以获得更好的网关穿透性与性能体验。对于暂时无法升级 Triple 的仍在使用 Dubbo2 协议用户来说，可参考 Envoy、Aeraki Mesh 提供的 Dubbo2 协议支持方案。
+
+ThinSDK + Sidecar 模式的 Mesh 架构有很多优势，如平滑升级、多语言、业务侵入小等，但也带来了一些额外的问题，比如：
+* Sidecar 通信带来了额外的性能损耗，这在复杂拓扑的网络调用中将变得尤其明显。
+* Sidecar 的存在让应用的声明周期管理变得更加复杂。
+* 部署环境受限，并不是所有的环境都能满足 Sidecar 部署与请求拦截要求。
+
+详细方案设计与示例请参考
+* [Dubbo ThinSDK Proposal](/zh-cn/overview/tasks/mesh)
+* [使用示例](/zh-cn/overview/tasks/mesh)
+
+### Dubbo Proxyless Mesh
+作为 ThinSDK + Sidecar 模式的补充，Dubbo 社区自很早之前就做了 Dubbo 直接对接到控制面的设想与思考，也就是当前所说的 Proxyless Mesh 模式。Proxyless 模式使得微服务又回到了 2.x 时代的部署架构。如下图所示，和我们上面看的 Dubbo 经典服务治理模式非常相似，所以说这个模式并不新鲜， Dubbo 从最开始就是这么样的设计模式。但相比于 Mesh 架构，Dubbo2 并没有强调控制面的统一管控，而这点恰好是 Service Mesh 所强调的，强调对流量、可观测性、证书等的标准化管控与治理，也是 Mesh 理念先进的地方。
+
+![dubbo-proxyless](/imgs/v3/mesh/dubbo-proxyless.png)
+
+通过不同语言版本的 Dubbo3 SDK 直接实现 xDS 协议解析，Dubbo 进程可以与控制面（Control Plane）直接通信，进而实现控制面对流量管控、服务治理、可观测性、安全等的统一管控，规避 Sidecar 模式带来的性能损耗与部署架构复杂性。
+
+> Proxyless 模式同时支持 Dubbo2、Triple 协议，但只支持应用级服务发现的地址模型。
+
+在 Dubbo3 Proxyless 架构模式下，Dubbo 进程将直接与控制面通信，Dubbo 进程之间也继续保持直连通信模式，我们可以看出 Proxyless 架构的优势：
+* 没有额外的 Proxy 中转损耗，因此更适用于性能敏感应用
+* 更有利于遗留系统的平滑迁移
+* 架构简单，容易运维部署
+* 适用于几乎所有的部署环境
+
+详细方案设计与示例请参考
+* [Dubbo Proxyless Mesh](/zh-cn/overview/tasks/mesh)
+* [使用示例](/zh-cn/overview/tasks/mesh)
+
+### Dubbo 控制面治理规则
+TBD
+
+Dubbo SDK 提供了非常灵活的配置来控制服务治理行为，如接口粒度的服务地址发现能力、接口粒度的配置同步等，这些能力让应用的开发和部署更加灵活。而在通用的 Mesh 部署方案或产品下一些高级功能可能受限，从总体上影响了易用性与灵活性。为此 Dubbo 计划提供自研控制面产品，以最大化的在 Mesh 体系发挥 Dubbo3 能力。

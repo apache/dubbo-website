@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Sofa"
-linkTitle: "Sofa"
-weight: 60
+aliases:
+    - /zh/overview/what/ecosystem/registry/sofa/
 description: ""
+linkTitle: Sofa
+title: Sofa
+type: docs
+weight: 60
 ---

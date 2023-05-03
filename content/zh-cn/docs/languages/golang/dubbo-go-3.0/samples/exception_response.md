@@ -1,12 +1,16 @@
 ---
-type: docs
-title: Dubbo-go 3.0 异常回传
-keywords: dubbogo 3.0 异常回传
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/samples/exception_response/
 description: dubbogo 3.0 异常回传
+keywords: dubbogo 3.0 异常回传
 linkTitle: Triple 异常回传
+title: Dubbo-go 3.0 异常回传
+type: docs
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/protocol/exception_response/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/exception_response/)。
 {{% /pageinfo %}}
 
 # Triple 协议异常回传

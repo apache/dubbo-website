@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/telnet/
+description: 通过 Telnet 命令进行服务治理
+linkTitle: Telnet 手册
+title: Telnet 命令参考手册
 type: docs
-title: "Telnet 命令参考手册"
-linkTitle: "Telnet 手册"
 weight: 11
-description: "通过 Telnet 命令进行服务治理"
 ---
+
+
 
 从 `2.0.5` 版本开始，dubbo 开始支持通过 telnet 命令来进行服务治理。
 

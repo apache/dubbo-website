@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/principals/extension/
+description: 扩展点重构
+linkTitle: 扩展点重构
+title: 扩展点重构
 type: docs
-title: "扩展点重构"
-linkTitle: "扩展点重构"
 weight: 5
 ---
+
+
 
 
 随着服务化的推广，网站对Dubbo服务框架的需求逐渐增多，Dubbo 的现有开发人员能实现的需求有限，很多需求都被 delay，而网站的同学也希望参与进来，加上领域的推动，所以平台计划将部分项目对公司内部开放，让大家一起来实现，Dubbo 为试点项目之一。 
@@ -136,5 +141,3 @@ createExporter(URL url);
 整理后，设计如下：
 
 ![design-step-4](/imgs/dev/design-step4.png)
-
-

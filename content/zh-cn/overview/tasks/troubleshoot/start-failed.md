@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/troubleshoot/start-failed/
+description: 在 Dubbo 应用启动失败时的排查思路
+linkTitle: 应用启动失败
+title: 应用启动失败
 type: docs
-title: "应用启动失败"
-linkTitle: "应用启动失败"
-weight: 10
-description: "在 Dubbo 应用启动失败时的排查思路"
+weight: 1
 ---
+
+
 
 在开发与生产部署过程中，由于各种非预期的变更，可能会出现应用无法启动的情况。对于 Dubbo 来说，通常启动失败时都会有类似以下的报错信息。
 

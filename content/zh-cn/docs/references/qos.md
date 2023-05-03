@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/qos/
+description: 新版本 telnet 命令使用说明
+linkTitle: QOS 手册
+title: 在线运维命令参考手册
 type: docs
-title: "在线运维命令参考手册"
-linkTitle: "QOS 手册"
 weight: 11
-description: "新版本 telnet 命令使用说明"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/qos/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/)。
 {{% /pageinfo %}}
 
 dubbo `2.5.8` 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
@@ -241,6 +245,3 @@ dubbo.application.qos-enable=true
 dubbo.application.qos-port=33333
 dubbo.application.qos-accept-foreign-ip=false
 ```
-
-
-

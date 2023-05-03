@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-reference/
+description: dubbo:reference 配置
+linkTitle: dubbo:reference
+title: dubbo:reference
 type: docs
-title: "dubbo:reference"
-linkTitle: "dubbo:reference"
 weight: 1
-description: "dubbo:reference 配置"
 ---
+
+
 
 
 服务消费者引用服务配置。对应的配置类： `org.apache.dubbo.config.ReferenceConfig`

@@ -1,10 +1,15 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/concurrency-control/
+description: Dubbo 中的并发控制
+linkTitle: 并发控制
+title: 并发控制
 type: docs
-title: "并发控制"
-linkTitle: "并发控制"
 weight: 28
-description: "Dubbo 中的并发控制"
 ---
+
+
+## 背景
 
 ## 示例
 

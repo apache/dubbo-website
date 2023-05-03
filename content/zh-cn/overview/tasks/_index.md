@@ -1,11 +1,9 @@
-
 ---
-type: docs
-title: "跟随示例任务学习 Dubbo"
-linkTitle: "任务"
+aliases:
+    - /zh/overview/tasks/
 description: ""
-weight: 40
+linkTitle: 任务
+title: 跟随示例任务学习 Dubbo
+type: docs
+weight: 5
 ---
-
-
-

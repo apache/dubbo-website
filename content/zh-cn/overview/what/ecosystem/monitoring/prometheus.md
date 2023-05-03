@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Prometheus"
-linkTitle: "Prometheus"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/monitoring/prometheus/
 description: ""
+linkTitle: Prometheus
+title: Prometheus
+type: docs
+weight: 30
 ---

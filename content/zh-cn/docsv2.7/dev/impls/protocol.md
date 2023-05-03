@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/protocol/
+description: 协议扩展
+linkTitle: 协议扩展
+title: 协议扩展
 type: docs
-title: "协议扩展"
-linkTitle: "协议扩展"
 weight: 1
 ---
+
+
 
 ## 扩展说明
 

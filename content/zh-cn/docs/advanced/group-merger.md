@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/advanced/group-merger/
+description: 通过分组对结果进行聚合并返回聚合后的结果
+linkTitle: 分组聚合
+title: 分组聚合
 type: docs
-title: "分组聚合"
-linkTitle: "分组聚合"
 weight: 13
-description: "通过分组对结果进行聚合并返回聚合后的结果"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/group-merger/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/group-merger/)。
 {{% /pageinfo %}}
 
 通过分组对结果进行聚合并返回聚合后的结果，比如菜单服务，用group区分同一接口的多种实现，现在消费方需从每种group中调用一次并返回结果，对结果进行合并之后返回，这样就可以实现聚合菜单项。  
@@ -67,4 +71,3 @@ description: "通过分组对结果进行聚合并返回聚合后的结果"
 {{% alert title="提示" color="primary" %}}
 从 `2.1.0` 版本开始支持
 {{% /alert %}}
-

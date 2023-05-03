@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/advanced/subscribe-only/
+description: 只订阅不注册
+linkTitle: 只订阅
+title: 只订阅
 type: docs
-title: "只订阅"
-linkTitle: "只订阅"
 weight: 6
-description: "只订阅不注册"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/subscribe-only/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/)。
 {{% /pageinfo %}}
 
 为方便开发测试，经常会在线下共用一个所有服务可用的注册中心，这时，如果一个正在开发中的服务提供者注册，可能会影响消费者不能正常运行。

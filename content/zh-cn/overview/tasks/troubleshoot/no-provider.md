@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/troubleshoot/no-provider/
+description: 在 Dubbo 抛出地址找不到异常的时候的排查思路
+linkTitle: 地址找不到异常
+title: 地址找不到异常
 type: docs
-title: "地址找不到异常"
-linkTitle: "地址找不到异常"
-weight: 20
-description: "在 Dubbo 抛出地址找不到异常的时候的排查思路"
+weight: 2
 ---
+
+
 
 在开发与生产部署过程中，由于 Dubbo 是一个需要基于服务发现功能进行调用的框架，很容易由于各种客观原因出现 `No Provder` 的异常，本文旨在通过体系化的排查思路，让您能够在异常的时候快速定位原因并解决。
 
@@ -359,7 +363,7 @@ As Consumer side:
 
 如果您找到了您所发布的服务，但是对应的服务发现模型错误，请检查以下清单：
 
-1. 是否配置的订阅迁移规则，如 `dubbo-migration.yaml` 或动态配置，请参考 [应用级服务发现地址迁移规则说明](/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/)
+1. 是否配置的订阅迁移规则，如 `dubbo-migration.yaml` 或动态配置，请参考 [应用级服务发现地址迁移规则说明](/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/)
 
 如果您找到了您所发布的服务，且对应的服务发现模型下地址数非 `0`，请跳转到第 7 步进行排查。
 
@@ -504,7 +508,7 @@ Disabled Invokers:
 
 请检查对应迁移模型是否符合预期，默认为 `APPLCATION_FIRST`，如果对应的服务发现模型错误，请检查以下清单：
 
-1. 是否配置的订阅迁移规则，如 `dubbo-migration.yaml` 或动态配置，请参考 [应用级服务发现地址迁移规则说明](/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/)
+1. 是否配置的订阅迁移规则，如 `dubbo-migration.yaml` 或动态配置，请参考 [应用级服务发现地址迁移规则说明](/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/)
 
 如果迁移模型正确，请检查对应模型下的**所有**地址是否符合预期，如果不符合预期，请检查以下清单：
 
@@ -593,6 +597,4 @@ dubbo>
 ```
 
 注：采集路由信息会消耗一定的性能，排查完毕后请及时关闭。
-参考文档：[路由状态命令](/zh-cn/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/)
-
-
+参考文档：[路由状态命令](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/router-snapshot/)

@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "gRPC"
-linkTitle: "gRPC"
-weight: 40
+aliases:
+    - /zh/overview/what/ecosystem/protocol/grpc/
 description: ""
+linkTitle: gRPC
+title: gRPC
+type: docs
+weight: 4
 ---
+
+
 
 ## 特性说明
 

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/set-host/
+description: 自定义 Dubbo 服务对外暴露的主机地址
+linkTitle: 主机配置
+title: 主机配置
 type: docs
-title: "主机配置"
-linkTitle: "主机配置"
 weight: 37
-description: "自定义 Dubbo 服务对外暴露的主机地址"
 ---
+
+
 
 ## 背景
 

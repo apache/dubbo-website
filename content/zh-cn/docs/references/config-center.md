@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/config-center/
+description: Dubbo 配置中心参考手册
+linkTitle: 配置中心
+title: 配置中心参考手册
 type: docs
-title: "配置中心参考手册"
-linkTitle: "配置中心"
 weight: 2
-description: "Dubbo 配置中心参考手册"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/config-center/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/config-center/)。
 {{% /pageinfo %}}
 
 配置中心在 Dubbo 中承担3个职责：
@@ -80,4 +84,3 @@ configCenter.setAddress("zookeeper://127.0.0.1:2181");
 - tag-router，[标签路由](/zh-cn/docsv2.7/user/examples/routing-rule/)
 - condition-router，[条件路由](/zh-cn/docsv2.7/user/examples/routing-rule/#条件路由)
 - migration，[迁移规则](../../migration/migration-service-discovery)
-

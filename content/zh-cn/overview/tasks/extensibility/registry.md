@@ -1,8 +1,10 @@
 ---
-type: docs
-title: "Registry"
-linkTitle: "Registry"
-description: "自定义注册中心"
-weight: 60
+aliases:
+    - /zh/overview/tasks/extensibility/registry/
+description: 自定义注册中心
+linkTitle: Registry
 no_list: true
+title: Registry
+type: docs
+weight: 3
 ---

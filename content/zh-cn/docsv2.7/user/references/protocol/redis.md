@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/redis/
+description: redis:// 协议参考手册
+linkTitle: redis://
+title: redis 协议
 type: docs
-title: "redis 协议"
-linkTitle: "redis://"
 weight: 4
-description: "redis:// 协议参考手册"
 ---
+
+
 
 
 基于 Redis [^1] 实现的 RPC 协议。

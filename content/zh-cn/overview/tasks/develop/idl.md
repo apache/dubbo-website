@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "使用 IDL 定义与开发服务"
-linkTitle: "IDL开发服务"
+aliases:
+    - /zh/overview/tasks/develop/idl/
 description: ""
-weight: 70
+linkTitle: IDL开发服务
+title: 使用 IDL 定义与开发服务
+type: docs
+weight: 7
 ---
+
+
 
 服务是 Dubbo 中的核心概念，一个服务代表一组 RPC 方法的集合，服务是面向用户编程、服务发现机制等的基本单位。Dubbo 开发的基本流程是：用户定义 RPC 服务，通过约定的配置
 方式将 RPC 声明为 Dubbo 服务，然后就可以基于服务 API 进行编程了。对服务提供者来说是提供 RPC 服务的具体实现，而对服务消费者来说则是使用特定数据发起服务调用。
@@ -14,7 +18,7 @@ weight: 70
 具体用例可以参考：[dubbo-samples-triple/stub](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/stub);
 
 ## 定义服务
-Dubbo3 推荐使用 IDL 定义跨语言服务，如您更习惯使用特定语言的服务定义方式，请移步[多语言 SDK](/zh-cn/docs3-v2/)查看。
+Dubbo3 推荐使用 IDL 定义跨语言服务，如您更习惯使用特定语言的服务定义方式，请移步[多语言 SDK](/zh-cn/overview/mannual/)查看。
 
 ```text
 syntax = "proto3";

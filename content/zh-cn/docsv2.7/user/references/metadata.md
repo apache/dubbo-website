@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/metadata/
+description: Dubbo 服务元数据参考手册
+linkTitle: 元数据参考手册
+title: 元数据参考手册
 type: docs
-title: "元数据参考手册"
-linkTitle: "元数据参考手册"
 weight: 5
-description: "Dubbo 服务元数据参考手册"
 ---
+
+
 
 ## 背景
 

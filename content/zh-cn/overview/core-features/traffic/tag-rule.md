@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "标签路由规则"
-linkTitle: "标签路由"
-weight: 20
+aliases:
+    - /zh/overview/core-features/traffic/tag-rule/
 description: ""
+linkTitle: 标签路由
+title: 标签路由规则
+type: docs
+weight: 2
 ---
+
+
 
 标签路由通过将某一个服务的实例划分到不同的分组，约束具有特定标签的流量只能在指定分组中流转，不同分组为不同的流量场景服务，从而达到实现流量隔离的目的，可以作为蓝绿发布、灰度发布等场景能力的基础。目前有两种方式可以对实例打标，分别是`动态规则打标`和`静态规则打标`。`动态规则打标` 可以在运行时动态的圈住一组机器实例，而 `静态规则打标` 则需要实例重启后才能生效，其中，动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。
 
@@ -55,5 +59,3 @@ tags:
 | --- | --- | --- | --- |
 | key | string | The name of the key in the Dubbo url address. | Yes |
 | value | StringMatch (oneof) | The matching condition for the value in the Dubbo url address. | Yes |
-
-

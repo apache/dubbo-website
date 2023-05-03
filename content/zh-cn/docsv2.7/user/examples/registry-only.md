@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/registry-only/
+description: 只注册不订阅
+linkTitle: 只注册
+title: 只注册
 type: docs
-title: "只注册"
-linkTitle: "只注册"
 weight: 41
-description: "只注册不订阅"
 ---
+
+
 
 如果有两个镜像环境，两个注册中心，有一个服务只在其中一个注册中心有部署，另一个注册中心还没来得及部署，而两个注册中心的其它应用都需要依赖此服务。这个时候，可以让服务提供者方只注册服务到另一注册中心，而不从另一注册中心订阅服务。
 

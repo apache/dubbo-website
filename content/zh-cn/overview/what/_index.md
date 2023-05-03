@@ -1,12 +1,16 @@
 ---
-type: docs
-title: "Dubbo 介绍"
-linkTitle: "介绍"
-weight: 20
+aliases:
+    - /zh/overview/what/
 description: ""
-no_list: true
 hide_summary: true
+linkTitle: 介绍
+no_list: true
+title: Dubbo 介绍
+type: docs
+weight: 3
 ---
+
+
 [5 分钟快速掌握 Apache Dubbo]({{< relref "../../blog/news/dubbo-introduction" >}})
 
 Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下的服务治理与通信问题，官方提供了 Java、Golang 等多语言 SDK 实现。使用 Dubbo 开发的微服务原生具备相互之间的远程地址发现与通信能力，
@@ -57,7 +61,7 @@ Dubbo 设计为让开发者以主流的应用开发框架的开发模式工作�
 
 * **不仅仅只是一款 RPC 框架**
 
-Dubbo 提供了内置 RPC 通信协议实现，但它不仅仅是一款 RPC 框架。首先，它不绑定某一个具体的 RPC 协议，开发者可以在基于 Dubbo 开发的微服务体系中使用多种通信协议；其次，出了 RPC 通信之外，Dubbo 提供了丰富的服务治理能力与生态。
+Dubbo 提供了内置 RPC 通信协议实现，但它不仅仅是一款 RPC 框架。首先，它不绑定某一个具体的 RPC 协议，开发者可以在基于 Dubbo 开发的微服务体系中使用多种通信协议；其次，除了 RPC 通信之外，Dubbo 提供了丰富的服务治理能力与生态。
 
 * **不是 gRPC 协议的替代品**
 

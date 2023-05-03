@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/advanced/service-downgrade/
+description: 降级 Dubbo 服务
+linkTitle: 服务降级
+title: 服务降级
 type: docs
-title: "服务降级"
-linkTitle: "服务降级"
 weight: 35
-description: "降级 Dubbo 服务"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/)。
 {{% /pageinfo %}}
 
 可以通过服务降级功能临时屏蔽某个出错的非关键服务，并定义降级后的返回策略。
@@ -27,4 +31,3 @@ registry.register(URL.valueOf("override://0.0.0.0/com.foo.BarService?category=co
 {{% alert title="提示" color="primary" %}}
 `2.2.0` 以上版本支持
 {{% /alert %}}
-

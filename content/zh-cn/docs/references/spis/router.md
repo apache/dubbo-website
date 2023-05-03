@@ -1,11 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/spis/router/
+description: 路由扩展
+linkTitle: 路由扩展
+title: 路由扩展
 type: docs
-title: "路由扩展"
-linkTitle: "路由扩展"
 weight: 6
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/router/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)。
 {{% /pageinfo %}}
 
 ## 扩展说明
@@ -68,5 +73,3 @@ META-INF/dubbo/org.apache.dubbo.rpc.cluster.RouterFactory：
 ```properties
 xxx=com.xxx.XxxRouterFactory
 ```
-
-

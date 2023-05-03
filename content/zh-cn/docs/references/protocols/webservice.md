@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/protocols/webservice/
+description: webservice:// 协议参考手册
+linkTitle: webservice://
+title: webservice 协议
 type: docs
-title: "webservice 协议"
-linkTitle: "webservice://"
 weight: 5
-description: "webservice:// 协议参考手册"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/protocol/webservice/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/webservice/)。
 {{% /pageinfo %}}
 
 基于 WebService 的远程调用协议，基于 [Apache CXF](http://cxf.apache.org) [^1] 的 `frontend-simple` 和 `transports-http` 实现。
@@ -119,4 +123,4 @@ Servlet Bridge Server (推荐)：
 * 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同，
 * 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。
 
-[^1]: CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来  
+[^1]: CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来

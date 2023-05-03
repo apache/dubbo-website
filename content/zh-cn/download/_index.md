@@ -1,13 +1,18 @@
 ---
-title: "版本发布"
-linkTitle: "版本发布"
-type: docs
+aliases:
+    - /zh/download/
+description: 版本发布
 layout: basic
-no_list: true
+linkTitle: 版本发布
 menu:
-  main:
-    weight: 30
+    main:
+        weight: 30
+no_list: true
+title: 版本发布
+type: docs
 ---
+
+
 下载 Apache Dubbo Release 归档.
 
 ## 验证
@@ -16,5 +21,4 @@ menu:
 
 ## Releases
 
-{{< blocks/download >}}
-
+{{< blocks/download-zh >}}

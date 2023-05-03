@@ -1,11 +1,12 @@
 ---
-type: docs
-title: "配置中心"
-linkTitle: "配置中心"
-weight: 31
-icon: "fas fa-external-link-alt"
+_build:
+    render: link
 description: ""
-manualLinkRelref: ../../../docs3-v2/java-sdk/reference-manual/config-center/
-_build: { render: link }
+icon: fas fa-external-link-alt
+linkTitle: 配置中心
+manualLinkRelref: ../../mannual/java-sdk/reference-manual/config-center/
 manualLinkTarget: _blank
+title: 配置中心
+type: docs
+weight: 31
 ---

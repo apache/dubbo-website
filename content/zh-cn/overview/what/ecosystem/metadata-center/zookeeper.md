@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Zookeeper"
-linkTitle: "Zookeeper"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/metadata-center/zookeeper/
 description: ""
+linkTitle: Zookeeper
+title: Zookeeper
+type: docs
+weight: 10
 ---
+
+
 
 
 ## 1 介绍

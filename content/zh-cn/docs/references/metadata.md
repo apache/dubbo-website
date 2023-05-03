@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/metadata/
+description: Dubbo 服务元数据参考手册
+linkTitle: 元数据参考手册
+title: 元数据参考手册
 type: docs
-title: "元数据参考手册"
-linkTitle: "元数据参考手册"
 weight: 5
-description: "Dubbo 服务元数据参考手册"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/metadata-center/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/metadata-center/)。
 {{% /pageinfo %}}
 
 ## 背景
@@ -613,10 +617,3 @@ configService.publishConfigCas(key, group, content, ticket);
 映射信息位于 namespace: 'public', dataId: '{service name}', group: 'mapping'.
 
 ![nacos-metadata-report-service-name-mapping.png](/imgs/user/nacos-metadata-report-service-name-mapping.png)
-
-
-
-
-
-
-

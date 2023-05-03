@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-config-center/
+description: dubbo:config-center 配置
+linkTitle: dubbo:config-center
+title: dubbo:config-center
 type: docs
-title: "dubbo:config-center"
-linkTitle: "dubbo:config-center"
 weight: 1
-description: "dubbo:config-center 配置"
 ---
+
+
 
 配置中心。对应的配置类：`org.apache.dubbo.config.ConfigCenterConfig`
 

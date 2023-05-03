@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "注册中心"
-linkTitle: "注册中心"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/registry/
 description: ""
+linkTitle: 注册中心
+title: 注册中心
+type: docs
+weight: 30
 ---

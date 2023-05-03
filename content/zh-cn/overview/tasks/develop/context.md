@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/develop/context/
+description: 通过 Dubbo 中的 Attachment 在服务消费方和提供方之间传递参数
+linkTitle: 上下文参数传递
+title: 上下文参数传递
 type: docs
-title: "上下文参数传递"
-linkTitle: "上下文参数传递"
 weight: 5
-description: "通过 Dubbo 中的 Attachment 在服务消费方和提供方之间传递参数"
 ---
+
+
 ## 上下文参数传递
 在 Dubbo 3 中，RpcContext 被拆分为四大模块（ServerContext、ClientAttachment、ServerAttachment 和 ServiceContext）。
 

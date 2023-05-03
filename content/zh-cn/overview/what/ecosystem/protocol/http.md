@@ -1,13 +1,14 @@
 ---
-type: docs
-title: "http"
-linkTitle: "http"
-weight: 30
+aliases:
+    - /zh/overview/what/ecosystem/protocol/http/
 description: ""
+linkTitle: http
+title: http
+type: docs
+weight: 3
 ---
 
 ## 什么是Dubbo Http
-
 基于 spring web 和 resteasy 注解编码风格，通过http协议进行服务间调用互通，dubbo protocol扩展实现的协议
 
 ## 为什么选择Dubbo Http

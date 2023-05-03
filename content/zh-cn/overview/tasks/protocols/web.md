@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "使用 Dubbo 开发 Web 应用"
-linkTitle: "开发 Web 应用"
+aliases:
+    - /zh/overview/tasks/protocols/web/
 description: ""
-weight: 20
+linkTitle: 开发 Web 应用
+title: 使用 Dubbo 开发 Web 应用
+type: docs
+weight: 2
 ---
+
+
 Dubbo3 HTTP 协议支持仍在建设中，目前最新的 3.3 开发分支已经有初版原型供体验。正式的生产可用版本预计会在 3.4/3.4 的某个正式版本发布。
 
 以下是 Dubbo3 HTTP 协议与编程模式计划支持的几种业务场景：
@@ -43,7 +47,3 @@ private SpringCloudRestService restService;
 ## 多协议发布
 
 ![img](/imgs/v3/tasks/protocol/http-usecase-1.png)
-
-
-
-

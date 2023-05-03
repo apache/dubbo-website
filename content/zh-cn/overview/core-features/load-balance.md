@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/core-features/load-balance/
+description: 负载均衡
+linkTitle: 负载均衡
+title: 负载均衡
 type: docs
-title: "负载均衡"
-linkTitle: "负载均衡"
-weight: 20
-description: ""
+weight: 3
 ---
+
+
 
 在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 `weighted random` 基于权重的随机负载均衡策略。
 

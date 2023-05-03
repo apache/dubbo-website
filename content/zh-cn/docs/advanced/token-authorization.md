@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/advanced/token-authorization/
+description: 通过令牌验证在注册中心控制权限
+linkTitle: 令牌验证
+title: 令牌验证
 type: docs
-title: "令牌验证"
-linkTitle: "令牌验证"
 weight: 32
-description: "通过令牌验证在注册中心控制权限"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/token-authorization/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/token-authorization/)。
 {{% /pageinfo %}}
 
 通过令牌验证在注册中心控制权限，以决定要不要下发令牌给消费者，可以防止消费者绕过注册中心访问提供者，另外通过注册中心可灵活改变授权方式，而不需修改或升级提供者

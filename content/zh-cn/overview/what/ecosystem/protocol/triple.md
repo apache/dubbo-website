@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Triple"
-linkTitle: "Triple"
-weight: 20
+aliases:
+    - /zh/overview/what/ecosystem/protocol/triple/
 description: ""
+linkTitle: Triple
+title: Triple
+type: docs
+weight: 2
 ---
+
+
 
 ## 概述说明
 

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/tasks/deploy/deploy-on-k8s-docker/
+description: 部署 Dubbo 应用到 Kubernetes + Docker 示例
+linkTitle: 部署到 Kubernetes + Docker
+title: 部署 Dubbo 应用到 Kubernetes + Docker 环境
 type: docs
-title: "部署 Dubbo 应用到 Kubernetes + Docker 环境"
-linkTitle: "部署到 Kubernetes + Docker"
 weight: 3
-description: "部署 Dubbo 应用到 Kubernetes + Docker 示例"
 ---
+
+
 ## 总体目标
 
 - [Kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/)
@@ -25,26 +29,13 @@ kubectl create ns dubbo-demo
 
 ### zookeeper
 
-获取 zookeeper
+获取图表
 ```
-helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update && helm search repo bitnami/zookeeper
+helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
-
-拉取 zookeeper
-```
-helm pull bitnami/zookeeper --untar --version x.x.x
-```
-
-关闭持久化存储
-```
-### values.yaml
-persistence:
-  enabled: false
-```
-
 安装 zookeeper
 ```
-helm install zookeeper -f values.yaml --namespace dubbo-demo .
+helm install zookeeper bitnami/zookeeper --set persistence.enabled=false -n dubbo-demo
 ```
 
 查看 zookeeper
@@ -57,13 +48,6 @@ kubectl get pods -n dubbo-demo
 克隆项目到本地
 ```
 git clone https://github.com/apache/dubbo-admin.git && cd /dubbo-admin/deploy/k8s
-```
-
-配置
-```
-admin.registry.address=zookeeper://zookeeper:2181
-admin.config-center=zookeeper://zookeeper:2181
-admin.metadata-report.address=zookeeper://zookeeper:2181
 ```
 
 创建服务
@@ -240,4 +224,3 @@ kubectl create -f consumer.yaml
 
 查看服务
 ![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
-

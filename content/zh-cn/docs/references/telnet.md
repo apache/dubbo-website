@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/references/telnet/
+description: 通过 Telnet 命令进行服务治理
+linkTitle: Telnet 手册
+title: Telnet 命令参考手册
 type: docs
-title: "Telnet 命令参考手册"
-linkTitle: "Telnet 手册"
 weight: 11
-description: "通过 Telnet 命令进行服务治理"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/qos/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/)。
 {{% /pageinfo %}}
 
 从 `2.0.5` 版本开始，dubbo 开始支持通过 telnet 命令来进行服务治理。

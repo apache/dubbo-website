@@ -1,15 +1,19 @@
-
 ---
-type: docs
-title: "流量管控"
-linkTitle: "流量管控"
-weight: 30
-no_list: true
+aliases:
+    - /zh/overview/core-features/traffic/
+description: 流量管控
 feature:
-  title: 流量管控
-  description: >
-    Dubbo 提供的基于路由规则的流量管控策略，可以帮助实现全链路灰度、金丝雀发布、按比例流量转发、动态调整调试时间、设置重试次数等服务治理能力。
+    description: |
+        Dubbo 提供的基于路由规则的流量管控策略，可以帮助实现全链路灰度、金丝雀发布、按比例流量转发、动态调整调试时间、设置重试次数等服务治理能力。
+    title: 流量管控
+linkTitle: 流量管控
+no_list: true
+title: 流量管控
+type: docs
+weight: 4
 ---
+
+
 
 Dubbo 提供了丰富的流量管控策略
 * **地址发现与负载均衡**，地址发现支持服务实例动态上下线，负载均衡确保流量均匀的分布到每个实例上。
@@ -119,7 +123,7 @@ RpcContext.getContext().setAttachment(Constants.TAG_KEY, "Hangzhou");
 
 条件路由与标签路由的工作模式非常相似，也是首先对请求中的参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。相比于标签路由，条件路由的匹配方式更灵活：
 
-* 在标签路由中，一旦给某一台或几台机器实例打了标签，则这部分实例就会被立马从通用流量集合中移除，不通标签之间不会再有交集。有点类似下图，地址集合在输入阶段就已经划分明确。
+* 在标签路由中，一旦给某一台或几台机器实例打了标签，则这部分实例就会被立马从通用流量集合中移除，不同标签之间不会再有交集。有点类似下图，地址集合在输入阶段就已经划分明确。
 
 ![tag-condition-compare](/imgs/v3/feature/traffic/tag-condition-compare1.png)
 

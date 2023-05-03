@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/graceful-shutdown/
+description: 让 Dubbo 服务完成优雅停机
+linkTitle: 优雅停机
+title: 优雅停机
 type: docs
-title: "优雅停机"
-linkTitle: "优雅停机"
 weight: 36
-description: "让 Dubbo 服务完成优雅停机"
 ---
+
+
 ## 背景
 Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用户使用 `kill -9 PID` 等强制关闭指令，是不会执行优雅停机的，只有通过 `kill PID` 时，才会执行。
 
@@ -38,4 +42,3 @@ DubboShutdownHook.destroyAll();
 {{% alert title="建议" color="primary" %}}
 使用 tomcat 等容器部署的场景，建议通过扩展 ContextListener 等自行调用以下代码实现优雅停机
 {{% /alert %}}
-

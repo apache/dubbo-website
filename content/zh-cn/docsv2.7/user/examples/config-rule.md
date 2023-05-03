@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/config-rule/
+description: 在 Dubbo 中配置应用级治理规则和服务级治理规则
+linkTitle: 配置规则
+title: 配置规则
 type: docs
-title: "配置规则"
-linkTitle: "配置规则"
 weight: 34
-description: "在 Dubbo 中配置应用级治理规则和服务级治理规则"
 ---
+
+
 ## 背景
 {{% alert title="提示" color="primary" %}}
 本文描述的是新版本规则配置，而不是[老版本配置规则](../config-rule-deprecated) 
@@ -17,7 +21,7 @@ description: "在 Dubbo 中配置应用级治理规则和服务级治理规则"
 
 请在服务治理控制台查看或修改覆盖规则。
 
-应用粒度
+### 应用粒度
 
 ```yaml
 # 将应用demo（key:demo）在20880端口上提供（side:provider）的所有服务（scope:application）的权重修改为1000（weight:1000）。
@@ -34,7 +38,7 @@ configs:
   ...
 ```
 
-服务粒度
+### 服务粒度
 
 ```yaml
 # 所有消费（side:consumer）DemoService服务（key:org.apache.dubbo.samples.governance.api.DemoService）的应用实例（addresses:[0.0.0.0]），超时时间修改为6000ms

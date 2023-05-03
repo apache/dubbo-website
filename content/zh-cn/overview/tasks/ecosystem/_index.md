@@ -1,12 +1,15 @@
-
 ---
-type: docs
-title: "微服务生态"
-linkTitle: "微服务生态"
-description: "围绕 Dubbo 生态的限流降级、全链路追踪、分布式一致性等解决方案"
-weight: 30
+aliases:
+    - /zh/overview/tasks/ecosystem/
+description: 围绕 Dubbo 生态的限流降级、全链路追踪、分布式一致性等解决方案
+linkTitle: 微服务生态
 no_list: true
+title: 微服务生态
+type: docs
+weight: 4
 ---
+
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -46,7 +49,7 @@ no_list: true
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/registry/" >}}'>服务发现</a>
+                 <a target="_blank" href='{{< relref "../../mannual/java-sdk/reference-manual/registry/" >}}'>服务发现</a>
                  </h4>
                  <p>Dubbo 官方支持的常见注册中心扩展实现及其使用方式。</p>
              </div>
@@ -56,7 +59,7 @@ no_list: true
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/config-center/" >}}'>配置中心</a>
+                 <a target="_blank" href='{{< relref "../../mannual/java-sdk/reference-manual/config-center/" >}}'>配置中心</a>
                  </h4>
                  <p>Dubbo 官方支持的常见配置中心扩展实现及其使用方式。</p>
              </div>
@@ -66,7 +69,7 @@ no_list: true
          <div class="h-100 card shadow">
              <div class="card-body">
                  <h4 class="card-title">
-                 <a target="_blank" href='{{< relref "../../../docs3-v2/java-sdk/reference-manual/metadata-center/" >}}'>元数据中心</a>
+                 <a target="_blank" href='{{< relref "../../mannual/java-sdk/reference-manual/metadata-center/" >}}'>元数据中心</a>
                  </h4>
                  <p>Dubbo 官方支持的常见元数据中心扩展实现及其使用方式。</p>
              </div>

@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/advanced/tls/
+description: 通过 TLS 保证传输安全
+linkTitle: TLS
+title: TLS
 type: docs
-title: "TLS"
-linkTitle: "TLS"
 weight: 32
-description: "通过 TLS 保证传输安全"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/tls/)。
 {{% /pageinfo %}}
 
 2.7.5 版本在传输链路的安全性上做了很多工作，对于内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。

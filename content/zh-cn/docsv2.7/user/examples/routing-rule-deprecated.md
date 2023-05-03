@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/routing-rule-deprecated/
+description: 在 Dubbo `2.6.x` 版本以及更早的版本中配置路由规则
+linkTitle: 旧路由规则
+title: 旧路由规则
 type: docs
-title: "旧路由规则"
-linkTitle: "旧路由规则"
 weight: 34
-description: "在 Dubbo `2.6.x` 版本以及更早的版本中配置路由规则"
 ---
+
+
 ## 背景
 
 ## 示例
@@ -195,7 +199,7 @@ RpcContext.getContext().setAttachment(Constants.TAG_KEY,"red");
    
 
 [^1]: `2.2.0` 以上版本支持
-[^2]: 路由规则扩展点：[路由扩展](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/router/)
+[^2]: 路由规则扩展点：[路由扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)
 [^3]: 注意：一个服务只能有一条白名单规则，否则两条规则交叉，就都被筛选掉了
 [^4]: 注意：脚本没有沙箱约束，可执行任意代码，存在后门风险
 [^5]: 该特性在 `2.7.0` 以上版本支持

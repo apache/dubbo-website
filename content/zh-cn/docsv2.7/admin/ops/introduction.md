@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/ops/introduction/
+description: Dubbo 管理控制台介绍
+linkTitle: Dubbo 管理控制台介绍
+title: Dubbo 管理控制台介绍
 type: docs
-title: "Dubbo 管理控制台介绍"
-linkTitle: "Dubbo 管理控制台介绍"
 weight: 2
 ---
+
+
 
 目前的管理控制台已经发布 0.1 版本，结构上采取了前后端分离的方式，前端使用 Vue 和 Vuetify 分别作为 Javascript 框架和UI框架，后端采用 Spring Boot 框架。既可以按照标准的 Maven 方式进行打包，部署，也可以采用前后端分离的部署方式，方便开发，功能上，目前具备了服务查询，服务治理(包括 Dubbo 2.7 中新增的治理规则)以及服务测试三部分内容。
 
@@ -82,4 +87,4 @@ dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 https://github.com/apache/dubbo-admin
 ```
 
-[^1]: 当前版本中未实现登录功能，会在后续版本加上 
+[^1]: 当前版本中未实现登录功能，会在后续版本加上

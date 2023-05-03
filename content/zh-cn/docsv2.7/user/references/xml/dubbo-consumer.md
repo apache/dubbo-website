@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/xml/dubbo-consumer/
+description: dubbo:consumer 配置
+linkTitle: dubbo:consumer
+title: dubbo:consumer
 type: docs
-title: "dubbo:consumer"
-linkTitle: "dubbo:consumer"
-weight: 1 
-description: "dubbo:consumer 配置"
+weight: 1
 ---
+
+
 
 服务消费者缺省值配置。配置类： `org.apache.dubbo.config.ConsumerConfig` 。同时该标签为 `<dubbo:reference>` 标签的缺省值设置。
 

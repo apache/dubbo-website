@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "限流降级"
-linkTitle: "限流降级"
-weight: 80
+aliases:
+    - /zh/overview/what/ecosystem/rate-limit/
 description: ""
+linkTitle: 限流降级
+title: 限流降级
+type: docs
+weight: 80
 ---

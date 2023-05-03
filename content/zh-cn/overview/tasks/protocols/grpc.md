@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "使用 Dubbo 开发 gRPC 服务"
-linkTitle: "开发 gRPC 服务"
+aliases:
+    - /zh/overview/tasks/protocols/grpc/
 description: ""
-weight: 10
+linkTitle: 开发 gRPC 服务
+title: 使用 Dubbo 开发 gRPC 服务
+type: docs
+weight: 1
 ---

@@ -1,15 +1,19 @@
 ---
-type: docs
-title: "部署服务"
-linkTitle: "部署服务"
-description: "部署 Dubbo 应用"
-weight: 10
-no_list: true
+aliases:
+    - /zh/overview/tasks/deploy/
+description: 部署 Dubbo 应用
 feature:
-  title: 灵活部署模式
-  description: >
-    一键拉起服务治理体系，屏蔽底层跨平台的微服务基础设施复杂度，支持虚拟机、Docker、Kubernetes、服务网格等多种部署模式。
+    description: |
+        一键拉起服务治理体系，屏蔽底层跨平台的微服务基础设施复杂度，支持虚拟机、Docker、Kubernetes、服务网格等多种部署模式。
+    title: 灵活部署模式
+linkTitle: 部署服务
+no_list: true
+title: 部署服务
+type: docs
+weight: 2
 ---
+
+
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

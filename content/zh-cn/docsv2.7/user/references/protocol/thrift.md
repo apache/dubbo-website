@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/references/protocol/thrift/
+description: thrift:// 协议参考手册
+linkTitle: thrift://
+title: thrift 协议
 type: docs
-title: "thrift 协议"
-linkTitle: "thrift://"
 weight: 4
-description: "thrift:// 协议参考手册"
 ---
+
+
 
 
 当前 dubbo 支持的 thrift 协议是对 thrift 原生协议 [^1] 的扩展，在原生协议的基础上添加了一些额外的头信息，比如 service name，magic number 等。

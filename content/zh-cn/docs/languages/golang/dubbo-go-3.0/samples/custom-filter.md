@@ -1,12 +1,16 @@
 ---
-type: docs
-title: Dubbo-go 3.0 自定义filter
-keywords: Dubbo-go 3.0 自定义filter
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/samples/custom-filter/
 description: Dubbo-go 3.0 自定义filter
+keywords: Dubbo-go 3.0 自定义filter
 linkTitle: Filter
+title: Dubbo-go 3.0 自定义filter
+type: docs
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/governance/features/custom-filter/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/custom-filter/)。
 {{% /pageinfo %}}
 
 # Dubbo-go 3.0 自定义Filter组件
@@ -32,7 +36,7 @@ Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，�
 
 ## 2. 框架预定义 Filter
 
-框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于[filter](https://github.com/apache/dubbo-go/tree/3.0/filter)
+框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于[filter](https://github.com/apache/dubbo-go/tree/release-3.0/filter)
 
 - accesslog
 - active
@@ -116,7 +120,3 @@ func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result,
 }
 
 ```
-
-
-
-

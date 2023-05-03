@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/dev/impls/telnet-handler/
+description: Telnet 命令扩展
+linkTitle: Telnet 命令扩展
+title: Telnet 命令扩展
 type: docs
-title: "Telnet 命令扩展"
-linkTitle: "Telnet 命令扩展"
 weight: 20
 ---
+
+
 
 ## 扩展说明
 

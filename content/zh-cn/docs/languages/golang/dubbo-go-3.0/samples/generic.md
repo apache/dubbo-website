@@ -1,12 +1,16 @@
 ---
-type: docs
-title: Dubbo-go 泛化调用
+aliases:
+    - /zh/docs/languages/golang/dubbo-go-3.0/samples/generic/
+description: Dubbo-go 泛化调用
 keywords: Dubbo-go 泛化调用
 linkTitle: 泛化调用
-description: Dubbo-go 泛化调用
+title: Dubbo-go 泛化调用
+type: docs
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/generic/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/golang-sdk/tutorial/develop/features/generic/)。
 {{% /pageinfo %}}
 
 # Dubbo-go 泛化调用 
@@ -105,7 +109,3 @@ GenericService 的 Invoke 方法包括三个参数：context.Context, []string, 
 ```
 INFO    cmd/client.go:89        GetUser1(userId string) res: map[age:48 class:org.apache.dubbo.User id:A003 name:Joe sex:MAN time:2021-10-04 14:03:03.37 +0800 CST]
 ```
-
-
-
-

@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/advanced/hostname-binding/
+description: 在 Dubbo 中绑定主机名
+linkTitle: 主机绑定
+title: 主机绑定
 type: docs
-title: "主机绑定"
-linkTitle: "主机绑定"
 weight: 37
-description: "在 Dubbo 中绑定主机名"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/set-host/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/set-host/)。
 {{% /pageinfo %}}
 
 ## 查找顺序

@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/contact/committer/apache-dubbo-page_dev/
+description: 官方 Dubbo 主页的维护
+linkTitle: 官方主页
+title: 官方 Dubbo 主页的维护
 type: docs
-title: "官方 Dubbo 主页的维护"
-linkTitle: "官方主页"
 weight: 5
 ---
+
+
 
 
 Apache 有一个官方的网站，用来维护所有的孵化项目的信息。每一个孵化项目在这个网站下都有一个信息页。

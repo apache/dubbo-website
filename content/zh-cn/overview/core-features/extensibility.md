@@ -1,14 +1,18 @@
 ---
-type: docs
-title: "扩展适配"
-linkTitle: "扩展适配"
-weight: 50
-description: ""
+aliases:
+    - /zh/overview/core-features/extensibility/
+description: 扩展适配
 feature:
-  title: 可扩展性
-  description: >
-    一切皆可扩展，通过扩展 (Filter、Router、Service Discovery、Configuration 等) 自定义调用、管控行为，适配开源微服务生态。
+    description: |
+        一切皆可扩展，通过扩展 (Filter、Router、Service Discovery、Configuration 等) 自定义调用、管控行为，适配开源微服务生态。
+    title: 可扩展性
+linkTitle: 扩展适配
+title: 扩展适配
+type: docs
+weight: 6
 ---
+
+
 
 Dubbo 从设计上是高度可扩展的，通过这些扩展点你可以做到：
 * 拦截流量并控制流量行为
@@ -107,7 +111,7 @@ Dubbo 官方提供了加权随机、加权轮询、一致性哈希、最小活�
 Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis、Apollo 等配置中心实现。
 
 ### Metadata Center
-与配置中心相反，从用户视角来看元数据中心是只读的，元数据中心唯一的写入放是 Dubbo 进程实例，Dubbo 实例会在启动之后将一些内部状态（如服务列表、服务配置、服务定义格式等）上报到元数据中心，供一些治理能力作为数据来源，如服务测试、文档管理、服务状态展示等。
+与配置中心相反，从用户视角来看元数据中心是只读的，元数据中心唯一的写入方是 Dubbo 进程实例，Dubbo 实例会在启动之后将一些内部状态（如服务列表、服务配置、服务定义格式等）上报到元数据中心，供一些治理能力作为数据来源，如服务测试、文档管理、服务状态展示等。
 
 Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis 等元数据中心实现。
 
@@ -118,6 +122,3 @@ Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis 等元数据中心实现。
 * [Go 扩展点手册](/)
 * [Rust 扩展点手册](/)
 * [Node.js 扩展点手册](/)
-
-
-

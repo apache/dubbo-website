@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "序列化"
-linkTitle: "序列化"
-weight: 20
+aliases:
+    - /zh/overview/what/ecosystem/serialization/
 description: ""
+linkTitle: 序列化
+title: 序列化
+type: docs
+weight: 20
 ---

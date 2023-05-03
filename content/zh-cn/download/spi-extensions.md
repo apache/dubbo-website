@@ -1,8 +1,13 @@
 ---
+aliases:
+    - /zh/download/spi-extensions/
+description: SPI Extensions
+title: SPI Extensions
 type: docs
-title: "SPI Extensions"
 weight: 60
 ---
+
+
 
 ## 验证
 

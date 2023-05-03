@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Grafana"
-linkTitle: "Grafana"
-weight: 20
+aliases:
+    - /zh/overview/what/ecosystem/monitoring/grafana/
 description: ""
+linkTitle: Grafana
+title: Grafana
+type: docs
+weight: 20
 ---

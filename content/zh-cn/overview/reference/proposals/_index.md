@@ -1,7 +1,9 @@
 ---
-type: docs
-title: "Proposals"
-linkTitle: "Proposals"
+aliases:
+    - /zh/overview/reference/proposals/
 description: ""
-weight: 10
+linkTitle: 提案
+title: 提案
+type: docs
+weight: 4
 ---

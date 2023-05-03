@@ -1,14 +1,18 @@
 ---
-type: docs
-title: "认证鉴权"
-linkTitle: "认证鉴权"
-weight: 70
-description: ""
+aliases:
+    - /zh/overview/core-features/security/
+description: 认证鉴权
 feature:
-  title: 认证鉴权
-  description: >
-    支持基于 TLS 的传输链路认证与加密通信以及基于请求身份的权限校验，帮助构建零信任分布式微服务体系。
+    description: |
+        支持基于 TLS 的传输链路认证与加密通信以及基于请求身份的权限校验，帮助构建零信任分布式微服务体系。
+    title: 认证鉴权
+linkTitle: 认证鉴权
+title: 认证鉴权
+type: docs
+weight: 8
 ---
+
+
 
 Dubbo 提供了构建安全微服务通信体系 (零信任体系) 的完善机制，这包括：
 * 避免通信过程中的中间人攻击，Dubbo 提供了身份认证 (Authentication) 和基于 TLS 的通信链路加密能力

@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/thread-model/
+description: 配置 Dubbo 中的线程模型
+linkTitle: 线程模型
+title: 线程模型
 type: docs
-title: "线程模型"
-linkTitle: "线程模型"
 weight: 4
-description: "配置 Dubbo 中的线程模型"
 ---
+
+
 
 ## 背景
 如果事件处理的逻辑能迅速完成，并且不会发起新的 IO 请求，比如只是在内存中记个标识，则直接在 IO 线程上处理更快，因为减少了线程池调度。  

@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "Dubbo"
-linkTitle: "Dubbo"
-weight: 10
+aliases:
+    - /zh/overview/what/ecosystem/protocol/dubbo/
 description: ""
+linkTitle: Dubbo
+title: Dubbo
+type: docs
+weight: 1
 ---
+
+
 
 ## 特性说明
 Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。

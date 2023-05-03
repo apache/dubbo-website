@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/multi-versions/
+description: 在 Dubbo 中为同一个服务配置多个版本
+linkTitle: 多版本
+title: 多版本
 type: docs
-title: "多版本"
-linkTitle: "多版本"
 weight: 12
-description: "在 Dubbo 中为同一个服务配置多个版本"
 ---
+
+
 
 ## 背景
 当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。

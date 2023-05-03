@@ -1,10 +1,14 @@
 ---
-type: docs
-title: "部署 Dubbo 应用到虚拟机环境"
-linkTitle: "部署到虚拟机"
-weight: 1
+aliases:
+    - /zh/overview/tasks/deploy/deploy-on-vm/
 description: ""
+linkTitle: 部署到虚拟机
+title: 部署 Dubbo 应用到虚拟机环境
+type: docs
+weight: 1
 ---
+
+
 
 ## 总体目标
 - 虚拟机环境
@@ -193,5 +197,3 @@ nohup java -jar dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar > /dev/null 
 
 查看服务
 ![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)
-
-

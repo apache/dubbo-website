@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/overview/quickstart/java/spring-xml/
+description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring XML 快速开发微服务应用。
+linkTitle: Dubbo x Spring XML 开发微服务应用
+title: 4 - Dubbo x Spring XML 开发微服务应用
 type: docs
-title: "4 - Dubbo x Spring XML 开发微服务应用"
-linkTitle: "Dubbo x Spring XML 开发微服务应用"
 weight: 4
-description: "本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring XML 快速开发微服务应用。"
 ---
+
+
 
 ## 目标
 
@@ -277,7 +281,7 @@ public class GreetingsServiceImpl implements GreetingsService {
     <context:property-placeholder/>
 
     <!-- 定义应用名 -->
-    <dubbo:application name="demo-provider"/>
+    <dubbo:application name="demo-consumer"/>
 
     <!-- 定义注册中心地址 -->
     <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
@@ -384,7 +388,7 @@ Receive result ======> hi, dubbo
 
 ### 1. Dubbo 的 XML 配置介绍
 
-Dubbo 的主要配置入口有`dubbo:application` 、`dubbo:registry` 、 `dubbo:reference`  和 `dubbo:service` 等，更多的细节可以参考 [XML 配置 | Apache Dubbo](/zh-cn/docs3-v2/java-sdk/reference-manual/config/xml/) 一文。
+Dubbo 的主要配置入口有`dubbo:application` 、`dubbo:registry` 、 `dubbo:reference`  和 `dubbo:service` 等，更多的细节可以参考 [XML 配置 | Apache Dubbo](/zh-cn/overview/mannual/java-sdk/reference-manual/config/xml/) 一文。
 
 ## 更多
 

@@ -1,14 +1,18 @@
 ---
-type: docs
-title: "服务发现"
-linkTitle: "服务发现"
-weight: 10
-description: ""
+aliases:
+    - /zh/overview/core-features/service-discovery/
+description: 服务发现
 feature:
-  title: 服务发现
-  description: >
-     Dubbo 提供了高性能、可伸缩的服务发现机制，面向百万集群实例规模设计，默认提供 Nacos、Zookeeper 等注册中心适配并支持自定义扩展。
+    description: |
+        Dubbo 提供了高性能、可伸缩的服务发现机制，面向百万集群实例规模设计，默认提供 Nacos、Zookeeper 等注册中心适配并支持自定义扩展。
+    title: 服务发现
+linkTitle: 服务发现
+title: 服务发现
+type: docs
+weight: 2
 ---
+
+
 
 Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持常用的注册中心如 Nacos、Consul、Zookeeper 等。
 
@@ -32,7 +36,7 @@ Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注
 从注册中心视角来看，它负责以应用名 (dubbo.application.name) 对整个集群的实例地址进行聚合，每个对外提供服务的实例将自身的应用名、实例ip:port 地址信息 (通常还包含少量的实例元数据，如机器所在区域、环境等) 注册到注册中心。
 
 > Dubbo2 版本注册中心以服务粒度聚合实例地址，比应用粒度更细，也就意味着传输的数据量更大，因此在大规模集群下也遇到一些性能问题。
-> 针对 Dubbo2 与 Dubbo3 跨版本数据模型不统一的问题，Dubbo3 给出了[平滑迁移方案](/zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/)，可做到模型变更对用户无感。
+> 针对 Dubbo2 与 Dubbo3 跨版本数据模型不统一的问题，Dubbo3 给出了[平滑迁移方案](/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/)，可做到模型变更对用户无感。
 
 ![service-discovery](/imgs/v3/feature/service-discovery/registry-data.png)
 

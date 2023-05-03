@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/examples/routing-rule/
+description: 通过 Dubbo 中的路由规则做服务治理
+linkTitle: 路由规则
+title: 路由规则
 type: docs
-title: "路由规则"
-linkTitle: "路由规则"
 weight: 33
-description: "通过 Dubbo 中的路由规则做服务治理"
 ---
+
+
 ## 背景
 路由规则在发起一次RPC调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起RPC调用的备选地址。
 
@@ -254,6 +258,5 @@ RpcContext.getContext().setAttachment(CommonConstants.TAG_KEY,"tag1");
 {{% alert title="提示" color="primary" %}}
 `2.6.x` 版本以及更早的版本请使用[老版本路由规则](../routing-rule-deprecated)
 
-自定义路由参考[路由扩展](/zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/router/)
+自定义路由参考[路由扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)
 {{% /alert %}}
-

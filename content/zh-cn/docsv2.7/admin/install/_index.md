@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/install/
+description: Dubbo 相关的安装手册
+linkTitle: 安装手册
+title: 安装手册
 type: docs
-title: "安装手册"
-linkTitle: "安装手册"
 weight: 2
-description: "Dubbo 相关的安装手册"
 ---
+
+
 
 你可以只运行 Demo Provider 和 Demo Consumer，它们缺省配置为通过 Multicast  [^1] 注册中心广播互相发现，建议在不同机器上运行，如果在同一机器上，需设置 `unicast=false`：即： `multicast://224.5.6.7:1234?unicast=false`，否则发给消费者的单播消息可能被提供者抢占，两个消费者在同一台机器也一样，只有 multicast 注册中心有此问题。
 

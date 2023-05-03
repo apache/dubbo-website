@@ -1,10 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/user/preface/architecture/
+description: Dubbo 架构
+linkTitle: 架构
+title: 架构
 type: docs
-title: "架构"
-linkTitle: "架构"
 weight: 3
-description: "Dubbo 架构"
 ---
+
+
 
 ![dubbo-architucture](/imgs/user/dubbo-architecture.jpg)
 

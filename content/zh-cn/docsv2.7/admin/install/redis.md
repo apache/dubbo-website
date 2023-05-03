@@ -1,9 +1,14 @@
 ---
+aliases:
+    - /zh/docsv2.7/admin/install/redis/
+description: Redis 注册中心安装
+linkTitle: Redis 注册中心安装
+title: Redis 注册中心安装
 type: docs
-title: "Redis 注册中心安装"
-linkTitle: "Redis 注册中心安装"
 weight: 4
 ---
+
+
 
 Redis [^1] 使用方式参见: [Redis 注册中心参考手册](/zh-cn/docsv2.7/user/references/registry/redis/)。
 

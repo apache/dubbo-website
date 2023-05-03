@@ -1,12 +1,16 @@
 ---
+aliases:
+    - /zh/docs/concepts/registry-configcenter-metadata/
+description: 了解 Dubbo 的三大中心化组件，它们各自的职责、工作方式。
+linkTitle: 部署架构
+title: 部署架构（注册中心 配置中心 元数据中心）
 type: docs
-title: "部署架构（注册中心 配置中心 元数据中心）"
-linkTitle: "部署架构"
 weight: 5
-description: "了解 Dubbo 的三大中心化组件，它们各自的职责、工作方式。"
 ---
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/docs3-v2/java-sdk/reference-manual/registry/)。
+
+
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/)。
 {{% /pageinfo %}}
 
 作为一个微服务框架，Dubbo sdk 跟随着微服务组件被部署在分布式集群各个位置，为了在分布式环境下实现各个微服务组件间的协作，
