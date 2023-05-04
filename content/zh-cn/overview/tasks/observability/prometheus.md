@@ -14,7 +14,7 @@ weight: 4
 本文演示如何在 Kubernetes 环境下部署 Prometheus 并实现对 Dubbo 集群的监控数据统计与查询，你需要完成或具备以下内容：
 
 * 本地或远端 Kubernetes 集群
-* 确保 [Prometheus 正确安装](../../../reference/integrations/prometheus#kubernetes)
+* 确保 [Prometheus 正确安装](../../../reference/integrations/prometheus/#安装)
 * 部署 [示例应用](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot)
 * 使用 Prometheus dashboard 查询数据指标
 
