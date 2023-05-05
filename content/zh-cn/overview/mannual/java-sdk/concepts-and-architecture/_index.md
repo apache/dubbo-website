@@ -6,5 +6,5 @@ description: 概念和架构
 linkTitle: 概念和架构
 title: 概念和架构
 type: docs
-weight: 3
+weight: 2
 ---
