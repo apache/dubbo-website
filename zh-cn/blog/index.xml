@@ -1664,7 +1664,221 @@ dubbo2.7.3默认开启qos功能，导致一些混部在物理机的dubbo服务�
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
 &lt;li>ApplicationModel 由 FrameWorkModel 创建，ModuleModel 由 ApplicationModel 创建，由此完成它们之间层级关系的引用。&lt;/li>
 &lt;li>ServiceConfig 和 ReferenceConfig 需要设置其所属的 ScopeModel（实际只能为 ModuleModel ）。然后，还需将它们设置到对应的ModuleModel 中。&lt;/li>
-&lt;/ul></description></item><item><title>Blog: 2022 年度总结与 2023 新年规划</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</link><pubDate>Thu, 23 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</guid><description>
+&lt;/ul></description></item><item><title>Blog: 精进云原生 - Dubbo 3.2 正式发布</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/15/%E7%B2%BE%E8%BF%9B%E4%BA%91%E5%8E%9F%E7%94%9F-dubbo-3.2-%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</link><pubDate>Sat, 15 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/15/%E7%B2%BE%E8%BF%9B%E4%BA%91%E5%8E%9F%E7%94%9F-dubbo-3.2-%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</guid><description>
+&lt;h2 id="背景介绍">背景介绍&lt;/h2>
+&lt;p>Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下的服务治理与通信问题，官方提供了 Java、Golang 等多语言 SDK 实现。使用 Dubbo 开发的微服务原生具备相互之间的远程地址发现与通信能力， 利用 Dubbo 提供的丰富服务治理特性，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。Dubbo 被设计为高度可扩展，用户可以方便的实现流量拦截、选址的各种定制逻辑。&lt;/p>
+&lt;h2 id="rest-协议支持">Rest 协议支持&lt;/h2>
+&lt;h3 id="1-why-rest">1. Why Rest？&lt;/h3>
+&lt;p>随着移动互联网的普及，越来越多的应用程序需要与不同的系统进行集成。而这些系统可能使用不同的通信协议，这就需要应用程序能够灵活地适应各种协议。Rest 协议正是一种非常灵活的协议，它使用 HTTP 进行通信，可以与几乎任何系统进行集成。&lt;/p>
+&lt;p>在过去，RPC框架通常使用二进制协议进行通信，这种协议非常高效，但不够灵活。相比之下，Rest协议使用HTTP进行通信，更方便与其他系统集成，也更容易与现代化的Web和移动应用程序集成。&lt;/p>
+&lt;p>除了灵活性，Rest协议还具有易读性和易用性。使用Rest协议，开发人员可以使用通用的HTTP工具（例如cURL或Postman）测试和调试服务，而不需要特定的工具。此外，由于Rest协议使用标准的HTTP方法（例如GET、POST、PUT和DELETE），因此开发人员可以更容易地理解和使用服务。&lt;/p>
+&lt;h3 id="2-how-to">2. How To？&lt;/h3>
+&lt;p>在之前的 Dubbo 版本中，也提供了 Rest 协议的支持，但存在以下问题：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>仅支持 JAX-RS 注解域，相较于采用度更高的 Spring Web 注解，复杂度更高&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>需要依赖众多外部组件，如 Resteasy、tomcat、jetty 等，才能正常工作，极大地增加了使用成本。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>因此，在 Dubbo 3.2 版本中，我们引入了 Spring Web 注解域的支持以及 Rest 协议的原生支持，无需依赖任何外部组件。&lt;/p>
+&lt;p>最直观的区别是，如果你升级到了 Dubbo 3.2，通过 Spring Web 发布的服务也可以直接通过 Dubbo 来发布。这一切只需要将 @Controller 注解改成 @DubboService 注解即可。&lt;/p>
+&lt;p>此外，对于原来使用 Spring Boot 或者 Spring Cloud 作为服务拆分的用户，也可以基于本功能平滑地迁移到 Dubbo 上来，以极低的成本获得 Dubbo 强大的能力。&lt;/p>
+&lt;h3 id="3-whats-next">3. What&amp;rsquo;s next？&lt;/h3>
+&lt;p>接下来 Dubbo 还将继续完善。除了现有的特性，我们还将加入以下新的特性，以更好地满足需求：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>HTTP/2、HTTP/3 协议的原生支持。这意味着，你可以更加方便地使用 Dubbo 与其他系统进行通信，无需担心协议的兼容性问题。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>参考 Spring Web 注解，Dubbo 原生提供 Web 注解的支持，使得用户无需依赖 Spring Web 也可以获得与使用 Spring Web 相同的体验。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>支持现有服务零改造以 Rest 协议发布。这个特性可以让你更加灵活地管理你的服务，而无需对现有的服务进行任何改动。你可以通过 Rest 协议来发布你的服务，这样你的服务就可以更加方便地被其他系统所使用了。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="可观测体系">可观测体系&lt;/h2>
+&lt;p>在微服务架构下，业务系统由越来越多的服务组成，服务之间互相调用，随之而来的问题是如何快速地定位故障，并及时解决。为了解决这一问题，我们需要更多的工具和技术来确保整个系统的可靠性。其中一个解决方案是使用日志记录和分析，以便可以更好地跟踪应用程序的运行情况，找到潜在的问题并及时解决。另外，使用可视化的监控工具可以帮助我们更好地理解整个系统的状态，从而更好地预测和解决问题。最后，我们还可以使用自动化测试来确保每个服务的质量，以及整个系统的稳定性和可靠性，从而更好地满足客户的需求。&lt;/p>
+&lt;p>一套完整的可观测体系应该包括以下功能：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Metrics 指标监控，用于收集和分析各种指标数据，包括系统的性能、资源消耗情况等等。通过指标监控，用户可以及时了解系统的运行情况，发现异常并做出相应的处理。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Tracing 分布式追踪，用于跟踪系统中各个服务之间的调用链路，帮助用户发现和定位潜在的性能问题、瓶颈等等。通过分布式追踪，用户可以深入了解系统的运作过程，识别出可能存在的问题并进行有效的优化和调整。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Logging 日志管理，用于记录系统中发生的各种事件和操作，包括错误日志、访问日志、事务日志等等。通过日志管理，用户可以了解系统的运行情况、故障信息等等，帮助用户快速定位问题并进行相应的处理。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>综上所述，以上三个功能不仅可以帮助用户快速定位故障，提高系统的可靠性和稳定性，还可以帮助用户深入了解系统的运行情况和性能状况，为用户提供全方位的监控和保障。&lt;/p>
+&lt;p>在 Dubbo 3.2 版本中，我们主要就 Metrics 和 Tracing 两个方面进行了增强。&lt;/p>
+&lt;h3 id="1-metrics">1. Metrics&lt;/h3>
+&lt;p>在 Metrics 方面，我们使用 Micrometer 大幅增加了指标的埋点，包括但不限于 QPS、RT、调用总数、成功数、失败数、失败原因统计等核心服务指标。为了更好地监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，例如线程池数量、服务健康状态等。此外，Dubbo 还支持标准 Prometheus 的 Pull 和 Push 模式，并提供了若干个官方原生的 Grafana 面板，实现面向生产的 Metrics 全天候观测。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/32-release/Untitled.png" alt="img">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/32-release/Untitled%201.png" alt="Untitled">&lt;/p>
+&lt;p>对于所有的用户，只需要升级到 Dubbo 3.2 版本，并添加 dubbo-spring-boot-observability-starter 依赖即可获得 Metrics 能力。在应用启动后，将在 Dubbo QoS 的 metrics 命令下暴露相关的指标，本地可以通过 &lt;a href="http://127.0.0.1:22222/metrics">http://127.0.0.1:22222/metrics&lt;/a> 获取。此外对于使用了 Spring Actuator 的用户，Dubbo 也将默认将这些数据暴露出来。&lt;/p>
+&lt;h3 id="tracing">Tracing&lt;/h3>
+&lt;p>在 Tracing 方面，我们还基于 Micrometer 实现了请求运行时的埋点跟踪。我们通过 Filter 拦截器原生方式来实现这一功能。我们支持将跟踪数据导出到一些主流实现，例如 Zipkin、Skywalking、Jaeger 等。这样就可以实现全链路跟踪数据的分析和可视化展示。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/32-release/Untitled%202.png" alt="Untitled">&lt;/p>
+&lt;h3 id="logging">Logging&lt;/h3>
+&lt;p>此外，对于 Logging 方面，Dubbo 从 3.1 版本开始引入了错误码机制，实现了 WARN、ERROR 级别日志的全覆盖。在异常场景下，支持快速索引官网解决文档。&lt;/p>
+&lt;h2 id="native-image-原生支持">Native Image 原生支持&lt;/h2>
+&lt;p>在Native Image方面，Dubbo从3.2开始将正式基于GraalVM完成对Native Image 的支持，从Dubbo3.0开始，Dubbo已经有一些Native Image支持的探索，但是易用性和支持程度都不太理想，从3.2版本开始，Dubbo将会简化用户接入Native Image的使用方式。主要可以分为三个面：&lt;/p>
+&lt;ol>
+&lt;li>编译插件配置升级：从最初的 native-image-maven-plugin 改为 dubbo-maven-plugin +native-maven-plugin，区分了Graalvm官方提供的native image配置与Dubbo所需的native image配置，简化了用户所需要关心的native image配置&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.graalvm.nativeimage&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>native-image-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>21.0.0.2&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>native-image&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;phase&amp;gt;&lt;/span>package&lt;span style="color:#268bd2">&amp;lt;/phase&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;skip&amp;gt;&lt;/span>false&lt;span style="color:#268bd2">&amp;lt;/skip&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;imageName&amp;gt;&lt;/span>demo-native-provider&lt;span style="color:#268bd2">&amp;lt;/imageName&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;mainClass&amp;gt;&lt;/span>org.apache.dubbo.demo.graalvm.provider.Application&lt;span style="color:#268bd2">&amp;lt;/mainClass&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;buildArgs&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --no-fallback
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.MDC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.LoggerFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.helpers.Loader
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.Logger
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.helpers.LogLog
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.LogManager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.spi.LoggingEvent
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.Log4jLoggerFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.Log4jLoggerAdapter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.eclipse.collections.api.factory.Sets
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.Epoll
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.Native
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.EpollEventLoop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.EpollEventArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.DefaultFileRegion
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventLoop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.Native
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Errors
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.IovArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Limits
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.util.internal.logging.Log4JLogger
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Socket
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.ChannelHandlerMask
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --report-unsupported-elements-at-runtime
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --allow-incomplete-classpath
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --enable-url-protocols=http
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> -H:+ReportExceptionStackTraces
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/buildArgs&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>变为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.graalvm.buildtools&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>native-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.9.20&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;classesDirectory&amp;gt;&lt;/span>${project.build.outputDirectory}&lt;span style="color:#268bd2">&amp;lt;/classesDirectory&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;metadataRepository&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;enabled&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/enabled&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/metadataRepository&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;requiredVersion&amp;gt;&lt;/span>22.3&lt;span style="color:#268bd2">&amp;lt;/requiredVersion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;mainClass&amp;gt;&lt;/span>org.apache.dubbo.demo.graalvm.provider.Application&lt;span style="color:#268bd2">&amp;lt;/mainClass&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${project.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;mainClass&amp;gt;&lt;/span>org.apache.dubbo.demo.graalvm.provider.Application&lt;span style="color:#268bd2">&amp;lt;/mainClass&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;phase&amp;gt;&lt;/span>process-sources&lt;span style="color:#268bd2">&amp;lt;/phase&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>dubbo-process-aot&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>旧版本中需要用户手动生成和补全Dubbo内独有的Adaptive代码，新版本用户将不需要关心这些细节。&lt;/li>
+&lt;li>旧版本中Dubbo框架生成的META-INF.native-image下的配置文件会直接生成在用户的工程目录中，3.2新版本将会被编译到target下，不影响用户的工程结构。除此之外，Dubbo框架也将不再采用手动补全native image的方式，而且采用自动探测和生成所需的配置文件的方式，简化了Dubbo开发者的体验。这也能够降低最后编译后的二进制包的大小和提高编译速度。&lt;/li>
+&lt;/ol>
+&lt;p>除了易用性提升以外，Dubbo将在3.2版本将在native image场景下支持API、注解以及XML配置方式，并支持与SpringBoot3中的native兼容。&lt;/p>
+&lt;h2 id="其他">其他&lt;/h2>
+&lt;h3 id="jdk-17--spring-boot-3-原生支持">JDK 17 &amp;amp; Spring Boot 3 原生支持&lt;/h3>
+&lt;p>JDK 17 是继 JDK 11 之后目前 Java 的最新 LTS 版本，包括许多新功能和改进，例如 Sealed 类、垃圾收集器的改进等等。&lt;/p>
+&lt;p>自从 JDK 16 开始限制 Java 内部类反射以后，Dubbo 的序列化以及动态代理都受到了一定的影响。在 Dubbo 3.2 中，我们通过 Fastjson2 以及 Javassist 的优化从底层解决了兼容性问题。目前 Dubbo 已经可以完美运行在 JDK17 之上，所有单元测试以及大多数集成测试也都在 JDK 17 平台上测试通过。&lt;/p>
+&lt;p>针对即将发布的 JDK 21 LTS，Dubbo 正在紧锣密鼓地进行适配。我们将在 3.3 版本中加入对 JDK 21 和 Dubbo 协程（Project Loom）的支持。&lt;/p>
+&lt;h3 id="rpc-性能大幅提升">RPC 性能大幅提升&lt;/h3>
+&lt;p>在3.2版本中，我们对RPC调用性能做了调优，其中优化内容如下。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>消除了同步锁竞争以及会出现阻塞的代码(&lt;code>triple&lt;/code>)&lt;/p>
+&lt;ol>
+&lt;li>在3.1版本中创建HTTP/2 Stream Channel时采用了同步阻塞用户线程的方式等待Stream Channel创建完成，创建完成后才开始发起远程调用。而在3.2中我们将创建HTTP/2 Stream Channel的行为&lt;code>异步化&lt;/code>并保证创建完毕后才发起请求，以此&lt;code>减少了用户线程不必要的等待&lt;/code>。&lt;/li>
+&lt;li>在3.1版本中用户线程与Netty的I/O线程出现了同步锁竞争，IO线程每次写请求都会检查Socket可用性，而用户线程中也使用了Socket可用性检查的方法，但JDK中Socket可用性检查的实现使用了 &lt;code>synchronized&lt;/code> 来保证并发安全，为了减少这部分的耗时我们将用户线程的检查移除，消除了该部分的耗时。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;p>减少了用同步阻塞调用方式的请求响应延迟(&lt;code>dubbo&lt;/code>、&lt;code>triple&lt;/code>)&lt;/p>
+&lt;p>在3.1版本中SYNC模式下的RPC调用我们使用了阻塞队列的方式等待远程服务写回的响应，当响应写回后会添加到队列中并唤醒被阻塞的用户线程。而在3.2中我们将阻塞队列更换为并发队列，利用其CAS的机制大幅度减少线程进入阻塞的次数，提高CPU利用率并降低了响应处理延迟&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>减少了线程切换的次数(&lt;code>triple&lt;/code>)&lt;/p>
+&lt;p>在3.1版本中SYNC模式下的RPC调用在接收响应时使用了一个消费者线程池进行处理，处理完毕后才唤醒用户线程接收响应。但通过分析SYNC模式下的消费者线程池是不必要的，多了一层消费者线程池处理不仅浪费服务器资源还降低了性能，因此我们在3.2版本中将SYNC模式下消费者线程池移除，交互模型由 &lt;code>NettyEventLoop → ConsumerThread → UserThread&lt;/code>变成了&lt;code>NettyEventLoop → UserThread&lt;/code>，以此减少服务器资源的浪费同时提高了性能&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>优化了I/O性能(&lt;code>dubbo&lt;/code>、&lt;code>triple&lt;/code>)&lt;/p>
+&lt;p>在3.1版本中我们利用了Netty框架实现了网络通讯，但每次往对端写消息时都直接刷写到对端导致系统调用次数极高，降低了通讯性能。为此我们在3.2版本中对该进行了优化，每次发消息时是先将消息提交到一个写队列中，并在合适的时机将多个消息一次性写出，以此提高了I/O利用率，大幅度提高RPC通讯性能。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>支持在用户线程上序列化报文(&lt;code>dubbo&lt;/code>、&lt;code>triple&lt;/code>)&lt;/p>
+&lt;p>在3.1版本中RPC通讯中的报文反序列化均是在单一I/O线程中船行执行的，导致无法利用多核CPU的优势。为此我们在3.2版本中支持了在用户线程上执行反序列化这类较为耗时的任务，将I/O线程的压力均分到多个CPU核心上，以此提高了&lt;code>较大报文&lt;/code>场景下的RPC性能。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>3.2对比3.1的性能提升如下：&lt;/p>
+&lt;p>Triple协议：较小报文场景createUser、existUser、getUser下，提升率约在&lt;code>40-45%&lt;/code>，提升后的性能与gRPC同场景的性能基本持平。较大报文场景listUser下提升了约&lt;code>17%&lt;/code>，相较于同场景下的gRPC还低&lt;code>11%&lt;/code>。&lt;/p>
+&lt;p>Dubbo协议：较小报文场景createUser、getUser下，提升率约&lt;code>180%&lt;/code>。极小报文existUser(仅一个boolean值)下提升率约&lt;code>24%&lt;/code>，而较大报文listUser提升率最高，达到了&lt;code>1000%&lt;/code>！&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/32-release/Untitled%203.png" alt="Untitled">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/32-release/Untitled%204.png" alt="Untitled">&lt;/p>
+&lt;h2 id="如何升级到-dubbo-32">如何升级到 Dubbo 3.2&lt;/h2>
+&lt;h3 id="pom-升级">Pom 升级&lt;/h3>
+&lt;p>最新的 Dubbo Maven 坐标为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="兼容性">兼容性&lt;/h3>
+&lt;p>对于绝大多数的用户，升级到 Dubbo 3.2.0 是完全平滑的，仅需要修改依赖包版本即可。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>序列化校验逻辑的增强（&lt;strong>重要&lt;/strong>）&lt;/p>
+&lt;p>如前文所述，在 Dubbo 3.2.0 版本中，Dubbo 将默认开启序列化白名单的强校验，以提升 Dubbo 的安全性，避免远程命令执行的问题。目前的机制通过包名递归机制自动信任了部分类，但对于一些使用了泛型等可能存在扫描不全的用户，我们建议您先升级到 Dubbo 3.1.9 版本或添加 &lt;code>-Ddubbo.application.serialize-check-status=WARN&lt;/code> 配置。观察一段时间后（通过日志、QoS 命令），如果没有触发安全告警，则可以配置强校验模式。&lt;/p>
+&lt;p>关于自定义白名单的配置，可以参考官网的 &lt;code>文档 / SDK 手册 / Java SDK / 高级特性和用法 / 提升安全性 / 类检查机制&lt;/code> 一文进行配置。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>默认序列化的修改&lt;/p>
+&lt;p>Dubbo 3.2.0 版本开始默认序列化方式从 &lt;code>hessian2&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>，对于升级到 3.2.0 的应用，Dubbo 会自动尝试采用 &lt;code>fastjson2&lt;/code> 进行序列化。请注意，无论是客户端还是服务端，只要有一端还没有升级到 3.2.0，都将降级为 &lt;code>hessian2&lt;/code> 序列化，保证兼容性。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>默认关闭推空保护&lt;/p>
+&lt;p>推空保护的目的是在注册中心出现故障并且主动推送空地址的时候，Dubbo 保留最后一批 provider 信息，以保证服务可用。但是，在大多数情况下，即使注册中心出现故障，也不会推送空地址，只有在一些特殊情况下才会出现。如果开启推空保护，则会对 Dubbo 的 Fallback 逻辑、心跳逻辑等造成较大的影响，给开发人员使用 Dubbo 带来困扰。&lt;/p>
+&lt;p>如果在生产环境中需要开启推空保护以实现高可用性，可以将 &lt;code>dubbo.application.enable-empty-protection&lt;/code> 配置为 &lt;code>true&lt;/code>。但是请注意，已知开启推空保护会导致服务端应用从仅支持接口级服务发现的 &lt;code>2.6.x&lt;/code>、&lt;code>2.7.x&lt;/code> 版本升级到 &lt;code>3.x&lt;/code> 之后回滚到原来的版本时出现异常，极端情况下可能会导致服务调用失败。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>Dubbo 3.2 是一个非常重要的版本，它带来了众多新功能和改进，使得 Dubbo 更加强大和易用。我们非常感谢社区的支持和贡献，希望大家可以尽快体验 Dubbo 3.2，享受其中带来的便利和优势。&lt;/p></description></item><item><title>Blog: 2022 年度总结与 2023 新年规划</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</link><pubDate>Thu, 23 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</guid><description>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/roadmap/2023-roadmap.jpg" alt="dubbo-introduction">&lt;/p>
 &lt;h2 id="2022-年度总结">2022 年度总结&lt;/h2>
 &lt;h3 id="1-dubbo-开源-12-周年">1 Dubbo 开源 12 周年&lt;/h3>
@@ -10346,297 +10560,4 @@ dubbo:config-center 配置&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>原文： &lt;a href="https://blog.elastic.link/2022/07/10/dubbo/7-dubbo-de-spi-kuo-zhan-ji-zhi-zhi-zi-dong-ji-huo-kuo-zhan-activate-yuan-ma-jie-xi/">《Dubbo的SPI扩展机制之自动激活扩展Activate源码解析》&lt;/a>&lt;/p></description></item><item><title>Blog: 06-Dubbo的SPI扩展机制之普通扩展对象的创建与Wrapper机制的源码解析</title><link>https://dubbo.apache.org/zh-cn/blog/2022/08/06/06-dubbo%E7%9A%84spi%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%99%AE%E9%80%9A%E6%89%A9%E5%B1%95%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8Ewrapper%E6%9C%BA%E5%88%B6%E7%9A%84%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</link><pubDate>Sat, 06 Aug 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/08/06/06-dubbo%E7%9A%84spi%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E4%B9%8B%E6%99%AE%E9%80%9A%E6%89%A9%E5%B1%95%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8Ewrapper%E6%9C%BA%E5%88%B6%E7%9A%84%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</guid><description>
-&lt;h1 id="6-dubbo的spi扩展机制之普通扩展对象的创建与wrapper机制的源码解析">6 Dubbo的SPI扩展机制之普通扩展对象的创建与Wrapper机制的源码解析&lt;/h1>
-&lt;h2 id="61-普通扩展对象的加载与创建">6.1 普通扩展对象的加载与创建&lt;/h2>
-&lt;p>这里我们要分析的是ExtensionLoader类型的getExtension(String name)方法, 有了前面自适应扩展的铺垫,这里就更容易来看了getExtension是根据扩展名字获取具体扩展的通用方法,我们来根据某个类型来获取扩展的时候就是走的这里,比如在这个博客开头的介绍:&lt;/p>
-&lt;ul>
-&lt;li>ApplicationModel中获取配置管理器对象&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> configManager &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">(&lt;/span>ConfigManager&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">.&lt;/span>getExtensionLoader&lt;span style="color:#719e07">(&lt;/span>ApplicationExt&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">.&lt;/span>getExtension&lt;span style="color:#719e07">(&lt;/span>ConfigManager&lt;span style="color:#719e07">.&lt;/span>NAME&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="611-getextension方法源码">6.1.1 getExtension方法源码&lt;/h3>
-&lt;p>先来看下getExtension方法的源码,根据扩展名字查询扩展对象&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">public&lt;/span> T &lt;span style="color:#268bd2">getExtension&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//这里并不能看到什么,只多传了个参数wrap为true调用另外一个重载的方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> T extension &lt;span style="color:#719e07">=&lt;/span> getExtension(name, &lt;span style="color:#b58900">true&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (extension &lt;span style="color:#719e07">==&lt;/span> null) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException(&lt;span style="color:#2aa198">&amp;#34;Not find extension: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> extension;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> T &lt;span style="color:#268bd2">getExtension&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> wrap&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//检查扩展加载器是否已被销毁
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> checkDestroyed&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>StringUtils&lt;span style="color:#719e07">.&lt;/span>isEmpty&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Extension name == null&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//扩展名字为true则加载默认扩展
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> getDefaultExtension&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//非wrap类型则将缓存的扩展名字key加上_origin后缀
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//wrap是aop机制 俗称切面,这个origin在aop里面可以称为切点,下面的wrap扩展可以称为增强通知的类型,普通扩展和wrap扩展的扩展名字是一样的
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> String cacheKey &lt;span style="color:#719e07">=&lt;/span> name&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>wrap&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cacheKey &lt;span style="color:#719e07">+=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;_origin&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//从cachedInstances缓存中查询
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Holder&lt;span style="color:#719e07">&amp;lt;&lt;/span>Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> holder &lt;span style="color:#719e07">=&lt;/span> getOrCreateHolder&lt;span style="color:#719e07">(&lt;/span>cacheKey&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object instance &lt;span style="color:#719e07">=&lt;/span> holder&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//缓存中不存在则创建扩展对象 双重校验锁
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>instance &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#719e07">(&lt;/span>holder&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//双重校验锁的方式
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> instance &lt;span style="color:#719e07">=&lt;/span> holder&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>instance &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建扩展对象
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> instance &lt;span style="color:#719e07">=&lt;/span> createExtension&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">,&lt;/span> wrap&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> holder&lt;span style="color:#719e07">.&lt;/span>set&lt;span style="color:#719e07">(&lt;/span>instance&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">(&lt;/span>T&lt;span style="color:#719e07">)&lt;/span> instance&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们先来看一下默认扩展的加载代码:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> T &lt;span style="color:#268bd2">getDefaultExtension&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//加载扩展类型对应的所有扩展SPI实现类型,在加载所有扩展实现类型的时候会缓存这个扩展的默认实现类型,将对象缓存在cachedDefaultName中
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> getExtensionClasses&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>StringUtils&lt;span style="color:#719e07">.&lt;/span>isBlank&lt;span style="color:#719e07">(&lt;/span>cachedDefaultName&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">||&lt;/span> &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>cachedDefaultName&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//再回到加载扩展的方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> getExtension&lt;span style="color:#719e07">(&lt;/span>cachedDefaultName&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建扩展对象方法这个和自适应扩展的创建扩展类似
-createExtension:
-具体过程如下:&lt;/p>
-&lt;ul>
-&lt;li>加载扩展类型:getExtensionClasses()&lt;/li>
-&lt;li>创建扩展对象:createExtensionInstance(clazz)&lt;/li>
-&lt;li>注入自适应扩展: injectExtension(instance);&lt;/li>
-&lt;li>wrap处理&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">private&lt;/span> T &lt;span style="color:#268bd2">createExtension&lt;/span>(String name, boolean wrap) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//扩展的创建的第一步扫描所有jar中的扩展实现,这里扫描完之后获取对应扩展名字的扩展实现类型的Class对象
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> clazz &lt;span style="color:#719e07">=&lt;/span> getExtensionClasses().get(name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//出现异常了 转换下异常信息 再抛出
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (clazz &lt;span style="color:#719e07">==&lt;/span> null &lt;span style="color:#719e07">||&lt;/span> unacceptableExceptions.contains(name)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> findException(name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//当前扩展对象是否已经创建过了则直接从缓存中获取
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> T instance &lt;span style="color:#719e07">=&lt;/span> (T) extensionInstances.get(clazz);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (instance &lt;span style="color:#719e07">==&lt;/span> null) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//第一次获取缓存中肯定没有则创建扩展对象然后缓存起来
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//createExtensionInstance 这个是与自适应扩展对象创建对象的不同之处
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> extensionInstances.putIfAbsent(clazz, createExtensionInstance(clazz));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> instance &lt;span style="color:#719e07">=&lt;/span> (T) extensionInstances.get(clazz);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> instance &lt;span style="color:#719e07">=&lt;/span> postProcessBeforeInitialization(instance, name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//注入扩展自适应方法,这个方法前面讲自适应扩展时候说了,注入自适应扩展方法的自适应扩展对象
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> injectExtension(instance);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> instance &lt;span style="color:#719e07">=&lt;/span> postProcessAfterInitialization(instance, name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//是否开启了wrap
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//Dubbo通过Wrapper实现AOP的方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (wrap) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//这个可以参考下Dubbo扩展的加载
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&amp;gt;&lt;/span> wrapperClassesList &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//wrap类型排序 这个wrap类型是如何来的呢,在前面扫描扩展类型的时候如果当前扩展类型不是Adaptive注解修饰的,并且当前类型type有个构造器参数是type自身的也是前面加载扩展类型时候说的装饰器模式 可以参考DubboProtocol的构造器
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (cachedWrapperClasses &lt;span style="color:#719e07">!=&lt;/span> null) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> wrapperClassesList.addAll(cachedWrapperClasses);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//根据Wrapper注解的order值来进行排序值越小越在列表的前面
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> wrapperClassesList.sort(WrapperComparator.COMPARATOR);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//反转之后值越大就会在列表的前面
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Collections.reverse(wrapperClassesList);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//从缓存中查到了wrapper扩展则遍历这些wrapp扩展进行筛选
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (CollectionUtils.isNotEmpty(wrapperClassesList)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> wrapperClass : wrapperClassesList) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Wrapper wrapper &lt;span style="color:#719e07">=&lt;/span> wrapperClass.getAnnotation(Wrapper.&lt;span style="color:#719e07">class&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//需要包装的扩展名。当此数组为空时，默认值为匹配
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//看下当前扩展是否匹配这个wrap,如何判断呢?
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//wrapper注解不存在或者matches匹配,或者mismatches不包含当前扩展
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//如果匹配到了当前扩展对象是需要进行wrapp的就为当前扩展创建当前wrapper扩展对象进行包装
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> boolean match &lt;span style="color:#719e07">=&lt;/span> (wrapper &lt;span style="color:#719e07">==&lt;/span> null) &lt;span style="color:#719e07">||&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ((ArrayUtils.isEmpty(wrapper.matches()) &lt;span style="color:#719e07">||&lt;/span> ArrayUtils.contains(wrapper.matches(), name)) &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">!&lt;/span>ArrayUtils.contains(wrapper.mismatches(), name));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//这是扩展类型是匹配wrapp的则开始注入
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (match) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//匹配到了就创建所有的wrapper类型的对象同时构造器参数设置为当前类型
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> instance &lt;span style="color:#719e07">=&lt;/span> injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> instance &lt;span style="color:#719e07">=&lt;/span> postProcessAfterInitialization(instance, name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Warning: After an instance of Lifecycle is wrapped by cachedWrapperClasses, it may not still be Lifecycle instance, this application may not invoke the lifecycle.initialize hook.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//初始化扩展,如果当前扩展是Lifecycle类型则调用初始化方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> initExtension(instance);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> instance;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Throwable t) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> &lt;span style="color:#268bd2">IllegalStateException&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Extension instance (name: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, class: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;)&lt;/span> couldn&amp;#39;t be instantiated: &lt;span style="color:#2aa198">&amp;#34; + t.getMessage(), t)&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="612-创建扩展对象">6.1.2 创建扩展对象&lt;/h3>
-&lt;p>前面加载扩展类型在自适应扩展的时候已经说过了这里就不重复了,这里我们来看下
-扩展对象的创建过程:createExtensionInstance(clazz)&lt;/p>
-&lt;p>前面看自适应扩展对象创建的时候自适应扩展对象仅仅是使用反射newInstance了一个扩展对象,而普通的扩展类型创建对象的过程就相对复杂一点,接下来我们来看下:&lt;/p>
-&lt;p>ExtensionLoader的createExtensionInstance方法&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">private&lt;/span> Object &lt;span style="color:#268bd2">createExtensionInstance&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> type) &lt;span style="color:#719e07">throws&lt;/span> ReflectiveOperationException {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//在ExtensionLoader构造器中,有个initInstantiationStrategy()方法中new了一个初始化策略InstantiationStrategy类型对象
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> instantiationStrategy.instantiate(type);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>InstantiationStrategy的实例化对象方法instantiate&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> T instantiate(Class&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> type) &lt;span style="color:#719e07">throws&lt;/span> ReflectiveOperationException {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// should not use default constructor directly, maybe also has another constructor matched scope model arguments
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. try to get default constructor
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Constructor&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> defaultConstructor &lt;span style="color:#719e07">=&lt;/span> null;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//反射获取对应类型的无参构造器
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> defaultConstructor &lt;span style="color:#719e07">=&lt;/span> type.getConstructor();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (NoSuchMethodException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore no default constructor
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 2. use matched constructor if found
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Constructor&lt;span style="color:#719e07">&amp;gt;&lt;/span> matchedConstructors &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取所有构造器
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Constructor&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span>[] declaredConstructors &lt;span style="color:#719e07">=&lt;/span> type.getConstructors();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//遍历构造器列表,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">for&lt;/span> (Constructor&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> constructor : declaredConstructors) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//如果存在构造器则构造器参数类型是否为ScopeModel类型,如果为ScopeModel则为匹配的构造器 说明我们扩展类型在这个版本如果想要让这个构造器生效必须参数类型为ScopeModel
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (isMatched(constructor)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> matchedConstructors.add(constructor);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// remove default constructor from matchedConstructors
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (defaultConstructor &lt;span style="color:#719e07">!=&lt;/span> null) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> matchedConstructors.remove(defaultConstructor);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// match order:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. the only matched constructor with parameters
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 2. default constructor if absent
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Constructor targetConstructor;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//匹配的参数ScopeModel的构造器太多了就抛出异常
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (matchedConstructors.size() &lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> &lt;span style="color:#268bd2">IllegalArgumentException&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Expect only one but found &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> matchedConstructors.size() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; matched constructors for type: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> type.getName() &lt;span style="color:#719e07">+&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;, matched constructors: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> matchedConstructors);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#268bd2">if&lt;/span> (matchedConstructors.size() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//一个参数一般为一个参数类型ScopeModel的构造器
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> targetConstructor &lt;span style="color:#719e07">=&lt;/span> matchedConstructors.get(&lt;span style="color:#2aa198">0&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#268bd2">if&lt;/span> (defaultConstructor &lt;span style="color:#719e07">!=&lt;/span> null) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//如果没有自定义构造器则使用空参数构造器
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> targetConstructor &lt;span style="color:#719e07">=&lt;/span> defaultConstructor;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//一个构造器也没匹配上也要报错
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> &lt;span style="color:#268bd2">IllegalArgumentException&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;None matched constructor was found for type: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> type.getName());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// create instance with arguments
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//反射获取构造器参数的参数类型列表
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Class[] parameterTypes &lt;span style="color:#719e07">=&lt;/span> targetConstructor.getParameterTypes();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//如果存在参数则为参数设置值
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Object[] args &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Object[parameterTypes.length];
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> parameterTypes.length; i&lt;span style="color:#719e07">++&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//借助scopeModelAccessor工具获取参数类型,这个参数类型为当前的域模型对象
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> args[i] &lt;span style="color:#719e07">=&lt;/span> getArgumentValueForType(parameterTypes[i]);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建扩展对象
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> (T) targetConstructor.newInstance(args);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="62-wrap机制">6.2 wrap机制&lt;/h2>
-&lt;h3 id="621-wrapper机制说明">6.2.1 Wrapper机制说明&lt;/h3>
-&lt;p>Dubbo通过Wrapper实现AOP的方法&lt;/p>
-&lt;p>Wrapper机制，即扩展点自动包装。Wrapper 类同样实现了扩展点接口，但是 Wrapper 不是扩展点的真正实现。它的用途主要是用于从 ExtensionLoader 返回扩展点时，包装在真正的扩展点实现外。即从 ExtensionLoader 中返回的实际上是 Wrapper 类的实例，Wrapper 持有了实际的扩展点实现类。
-扩展点的 Wrapper 类可以有多个，也可以根据需要新增。
-通过 Wrapper 类可以把所有扩展点公共逻辑移至 Wrapper 中。新加的 Wrapper 在所有的扩展点上添加了逻辑，有些类似 AOP，即 Wrapper 代理了扩展点。&lt;/p>
-&lt;p>Wrapper的规范
-Wrapper 机制不是通过注解实现的，而是通过一套 Wrapper 规范实现的。
-Wrapper 类在定义时需要遵循如下规范。&lt;/p>
-&lt;ul>
-&lt;li>该类要实现 SPI 接口&lt;/li>
-&lt;li>该类中要有 SPI 接口的引用&lt;/li>
-&lt;li>该类中必须含有一个含参的构造方法且参数只能有一个类型为SPI接口&lt;/li>
-&lt;li>在接口实现方法中要调用 SPI 接口引用对象的相应方法&lt;/li>
-&lt;li>该类名称以 Wrapper 结尾&lt;/li>
-&lt;/ul>
-&lt;p>比如如下几个扩展类型&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">class&lt;/span> &lt;span style="color:#268bd2">org&lt;/span>.apache.dubbo.rpc.protocol.ProtocolListenerWrapper
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">class&lt;/span> &lt;span style="color:#268bd2">org&lt;/span>.apache.dubbo.qos.protocol.QosProtocolWrapper
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">class&lt;/span> &lt;span style="color:#268bd2">org&lt;/span>.apache.dubbo.rpc.protocol.ProtocolListenerWrapper
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">class&lt;/span> &lt;span style="color:#268bd2">org&lt;/span>.apache.dubbo.qos.protocol.QosProtocolWrapper
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>回顾下Wrapper扩展类型的扫描于对象的创建&lt;/p>
-&lt;h3 id="622-wrapper类型的扫描">6.2.2 Wrapper类型的扫描&lt;/h3>
-&lt;p>&lt;strong>Wrapper类型的扫描代码如下:&lt;/strong>&lt;/p>
-&lt;p>来自4.5.2.3小节ExtensionLoader类型中的loadClass方法&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//扩展子类型是否存在这个注解@Adaptive
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (clazz.isAnnotationPresent(Adaptive.&lt;span style="color:#719e07">class&lt;/span>)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cacheAdaptiveClass(clazz, overridden);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#268bd2">if&lt;/span> (isWrapperClass(clazz)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//扩展子类型构造器中是否有这个类型的接口 (这个可以想象下我们了解的Java IO流中的类型使用到的装饰器模式 构造器传个类型)
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> cacheWrapperClass(clazz);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>isWrapperClass方法通过判断构造器类型是否为当前类型来判断是否为Wrapper类型&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">private&lt;/span> boolean &lt;span style="color:#268bd2">isWrapperClass&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> clazz) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> clazz.getConstructor(type);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#b58900">true&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (NoSuchMethodException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#b58900">false&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="623-wrapper类型的创建">6.2.3 Wrapper类型的创建&lt;/h3>
-&lt;p>这个可以看下4.6.1 getExtension方法源码的获取扩展对象时候查询扩展对象是否有对应的Wrapper类型的扩展为其创建Wrapper扩展对象,如下代码&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//Dubbo通过Wrapper实现AOP的方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (wrap) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//这个可以参考下Dubbo扩展的加载
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&amp;gt;&lt;/span> wrapperClassesList &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//wrap类型排序 这个wrap类型是如何来的呢,在前面扫描扩展类型的时候如果当前扩展类型不是Adaptive注解修饰的,并且当前类型type有个构造器参数是type自身的也是前面加载扩展类型时候说的装饰器模式 可以参考DubboProtocol的构造器
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (cachedWrapperClasses &lt;span style="color:#719e07">!=&lt;/span> null) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> wrapperClassesList.addAll(cachedWrapperClasses);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//根据Wrapper注解的order值来进行排序值越小越在列表的前面
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> wrapperClassesList.sort(WrapperComparator.COMPARATOR);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//反转之后值越大就会在列表的前面
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Collections.reverse(wrapperClassesList);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//从缓存中查到了wrapper扩展则遍历这些wrapp扩展进行筛选
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (CollectionUtils.isNotEmpty(wrapperClassesList)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> wrapperClass : wrapperClassesList) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Wrapper wrapper &lt;span style="color:#719e07">=&lt;/span> wrapperClass.getAnnotation(Wrapper.&lt;span style="color:#719e07">class&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//需要包装的扩展名。当此数组为空时，默认值为匹配
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//看下当前扩展是否匹配这个wrap,如何判断呢?
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//wrapper注解不存在或者matches匹配,或者mismatches不包含当前扩展
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//如果匹配到了当前扩展对象是需要进行wrapp的就为当前扩展创建当前wrapper扩展对象进行包装
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> boolean match &lt;span style="color:#719e07">=&lt;/span> (wrapper &lt;span style="color:#719e07">==&lt;/span> null) &lt;span style="color:#719e07">||&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ((ArrayUtils.isEmpty(wrapper.matches()) &lt;span style="color:#719e07">||&lt;/span> ArrayUtils.contains(wrapper.matches(), name)) &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">!&lt;/span>ArrayUtils.contains(wrapper.mismatches(), name));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//这是扩展类型是匹配wrapp的则开始注入
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> (match) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//匹配到了就创建所有的wrapper类型的对象同时构造器参数设置为当前类型
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> instance &lt;span style="color:#719e07">=&lt;/span> injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> instance &lt;span style="color:#719e07">=&lt;/span> postProcessAfterInitialization(instance, name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>主要来看下什么情况下才为当前扩展类型创建Wrapper包装类型:&lt;/p>
-&lt;ul>
-&lt;li>wrapper注解不存在(前面判断过Wrapper类型是构造器满足条件的)&lt;/li>
-&lt;li>存在Wrapper注解:
-&lt;ul>
-&lt;li>matches匹配,&lt;/li>
-&lt;li>或者mismatches不包含当前扩展&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;p>如果匹配到了当前扩展对象是需要进行wrapp的就为当前扩展创建当前wrapper扩展对象进行包装&lt;/p>
-&lt;p>原文： &lt;a href="https://blog.elastic.link/2022/07/10/dubbo/6-dubbo-de-spi-kuo-zhan-ji-zhi-zhi-pu-tong-kuo-zhan-dui-xiang-de-chuang-jian-yu-wrapper-ji-zhi-de-yuan-ma-jie-xi/">《Dubbo的SPI扩展机制之普通扩展对象的创建与Wrapper机制的源码解析》&lt;/a>&lt;/p></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>原文： &lt;a href="https://blog.elastic.link/2022/07/10/dubbo/7-dubbo-de-spi-kuo-zhan-ji-zhi-zhi-zi-dong-ji-huo-kuo-zhan-activate-yuan-ma-jie-xi/">《Dubbo的SPI扩展机制之自动激活扩展Activate源码解析》&lt;/a>&lt;/p></description></item></channel></rss>
