@@ -25,7 +25,7 @@ weight: 2
 ```
 dubbo.application.qos-port=22222
 dubbo.application.qos-accept-foreign-ip=true
-dubbo.metrics.aggregation.enabled=true
+dubbo.metrics.histogram.enabled=true
 dubbo.metrics.protocol=prometheus
 ```
 
