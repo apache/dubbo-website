@@ -138,45 +138,45 @@ kubectl port-forward svc/dubbo-admin -n dubbo-system 38080:38080
 ```
 
 打开浏览器，访问： `http://127.0.0.1:38080/`
+
 ### Helm 安装
-#### 前置条件
 
-- [Install the Helm client](https://helm.sh/docs/intro/install/), version 3.6 or above.
-- Kubernetes 集群
-- 配置 helm repository
-```shell
-$ helm repo add dubbo https://dubbo.apache.org/charts
-$ helm repo update
+获取图表
 ```
-#### 安装步骤
-##### 安装方式一
-```shell
-helm install dubbo-admin dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-nacos dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-zookeeper dubbo/dubbo-stack -n dubbo-system
+helm repo add https://charts.bitnami.com/bitnami
+helm repo add https://prometheus-community.github.io/helm-charts
+helm repo add https://grafana.github.io/helm-charts
+helm repo add https://apache.jfrog.io/artifactory/skywalking-helm
+helm repo add https://openzipkin.github.io/zipkin
+```
+安装 zookeeper
+```bash
+helm install zookeeper bitnami/zookeeper -n dubbo-system
 ```
 
-```shell
-helm install dubbo-admin-grafana dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-prometheus dubbo/dubbo-stack -n dubbo-system
-```
-##### 安装方式二
-```shell
-helm install dubbo-admin-all dubbo/dubbo-stack -n dubbo-system
+安装 prometheus
+```bash
+helm install prometheus prometheus-community/prometheus -n dubbo-system
 ```
 
-> 引发的问题。需要明确哪些组件是保证生产可用的，哪些是仅作展示的，比如 nacos/zookeeper/admin 保障生产可用，prometheus/grafana 是仅作展示
-> 如果基于以上结论，则大部分情况下，dubbo-admin-all 是不推荐保生产安装的；更推荐使用类似 dubbo-admin-nacos 生产保障包，然后自己用 prometheus 社区的生产安装包
+安装 grafana
+```bash
+helm install grafana grafana/grafana -n dubbo-system
+```
 
+安装 skywalking
+```bash
+helm install skywalking skywalking/skywalking -n dubbo-system
+```
+
+安装 zipkin
+```
+helm install zipkin openzipkin/zipkin -n dubbo-system
+```
 
 检查安装状态
 ```shell
-helm ls -n dubbo-system
-
-kubectl get deployments -n dubbo-system --output wide
+helm ls -n dubbo-system ；kubectl get pods -n dubbo-system --output wide
 ```
 
 ### VM 安装
