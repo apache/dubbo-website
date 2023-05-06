@@ -4,6 +4,7 @@ linkTitle: 文档查询
 title: Admin 服务查询
 type: docs
 weight: 2
+working_in_progress: true
 ---
 
 Admin 支持可视化的展示 Dubbo 微服务集群的状态，方便用户从全局掌握集群的应用、服务和实例分布，Admin 还可以通过查询的方式了解某一个服务更详细的信息：

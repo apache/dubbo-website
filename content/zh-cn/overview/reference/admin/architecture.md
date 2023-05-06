@@ -5,6 +5,7 @@ no_list: true
 title: Admin 整体架构与安装步骤
 type: docs
 weight: 1
+working_in_progress: true
 ---
 
 回顾 [Dubbo 服务治理体系的总体架构](../../../what/overview/)，Admin 是服务治理控制面中的一个核心组件，负责微服务集群的服务治理、可视化展示等。

@@ -198,9 +198,9 @@ dubbo.metrics.enable=true
 另外，还可以设置一些更多的指标
 
 ```properties
-dubbo.metrics.enable=true
-dubbo.metrics.bucket-num=5
-dubbo.metrics.time-window-seconds=10
+dubbo.metrics.aggregation.enable=true
+dubbo.metrics.aggregation.bucket-num=5
+dubbo.metrics.aggregation.time-window-seconds=10
 ```
 
 #### 具体指标

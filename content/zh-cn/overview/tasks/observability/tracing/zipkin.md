@@ -9,7 +9,7 @@ type: docs
 weight: 1
 ---
 
-这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，此示例共包含三部分内容：
+这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，完整代码请参考 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot3-tracing" target="_blank">dubbo-samples-tracing-zipkin</a>，此示例共包含三部分内容：
 * dubbo-samples-spring-boot3-tracing-provider
 * dubbo-samples-spring-boot3-tracing-consumer
 * dubbo-samples-spring-boot3-tracing-interface
