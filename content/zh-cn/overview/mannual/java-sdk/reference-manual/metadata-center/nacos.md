@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/nacos/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/metadata-center/nacos/
+    - /zh-cn/overview/what/ecosystem/metadata-center/nacos/
 description: Nacos 元数据中心基本使用与工作原理
 linkTitle: Nacos
 title: Nacos

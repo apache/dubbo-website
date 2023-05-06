@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/service-discovery/
+    - /zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/
 description: 服务发现
 feature:
     description: |
@@ -11,7 +12,6 @@ title: 服务发现
 type: docs
 weight: 2
 ---
-
 
 
 Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持常用的注册中心如 Nacos、Consul、Zookeeper 等。
@@ -62,12 +62,11 @@ Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注
 ## 配置方式
 Dubbo 服务发现扩展了多种注册中心组件支持，如 Nacos、Zookeeper、Consul、Redis、kubernetes 等，可以通过配置切换不通实现，同时还支持鉴权、命名空间隔离等配置。具体配置方式请查看 SDK 文档
 
-* [Java](/)
-* [Golang](/)
-* [Rust](/)
-* [Node.js](/)
+* [Java](../../mannual/java-sdk/reference-manual/registry)
+* [Golang](../../mannual/golang-sdk/tutorial/registry)
+* [Rust](../../mannual/rust-sdk/)
 
-Dubbo 还支持一个应用内配置多注册中心的情形如双注册、双订阅等，这对于实现不同集群地址数据互通、集群迁移等场景非常有用处，[最佳实践](/) 任务里有关于这部分的示例说明。
+Dubbo 还支持一个应用内配置多注册中心的情形如双注册、双订阅等，这对于实现不同集群地址数据互通、集群迁移等场景非常有用处，[最佳实践](../../reference/best-practices/) 任务里有关于这部分的示例说明。
 
 ## 自定义扩展
 注册中心适配支持自定义扩展实现，具体请参见 [Dubbo 可扩展性](../extensibility)

@@ -15,7 +15,7 @@ weight: 4
 
 * 本地或远端 Kubernetes 集群
 * 确保 [Prometheus 正确安装](../../../reference/integrations/prometheus#kubernetes)
-* 部署 [示例应用](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot)
+* 部署 [示例应用](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot) 并开启指标采集
 * 使用 Prometheus dashboard 查询数据指标
 
 ## 确保 Prometheus 正确运行

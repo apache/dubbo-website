@@ -2,17 +2,13 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config-center/nacos/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/nacos/
+    - /zh-cn/overview/what/ecosystem/config-center/nacos/
 description: Nacos 配置中心的基本使用和工作原理。
 linkTitle: Nacos
 title: Nacos
 type: docs
 weight: 3
 ---
-
-
-
-
-
 
 ## 1 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)

@@ -37,8 +37,6 @@ Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数�
 可以通过 Grafana 可视化的查看 Metrics 指标
 
 ![Grafana 效果图](/imgs/v3/feature/observability/provider-stat.png)
-![Grafana 效果图](/imgs/v3/feature/observability/provider-rt.png)
-
 
 * [使用 Grafana 可视化展示 Metrics 指标](../../tasks/observability/grafana/)
 * [如何从 Prometheus 查询特定 Metrics 指标](../../tasks/observability/prometheus/)
