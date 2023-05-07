@@ -268,7 +268,7 @@ Dubbo 还提供了 `dubboctl` 命令行工具，前提也是需要有 Dubbo Admi
 
 以上介绍的都是 Dubbo 体系内的流量治理规则，如果您对服务网格架构感兴趣，则可以将 Dubbo 服务接入服务网格体系，这样，您就可以使用服务网格提供的流量治理能力，如 Istio 体系的 VirtualService 等。
 
-具体请参见 [Dubbo 中的服务网格架构](./service-mesh)。
+具体请参见 [Dubbo 中的服务网格架构](../service-mesh)。
 
 ## 跟随示例学习
 我们搭建了一个 [线上商城系统](../../tasks/traffic-management/) 供您学习流量规则的具体使用。

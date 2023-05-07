@@ -82,7 +82,7 @@ Power of Two Choice算法简单但是经典，主要思路如下：
 1. 对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。
 2. 比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。
 
-以下是 [Dubbo P2C 算法实现提案](../../reference/proposals/heuristic-flow-control/#P2C算法)
+以下是 [Dubbo P2C 算法实现提案](../../reference/proposals/heuristic-flow-control/#p2c算法)
 
 ### Adaptive Load Balance
 Adaptive 即自适应负载均衡，是一种能根据后端实例负载自动调整流量分布的算法实现，它总是尝试将请求转发到负载最小的节点。

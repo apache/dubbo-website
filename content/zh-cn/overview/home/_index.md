@@ -29,7 +29,7 @@ content:
         - name: "生产环境的 Dubbo 微服务生态"
           description: ""
           links:
-            - "[服务发现&配置&元数据中心](../tasks/ecosystem/registry/)"
+            - "[服务发现&配置&元数据中心](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/)"
             - "[HTTP 网关](../tasks/ecosystem/gateway/)"
             - "[保证数据一致性](../tasks/ecosystem/transaction/)"
             - "[Tracing 全链路追踪](../tasks/observability/tracing/)"
