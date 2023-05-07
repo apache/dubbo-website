@@ -70,7 +70,7 @@ Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下�
 
 ![Untitled](/imgs/blog/32-release/Untitled%201.png)
 
-对于所有的用户，只需要升级到 Dubbo 3.2 版本，并添加 dubbo-spring-boot-observability-starter 依赖即可获得 Metrics 能力。在应用启动后，将在 Dubbo QoS 的 metrics 命令下暴露相关的指标，本地可以通过 [http://127.0.0.1:22222/metrics](http://127.0.0.1:22222/metrics) 获取。此外对于使用了 Spring Actuator 的用户，Dubbo 也将默认将这些数据暴露出来。
+对于所有的用户，只需要升级到 Dubbo 3.2 版本，并添加 dubbo-spring-boot-observability-starter 依赖即可获得 Metrics 能力。在应用启动后，将在 Dubbo QoS 的 metrics 命令下暴露相关的指标，本地可以通过 `http://127.0.0.1:22222/metrics` 获取。此外对于使用了 Spring Actuator 的用户，Dubbo 也将默认将这些数据暴露出来。
 
 ### Tracing
 

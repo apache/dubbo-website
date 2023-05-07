@@ -69,7 +69,7 @@ In terms of metrics, we use Micrometer to greatly increase the buried points of 
 
 ![Untitled](/imgs/blog/32-release/Untitled%201.png)
 
-For all users, only need to upgrade to Dubbo 3.2 version and add dubbo-spring-boot-observability-starter dependency to get Metrics capability. After the application starts, relevant indicators will be exposed under the metrics command of Dubbo QoS, which can be obtained locally through [http://127.0.0.1:22222/metrics](http://127.0.0.1:22222/metrics). In addition, for users who use Spring Actuator, Dubbo will also expose these data by default.
+For all users, only need to upgrade to Dubbo 3.2 version and add dubbo-spring-boot-observability-starter dependency to get Metrics capability. After the application starts, relevant indicators will be exposed under the metrics command of Dubbo QoS, which can be obtained locally through `http://127.0.0.1:22222/metrics`. In addition, for users who use Spring Actuator, Dubbo will also expose these data by default.
 
 ### Tracing
 
