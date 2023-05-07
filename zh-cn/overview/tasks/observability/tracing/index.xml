@@ -1,10 +1,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 全链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</link><description>Recent content in 全链路追踪 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Zipkin</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/</guid><description>
-&lt;p>这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，此示例共包含三部分内容：&lt;/p>
+&lt;p>这个示例演示了 SpringBoot 项目中 Dubbo 集成 Zipkin 全链路追踪的基础示例，此示例共包含三部分内容：&lt;/p>
 &lt;ul>
 &lt;li>dubbo-samples-spring-boot3-tracing-provider&lt;/li>
 &lt;li>dubbo-samples-spring-boot3-tracing-consumer&lt;/li>
 &lt;li>dubbo-samples-spring-boot3-tracing-interface&lt;/li>
 &lt;/ul>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot3-tracing">案例代码地址&lt;/a>&lt;/p>
 &lt;h2 id="快速开始">快速开始&lt;/h2>
 &lt;h3 id="安装--启动-zipkin">安装 &amp;amp; 启动 Zipkin&lt;/h3>
 &lt;p>参考 &lt;a href="https://zipkin.io/pages/quickstart.html">Zipkin&amp;rsquo;s quick start&lt;/a> 安装 Zipkin。&lt;/p>
@@ -21,80 +22,79 @@
 &lt;h3 id="检查监控效果">检查监控效果&lt;/h3>
 &lt;p>在浏览器中打开 &lt;code>[http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)&lt;/code> 查看效果。&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/zipkin.png" alt="zipkin.png">&lt;/p>
-&lt;h2 id="如何在项目中使用-dubbo-tracing">如何在项目中使用 Dubbo Tracing&lt;/h2>
-&lt;h3 id="1-添加-micrometer-observation-依赖">1. 添加 Micrometer Observation 依赖&lt;/h3>
-&lt;p>首先需要添加 &lt;code>dubbo-metrics-api&lt;/code> 依赖将 Micrometer 和 Dubbo Metrics 引入项目中：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;h2 id="如何在springboot项目中使用-dubbo-tracing">如何在SpringBoot项目中使用 Dubbo Tracing&lt;/h2>
+&lt;h3 id="1-添加-dubbo-tracing-相关的-starter-依赖">1. 添加 Dubbo Tracing 相关的 Starter 依赖&lt;/h3>
+&lt;p>从下面两个 starter 中选择一个加入到你的项目中，区别在于 Tracer 的选型不一样，一个是 Opentelemetry，一个是 Brave：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Opentelemetry as Tracer, Zipkin as exporter --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metrics-api&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-tracing-otel-zipkin-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过集成 &lt;a href="https://micrometer.io/">Micrometer Observations&lt;/a> Dubbo 可以在只被拦截一次的情况下，导出多种不同类型的监控指标如 Metrics、Tracer、其他一些信号等，这具体取决于你对 &lt;code>ObservationHandlers&lt;/code> 的配置。 可以参考以下链接 &lt;a href="https://micrometer.io">documentation under docs/observation&lt;/a> 了解更多内容。&lt;/p>
-&lt;h3 id="2-配置-micrometer-tracing-bridge">2. 配置 Micrometer Tracing Bridge&lt;/h3>
-&lt;p>为了启用 Dubbo 全链路追踪统计，需要为 Micrometer Tracing 和实际的 Tracer（本示例中的 Zipkin）间配置 &lt;code>bridge&lt;/code>。&lt;/p>
-&lt;blockquote>
-&lt;p>注意：Tracer 是一个管控 span 生命周期的二进制包，比如 span 的 创建、终止、采样、上报等。&lt;/p>
-&lt;/blockquote>
-&lt;p>Micrometer Tracing 支持 &lt;a href="https://github.com/open-telemetry/opentelemetry-java">OpenTelemetry&lt;/a> and &lt;a href="https://github.com/openzipkin/brave">Brave&lt;/a> 格式的 Tracer。Dubbo 推荐使 OpenTelemetry 作为标准的 tracing 协议，&lt;code>bridge&lt;/code> 的具体配置如下:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- OpenTelemetry Tracer --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Brave as Tracer, Zipkin as exporter --&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-otel&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-tracing-brave-zipkin-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-添加-micrometer-tracing-exporter">3. 添加 Micrometer Tracing Exporter&lt;/h3>
-&lt;p>添加 Tracer 后，需要继续配置 exporter（也称为 reporter）。exporter 负责导出完成 span 并将其发送到后端 reporter 系统。Micrometer Tracer 原生支持 Tanzu Observability by Wavefront 和 Zipkin。以 Zipkin 为例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.opentelemetry&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>opentelemetry-exporter-zipkin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>你可以在此阅读更多关于 Tracing 的配置信息 &lt;a href="https://micrometer.io/">this documentation, under docs/tracing&lt;/a>.&lt;/p>
-&lt;h3 id="4-配置-observationregistry">4. 配置 ObservationRegistry&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ObservationConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-配置">2. 配置&lt;/h3>
+&lt;p>在application.yml中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span> &lt;span style="color:#586e75"># 默认为false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">sampling&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">probability&lt;/span>: &lt;span style="color:#2aa198">0.5&lt;/span> &lt;span style="color:#586e75"># 采样率, 默认是 0.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">propagation&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: W3C &lt;span style="color:#586e75"># 传播器类型：W3C/B3 默认是W3C&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing-exporter&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zipkin-config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">endpoint&lt;/span>: http://localhost:9411/api/v2/spans
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">connect-timeout&lt;/span>: 1s &lt;span style="color:#586e75"># 建立连接超时时间, 默认为1s&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">read-timeout&lt;/span>: 10s &lt;span style="color:#586e75"># 传递数据超时时间, 默认为10s&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// reuse the applicationModel in your system
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">@Bean&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel &lt;span style="color:#268bd2">applicationModel&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ObservationRegistry observationRegistry&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel applicationModel &lt;span style="color:#719e07">=&lt;/span> ApplicationModel&lt;span style="color:#719e07">.&lt;/span>defaultModel&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>registerBean&lt;span style="color:#719e07">(&lt;/span>observationRegistry&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationModel&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// zipkin endpoint url
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">@Bean&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpanExporter &lt;span style="color:#268bd2">spanExporter&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ZipkinSpanExporterBuilder&lt;span style="color:#719e07">().&lt;/span>setEndpoint&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;http://localhost:9411/api/v2/spans&amp;#34;&lt;/span>&lt;span style="color:#719e07">).&lt;/span>build&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="5-定制-observation-filters">5. 定制 Observation Filters&lt;/h3>
-&lt;p>To customize the tags present in metrics (low cardinality tags) and in spans (low and high cardinality tags) you should
-create your own versions of &lt;code>DubboServerObservationConvention&lt;/code> (server side) and &lt;code>DubboClientObservationConvention&lt;/code> (
-client side) and register them in the &lt;code>ApplicationModel&lt;/code>&amp;rsquo;s &lt;code>BeanFactory&lt;/code>. To reuse the existing ones
-check &lt;code>DefaultDubboServerObservationConvention&lt;/code> (server side) and &lt;code>DefaultDubboClientObservationConvention&lt;/code> (client
-side).&lt;/p>
-&lt;h2 id="extension">Extension&lt;/h2>
-&lt;h3 id="其他-micrometer-tracing-bridge">其他 Micrometer Tracing Bridge&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Brave Tracer --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-brave&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="其他-micrometer-tracing-exporter">其他 Micrometer Tracing Exporter&lt;/h3>
-&lt;p>Tanzu Observability by Wavefront&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-reporter-wavefront&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>OpenZipkin Zipkin with Brave&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.zipkin.reporter2&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>zipkin-reporter-brave&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>An OpenZipkin URL sender dependency to send out spans to Zipkin via a URLConnectionSender&lt;/p>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># tracing信息输出到logging&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">logging&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pattern&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">level&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="扩展">扩展&lt;/h2>
+&lt;h3 id="选择合适的sender">选择合适的Sender&lt;/h3>
+&lt;p>Zipkin 的 Sender，是 Exporter 将埋点后的数据进行上报的客户端实现，全部实现可&lt;a href="https://github.com/openzipkin/zipkin-reporter-java">参考&lt;/a>&lt;/p>
+&lt;p>Sender 有很多种实现：&lt;/p>
+&lt;ul>
+&lt;li>URLConnectionSender 通过 Java 自带的 HTTP 客户端上报&lt;/li>
+&lt;li>OkHttpSender 通过 OKHttp3 上报&lt;/li>
+&lt;li>KafkaSender 通过 Kafka 消息队列上报&lt;/li>
+&lt;li>ActiveMQSender 通过 ActiveMQ 消息队列上报&lt;/li>
+&lt;li>RabbitMQSender 通过 RabbitMQ 消息队列上报&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo Tracing 相关的 starter 目前默认是使用 OKHttpSender，也支持 URLConnectionSender，如果想通过 URLConnectionSender 向 Zipkin 发送 Spans，可直接在 pom 中添加如下依赖：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.zipkin.reporter2&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>zipkin-sender-urlconnection&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Skywalking</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</guid><description>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置 Zipkin 的 endpoint、connectTimeout、readTimeout&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span> &lt;span style="color:#586e75"># 默认为false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing-exporter&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zipkin-config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">endpoint&lt;/span>: http://localhost:9411/api/v2/spans
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">connect-timeout&lt;/span>: 1s &lt;span style="color:#586e75"># 建立连接超时时间, 默认为1s&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">read-timeout&lt;/span>: 10s &lt;span style="color:#586e75"># 传递数据超时时间, 默认为10s&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果想使用其他类型的 Sender ，需要用户在项目中手动注入对应的 Bean，并配置对应的属性，如 KafkaSender：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">KafkaSenderConfiguration&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> KafkaSender &lt;span style="color:#268bd2">kafkaSender&lt;/span>&lt;span style="color:#719e07">(){&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> KafkaSender&lt;span style="color:#719e07">.&lt;/span>Builder builder &lt;span style="color:#719e07">=&lt;/span> KafkaSender&lt;span style="color:#719e07">.&lt;/span>newBuilder&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> builder&lt;span style="color:#719e07">.&lt;/span>bootstrapServers&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;127.0.0.0.1:9092&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> builder&lt;span style="color:#719e07">.&lt;/span>topic&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;zipkin&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> builder&lt;span style="color:#719e07">.&lt;/span>encoding&lt;span style="color:#719e07">(&lt;/span>Encoding&lt;span style="color:#719e07">.&lt;/span>JSON&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> builder&lt;span style="color:#719e07">.&lt;/span>build&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="springboot2案例">SpringBoot2案例&lt;/h3>
+&lt;p>dubbo-tracing相关的使用在SpringBoot2与3中区别不大，SpringBoot2的案例可参考&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-tracing">代码地址&lt;/a>。&lt;/p></description></item><item><title>Overview: Skywalking</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/</guid><description>
 &lt;p>本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系，依赖的 Skywalking Agent 版本为 &lt;a href="https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/">skywalking micrometer-1.10 api&lt;/a>.&lt;/p>
 &lt;h2 id="1-添加-micrometer-observation-依赖到你的项目">1. 添加 Micrometer Observation 依赖到你的项目&lt;/h2>
 &lt;p>为了能够将 Micrometer 及相关 Metrics 依赖添加到 classpath，需要增加 &lt;code>dubbo-metrics-api&lt;/code> 依赖，如下所示：&lt;/p>
