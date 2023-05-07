@@ -36,7 +36,7 @@ weight: 5
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2023/png/67956773/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png#clientId=u54f9e7eb-38a1-4&from=paste&height=246&id=u4652443c&name=image.png&originHeight=890&originWidth=1798&originalType=binary&ratio=1&rotation=0&showTitle=false&size=57908&status=done&style=none&taskId=u624f980f-f1de-43ed-a068-9f1c38ab171&title=&width=497)
 
 #### 使用方法
-[Dubbo Java 实现的使用方法](zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance) 与原本的负载均衡方法相同。只需要在consumer端将"loadbalance"设置为"p2c"或者"adaptive"即可。
+[Dubbo Java 实现的使用方法](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance) 与原本的负载均衡方法相同。只需要在consumer端将"loadbalance"设置为"p2c"或者"adaptive"即可。
 
 #### 代码结构
 负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。
@@ -122,7 +122,7 @@ inflight为consumer端还未返回的请求的数量。
 #### 使用方法
 要确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。
 
-[Dubbo Java 实现的自适应限流开启方法](zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance)  与静态的最大并发值设置类似，只需在provider端将"flowcontrol"设置为"autoConcurrencyLimier"或者"heuristicSmoothingFlowControl"即可。
+[Dubbo Java 实现的自适应限流开启方法](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance)  与静态的最大并发值设置类似，只需在provider端将"flowcontrol"设置为"autoConcurrencyLimier"或者"heuristicSmoothingFlowControl"即可。
 
 #### 代码结构
 1. FlowControlFilter：在provider端的filter负责根据限流算法的结果来对provider端进行限流功能。
