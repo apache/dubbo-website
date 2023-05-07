@@ -41,63 +41,34 @@ weight: 2
 <hr>
 </div>
 {{< /blocks/section >}}
----
-aliases:
-    - /zh/overview/tasks/observability/tracing/
-description: ""
-linkTitle: 全链路追踪
-no_list: true
-title: 全链路追踪
-type: docs
-weight: 2
----
-
-{{< blocks/section color="white" height="auto">}}
-<div class="td-content list-page">
-<div class="lead"></div>
-<header class="article-meta"></header>
-<div class="row">
-        <div class="col-sm col-md-6 mb-4">
-          <div class="h-100 card shadow">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <a href='{{< relref "./zipkin/" >}}'>Zipkin 全链路追踪</a>
-                    </h4>
-                    <p>演示如果通过 Zipkin 实现对 Dubbo 服务的全链路追踪。
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm col-md-6 mb-4">
-            <div class="h-100 card shadow">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <a href='{{< relref "./skywalking/" >}}'>Skywalking 全链路追踪</a>
-                    </h4>
-                    <p>演示如果通过 Skywalking 实现对 Dubbo 服务的全链路追踪。
-                    </p>
-                </div>
-            </div>
-        </div>
-</div>
-<hr>
-</div>
-{{< /blocks/section >}}
 
 ## 说明
 
-目前Dubbo内置了Micrometer（SpringBoot3内置的可观测组件）
+目前 Dubbo 内置了 [Micrometer](https://micrometer.io/)（Micrometer 为最流行的可观察性系统在检测客户端上提供了一个统一的门面，相当于日志领域的SLF4J，SpringBoot3 内置的可观测门面组件）。
 
 ## Tracing相关概念
 
-- tracer: 处理span生命周期的库（dubbo支持opentelemetry和brave）。它可以通过exporter创建、启动、停止和报告spans到外部系统（如Zipkin、Jagger等）。
-- exporter: 将产生的trace信息通过http等接口上报到外部系统。
+- Span：基本工作单元。例如，发送 RPC 是一个新的 span，发送对 RPC 的响应也是如此。Span还有其他数据，例如description、带时间戳的事件、键值注释（标签）、导致它们的跨度的 ID 和进程 ID（通常是 IP 地址）。跨度可以启动和停止，并且它们会跟踪它们的时间信息。创建跨度后，您必须在将来的某个时间点停止它。
+
+- Trace：一组形成树状结构的跨度。例如，如果您运行分布式大数据存储，则可能会通过请求形成跟踪PUT。
+
+- Annotation/Event : 用于及时记录一个事件的存在。
+
+- Tracing context：为了使分布式跟踪工作，跟踪上下文（跟踪标识符、跨度标识符等）必须通过进程（例如通过线程）和网络传播。
+
+- Log correlation：部分跟踪上下文（例如跟踪标识符、跨度标识符）可以填充到给定应用程序的日志中。然后可以将所有日志收集到一个存储中，并通过跟踪 ID 对它们进行分组。这样就可以从所有按时间顺序排列的服务中获取单个业务操作（跟踪）的所有日志。
+
+- Latency analysis tools：一种收集导出跨度并可视化整个跟踪的工具。允许轻松进行延迟分析。
+
+- Tracer: 处理span生命周期的库（Dubbo 目前支持 Opentelemetry 和 Brave）。它可以通过 Exporter 创建、启动、停止和报告 Spans 到外部系统（如 Zipkin、Jagger 等）。
+
+- Exporter: 将产生的 Trace 信息通过 http 等接口上报到外部系统，比如上报到 Zipkin。
 
 ## SpringBoot Starters
 
-对于SpringBoot用户，Dubbo提供了tracing相关的starters，自动装配Micrometer相关的配置代码，且用户可自由选择tracer和exporter。
+对于 SpringBoot 用户，Dubbo 提供了 Tracing 相关的 starters，自动装配 Micrometer 相关的配置代码，且用户可自由选择 Tracer 和Exporter。
 
-### opentelemetry作为tracer，将trace信息export到zipkin
+### Opentelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin
 
 ```yml
   <dependency>
@@ -107,7 +78,7 @@ weight: 2
   </dependency>
 ```
 
-### brave作为tracer，将trace信息export到zipkin
+### Brave 作为 Tracer，将 Trace 信息 export 到 Zipkin
 
 ```yml
   <dependency>
@@ -117,9 +88,9 @@ weight: 2
   </dependency>
 ```
 
-### 自由组装tracer和exporter
+### 自由组装 Tracer 和 Exporter
 
-如果用户基于Micrometer有自定义的需求，想将trace信息上报至其他外部系统观测，可参照如下自由组装tracer和exporter：
+如果用户基于 Micrometer 有自定义的需求，想将 Trace 信息上报至其他外部系统观测，可参照如下自由组装 Tracer 和 Exporter：
 
 ```yml
   <!-- 自动装配 -->
@@ -163,4 +134,4 @@ weight: 2
   </dependency>
 ```
 
-后续还会开发更多的starter，敬请期待
+后续还会补齐更多的 starters，如 Jagger、SkyWalking等。
