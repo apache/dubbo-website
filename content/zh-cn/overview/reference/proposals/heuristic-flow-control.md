@@ -43,14 +43,14 @@ weight: 5
 
 ### 原理介绍
 
-#### P2C算法
+#### P2C
 
-Power of Two Choice算法简单但是经典，主要思路如下：
+Power of Two Choice 算法简单但是经典，主要思路如下：
 
 1. 对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。
 2. 比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。
 
-#### adaptive算法
+#### adaptive
 
 [代码的github地址](https://github.com/apache/dubbo/pull/10745)
 

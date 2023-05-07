@@ -2,11 +2,11 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
-description: "指标埋点"
+description: "开启 Metrics 指标埋点"
 hide_summary: true
-linkTitle: 指标埋点
+linkTitle: Metrics
 no_list: true
-title: 指标埋点
+title: Metrics
 type: docs
 weight: 1
 ---

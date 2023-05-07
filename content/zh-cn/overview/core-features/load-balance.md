@@ -77,17 +77,17 @@ weight: 3
 * 缺省用 160 份虚拟节点，如果要修改，请配置 `<dubbo:parameter key="hash.nodes" value="320" />`
 
 ### P2C Load Balance
-Power of Two Choice算法简单但是经典，主要思路如下：
+Power of Two Choice 算法简单但是经典，主要思路如下：
 
 1. 对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。
 2. 比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。
 
-以下是 [Dubbo P2C 算法实现提案](../../reference/proposals/heuristic-flow-control/#p2c算法)
+以下是 [Dubbo P2C 算法实现提案](../../reference/proposals/heuristic-flow-control/#p2c)
 
 ### Adaptive Load Balance
 Adaptive 即自适应负载均衡，是一种能根据后端实例负载自动调整流量分布的算法实现，它总是尝试将请求转发到负载最小的节点。
 
-以下是 [Dubbo Adaptive 算法实现提案](../../reference/proposals/heuristic-flow-control/#adaptive算法)
+以下是 [Dubbo Adaptive 算法实现提案](../../reference/proposals/heuristic-flow-control/#adaptive)
 
 ## 配置方式
 Dubbo 支持在服务提供者一侧配置默认的负载均衡策略，这样所有的消费者都将默认使用提供者指定的负载均衡策略，消费者可以自己配置要使用的负载均衡策略，如果都没有任何配置，
