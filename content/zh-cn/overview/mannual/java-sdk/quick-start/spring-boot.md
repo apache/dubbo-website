@@ -26,7 +26,7 @@ weight: 3
 
 - 系统：Windows、Linux、MacOS
 
-- JDK 8 及以上（推荐使用 JDK17）
+- JDK 8 版本
 
 - Git
 
