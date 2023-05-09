@@ -169,81 +169,14 @@ Consumer应用引入服务Mock依赖，添加JVM启动参数-Denable.dubbo.admin
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;zipkin-reporter-brave&amp;lt;/artifactId&amp;gt;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>后续还会补齐更多的 starters，如 Jagger、SkyWalking等。&lt;/p></description></item><item><title>Overview: 指标监控入门指南</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/metrics-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/metrics-start/</guid><description>
-&lt;h1 id="指标监控入门指南">指标监控入门指南&lt;/h1>
-&lt;h2 id="指标模块简介">指标模块简介&lt;/h2>
-&lt;p>Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 &lt;em>四个黄金信号&lt;/em>、&lt;em>RED方法&lt;/em>、&lt;em>USE方法&lt;/em> 等理论并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。&lt;/p>
-&lt;p>Dubbo的关键指标包含：&lt;strong>延迟（Latency）&lt;/strong>、&lt;strong>流量（Traffic）&lt;/strong>、 &lt;strong>错误（Errors）&lt;/strong> 和 &lt;strong>饱和度（Saturation）&lt;/strong> 等内容 。同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如Dubbo应用信息、线程池信息、三大中心交互的指标数据等。&lt;/p>
-&lt;p>Dubbo指标监控目前推荐使用Prometheus来进行服务监控，Grafana来展示指标数据。接下来就通过案例来快速入门Dubbo的指标监控吧。&lt;/p>
-&lt;h2 id="快速入门">快速入门&lt;/h2>
-&lt;h3 id="环境">环境&lt;/h3>
-&lt;ul>
-&lt;li>系统：Windows、Linux、MacOS&lt;/li>
-&lt;li>JDK 8 及以上&lt;/li>
-&lt;li>Git&lt;/li>
-&lt;li>Maven&lt;/li>
-&lt;li>Prometheus &lt;a href="../prometheus">使用教程&lt;/a>&lt;/li>
-&lt;li>Grafana &lt;a href="../grafana">使用教程&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h3 id="参考案例">参考案例&lt;/h3>
-&lt;p>Dubbo官方案例中提供了指标埋点的示例，可以访问如下地址获取案例源码：&lt;/p>
-&lt;ul>
-&lt;li>Spring项目参考案例： &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-prometheus">dubbo-samples-metrics-prometheus&lt;/a>&lt;/li>
-&lt;li>SpringBoot项目参考案例: &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">dubbo-samples-metrics-spring-boot&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h3 id="依赖">依赖&lt;/h3>
-&lt;p>目前Dubbo的指标埋点仅支持3.2及以上版本，同时需要额外引入dubbo-spring-boot-observability-starter依赖如下所示：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-observability-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2及以上的正式版本&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置">配置&lt;/h3>
-&lt;p>目前Dubbo支持推和拉两种模式获取指标数据，下面以普罗米修斯拉取指标数据的方式来作为演示，Dubbo的指标埋点服务端口复用了QOS的服务，拉取模式只需要开启QOS相关对应配置即可。下面介绍两种开启的方式分别为Spring文件中配置和dubbo.properties配置文件中配置，您可以选择其中一种适合自己方式即可。&lt;/p>
-&lt;h4 id="spring-xml配置">Spring XML配置&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span> xmlns:context=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/context&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;context:property-placeholder/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span> qos-enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> qos-port=&lt;span style="color:#2aa198">&amp;#34;22222&amp;#34;&lt;/span> qos-accept-foreign-ip=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> qos-accept-foreign-ip-whitelist=&lt;span style="color:#2aa198">&amp;#34;192.168.1.169,47.96.183.43,192.168.1.9,121.199.25.64&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://${zookeeper.address:127.0.0.1}:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:config-center&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://${zookeeper.address:127.0.0.1}:2181&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:metadata-report&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://${zookeeper.address:127.0.0.1}:2181&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;prometheus&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:histogram&lt;/span> enabled=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.provider.impl.DemoServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService2&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.provider.impl.DemoServiceImpl2&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService2&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService2&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="dubboproperties配置">dubbo.properties配置&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.qos-port=22222
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip=false
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-accept-foreign-ip-whitelist=8.131.79.126,114.55.147.139,121.199.25.64
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.metrics.histogram.enabled=true
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.metrics.protocol=prometheus
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="查询apache-dubbo指标">查询Apache Dubbo指标&lt;/h3>
-&lt;p>如果需要测试指标数据可以直接在服务器上面执行如下命令：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>curl http://localhost:22222/metrics
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 使用 Grafana 可视化查看集群 Metrics 指标</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</guid><description>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>后续还会补齐更多的 starters，如 Jagger、SkyWalking等。&lt;/p></description></item><item><title>Overview: 使用 Grafana 可视化查看集群 Metrics 指标</title><link>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</guid><description>
 &lt;p>指标可视化页面目前推荐的方式是使用 Grafana 来配置 Dubbo 的可观测性监控大盘。&lt;/p>
 &lt;h2 id="在您开始之前">在您开始之前&lt;/h2>
 &lt;ul>
 &lt;li>一个可以访问的 Kubernetes 集群&lt;/li>
 &lt;li>正确安装并配置 &lt;a href="../../../reference/integrations/prometheus">普罗米修斯服务&lt;/a>&lt;/li>
 &lt;li>安装 &lt;a href="../../../reference/integrations/grafana">Grafana&lt;/a>&lt;/li>
-&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a>&lt;/li>
+&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a> 并开启指标采集&lt;/li>
 &lt;/ul>
 &lt;h2 id="确认组件正常运行">确认组件正常运行&lt;/h2>
 &lt;h3 id="kubernetes">Kubernetes&lt;/h3>
@@ -296,7 +229,7 @@ Consumer应用引入服务Mock依赖，添加JVM启动参数-Denable.dubbo.admin
 &lt;ul>
 &lt;li>本地或远端 Kubernetes 集群&lt;/li>
 &lt;li>确保 &lt;a href="../../../reference/integrations/prometheus/#%E5%AE%89%E8%A3%85">Prometheus 正确安装&lt;/a>&lt;/li>
-&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a>&lt;/li>
+&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a> 并开启指标采集&lt;/li>
 &lt;li>使用 Prometheus dashboard 查询数据指标&lt;/li>
 &lt;/ul>
 &lt;h2 id="确保-prometheus-正确运行">确保 Prometheus 正确运行&lt;/h2>

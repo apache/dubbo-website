@@ -1878,7 +1878,245 @@ dubbo2.7.3默认开启qos功能，导致一些混部在物理机的dubbo服务�
 &lt;/li>
 &lt;/ol>
 &lt;h2 id="总结">总结&lt;/h2>
-&lt;p>Dubbo 3.2 是一个非常重要的版本，它带来了众多新功能和改进，使得 Dubbo 更加强大和易用。我们非常感谢社区的支持和贡献，希望大家可以尽快体验 Dubbo 3.2，享受其中带来的便利和优势。&lt;/p></description></item><item><title>Blog: 2022 年度总结与 2023 新年规划</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</link><pubDate>Thu, 23 Feb 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</guid><description>
+&lt;p>Dubbo 3.2 是一个非常重要的版本，它带来了众多新功能和改进，使得 Dubbo 更加强大和易用。我们非常感谢社区的支持和贡献，希望大家可以尽快体验 Dubbo 3.2，享受其中带来的便利和优势。&lt;/p></description></item><item><title>Blog: 如何通过 Higress 网关代理 Dubbo 服务</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Sat, 01 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>
+&lt;h1 id="higress-对接-dubbo-服务">Higress 对接 Dubbo 服务&lt;/h1>
+&lt;p>Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过配置协议转换，可以将一个Dubbo服务以HTTP接口暴露出来，从而用HTTP请求实现对Dubbo接口的调用。本文将通过一个示例来介绍如何用Higress配置HTTP到Dubbo的协议转换。该示例会引导您轻松地部署一个Nacos server和一个Dubbo服务，然后通过Ingress将HTTP请求转发到注册在Nacos上的Dubbo服务，并通过Higress的协议转换能力完成对Dubbo服务的HTTP调用。&lt;/p>
+&lt;h2 id="前提条件">前提条件&lt;/h2>
+&lt;ol>
+&lt;li>Higress目前支持的Dubbo框架的版本为2.x。若您使用Dubbo3.0，要求使用dubbo协议（目前暂不支持Triple协议）。&lt;/li>
+&lt;li>已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm">Higress安装部署文档&lt;/a>。&lt;/li>
+&lt;/ol>
+&lt;h2 id="部署nacos和dubbo服务">部署Nacos和Dubbo服务&lt;/h2>
+&lt;p>首先在K8s集群中apply以下资源，以部署一个Nacos注册中心，同时通过K8s service将这个Nacos server暴露出来。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Nacos Server配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: MODE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: standalone
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: nacos/nacos-server:v2.2.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">imagePullPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">containerPort&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dnsPolicy&lt;/span>: ClusterFirst
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">restartPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Nacos Server Service配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: TCP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">targetPort&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: ClusterIP
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在K8s集群中apply以下资源，以部署一个Dubbo服务，该Dubbo服务将注册到上述的Naocs中。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: higress-registry.cn-hangzhou.cr.aliyuncs.com/samples/nacos-dubbo-provider:v1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">imagePullPolicy&lt;/span>: IfNotPresent
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">containerPort&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: DUBBO_REGISTRY_ADDRESS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: nacos-server.default.svc.cluster.local
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该Dubbo服务的代码可以在Nacos的&lt;a href="https://github.com/nacos-group/nacos-examples/tree/master/nacos-dubbo-example">示例代码&lt;/a>仓库中找到，其接口定义为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.alibaba.nacos.example.dubbo.service&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayName&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口实现如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.alibaba.nacos.example.dubbo.service&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.alibaba.dubbo.config.annotation.Service&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.alibaba.dubbo.rpc.RpcContext&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.beans.factory.annotation.Value&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Default {@link DemoService}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @since 2.6.5
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>&lt;span style="color:#719e07">(&lt;/span>version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;${demo.service.version}&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;${demo.service.group}&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultService&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Value&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;${demo.service.name}&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String serviceName&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayName&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String name&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RpcContext rpcContext &lt;span style="color:#719e07">=&lt;/span> RpcContext&lt;span style="color:#719e07">.&lt;/span>getContext&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> String&lt;span style="color:#719e07">.&lt;/span>format&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Service [name :%s , port : %d] %s(\&amp;#34;%s\&amp;#34;) : Hello,%s&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceName&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpcContext&lt;span style="color:#719e07">.&lt;/span>getLocalPort&lt;span style="color:#719e07">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpcContext&lt;span style="color:#719e07">.&lt;/span>getMethodName&lt;span style="color:#719e07">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name&lt;span style="color:#719e07">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在本示例中，该Dubbo服务的服务名为com.alibaba.nacos.example.dubbo.service.DemoService，服务版本为1.0.0，服务分组为dev。&lt;/p>
+&lt;p>为了测试方便，我们可以通过运行以下命令来将我们部署在K8s集群中的Naocs服务映射到本地端口：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl port-forward svc/nacos-server 8848:8848 --address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#39;0.0.0.0&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后请求Nacos的服务发现接口，可以查看到我们Dubbo服务的元数据信息，从而对以上部署进行验证。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">$curl&lt;/span> -X GET &lt;span style="color:#2aa198">&amp;#39;http://127.0.0.1:8848/nacos/v1/ns/instance/list?serviceName=providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT_GROUP@@providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;groupName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT_GROUP&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;clusters&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;cacheMillis&amp;#34;&lt;/span>:10000,&lt;span style="color:#2aa198">&amp;#34;hosts&amp;#34;&lt;/span>:&lt;span style="color:#719e07">[{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;10.244.0.58&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;port&amp;#34;&lt;/span>:20880,&lt;span style="color:#2aa198">&amp;#34;weight&amp;#34;&lt;/span>:1.0,&lt;span style="color:#2aa198">&amp;#34;healthy&amp;#34;&lt;/span>:true,&lt;span style="color:#2aa198">&amp;#34;enabled&amp;#34;&lt;/span>:true,&lt;span style="color:#2aa198">&amp;#34;ephemeral&amp;#34;&lt;/span>:true,&lt;span style="color:#2aa198">&amp;#34;clusterName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;serviceName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT_GROUP@@providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;metadata&amp;#34;&lt;/span>:&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;side&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;provider&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;release&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo_demo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;methods&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;sayName&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;deprecated&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;2.0.2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;pid&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;3034042&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;interface&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;com.alibaba.nacos.example.dubbo.service.DemoService&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;service-name-mapping&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;version&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;generic&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;revision&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo_demo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;path&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;com.alibaba.nacos.example.dubbo.service.DemoService&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;protocol&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;metadata-type&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;remote&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;application&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo-provider-demo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;background&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dynamic&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;category&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;providers&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;group&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dev&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;anyhost&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;timestamp&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;1680176973875&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;ipDeleteTimeout&amp;#34;&lt;/span>:30000,&lt;span style="color:#2aa198">&amp;#34;instanceHeartBeatInterval&amp;#34;&lt;/span>:5000,&lt;span style="color:#2aa198">&amp;#34;instanceHeartBeatTimeOut&amp;#34;&lt;/span>:15000&lt;span style="color:#719e07">}]&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;lastRefTime&amp;#34;&lt;/span>:1680178336936,&lt;span style="color:#2aa198">&amp;#34;checksum&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;allIPs&amp;#34;&lt;/span>:false,&lt;span style="color:#2aa198">&amp;#34;reachProtectionThreshold&amp;#34;&lt;/span>:false,&lt;span style="color:#2aa198">&amp;#34;valid&amp;#34;&lt;/span>:true&lt;span style="color:#719e07">}&lt;/span>%
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="通过ingress转发请求到dubbo服务">通过Ingress转发请求到Dubbo服务&lt;/h2>
+&lt;p>Higress可以通过McpBridge来对接Nacos作为服务来源，在K8s集群中apply以下资源来配置McpBridge&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.higress.io/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: McpBridge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: higress-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">domain&lt;/span>: nacos-server.default.svc.cluster.local
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacosGroups&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - DEFAULT_GROUP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-service-resource
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: nacos2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过McpBridge，我们可以直接从Nacos中发现Dubbo服务，并为其创建路由，而无需为每一个Dubbo服务创建service资源。&lt;/p>
+&lt;p>接下来我们创建如下Ingress，从而创建一条指向Dubbo服务的HTTP路由：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.k8s.io/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Ingress
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">annotations&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">higress.io/destination&lt;/span>: providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev.DEFAULT-GROUP.public.nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: higress-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ingressClassName&lt;/span>: higress
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">rules&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">paths&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">backend&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">resource&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">apiGroup&lt;/span>: networking.higress.io
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">kind&lt;/span>: McpBridge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pathType&lt;/span>: Prefix
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，path前缀为/dubbo的请求就会被路由到我们刚刚创建的Dubbo服务上。&lt;/p>
+&lt;h2 id="通过envoyfilter配置http到dubbo的协议转换规则">通过EnvoyFilter配置HTTP到Dubbo的协议转换规则&lt;/h2>
+&lt;p>经过上述步骤，我们已经在K8s环境下部署了一套Naocs和Dubbo，并通过Ingress将path前缀为/dubbo的请求路由到我们配好的Dubbo服务上。但光是这样是无法正常通信的，因为Dubbo服务使用的是定制的Dubbo协议，无法天然与HTTP协议进行兼容。因此接下来我们将通过EnvoyFilter来配置HTTP到Dubbo的协议转换规则，从而实现用HTTP请求来调用Dubbo服务。&lt;/p>
+&lt;p>在K8s集群中apply以下资源，要注意的是，EnvoyFilter是属于Istio的CRD，因此需要参照前提条件中的第2点来开启Higress对Istio CRD的支持。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: EnvoyFilter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: http-dubbo-transcoder-test
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: higress-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">configPatches&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">applyTo&lt;/span>: HTTP_FILTER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">context&lt;/span>: GATEWAY
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">listener&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filterChain&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: envoy.filters.network.http_connection_manager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subFilter&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: envoy.filters.http.router
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">patch&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">operation&lt;/span>: INSERT_BEFORE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: envoy.filters.http.http_dubbo_transcoder
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">typed_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#39;@type&amp;#39;&lt;/span>: type.googleapis.com/udpa.type.v1.TypedStruct
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type_url&lt;/span>: type.googleapis.com/envoy.extensions.filters.http.http_dubbo_transcoder.v3.HttpDubboTranscoder
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">applyTo&lt;/span>: HTTP_ROUTE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">context&lt;/span>: GATEWAY
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">routeConfiguration&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">vhost&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">patch&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">operation&lt;/span>: MERGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">upgrade_configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">connect_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">allow_post&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">upgrade_type&lt;/span>: CONNECT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">typed_per_filter_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">envoy.filters.http.http_dubbo_transcoder&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#39;@type&amp;#39;&lt;/span>: type.googleapis.com/udpa.type.v1.TypedStruct
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type_url&lt;/span>: type.googleapis.com/envoy.extensions.filters.http.http_dubbo_transcoder.v3.HttpDubboTranscoder
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">request_validation_options&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">reject_unknown_method&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">reject_unknown_query_parameters&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services_mapping&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">group&lt;/span>: dev
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">method_mapping&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: sayName
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameter_mapping&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">extract_key&lt;/span>: p
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">extract_key_spec&lt;/span>: ALL_QUERY_PARAMETER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">mapping_type&lt;/span>: java.lang.String
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">passthrough_setting&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">passthrough_all_headers&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path_matcher&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match_http_method_spec&lt;/span>: ALL_GET
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match_pattern&lt;/span>: /dubbo/hello
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: com.alibaba.nacos.example.dubbo.service.DemoService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">1.0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url_unescape_spec&lt;/span>: ALL_CHARACTERS_EXCEPT_RESERVED
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">applyTo&lt;/span>: CLUSTER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cluster&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">service&lt;/span>: providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev.DEFAULT-GROUP.public.nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">context&lt;/span>: GATEWAY
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">patch&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">operation&lt;/span>: MERGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">upstream_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: envoy.upstreams.http.dubbo_tcp
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">typed_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#39;@type&amp;#39;&lt;/span>: type.googleapis.com/udpa.type.v1.TypedStruct
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type_url&lt;/span>: type.googleapis.com/envoy.extensions.upstreams.http.dubbo_tcp.v3.DubboTcpConnectionPoolProto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在以上EnvoyFilter中，我们配置了将path为/dubbo/hello的HTTP请求转发到Dubbo服务com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev中，并调用其sayName方法，而该方法的参数则通过HTTP url中的的query参数p来指定。&lt;/p>
+&lt;h2 id="请求验证">请求验证&lt;/h2>
+&lt;p>通过以上配置，我们就可以执行以下curl命令来调用这个dubbo服务了：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">$curl&lt;/span> &lt;span style="color:#2aa198">&amp;#34;localhost/dubbo/hello?p=abc&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;result&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;Service [name :demoService , port : 20880] sayName(\&amp;#34;abc\&amp;#34;) : Hello,abc&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置参考">配置参考&lt;/h2>
+&lt;p>EnvoyFilter的相关配置项参考&lt;a href="https://higress.io/zh-cn/docs/user/dubbo-envoyfilter">HTTP转Dubbo配置说明&lt;/a>&lt;/p></description></item><item><title>Blog: 2022 年度总结与 2023 新年规划</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</link><pubDate>Thu, 23 Feb 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</guid><description>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/roadmap/2023-roadmap.jpg" alt="dubbo-introduction">&lt;/p>
 &lt;h2 id="2022-年度总结">2022 年度总结&lt;/h2>
 &lt;h3 id="1-dubbo-开源-12-周年">1 Dubbo 开源 12 周年&lt;/h3>
@@ -1932,30 +2170,30 @@ Spring Boot3 &amp;amp; Spring6&lt;/p>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/6-extensibility.jpg" alt="overview">&lt;/p>
 &lt;p>Dubbo 不是应用框架的替代者，它可以很好的工作在每种语言的主流编程框架之上，以 Java 为例，Dubbo 可以很好的与 Spring 协作，并在此基础上提供服务定义、微服务编程、服务发现、负载均衡、流量管控等能力。&lt;/p>
 &lt;h3 id="提供灵活的通信协议切换能力">提供灵活的通信协议切换能力&lt;/h3>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/8-extensibility.jpg" alt="overview">&lt;/p>
 &lt;p>在通信方面，Dubbo 区别于其他 RPC 框架的是它不绑定特定协议，你可以在底层选用 HTTP./2、TCP、gRPC、REST、Hessian 等任意通信协议，同时享受统一的 API、以及对等的服务治理能力。&lt;/p>
 &lt;h3 id="一切皆可扩展">一切皆可扩展&lt;/h3>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/9-ecosystem.jpg" alt="overview">&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/8-extensibility.jpg" alt="overview">&lt;/p>
 &lt;p>Dubbo 的另一个优势在于其可扩展性设计，从流量管控、协议编码、诊断调优、再到服务治理，你都可以去扩展，满足企业级微服务开发与运维的所有诉求。&lt;/p>
 &lt;h3 id="丰富的生态">丰富的生态&lt;/h3>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/10-mesh.jpg" alt="overview">&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/9-ecosystem.jpg" alt="overview">&lt;/p>
 &lt;p>基于扩展能力 Dubbo 官方提供了丰富的生态适配，涵盖了所有主流的开源微服务组件。&lt;/p>
 &lt;h3 id="服务网格">服务网格&lt;/h3>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/11-initializer.jpg" alt="overview">&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/10-mesh.jpg" alt="overview">&lt;/p>
 &lt;p>对于服务网格架构，Dubbo也可以轻松接入原生 Istio 体系；
 在数据面支持与 Envoy 部署的 Proxy 模式，也支持无 Envoy 的 Proxyless 模式，提供更灵活的数据面选择。&lt;/p>
 &lt;h2 id="构建企业级dubbo-微服务有多简单你只需要-4-步">构建企业级Dubbo 微服务有多简单？你只需要 4 步&lt;/h2>
 &lt;p>我们以 Java 微服务开发为例。&lt;/p>
 &lt;h3 id="第一步">第一步&lt;/h3>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/12-interface.jpg" alt="overview">&lt;/p>
-&lt;p>使用官方脚手架快速创建项目模板，只需要选择依赖的版本、组件，点击 “获取代码” 即可&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/11-initializer.png" alt="overview">&lt;/p>
+&lt;p>使用 &lt;a href="https://start.dubbo.apache.org/bootstrap.html">官方脚手架&lt;/a> 快速创建项目模板，只需要选择依赖的版本、组件，点击 “获取代码” 即可&lt;/p>
 &lt;h3 id="第二步">第二步&lt;/h3>
 &lt;p>将模板项目导入 IDE 开发环境。
 定义 Java 接口作为 Dubbo 服务。
-&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/13-impl.jpg" alt="overview">&lt;/p>
+&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/12-interface.jpg" alt="overview">&lt;/p>
 &lt;p>开发 Dubbo 服务端，实现接口并完成业务逻辑编码，通过一条简单的注解配置完成服务发布。
+&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/13-impl.jpg" alt="overview">&lt;/p>
+&lt;p>开发Dubbo 客户端，通过注解声明 Dubbo 服务，然后就可以发起远程方法调用了。至此，开发工作完成。
 &lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/14-reference.jpg" alt="overview">&lt;/p>
-&lt;p>开发Dubbo 客户端，通过注解声明 Dubbo 服务，然后就可以发起远程方法调用了。至此，开发工作完成。&lt;/p>
 &lt;h3 id="第三步">第三步&lt;/h3>
 &lt;p>进入部署环节，我们选择 Kubernetes 作为部署环境。&lt;/p>
 &lt;p>首先，通过一条命令安装 dubbo-admin 等服务治理组件，安装成功之后，我们查看部署状态。接下来，开始部署业务应用，随后查看确认直到应用已经正常启动
@@ -1963,8 +2201,7 @@ Spring Boot3 &amp;amp; Spring6&lt;/p>
 &lt;p>然后，我们就可以打开 Admin 控制台查看服务部署与调用情况了。这里是 Dubbo Admin 控制台的页面显示效果，可以看到刚才启动的 Dubbo 服务部署状态；除此之外，Admin 还提供了更详细的流量监控监测，点击服务统计，可进入监控页面&lt;/p>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/16-admin.jpg" alt="overview">&lt;/p>
 &lt;p>你可以在此了解Dubbo 集群的详细运行状态，包括每个应用对外服务和调用服务的情况，QpS、成功率等，还可以查看每个实例的资源健康状况。&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/17-grafana1.jpg" alt="overview">&lt;/p>
-&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/18-grafana2.jpg" alt="overview">&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/17-grafana1.png" alt="overview">&lt;/p>
 &lt;h3 id="第四步">第四步&lt;/h3>
 &lt;p>进行流量管控。当应用已经平稳运行后，进一步控制流量的访问行为，包括实现金丝雀发布、全链路灰度、动态调整超时时间、调整权重、按比例流量分发、参数路由等。控制台提供了可视化的流量治理规则操作入口，在这里可以直接下发流量规则。&lt;/p>
 &lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/2/introduction/19-gray.jpg" alt="overview">&lt;/p>
@@ -2788,159 +3025,265 @@ Dubbo 社区是国内最早开始对 Proxyless Service Mesh 模式进行探索�
 &lt;p>这里我们个重点看消费端 Consumer 的地址订阅行为，消费端从分两步读取地址数据，首先是从注册中心收到精简后的地址，随后通过调用 MetadataService 元数据服务，读取对端的元数据信息。在收到这两部分数据之后，消费端会完成地址数据的聚合，最终在运行态还原出类似 Dubbo2 的 URL 地址格式。因此从最终结果而言，应用级地址模型同时兼顾了地址传输层面的性能与运行层面的功能性。&lt;/p>
 &lt;p>以上就是的应用级服务发现背景、工作原理部分的所有内容，接下来我们看一下饿了么升级到 Dubbo3 尤其是应用级服务发现的过程。&lt;/p></description></item><item><title>Blog: 启发式流控制</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</guid><description>
 &lt;h1 id="整体介绍">整体介绍&lt;/h1>
-&lt;p>本文所说的“柔性服务”主要是指consumer端的负载均衡和provider端的限流两个功能。在之前的dubbo版本中，负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。而限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。我们针对这些存在的问题进行了改进。&lt;/p>
-&lt;h1 id="负载均衡">负载均衡&lt;/h1>
-&lt;p>在原本的dubbo版本中，有五种负载均衡的方案供选择，他们分别是&amp;quot;Random&amp;quot;,&amp;ldquo;ShortestResponse&amp;rdquo;,&amp;ldquo;RoundRobin&amp;rdquo;，&amp;ldquo;LeastActive&amp;quot;和&amp;quot;ConsistentHash&amp;rdquo;。其中除&amp;quot;ShortestResponse&amp;quot;和&amp;quot;LeastActive&amp;quot;外，其他的几种方案主要是考虑选择时的公平性和稳定性。对于&amp;quot;ShortestResponse&amp;quot;来说，其设计目的是从所有备选的provider中选择response时间最短的以提高系统整体的吞吐量。然而存在两个问题：1.在大多数的场景下，不同provider的response时长没有非常明显的区别，此时该算法会退化为随机选择。2.response的时间长短有时也并不能代表机器的吞吐能力。对于&amp;quot;LeastActive&amp;quot;来说，其认为应该将流量尽可能分配到当前并发处理任务较少的机器上。但是其同样存在和&amp;quot;ShortestResponse&amp;quot;类似的问题，即这并不能单独代表机器的吞吐能力。
-基于以上分析，我们提出了两种新的负载均衡算法。一种是同样基于公平性考虑的单纯&amp;quot;P2C&amp;quot;算法，另一种是基于自适应的方法&amp;quot;adaptive&amp;quot;，其试图自适应的衡量provider端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。&lt;/p>
-&lt;h2 id="效果介绍">效果介绍&lt;/h2>
-&lt;p>对于负载均衡部分的有效性实验在两个不同的情况下进行的，分别是提供端机器配置比较均衡和提供端机器配置差距较大的情况。
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/67956773/1675265258687-c3df68a8-80e0-4311-816c-63480494850c.png#clientId=u54f9e7eb-38a1-4&amp;amp;from=paste&amp;amp;height=226&amp;amp;id=ud2d81be9&amp;amp;name=image.png&amp;amp;originHeight=890&amp;amp;originWidth=1798&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;rotation=0&amp;amp;showTitle=false&amp;amp;size=63793&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u9adb8df7-315a-4800-ac9f-888ba0d1c11&amp;amp;title=&amp;amp;width=457" alt="image.png">
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/67956773/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png#clientId=u54f9e7eb-38a1-4&amp;amp;from=paste&amp;amp;height=246&amp;amp;id=u4652443c&amp;amp;name=image.png&amp;amp;originHeight=890&amp;amp;originWidth=1798&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;rotation=0&amp;amp;showTitle=false&amp;amp;size=57908&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u624f980f-f1de-43ed-a068-9f1c38ab171&amp;amp;title=&amp;amp;width=497" alt="image.png">&lt;/p>
-&lt;h2 id="使用方法">使用方法&lt;/h2>
+&lt;p>本文所说的柔性服务主要是指&lt;strong>consumer端的负载均衡&lt;/strong>和&lt;strong>provider端的限流&lt;/strong>两个功能。在之前的dubbo版本中，&lt;/p>
+&lt;ul>
+&lt;li>负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。&lt;/li>
+&lt;li>限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。&lt;/li>
+&lt;/ul>
+&lt;p>我们针对这些存在的问题进行了改进。&lt;/p>
+&lt;h2 id="负载均衡">负载均衡&lt;/h2>
+&lt;h3 id="使用介绍">使用介绍&lt;/h3>
+&lt;p>在原本的dubbo版本中，有五种负载均衡的方案供选择，他们分别是 &lt;code>Random&lt;/code>、&lt;code>ShortestResponse&lt;/code>、&lt;code>RoundRobin&lt;/code>、&lt;code>LeastActive&lt;/code> 和 &lt;code>ConsistentHash&lt;/code>。其中除 &lt;code>ShortestResponse&lt;/code> 和 &lt;code>LeastActive&lt;/code> 外，其他的几种方案主要是考虑选择时的公平性和稳定性。&lt;/p>
+&lt;p>对于 &lt;code>ShortestResponse&lt;/code> 来说，其设计目的是从所有备选的 provider 中选择 response 时间最短的以提高系统整体的吞吐量。然而存在两个问题：&lt;/p>
+&lt;ol>
+&lt;li>在大多数的场景下，不同provider的response时长没有非常明显的区别，此时该算法会退化为随机选择。&lt;/li>
+&lt;li>response的时间长短有时也并不能代表机器的吞吐能力。对于 &lt;code>LeastActive&lt;/code> 来说，其认为应该将流量尽可能分配到当前并发处理任务较少的机器上。但是其同样存在和 &lt;code>ShortestResponse&lt;/code> 类似的问题，即这并不能单独代表机器的吞吐能力。&lt;/li>
+&lt;/ol>
+&lt;p>基于以上分析，我们提出了两种新的负载均衡算法。一种是同样基于公平性考虑的单纯 &lt;code>P2C&lt;/code> 算法，另一种是基于自适应的方法 &lt;code>adaptive&lt;/code>，其试图自适应的衡量 provider 端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。&lt;/p>
+&lt;h4 id="总体效果">总体效果&lt;/h4>
+&lt;p>对于负载均衡部分的有效性实验在两个不同的情况下进行的，分别是提供端机器配置比较均衡和提供端机器配置差距较大的情况。&lt;/p>
+&lt;p>&lt;img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/67956773/1675265258687-c3df68a8-80e0-4311-816c-63480494850c.png#clientId=u54f9e7eb-38a1-4&amp;amp;from=paste&amp;amp;height=226&amp;amp;id=ud2d81be9&amp;amp;name=image.png&amp;amp;originHeight=890&amp;amp;originWidth=1798&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;rotation=0&amp;amp;showTitle=false&amp;amp;size=63793&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u9adb8df7-315a-4800-ac9f-888ba0d1c11&amp;amp;title=&amp;amp;width=457" alt="image.png">&lt;/p>
+&lt;p>&lt;img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/67956773/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png#clientId=u54f9e7eb-38a1-4&amp;amp;from=paste&amp;amp;height=246&amp;amp;id=u4652443c&amp;amp;name=image.png&amp;amp;originHeight=890&amp;amp;originWidth=1798&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;rotation=0&amp;amp;showTitle=false&amp;amp;size=57908&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u624f980f-f1de-43ed-a068-9f1c38ab171&amp;amp;title=&amp;amp;width=497" alt="image.png">&lt;/p>
+&lt;h4 id="使用方法">使用方法&lt;/h4>
 &lt;p>使用方法与原本的负载均衡方法相同。只需要在consumer端将&amp;quot;loadbalance&amp;quot;设置为&amp;quot;p2c&amp;quot;或者&amp;quot;adaptive&amp;quot;即可。&lt;/p>
-&lt;h2 id="代码结构">代码结构&lt;/h2>
+&lt;h4 id="代码结构">代码结构&lt;/h4>
 &lt;p>负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。&lt;/p>
-&lt;h2 id="原理介绍">原理介绍&lt;/h2>
-&lt;h3 id="p2c算法">P2C算法&lt;/h3>
-&lt;p>Power of Two Choice算法简单但是经典，主要思路如下：
-1.对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。
-2.比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。&lt;/p>
-&lt;h3 id="adaptive算法">adaptive算法&lt;/h3>
+&lt;h3 id="原理介绍">原理介绍&lt;/h3>
+&lt;h4 id="p2c算法">P2C算法&lt;/h4>
+&lt;p>Power of Two Choice算法简单但是经典，主要思路如下：&lt;/p>
+&lt;ol>
+&lt;li>对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。&lt;/li>
+&lt;li>比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。&lt;/li>
+&lt;/ol>
+&lt;h4 id="adaptive算法">adaptive算法&lt;/h4>
 &lt;p>&lt;a href="https://github.com/apache/dubbo/pull/10745">代码的github地址&lt;/a>&lt;/p>
-&lt;h4 id="相关指标">相关指标&lt;/h4>
-&lt;p>1.cpuLoad
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/26808016bc7f1ee83ab425e308074f17.svg#card=math&amp;amp;code=cpuLoad%20%3D%20cpu%E4%B8%80%E5%88%86%E9%92%9F%E5%B9%B3%E5%9D%87%E8%B4%9F%E8%BD%BD%20%2A%20100%20%2F%20%E5%8F%AF%E7%94%A8cpu%E6%95%B0%E9%87%8F&amp;amp;id=DLuwW" alt="img">。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。
-2.rt
-rt为一次rpc调用所用的时间，单位为毫秒。
-3.timeout
-timeout为本次rpc调用超时剩余的时间，单位为毫秒。
-4.weight
-weight是设置的服务权重。
-5.currentProviderTime
-provider端在计算cpuLoad时的时间，单位是毫秒
-6.currentTime
-currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。
-7.multiple
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/b60f036bd026b92129df8a6476922cc8.svg#card=math&amp;amp;code=multiple%3D%28%E5%BD%93%E5%89%8D%E6%97%B6%E9%97%B4%20-%20currentTime%29%2Ftimeout%20%2B%201&amp;amp;id=VpE3k" alt="img">
-8.lastLatency
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/f2abbc771049cf4f3e492e93a258d699.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cend%7Balign%2A%7D%0A%0A&amp;amp;id=ynJBf" alt="img">&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/8fb1af970b995232ebed2764a5706aab.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AlastLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%202%2Atimeout%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20currentTime%3D%3DcurrentProviderTime%5C%5C%0A%20%0A%20%20%20%20lastLatency%20%3E%3E%20multiple%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&amp;amp;id=xAu3F" alt="img">
-9.beta
-平滑参数，默认为0.5
-10.ewma
-lastLatency的平滑值&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/c26fdbae56f3a06c46434ae91185a3d6.svg#card=math&amp;amp;code=lastLatency%3Dbeta%20%2A%20lastLatency%20%2B%20%281%20-%20beta%29%20%2A%20lastLatency&amp;amp;id=absgN" alt="img">
-11.inflight
+&lt;h5 id="相关指标">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>cpuLoad
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/26808016bc7f1ee83ab425e308074f17.svg#card=math&amp;amp;code=cpuLoad%20%3D%20cpu%E4%B8%80%E5%88%86%E9%92%9F%E5%B9%B3%E5%9D%87%E8%B4%9F%E8%BD%BD%20%2A%20100%20%2F%20%E5%8F%AF%E7%94%A8cpu%E6%95%B0%E9%87%8F&amp;amp;id=DLuwW" alt="img">。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>rt
+rt为一次rpc调用所用的时间，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>timeout
+timeout为本次rpc调用超时剩余的时间，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>weight
+weight是设置的服务权重。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>currentProviderTime
+provider端在计算cpuLoad时的时间，单位是毫秒&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>currentTime
+currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>multiple
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/b60f036bd026b92129df8a6476922cc8.svg#card=math&amp;amp;code=multiple%3D%28%E5%BD%93%E5%89%8D%E6%97%B6%E9%97%B4%20-%20currentTime%29%2Ftimeout%20%2B%201&amp;amp;id=VpE3k" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>lastLatency
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/f2abbc771049cf4f3e492e93a258d699.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cend%7Balign%2A%7D%0A%0A&amp;amp;id=ynJBf" alt="img">&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/8fb1af970b995232ebed2764a5706aab.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AlastLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%202%2Atimeout%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20currentTime%3D%3DcurrentProviderTime%5C%5C%0A%20%0A%20%20%20%20lastLatency%20%3E%3E%20multiple%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&amp;amp;id=xAu3F" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>beta
+平滑参数，默认为0.5&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ewma
+lastLatency的平滑值&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/c26fdbae56f3a06c46434ae91185a3d6.svg#card=math&amp;amp;code=lastLatency%3Dbeta%20%2A%20lastLatency%20%2B%20%281%20-%20beta%29%20%2A%20lastLatency&amp;amp;id=absgN" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>inflight
 inflight为consumer端还未返回的请求的数量。
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/f429c4726dec484e70ee73e6a37c88dd.svg#card=math&amp;amp;code=inflight%3DconsumerReq%20-%20consumerSuccess%20-%20errorReq&amp;amp;id=UZIcf" alt="img">
-12.load
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/f429c4726dec484e70ee73e6a37c88dd.svg#card=math&amp;amp;code=inflight%3DconsumerReq%20-%20consumerSuccess%20-%20errorReq&amp;amp;id=UZIcf" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>load
 对于备选后端机器x来说，若距离上次被调用的时间大于2*timeout，则其load值为0。
-否则
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/0f56746b3643dc3ed0e019c24ad5f377.svg#card=math&amp;amp;code=load%20%3D%20CpuLoad%20%2A%20%28sqrt%28ewma%29%20%2B%201%29%20%2A%20%28inflight%20%2B%201%29%2F%28%28%28consumerSuccess%20%2F%20%28consumerReq%20%2B1%29%20%29%20%2A%20weight%29%2B1%29&amp;amp;id=TCYWX" alt="img">&lt;/p>
-&lt;h4 id="算法实现">算法实现&lt;/h4>
-&lt;p>依然是基于P2C算法。
-1.从备选列表中做两次随机选择，得到providerA和providerB
-2.比较providerA和providerB的load值，选择较小的那个。&lt;/p>
-&lt;h1 id="自适应限流">自适应限流&lt;/h1>
+否则,&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/0f56746b3643dc3ed0e019c24ad5f377.svg#card=math&amp;amp;code=load%20%3D%20CpuLoad%20%2A%20%28sqrt%28ewma%29%20%2B%201%29%20%2A%20%28inflight%20%2B%201%29%2F%28%28%28consumerSuccess%20%2F%20%28consumerReq%20%2B1%29%20%29%20%2A%20weight%29%2B1%29&amp;amp;id=TCYWX" alt="img">&lt;/p>
+&lt;h5 id="算法实现">算法实现&lt;/h5>
+&lt;p>依然是基于P2C算法。&lt;/p>
+&lt;ol>
+&lt;li>从备选列表中做两次随机选择，得到providerA和providerB&lt;/li>
+&lt;li>比较providerA和providerB的load值，选择较小的那个。&lt;/li>
+&lt;/ol>
+&lt;h2 id="自适应限流">自适应限流&lt;/h2>
 &lt;p>与负载均衡运行在consumer端不同的是，限流功能运行在provider端。其作用是限制provider端处理并发任务时的最大数量。从理论上讲，服务端机器的处理能力是存在上限的，对于一台服务端机器，当短时间内出现大量的请求调用时，会导致处理不及时的请求积压，使机器过载。在这种情况下可能导致两个问题：1.由于请求积压，最终所有的请求都必须等待较长时间才能被处理，从而使整个服务瘫痪。2.服务端机器长时间的过载可能有宕机的风险。因此，在可能存在过载风险时，拒绝掉一部分请求反而是更好的选择。在之前的dubbo版本中，限流是通过在provider端设置静态的最大并发值实现的。但是在服务数量多，拓扑复杂且处理能力会动态变化的局面下，该值难以通过计算静态设置。
-基于以上原因，我们需要一种自适应的算法，其可以动态调整服务端机器的最大并发值，使其可以在保证机器不过载的前提下，尽可能多的处理接收到的请求。因此，我们参考brpc等其他框架的基础上，在dubbo的框架内实现了两种自适应限流算法，分别是基于启发式平滑的&amp;quot;HeuristicSmoothingFlowControl&amp;quot;和基于窗口的&amp;quot;AutoConcurrencyLimier&amp;quot;。
-&lt;a href="https://github.com/apache/dubbo/pull/10642">代码的github地址&lt;/a>&lt;/p>
-&lt;h2 id="效果介绍-1">效果介绍&lt;/h2>
+基于以上原因，我们需要一种自适应的算法，其可以动态调整服务端机器的最大并发值，使其可以在保证机器不过载的前提下，尽可能多的处理接收到的请求。因此，我们参考brpc等其他框架的基础上，在dubbo的框架内实现了两种自适应限流算法，分别是基于启发式平滑的&amp;quot;HeuristicSmoothingFlowControl&amp;quot;和基于窗口的&amp;quot;AutoConcurrencyLimier&amp;quot;。&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo/pull/10642">代码的github地址&lt;/a>&lt;/p>
+&lt;h3 id="使用介绍-1">使用介绍&lt;/h3>
+&lt;h4 id="总体效果-1">总体效果&lt;/h4>
 &lt;p>自适应限流部分的有效性实验我们在提供端机器配置尽可能大的情况下进行，并且为了凸显效果，在实验中我们将单次请求的复杂度提高，将超时时间尽可能设置的大，并且开启消费端的重试功能。
 &lt;img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/67956773/1675267798831-3da99681-577f-4e5a-b122-b87c8aba7299.png#clientId=u54f9e7eb-38a1-4&amp;amp;from=paste&amp;amp;height=239&amp;amp;id=u4de83107&amp;amp;name=image.png&amp;amp;originHeight=800&amp;amp;originWidth=1680&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;rotation=0&amp;amp;showTitle=false&amp;amp;size=53641&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u948ff148-1ec8-42ec-9712-0655b1e0336&amp;amp;title=&amp;amp;width=502" alt="image.png">&lt;/p>
-&lt;h2 id="使用方法-1">使用方法&lt;/h2>
-&lt;p>要确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。
-设置方法与静态的最大并发值设置类似，只需在provider端将&amp;quot;flowcontrol&amp;quot;设置为&amp;quot;autoConcurrencyLimier&amp;quot;或者&amp;quot;heuristicSmoothingFlowControl&amp;quot;即可。&lt;/p>
-&lt;h2 id="代码结构-1">代码结构&lt;/h2>
-&lt;p>1.FlowControlFilter：在provider端的filter负责根据限流算法的结果来对provider端进行限流功能。
-2.FlowControl：根据dubbo的spi实现的限流算法的接口。限流的具体实现算法需要继承自该接口并可以通过dubbo的spi方式使用。
-3.CpuUsage：周期性获取cpu的相关指标
-4.HardwareMetricsCollector：获取硬件指标的相关方法
-5.ServerMetricsCollector：基于滑动窗口的获取限流需要的指标的相关方法。比如qps等。
-6.AutoConcurrencyLimier：自适应限流的具体实现算法。
-7.HeuristicSmoothingFlowControl：自适应限流的具体实现方法。&lt;/p>
-&lt;h2 id="原理介绍-1">原理介绍&lt;/h2>
-&lt;h3 id="heuristicsmoothingflowcontrol">HeuristicSmoothingFlowControl&lt;/h3>
-&lt;h4 id="相关指标-1">相关指标&lt;/h4>
-&lt;p>1.alpha
-alpha为可接受的延时的上升幅度，默认为0.3
-2.minLatency
-在一个时间窗口内的最小的Latency值。
-3.noLoadLatency
-noLoadLatency是单纯处理任务的延时，不包括排队时间。这是服务端机器的固有属性，但是并不是一成不变的。在HeuristicSmoothingFlowControl算法中，我们根据机器CPU的使用率来确定机器当前的noLoadLatency。当机器的CPU使用率较低时，我们认为minLatency便是noLoadLatency。当CPU使用率适中时，我们平滑的用minLatency来更新noLoadLatency的值。当CPU使用率较高时，noLoadLatency的值不再改变。
-4.maxQPS
-一个时间窗口周期内的QPS的最大值。
-5.avgLatency
-一个时间窗口周期内的Latency的平均值，单位为毫秒。
-6.maxConcurrency
+&lt;h4 id="使用方法-1">使用方法&lt;/h4>
+&lt;p>要确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。&lt;/p>
+&lt;p>设置方法与静态的最大并发值设置类似，只需在provider端将&amp;quot;flowcontrol&amp;quot;设置为&amp;quot;autoConcurrencyLimier&amp;quot;或者&amp;quot;heuristicSmoothingFlowControl&amp;quot;即可。&lt;/p>
+&lt;h4 id="代码结构-1">代码结构&lt;/h4>
+&lt;ol>
+&lt;li>FlowControlFilter：在provider端的filter负责根据限流算法的结果来对provider端进行限流功能。&lt;/li>
+&lt;li>FlowControl：根据dubbo的spi实现的限流算法的接口。限流的具体实现算法需要继承自该接口并可以通过dubbo的spi方式使用。&lt;/li>
+&lt;li>CpuUsage：周期性获取cpu的相关指标&lt;/li>
+&lt;li>HardwareMetricsCollector：获取硬件指标的相关方法&lt;/li>
+&lt;li>ServerMetricsCollector：基于滑动窗口的获取限流需要的指标的相关方法。比如qps等。&lt;/li>
+&lt;li>AutoConcurrencyLimier：自适应限流的具体实现算法。&lt;/li>
+&lt;li>HeuristicSmoothingFlowControl：自适应限流的具体实现方法。&lt;/li>
+&lt;/ol>
+&lt;h3 id="原理介绍-1">原理介绍&lt;/h3>
+&lt;h4 id="heuristicsmoothingflowcontrol">HeuristicSmoothingFlowControl&lt;/h4>
+&lt;h5 id="相关指标-1">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>alpha
+alpha为可接受的延时的上升幅度，默认为0.3&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>minLatency
+在一个时间窗口内的最小的Latency值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>noLoadLatency
+noLoadLatency是单纯处理任务的延时，不包括排队时间。这是服务端机器的固有属性，但是并不是一成不变的。在HeuristicSmoothingFlowControl算法中，我们根据机器CPU的使用率来确定机器当前的noLoadLatency。当机器的CPU使用率较低时，我们认为minLatency便是noLoadLatency。当CPU使用率适中时，我们平滑的用minLatency来更新noLoadLatency的值。当CPU使用率较高时，noLoadLatency的值不再改变。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxQPS
+一个时间窗口周期内的QPS的最大值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>avgLatency
+一个时间窗口周期内的Latency的平均值，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxConcurrency
 计算得到的当前服务提供端的最大并发值。
 &lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/f40e48ebdb49648cf942714609808c52.svg#card=math&amp;amp;code=maxConcurrency%3Dceil%28maxQPS%20%2A%20%28%282%20%2B%20alpha%29%20%2A%20noLoadLatency%20-%20avgLatency%29%29&amp;amp;id=xO1h8" alt="img">&lt;/p>
-&lt;h4 id="算法实现-1">算法实现&lt;/h4>
+&lt;/li>
+&lt;/ol>
+&lt;h5 id="算法实现-1">算法实现&lt;/h5>
 &lt;p>当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从HeuristicSmoothingFlowControl算法中获得当前的maxConcurrency值。如果当前正在处理的请求数量超过了maxConcurrency，则拒绝该请求。&lt;/p>
-&lt;h3 id="autoconcurrencylimier">AutoConcurrencyLimier&lt;/h3>
-&lt;h4 id="相关指标-2">相关指标&lt;/h4>
-&lt;p>1.MaxExploreRatio
-默认设置为0.3
-2.MinExploreRatio
-默认设置为0.06
-3.SampleWindowSizeMs
-采样窗口的时长。默认为1000毫秒。
-4.MinSampleCount
-采样窗口的最小请求数量。默认为40。
-5.MaxSampleCount
-采样窗口的最大请求数量。默认为500。
-6.emaFactor
-平滑处理参数。默认为0.1。
-7.exploreRatio
+&lt;h4 id="autoconcurrencylimier">AutoConcurrencyLimier&lt;/h4>
+&lt;h5 id="相关指标-2">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>MaxExploreRatio
+默认设置为0.3&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MinExploreRatio
+默认设置为0.06&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>SampleWindowSizeMs
+采样窗口的时长。默认为1000毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MinSampleCount
+采样窗口的最小请求数量。默认为40。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MaxSampleCount
+采样窗口的最大请求数量。默认为500。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>emaFactor
+平滑处理参数。默认为0.1。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>exploreRatio
 探索率。初始设置为MaxExploreRatio。
 若avgLatency&amp;lt;=noLoadLatency*(1.0 + MinExploreRatio)或者qps&amp;gt;=maxQPS*(1.0 + MinExploreRatio)
 则exploreRatio=min(MaxExploreRatio,exploreRatio+0.02)
 否则
 exploreRatio=max(MinExploreRatio,exploreRatio-0.02)&lt;/p>
-&lt;p>8.maxQPS
+&lt;/li>
+&lt;li>
+&lt;p>maxQPS
 窗口周期内QPS的最大值。
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/d5cf045bc17267befc176f3d76273267.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AmaxQPS%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20qps%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20qps%20%3E%20maxQPS%5C%5C%0A%20%0A%20%20%20%20qps%2AemaFactor%20%2B%20maxQPS%2A%281-emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&amp;amp;id=VbdUd" alt="img">
-9.noLoadLatency
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/8c700211f5c7a13403e3088df9cd9f43.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AnoLoadLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20avgLatency%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20noLoadLatency%20%3C%3D%200%5C%5C%0A%20%0A%20%20%20%20avgLatency%2AemaFactor%20%2B%20noLoadLatency%2A%281%20-%20emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&amp;amp;id=hB7ED" alt="img">
-10.halfSampleIntervalMs
-半采样区间。默认为25000毫秒。
-11.resetLatencyUs
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/d5cf045bc17267befc176f3d76273267.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AmaxQPS%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20qps%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20qps%20%3E%20maxQPS%5C%5C%0A%20%0A%20%20%20%20qps%2AemaFactor%20%2B%20maxQPS%2A%281-emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&amp;amp;id=VbdUd" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>noLoadLatency
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/8c700211f5c7a13403e3088df9cd9f43.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AnoLoadLatency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20avgLatency%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20noLoadLatency%20%3C%3D%200%5C%5C%0A%20%0A%20%20%20%20avgLatency%2AemaFactor%20%2B%20noLoadLatency%2A%281%20-%20emaFactor%29%2C%20%20%20%20%20%26%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&amp;amp;id=hB7ED" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>halfSampleIntervalMs
+半采样区间。默认为25000毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>resetLatencyUs
 下一次重置所有值的时间戳，这里的重置包括窗口内值和noLoadLatency。单位是微秒。初始为0.
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/1af4a6134ede96985302ee8a27f93df7.svg#card=math&amp;amp;code=resetLatencyUs%3DsamplingTimeUs%2B2%2AavgLatency%2C%0Aif%28remeasureStartUs%3C%3DsamplingTimeUs%29&amp;amp;id=vJHLa" alt="img">
-12.remeasureStartUs
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/1af4a6134ede96985302ee8a27f93df7.svg#card=math&amp;amp;code=resetLatencyUs%3DsamplingTimeUs%2B2%2AavgLatency%2C%0Aif%28remeasureStartUs%3C%3DsamplingTimeUs%29&amp;amp;id=vJHLa" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>remeasureStartUs
 下一次重置窗口的开始时间。
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/c7da904b9a4c890456499b09d01938d3.svg#card=math&amp;amp;code=remeasureStartUs%3DsamplingTimeUs%2B%28halfSampleIntervalMS%20%2B%20%E9%9A%8F%E6%9C%BA%E5%80%BC%29%2A1000&amp;amp;id=ket08" alt="img">
-13.startSampleTimeUs
-开始采样的时间。单位为微秒。
-14.sampleCount
-当前采样窗口内请求的数量。
-15.totalSampleUs
-采样窗口内所有请求的latency的和。单位为微秒。
-16.totalReqCount
-采样窗口时间内所有请求的数量和。注意区别sampleCount。
-17.samplingTimeUs
-采样当前请求的时间戳。单位为微秒。
-18.latency
-当前请求的latency。
-19.qps
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/c7da904b9a4c890456499b09d01938d3.svg#card=math&amp;amp;code=remeasureStartUs%3DsamplingTimeUs%2B%28halfSampleIntervalMS%20%2B%20%E9%9A%8F%E6%9C%BA%E5%80%BC%29%2A1000&amp;amp;id=ket08" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>startSampleTimeUs
+开始采样的时间。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>sampleCount
+当前采样窗口内请求的数量。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>totalSampleUs
+采样窗口内所有请求的latency的和。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>totalReqCount
+采样窗口时间内所有请求的数量和。注意区别sampleCount。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>samplingTimeUs
+采样当前请求的时间戳。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>latency
+当前请求的latency。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>qps
 在该时间窗口内的qps值。
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/c0e8b30fc1ecf9438bc2d574fb3da8b6.svg#card=math&amp;amp;code=qps%3DtotalReqCount%2A1000000%2F%28samplingTimeUs%20-%20startSampleTimeUs%29&amp;amp;id=tzGm6" alt="img">
-20.avgLatency
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/c0e8b30fc1ecf9438bc2d574fb3da8b6.svg#card=math&amp;amp;code=qps%3DtotalReqCount%2A1000000%2F%28samplingTimeUs%20-%20startSampleTimeUs%29&amp;amp;id=tzGm6" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>avgLatency
 窗口内的平均latency。
-&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/3a3acfdb05be7d3985835d43e492d3b9.svg#card=math&amp;amp;code=avgLatency%3DtotalSampleUs%20%2F%20sampleCount&amp;amp;id=gTnsb" alt="img">
-21.maxConcurrency
-上一个窗口计算得到当前周期的最大并发值。
-22.nextMaxConcurrency
+&lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/3a3acfdb05be7d3985835d43e492d3b9.svg#card=math&amp;amp;code=avgLatency%3DtotalSampleUs%20%2F%20sampleCount&amp;amp;id=gTnsb" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxConcurrency
+上一个窗口计算得到当前周期的最大并发值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>nextMaxConcurrency
 当前窗口计算出的下一个周期的最大并发值。
 &lt;img src="https://intranetproxy.alipay.com/skylark/lark/__latex/09852cc0ef125b43a37719796cb8baae.svg#card=math&amp;amp;code=%5Cbegin%7Balign%2A%7D%0A%5Cbegin%7Bsplit%7D%0A%20%0AnextMaxConcurrency%3D%20%5Cleft%20%5C%7B%0A%20%0A%5Cbegin%7Barray%7D%7Bll%7D%0A%20%0A%20%20%20%20ceil%28maxQPS%2AnoLoadLatency%2A0.9%2F1000000%29%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20remeasureStartUs%20%3C%3D%20samplingTimeUs%5C%5C%0A%20%0A%20%20%20%20ceil%28noLoadLatency%2AmaxQPS%2A%281%2BexploreRatio%29%2F1000000%29%2C%20%20%20%20%20%20otherwise%5C%5C%0A%20%0A%0A%5Cend%7Barray%7D%0A%20%0A%5Cright.%0A%20%0A%5Cend%7Bsplit%7D%0A%20%0A%5Cend%7Balign%2A%7D&amp;amp;id=kLKle" alt="img">&lt;/p>
-&lt;h4 id="littles-law">Little&amp;rsquo;s Law&lt;/h4>
-&lt;p>当服务处于稳定状态时：concurrency=latency*qps。这是自适应限流理论的基础。
-当请求没有导致机器超载时，latency基本稳定，qps和concurrency处于线性关系。
-当短时间内请求数量过多，导致服务超载的时候，concurrency会和latency一起上升，qps则会趋于稳定。&lt;/p>
-&lt;h4 id="算法实现-2">算法实现&lt;/h4>
-&lt;p>AutoConcurrencyLimier的算法使用过程和HeuristicSmoothingFlowControl类似。
-实现与HeuristicSmoothingFlowControl的最大区别是AutoConcurrencyLimier是基于窗口的。每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到maxConcurrency。
-其次，利用exploreRatio来对剩余的容量进行探索。
-另外，每隔一段时间都会自动缩小max_concurrency并持续一段时间，以处理noLoadLatency上涨的情况。因为估计noLoadLatency时必须先让服务处于低负载的状态，因此对maxConcurrency的缩小是难以避免的。
-由于max_concurrency&amp;lt;concurrency时，服务会拒绝掉所有的请求，限流算法将&amp;quot;排空所有的经历过排队的等待请求的时间&amp;quot;设置为2*latency，以确保minLatency的样本绝大部分时没有经过排队等待的。&lt;/p></description></item><item><title>Blog: Dubbo 连接异构微服务体系 - 多协议&amp;多注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</link><pubDate>Thu, 05 Jan 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</guid><description>
+&lt;/li>
+&lt;/ol>
+&lt;h5 id="littles-law">Little&amp;rsquo;s Law&lt;/h5>
+&lt;ul>
+&lt;li>当服务处于稳定状态时：concurrency=latency*qps。这是自适应限流理论的基础。&lt;/li>
+&lt;li>当请求没有导致机器超载时，latency基本稳定，qps和concurrency处于线性关系。&lt;/li>
+&lt;li>当短时间内请求数量过多，导致服务超载的时候，concurrency会和latency一起上升，qps则会趋于稳定。&lt;/li>
+&lt;/ul>
+&lt;h5 id="算法实现-2">算法实现&lt;/h5>
+&lt;p>AutoConcurrencyLimier的算法使用过程和HeuristicSmoothingFlowControl类似。与HeuristicSmoothingFlowControl的最大区别是:&lt;/p>
+&lt;p>AutoConcurrencyLimier是基于窗口的。每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到maxConcurrency。
+其次，利用exploreRatio来对剩余的容量进行探索。&lt;/p>
+&lt;p>另外，每隔一段时间都会自动缩小max_concurrency并持续一段时间，以处理noLoadLatency上涨的情况。因为估计noLoadLatency时必须先让服务处于低负载的状态，因此对maxConcurrency的缩小是难以避免的。&lt;/p>
+&lt;p>由于 max_concurrency &amp;lt; concurrency 时，服务会拒绝掉所有的请求，限流算法将 &amp;ldquo;排空所有的经历过排队的等待请求的时间&amp;rdquo; 设置为 2*latency，以确保 minLatency 的样本绝大部分时没有经过排队等待的。&lt;/p></description></item><item><title>Blog: Dubbo 连接异构微服务体系 - 多协议&amp;多注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</link><pubDate>Thu, 05 Jan 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</guid><description>
 &lt;p>从编程开发的角度来说，Dubbo 首先是一款 RPC 服务框架，它最大的优势在于提供了面向接口代理的服务编程模型，对开发者屏蔽了底层的远程通信细节。同时 Dubbo 也是一款服务治理框架，它为分布式部署的微服务提供了服务发现、流量调度等服务治理解决方案。&lt;/p>
 &lt;p>在这篇文章中，我们将以以上基础能力为背景，尝试突破 Dubbo 体系自身，探索如何利用 Dubbo 对多协议、多服务发现模型的支持，来实现异构微服务体系间的互联互通。在实际业务场景中，这可以用来解决异构技术体系共存场景下的通信问题，帮助公司实现在异构技术体系间作平滑迁移，解决大规模跨区域、多集群部署场景的地址发现及流量调度等问题。&lt;/p>
 &lt;h2 id="面向接口代理的透明服务开发框架">面向接口代理的透明服务开发框架&lt;/h2>
@@ -10369,195 +10712,4 @@ dubbo:config-center 配置&lt;/p>
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// register DubboBootstrap bean
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>registerBean&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>原文： &lt;a href="https://blog.elastic.link/2022/07/10/dubbo/8-dubbo-qi-dong-qi-dubbobootstrap-jie-zhu-shuang-chong-xiao-yan-suo-de-dan-li-mo-shi-jin-xing-dui-xiang-de-chu-shi-hua/">&amp;laquo;Dubbo启动器DubboBootstrap借助双重校验锁的单例模式进行对象的初始化&amp;raquo;&lt;/a>&lt;/p></description></item><item><title>Blog: 7-Dubbo的SPI扩展机制之自动激活扩展Activate源码解析</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2022/08/07/7-dubbo%E7%9A%84spi%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E4%B9%8B%E8%87%AA%E5%8A%A8%E6%BF%80%E6%B4%BB%E6%89%A9%E5%B1%95activate%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</link><pubDate>Sun, 07 Aug 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2022/08/07/7-dubbo%E7%9A%84spi%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6%E4%B9%8B%E8%87%AA%E5%8A%A8%E6%BF%80%E6%B4%BB%E6%89%A9%E5%B1%95activate%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</guid><description>
-&lt;h1 id="7-dubbo的spi扩展机制之自动激活扩展activate源码解析">7-Dubbo的SPI扩展机制之自动激活扩展Activate源码解析&lt;/h1>
-&lt;h2 id="71-activate扩展的说明">7.1 Activate扩展的说明&lt;/h2>
-&lt;p>此注解对于使用给定条件自动激活某些扩展非常有用，例如：@Activate可用于在有多个实现时加载某些筛选器扩展。&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>group()&lt;/strong> 指定组条件。框架SPI定义了有效的组值。&lt;/li>
-&lt;li>&lt;strong>value()&lt;/strong> 指定URL条件中的参数键。&lt;/li>
-&lt;/ul>
-&lt;p>SPI提供程序可以调用ExtensionLoader。getActivateExtension(URL、String、String)方法以查找具有给定条件的所有已激活扩展。&lt;/p>
-&lt;p>比如后面我们会说到的&lt;strong>过滤器扩展对象&lt;/strong>的获取,如下通过调用&lt;strong>getActivateExtension方法的&lt;/strong>代码:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Filter&lt;span style="color:#719e07">&amp;gt;&lt;/span> filters&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filters &lt;span style="color:#719e07">=&lt;/span> ScopeModelUtil&lt;span style="color:#719e07">.&lt;/span>getExtensionLoader&lt;span style="color:#719e07">(&lt;/span>Filter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">,&lt;/span> moduleModels&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">)).&lt;/span>getActivateExtension&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">,&lt;/span> key&lt;span style="color:#719e07">,&lt;/span> group&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="72-获取自动激活扩展的源码">7.2 获取自动激活扩展的源码&lt;/h2>
-&lt;p>前面我们看了激活扩展是通过调用getActivateExtension方法来获取对象的,那接下来就来看下这个方法做了什么操作:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">* @param url 服务的url
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">* @param key 用于获取扩展点名称的url参数键 比如监听器:exporter.listener,过滤器:params-filter,telnet处理器:telnet
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">*/&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getActivateExtension&lt;/span>&lt;span style="color:#719e07">(&lt;/span>URL url&lt;span style="color:#719e07">,&lt;/span> String key&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> getActivateExtension&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">,&lt;/span> key&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>继续调用重载的方法&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param url 服务的url
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param key 用于获取扩展点名称的url参数键 比如监听器:exporter.listener,过滤器:params-filter,telnet处理器:telnet
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param group group 用于筛选的分组,比如过滤器中使用此参数来区分消费者使用这个过滤器还是提供者使用这个过滤器他们的group参数分表为consumer,provider
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return 已激活的扩展列表。
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getActivateExtension&lt;/span>&lt;span style="color:#719e07">(&lt;/span>URL url&lt;span style="color:#719e07">,&lt;/span> String key&lt;span style="color:#719e07">,&lt;/span> String group&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//从参数中获取url指定的值
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> String value &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>key&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用下个重载的方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> getActivateExtension&lt;span style="color:#719e07">(&lt;/span>url&lt;span style="color:#719e07">,&lt;/span> StringUtils&lt;span style="color:#719e07">.&lt;/span>isEmpty&lt;span style="color:#719e07">(&lt;/span>value&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">:&lt;/span> COMMA_SPLIT_PATTERN&lt;span style="color:#719e07">.&lt;/span>split&lt;span style="color:#719e07">(&lt;/span>value&lt;span style="color:#719e07">),&lt;/span> group&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面的重载方法都是用来转换参数的,下面这个方法才是真正的逻辑&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 获取激活扩展.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param url 服务的url
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param values 这个value是扩展点的名字 当指定了时候会使用指定的名字的扩展
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param group group 用于筛选的分组,比如过滤器中使用此参数来区分消费者使用这个过滤器还是提供者使用这个过滤器他们的group参数分表为consumer,provider
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return 获取激活扩展.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getActivateExtension&lt;/span>&lt;span style="color:#719e07">(&lt;/span>URL url&lt;span style="color:#719e07">,&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span> values&lt;span style="color:#719e07">,&lt;/span> String group&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//检查扩展加载器是否被销毁了
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> checkDestroyed&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// solve the bug of using @SPI&amp;#39;s wrapper method to report a null pointer exception.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//创建个有序的Map集合,用来对扩展进行排序
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;,&lt;/span> T&lt;span style="color:#719e07">&amp;gt;&lt;/span> activateExtensionsMap &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TreeMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;(&lt;/span>activateComparator&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//初始化扩展名字,指定了扩展名字values不为空
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> names &lt;span style="color:#719e07">=&lt;/span> values &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;(&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">:&lt;/span> asList&lt;span style="color:#719e07">(&lt;/span>values&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//扩展名字使用Set集合进行去重
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Set&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> namesSet &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashSet&lt;span style="color:#719e07">&amp;lt;&amp;gt;(&lt;/span>names&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//参数常量是 -default 扩展名字是否不包含默认的
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>namesSet&lt;span style="color:#719e07">.&lt;/span>contains&lt;span style="color:#719e07">(&lt;/span>REMOVE_VALUE_PREFIX &lt;span style="color:#719e07">+&lt;/span> DEFAULT_KEY&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//第一次进来肯定是没有缓存对象双重校验锁检查下
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>cachedActivateGroups&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#719e07">(&lt;/span>cachedActivateGroups&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// cache all extensions
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>cachedActivateGroups&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//加载扩展类型对应的扩展类,这个具体细节参考源码或者《[Dubbo3.0.7源码解析系列]-5-Dubbo的SPI扩展机制与自适应扩展对象的创建与扩展文件的扫描源码解析》章节
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> getExtensionClasses&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Map&lt;span style="color:#719e07">.&lt;/span>Entry&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">,&lt;/span> Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> entry &lt;span style="color:#719e07">:&lt;/span> cachedActivates&lt;span style="color:#719e07">.&lt;/span>entrySet&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String name &lt;span style="color:#719e07">=&lt;/span> entry&lt;span style="color:#719e07">.&lt;/span>getKey&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object activate &lt;span style="color:#719e07">=&lt;/span> entry&lt;span style="color:#719e07">.&lt;/span>getValue&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String&lt;span style="color:#719e07">[]&lt;/span> activateGroup&lt;span style="color:#719e07">,&lt;/span> activateValue&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//遍历所有的activates列表获取group()和value()值
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>activate &lt;span style="color:#719e07">instanceof&lt;/span> Activate&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> activateGroup &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">((&lt;/span>Activate&lt;span style="color:#719e07">)&lt;/span> activate&lt;span style="color:#719e07">).&lt;/span>group&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> activateValue &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">((&lt;/span>Activate&lt;span style="color:#719e07">)&lt;/span> activate&lt;span style="color:#719e07">).&lt;/span>value&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>activate &lt;span style="color:#719e07">instanceof&lt;/span> com&lt;span style="color:#719e07">.&lt;/span>alibaba&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>common&lt;span style="color:#719e07">.&lt;/span>extension&lt;span style="color:#719e07">.&lt;/span>Activate&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> activateGroup &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">((&lt;/span>com&lt;span style="color:#719e07">.&lt;/span>alibaba&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>common&lt;span style="color:#719e07">.&lt;/span>extension&lt;span style="color:#719e07">.&lt;/span>Activate&lt;span style="color:#719e07">)&lt;/span> activate&lt;span style="color:#719e07">).&lt;/span>group&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> activateValue &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">((&lt;/span>com&lt;span style="color:#719e07">.&lt;/span>alibaba&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>common&lt;span style="color:#719e07">.&lt;/span>extension&lt;span style="color:#719e07">.&lt;/span>Activate&lt;span style="color:#719e07">)&lt;/span> activate&lt;span style="color:#719e07">).&lt;/span>value&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">continue&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//缓存分组值
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> cachedActivateGroups&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashSet&lt;span style="color:#719e07">&amp;lt;&amp;gt;(&lt;/span>Arrays&lt;span style="color:#719e07">.&lt;/span>asList&lt;span style="color:#719e07">(&lt;/span>activateGroup&lt;span style="color:#719e07">)));&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String&lt;span style="color:#719e07">[][]&lt;/span> keyPairs &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[&lt;/span>activateValue&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">][];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//遍历指定的激活扩展的扩展名字列表
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> activateValue&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">;&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>activateValue&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">].&lt;/span>contains&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;:&amp;#34;&lt;/span>&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> keyPairs&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String&lt;span style="color:#719e07">[]&lt;/span> arr &lt;span style="color:#719e07">=&lt;/span> activateValue&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">].&lt;/span>split&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;:&amp;#34;&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> keyPairs&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">][&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> arr&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> keyPairs&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">][&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> arr&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> keyPairs&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> keyPairs&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">][&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> activateValue&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//缓存指定扩展信息
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> cachedActivateValues&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">,&lt;/span> keyPairs&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// traverse all cached extensions
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//遍历所有激活的扩展名字和扩展分组集合
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> cachedActivateGroups&lt;span style="color:#719e07">.&lt;/span>forEach&lt;span style="color:#719e07">((&lt;/span>name&lt;span style="color:#719e07">,&lt;/span> activateGroup&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//筛选当前扩展的扩展分组与激活扩展的扩展分组是否可以匹配
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>isMatchGroup&lt;span style="color:#719e07">(&lt;/span>group&lt;span style="color:#719e07">,&lt;/span> activateGroup&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//不能是指定的扩展名字
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>namesSet&lt;span style="color:#719e07">.&lt;/span>contains&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//也不能是带有 -指定扩展名字
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>namesSet&lt;span style="color:#719e07">.&lt;/span>contains&lt;span style="color:#719e07">(&lt;/span>REMOVE_VALUE_PREFIX &lt;span style="color:#719e07">+&lt;/span> name&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//如果在Active注解中配置了value则当指定的键出现在URL的参数中时，激活当前扩展名。
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//如果未配置value属性则默认都是匹配的(cachedActivateValues中不存在对应扩展名字的缓存的时候默认为true)
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> isActive&lt;span style="color:#719e07">(&lt;/span>cachedActivateValues&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">),&lt;/span> url&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//缓存激活的扩展类型映射的扩展名字
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> activateExtensionsMap&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>getExtensionClass&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">),&lt;/span> getExtension&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">));&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">});&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>namesSet&lt;span style="color:#719e07">.&lt;/span>contains&lt;span style="color:#719e07">(&lt;/span>DEFAULT_KEY&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// will affect order
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// `ext1,default,ext2` means ext1 will happens before all of the default extensions while ext2 will after them
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> extensionsResult &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;(&lt;/span>activateExtensionsMap&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> names&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">());&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> names&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">();&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String name &lt;span style="color:#719e07">=&lt;/span> names&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>i&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>name&lt;span style="color:#719e07">.&lt;/span>startsWith&lt;span style="color:#719e07">(&lt;/span>REMOVE_VALUE_PREFIX&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>namesSet&lt;span style="color:#719e07">.&lt;/span>contains&lt;span style="color:#719e07">(&lt;/span>REMOVE_VALUE_PREFIX &lt;span style="color:#719e07">+&lt;/span> name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>DEFAULT_KEY&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>containsExtension&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> extensionsResult&lt;span style="color:#719e07">.&lt;/span>add&lt;span style="color:#719e07">(&lt;/span>getExtension&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">));&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> extensionsResult&lt;span style="color:#719e07">.&lt;/span>addAll&lt;span style="color:#719e07">(&lt;/span>activateExtensionsMap&lt;span style="color:#719e07">.&lt;/span>values&lt;span style="color:#719e07">());&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> extensionsResult&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// add extensions, will be sorted by its order
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> names&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">();&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String name &lt;span style="color:#719e07">=&lt;/span> names&lt;span style="color:#719e07">.&lt;/span>get&lt;span style="color:#719e07">(&lt;/span>i&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>name&lt;span style="color:#719e07">.&lt;/span>startsWith&lt;span style="color:#719e07">(&lt;/span>REMOVE_VALUE_PREFIX&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>namesSet&lt;span style="color:#719e07">.&lt;/span>contains&lt;span style="color:#719e07">(&lt;/span>REMOVE_VALUE_PREFIX &lt;span style="color:#719e07">+&lt;/span> name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>DEFAULT_KEY&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>containsExtension&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> activateExtensionsMap&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>getExtensionClass&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">),&lt;/span> getExtension&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">));&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;(&lt;/span>activateExtensionsMap&lt;span style="color:#719e07">.&lt;/span>values&lt;span style="color:#719e07">());&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>再来回顾下扫描扩展类型的时候,与激活扩展的相关扫描代码:
-与激活注解关键的代码位置在这里ExtensionLoader的loadClass方法中
-我来贴下loadClass方法核心的代码:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>clazz&lt;span style="color:#719e07">.&lt;/span>isAnnotationPresent&lt;span style="color:#719e07">(&lt;/span>Adaptive&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cacheAdaptiveClass&lt;span style="color:#719e07">(&lt;/span>clazz&lt;span style="color:#719e07">,&lt;/span> overridden&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>isWrapperClass&lt;span style="color:#719e07">(&lt;/span>clazz&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cacheWrapperClass&lt;span style="color:#719e07">(&lt;/span>clazz&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>StringUtils&lt;span style="color:#719e07">.&lt;/span>isEmpty&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name &lt;span style="color:#719e07">=&lt;/span> findAnnotationName&lt;span style="color:#719e07">(&lt;/span>clazz&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;No such extension name for the class &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> clazz&lt;span style="color:#719e07">.&lt;/span>getName&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; in the config &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resourceURL&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String&lt;span style="color:#719e07">[]&lt;/span> names &lt;span style="color:#719e07">=&lt;/span> NAME_SEPARATOR&lt;span style="color:#719e07">.&lt;/span>split&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>ArrayUtils&lt;span style="color:#719e07">.&lt;/span>isNotEmpty&lt;span style="color:#719e07">(&lt;/span>names&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//位置在这里其他地方就不标记注释了,前面判断了如果不是Adaptive也不是Wrapper类型则我们可以来判断是否为Activate 类型如果是的话调用cacheActivateClass方法将扩展缓存进cachedActivates缓存中
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> cacheActivateClass&lt;span style="color:#719e07">(&lt;/span>clazz&lt;span style="color:#719e07">,&lt;/span> names&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>String n &lt;span style="color:#719e07">:&lt;/span> names&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cacheName&lt;span style="color:#719e07">(&lt;/span>clazz&lt;span style="color:#719e07">,&lt;/span> n&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> saveInExtensionClass&lt;span style="color:#719e07">(&lt;/span>extensionClasses&lt;span style="color:#719e07">,&lt;/span> clazz&lt;span style="color:#719e07">,&lt;/span> n&lt;span style="color:#719e07">,&lt;/span> overridden&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">cacheActivateClass&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> clazz&lt;span style="color:#719e07">,&lt;/span> String name&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Activate activate &lt;span style="color:#719e07">=&lt;/span> clazz&lt;span style="color:#719e07">.&lt;/span>getAnnotation&lt;span style="color:#719e07">(&lt;/span>Activate&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>activate &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//注解存在则加入激活注解缓存
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> cachedActivates&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">,&lt;/span> activate&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// support com.alibaba.dubbo.common.extension.Activate
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> com&lt;span style="color:#719e07">.&lt;/span>alibaba&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>common&lt;span style="color:#719e07">.&lt;/span>extension&lt;span style="color:#719e07">.&lt;/span>Activate oldActivate &lt;span style="color:#719e07">=&lt;/span> clazz&lt;span style="color:#719e07">.&lt;/span>getAnnotation&lt;span style="color:#719e07">(&lt;/span>com&lt;span style="color:#719e07">.&lt;/span>alibaba&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>common&lt;span style="color:#719e07">.&lt;/span>extension&lt;span style="color:#719e07">.&lt;/span>Activate&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>oldActivate &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cachedActivates&lt;span style="color:#719e07">.&lt;/span>put&lt;span style="color:#719e07">(&lt;/span>name&lt;span style="color:#719e07">,&lt;/span> oldActivate&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>原文： &lt;a href="https://blog.elastic.link/2022/07/10/dubbo/7-dubbo-de-spi-kuo-zhan-ji-zhi-zhi-zi-dong-ji-huo-kuo-zhan-activate-yuan-ma-jie-xi/">《Dubbo的SPI扩展机制之自动激活扩展Activate源码解析》&lt;/a>&lt;/p></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>原文： &lt;a href="https://blog.elastic.link/2022/07/10/dubbo/8-dubbo-qi-dong-qi-dubbobootstrap-jie-zhu-shuang-chong-xiao-yan-suo-de-dan-li-mo-shi-jin-xing-dui-xiang-de-chu-shi-hua/">&amp;laquo;Dubbo启动器DubboBootstrap借助双重校验锁的单例模式进行对象的初始化&amp;raquo;&lt;/a>&lt;/p></description></item></channel></rss>
