@@ -1,0 +1,69 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – dubbo-metrics 指标模块源码浅析</title><link>https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/</link><description>Recent content in dubbo-metrics 指标模块源码浅析 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 引言</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</guid><description>
+&lt;h2 id="引言">引言&lt;/h2>
+&lt;p>服务指标统计体系是 Dubbo 可观测能力的重要组成部分。
+dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综合到一个单独的模块中，提供一套更加完善、全面、可拓展、解耦合的指标采样-统计-导出解决方案。&lt;/p>
+&lt;p>dubbo-metrics 模块包括：&lt;/p>
+&lt;ul>
+&lt;li>dubbo-metrics-api 公用接口包&lt;/li>
+&lt;li>dubbo-metrics-prometheus 普罗米修斯适配包&lt;/li>
+&lt;li>dubbo-metrics-metadata 元数据中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-registry 注册中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-config-center 配置中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-default 接口默认实现包，提供dubbo内部核心指标的监控功能&lt;/li>
+&lt;/ul>
+&lt;p>在设计上，dubbo-metrics 深入应用事件驱动编程思想，总体体现出下图的事件处理链路：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/metrics-event-struct.png" alt="metrics-event-struct">&lt;/p>
+&lt;p>在拓展上，dubbo-metrics 抽象了一套指标导出接口与抽象实现，可实现兼容多种指标统计监控中心，默认提供了普罗米修斯实现。&lt;/p></description></item><item><title>Blog: 指标样本的收集与存储</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</guid><description>
+&lt;h2 id="一指标样本的收集与存储">一、指标样本的收集与存储&lt;/h2>
+&lt;h3 id="指标样本收集">指标样本收集&lt;/h3>
+&lt;p>&lt;strong>指标收集器（Collector）是指标对外导出的入口&lt;/strong>。最终导出到指标统计中心的指标采样实际均直接来源于各个指标采样器。因此，我们将从各个收集器实现开始，分析 dubbo-metrics 模块是如何工作的。&lt;/p>
+&lt;p>指标收集操作定义在 &lt;code>MetricsCollector&lt;/code> （指标采集器，SPI）接口中，可以通过它的实现收集某一类的指标样本（MetricSample）。它主要有以下实现：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>ConfigCenterMetricsCollector&lt;/code> &lt;strong>配置中心操作相关指标收集器&lt;/strong> ，收集配置信息的变化次数&lt;/li>
+&lt;li>&lt;code>MetadataMetricsCollector&lt;/code> &lt;strong>元数据中心操作相关指标收集器&lt;/strong>，收集提供者、消费者对元数据中心操作（推送数据、拉取数据）情况的计数、耗时统计。&lt;/li>
+&lt;li>&lt;code>RegistryMetricsCollector&lt;/code> &lt;strong>注册中心相关操作指标收集器&lt;/strong>，收集应用级、接口级服务注册成功、失败、耗时的相关计数。&lt;/li>
+&lt;li>&lt;code>DefaultMetricsCollector&lt;/code> &lt;strong>默认指标收集器&lt;/strong>，内置了 方法指标采样器（&lt;code>MethodMetricsSampler&lt;/code>）、线程池指标采样器（&lt;code>ThreadPoolMetricsSampler&lt;/code>） 用于统计方法、线程池相关指标，包括方法调用成功、失败计数级线程池线程情况的相关计数。这些指标收集器会被默认应用程序部署器（&lt;code>DefaultApplicationDeployer&lt;/code> ） 创建，完成初始化。&lt;/li>
+&lt;li>&lt;code>HistogramMetricsCollector&lt;/code> &lt;strong>直方图指标收集器&lt;/strong>，利用 micrometer 处理直方图类型的指标，它的实现较为特殊。&lt;/li>
+&lt;/ul>
+&lt;p>配置中心 、元数据、服务注册指标收集器均实现自混合指标收集器（CombMetricsCollector）。该收集器实现了ApplicationMetricsCollector 、ServiceMetricsCollector 两个接口（定义按应用名收集和应用名-服务名收集指标操作），因此它们可以进行应用和服务两个层面的指标收集工作。&lt;/p>
+&lt;p>默认指标收集器是 &lt;code>MetricsCollector&lt;/code> 接口的默认实现，主要负责线程池和方法相关指标的收集。&lt;/p>
+&lt;p>直方图指标收集器则负责收集直方图类型的指标。它利用直方图度量寄存器（HistogramMetricRegister）借助 micrometer API 完成直方图样本的采集。直方图类型包括百分位数、服务水平目标、最小预期值、最大预期值、统计数据分布有效期等。&lt;/p>
+&lt;p>&lt;strong>Collector的继承关系：&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/collectors.png" alt="collectors">&lt;/p>
+&lt;p>可以看出，每个指标收集器都具有来自 &lt;code>MetricsListener&lt;/code> 的监听指标事件的能力。为什么指标收集器本身需要监听指标事件？ 在后文中，我们将讨论指标收集器是如何利用内置的转发器转发指标的。&lt;/p>
+&lt;h3 id="指标样本存储">指标样本存储&lt;/h3>
+&lt;p>前文中，我们了解了指标收集的入口是指标收集器（Collector）。那么各个收集器从哪里收集指标样本？&lt;/p>
+&lt;p>&lt;strong>对于配置中心、元数据中心、 注册中心的指标收集器：&lt;/strong>&lt;/p>
+&lt;p>它们分别负责采集三大中心模块的指标，均继承于&lt;strong>混合数据收集器（CombMetricsCollector）&lt;/strong>，而混合数据收集器中实现了 &lt;code>export&lt;/code> 方法 。&lt;/p>
+&lt;p>混合数据收集器内部有一个&lt;strong>基本数据聚合器（BaseStatComposite）&lt;/strong>，它实现了 MetricsExport 接口，该接口定义了指标导出操作，混合数据收集器则利用它的 &lt;code>export&lt;/code> 方法导出指标。&lt;/p>
+&lt;p>基本数据聚合器是一个抽象类，内有三个属性：ApplicationStatComposite 、ServiceStatComposite 和 RtStatComposite 。它们的作用：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>ApplicationStatComposite 应用数据聚合器&lt;/strong>，应用程序级别相关事件的计数 ，根据指标Key（ MetricsKey ）和应用名统计指标，提供计数递增操作&lt;/li>
+&lt;li>&lt;strong>ServiceStatComposite 服务数据聚合器&lt;/strong>，服务级别相关事件的计数，根据指标Key、应用名和服务名统计指标，提供计数递增操作&lt;/li>
+&lt;li>&lt;strong>RtStatComposite，Rt（Response Time，响应时间）数据聚合器&lt;/strong>，包括应用级别和服务级别。根据应用名、服务名、注册的指标名及相应相应时间统计指标，提供添加操作。&lt;/li>
+&lt;/ul>
+&lt;p>对于以上三个聚合器，可以认为它们是作为不同类型统计数据的仓库使用的。&lt;/p>
+&lt;p>**基本数据聚合器 （BaseStatComposite）**对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p>
+&lt;p>&lt;strong>当调用元数据中心指标收集器、注册中心指标收集器的 collect 方法时，最终会调用&lt;code>BaseStatComposite.export(MetricsCategory category)&lt;/code> , 该方法会收集内部三个聚合器的指标并返回。&lt;/strong>&lt;/p>
+&lt;p>需要注意的是， 配置中心指标收集器不依赖于基本数据聚合器 导出数据，它在创建时将基本数据聚合器置为null，而使用自己的 updatedMetrics 字段存储采样：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ConfigCenterMetricsCollector
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>ConfigCenterMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> updatedMetrics &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">ConfigCenterMetricsCollector&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ApplicationModel applicationModel&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//BaseStatComposite = null
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">super&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>混合指标收集器和数据聚合器之间呈现如下的包含关系：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
+&lt;p>&lt;strong>DefaultMetricsCollector 默认指标采集器：&lt;/strong>&lt;/p>
+&lt;p>它不直接存储采样数据，而是通过收集其下**指标采样器（MetricsSampler）**的样本来完成采样工作。这些采样器包括：&lt;/p>
+&lt;ul>
+&lt;li>方法采样器&lt;/li>
+&lt;li>应用采样器&lt;/li>
+&lt;li>线程池采样器&lt;/li>
+&lt;/ul>
+&lt;p>这些采样器完成采样后，还会利用采集器中的**事件多播器（Multicaster）**将指标事件发布出去，可以被其它监听器处理。详细流程将在后文中探讨。&lt;/p></description></item><item><title>Blog:</title><link>https://dubbo.apache.org/zh-cn/blog/1/01/01/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/1/01/01/</guid><description>
+&lt;p>//TODO&lt;/p></description></item><item><title>Blog:</title><link>https://dubbo.apache.org/zh-cn/blog/1/01/01/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/1/01/01/</guid><description>
+&lt;p>//TODO&lt;/p></description></item><item><title>Blog:</title><link>https://dubbo.apache.org/zh-cn/blog/1/01/01/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/1/01/01/</guid><description>
+&lt;p>//TODO&lt;/p></description></item></channel></rss>

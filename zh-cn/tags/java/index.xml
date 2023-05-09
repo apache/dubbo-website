@@ -1,4 +1,69 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Java</title><link>https://dubbo.apache.org/zh-cn/tags/java/</link><description>Recent content in Java on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 05 Jan 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/java/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Dubbo 连接异构微服务体系 - 多协议&amp;多注册中心</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</link><pubDate>Thu, 05 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Java</title><link>https://dubbo.apache.org/zh-cn/tags/java/</link><description>Recent content in Java on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 28 Apr 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/java/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 引言</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</guid><description>
+&lt;h2 id="引言">引言&lt;/h2>
+&lt;p>服务指标统计体系是 Dubbo 可观测能力的重要组成部分。
+dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综合到一个单独的模块中，提供一套更加完善、全面、可拓展、解耦合的指标采样-统计-导出解决方案。&lt;/p>
+&lt;p>dubbo-metrics 模块包括：&lt;/p>
+&lt;ul>
+&lt;li>dubbo-metrics-api 公用接口包&lt;/li>
+&lt;li>dubbo-metrics-prometheus 普罗米修斯适配包&lt;/li>
+&lt;li>dubbo-metrics-metadata 元数据中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-registry 注册中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-config-center 配置中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-default 接口默认实现包，提供dubbo内部核心指标的监控功能&lt;/li>
+&lt;/ul>
+&lt;p>在设计上，dubbo-metrics 深入应用事件驱动编程思想，总体体现出下图的事件处理链路：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/metrics-event-struct.png" alt="metrics-event-struct">&lt;/p>
+&lt;p>在拓展上，dubbo-metrics 抽象了一套指标导出接口与抽象实现，可实现兼容多种指标统计监控中心，默认提供了普罗米修斯实现。&lt;/p></description></item><item><title>Blog: 指标样本的收集与存储</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</guid><description>
+&lt;h2 id="一指标样本的收集与存储">一、指标样本的收集与存储&lt;/h2>
+&lt;h3 id="指标样本收集">指标样本收集&lt;/h3>
+&lt;p>&lt;strong>指标收集器（Collector）是指标对外导出的入口&lt;/strong>。最终导出到指标统计中心的指标采样实际均直接来源于各个指标采样器。因此，我们将从各个收集器实现开始，分析 dubbo-metrics 模块是如何工作的。&lt;/p>
+&lt;p>指标收集操作定义在 &lt;code>MetricsCollector&lt;/code> （指标采集器，SPI）接口中，可以通过它的实现收集某一类的指标样本（MetricSample）。它主要有以下实现：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>ConfigCenterMetricsCollector&lt;/code> &lt;strong>配置中心操作相关指标收集器&lt;/strong> ，收集配置信息的变化次数&lt;/li>
+&lt;li>&lt;code>MetadataMetricsCollector&lt;/code> &lt;strong>元数据中心操作相关指标收集器&lt;/strong>，收集提供者、消费者对元数据中心操作（推送数据、拉取数据）情况的计数、耗时统计。&lt;/li>
+&lt;li>&lt;code>RegistryMetricsCollector&lt;/code> &lt;strong>注册中心相关操作指标收集器&lt;/strong>，收集应用级、接口级服务注册成功、失败、耗时的相关计数。&lt;/li>
+&lt;li>&lt;code>DefaultMetricsCollector&lt;/code> &lt;strong>默认指标收集器&lt;/strong>，内置了 方法指标采样器（&lt;code>MethodMetricsSampler&lt;/code>）、线程池指标采样器（&lt;code>ThreadPoolMetricsSampler&lt;/code>） 用于统计方法、线程池相关指标，包括方法调用成功、失败计数级线程池线程情况的相关计数。这些指标收集器会被默认应用程序部署器（&lt;code>DefaultApplicationDeployer&lt;/code> ） 创建，完成初始化。&lt;/li>
+&lt;li>&lt;code>HistogramMetricsCollector&lt;/code> &lt;strong>直方图指标收集器&lt;/strong>，利用 micrometer 处理直方图类型的指标，它的实现较为特殊。&lt;/li>
+&lt;/ul>
+&lt;p>配置中心 、元数据、服务注册指标收集器均实现自混合指标收集器（CombMetricsCollector）。该收集器实现了ApplicationMetricsCollector 、ServiceMetricsCollector 两个接口（定义按应用名收集和应用名-服务名收集指标操作），因此它们可以进行应用和服务两个层面的指标收集工作。&lt;/p>
+&lt;p>默认指标收集器是 &lt;code>MetricsCollector&lt;/code> 接口的默认实现，主要负责线程池和方法相关指标的收集。&lt;/p>
+&lt;p>直方图指标收集器则负责收集直方图类型的指标。它利用直方图度量寄存器（HistogramMetricRegister）借助 micrometer API 完成直方图样本的采集。直方图类型包括百分位数、服务水平目标、最小预期值、最大预期值、统计数据分布有效期等。&lt;/p>
+&lt;p>&lt;strong>Collector的继承关系：&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/collectors.png" alt="collectors">&lt;/p>
+&lt;p>可以看出，每个指标收集器都具有来自 &lt;code>MetricsListener&lt;/code> 的监听指标事件的能力。为什么指标收集器本身需要监听指标事件？ 在后文中，我们将讨论指标收集器是如何利用内置的转发器转发指标的。&lt;/p>
+&lt;h3 id="指标样本存储">指标样本存储&lt;/h3>
+&lt;p>前文中，我们了解了指标收集的入口是指标收集器（Collector）。那么各个收集器从哪里收集指标样本？&lt;/p>
+&lt;p>&lt;strong>对于配置中心、元数据中心、 注册中心的指标收集器：&lt;/strong>&lt;/p>
+&lt;p>它们分别负责采集三大中心模块的指标，均继承于&lt;strong>混合数据收集器（CombMetricsCollector）&lt;/strong>，而混合数据收集器中实现了 &lt;code>export&lt;/code> 方法 。&lt;/p>
+&lt;p>混合数据收集器内部有一个&lt;strong>基本数据聚合器（BaseStatComposite）&lt;/strong>，它实现了 MetricsExport 接口，该接口定义了指标导出操作，混合数据收集器则利用它的 &lt;code>export&lt;/code> 方法导出指标。&lt;/p>
+&lt;p>基本数据聚合器是一个抽象类，内有三个属性：ApplicationStatComposite 、ServiceStatComposite 和 RtStatComposite 。它们的作用：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>ApplicationStatComposite 应用数据聚合器&lt;/strong>，应用程序级别相关事件的计数 ，根据指标Key（ MetricsKey ）和应用名统计指标，提供计数递增操作&lt;/li>
+&lt;li>&lt;strong>ServiceStatComposite 服务数据聚合器&lt;/strong>，服务级别相关事件的计数，根据指标Key、应用名和服务名统计指标，提供计数递增操作&lt;/li>
+&lt;li>&lt;strong>RtStatComposite，Rt（Response Time，响应时间）数据聚合器&lt;/strong>，包括应用级别和服务级别。根据应用名、服务名、注册的指标名及相应相应时间统计指标，提供添加操作。&lt;/li>
+&lt;/ul>
+&lt;p>对于以上三个聚合器，可以认为它们是作为不同类型统计数据的仓库使用的。&lt;/p>
+&lt;p>**基本数据聚合器 （BaseStatComposite）**对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p>
+&lt;p>&lt;strong>当调用元数据中心指标收集器、注册中心指标收集器的 collect 方法时，最终会调用&lt;code>BaseStatComposite.export(MetricsCategory category)&lt;/code> , 该方法会收集内部三个聚合器的指标并返回。&lt;/strong>&lt;/p>
+&lt;p>需要注意的是， 配置中心指标收集器不依赖于基本数据聚合器 导出数据，它在创建时将基本数据聚合器置为null，而使用自己的 updatedMetrics 字段存储采样：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ConfigCenterMetricsCollector
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>ConfigCenterMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> updatedMetrics &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">ConfigCenterMetricsCollector&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ApplicationModel applicationModel&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//BaseStatComposite = null
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">super&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>混合指标收集器和数据聚合器之间呈现如下的包含关系：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
+&lt;p>&lt;strong>DefaultMetricsCollector 默认指标采集器：&lt;/strong>&lt;/p>
+&lt;p>它不直接存储采样数据，而是通过收集其下**指标采样器（MetricsSampler）**的样本来完成采样工作。这些采样器包括：&lt;/p>
+&lt;ul>
+&lt;li>方法采样器&lt;/li>
+&lt;li>应用采样器&lt;/li>
+&lt;li>线程池采样器&lt;/li>
+&lt;/ul>
+&lt;p>这些采样器完成采样后，还会利用采集器中的**事件多播器（Multicaster）**将指标事件发布出去，可以被其它监听器处理。详细流程将在后文中探讨。&lt;/p></description></item><item><title>Blog: Dubbo 连接异构微服务体系 - 多协议&amp;多注册中心</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</link><pubDate>Thu, 05 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</guid><description>
 &lt;p>从编程开发的角度来说，Dubbo 首先是一款 RPC 服务框架，它最大的优势在于提供了面向接口代理的服务编程模型，对开发者屏蔽了底层的远程通信细节。同时 Dubbo 也是一款服务治理框架，它为分布式部署的微服务提供了服务发现、流量调度等服务治理解决方案。&lt;/p>
 &lt;p>在这篇文章中，我们将以以上基础能力为背景，尝试突破 Dubbo 体系自身，探索如何利用 Dubbo 对多协议、多服务发现模型的支持，来实现异构微服务体系间的互联互通。在实际业务场景中，这可以用来解决异构技术体系共存场景下的通信问题，帮助公司实现在异构技术体系间作平滑迁移，解决大规模跨区域、多集群部署场景的地址发现及流量调度等问题。&lt;/p>
 &lt;h2 id="面向接口代理的透明服务开发框架">面向接口代理的透明服务开发框架&lt;/h2>
@@ -15000,396 +15065,4 @@ random的定义在配置文件&lt;code>META-INF/dubbo/internal/com.alibaba.dubbo
 &lt;li>Dubbo的扩展机制能很好的支持第三方IoC容器，默认支持Spring Bean，可自己扩展来支持其他容器，比如Google的Guice。&lt;/li>
 &lt;li>切换扩展点的实现，只需要在配置文件中修改具体的实现，不需要改代码。使用方便。&lt;/li>
 &lt;/ul>
-&lt;p>下一篇，我们将会一起深入Dubbo的源码，更深入的了解Dubbo的可扩展机制。&lt;/p></description></item><item><title>Blog: 提前if判断帮助CPU分支预测</title><link>https://dubbo.apache.org/zh-cn/blog/2019/02/03/%E6%8F%90%E5%89%8Dif%E5%88%A4%E6%96%AD%E5%B8%AE%E5%8A%A9cpu%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B/</link><pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/02/03/%E6%8F%90%E5%89%8Dif%E5%88%A4%E6%96%AD%E5%B8%AE%E5%8A%A9cpu%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B/</guid><description>
-&lt;h2 id="分支预测">分支预测&lt;/h2>
-&lt;p>在stackoverflow上有一个非常有名的问题：&lt;a href="https://stackoverflow.com/questions/11227809/why-is-it-faster-to-process-a-sorted-array-than-an-unsorted-array">为什么处理有序数组要比非有序数组快？&lt;/a>，可见分支预测对代码运行效率有非常大的影响。&lt;/p>
-&lt;p>现代CPU都支持分支预测(branch prediction)和指令流水线(instruction pipeline)，这两个结合可以极大提高CPU效率。对于像简单的if跳转，CPU是可以比较好地做分支预测的。但是对于switch跳转，CPU则没有太多的办法。switch本质上是据索引，从地址数组里取地址再跳转。&lt;/p>
-&lt;p>要提高代码执行效率，一个重要的原则就是尽量避免CPU把流水线清空，那么提高分支预测的成功率就非常重要。&lt;/p>
-&lt;p>那么对于代码里，如果某个switch分支概率很高，是否可以考虑代码层面帮CPU把判断提前，来提高代码执行效率呢？&lt;/p>
-&lt;h2 id="dubbo里channeleventrunnable的switch判断">Dubbo里ChannelEventRunnable的switch判断&lt;/h2>
-&lt;p>在&lt;code>ChannelEventRunnable&lt;/code>里有一个switch来判断channel state，然后做对应的逻辑：&lt;a href="https://github.com/hengyunabc/dubbo/blob/dubbo-2.6.1/dubbo-remoting/dubbo-remoting-api/src/main/java/com/alibaba/dubbo/remoting/transport/dispatcher/ChannelEventRunnable.java#L54">查看&lt;/a>&lt;/p>
-&lt;p>一个channel建立起来之后，超过99.9%情况它的state都是&lt;code>ChannelState.RECEIVED&lt;/code>，那么可以考虑把这个判断提前。&lt;/p>
-&lt;h2 id="benchmark验证">benchmark验证&lt;/h2>
-&lt;p>下面通过jmh来验证下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TestBenchMarks&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">enum&lt;/span> ChannelState &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CONNECTED&lt;span style="color:#719e07">,&lt;/span> DISCONNECTED&lt;span style="color:#719e07">,&lt;/span> SENT&lt;span style="color:#719e07">,&lt;/span> RECEIVED&lt;span style="color:#719e07">,&lt;/span> CAUGHT
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@State&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Scope&lt;span style="color:#719e07">.&lt;/span>Benchmark&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ExecutionPlan&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Param&lt;/span>&lt;span style="color:#719e07">({&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1000000&amp;#34;&lt;/span> &lt;span style="color:#719e07">})&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> size&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ChannelState&lt;span style="color:#719e07">[]&lt;/span> states &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Setup&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setUp&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ChannelState&lt;span style="color:#719e07">[]&lt;/span> values &lt;span style="color:#719e07">=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>values&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> states &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ChannelState&lt;span style="color:#719e07">[&lt;/span>size&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Random random &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Random&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> Date&lt;span style="color:#719e07">().&lt;/span>getTime&lt;span style="color:#719e07">());&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> size&lt;span style="color:#719e07">;&lt;/span> i&lt;span style="color:#719e07">++)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> nextInt &lt;span style="color:#719e07">=&lt;/span> random&lt;span style="color:#719e07">.&lt;/span>nextInt&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">1000000&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>nextInt &lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#2aa198">100&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> values&lt;span style="color:#719e07">[&lt;/span>nextInt &lt;span style="color:#719e07">%&lt;/span> values&lt;span style="color:#719e07">.&lt;/span>length&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Fork&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">5&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Benchmark&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@BenchmarkMode&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Mode&lt;span style="color:#719e07">.&lt;/span>Throughput&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">benchSiwtch&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ExecutionPlan plan&lt;span style="color:#719e07">,&lt;/span> Blackhole bh&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> result &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> plan&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">;&lt;/span> &lt;span style="color:#719e07">++&lt;/span>i&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">switch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>plan&lt;span style="color:#719e07">.&lt;/span>states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">])&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> CONNECTED&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> DISCONNECTED&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>DISCONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> SENT&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>SENT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> RECEIVED&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> CAUGHT&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CAUGHT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bh&lt;span style="color:#719e07">.&lt;/span>consume&lt;span style="color:#719e07">(&lt;/span>result&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Fork&lt;/span>&lt;span style="color:#719e07">(&lt;/span>value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">5&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Benchmark&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@BenchmarkMode&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Mode&lt;span style="color:#719e07">.&lt;/span>Throughput&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">benchIfAndSwitch&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ExecutionPlan plan&lt;span style="color:#719e07">,&lt;/span> Blackhole bh&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> result &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">;&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> plan&lt;span style="color:#719e07">.&lt;/span>size&lt;span style="color:#719e07">;&lt;/span> &lt;span style="color:#719e07">++&lt;/span>i&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ChannelState state &lt;span style="color:#719e07">=&lt;/span> plan&lt;span style="color:#719e07">.&lt;/span>states&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">];&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>state &lt;span style="color:#719e07">==&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>RECEIVED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">else&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">switch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>state&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> CONNECTED&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> SENT&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>SENT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> DISCONNECTED&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>DISCONNECTED&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> CAUGHT&lt;span style="color:#719e07">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">+=&lt;/span> ChannelState&lt;span style="color:#719e07">.&lt;/span>CAUGHT&lt;span style="color:#719e07">.&lt;/span>ordinal&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bh&lt;span style="color:#719e07">.&lt;/span>consume&lt;span style="color:#719e07">(&lt;/span>result&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>benchSiwtch里是纯switch判断&lt;/li>
-&lt;li>benchIfAndSwitch 里用一个if提前判断state是否&lt;code>ChannelState.RECEIVED&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;p>benchmark结果是：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Result &amp;#34;io.github.hengyunabc.jmh.TestBenchMarks.benchSiwtch&amp;#34;:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 576.745 ±(99.9%) 6.806 ops/s [Average]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> (min, avg, max) = (490.348, 576.745, 618.360), stdev = 20.066
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CI (99.9%): [569.939, 583.550] (assumes normal distribution)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># Run complete. Total time: 00:06:48
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Benchmark (size) Mode Cnt Score Error Units
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TestBenchMarks.benchIfAndSwitch 1000000 thrpt 100 1535.867 ± 61.212 ops/s
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TestBenchMarks.benchSiwtch 1000000 thrpt 100 576.745 ± 6.806 ops/s
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到提前if判断的确提高了代码效率，这种技巧可以放在性能要求严格的地方。&lt;/p>
-&lt;p>Benchmark代码：https://github.com/hengyunabc/jmh-demo&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;ul>
-&lt;li>switch对于CPU来说难以做分支预测&lt;/li>
-&lt;li>某些switch条件如果概率比较高，可以考虑单独提前if判断，充分利用CPU的分支预测机制&lt;/li>
-&lt;/ul></description></item><item><title>Blog: 当Dubbo遇上Arthas：排查问题的实践</title><link>https://dubbo.apache.org/zh-cn/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</guid><description>
-&lt;p>Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用户。&lt;/p>
-&lt;ul>
-&lt;li>Github: &lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
-&lt;li>文档：http://dubbo.apache.org/zh-cn/&lt;/li>
-&lt;/ul>
-&lt;p>Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。&lt;/p>
-&lt;ul>
-&lt;li>Github: &lt;a href="https://github.com/alibaba/arthas">https://github.com/alibaba/arthas&lt;/a>&lt;/li>
-&lt;li>文档：https://arthas.aliyun.com/doc/&lt;/li>
-&lt;li>Arthas开源交流QQ群: 916328269&lt;/li>
-&lt;li>Arthas开源交流钉钉群: 21965291&lt;/li>
-&lt;/ul>
-&lt;p>当Dubbo遇上Arthas，会碰撞出什么样的火花呢？下面来分享Arthas排查Dubbo问题的一些经验。&lt;/p>
-&lt;h3 id="dubbo-arthas-demo">dubbo-arthas-demo&lt;/h3>
-&lt;p>下面的排查分享基于这个&lt;code>dubbo-arthas-demo&lt;/code>，非常简单的一个应用，浏览器请求从Spring MVC到Dubbo Client，再发送到Dubbo Server。&lt;/p>
-&lt;p>Demo里有两个spring boot应用，可以先启动&lt;code>server-demo&lt;/code>，再启动&lt;code>client-demo&lt;/code>。&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/hengyunabc/dubbo-arthas-demo">https://github.com/hengyunabc/dubbo-arthas-demo&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> /user/{id} -&amp;gt; UserService -&amp;gt; UserServiceImpl
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Browser Dubbo Client Dubbo Server
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Client端：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RestController&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserController&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Reference&lt;/span>&lt;span style="color:#719e07">(&lt;/span>version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> UserService userService&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GetMapping&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;/user/{id}&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUserById&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#268bd2">@PathVariable&lt;/span> Integer id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> userService&lt;span style="color:#719e07">.&lt;/span>findUser&lt;span style="color:#719e07">(&lt;/span>id&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Server端：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>&lt;span style="color:#719e07">(&lt;/span>version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUser&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>id &lt;span style="color:#719e07">&amp;lt;&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;user id &amp;lt; 1, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>User user &lt;span style="color:#719e07">:&lt;/span> users&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>user&lt;span style="color:#719e07">.&lt;/span>getId&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> user&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Can not find user, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="arthas快速开始">Arthas快速开始&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/install-detail.html">https://arthas.aliyun.com/doc/install-detail.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ wget https://arthas.aliyun.com/arthas-boot.jar
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ java -jar arthas-boot.jar
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动后，会列出所有的java进程，选择1，然后回车，就会连接上&lt;code>ServerDemoApplication&lt;/code>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ java -jar arthas-boot.jar
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>* &lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>: &lt;span style="color:#2aa198">43523&lt;/span> ServerDemoApplication
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span>2&lt;span style="color:#719e07">]&lt;/span>: &lt;span style="color:#2aa198">22342&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">[&lt;/span>3&lt;span style="color:#719e07">]&lt;/span>: &lt;span style="color:#2aa198">44108&lt;/span> ClientDemoApplication
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> arthas home: /Users/hengyunabc/.arthas/lib/3.0.5/arthas
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> Try to attach process &lt;span style="color:#2aa198">43523&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> Attach process &lt;span style="color:#2aa198">43523&lt;/span> success.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>INFO&lt;span style="color:#719e07">]&lt;/span> arthas-client connect 127.0.0.1 &lt;span style="color:#2aa198">3658&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ,---. ,------. ,--------.,--. ,--. ,---. ,---.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / O &lt;span style="color:#cb4b16">\ &lt;/span>| .--. &lt;span style="color:#2aa198">&amp;#39;&amp;#39;&lt;/span>--. .--&lt;span style="color:#2aa198">&amp;#39;| &amp;#39;&lt;/span>--&lt;span style="color:#2aa198">&amp;#39; | / O \ &amp;#39;&lt;/span> .-&lt;span style="color:#2aa198">&amp;#39;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">| .-. || &amp;#39;&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;.&amp;#39;&lt;/span> | | | .--. &lt;span style="color:#719e07">||&lt;/span> .-. |&lt;span style="color:#586e75">`&lt;/span>. &lt;span style="color:#586e75">`&lt;/span>-.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>| | | &lt;span style="color:#719e07">||&lt;/span> |&lt;span style="color:#cb4b16">\ &lt;/span> &lt;span style="color:#cb4b16">\ &lt;/span> | | | | | &lt;span style="color:#719e07">||&lt;/span> | | |.-&lt;span style="color:#2aa198">&amp;#39; |
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">`--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;`--&amp;#39;&lt;/span> &lt;span style="color:#2aa198">&amp;#39;--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39; `--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;`--&amp;#39;&lt;/span> &lt;span style="color:#586e75">`&lt;/span>--&lt;span style="color:#2aa198">&amp;#39;`-----&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>wiki: https://arthas.aliyun.com/doc
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version: 3.0.5
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>pid: &lt;span style="color:#2aa198">43523&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time: 2018-12-05 16:23:52
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo线上服务抛出异常怎么获取调用参数">Dubbo线上服务抛出异常，怎么获取调用参数？&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/watch.html">https://arthas.aliyun.com/doc/watch.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>当线上服务抛出异常时，最着急的是什么参数导致了抛异常？&lt;/p>
-&lt;p>在demo里，访问 http://localhost:8080/user/0 ，&lt;code>UserServiceImpl&lt;/code>就会抛出一个异常，因为user id不合法。&lt;/p>
-&lt;p>在Arthas里执行 &lt;code>watch com.example.UserService * -e -x 2 '{params,throwExp}'&lt;/code> ，然后再次访问，就可以看到watch命令把参数和异常都打印出来了。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>$ watch com.example.UserService * -e -x 2 &amp;#39;{params,throwExp}&amp;#39;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Press Ctrl+C to abort.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Affect(class-cnt:1 , method-cnt:4) cost in 230 ms.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ts=2018-12-05 16:26:44; [cost=3.905523ms] result=@ArrayList[
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @Object[][
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @Integer[0],
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ],
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> java.lang.IllegalArgumentException: user id &amp;lt; 1, id: 0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at com.example.UserServiceImpl.findUser(UserServiceImpl.java:24)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at com.alibaba.dubbo.common.bytecode.Wrapper1.invokeMethod(Wrapper1.java)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory$1.doInvoke(JavassistProxyFactory.java:45)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at com.alibaba.dubbo.rpc.proxy.AbstractProxyInvoker.invoke(AbstractProxyInvoker.java:71)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at com.alibaba.dubbo.config.invoker.DelegateProviderMetaDataInvoker.invoke(DelegateProviderMetaDataInvoker.java:48)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at com.alibaba.dubbo.rpc.protocol.InvokerWrapper.invoke(InvokerWrapper.java:52)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at com.alibaba.dubbo.rpc.filter.ExceptionFilter.invoke(ExceptionFilter.java:61)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="怎样线上调试dubbo服务代码">怎样线上调试Dubbo服务代码?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/redefine.html">https://arthas.aliyun.com/doc/redefine.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>在本地开发时，可能会用到热部署工具，直接改代码，不需要重启应用。但是在线上环境，有没有办法直接动态调试代码？比如增加日志。&lt;/p>
-&lt;p>在Arthas里，可以通过&lt;code>redefine&lt;/code>命令来达到线上不重启，动态更新代码的效果。&lt;/p>
-&lt;p>比如我们修改下&lt;code>UserServiceImpl&lt;/code>，用&lt;code>System.out&lt;/code>打印出具体的&lt;code>User&lt;/code>对象来：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUser&lt;/span>&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#dc322f">int&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>id &lt;span style="color:#719e07">&amp;lt;&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;user id &amp;lt; 1, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>User user &lt;span style="color:#719e07">:&lt;/span> users&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>user&lt;span style="color:#719e07">.&lt;/span>getId&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">==&lt;/span> id&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System&lt;span style="color:#719e07">.&lt;/span>out&lt;span style="color:#719e07">.&lt;/span>println&lt;span style="color:#719e07">(&lt;/span>user&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> user&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Can not find user, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>本地编绎后，把&lt;code>server-demo/target/classes/com/example/UserServiceImpl.class&lt;/code>传到线上服务器，然后用&lt;code>redefine&lt;/code>命令来更新代码：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>$ redefine -p /tmp/UserServiceImpl.class
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>redefine success, size: 1
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样子更新成功之后，访问 http://localhost:8080/user/1 ，在&lt;code>ServerDemoApplication&lt;/code>的控制台里就可以看到打印出了user信息。&lt;/p>
-&lt;h3 id="怎样动态修改dubbo的logger级别">怎样动态修改Dubbo的logger级别?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/ognl.html">https://arthas.aliyun.com/doc/ognl.html&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/sc.html">https://arthas.aliyun.com/doc/sc.html&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://commons.apache.org/proper/commons-ognl/language-guide.html">https://commons.apache.org/proper/commons-ognl/language-guide.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>在排查问题时，需要查看到更多的信息，如果可以把logger级别修改为&lt;code>DEBUG&lt;/code>，就非常有帮助。&lt;/p>
-&lt;p>&lt;code>ognl&lt;/code>是apache开源的一个轻量级表达式引擎。下面通过Arthas里的&lt;code>ognl&lt;/code>命令来动态修改logger级别。&lt;/p>
-&lt;p>首先获取Dubbo里&lt;code>TraceFilter&lt;/code>的一个logger对象，看下它的实现类，可以发现是log4j。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ ognl &lt;span style="color:#2aa198">&amp;#39;@com.alibaba.dubbo.rpc.protocol.dubbo.filter.TraceFilter@logger.logger&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@Log4jLogger&lt;span style="color:#719e07">[&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">FQCN&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@String&lt;span style="color:#719e07">[&lt;/span>com.alibaba.dubbo.common.logger.support.FailsafeLogger&lt;span style="color:#719e07">]&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">logger&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@Logger&lt;span style="color:#719e07">[&lt;/span>org.apache.log4j.Logger@2f19bdcf&lt;span style="color:#719e07">]&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>再用&lt;code>sc&lt;/code>命令来查看具体从哪个jar包里加载的：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ sc -d org.apache.log4j.Logger
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> class-info org.apache.log4j.Logger
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> code-source /Users/hengyunabc/.m2/repository/org/slf4j/log4j-over-slf4j/1.7.25/log4j-over-slf4j-1.7.25.jar
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name org.apache.log4j.Logger
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isInterface &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isAnnotation &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isEnum &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isAnonymousClass &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isArray &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isLocalClass &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isMemberClass &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isPrimitive &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> isSynthetic &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> simple-name Logger
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> modifier public
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> annotation
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> interfaces
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> super-class +-org.apache.log4j.Category
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-java.lang.Object
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> class-loader +-sun.misc.Launcher&lt;span style="color:#268bd2">$AppClassLoader&lt;/span>@5c647e05
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-sun.misc.Launcher&lt;span style="color:#268bd2">$ExtClassLoader&lt;/span>@59878d35
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classLoaderHash 5c647e05
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Affect&lt;span style="color:#719e07">(&lt;/span>row-cnt:1&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">126&lt;/span> ms.
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>可以看到log4j是通过slf4j代理的。&lt;/strong>&lt;/p>
-&lt;p>那么通过&lt;code>org.slf4j.LoggerFactory&lt;/code>获取&lt;code>root&lt;/code> logger，再修改它的level：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>$ ognl &amp;#39;@org.slf4j.LoggerFactory@getLogger(&amp;#34;root&amp;#34;).setLevel(@ch.qos.logback.classic.Level@DEBUG)&amp;#39;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>null
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ ognl &amp;#39;@org.slf4j.LoggerFactory@getLogger(&amp;#34;root&amp;#34;).getLevel().toString()&amp;#39;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@String[DEBUG]
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到修改之后，&lt;code>root&lt;/code> logger的level变为&lt;code>DEBUG&lt;/code>。&lt;/p>
-&lt;h3 id="怎样减少测试小姐姐重复发请求的麻烦">怎样减少测试小姐姐重复发请求的麻烦?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/tt.html">https://arthas.aliyun.com/doc/tt.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>在平时开发时，可能需要测试小姐姐发请求过来联调，但是我们在debug时，可能不小心直接跳过去了。这样子就尴尬了，需要测试小姐姐再发请求过来。&lt;/p>
-&lt;p>Arthas里提供了&lt;code>tt&lt;/code>命令，可以减少这种麻烦，可以直接重放请求。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ tt -t com.example.UserServiceImpl findUser
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Press Ctrl+C to abort.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Affect&lt;span style="color:#719e07">(&lt;/span>class-cnt:1 , method-cnt:1&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">145&lt;/span> ms.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> INDEX TIMESTAMP COST&lt;span style="color:#719e07">(&lt;/span>ms&lt;span style="color:#719e07">)&lt;/span> IS-RET IS-EXP OBJECT CLASS METHOD
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>----------------------------------------------------------------------------------------------------------------
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">1000&lt;/span> 2018-12-05 17:47:52 1.56523 &lt;span style="color:#b58900">true&lt;/span> &lt;span style="color:#b58900">false&lt;/span> 0x3233483 UserServiceImpl findUser
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">1001&lt;/span> 2018-12-05 17:48:03 0.286176 &lt;span style="color:#b58900">false&lt;/span> &lt;span style="color:#b58900">true&lt;/span> 0x3233483 UserServiceImpl findUser
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">1002&lt;/span> 2018-12-05 17:48:11 90.324335 &lt;span style="color:#b58900">true&lt;/span> &lt;span style="color:#b58900">false&lt;/span> 0x3233483 UserServiceImpl findUser
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面的&lt;code>tt -t&lt;/code>命令捕获到了3个请求。然后通过&lt;code>tt --play&lt;/code>可以重放请求：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ tt --play -i &lt;span style="color:#2aa198">1000&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RE-INDEX &lt;span style="color:#2aa198">1000&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> GMT-REPLAY 2018-12-05 17:55:50
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> OBJECT 0x3233483
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CLASS com.example.UserServiceImpl
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> METHOD findUser
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PARAMETERS&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span> @Integer&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> IS-RETURN &lt;span style="color:#b58900">true&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> IS-EXCEPTION &lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RETURN-OBJ @User&lt;span style="color:#719e07">[&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@Integer&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@String&lt;span style="color:#719e07">[&lt;/span>Deanna Borer&lt;span style="color:#719e07">]&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Time fragment&lt;span style="color:#719e07">[&lt;/span>1000&lt;span style="color:#719e07">]&lt;/span> successfully replayed.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Affect&lt;span style="color:#719e07">(&lt;/span>row-cnt:1&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">4&lt;/span> ms.
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo运行时有哪些filter-耗时是多少">Dubbo运行时有哪些Filter? 耗时是多少?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/trace.html">https://arthas.aliyun.com/doc/trace.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>Dubbo运行时会加载很多的Filter，那么一个请求会经过哪些Filter处理，Filter里的耗时又是多少呢？&lt;/p>
-&lt;p>通过Arthas的&lt;code>trace&lt;/code>命令，可以很方便地知道Filter的信息，可以看到详细的调用栈和耗时。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ trace com.alibaba.dubbo.rpc.Filter *
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Press Ctrl+C to abort.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Affect&lt;span style="color:#719e07">(&lt;/span>class-cnt:19 , method-cnt:59&lt;span style="color:#719e07">)&lt;/span> cost in &lt;span style="color:#2aa198">1441&lt;/span> ms.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">`&lt;/span>---ts&lt;span style="color:#719e07">=&lt;/span>2018-12-05 19:07:26;&lt;span style="color:#268bd2">thread_name&lt;/span>&lt;span style="color:#719e07">=&lt;/span>DubboServerHandler-30.5.125.152:20880-thread-10;&lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>3e;&lt;span style="color:#268bd2">is_daemon&lt;/span>&lt;span style="color:#719e07">=&lt;/span>true;&lt;span style="color:#268bd2">priority&lt;/span>&lt;span style="color:#719e07">=&lt;/span>5;&lt;span style="color:#268bd2">TCCL&lt;/span>&lt;span style="color:#719e07">=&lt;/span>sun.misc.Launcher&lt;span style="color:#268bd2">$AppClassLoader&lt;/span>@5c647e05
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>8.435844ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.filter.EchoFilter:invoke&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>0.124572ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invocation:getMethodName&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>0.065123ms&lt;span style="color:#719e07">]&lt;/span> java.lang.String:equals&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>7.762928ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invoker:invoke&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>7.494124ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.filter.ClassLoaderFilter:invoke&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#268bd2">min&lt;/span>&lt;span style="color:#719e07">=&lt;/span>0.00355ms,max&lt;span style="color:#719e07">=&lt;/span>0.049922ms,total&lt;span style="color:#719e07">=&lt;/span>0.057637ms,count&lt;span style="color:#719e07">=&lt;/span>3&lt;span style="color:#719e07">]&lt;/span> java.lang.Thread:currentThread&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>0.0126ms&lt;span style="color:#719e07">]&lt;/span> java.lang.Thread:getContextClassLoader&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>0.02188ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invoker:getInterface&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>0.004115ms&lt;span style="color:#719e07">]&lt;/span> java.lang.Class:getClassLoader&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#268bd2">min&lt;/span>&lt;span style="color:#719e07">=&lt;/span>0.003906ms,max&lt;span style="color:#719e07">=&lt;/span>0.014058ms,total&lt;span style="color:#719e07">=&lt;/span>0.017964ms,count&lt;span style="color:#719e07">=&lt;/span>2&lt;span style="color:#719e07">]&lt;/span> java.lang.Thread:setContextClassLoader&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>7.033486ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invoker:invoke&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">`&lt;/span>---&lt;span style="color:#719e07">[&lt;/span>6.869488ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.filter.GenericFilter:invoke&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +---&lt;span style="color:#719e07">[&lt;/span>0.01481ms&lt;span style="color:#719e07">]&lt;/span> com.alibaba.dubbo.rpc.Invocation:getMethodName&lt;span style="color:#719e07">()&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo动态代理是怎样实现的">Dubbo动态代理是怎样实现的?&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/jad.html">https://arthas.aliyun.com/doc/jad.html&lt;/a>&lt;/li>
-&lt;li>com.alibaba.dubbo.common.bytecode.Wrapper&lt;/li>
-&lt;/ul>
-&lt;p>通过Arthas的&lt;code>jad&lt;/code>命令，可以看到Dubbo通过javaassist动态生成的Wrappr类的代码：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>$ jad com&lt;span style="color:#719e07">.&lt;/span>alibaba&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>common&lt;span style="color:#719e07">.&lt;/span>bytecode&lt;span style="color:#719e07">.&lt;/span>Wrapper1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ClassLoader:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">+-&lt;/span>sun&lt;span style="color:#719e07">.&lt;/span>misc&lt;span style="color:#719e07">.&lt;/span>Launcher$AppClassLoader@&lt;span style="color:#2aa198">5&lt;/span>c647e05
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">+-&lt;/span>sun&lt;span style="color:#719e07">.&lt;/span>misc&lt;span style="color:#719e07">.&lt;/span>Launcher$ExtClassLoader@&lt;span style="color:#2aa198">59878&lt;/span>d35
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Location:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">/&lt;/span>Users&lt;span style="color:#719e07">/&lt;/span>hengyunabc&lt;span style="color:#719e07">/.&lt;/span>m2&lt;span style="color:#719e07">/&lt;/span>repository&lt;span style="color:#719e07">/&lt;/span>com&lt;span style="color:#719e07">/&lt;/span>alibaba&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">2.5.10&lt;/span>&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">2.5.10&lt;/span>&lt;span style="color:#719e07">.&lt;/span>jar
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.alibaba.dubbo.common.bytecode&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Wrapper1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">extends&lt;/span> Wrapper
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">implements&lt;/span> ClassGenerator&lt;span style="color:#719e07">.&lt;/span>DC &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">invokeMethod&lt;/span>&lt;span style="color:#719e07">(&lt;/span>Object object&lt;span style="color:#719e07">,&lt;/span> String string&lt;span style="color:#719e07">,&lt;/span> Class&lt;span style="color:#719e07">[]&lt;/span> arrclass&lt;span style="color:#719e07">,&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span> arrobject&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#268bd2">throws&lt;/span> InvocationTargetException &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UserServiceImpl userServiceImpl&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> userServiceImpl &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">(&lt;/span>UserServiceImpl&lt;span style="color:#719e07">)&lt;/span>object&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>Throwable throwable&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException&lt;span style="color:#719e07">(&lt;/span>throwable&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;findUser&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>string&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> arrclass&lt;span style="color:#719e07">.&lt;/span>length &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> userServiceImpl&lt;span style="color:#719e07">.&lt;/span>findUser&lt;span style="color:#719e07">(((&lt;/span>Number&lt;span style="color:#719e07">)&lt;/span>arrobject&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]).&lt;/span>intValue&lt;span style="color:#719e07">());&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;listUsers&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>string&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> arrclass&lt;span style="color:#719e07">.&lt;/span>length &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> userServiceImpl&lt;span style="color:#719e07">.&lt;/span>listUsers&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;findUserByName&amp;#34;&lt;/span>&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>string&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> arrclass&lt;span style="color:#719e07">.&lt;/span>length &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> userServiceImpl&lt;span style="color:#719e07">.&lt;/span>findUserByName&lt;span style="color:#719e07">((&lt;/span>String&lt;span style="color:#719e07">)&lt;/span>arrobject&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">]);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="获取spring-context">获取Spring context&lt;/h3>
-&lt;p>除了上面介绍的一些排查技巧，下面分享一个获取Spring Context，然后“为所欲为”的例子。&lt;/p>
-&lt;p>在Dubbo里有一个扩展&lt;code>com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory&lt;/code>，把Spring Context保存到了里面。
-因此，我们可以通过&lt;code>ognl&lt;/code>命令获取到。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ ognl &lt;span style="color:#2aa198">&amp;#39;#context=@com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory@contexts.iterator.next, #context.getBean(&amp;#34;userServiceImpl&amp;#34;).findUser(1)&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@User&lt;span style="color:#719e07">[&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@Integer&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>&lt;span style="color:#719e07">=&lt;/span>@String&lt;span style="color:#719e07">[&lt;/span>Deanna Borer&lt;span style="color:#719e07">]&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>&lt;code>SpringExtensionFactory@contexts.iterator.next&lt;/code> 获取到&lt;code>SpringExtensionFactory&lt;/code>里保存的spring context对象&lt;/li>
-&lt;li>&lt;code>#context.getBean(&amp;quot;userServiceImpl&amp;quot;).findUser(1)&lt;/code> 获取到&lt;code>userServiceImpl&lt;/code>再执行一次调用&lt;/li>
-&lt;/ul>
-&lt;p>只要充分发挥想像力，组合Arthas里的各种命令，可以发挥出神奇的效果。&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;p>本篇文章来自杭州Dubbo Meetup的分享《当DUBBO遇上Arthas - 排查问题的实践》，希望对大家线上排查Dubbo问题有帮助。&lt;/p>
-&lt;p>分享的PDF可以在 &lt;a href="https://github.com/alibaba/arthas/issues/327">https://github.com/alibaba/arthas/issues/327&lt;/a> 里下载。&lt;/p></description></item></channel></rss>
+&lt;p>下一篇，我们将会一起深入Dubbo的源码，更深入的了解Dubbo的可扩展机制。&lt;/p></description></item></channel></rss>
