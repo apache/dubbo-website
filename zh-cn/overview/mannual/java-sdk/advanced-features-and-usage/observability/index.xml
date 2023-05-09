@@ -1,21 +1,33 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 可观测性</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/</link><description>Recent content in 可观测性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 指标埋点</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/meter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/meter/</guid><description>
-&lt;h1 id="概述">概述&lt;/h1>
-&lt;h2 id="1-指标接入说明">1. 指标接入说明&lt;/h2>
-&lt;h2 id="2-指标体系设计">2. 指标体系设计&lt;/h2>
-&lt;p>Dubbo的指标体系，总共涉及三块，指标收集、本地聚合、指标推送
-指标收集：将Dubbo内部需要监控的指标推送至统一的Collector中进行存储
-本地聚合：指标收集获取的均为基础指标，而一些分位数指标则需通过本地聚合计算得出
-指标推送：收集和聚合后的指标通过一定的方式推送至第三方服务器，目前只涉及Prometheus&lt;/p>
-&lt;h2 id="3-结构设计">3. 结构设计&lt;/h2>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 可观测性</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/</link><description>Recent content in 可观测性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Metrics</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/meter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/meter/</guid><description>
+&lt;h2 id="概述">概述&lt;/h2>
+&lt;p>Dubbo Metrics 的总体设计请参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/proposals/metrics/">可观测性 Metrics Proposal&lt;/a>。&lt;/p>
+&lt;p>以下是 Dubbo Java 相关的具体实现与使用方式讲解。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>要为 Dubbo 进程开启指标采集，需要在项目中引入相关依赖并增加配置。以 Spring Boot 项目为例，增加以下 spring-boot-starter 依赖到项目中，即会自动开启指标采集。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-metrics-prometheus --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-observability-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>完整示例请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot" target="_blank">dubbo-samples-metrics-spring-boot&lt;/a>&lt;/li>
+&lt;li>完整配置参数请参见 &lt;a href="../../../reference-manual/config/properties/">Metrics 配置项手册&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="实现原理解析">实现原理解析&lt;/h2>
+&lt;h3 id="代码结构与工作流程">代码结构与工作流程&lt;/h3>
 &lt;ul>
 &lt;li>移除原来与 Metrics 相关的类&lt;/li>
 &lt;li>创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类&lt;/li>
 &lt;li>使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换&lt;/li>
 &lt;/ul>
-&lt;h2 id="4-数据流转">4. 数据流转&lt;/h2>
+&lt;p>以下是 Dubbo 实现中的关键组件及数据流转过程&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dataflow.png" alt="img.png">&lt;/p>
-&lt;h2 id="5-目标">5. 目标&lt;/h2>
-&lt;p>指标接口将提供一个 MetricsService，该 Service 不仅提供柔性服务所的接口级数据，也提供所有指标的查询方式，其中方法级指标的查询的接口可按如下方式声明&lt;/p>
+&lt;h3 id="指标上报接口">指标上报接口&lt;/h3>
+&lt;p>根据上图架构，指标接口是 Dubbo 对外暴露指标数据的出口，以下是指标接口的具体定义：&lt;/p>
+&lt;blockquote>
+&lt;p>另外，该 Service 还作为一些 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/proposals/heuristic-flow-control/">智能自适应流量调度算法&lt;/a> 的数据来源&lt;/p>
+&lt;/blockquote>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsService&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
@@ -69,11 +81,13 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> MetricsCategory category&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Object value&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标收集">指标收集&lt;/h1>
-&lt;h2 id="1-嵌入位置">1. 嵌入位置&lt;/h2>
-&lt;p>Dubbo 架构图如下
-&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dubbo.png" alt="img.png">&lt;/p>
-&lt;p>在 provider 中添加一层 MetricsFilter 重写 invoke 方法嵌入调用链路用于收集指标，用 try-catch-finally 处理，核心代码如下&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="指标采集埋点">指标采集埋点&lt;/h3>
+&lt;p>Dubbo 是通过扩展 Filter SPI 扩展点实现对请求调用指标进行拦截的，目前在消费端和提供端分别增加了 Filter 扩展实现&lt;/p>
+&lt;ul>
+&lt;li>MetricsFilter 提供端请求指标埋点&lt;/li>
+&lt;li>MetricsClusterFilter 消费端请求指标埋点&lt;/li>
+&lt;/ul>
+&lt;p>以下是 MetricsFilter 的实现源码，注意 try-catch-finally 处理。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>&lt;span style="color:#719e07">(&lt;/span>group &lt;span style="color:#719e07">=&lt;/span> PROVIDER&lt;span style="color:#719e07">,&lt;/span> order &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Filter&lt;span style="color:#719e07">,&lt;/span> ScopeModelAware &lt;span style="color:#719e07">{&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
@@ -96,8 +110,8 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-指标标识">2. 指标标识&lt;/h2>
-&lt;p>用以下五个属性作为隔离级别区分标识不同方法，也是各个 ConcurrentHashMap 的 key&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="指标统计单位">指标统计单位&lt;/h3>
+&lt;p>以下五个属性是指标统计的基本单位（应用、服务、方法的组合），也是源代码 MetricsCollector 中 Map 数据结构的 key&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MethodMetric&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String applicationName&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String interfaceName&lt;span style="color:#719e07">;&lt;/span>
@@ -105,8 +119,8 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String group&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String version&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-基础指标">3. 基础指标&lt;/h2>
-&lt;p>指标通过 common 模块下的 MetricsCollector 存储所有指标数据&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="基础指标">基础指标&lt;/h3>
+&lt;p>dubbo-common 模块下的 MetricsCollector 负责存储所有指标数据&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector &lt;span style="color:#719e07">{&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Boolean collectEnabled &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> listeners &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
@@ -125,200 +139,18 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric&lt;span style="color:#719e07">,&lt;/span> AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> rtCount &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;();&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="本地聚合">本地聚合&lt;/h1>
-&lt;p>本地聚合指将一些简单的指标通过计算获取各分位数指标的过程&lt;/p>
-&lt;h2 id="1-参数设计">1. 参数设计&lt;/h2>
-&lt;p>收集指标时，默认只收集基础指标，而一些单机聚合指标则需要开启服务柔性或者本地聚合后另起线程计算。此处若开启服务柔性，则本地聚合默认开启&lt;/p>
-&lt;h3 id="11-本地聚合开启方式">1.1 本地聚合开启方式&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-指标聚合参数">1.2 指标聚合参数&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> bucket-num=&lt;span style="color:#2aa198">&amp;#34;5&amp;#34;&lt;/span> time-window-seconds=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-具体指标">2. 具体指标&lt;/h2>
-&lt;p>四个需要监控的关键指标。他们称之为“四个黄金信号”：延迟（Latency），流量（Traffic），错误（Errors）和饱和度（Saturation）。
-在Dubbo中主要包含如下监控指标：&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th style="text-align:left">&lt;/th>
-&lt;th style="text-align:left">基础设施&lt;/th>
-&lt;th style="text-align:left">业务监控&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td style="text-align:left">延迟类&lt;/td>
-&lt;td style="text-align:left">IO 等待； 网络延迟；&lt;/td>
-&lt;td style="text-align:left">接口、服务的平均耗时、TP90、TP99、TP999 等&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">流量类&lt;/td>
-&lt;td style="text-align:left">网络和磁盘 IO；&lt;/td>
-&lt;td style="text-align:left">服务层面的 QPS、&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">错误类&lt;/td>
-&lt;td style="text-align:left">宕机； 磁盘（坏盘或文件系统错误）； 进程或端口挂掉； 网络丢包；&lt;/td>
-&lt;td style="text-align:left">错误日志;业务状态码、错误码走势;&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">饱和度类&lt;/td>
-&lt;td style="text-align:left">系统资源利用率： CPU、内存、磁盘、网络等； 饱和度：等待线程数，队列积压长度；&lt;/td>
-&lt;td style="text-align:left">这里主要包含JVM、线程池等&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;ul>
-&lt;li>qps: 基于滑动窗口获取动态qps&lt;/li>
-&lt;li>rt: 基于滑动窗口获取动态rt&lt;/li>
-&lt;li>失败请求数: 基于滑动窗口获取最近时间内的失败请求数&lt;/li>
-&lt;li>成功请求数: 基于滑动窗口获取最近时间内的成功请求数&lt;/li>
-&lt;li>处理中请求数: 前后增加Filter简单统计&lt;/li>
-&lt;li>具体指标依赖滑动窗口，额外使用 AggregateMetricsCollector 收集&lt;/li>
-&lt;/ul>
-&lt;p>输出到普罗米修斯的相关指标可以参考的内容如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_live_data_size_bytes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_live_data_size_bytes 1.6086528E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_succeed_aggregate Aggregated Succeed Requests
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_succeed_aggregate gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed_aggregate{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 39.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_buffer_memory_used_bytes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id=&amp;#34;direct&amp;#34;,} 1.679975E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id=&amp;#34;mapped&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_memory_allocated_bytes_total Incremented for an increase in the size of the (young) heap memory pool after one GC to before the next
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_memory_allocated_bytes_total counter
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_allocated_bytes_total 2.9884416E9
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_total_aggregate Aggregated Total Requests
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_total_aggregate gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total_aggregate{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 39.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE system_load_average_1m gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_load_average_1m 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP system_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the whole system
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE system_cpu_usage gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_usage 0.015802269043760128
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_peak_threads gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_peak_threads 40.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_processing Processing Requests
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_processing gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_processing{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_memory_max_bytes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;,} 1.22912768E8
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Survivor Space&amp;#34;,} -1.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Old Gen&amp;#34;,} 9.52107008E8
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Metaspace&amp;#34;,} -1.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Eden Space&amp;#34;,} -1.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;,} 5828608.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Compressed Class Space&amp;#34;,} 1.073741824E9
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;,} 1.22916864E8
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_states_threads The current number of threads having BLOCKED state
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_states_threads gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;blocked&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;runnable&amp;#34;,} 10.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;waiting&amp;#34;,} 16.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;timed-waiting&amp;#34;,} 13.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;new&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state=&amp;#34;terminated&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_buffer_total_capacity_bytes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id=&amp;#34;direct&amp;#34;,} 1.6799749E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id=&amp;#34;mapped&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_p99 Response Time P99
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_p99 gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p99{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 1.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_memory_used_bytes The amount of used memory
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_memory_used_bytes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Survivor Space&amp;#34;,} 1048576.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;,} 1.462464E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Old Gen&amp;#34;,} 1.6098728E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Metaspace&amp;#34;,} 4.0126952E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Eden Space&amp;#34;,} 8.2837504E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;,} 1372032.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Compressed Class Space&amp;#34;,} 4519248.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;,} 5697408.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP qps Query Per Seconds
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE qps gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>qps{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.3333333333333333
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_min Min Response Time
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_min gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_min{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_buffer_count_buffers An estimate of the number of buffers in the pool
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_buffer_count_buffers gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id=&amp;#34;mapped&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id=&amp;#34;direct&amp;#34;,} 10.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP system_cpu_count The number of processors available to the Java virtual machine
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE system_cpu_count gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_count 2.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_classes_loaded_classes The number of classes that are currently loaded in the Java virtual machine
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_classes_loaded_classes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_loaded_classes 7325.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_total Total Response Time
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_total gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_total{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 2783.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_last Last Response Time
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_last gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_last{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_memory_promoted_bytes_total counter
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_promoted_bytes_total 1.4450952E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_pause_seconds Time spent in GC pause
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_pause_seconds summary
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;Metadata GC Threshold&amp;#34;,} 2.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;Metadata GC Threshold&amp;#34;,} 0.026
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;G1 Evacuation Pause&amp;#34;,} 37.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;G1 Evacuation Pause&amp;#34;,} 0.156
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_pause_seconds_max Time spent in GC pause
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_pause_seconds_max gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;Metadata GC Threshold&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action=&amp;#34;end of minor GC&amp;#34;,cause=&amp;#34;G1 Evacuation Pause&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_p95 Response Time P95
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_p95 gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p95{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_total Total Requests
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_total gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 27738.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP process_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the Java Virtual Machine process
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE process_cpu_usage gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>process_cpu_usage 8.103727714748784E-4
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_max Max Response Time
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_max gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_max{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 4.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_gc_max_data_size_bytes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_max_data_size_bytes 9.52107008E8
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_live_threads gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_live_threads 39.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_threads_daemon_threads The current number of live daemon threads
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_threads_daemon_threads gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_daemon_threads 36.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_classes_unloaded_classes_total The total number of classes unloaded since the Java virtual machine has started execution
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_classes_unloaded_classes_total counter
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_unloaded_classes_total 0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE jvm_memory_committed_bytes gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;,} 1.4680064E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Survivor Space&amp;#34;,} 1048576.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Old Gen&amp;#34;,} 5.24288E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Metaspace&amp;#34;,} 4.1623552E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;heap&amp;#34;,id=&amp;#34;G1 Eden Space&amp;#34;,} 9.0177536E7
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;,} 2555904.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;Compressed Class Space&amp;#34;,} 5111808.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area=&amp;#34;nonheap&amp;#34;,id=&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;,} 5701632.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP requests_succeed Succeed Requests
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE requests_succeed gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 27738.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP rt_avg Average Response Time
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE rt_avg gauge
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_avg{application_name=&amp;#34;metrics-provider&amp;#34;,group=&amp;#34;&amp;#34;,hostname=&amp;#34;iZ8lgm9icspkthZ&amp;#34;,interface=&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;,ip=&amp;#34;172.28.236.104&amp;#34;,method=&amp;#34;sayHello&amp;#34;,version=&amp;#34;&amp;#34;,} 0.0
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="聚合收集器">聚合收集器&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="本地指标聚合">本地指标聚合&lt;/h3>
+&lt;p>本地聚合指将一些简单的指标通过计算获取各分位数指标的过程。&lt;/p>
+&lt;h4 id="开启本地聚合">开启本地聚合&lt;/h4>
+&lt;p>收集指标时，默认只收集基础指标，而一些单机聚合指标则需要开启服务柔性或者本地聚合后另起线程计算。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.metrics.enable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>另外，还可以设置一些更多的指标&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.metrics.aggregation.enable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.metrics.aggregation.bucket-num&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.metrics.aggregation.time-window-seconds&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="具体指标">具体指标&lt;/h4>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/metrics/standard_metrics/">具体指标&lt;/a> 请参考 Dubbo Metrics 总体设计文档。&lt;/p>
+&lt;h4 id="聚合收集器实现">聚合收集器实现&lt;/h4>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector&lt;span style="color:#719e07">,&lt;/span> MetricsListener &lt;span style="color:#719e07">{&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> bucketNum&lt;span style="color:#719e07">;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> timeWindowSeconds&lt;span style="color:#719e07">;&lt;/span>
@@ -355,7 +187,7 @@
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerListener&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>getBean&lt;span style="color:#719e07">(&lt;/span>DefaultMetricsCollector&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">).&lt;/span>addListener&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">this&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-指标聚合">3. 指标聚合&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="指标聚合原理">指标聚合原理&lt;/h3>
 &lt;p>滑动窗口
 假设我们初始有6个bucket，每个窗口时间设置为2分钟
 每次写入指标数据时，会将数据分别写入6个bucket内，每隔两分钟移动一个bucket并且清除原来bucket内的数据
@@ -416,67 +248,33 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> ringBuffer&lt;span style="color:#719e07">[&lt;/span>currentBucket&lt;span style="color:#719e07">];&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标推送">指标推送&lt;/h1>
-&lt;p>指标推送只有用户在设置了&amp;lt;dubbo:metrics /&amp;gt;配置且配置protocol参数后才开启，若只开启指标聚合，则默认不推送指标。&lt;/p>
-&lt;h2 id="1-promehteus-pull-servicediscovery">1. Promehteus Pull ServiceDiscovery&lt;/h2>
-&lt;p>使用dubbo-admin等类似的中间层，启动时根据配置将本机 IP、Port、MetricsURL 推送地址信息至dubbo-admin（或任意中间层）的方式，暴露HTTP ServiceDiscovery供prometheus读取，配置方式如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;pull&amp;rdquo; address=&amp;quot;${dubbo-admin.address}&amp;quot; port=&amp;ldquo;20888&amp;rdquo; url=&amp;quot;/metrics&amp;quot;/&amp;gt;，其中在pull模式下address为可选参数，若不填则需用户手动在Prometheus配置文件中配置地址&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">exportHttpServer&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> exporterEnabled &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_EXPORTER_ENABLED_KEY&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>exporterEnabled&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> port &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_EXPORTER_METRICS_PORT_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_METRICS_PORT&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String path &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_EXPORTER_METRICS_PATH_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_METRICS_PATH&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>path&lt;span style="color:#719e07">.&lt;/span>startsWith&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> path&lt;span style="color:#719e07">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer &lt;span style="color:#719e07">=&lt;/span> HttpServer&lt;span style="color:#719e07">.&lt;/span>create&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> InetSocketAddress&lt;span style="color:#719e07">(&lt;/span>port&lt;span style="color:#719e07">),&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer&lt;span style="color:#719e07">.&lt;/span>createContext&lt;span style="color:#719e07">(&lt;/span>path&lt;span style="color:#719e07">,&lt;/span> httpExchange &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String response &lt;span style="color:#719e07">=&lt;/span> prometheusRegistry&lt;span style="color:#719e07">.&lt;/span>scrape&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpExchange&lt;span style="color:#719e07">.&lt;/span>sendResponseHeaders&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">200&lt;/span>&lt;span style="color:#719e07">,&lt;/span> response&lt;span style="color:#719e07">.&lt;/span>getBytes&lt;span style="color:#719e07">().&lt;/span>length&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">(&lt;/span>OutputStream os &lt;span style="color:#719e07">=&lt;/span> httpExchange&lt;span style="color:#719e07">.&lt;/span>getResponseBody&lt;span style="color:#719e07">())&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> os&lt;span style="color:#719e07">.&lt;/span>write&lt;span style="color:#719e07">(&lt;/span>response&lt;span style="color:#719e07">.&lt;/span>getBytes&lt;span style="color:#719e07">());&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">});&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Thread&lt;span style="color:#719e07">(&lt;/span>prometheusExporterHttpServer&lt;span style="color:#719e07">::&lt;/span>start&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread&lt;span style="color:#719e07">.&lt;/span>start&lt;span style="color:#719e07">();&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>IOException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException&lt;span style="color:#719e07">(&lt;/span>e&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-prometheus-push-pushgateway">2. Prometheus Push Pushgateway&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="指标推送">指标推送&lt;/h3>
+&lt;p>指标推送只有用户在设置了 &lt;code>dubbo.metrics.protocol=prometheus&lt;/code> 参数后才开启，若只开启指标聚合，则默认不推送指标。&lt;/p>
+&lt;h4 id="prometheus-pull-service-discovery">Prometheus Pull Service Discovery&lt;/h4>
+&lt;p>目前 Dubbo Admin 内置了 prometheus http_sd service discovery 实例地址发现机制，Admin 默认会使用 &lt;code>qos 端口&lt;/code>、 &lt;code>/metrics&lt;/code> 作为这样 Admin 就能够将所有示例地址汇聚后以标准 http_sd 的方式同步给 Prometheus Server。&lt;/p>
+&lt;p>具体配置方式如下&lt;/p>
+&lt;p>其中，address、port、url 均是可选项，如不配置则 Admin 使用默认约定值。&lt;/p>
+&lt;blockquote>
 &lt;p>用户直接在Dubbo配置文件中配置Prometheus Pushgateway的地址即可，如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;push&amp;rdquo; address=&amp;quot;${prometheus.pushgateway-url}&amp;quot; interval=&amp;ldquo;5&amp;rdquo; /&amp;gt;，其中interval代表推送间隔&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">schedulePushJob&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> pushEnabled &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_ENABLED_KEY&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>pushEnabled&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String baseUrl &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_BASE_URL_KEY&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String job &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_JOB_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_JOB_NAME&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> pushInterval &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_PUSH_INTERVAL_KEY&lt;span style="color:#719e07">,&lt;/span> PROMETHEUS_DEFAULT_PUSH_INTERVAL&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String username &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_USERNAME_KEY&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String password &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_PASSWORD_KEY&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> NamedThreadFactory threadFactory &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> NamedThreadFactory&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;prometheus-push-job&amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor &lt;span style="color:#719e07">=&lt;/span> Executors&lt;span style="color:#719e07">.&lt;/span>newScheduledThreadPool&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">,&lt;/span> threadFactory&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PushGateway pushGateway &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> PushGateway&lt;span style="color:#719e07">(&lt;/span>baseUrl&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>StringUtils&lt;span style="color:#719e07">.&lt;/span>isBlank&lt;span style="color:#719e07">(&lt;/span>username&lt;span style="color:#719e07">))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway&lt;span style="color:#719e07">.&lt;/span>setConnectionFactory&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">new&lt;/span> BasicAuthHttpConnectionFactory&lt;span style="color:#719e07">(&lt;/span>username&lt;span style="color:#719e07">,&lt;/span> password&lt;span style="color:#719e07">));&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor&lt;span style="color:#719e07">.&lt;/span>scheduleWithFixedDelay&lt;span style="color:#719e07">(()&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> push&lt;span style="color:#719e07">(&lt;/span>pushGateway&lt;span style="color:#719e07">,&lt;/span> job&lt;span style="color:#719e07">),&lt;/span> pushInterval&lt;span style="color:#719e07">,&lt;/span> pushInterval&lt;span style="color:#719e07">,&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>SECONDS&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">push&lt;/span>&lt;span style="color:#719e07">(&lt;/span>PushGateway pushGateway&lt;span style="color:#719e07">,&lt;/span> String job&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway&lt;span style="color:#719e07">.&lt;/span>pushAdd&lt;span style="color:#719e07">(&lt;/span>prometheusRegistry&lt;span style="color:#719e07">.&lt;/span>getPrometheusRegistry&lt;span style="color:#719e07">(),&lt;/span> job&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span> &lt;span style="color:#719e07">catch&lt;/span> &lt;span style="color:#719e07">(&lt;/span>IOException e&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger&lt;span style="color:#719e07">.&lt;/span>error&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Error occurred when pushing metrics to prometheus: &amp;#34;&lt;/span>&lt;span style="color:#719e07">,&lt;/span> e&lt;span style="color:#719e07">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/tracing/</guid><description/></item><item><title>Overview: 日志管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/logging/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/logging/</guid><description>
+&lt;/blockquote></description></item><item><title>Overview: 链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/tracing/</guid><description>
+&lt;h2 id="概述">概述&lt;/h2>
+&lt;p>Dubbo 内置了全链路追踪能力，你可以通过引入 spring-boot-starter 或者相关依赖开启链路跟踪能力，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等后端系统，可以实现全链路跟踪数据的分析与可视化展示。&lt;/p>
+&lt;p>Dubbo 目前借助 Micrometer Observation 完成 Tracing 的所有埋点工作，依赖 Micrometer 提供的各种 Bridge 适配，我们可以实现将 Tracing 导入各种后端系统，具体工作原理如下。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/micrometer-bridge.png" alt="micrometer-bridge">&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>以 Dubbo Spring Boot 应用为例，通过加入如下依赖即可开启链路追踪，并使用 zipkin exporter bridge 将链路追踪数据导入 Zipkin 后端系统。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-tracing-otel-zipkin-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.1-SNAPSHOT&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>更多完整示例请参见：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/">使用 Zipkin 实现 Dubbo 全链路追踪&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/">使用 Skywalking 实现 Dubbo 全链路追踪&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="关联日志">关联日志&lt;/h2>
+&lt;p>Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、span-id 等信息自动置入日志 MDC 上下文，你只需要设置日志输出格式中包含类似 &lt;code>%X{traceId:-},%X{spanId:-}]&lt;/code>，即可实现业务日志与 tracing 系统的自动关联，具体可参见 &lt;a href="https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-spring-boot-tracing/dubbo-samples-spring-boot-tracing-provider/src/main/resources/application.yml#L46">Tracing 日志上下文配置示例&lt;/a>。&lt;/p></description></item><item><title>Overview: 日志管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/logging/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/logging/</guid><description>
 &lt;p>在 Dubbo 框架内所有的日志输出都是通过 LoggerFactory 这个静态工厂类来获得 Logger 的对象实体，并且抽离了一个 LoggerAdapter 用于对接第三方日志框架，所以就有了JDKLoggerAdapter, Log4jLoggerAdapter, SLF4JLoggerAdapter等一些实现子类，分别对接了不同 Log 第三方实现。既然 Dubbo 能够支持这么多log实现，那么这些实现在 Dubbo 中优先级是在呢么样的呢？这里的优先级是指未配置指定的 logger 提供方的情况下，由 Dubbo 框架自己选择。优先级如下：&lt;/p>
 &lt;table>
 &lt;thead>
@@ -629,4 +427,4 @@
 &lt;/ol>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;http://localhost/log.txt&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;http://localhost/log2.txt&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 健康检查</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/health-information/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/health-information/</guid><description/></item><item><title>Overview: K8S探测器</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/kubernetes-probes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/kubernetes-probes/</guid><description/></item><item><title>Overview: 文档案例</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/doc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/observability/doc/</guid><description/></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

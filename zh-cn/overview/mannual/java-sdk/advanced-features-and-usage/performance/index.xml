@@ -225,10 +225,10 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="注意-1">注意：&lt;/h4>
 &lt;p>由于日志框架不匹配导致的日志为空可以参考&lt;a href="../../others/logger-management/">日志框架适配及运行时管理&lt;/a>动态修改日志输出框架。&lt;/p></description></item><item><title>Overview: 负载均衡</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/</guid><description>
 &lt;h2 id="功能说明">功能说明&lt;/h2>
-&lt;p>在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 &lt;code>random&lt;/code> 随机调用。&lt;/p>
-&lt;p>具体实现上，Dubbo 提供的是客户端负载均衡，即由 Consumer 通过负载均衡算法得出需要将请求提交到哪个 Provider 实例。&lt;/p>
-&lt;p>可以自行扩展负载均衡策略，参见：&lt;a href="../../../reference-manual/spi/description/load-balance">负载均衡扩展&lt;/a>&lt;/p>
-&lt;h3 id="负载均衡策略">负载均衡策略&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/core-features/load-balance/">Dubbo 负载均衡算法说明&lt;/a>&lt;/li>
+&lt;li>如果要扩展更多负载均衡策略，参见 &lt;a href="../../../reference-manual/spi/description/load-balance">Java SPI 负载均衡扩展&lt;/a>&lt;/li>
+&lt;/ul>
 &lt;p>目前 Dubbo 内置了如下负载均衡算法，用户可直接配置使用：&lt;/p>
 &lt;table>
 &lt;thead>
@@ -236,129 +236,58 @@
 &lt;th style="text-align:left">算法&lt;/th>
 &lt;th style="text-align:left">特性&lt;/th>
 &lt;th style="text-align:left">备注&lt;/th>
+&lt;th style="text-align:left">配置值&lt;/th>
 &lt;/tr>
 &lt;/thead>
 &lt;tbody>
 &lt;tr>
-&lt;td style="text-align:left">RandomLoadBalance&lt;/td>
+&lt;td style="text-align:left">Weighted Random LoadBalance&lt;/td>
 &lt;td style="text-align:left">加权随机&lt;/td>
 &lt;td style="text-align:left">默认算法，默认权重相同&lt;/td>
+&lt;td style="text-align:left">random (默认)&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td style="text-align:left">RoundRobinLoadBalance&lt;/td>
+&lt;td style="text-align:left">RoundRobin LoadBalance&lt;/td>
 &lt;td style="text-align:left">加权轮询&lt;/td>
 &lt;td style="text-align:left">借鉴于 Nginx 的平滑加权轮询算法，默认权重相同，&lt;/td>
+&lt;td style="text-align:left">roundrobin&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td style="text-align:left">LeastActiveLoadBalance&lt;/td>
+&lt;td style="text-align:left">LeastActive LoadBalance&lt;/td>
 &lt;td style="text-align:left">最少活跃优先 + 加权随机&lt;/td>
 &lt;td style="text-align:left">背后是能者多劳的思想&lt;/td>
+&lt;td style="text-align:left">leastactive&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td style="text-align:left">ShortestResponseLoadBalance&lt;/td>
+&lt;td style="text-align:left">Shortest-Response LoadBalance&lt;/td>
 &lt;td style="text-align:left">最短响应优先 + 加权随机&lt;/td>
 &lt;td style="text-align:left">更加关注响应速度&lt;/td>
+&lt;td style="text-align:left">shortestresponse&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td style="text-align:left">ConsistentHashLoadBalance&lt;/td>
-&lt;td style="text-align:left">一致性 Hash&lt;/td>
+&lt;td style="text-align:left">ConsistentHash LoadBalance&lt;/td>
+&lt;td style="text-align:left">一致性哈希&lt;/td>
 &lt;td style="text-align:left">确定的入参，确定的提供者，适用于有状态请求&lt;/td>
+&lt;td style="text-align:left">consistenthash&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">P2C LoadBalance&lt;/td>
+&lt;td style="text-align:left">Power of Two Choice&lt;/td>
+&lt;td style="text-align:left">随机选择两个节点后，继续选择“连接数”较小的那个节点。&lt;/td>
+&lt;td style="text-align:left">p2c&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">Adaptive LoadBalance&lt;/td>
+&lt;td style="text-align:left">自适应负载均衡&lt;/td>
+&lt;td style="text-align:left">在 P2C 算法基础上，选择二者中 load 最小的那个节点&lt;/td>
+&lt;td style="text-align:left">adaptive&lt;/td>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
-&lt;h3 id="random">Random&lt;/h3>
-&lt;ul>
-&lt;li>&lt;strong>加权随机&lt;/strong>，按权重设置随机概率。&lt;/li>
-&lt;li>在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。&lt;/li>
-&lt;li>缺点：存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。&lt;/li>
-&lt;/ul>
-&lt;h3 id="roundrobin">RoundRobin&lt;/h3>
-&lt;ul>
-&lt;li>&lt;strong>加权轮询&lt;/strong>，按公约后的权重设置轮询比率，循环调用节点&lt;/li>
-&lt;li>缺点：同样存在慢的提供者累积请求的问题。&lt;/li>
-&lt;/ul>
-&lt;p>加权轮询过程过程中，如果某节点权重过大，会存在某段时间内调用过于集中的问题。&lt;br>
-例如 ABC 三节点有如下权重：&lt;code>{A: 3, B: 2, C: 1}&lt;/code>&lt;br>
-那么按照最原始的轮询算法，调用过程将变成：&lt;code>A A A B B C&lt;/code>&lt;/p>
-&lt;p>对此，Dubbo 借鉴 Nginx 的平滑加权轮询算法，对此做了优化，调用过程可抽象成下表:&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th style="text-align:left">轮前加和权重&lt;/th>
-&lt;th style="text-align:left">本轮胜者&lt;/th>
-&lt;th style="text-align:left">合计权重&lt;/th>
-&lt;th style="text-align:left">轮后权重（胜者减去合计权重）&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td style="text-align:left">起始轮&lt;/td>
-&lt;td style="text-align:left">\&lt;/td>
-&lt;td style="text-align:left">\&lt;/td>
-&lt;td style="text-align:left">&lt;code>A(0), B(0), C(0)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">&lt;code>A(3), B(2), C(1)&lt;/code>&lt;/td>
-&lt;td style="text-align:left">A&lt;/td>
-&lt;td style="text-align:left">6&lt;/td>
-&lt;td style="text-align:left">&lt;code>A(-3), B(2), C(1)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">&lt;code>A(0), B(4), C(2)&lt;/code>&lt;/td>
-&lt;td style="text-align:left">B&lt;/td>
-&lt;td style="text-align:left">6&lt;/td>
-&lt;td style="text-align:left">&lt;code>A(0), B(-2), C(2)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">&lt;code>A(3), B(0), C(3)&lt;/code>&lt;/td>
-&lt;td style="text-align:left">A&lt;/td>
-&lt;td style="text-align:left">6&lt;/td>
-&lt;td style="text-align:left">&lt;code>A(-3), B(0), C(3)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">&lt;code>A(0), B(2), C(4)&lt;/code>&lt;/td>
-&lt;td style="text-align:left">C&lt;/td>
-&lt;td style="text-align:left">6&lt;/td>
-&lt;td style="text-align:left">&lt;code>A(0), B(2), C(-2)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">&lt;code>A(3), B(4), C(-1)&lt;/code>&lt;/td>
-&lt;td style="text-align:left">B&lt;/td>
-&lt;td style="text-align:left">6&lt;/td>
-&lt;td style="text-align:left">&lt;code>A(3), B(-2), C(-1)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align:left">&lt;code>A(6), B(0), C(0)&lt;/code>&lt;/td>
-&lt;td style="text-align:left">A&lt;/td>
-&lt;td style="text-align:left">6&lt;/td>
-&lt;td style="text-align:left">&lt;code>A(0), B(0), C(0)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>我们发现经过合计权重（3+2+1）轮次后，循环又回到了起点，整个过程中节点流量是平滑的，且哪怕在很短的时间周期内，概率都是按期望分布的。&lt;/p>
-&lt;p>如果用户有加权轮询的需求，可放心使用该算法。&lt;/p>
-&lt;h3 id="leastactive">LeastActive&lt;/h3>
-&lt;ul>
-&lt;li>&lt;strong>加权最少活跃调用优先&lt;/strong>，活跃数越低，越优先调用，相同活跃数的进行加权随机。活跃数指调用前后计数差（针对特定提供者：请求发送数 - 响应返回数），表示特定提供者的任务堆积量，活跃数越低，代表该提供者处理能力越强。&lt;/li>
-&lt;li>使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大；相对的，处理能力越强的节点，处理更多的请求。&lt;/li>
-&lt;/ul>
-&lt;h3 id="shortestresponse">ShortestResponse&lt;/h3>
-&lt;ul>
-&lt;li>&lt;strong>加权最短响应优先&lt;/strong>，在最近一个滑动窗口中，响应时间越短，越优先调用。相同响应时间的进行加权随机。&lt;/li>
-&lt;li>使得响应时间越快的提供者，处理更多的请求。&lt;/li>
-&lt;li>缺点：可能会造成流量过于集中于高性能节点的问题。&lt;/li>
-&lt;/ul>
-&lt;p>这里的响应时间 = 某个提供者在窗口时间内的平均响应时间，窗口时间默认是 30s。&lt;/p>
-&lt;h3 id="consistenthash">ConsistentHash&lt;/h3>
-&lt;ul>
-&lt;li>&lt;strong>一致性 Hash&lt;/strong>，相同参数的请求总是发到同一提供者。&lt;/li>
-&lt;li>当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。&lt;/li>
-&lt;li>算法参见：&lt;a href="http://en.wikipedia.org/wiki/Consistent_hashing">Consistent Hashing | WIKIPEDIA&lt;/a>&lt;/li>
-&lt;li>缺省只对第一个参数 Hash，如果要修改，请配置 &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.arguments&amp;quot; value=&amp;quot;0,1&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
-&lt;li>缺省用 160 份虚拟节点，如果要修改，请配置 &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.nodes&amp;quot; value=&amp;quot;320&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;blockquote>
+&lt;p>只需要调整 &lt;code>loadbalance&lt;/code> 相应取值即可，每种负载均衡策略取值请参见文档最上方表格。&lt;/p>
+&lt;/blockquote>
 &lt;h3 id="服务端服务级别">服务端服务级别&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="客户端服务级别">客户端服务级别&lt;/h3>
@@ -761,6 +690,7 @@
 &lt;p>控制某些服务的最大并发请求数，确保其他服务的资源可用性。系统过载和确保系统稳定性。&lt;/p>
 &lt;p>允许在需求增加时更平滑地扩展服务。&lt;/p>
 &lt;p>确保服务在高峰使用时间保持可靠和稳定。&lt;/p>
+&lt;p>这种方式要求用户准确的预先评估系统能处理的并发数，而准确的评估系统处理能力并不是一件容易的事情，因此 Dubbo 还提供了自适应限流模式，根据系统负载自动识别系统健康程度并进行限流保护，可以在此 &lt;a href="../adaptive-concurrency-control">查看使用文档&lt;/a>。&lt;/p>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
 &lt;h3 id="样例一">样例一&lt;/h3>
 &lt;blockquote>
@@ -800,6 +730,25 @@
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;leastactive&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>或&lt;/strong>&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;leastactive&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 自适应限流</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/adaptive-concurrency-control/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/adaptive-concurrency-control/</guid><description>
+&lt;p>自适应限流的设计与实现思路请参考 &lt;a href="../../../../../reference/proposals/heuristic-flow-control/">Dubbo 自适应限流功能&lt;/a>。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>设置方法与静态的最大并发值设置类似，只需在服务端设置 flowcontrol 参数即可，可选值有以下两种：&lt;/p>
+&lt;ul>
+&lt;li>heuristicSmoothingFlowControl。当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从 HeuristicSmoothingFlowControl 算法中获得当前的 maxConcurrency 值。如果当前正在处理的请求数量超过了 maxConcurrency，则拒绝该请求。&lt;/li>
+&lt;li>autoConcurrencyLimier。与 HeuristicSmoothingFlowControl 的最大区别是，AutoConcurrencyLimier 是基于窗口的，每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到 maxConcurrency，其次，利用exploreRatio来对剩余的容量进行探索。&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>在确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="示例一使用-heuristicsmoothingflowcontrol-自适应限流算法">示例一：使用 heuristicSmoothingFlowControl 自适应限流算法&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.provider.flowcontrol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">heuristicSmoothingFlowControl&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> flowcontrol=&lt;span style="color:#2aa198">&amp;#34;heuristicSmoothingFlowControl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="示例二使用-autoconcurrencylimiter-自适应限流算法">示例二：使用 autoConcurrencyLimiter 自适应限流算法&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.provider.flowcontrol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">autoConcurrencyLimiter&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> flowcontrol=&lt;span style="color:#2aa198">&amp;#34;autoConcurrencyLimiter&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="示例三设置服务粒度的-heuristicsmoothingflowcontrol-自适应限流">示例三：设置服务粒度的 heuristicSmoothingFlowControl 自适应限流&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> flowcontrol=&lt;span style="color:#2aa198">&amp;#34;heuristicSmoothingFlowControl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 连接控制</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/config-connections/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/config-connections/</guid><description>
 &lt;h2 id="功能说明">功能说明&lt;/h2>
 &lt;p>连接控制功能可以使用户能够控制和管理进出服务器连接数，限制连接数并设置超时，以确保 Dubbo 系统的稳定性和性能，还允许用户根据 IP 地址、端口和协议配置不同级别的访问控制，保护系统免受恶意流量的影响，并降低服务中断的风险，此外提供了一种监视当前流量和连接状态的方法。&lt;/p>
