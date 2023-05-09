@@ -42,22 +42,22 @@ Dubbo 设计用于解决阿里巴巴内部大规模 微服务集群实践难题�
 Dubbo 不是应用框架的替代者，它可以很好的工作在每种语言的主流编程框架之上，以 Java 为例，Dubbo 可以很好的与 Spring 协作，并在此基础上提供服务定义、微服务编程、服务发现、负载均衡、流量管控等能力。
 
 ### 提供灵活的通信协议切换能力
-![overview](/imgs/blog/2023/2/introduction/8-extensibility.jpg)
+
 
 在通信方面，Dubbo 区别于其他 RPC 框架的是它不绑定特定协议，你可以在底层选用 HTTP./2、TCP、gRPC、REST、Hessian 等任意通信协议，同时享受统一的 API、以及对等的服务治理能力。
 
 ### 一切皆可扩展
-![overview](/imgs/blog/2023/2/introduction/9-ecosystem.jpg)
+![overview](/imgs/blog/2023/2/introduction/8-extensibility.jpg)
 
 Dubbo 的另一个优势在于其可扩展性设计，从流量管控、协议编码、诊断调优、再到服务治理，你都可以去扩展，满足企业级微服务开发与运维的所有诉求。
 
 ### 丰富的生态
-![overview](/imgs/blog/2023/2/introduction/10-mesh.jpg)
+![overview](/imgs/blog/2023/2/introduction/9-ecosystem.jpg)
 
 基于扩展能力 Dubbo 官方提供了丰富的生态适配，涵盖了所有主流的开源微服务组件。
 
 ### 服务网格
-![overview](/imgs/blog/2023/2/introduction/11-initializer.jpg)
+![overview](/imgs/blog/2023/2/introduction/10-mesh.jpg)
 
 对于服务网格架构，Dubbo也可以轻松接入原生 Istio 体系；
 在数据面支持与 Envoy 部署的 Proxy 模式，也支持无 Envoy 的 Proxyless 模式，提供更灵活的数据面选择。
@@ -66,19 +66,21 @@ Dubbo 的另一个优势在于其可扩展性设计，从流量管控、协议�
 我们以 Java 微服务开发为例。
 
 ### 第一步
-![overview](/imgs/blog/2023/2/introduction/12-interface.jpg)
+![overview](/imgs/blog/2023/2/introduction/11-initializer.png)
 
-使用官方脚手架快速创建项目模板，只需要选择依赖的版本、组件，点击 “获取代码” 即可
+使用 [官方脚手架](https://start.dubbo.apache.org/bootstrap.html) 快速创建项目模板，只需要选择依赖的版本、组件，点击 “获取代码” 即可
 
 ### 第二步
 将模板项目导入 IDE 开发环境。
 定义 Java 接口作为 Dubbo 服务。
-![overview](/imgs/blog/2023/2/introduction/13-impl.jpg)
+![overview](/imgs/blog/2023/2/introduction/12-interface.jpg)
 
 开发 Dubbo 服务端，实现接口并完成业务逻辑编码，通过一条简单的注解配置完成服务发布。
-![overview](/imgs/blog/2023/2/introduction/14-reference.jpg)
+![overview](/imgs/blog/2023/2/introduction/13-impl.jpg)
 
 开发Dubbo 客户端，通过注解声明 Dubbo 服务，然后就可以发起远程方法调用了。至此，开发工作完成。
+![overview](/imgs/blog/2023/2/introduction/14-reference.jpg)
+
 
 ### 第三步
 进入部署环节，我们选择 Kubernetes 作为部署环境。
@@ -92,9 +94,7 @@ Dubbo 的另一个优势在于其可扩展性设计，从流量管控、协议�
 
 你可以在此了解Dubbo 集群的详细运行状态，包括每个应用对外服务和调用服务的情况，QpS、成功率等，还可以查看每个实例的资源健康状况。
 
-![overview](/imgs/blog/2023/2/introduction/17-grafana1.jpg)
-
-![overview](/imgs/blog/2023/2/introduction/18-grafana2.jpg)
+![overview](/imgs/blog/2023/2/introduction/17-grafana1.png)
 
 ### 第四步
 进行流量管控。当应用已经平稳运行后，进一步控制流量的访问行为，包括实现金丝雀发布、全链路灰度、动态调整超时时间、调整权重、按比例流量分发、参数路由等。控制台提供了可视化的流量治理规则操作入口，在这里可以直接下发流量规则。

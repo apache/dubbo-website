@@ -2,16 +2,13 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/zookeeper/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/metadata-center/zookeeper/
+    - /zh-cn/overview/what/ecosystem/metadata-center/zookeeper/
 description: Zookeeper 元数据中心基本使用与工作原理
 linkTitle: Zookeeper
 title: Zookeeper
 type: docs
 weight: 3
 ---
-
-
-
-
 
 
 ## 1 预备工作

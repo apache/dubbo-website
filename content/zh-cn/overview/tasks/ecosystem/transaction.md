@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/tasks/ecosystem/transaction/
+    - /zh-cn/overview/what/ecosystem/transaction/seata/
 description: 本示例演示如何通过 Seata 实现分布式 Dubbo 服务的事务管理，保证数据一致性。
 linkTitle: 事务管理
 title: 事务管理
@@ -8,12 +9,12 @@ type: docs
 weight: 1
 ---
 
-
-
 ## Seata 是什么
 Seata 是一款开源的分布式事务解决方案，致力于提供高性能和简单易用的分布式事务服务。Seata 将为用户提供了 AT、TCC、SAGA 和 XA 事务模式，为用户打造一站式的分布式解决方案。
 
 ## 一、示例架构说明
+可在此查看本示例完整代码地址：<a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-seata" target="_blank">dubbo-samples-seata</a>
+
 用户采购商品业务，整个业务包含3个微服务:
 
 - 库存服务: 扣减给定商品的库存数量。

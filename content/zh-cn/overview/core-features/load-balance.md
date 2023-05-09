@@ -19,11 +19,13 @@ weight: 3
 
 | 算法                        | 特性                    | 备注                                            |
 | :-------------------------- | :---------------------- | :---------------------------------------------- |
-| Weighted Random LoadBalance           | 加权随机                | 默认算法，默认权重相同                          |
+| Weighted Random LoadBalance           | 加权随机                | 默认算法，默认权重相同              |
 | RoundRobin LoadBalance       | 加权轮询                | 借鉴于 Nginx 的平滑加权轮询算法，默认权重相同， |
-| LeastActive LoadBalance      | 最少活跃优先 + 加权随机 | 背后是能者多劳的思想                            |
-| Shortest-Response LoadBalance | 最短响应优先 + 加权随机 | 更加关注响应速度                                |
-| ConsistentHash LoadBalance   | 一致性哈希             | 确定的入参，确定的提供者，适用于有状态请求      |
+| LeastActive LoadBalance      | 最少活跃优先 + 加权随机 | 背后是能者多劳的思想                           |
+| Shortest-Response LoadBalance | 最短响应优先 + 加权随机 | 更加关注响应速度                             |
+| ConsistentHash LoadBalance   | 一致性哈希             | 确定的入参，确定的提供者，适用于有状态请求        |
+| P2C LoadBalance   | Power of Two Choice    | 随机选择两个节点后，继续选择“连接数”较小的那个节点。         |
+| Adaptive LoadBalance   | 自适应负载均衡       | 在 P2C 算法基础上，选择二者中 load 最小的那个节点         |
 
 ### Weighted Random
 
@@ -74,6 +76,19 @@ weight: 3
 * 缺省只对第一个参数 Hash，如果要修改，请配置 `<dubbo:parameter key="hash.arguments" value="0,1" />`
 * 缺省用 160 份虚拟节点，如果要修改，请配置 `<dubbo:parameter key="hash.nodes" value="320" />`
 
+### P2C Load Balance
+Power of Two Choice 算法简单但是经典，主要思路如下：
+
+1. 对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。
+2. 比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。
+
+以下是 [Dubbo P2C 算法实现提案](../../reference/proposals/heuristic-flow-control/#p2c算法)
+
+### Adaptive Load Balance
+Adaptive 即自适应负载均衡，是一种能根据后端实例负载自动调整流量分布的算法实现，它总是尝试将请求转发到负载最小的节点。
+
+以下是 [Dubbo Adaptive 算法实现提案](../../reference/proposals/heuristic-flow-control/#adaptive算法)
+
 ## 配置方式
 Dubbo 支持在服务提供者一侧配置默认的负载均衡策略，这样所有的消费者都将默认使用提供者指定的负载均衡策略，消费者可以自己配置要使用的负载均衡策略，如果都没有任何配置，
 则默认使用随机负载均衡策略。
@@ -82,10 +97,8 @@ Dubbo 支持在服务提供者一侧配置默认的负载均衡策略，这样�
 
 具体配置方式参加以下多语言实现
 
-* [Java](/)
-* [Golang](/)
-* [Rust](/)
-* [Node.js](/)
+* [Java](../../mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/#使用方式)
+* [Golang](../../mannual/golang-sdk/)
 
 ## 自定义扩展
 负载均衡策略支持自定义扩展实现，具体请参见 [Dubbo 可扩展性](../extensibility)

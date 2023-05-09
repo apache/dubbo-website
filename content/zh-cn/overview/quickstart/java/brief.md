@@ -8,8 +8,6 @@ type: docs
 weight: 1
 ---
 
-
-
 ## 背景
 
 ![arch-service-discovery](/imgs/architecture.png)
