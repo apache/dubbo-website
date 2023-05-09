@@ -20,10 +20,11 @@ weight: 3
 ## 协议规范
 - Reuqest
 
-相对于原生的http协议dubbo http 请求增加version和group两个header用于确定服务的唯一
-且是必传header,如果使用dubbo http的RestClient这两个header将会默认通过attachment传递
-为区别于其他的header，attachment将会增加#rest#前缀，因此通过其他形式的http client调用
-dubbo http服务需要传递 #rest#version 和 #rest#group 两个header
+ 相对于原生的http协议dubbo http 请求增加version和group两个header用于确定服务的唯一,
+ 如果provider一端没有声明group和version,http请求时就不需要传递这连个header,反之必须要传递目标
+ 服务的group和version, 如果使用dubbo http的RestClient这两个header将会默认通过attachment传递
+ 为区别于其他的header，attachment将会增加#rest#前缀，因此通过其他形式的http client调用
+ dubbo http服务需要传递 #rest#version 和 #rest#group 两个header
 ````
 POST /test/path  HTTP/1.1
 Host: localhost:8080
@@ -46,34 +47,20 @@ Date: Fri, 28 Apr 2023 14:16:42 GMT
 "success"
 ````
 - content-type支持
-  - application/json
-  - application/x-www-form-urlencoded
-  - text/plain
-  - text/xml
-  
+    - application/json
+    - application/x-www-form-urlencoded
+    - text/plain
+    - text/xml
+
 目前支持以上media，后面还会对type进行扩展
 
-
-
-## 3.2与3.0对比
-
-因为dubbo3.2内部移除了原本resteasy的实现，因此在对resteasy 内置的Response,extend,ExceptionMapper支持上将会有所变化
-ExceptionMapper 转换成了org.apache.dubbo.rpc.protocol.rest.exception.mapper.ExceptionHandler,Response后面也会做适配处理
-
-|  版本   |   JaxRs|  j2ee | web容器（tomcat/jetty）|spring web| http client\(okhttp/httpclient/jdk URLConnnection )
-|  ----  | ----   |---    |---                    |---       |---|
-| 3.0 | 依赖与resteasy的client和server |遵循j2ee规范|依赖常见web容器|不依赖|不依赖
-| 3.2  | 不依赖（仅需要JaxRs注解包） |不遵循|netty实现的http服务器|仅依赖spring web注解|内部实现RestClient依赖http client（默认为okhttp）
-
-
-
-##快速入门
+## 快速入门
 详细的依赖以及spring配置，可以参见dubbo 项目的duubo-demo-xml模块
 https://github.com/apache/dubbo/tree/3.2/dubbo-demo/dubbo-demo-xml
 
 - spring web 编码
-在使用dubbo http的spring web编码时，类注解我们要求必须出现@RequestMapping或者@Controller,以此来判断用户使用的编码风格，决定使用对应的SpringMvcServiceRestMetadataResolver
-注解解析器进行元注解解析，Provider一侧我们允许用户使用实现类作为Dubbo Service(相比之前dubbo service export时service必须是接口的要求)
+  在使用dubbo http的spring web编码时，类注解我们要求必须出现@RequestMapping或者@Controller,以此来判断用户使用的编码风格，决定使用对应的SpringMvcServiceRestMetadataResolver
+  注解解析器进行元注解解析，Provider一侧我们允许用户使用实现类作为Dubbo Service(相比之前dubbo service export时service必须是接口的要求)
 
 API
 ````java
@@ -269,10 +256,6 @@ public interface JaxRsRestDemoService {
     @Path("/say")
     String sayHello(String name);
 
-
-
-
-
     @POST
     @Path("/testFormBody")
     Long testFormBody(@FormParam("number") Long number);
@@ -450,8 +433,8 @@ public class JaxRsRestDemoService {
 
 ## 使用场景
 
- 因为dubbo http consumer一端实现http 调用的RestClient 实现有三种形式：httpclient,okhttp,URLConnection(jdk内置)
- 默认请情况下采用okhttp,因此在使用dubbo http 去调用其他http服务时，需要添加引入的依赖有
+因为dubbo http consumer一端实现http 调用的RestClient 实现有三种形式：httpclient,okhttp,URLConnection(jdk内置)
+默认请情况下采用okhttp,因此在使用dubbo http 去调用其他http服务时，需要添加引入的依赖有
 
 ````xml
          <dependency>
@@ -474,7 +457,7 @@ public class JaxRsRestDemoService {
 ````
 
 - 微服务服务调用dubbo http
-  
+
 ````java
 
 /**
@@ -494,10 +477,52 @@ public class JaxRsRestDemoService {
 
 - 跨语言调用
 
+  python
+  ````
+  import requests
+
+   url = 'http://localhost:8888/services/curl'
+   headers = {
+   'group': 'test',
+   'version': '1.0.0'
+   }
+
+  response = requests.get(url, headers=headers)
+  ````
+
+  go
+  ````
+    import (
+    "fmt"
+    "net/http"
+     )
+
+    func main() {
+    url := "http://localhost:8888/services/curl"
+    req, err := http.NewRequest("GET", url, nil)
+    if err != nil {
+    fmt.Println("Error creating request:", err)
+    return
+    }
+    req.Header.Set("group", "test")
+    req.Header.Set("version", "1.0.0")
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        fmt.Println("Error sending request:", err)
+        return
+    }
+    defer resp.Body.Close()
+
+    fmt.Println("Response status:", resp.Status)
+  }
+  
+  ````
 
 - 多协议发布
-  - dubbo 协议的代码使用http 进行数据请求测试
-  - 服务协议迁移
+    - dubbo 协议的代码使用http 进行数据请求测试
+    - 服务协议迁移
 
 ````java
 @DubboService(interfaceClass = HttpService.class, protocol = "rest,dubbo", version = "1.0.0", group = "test")
@@ -511,7 +536,7 @@ public class HttpServiceImpl implements HttpService {
 }
 ````
 
- - http client组件调用dubbo http(可以不引入 service api)
+- http client组件调用dubbo http(可以不引入 service api)
 
 ````java
 public class HttpClientInvoke {
@@ -585,10 +610,12 @@ public class HttpClientInvoke {
 }
 ````
 
+## 3.2 与 3.0 HTTP 实现对比
 
+因为 Dubbo Java 3.2 内部移除了原本 Resteasy 的实现，因此在对 Resteasy 内置的 Response,extend,ExceptionMapper 支持上将会有所变化
+ExceptionMapper 转换成了org.apache.dubbo.rpc.protocol.rest.exception.mapper.ExceptionHandler,Response后面也会做适配处理
 
-
-
- 
-
-
+|  版本   |   JaxRs|  j2ee | web容器（tomcat/jetty）|spring web| http client\(okhttp/httpclient/jdk URLConnnection )
+|  ----  | ----   |---    |---                    |---       |---|
+| 3.0 | 依赖与resteasy的client和server |遵循j2ee规范|依赖常见web容器|不依赖|不依赖
+| 3.2  | 不依赖（仅需要JaxRs注解包） |不遵循|netty实现的http服务器|仅依赖spring web注解|内部实现RestClient依赖http client（默认为okhttp）
