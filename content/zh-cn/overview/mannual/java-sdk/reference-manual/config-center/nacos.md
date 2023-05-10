@@ -111,5 +111,5 @@ dubbo
 
 流量治理规则有多种类型，不同类型的规则 dataId 的后缀是不同的：
 
-- configurators [覆盖规则](../../../advanced-features-and-usage/traffic/config-rule/)
-- tag-router [标签路由](../../../advanced-features-and-usage/traffic/routing-rule/) 与 condition-router [条件路由](../../../advanced-features-and-usage/traffic/routing-rule/)
+- configurators [覆盖规则](/zh-cn/overview/core-features/traffic/configuration-rule/)
+- tag-router [标签路由](/zh-cn/overview/core-features/traffic/tag-rule/) 与 condition-router [条件路由](/zh-cn/overview/core-features/traffic/condition-rule/)

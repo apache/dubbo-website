@@ -10,7 +10,7 @@ weight: 30
 
 
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/traffic/mesh-style/ab-testing-deployment/)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/tasks/traffic-management/)。
 {{% /pageinfo %}}
 
 #### 场景描述
