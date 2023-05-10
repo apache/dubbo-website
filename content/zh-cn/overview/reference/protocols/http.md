@@ -20,17 +20,18 @@ weight: 3
 ## 协议规范
 - Request
 
-相对于原生的http协议dubbo http 请求增加version和group两个header用于确定服务的唯一
-且是必传header,如果使用dubbo http的RestClient这两个header将会默认通过attachment传递
-为区别于其他的header，attachment将会增加#rest#前缀，因此通过其他形式的http client调用
-dubbo http服务需要传递 #rest#version 和 #rest#group 两个header
+相对于原生的http协议dubbo http 请求增加version和group两个header用于确定服务的唯一,
+如果provider一端没有声明group和version,http请求时就不需要传递这连个header,反之必须要传递目标
+服务的group和version, 如果使用dubbo http的RestClient这两个header将会默认通过attachment传递
+为区别于其他的header，attachment将会增加rest-service-前缀，因此通过其他形式的http client调用
+dubbo http服务需要传递 rest-service-version 和 rest-service-group 两个header
 ````
 POST /test/path  HTTP/1.1
 Host: localhost:8080
 Content-type: application/json
 Accept: text/html
-#rest#version: 1.0.0
-#rest#group: dubbo
+rest-service-version: 1.0.0
+rest-service-group: dubbo
 
 {"name":"dubbo","age":10,"address":"hangzhou"}
 
@@ -479,6 +480,43 @@ public class JaxRsRestDemoService {
 ````
 
 - 跨语言调用
+
+  python
+  ````
+  import requests
+   url = 'http://localhost:8888/services/curl'
+   headers = {
+   'rest-service-group': 'test',
+   'rest-service-version': '1.0.0'
+   }
+  response = requests.get(url, headers=headers)
+  ````
+
+  go
+  ````
+    import (
+    "fmt"
+    "net/http"
+     )
+  
+    func main() {
+    url := "http://localhost:8888/services/curl"
+    req, err := http.NewRequest("GET", url, nil)
+    if err != nil {
+    fmt.Println("Error creating request:", err)
+    return
+    }
+  
+    req.Header.Set("rest-service-group", "test")
+    req.Header.Set("rest-service-version", "1.0.0")
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        fmt.Println("Error sending request:", err)
+        return
+    }
+  
+    defer resp.Body.Close()
 
 
 - 多协议发布
