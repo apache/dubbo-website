@@ -16,15 +16,9 @@ type: docs
 weight: 6
 ---
 
-
-
-
-
-
-
 > 本文档基于 Dubbo3 编写，由于 Dubbo3 完全兼容 2.7 版本用法，因此文档中的通用功能（除 3.x 版本特有功能外）同样适用于 2.7 版本用户。
 >
-> 点此可查看[老版本文档](/zh-cn/docsv2.7)
+> 点此可查看 <a href="/zh-cn/docsv2.7" target="_blank">老版本文档</a>
 >
 
 
@@ -32,7 +26,7 @@ weight: 6
 <div class="td-content list-page">
     <div class="lead"></div><header class="article-meta">
     </header><div class="row">
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
@@ -42,7 +36,7 @@ weight: 6
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
@@ -52,7 +46,7 @@ weight: 6
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
@@ -62,7 +56,7 @@ weight: 6
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
@@ -72,7 +66,7 @@ weight: 6
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
+    <div class="col-sm col-md-6 mb-4">
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">

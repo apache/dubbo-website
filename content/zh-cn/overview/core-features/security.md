@@ -12,8 +12,6 @@ type: docs
 weight: 8
 ---
 
-
-
 Dubbo 提供了构建安全微服务通信体系 (零信任体系) 的完善机制，这包括：
 * 避免通信过程中的中间人攻击，Dubbo 提供了身份认证 (Authentication) 和基于 TLS 的通信链路加密能力
 * 控制服务间的访问鉴权 (Authorization)，Dubbo 提供了 mTLS 和权限检查机制

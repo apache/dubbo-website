@@ -19,7 +19,7 @@ Dubbo 解决企业微服务从开发、部署到治理运维的一系列挑战�
 接下来以 Java 体系 Spring Boot 项目为例讲解 Dubbo 应用开发的基本步骤，整个过程非常直观简单，其他语言开发过程类似。
 
 ### 创建项目
-[Dubbo 微服务项目脚手架](/)（支持浏览器页面、命令行和 IDE）可用于快速创建微服务项目，只需要告诉脚手架期望包含的功能或组件，脚手架最终可以帮助开发者生成具有必要依赖的微服务工程。
+<a href="https://start.dubbo.apache.org/bootstrap.html" target="_blank">Dubbo 微服务项目脚手架</a>（支持浏览器页面、命令行和 IDE）可用于快速创建微服务项目，只需要告诉脚手架期望包含的功能或组件，脚手架最终可以帮助开发者生成具有必要依赖的微服务工程。更多脚手架使用方式的讲解，请参见任务模块的 [通过模板生成项目脚手架](../../tasks/develop/template/)
 
 ![脚手架示例图](/imgs/v3/advantages/initializer.png)
 
@@ -97,7 +97,7 @@ Dubbo 原生服务可打包部署到 Docker 容器、Kubernetes、服务网格 �
 
 关于不同环境的部署示例，可参考：
 * [部署 Dubbo 服务到 Docker 容器](../../tasks/deploy/deploy-on-docker)
-* [部署 Dubbo 服务到 Kubernetes](../../tasks/deploy/deploy-on-k8s-containerd)
+* [部署 Dubbo 服务到 Kubernetes](../../tasks/deploy/deploy-on-k8s-docker)
 
 ## 治理
 对于服务治理，绝大多数应用只需要增加以下配置即可，Dubbo 应用将具备地址发现和负载均衡能力。

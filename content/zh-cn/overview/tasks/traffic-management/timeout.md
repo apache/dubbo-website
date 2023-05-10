@@ -14,7 +14,7 @@ Dubbo 提供动态调整服务超时时间的能力，在无需重启应用的�
 
 ## 开始之前
 * [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../../deploy)
+* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
 
 ## 任务详情
 

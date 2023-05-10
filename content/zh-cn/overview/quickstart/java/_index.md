@@ -29,29 +29,9 @@ weight: 1
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./api" >}}'>Dubbo API 开发</a>
-                </h4>
-                <p>基于 Dubbo API 开发微服务应用</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm col-md-6 mb-4">
-        <div class="h-100 card shadow" href="#">
-            <div class="card-body">
-                <h4 class="card-title">
                      <a href='{{< relref "./spring-boot" >}}'>Dubbo x Spring Boot 开发</a>
                 </h4>
-                <p>Dubbo x Spring Boot 开发微服务应用</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm col-md-6 mb-4">
-        <div class="h-100 card shadow" href="#">
-            <div class="card-body">
-                <h4 class="card-title">
-                     <a href='{{< relref "./spring-xml" >}}'>Dubbo x Spring XML 开发</a>
-                </h4>
-                <p>Dubbo x Spring XML 开发微服务应用</p>
+                <p>使用 dubbo-spring-boot-starter 开发微服务应用</p>
             </div>
         </div>
     </div>

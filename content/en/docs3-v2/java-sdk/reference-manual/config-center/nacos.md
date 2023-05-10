@@ -107,6 +107,6 @@ It is recommended to add, delete, and modify traffic governance rules through du
 
 There are many types of traffic governance rules, and the suffixes of dataId for different types of rules are different:
 
-- configurators, [override rules](../../../advanced-features-and-usage/traffic/config-rule/)
-- tag-router, [tag routing](../../../advanced-features-and-usage/traffic/routing-rule/#tag routing rule)
-- condition-router, [conditional routing](../../../advanced-features-and-usage/traffic/routing-rule/#conditional routing)
+- configurators, [override rules](/zh-cn/overview/core-features/traffic/configuration-rule/)
+- tag-router, [tag routing](/zh-cn/overview/core-features/traffic/tag-rule/)
+- condition-router, [conditional routing](/zh-cn/overview/core-features/traffic/condition-rule/)

@@ -2,16 +2,13 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
+    - /zh-cn/overview/what/ecosystem/config-center/zookeeper/
 description: Zookeeper 配置中心的基本使用和工作原理。
 linkTitle: Zookeeper
 title: Zookeeper
 type: docs
 weight: 2
 ---
-
-
-
-
 
 
 ## 1 前置条件

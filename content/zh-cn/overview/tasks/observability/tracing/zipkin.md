@@ -9,7 +9,7 @@ type: docs
 weight: 1
 ---
 
-这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，此示例共包含三部分内容：
+这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，完整代码请参考 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot3-tracing" target="_blank">dubbo-samples-tracing-zipkin</a>，此示例共包含三部分内容：
 * dubbo-samples-spring-boot3-tracing-provider
 * dubbo-samples-spring-boot3-tracing-consumer
 * dubbo-samples-spring-boot3-tracing-interface
@@ -49,117 +49,67 @@ docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/zipkin.png)
 
-## 如何在项目中使用 Dubbo Tracing
+## 如何在SpringBoot项目中使用 Dubbo Tracing
 
-### 1. 添加 Micrometer Observation 依赖
+### 1. 添加 Dubbo Tracing 相关的 Starter 依赖
 
-首先需要添加 `dubbo-metrics-api`  依赖将 Micrometer 和 Dubbo Metrics 引入项目中：
+从下面两个 starter 中选择一个加入到你的项目中，区别在于 Tracer 的选型不一样，一个是 Opentelemetry，一个是 Brave：
 
 ```xml
+<!-- Opentelemetry as Tracer, Zipkin as exporter -->
 <dependency>
     <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-metrics-api</artifactId>
+    <artifactId>dubbo-spring-boot-tracing-otel-zipkin-starter</artifactId>
 </dependency>
 ```
-
-通过集成 [Micrometer Observations](https://micrometer.io/) Dubbo 可以在只被拦截一次的情况下，导出多种不同类型的监控指标如 Metrics、Tracer、其他一些信号等，这具体取决于你对 `ObservationHandlers` 的配置。 可以参考以下链接 [documentation under docs/observation](https://micrometer.io) 了解更多内容。
-
-### 2. 配置 Micrometer Tracing Bridge
-
-为了启用 Dubbo 全链路追踪统计，需要为 Micrometer Tracing 和实际的 Tracer（本示例中的 Zipkin）间配置 `bridge`。
-
-> 注意：Tracer 是一个管控 span 生命周期的二进制包，比如 span 的 创建、终止、采样、上报等。
-
-Micrometer Tracing 支持 [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) and [Brave](https://github.com/openzipkin/brave) 格式的 Tracer。Dubbo 推荐使 OpenTelemetry 作为标准的 tracing 协议，`bridge`  的具体配置如下:
 
 ```xml
-<!-- OpenTelemetry Tracer -->
+<!-- Brave as Tracer, Zipkin as exporter -->
 <dependency>
-    <groupId>io.micrometer</groupId>
-    <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-spring-boot-tracing-brave-zipkin-starter</artifactId>
 </dependency>
 ```
 
-### 3. 添加 Micrometer Tracing Exporter
+### 2. 配置
 
-添加 Tracer 后，需要继续配置 exporter（也称为 reporter）。exporter 负责导出完成 span 并将其发送到后端 reporter 系统。Micrometer Tracer 原生支持 Tanzu Observability by Wavefront 和 Zipkin。以 Zipkin 为例：
+在application.yml中添加如下配置：
 
-```xml
-<dependency>
-    <groupId>io.opentelemetry</groupId>
-    <artifactId>opentelemetry-exporter-zipkin</artifactId>
-</dependency>
+```yaml
+dubbo:
+  tracing:
+    enabled: true # 默认为false
+    sampling:
+      probability: 0.5 # 采样率, 默认是 0.1
+    propagation:
+      type: W3C # 传播器类型：W3C/B3 默认是W3C
+    tracing-exporter:
+      zipkin-config:
+        endpoint: http://localhost:9411/api/v2/spans
+        connect-timeout: 1s # 建立连接超时时间, 默认为1s
+        read-timeout: 10s # 传递数据超时时间, 默认为10s
+
+# tracing信息输出到logging
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 ```
 
-你可以在此阅读更多关于 Tracing 的配置信息 [this documentation, under docs/tracing](https://micrometer.io/).
+## 扩展
 
-### 4. 配置 ObservationRegistry
+### 选择合适的Sender
 
-```java
-@Configuration
-public class ObservationConfiguration {
+Zipkin 的 Sender，是 Exporter 将埋点后的数据进行上报的客户端实现，全部实现可[参考](https://github.com/openzipkin/zipkin-reporter-java)
 
-    // reuse the applicationModel in your system
-    @Bean
-    ApplicationModel applicationModel(ObservationRegistry observationRegistry) {
-        ApplicationModel applicationModel = ApplicationModel.defaultModel();
-        applicationModel.getBeanFactory().registerBean(observationRegistry);
-        return applicationModel;
-    }
+Sender 有很多种实现：
 
-    // zipkin endpoint url
-    @Bean
-    SpanExporter spanExporter() {
-        return new ZipkinSpanExporterBuilder().setEndpoint("http://localhost:9411/api/v2/spans").build();
-    }
-}
-```
+* URLConnectionSender 通过 Java 自带的 HTTP 客户端上报
+* OkHttpSender 通过 OKHttp3 上报
+* KafkaSender 通过 Kafka 消息队列上报
+* ActiveMQSender 通过 ActiveMQ 消息队列上报
+* RabbitMQSender 通过 RabbitMQ 消息队列上报
 
-### 5. 定制 Observation Filters
-
-To customize the tags present in metrics (low cardinality tags) and in spans (low and high cardinality tags) you should
-create your own versions of `DubboServerObservationConvention` (server side) and `DubboClientObservationConvention` (
-client side) and register them in the `ApplicationModel`'s `BeanFactory`. To reuse the existing ones
-check `DefaultDubboServerObservationConvention` (server side) and `DefaultDubboClientObservationConvention` (client
-side).
-
-
-
-## Extension
-
-### 其他 Micrometer Tracing Bridge
-
-```xml
-<!-- Brave Tracer -->
-<dependency>
-    <groupId>io.micrometer</groupId>
-    <artifactId>micrometer-tracing-bridge-brave</artifactId>
-</dependency>
-```
-
-
-
-### 其他 Micrometer Tracing Exporter
-
-Tanzu Observability by Wavefront
-
-```xml
-<dependency>
-    <groupId>io.micrometer</groupId>
-    <artifactId>micrometer-tracing-reporter-wavefront</artifactId>
-</dependency>
-```
-
-OpenZipkin Zipkin with Brave
-
-```xml
-<dependency>
-    <groupId>io.zipkin.reporter2</groupId>
-    <artifactId>zipkin-reporter-brave</artifactId>
-</dependency>
-```
-
-An OpenZipkin URL sender dependency to send out spans to Zipkin via a URLConnectionSender
+Dubbo Tracing 相关的 starter 目前默认是使用 OKHttpSender，也支持 URLConnectionSender，如果想通过 URLConnectionSender 向 Zipkin 发送 Spans，可直接在 pom 中添加如下依赖：
 
 ```xml
 <dependency>
@@ -167,3 +117,38 @@ An OpenZipkin URL sender dependency to send out spans to Zipkin via a URLConnect
     <artifactId>zipkin-sender-urlconnection</artifactId>
 </dependency>
 ```
+
+配置 Zipkin 的 endpoint、connectTimeout、readTimeout
+
+```yaml
+dubbo:
+  tracing:
+    enabled: true # 默认为false
+    tracing-exporter:
+      zipkin-config:
+        endpoint: http://localhost:9411/api/v2/spans
+        connect-timeout: 1s # 建立连接超时时间, 默认为1s
+        read-timeout: 10s # 传递数据超时时间, 默认为10s
+```
+
+如果想使用其他类型的 Sender ，需要用户在项目中手动注入对应的 Bean，并配置对应的属性，如 KafkaSender：
+
+```java
+@Configuration
+public class KafkaSenderConfiguration {
+
+    @Bean
+    KafkaSender kafkaSender(){
+        KafkaSender.Builder builder = KafkaSender.newBuilder();
+        builder.bootstrapServers("127.0.0.0.1:9092");
+        builder.topic("zipkin");
+        builder.encoding(Encoding.JSON);
+        return builder.build();
+    }
+
+}
+```
+
+### SpringBoot2案例
+
+dubbo-tracing相关的使用在SpringBoot2与3中区别不大，SpringBoot2的案例可参考[代码地址](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-tracing)。

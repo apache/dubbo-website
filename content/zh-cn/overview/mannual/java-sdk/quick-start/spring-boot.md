@@ -3,8 +3,8 @@ aliases:
     - /zh/docs3-v2/java-sdk/quick-start/spring-boot/
     - /zh-cn/docs3-v2/java-sdk/quick-start/spring-boot/
 description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring Boot 快速开发微服务应用。
-linkTitle: Dubbo x Spring Boot 开发微服务应用
-title: 3 - Dubbo x Spring Boot 开发微服务应用
+linkTitle: 基于 Spring Boot Starter 开发微服务应用
+title: 3 - 基于 Spring Boot Starter 开发微服务应用
 type: docs
 weight: 3
 ---
@@ -16,7 +16,7 @@ weight: 3
 
 ## 目标
 
-从零上手开发基于 Dubbo x Spring Boot 的微服务开发，了解 Dubbo x Spring Boot 配置方式。
+从零上手开发基于 dubbo-spring-boot-starter 开发微服务，了解 Dubbo x Spring Boot 配置方式。
 
 ## 难度
 

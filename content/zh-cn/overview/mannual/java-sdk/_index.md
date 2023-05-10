@@ -17,6 +17,9 @@ content:
     - 升级与兼容性:
         - description: 3.0 迁移指南
           name: '[3.0 迁移指南](upgrades-and-compatibility/)'
+    - 历史版本文档:
+            - description: 历史版本文档
+              name: '[2.x 及早期版本文档](/zh-cn/docsv2.7/)'
 description: Java SDK 手册
 hide_feedback: true
 hide_summary: true
@@ -26,10 +29,6 @@ title: Java SDK 手册
 type: docs
 weight: 1
 ---
-
-
-
-
 
 
 {{% docs/content_box %}}
