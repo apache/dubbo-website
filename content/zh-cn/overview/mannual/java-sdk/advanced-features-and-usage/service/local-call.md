@@ -54,8 +54,9 @@ weight: 22
 <dubbo:service injvm="true" .../>
 ```
 
-#### 注意：
+{{% alert title="注意" color="warning" %}}
 **Dubbo 从 `2.2.0` 每个服务默认都会在本地暴露，无需进行任何配置即可进行本地引用，如果不希望服务进行远程暴露，只需要在 provider 将 protocol 设置成 injvm 即可。**
+{{% /alert %}}
 
 
 ### 自动暴露
