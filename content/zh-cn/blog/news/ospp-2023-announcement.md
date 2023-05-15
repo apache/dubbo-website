@@ -1,3 +1,13 @@
+---
+title: "Apache Dubbo 开源之夏 2023，贡献社区赢取 12000 奖金"
+linkTitle: "Apache Dubbo开源之夏2023，贡献社区赢取12000奖金"
+date: 2023-05-15
+tags: ["新闻动态"]
+authors: Dubbo 社区
+description: >
+    Apache Dubbo开源之夏2023，贡献社区赢取12000奖金。
+---
+
 欢迎在校同学们参与Apache Dubbo开源之夏，社区导师手把手让**你的代码被社会广泛复用，来赚取最高12000奖金，可**推荐入职/实习你心意公司，**又拿钱又成长又有价值**，你还等什么呢？报名马上截止，快来参与Apache Dubbo开源之夏。
 
 ## OSPP 开源之夏是什么？
