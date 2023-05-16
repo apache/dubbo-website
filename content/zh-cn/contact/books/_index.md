@@ -13,11 +13,19 @@ weight: 1
 以下是 Apache Dubbo 社区及贡献者编写的部分书籍资料。
 
 {{< cardpane >}}
-{{< card header="《Apache Dubbo3 源码深入解析》电子书" title="源码视角深入剖析 Dubbo3 实现与原理" subtitle="宋小生 著" url="https://developer.aliyun.com/ebook/7894" >}}
-![Apache Dubbo3 源码深入解析](/imgs/contacts/book-source-code.jpg)
+{{< card header="《Apache Dubbo3 源码深入解析》电子书" title="<a target='_blank' href='https://github.com/apache/dubbo-awesome/blob/master/ebooks/apache-dubbo3-code-analysis.pdf'>源码视角深入剖析 Dubbo3 实现与原理</a>" subtitle="宋小生 著" url="https://developer.aliyun.com/ebook/7894" >}}
+<img style="max-width:200px;" src="/imgs/contacts/book-source-code.jpg" alt="book-source-code"/>
+
+下载地址：
+* <a target='_blank' href='https://github.com/apache/dubbo-awesome/blob/master/ebooks/apache-dubbo3-code-analysis.pdf'>Github</a>
+* <a target='_blank' href='https://developer.aliyun.com/ebook/7894'>阿里云开发者社区</a>
 {{< /card >}}
-{{< card header="《Apache Dubbo3 微服务开发从入门到精通》电子书" title="从 Dubbo 的基本开发模式、到高阶的治理与运维技巧" subtitle="Dubbo社区 著" url="https://developer.aliyun.com/ebook/7894" >}}
-![Apache Dubbo3 源码深入解析](/imgs/contacts/book-microservice-explained.jpg)
+{{< card header="《Apache Dubbo3 微服务开发从入门到精通》电子书" title="<a target='_blank' href='https://github.com/apache/dubbo-awesome/blob/master/ebooks/apache-dubbo-microservice-guide.pdf'>从 Dubbo 的基本开发模式、到高阶的治理与运维技巧</a>" subtitle="Dubbo社区 著" url="https://developer.aliyun.com/ebook/7913" >}}
+<img style="max-width:200px;" src="/imgs/contacts/book-microservice-explained.jpg" alt="apache-dubbo-microservice-guide"/>
+
+下载地址：
+* <a target='_blank' href='https://github.com/apache/dubbo-awesome/blob/master/ebooks/apache-dubbo-microservice-guide.pdf'>Github</a>
+* <a target='_blank' href='https://developer.aliyun.com/ebook/7913'>阿里云开发者社区</a>
 {{< /card >}}
 {{< /cardpane >}}
 
