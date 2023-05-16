@@ -9,7 +9,7 @@ type: docs
 weight: 2
 ---
 
-本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系，依赖的 Skywalking Agent 版本为 [skywalking micrometer-1.10 api](https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/).
+本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系，完整示例请参考 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-tracing-skywalking" target="_blank">dubbo-samples-tracing-skywalking</a>。依赖的 Skywalking Agent 版本为 [skywalking micrometer-1.10 api](https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/).
 
 ## 1. 添加 Micrometer Observation 依赖到你的项目
 为了能够将  Micrometer 及相关 Metrics 依赖添加到 classpath，需要增加 `dubbo-metrics-api` 依赖，如下所示：

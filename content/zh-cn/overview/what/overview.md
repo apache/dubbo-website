@@ -1,6 +1,9 @@
 ---
 aliases:
     - /zh/overview/what/overview/
+    - /zh/docs3-v2/java-sdk/concepts-and-architecture/overall-architecture/
+    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/overall-architecture/
+    - /zh-cn/overview/mannual/java-sdk/concepts-and-architecture/overall-architecture/
 description: ""
 linkTitle: 概念与架构
 title: 了解 Dubbo 核心概念和架构

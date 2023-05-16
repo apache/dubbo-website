@@ -5,6 +5,7 @@ no_list: true
 title: Admin 服务测试功能简介
 type: docs
 weight: 3
+working_in_progress: true
 ---
 
 服务测试功能通常提供给 Dubbo 服务的开发者使用，用来对自己发布的服务进行自测。通过在 Admin 控制台上模拟真实的消费端进程，对服务提供者发起调用，并验证调用结果是否符合预期。
