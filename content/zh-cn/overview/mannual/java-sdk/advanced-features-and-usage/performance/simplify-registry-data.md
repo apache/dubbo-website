@@ -21,14 +21,13 @@ Dubbo provider 中的服务配置项有接近 [30 个配置项](/zh-cn/docs/refe
 Dubbo consumer 中的配置项也有 [20+个配置项](/zh-cn/docs/references/xml/dubbo-consumer)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。    
 这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心 (如 zookeeper) 的网络开销增大，性能降低。
 
-> 设计目标和宗旨 
+{{% alert title="设计目标和宗旨" color="primary" %}} 
  
 1. 期望简化进入注册中心的 provider 和 consumer 配置数量。
 2. 期望将部分配置项以其他形式存储。这些配置项需要满足：不在服务调用链路上，同时这些配置项不在注册中心的核心链路上(服务查询，服务列表)。
+{{% /alert %}}
 
-
-> 简化注册中心的配置，只在 2.7 之后的版本中进行支持。  
-  开启 provider 或者 consumer 简化配置之后，默认保留的配置项
+> 注意：简化注册中心的配置，只在 2.7 之后的版本中进行支持。开启 provider 或者 consumer 简化配置之后，默认保留的配置项。
 
 **provider**
 
