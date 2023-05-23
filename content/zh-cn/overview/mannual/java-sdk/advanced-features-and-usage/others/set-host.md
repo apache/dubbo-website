@@ -83,12 +83,11 @@ PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BI
 * 设置 `PORT_TO_REGISTRY=20881` 和 `IP_TO_REGISTRY=30.5.97.6`，则 `PORT_TO_BIND` 和 `IP_TO_BIND` 不受影响
 * 设置 `PORT_TO_BIND=20881` 和 `IP_TO_BIND=30.5.97.6`，则默认 `PORT_TO_REGISTRY=20881`  且 `IP_TO_REGISTRY=30.5.97.6`
 
-### 总结
-
+{{% alert title="总结" color="primary" %}}
  1. 可以通过`dubbo.protocol`或`dubbo.provider`的`host`属性对`host`进行配置,支持IP地址和域名.但此时注册到注册中心的IP地址和监听IP地址是同一个值
  2. 为了解决在虚拟环境或局域网内consumer无法与provider通信的问题,可以通过环境变量分别设置注册到注册中心的IP地址和监听IP地址,其优先级高于`dubbo.protocol`或`dubbo.provider`的`host`配置
 
-### 参考
+ 参考一：[Proposal: support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
 
- 1. [Proposal: support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
- 2. [dubbo通过环境变量设置host](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
+ 参考二：[dubbo通过环境变量设置host](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
+ {{% /alert %}}
