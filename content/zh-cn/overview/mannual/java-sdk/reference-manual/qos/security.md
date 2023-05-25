@@ -77,7 +77,8 @@ dubbo>
 > curl http://127.0.0.1:22222/serializeWarnedClasses
 {"warnedClasses":["io.dubbo.test2.NotSerializable","org.apache.dubbo.samples.NotSerializable","io.dubbo.test.NotSerializable","io.dubbo.test2.OthersSerializable"]}
 ```
+{{% alert title="注意" color="primary" %}}
+建议及时关注 `serializeWarnedClasses` 的结果，通过返回结果是否非空来判断是否受到攻击。
 
-注：建议及时关注 `serializeWarnedClasses` 的结果，通过返回结果是否非空来判断是否受到攻击。
-
-> 更多配置细节请参考[Dubbo 类检查机制](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/)一文。
+[Dubbo 类检查机制](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/)。
+{{% /alert %}}
