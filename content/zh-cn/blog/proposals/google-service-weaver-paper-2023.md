@@ -143,86 +143,161 @@ API 的实现者是运行时，它负责所有控制平面操作。运行时决�
 
 
 [1]  Acorn. [https://www.acorn.io/.](https://www.acorn.io/)
+
 [2]  Actor model. [https://en.wikipedia.org/wiki/Actor_model.](https://en.wikipedia.org/wiki/Actor_model)
+
 [3]  Akka. [https://akka.io.](https://akka.io)
+
 [4]  Amazon Web Services. [https://aws.amazon.com/.](https://aws.amazon.com/)
+
 [5]  Apache avro. [https://avro.apache.org/docs/1.2.0/.](https://avro.apache.org/docs/1.2.0/)
+
 [6]  Apache thrift. [https://thrift.apache.org/.](https://thrift.apache.org/)
+
 [7]  AWS Cloud Map. [https://aws.amazon.com/cloud-map/.](https://aws.amazon.com/cloud-map/)
+
 [8]  Azure Machine Learning. [https://docs.microsoft.com/en-us/azure/](https://docs.microsoft.com/en-us/azure/machine-learning)[machine-learning.](https://docs.microsoft.com/en-us/azure/machine-learning)
+
 [9]  Blue/green deployments. [https://tinyurl.com/3bk64ch2.](https://tinyurl.com/3bk64ch2)
+
 [10]  The c++ actor framework. [https://www.actor-framework.org/.](https://www.actor-framework.org/)
+
 [11]  Cloudflare Workers. [https://workers.cloudflare.com/.](https://workers.cloudflare.com/)
+
 [12]  Continuous integration and delivery - circleci. [https://circleci.com/.](https://circleci.com/)
+
 [13]  Dapr - distributed application runtime. [https://dapr.io/.](https://dapr.io/)
+
 [14]  Distributed systems safety research. [https://jespen.io.](https://jespen.io)
+
 [15]  Docker compose. [https://docs.docker.com/compose/.](https://docs.docker.com/compose/)
+
 [16]  Google Cloud. [https://cloud.google.com/.](https://cloud.google.com/)
+
 [17]  Google Cloud AI Platform. [https://cloud.google.com/ai-platform.](https://cloud.google.com/ai-platform)
+
 [18]  grpc. [https://grpc.io/.](https://grpc.io/)
+
 [19]  Helm. [http://helm.sh.](http://helm.sh)
+
 [20]  Horizontal Pod Autoscaling. [https://kubernetes.io/docs/tasks/run-](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)[application/horizontal-pod-autoscale/.](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+
 [21]  Istio. [https://istio.io/.](https://istio.io/)
+
 [22]  Jenkins. [https://www.jenkins.io/.](https://www.jenkins.io/)
+
 [23]  Json. [https://www.json.org/json-en.html.](https://www.json.org/json-en.html)
+
 [24]  Kalix. [https://www.kalix.io/.](https://www.kalix.io/)
+
 [25]  Kubernetes. [https://kubernetes.io/.](https://kubernetes.io/)
+
 [26]  Locust. [https://locust.io/.](https://locust.io/)
+
 [27]  Micro | powering the future of cloud. [https://micro.dev/.](https://micro.dev/)
+
 [28]  Pods. [https://kubernetes.io/docs/concepts/workloads/pods/.](https://kubernetes.io/docs/concepts/workloads/pods/)
+
 [29]  Postgresql. [https://www.postgresql.org/.](https://www.postgresql.org/)
+
 [30]  Protocol buffers. [https://developers.google.com/protocol-buffers.](https://developers.google.com/protocol-buffers)
+
 [31]  RabbitMQ. [https://www.rabbitmq.com/.](https://www.rabbitmq.com/)
+
 [32]  Remote direct memory access. [https://en.wikipedia.org/wiki/Remote_](https://en.wikipedia.org/wiki/Remote_direct_memory_access)[direct_memory_access.](https://en.wikipedia.org/wiki/Remote_direct_memory_access)
+
 [33]  REST API. [https://restfulapi.net/.](https://restfulapi.net/)
+
 [34]  Scaling up the Prime Video audio/video monitoring service and reduc-ing costs by 90%. [https://tinyurl.com/yt6nxt63.](https://tinyurl.com/yt6nxt63)
+
 [35]  Skaffold. [https://skaffold.dev/.](https://skaffold.dev/)
+
 [36]  Temporal. [https://temporal.io/.](https://temporal.io/)
+
 [37]  Terraform. [https://www.terraform.io/.](https://www.terraform.io/)
+
 [38]  The Go programming language. [https://go.dev/.](https://go.dev/)
+
 [39]  To Microservices and Back Again - Why Segment Went Back to a Monolith. [https://tinyurl.com/5932ce5n.](https://tinyurl.com/5932ce5n)
+
 [40]  WebSocket. [https://en.wikipedia.org/wiki/WebSocket.](https://en.wikipedia.org/wiki/WebSocket)
+
 [41]  Online boutique. [https://github.com/GoogleCloudPlatform/](https://github.com/GoogleCloudPlatform/microservices-demo)[microservices-demo,](https://github.com/GoogleCloudPlatform/microservices-demo)2023.
+
 [42]   M. Abadi, P. Barham, J. Chen, Z. Chen, A. Davis, J. Dean, M. Devin,
 S.Ghemawat, G. Irving, M. Isard, M. Kudlur, J. Levenberg, R. Monga,
 S.Moore, D. G. Murray, B. Steiner, P. Tucker, V. Vasudevan, P. Warden,
 M.Wicke, Y. Yu, and X. Zheng. Tensorflow: A system for large-scale machine learning. In OSDI, 2016.
+
 [43]  A. Adya, R. Grandl, D. Myers, and H. Qin. Fast key-value stores: An idea whose time has come and gone. In HotOS, 2019.
+
 [44]   A. Adya, D. Myers, J. Howell, J. Elson, C. Meek, V. Khemani, S. Fulger,
 P.Gu, L. Bhuvanagiri, J. Hunter, R. Peon, L. Kai, A. Shraer, A. Merchant, and K. Lev-Ari. Slicer: Auto-sharding for datacenter applications. In OSDI, 2016.
+
 [45] D. Ardelean, A. Diwan, and C. Erdman. Performance analysis of cloud applications. In NSDI, 2018.
+
 [46] S. Ashok, P. B. Godfrey, and R. Mittal. Leveraging service meshes as a new network layer. In HotNets, 2021.
+
 [47] A. Basiri, N. Behnam, R. De Rooij, L. Hochstein, L. Kosewski, J.Reynolds, and C. Rosenthal. Chaos engineering. In IEEE Software, 2016.
+
 [48] B. Bloom, J. Field, N. Nystrom, J. Östlund, G. Richards, R. Strniša, J.Vitek, and T. Wrigstad. Thorn: Robust, concurrent, extensible script-ing on the jvm. In OOPSLA, 2009.
 
 [49] J. C. Corbett, J. Dean, M. Epstein, A. Fikes, C. Frost, J. J. Furman, S. Ghe-mawat, A. Gubarev, C. Heiser, P. Hochschild, W. Hsieh, S. Kanthak, E.Kogan, H. Li, A. Lloyd, S. Melnik, D. Mwaura, D. Nagle, S. Quin-lan, R. Rao, L. Rolig, Y. Saito, M. Szymaniak, C. Taylor, R. Wang, and D.Woodford. Spanner: Google’s globally-distributed database. In OSDI, 2012.
+
 [50] D. Crankshaw, X. Wang, G. Zhou, M. J. Franklin, J. E. Gonzalez, and I.Stoica. Clipper: A low-latency online prediction serving system. In NSDI, 2017.
+
 [51] J. Dean and S. Ghemawat. Mapreduce: Simplified data processing on large clusters. In OSDI, 2004.
 [52]  J. Eker, J. Janneck, E. Lee, J. Liu, X. Liu, J. Ludvig, S. Neuendorffer, S.Sachs, and Y. Xiong. Taming heterogeneity - the ptolemy approach. In Proceedings of the IEEE, 2003.
+
 [53]  M. J. Fischer, N. A. Lynch, and M. S. Paterson. Impossibility of dis-tributed consensus with one faulty process. In ACM Journal, 1985.
+
 [54]  Y. Gan, M. Liang, S. Dev, D. Lo, and C. Delimitrou. Sage: Practical and Scalable ML-Driven Performance Debugging in Microservices. In ASPLOS, 2021.
+
 [55]   Y. Gan, Y. Zhang, D. Cheng, A. Shetty, P. Rathi, N. Katarki, A. Bruno, J.Hu, B. Ritchken, B. Jackson, et al. An open-source benchmark suite for microservices and their hardware-software implications for cloud & edge systems. In ASPLOS, 2019.
+
 [56]  Y. Gan, Y. Zhang, K. Hu, Y. He, M. Pancholi, D. Cheng, and C. De-limitrou. Seer: Leveraging Big Data to Navigate the Complexity of Performance Debugging in Cloud Microservices. In ASPLOS, 2019.
+
 [57]   R. Grandl, G. Ananthanarayanan, S. Kandula, S. Rao, and A. Akella. Multi-resource packing for cluster schedulers. In SIGCOMM, 2014.
+
 [58]  M. Henning. The rise and fall of corba: There’s a lot we can learn from corba’s mistakes. In Queue, 2006.
+
 [59]  M. Isard, M. Budiu, Y. Yu, A. Birrell, and D. Fetterly. Dryad: Distributed data-parallel programs from sequential building blocks. In Eurosys, 2007.
+
 [60]  K. Jay, N. Neha, and R. Jun. Kafka : a distributed messaging system for log processing. In NetDB, 2011.
+
 [61]  A. Joe. Erlang. In Communications of the ACM, 2010.
+
 [62]  L. Lamport. The temporal logic of actions. In ACM TOPLS, 1994.
+
 [63]  A. Langley, A. Riddoch, A. Wilk, A. Vicente, C. Krasic, D. Zhang, F.Yang, F. Kouranov, I. Swett, J. Iyengar, J. Bailey, J. Dorfman, J. Roskind, J.Kulik, P. Westin, R. Tenneti, R. Shade, R. Hamilton, V. Vasiliev, W.-T. Chang, and Z. Shi. The quic transport protocol: Design and internet-scale deployment. In SIGCOMM, 2017.
+
 [64]  N. Lazarev, N. Adit, S. Xiang, Z. Zhang, and C. Delimitrou. Dagger: Towards Efficient RPCs in Cloud Microservices with Near-Memory Reconfigurable NICs. In ASPLOS, 2021.
+
 [65]   S. Lee, Z. Guo, O. Sunercan, J. Ying, T. Kooburat, S. Biswal, J. Chen, K.Huang, Y. Cheung, Y. Zhou, K. Veeraraghavan, B. Damani, P. M. Ruiz, V.Mehta, and C. Tang. Shard manager: A generic shard management framework for geo-distributed applications. In SOSP, 2021.
+
 [66]  B. Livshits and E. Kiciman. Doloto: Code splitting for network-bound web 2.0 applications. In FSE, 2008.
+
 [67]  S. Luo, H. Xu, C. Lu, K. Ye, G. Xu, L. Zhang, Y. Ding, J. He, and C. Xu. Characterizing microservice dependency and performance: Alibaba trace analysis. In SOCC, 2021.
+
 [68]  N. A. Lynch. Distributed algorithms. In Morgan Kaufmann Publishers Inc., 1996.
+
 [69]  S. McClure, S. Ratnasamy, D. Bansal, and J. Padhye. Rethinking net-working abstractions for cloud tenants. In HotOS, 2021.
+
 [70]  P. Moritz, R. Nishihara, S. Wang, A. Tumanov, R. Liaw, E. Liang, M. Eli-bol, Z. Yang, W. Paul, M. I. Jordan, and I. Stoica. Ray: A distributed framework for emerging ai applications. In OSDI, 2018.
+
 [71]  H. Qiu, S. S. Banerjee, S. Jha, Z. T. Kalbarczyk, and R. K. Iyer. FIRM: An intelligent fine-grained resource management framework for SLO-Oriented microservices. In OSDI, 2020.
+
 [72]  D. Raghavan, P. Levis, M. Zaharia, and I. Zhang. Breakfast of champi-ons: towards zero-copy serialization with nic scatter-gather. In HotOS, 2021.
+
 [73]  F. Romero, Q. Li, N. J. Yadwadkar, and C. Kozyrakis. Infaas: Automated model-less inference serving. In ATC, 2021.
+
 [74]  B. Sergey, G. Allan, K. Gabriel, L. James, P. Ravi, and T. Jorgen. Orleans: Cloud computing for everyong. In SOCC, 2011.
+
 [75]  M. Waseem, P. Liang, G. Márquez, and A. D. Salle. Testing microser-vices architecture-based applications: A systematic mapping study. In APSEC, 2020.
+
 [76]  Wikipedia contributors. Fallacies of distributed computing.
+
 [77]  M. Zaharia, M. Chowdhury, T. Das, A. Dave, J. Ma, M. McCauly, M. J. Franklin, S. Shenker, and I. Stoica. Resilient distributed datasets: A fault-tolerant abstraction for in-memory cluster computing. In NSDI, 2012.
+
 [78]  Y. Zhang, J. Yang, Z. Jin, U. Sethi, K. Rodrigues, S. Lu, and D. Yuan. Understanding and detecting software upgrade failures in distributed systems. In SOSP, 2021.
 
