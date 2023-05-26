@@ -3,7 +3,7 @@ title: "[Google Paper] 面向云时代的应用开发新模式"
 linkTitle: "面向云时代的应用开发新模式"
 date: 2023-05-26
 author: Google
-description: >
+description: "面向云时代的应用开发新模式 - Service Weaver 谷歌论文"
 ---
 > 本文翻译自发表在以下地址的论文：https://serviceweaver.dev/assets/docs/hotos23_vision_paper.pdf
 
