@@ -8,12 +8,6 @@ title: 优雅停机
 type: docs
 weight: 2
 ---
-
-
-
-
-
-
 ## 特性说明
 
 优雅停机是指服务实例能安全平稳的停止，对进行中的业务不产生影响。
@@ -26,7 +20,7 @@ weight: 2
 1. 通过 `kill PID` 停止服务
 2. 通过 SpringBoot Actuator 的 `/shutdown` 停止服务
 
-Dubbo 3.0 及以上版本支持不同类型的Java应用，包括 SpringBoot 应用、 Spring 应用、非 Spring 应用。
+> Dubbo 3.0 及以上版本支持不同类型的Java应用，包括 SpringBoot 应用、 Spring 应用、非 Spring 应用。
 
 ## 使用方式
 
@@ -37,7 +31,7 @@ Dubbo 3.0 及以上版本支持不同类型的Java应用，包括 SpringBoot 应
 dubbo.service.shutdown.wait=30000
 ```
 
-## 注意事项
+{{% alert title="注意事项" color="primary" %}}
 
 1. Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用户使用 `kill -9 PID` 等强制关闭指令，是不会执行优雅停机的，只有通过 `kill PID` 时，才会执行。
 
@@ -56,3 +50,4 @@ server:
 ```java
 ApplicationModel.defaultModel().destroy();
 ```
+{{% /alert %}}

@@ -72,8 +72,8 @@ Apache Dubbo 是国内最具影响力的开源软件项目之一，由阿里巴�
    - [Rust](http://github.com/apache/dubbo-rust)
    - [Admin](http://github.com/apache/dubbo-admin)
    - [更多生态](http://github.com/dubbo/)
-- [Apache Dubbo 官网 ](https://dubbo.apache.org/)
-- 开源之夏官网：[https://summer-ospp.ac.cn/org/orgdetail/ab188e59-fab8-468f-bc89-bdc2bd8b5e64?lang=zh](https://summer-ospp.ac.cn/org/orgdetail/ab188e59-fab8-468f-bc89-bdc2bd8b5e64?lang=zh)
+- [Apache Dubbo 官网](https://dubbo.apache.org/)
+- [开源之夏官网](https://summer-ospp.ac.cn/org/orgdetail/a7f6e2ad-4acc-47f8-9471-4e54b9a166a6?lang=zh)
 
 为了让同学们更好地了解Apache Dubbo，我们还在观望提供了电子书供大家阅读学习。
 
