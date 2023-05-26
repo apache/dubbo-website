@@ -13,8 +13,8 @@ weight: 4
 
 
 
-
-参考文档：[Kubernetes 生命周期探针](../../../advanced-features-and-usage/others/dubbo-kubernetes-probe/)
+框架状态功能提供了一系列的命令来管理和监控 Dubbo 服务的状态。
+> [Kubernetes 生命周期探针](../../../advanced-features-and-usage/others/dubbo-kubernetes-probe/)
 
 ### startup 命令
 
