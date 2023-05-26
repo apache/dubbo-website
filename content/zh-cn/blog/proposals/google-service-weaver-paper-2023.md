@@ -24,7 +24,7 @@ description: >
 在编写分布式应用程序时，传统的明智做法是将您的应用程序拆分为可以分别拉起的独立服务。这种方式的用意是好的，但像这样基于微服务的架构经常会适得其反，带来的挑战抵消了架构试图实现的好处。从根本上说，这是因为微服务将逻辑边界（代码的编写方式）与物理边界（代码的部署方式）混为一谈。在本文中，我们提出了一种不同的编程方法，将两者（代码编写与部署方式）分离以解决这些挑战。通过我们的方法，开发人员将他们的应用程序编写为逻辑上的单体，将有关如何分发和运行应用程序的决策放到一套自动化运行时 (runtime)，并以原子方式部署应用程序。与当前的微服务开发模式相比，我们的原型应用最多可减少延迟 15 倍、成本最多减少了 9 倍。
 
 ACM 参考格式：
-Sanjay Ghemawat, Robert Grandl, Srdjan Petrovic, Michael Whit-taker, Parveen Patel, Ivan Posva, Amin Vahdat. 2023. Towards Mod-ern Development of Cloud Applications. In Workshop on Hot Topics in Operating Systems (HOTOS ’23), June 22–24, 2023, Providence, RI, USA. ACM, New York, NY, USA, 8 pages. [https://doi.org/10.1145/](https://doi.org/10.1145/3593856.3595909)[3593856.3595909](https://doi.org/10.1145/3593856.3595909)
+Sanjay Ghemawat, Robert Grandl, Srdjan Petrovic, Michael Whit-taker, Parveen Patel, Ivan Posva, Amin Vahdat. 2023. Towards Mod-ern Development of Cloud Applications. In Workshop on Hot Topics in Operating Systems (HOTOS ’23), June 22–24, 2023, Providence, RI, USA. ACM, New York, NY, USA, 8 pages. https://doi.org/10.1145/3593856.3595909
 
 ## 1 介绍
 近年来，云计算出现了前所未有的增长。编写和部署可扩展到数百万用户的分布式应用程序从未如此简单，这在很大程度上归功于 Kubernetes [25] 等框架，[7, 18, 31, 33, 40, 60] 等消息传递解决方案，以及数据格式如 [5,6, 23, 30]。使用这些技术时，普遍的做法是手动将您的应用程序拆分为可以独立部署的独立微服务。
