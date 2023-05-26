@@ -9,7 +9,7 @@ description: "面向云时代的应用开发新模式：谷歌发布的关于单
 
 > 原文作者(Authors): Sanjay Ghemawat, Robert Grandl, Srdjan Petrovic, Michael Whittaker, Parveen Patel, Ivan Posva, Amin Vahdat
 >
-> 转载或发布请遵循原文许可
+> 转载或发布请遵循原文许可：
 > Permission to make digital or hard copies of part or all of this work for
 > personal or classroom use is granted without fee provided that copies are
 > not made or distributed for profit or commercial advantage and that copies
