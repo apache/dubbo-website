@@ -25,7 +25,7 @@ Dubbo 中的 RpcContext 是一个 ThreadLocal 的临时状态记录器，当接�
 
 在 Dubbo 3 中，RpcContext 被拆分为四大模块（ServerContext、ClientAttachment、ServerAttachment 和 ServiceContext）。
 
-它们分别承担了不同的指责：
+它们分别承担了不同的职责：
 - ServiceContext：在 Dubbo 内部使用，用于传递调用链路上的参数信息，如 invoker 对象等
 - ClientAttachment：在 Client 端使用，往 ClientAttachment 中写入的参数将被传递到 Server 端
 - ServerAttachment：在 Server 端使用，从 ServerAttachment 中读取的参数是从 Client 中传递过来的
