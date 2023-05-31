@@ -243,6 +243,17 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 编辑 `./pom.xml` 这个文件，添加下列配置。
 
 ```xml
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-spring-boot-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>dubbo-spring-boot-demo-interface</module>
+        <module>dubbo-spring-boot-demo-provider</module>
+        <module>dubbo-spring-boot-demo-consumer</module>
+    </modules>
+
     <properties>
         <dubbo.version>3.2.0-beta.4</dubbo.version>
         <spring-boot.version>2.7.8</spring-boot.version>
@@ -304,7 +315,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
     <dependencies>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-spring-boot-interface</artifactId>
+            <artifactId>dubbo-spring-boot-demo-interface</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
