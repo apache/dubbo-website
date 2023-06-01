@@ -11,7 +11,7 @@ Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它基
 
 Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你构建浏览器、gRPC 兼容的 HTTP API 接口：你只需要定义一个标准的 Protocol Buffer 格式的服务并实现业务逻辑，Dubbo 负责帮助生成语言相关的 Server Stub、Client Stub，并将整个调用流程无缝接入如路由、服务发现等 Dubbo 体系。Go、Java 等语言的 Triple 协议实现原生支持 HTTP/1 传输层通信，相比于 gRPC 官方实现，Dubbo 框架提供的协议实现更简单、更稳定，帮助你更容易的开发和治理微服务应用。
 
-针对某些语言版本，Dubbo 框架还提供了更贴合语言特性的编程模式，即不绑定 IDL 的服务定义与开发模式，比如在 Dubbo Java 中，你可以选择使用 Java Interface 和 Pojo 类定义 Dubbo 服务，并将起发布为基于 Triple 协议通信的微服务。
+针对某些语言版本，Dubbo 框架还提供了更贴合语言特性的编程模式，即不绑定 IDL 的服务定义与开发模式，比如在 Dubbo Java 中，你可以选择使用 Java Interface 和 Pojo 类定义 Dubbo 服务，并将其发布为基于 Triple 协议通信的微服务。
 
 ## 协议规范(Specification)
 Triple 协议是参考 gRPC 与 gRPC-Web 两个协议设计而来，它吸取了两个协议各自的特性和优点，将它们整合在一起，成为一个完全兼容 gRPC 且支持 Streaming 通信的协议，同时 Triple 还支持 HTTP/1、HTTP/2。
