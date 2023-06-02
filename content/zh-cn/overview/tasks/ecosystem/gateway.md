@@ -9,9 +9,9 @@ type: docs
 weight: 2
 ---
 
-
-
-更多网关接入案例，请参考 [官方博客]({{< relref "../../../../blog/integration/how-to-proxy-dubbo-in-apache-shenyu" >}})
+更多网关接入案例，请参考
+*  [使用 Apache Shenyu 代理 Dubbo 流量]({{< relref "../../../../blog/integration/how-to-proxy-dubbo-in-apache-shenyu" >}})
+*  [使用 Higress 代理 Dubbo 流量]({{< relref "../../../../blog/integration/how-to-proxy-dubbo-in-higress" >}})
 
 ## 背景
 

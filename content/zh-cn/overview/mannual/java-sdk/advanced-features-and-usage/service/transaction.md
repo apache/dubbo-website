@@ -410,4 +410,4 @@ cd bin
 
 由于 seata-server 支持计算与存储分离模式,并支持暴露服务地址至多种注册中心,仅需按照第六步配置完毕后水平扩展即可
 
-详情请访问:https://seata.io/
+> 详情请访问: [seata官网](https://seata.io/)

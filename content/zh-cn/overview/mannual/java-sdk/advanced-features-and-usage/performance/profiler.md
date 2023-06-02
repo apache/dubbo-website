@@ -30,9 +30,7 @@ weight: 1
 
 `simple profiler` 默认自动开启，对于请求处理时间超过超时时间 3/4 的，都会通过日志打印出慢调用信息。如果需要开启 `detail profiler` 模式或者修改超时告警比例，可以参考[性能采样命令](../../../reference-manual/qos/profiler/)文档。
 
-### 输出示例
-
-#### 日志说明
+### 日志说明
 
 日志中各字段的含义如下：
 
@@ -108,7 +106,7 @@ methodE() {
 (1) (2) (3) ... 均为时间占位符
 ```
 
-#### simple profiler
+### simple profiler
 
 Consumer 侧：
 ```
@@ -143,7 +141,7 @@ Start time: 285821754461125
   +-[ Offset: 1.030912ms; Usage: 804.236342ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
 ```
 
-#### detail profiler
+### detail profiler
 
 Consumer 侧：
 ```
@@ -193,5 +191,6 @@ Start time: 285965612316294
                              +-[ Offset: 1.536964ms; Usage: 809.335907ms, 99% ] Filter org.apache.dubbo.rpc.filter.ClassLoaderCallbackFilter invoke.
                                 +-[ Offset: 1.558545ms; Usage: 804.276436ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
 ```
-
-注：由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](../../others/logger-management/)动态修改日志输出框架。
+{{% alert title="注意" color="warning" %}}
+由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](../../others/logger-management/)动态修改日志输出框架。
+{{% /alert %}}

@@ -73,5 +73,6 @@ weight: 1
 </dubbo:reference>
 ```
 
-#### 提示：
-从 `2.1.0` 版本开始支持
+{{% alert title="提示" color="primary" %}}
+`2.1.0` 开始支持
+{{% /alert %}}

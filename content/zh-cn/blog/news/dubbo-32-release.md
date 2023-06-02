@@ -70,7 +70,7 @@ Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下�
 
 ![Untitled](/imgs/blog/32-release/Untitled%201.png)
 
-对于所有的用户，只需要升级到 Dubbo 3.2 版本，并添加 dubbo-spring-boot-observability-starter 依赖即可获得 Metrics 能力。在应用启动后，将在 Dubbo QoS 的 metrics 命令下暴露相关的指标，本地可以通过 [http://127.0.0.1:22222/metrics](http://127.0.0.1:22222/metrics) 获取。此外对于使用了 Spring Actuator 的用户，Dubbo 也将默认将这些数据暴露出来。
+对于所有的用户，只需要升级到 Dubbo 3.2 版本，并添加 dubbo-spring-boot-observability-starter 依赖即可获得 Metrics 能力。在应用启动后，将在 Dubbo QoS 的 metrics 命令下暴露相关的指标，本地可以通过 `http://127.0.0.1:22222/metrics` 获取。此外对于使用了 Spring Actuator 的用户，Dubbo 也将默认将这些数据暴露出来。
 
 ### Tracing
 
@@ -211,7 +211,7 @@ JDK 17 是继 JDK 11 之后目前 Java 的最新 LTS 版本，包括许多新功
 
 - 支持在用户线程上序列化报文(`dubbo`、`triple`)
 
-  在3.1版本中RPC通讯中的报文反序列化均是在单一I/O线程中船行执行的，导致无法利用多核CPU的优势。为此我们在3.2版本中支持了在用户线程上执行反序列化这类较为耗时的任务，将I/O线程的压力均分到多个CPU核心上，以此提高了`较大报文`场景下的RPC性能。
+  在3.1版本中RPC通讯中的报文反序列化均是在单一I/O线程中串行执行的，导致无法利用多核CPU的优势。为此我们在3.2版本中支持了在用户线程上执行反序列化这类较为耗时的任务，将I/O线程的压力均分到多个CPU核心上，以此提高了`较大报文`场景下的RPC性能。
 
 
 3.2对比3.1的性能提升如下：

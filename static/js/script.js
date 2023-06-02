@@ -478,9 +478,9 @@ var pushmenu = (function(){
 
 $(function() {
     // If vendor strip doesn't exist add className
-    if ( !$('#vendorStrip').length > 0 ) {
-        $('.header-hero').addClass('bot-bar');
-    }
+    // if ( !$('#vendorStrip').length > 0 ) {
+    //     $('.header-hero').addClass('bot-bar');
+    // }
 
     // If is not homepage add class to hero section
     if (!$('.td-home').length > 0 ) {

@@ -25,7 +25,7 @@ key: shop-detail
 configs:
   - side: provider
     parameters:
-      accesslog: true
+      accesslog: 'true'
 ```
 
 以下是一个服务级别的配置示例，`key: org.apache.dubbo.samples.UserService` 和 `side: consumer` 说明这条配置对所有正在消费 UserService 的 Dubbo 实例生效，在调用失败后都执行 4 次重试。`match` 条件进一步限制了消费端的范围，限定为只对应用名为 `shop-frontend` 的这个消费端应用生效。
@@ -41,7 +41,7 @@ configs:
           - exact: shop-frontend
     side: consumer
     parameters:
-      retries: 4
+      retries: '4'
 ```
 ## ConfigurationRule
 配置规则主体，定义要设置的目标服务或应用、具体的规则配置。具体配置规则 (configs) 可以设置多条。

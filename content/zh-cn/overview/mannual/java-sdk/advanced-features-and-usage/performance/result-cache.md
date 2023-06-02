@@ -36,7 +36,8 @@ Dubbo支持了服务端结果缓存和客户端结果缓存。
 
 结果缓存，用于加速热门数据的访问速度，Dubbo 提供声明式缓存，以减少用户加缓存的工作量。
 
-## 客户端缓存使用方式
+## 使用方式
+### 客户端缓存
 
 Dubbo中对RPC调用结果缓存支持接口粒度和方法粒度的配置控制。
 
@@ -70,7 +71,7 @@ private DemoService demoService;
 private DemoService demoService;
 ```
 
-## 服务端缓存使用方式
+### 服务端缓存
 
 **接口粒度**
 
@@ -123,5 +124,3 @@ public class DemoServiceImpl implements DemoService {
 
 }
 ```
-
-##
