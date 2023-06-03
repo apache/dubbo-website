@@ -86,7 +86,7 @@ public interface ClusterFilter extends BaseFilter {
 @Activate(group = CommonConstants.PROVIDER)
 ```
 
-具体调用拦截扩展方式请[参考](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/)
+> [调用拦截扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/)
 
 ## Router（路由选址）
 
@@ -125,7 +125,7 @@ public interface Router extends Comparable<Router> {
 }
 ```
 
-具体路由选址扩展方式请[参考](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)
+> [路由选址扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)
 
 ## Cluster（集群规则）
 
@@ -142,7 +142,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
 ```
 
 
-具体集群规则扩展方式请[参考](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/cluster/)
+> [集群规则扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/cluster/)
 
 ## LoadBalance（负载均衡）
 
@@ -156,5 +156,4 @@ public interface LoadBalance {
     <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
 }
 ```
-
-具体调用拦截扩展方式请[参考](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/)
+> [调用拦截扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/)
