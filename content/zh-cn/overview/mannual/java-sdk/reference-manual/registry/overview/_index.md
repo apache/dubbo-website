@@ -24,11 +24,11 @@ dubbo
 ```
 其中，protocol 为选择的配置中心类型，cluster-address 为访问注册中心的集群地址，如
 
-`address: nacos://localshot:8848`
+`address: nacos://localhost:8848`
 
 如需集群格式地址可使用 backup 参数
 
-`address: nacos://localshot:8848?backup=localshot:8846,localshot:8847`
+`address: nacos://localhost:8848?backup=localshot:8846,localshot:8847`
 
 > 应用必须指定 Dubbo 注册中心，即使不启用注册中心也要配置（可通过设置地址为空 address='N/A' ）。
 
