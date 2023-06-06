@@ -23,7 +23,7 @@ Dubbo Client 可以访问 Dubbo 服务端 (Server) 发布的 Triple 协议服务
 * Content-type 为标准的 gRPC (Triple) 类型：application/grpc, application/grpc+proto, and application/grpc+json
 
 ### 当 Dubbo 作为 Server 时
-Dubbo Server 将同时发布对 Triple、gRPC、gRPC-Web 协议的支持，并且可以同时工作在 HTTP/1、HTTP/2 协议之上。因此，Server 可以处理 Dubbo 客户端发过来的 Triple 协议请求，可以处理标准的 gRPC-web、gRPC 协议请求，还能处理 curl、浏览器发送过来的 HTTP/1 请求。
+Dubbo Server 默认将同时发布对 Triple、gRPC、gRPC-Web 协议的支持，并且 Triple 协议可以同时工作在 HTTP/1、HTTP/2 之上。因此，Dubbo Server 可以处理 Dubbo 客户端发过来的 Triple 协议请求，可以处理标准的 gRPC-web、gRPC 协议请求，还能处理 curl、浏览器发送过来的 HTTP/1 请求。
 * Content-type 为标准 gRPC-web 类型的请求：application/grpc-web、application/grpc-web+proto、application/grpc-web+json
 * Content-type 为标准 gRPC(Triple) 类型的请求：application/grpc、application/grpc+proto、application/grpc+json
 * Content-type 为标准普通 HTTP/1 类型的请求：application/json, application/proto
