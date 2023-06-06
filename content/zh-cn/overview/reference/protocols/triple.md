@@ -1,7 +1,7 @@
 ---
-description: "Triple 设计理念：Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它基于 gRPC 设计而来因此可以完全兼容 gRPC 协议，可同时运行在 HTTP/1 和 HTTP/2 之上。"
-linkTitle: Triple 设计理念
-title: Triple 协议设计理念与规范
+description: "Triple 协议优势与目标：Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它基于 gRPC 设计而来因此可以完全兼容 gRPC 协议，可同时运行在 HTTP/1 和 HTTP/2 之上。"
+linkTitle: Triple 协议优势与目标
+title: Triple 协议优势与目标
 type: docs
 weight: 1
 working_in_progress: true
