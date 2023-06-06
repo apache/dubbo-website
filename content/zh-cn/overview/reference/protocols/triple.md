@@ -1,9 +1,10 @@
 ---
-description: "HTTP/2 (Triple) 协议规范"
-linkTitle: Triple 协议规范
+description: "Triple 设计理念：Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它基于 gRPC 设计而来因此可以完全兼容 gRPC 协议，可同时运行在 HTTP/1 和 HTTP/2 之上。"
+linkTitle: Triple 设计理念
 title: Triple 协议设计理念与规范
 type: docs
 weight: 1
+working_in_progress: true
 ---
 
 ## 简介
@@ -14,20 +15,20 @@ Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你
 针对某些语言版本，Dubbo 框架还提供了更贴合语言特性的编程模式，即不绑定 IDL 的服务定义与开发模式，比如在 Dubbo Java 中，你可以选择使用 Java Interface 和 Pojo 类定义 Dubbo 服务，并将其发布为基于 Triple 协议通信的微服务。
 
 ## 协议规范(Specification)
-Triple 协议是参考 gRPC 与 gRPC-Web 两个协议设计而来，它吸取了两个协议各自的特性和优点，将它们整合在一起，成为一个完全兼容 gRPC 且支持 Streaming 通信的协议，同时 Triple 还支持 HTTP/1、HTTP/2。
+基于 Triple 协议，你可以实现以下目标：
 
-Triple 协议的设计目标如下：
-* Triple 设计为对人类友好、开发调试友好的一款基于 HTTP 的协议，尤其是对 unary 类型的 RPC 请求。
-* 完全兼容基于 HTTP/2 的 gRPC 协议，因此 Dubbo Triple 协议实现可以 100% 与 gRPC 体系互调互通。
-* 仅依赖标准的、被广泛使用的 HTTP 特性，以便在实现层面可以直接依赖官方的标准 HTTP 网络库。
+### 当 Dubbo 作为 Client 时
+Dubbo Client 可以访问 Dubbo 服务端 (Server) 发布的 Triple 协议服务，同时还可以访问标准的 gRPC-web、gRPC 服务端。
+* Content-type 为标准的 gRPC-web 类型：application/grpc-web, application/grpc-web+proto, and application/grpc-web+json
+* Content-type 为标准的 gRPC (Triple) 类型：application/grpc, application/grpc+proto, and application/grpc+json
 
-当与 Protocol Buffers 一起使用时，Dubbo Triple 协议实现支持 unary、client-streaming、server-streaming 和 bi-streaming RPC，可以支持二进制 Protobuf、JSON 两种数据 payload。Triple 协议不使用 HTTP trailers，因此可以与任何网络基础设施配合使用。
+### 当 Dubbo 作为 Server 时
+Dubbo Server 将同时发布对 Triple、gRPC、gRPC-Web 协议的支持，并且可以同时工作在 HTTP/1、HTTP/2 协议之上。因此，Server 可以处理 Dubbo 客户端发过来的 Triple 协议请求，可以处理标准的 gRPC-web、gRPC 协议请求，还能处理 curl、浏览器发送过来的 HTTP/1 请求。
+* Content-type 为标准 gRPC-web 类型的请求：application/grpc-web、application/grpc-web+proto、application/grpc-web+json
+* Content-type 为标准 gRPC(Triple) 类型的请求：application/grpc、application/grpc+proto、application/grpc+json
+* Content-type 为标准普通 HTTP/1 类型的请求：application/json, application/proto
 
-Unary RPC使用 application/grpc+proto 和 application/json 内容类型，看起来类似于精简的 REST 方言。大多数请求都是 POST，路径是从 Protobuf 模式派生的，请求和响应主体是有效的 Protobuf 或 JSON（没有 gRPC 风格的二进制框架），响应具有有意义的 HTTP 状态代码。
-
-请参考以下文档编写详细的 Triple Specification。
-* [参考文档1](https://connect.build/docs/protocol/)
-* [参考文档2](https://github.com/grpc/grpc/edit/master/doc/PROTOCOL-HTTP2.md)
+详细在此查看详细的 [Triple Specification](../triple-spec)。
 
 ## 为什么要再实现一遍 gRPC 协议
 既然 gRPC 官方已经提供了多语言的框架实现，为什么 Dubbo 还要重新实现一遍那？核心目标主要有以下两点：
