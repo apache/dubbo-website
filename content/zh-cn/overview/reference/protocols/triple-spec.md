@@ -20,7 +20,7 @@ Triple 协议的设计目标如下：
 ## 示例
 ### 基于 HTTP/1 的 Unary 请求
 
-目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 内容类型，使用方式与 REST 风格请求保持一致，同时相应也包含常规的 HTTP 相应编码。
+目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 内容类型，使用方式与 REST 风格请求保持一致，同时响应也包含常规的 HTTP 响应编码（如 200 OK）。
 
 ```text
 > POST /buf.greet.v1.GreetService/Greet HTTP/1.1
@@ -96,7 +96,7 @@ Triple 协议支持同时运行在 HTTP/1 和 HTTP/2 协议之上，其中，Una
 
 ### Unary (Request-Response) RPCs
 
-大部分的 RPCs 调用都是 unary (request-response) 模式的。Triple 协议 unary 模式能很好的满足后端服务间的数据传输需求，同时可以让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即使用标准的 HTTP 协议即可。
+大部分的 RPC 调用都是 unary (request-response) 模式的。Triple 协议 unary 模式能很好的满足后端服务间的数据传输需求，同时可以让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即使用标准的 HTTP 协议即可。
 
 Triple unary RPC 同时支持 HTTP/1、HTTP/2，对应支持的 content-type 类型为 application/json、application/proto
 
@@ -155,11 +155,13 @@ Successful responses have an HTTP-Status of 200. In those cases, Unary-Content-T
 
 Errors are sent with a non-200 HTTP-Status. In those cases, Unary-Content-Type must be "application/json". Bare-Message is either omitted or a JSON-serialized Error, possibly compressed using Content-Encoding and sent on the wire as the HTTP response content. If Bare-Message is an Error, HTTP-Status must match Error.code as specified in the table below. When reading data from the wire, client implementations must use the HTTP-to-Connect mapping to infer a Connect error code if Bare-Message is missing or malformed.
 
-### gRPC (HTTP/2)
+### Streaming RPCs
 
-Triple 协议在 HTTP/2 请完全参照 <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范</a>。
+Triple 协议的 Streaming 请求完全遵循 HTTP/2 请完全参照 <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范</a>。
 
 支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json。
+
+> 不止是 Streaming 类型的 RPC，由于 Triple 完整的兑现了 gRPC 协议规范，因此也支持标准 gRPC 协议规范的 Unary 请求。
 
 
 
