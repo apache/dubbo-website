@@ -18,7 +18,7 @@ Triple 协议的设计目标如下：
 当与 Protocol Buffers 一起使用时，Dubbo Triple 协议实现支持 unary、client-streaming、server-streaming 和 bi-streaming RPC，可以支持二进制 Protobuf、JSON 两种数据格式 payload。
 
 ## 示例
-### 基于 HTTP/1 的协议请求
+### 基于 HTTP/1 的 Unary 请求
 
 目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 内容类型，使用方式与 REST 风格请求保持一致，同时相应也包含常规的 HTTP 相应编码。
 
@@ -49,10 +49,11 @@ Triple 协议的设计目标如下：
 < Content-Type: application/json
 <
 < {"greeting": "Hello, Buf!"}
+```
 
 > 目前仅支持 POST 请求类型，我们将考虑在未来支持 GET 请求类型，GET 请求可能适用于具有幂等属性的一些服务调用。
 
-### 基于 HTTP/2 的协议请求
+### 基于 HTTP/2 的调用请求
 
 为了与 gRPC 协议保持兼容，Triple 在 HTTP/2 协议实现上保持与标准 gRPC 协议完全一致。
 
