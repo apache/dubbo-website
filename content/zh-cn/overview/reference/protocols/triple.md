@@ -1,5 +1,5 @@
 ---
-description: "Triple 协议优势与目标：Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它基于 gRPC 设计而来因此可以完全兼容 gRPC 协议，可同时运行在 HTTP/1 和 HTTP/2 之上。"
+description: "Triple 协议优势与目标：Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它完全兼容 gRPC 协议并可同时运行在 HTTP/1 和 HTTP/2 之上。"
 linkTitle: Triple 协议优势与目标
 title: Triple 协议优势与目标
 type: docs
@@ -8,7 +8,7 @@ working_in_progress: true
 ---
 
 ## 简介
-Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它基于 gRPC 设计而来因此可以完全兼容 gRPC 协议，可同时运行在 HTTP/1 和 HTTP/2 之上。
+Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它完全兼容 gRPC 协议，支持 Request-Response、Streaming 流式等通信模型，可同时运行在 HTTP/1 和 HTTP/2 之上。
 
 Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你构建浏览器、gRPC 兼容的 HTTP API 接口：你只需要定义一个标准的 Protocol Buffer 格式的服务并实现业务逻辑，Dubbo 负责帮助生成语言相关的 Server Stub、Client Stub，并将整个调用流程无缝接入如路由、服务发现等 Dubbo 体系。Go、Java 等语言的 Triple 协议实现原生支持 HTTP/1 传输层通信，相比于 gRPC 官方实现，Dubbo 框架提供的协议实现更简单、更稳定，帮助你更容易的开发和治理微服务应用。
 
@@ -18,22 +18,22 @@ Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你
 基于 Triple 协议，你可以实现以下目标：
 
 ### 当 Dubbo 作为 Client 时
-Dubbo Client 可以访问 Dubbo 服务端 (Server) 发布的 Triple 协议服务，同时还可以访问标准的 gRPC-web、gRPC 服务端。
-* Content-type 为标准的 gRPC-web 类型：application/grpc-web, application/grpc-web+proto, and application/grpc-web+json
-* Content-type 为标准的 gRPC (Triple) 类型：application/grpc, application/grpc+proto, and application/grpc+json
+Dubbo Client 可以访问 Dubbo 服务端 (Server) 发布的 Triple 协议服务，同时还可以访问标准的 gRPC 服务端。
+* 调用标准 gRPC 服务端，发送 Content-type 为标准 gRPC 类型的请求：application/grpc, application/grpc+proto, and application/grpc+json
+* 调用 Dubbo 服务端，发送 Content-type 为 Triple 类型的请求：application/json, application/proto, application/triple+wrapper
 
 ### 当 Dubbo 作为 Server 时
-Dubbo Server 默认将同时发布对 Triple、gRPC、gRPC-Web 协议的支持，并且 Triple 协议可以同时工作在 HTTP/1、HTTP/2 之上。因此，Dubbo Server 可以处理 Dubbo 客户端发过来的 Triple 协议请求，可以处理标准的 gRPC-web、gRPC 协议请求，还能处理 curl、浏览器发送过来的 HTTP/1 请求。
-* Content-type 为标准 gRPC-web 类型的请求：application/grpc-web、application/grpc-web+proto、application/grpc-web+json
-* Content-type 为标准 gRPC(Triple) 类型的请求：application/grpc、application/grpc+proto、application/grpc+json
-* Content-type 为标准普通 HTTP/1 类型的请求：application/json, application/proto
+Dubbo Server 默认将同时发布对 Triple、gRPC 协议的支持，并且 Triple 协议可以同时工作在 HTTP/1、HTTP/2 之上。因此，Dubbo Server 可以处理 Dubbo 客户端发过来的 Triple 协议请求，可以处理标准的 gRPC 协议请求，还能处理 cURL、浏览器发送过来的 HTTP 请求。以 Content-type 区分就是：
+* 处理 gRPC 客户端发送的 Content-type 为标准 gRPC 类型的请求：application/grpc、application/grpc+proto、application/grpc+json
+* 处理 Dubbo 客户端发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper
+* 处理 cURL、浏览器等发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper
 
 详细在此查看详细的 [Triple Specification](../triple-spec)。
 
-## 为什么要再实现一遍 gRPC 协议
-既然 gRPC 官方已经提供了多语言的框架实现，为什么 Dubbo 还要重新实现一遍那？核心目标主要有以下两点：
+## 与 gRPC 协议的关系
+上面提到 Triple 完全兼容 gRPC 协议，那既然 gRPC 官方已经提供了多语言的框架实现，为什么 Dubbo 还要通过 Triple 重新实现一遍那？核心目标主要有以下两点：
 
-* 首先，在协议设计上，Dubbo 参考 gRPC 与 gRPC-Web 两个协议设计了自定义的 Triple 协议：Triple 是一个基于 HTTP 传输层协议的 RPC 协议，它完全兼容 gRPC，可以同时运行在 HTTP/1、HTTP/2 之上。
+* 首先，在协议设计上，Dubbo 参考 gRPC 与 gRPC-Web 两个协议设计了自定义的 Triple 协议：Triple 是一个基于 HTTP 传输层协议的 RPC 协议，它完全兼容 gRPC 的同时可运行在 HTTP/1、HTTP/2 之上。
 * 其次，Dubbo 框架在每个语言的实现过程中遵循了符合框架自身定位的设计理念，相比于 grpc-java、grpc-go 等框架库，Dubbo 协议实现更简单、更纯粹，尝试在实现上规避 gRPC 官方库中存在的一系列问题。
 
 gRPC 本身作为 RPC 协议规范非常优秀，但我们发现原生的 gRPC 库实现在实际使用存在一系列问题，包括实现复杂、绑定 IDL、难以调试等，Dubbo 在协议设计与实现上从实践出发，很好的规避了这些问题：
@@ -58,7 +58,7 @@ Dubbo 提供的 Triple 协议实现非常简单，对应 Dubbo 中的 Protocol �
 
 Dubbo 完全兼容 gRPC 协议及相关特性包括 streaming、trailers、error details 等，你选择直接在 Dubbo 框架中使用 Triple 协议（另外，你也可以选择使用原生的 gRPC 协议），然后你就可以直接使用 Dubbo 客户端、curl、浏览器等访问你发布的服务。在与 gRPC 生态互操作性方面，任何标准的 gRPC 客户端，都可以正常访问 Dubbo 服务；Dubbo 客户端也可以调用任何标准的 gRPC 服务，这里有提供的 [互操作性示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/interop)
 
-以下是使用 curl 客户端访问 Dubbo 服务端一个 Triple 协议服务的示例：
+以下是使用 cURL 客户端访问 Dubbo 服务端 Triple 协议服务的示例：
 
 ```sh
 curl \

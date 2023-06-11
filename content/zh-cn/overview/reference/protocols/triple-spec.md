@@ -8,38 +8,38 @@ working_in_progress: true
 ---
 
 ## 协议设计理念
-Triple 协议是参考 gRPC 与 gRPC-Web 两个协议设计而来，它吸取了两个协议各自的特性和优点，将它们整合在一起，成为一个完全兼容 gRPC 且支持 Streaming 通信的协议，Triple 支持同时运行在 HTTP/1、HTTP/2 协议之上。
+Triple 协议的设计参考了 gRPC、gRPC-Web、通用HTTP 等多种协议模式，吸取每个协议各自的特性和优点，成为一个完全易于浏览器访问、兼容 gRPC 且支持 Streaming 通信的协议，Triple 支持同时运行在 HTTP/1、HTTP/2 协议之上。
 
 Triple 协议的设计目标如下：
-* Triple 设计为对人类友好、开发调试友好的一款基于 HTTP 的协议，尤其是对 unary 类型的 RPC 请求。
+* Triple 设计为对人类、开发调试友好的一款基于 HTTP 的协议，尤其是对 unary 类型的 RPC 请求。
 * 完全兼容基于 HTTP/2 的 gRPC 协议，因此 Dubbo Triple 协议实现可以 100% 与 gRPC 体系互调互通。
 * 仅依赖标准的、被广泛使用的 HTTP 特性，以便在实现层面可以直接依赖官方的标准 HTTP 网络库。
 
-当与 Protocol Buffers 一起使用时，Dubbo Triple 协议实现支持 unary、client-streaming、server-streaming 和 bi-streaming RPC，可以支持二进制 Protobuf、JSON 两种数据格式 payload。
+当与 Protocol Buffers 一起使用时（即使用 IDL 定义服务），Triple 协议可支持 unary、client-streaming、server-streaming 和 bi-streaming RPC 通信模式，支持二进制 Protobuf、JSON 两种数据格式 payload。 Triple 实现并不绑定 Protocol Buffers，比如你可以使用 Java 接口定义服务，Triple 协议有对这种模式的扩展 Content-type 支持。
 
 ## 示例
-### 基于 HTTP/1 的 Unary 请求
+### Unary 请求
 
-目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 内容类型，使用方式与 REST 风格请求保持一致，同时响应也包含常规的 HTTP 响应编码（如 200 OK）。
+以 HTTP/1 请求为例，目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 编码类型，使用方式与 REST 风格请求保持一致，同时响应也包含常规的 HTTP 响应编码（如 200 OK）。
 
 ```text
-> POST /buf.greet.v1.GreetService/Greet HTTP/1.1
-> Host: demo.connect.build
+> POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+> Host: 127.0.0.1:30551
 > Content-Type: application/json
 >
-> {"name": "Buf"}
+> {"name": "Dubbo"}
 
 < HTTP/1.1 200 OK
 < Content-Type: application/json
 <
-< {"greeting": "Hello, Buf!"}
+< {"greeting": "Hello, Dubbo!"}
 ```
 
 一个包含指定超时时间的调用请求。
 
 ```text
-> POST /buf.greet.v1.GreetService/Greet HTTP/1.1
-> Host: demo.connect.build
+> POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+> Host: 127.0.0.1:30551
 > Content-Type: application/json
 > Rest-service-timeout: 5000
 >
@@ -53,9 +53,9 @@ Triple 协议的设计目标如下：
 
 > 目前仅支持 POST 请求类型，我们将考虑在未来支持 GET 请求类型，GET 请求可能适用于具有幂等属性的一些服务调用。
 
-### 基于 HTTP/2 的调用请求
+### Streaming 调用请求
 
-为了与 gRPC 协议保持兼容，Triple 在 HTTP/2 协议实现上保持与标准 gRPC 协议完全一致。
+为了与 gRPC 协议保持兼容，Triple 在 HTTP/2 协议实现上（包含 Streaming RPC）保持与标准 gRPC 协议完全一致。
 
 Request
 
@@ -157,11 +157,11 @@ Errors are sent with a non-200 HTTP-Status. In those cases, Unary-Content-Type m
 
 ### Streaming RPCs
 
-Triple 协议的 Streaming 请求完全遵循 HTTP/2 请完全参照 <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范</a>。
+Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且目前仅支持 HTTP/2 作为传输层协议，详细规范请完全参照 <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范</a>。
 
-支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json。
+Triple 支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json，除此之外，Triple 在实现上还扩展了 application/triple+wrapper 编码格式。
 
-> 不止是 Streaming 类型的 RPC，由于 Triple 完整的兑现了 gRPC 协议规范，因此也支持标准 gRPC 协议规范的 Unary 请求。
+> 注意：Triple 完全兼容 gRPC 协议，因此不止是 Streaming 类型的 RPC，Triple 还支持标准 gRPC 协议规范的 Unary RPC 请求，以确保能发起或处理标准的 gRPC 服务。
 
 
 
