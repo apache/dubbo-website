@@ -36,7 +36,7 @@ description: |
 | dubbo_provider_rt_milliseconds_histogram_seconds_count  | The count of histogram of response time of the provider under the sliding window    | 滑动窗口下的提供者响应时间直方图总数     |
 | dubbo_provider_rt_milliseconds_histogram_seconds_max    | The max of histogram of response time of the provider under the sliding window      | 滑动窗口下的提供者响应时间直方图最大值    |
 | dubbo_provider_rt_milliseconds_histogram_seconds_sum    | The sum of histogram of response time of the provider under the sliding window      | 滑动窗口下的提供者响应时间直方图总和     |
-| dubbo_provider_requests_business_failed_total            | Total Failed Business Requests            | 当RPC请求异常状态码为 RpcException.BIZ_EXCEPTION                                                                                                               |
+| dubbo_provider_requests_business_failed_total            | Total Failed Business Requests            | 当RPC请求异常状态码为 RpcException_BIZ_EXCEPTION                                                                                                               |
 | dubbo_provider_requests_timeout_total                    | Total Timeout Failed Requests             | 当RPC请求异常为超时异常状态码为 RpcException.TIMEOUT_EXCEPTION                                                                                                      |
 | dubbo_provider_requests_limit_total                      | Total Limit Failed Requests               | RPC请求中一般为并发数超过了限制 max concurrent invoke 或者是超过了系统的上限出现了异常状态码为RpcException.LIMIT_EXCEEDED_EXCEPTION或者异常类型为LimitExceededException LimitExceededException |
 | dubbo_provider_requests_unknown_failed_total             | Total Unknown Failed Requests             | 暂为归类的其他类型的异常具体分析根据日志来看                                                                                                                                |
@@ -46,13 +46,13 @@ description: |
 | dubbo_provider_requests_failed_service_unavailable_total | Total Service Unavailable Failed Requests | 当不存在提供者或者调用了被禁止访问提的提供者时候会出现此异常 ，对应异常码FORBIDDEN_EXCEPTION                                                                                              |
 | dubbo_provider_requests_failed_codec_total               | Total codec failed                        | 序列化相关的异常，异常码SERIALIZATION_EXCEPTION                                                                                                                   |
 | dubbo_provider_requests_failed_aggregate                 | Total Failed Aggregate Requests           | 聚合请求失败次数，当聚合请求中有一个请求失败时候会触发此异常                                                                                                                        |
-| dubbo.provider.requests.timeout.total                    | Total Timeout Failed Requests             | 当RPC请求异常为超时异常状态码为 RpcException.TIMEOUT_EXCEPTION                                                                                                      |
-| dubbo.provider.requests.limit.total                      | Total Limit Failed Requests               | RPC请求中一般为并发数超过了限制 max concurrent invoke 或者是超过了系统的上限出现了异常状态码为RpcException.LIMIT_EXCEEDED_EXCEPTION或者异常类型为LimitExceededException LimitExceededException |
-| dubbo.provider.requests.unknown.failed.total             | Total Unknown Failed Requests             | 暂为归类的其他类型的异常具体分析根据日志来看                                                                                                                                |
-| dubbo.provider.requests.failed.total                     | Total Failed Requests                     | 总的异常次数                                                                                                                                                |
-| dubbo.provider.requests.failed.network.total             | Total network Failed Requests             | 一般发生在网络连接失败或者网络通信时候发生的异常，对应Java异常为RemotingException                                                                                                   |
-| dubbo.provider.requests.failed.service.unavailable.total | Total Service Unavailable Failed Requests | 当不存在提供者或者调用了被禁止访问提的提供者时候会出现此异常 ，对应异常码FORBIDDEN_EXCEPTION                                                                                              |
-| dubbo.provider.requests.failed.codec.total               | Total codec failed                        | 序列化相关的异常，异常码SERIALIZATION_EXCEPTION                                                                                                                   |
+| dubbo_provider_requests_timeout_total                    | Total Timeout Failed Requests             | 当RPC请求异常为超时异常状态码为 RpcException.TIMEOUT_EXCEPTION                                                                                                      |
+| dubbo_provider_requests_limit_total                      | Total Limit Failed Requests               | RPC请求中一般为并发数超过了限制 max concurrent invoke 或者是超过了系统的上限出现了异常状态码为RpcException_LIMIT_EXCEEDED_EXCEPTION或者异常类型为LimitExceededException LimitExceededException |
+| dubbo_provider_requests_unknown_failed_total             | Total Unknown Failed Requests             | 暂为归类的其他类型的异常具体分析根据日志来看                                                                                                                                |
+| dubbo_provider_requests_failed_total                     | Total Failed Requests                     | 总的异常次数                                                                                                                                                |
+| dubbo_provider_requests_failed_network_total             | Total network Failed Requests             | 一般发生在网络连接失败或者网络通信时候发生的异常，对应Java异常为RemotingException                                                                                                   |
+| dubbo_provider_requests_failed_service_unavailable_total | Total Service Unavailable Failed Requests | 当不存在提供者或者调用了被禁止访问提的提供者时候会出现此异常 ，对应异常码FORBIDDEN_EXCEPTION                                                                                              |
+| dubbo_provider_requests_failed_codec_total               | Total codec failed                        | 序列化相关的异常，异常码SERIALIZATION_EXCEPTION                                                                                                                   |
 
 #### Consumer Metrics
 
@@ -94,14 +94,15 @@ description: |
 
 #### ThreadPool Metrics
 
-| Metrics Name                   | Description              | 说明      |
-|--------------------------------|--------------------------|---------|
-| dubbo_thread_pool_max_size     | Thread Pool Max Size     | 线程池最大大小 |
-| dubbo_thread_pool_largest_size | Thread Pool Largest Size | 线程池最大大小 |
-| dubbo_thread_pool_thread_count | Thread Pool Thread Count | 线程池线程计数 |
-| dubbo_thread_pool_queue_size   | Thread Pool Queue Size   | 线程池队列大小 |
-| dubbo_thread_pool_active_size  | Thread Pool Active Size  | 线程池活动大小 |
-| dubbo_thread_pool_core_size    | Thread Pool Core Size    | 线程池核心大小 |
+| Metrics Name                   | Description              | 说明          |
+|--------------------------------|--------------------------|-------------|
+| dubbo_thread_pool_max_size     | Thread Pool Max Size     | 线程池最大大小     |
+| dubbo_thread_pool_largest_size | Thread Pool Largest Size | 线程池最大大小     |
+| dubbo_thread_pool_thread_count | Thread Pool Thread Count | 线程池线程计数     |
+| dubbo_thread_pool_queue_size   | Thread Pool Queue Size   | 线程池队列大小     |
+| dubbo_thread_pool_active_size  | Thread Pool Active Size  | 线程池活动大小     |
+| dubbo_thread_pool_core_size    | Thread Pool Core Size    | 线程池核心大小     |
+| dubbo_thread_pool_reject_thread_count    | Thread Pool Reject Count | 线程池拒绝执行任务数量 |
 
 #### Registration Center Metrics
 
