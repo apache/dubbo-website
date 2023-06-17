@@ -151,4 +151,4 @@ public class KafkaSenderConfiguration {
 
 ### SpringBoot2案例
 
-dubbo-tracing相关的使用在SpringBoot2与3中区别不大，SpringBoot2的案例可参考[代码地址](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-tracing)。
+dubbo-tracing相关的使用在SpringBoot2与3中区别不大，SpringBoot2的案例可参考[代码地址](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot3-tracing)。
