@@ -16,7 +16,10 @@ weight: 10
 
 ## 特性说明
 
-在 Dubbo3 中有一种机制可以实现轻量级的服务降级，也就是本地伪装 [^1]。
+在 Dubbo3 中有一种机制可以实现轻量级的服务降级，也就是本地伪装。
+
+Mock 是 Stub 的一个子集，便于服务提供方在客户端执行容错逻辑，因经常需要在出现 RpcException (比如网络失败，超时等)时进行容错，而在出现业务异常(比如登录用户名密码错误)时不需要容错，
+如果用 Stub，可能就需要捕获并依赖 RpcException 类，而用 Mock 就可以不依赖 RpcException，因为它的约定就是只有出现 RpcException 时才执行。
 
 ## 使用场景
 
@@ -41,7 +44,7 @@ weight: 10
 ```
 
 在工程中提供 Mock 实现 [^2]：
-
+在 interface 旁放一个 Mock 实现，它实现 BarService 接口，并有一个无参构造函数。同时，如果没有在配置文件中显式指定 Mock 类的时候，那么需要保证 Mock 类的全限定类名是 `原全限定类名+Mock` 的形式，例如 `com.foo.BarServiceMock`，否则将会 Mock 失败。
 ```java
 package com.foo;
 public class BarServiceMock implements BarService {
@@ -55,7 +58,7 @@ public class BarServiceMock implements BarService {
 ### 使用 return 关键字 Mock 返回值 
 
 使用 `return` 来返回一个字符串表示的对象，作为 Mock 的返回值。合法的字符串可以是：
-- *empty*：代表空，返回基本类型的默认值、集合类的空值、自定义实体类的空对象 [^3]
+- *empty*：代表空，返回基本类型的默认值、集合类的空值、自定义实体类的空对象，如果返回值是一个实体类，那么此时返回的将会是一个属性都为默认值的空对象而不是 `null`。
 - *null*：返回 `null`
 - *true*：返回 `true`
 - *false*：返回 `false`
@@ -96,8 +99,9 @@ public class DemoService {
 <dubbo:reference interface="com.foo.BarService" mock="throw"/>
 ```
 
-当调用出错时，抛出指定的 Exception [^4]：
+当调用出错时，抛出指定的 Exception：
 
+自定义异常必须拥有一个入参为 `String` 的构造函数，该构造函数将用于接受异常信息。
 ```xml
 
 <dubbo:reference interface="com.foo.BarService" mock="throw com.foo.MockException"/>
@@ -156,11 +160,3 @@ Mock 可以在方法级别上指定，假定 `com.foo.BarService` 上有好几�
     <dubbo:parameter key="sayHello.mock" value="force:return fake"/>
 </dubbo:reference>
 ```
-
-{{% alert title="注意事项" color="primary" %}}
-
-[^1]: Mock 是 Stub 的一个子集，便于服务提供方在客户端执行容错逻辑，因经常需要在出现 RpcException (比如网络失败，超时等)时进行容错，而在出现业务异常(比如登录用户名密码错误)时不需要容错，如果用 Stub，可能就需要捕获并依赖 RpcException 类，而用 Mock 就可以不依赖 RpcException，因为它的约定就是只有出现 RpcException 时才执行。
-[^2]: 在 interface 旁放一个 Mock 实现，它实现 BarService 接口，并有一个无参构造函数。同时，如果没有在配置文件中显式指定 Mock 类的时候，那么需要保证 Mock 类的全限定类名是 `原全限定类名+Mock` 的形式，例如 `com.foo.BarServiceMock`，否则将会 Mock 失败。
-[^3]: 如果返回值是一个实体类，那么此时返回的将会是一个属性都为默认值的空对象而不是 `null`。
-[^4]: 自定义异常必须拥有一个入参为 `String` 的构造函数，该构造函数将用于接受异常信息。
-{{% /alert %}}
