@@ -103,9 +103,11 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;p>在一些大文件传输、直播等应用场景中， consumer或provider需要跟对端进行大量数据的传输，由于这些情况下的数据量是非常大的，因此是没有办法可以在一个RPC的数据包中进行传输，因此对于这些数据包我们需要对数据包进行分片之后，通过多次RPC调用进行传输，如果我们对这些已经拆分了的RPC数据包进行并行传输，那么到对端后相关的数据包是无序的，需要对接收到的数据进行排序拼接，相关的逻辑会非常复杂。但如果我们对拆分了的RPC数据包进行串行传输，那么对应的网络传输RTT与数据处理的时延会是非常大的。&lt;/p>
 &lt;p>为了解决以上的问题，并且为了大量数据的传输以流水线方式在consumer与provider之间传输，因此Streaming RPC的模型应运而生。&lt;/p>
 &lt;p>通过Triple协议的Streaming RPC方式，会在consumer跟provider之间建立多条用户态的长连接，Stream。同一个TCP连接之上能同时存在多个Stream，其中每条Stream都有StreamId进行标识，对于一条Stream上的数据包会以顺序方式读写。&lt;/p>
-&lt;h3 id="总结">总结&lt;/h3>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">总结&lt;/h4>
 &lt;p>在API领域，最重要的趋势是标准化技术的崛起。Triple 协议是 Dubbo3 推出的主力协议。它采用分层设计，其数据交换格式基于Protobuf (Protocol Buffers) 协议开发，具备优秀的序列化/反序列化效率，当然还支持多种序列化方式，也支持众多开发语言。在传输层协议，Triple 选择了 HTTP/2，相较于 HTTP/1.1，其传输效率有了很大提升。此外HTTP/2作为一个成熟的开放标准，具备丰富的安全、流控等能力，同时拥有良好的互操作性。Triple 不仅可以用于Server端服务调用，也可以支持浏览器、移动App和IoT设备与后端服务的交互，同时 Triple协议无缝支持 Dubbo3 的全部服务治理能力。&lt;/p>
 &lt;p>在Cloud Native的潮流下，跨平台、跨厂商、跨环境的系统间互操作性的需求必然会催生基于开放标准的RPC技术，而gRPC顺应了历史趋势，得到了越来越广泛地应用。在微服务领域，Triple协议的提出与落地，是 Dubbo3 迈向云原生微服务的一大步。&lt;/p>
+&lt;/div>
 &lt;h2 id="dubbo2">Dubbo2&lt;/h2>
 &lt;h3 id="protocol-spec">Protocol SPEC&lt;/h3>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo_protocol_header.png" alt="/dev-guide/images/dubbo_protocol_header.jpg">&lt;/p>
@@ -181,12 +183,12 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/ul>
 &lt;/li>
 &lt;/ol>
-&lt;blockquote>
+&lt;div class="alert alert-primary" role="alert">
 &lt;p>对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：&lt;/p>
-&lt;/blockquote>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Dubbo version bytes (换行符)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Service name bytes (换行符)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Dubbo协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</guid><description>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div></description></item><item><title>Overview: Dubbo协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</guid><description>
 &lt;h2 id="特性说明">特性说明&lt;/h2>
 &lt;p>Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。&lt;/p>
 &lt;p>反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。&lt;/p>
@@ -251,11 +253,13 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;/table>
 &lt;p>接口增加方法，对客户端无影响，如果该方法不是客户端需要的，客户端不需要重新部署。输入参数和结果集中增加属性，对客户端无影响，如果客户端并不需要新属性，不用重新部署。&lt;/p>
 &lt;p>输入参数和结果集属性名变化，对客户端序列化无影响，但是如果客户端不重新部署，不管输入还是输出，属性名变化的属性值是获取不到的。&lt;/p>
-&lt;p>&lt;strong>总结&lt;/strong>&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">总结&lt;/h4>
 &lt;ul>
 &lt;li>服务器端和客户端对领域对象并不需要完全一致，而是按照最大匹配原则。&lt;/li>
 &lt;li>会抛异常的情况：枚举值一边多一种，一边少一种，正好使用了差别的那种，或者属性名相同，类型不同。&lt;/li>
 &lt;/ul>
+&lt;/div>
 &lt;h2 id="使用场景">使用场景&lt;/h2>
 &lt;p>适合大并发小数据量的服务调用，服务消费者远大于服务提供者的情景。&lt;/p>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
