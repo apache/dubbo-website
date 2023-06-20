@@ -23,10 +23,10 @@ RPC 协议扩展，封装远程调用细节。
 * 当用户调用 `refer()` 所返回的 `Invoker` 对象的 `invoke()` 方法时，协议需相应执行同 URL 远端 `export()` 传入的 `Invoker` 对象的 `invoke()` 方法。
 * 其中，`refer()` 返回的 `Invoker` 由协议实现，协议通常需要在此 `Invoker` 中发送远程请求，`export()` 传入的 `Invoker` 由框架实现并传入，协议不需要关心。
 
-注意：
-
+{{% alert title="注意" color="primary" %}}
 * 协议不关心业务接口的透明代理，以 `Invoker` 为中心，由外层将 `Invoker` 转换为业务接口。
 * 协议不一定要是 TCP 网络通讯，比如通过共享文件，IPC 进程间通讯等。
+{{% /alert %}}
 
 ## 扩展接口
 
