@@ -213,7 +213,7 @@ gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
 &lt;ul>
 &lt;li>参数及返回值需实现 &lt;code>Serializable&lt;/code> 接口&lt;/li>
 &lt;li>参数及返回值不能自定义实现 &lt;code>List&lt;/code>, &lt;code>Map&lt;/code>, &lt;code>Number&lt;/code>, &lt;code>Date&lt;/code>, &lt;code>Calendar&lt;/code> 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。&lt;/li>
-&lt;li>Hessian 序列化，只传成员属性值和值的类型，不传方法或静态变量，兼容情况&lt;strong>吴亚军提供&lt;/strong>&lt;/li>
+&lt;li>Hessian 序列化，只传成员属性值和值的类型，不传方法或静态变量，兼容情况由&lt;strong>吴亚军提供&lt;/strong>&lt;/li>
 &lt;/ul>
 &lt;table>
 &lt;thead>
@@ -1459,7 +1459,9 @@ return context;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java -Dsun.rmi.transport.tcp.responseTimeout&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">3000&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>更多 RMI 优化参数请查看 &lt;a href="https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html">JDK 文档&lt;/a>&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>更多 RMI 优化参数请查看 &lt;a href="https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html">JDK 文档&lt;/a>&lt;/p>
+&lt;/blockquote>
 &lt;h3 id="接口说明">接口说明&lt;/h3>
 &lt;p>如果服务接口继承了 &lt;code>java.rmi.Remote&lt;/code> 接口，可以和原生 RMI 互操作，即：&lt;/p>
 &lt;ul>
@@ -1484,21 +1486,21 @@ return context;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rmi1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Spring 兼容性&lt;/strong>&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> codec=&lt;span style="color:#2aa198">&amp;#34;spring&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
 &lt;ul>
-&lt;li>&lt;strong>如果正在使用 RMI 提供服务给外部访问，&lt;/strong> 公司内网环境应该不会有攻击风险。&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>如果正在使用 RMI 提供服务给外部访问，&lt;/strong> 公司内网环境应该不会有攻击风险。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>同时应用里依赖了老的 common-collections 包的情况下，&lt;/strong> dubbo 不会依赖这个包，请排查自己的应用有没有使用。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>存在反序列化安全风险。&lt;/strong> 请检查应用：将 commons-collections3 请升级到 &lt;a href="https://commons.apache.org/proper/commons-collections/release_3_2_2.html">3.2.2&lt;/a>；将 commons-collections4 请升级到 &lt;a href="https://commons.apache.org/proper/commons-collections/release_4_1.html">4.1&lt;/a>。新版本的 commons-collections 解决了该问题。&lt;/p>
+&lt;/li>
 &lt;/ul>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;ul>
-&lt;li>&lt;strong>同时应用里依赖了老的 common-collections 包的情况下，&lt;/strong> dubbo 不会依赖这个包，请排查自己的应用有没有使用。&lt;/li>
-&lt;/ul>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;ul>
-&lt;li>&lt;strong>存在反序列化安全风险。&lt;/strong> 请检查应用：将 commons-collections3 请升级到 &lt;a href="https://commons.apache.org/proper/commons-collections/release_3_2_2.html">3.2.2&lt;/a>；将 commons-collections4 请升级到 &lt;a href="https://commons.apache.org/proper/commons-collections/release_4_1.html">4.1&lt;/a>。新版本的 commons-collections 解决了该问题。&lt;/li>
-&lt;/ul>
-&lt;/blockquote></description></item><item><title>Overview: Redis协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/</guid><description>
+&lt;/div></description></item><item><title>Overview: Redis协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/</guid><description>
 &lt;h2 id="特性说明">特性说明&lt;/h2>
 &lt;p>基于 Redis 实现的 RPC 协议。 &lt;code>2.3.0&lt;/code> 以上版本支持。&lt;/p>
 &lt;p>&lt;a href="http://redis.io">Redis&lt;/a> 是一个高效的 KV 存储服务器。&lt;/p>
