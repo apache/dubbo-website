@@ -37,7 +37,10 @@ bool | boolean
 string | String
 bytes | ByteString
 
-> [注]在Java中，无符号的32位和64位整数使用它们的有符号对数来表示，顶部位只存储在符号位中。
+{{% alert title="注意" color="primary" %}}
+在Java中，无符号的32位和64位整数使用它们的有符号对数来表示，顶部位只存储在符号位中。
+{{% /alert %}}
+
 ## 2. 复合类型
 
 ### 2.1. 枚举
