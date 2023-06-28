@@ -15,4 +15,4 @@ weight: 3
 ```bash
 kubectl create -f https://raw.githubusercontent.com/apache/dubbo-admin/refactor-with-go/deploy/kubernetes/skywalking.yaml
 ```
-> 本安装仅适用于测试或体验使用，生产级别的安装请参考 Skywalking 官方安装文档。
+> 本安装仅适用于测试或体验使用，生产级别的安装请参考 [Skywalking](https://skywalking.apache.org/) 官方安装文档。
