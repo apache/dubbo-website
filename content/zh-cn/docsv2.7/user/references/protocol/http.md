@@ -1,6 +1,8 @@
 ---
 aliases:
     - /zh/docsv2.7/user/references/protocol/http/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/http/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/http/
 description: http:// 协议参考手册
 linkTitle: http://
 title: http 协议

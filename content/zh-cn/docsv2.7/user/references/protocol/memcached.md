@@ -1,6 +1,8 @@
 ---
 aliases:
     - /zh/docsv2.7/user/references/protocol/memcached/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/memcached/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/memcached/
 description: memcached:// 协议参考手册
 linkTitle: memcached://
 title: memcached 协议

@@ -1,6 +1,8 @@
 ---
 aliases:
     - /zh/docsv2.7/user/references/protocol/thrift/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/thrift/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/thrift/
 description: thrift:// 协议参考手册
 linkTitle: thrift://
 title: thrift 协议

@@ -16,7 +16,7 @@ weight: 1
 
 ## 概述说明
 
-`Triple` 协议的格式和原理请参阅 [RPC 通信协议](/zh-cn/docs/concepts/rpc-protocol/)
+`Triple` 协议的规范 [协议规范](/zh-cn/overview/reference/protocols/triple/)。
 
 根据 Triple 设计的目标，`Triple` 协议有以下优势
 

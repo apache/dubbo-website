@@ -4,7 +4,7 @@ aliases:
     - /zh/docs3-v2/java-sdk/concepts-and-architecture/overall-architecture/
     - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/overall-architecture/
     - /zh-cn/overview/mannual/java-sdk/concepts-and-architecture/overall-architecture/
-description: ""
+description: "本文介绍了 Dubbo 的基本工作原理，涵盖了服务治理控制面、数据面、通信协议、服务发现、服务治理能力、流量管控等"
 linkTitle: 概念与架构
 title: 了解 Dubbo 核心概念和架构
 type: docs

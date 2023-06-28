@@ -6,9 +6,9 @@ aliases:
     - /zh/docs3-v2/java-sdk/concepts-and-architecture/triple/
     - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/triple/
     - zh-cn/overview/mannual/java-sdk/concepts-and-architecture/triple/
-description: Triple协议
-linkTitle: Triple协议
-title: Triple协议
+description: 基于 HTTP 的 Triple 协议实现及使用方式
+linkTitle: 基于 HTTP 的 Triple 协议
+title: 基于 HTTP 的 Triple 协议
 type: docs
 weight: 3
 ---
@@ -37,6 +37,6 @@ Java SDK 支持 [IDL 生成 Stub](/zh-cn/overview/mannual/java-sdk/quick-start/i
 和 [Java Interface](/zh-cn/overview/mannual/java-sdk/quick-start/idl) 两种方式，多语言、生态互通、流式需求推荐使用 IDL 方式，现有服务平滑升级推荐使用
 Interface 方式。
 
-- Dubbo2 老用户如何从现有协议升级至 Triple(TBD)
+- [Dubbo2 老用户如何从现有协议升级至 Triple](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/migration/)
 - 新用户或业务参考 [Dubbo3 Triple Quick Start](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)
 - 深入了解 Triple 协议: [Dubbo3 Triple 协议设计与原理](https://github.com/apache/dubbo-awesome/blob/master/proposals/D0-triple.md)

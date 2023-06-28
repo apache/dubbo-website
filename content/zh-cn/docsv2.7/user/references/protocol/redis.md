@@ -1,6 +1,8 @@
 ---
 aliases:
     - /zh/docsv2.7/user/references/protocol/redis/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/redis/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/
 description: redis:// 协议参考手册
 linkTitle: redis://
 title: redis 协议

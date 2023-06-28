@@ -6,4 +6,4 @@ type: docs
 weight: 1
 ---
 
-文档编写中...
+同时 Go 语言

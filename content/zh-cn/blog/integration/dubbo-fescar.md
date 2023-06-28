@@ -4,7 +4,7 @@ linkTitle: "如何使用Seata保证Dubbo微服务间的一致性"
 date: 2019-01-17
 tags: ["生态", "Java"]
 description: >
-    本文主要介绍如何使用Seata保证Dubbo微服务间的一致性
+    本文主要介绍如何使用Seata保证Dubbo微服务间的一致性，提供Dubbo的分布式事物解决方案。
 ---
 
 ## 案例

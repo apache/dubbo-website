@@ -1,6 +1,8 @@
 ---
 aliases:
     - /zh/docsv2.7/user/references/protocol/hessian/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/hessian/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/hessian/
 description: hessian:// 协议参考手册
 linkTitle: hessian://
 title: hessian 协议
