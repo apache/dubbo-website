@@ -16,9 +16,10 @@ weight: 9
 
 
 ## 特性说明
-基于 Redis 实现的 RPC 协议。 `2.3.0` 以上版本支持。
+[Redis](http://redis.io) 是一个高效的 KV 存储服务器。基于 Redis 实现的 RPC 协议。 
 
-[Redis](http://redis.io) 是一个高效的 KV 存储服务器。
+> `2.3.0` 以上版本支持。
+
 
 ## 使用场景
 
@@ -67,4 +68,4 @@ registry.register(URL.valueOf("redis://10.20.153.11/com.foo.BarService?category=
 ```
 方法名建议和 redis 的标准方法名相同，即：get(key), set(key, value), delete(key)。
 
-如果方法名和 redis 的标准方法名不相同，则需要配置映射关系：
+如果方法名和 redis 的标准方法名不相同，则需要配置映射关系。
