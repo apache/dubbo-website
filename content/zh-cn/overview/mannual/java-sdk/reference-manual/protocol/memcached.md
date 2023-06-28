@@ -14,9 +14,11 @@ weight: 12
 
 
 ## 特性说明
-基于 memcached 实现的 RPC 协议。 `2.3.0` 以上版本支持。
+[Memcached](http://memcached.org/) 是一个高效的 KV 缓存服务器。基于 memcached 实现的 RPC 协议。 
 
-[Memcached](http://memcached.org/) 是一个高效的 KV 缓存服务器。
+> `2.3.0` 以上版本支持。
+
+
 
 ## 使用场景
 缓解数据库压力，提高交互速度等。

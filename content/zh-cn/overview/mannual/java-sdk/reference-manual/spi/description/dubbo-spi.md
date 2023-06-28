@@ -14,7 +14,7 @@ weight: 0
 
 
 
-## 1.简介
+## 1. Dubbo SPI 扩展简介
 
 SPI 全称为 Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件，加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过 SPI 机制为我们的程序提供拓展功能。SPI 机制在第三方框架中也有所应用，比如 Dubbo 就是通过 SPI 机制加载所有的组件。不过，Dubbo 并未使用 Java 原生的 SPI 机制，而是对其进行了增强，使其能够更好的满足需求。在 Dubbo 中，SPI 是一个非常重要的模块。基于 SPI，我们可以很容易的对 Dubbo 进行拓展。
 Dubbo 中，SPI 主要有两种用法，一种是加载固定的扩展类，另一种是加载自适应扩展类。这两种方式会在下面详细的介绍。
@@ -135,7 +135,7 @@ createExtension 方法的逻辑稍复杂一下，包含了如下的步骤：
 
 以上步骤中，第一个步骤是加载拓展类的关键，第三和第四个步骤是 Dubbo IOC 与 AOP 的具体实现。在接下来的章节中，将会重点分析 getExtensionClasses 方法的逻辑，以及简单介绍 Dubbo IOC 的具体实现。
 
-### 2.1.1 获取所有的拓展类
+#### 2.1.1 获取所有的拓展类
 
 我们在通过名称获取拓展类之前，首先需要根据配置文件解析出拓展项名称到拓展类的映射关系表（Map\<名称, 拓展类\>），之后再根据拓展项名称从映射关系表中取出相应的拓展类即可。相关过程的代码分析如下：
 
@@ -315,7 +315,7 @@ private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL reso
 
 到此，关于缓存类加载的过程就分析完了。整个过程没什么特别复杂的地方，大家按部就班的分析即可，不懂的地方可以调试一下。接下来，我们来聊聊 Dubbo IOC 方面的内容。
 
-### 2.1.2 Dubbo IOC
+#### 2.1.2 Dubbo IOC
 
 Dubbo IOC 是通过 setter 方法注入依赖。Dubbo 首先会通过反射获取到实例的所有方法，然后再遍历方法列表，检测方法名是否具有 setter 方法特征。若有，则通过 ObjectFactory 获取依赖对象，最后通过反射调用 setter 方法将依赖设置到目标对象中。整个过程对应的代码如下：
 
@@ -479,7 +479,7 @@ private Class<?> createAdaptiveExtensionClass() {
 
 createAdaptiveExtensionClass 方法用于生成自适应拓展类，该方法首先会生成自适应拓展类的源码，然后通过 Compiler 实例（Dubbo 默认使用 javassist 作为编译器）编译源码，得到代理类 Class 实例。接下来，我们把重点放在代理类代码生成的逻辑上，其他逻辑大家自行分析。
 
-### 2.2.1 自适应拓展类代码生成
+#### 2.2.1 自适应拓展类代码生成
 
 AdaptiveClassCodeGenerator#generate 方法生成扩展类代码
 ```java
@@ -579,7 +579,7 @@ private String generateMethodContent(Method method) {
 3.使用 ExtensionLoader.getExtension 获取扩展
 4.执行对应的方法
 
-### 2.2.3 附一个动态生成代码后的例子
+#### 2.2.3 附一个动态生成代码后的例子
 
 ```java
 package org.apache.dubbo.common.extension.adaptive;
@@ -615,11 +615,11 @@ public class HasAdaptiveExt$Adaptive implements org.apache.dubbo.common.extensio
 ```
 
 
-## 3.SPI 扩展示例
+## 3. Dubbo SPI 扩展示例
 
 ### 3.1  加载固定扩展类
 
-### 3.1.1 编写 SPI 接口及实现类
+#### 3.1.1 编写 SPI 接口及实现类
 
 不管是 Java SPI，还是 Dubbo 中实现的 SPI，都需要编写接口。不过 Dubbo 中的接口需要被 @SPI 注解修饰。
 
@@ -663,7 +663,7 @@ public class DubboSPITest {
 
 这个以 Protocol 为例进行说明
 
-### 3.2.1 Protocol 接口(抽取部分核心方法)
+#### 3.2.1 Protocol 接口(抽取部分核心方法)
 
 ```java
 @SPI("dubbo")
@@ -690,7 +690,7 @@ public class DubboProtocol extends AbstractProtocol {
 }
 ```
 
-### 3.2.2 将实现类放在特定目录下
+#### 3.2.2 将实现类放在特定目录下
 在 dubbo 中，该配置路径 META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol
 ```text
 dubbo=org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
@@ -698,7 +698,7 @@ dubbo=org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
 
 需要说明一点的是，在 dubbo 中，并不是直接使用 DubboProtocol 的，而是使用的是其包装类。
 
-### 3.2.3 使用
+#### 3.2.3 使用
 
 ```java
 public class DubboAdaptiveTest {

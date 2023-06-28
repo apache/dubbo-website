@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/what/ecosystem/serialization/protobuf/
     - /zh-cn/overview/what/ecosystem/serialization/protobuf/
-description: ""
+description: "本文介绍 Protobuf 序列化"
 linkTitle: Protobuf
 title: Protobuf
 type: docs

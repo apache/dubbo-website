@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/what/ecosystem/serialization/fastjson/
     - /zh-cn/overview/what/ecosystem/serialization/fastjson/
-description: ""
+description: "本文介绍 Fastjson 序列化"
 linkTitle: Fastjson
 title: Fastjson
 type: docs
