@@ -8,20 +8,22 @@ type: docs
 weight: 2
 ---
 
-
-
-
-
-
-
 ## 1. 生成 Demo 项目
 
-使用安装好的 dubbogo-cli 工具，创建demo工程。
+使用安装好的 dubbogo-cli 工具，创建 demo 工程。
 
+创建并切换目录
 ```bash
-$ mkdir quickstart
-$ cd quickstart 
+$ mkdir quickstart && cd quickstart
+```
+
+使用 dubbogo-cli 工具创建新项目
+```bash
 $ dubbogo-cli newDemo .
+```
+
+查看项目结构
+```bash
 $ tree .
 .
 ├── api
@@ -40,7 +42,6 @@ $ tree .
 │       └── dubbogo.yaml
 └── go.mod
 ```
-
 可看到生成的项目中包含一个 client 项目和一个 server 项目，以及相关的配置文件。
 
 ### 1.1 查看接口描述文件 
@@ -76,7 +77,9 @@ message User {
 
 demo项目中，默认生成了一个接口描述文件，接口服务名为 api.Greeter, 包含两个 RPC 方法，入参为 HelloRequest，返回值为 User，两个方法分别为普通 RPC 方法和 Streaming 类型 RPC 方法。
 
-### 1.2 (*可选) 使用安装好的编译工具编译 pb 接口
+### 1.2 编译接口 (可选)
+
+使用安装好的编译工具编译 pb 接口。
 
 ```bash
 $ cd api
@@ -89,7 +92,7 @@ $ protoc --go_out=. --go-triple_out=. ./samples_api.proto
 
 在 demo 工程中，预先生成好了这两个文件，修改 .proto 文件后重新执行命令生成，即可覆盖。
 
-## 2. 开启一次RPC调用
+## 2. 开启一次 RPC 调用
 
 项目根目录执行
 
@@ -116,15 +119,16 @@ require (
 )
 
 ```
-
-先后启动服务端和客户端: 开启两个终端，在 go-server/cmd 和 go-client/cmd 文件夹下分别执行 `go run .` , 可在客户端看到输出：
+{{% alert title="输出结果" color="info" %}}
+先后启动服务端和客户端: 开启两个终端，在 `go-server/cmd` 和 `go-client/cmd` 文件夹下分别执行 `go run .` , 可在客户端看到输出：
 
 ```shell
 client response result: name:"Hello laurence" id:"12345" age:21
 ```
 
-获得调用结果成功
+获得调用结果成功。
+{{% /alert %}}
 
-## 更多
-
-> 细心的读者可以发现，以上例子编写的的服务端可以接受来自客户端的普通RPC、流式RPC调用请求。目前只编写了普通调用的Client，读者可以根据 samples 库中的例子来尝试编写流式客户端和服务端。
+{{% alert title="更多" color="primary" %}}
+细心的读者可以发现，以上例子编写的的服务端可以接受来自客户端的普通RPC、流式RPC调用请求。目前只编写了普通调用的Client，读者可以根据 samples 库中的例子来尝试编写流式客户端和服务端。
+{{% /alert %}}

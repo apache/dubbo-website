@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/what/ecosystem/serialization/kryo/
     - /zh-cn/overview/what/ecosystem/serialization/kryo/
-description: ""
+description: "本文介绍 Kryo 序列化"
 linkTitle: Kryo
 title: Kryo
 type: docs

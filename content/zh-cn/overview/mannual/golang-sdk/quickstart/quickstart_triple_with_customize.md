@@ -8,20 +8,17 @@ type: docs
 weight: 3
 ---
 
-
-
-
-
-
-## 1.实现概述
+## 1. 实现概述
 我们本章来实现一个简单的小需求，实现一个分布式ID生成服务，通过该服务可以获取分布式ID
 （假设的分布式ID，我们不探讨ID的生成方案和算法，这里直接使用uuid代替，只为演示自定义服务的创建）
 
 ## 2. 服务端实现
 首先使用 dubbogo-cli 创建 IDC 服务
 ```bash
-dubbogo-cli newApp IDC
-cd IDC
+dubbogo-cli newApp IDC && cd IDC 
+```
+查看项目结构
+```bash
 tree .
 
 .
@@ -60,7 +57,7 @@ tree .
 
 ```
 
-我们编辑proto定义我们的接口
+我们编辑 proto 定义我们的接口
 
 ```protobuf
 syntax = "proto3";
@@ -84,12 +81,10 @@ message GenResp {
 生成代码
 
 ```bash
-$ cd api
-$ protoc --go_out=. --go-triple_out=. ./api.proto
+$ cd api && protoc --go_out=. --go-triple_out=. ./api.proto
 ```
 
-我们来调整service
-目录：pkg/service/service.go
+我们来调整 `service` 目录：`pkg/service/service.go`
 修改后的代码如下
 
 ```go
@@ -111,7 +106,7 @@ func init() {
 	config.SetProviderService(&GeneratorServerImpl{})
 }
 ```
-同时，我们调整conf/dubbogo.yaml中的provider部分，
+同时，我们调整 `conf/dubbogo.yaml` 中的 `provider` 部分，
 ```yaml
 dubbo:
   registries:
@@ -127,25 +122,30 @@ dubbo:
       GeneratorServerImpl:
         interface: "" # read from stub
 ```
-我们需要拉起一个依赖的注册中心，nacos，如果你有现成的，本步骤可以忽略，我们使用docker来快速启动一个nacos，
+我们需要拉起一个依赖的注册中心 nacos，如果你有现成的，本步骤可以忽略，我们使用 docker 来快速启动一个 nacos
 
 ```bash
-git clone https://github.com/nacos-group/nacos-docker.git
-cd nacos-docker
+git clone https://github.com/nacos-group/nacos-docker.git && cd nacos-docker
+```
+
+```bash
 docker-compose -f example/standalone-derby.yaml up
 ```
 
 最后，我们启动服务端。
 ```go
-export DUBBO_GO_CONFIG_PATH=conf/dubbogo.yaml 
+export DUBBO_GO_CONFIG_PATH=conf/dubbogo.yaml
+```
+```
 go run cmd/app.go  
 ```
-打开nacos的控制台，可以看到服务已经注册
+打开 nacos 的控制台，可以看到服务已经注册
+
 ![img](/imgs/docs3-v2/golang-sdk/quickstart/nacos.jpg)
 
 
 ## 2. 客户端使用
-首先，我们可以共享我们的服务端的api给客户端，并生成相关的代码（这里可以根据实际项目需要，共享共享proto，每个consumer自行生成代码，或统一生成sdk后给依赖的服务引入）
+首先，我们可以共享我们的服务端的 api 给客户端，并生成相关的代码（这里可以根据实际项目需要，共享 proto，每个 consumer 自行生成代码，或统一生成 sdk 后给依赖的服务引入）
 客户端目录如下：
 ```bash
 .
@@ -161,8 +161,7 @@ go run cmd/app.go
 ├── go.sum
 
 ```
-api目录同服务端的api目录
-client.go 代码如下
+`api` 目录同服务端的 `api` 目录 `client.go` 代码如下:
 ```go
 
 var grpcGeneratorImpl = new(api.GeneratorClientImpl)
@@ -186,7 +185,7 @@ func main() {
 
 ```
 
-dubbogo.yml 如下
+`dubbogo.yml`
 ```yaml
 dubbo:
   registries:
@@ -200,17 +199,23 @@ dubbo:
         interface: ""
 ```
 
-运行client，获取id，如下：
+运行 client，获取 id:
 
 ```bash
 export DUBBO_GO_CONFIG_PATH=conf/dubbogo.yml
+```
+```
 go run cmd/client.go
+```
+{{% alert title="输出结果" color="info" %}}
+```shell
 ……
 ……
 2022-12-30T20:59:19.971+0800    INFO    cmd/client.go:44        start to test dubbo
 2022-12-30T20:59:19.982+0800    INFO    cmd/client.go:52        get id result: aafd9c73-4014-4d67-a67f-5d107105647b
-
 ```
-## 更多
+{{% /alert %}}
 
-> 可以发现注册中心我们是使用nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考[注册中心](/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/)
+{{% alert title="更多" color="primary" %}}
+可以发现注册中心我们是使用 nacos，当然，我们也可以使用其他的注册中心，更多的使用方式，可以参考 [注册中心](/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/)
+{{% /alert %}}

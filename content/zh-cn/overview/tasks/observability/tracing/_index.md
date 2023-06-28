@@ -37,6 +37,17 @@ weight: 2
                 </div>
             </div>
         </div>
+        <div class="col-sm col-md-6 mb-4">
+            <div class="h-100 card shadow">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <a href='{{< relref "./otlp/" >}}'>OTlp 全链路追踪</a>
+                    </h4>
+                    <p>演示如果通过 OpenTelemetry 的 Otlp Collector 实现对 Dubbo 服务的全链路追踪。
+                    </p>
+                </div>
+            </div>
+        </div>
 </div>
 <hr>
 </div>
@@ -60,7 +71,7 @@ weight: 2
 
 - Latency analysis tools：一种收集导出跨度并可视化整个跟踪的工具。允许轻松进行延迟分析。
 
-- Tracer: 处理span生命周期的库（Dubbo 目前支持 Opentelemetry 和 Brave）。它可以通过 Exporter 创建、启动、停止和报告 Spans 到外部系统（如 Zipkin、Jagger 等）。
+- Tracer: 处理span生命周期的库（Dubbo 目前支持 OpenTelemetry 和 Brave）。它可以通过 Exporter 创建、启动、停止和报告 Spans 到外部系统（如 Zipkin、Jagger 等）。
 
 - Exporter: 将产生的 Trace 信息通过 http 等接口上报到外部系统，比如上报到 Zipkin。
 
@@ -68,12 +79,22 @@ weight: 2
 
 对于 SpringBoot 用户，Dubbo 提供了 Tracing 相关的 starters，自动装配 Micrometer 相关的配置代码，且用户可自由选择 Tracer 和Exporter。
 
-### Opentelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin
+### OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin
 
 ```yml
   <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-spring-boot-tracing-otel-zipkin-starter</artifactId>
+    <version>${version}</version>
+  </dependency>
+```
+
+### OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 OTlp Collector
+
+```yml
+  <dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-spring-boot-tracing-otel-otlp-starter</artifactId>
     <version>${version}</version>
   </dependency>
 ```
@@ -135,3 +156,9 @@ weight: 2
 ```
 
 后续还会补齐更多的 starters，如 Jagger、SkyWalking等。
+
+## Dubbo Bootstrap API
+
+对于像非 SpringBoot 的项目，可以使用 Dubbo API 使用Tracing。
+
+详细案例可参考[代码地址](https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-sample-api-tracing-otel-zipkin)

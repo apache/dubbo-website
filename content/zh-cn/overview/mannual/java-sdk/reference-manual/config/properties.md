@@ -397,6 +397,54 @@ weight: 6
 | bucketNum | int | 可选 | | 时间窗口存储桶个数 |
 | timeWindowSeconds | int | 可选 | | 时间窗口时长（s） |
 
+### tracing
+
+指标配置。
+
+> 配置类： `org.apache.dubbo.config.TracingConfig`
+
+| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
+| --- | --- | ---- | --- | --- | --- | --- | --- |
+| enabled | | boolean | 可选 | false | 服务治理 | 是否开启tracing相关功能 | 3.2.3以上版本 |
+| sampling | | SamplingConfig | 可选 | | 性能调优 | tracing 采样相关配置 | 3.2.3以上版本 |
+| propagation | | PropagationConfig | 可选 | | 服务治理 | tracing 传播协议相关配置 | 3.2.3以上版本 |
+| tracingExporter | | ExporterConfig | 可选 | | 服务治理 | tracing 信息导出相关配置 | 3.2.3以上版本 |
+
+- SamplingConfig 对应类：`org.apache.dubbo.config.nested.SamplingConfig`
+
+| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
+| --- | --- | ---- | --- | --- |
+| probability | float | 可选 | 0.1 | 采样率 |
+
+- PropagationConfig 对应类：`org.apache.dubbo.config.nested.PropagationConfig`
+
+| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
+| --- | --- | ---- | --- | --- |
+| type | string | 可选 | W3C | 可选 B3/W3C |
+
+- ExporterConfig 对应类：`org.apache.dubbo.config.nested.ExporterConfig`
+
+| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
+| --- | --- | ---- | --- | --- |
+| zipkinConfig | ZipkinConfig | 可选 | | zipkin 作为 exporter 的配置信息 |
+| otlpConfig | OtlpConfig | 可选 | | OTlp Colletcor 作为exporter的配置信息 |
+
+- ZipkinConfig 对应类：`org.apache.dubbo.config.nested.ExporterConfig.ZipkinConfig`
+
+| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
+| --- | --- | ---- | --- | --- |
+| endpoint | string | 可选 | | zipkin server 地址 |
+| connectTimeout | duration | 可选 | 10s | 连接到 zipkin server 的超时时间 |
+| readTimeout | duration | 可选 | 10s | zipkin server 读取超时时间 |
+
+- OtlpConfig 对应类：`org.apache.dubbo.config.nested.ExporterConfig.OtlpConfig`
+
+| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
+| --- | --- | ---- | --- | --- |
+| endpoint | string | 可选 | | zipkin server 地址 |
+| timeout | duration | 可选 | 10s | 等待收集器处理导出的一批 spans 的最大时间 |
+| compressionMethod | string | 可选 | none | 用于传输中压缩 tracing 信息的方法，支持 gzip/none |
+| headers | Map<string, string> | 可选 | | 向 OTlp Collector 上报信息时，添加自定义的 header 头 |
 
 ### ssl
 
