@@ -13,13 +13,11 @@ weight: 2
 
 
 
-参考文章[**《Dubbo 迈出云原生重要一步 应用级服务发现解析》**](https://baijiahao.baidu.com/s?id=1669266413887039723&wfr=spider&for=pc)
+参考文章: [《Dubbo 迈出云原生重要一步 应用级服务发现解析》](https://baijiahao.baidu.com/s?id=1669266413887039723&wfr=spider&for=pc)
 
-参考仓库：[dubbo-go-samples/registry/serivcediscovery](https://github.com/apache/dubbo-go-samples/tree/master/registry/servicediscovery)
+参考仓库：[服务发现](https://github.com/apache/dubbo-go-samples/tree/master/registry/servicediscovery)
 
-## 配置方案
-
-- Consumer 端
+## Consumer 端
 
 ```yaml
 dubbo:
@@ -39,8 +37,7 @@ dubbo:
 ```
 
 
-
-- Provider 端
+## Provider 端
 
 ```yaml
 dubbo:
@@ -62,4 +59,4 @@ dubbo:
         interface: com.apache.dubbo.sample.basic.IGreeter 
 ```
 
-相比于常规配置，定义好registry-type: service, 并且定义好元数据中心后，将会使用应用级服务注册/服务发现。
+相比于常规配置，定义好 `registry-type: service`, 并且定义好元数据中心后，将会使用应用级服务注册/服务发现。
