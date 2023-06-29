@@ -8,20 +8,14 @@ type: docs
 weight: 10
 ---
 
+1. `dubbogo-cli` 工具和依赖工具已安装
+2. 创建一个新的 `demo` 应用
 
+## grpc_cli 工具进行服务调试
 
+### 开启服务端
 
-
-
-## 1. 准备工作
-
-- dubbo-go cli 工具和依赖工具已安装
-- 创建一个新的 demo 应用
-
-## 2. 使用 grpc_cli 工具进行 Dubbo 服务调试
-
-### 2.1 开启服务端
-示例：user.go:
+`user.go` 示例
 ```go
 func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) (*User, error) {
 	fmt.Printf("=======================\nreq:%#v\n", userStruct)
@@ -31,8 +25,10 @@ func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) 
 }
 
 ```
-服务端开启一个服务，名为GetUser，传入一个CallUserStruct的参数，返回一个User参数\
-CallUserStruct参数定义：
+
+服务端开启一个服务，名为 `GetUser`，传入一个 `CallUserStruct` 的参数，返回一个 `User` 参数\
+
+`CallUserStruct` 参数定义：
 ```go
 type CallUserStruct struct {
 	ID      string
@@ -54,7 +50,8 @@ func (s SubInfo) JavaClassName() string {
 }
 
 ```
-User结构定义：
+
+User 结构定义：
 ```go
 type User struct {
 	Id      string
@@ -74,14 +71,12 @@ func (u *User) JavaClassName() string {
 `source builddev.sh`\
 `go run .`
 
-### 2.2 定义请求体(打解包协议)
+### 定义请求体(打解包协议)
 
-请求体定义为json文件，约定键值均为string\
-键对应go语言struct字段名例如"ID"、"Name" ，值对应"type@val"\
-其中type支持string int bool time，val使用string 来初始化，如果只填写type则初始化为零值。
-约定每个struct必须有JavaClassName字段，务必与server端严格对应
-
-见userCall.json:
+请求体定义为 `json` 文件，约定键值均为 `string\` 
+键对应go语言 `struct` 字段名例如 `"ID"`、`"Name"` ，值对应 `"type@val"\`
+其中 `type` 支持` string int bool time`，`val` 使用` string` 来初始化，如果只填写 `type` 则初始化为零值。
+约定每个 `struct` 必须有 `JavaClassName` 字段，务必与 `server` 端严格对应见 `userCall.json`:
 ```json
 {
   "ID": "string@A000",
@@ -95,9 +90,9 @@ func (u *User) JavaClassName() string {
   "JavaClassName": "string@com.ikurento.user.CallUserStruct"
 }
 ```
-userCall.json将参数CallUserStruct的结构及子结构SubInfo都定义了出来，并且给请求参数赋值。
+`userCall.json` 将参数 `CallUserStruct` 的结构及子结构 `SubInfo` 都定义了出来，并且给请求参数赋值。
 
-user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段一定与server端严格对应
+`user.json` 同理，作为返回值不需要赋初始值，但`JavaClassName` 字段一定与 `server` 端严格对应
 ```go
 {
   "ID": "string",
@@ -113,10 +108,10 @@ user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段
 }
 ```
 
-### 2.3 执行请求
+### 执行请求
 `dubbogo-cli call --h=localhost --p 20001 --proto=dubbo --i=com.ikurento.user.UserProvider --method=GetUser --sendObj="./userCall.json" --recvObj="./user.json"`
 
-cli端打印结果：
+cli 端打印结果：
 ```log
 2020/10/26 20:47:45 Created pkg:
 2020/10/26 20:47:45 &{ID:A000 Male:true SubInfo:0xc00006ea20 JavaClassName:com.ikurento.user.CallUserStruct}
@@ -141,10 +136,10 @@ cli端打印结果：
 ```
 可看到详细的请求体赋值情况，以及返回结果和耗时。支持嵌套结构
 
-server端打印结果
+server 端打印结果
 ```
 =======================
 req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001", SubMale:false, SubAge:18}}
 =======================
 ```
-可见接收到了来自cli的数据
+可见接收到了来自 cli 的数据
