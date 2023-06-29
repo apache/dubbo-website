@@ -8,20 +8,15 @@ type: docs
 weight: 10
 ---
 
+参考仓库： [注册中心](https://github.com/apache/dubbo-go-samples/tree/master/registry)
 
+1. 确保 `dubbogo-cli` 工具和依赖工具已安装 
+2. 创建一个新的 `demo` 应用
+3. 启动一个 Nacos 实例，暴露 `8848` 端口
 
+## 注册中心配置
 
-
-
-## 1. 准备工作
-
-- dubbo-go cli 工具和依赖工具已安装
-- 创建一个新的 demo 应用
-- 启动一个 Nacos 实例，暴露 8848 端口
-
-## 2. 配置注册中心
-
-修改服务端配置 go-server/conf/dubbogo.yaml
+修改服务端配置 `go-server/conf/dubbogo.yaml`
 
 ```yaml
 dubbo:
@@ -39,7 +34,7 @@ dubbo:
         interface: "" # read from pb
 ```
 
-修改客户端配置 go-client/conf/dubbogo.yaml
+修改客户端配置 `go-client/conf/dubbogo.yaml`
 
 ```yaml
 dubbo:
@@ -56,9 +51,9 @@ dubbo:
 
 
 
-## 3. 使用 Nacos 进行服务发现
+## 使用 Nacos 进行服务发现
 
-- 启动go-server/cmd，查看日志
+- 启动 `go-server/cmd`，查看日志
 
   ```bash
   [Nacos Registry] Registry instance with param ...
@@ -66,9 +61,9 @@ dubbo:
 
   日志中包含 Nacos 注册信息，将当前服务接口注册在 Nacos。
 
-  可登陆控制台 http://localhost:8848/nacos 查看注册的服务
+  可登陆控制台 `http://localhost:8848/nacos` 查看注册的服务
 
-- 启动 go-client/cmd 查看日志
+- 启动 `go-client/cmd` 查看日志
 
   ```
    [Nacos Registry] Update begin, service event: ServiceEvent{Action{add}, Path{tri://xxx.xxx.xxx.xxx:20000/api.Greeter ...
@@ -79,9 +74,3 @@ dubbo:
   ```
   client response result: name:"Hello laurence" id:"12345" age:21
   ```
-
-
-
-## 4. 更多支持的注册中心
-
-参考 [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
