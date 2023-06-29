@@ -8,159 +8,149 @@ type: docs
 weight: 4
 ---
 
+1. `JDK 8`
+2. `Golang >= 1.15`
+3. `Dubbo 3.0.2`
+4. zookeeper 启动
 
 
+Go/Java 互通前提：Go/Java 定义的传输结构一致
 
+## PB 序列化
 
+### proto for Go
 
-## 准备工作
+```protobuf
+// The response message containing the greetings
+message User {
+  string name = 1;
+  string id = 2;
+  int32 age = 3;
+}
+```
 
-### 环境
+### proto for Java
 
-JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
+```protobuf
+// The response message containing the greetings
+message User {
+  string name = 1;
+  string id = 2;
+  int32 age = 3;
+}
+```
 
-### Go- Java 互通前提
+## Hessian 序列化
 
-- Go/Java 定义的传输结构一致
+### POJO for Go 
 
-  - PB 序列化
+需参考 [Dubbogo Hessian 序列化](https://www.yuque.com/docs/share/c698bd6e-e4d6-47db-bc1c-c757cc9b4f3e?)
 
-  proto for Go
-
-  ```protobuf
-  // The response message containing the greetings
-  message User {
-    string name = 1;
-    string id = 2;
-    int32 age = 3;
-  }
-  ```
-
-  proto for Java
-
-  ```protobuf
-  // The response message containing the greetings
-  message User {
-    string name = 1;
-    string id = 2;
-    int32 age = 3;
-  }
-  ```
-
-  - Hessian 序列化
-
-  POJO for Go，需参考 [Dubbogo Hessian 序列化支持文档](https://www.yuque.com/docs/share/c698bd6e-e4d6-47db-bc1c-c757cc9b4f3e?)
-
-  ```go
-  type User struct {
-    ID   string
-    Name string
-    Age  int32
-  }
+```go
+type User struct {
+  ID   string
+  Name string
+  Age  int32
+}
   
-  func (u *User) JavaClassName() string {
-  	return "org.apache.dubbo.User"
-  }
+func (u *User) JavaClassName() string {
+  return "org.apache.dubbo.User"
+}
   
-  func init(){
-  	hessian.RegisterPOJO(&User{})  
-  }
-  ```
+func init(){
+  hessian.RegisterPOJO(&User{})  
+}
+```
 
-  POJO for Java
+### POJO for Java
 
-  ```java
-  package org.apache.dubbo
+```java
+package org.apache.dubbo
     
-  public class User {
-    private String id;
-    private String name;
-    private int age;
-  }
-  ```
+public class User {
+  private String id;
+  private String name;
+  private int age;
+}
+```
 
-- Java 需要互通的方法签名与 Go 一致
 
-  例如：
+Java 需要互通的方法签名与 Go 一致，例如： Java Interface
 
-  Java Interface
+```java
+public interface IGreeter {
+   /**
+    * <pre>
+    *  Sends a greeting
+    * </pre>
+    */
+  User sayHello(HelloRequest request);
+}
+```
 
-  ```java
-  public interface IGreeter {
-    /**
-     * <pre>
-     *  Sends a greeting
-     * </pre>
-     */
-  	User sayHello(HelloRequest request);
-  }
-  ```
+Go client (由protoc-gen-go-triple 根据 proto 文件自动生成)
 
-  Go client (由protoc-gen-go-triple 根据 proto 文件自动生成)
+```go
+type GreeterClientImpl struct {
+  // Sends a greeting
+  SayHello func(ctx context.Context, in *HelloRequest) (*User, error)
+}
+```
 
-  ```go
-  type GreeterClientImpl struct {
-  	// Sends a greeting
-  	SayHello func(ctx context.Context, in *HelloRequest) (*User, error)
-  }
-  ```
+Go server (由开发者定义)
 
-  Go server (由开发者定义)
-
-  ```go
-  type GreeterProvider struct {
-  	api.GreeterProviderBase
-  }
+```go
+type GreeterProvider struct {
+  api.GreeterProviderBase
+}
   
-  func (s *GreeterProvider) SayHello(ctx context.Context, in *api.HelloRequest) (*api.User, error) {
-  	logger.Infof("Dubbo3 GreeterProvider get user name = %s\n", in.Name)
-  	return &api.User{Name: "Hello " + in.Name, Id: "12345", Age: 21}, nil
-  }
-  ```
+func (s *GreeterProvider) SayHello(ctx context.Context, in *api.HelloRequest) (*api.User, error) {
+  logger.Infof("Dubbo3 GreeterProvider get user name = %s\n", in.Name)
+  return &api.User{Name: "Hello " + in.Name, Id: "12345", Age: 21}, nil
+}
+```
 
-  Go 方法需要遵守 [Dubbogo 3.0 用户服务接口定义规范](https://www.yuque.com/docs/share/eff9c51f-a7f4-47d6-87ff-11a2152bdffe?)
+Go 方法需要遵守 [Dubbogo 3.0 用户服务接口定义规范](https://www.yuque.com/docs/share/eff9c51f-a7f4-47d6-87ff-11a2152bdffe?)
 
   
 
-- Java 的三元组与Go service/reference 配置的 interface 一致
+- Java 的三元组与 Go service/reference 配置的 interface 一致
 
   三元组，即为接口级别配置的：interface, group, version。**其中需要注意，group 和 version 的概念为 dubbo 接口的 group 和vesion，在启动 dubbo-java 服务时配置于 spring cloud 的 properties 文件中，并非pom.xml 中 mvn 依赖的version。** group 和version 默认为空，在 dubbo-go 框架中，可以在service/reference 的对应位置指定 group 和 version。
 
-  例如：
+  例如： Java 的接口全名：com.apache.dubbo.sample.basic.IGreeter，接口 version 为v1.0.1, group 为 Go-client: 
 
-  Java 的接口全名：com.apache.dubbo.sample.basic.IGreeter，接口 version 为v1.0.1, group 为
+```yaml
+references:
+  GreeterClientImpl:
+    protocol: tri
+    interface: com.apache.dubbo.sample.basic.IGreeter # must be compatible with grpc or dubbo-java
+    group: dubbogo # 需要与服务端对应 默认为空
+    version: v1.0.1 # 需要与服务端对应 默认为空
+```
 
-  Go-client: 
+Go-server:
 
-  ```yaml
-  references:
-    GreeterClientImpl:
-      protocol: tri
-      interface: com.apache.dubbo.sample.basic.IGreeter # must be compatible with grpc or dubbo-java
-      group: dubbogo # 需要与服务端对应 默认为空
-      version: v1.0.1 # 需要与服务端对应 默认为空
-  ```
-
-  Go-server:
-
-  ```yaml
-  services:
-    GreeterProvider:
-      protocol-ids: tripleProtocol
-      interface: com.apache.dubbo.sample.basic.IGreeter # must be compatible with grpc or dubbo-java
-      group: dubbogo # 需要与服务端对应 默认为空
-      version: v1.0.1 # 需要与服务端对应 默认为空
-  ```
+```yaml
+services:
+  GreeterProvider:
+    protocol-ids: tripleProtocol
+    interface: com.apache.dubbo.sample.basic.IGreeter # must be compatible with grpc or dubbo-java
+    group: dubbogo # 需要与服务端对应 默认为空
+    version: v1.0.1 # 需要与服务端对应 默认为空
+```
 
 
 
-## 1. 基于 Triple 协议互通 (PB序列化)
+## 基于 Triple 协议互通 
 
-参考 [dubbo-go-samples/helloworld](https://github.com/apache/dubbo-go-samples/tree/master/helloworld)
+Triple 协议互通使用 PB 序列化
 
-### 1.1 Go-Client -> Java-Server
+参考仓库： [helloworld](https://github.com/apache/dubbo-go-samples/tree/master/helloworld)
 
-#### Java-Server 启动
+### Go-Client -> Java-Server
+
+Java-Server 启动
 
 1. 定义 Java 的 PB 文件，可参考 [Dubbo 快速开始](/zh-cn/docs/quick-start/)
 
@@ -269,7 +259,7 @@ main  INFO bootstrap.DubboBootstrap:  [DUBBO] DubboBootstrap has started., dubbo
 dubbo service started
 ```
 
-#### Go-Client 启动
+Go-Client 启动
 
 对于已经启动的Dubbo服务，如需要开发与其对应的Go-client，需要进行如下步骤：
 
@@ -364,9 +354,9 @@ cmd/client.go:53        client response result: name:"hello laurence" id:"12345"
 receiv: name: "laurence"
 ```
 
-### 1.2 Java-Client -> Go-Server
+### Java-Client -> Go-Server
 
-#### Go-Server 启动
+Go-Server 启动
 
 1. 定义配置文件
 
@@ -414,7 +404,7 @@ func main() {
 
 
 
-#### Java-Client 启动
+Java-Client 启动
 
 1. proto 文件编写和接口生成参考上述 java-server 介绍
 
@@ -449,13 +439,15 @@ public class ApiConsumer {
 }
 ```
 
-## 2. 基于 Dubbo 协议互通 (Hessian2序列化)
+## 基于 Dubbo 协议互通 
 
-参考 [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/master/rpc/dubbo)
+Dubbo 协议互通使用 Hessian2 序列化
 
-### 2.1 Go-Client -> Java-Server
+参考仓库： [dubbo 协议](https://github.com/apache/dubbo-go-samples/tree/master/rpc/dubbo)
 
-#### Java-Server 启动
+### Go-Client -> Java-Server
+
+Java-Server 启动
 
 1. 定义 Java 接口、参数和返回值，可参考 [Dubbo 快速开始](/zh-cn/docs/quick-start/)
 
@@ -595,7 +587,7 @@ public class Provider {
 [DUBBO] DubboBootstrap has started., dubbo version: 2.7.7, current host: 127.0.0.1
 ```
 
-#### Go-Client 启动
+Go-Client 启动
 
 对于已经启动的Dubbo服务，如需要开发与其对应的Go-client，需要进行如下步骤：
 
@@ -712,9 +704,9 @@ func main(){
 response result: User{ID:1, Name:userCode get, Age:48, Time:2021-10-21 20:25:26.009 +0800 CST}
 ```
 
-### 2.2 Java-Client -> Go-Server
+### Java-Client -> Go-Server
 
-#### Go-Server 启动
+Go-Server 启动
 
 1. 定义配置文件
 
@@ -778,7 +770,7 @@ func main() {
 
 
 
-#### Java-Client 启动
+Java-Client 启动
 
 1. Java 客户端 Spring 配置
 
