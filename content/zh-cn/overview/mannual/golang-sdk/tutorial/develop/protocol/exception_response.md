@@ -8,20 +8,15 @@ type: docs
 weight: 5
 ---
 
+参考仓库：[异常回传](https://github.com/apache/dubbo-go-samples/tree/master/error)
 
+用户可以在 provider 端生成用户定义的异常信息，可以记录异常产生堆栈，triple 协议可保证将用户在客户端获取到异常 `message`，并可以查看报错堆栈，便于定位问题。
 
+注意返回 `error` 非 `nil` 时，框架不负责其他返回值的传递。
 
+## Triple provider 端
 
-
-参考samples [dubbo-go-samples/error](https://github.com/apache/dubbo-go-samples/tree/master/error)
-
-## 用户异常回传介绍
-
-用户可以在 provider 端生成用户定义的异常信息，可以记录异常产生堆栈，triple 协议可保证将用户在客户端获取到异常 message ，并可以查看报错堆栈，便于定位问题。
-
-注意返回 error 非 nil 时，框架不负责其他返回值的传递。
-
-- 在Triple provider 端返回异常，以 pb 序列化为例：
+在 Triple provider 端返回异常，以 pb 序列化为例：
 
 ```go
 package main
@@ -56,9 +51,7 @@ func (s *ErrorResponseProvider) SayHello(ctx context.Context, in *triplepb.Hello
 
 ```
 
-
-
-- 客户端打印异常和堆栈
+## 客户端打印异常和堆栈
 
 ```go
 package main
