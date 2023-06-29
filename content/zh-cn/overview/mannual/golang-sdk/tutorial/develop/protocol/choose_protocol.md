@@ -8,25 +8,16 @@ title: 选择使用的网络协议
 type: docs
 ---
 
+1. 确保 `dubbogo-cli` 工具和依赖工具已安装
+2. 创建一个新的 `demo` 应用
 
+## 配置网络协议
 
-
-
-
-# 修改使用的协议
-
-## 1. 准备工作
-
-- dubbo-go cli 工具和依赖工具已安装
-- 创建一个新的 demo 应用
-
-## 2. 如何配置网络协议
-
-在快速开始章节可以看到，生成的Demo 将 Protocol 设置为 tri，表明使用 Triple 协议进行服务暴露和服务调用。快速开始章节使用的配置 API 进行配置的写入，这样的好处是无需使用配置文件。我们摘取出和网络协议相关的内容进行说明。
+在快速开始章节可以看到，生成的 Demo 将 Protocol 设置为 tri，表明使用 Triple 协议进行服务暴露和服务调用。快速开始章节使用的配置 API 进行配置的写入，这样的好处是无需使用配置文件。我们摘取出和网络协议相关的内容进行说明。
 
 ### 使用配置文件 
 
-参考 samples/helloworld
+参考 `samples/helloworld`
 
 - 客户端使用配置文件设置网络协议
 
@@ -56,9 +47,11 @@ dubbo:
 
 
 
-## 3. 编写 Dubbo 协议的接口和实现
+## Dubbo 协议接口和实现
 
-### 3.1 定义接口和传输结构，位于api/api.go
+### 定义接口和传输结构
+
+位于 `api/api.go`
 
 ```go
 package api
@@ -100,9 +93,9 @@ func init(){
 }
 ```
 
-### 2.2 编写 Go-Server 配置和代码
+### 编写 Go-Server 配置和代码
 
-server/dubbogo.yaml
+`server/dubbogo.yaml`
 
 ```yaml
 dubbo:
@@ -120,7 +113,7 @@ dubbo:
         interface: org.apache.dubbo.UserProvider  # 接口需要与 go/java 客户端对应
 ```
 
-server/server.go
+`server/server.go`
 
 ```go
 package main
@@ -172,9 +165,7 @@ func main() {
 
 ```
 
-
-
-### 2.3 编写 Go-Client 配置和代码
+### 编写 Go-Client 配置和代码
 
 client/dubbogo.yaml
 
@@ -191,7 +182,7 @@ dubbo:
         interface: org.apache.dubbo.UserProvider # 接口需要与 go/java 客户端对应
 ```
 
-client/client.go
+`client/client.go`
 
 ```go
 package main
@@ -219,9 +210,9 @@ func main(){
 }
 ```
 
-## 4. 启动服务
+## 启动服务
 
-开启两个终端，分别进入server client 目录
+开启两个终端，分别进入 `server client` 目录
 
 分别执行；
 
