@@ -36,5 +36,5 @@ Dubbo 目前借助 Micrometer Observation 完成 Tracing 的所有埋点工作�
 
 ## 关联日志
 
-Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、span-id 等信息自动置入日志 MDC 上下文，你只需要设置日志输出格式中包含类似 `%X{traceId:-},%X{spanId:-}]`，即可实现业务日志与 tracing 系统的自动关联，具体可参见 [Tracing 日志上下文配置示例](https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-spring-boot-tracing/dubbo-samples-spring-boot-tracing-otel-otlp/provider/src/main/resources/application.yml)。
+Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、span-id 等信息自动置入日志 MDC 上下文，你只需要设置日志输出格式中包含类似 `%X{traceId:-},%X{spanId:-}]`，即可实现业务日志与 tracing 系统的自动关联，具体可参见 [Tracing 日志上下文配置示例](https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-otel-otlp/provider/src/main/resources/application.yml)。
 

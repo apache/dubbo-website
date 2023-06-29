@@ -52,11 +52,11 @@ Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用�
     开启 Mock 前，请确保在消费端应用中引入以下依赖：
 
     ```xml
-    <denpendency>
+    <dependency>
       <groupId>org.apache.dubbo.extensions</groupId>
       <artifactId>dubbo-mock-admin</artifactId>
       <version>${version}</version>
-    </denpendency>
+    </dependency>
     ```
 
     > 查看 [dubbo-mock-admin 的可用版本](/zh-cn/download/spi-extensions/)

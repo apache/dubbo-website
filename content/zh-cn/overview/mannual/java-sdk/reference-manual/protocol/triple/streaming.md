@@ -38,17 +38,18 @@ Stream 分为以下三种:
 - BIDIRECTIONAL_STREAM(双向流)
   ![BIDIRECTIONAL_STREAM](/imgs/v3/migration/tri/migrate-bi-stream.png)
 
-> 由于 `java` 语言的限制，BIDIRECTIONAL_STREAM 和 CLIENT_STREAM 的实现是一样的。
+由于 `java` 语言的限制，BIDIRECTIONAL_STREAM 和 CLIENT_STREAM 的实现是一样的。
 
 在 Dubbo3 中，流式接口以 `SteamObserver` 声明和使用，用户可以通过使用和实现这个接口来发送和处理流的数据、异常和结束。
 
-> 对于 Dubbo2 用户来说，可能会对StreamObserver感到陌生，这是Dubbo3定义的一种流类型，Dubbo2 中并不存在 Stream 的类型，所以对于迁移场景没有任何影响。
+对于 Dubbo2 用户来说，可能会对StreamObserver感到陌生，这是Dubbo3定义的一种流类型，Dubbo2 中并不存在 Stream 的类型，所以对于迁移场景没有任何影响。
 
-流的语义保证
+{{% alert title="流的语义保证" color="primary" %}}
 - 提供消息边界，可以方便地对消息单独处理
 - 严格有序，发送端的顺序和接收端顺序一致
 - 全双工，发送不需要等待
-- 支持取消和超时
+- 支持取消和超时 
+{{% /alert %}}
 
 ### Protobuf 序列化的流
 

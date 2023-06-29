@@ -68,6 +68,17 @@ weight: 5
             </div>
         </div>
     </div>
+    <div class="col-sm col-md-6 mb-4">
+        <div class="h-100 card shadow">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <a href='{{< relref "./tracing/otlp/" >}}'>OTlp 全链路追踪</a>
+                </h4>
+                <p>演示如果通过 OpenTelemetry 的 Otlp Collector 实现对 Dubbo 服务的全链路追踪。
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 <hr>
 </div>

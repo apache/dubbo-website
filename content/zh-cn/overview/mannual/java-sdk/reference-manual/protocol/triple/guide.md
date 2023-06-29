@@ -23,7 +23,7 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 ### Protobuf 方式
 
 1. 编写 IDL 文件
-    ```protobuf
+```protobuf
     syntax = "proto3";
 
     option java_multiple_files = true;
@@ -42,10 +42,10 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
     message HelloReply {
       string message = 1;
     }
-    ```
+```
 
 2. 添加编译 protobuf 的 extension 和 plugin (以 maven 为例)
-    ```xml
+```xml
        <extensions>
                 <extension>
                     <groupId>kr.motd.maven</groupId>
@@ -73,17 +73,17 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
                     </executions>
                 </plugin>
             </plugins>
-    ```
+```
 
 3. 构建/ 编译生成 protobuf Message 类
-    ```shell
-    mvn clean install
-    ```
+```shell
+mvn clean install
+```
 
 ### Unary 方式
 
 4.  编写 Java 接口
-    ```java
+```java
     import org.apache.dubbo.hello.HelloReply;
     import org.apache.dubbo.hello.HelloRequest;
 
@@ -96,10 +96,10 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
         HelloReply sayHello(HelloRequest request);
 
     }
-    ```
+```
 
 5. 创建 Provider
-    ```java
+```java
         public static void main(String[] args) throws InterruptedException {
             ServiceConfig<IGreeter> service = new ServiceConfig<>();
             service.setInterface(IGreeter.class);
@@ -113,12 +113,12 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
             new CountDownLatch(1).await();
         }
 
-    ```
+```
 
 
 6. 创建 Consumer
 
-    ```java
+```java
     public static void main(String[] args) throws IOException {
         ReferenceConfig<IGreeter> ref = new ReferenceConfig<>();
         ref.setInterface(IGreeter.class);
@@ -142,17 +142,17 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
         }
         System.in.read();
     }
-    ```
+```
 
 7. 运行 Provider 和 Consumer ,可以看到请求正常返回
-    ```java
-   > Reply:message: "name"
-    ```
+```java
+> Reply:message: "name"
+```
 
 ### stream 方式
 
 8.  编写 Java 接口
-    ```java
+```java
     import org.apache.dubbo.hello.HelloReply;
     import org.apache.dubbo.hello.HelloRequest;
 
@@ -165,10 +165,10 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 	    StreamObserver<HelloRequest> sayHello(StreamObserver<HelloReply> replyObserver);
 
     }
-    ```
+```
 
 9. 编写实现类
-    ```java
+```java
 	public class IStreamGreeterImpl implements IStreamGreeter {
 
 	    @Override
@@ -202,11 +202,11 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 	        };
 	    }
 	}
-    ```
+```
 
 10. 创建 Provider
 
-    ```java
+```java
 	public class StreamProvider {
 	    public static void main(String[] args) throws InterruptedException {
 	        ServiceConfig<IStreamGreeter> service = new ServiceConfig<>();
@@ -220,11 +220,11 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 	        new CountDownLatch(1).await();
 	    }
 	}
-    ```
+```
 
 11. 创建 Consumer
 
-    ```java
+```java
 	public class StreamConsumer {
 	    public static void main(String[] args) throws InterruptedException, IOException {
 	        ReferenceConfig<IStreamGreeter> ref = new ReferenceConfig<>();
@@ -273,16 +273,16 @@ Triple 协议是 Dubbo3 的主力协议，完整兼容 gRPC over HTTP/2，并在
 	        System.in.read();
 	    }
 	}
-    ```
+```
 
 12. 运行 Provider 和 Consumer ,可以看到请求正常返回了
-    ```java
-    > onNext\
-    > receive name:tony\
-    > onNext\
-    > receive name:nick\
-    > onCompleted
-    ```
+```java
+> onNext\
+> receive name:tony\
+> onNext\
+> receive name:nick\
+> onCompleted
+```
 
 ### 其他序列化方式
 省略上文中的 1-3 步，指定 Provider 和 Consumer 使用的协议即可完成协议升级。

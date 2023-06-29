@@ -69,4 +69,4 @@ Dubbo 支持基于 gRPC 作为底层通信协议，在 Dubbo 模式下使用 gRP
 
 * **不只有 Java 语言实现**
 
-自 Dubbo3 开始，Dubbo 提供了 Dubbo、Golang、Rust、Node.js 等多语言实现，未来会有更多的语言实现。
+自 Dubbo3 开始，Dubbo 提供了 Java、Golang、Rust、Node.js 等多语言实现，未来会有更多的语言实现。
