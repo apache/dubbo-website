@@ -46,16 +46,6 @@ weight: 6
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4">
-        <div class="h-100 card shadow" href="#">
-            <div class="card-body">
-                <h4 class="card-title">
-                     <a href='{{< relref "./multi-protocols/" >}}'>单端口多协议发布服务</a>
-                </h4>
-                <p>演示如何在一个应用内发布多个使用不同协议的服务，并通过唯一的一个端口对外发布。</p>
-            </div>
-        </div>
-    </div>
 </div>
 <hr>
 </div>
