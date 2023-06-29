@@ -8,22 +8,15 @@ type: docs
 weight: 100
 ---
 
-
-
-
-
-
 一个 Dubbo-go 应用可以配置的多个接口维度的注册中心。
 
-## 1. 准备工作
+1. `dubbogo-cli` 工具和依赖工具已安装
+2. 创建一个新的 `demo` 应用
+3. 本地启动 Nacos、Zookeeper 
 
-- dubbo-go cli 工具和依赖工具已安装
-- 创建一个新的 demo 应用
-- 本地启动Nacos、Zookeeper 
+## 使用多注册中心
 
-## 2. 使用多注册中心
-
-修改服务端配置 go-server/conf/dubbogo.yaml， 同时将服务注册在两个注册中心上。
+修改服务端配置 `go-server/conf/dubbogo.yaml`， 同时将服务注册在两个注册中心上。
 
 ```yaml
 dubbo:
@@ -47,7 +40,7 @@ dubbo:
         interface: "" 
 ```
 
-修改客户端配置 go-client/conf/dubbogo.yaml
+修改客户端配置 `go-client/conf/dubbogo.yaml`
 
 ```yaml
 dubbo:
@@ -72,7 +65,7 @@ dubbo:
         interface: ""
 ```
 
-修改客户端代码，再定义一个客户端存根类，名为GreeterClientImpl2：
+修改客户端代码，再定义一个客户端存根类，名为 `GreeterClientImpl2`：
 
 ```go
 var grpcGreeterImpl2 = new(GreeterClientImpl2)
@@ -113,9 +106,9 @@ func main() {
 
 
 
-## 3. 多注册中心服务发现验证
+## 多注册中心服务发现验证
 
-分别启动 go-server/cmd 和 go-client/cmd 查看两条调用成功的日志：
+分别启动 `go-server/cmd` 和 `go-client/cmd` 查看两条调用成功的日志：
 
 ```
 INFO    cmd/client.go:55        nacos server response result: name:"Hello laurence" id:"12345" age:21
