@@ -8,16 +8,9 @@ type: docs
 weight: 4
 ---
 
+参考仓库：[注册中心](https://github.com/apache/dubbo-go-samples/tree/master/registry)
 
-
-
-
-
-参考samples [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
-
-## Registry 注册中心配置
-
-- **Nacos 注册中心**
+## Nacos 注册中心
 
 ```yaml
 dubbo:
@@ -48,9 +41,9 @@ dubbo:
         group: myInterfaceGroup # 默认为空
 ```
 
-dubbogo 的注册中心配置的 group、namespace、username、password，均与 nacos 相关概念对应。
+dubbogo 的注册中心配置的 `group`、`namespace`、`username`、`password`，均与 `nacos` 相关概念对应。
 
-- **Zookeeper 注册中心**
+## Zookeeper 注册中心
 
 ```yaml
 dubbo:
@@ -72,11 +65,11 @@ dubbo:
         group: myInterfaceGroup # 默认为空
 ```
 
-zookeeper 注册时，provider 端将接口信息注册在` /$(group)/$(interface)/providers` 节点，以上面配置为例，注册的 zk  path 为 `/myGroup/com.apache.dubbo.sample.basic.IGreeter/providers/`
+zookeeper 注册时，provider 端将接口信息注册在 `/$(group)/$(interface)/providers` 节点，以上面配置为例，注册的 zk 路径为 `/myGroup/com.apache.dubbo.sample.basic.IGreeter/providers/`
 
-consumer 端注册在 /$(group)/$(interface)/consumers 作统计用。
+consumer 端注册在 `/$(group)/$(interface)/consumers` 作统计用。
 
-- **ETCD 注册中心**
+## ETCD 注册中心
 
 ```yaml
 dubbo:
@@ -95,7 +88,7 @@ dubbo:
         interface: org.apache.dubbo.UserProvider
 ```
 
-- **应用级服务注册发现**
+## 应用级服务注册发现
 
 ```yaml
 dubbo:
