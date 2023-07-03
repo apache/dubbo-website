@@ -8,25 +8,19 @@ type: docs
 weight: 3
 ---
 
+参考仓库：[配置中心](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)
 
-
-
-
-
-# 远程加载配置启动
-
-## 1. 准备工作
-
-- dubbo-go cli 工具和依赖工具已安装
+- 确保 `dubbogo-cli` 工具和依赖工具已安装
 - 创建一个新的 demo 应用
 - 本地/远程启动一个 Nacos 实例，登录控制台
 
-## 2. 在配置中心创建配置
+## 配置中心创建配置
 
-Dubbogo 服务框架支持将配置文件 'dubbogo.yaml' 的内容预先放入配置中心，再通过配置注册中心的地址。在本地 dubbogo.yaml 配置文件内只需写入配置中心的信息即可，目前支持作为配置中心的中间件有：apollo、nacos、zookeeper
+Dubbogo 服务框架支持将配置文件 `dubbogo.yaml` 的内容预先放入配置中心，再通过配置注册中心的地址。在本地 `dubbogo.yaml` 配置文件内只需写入配置中心的信息即可，目前支持作为配置中心的中间件有：apollo、nacos、zookeeper
 
-可参考 [配置中心 samples](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)，凡是正确配置了config-center 配置的服务，都会优先从配置中心加载整个配置文件。
+凡是正确配置了 `config-center` 配置的服务，都会优先从配置中心加载整个配置文件。
 
+## 示例用法
 ```yaml
 dubbo:
   config-center:
