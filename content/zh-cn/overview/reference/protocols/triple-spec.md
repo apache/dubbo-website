@@ -119,6 +119,7 @@ Content-Encoding Accept-Encoding Accept Content-Length
 - Target-Port → target server process port
 - Content-Type → “Content-Type: ” “application/” Message-Codec
 - Message-Codec → (“json” / {custom})
+- TRI-Protocol-Version → "tri-protocol-version" "1"
 - TRI-Service-Timeout → “tri-service-timeout: ” Timeout-Milliseconds
 - Timeout-Milliseconds → positive integer
 - TRI-Service-Version → “tri-unary-service-version: ” Version
@@ -142,6 +143,8 @@ Triple 协议请求的仅支持 POST 请求，请求 path 为 interfaceName/meth
 Dubbo 框架支持基于**分组（group）**和**版本（version**）的服务隔离机制，因此 Triple 协议中引入了 tri-service-group、tri-service-version 支持。
 
 **Request-Headers** 以标准的 HTTP header 的形式发送，如果收到的 headers 数量过多，server 可返回相应错误信息。
+
+**TRI-Protocol-Version** 头用来区分具有相同 Content-Type 的 triple 协议请求和其他协议请求，因为 application/json 格式的 Content-Type 非常普遍。所有的 Dubbo 原生客户端实现都应该在请求中携带 TRI-Protocol-Version，Dubbo 服务端或代理可以选择拒绝没有 TRI-Protocol-Version 的请求并返回 Http-Status 400 错误。
 
 如果 Server 不支持 **Message-Codec **指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。
 

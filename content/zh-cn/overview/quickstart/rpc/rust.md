@@ -1,17 +1,12 @@
 ---
-aliases:
-    - /zh/overview/quickstart/rust/
-description: Rust 微服务开发入门
-hide: true
+alias:
+ - /zh-cn/overview/quickstart/rust/
+description: 使用轻量的 Rust SDK 开发 RPC Server 和 Client
 linkTitle: Rust
-no_list: true
-title: Rust 微服务开发入门
+title: 使用轻量的 Rust SDK 开发 RPC Server 和 Client
 type: docs
-weight: 3
+weight: 5
 ---
-
-
-
 
 请在此查看完整 [示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
 
