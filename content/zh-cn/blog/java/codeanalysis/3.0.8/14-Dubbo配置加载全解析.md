@@ -99,7 +99,7 @@ Dubbo框架的配置项比较繁多，为了更好地管理各种配置，将其
 
 
 
-在ModuleConfigManager对象初始化方法initialize()中创建了模块配置管理器:ModuleConfigManager
+在ModuleModel对象初始化方法initialize()中创建了模块配置管理器:ModuleConfigManager
 如下代码所示:
 
 ```java
