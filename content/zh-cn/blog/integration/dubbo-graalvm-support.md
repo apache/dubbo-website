@@ -1,6 +1,6 @@
 ---
 title: "走向 Native 化：Spring&Dubbo AOT 技术示例与原理讲解"
-linkTitle: "Native Image"
+linkTitle: "走向 Native 化：Dubbo AOT 正式发布"
 date: 2023-06-28
 tags: ["Java", "Native Image", "GraalVM"]
 authors: ["刘军", "华钟明"]
