@@ -1,7 +1,7 @@
 ---
 title: "GLCC x Apache Dubbo编程夏令营报名启动"
 linkTitle: "GLCC x Apache Dubbo编程夏令营报名启动"
-date: 2023-04-15
+date: 2023-07-05
 tags: ["新闻动态"]
 description: >
   "GitLink编程夏令营（GLCC）Apache Dubbo 无奖金项目报名正式启动后！"
