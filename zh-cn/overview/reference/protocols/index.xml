@@ -1,27 +1,359 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 协议规范</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/</link><description>Recent content in 协议规范 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Triple 协议设计理念与规范</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple/</guid><description>
-&lt;h2 id="简介">简介&lt;/h2>
-&lt;p>Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它基于 gRPC 设计而来因此可以完全兼容 gRPC 协议，可同时运行在 HTTP/1 和 HTTP/2 之上。&lt;/p>
-&lt;p>Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你构建浏览器、gRPC 兼容的 HTTP API 接口：你只需要定义一个标准的 Protocol Buffer 格式的服务并实现业务逻辑，Dubbo 负责帮助生成语言相关的 Server Stub、Client Stub，并将整个调用流程无缝接入如路由、服务发现等 Dubbo 体系。Go、Java 等语言的 Triple 协议实现原生支持 HTTP/1 传输层通信，相比于 gRPC 官方实现，Dubbo 框架提供的协议实现更简单、更稳定，帮助你更容易的开发和治理微服务应用。&lt;/p>
-&lt;p>针对某些语言版本，Dubbo 框架还提供了更贴合语言特性的编程模式，即不绑定 IDL 的服务定义与开发模式，比如在 Dubbo Java 中，你可以选择使用 Java Interface 和 Pojo 类定义 Dubbo 服务，并将其发布为基于 Triple 协议通信的微服务。&lt;/p>
-&lt;h2 id="协议规范specification">协议规范(Specification)&lt;/h2>
-&lt;p>Triple 协议是参考 gRPC 与 gRPC-Web 两个协议设计而来，它吸取了两个协议各自的特性和优点，将它们整合在一起，成为一个完全兼容 gRPC 且支持 Streaming 通信的协议，同时 Triple 还支持 HTTP/1、HTTP/2。&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 协议规范</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/</link><description>Recent content in 协议规范 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Triple 协议设计理念与规范</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/</guid><description>
+&lt;h2 id="1-协议设计理念">1 协议设计理念&lt;/h2>
+&lt;p>Triple 协议的设计参考了 gRPC、gRPC-Web、通用 HTTP 等多种协议模式，吸取每个协议各自的特性和优点，最终设计成为一个易于浏览器访问、完全兼容 gRPC 且支持 Streaming 通信的协议，Triple 支持同时运行在 HTTP/1、HTTP/2 协议之上。&lt;/p>
 &lt;p>Triple 协议的设计目标如下：&lt;/p>
 &lt;ul>
-&lt;li>Triple 设计为对人类友好、开发调试友好的一款基于 HTTP 的协议，尤其是对 unary 类型的 RPC 请求。&lt;/li>
+&lt;li>Triple 设计为对人类、开发调试友好的一款基于 HTTP 的协议，尤其是对 unary 类型的 RPC 请求。&lt;/li>
 &lt;li>完全兼容基于 HTTP/2 的 gRPC 协议，因此 Dubbo Triple 协议实现可以 100% 与 gRPC 体系互调互通。&lt;/li>
 &lt;li>仅依赖标准的、被广泛使用的 HTTP 特性，以便在实现层面可以直接依赖官方的标准 HTTP 网络库。&lt;/li>
 &lt;/ul>
-&lt;p>当与 Protocol Buffers 一起使用时，Dubbo Triple 协议实现支持 unary、client-streaming、server-streaming 和 bi-streaming RPC，可以支持二进制 Protobuf、JSON 两种数据 payload。Triple 协议不使用 HTTP trailers，因此可以与任何网络基础设施配合使用。&lt;/p>
-&lt;p>Unary RPC使用 application/grpc+proto 和 application/json 内容类型，看起来类似于精简的 REST 方言。大多数请求都是 POST，路径是从 Protobuf 模式派生的，请求和响应主体是有效的 Protobuf 或 JSON（没有 gRPC 风格的二进制框架），响应具有有意义的 HTTP 状态代码。&lt;/p>
-&lt;p>请参考以下文档编写详细的 Triple Specification。&lt;/p>
+&lt;p>当与 Protocol Buffers 一起使用时（即使用 IDL 定义服务），Triple 协议可支持 unary、client-streaming、server-streaming 和 bi-streaming RPC 通信模式，支持二进制 Protobuf、JSON 两种数据格式 payload。 Triple 实现并不绑定 Protocol Buffers，比如你可以使用 Java 接口定义服务，Triple 协议有对这种模式的扩展 Content-type 支持。&lt;/p>
+&lt;h2 id="2-示例">2 示例&lt;/h2>
+&lt;h3 id="21-unary-请求">2.1 Unary 请求&lt;/h3>
+&lt;p>以 HTTP/1 请求为例，目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 编码类型，使用方式与 REST 风格请求保持一致，同时响应也包含常规的 HTTP 响应编码（如 200 OK）。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>&amp;gt; POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Host: 127.0.0.1:30551
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; [&amp;#34;Dubbo&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; HTTP/1.1 200 OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; {&amp;#34;greeting&amp;#34;: &amp;#34;Hello, Dubbo!&amp;#34;}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>一个包含指定超时时间的调用请求。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>&amp;gt; POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Host: 127.0.0.1:30551
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Rest-service-timeout: 5000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; [&amp;#34;Dubbo&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; HTTP/1.1 200 OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; {&amp;#34;greeting&amp;#34;: &amp;#34;Hello, Buf!&amp;#34;}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>目前仅支持 POST 请求类型，我们将考虑在未来支持 GET 请求类型，GET 请求可能适用于具有幂等属性的一些服务调用。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="22-streaming-调用请求">2.2 Streaming 调用请求&lt;/h3>
+&lt;p>Triple 仅支持在 HTTP/2 上支持 Streaming RPC。并且为了与 gRPC 协议保持兼容，Triple 在 HTTP/2 协议实现上（包含 Streaming RPC）保持与标准 gRPC 协议完全一致。&lt;/p>
+&lt;p>Request&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>HEADERS (flags = END_HEADERS)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:method = POST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:scheme = http
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:path = /google.pubsub.v2.PublisherService/CreateTopic
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:authority = pubsub.googleapis.com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-timeout = 1S
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-type = application/grpc+proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-encoding = gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>authorization = Bearer y235.wef315yfh138vh31hv93hv8h3v
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DATA (flags = END_STREAM)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;Length-Prefixed Message&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Response&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>HEADERS (flags = END_HEADERS)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:status = 200
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-encoding = gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-type = application/grpc+proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DATA
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;Length-Prefixed Message&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HEADERS (flags = END_STREAM, END_HEADERS)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-status = 0 # OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>trace-proto-bin = jher831yy13JHy3hc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-规范详情">3 规范详情&lt;/h2>
+&lt;p>Triple 协议支持同时运行在 HTTP/1 和 HTTP/2 协议之上，其包含以下两部分内容：&lt;/p>
+&lt;ol>
+&lt;li>一套自定义的精简 HTTP RPC 子协议，支持 HTTP/1 和 HTTP/2 作为传输层实现，仅支持 Request-Response 类型的 Unary RPC。&lt;/li>
+&lt;li>一套基于 gRPC 协议的扩展子协议（仍保持和 gRPC 的 100% 兼容），仅支持 HTTP/2 实现，支持 Streaming RPC。&lt;/li>
+&lt;/ol>
+&lt;h3 id="31-triple-之-http-rpc-协议">3.1 Triple 之 HTTP RPC 协议&lt;/h3>
+&lt;p>大部分的 RPC 调用都是 unary (request-response) 模式的。Triple HTTP RPC 协议 unary 模式能很好的满足后端服务间的数据传输需求，同时可以让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即使用标准的 HTTP 协议发起调用即可。&lt;/p>
+&lt;p>Triple HTTP RPC 同时支持 HTTP/1、HTTP/2 作为底层传输层协议，在实现上对应支持的 content-type 类型为 application/json、application/proto&lt;/p>
+&lt;h4 id="311-请求-request">3.1.1 请求 Request&lt;/h4>
 &lt;ul>
-&lt;li>&lt;a href="https://connect.build/docs/protocol/">参考文档1&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/grpc/grpc/edit/master/doc/PROTOCOL-HTTP2.md">参考文档2&lt;/a>&lt;/li>
+&lt;li>Request → Request-Headers Bare-Message&lt;/li>
+&lt;li>Request-Headers → Call-Specification *Leading-Metadata&lt;/li>
+&lt;li>Call-Specification →
+Schema Http-Method Path Http-Host Content-Type TRI-Service-Timeout TRI-Service-Version TRI-Service-Group
+Content-Encoding Accept-Encoding Accept Content-Length&lt;/li>
+&lt;li>Scheme → &amp;ldquo;http&amp;rdquo; / &amp;ldquo;https&amp;rdquo;&lt;/li>
+&lt;li>Http-Method → POST&lt;/li>
+&lt;li>Path → /Service-Name/Method-Name; case-sensitive&lt;/li>
+&lt;li>Service-Name → service interface full classname&lt;/li>
+&lt;li>Method-Name → service interface declared method`s name&lt;/li>
+&lt;li>Http-Host → Target-IP:Target-Port&lt;/li>
+&lt;li>Target-IP → target server ip or domain&lt;/li>
+&lt;li>Target-Port → target server process port&lt;/li>
+&lt;li>Content-Type → “Content-Type: ” “application/” Message-Codec&lt;/li>
+&lt;li>Message-Codec → (“json” / {custom})&lt;/li>
+&lt;li>TRI-Protocol-Version → &amp;ldquo;tri-protocol-version&amp;rdquo; &amp;ldquo;1&amp;rdquo;&lt;/li>
+&lt;li>TRI-Service-Timeout → “tri-service-timeout: ” Timeout-Milliseconds&lt;/li>
+&lt;li>Timeout-Milliseconds → positive integer&lt;/li>
+&lt;li>TRI-Service-Version → “tri-unary-service-version: ” Version&lt;/li>
+&lt;li>Version → dubbo service version&lt;/li>
+&lt;li>TRI-Service-Group → &amp;ldquo;tri-service-group: &amp;quot; Group&lt;/li>
+&lt;li>Group → dubbo service group&lt;/li>
+&lt;li>Content-Encoding → “content-encoding” Content-Coding&lt;/li>
+&lt;li>Content-Coding → “identity” / “gzip” / “br” / “zstd” / {custom}&lt;/li>
+&lt;li>Accept-Encoding → “accept-encoding” Content-Coding *(&amp;rdquo;,&amp;quot; [&amp;quot; “] Content-Coding) ; subset of HTTP quality value syntax&lt;/li>
+&lt;li>Content-Length → length of the encoded payload&lt;/li>
+&lt;li>Leading-Metadata → Custom-Metadata&lt;/li>
+&lt;li>Custom-Metadata → ASCII-Metadata / Binary-Metadata&lt;/li>
+&lt;li>ASCII-Metadata → Header-Name ASCII-Value&lt;/li>
+&lt;li>Binary-Metadata → {Header-Name &amp;ldquo;-bin&amp;rdquo;} {base64-encoded value}&lt;/li>
+&lt;li>Header-Name → 1*( %x30-39 / %x61-7A / &amp;ldquo;_&amp;rdquo; / &amp;ldquo;-&amp;rdquo; / &amp;ldquo;.&amp;rdquo;) ; 0-9 a-z _ - .&lt;/li>
+&lt;li>ASCII-Value → 1*( %x20-%x7E ) ; space &amp;amp; printable ASCII&lt;/li>
+&lt;li>Bare-Message → data that encoded by json or custom and Content-Encoding&lt;/li>
 &lt;/ul>
-&lt;h2 id="为什么要再实现一遍-grpc-协议">为什么要再实现一遍 gRPC 协议&lt;/h2>
-&lt;p>既然 gRPC 官方已经提供了多语言的框架实现，为什么 Dubbo 还要重新实现一遍那？核心目标主要有以下两点：&lt;/p>
+&lt;p>Triple 协议请求的仅支持 POST 请求，请求 path 为 interfaceName/methodName，为了实现调用超时机制，需要添加 tri-service-timeout (单位 ms)，&lt;/p>
+&lt;p>Dubbo 框架支持基于 &lt;strong>分组（group）&lt;/strong> 和 &lt;strong>版本（version）&lt;/strong> 的服务隔离机制，因此 Triple 协议中引入了 tri-service-group、tri-service-version 支持。&lt;/p>
+&lt;p>&lt;strong>Request-Headers&lt;/strong> 以标准的 HTTP header 的形式发送，如果收到的 headers 数量过多，server 可返回相应错误信息。&lt;/p>
+&lt;p>&lt;strong>TRI-Protocol-Version&lt;/strong> 头用来区分具有相同 Content-Type 的 triple 协议请求和其他协议请求，因为 application/json 格式的 Content-Type 非常普遍。所有的 Dubbo 原生客户端实现都应该在请求中携带 TRI-Protocol-Version，Dubbo 服务端或代理可以选择拒绝没有 TRI-Protocol-Version 的请求并返回 Http-Status 400 错误。&lt;/p>
+&lt;p>如果 Server 不支持 &lt;strong>Message-Codec&lt;/strong> 指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。&lt;/p>
+&lt;p>&lt;strong>Bare-Message&lt;/strong> 即请求 payload 的编码格式取决于 Message-Codec 设置：&lt;/p>
 &lt;ul>
-&lt;li>首先，在协议设计上，Dubbo 参考 gRPC 与 gRPC-Web 两个协议设计了自定义的 Triple 协议：Triple 是一个基于 HTTP 传输层协议的 RPC 协议，它完全兼容 gRPC，可以同时运行在 HTTP/1、HTTP/2 之上。&lt;/li>
+&lt;li>Message-Codec: json 的场景下，payload 采用有序的数组编码形式，即将 rpc 方法的参数按顺序组装进 Array 后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。对于使用 Protocol Buffer 的情形，payload 则是只有一个 json 对象的数组。&lt;/li>
+&lt;li>Message-Codec: proto 的场景下，Protobuf 生成的 Request 类包含了编码格式，因此将直接使用 Request 对象中的内置编码方式。&lt;/li>
+&lt;li>Message-Codec 支持更多自定义扩展值，请确保框架实现遵循相应的编码与解码约定。&lt;/li>
+&lt;/ul>
+&lt;p>如果 Content-Encoding 指定了相应值，则 payload 是被压缩过的，应该首先进行解压缩后再解析编码数据，Bare-Message 将作为 HTTP Body 在链路上传输。&lt;/p>
+&lt;h5 id="request-报文示例">Request 报文示例&lt;/h5>
+&lt;ul>
+&lt;li>请求行
+&lt;ul>
+&lt;li>POST /org.apache.dubbo.demo.GreetService/greeting HTTP/1.1&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>请求头
+&lt;ul>
+&lt;li>Host: 127.0.0.1:30551&lt;/li>
+&lt;li>Content-Type: application/json&lt;/li>
+&lt;li>Accept: application/json&lt;/li>
+&lt;li>Content-Length: 11&lt;/li>
+&lt;li>Accept-Encoding: compress, gzip&lt;/li>
+&lt;li>tri-service-version: 1.0.0&lt;/li>
+&lt;li>tri-service-group: dubbo&lt;/li>
+&lt;li>tri-service-timeout: 3000&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>请求体
+&lt;ul>
+&lt;li>[{&amp;ldquo;world&amp;rdquo;}]&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-latex" data-lang="latex">&lt;span style="display:flex;">&lt;span>POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host: 127.0.0.1:30551
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length: 11
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept-Encoding: compress, gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri-service-version: 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri-service-group: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri-service-timeout: 3000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[&lt;span style="color:#b58900">{&lt;/span>&amp;#34;world&amp;#34;&lt;span style="color:#b58900">}&lt;/span>]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="312-响应-response">3.1.2 响应 Response&lt;/h4>
+&lt;ul>
+&lt;li>Response → Response-Headers *Bare-Message&lt;/li>
+&lt;li>Response-Headers → HTTP-Status Content-Type [Content-Encoding] [Accept-Encoding] *Leading-Metadata *Prefixed-Trailing-Metadata&lt;/li>
+&lt;li>HTTP-Status → 200 /{error code translated to HTTP}&lt;/li>
+&lt;li>Bare-Message → data that encoded by Content-Type and Content-Encoding&lt;/li>
+&lt;/ul>
+&lt;p>对于成功 Response 响应 &lt;strong>HTTP-Status&lt;/strong> 是 200，在这种场景下，响应体的 Content-Type 将保持和请求体的 Content-Type 保持一致。&lt;strong>Bare-Message&lt;/strong> 就是 RPC 响应的 Payload，以 Content-Type 指定的方式进行编码并且以 Content-Encoding 来压缩（如果指定了 Content-Encoding 的话）。Bare-Message 作为 HTTP response body 发送。&lt;/p>
+&lt;p>异常 Response 响应的 HTTP-Status 是 non-200，并且都是标准的 HTTP status code，在这个场景下，&lt;strong>Content-Type&lt;/strong> 必须是 &amp;ldquo;application/json&amp;rdquo;。&lt;strong>Bare-Message&lt;/strong> 可以是空的，如果 Bare-Message 有值的话则是一个标准 JSON 格式数据，如果 &lt;strong>Content-Encoding&lt;/strong> 有指定的话则是一个压缩过的数据，Bare-Message 作为标准的 HTTP response body 发送回调用方。客户端可以根据以下表格，查询 HTTP-Status 与 RPC status 之间的映射关系，以了解具体的 RPC 错误情况。&lt;/p>
+&lt;h5 id="response-报文格式">Response 报文格式&lt;/h5>
+&lt;p>** 成功响应 **&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-latex" data-lang="latex">&lt;span style="display:flex;">&lt;span>HTTP/1.1 200 OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length: 11
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>hello world
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>** 失败响应 **&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-latex" data-lang="latex">&lt;span style="display:flex;">&lt;span>HTTP/1.1 400 Bad Request
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length: 46
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">{&lt;/span>&amp;#34;status&amp;#34;:20,&amp;#34;message&amp;#34;:&amp;#34;request format error&amp;#34;&lt;span style="color:#b58900">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="313-error-codes">3.1.3 Error Codes&lt;/h4>
+&lt;p>Dubbo 的错误码参考&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> status http-status message
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 20 200 ok
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 25 400 serialization error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 30 408 client side timeout
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 31 408 server side timeout
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 35 500 channel inactive, directly return the unfinished requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 40 400 request format error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 50 500 response format error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 60 404 service not found.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 70 500 service error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 80 500 internal server error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 90 500 internal client error
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Connect 的 HTTP to Error Code 参考&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>HTTP Status&lt;/th>
+&lt;th>Inferred Code&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>400 Bad Request&lt;/td>
+&lt;td>invalid_argument&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>401 Unauthorized&lt;/td>
+&lt;td>unauthenticated&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>403 Forbidden&lt;/td>
+&lt;td>permission_denied&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>404 Not Found&lt;/td>
+&lt;td>unimplemented&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>408 Request Timeout&lt;/td>
+&lt;td>deadline_exceeded&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>409 Conflict&lt;/td>
+&lt;td>aborted&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>412 Precondition Failed&lt;/td>
+&lt;td>failed_precondition&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>413 Payload Too Large&lt;/td>
+&lt;td>resource_exhausted&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>415 Unsupported Media Type&lt;/td>
+&lt;td>internal&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>429 Too Many Requests&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>431 Request Header Fields Too Large&lt;/td>
+&lt;td>resource_exhausted&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>502 Bad Gateway&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>503 Service Unavailable&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>504 Gateway Timeout&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;em>all others&lt;/em>&lt;/td>
+&lt;td>unknown&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;/blockquote>
+&lt;h3 id="32-triple-之扩展版-grpc-协议">3.2 Triple 之扩展版 gRPC 协议&lt;/h3>
+&lt;p>Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且仅支持 HTTP/2 作为传输层协议。&lt;/p>
+&lt;p>Triple 支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json，除此之外，Triple 在实现上还扩展了 application/triple+wrapper 编码格式。&lt;/p>
+&lt;h4 id="321-outline">3.2.1 Outline&lt;/h4>
+&lt;p>The following is the general sequence of message atoms in a GRPC request &amp;amp; response message stream&lt;/p>
+&lt;ul>
+&lt;li>Request → Request-Headers *Length-Prefixed-Message EOS&lt;/li>
+&lt;li>Response → (Response-Headers *Length-Prefixed-Message Trailers) / Trailers-Only&lt;/li>
+&lt;/ul>
+&lt;h4 id="322-requests">3.2.2 Requests&lt;/h4>
+&lt;ul>
+&lt;li>Request → Request-Headers *Length-Prefixed-Message EOS&lt;/li>
+&lt;/ul>
+&lt;p>Request-Headers are delivered as HTTP2 headers in HEADERS + CONTINUATION frames.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Request-Headers&lt;/strong> → Call-Definition *Custom-Metadata&lt;/li>
+&lt;li>&lt;strong>Call-Definition&lt;/strong> → Method Scheme Path TE [Authority] [Timeout] Content-Type [Message-Type] [Message-Encoding] [Message-Accept-Encoding] [User-Agent] Service-Version Service-Group Tracing-ID Tracing-Span-ID Cluster-Info&lt;/li>
+&lt;li>&lt;strong>Method&lt;/strong> → &amp;ldquo;:method POST&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Scheme&lt;/strong> → &amp;ldquo;:scheme &amp;quot; (&amp;ldquo;http&amp;rdquo; / &amp;ldquo;https&amp;rdquo;)&lt;/li>
+&lt;li>&lt;strong>Path&lt;/strong> → &amp;ldquo;:path&amp;rdquo; &amp;ldquo;/&amp;rdquo; Service-Name &amp;ldquo;/&amp;rdquo; {&lt;em>method name&lt;/em>} # But see note below.&lt;/li>
+&lt;li>&lt;strong>Service-Name&lt;/strong> → {&lt;em>IDL-specific service name&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>Authority&lt;/strong> → &amp;ldquo;:authority&amp;rdquo; {&lt;em>virtual host name of authority&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>TE&lt;/strong> → &amp;ldquo;te&amp;rdquo; &amp;ldquo;trailers&amp;rdquo; # Used to detect incompatible proxies&lt;/li>
+&lt;li>&lt;strong>Timeout&lt;/strong> → &amp;ldquo;grpc-timeout&amp;rdquo; TimeoutValue TimeoutUnit&lt;/li>
+&lt;li>&lt;strong>TimeoutValue&lt;/strong> → {&lt;em>positive integer as ASCII string of at most 8 digits&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>TimeoutUnit&lt;/strong> → Hour / Minute / Second / Millisecond / Microsecond / Nanosecond
+&lt;ul>
+&lt;li>&lt;strong>Hour&lt;/strong> → &amp;ldquo;H&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Minute&lt;/strong> → &amp;ldquo;M&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Second&lt;/strong> → &amp;ldquo;S&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Millisecond&lt;/strong> → &amp;ldquo;m&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Microsecond&lt;/strong> → &amp;ldquo;u&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Nanosecond&lt;/strong> → &amp;ldquo;n&amp;rdquo;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;strong>Content-Type&lt;/strong> → &amp;ldquo;content-type&amp;rdquo; &amp;ldquo;application/grpc&amp;rdquo; [(&amp;quot;+proto&amp;rdquo; / &amp;ldquo;+json&amp;rdquo; / {&lt;em>custom&lt;/em>})]&lt;/li>
+&lt;li>&lt;strong>Content-Coding&lt;/strong> → &amp;ldquo;identity&amp;rdquo; / &amp;ldquo;gzip&amp;rdquo; / &amp;ldquo;deflate&amp;rdquo; / &amp;ldquo;snappy&amp;rdquo; / {&lt;em>custom&lt;/em>}&lt;/li>
+&lt;li>&lt;a name="message-encoding">&lt;/a>&lt;strong>Message-Encoding&lt;/strong> → &amp;ldquo;grpc-encoding&amp;rdquo; Content-Coding&lt;/li>
+&lt;li>&lt;strong>Message-Accept-Encoding&lt;/strong> → &amp;ldquo;grpc-accept-encoding&amp;rdquo; Content-Coding *(&amp;quot;,&amp;quot; Content-Coding)&lt;/li>
+&lt;li>&lt;strong>User-Agent&lt;/strong> → &amp;ldquo;user-agent&amp;rdquo; {&lt;em>structured user-agent string&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>Message-Type&lt;/strong> → &amp;ldquo;grpc-message-type&amp;rdquo; {&lt;em>type name for message schema&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>Custom-Metadata&lt;/strong> → Binary-Header / ASCII-Header&lt;/li>
+&lt;li>&lt;strong>Binary-Header&lt;/strong> → {Header-Name &amp;ldquo;-bin&amp;rdquo; } {&lt;em>base64 encoded value&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>ASCII-Header&lt;/strong> → Header-Name ASCII-Value&lt;/li>
+&lt;li>&lt;strong>Header-Name&lt;/strong> → 1*( %x30-39 / %x61-7A / &amp;ldquo;_&amp;rdquo; / &amp;ldquo;-&amp;rdquo; / &amp;ldquo;.&amp;rdquo;) ; 0-9 a-z _ - .&lt;/li>
+&lt;li>&lt;strong>ASCII-Value&lt;/strong> → 1*( %x20-%x7E ) ; space and printable ASCII&lt;/li>
+&lt;li>Service-Version → &amp;ldquo;tri-service-version&amp;rdquo; {Dubbo service version}&lt;/li>
+&lt;li>Service-Group → &amp;ldquo;tri-service-group&amp;rdquo; {Dubbo service group}&lt;/li>
+&lt;li>Tracing-ID → &amp;ldquo;tri-trace-traceid&amp;rdquo; {tracing id}&lt;/li>
+&lt;li>Tracing-RPC-ID → &amp;ldquo;tri-trace-rpcid&amp;rdquo; {_span id _}&lt;/li>
+&lt;li>Cluster-Info → &amp;ldquo;tri-unit-info&amp;rdquo; {cluster infomation}&lt;/li>
+&lt;/ul>
+&lt;h4 id="323-responses">3.2.3 Responses&lt;/h4>
+&lt;ul>
+&lt;li>&lt;strong>Response&lt;/strong> → (Response-Headers *Length-Prefixed-Message Trailers) / Trailers-Only&lt;/li>
+&lt;li>&lt;strong>Response-Headers&lt;/strong> → HTTP-Status [Message-Encoding] [Message-Accept-Encoding] Content-Type *Custom-Metadata&lt;/li>
+&lt;li>&lt;strong>Trailers-Only&lt;/strong> → HTTP-Status Content-Type Trailers&lt;/li>
+&lt;li>&lt;strong>Trailers&lt;/strong> → Status [Status-Message] *Custom-Metadata&lt;/li>
+&lt;li>&lt;strong>HTTP-Status&lt;/strong> → &amp;ldquo;:status 200&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Status&lt;/strong> → &amp;ldquo;grpc-status&amp;rdquo; 1*DIGIT ; 0-9&lt;/li>
+&lt;li>&lt;strong>Status-Message&lt;/strong> → &amp;ldquo;grpc-message&amp;rdquo; Percent-Encoded&lt;/li>
+&lt;li>&lt;strong>Percent-Encoded&lt;/strong> → 1*(Percent-Byte-Unencoded / Percent-Byte-Encoded)&lt;/li>
+&lt;li>&lt;strong>Percent-Byte-Unencoded&lt;/strong> → 1*( %x20-%x24 / %x26-%x7E ) ; space and VCHAR, except %&lt;/li>
+&lt;li>&lt;strong>Percent-Byte-Encoded&lt;/strong> → &amp;ldquo;%&amp;rdquo; 2HEXDIGIT ; 0-9 A-F&lt;/li>
+&lt;/ul>
+&lt;p>以上即为 Triple 扩展版本的 gRPC 协议，更多详细规范说明请参照 &lt;a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范&lt;/a>。&lt;/p></description></item><item><title>Overview: Triple 协议优势与目标</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple/</guid><description>
+&lt;h2 id="简介">简介&lt;/h2>
+&lt;p>Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它完全兼容 gRPC 协议，支持 Request-Response、Streaming 流式等通信模型，可同时运行在 HTTP/1 和 HTTP/2 之上。&lt;/p>
+&lt;p>Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你构建浏览器、gRPC 兼容的 HTTP API 接口：你只需要定义一个标准的 Protocol Buffer 格式的服务并实现业务逻辑，Dubbo 负责帮助生成语言相关的 Server Stub、Client Stub，并将整个调用流程无缝接入如路由、服务发现等 Dubbo 体系。Go、Java 等语言的 Triple 协议实现原生支持 HTTP/1 传输层通信，相比于 gRPC 官方实现，Dubbo 框架提供的协议实现更简单、更稳定，帮助你更容易的开发和治理微服务应用。&lt;/p>
+&lt;p>针对某些语言版本，Dubbo 框架还提供了更贴合语言特性的编程模式，即不绑定 IDL 的服务定义与开发模式，比如在 Dubbo Java 中，你可以选择使用 Java Interface 和 Pojo 类定义 Dubbo 服务，并将其发布为基于 Triple 协议通信的微服务。&lt;/p>
+&lt;h2 id="协议规范specification">协议规范(Specification)&lt;/h2>
+&lt;p>基于 Triple 协议，你可以实现以下目标：&lt;/p>
+&lt;h3 id="当-dubbo-作为-client-时">当 Dubbo 作为 Client 时&lt;/h3>
+&lt;p>Dubbo Client 可以访问 Dubbo 服务端 (Server) 发布的 Triple 协议服务，同时还可以访问标准的 gRPC 服务端。&lt;/p>
+&lt;ul>
+&lt;li>调用标准 gRPC 服务端，发送 Content-type 为标准 gRPC 类型的请求：application/grpc, application/grpc+proto, and application/grpc+json&lt;/li>
+&lt;li>调用 Dubbo 服务端，发送 Content-type 为 Triple 类型的请求：application/json, application/proto, application/triple+wrapper&lt;/li>
+&lt;/ul>
+&lt;h3 id="当-dubbo-作为-server-时">当 Dubbo 作为 Server 时&lt;/h3>
+&lt;p>Dubbo Server 默认将同时发布对 Triple、gRPC 协议的支持，并且 Triple 协议可以同时工作在 HTTP/1、HTTP/2 之上。因此，Dubbo Server 可以处理 Dubbo 客户端发过来的 Triple 协议请求，可以处理标准的 gRPC 协议请求，还能处理 cURL、浏览器发送过来的 HTTP 请求。以 Content-type 区分就是：&lt;/p>
+&lt;ul>
+&lt;li>处理 gRPC 客户端发送的 Content-type 为标准 gRPC 类型的请求：application/grpc、application/grpc+proto、application/grpc+json&lt;/li>
+&lt;li>处理 Dubbo 客户端发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper&lt;/li>
+&lt;li>处理 cURL、浏览器等发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper&lt;/li>
+&lt;/ul>
+&lt;p>详细在此查看详细的 &lt;a href="../triple-spec">Triple Specification&lt;/a>。&lt;/p>
+&lt;h2 id="与-grpc-协议的关系">与 gRPC 协议的关系&lt;/h2>
+&lt;p>上面提到 Triple 完全兼容 gRPC 协议，那既然 gRPC 官方已经提供了多语言的框架实现，为什么 Dubbo 还要通过 Triple 重新实现一遍那？核心目标主要有以下两点：&lt;/p>
+&lt;ul>
+&lt;li>首先，在协议设计上，Dubbo 参考 gRPC 与 gRPC-Web 两个协议设计了自定义的 Triple 协议：Triple 是一个基于 HTTP 传输层协议的 RPC 协议，它完全兼容 gRPC 的同时可运行在 HTTP/1、HTTP/2 之上。&lt;/li>
 &lt;li>其次，Dubbo 框架在每个语言的实现过程中遵循了符合框架自身定位的设计理念，相比于 grpc-java、grpc-go 等框架库，Dubbo 协议实现更简单、更纯粹，尝试在实现上规避 gRPC 官方库中存在的一系列问题。&lt;/li>
 &lt;/ul>
 &lt;p>gRPC 本身作为 RPC 协议规范非常优秀，但我们发现原生的 gRPC 库实现在实际使用存在一系列问题，包括实现复杂、绑定 IDL、难以调试等，Dubbo 在协议设计与实现上从实践出发，很好的规避了这些问题：&lt;/p>
@@ -41,7 +373,7 @@
 &lt;h3 id="原生多协议支持">原生多协议支持&lt;/h3>
 &lt;p>当以 Dubbo 框架为服务端对外发布服务时，可以做到在同一端口原生支持 Triple、gRPC 和 HTTP/1 协议，这意味着你可以用多种形式访问 Dubbo 服务端发布的服务，所有请求形式最终都会被转发到相同的业务逻辑实现，这给你提供了更大的灵活性。&lt;/p>
 &lt;p>Dubbo 完全兼容 gRPC 协议及相关特性包括 streaming、trailers、error details 等，你选择直接在 Dubbo 框架中使用 Triple 协议（另外，你也可以选择使用原生的 gRPC 协议），然后你就可以直接使用 Dubbo 客户端、curl、浏览器等访问你发布的服务。在与 gRPC 生态互操作性方面，任何标准的 gRPC 客户端，都可以正常访问 Dubbo 服务；Dubbo 客户端也可以调用任何标准的 gRPC 服务，这里有提供的 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/interop">互操作性示例&lt;/a>&lt;/p>
-&lt;p>以下是使用 curl 客户端访问 Dubbo 服务端一个 Triple 协议服务的示例：&lt;/p>
+&lt;p>以下是使用 cURL 客户端访问 Dubbo 服务端 Triple 协议服务的示例：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;sentence&amp;#34;: &amp;#34;Hello Dubbo.&amp;#34;}&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
@@ -56,6 +388,7 @@
 &lt;p>Dubbo Go 推荐 IDL 开发模式，通过 Dubbo 配套的 protoc 插件生成 stub 代码，你只需要提供对应的业务逻辑实现即可，你可以通过 curl、浏览器访问 Dubbo Go 发布的 gRPC 服务。&lt;/p>
 &lt;h2 id="后续规划">后续规划&lt;/h2>
 &lt;p>当前我们已经提供了 Triple 协议的 Java、Go 语言版本，接下来我们计划陆续提供 Rust、Python、Node.js 等语言的对应实现。&lt;/p></description></item><item><title>Overview: Dubbo2 协议规范</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/</guid><description>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/dev/dubbo_protocol_header.png" alt="/dev-guide/images/dubbo_protocol_header.jpg">&lt;/p>
 &lt;h2 id="协议规范-specification">协议规范 Specification&lt;/h2>
 &lt;ul>
 &lt;li>
