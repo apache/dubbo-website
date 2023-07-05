@@ -449,4 +449,149 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当接收到事件时，直方图指标收集器会先计算当前调用花费的时间，然后为计时器（Time）添加一条响应时间记录。&lt;/p></description></item><item><title>Blog: 3-指标监听注册梳理</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</guid><description>
 &lt;p>连载中，敬请期待&amp;hellip;&lt;/p></description></item><item><title>Blog: 4-指标转换与导出</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</guid><description>
-&lt;p>连载中，敬请期待&amp;hellip;&lt;/p></description></item></channel></rss>
+&lt;h2 id="四指标转换与导出">四、指标转换与导出&lt;/h2>
+&lt;p>本章主要梳理指标收集完成后，向外部收集器导出的流程。&lt;/p>
+&lt;p>通过之前的分析，我们知道不同类型指标的收集分别由各个 Collector 实现进行。它们底层的 MetricsCollector 接口定义了指标导出的操作。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SPI&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsCollector&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>E &lt;span style="color:#268bd2">extends&lt;/span> TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> MetricsLifeListener&lt;span style="color:#719e07">&amp;lt;&lt;/span>E&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">isCollectEnabled&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Collect metrics as {@link MetricSample}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return List of MetricSample
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricSample&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">collect&lt;/span>&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>而指标报告器 (MetricsReporter) 的实现会定时调用Collector 的 &lt;code>collect&lt;/code> 方法，更新并导出指标数据。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsReporter&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//初始化
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//刷新统计数据，定时调用collect()
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">refreshData&lt;/span>&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取指标数据
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> String &lt;span style="color:#268bd2">getResponse&lt;/span>&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取带指标名的指标样本（单个指标）
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">default&lt;/span> String &lt;span style="color:#268bd2">getResponseWithName&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String metricsName&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>指标报告器有两个实现：DefaultMetricsReporter 和 PrometheusMetricsReporter，它们都实现自 AbstractMetricsRepoter，并使用它的指标刷新逻辑 (&lt;code>refreshData&lt;/code>方法)。&lt;/p>
+&lt;p>AbstractMetricsRepoter 初始化时会获取并保存所有 Collector 的实现，每次刷新数据，调用&lt;code>refreshData&lt;/code>方法时都会遍历这些收集器，更新指标数据。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//AbstractMetricsRepoter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">initCollectors&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCollector&lt;span style="color:#719e07">&amp;gt;&lt;/span> otherCollectors &lt;span style="color:#719e07">=&lt;/span> beanFactory&lt;span style="color:#719e07">.&lt;/span>getBeansOfType&lt;span style="color:#719e07">(&lt;/span>MetricsCollector&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collectors&lt;span style="color:#719e07">.&lt;/span>addAll&lt;span style="color:#719e07">(&lt;/span>otherCollectors&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">refreshData&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collectors&lt;span style="color:#719e07">.&lt;/span>forEach&lt;span style="color:#719e07">(&lt;/span>collector &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricSample&lt;span style="color:#719e07">&amp;gt;&lt;/span> samples &lt;span style="color:#719e07">=&lt;/span> collector&lt;span style="color:#719e07">.&lt;/span>collect&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> &lt;span style="color:#719e07">(&lt;/span>MetricSample sample &lt;span style="color:#719e07">:&lt;/span> samples&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//将Dubbo的度量类型适配为micrometer的度量类型，并将其添加到CompositeMeterRegistry中，借此实现多监控系统的支持。
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">});&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>DefaultMetricsReporter 和 PrometheusMetricsReporter 各自实现了自己的指标采样逻辑 (&lt;code>getResponse&lt;/code>方法)。&lt;/p>
+&lt;p>&lt;strong>PrometheusMetricsReporter&lt;/strong>&lt;/p>
+&lt;p>它通过 PrometheusMeterRegistry 获取普罗米修斯支持格式的样本数据：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//PrometheusMetricsReporter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getResponse&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> prometheusRegistry&lt;span style="color:#719e07">.&lt;/span>scrape&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在初始化时，它会开启一个定时任务，定时向普罗米修斯服务端推送采样数据：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//PrometheusMetricsReporter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SimpleMeterRegistry meterRegistry &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SimpleMeterRegistry&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doInit&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> addMeterRegistry&lt;span style="color:#719e07">(&lt;/span>prometheusRegistry&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> schedulePushJob&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">schedulePushJob&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//这里的URL是DefaultMetricsReporter中定义的指标报告URL，提供了指标服务的具体地址
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> pushEnabled &lt;span style="color:#719e07">=&lt;/span> url&lt;span style="color:#719e07">.&lt;/span>getParameter&lt;span style="color:#719e07">(&lt;/span>PROMETHEUS_PUSHGATEWAY_ENABLED_KEY&lt;span style="color:#719e07">,&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>pushEnabled&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor&lt;span style="color:#719e07">.&lt;/span>scheduleWithFixedDelay&lt;span style="color:#719e07">(()&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> push&lt;span style="color:#719e07">(&lt;/span>pushGateway&lt;span style="color:#719e07">,&lt;/span> job&lt;span style="color:#719e07">),&lt;/span> pushInterval&lt;span style="color:#719e07">,&lt;/span> pushInterval&lt;span style="color:#719e07">,&lt;/span> TimeUnit&lt;span style="color:#719e07">.&lt;/span>SECONDS&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">push&lt;/span>&lt;span style="color:#719e07">(&lt;/span>PushGateway pushGateway&lt;span style="color:#719e07">,&lt;/span> String job&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> refreshData&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//将本次采样数据添加到pushGateway，等待下次抓取
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> pushGateway&lt;span style="color:#719e07">.&lt;/span>pushAdd&lt;span style="color:#719e07">(&lt;/span>prometheusRegistry&lt;span style="color:#719e07">.&lt;/span>getPrometheusRegistry&lt;span style="color:#719e07">(),&lt;/span> job&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>PushGateway 和 PrometheusRegistry 均为 micrometer 提供的 API。&lt;/p>
+&lt;p>&lt;strong>PrometheusRegistry 将度量数据转换为普罗米修斯支持的格式，而 PushGateway 存储样本，暴露一个HTTP端点供普罗米修斯服务端抓取。&lt;/strong>&lt;/p>
+&lt;p>PushGateway 本身只是一个度量数据的缓存区，普罗米修斯服务端每从其中抓取一次数据，其内部的样本就会被清除。&lt;/p>
+&lt;p>&lt;strong>DefaultMetricsReporter&lt;/strong>&lt;/p>
+&lt;p>指标报告器的默认实现，提供了按指标名称导出特定指标的方法。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//DefaultMetricsReporter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getResponse&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getResponseWithName&lt;/span>&lt;span style="color:#719e07">(&lt;/span>String metricsName&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> meterRegistry&lt;span style="color:#719e07">.&lt;/span>getMeters&lt;span style="color:#719e07">().&lt;/span>stream&lt;span style="color:#719e07">().&lt;/span>filter&lt;span style="color:#719e07">(&lt;/span>meter &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//根据名称过滤样本
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metricsValue&lt;span style="color:#719e07">.&lt;/span>forEach&lt;span style="color:#719e07">((&lt;/span>key&lt;span style="color:#719e07">,&lt;/span> value&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//按格式拼装结果
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> sb&lt;span style="color:#719e07">.&lt;/span>toString&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doInit&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> addMeterRegistry&lt;span style="color:#719e07">(&lt;/span>meterRegistry&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doDestroy&lt;/span>&lt;span style="color:#719e07">()&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该实现使用的 SimpleMeterRegistry 本身只会存储指标数据的功能，而不像 PrometheusMeterRegistry 那样提供发布数据的方法。&lt;/p>
+&lt;p>&lt;strong>因此该指标报告器不会主动向外部发布数据，而是被动的通过 &lt;code>getResponseWithName&lt;/code> 提供数据。&lt;/strong>&lt;/p>
+&lt;p>而且，该报告器在任何情况下都会被初始化:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//DefaultApplicationDeployer#initMetricsReporter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//If the protocol is not the default protocol, the default protocol is also initialized.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(!&lt;/span>PROTOCOL_DEFAULT&lt;span style="color:#719e07">.&lt;/span>equals&lt;span style="color:#719e07">(&lt;/span>metricsConfig&lt;span style="color:#719e07">.&lt;/span>getProtocol&lt;span style="color:#719e07">()))&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DefaultMetricsReporterFactory defaultMetricsReporterFactory &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> DefaultMetricsReporterFactory&lt;span style="color:#719e07">(&lt;/span>applicationModel&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsReporter defaultMetricsReporter &lt;span style="color:#719e07">=&lt;/span> defaultMetricsReporterFactory&lt;span style="color:#719e07">.&lt;/span>createMetricsReporter&lt;span style="color:#719e07">(&lt;/span>metricsConfig&lt;span style="color:#719e07">.&lt;/span>toUrl&lt;span style="color:#719e07">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> defaultMetricsReporter&lt;span style="color:#719e07">.&lt;/span>init&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>registerBean&lt;span style="color:#719e07">(&lt;/span>defaultMetricsReporter&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>实际上，该类主要在用户使用Qos命令查询时提供指定指标数据，而非提供给某个特定的外部指标中心。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//Qos命令
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultMetricsReporterCmd&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> BaseCommand &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> String &lt;span style="color:#268bd2">getResponseByApplication&lt;/span>&lt;span style="color:#719e07">(&lt;/span>ApplicationModel applicationModel&lt;span style="color:#719e07">,&lt;/span> String metricsName&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String response &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;DefaultMetricsReporter not init&amp;#34;&lt;/span>&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsReporter metricsReporter &lt;span style="color:#719e07">=&lt;/span> applicationModel&lt;span style="color:#719e07">.&lt;/span>getBeanFactory&lt;span style="color:#719e07">().&lt;/span>getBean&lt;span style="color:#719e07">(&lt;/span>DefaultMetricsReporter&lt;span style="color:#719e07">.&lt;/span>class&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> &lt;span style="color:#719e07">(&lt;/span>metricsReporter &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metricsReporter&lt;span style="color:#719e07">.&lt;/span>refreshData&lt;span style="color:#719e07">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取指定名称指标的数据
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> response &lt;span style="color:#719e07">=&lt;/span> metricsReporter&lt;span style="color:#719e07">.&lt;/span>getResponseWithName&lt;span style="color:#719e07">(&lt;/span>metricsName&lt;span style="color:#719e07">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> response&lt;span style="color:#719e07">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>*需要注意的是，PrometheusMetricsReporter 也支持使用 Qos 命令查询内部指标数据，同样有对应的 PrometheusMetricsReporterCmd 实现，它们的工作原理相似。&lt;/p>
+&lt;p>以上就是指标样本从收集完成到最终导出到外部指标中心的大致流程。&lt;/p></description></item></channel></rss>
