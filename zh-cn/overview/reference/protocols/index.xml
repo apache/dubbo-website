@@ -113,7 +113,13 @@ Content-Encoding Accept-Encoding Accept Content-Length&lt;/li>
 &lt;p>&lt;strong>Request-Headers&lt;/strong> 以标准的 HTTP header 的形式发送，如果收到的 headers 数量过多，server 可返回相应错误信息。&lt;/p>
 &lt;p>&lt;strong>TRI-Protocol-Version&lt;/strong> 头用来区分具有相同 Content-Type 的 triple 协议请求和其他协议请求，因为 application/json 格式的 Content-Type 非常普遍。所有的 Dubbo 原生客户端实现都应该在请求中携带 TRI-Protocol-Version，Dubbo 服务端或代理可以选择拒绝没有 TRI-Protocol-Version 的请求并返回 Http-Status 400 错误。&lt;/p>
 &lt;p>如果 Server 不支持 &lt;strong>Message-Codec&lt;/strong> 指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。&lt;/p>
-&lt;p>&lt;strong>Bare-Message&lt;/strong> 即请求 payload 采用有序的数组编码形式，将方法的参数按顺序进行 Array 封装后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。如果 Content-Encoding 指定了相应值，则 payload 将被压缩。Bare-Message 将作为 HTTP Body 在链路上传输。&lt;/p>
+&lt;p>&lt;strong>Bare-Message&lt;/strong> 即请求 payload 的编码格式取决于 Message-Codec 设置：&lt;/p>
+&lt;ul>
+&lt;li>Message-Codec: json 的场景下，payload 采用有序的数组编码形式，即将 rpc 方法的参数按顺序组装进 Array 后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。对于使用 Protocol Buffer 的情形，payload 则是只有一个 json 对象的数组。&lt;/li>
+&lt;li>Message-Codec: proto 的场景下，Protobuf 生成的 Request 类包含了编码格式，因此将直接使用 Request 对象中的内置编码方式。&lt;/li>
+&lt;li>Message-Codec 支持更多自定义扩展值，请确保框架实现遵循相应的编码与解码约定。&lt;/li>
+&lt;/ul>
+&lt;p>如果 Content-Encoding 指定了相应值，则 payload 是被压缩过的，应该首先进行解压缩后再解析编码数据，Bare-Message 将作为 HTTP Body 在链路上传输。&lt;/p>
 &lt;h5 id="request-报文示例">Request 报文示例&lt;/h5>
 &lt;ul>
 &lt;li>请求行
