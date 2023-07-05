@@ -148,7 +148,12 @@ Dubbo 框架支持基于 **分组（group）** 和 **版本（version）** 的�
 
 如果 Server 不支持 **Message-Codec** 指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。
 
-**Bare-Message** 即请求 payload 采用有序的数组编码形式，将方法的参数按顺序进行 Array 封装后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。如果 Content-Encoding 指定了相应值，则 payload 将被压缩。Bare-Message 将作为 HTTP Body 在链路上传输。
+**Bare-Message** 即请求 payload 的编码格式取决于 Message-Codec 设置：
+* Message-Codec: json 的场景下，payload 采用有序的数组编码形式，即将 rpc 方法的参数按顺序组装进 Array 后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。对于使用 Protocol Buffer 的情形，payload 则是只有一个 json 对象的数组。
+* Message-Codec: proto 的场景下，Protobuf 生成的 Request 类包含了编码格式，因此将直接使用 Request 对象中的内置编码方式。
+* Message-Codec 支持更多自定义扩展值，请确保框架实现遵循相应的编码与解码约定。
+
+如果 Content-Encoding 指定了相应值，则 payload 是被压缩过的，应该首先进行解压缩后再解析编码数据，Bare-Message 将作为 HTTP Body 在链路上传输。
 
 ##### Request 报文示例
 
