@@ -14,21 +14,26 @@ working_in_progress: true
 ## 什么是 Dubbo Http
 基于 spring web 和 resteasy 注解编码风格，通过http协议进行服务间调用互通，dubbo protocol扩展实现的协议
 
-## 为什么选择Dubbo Http
-- dubbo http 可以实现微服务与dubbo之间的互通
-- 多协议发布服务，可以实现服务协议的平滑迁移
-- http的通用性，解决跨语言互通
-- 最新版本的http 无需添加其他组件，更轻量
-- resteasy以及spring web的编码风格，上手更快
+## 为什么选择 Http
+- 基于标准 http+json 可以实现 Dubbo 与 Spring 等微服务体系的互调互通
+- 多协议发布服务，可以实现服务协议间的平滑迁移
+- 得益于 http 的通用性，解决跨语言互通
+- Resteasy 以及 Spring-web 的编码风格，上手更快
 
 ## 协议规范
+
+由于 Dubbo 体系中有 group、version 的概念作为隔离服务的不同维度，Dubbo 中的 rest 请求也增加了 version 和 group 这两个 header 用于确定服务的唯一。
+
+* 如果provider一端没有声明group和version,http请求时就不需要传递这两个header。
+* 如果provider声明了group和version，则请求header中必须包含声明的header，否则调用将找不到服务。
+
+为区别于其他的header，我们增加了 `rest-service-` 前缀，因此通过其他形式的 http client 调用 dubbo http 服务需要传递 rest-service-version 和 rest-service-group 两个header。
+
+
+### 示例请求
+
 - Request
 
-相对于原生的http协议dubbo http 请求增加version和group两个header用于确定服务的唯一,
-如果provider一端没有声明group和version,http请求时就不需要传递这连个header,反之必须要传递目标
-服务的group和version, 如果使用dubbo http的RestClient这两个header将会默认通过attachment传递
-为区别于其他的header，attachment将会增加rest-service-前缀，因此通过其他形式的http client调用
-dubbo http服务需要传递 rest-service-version 和 rest-service-group 两个header
 ````
 POST /test/path  HTTP/1.1
 Host: localhost:8080
@@ -38,10 +43,11 @@ rest-service-version: 1.0.0
 rest-service-group: dubbo
 
 {"name":"dubbo","age":10,"address":"hangzhou"}
-
-
 ````
+
 - Response
+
+
 ````
 HTTP/1.1 200
 Content-Type: text/html
@@ -50,7 +56,8 @@ Date: Fri, 28 Apr 2023 14:16:42 GMT
 
 "success"
 ````
-- content-type支持
+
+content-type支持
   - application/json
   - application/x-www-form-urlencoded
   - text/plain
@@ -59,7 +66,7 @@ Date: Fri, 28 Apr 2023 14:16:42 GMT
 目前支持以上media，后面还会对type进行扩展
 
 ## 快速入门
-详细的依赖以及spring配置，可以参见dubbo 项目的duubo-demo-xml模块
+详细的依赖以及spring配置，可以参见dubbo 项目的dubbo-demo-xml模块
 https://github.com/apache/dubbo/tree/3.2/dubbo-demo/dubbo-demo-xml
 
 - spring web 编码
@@ -447,8 +454,8 @@ public class JaxRsRestDemoService {
 ````xml
          <dependency>
             <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-rpc-rest</artifactId>
-            <version>${dubbo-rpc-rest_version}</version>
+            <artifactId>dubbo-rpc</artifactId>
+            <version>${dubbo-version}</version>
          </dependency>
 
          <dependency>
