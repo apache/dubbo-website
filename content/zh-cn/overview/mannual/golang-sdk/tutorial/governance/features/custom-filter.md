@@ -58,15 +58,10 @@ Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，�
 
 ## 3. 默认加载Filter
 
-用户在配置文件中配置了将要使用的 Filter 时，框架使用用户配置的 Filter，否则则加载默认Filter：
+用户在配置文件中配置了将要使用的 Filters 时，框架使用用户配置的 Filters 和默认 Filters，否则仅加载默认 Filters：
 
-- Consumer:
-
-  cshutdown
-
-- Provider:
-
-  echo, metrics, token, accesslog, tps, generic_service, executivete, pshutdown
+- Consumer: cshutdown
+- Provider: echo, metrics, token, accesslog, tps, generic_service, executivete, pshutdown
 
 ## 4. 用户指定 Filter
 
