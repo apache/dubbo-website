@@ -227,7 +227,7 @@ script: |
 
 当前，有两种方式可以在启动阶段为 Dubbo 实例指定标签，一种是之前提到的应用内配置的方式，如在 xml 文件中设置 `<dubbo:provider tag="gray"/>`，应用打包部署后即自动被打标。
 
-还有一种更灵活的方式，那就是通过读取所部署机器上的环境信息给应用打标，这样应用的标签就可以跟随实例动态的自动填充，避免的每次更换部署环境就重新打包应用镜像的问题。当前 Dubbo 能自动读取以下环境变量配置：
+还有一种更灵活的方式，那就是通过读取所部署机器上的环境信息给应用打标，这样应用的标签就可以跟随实例动态的自动填充，避免每次更换部署环境就重新打包应用镜像的问题。当前 Dubbo 能自动读取以下环境变量配置：
 
 ```yaml
 spec:
@@ -260,7 +260,7 @@ Dubbo 提供了控制台 Dubbo Admin，帮助您可视化的下发流量管控�
 
 ![Admin](/imgs/v3/what/admin.png)
 
-Dubbo 还提供了 `dubboctl` 命令行工具，前提也是需要有 Dubbo Admin 提前部署就绪，因为 dubboctl 是通过与 Admin 进行 http 通信完成规则下发的。
+Dubbo 还提供了 `dubboctl` 命令行工具，需要有 Dubbo Admin 提前部署就绪，因为 dubboctl 是通过与 Admin 进行 http 通信完成规则下发的。
 
 如果您使用的是如 Istio 的服务网格架构，还可以使用 Istioctl、kubectl 等下发 Istio 标准规则。
 
