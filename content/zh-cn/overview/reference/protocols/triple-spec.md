@@ -94,11 +94,11 @@ trace-proto-bin = jher831yy13JHy3hc
 
 Triple 协议支持同时运行在 HTTP/1 和 HTTP/2 协议之上，其包含以下两部分内容：
 1. 一套自定义的精简 HTTP RPC 子协议，支持 HTTP/1 和 HTTP/2 作为传输层实现，仅支持 Request-Response 类型的 Unary RPC。
-2. 一套基于 gRPC 协议的扩展子协议（仍保持和 gRPC 的 100% 兼容），仅支持 HTTP/2 实现，支持 Streaming RPC。
+2. 一套基于 gRPC 协议的扩展子协议（仍保持和 gRPC 的 100% 兼容），仅支持 HTTP/2 实现，支持 Unary RPC 和 Streaming RPC。
 
 ### 3.1 Triple 之 HTTP RPC 协议
 
-大部分的 RPC 调用都是 unary (request-response) 模式的。Triple HTTP RPC 协议 unary 模式能很好的满足后端服务间的数据传输需求，同时可以让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即使用标准的 HTTP 协议发起调用即可。
+大部分的 RPC 调用都是 unary (request-response) 模式的，Triple HTTP RPC 协议 unary 模式能很好的满足后端服务间的数据传输需求。同时解决了gRPC协议的痛点，让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即不需要借助代理和gRPC-web，使用标准的 HTTP 协议直接发起调用。
 
 Triple HTTP RPC 同时支持 HTTP/1、HTTP/2 作为底层传输层协议，在实现上对应支持的 content-type 类型为 application/json、application/proto
 
@@ -122,7 +122,7 @@ Content-Encoding Accept-Encoding Accept Content-Length
 - TRI-Protocol-Version → "tri-protocol-version" "1"
 - TRI-Service-Timeout → “tri-service-timeout: ” Timeout-Milliseconds
 - Timeout-Milliseconds → positive integer
-- TRI-Service-Version → “tri-unary-service-version: ” Version
+- TRI-Service-Version → “tri-service-version: ” Version
 - Version → dubbo service version
 - TRI-Service-Group → "tri-service-group: " Group
 - Group → dubbo service group
@@ -259,7 +259,7 @@ Dubbo 的错误码参考
 
 ### 3.2 Triple 之扩展版 gRPC 协议
 
-Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且仅支持 HTTP/2 作为传输层协议。
+Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且仅支持 HTTP/2 作为传输层协议。并且后端服务间的 Unary 请求默认采用扩展版 gPRC 协议。
 
 Triple 支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json，除此之外，Triple 在实现上还扩展了 application/triple+wrapper 编码格式。
 
