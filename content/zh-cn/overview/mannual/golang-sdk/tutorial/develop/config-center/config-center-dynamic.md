@@ -2,26 +2,21 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/config-center/config-center-dynamic/
     - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/config-center/config-center-dynamic/
-description: Dubbogo 3.0 配置中心和配置监听
-title: Dubbogo 3.0 配置中心和配置监听
+description: Dubbogo 3.0 配置中心
+title: Dubbogo 3.0 配置中心
 type: docs
 weight: 2
 ---
 
-
-
-
-
-
-## 1. 配置中心概念
+## 配置中心概念
 
 配置中心即为在分布式场景下，无法将最新的框架配置文件和应用程序绑定在一起，可以指定好配置中心的信息，例如配置中心类型和地址，并在框架启动时从配置中心拉取相应配置进行启动。
 
-## 2. 配置中心的配置
+## 配置中心配置
 
-参考仓库：[dubbo-go-samples/configcenter](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)
+参考仓库：[配置中心](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)
 
-dubbogo.yml 
+`dubbogo.yml`
 
 ```yaml
 dubbo:
@@ -60,7 +55,7 @@ dubbo:
 
 
 
-## 3. Dubbogo 动态配置 API
+## Dubbogo 动态配置 API
 
 Config API 为 dubbogo 3.0 用来操作配置结构的 API。可使用框架提供的 Config API 进行配置结构的初始化，获取组件实例并使用。一个例子如下，包含了动态配置实例的初始化、发布配置、读取配置、订阅配置操作。
 
@@ -147,9 +142,9 @@ func (l listener) Process(event *config_center.ConfigChangeEvent) {
 
 ```
 
-当然，以 API 的形式来启动框架时，可以直接以API的形式来启动框架。
+当然，以 API 的形式来启动框架时，可以直接以 API 的形式来启动框架。
 
-## 4. Dubbogo 配置热更新
+## Dubbogo 配置热更新
 
 // todo 
 
