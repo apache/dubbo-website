@@ -15,7 +15,7 @@ weight: 1
 ```bash
 kubectl create -f https://raw.githubusercontent.com/apache/dubbo-admin/refactor-with-go/deploy/kubernetes/prometheus.yaml
 ```
-> 本安装仅适用于测试或体验使用，生产级别的安装请参考 Prometheus 官方安装文档。
+> 本安装仅适用于测试或体验使用，生产级别的安装请参考 [Prometheus](https://prometheus.io/) 官方安装文档。
 
 执行端口映射 `kubectl -n dubbo-system port-forward svc/prometheus-server 9090:9090`，访问页面 `http://localhost:9090`，切换到 graph 视图。
 
