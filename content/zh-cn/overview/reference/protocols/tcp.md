@@ -6,6 +6,8 @@ type: docs
 weight: 2
 ---
 
+Dubbo 协议是基于 TCP 传输层之上构建的私有 RPC 通信协议，协议采用单一长连接和 NIO 异步通讯模式，适合于小数据量大并发的服务调用，具有传输时延小、吞吐量高等特点。
+
 ![/dev-guide/images/dubbo_protocol_header.jpg](/imgs/dev/dubbo_protocol_header.png)
 
 ## 协议规范 Specification

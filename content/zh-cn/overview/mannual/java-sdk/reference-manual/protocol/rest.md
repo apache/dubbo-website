@@ -8,19 +8,18 @@ type: docs
 weight: 3
 working_in_progress: true
 ---
+> 此文档描述内容基于 Dubbo 3.3.0 及以上版本。如果要参考 2.7 老版本 REST 协议实现，请参考<a hre="/zh-cn/docsv2.7/user/references/protocol/hessian/" target="_blank">此文档</a>。
 
-如果要参考 2.7 老版本 REST 协议实现，请参考<a hre="/zh-cn/docsv2.7/user/references/protocol/hessian/" target="_blank">此文档</a>。
+## 什么是 Dubbo 要支持 rest 编程范式
+当前一些微服务体系，基于 spring web 和 resteasy 注解编码风格，通过http协议进行服务间调用互通，dubbo protocol扩展实现的协议
 
-## 什么是 Dubbo Http
-基于 spring web 和 resteasy 注解编码风格，通过http协议进行服务间调用互通，dubbo protocol扩展实现的协议
-
-## 为什么选择 Http
+典型使用场景：
 - 基于标准 http+json 可以实现 Dubbo 与 Spring 等微服务体系的互调互通
 - 多协议发布服务，可以实现服务协议间的平滑迁移
 - 得益于 http 的通用性，解决跨语言互通
 - Resteasy 以及 Spring-web 的编码风格，上手更快
 
-## 协议规范
+## REST 协议规范
 
 由于 Dubbo 体系中有 group、version 的概念作为隔离服务的不同维度，Dubbo 中的 rest 请求也增加了 version 和 group 这两个 header 用于确定服务的唯一。
 
@@ -28,7 +27,6 @@ working_in_progress: true
 * 如果provider声明了group和version，则请求header中必须包含声明的header，否则调用将找不到服务。
 
 为区别于其他的header，我们增加了 `rest-service-` 前缀，因此通过其他形式的 http client 调用 dubbo http 服务需要传递 rest-service-version 和 rest-service-group 两个header。
-
 
 ### 示例请求
 

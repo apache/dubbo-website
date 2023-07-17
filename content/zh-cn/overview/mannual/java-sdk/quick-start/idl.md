@@ -3,75 +3,86 @@ aliases:
     - /zh/docs3-v2/java-sdk/quick-start/idl/
     - /zh-cn/docs3-v2/java-sdk/quick-start/idl/
 description: 从零演示如何基于 IDL 方式来定义 Dubbo 服务并使用 Triple 协议
-linkTitle: IDL 定义跨语言服务
-title: IDL 定义跨语言服务
+linkTitle: 基于 IDL 定义跨语言服务
+title: 基于 IDL 定义跨语言服务
 type: docs
 weight: 11
 ---
 
+使用 IDL 定义服务具有更好的跨语言友好性，对于 Dubbo3 新用户而言，我们推荐使用这种方式。可在此查看[本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-triple-unary)。
 
+然而 Triple 协议并不是和 IDL 强绑定的，也可以[使用 Java Interface + Pojo 的方式定义服务](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/pojo/)并启用 Triple 协议。
 
-
-
-
-使用 IDL 定义服务具有更好的跨语言友好性，对于 Dubbo3 新用户而言，我们推荐使用这种方式。
-然而 Triple 协议并不是和 IDL 强绑定的，也可以使用 Java Interface + Pojo 的方式定义服务并启用 Triple 协议，具体可参见[示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo)。
-
-更多 Triple 和 IDL 使用方式，请参考[官方示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple)
-
-### 前置条件
+## 前置条件
 - [JDK](https://jdk.java.net/) 版本 >= 8
 - 已安装 [Maven](https://maven.apache.org/)
 
-### 创建工程
-1. 首先创建一个空的 maven 工程
-    ```
-   $ mvn archetype:generate                                \
-        -DgroupId=org.apache.dubbo                          \
-        -DartifactId=tri-stub-demo                          \
-        -DarchetypeArtifactId=maven-archetype-quickstart    \
-        -DarchetypeVersion=1.4                              \
-        -DarchetypeGroupId=org.apache.maven.archetypes      \
-        -Dversion=1.0-SNAPSHOT
-   ```
-2. 切换到工程目录
-    ```
-   $ cd tri-stub-demo
-   ```
-3. 在 `pom.xml` 中设置 JDK 版本，添加 Dubbo 依赖和插件
-    ```xml
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <dubbo.version>3.1.7</dubbo.version>
-    </properties>
-   
+## 运行示例
+首先可通过以下命令下载示例源码
+```shell
+git clone https://github.com/apache/dubbo-samples.git
+```
+
+编译项目，由 IDL 生成代码
+```shell
+cd dubbo-samples
+mvn clean compile
+```
+
+### 启动 Server
+进入示例目录并运行以下命令启动 server。
+```shell
+cd 1-basic/dubbo-samples-triple-unary
+mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryServer"
+```
+
+### 访问服务
+有两种方式可以访问 Triple 服务：
+* 以标准 HTTP 工具访问
+* 以 Dubbo client sdk 访问
+
+#### cURL 访问
+
+```shell
+curl \
+    --header "Content-Type: application/json" \
+    --data '[{"name": "Dubbo"}]' \
+    http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
+```
+
+#### Dubbo client 访问
+运行以下命令，启动 Dubbo client 并完成服务调用
+```shell
+mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryClient"
+```
+
+## 示例讲解
+可在此查看 [完整示例代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-triple-unary)。
+
+### 项目依赖
+由于使用 IDL 开发模式，因此要添加 dubbo、protobuf-java 等依赖，同时还要配置 protobuf-maven-plugin 等插件，用于生成桩代码。
+
+```xml
+<project>
     <dependencies>
-       <dependency>
-           <groupId>junit</groupId>
-           <artifactId>junit</artifactId>
-           <version>4.13</version>
-           <scope>test</scope>
-       </dependency>
-       <dependency>
-           <groupId>org.apache.dubbo</groupId>
-           <artifactId>dubbo</artifactId>
-           <version>${dubbo.version}</version>
-       </dependency>
-       <dependency>
-        <groupId>org.apache.dubbo</groupId>
-        <artifactId>dubbo-dependencies-zookeeper-curator5</artifactId>
-        <type>pom</type>
-        <version>${dubbo.version}</version>
-       </dependency>
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo</artifactId>
+            <version>${dubbo.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.19.4</version>
+            <version>3.19.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-dependencies-zookeeper-curator5</artifactId>
+            <version>${dubbo.version}</version>
+            <type>pom</type>
         </dependency>
     </dependencies>
-   
+
     <build>
         <extensions>
             <extension>
@@ -86,7 +97,7 @@ weight: 11
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:3.19.4:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
                     <protocPlugins>
                         <protocPlugin>
                             <id>dubbo</id>
@@ -105,137 +116,128 @@ weight: 11
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${source.level}</source>
+                    <target>${target.level}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources/protobuf/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-   ```
-4. 添加接口定义文件`src/main/proto/hello.proto`，Dubbo 使用 [Protobuf](https://developers.google.com/protocol-buffers) 作为 IDL
-    ```protobuf
-    syntax = "proto3";
-   
-    option java_multiple_files = true;
-    option java_package = "org.apache.dubbo.hello";
-    option java_outer_classname = "HelloWorldProto";
-    option objc_class_prefix = "HLW";
+</project>
+```
 
-    package helloworld;
+### 服务定义
+使用 Protocol Buffers 定义服务
 
-    message HelloRequest {
-        string name = 1;
+```protobuf
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package org.apache.dubbo.samples.tri.unary;
+
+message GreeterRequest {
+  string name = 1;
+}
+
+message GreeterReply {
+  string message = 1;
+}
+
+service Greeter{
+  rpc greet(GreeterRequest) returns (GreeterReply);
+}
+```
+
+### 代码生成
+执行 `mvn clean compile` 后，生成代码如下
+
+
+### 服务实现
+继承生成的基础类 `DubboGreeterTriple.GreeterImplBase`，以下具体的业务逻辑实现。
+
+```java
+public class GreeterImpl extends DubboGreeterTriple.GreeterImplBase {
+    @Override
+    public GreeterReply greet(GreeterRequest request) {
+        LOGGER.info("Server {} received greet request {}", serverName, request);
+        return GreeterReply.newBuilder()
+                .setMessage("hello," + request.getName())
+                .build();
+    }
+}
+```
+
+注册服务到 server
+
+```java
+public class TriUnaryServer {
+    public static void main(String[] args) throws IOException {
+        new EmbeddedZooKeeper(TriSampleConstants.ZK_PORT, false).start();
+        ServiceConfig<Greeter> service = new ServiceConfig<>();
+        service.setInterface(Greeter.class);
+        service.setRef(new GreeterImpl("tri-stub"));
+        ApplicationConfig applicationConfig = new ApplicationConfig("tri-stub-server");
+        applicationConfig.setQosEnable(false);
+        DubboBootstrap bootstrap = DubboBootstrap.getInstance();
+        bootstrap.application(applicationConfig)
+                .registry(new RegistryConfig(TriSampleConstants.ZK_ADDRESS))
+                .protocol(new ProtocolConfig(CommonConstants.TRIPLE, TriSampleConstants.SERVER_PORT))
+                .service(service)
+                .start();
+        System.out.println("Dubbo triple unary server started, port=" + TriSampleConstants.SERVER_PORT);
+    }
+}
+```
+
+### 编写 client 逻辑
+```java
+public class TriUnaryClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TriUnaryClient.class);
+
+    public static void main(String[] args) throws IOException {
+        DubboBootstrap bootstrap = DubboBootstrap.getInstance();
+        ReferenceConfig<Greeter> ref = new ReferenceConfig<>();
+        ref.setInterface(Greeter.class);
+        ref.setProtocol(CommonConstants.TRIPLE);
+        ref.setProxy(CommonConstants.NATIVE_STUB);
+        ref.setTimeout(3000);
+
+        ApplicationConfig applicationConfig = new ApplicationConfig("tri-stub-consumer");
+        applicationConfig.setQosEnable(false);
+        bootstrap.application(applicationConfig).reference(ref).registry(new RegistryConfig(TriSampleConstants.ZK_ADDRESS)).start();
+        Greeter greeter = ref.get();
+
+        //sync
+        unarySync(greeter);
     }
 
-    message HelloReply {
-        string message = 1;
+    private static void unarySync(Greeter greeter) {
+        LOGGER.info("{} Start unary", "tri-unary-client");
+        final GreeterReply reply = greeter.greet(GreeterRequest.newBuilder().setName("name").build());
+        LOGGER.info("{} Unary reply <-{}", "tri-unary-client", reply);
     }
-    service Greeter{
-        rpc greet(HelloRequest) returns (HelloReply);
-    }
-
-    ```
-5. 编译 IDL
-    ```
-    $ mvn clean install
-    ```
-   编译成功后，可以看到`target/generated-sources/protobuf/java` 目录下生成了代码文件
-    ```
-   $ ls org/apache/dubbo/hello/
-    DubboGreeterTriple.java    HelloReply.java            HelloRequest.java          HelloWorldProto.java
-    Greeter.java               HelloReplyOrBuilder.java   HelloRequestOrBuilder.java
-   ```
-
-6. 添加服务端接口实现`src/main/java/org/apache/dubbo/GreeterImpl.java`
-   ```java
-   package org.apache.dubbo;
-
-   import org.apache.dubbo.hello.DubboGreeterTriple;
-   import org.apache.dubbo.hello.HelloReply;
-   import org.apache.dubbo.hello.HelloRequest;
-
-   public class GreeterImpl extends DubboGreeterTriple.GreeterImplBase {
-      @Override
-      public HelloReply greet(HelloRequest request) {
-         return HelloReply.newBuilder()
-         .setMessage("Hello," + request.getName() + "!")
-         .build();
-      }
-   }
-   ```
-7. 添加服务端启动类 `src/main/java/org/apache/dubbo/MyDubboServer.java`
-    ```java
-   package org.apache.dubbo;
-
-   import org.apache.dubbo.common.constants.CommonConstants;
-   import org.apache.dubbo.config.ApplicationConfig;
-   import org.apache.dubbo.config.ProtocolConfig;
-   import org.apache.dubbo.config.RegistryConfig;
-   import org.apache.dubbo.config.ServiceConfig;
-   import org.apache.dubbo.config.bootstrap.DubboBootstrap;
-   import org.apache.dubbo.hello.Greeter;
-
-   import java.io.IOException;
-
-   public class MyDubboServer {
-
-       public static void main(String[] args) throws IOException {
-           ServiceConfig<Greeter> service = new ServiceConfig<>();
-           service.setInterface(Greeter.class);
-           service.setRef(new GreeterImpl());
-
-           DubboBootstrap bootstrap = DubboBootstrap.getInstance();
-           bootstrap.application(new ApplicationConfig("tri-stub-server"))
-                   .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
-                   .protocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051))
-                   .service(service)
-                   .start();
-           System.out.println("Dubbo triple stub server started");
-           System.in.read();
-       }
-   }
-    ```
-
-8. 添加客户端启动类`src/main/java/org/apache/dubbo/MyDubboClient.java`
-   ```java
-   package org.apache.dubbo;
-
-   import org.apache.dubbo.common.constants.CommonConstants;
-   import org.apache.dubbo.config.ApplicationConfig;
-   import org.apache.dubbo.config.ReferenceConfig;
-   import org.apache.dubbo.config.RegistryConfig;
-   import org.apache.dubbo.config.bootstrap.DubboBootstrap;
-   import org.apache.dubbo.hello.Greeter;
-   import org.apache.dubbo.hello.HelloReply;
-   import org.apache.dubbo.hello.HelloRequest;
-
-   public class MyDubboClient {
-      public static void main(String[] args) {
-         DubboBootstrap bootstrap = DubboBootstrap.getInstance();
-         ReferenceConfig<Greeter> ref = new ReferenceConfig<>();
-         ref.setInterface(Greeter.class);
-         ref.setProtocol(CommonConstants.TRIPLE);
-         ref.setProxy(CommonConstants.NATIVE_STUB);
-         ref.setTimeout(3000);
-         bootstrap.application(new ApplicationConfig("tri-stub-client"))
-            .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
-            .reference(ref)
-            .start();
-
-         Greeter greeter = ref.get();
-         HelloRequest request = HelloRequest.newBuilder().setName("Demo").build();
-         HelloReply reply = greeter.greet(request);
-         System.out.println("Received reply:" + reply);
-       }
-   }
-   ```
-9. 编译代码
-   ```
-   $ mvn clean install
-   ```
-10. 启动服务端
-   ```
-   $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboServer"
-   Dubbo triple stub server started
-   ```
-11. 打开新的终端，启动客户端
-   ```
-   $ mvn org.codehaus.mojo:exec-maven-plugin:3.0.0:java -Dexec.mainClass="org.apache.dubbo.MyDubboClient"
-   Received reply:message: "Hello,Demo!"
-   ```
+}
+```

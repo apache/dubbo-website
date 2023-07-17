@@ -30,9 +30,9 @@ weight: 6
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./web/" >}}'>使用 Dubbo 开发 Web 应用</a>
+                     <a href='{{< relref "./springcloud/" >}}'>与 Spring Cloud 互调</a>
                 </h4>
-                <p>演示使用 Dubbo 对外暴露 HTTP 接口，支持 Spring Web 标准开发方式。</p>
+                <p>演示如何使用 Dubbo 作为消费端调用 Spring Cloud 服务</p>
             </div>
         </div>
     </div>
@@ -40,9 +40,9 @@ weight: 6
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./springcloud/" >}}'>与 Spring Cloud 互调</a>
+                    <a href='{{< relref "./triple/" >}}'>基于IDL开发</a>
                 </h4>
-                <p>演示如何使用 Dubbo 作为消费端调用 Spring Cloud 服务</p>
+                <p>演示 Dubbo 如何简化 gRPC 服务开发。</p>
             </div>
         </div>
     </div>
