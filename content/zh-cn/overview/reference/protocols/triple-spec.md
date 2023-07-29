@@ -107,7 +107,7 @@ Triple HTTP RPC 同时支持 HTTP/1、HTTP/2 作为底层传输层协议，在�
 - Request → Request-Headers Bare-Message
 - Request-Headers → Call-Specification *Leading-Metadata
 - Call-Specification →
-Schema Http-Method Path Http-Host Content-Type TRI-Service-Timeout TRI-Service-Version TRI-Service-Group
+Schema Http-Method Path Http-Host Content-Type TRI-Protocol-Version TRI-Service-Timeout TRI-Service-Version TRI-Service-Group
 Content-Encoding Accept-Encoding Accept Content-Length
 - Scheme → "http" / "https"
 - Http-Method → POST
@@ -165,6 +165,7 @@ Dubbo 框架支持基于 **分组（group）** 和 **版本（version）** 的�
    - Accept: application/json
    - Content-Length: 11
    - Accept-Encoding: compress, gzip
+   - tri-protocol-version: 1.0.0
    - tri-service-version: 1.0.0
    - tri-service-group: dubbo
    - tri-service-timeout: 3000
@@ -178,6 +179,7 @@ Content-Type: application/json
 Accept: application/json
 Content-Length: 11
 Accept-Encoding: compress, gzip
+tri-protocol-version: 1.0.0
 tri-service-version: 1.0.0
 tri-service-group: dubbo
 tri-service-timeout: 3000
