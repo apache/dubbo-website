@@ -15,4 +15,4 @@ weight: 4
 ```bash
 kubectl create -f https://raw.githubusercontent.com/apache/dubbo-admin/refactor-with-go/deploy/kubernetes/zipkin.yaml
 ```
-> 本安装仅适用于测试或体验使用，生产级别的安装请参考 Zipkin 官方安装文档。
+> 本安装仅适用于测试或体验使用，生产级别的安装请参考 [Zipkin](https://zipkin.io) 官方安装文档。
