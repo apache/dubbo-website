@@ -28,7 +28,7 @@ weight: 5
 1. 全局开关
 
 应用配置（可以通过配置文件或者 -D 指定）`dubbo.application.register-mode` 为 instance（只注册应用级）、all（接口级+应用级均注册）开启全局的注册开关，配置此开关后，默认会向所有的注册中心中注册应用级的地址，供消费端服务发现使用。
-> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src/main/resources/dubbo.properties)
+> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src/main/resources/dubbo.properties)
 
 ```
 # 双注册
@@ -42,7 +42,7 @@ dubbo.application.register-mode=instance
 2. 注册中心地址参数配置
 
 注册中心的地址上可以配置 `registry-type=service` 来显示指定该注册中心为应用级服务发现的注册中心，带上此配置的注册中心将只进行应用级服务发现。
-> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources/spring/dubbo-provider.xml)
+> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources/spring/dubbo-provider.xml)
 
 ```xml
 <dubbo:registry address="nacos://${nacos.address:127.0.0.1}:8848?registry-type=service"/>
@@ -61,7 +61,7 @@ FORCE_APPLICATION：仅应用级订阅，将只采用全新的服务发现模型
 
 应用配置（可以通过配置文件或者 -D 指定）`dubbo.application.service-discovery.migration` 为 `APPLICATION_FIRST` 可以开启多订阅模式，配置为 `FORCE_APPLICATION` 可以强制为仅应用级订阅模式。
 具体接口订阅可以在 `ReferenceConfig` 中的 `parameters` 中配置 Key 为 `migration.step`，Value 为 `APPLICATION_FIRST` 或 `FORCE_APPLICATION` 的键值对来对单一订阅进行配置。
-> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/test/java/org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java)
+> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/test/java/org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java)
 
 ```java
 System.setProperty("dubbo.application.service-discovery.migration", "APPLICATION_FIRST");
@@ -77,7 +77,7 @@ return referenceConfig.get();
 3. 动态配置（优先级最高，可以在运行时修改配置）
 
 此配置需要基于配置中心进行推送，Key 为应用名 + `.migration` （如 `demo-application.migraion`），Group 为 `DUBBO_SERVICEDISCOVERY_MIGRATION`。规则体配置详见[接口级服务发现迁移至应用级服务发现指南](../migration-service-discovery/)。
-> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java)
+> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java)
 
 ```java
 step: FORCE_INTERFACE
