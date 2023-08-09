@@ -11,7 +11,7 @@ description: >
 
 ## 什么是Pinpoint
 
-> 摘自[Pinpoint学习笔记](https://skyao.gitbooks.io/learning-pinpoint/)
+> 摘自[Pinpoint学习笔记](https://skyao.gitbooks.io/learning-pinpoint/content/index.html)
 
 [Pinpoint](https://github.com/naver/pinpoint)是一个开源的 APM (Application Performance Management/应用性能管理)工具，用于基于java的大规模分布式系统。
 仿照Google Dapper，Pinpoint通过跟踪分布式应用之间的调用来提供解决方案，以帮助分析系统的总体结构和内部模块之间如何相互联系。

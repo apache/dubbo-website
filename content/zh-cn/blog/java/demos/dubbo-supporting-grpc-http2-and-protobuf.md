@@ -155,7 +155,7 @@ service SearchService {
 
 [gRPC](https://grpc.io/) 是 Google 开源的构建在 HTTP/2 之上的一个 PRC 通信协议。Dubbo 依赖其灵活的协议扩展机制，增加了对 gRPC (HTTP/2) 协议的支持。
 
-目前的支持限定在 Dubbo Java 语言版本，后续 Go 语言或其他语言版本将会以类似方式提供支持。下面，通过一个[简单的示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc)来演示如何在 Dubbo 中使用 gRPC 协议通信。
+目前的支持限定在 Dubbo Java 语言版本，后续 Go 语言或其他语言版本将会以类似方式提供支持。下面，通过一个[简单的示例](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc)来演示如何在 Dubbo 中使用 gRPC 协议通信。
 
 #### 1. 定义服务 IDL
 
@@ -589,7 +589,7 @@ message HelloReply {
 </plugin>
 ```
 
-注意，这里与 [Dubbo 对 gRPC](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc) 支持部分的区别在于： 
+注意，这里与 [Dubbo 对 gRPC](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc) 支持部分的区别在于： 
 ` <pluginParameter>dubbo</pluginParameter>` 
 
 2. 生成 Dubbo stub
