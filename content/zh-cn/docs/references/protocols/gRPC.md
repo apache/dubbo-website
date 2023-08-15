@@ -26,6 +26,6 @@ Dubbo 自 2.7.5 版本开始支持 gRPC 协议，对于计划使用 HTTP/2 通�
 2. 配置 compiler 插件，本地预编译
 3. 配置暴露/引用 Dubbo 服务
 
-具体可参见以下[示例](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc)
+具体可参见以下[示例](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc)
 
-除了原生 StreamObserver 接口类型之外，Dubbo 还支持 [RxJava](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava)、[Reactor](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-reactor) 编程风格的 API
+除了原生 StreamObserver 接口类型之外，Dubbo 还支持 [RxJava](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc/dubbo-samples-rxjava)、[Reactor](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc/dubbo-samples-reactor) 编程风格的 API

@@ -39,13 +39,13 @@ Start `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication` directly f
 
 ### 查看 Trace 信息
 
-在浏览器中打开zipkin看板 [http://localhost:9411/zipkin/](http://localhost:9411/zipkin/) :
+在浏览器中打开zipkin看板 `http://localhost:9411/zipkin/` :
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/otlp/zipkin_search.png)
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/otlp/zipkin_detail.png)
 
-在浏览器中打开Jaeger看板 [http://localhost:16686/search](http://localhost:16686/search) :
+在浏览器中打开Jaeger看板 `http://localhost:16686/search` :
 
 ![jaeger_search.png](/imgs/v3/tasks/observability/tracing/otlp/jaeger_search.png)
 

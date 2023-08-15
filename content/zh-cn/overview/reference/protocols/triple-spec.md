@@ -94,11 +94,11 @@ trace-proto-bin = jher831yy13JHy3hc
 
 Triple 协议支持同时运行在 HTTP/1 和 HTTP/2 协议之上，其包含以下两部分内容：
 1. 一套自定义的精简 HTTP RPC 子协议，支持 HTTP/1 和 HTTP/2 作为传输层实现，仅支持 Request-Response 类型的 Unary RPC。
-2. 一套基于 gRPC 协议的扩展子协议（仍保持和 gRPC 的 100% 兼容），仅支持 HTTP/2 实现，支持 Streaming RPC。
+2. 一套基于 gRPC 协议的扩展子协议（仍保持和 gRPC 的 100% 兼容），仅支持 HTTP/2 实现，支持 Unary RPC 和 Streaming RPC。
 
 ### 3.1 Triple 之 HTTP RPC 协议
 
-大部分的 RPC 调用都是 unary (request-response) 模式的。Triple HTTP RPC 协议 unary 模式能很好的满足后端服务间的数据传输需求，同时可以让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即使用标准的 HTTP 协议发起调用即可。
+大部分的 RPC 调用都是 unary (request-response) 模式的，Triple HTTP RPC 协议 unary 模式能很好的满足后端服务间的数据传输需求。同时解决了gRPC协议的痛点，让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即不需要借助代理和gRPC-web，使用标准的 HTTP 协议直接发起调用。
 
 Triple HTTP RPC 同时支持 HTTP/1、HTTP/2 作为底层传输层协议，在实现上对应支持的 content-type 类型为 application/json、application/proto
 
@@ -107,7 +107,7 @@ Triple HTTP RPC 同时支持 HTTP/1、HTTP/2 作为底层传输层协议，在�
 - Request → Request-Headers Bare-Message
 - Request-Headers → Call-Specification *Leading-Metadata
 - Call-Specification →
-Schema Http-Method Path Http-Host Content-Type TRI-Service-Timeout TRI-Service-Version TRI-Service-Group
+Schema Http-Method Path Http-Host Content-Type TRI-Protocol-Version TRI-Service-Timeout TRI-Service-Version TRI-Service-Group
 Content-Encoding Accept-Encoding Accept Content-Length
 - Scheme → "http" / "https"
 - Http-Method → POST
@@ -122,7 +122,7 @@ Content-Encoding Accept-Encoding Accept Content-Length
 - TRI-Protocol-Version → "tri-protocol-version" "1"
 - TRI-Service-Timeout → “tri-service-timeout: ” Timeout-Milliseconds
 - Timeout-Milliseconds → positive integer
-- TRI-Service-Version → “tri-unary-service-version: ” Version
+- TRI-Service-Version → “tri-service-version: ” Version
 - Version → dubbo service version
 - TRI-Service-Group → "tri-service-group: " Group
 - Group → dubbo service group
@@ -130,25 +130,30 @@ Content-Encoding Accept-Encoding Accept Content-Length
 - Content-Coding → “identity” / “gzip” / “br” / “zstd” / {custom}
 - Accept-Encoding → “accept-encoding” Content-Coding *("," [" “] Content-Coding) ; subset of HTTP quality value syntax
 - Content-Length → length of the encoded payload
-- **Leading-Metadata** → Custom-Metadata
-- **Custom-Metadata** → ASCII-Metadata / Binary-Metadata
+- Leading-Metadata → Custom-Metadata
+- Custom-Metadata → ASCII-Metadata / Binary-Metadata
 - ASCII-Metadata → Header-Name ASCII-Value
-- **Binary-Metadata** → {Header-Name "-bin"} {base64-encoded value}
-- **Header-Name** → 1*( %x30-39 / %x61-7A / "_" / "-" / ".") ; 0-9 a-z _ - .
+- Binary-Metadata → {Header-Name "-bin"} {base64-encoded value}
+- Header-Name → 1*( %x30-39 / %x61-7A / "_" / "-" / ".") ; 0-9 a-z _ - .
 - ASCII-Value → 1*( %x20-%x7E ) ; space & printable ASCII
 - Bare-Message → data that encoded by json or custom and Content-Encoding
 
 Triple 协议请求的仅支持 POST 请求，请求 path 为 interfaceName/methodName，为了实现调用超时机制，需要添加 tri-service-timeout (单位 ms)，
 
-Dubbo 框架支持基于**分组（group）**和**版本（version**）的服务隔离机制，因此 Triple 协议中引入了 tri-service-group、tri-service-version 支持。
+Dubbo 框架支持基于 **分组（group）** 和 **版本（version）** 的服务隔离机制，因此 Triple 协议中引入了 tri-service-group、tri-service-version 支持。
 
 **Request-Headers** 以标准的 HTTP header 的形式发送，如果收到的 headers 数量过多，server 可返回相应错误信息。
 
 **TRI-Protocol-Version** 头用来区分具有相同 Content-Type 的 triple 协议请求和其他协议请求，因为 application/json 格式的 Content-Type 非常普遍。所有的 Dubbo 原生客户端实现都应该在请求中携带 TRI-Protocol-Version，Dubbo 服务端或代理可以选择拒绝没有 TRI-Protocol-Version 的请求并返回 Http-Status 400 错误。
 
-如果 Server 不支持 **Message-Codec **指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。
+如果 Server 不支持 **Message-Codec** 指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。
 
-**Bare-Message **即请求 payload 采用有序的数组编码形式，将方法的参数按顺序进行 Array 封装后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。如果 Content-Encoding 指定了相应值，则 payload 将被压缩。Bare-Message 将作为 HTTP Body 在链路上传输。
+**Bare-Message** 即请求 payload 的编码格式取决于 Message-Codec 设置：
+* Message-Codec: json 的场景下，payload 采用有序的数组编码形式，即将 rpc 方法的参数按顺序组装进 Array 后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。对于使用 Protocol Buffer 的情形，payload 则是只有一个 json 对象的数组。
+* Message-Codec: proto 的场景下，Protobuf 生成的 Request 类包含了编码格式，因此将直接使用 Request 对象中的内置编码方式。
+* Message-Codec 支持更多自定义扩展值，请确保框架实现遵循相应的编码与解码约定。
+
+如果 Content-Encoding 指定了相应值，则 payload 是被压缩过的，应该首先进行解压缩后再解析编码数据，Bare-Message 将作为 HTTP Body 在链路上传输。
 
 ##### Request 报文示例
 
@@ -160,6 +165,7 @@ Dubbo 框架支持基于**分组（group）**和**版本（version**）的服务
    - Accept: application/json
    - Content-Length: 11
    - Accept-Encoding: compress, gzip
+   - tri-protocol-version: 1.0.0
    - tri-service-version: 1.0.0
    - tri-service-group: dubbo
    - tri-service-timeout: 3000
@@ -173,6 +179,7 @@ Content-Type: application/json
 Accept: application/json
 Content-Length: 11
 Accept-Encoding: compress, gzip
+tri-protocol-version: 1.0.0
 tri-service-version: 1.0.0
 tri-service-group: dubbo
 tri-service-timeout: 3000
@@ -188,7 +195,7 @@ tri-service-timeout: 3000
 - HTTP-Status → 200 /{error code translated to HTTP}
 - Bare-Message → data that encoded by Content-Type and Content-Encoding
 
-对于成功 Response 响应 **HTTP-Status **是 200，在这种场景下，响应体的 Content-Type 将保持和请求体的 Content-Type 保持一致。**Bare-Message** 就是 RPC 响应的 Payload，以 Content-Type 指定的方式进行编码并且以 Content-Encoding 来压缩（如果指定了 Content-Encoding 的话）。Bare-Message 作为 HTTP response body 发送。
+对于成功 Response 响应 **HTTP-Status** 是 200，在这种场景下，响应体的 Content-Type 将保持和请求体的 Content-Type 保持一致。**Bare-Message** 就是 RPC 响应的 Payload，以 Content-Type 指定的方式进行编码并且以 Content-Encoding 来压缩（如果指定了 Content-Encoding 的话）。Bare-Message 作为 HTTP response body 发送。
 
 异常 Response 响应的 HTTP-Status 是 non-200，并且都是标准的 HTTP status code，在这个场景下，**Content-Type** 必须是 "application/json"。**Bare-Message** 可以是空的，如果 Bare-Message 有值的话则是一个标准 JSON 格式数据，如果 **Content-Encoding** 有指定的话则是一个压缩过的数据，Bare-Message 作为标准的 HTTP response body 发送回调用方。客户端可以根据以下表格，查询 HTTP-Status 与 RPC status 之间的映射关系，以了解具体的 RPC 错误情况。
 
@@ -254,7 +261,7 @@ Dubbo 的错误码参考
 
 ### 3.2 Triple 之扩展版 gRPC 协议
 
-Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且仅支持 HTTP/2 作为传输层协议。
+Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且仅支持 HTTP/2 作为传输层协议。并且后端服务间的 Unary 请求默认采用扩展版 gPRC 协议。
 
 Triple 支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json，除此之外，Triple 在实现上还扩展了 application/triple+wrapper 编码格式。
 
@@ -320,5 +327,3 @@ Request-Headers are delivered as HTTP2 headers in HEADERS + CONTINUATION frames.
 * **Percent-Byte-Encoded** → "%" 2HEXDIGIT ; 0-9 A-F
 
 以上即为 Triple 扩展版本的 gRPC 协议，更多详细规范说明请参照 <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范</a>。
-
-## 总结

@@ -32,7 +32,7 @@ Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Gith
   {{< card header="钉钉群组" >}}
 <div id="slack" class="community-resource">
     <a href="/">
-        <img src="/imgs/contacts/dingtalk.jpg" alt="Dingtalk">
+        <img src="/imgs/contacts/dingtalk.png" alt="Dingtalk">
     </a>
     <p>定期举办线上社区会议或开发者双周会</p>
 </div>

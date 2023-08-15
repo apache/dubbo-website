@@ -75,7 +75,7 @@ weight: 6
 | local | local | class/boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省代理类名，即：接口名 + Local后缀，已废弃，请使用stub| 2.0.0以上版本 |
 | stub | stub | class/boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省代理类名，即：接口名 + Stub后缀，服务接口客户端本地代理类名，用于在客户端执行本地逻辑，如本地缓存等，该本地代理类的构造函数必须允许传入远程代理对象，构造函数如：public XxxServiceStub(XxxService xxxService) | 2.0.0以上版本 |
 | mock | mock | class/boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省Mock类名，即：接口名 + Mock后缀，服务接口调用失败Mock实现类，该Mock类必须有一个无参构造函数，与Local的区别在于，Local总是被执行，而Mock只在出现非业务异常(比如超时，网络异常等)时执行，Local在远程调用之前执行，Mock在远程调用后执行。 | 2.0.0以上版本 |
-| token | token | string/boolean | 可选 | false | 服务治理 | 令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌，否则使用静态令牌，令牌的作用是防止消费者绕过注册中心直接访问，保证注册中心的授权功能有效，如果使用点对点调用，需关闭令牌功能 | 2.0.0以上版本 |
+| token | token | string/boolean | 可选 |  | 服务治理 | 令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌，否则使用静态令牌，令牌的作用是防止消费者绕过注册中心直接访问，保证注册中心的授权功能有效，如果使用点对点调用，需关闭令牌功能 | 2.0.0以上版本 |
 | registry | | string | 可选 | 缺省向所有registry注册 | 配置关联 | 向指定注册中心注册，在多个注册中心时使用，值为&lt;dubbo:registry&gt;的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A | 2.0.0以上版本 |
 | provider | | string | 可选 | 缺省使用第一个provider配置 | 配置关联 | 指定provider，值为&lt;dubbo:provider&gt;的id属性 | 2.0.0以上版本 |
 | deprecated | deprecated | boolean | 可选 | false | 服务治理 | 服务是否过时，如果设为true，消费方引用时将打印服务过时警告error日志 | 2.0.5以上版本 |
@@ -223,7 +223,7 @@ weight: 6
 | cluster         | cluster  | string | 可选    |            | 含义视所选定的元数据中心而不同。<br />如Apollo中用来区分不同的配置集群 | 2.7.0以上版本 |
 | file            | file      | string | 可选   |            | 使用文件缓存元数据中心列表，应用重启时将基于此文件恢复，注意：两个元数据中心不能使用同一文件存储 | 2.7.0以上版本 |
 | check           | check   | boolean | 可选   | true       | 当元数据中心连接失败时，是否终止应用启动。                     | 3.0.0以上版本 |
-| reportMetadata  | report-metadata | boolean | 可选 | false | 是否上地址发现中的接口配置报元数据，`dubbo.application.metadata-type=remote` 该配置不起作用即一定会上报，`dubbo.application.metadata-type=local` 时是否上报由该配置值决定 | 3.0.0以上版本 |
+| reportMetadata  | report-metadata | boolean | 可选 | false | 是否上报地址发现中的接口配置报元数据，`dubbo.application.metadata-type=remote` 该配置不起作用即一定会上报，`dubbo.application.metadata-type=local` 时是否上报由该配置值决定 | 3.0.0以上版本 |
 | reportDefinition | report-definition | boolean | 可选 | true | 是否上报服务运维用元数据                                   | 3.0.0以上版本 |
 | reportConsumerDefinition | report-consumer-definition | boolean | 可选 | true | 是否在消费端上报服务运维用元数据                                    | 3.0.0以上版本 |
 | parameters      | parameters | Map<string, string> | 可选     |  | 扩展参数，用来支持不同元数据中心的定制化配置参数         | 2.7.0以上版本 |
@@ -301,7 +301,7 @@ weight: 6
 | async | default.async | boolean | 可选 | false | 性能调优 | 是否缺省异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 2.0.5以上版本 |
 | stub | stub | boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省代理类名，即：接口名 + Local后缀。 | 2.0.5以上版本 |
 | mock | mock | boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省Mock类名，即：接口名 + Mock后缀。 | 2.0.5以上版本 |
-| token | token | boolean | 可选 | false | 服务治理 | 令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌 | 2.0.5以上版本 |
+| token | token | boolean | 可选 | | 服务治理 | 令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌 | 2.0.5以上版本 |
 | registry | registry | string | 可选 | 缺省向所有registry注册 | 配置关联 | 向指定注册中心注册，在多个注册中心时使用，值为&lt;dubbo:registry&gt;的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A | 2.0.5以上版本 |
 | dynamic | dynamic | boolean | 可选 | true | 服务治理 | 服务是否动态注册，如果设为false，注册后将显示后disable状态，需人工启用，并且服务提供者停止时，也不会自动取消册，需人工禁用。 | 2.0.5以上版本 |
 | accesslog | accesslog | string/boolean | 可选 | false | 服务治理 | 设为true，将向logger中输出访问日志，也可填写访问日志文件路径，直接把访问日志输出到指定文件 | 2.0.5以上版本 |

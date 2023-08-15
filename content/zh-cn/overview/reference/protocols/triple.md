@@ -14,7 +14,7 @@ Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你
 
 针对某些语言版本，Dubbo 框架还提供了更贴合语言特性的编程模式，即不绑定 IDL 的服务定义与开发模式，比如在 Dubbo Java 中，你可以选择使用 Java Interface 和 Pojo 类定义 Dubbo 服务，并将其发布为基于 Triple 协议通信的微服务。
 
-## 目标与场景示例
+## 协议规范(Specification)
 基于 Triple 协议，你可以实现以下目标：
 
 ### 当 Dubbo 作为 Client 时
@@ -28,21 +28,7 @@ Dubbo Server 默认将同时发布对 Triple、gRPC 协议的支持，并且 Tri
 * 处理 Dubbo 客户端发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper
 * 处理 cURL、浏览器等发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper
 
-### 示例
-Triple 协议按照 gRPC Spec 原生全量支持 Content-Type: application/grpc 协议的通信。基于此模式，Triple Client 可以调用任意的 gRPC Server，反之亦然。
-
-![triple](/imgs/v3/reference/protocol/triple.png)
-
-Triple 协议支持基于 json 这种通用格式，将任意服务暴露到外部，任何支持标准 HTTP 协议的客户端（如 cURL、浏览器、终端）都可以直接发起调用，无需任何协议转换。
-
-![triple-grpc](/imgs/v3/reference/protocol/triple-grpc.png)
-
-Triple 支持将 Java 友好的 Hessian、Kryo 等序列化封装在 HTTP 协议之上，从网络层看来就是一个标准的 HTTP 协议报文，天然兼容任何支持 HTTP 协议的 WAF、Gateway 等，可以很好地复用当前网络层的基础设施。
-
-![triple-hessian](/imgs/v3/reference/protocol/triple-hessian.png)
-
-## 协议规范(Specification)
-详细在此查看 Triple 协议规范详情 [Triple Specification](../triple-spec)。
+详细在此查看详细的 [Triple Specification](../triple-spec)。
 
 ## 与 gRPC 协议的关系
 上面提到 Triple 完全兼容 gRPC 协议，那既然 gRPC 官方已经提供了多语言的框架实现，为什么 Dubbo 还要通过 Triple 重新实现一遍那？核心目标主要有以下两点：
