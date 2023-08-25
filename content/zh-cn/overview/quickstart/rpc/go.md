@@ -8,15 +8,16 @@ weight: 2
 
 基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Go SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
 
-本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。本示例完整代码请参见 [xxx](a)。
+本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。本示例完整代码请参见 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/master/helloworld)。
 
 ## 前置条件
 
-因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `buf`、`protoc-gen-go`、`protoc-gen-dubbo-go`。
+因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `buf`、`protoc-gen-go`、`protoc-gen-triple-go`。
+
 ```shell
 go install github.com/bufbuild/buf/cmd/buf@latest
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest
+go install github.com/bufbuild/connect-go/cmd/protoc-gen-triple-go@latest
 ```
 
 ## 定义服务
@@ -47,7 +48,7 @@ service GreetService {
 
 ## 生成代码
 
-接下来，我们就使用 `protoc-gen-go`、`protoc-gen-dubbo-go`生成相关的代码
+接下来，我们就使用 `protoc-gen-go`、`protoc-gen-triple-go`生成相关的代码
 
 ```bash
 $ buf lint
@@ -112,6 +113,7 @@ curl \
 ```
 
 也可以使用标准的 Dubbo client 请求服务，我们首先需要从生成代码即`greetv1triple`包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起 RPC 调用了。
+
 ```go
 func main() {
 	c := greetv1triple.NewGreeterClient()
@@ -120,10 +122,10 @@ func main() {
 	c.SayHello(ctx, request)
 }
 ```
-恭喜您， 以上即是 Dubbo Go RPC 通信的基本使用方式！  🎉
-## 更多内容
+恭喜您， 以上即是 Dubbo Go RPC 通信的基本使用方式！ 🎉
 
-- 使用 Dubbo Go 开发微服务
-- 更多 Dubbo Go 特性
+## 更多内容
+- 请查看 [Dubbo Go 开发文档](/zh-cn/overview/mannual/go-sdk) 了解更多使用方式。
+
 
 

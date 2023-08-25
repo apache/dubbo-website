@@ -8,62 +8,79 @@ type: docs
 weight: 2
 ---
 
-在这个示例中，我们会将之前开发的微服务 demo 部署到 Kubernetes 集群，并使用 dubboctl 简化整个部署过程。
+在这个示例中，我们将之前开发的 Dubbo 微服务应用以容器镜像模式部署到 Kubernetes 集群，并使用 dubboctl 简化整个部署过程。
 
-## 准备示例镜像
+## 前置条件
+dubbo 提供了相应的工具和解决方案来简化整个 Kubernetes 环境的打包与部署过程，所以开始前我们需要先安装相关工具。
 
-git clone xxx
+1. 安装 dubboctl
+    ```sh
+    curl -L https://dubbo.apache.org/downloadAdmin | sh -
+    ```
 
-> 你也可以自己打包，完整示例源码在这里 xxx，源码中有详细的打包步骤说明。
+    ```shell
+    cd dubbo-kube-$version
+    ```
 
-## 安装微服务组件
+    ```sh
+    export PATH=$PWD/bin:$PATH
+    ```
 
-### 安装 dubboctl
+2. dubboctl 安装完成之后，接下来通过以下命令初始化微服务开发环境。
 
+    ```sh
+    dubboctl install --profile=demo
+    ```
 
+    `--profile=demo` 指定了安装的组件列表，作为示例用途，以上命令会一键安装 Nacos、Console、Prometheus、Grafana、Zipkin、Ingress 等组件，关于 profile 更多解释及可选值请参见文档说明。
+
+3. 检查环境准备就绪
+
+    ```sh
+    kubectl get services -n dubbo-system
+    ```
+
+## 部署应用
+准备 kubernetes manifests，执行以下命令会在当前目录下生成 `deployment.yml` 文件（其中包括 deployment、service 等资源定义）。
 ```sh
-curl -L https://dubbo.apache.org/downloadAdmin | sh -
+dubboctl deploy --image=ghcr.io/dubbo-demo:latest
 ```
 
-```sh
-cd dubbo-admin-0.5.0
+> 设计在生成的 deployment.yml 中自动加入 nacos注册中心地址
+
+> 以上命令默认:
+> * 使用 Docker Hub 仓库，可以通过 `--registry=xxx` 参数指定仓库，通过 `--file=xxx` 指定输出文件地址。
+> * 通过 `--image` 指定了官方预先准备好的容器镜像，你也可以自行打包镜像，具体请参见 `dubboctl build` 命令。
+
+接下来，将应用部署到 Kubernetes 环境。
+
+```shell
+kubectl apply -f ./deployment.yml
 ```
 
-```sh
-export PATH=$PWD/bin:$PATH
+检查部署状态
+```shell
+kubectl get services
 ```
 
-### 安装 Nacos & Admin
+## 访问应用
 
-```sh
-dubboctl install --profile=demo
-```
-
-以上命令会安装 Nacos、Admin 注册中心和控制台等关键组件，同时还会安装 Grafana、Prometheus。
-
-## 部署
-
-```sh
-dubboctl deploy --image=ghcr.io/dubbo-admin:latest
-```
-
-> 确保在项目源码根目录
-> ```sh
-> cd demo-application/
-> ```
-
-## 检查部署状态
-```sh
+```shell
 dubboctl dashboard admin
 ```
 
-打开浏览器访问 http://localhost:38080/admin，可以看到应用已经成功部署。
+打开浏览器访问 http://localhost:38080/admin，可以看到 Dubbo 微服务已经成功注册。
 
-继续访问 http://localhost:29000/，打开示例应用，访问产生流量。
+> 截图
 
+通过 triple 协议，可以继续测试 Dubbo 服务：
+```shell
+curl xxx
+```
 
+## 总体架构图
 
+![部署后的总体架构图]()
 
-更多内容，请参见
-* 模块 - 安装说明
-* 模块 - 服务网格
+* 如果您是非 Kubernetes - 暨传统虚拟机模式的 Dubbo 部署，请参考我们的 [部署任务]()。
+* 如果您计划将 Dubbo 部署到服务网格体系，请参考 [服务网格]()
