@@ -33,7 +33,7 @@ weight: 6
 
 > 如果没有通过`json-check-level`指定兼容性检查级别，则默认是`warn`告警级别。
 
-#### 使用示例
+### 使用示例
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
