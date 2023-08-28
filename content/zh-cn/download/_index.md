@@ -4,9 +4,8 @@ aliases:
 description: 版本发布
 layout: basic
 linkTitle: 版本发布
-menu:
-    main:
-        weight: 30
+hide_summary: true
+toc_hide: true
 no_list: true
 title: 版本发布
 type: docs
