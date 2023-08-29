@@ -2,7 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/json-compatibility-check/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/json-compatibility-check/
-description: Rest协议下对服务接口进行JSON兼容性检查
+description: Rest协议下对服务接口进行JSON兼容性检测
 linkTitle: 服务接口JSON兼容性检测
 title: 服务接口JSON兼容性检测
 type: docs
