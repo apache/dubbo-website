@@ -1,0 +1,56 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Service Debugging</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/debugging/</link><description>Recent content in Service Debugging on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/debugging/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Use grpc_cli to debug Dubbo-go service</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/debugging/grpc_cli/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/debugging/grpc_cli/</guid><description>
+&lt;p>The grpc_cli tool is a tool used by the gRPC ecosystem to debug services. It can be obtained under the premise that [reflection service] (&lt;a href="https://github.com/grpc/grpc/blob/master/doc/server-reflection.md">https://github.com/grpc/grpc/blob/master/doc/server-reflection.md&lt;/a>) is enabled on the server Go to the service&amp;rsquo;s proto file, service name, method name, parameter list, and initiate a gRPC call.&lt;/p>
+&lt;p>The Triple protocol is compatible with the gRPC ecosystem, and the gRPC reflection service is enabled by default, so you can directly use grpc_cli to debug the triple service.&lt;/p>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;li>Install grpc_cli, refer to &lt;a href="https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md">grpc_cli documentation&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-use-grpc_cli-tool-to-debug-triple-service">2. Use grpc_cli tool to debug Triple service&lt;/h2>
+&lt;h3 id="21-start-demo-application-server">2.1 Start demo application server&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ mkdir grpc_cli_test
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> grpc_cli_test
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newDemo.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ go mod tidy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> go-server/cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-use-grpc_cli-for-service-debugging">2.2 Use grpc_cli for service debugging&lt;/h3>
+&lt;ol>
+&lt;li>View the interface definition of the triple service&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ grpc_cli ls localhost:20000 -l
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>filename: samples_api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>package: api;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service Greeter &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHello&lt;span style="color:#719e07">(&lt;/span>api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHelloStream&lt;span style="color:#719e07">(&lt;/span>stream api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>stream api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>
+&lt;p>Check the request parameter type&lt;/p>
+&lt;p>For example, if a developer wants to test the SayHello method of the above port and try to obtain the specific definition of HelloRequest, he needs to execute the following command to view the definition of the corresponding parameters.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ grpc_cli &lt;span style="color:#b58900">type&lt;/span> localhost:20000 api.HelloRequest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>message HelloRequest &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string &lt;span style="color:#268bd2">name&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#268bd2">json_name&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>
+&lt;p>Request interface&lt;/p>
+&lt;p>Knowing the specific type of the request parameter, you can initiate a call to test the corresponding service. Check to see if the return value is as expected.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ grpc_cli call localhost:20000 SayHello &lt;span style="color:#2aa198">&amp;#34;name: &amp;#39;laurence&amp;#39;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>connecting to localhost:20000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>name: &lt;span style="color:#2aa198">&amp;#34;Hello Laurence&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>age: &lt;span style="color:#2aa198">21&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Received trailing metadata from server:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept-encoding: identity, gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-accept-encoding : identity,deflate,gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Rpc succeeded with OK status
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen that the correct return value has been obtained. On the server side, you can observe the logs that are correctly requested:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>Dubbo3 GreeterProvider get user &lt;span style="color:#268bd2">name&lt;/span> &lt;span style="color:#719e07">=&lt;/span> laurence
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

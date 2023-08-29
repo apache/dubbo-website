@@ -1,0 +1,515 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 部署服务</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/</link><description>Recent content in 部署服务 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/tasks/deploy/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 部署 Dubbo 应用到虚拟机环境</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-vm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-vm/</guid><description>
+&lt;h2 id="总体目标">总体目标&lt;/h2>
+&lt;ul>
+&lt;li>虚拟机环境&lt;/li>
+&lt;li>部署 Zookeeper&lt;/li>
+&lt;li>部署 Dubbo-admin + Zookeeper&lt;/li>
+&lt;li>部署 Provider + Zookeeper 与 Consumer + Zookeeper&lt;/li>
+&lt;/ul>
+&lt;h2 id="基本流程与工作原理">基本流程与工作原理&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/linux.jpg" alt="img">&lt;/p>
+&lt;h2 id="详细步骤">详细步骤&lt;/h2>
+&lt;h3 id="zookeeper">zookeeper&lt;/h3>
+&lt;p>下载项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>wget https://dlcdn.apache.org/zookeeper/zookeeper-x.x.x/apache-zookeeper-x.x.x-bin.tar.gz
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>apache-zookeeper-x.x.x.tar.gz 为未编译版本, 自 3.5.5 版本以后，已编译的 jar 包后缀 &lt;code>-bin&lt;/code>，请使用 apache-zookeeper-x.x.x-bin.tar.gz&lt;/p>
+&lt;/blockquote>
+&lt;p>解压项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>tar zxvf apache-zookeeper-x.x.x-bin.tar.gz -C /usr/local/ &amp;amp;&amp;amp; cd /usr/local
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>移动项目修改为 zookeeper 并切换至 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mv apache-zookeeper-x.x.x-bin zookeeper &amp;amp;&amp;amp; cd zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建目录并切换此目录导入内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mkdir data &amp;amp;&amp;amp; cd data &amp;amp;&amp;amp; echo 1 &amp;gt; myid
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>切换至 zookeeper 配置文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd .. &amp;amp;&amp;amp; cp conf/zoo_sample.cfg conf/zoo.cfg &amp;amp;&amp;amp; vim conf/zoo.cfg
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># zoo.cfg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tickTime=2000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>initLimit=10
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>syncLimit=5
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dataDir=/usr/local/zookeeper/data
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>clientPort=2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.serverPort=2182
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>./bin/zkServer.sh start
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>克隆项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-samples.git &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Reactor Summary:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Dubbo Samples Spring Boot 1.0-SNAPSHOT ............. SUCCESS [ 0.178 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-interface ................ SUCCESS [ 2.169 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-provider ................. SUCCESS [12:37 min]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-consumer 1.0-SNAPSHOT .... SUCCESS [ 0.219 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] BUILD SUCCESS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Total time: 12:54 min
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Finished at: 2023-01-16T01:17:09-05:00
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-admin">dubbo-admin&lt;/h3>
+&lt;p>克隆项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># 默认配置
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git &amp;amp;&amp;amp; cd dubbo-admin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># 修改配置
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git &amp;amp;&amp;amp; cd dubbo-admin &amp;amp;&amp;amp; vim dubbo-admin-server/src/main/resources/application.properties
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># dubbo-admin-server/src/main/resources/application.properties
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>server.port=38080
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port=30880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-port=32222
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.registry.address=zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.config-center=zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.metadata-report.address=zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.root.user.name=root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.root.user.password=root
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>mvn clean &lt;span style="color:#719e07">package&lt;/span> &lt;span style="color:#719e07">-&lt;/span>Dmaven.test.skip=&lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-admin/dubbo-admin-server/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>后台运行&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>nohup java -jar dubbo-admin-server-0.5.0-SNAPSHOT.jar &amp;gt; /dev/null 2&amp;gt;&amp;amp;1 &amp;amp;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://&amp;lt;IP&amp;gt;:38080
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>登录页面
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-login.jpg" alt="img">&lt;/p>
+&lt;p>服务查询
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-page.jpg" alt="img">&lt;/p>
+&lt;h3 id="dubbo">dubbo&lt;/h3>
+&lt;p>克隆项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-samples.git &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Reactor Summary:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Dubbo Samples Spring Boot 1.0-SNAPSHOT ............. SUCCESS [ 8.147 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-interface ................ SUCCESS [ 51.524 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-provider ................. SUCCESS [02:27 min]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-consumer 1.0-SNAPSHOT .... SUCCESS [ 0.284 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] BUILD SUCCESS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Total time: 03:49 min
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Finished at: 2023-01-16T09:34:39-05:00
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="provider">Provider&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-provider/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>后台运行&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>nohup java -jar dubbo-samples-spring-boot-provider-1.0-SNAPSHOT.jar &amp;gt; /dev/null 2&amp;gt;&amp;amp;1 &amp;amp;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer">Consumer&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-consumer/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>后台运行&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>nohup java -jar dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar &amp;gt; /dev/null 2&amp;gt;&amp;amp;1 &amp;amp;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看服务
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/consumer-provider.jpg" alt="img">&lt;/p></description></item><item><title>Overview: 部署 Dubbo 应用到 Docker 环境</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-docker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-docker/</guid><description>
+&lt;h2 id="总体目标">总体目标&lt;/h2>
+&lt;ul>
+&lt;li>部署 &lt;a href="https://docs.docker.com/engine/install/">Docker&lt;/a>&lt;/li>
+&lt;li>部署 Zookeeper&lt;/li>
+&lt;li>部署 Dubbo-admin + Zookeeper&lt;/li>
+&lt;li>部署 Producer + Zookeeper 与 Consumer + Zookeeper&lt;/li>
+&lt;/ul>
+&lt;h2 id="基本流程与工作原理">基本流程与工作原理&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/docker.jpg" alt="img">&lt;/p>
+&lt;h2 id="详细步骤">详细步骤&lt;/h2>
+&lt;h3 id="zookeeper">zookeeper&lt;/h3>
+&lt;p>下载项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>wget https://dlcdn.apache.org/zookeeper/zookeeper-x.x.x/apache-zookeeper-x.x.x-bin.tar.gz
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>apache-zookeeper-x.x.x.tar.gz 为未编译版本, 自 3.5.5 版本以后，已编译的 jar 包后缀 &lt;code>-bin&lt;/code>，请使用 apache-zookeeper-x.x.x-bin.tar.gz&lt;/p>
+&lt;/blockquote>
+&lt;p>解压项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>tar zxvf apache-zookeeper-x.x.x-bin.tar.gz -C /usr/local/ &amp;amp;&amp;amp; cd /usr/local
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>移动项目修改为 zookeeper 并切换至 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mv apache-zookeeper-x.x.x-bin zookeeper &amp;amp;&amp;amp; cd zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建目录并切换此目录导入内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mkdir -p /usr/local/docker/zookeeper/data &amp;amp;&amp;amp; cd /usr/local/docker/zookeeper/data &amp;amp;&amp;amp; echo 1 &amp;gt; myid
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>拉取 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker pull zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker run -p 2181:2181 -p 2888:2888 -p 3888:3888 -v /usr/local/docker/zookeeper/data:/data/ --name zookeeper --restart always -d zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>测试 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker run -it --rm --link zookeeper:zookeeper zookeeper zkCli.sh -server zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-admin">dubbo-admin&lt;/h3>
+&lt;p>下载项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git &amp;amp;&amp;amp; cd dubbo-admin
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># dubbo-admin-server/src/main/resources/application.properties
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>server.port=38080
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port=30880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qos-port=32222
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.registry.address=zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.config-center=zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.metadata-report.address=zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.root.user.name=root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.root.user.password=root
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker run -it --rm -v /the/host/path/containing/properties:/config -p 38080:38080 apache/dubbo-admin
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>将 /the/host/path/containing/properties 替换为宿主机上包含 application.properties 文件的实际路径（必须是一个有效目录的绝对路径）。&lt;/p>
+&lt;/blockquote>
+&lt;p>进入服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://&amp;lt;IP&amp;gt;:38080
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>登录页面
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-login.jpg" alt="img">&lt;/p>
+&lt;p>服务查询
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-page.jpg" alt="img">&lt;/p>
+&lt;h3 id="dubbo">dubbo&lt;/h3>
+&lt;p>下载项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-samples.git &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改 Provider 的 zookeeper 地址&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># dubbo-samples-spring-boot-provider/src/main/resources/application.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: -1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config-center:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadata-report:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改 Consumer 的 zookeeper 地址&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># dubbo-samples-spring-boot-consumer/src/main/resources/application.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: -1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config-center:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadata-report:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://&amp;lt;docker-zookeeper-ip&amp;gt;:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>切换到服务示例&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Reactor Summary:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Dubbo Samples Spring Boot 1.0-SNAPSHOT ............. SUCCESS [ 8.147 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-interface ................ SUCCESS [ 51.524 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-provider ................. SUCCESS [02:27 min]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-consumer 1.0-SNAPSHOT .... SUCCESS [ 0.284 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] BUILD SUCCESS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Total time: 03:49 min
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Finished at: 2023-01-16T09:34:39-05:00
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="producer">Producer&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-provider/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD dubbo-samples-spring-boot-provider-1.0-SNAPSHOT.jar /app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT [&amp;#34;java&amp;#34;, &amp;#34;-Djava.security.egd=file:/dev/urandom&amp;#34;, &amp;#34;-jar&amp;#34;, &amp;#34;/app.jar&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-springboot-provider:alpine .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker run --name provider -d dubbo-springboot-provider:alpine
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer">Consumer&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-consumer/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar /app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT [&amp;#34;java&amp;#34;, &amp;#34;-Djava.security.egd=file:/dev/urandom&amp;#34;, &amp;#34;-jar&amp;#34;, &amp;#34;/app.jar&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-springboot-consumer:alpine .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker run --name consumer -d dubbo-springboot-consumer:alpine
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看服务
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/consumer-provider.jpg" alt="img">&lt;/p></description></item><item><title>Overview: 部署 Dubbo 应用到 Kubernetes + Docker 环境</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-k8s-docker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-k8s-docker/</guid><description>
+&lt;h2 id="总体目标">总体目标&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://kubernetes.io/docs/setup/production-environment/tools/">Kubernetes&lt;/a>&lt;/li>
+&lt;li>Zookeeper&lt;/li>
+&lt;li>Dubbo-admin + Zookeeper&lt;/li>
+&lt;li>Producer + Zookeeper 与 Consumer + Zookeeper&lt;/li>
+&lt;/ul>
+&lt;h2 id="基本流程与工作原理">基本流程与工作原理&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-k8s-docker.jpg" alt="img">&lt;/p>
+&lt;h2 id="详细步骤">详细步骤&lt;/h2>
+&lt;p>创建命名空间&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl create ns dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="zookeeper">zookeeper&lt;/h3>
+&lt;p>获取图表&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>helm repo add bitnami https://charts.bitnami.com/bitnami
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>helm install zookeeper bitnami/zookeeper --set persistence.enabled=false -n dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl get pods -n dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-admin">dubbo-admin&lt;/h3>
+&lt;p>克隆项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git &amp;amp;&amp;amp; cd /dubbo-admin/deploy/k8s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl apply -f ./ -n dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl --namespace dubbo-demo port-forward service/dubbo-admin 38080:38080
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>登录页面
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-login.jpg" alt="img">&lt;/p>
+&lt;p>服务查询
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-page.jpg" alt="img">&lt;/p>
+&lt;h3 id="dubbo">dubbo&lt;/h3>
+&lt;p>克隆项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-samples.git &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Reactor Summary:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Dubbo Samples Spring Boot 1.0-SNAPSHOT ............. SUCCESS [ 8.147 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-interface ................ SUCCESS [ 51.524 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-provider ................. SUCCESS [02:27 min]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-consumer 1.0-SNAPSHOT .... SUCCESS [ 0.284 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] BUILD SUCCESS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Total time: 03:49 min
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Finished at: 2023-01-16T09:34:39-05:00
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>### dubbo-samples-spring-boot-provider/src/main/resources/application.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: -1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config-center:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadata-report:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>### dubbo-samples-spring-boot-consumer/src/main/resources/application.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: -1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config-center:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadata-report:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>切换到服务示例&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="producer">Producer&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-provider/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD dubbo-samples-spring-boot-provider-1.0-SNAPSHOT.jar /app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT [&amp;#34;java&amp;#34;, &amp;#34;-Djava.security.egd=file:/dev/urandom&amp;#34;, &amp;#34;-jar&amp;#34;, &amp;#34;/app.jar&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-springboot-provider:alpine .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>导入服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; provider.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>apiVersion: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kind: Pod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>metadata:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> namespace: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>spec:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> containers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> image: dubbo-springboot-provider:alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl create -f provider.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer">Consumer&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-consumer/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar /app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT [&amp;#34;java&amp;#34;, &amp;#34;-Djava.security.egd=file:/dev/urandom&amp;#34;, &amp;#34;-jar&amp;#34;, &amp;#34;/app.jar&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-springboot-consumer:alpine .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>导入服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; consumer.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>apiVersion: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kind: Pod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>metadata:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> namespace: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>spec:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> containers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> image: dubbo-springboot-consumer:alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl create -f consumer.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看服务
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/consumer-provider.jpg" alt="img">&lt;/p></description></item><item><title>Overview: 部署 Dubbo 应用到 Kubernetes + Containerd 环境</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-k8s-containerd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/deploy/deploy-on-k8s-containerd/</guid><description>
+&lt;h2 id="总体目标">总体目标&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://kubernetes.io/docs/setup/production-environment/tools/">Kubernetes&lt;/a>&lt;/li>
+&lt;li>Zookeeper&lt;/li>
+&lt;li>Dubbo-admin + Zookeeper&lt;/li>
+&lt;li>Producer + Zookeeper 与 Consumer + Zookeeper&lt;/li>
+&lt;/ul>
+&lt;h2 id="基本流程与工作原理">基本流程与工作原理&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-k8s-containerd.jpg" alt="img">&lt;/p>
+&lt;h2 id="详细步骤">详细步骤&lt;/h2>
+&lt;p>创建命名空间&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl create ns dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="zookeeper">zookeeper&lt;/h3>
+&lt;p>获取图表&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>helm repo add bitnami https://charts.bitnami.com/bitnami
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>helm install zookeeper bitnami/zookeeper --set persistence.enabled=false -n dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl get pods -n dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-admin">dubbo-admin&lt;/h3>
+&lt;p>克隆项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git &amp;amp;&amp;amp; cd /dubbo-admin/deploy/k8s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>admin.registry.address=zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.config-center=zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.metadata-report.address=zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl apply -f ./ -n dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl --namespace dubbo-demo port-forward service/dubbo-admin 38080:38080
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>登录页面
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-login.jpg" alt="img">&lt;/p>
+&lt;p>服务查询
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/dubbo-admin-page.jpg" alt="img">&lt;/p>
+&lt;h3 id="dubbo">dubbo&lt;/h3>
+&lt;p>克隆项目到本地&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-samples.git &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Reactor Summary:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Dubbo Samples Spring Boot 1.0-SNAPSHOT ............. SUCCESS [ 8.147 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-interface ................ SUCCESS [ 51.524 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-provider ................. SUCCESS [02:27 min]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] dubbo-samples-spring-boot-consumer 1.0-SNAPSHOT .... SUCCESS [ 0.284 s]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] BUILD SUCCESS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Total time: 03:49 min
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] Finished at: 2023-01-16T09:34:39-05:00
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] ------------------------------------------------------------------------
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>### dubbo-samples-spring-boot-provider/src/main/resources/application.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: -1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config-center:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadata-report:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>### dubbo-samples-spring-boot-consumer/src/main/resources/application.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: -1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config-center:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadata-report:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: zookeeper://zookeeper:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>切换到服务示例&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd &amp;amp;&amp;amp; cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打包编译&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="producer">Producer&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-provider/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD dubbo-samples-spring-boot-provider-1.0-SNAPSHOT.jar /app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT [&amp;#34;java&amp;#34;, &amp;#34;-Djava.security.egd=file:/dev/urandom&amp;#34;, &amp;#34;-jar&amp;#34;, &amp;#34;/app.jar&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>nerdctl build --no-cache -t dubbo-springboot-provider:alpine -f Dockerfile .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>导入服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; provider.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>apiVersion: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kind: Pod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>metadata:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> namespace: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>spec:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> containers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> image: dubbo-springboot-provider:alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl create -f provider.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer">Consumer&lt;/h4>
+&lt;p>切换至目标服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cd dubbo-samples-spring-boot-consumer/target
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>构建镜像&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar /app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT [&amp;#34;java&amp;#34;, &amp;#34;-Djava.security.egd=file:/dev/urandom&amp;#34;, &amp;#34;-jar&amp;#34;, &amp;#34;/app.jar&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>nerdctl build --no-cache -t dubbo-springboot-consumer:alpine -f Dockerfile .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>导入服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cat &amp;lt;&amp;lt;EOF &amp;gt; consumer.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>apiVersion: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kind: Pod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>metadata:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name: dubbo-springboot-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> namespace: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>spec:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> containers:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> image: dubbo-springboot-consumer:alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>EOF
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl create -f consumer.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看服务
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/consumer-provider.jpg" alt="img">&lt;/p></description></item></channel></rss>
