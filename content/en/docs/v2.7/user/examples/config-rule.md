@@ -29,7 +29,7 @@ Example：
 1. Disable service provider.(Usually used to temporarily kick off a provider machine, similar to the prohibition of consumer access, please use the routing rules)
 
     ```
-    override://10.20.153.10/com.foo.BarService?category=configurators&dynamic=false&disbaled=true
+    override://10.20.153.10/com.foo.BarService?category=configurators&dynamic=false&disabled=true
     ```
 
 2. Adjustment weight:(Usually used to capacity assessment,default is 100)
