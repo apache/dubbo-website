@@ -13,10 +13,10 @@ type: docs
 weight: 2
 ---
 
+## Dubbo Rust服务发现简介
+Dubbo Rust提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持的注册中心： Nacos、Zookeeper 
 
-Dubbo Rust提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持的注册中心： Nacos、Zookeeper。。
-
-以下是 Dubbo Rust服务发现机制的基本工作原理图：
+以下是 Dubbo Rust服务发现机制的基本工作原理图： 
 
 ![service-discovery](/imgs/rust/dubbo-rust-service-discovery.png)
 
@@ -24,12 +24,14 @@ Dubbo Rust提供的是一种 Client-Based 的服务发现机制，依赖第三�
 
 * Dubbo Rust注册中心以服务粒度聚合实例数据，消费者按消费需求精准订阅。
 
-### 高效地址推送实现
+Dubbo Rust服务发现的一个示例：[example](https://github.com/apache/dubbo-rust/tree/feat/cluster/examples/greeter)
+
+## 高效地址推送实现
 
 从注册中心视角来看，它负责以服务名 (例如：org.apache.dubbo.sample.tri.Greeter) 对整个集群的实例地址进行聚合，每个对外提供服务的实例将自身的实例ip:port 地址信息 (例如：127.0.0.1:8848) 注册到注册中心。
 
 ## 配置方式
-Dubbo Rust服务发现支持两种注册中心组件，既Nacos、Zookeeper，可以通过以下集中方式切换不同实现。
+Dubbo Rust服务发现支持两种注册中心组件，既Nacos、Zookeeper，可以通过以下方式创建不同的注册中心，并将其绑定到Dubbo Rust框架。
 
 配置方式：
 假设有服务：Greeter，对应的服务实现为GreeterServerImpl
