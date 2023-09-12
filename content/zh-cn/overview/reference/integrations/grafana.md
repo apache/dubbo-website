@@ -17,7 +17,7 @@ Grafana 是一种开源的监控解决方案，可用于为 Dubbo 配置可视�
 * [**Apache Dubbo Observability Dashboard：**](https://grafana.com/grafana/dashboards/18469)
 * [**JVM (Micrometer) Dashboard：**](https://grafana.com/grafana/dashboards/4701)
 
-您可以通过以下几种方式快速的导入 Grafana 监控面板。
+您可以通过以下几种方式快速的导入 [Grafana](https://grafana.com/docs) 监控面板。
 
 ### 方式一：Kubernetes 安装
 
