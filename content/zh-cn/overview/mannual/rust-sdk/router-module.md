@@ -112,7 +112,7 @@ name：固定为application;
 #### 注意事项
 dubbo rust目前还没有实现对于**应用**的区分，无法区分服务来自哪个应用；
 故对于应用级别的配置项，默认对所有服务生效
-因此对于标签路由和条件路由，都仅能配置一条应用级别的配置，对于应用级配置，配置名称（name）指定为application
+因此对于标签路由和条件路由，都仅能配置一条应用级别的配置，配置名称（name）指定为application
 
 #### 例：
 ![nacos-example.png](/imgs/rust/router-example/nacos-example.png)
