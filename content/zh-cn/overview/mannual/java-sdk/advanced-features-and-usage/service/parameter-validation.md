@@ -168,6 +168,8 @@ public interface ValidationService {
 
 > **Dubbo 默认支持 hibernate-validator 版本 <=6.x，若使用 hibernate-validator 7.x 版本，请将 validation 参数声明为 jvalidationNew**
 
+> 如果需要启动客户端验证,并且使用jdk17,择需添加jvm启动参数`--add-opens java.base/java.lang=ALL-UNNAMED`做兼容处理.
+
 ### 验证异常信息
 
 ```java
