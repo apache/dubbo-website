@@ -20,7 +20,7 @@ weight: 1
     <version>3.3.0-beta.1</version>
 </dependency>
 
-<!-- dubbo 的唯一传递依赖是 Netty，为了避免依赖冲突，您也可以是选择使用shade版本，这样就不会有任何传递依赖！ -->
+<!-- 为了避免 Netty 依赖冲突，您也可以是选择使用 dubbo-shaded 版本！-->
 <!--
 <dependency>
     <groupId>org.apache.dubbo</groupId>
@@ -81,9 +81,9 @@ curl \
     http://localhost:50051/org.apache.dubbo.demo.DemoService/sayHello
 ```
 
-> JSON 必须以包装成数组的方式传递，如果有多个参数，则格式类似 `["param1", {"param2-field": "param2-value"}, ...]`，具体请参见 triple 协议规范。
+> 参数必须以数组格式进行传递，如果有多个参数，则格式类似 `["param1", {"param2-field": "param2-value"}, ...]`，具体请参见 triple 协议规范。
 
-您也可以使用标准的 Dubbo client 请求服务，指定 server 地址即可发起 RPC 调用，其格式为 `protocol://ip:host`
+接下来，您也可以使用标准的 Dubbo client 请求服务，指定 server 地址即可发起 RPC 调用，其格式为 `protocol://ip:host`
 
 ```java
 public class Application {
@@ -106,6 +106,7 @@ public class Application {
 ## 更多内容
 
 - Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)
+- 查看 [更多 API 使用示例](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)
 - 您可以继续使用 API 为应用添加更多微服务治理能力，但我们更推进您使用 [Dubbo Spring Boot 开发微服务应用](../../microservice/develop/)
 
 
