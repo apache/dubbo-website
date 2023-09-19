@@ -71,9 +71,9 @@ The Apache Dubbo Node.js implementation.
   {{< card header="apache/dubbo-rust" >}}
 The Apache Dubbo Rust implementation.
  <div style="width:130px;float:left;" class="mr-5">
-     <a class="github-button" href="https://github.com/apache/dubbo-js" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star apache/dubbo-js on GitHub">Star</a>
-     <a class="github-button" href="https://github.com/apache/dubbo-js/fork" data-icon="octicon-repo-forked" data-size="large" data-show-count="true" aria-label="Fork apache/dubbo-js on GitHub">Fork</a>
-     <a class="github-button" href="https://github.com/apache/dubbo-js/subscription" data-icon="octicon-eye" data-size="large" data-show-count="true" aria-label="Watch apache/dubbo-js on GitHub">Watch</a>
+     <a class="github-button" href="https://github.com/apache/dubbo-rust" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star apache/dubbo-js on GitHub">Star</a>
+     <a class="github-button" href="https://github.com/apache/dubbo-rust/fork" data-icon="octicon-repo-forked" data-size="large" data-show-count="true" aria-label="Fork apache/dubbo-js on GitHub">Fork</a>
+     <a class="github-button" href="https://github.com/apache/dubbo-rust/subscription" data-icon="octicon-eye" data-size="large" data-show-count="true" aria-label="Watch apache/dubbo-js on GitHub">Watch</a>
  </div>
     {{< /card >}}
 {{< /cardpane >}}
