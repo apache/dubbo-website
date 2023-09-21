@@ -8,7 +8,7 @@ weight: 2
 
 基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Go SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
 
-本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。本示例完整代码请参见 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/master/helloworld)。
+本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。本示例完整代码请参见 <a href="https://github.com/apache/dubbo-go-samples/tree/master/helloworld" target="_blank">dubbo-go-samples</a>。
 
 ## 前置条件
 

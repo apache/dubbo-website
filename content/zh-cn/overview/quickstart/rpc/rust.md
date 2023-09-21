@@ -8,7 +8,7 @@ type: docs
 weight: 5
 ---
 
-请在此查看完整 [示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
+请在此查看完整 <a href="https://github.com/apache/dubbo-rust/tree/main/examples/greeter" target="_blank">dubbo-rust/example</a>。
 
 ## 1 前置条件
 - 安装 [Rust](https://rustup.rs/) 开发环境

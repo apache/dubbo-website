@@ -8,7 +8,7 @@ weight: 4
 
 基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo TypeScript SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 APl 来发布或调用这些服务。
 
-本示例演示了如何使用 dubbo-js 开发运行在浏览器上的 web 应用程序，web 页面将调用 dubbo node.js 开发的后端服务并生成页面内容。本示例演示基于 IDL 和非 IDL 两种编码模式，完整源码请查看 [dubbo-js/example](https://github.com/apache/dubbo-js/tree/dubbo3/example/dubbo-web-example)。
+本示例演示了如何使用 dubbo-js 开发运行在浏览器上的 web 应用程序，web 页面将调用 dubbo node.js 开发的后端服务并生成页面内容。本示例演示基于 IDL 和非 IDL 两种编码模式，完整源码请查看 <a href="https://github.com/apache/dubbo-js/tree/dubbo3/example/dubbo-web-example" target="_blank">dubbo-js/web-example</a>。
 
 ## IDL 模式
 
@@ -253,4 +253,4 @@ npm run dev
 ```
 
 ## 更多内容
-- 请查看[Javascript 开发文档](/zh-cn/overview/mannual/web-sdk)了解更多使用方式。
+- 请查看 [Dubbo Web 开发文档](/zh-cn/overview/mannual/web-sdk) 了解更多使用方式。

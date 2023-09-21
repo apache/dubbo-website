@@ -1,6 +1,4 @@
 ---
-aliases:
-    - /zh/overview/quickstart/java/brief/
 description:
 linkTitle: 快速体验 Dubbo 开发与部署
 title: 快速开发和部署一个 Dubbo 应用
@@ -164,7 +162,7 @@ ACK ingerss-controller 的访问方式......
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/java-sdk/quick-start/spring-boot/" >}}'>示例源码解读</a>
+                     <a href='{{< relref "./customize" >}}'>示例源码解读</a>
                 </h4>
                 <p>关于示例应用的源码讲解，学习如何定制 Dubbo Spring Boot 应用。</p>
             </div>
@@ -174,7 +172,7 @@ ACK ingerss-controller 的访问方式......
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/java-sdk/quick-start/spring-boot/" >}}'>使用 dubboctl 创建多语言应用</a>
+                     <a href='{{< relref "./customize" >}}'>使用 dubboctl 创建多语言应用</a>
                 </h4>
                 <p>如何使用 dubboctl 快速创建 go、node.js、web、rust 等多语言应用。</p>
             </div>

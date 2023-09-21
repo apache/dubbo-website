@@ -9,7 +9,7 @@ type: docs
 weight: 2
 ---
 
-
+**Dubbo 既能作为轻量 RPC 框架解决组件之间的通信问题，又能为复杂的微服务集群提供完善的服务治理解决方案。**
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -37,3 +37,8 @@ weight: 2
     </div>
 
 {{< /blocks/section >}}
+
+下图展示了 Dubbo 的多语言生态：在端上有 dubbo-web 和 dubbo-mobile 以标准的 http+json 格式与后端微服务体系通信；后端实现则涵盖 Java、Go、Node.js、Rust 等语言。基于 Triple 协议打通了端上设备、后端微服务、异构体系如 gRPC 等之间的数据通信。
+
+<img src="/imgs/v3/quickstart/rpc-arc.png" style="width:700px;height:auto;"/>
+

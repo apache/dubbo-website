@@ -2,16 +2,16 @@
 description: "Dubbo 是一款轻量的 RPC 框架，提供 Java、Go、Node.js、Javascript 等语言支持，帮助开发者构建浏览器、gRPC 兼容的 HTTP API。"
 linkTitle: RPC
 no_list: true
-title: 轻量 RPC 框架
+title: Dubbo 作为轻量 RPC 框架解决组件通信问题
 type: docs
 weight: 1
 ---
 
- Dubbo is a family of libraries for building browser and gRPC-compatible HTTP APIs. If you're tired of hand-written boilerplate and turned off by massive frameworks, Connect is for you.
- * 轻量
- * 简单 API
- * gRPC 兼容
- * 支持 HTTP 访问
+ 基于 Dubbo3 定义的 Triple 协议，你可以轻松编写浏览器、移动端、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Node.js SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
+
+ 当前提供完整 Triple 协议通信的多语言 SDK 如下：
+
+<!-- <img src="/imgs/v3/quickstart/rpc-arc.png" style="width:700px;height:auto;"/> -->
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

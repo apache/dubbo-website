@@ -75,16 +75,6 @@ weight: 6
             </div>
         </div>
     </div>
-    <div class="col-sm col-md-6 mb-4">
-        <div class="h-100 card shadow">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <a href='{{< relref "./erlang-sdk" >}}'>Erlang SDK</a>
-                </h4>
-                <p>Dubbo Erlang SDK 手册</p>
-            </div>
-        </div>
-    </div>
 </div>
 <hr>
 </div>

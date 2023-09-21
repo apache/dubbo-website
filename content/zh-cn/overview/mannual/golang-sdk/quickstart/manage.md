@@ -1,6 +1,4 @@
 ---
-aliases:
-    - /zh/overview/quickstart/java/brief/
 description: 本文会部署一个经典的商城系统，并演示如何使用 Dubbo 的流量治理规则管控商城系统流量，包括灰度发布、金丝雀发布、按比例流量转发等。
 linkTitle: 尝试治理微服务
 title: 尝试治理微服务
@@ -140,7 +138,7 @@ Admin 控制台显示的服务注册情况界面如下：<br/><br/>
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/java-sdk/quick-start/spring-boot/" >}}'>示例源码解读</a>
+                     <a href='{{< relref "../../java-sdk/quick-start/spring-boot/" >}}'>示例源码解读</a>
                 </h4>
                 <p>关于示例应用的源码讲解，学习如何定制 Dubbo Spring Boot 应用。</p>
             </div>
@@ -150,7 +148,7 @@ Admin 控制台显示的服务注册情况界面如下：<br/><br/>
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/java-sdk/quick-start/spring-boot/" >}}'>使用 dubboctl 创建多语言应用</a>
+                     <a href='{{< relref "../../java-sdk/quick-start/spring-boot/" >}}'>使用 dubboctl 创建多语言应用</a>
                 </h4>
                 <p>如何使用 dubboctl 快速创建 go、node.js、web、rust 等多语言应用。</p>
             </div>

@@ -8,7 +8,7 @@ weight: 1
 
 基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Java SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
 
-本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Java Interface 方式定义、发布和访问 RPC 服务。本示例完整代码请参见 [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api)。
+本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Java Interface 方式定义、发布和访问 RPC 服务。本示例完整代码请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>。
 
 ## Maven 依赖
 
