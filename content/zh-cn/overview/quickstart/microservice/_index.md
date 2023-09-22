@@ -15,9 +15,9 @@ weight: 1
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./develop" >}}'>快速开发和部署一个 Dubbo 应用</a>
+                     <a href='{{< relref "./develop" >}}'>快速创建一个 Dubbo 应用</a>
                 </h4>
-                <p>我们学习如何快速创建一个示例 Dubbo 应用，将其打包为 Docker 镜像，并部署到 Kubernetes 集群。</p>
+                <p>我们学习如何使用 <em>cli</em> 或 <em>start.dubbo.apache.org</em> 快速创建一个 Dubbo 应用，并在本地开发环境进行调试。</p>
             </div>
         </div>
     </div>
@@ -25,9 +25,9 @@ weight: 1
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./deploy" >}}'>微服务应用定制开发</a>
+                     <a href='{{< relref "./deploy" >}}'>Dubbo 应用的打包与部署</a>
                 </h4>
-                <p>我们以一个 Dubbo Spring Boot 应用为例，讲解如何。</p>
+                <p>演示如何部署将 Dubbo 微服务应用打包为镜像，之后部署到 Kubernetes 集群</p>
             </div>
         </div>
     </div>
@@ -35,9 +35,9 @@ weight: 1
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./manage" >}}'></a>
+                     <a href='{{< relref "./manage" >}}'>尝试治理 Dubbo 微服务集群</a>
                 </h4>
-                <p>使用轻量的 Node.js SDK 开发 RPC Server 和 Client。</p>
+                <p>部署一个经典的商城系统，并演示如何使用 Dubbo 的流量治理规则管控商城系统流量，包括灰度发布、金丝雀发布、按比例流量转发等。</p>
             </div>
         </div>
     </div>

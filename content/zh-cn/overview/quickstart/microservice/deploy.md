@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/quickstart/java/brief/
 description: 演示如何部署 Dubbo 微服务应用到 Kubernetes 集群
-linkTitle: 部署微服务应用
+linkTitle: 应用打包与部署
 title: 部署 Dubbo 微服务应用到 Kubernetes 集群
 type: docs
 weight: 2

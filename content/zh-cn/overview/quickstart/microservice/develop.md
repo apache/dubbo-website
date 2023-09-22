@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/quickstart/java/brief/
 description: 演示如何快速开发一个 Dubbo 微服务应用
-linkTitle: 开发一个微服务应用
+linkTitle: 快速创建一个应用
 title: 演示如何快速开发一个 Dubbo 微服务应用
 type: docs
 weight: 1

@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/quickstart/java/brief/
 description: 本文会部署一个经典的商城系统，并演示如何使用 Dubbo 的流量治理规则管控商城系统流量，包括灰度发布、金丝雀发布、按比例流量转发等。
-linkTitle: 尝试治理微服务
+linkTitle: 尝试治理Dubbo微服务
 title: 通过一个商场示例了解流量治理规则
 type: docs
 weight: 3
