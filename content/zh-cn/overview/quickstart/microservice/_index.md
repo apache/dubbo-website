@@ -25,7 +25,7 @@ weight: 1
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "./customize" >}}'>微服务应用定制开发</a>
+                     <a href='{{< relref "./deploy" >}}'>微服务应用定制开发</a>
                 </h4>
                 <p>我们以一个 Dubbo Spring Boot 应用为例，讲解如何。</p>
             </div>
