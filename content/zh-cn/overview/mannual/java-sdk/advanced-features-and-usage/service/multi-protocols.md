@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-protocols/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-protocols/
+    - /zh-cn/overview/tasks/protocols/multi-protocols/
 description: 在 Dubbo 中配置多协议
 linkTitle: 多协议
 title: 多协议
@@ -10,7 +11,11 @@ weight: 9
 ---
 
 
+如果是共享注册中心，建议是
 
+如果是多注册中心，建议是多协议模式。
+
+### 消费端行为说明
 
 
 ## 特性说明

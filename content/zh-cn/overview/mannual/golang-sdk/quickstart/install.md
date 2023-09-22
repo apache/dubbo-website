@@ -2,6 +2,8 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/quickstart/install/
     - /zh-cn/docs3-v2/golang-sdk/quickstart/install/
+    - /zh/overview/quickstart/go/install/
+    - /zh-cn/overview/quickstart/go/install/
 description: 安装 Dubbo-go 开发环境
 title: 安装 Dubbo-go 开发环境
 type: docs

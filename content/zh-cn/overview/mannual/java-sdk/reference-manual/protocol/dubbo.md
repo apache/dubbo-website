@@ -1,14 +1,15 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
     - /zh/overview/what/ecosystem/protocol/dubbo/
-description: Dubbo协议
-linkTitle: Dubbo协议
-title: Dubbo协议
+description: 基于 TCP 的 Dubbo 二进制通信协议实现及使用方式
+linkTitle: 基于 TCP 的 Dubbo 二进制协议
+title: 基于 TCP 的 Dubbo 二进制协议
 type: docs
 weight: 2
 ---
+
+请在此查看 [Dubbo 协议规范](/zh-cn/overview/reference/protocols/tcp/)。
 
 ## 特性说明
 Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。

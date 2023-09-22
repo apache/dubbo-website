@@ -1,6 +1,8 @@
 ---
 aliases:
     - /zh/docsv2.7/user/references/protocol/gRPC/
+    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/grpc/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/grpc/
 description: grpc:// 协议参考手册
 linkTitle: grpc://
 title: gRPC 协议

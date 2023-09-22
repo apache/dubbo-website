@@ -2,25 +2,20 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
-description: Dubbo2 协议迁移
-linkTitle: Dubbo2 协议迁移
-title: Dubbo2 协议迁移
+description: "如何从 Dubbo2 协议平滑的迁移到 Triple 协议"
+linkTitle: 老用户协议平滑迁移
+title: 老用户协议平滑迁移
 type: docs
 weight: 10
 ---
 
-
-
-
-
-
 ## 迁移流程说明
 
-Dubbo2 的用户使用 dubbo 协议 + 自定义序列化，如 hessian2 完成远程调用。
-
-而 Grpc 的默认仅支持 Protobuf 序列化，对于 Java 语言中的多参数以及方法重载也无法支持。
+Dubbo2 的老用户使用 dubbo 协议 + 自定义序列化，如 hessian2 完成远程调用。
 
 Dubbo3 的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 能够平滑升级， Dubbo 框架侧做了很多工作来保证升级的无感，目前默认的序列化和 Dubbo2 保持一致为 `hessian2`。
+
+> 而 Grpc 的默认仅支持 Protobuf 序列化，对于 Java 语言中的多参数以及方法重载也无法支持。
 
 所以，如果决定要升级到 Dubbo3 的 `Triple` 协议，只需要修改配置中的协议名称为 `tri` (注意: 不是 triple )即可。
 
@@ -100,3 +95,6 @@ public class IGreeter2Impl implements IWrapperGreeter {
 {{% alert title="输出结果" color="info" %}}
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
 {{% /alert %}}
+
+## 总结
+升级中用到了 Dubbo 的多协议发布能力，为了保证升级稳定性，请仔细阅读 [Dubbo 的多协议支持]() 相关文档。
