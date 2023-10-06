@@ -211,7 +211,7 @@ API 的实现者是运行时，它负责所有控制平面操作。运行时决�
 
 [13]  Dapr - distributed application runtime. [https://dapr.io/.](https://dapr.io/)
 
-[14]  Distributed systems safety research. [https://jespen.io.](https://jespen.io)
+[14]  Distributed systems safety research. `https://jespen.io.`
 
 [15]  Docker compose. [https://docs.docker.com/compose/.](https://docs.docker.com/compose/)
 

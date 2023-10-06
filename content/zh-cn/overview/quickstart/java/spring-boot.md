@@ -366,7 +366,7 @@ public interface DemoService {
 }
 ```
 
-在 `GreetingsService` 中，定义了 `sayHi` 这个方法。后续服务端发布的服务，消费端订阅的服务都是围绕着 `GreetingsService` 接口展开的。
+在 `DemoService` 中，定义了 `sayHello` 这个方法。后续服务端发布的服务，消费端订阅的服务都是围绕着 `DemoService` 接口展开的。
 
 ### 5. 定义服务端的实现
 

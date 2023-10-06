@@ -45,7 +45,7 @@ docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
 
 ### 检查监控效果
 
-在浏览器中打开 `[http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)` 查看效果。
+在浏览器中打开 `http://localhost:9411/zipkin/` 查看效果。
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/zipkin.png)
 

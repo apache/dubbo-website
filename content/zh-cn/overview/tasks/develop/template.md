@@ -28,7 +28,7 @@ Initializer 将使用 `dubbo-spring-boot-starter` 创建 Spring Boot 项目，�
 ![initializer-project-architecture](/imgs/v3/tasks/develop/initializer-project-architecture.png)
 
 * 单模块，所有组件代码存放在一个 module 中，特点是结构简单。
-* 多模块，生成的项目有 `API`、`Service` 两个模块，其中 `API` 用于存放 Dubbo 服务定义，`Service` 用于存放服务服务实现或调用逻辑。通常多模块更有利于服务定义的单独管理与发布。
+* 多模块，生成的项目有 `API`、`Service` 两个模块，其中 `API` 用于存放 Dubbo 服务定义，`Service` 用于存放服务实现或调用逻辑。通常多模块更有利于服务定义的单独管理与发布。
 
 ## 选择依赖组件
 我们为模板默认选择如下几个依赖组件：

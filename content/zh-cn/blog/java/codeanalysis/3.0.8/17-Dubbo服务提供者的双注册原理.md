@@ -709,7 +709,7 @@ ZookeeperServiceDiscovery的构造器
 ```
 
 
-如果感兴趣的话可以看更详细的curator服务发现文档[curator-x-discovery](https://curator.apache.org/curator-x-discovery/index.html)
+如果感兴趣的话可以看更详细的curator服务发现文档[curator-x-discovery](https://curator.apache.org/docs/service-discovery/index.html)
 
 ### 17.4.2 AbstractServiceDiscovery的构造器
 

@@ -24,11 +24,11 @@ You can consider enabling the gRPC protocol.
 
 ## How to use
 ### Using gRPC in Dubbo
-[Example](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc)
+[Example](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc)
 
 ### steps
 1. Define a service using IDL
 2. Configure the compiler plug-in, precompile locally
 3. Configure to expose/reference Dubbo service
 
-> In addition to the native StreamObserver interface type, Dubbo also supports [RxJava](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava), [Reactor](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-reactor) programming style API.
+> In addition to the native StreamObserver interface type, Dubbo also supports [RxJava](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc/dubbo-samples-rxjava), [Reactor](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc/dubbo-samples-reactor) programming style API.

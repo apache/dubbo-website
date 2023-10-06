@@ -51,7 +51,7 @@ public class ObservationConfiguration {
     }
 }
 ```
-## 4. 启 Skywalking OAP
+## 4. 启动 Skywalking OAP
 请参考这里了解如何 [设置 Skywalking OAP](https://skywalking.apache.org/docs/main/v9.3.0/en/setup/backend/backend-setup/)
 
 ```shell

@@ -107,7 +107,7 @@ CompletableFuture<String> future = helloService.sayHello("world");
 
 ![idl dubbo compiler](/imgs/blog/idl-dubbo-compiler.png) 
 
-但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
+但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
 
 ### 性能优化
 

@@ -572,7 +572,7 @@ ZookeeperServiceDiscovery中的doRegister方法
 
 
 先来看第一步：Dubbo实现的ServiceInstance类型对象转 Curator的ServiceInstance
-关于Curator的服务发现原理可以参考官网的文章博客[curator-x-discovery](https://curator.apache.org/curator-x-discovery/index.html)
+关于Curator的服务发现原理可以参考官网的文章博客[curator-x-discovery](https://curator.apache.org/docs/service-discovery/index.html)
 
 
 **什么是发现服务？**
