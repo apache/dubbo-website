@@ -4,7 +4,7 @@ linkTitle: "基于 Triple 实现 Web 移动端后端全面打通"
 tags: ["apachecon2023", "triple", "protocol"]
 date: 2023-10-07
 authors: ["陈有为"]
-description: A基于 Triple 实现 Web 移动端后端全面打通
+description: 基于 Triple 实现 Web 移动端后端全面打通
 ---
 
 摘要：本文整理自陌陌研发工程师、Apache Dubbo PMC陈有为在 Community Over Code 2023 大会上的分享，本篇内容主要分为四个部分：

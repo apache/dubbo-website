@@ -1,6 +1,6 @@
 ---
-title: "Web 浏览器页面也能访问dubbo、grpc微服务？Dubbo-js alpha版本正式发布"
-linkTitle: "Web 浏览器页面也能访问dubbo、grpc微服务？Dubbo-js alpha版本正式发布"
+title: "Apache Dubbo 首个 Node.js 3.0-alpha 版本正式发布"
+linkTitle: "Apache Dubbo 首个 Node.js 3.0-alpha 版本正式发布"
 tags: ["node.js", "dubbo-js"]
 authors: ["蔡建怿"]
 date: 2023-10-07

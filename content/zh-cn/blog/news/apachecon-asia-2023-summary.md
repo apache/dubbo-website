@@ -6,7 +6,15 @@ description: >
     Community over Code Asia 首次下线大会在北京召开，Dubbo 微服务专题论坛带来了 8 大精彩主题演讲，让我们一起回顾一些大会的一些精彩瞬间吧。
 ---
 
-本期演讲的 ppt、视频录像、文章等内容，稍后将在官网发布，敬请期待！也可关注 "apachedubbo" 微信公众号了解动态。
+以下包含本期演讲的完成文字稿内容与现场精彩瞬间，更多 ppt、视频录像可关注 "apachedubbo" 微信公众号获取。
+* [基于 Triple 协议实现 Web、移动端、后端微服务全面打通](/zh-cn/blog/2023/10/07/基于-triple-实现-web-移动端后端全面打通/)
+* [手把手教你部署 Dubbo 应用到 Kubernetes - Apache Dubbo & Kubernetes最佳实践](/zh-cn/blog/2023/10/07/手把手教你部署dubbo应用到kubernetes-apache-dubbo-kubernetes-最佳实践/)
+* [Apache Dubbo 云原生可观测性的探索与实践](/zh-cn/blog/2023/10/07/apache-dubbo-云原生可观测性的探索与实践/)
+* [Opensergo & Dubbo 微服务治理最佳实践](/zh-cn/blog/2023/10/07/opensergo-dubbo-微服务治理最佳实践/)
+* [Seata 微服务架构下的一站式分布式事务解决方案](/zh-cn/blog/2023/10/07/seata-微服务架构下的一站式分布式事务解决方案/)
+* [启动速度提升 10 倍：Apache Dubbo-静态化 GraalVM Native Image 深度解析](/zh-cn/blog/2023/10/07/启动速度提升10倍apache-dubbo-静态化-graalvm-native-image-深度解析/)
+* [政采云基于 Dubbo 的混合云数据跨网实践](/zh-cn/blog/2023/10/07/政采云基于Dubbo的混合云数据跨网实践/)
+* 工商银行分布式建设及转型实践
 
 ![dubbo-members-justin](/imgs/blog/2023/8/apachecon-summary/dubbo-members-justin.jpg)
 
