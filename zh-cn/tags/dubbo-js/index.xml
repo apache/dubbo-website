@@ -1,0 +1,310 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – dubbo-js</title><link>https://cn.dubbo.apache.org/zh-cn/tags/dubbo-js/</link><description>Recent content in dubbo-js on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 07 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://cn.dubbo.apache.org/zh-cn/tags/dubbo-js/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Apache Dubbo 首个 Node.js 3.0-alpha 版本正式发布</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E9%A6%96%E4%B8%AA-node.js-3.0-alpha-%E7%89%88%E6%9C%AC%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E9%A6%96%E4%B8%AA-node.js-3.0-alpha-%E7%89%88%E6%9C%AC%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</guid><description>
+&lt;h1 id="关于-apache-dubbo3">关于 Apache Dubbo3&lt;/h1>
+&lt;p>Apache Dubbo 是一款易用、高性能的 WEB 和 RPC 框架，同时为构建企业级微服务提供服务发现、流量治理、可观测、认证鉴权等能力、工具与最佳实践。经过近几年发展，Dubbo3 已在阿里巴巴集团各条业务线实现全面推广，成功取代运行多年的 HSF 框架；同时 Dubbo3 的多语言体系也有了快速发展，目前涵盖的多语言体系有：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/apache/dubbo">apache/dubbo&lt;/a> (java)&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-go">apache/dubbo-go&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-js">apache/dubbo-js&lt;/a> (web、node.js)&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-rust">apache/dubbo-rust&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>基于 Dubbo3 定义的 &lt;strong>Triple&lt;/strong> 协议，你可以轻松编写浏览器、移动端、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Node.js SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/9/nodejs/img.png" alt="image.png">&lt;/p>
+&lt;h1 id="关于-dubbo3-nodejs-首个发布版">关于 Dubbo3 Node.js 首个发布版&lt;/h1>
+&lt;p>Dubbo-js 项目于 9 月份刚刚发布了支持 Dubbo3 协议的首个 alpha 版本，该项目是 Dubbo3 的 Typescript 版本实现，提供了 Web、Node.js 两种发布包。其中，Web 框架能让开发者直接在浏览器页面访问后端服务，Node.js 则进一步丰富了后端微服务技术栈的选择。当前 Node.js 版本主要是实现了 Triple 协议的完整支持，接下来的版本中，社区将继续完善地址发现、负载均衡等服务治理能力。目前 dubbo-js 项目快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎搜索钉钉群：&lt;strong>29775027779&lt;/strong> 加入开发者群组。&lt;/p>
+&lt;h1 id="nodejs-微服务开发完整示例">Node.js 微服务开发完整示例&lt;/h1>
+&lt;p>本示例基于最新发布的 Node.js 版本，演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。&lt;/p>
+&lt;h2 id="前置条件">前置条件&lt;/h2>
+&lt;p>因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 &lt;code>@bufbuild/protoc-gen-es&lt;/code>、&lt;code>@bufbuild/protobuf&lt;/code>、&lt;code>@apachedubbo/protoc-gen-apache-dubbo-es&lt;/code>、&lt;code>@apachedubbo/dubbo&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install @bufbuild/protoc-gen-es @bufbuild/protobuf @apachedubbo/protoc-gen-apache-dubbo-es @apachedubbo/dubbo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="定义服务">定义服务&lt;/h2>
+&lt;p>现在，使用 Protocol Buffer (IDL) 来定义一个 Dubbo 服务。&lt;/p>
+&lt;p>创建目录，并生成文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mkdir -p proto &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> touch proto/example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>写入内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> apache&lt;span style="color:#719e07">.&lt;/span>dubbo.demo.example.v1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayResponse&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> ExampleService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Say(SayRequest) &lt;span style="color:#719e07">returns&lt;/span> (SayResponse) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个文件声明了一个叫做 &lt;code>ExampleService&lt;/code> 的服务，为这个服务定义了 &lt;code>Say&lt;/code> 方法以及它的请求参数 &lt;code>SayRequest&lt;/code> 和返回值 &lt;code>SayResponse&lt;/code>。&lt;/p>
+&lt;h2 id="生成代码">生成代码&lt;/h2>
+&lt;p>创建 gen 目录，做为生成文件放置的目标目录&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mkdir -p gen
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行以下命令，在 gen 目录下生成代码文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#268bd2">$PATH&lt;/span>:&lt;span style="color:#719e07">$(&lt;/span>&lt;span style="color:#b58900">pwd&lt;/span>&lt;span style="color:#719e07">)&lt;/span>/node_modules/.bin &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> protoc -I proto &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --es_out gen &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --es_opt &lt;span style="color:#268bd2">target&lt;/span>&lt;span style="color:#719e07">=&lt;/span>ts &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --apache-dubbo-es_out gen &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --apache-dubbo-es_opt &lt;span style="color:#268bd2">target&lt;/span>&lt;span style="color:#719e07">=&lt;/span>ts &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行命令后，应该可以在目标目录中看到以下生成的文件:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>├── gen
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── example_dubbo.ts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── example_pb.ts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="实现服务">实现服务&lt;/h2>
+&lt;p>接下来我们就需要添加业务逻辑了，实现 ExampleService ，并将其注册到 DubboRouter 中。&lt;/p>
+&lt;p>创建 dubbo.ts 文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { DubboRouter } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { ExampleService } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./gen/example_dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">export&lt;/span> &lt;span style="color:#719e07">default&lt;/span> (router: &lt;span style="color:#dc322f">DubboRouter&lt;/span>) &lt;span style="color:#719e07">=&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// registers apache.dubbo.demo.example.v1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> router.service(ExampleService, {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// implements rpc Say
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">async&lt;/span> say(req) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sentence&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#586e75">`You said: &lt;/span>&lt;span style="color:#2aa198">${&lt;/span>req.sentence&lt;span style="color:#2aa198">}&lt;/span>&lt;span style="color:#586e75">`&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }, { serviceGroup&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;dubbo&amp;#39;&lt;/span>, serviceVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;1.0.0&amp;#39;&lt;/span> });
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="启动-server">启动 Server&lt;/h2>
+&lt;p>Dubbo 服务可以嵌入到普通的 Node.js 服务器、Next.js、Express 或 Fastify 中。
+在这里我们将使用 Fastify，所以让我们安装 Fastify 以及我们为 Fastify 准备的插件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install fastify @apachedubbo/dubbo-fastify
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建 server.ts 文件，新建一个 Server，把上一步中实现的 &lt;code>ExampleService&lt;/code> 注册给它。
+接下来就可以直接初始化和启动 Server 了，它将在指定的端口接收请求。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { fastify } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;fastify&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { fastifyDubboPlugin } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo-fastify&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> routes &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">async&lt;/span> &lt;span style="color:#268bd2">function&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> server &lt;span style="color:#719e07">=&lt;/span> fastify();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">await&lt;/span> server.register(fastifyDubboPlugin, {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> routes,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> server.&lt;span style="color:#268bd2">get&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>, (_, reply) &lt;span style="color:#719e07">=&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reply.&lt;span style="color:#268bd2">type&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;text/plain&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reply.send(&lt;span style="color:#2aa198">&amp;#34;Hello World!&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">await&lt;/span> server.listen({ host&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;localhost&amp;#34;&lt;/span>, port: &lt;span style="color:#dc322f">8080&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> console.log(&lt;span style="color:#2aa198">&amp;#34;server is listening at&amp;#34;&lt;/span>, server.addresses());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">void&lt;/span> main();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>最后，运行代码启动服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npx tsx server.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="访问服务">访问服务&lt;/h2>
+&lt;p>最简单方式是使用 HTTP/1.1 POST 请求访问服务，参数则作以标准 JSON 格式作为 HTTP 负载传递。如下是使用 cURL 命令的访问示例:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#39;Content-Type: application/json&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#39;TRI-Service-Version: 1.0.0&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#39;TRI-Service-group: dubbo&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;sentence&amp;#34;: &amp;#34;Hello World&amp;#34;}&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:8080/apache.dubbo.demo.example.v1.ExampleService/Say
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以使用标准的 Dubbo client 请求服务，我们首先需要从生成代码即 dubbo-node 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起起 RPC 调用了。&lt;/p>
+&lt;p>创建 client.ts 文件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { createPromiseClient } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { ExampleService } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./gen/example_dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { createDubboTransport } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo-node&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">const&lt;/span> transport &lt;span style="color:#719e07">=&lt;/span> createDubboTransport({
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> baseUrl&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;http://localhost:8080&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">async&lt;/span> &lt;span style="color:#268bd2">function&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> client &lt;span style="color:#719e07">=&lt;/span> createPromiseClient(ExampleService, transport, { serviceVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;1.0.0&amp;#39;&lt;/span>, serviceGroup&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;dubbo&amp;#39;&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> res &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">await&lt;/span> client.say({ sentence&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello World&amp;#34;&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> console.log(res);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">void&lt;/span> main();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行客户端&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npx tsx client.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="总结">总结&lt;/h1>
+&lt;p>当前 Node.js 版本主要是实现了 Triple 协议的完整支持，接下来的版本中，社区将继续完善地址发现、负载均衡等服务治理能力。目前 dubbo-js 项目快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎搜索钉钉群：&lt;strong>29775027779&lt;/strong> 加入开发者群组。&lt;/p></description></item><item><title>Blog: Web 浏览器页面也能访问dubbo、grpc微服务？Dubbo-js alpha版本正式发布</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/web-%E6%B5%8F%E8%A7%88%E5%99%A8%E9%A1%B5%E9%9D%A2%E4%B9%9F%E8%83%BD%E8%AE%BF%E9%97%AEdubbogrpc%E5%BE%AE%E6%9C%8D%E5%8A%A1dubbo-js-alpha%E7%89%88%E6%9C%AC%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/web-%E6%B5%8F%E8%A7%88%E5%99%A8%E9%A1%B5%E9%9D%A2%E4%B9%9F%E8%83%BD%E8%AE%BF%E9%97%AEdubbogrpc%E5%BE%AE%E6%9C%8D%E5%8A%A1dubbo-js-alpha%E7%89%88%E6%9C%AC%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</guid><description>
+&lt;p>基于 Dubbo3 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。&lt;a href="https://github.com/apache/dubbo-js/">Dubbo TypeScript SDK&lt;/a> 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 APl 来发布或调用这些服务。&lt;/p>
+&lt;p>Dubbo-js 已于 9 月份发布支持 Dubbo3 协议的首个 alpha 版本，它的发布将有机会彻底改变微服务前后端的架构与通信模式，让你能直接在浏览器页面或web服务器中访问后端 Dubbo RPC 服务。目前项目快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎搜索钉钉群：&lt;strong>29775027779&lt;/strong> 加入开发者群组。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/9/web/img.png" alt="Web 浏览器页面也能访问dubbo、grpc微服务">&lt;/p>
+&lt;h1 id="浏览器-web-应用示例">浏览器 Web 应用示例&lt;/h1>
+&lt;p>本示例演示了如何使用 dubbo-js 开发运行在浏览器上的 web 应用程序，web 页面将调用 dubbo node.js 开发的后端服务并生成页面内容。本示例演示基于 IDL 和非 IDL 两种编码模式。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/9/web/img_1.png" alt="Web 浏览器页面也能访问dubbo、grpc微服务">&lt;/p>
+&lt;h2 id="idl-模式">IDL 模式&lt;/h2>
+&lt;h3 id="前置条件">前置条件&lt;/h3>
+&lt;p>首先，我们将使用 Vite 来生成我们的前端项目模板，它内置了我们稍后需要的所有功能支持。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm create vite@latest -- dubbo-web-example --template react-ts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-web-example
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>npm install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 &lt;code>@bufbuild/protoc-gen-es&lt;/code>、&lt;code>@bufbuild/protobuf&lt;/code>、&lt;code>@apachedubbo/protoc-gen-apache-dubbo-es&lt;/code>、&lt;code>@apachedubbo/dubbo&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install @bufbuild/protoc-gen-es @bufbuild/protobuf @apachedubbo/protoc-gen-apache-dubbo-es @apachedubbo/dubbo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="使用-proto-定义服务">使用 Proto 定义服务&lt;/h3>
+&lt;p>现在，使用 Protocol Buffer (IDL) 来定义一个 Dubbo 服务。&lt;/p>
+&lt;p>src 下创建 util/proto 目录，并生成文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mkdir -p src/util/proto &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> touch src/util/proto/example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>写入内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> apache&lt;span style="color:#719e07">.&lt;/span>dubbo.demo.example.v1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayResponse&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> ExampleService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Say(SayRequest) &lt;span style="color:#719e07">returns&lt;/span> (SayResponse) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个文件声明了一个叫做 &lt;code>ExampleService&lt;/code> 的服务，为这个服务定义了 &lt;code>Say&lt;/code> 方法以及它的请求参数 &lt;code>SayRequest&lt;/code> 和返回值 &lt;code>SayResponse&lt;/code>。&lt;/p>
+&lt;h3 id="生成代码">生成代码&lt;/h3>
+&lt;p>创建 gen 目录，作为生成文件放置的目标目录&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mkdir -p src/util/gen
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行以下命令，利用 &lt;code>protoc-gen-es&lt;/code>、&lt;code>protoc-gen-apache-dubbo-es&lt;/code> 等插件在 gen 目录下生成代码文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#268bd2">$PATH&lt;/span>:&lt;span style="color:#719e07">$(&lt;/span>&lt;span style="color:#b58900">pwd&lt;/span>&lt;span style="color:#719e07">)&lt;/span>/node_modules/.bin &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> protoc -I src/util/proto &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --es_out src/util/gen &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --es_opt &lt;span style="color:#268bd2">target&lt;/span>&lt;span style="color:#719e07">=&lt;/span>ts &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --apache-dubbo-es_out src/util/gen &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --apache-dubbo-es_opt &lt;span style="color:#268bd2">target&lt;/span>&lt;span style="color:#719e07">=&lt;/span>ts &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行命令后，应该可以在目标目录中看到以下生成的文件:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>├── src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── util
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── gen
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── example_dubbo.ts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── example_pb.ts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="创建-app">创建 App&lt;/h3>
+&lt;p>需要先下载 &lt;code>@apachedubbo/dubbo-web&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install @apachedubbo/dubbo-web
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>现在我们可以从包中导入服务并设置一个客户端。在 App.tsx 中添加以下内容：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { useState } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;react&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./App.css&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { createPromiseClient } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { createDubboTransport } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo-web&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Import service definition that you want to connect to.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">import&lt;/span> { ExampleService } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./util/gen/example_dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The transport defines what type of endpoint we&amp;#39;re hitting.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// In our example we&amp;#39;ll be communicating with a Dubbo endpoint.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">const&lt;/span> transport &lt;span style="color:#719e07">=&lt;/span> createDubboTransport({
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> baseUrl&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;http://localhost:8080&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Here we make the client itself, combining the service
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// definition with the transport.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">const&lt;/span> client &lt;span style="color:#719e07">=&lt;/span> createPromiseClient(ExampleService, transport, { serviceGroup&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;dubbo&amp;#39;&lt;/span>, serviceVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;1.0.0&amp;#39;&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">function&lt;/span> App() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> [inputValue, setInputValue] &lt;span style="color:#719e07">=&lt;/span> useState(&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> [messages, setMessages] &lt;span style="color:#719e07">=&lt;/span> useState&lt;span style="color:#719e07">&amp;lt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fromMe: &lt;span style="color:#dc322f">boolean&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> message: &lt;span style="color:#dc322f">string&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }[]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;gt;&lt;/span>([]);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">ol&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {messages.map((msg, index) &lt;span style="color:#719e07">=&amp;gt;&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">li&lt;/span> key&lt;span style="color:#719e07">=&lt;/span>{index}&amp;gt;{&lt;span style="color:#586e75">`&lt;/span>&lt;span style="color:#2aa198">${&lt;/span>msg.fromMe &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#2aa198">&amp;#34;ME:&amp;#34;&lt;/span> &lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Dubbo Server:&amp;#34;&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>&lt;span style="color:#586e75"> &lt;/span>&lt;span style="color:#2aa198">${&lt;/span>msg.message&lt;span style="color:#2aa198">}&lt;/span>&lt;span style="color:#586e75">`&lt;/span>}&amp;lt;/&lt;span style="color:#268bd2">li&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ))}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/&lt;span style="color:#268bd2">ol&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">form&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> onSubmit&lt;span style="color:#719e07">=&lt;/span>{&lt;span style="color:#268bd2">async&lt;/span> (e) &lt;span style="color:#719e07">=&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.preventDefault();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Clear inputValue since the user has submitted.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> setInputValue(&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Store the inputValue in the chain of messages and
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// mark this message as coming from &amp;#34;me&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> setMessages((prev) &lt;span style="color:#719e07">=&amp;gt;&lt;/span> [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...prev,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fromMe: &lt;span style="color:#dc322f">true&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> message: &lt;span style="color:#dc322f">inputValue&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> response &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">await&lt;/span> client.say({
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sentence: &lt;span style="color:#dc322f">inputValue&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setMessages((prev) &lt;span style="color:#719e07">=&amp;gt;&lt;/span> [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...prev,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fromMe: &lt;span style="color:#dc322f">false&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> message: &lt;span style="color:#dc322f">response.sentence&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">input&lt;/span> value&lt;span style="color:#719e07">=&lt;/span>{inputValue} onChange&lt;span style="color:#719e07">=&lt;/span>{(e) &lt;span style="color:#719e07">=&amp;gt;&lt;/span> setInputValue(e.target.value)} /&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">button&lt;/span> type&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;submit&amp;#34;&lt;/span>&amp;gt;Send&amp;lt;/&lt;span style="color:#268bd2">button&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/&lt;span style="color:#268bd2">form&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">export&lt;/span> &lt;span style="color:#719e07">default&lt;/span> App;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>执行以下命令，即可得到样例页面&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm run dev
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动-server">启动 Server&lt;/h3>
+&lt;p>接下来我们需要启动 Server，可以使用 Java、Go、Node.js 等 Dubbo 支持的任一语言开发 Server。这里我们采用 Dubbo 服务嵌入的 Node.js 服务器，具体可参考 &lt;a href="https://github.com/apache/dubbo-js/tree/dubbo3/example/dubbo-node-example">Node.js 开发 Dubbo 后端服务&lt;/a> 中的操作步骤。&lt;/p>
+&lt;p>不过需要注意，我们额外需要修改 Node.js 示例：引入 @fastify/cors 来解决前端请求的跨域问题&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install @fastify/cors
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>需要在 server.ts 文件下修改&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> cors &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@fastify/cors&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">async&lt;/span> &lt;span style="color:#268bd2">function&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> server &lt;span style="color:#719e07">=&lt;/span> fastify();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">await&lt;/span> server.register(cors, {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> origin: &lt;span style="color:#dc322f">true&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">await&lt;/span> server.listen({ host&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;localhost&amp;#34;&lt;/span>, port: &lt;span style="color:#dc322f">8080&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">void&lt;/span> main();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>最后，运行代码启动服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npx tsx server.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="无-idl-模式">无 IDL 模式&lt;/h2>
+&lt;p>在接下来的版本中，我们将继续提供无 IDL 模式的通信支持，这样就可以更方便的访问无 IDL 的后端服务。在这里，我们先快速的看一下无 IDL 模式的使用方式。&lt;/p>
+&lt;p>同样需要先安装 &lt;code>@apachedubbo/dubbo&lt;/code>、&lt;code>@apachedubbo/dubbo-web&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install @apachedubbo/dubbo @apachedubbo/dubbo-web
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>现在就可以一个启动一个客户端，并发起调用了。App.tsx 中的代码与 IDL 模式基本一致，区别点在于以下内容：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// set backend server to connect
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">const&lt;/span> transport &lt;span style="color:#719e07">=&lt;/span> createDubboTransport({
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> baseUrl&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;http://localhost:8080&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// init client
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">const&lt;/span> client &lt;span style="color:#719e07">=&lt;/span> createPromiseClient(transport);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">function&lt;/span> App() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// call remote Dubbo service
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">const&lt;/span> response &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">await&lt;/span> client.call(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;apache.dubbo.demo.example.v1.ExampleService&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;say&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sentence: &lt;span style="color:#dc322f">inputValue&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>执行以下命令，即可得到样例页面&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm run dev
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="总结">总结&lt;/h1>
+&lt;p>直接在浏览器页面或web服务器中访问后端 Dubbo RPC 服务！Dubbo Triple 协议升级以及 Dubbo javascript sdk 的发布，对整个微服务体系是一个非常有力的补充，期待看到它能改变未来整个微服务架构以及前后端通信模式。&lt;/p>
+&lt;p>Dubbo-js 刚刚在 9 月份发布了支持 Dubbo3 Triple 协议的首个 alpha 版本，目前项目正处于快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎通过以下方式加入组织：&lt;/p>
+&lt;ul>
+&lt;li>搜索钉钉群：&lt;strong>29775027779&lt;/strong> 加入开发者群组。&lt;/li>
+&lt;li>关注该公众号 &lt;code>apachedubbo&lt;/code>，回复 &amp;ldquo;dubbojs&amp;rdquo; 接受邀请加入开发组&lt;/li>
+&lt;/ul></description></item></channel></rss>

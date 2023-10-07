@@ -1,0 +1,107 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – opensergo</title><link>https://cn.dubbo.apache.org/zh-cn/tags/opensergo/</link><description>Recent content in opensergo on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 07 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://cn.dubbo.apache.org/zh-cn/tags/opensergo/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: OpenSergo &amp; Dubbo 微服务治理最佳实践</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/opensergo-dubbo-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/opensergo-dubbo-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</guid><description>
+&lt;p>摘要：本文整理自阿里云 MSE 研发工程师何家欢的分享。本篇内容主要分为四个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、Why 微服务治理？&lt;/li>
+&lt;li>二、OpenSergo：服务治理控制面与标准规范&lt;/li>
+&lt;li>三、OpenSergo &amp;amp; Dubbo 最佳实践&lt;/li>
+&lt;li>四、OpenSergo 的未来之路&lt;/li>
+&lt;/ul>
+&lt;h2 id="一why-微服务治理">一、Why 微服务治理？&lt;/h2>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>现代的微服务架构里，我们通过将系统分解成一系列的服务并通过远程过程调用联接在一起，在带来一些优势的同时也为我们带来了一些挑战。&lt;/p>
+&lt;p>如上图所示，可以看到一个词云，这些都是目前微服务架构在生产上所遇到的挑战。比如，最常见的流量激增的场景，近一年内AIGC突然爆火，相关网站/服务都存在过因为激增流量导致服务不可用的情况，可能会让我们错过一个最佳的增长窗口。&lt;/p>
+&lt;p>再比如缺乏容错机制，某视频网站的某个服务异常，随调用链扩散，导致全站入口不可用，影响千万用户，产生实质性的经济损失。这些生产故障频频发生，也是在提醒我们稳定性是用好微服务的重大挑战之一。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_1.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>为了保障微服务的稳定性，我们就需要做一些架构的演进。&lt;/p>
+&lt;p>我们先看一下左侧的微服务3大件，这个大家已经很熟悉了，通过这三者的配合，我们的应用就能够正常使用了，但是距离生产可用其实还有很大一段距离，各个企业和社区为了消除这其中的gap都有一些探索和实践，比如Dubbo社区在Dubbo3中引入一系列诸如流量管理、高可用性的能力来保障微服务的稳定性，这些措施可以统称为微服务治理。&lt;/p>
+&lt;p>所以其实大家已经意识到，从把微服务跑起来到真的生产可用，微服务治理是必不可少的一环。但微服务治理要做些什么，如何去做其实都还比较模糊。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_2.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>从软件生命周期的角度，我们可以把微服务治理分成三个域，开发态与测试态、变更态、运行态。&lt;/p>
+&lt;p>在这三个域中都面临着很多挑战，对于这些挑战大家也有着一些探索和实践，比如对于发布有损的问题，我们可以通过无损上下线来解决，变更的影响面通过灰度来控制，对于不确定流量使用流控、热点防护，不稳定调用使用熔断与隔离。&lt;/p>
+&lt;p>可以看到在各个域中都有一些成熟的方案和效果很好的实践。但是不管是阿里还是其他公司，在体系化落地微服务治理时都会遇到很多问题。&lt;/p>
+&lt;h2 id="二opensergo服务治理控制面与标准规范">二、OpenSergo：服务治理控制面与标准规范&lt;/h2>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_3.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>首先我们涉及的组件有很多，在微服务架构中，往往会涉及很多组件，它们需要有Dubbo这样的调用框架，nacos这样注册中心，snetinel、hystrix这样的稳定性中间件等等，因此也没办法进行统一治理，管控成本就非常高。&lt;/p>
+&lt;p>其次时概念不统一，比如在envoy中的隔离与 sentinel中的隔离完全不是一个意思，envoy的隔离是摘除不健康实例，sentinel的隔离是并发控制，这就会使开发者理解成本很高。&lt;/p>
+&lt;p>同时各个企业社区都有自己的最佳实践，这也就导致大家能力上是不对齐的，没有统一的标准。&lt;/p>
+&lt;p>还有配置不统一的问题相信大家都很有体感，比如sentinel、hystrix、istio都有熔断的能力，但是配置却各有差别，需要开发者分别学习，还要注意不混淆，不利于理解，也不利于统一管控。&lt;/p>
+&lt;p>可以发现由于这些问题，我们在落地体系化微服务治理时会有很大的阻力，我们需要的是一个统一的治理界面来让我们更好地做微服务治理，因此我们提出了OpenSergo这个项目。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_4.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>而OpenSergo期望提出一套开放通用的、面向云原生架构的微服务治理解决方案及标准规范，来助力保障微服务高可用，上图的四个部分就是OpenSergo社区的愿景。&lt;/p>
+&lt;p>OpenSergo社区会基于业界微服务治理场景与实践抽象成规范，通过这种方式去解决前面提到的概念、配置、能力不统一的问题，并用统一的管控面去承载，降低使用和维护成本。&lt;/p>
+&lt;p>同时在纵向上，我们针对链路上的每一环进行抽象，覆盖完整的场景，在横向上，无论是Java生态，Go生态或是其他语言，无论是传统微服务还是Mesh架构，都会纳入到这套统一的体系中。&lt;/p>
+&lt;p>但是OpenSergo作为一个开放标准，仅凭借阿里是不够的，所以我们联合了多家公司以及社区比如bilibili、中国移动、字节跳动的cloudwego社区等，共同建设这套开放标准，希望能够真正解决微服务稳定性的风险。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_5.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来简单介绍一下OpenSergo的架构体系，前面也介绍了OpenSergo社区会基于场景抽象出OpenSergo的Spec，但这只是第一步，为了承载这些标准规范我们就需要一个控制面，社区在一开始的演进中选择从0开始开发一个控制面来做治理规则的管控、监听与下发。&lt;/p>
+&lt;p>但是随着社区的演进，我们发现基于Istion去扩展，成本更低，也能够复用更多的能力，因此在后续的演进中我们会选择结合Istio扩展控制面与决策中心实现治理规则统一管控、治理策略预计算。&lt;/p>
+&lt;p>在有了控制面后我们还需要数据面来进行具体治理能力的实现，它可以是像sentinel这样的中间件，也可以是框架本身。控制面与数据面之间的通讯在初始的架构中是基于grpc构建的链路，但在确定了后续演进方向会基于istio扩展后，社区选择拥抱xds，尽可能服用它的链路，对于一些无法承载的我们再使用自身的grpc链路。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_6.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>前面也提到社区控制面的后续演进是基于Istio扩展的，Istio本身也有一些流量治能力，并有着一定的普及度。但是Istio主要关注流量管理，让流量到达该去的地方而不是微服务治理治理，所以在微服务稳定性的场景下，Istio所提供的这些能力是不足以满足我们的需求的。&lt;/p>
+&lt;p>因此我们在Istio的基础上，基于微服务稳定性的一些场景，比如前面提到的变更态稳定性、运行时稳定性去抽象、制定了满足需求的规范标准，希望能够更加贴合微服务场景。所以整体上我们在微服务治理领域会是Istio的超集，而不是互斥关系。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_7.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来我们一起看一下OpenSergo的标准规范是如何解决前面所提到的这些场景。&lt;/p>
+&lt;p>首先我们聊一下流量路由，它的主要作用是将符合一定特征的流量路由到指定的workload上，一般大家会用这种能力来实现灰度、同AZ路由等方案。&lt;/p>
+&lt;p>基于 Istio VirtualService/DestinationRule 的格式社区定义了流量路由spec，但我们在调研以及实践的过程中发现，它并不能很好的满足微服务场景下的需求。所以为了更贴近微服务的场景去扩展去做了扩展。比如我们增加了路由失败后的处理逻辑，这在微服务架构中是很常见的需求。&lt;/p>
+&lt;p>又由于Istio主要关注的是HTTP请求，它的CRD不能够很好地承载像Dubbo这样的RPC调用，所以我们为此增加了更多RPC模型的支持。后续我们也会探索与社区标准结合的方案，使我们的Spec更加通用与标准。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_8.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>前面所提到的灰度，在阿里集团内部数年的安全生产实践中，与可监控、可回滚一起被定义为安全变更的三板斧，其中灰度是控制变更影响面，保障变更稳定性的必不可少的能力。&lt;/p>
+&lt;p>为了实现灰度，我们通常有几种方案，第一种是物理隔离，我们通过部署两套一样的环境来实现灰度，但是这种方案的部署和维护成本都很高。&lt;/p>
+&lt;p>为了提高资源利用率，便产生了第二种方案，流量灰度。我们不部署独立的环境，而是在流量的每一跳进行流量的特征匹配，并且由此决定去往灰度实例还是base实例，这种方案相较与前者更加灵活高效，可以通过前面提到的流量路由能力来实现。但是需要我们在每一跳都配置路由规则，相对比较繁琐。&lt;/p>
+&lt;p>并且由于有些信息在后续链路是获取不到的，比如uid，导致这个方案的实施有一定的困难。于是便产生了第三种方案，全链路灰度，我们通过在流量入口处进行流量匹配并打上标签，标签会自动沿着调用链路透传，后续链路根据标签来进行路由。通过这种方式，我们就能够更简洁地去定义灰度。Opensergo针对这种场景抽象了对应的CRD。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_9.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>我们将这个CRD称之为TrafficLane也就是泳道，我觉得还是比较形象的，大家看一下上边的图片，橙色的是正常的流量走向，灰色的是灰度流量的走向，就像是将一个池子分成了多个泳道。&lt;/p>
+&lt;p>泳道的CRD有三个部分组成，也比较好理解，首先我们需要去匹配灰度流量，所以就要去定义匹配的条件，然后定义为这些流量打上什么标签，最后再定义这个标签以什么方式去透传。&lt;/p>
+&lt;p>通过这样的CRD我们就定义了一条灰度泳道。但是如果只是定义是不足以实现全路灰度的，我们还需要借助OpenSergo体系全链路全方位框架的一个支持，才能让标签在这些框架中自动的透传，这些框架也能通过标签进行路由。其中流量染色和标签透传会借助标准的trcae体系去实现，比如OT。&lt;/p>
+&lt;p>上图右侧是一个CRD的例子，大家可以简单看一下。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_10.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来我们一起看一下运行态稳定性的场景。&lt;/p>
+&lt;p>我们主要提两个场景，第一个是流量激增的场景，比如双十一的秒杀活动，一开始流量是稳定的情况下，系统也处于稳态。但是当流量激增的时候，系统就会开始往不稳定的方向发展，异常调用也会激增，最后就会变成不可用的状态。对于这类场景，我们可以用流量控制的能力拒绝超出容量的请求，或是通过流量平滑的能力削峰填谷，让流量处于比较平稳的状态，避免服务的不可用。&lt;/p>
+&lt;p>第二个是不稳定调用导致服务不可用的场景，比如我们调用一些第三方服务经常会出现不稳定的情况，这里的不稳定主要指异常或是慢调用。以dubbo为例，当服务提供方出现慢调用的时候，会导致服务消费方的线程堆积，影响到其他的正常调用甚至是整个服务的稳定性，并且这种风险会沿着调用链反向传递、扩散最终影响整个系统的稳定性。这时我们可以通过并发控制或是熔断保护来限制慢调用对资源的占用，保障系统的整体稳定性。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_11.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>针对前面提到的这些场景，OpenSergo也制定了相关的CRD。在业界的实践中sentinel是一个成熟的流量防护方案，在阿里内部积累了大量的流量防护相关的场景和实践，2018年开源依赖在业界进一步丰富了这些积累，我们从这些积累中抽象出了一套流量防护的规范标准。&lt;/p>
+&lt;p>那么一条流量防护的规则应该包含哪些内容，大家可以简单想一下。&lt;/p>
+&lt;p>首先我们要确定的是要针对怎样的流量，我们可以按接口去划，也可以按请求中的特征去划。确定了目标之后，我们就需要定义要采取怎样的治理策略。这里的策略包括了刚才提到的这些策略，以及更高阶的比如自身过载保护等策略。&lt;/p>
+&lt;p>最后由于限流本身是有损的，但是我们不希望这种有损传递到用户侧，因此我们需要为不同的规则配置不同行为，从而使得在用户侧的表现是比较友好的，比如最基本的对于抢购场景的限流，我们可以返回一个排队中，请稍后的提示。&lt;/p>
+&lt;p>上图右侧是一个CRD的示例，流量目标为接口名为/foo的请求，策略为阈值为10的全局限流，fallback为特定的返回体。&lt;/p>
+&lt;p>通过这样的CRD配置，不管是Dubbo框架还是其他框架，我们都能很方便的使用流量防护的能力。&lt;/p>
+&lt;h2 id="三opensergo--dubbo-最佳实践">三、OpenSergo &amp;amp; Dubbo 最佳实践&lt;/h2>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_12.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>对于框架开发者来说想要接入到OpenSergo的体系中其实有两种方式&lt;/p>
+&lt;p>一种是通过对接OpenSergo体系的数据面来接入，框架开发者只需要实现对接Sentinel的适配模块就可以完成对接工作。而对于有特殊要求或是更贴近特定场景的框架，也可以自行对接OpenSergo的标准，来接入OpenSergo体系。&lt;/p>
+&lt;p>对于用户来说，不管是哪一种方式，都只需要简单地引入一些依赖，就可以无感地获取OpenSergo定义的微服务治理能力，并能在统一的控制面管控这些框架的微服务治理能力，大大提高使用微服务治理的体验与效率。讲完了接入的方式，我们再一起来看下实现的效果。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_13.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>第一个实践是全链路灰度控制消除变更态稳定性风险。这是一个简单的demo，我们只需要部署这样的一个CRD，定义/A/dubbo的请求，当它的参数里出现xiaoing的时候，我们就把它导向灰度的环境。可以看到现在的请求走向是符合我们预期的，有灰度环境的就是灰度环境了。对于不符合要求的流量，就还是走基线环境，我们只需要简单的CRD就可以实现。&lt;/p>
+&lt;p>但我们的生产环境会比demo复杂的多，会涉及各种框架，比如RokcetMQ、spring cloud alibabab。但只要这些框架对接了Opensergo的体系，就可以用这一个CRD来做到全链路，全框架的灰度。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_14.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>第二个实践是流量防护与容错保障运行时稳定性——不稳定调用场景。这里使用一个简单的Demo，应用A通过Dubbo调用应用B。右侧是一个正常接口和慢调用接口的流量图，蓝色的是总流量，黄色的是拒绝流量，橙色的异常流量。在一开始慢调用还没有发生，系统处于稳态，没有异常流量。&lt;/p>
+&lt;p>在第一个时间点，我手动调整了慢调用接口的RT，慢调用发生，异常流量出现，同时由于慢调用大量地占用了Dubbo的线程资源，导致正常调用的资源受到挤占，同样出现大量的异常流量，Dubbo侧也出现了线程池耗尽的异常。&lt;/p>
+&lt;p>大家可以想一下，这种场景下我们应该配置什么规则来解决这个问题，其实这个时候很多人会想要流量控制来做限流希望能解决这个问题，我们一起看下它的一个效果。&lt;/p>
+&lt;p>在第二个时间我配置了一条限流规则，可以看到情况虽然有所缓解，但是依旧有大量报错，这是因为在慢调用场景下，请求已经出现堆积，仅仅通过QPS限流还是会导致请求涌入进一步堆积。&lt;/p>
+&lt;p>所以我们真正需要的并发控制，在第三个时间点我配置并发控制规则来限制慢调用接口的并发数，也就是正在处理的请求数。可以看到通过这种限制，即便慢调用仍然存在，但是它所能占用的线程资源被限制，正常接口得以正常调用，从而避免稳定性风险的扩展，保障应用的稳定性。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_15.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>第三个实践是流量防护与容错保障运行时稳定性——自适应过载保护。可以看到我们的demo在持续的高负载下，异常流量开始逐渐上升，系统的稳态被破坏，这时我们可以通过配置自适应过载保护规则，来自适应地调节限流行为，达到消除异常请求，帮助系统重新回到稳态的效果。&lt;/p>
+&lt;p>目前的策略我们在开源已经支持了BBR，在内部的实践中我们也有用PID。这些策略我就不在这里详细介绍了，大家感兴趣可以去我们的开源社区一起参与讨论。&lt;/p>
+&lt;p>从这三个例子可以看到Dubbo通过对接Sentinel接入OpenSergo体系后就无感地具备了OpenSergo所定义的通用的治理能力，并且能够通过统一的控制平面来管控。&lt;/p>
+&lt;p>而对于其他框架也是一样，可以设想一下如果我们生产上所涉及的所有框架都对接了OpenSergo体系，那我们就可以在一个控制面上管控所有服务，所有框架的微服务治理能力，更好地保障系统的稳定性。&lt;/p>
+&lt;h2 id="四opensergo-的未来之路">四、OpenSergo 的未来之路&lt;/h2>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_16.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>这是多语言服务治理的生态大图。在生态上，我们希望OpenSergo是全链路多语言异构化的，我们会主要关注Java/Go + Gateway + Mesh 生态，在生态上不断去覆盖更多的框架。&lt;/p>
+&lt;p>在能力上我们会不断抽象并落地更多的通用的微服务治理能力。包括流量防护、自愈、服务容错、健全、发现等等。&lt;/p>
+&lt;p>目前我们已经和很多社区建立了联系和合作，比如Dubbo、ShenYu、APISIX、Higress、RocketMQ、MOSN等等，其中也有不少已经有了一些实质性的进展。&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_17.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来分享一下我们近期的规划。&lt;/p>
+&lt;ul>
+&lt;li>控制面方面，我们会逐步推动控制面的生产可用，在明年3月份发布GA版本，让大家能够在生产上去验证微服务治理体系。&lt;/li>
+&lt;li>Spec方面，我们会去支持微服务安全治理、离群实例摘除，并持续地与社区标准集成。&lt;/li>
+&lt;li>治理能力的演进上，我们会重点完成Sentinel 2.0 流量治理的升级，并在安全和自适应方向上进行探索。&lt;/li>
+&lt;li>在社区合作上，我们会继续推进与社区间的交流与合作，推进各个微服务治理领域的生态落地，统一控制面、Spec 共建。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_18.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>虽然阿里在集团以及云上积累了大量的经验和场景，但稳定性的问题是复杂的，场景是多样的，仅凭一方不足以覆盖所有稳定性的场景，也不足以成为标准，所以微服务治理技术、生态与标准化的演进还需要各个企业和社区的共同参与。&lt;/p>
+&lt;p>大家可以从以下三个方面入手来参与社区。&lt;/p>
+&lt;ul>
+&lt;li>微服务治理的spec，各个社区和企业都是各自领域中引领者，大家能从各自的场景和最佳实践出发，一起制定与完善标准规范。&lt;/li>
+&lt;li>微服务统一控制面的演进，这一块其实有很多的可能性，作为控制面其实它处在一个决策者的位置，一定程度上具备整个系统的上帝视角，在AI技术火爆的当下大有可为。&lt;/li>
+&lt;li>治理能力与社区生态的贡献，大家可以参与到服务治理能力的演进中，也可以贡献各个社区和OpenSergo体系的对接。&lt;/li>
+&lt;/ul>
+&lt;p>最后我想说，微服务治理其实是一个很广阔的平台，参与其中，你可以接触到各个领域的技术与场景，而不是被限制在单点技术范围内摸爬滚打。欢迎企业与社区同学加入开源贡献小组，一起主导下一代微服务技术体系的演进！&lt;/p></description></item></channel></rss>
