@@ -16,7 +16,7 @@ Apache Dubbo 是一款易用、高性能的 WEB 和 RPC 框架，同时为构建
 
 基于 Dubbo3 定义的 **Triple** 协议，你可以轻松编写浏览器、移动端、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Node.js SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
 
-![image.png](/imgs/blog/2023/9/nodejs/img_1.png)
+![image.png](/imgs/blog/2023/9/nodejs/img.png)
 
 # 关于 Dubbo3 Node.js 首个发布版
 Dubbo-js 项目于 9 月份刚刚发布了支持 Dubbo3 协议的首个 alpha 版本，该项目是 Dubbo3 的 Typescript 版本实现，提供了 Web、Node.js 两种发布包。其中，Web 框架能让开发者直接在浏览器页面访问后端服务，Node.js 则进一步丰富了后端微服务技术栈的选择。当前 Node.js 版本主要是实现了 Triple 协议的完整支持，接下来的版本中，社区将继续完善地址发现、负载均衡等服务治理能力。目前 dubbo-js 项目快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎搜索钉钉群：**29775027779** 加入开发者群组。
