@@ -1,0 +1,170 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 框架介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/</link><description>Recent content in 框架介绍 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 概念体系</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/</guid><description/></item><item><title>Overview: 新特性</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/3.0_feature/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/3.0_feature/</guid><description>
+&lt;p>&lt;img src="https://shields.io/github/stars/apache/dubbo-go?style=dark" alt="star">&lt;/p>
+&lt;h2 id="1-triple-协议">1. Triple 协议&lt;/h2>
+&lt;h3 id="11-概述">1.1 概述&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/tri.png" alt="img">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>通信层面&lt;/p>
+&lt;p>Triple 协议，也称为Dubbo3协议，是基于HTTP2 + gRPC协议，增加特定字段和逻辑的扩展协议，保证了和&lt;strong>原生gRPC协议互通&lt;/strong>。在此基础之上，Triple 新协议将更原生地支持 &lt;strong>Dubbo 服务治理能力&lt;/strong>。并支持&lt;strong>流式RPC调用&lt;/strong>。&lt;/p>
+&lt;p>简单来说，可以理解为 Triple = gRPC + Dubbo&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>序列化&lt;/p>
+&lt;p>Triple 协议使用高效的&lt;strong>PB序列化方式&lt;/strong>，并在此基础之上增加序列化协议的&lt;strong>可扩展支持&lt;/strong>。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>用户开发习惯：&lt;/p>
+&lt;p>Triple 服务在开发前需要&lt;strong>预定义.proto文件&lt;/strong>，对于习惯在编码前先定义IDL的Go语言开发者带来便捷。不同于符合java编程习惯的，定义JavaClassName用于描述接口的 Dubbo-go 1.x版本。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>跨语言互通性：&lt;/p>
+&lt;p>可与 Dubbo-Java 实现&lt;strong>跨语言互通&lt;/strong>。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-应用级服务发现">2. 应用级服务发现&lt;/h2>
+&lt;h3 id="21-简介">2.1 简介&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/disc.png" alt="img">&lt;/p>
+&lt;p>在服务注册阶段，服务端实例将应用级别的注册信息，主要包含从应用名到实例IP的映射注册到注册中心。在服务发现阶段，客户端实例，通过注册中心获取到需要请求的服务实例IP。进入服务自省阶段，服务自省过程为通过应用信息获取接口信息的过程。如上图，包含两种模式：&lt;/p>
+&lt;ol>
+&lt;li>remote模式：通过元数据中心（例如 zk ）获取应用到接口元数据的映射&lt;/li>
+&lt;li>local模式：直接通过服务端获取应用到接口元数据的映射（通过 Dubbo 协议针对 Metadata Service 发起 RPC 调用）&lt;/li>
+&lt;/ol>
+&lt;p>经过服务自省后，客户端正式向对应实例发起调用。这样做最明显的好处是减少了注册中心的数据量，即注册中心只保存了应用级别的数据。&lt;/p>
+&lt;p>用户在使用 Dubbo-go 3.0的应用级服务发现能力时，可以仿照示例，直接在配置文件中配置服务自省模式和元数据中心信息，引入依赖，开启应用级别服务发现。&lt;/p>
+&lt;h3 id="22-应用级服务发现介绍文章">2.2 应用级服务发现介绍文章&lt;/h3>
+&lt;p>&lt;a href="https://baijiahao.baidu.com/s?id=1669266413887039723&amp;amp;wfr=spider&amp;amp;for=pc">应用级服务发现解析&lt;/a>&lt;/p>
+&lt;h2 id="3-mesh-路由规则">3. Mesh 路由规则&lt;/h2>
+&lt;p>用户可定义路由文件：&lt;/p>
+&lt;p>virtual_service.yaml&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/virtual_service.png" alt="img">&lt;/p>
+&lt;p>以及 dist_rule.yml&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/dest_rule.png" alt="img">&lt;/p>
+&lt;p>框架可根据路由文件针对特定的请求进行流量转发。&lt;/p>
+&lt;h2 id="4-相关文章">4. 相关文章&lt;/h2>
+&lt;p>阿里云官方介绍文章：&lt;a href="https://developer.aliyun.com/article/770964?utm_content=g_1000175535">《Dubbo 3.0 - 开启下一代云原生微服务》&lt;/a>&lt;/p></description></item><item><title>Overview: 代码架构</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/design/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/design/</guid><description/></item><item><title>Overview: 快速入门</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/samples/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/samples/</guid><description>
+&lt;p>为了方便 Dubbo-go 框架用户的使用，我们提供了 Samples 仓库以供用户参考：&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-go-samples">【Dubbo-go-samples 仓库地址】&lt;/a>&lt;/p>
+&lt;h2 id="1-samples-仓库包含的例子">1. Samples 仓库包含的例子&lt;/h2>
+&lt;ul>
+&lt;li>config-api: 使用 API 进行配置初始化&lt;/li>
+&lt;li>configcenter: 使用不同的配置中心，目前支持三种：zookeeper、apollo、和 nacos&lt;/li>
+&lt;li>context: 如何使用上下文传递 attachment&lt;/li>
+&lt;li>direct: 直连模式&lt;/li>
+&lt;li>game: 游戏服务例子&lt;/li>
+&lt;li>generic: 泛化调用&lt;/li>
+&lt;li>rpc: RPC 调用例子, 包含 Triple、Dubbo等协议以及跨语言/gRPC互通示例&lt;/li>
+&lt;li>helloworld: RPC调用入门例子&lt;/li>
+&lt;li>logger: 日志例子&lt;/li>
+&lt;li>registry: 展示与不同注册中心的对接，包含了 zk、nacos、etcd&lt;/li>
+&lt;li>metrics: 数据上报&lt;/li>
+&lt;li>filter: 使用提供filter和自定义filter的例子&lt;/li>
+&lt;li>registry/servicediscovery：应用级服务发现例子&lt;/li>
+&lt;li>router: 路由例子&lt;/li>
+&lt;li>tracing: 链路追踪例子&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-如何运行">2. 如何运行&lt;/h2>
+&lt;p>目前有三种方式来运行 dubbo-go 的示例:&lt;/p>
+&lt;ol>
+&lt;li>通过 bash 命令快速开始: 通过简单的命令行启动样例以及进行单元测试&lt;/li>
+&lt;li>在 IDE 中快速开始，这也是&lt;strong>推荐&lt;/strong>的方式: 在工程 &amp;ldquo;.run&amp;rdquo; 子目录下，提供了所有示例的 GoLand 运行配置文件，因此用户可以简单在 IDE 中单击运行所有的示例。&lt;/li>
+&lt;li>在 IDE 中手工配置并运行: 为了完整性的目的，也为了万一您不使用 GoLand 而使用其他的 IDE，这里也提供了如何一步一步的配置的指南，帮助用户理解如何在 IDE 中配置，运行或者调试 dubbo-go 的示例。&lt;/li>
+&lt;/ol>
+&lt;h3 id="21-通过-命令行-快速开始">2.1 通过 命令行 快速开始&lt;/h3>
+&lt;p>&lt;em>前置条件：需要 docker 环境就绪&lt;/em>&lt;/p>
+&lt;p>下面我们将使用 &amp;ldquo;helloworld&amp;rdquo; 作为示例:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>启动注册中心（比如 zookeeper）&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make -f build/Makefile docker-up
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当看到类似下面的输出信息时，就表明 zookeeper server 启动就绪了。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; Starting dependency services with ./integrate_test/dockercompose/docker-compose.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Docker Compose is now in the Docker CLI, try &lt;span style="color:#586e75">`&lt;/span>docker compose up&lt;span style="color:#586e75">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Creating network &lt;span style="color:#2aa198">&amp;#34;dockercompose_default&amp;#34;&lt;/span> with the default driver
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Creating dockercompose_zookeeper_1 ... &lt;span style="color:#719e07">done&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Creating etcd ... &lt;span style="color:#719e07">done&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Creating nacos-standalone ... &lt;span style="color:#719e07">done&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果要停掉注册中心，可以通过运行以下的命令完成:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make -f build/Makefile docker-down
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>启动服务提供方&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> helloworld/go-server/cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">DUBBO_GO_CONFIG_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../conf/dubbogo.yml&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当看到类似下面的输出信息时，就表明服务提供方启动就绪了。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>2021/10/27 00:33:10 Connected to 127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2021/10/27 00:33:10 Authenticated: &lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>72057926938066944, &lt;span style="color:#268bd2">timeout&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">10000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2021/10/27 00:33:10 Re-submitting &lt;span style="color:#586e75">`&lt;/span>0&lt;span style="color:#586e75">`&lt;/span> credentials after reconnect
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>运行服务调用方&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> helloworld/go-client/cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">DUBBO_GO_CONFIG_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../conf/dubbogo.yml&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当以下的信息输出时，说明 &lt;code>go-client&lt;/code> 调用 &lt;code>go-server&lt;/code> 成功。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>2021-10-27T00:40:44.879+0800 DEBUG triple/dubbo3_client.go:106 TripleClient.Invoke: get &lt;span style="color:#268bd2">reply&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span> age:21
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2021-10-27T00:40:44.879+0800 DEBUG proxy/proxy.go:218 &lt;span style="color:#719e07">[&lt;/span>makeDubboCallProxy&lt;span style="color:#719e07">]&lt;/span> result: name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span> age:21 , err: &amp;lt;nil&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2021-10-27T00:40:44.879+0800 INFO cmd/client.go:51 client response result: name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span> age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>集成测试&lt;/strong>
+本项目 dubbo-go-samples 除了用来展示如何使用 dubbo-go 中的功能和特性之外，还被用于 apache/dubbo-go 的集成测试。可以按照以下的步骤来运行针对 &lt;code>go-server&lt;/code> 设计的集成测试:&lt;/p>
+&lt;p>首先启动服务方&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> helloworld/go-server/cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">DUBBO_GO_CONFIG_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../conf/dubbogo.yml&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后切换到单测目录， 设置环境变量，然后执行单测&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> integrate_test/helloworld/tests/integration
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">DUBBO_GO_CONFIG_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../../../../helloworld/go-client/conf/dubbogo.yml&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go &lt;span style="color:#b58900">test&lt;/span> -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当以下信息输出时，说明集成测试通过。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; Running integration &lt;span style="color:#b58900">test&lt;/span> &lt;span style="color:#719e07">for&lt;/span> application go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--- PASS: TestSayHello &lt;span style="color:#719e07">(&lt;/span>0.01s&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>PASS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ok github.com/apache/dubbo-go-samples/integrate_test/helloworld/tests/integration 0.119s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>关闭并清理&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make -f build/Makefile clean docker-down
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;em>以下的两种运行方式都与 IDE 有关。这里我们以 Intellij GoLand 为例来讨论。&lt;/em>&lt;/p>
+&lt;h3 id="22-在-ide-中快速开始">2.2 在 IDE 中快速开始&lt;/h3>
+&lt;p>一旦在 GoLand 中打开本项目，可以发现，在 &amp;ldquo;Run Configuration&amp;rdquo; 弹出菜单中已经存在了一系列事先配置好了的用来运行相关服务提供方和调用方的选项，例如：&amp;ldquo;helloworld-go-server&amp;rdquo; 和 &amp;ldquo;helloworld-go-client&amp;rdquo;。&lt;/p>
+&lt;p>可以选择其中的任意一个快速启动相关示例。当然在运行之前，假设需要的注册中心已经事先启动了，不然用例将会失败。您可以选择手动自行启动的方式，也可以利用工程中提供的 &amp;ldquo;docker-compose.yml&amp;rdquo; 在启动注册中心的 docker 实例。&lt;/p>
+&lt;h3 id="23在-ide-中手工运行">2.3.在 IDE 中手工运行&lt;/h3>
+&lt;p>这里以 &lt;em>Intellij GoLand&lt;/em> 为例。在 GoLand 中打开 dubbo-go-samples 工程之后，按照以下的步骤来运行/调试本示例:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>启动 zookeeper 服务器&lt;/strong>&lt;/p>
+&lt;p>打开 &amp;ldquo;integrate_test/dockercompose/docker-compose.yml&amp;rdquo; 这个文件，然后点击位于编辑器左边 gutter 栏位中的 ▶︎▶︎ 图标运行，&amp;ldquo;Service&amp;rdquo; Tab 应当会弹出并输出类似下面的文本信息:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Deploying &amp;#39;Compose: docker&amp;#39;...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/usr/local/bin/docker-compose -f ...integrate_test/dockercompose/docker-compose.yml up -d
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Creating network &amp;#34;docker_default&amp;#34; with the default driver
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Creating docker_zookeeper_1 ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;#39;Compose: docker&amp;#39; has been deployed successfully.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>启动服务提供方&lt;/strong>&lt;/p>
+&lt;p>打开 &amp;ldquo;helloworld/go-server/cmd/server.go&amp;rdquo; 文件，然后点击左边 gutter 栏位中紧挨着 &amp;ldquo;main&amp;rdquo; 函数的 ▶︎ 图标，并从弹出的菜单中选择 &amp;ldquo;Modify Run Configuration&amp;hellip;&amp;quot;，并确保以下配置的准确:&lt;/p>
+&lt;ul>
+&lt;li>Working Directory: &amp;ldquo;helloworld/go-server&amp;rdquo; 目录的绝对路径，比如： &lt;em>/home/dubbo-go-samples/helloworld/go-server&lt;/em>&lt;/li>
+&lt;li>Environment: DUBBO_GO_CONFIG_PATH=&amp;rdquo;../conf/dubbogo.yml&amp;quot;&lt;/li>
+&lt;/ul>
+&lt;p>这样示例中的服务端就准备就绪，随时可以运行了。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>运行服务消费方&lt;/strong>&lt;/p>
+&lt;p>打开 &amp;ldquo;helloworld/go-client/cmd/client.go&amp;rdquo; 这个文件，然后从左边 gutter 栏位中点击紧挨着 &amp;ldquo;main&amp;rdquo; 函数的 ▶︎ 图标，然后从弹出的菜单中选择 &amp;ldquo;Modify Run Configuration&amp;hellip;&amp;quot;，并确保以下配置的准确:&lt;/p>
+&lt;ul>
+&lt;li>Working Directory: &amp;ldquo;helloworld/go-client&amp;rdquo; 目录的绝对路径，比如： &lt;em>/home/dubbo-go-samples/helloworld/go-client&lt;/em>&lt;/li>
+&lt;li>Environment: DUBBO_GO_CONFIG_PATH=&amp;rdquo;../conf/dubbogo.yml&amp;quot;&lt;/li>
+&lt;/ul>
+&lt;p>然后就可以运行并调用远端的服务了，如果调用成功，将会有以下的输出:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[2021-02-03/16:19:30 main.main: client.go: 66] response result: &amp;amp;{A001 Alex Stocks 18 2020-02-04 16:19:30.422 +0800 CST}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>如果需要调试该示例或者 dubbo-go 框架，可以在 IDE 中从 &amp;ldquo;Run&amp;rdquo; 切换到 &amp;ldquo;Debug&amp;rdquo;。如果要结束的话，直接点击 ◼︎ 就好了。&lt;/p></description></item></channel></rss>

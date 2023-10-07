@@ -1,0 +1,750 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Service Mesh</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/</link><description>Recent content in Service Mesh on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Deploy the Istio environment</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/istio/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/istio/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>The docker, helm, and kubectl environments have been installed.&lt;/li>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-deploy-the-istio-environment">2. Deploy the Istio environment&lt;/h2>
+&lt;ol>
+&lt;li>Use helm to install istio base CRD and istiod components. You can also refer to &lt;a href="https://istio.io/">Istio Documentation&lt;/a> to install using istioctl.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ helm repo add istio https://istio-release.storage.googleapis.com/charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ kubectl create namespace istio-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istio-base istio/base -n istio-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istiod istio/istiod --namespace istio-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>
+&lt;p>Delete istio horizontal expansion resource&lt;/p>
+&lt;p>*Currently dubbo-go relies on a single istiod instance for service discovery.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl delete hpa istiod -n istio-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the installation is complete, you can see an istiod pod running normally under the istio-system namespace.&lt;/p></description></item><item><title>Docs3-V2: Deploy Dubbo-go application in Istio environment</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/</guid><description>
+&lt;p>In this chapter, we will use the application template to quickly create a set of Dubbo-go Server and Client applications and deploy them in the Istio cluster; observe, debug and verify that service discovery and invocation are successful.&lt;/p>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>The dubbo-go cli tool and dependent tools have been installed, grpc_cli (for local debugging).&lt;/li>
+&lt;li>The docker, helm, and kubectl environments have been installed. (arm machines need to support docker buildx)&lt;/li>
+&lt;li>&lt;a href="../istio/">Task [istio environment deployment]&lt;/a> completed&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-develop-server-side-dubbo-go-application">2. Develop server-side Dubbo-go application&lt;/h2>
+&lt;h3 id="21-use-dubbogo-cli-to-create-a-project-template">2.1 Use dubbogo-cli to create a project template&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>$ mkdir mesh-app-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd mesh-app-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ tree .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├──build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── chart
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── serviceaccount.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── nacos_env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── app.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── conf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── dubbogo.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── pkg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service.go
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The generated project includes several directories:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>api: place interface files: proto file and generated pb.go file&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>build: place build related files&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Chart: place the chart warehouse for publishing, the basic environment chart warehouse: nacos, mesh (under development)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>cmd: program entry&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>conf: framework configuration&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>pkg/service: RPC service implementation&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Makefile:&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>Mirror, Helm installation name:&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE = $(your_repo)/$(namespace)/$(image_name)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-app
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>Provide scripts such as:&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;ul>
+&lt;li>
+&lt;ul>
+&lt;li>make build # Package the image and push it&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>make buildx-publish # The arm architecture locally packs the amd64 image and pushes it, relying on buildx&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>make deploy # Publish the application through helm&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>make remove # Delete the published helm application&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>make proto-gen # generate pb.go file under api
+-&amp;hellip;&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="22-develop-and-deploy-dubbo-go-applications">2.2 Develop and deploy Dubbo-go applications:&lt;/h3>
+&lt;h4 id="developing-applications">Developing Applications&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>compile interface&lt;/p>
+&lt;p>Developers need to modify the proto file, and the default interface can be used directly in this task.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make proto-gen
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>protoc --go_out&lt;span style="color:#719e07">=&lt;/span>./api --go-triple_out&lt;span style="color:#719e07">=&lt;/span>./api ./api/api.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>pull dependencies&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ go get dubbo.apache.org/dubbo-go/v3@3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ make tidy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go mod tidy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Write business logic&lt;/p>
+&lt;p>Modify pkg/service/service.go to implement the function, and the version displayed in the returned string is v1.0.0&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterServerImpl) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Modify the following configuration fields to use the xds protocol as the registration center&lt;/p>
+&lt;p>conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">xds&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: xds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: istiod.istio-system.svc.cluster.local:15010
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterServerImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from stub&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, the application development is complete.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="configure-build-and-deployment-parameters">Configure build and deployment parameters&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>Specify the image to be built:&lt;/p>
+&lt;p>Modify the following fields in the Makefile to specify the address and version of the image to be built.&lt;/p>
+&lt;p>Specify the name that needs to be installed through helm.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE = xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-server-v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Specify the application and image to be deployed:&lt;/p>
+&lt;p>Modify the following fields in chart/app/Chart.yaml, and specify the current application name as &lt;code>dubbo-go-server&lt;/code>. When deploying, a service named dubbo-go-server will be created and associated with all versions of the current application.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">description&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Modify the following fields in chart/app/values.yaml, and specify the image to be deployed and the currently developed application version dubbogoAppVersion as v1.&lt;/p>
+&lt;p>The deployed image needs to be consistent with the image built above. The current application version is used for mesh traffic rule control.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">image&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repository&lt;/span>: xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pullPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tag&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo-go-mesh version control labels&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">version&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, the build parameters and release parameters have been specified, ready to build and deploy.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="use-templates-to-build-and-deploy-dubbo-go-applications">Use templates to build and deploy Dubbo-go applications&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>Build and push images&lt;/p>
+&lt;p>&lt;code>$ make build&lt;/code> (locally for amd64 machines)&lt;/p>
+&lt;p>or&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (Local is arm64 machine, depends on docker buildx command)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Publish the Dubbo-go application to the cluster&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make deploy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install dubbo-go-server-v1 ./chart/app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME: dubbo-go-server-v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LAST DEPLOYED: Thu Apr &lt;span style="color:#2aa198">7&lt;/span> 11:19:42 &lt;span style="color:#2aa198">2022&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAMESPACE: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>STATUS: deployed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REVISION: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TEST SUITE: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm list
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME NAMESPACE REVISION UPDATED STATUS CHART APP VERSION
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:19:42.350553 +0800 CST deployed dubbo-go-server-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen that the deployment through helm is successful&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="23-verify-application">2.3 Verify application&lt;/h3>
+&lt;h4 id="view-resource-deployment">View resource deployment&lt;/h4>
+&lt;p>View the deployed deployment, the version is v1.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME READY UP-TO-DATE AVAILABLE AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 26s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>View the deployed service.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get svc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server ClusterIP 192.168.216.253 &amp;lt;none&amp;gt; 20000/TCP 70s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="optional-debug-the-deployed-dubbo-go-application-locally">(*Optional) Debug the deployed Dubbo-go application locally&lt;/h4>
+&lt;p>Use kubectl port-forward Dubbo-go to apply locally&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl port-forward svc/dubbo-go-server &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Forwarding from 127.0.0.1:20000 -&amp;gt; &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Forwarding from &lt;span style="color:#719e07">[&lt;/span>::1&lt;span style="color:#719e07">]&lt;/span>:20000 -&amp;gt; &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Use grpc_cli to debug applications in the cluster, refer to the task &lt;a href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/debugging/grpc_cli/">[Use grpc_cli to debug Dubbo-go applications]&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ grpc_cli ls localhost:20000 -l
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>filename: api/api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>package: api;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service Greeter &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHello&lt;span style="color:#719e07">(&lt;/span>api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHelloStream&lt;span style="color:#719e07">(&lt;/span>stream api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>stream api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Use grpc_cli to initiate a call to test the interface&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ grpc_cli call localhost:20000 SayHello &lt;span style="color:#2aa198">&amp;#34;name: &amp;#39;laurence&amp;#39;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>connecting to localhost:20000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>name: &lt;span style="color:#2aa198">&amp;#34;Hello Laurence&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>id: &lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Received trailing metadata from server:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept-encoding: identity, gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-accept-encoding : identity,deflate,gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Rpc succeeded with OK status
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>So far, we have successfully developed an application and deployed it in the istio cluster.&lt;/p>
+&lt;h2 id="3-develop-client-side-dubbo-go-application">3. Develop client-side Dubbo-go application&lt;/h2>
+&lt;h3 id="31-use-dubbogo-cli-to-create-another-project-template">3.1 Use dubbogo-cli to create another project template&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-develop-and-deploy-client-dubbo-go-applications">3.2 Develop and deploy client Dubbo-go applications:&lt;/h3>
+&lt;h4 id="write-business-logic">Write business logic&lt;/h4>
+&lt;ul>
+&lt;li>Modify the main method of cmd/app.go to initiate a call to the downstream interface every second&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>client &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api. GreeterClientImpl{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config. &lt;span style="color:#268bd2">SetConsumerService&lt;/span>(client)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>request &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name: &lt;span style="color:#2aa198">&amp;#34;Laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> rsp, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), request); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server error = %s&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}&lt;span style="color:#719e07">else&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server response = %+v&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time. &lt;span style="color:#268bd2">Sleep&lt;/span>(time. Second)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>Modify the following configuration file, use the xds protocol as the registration center, and load the client service named GreeterClientImpl.&lt;/p>
+&lt;p>conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">xds&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: xds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: istiod.istio-system.svc.cluster.local:15010
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from stub&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, the application development is complete.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="configure-build-and-deployment-parameters-1">Configure build and deployment parameters&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>Specify the image to be built:&lt;/p>
+&lt;p>Modify the following fields in the Makefile to specify the address and version of the image to be built.&lt;/p>
+&lt;p>Specify the name that needs to be installed through helm.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE=xxx/dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-client
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Specify the application and image to be deployed:&lt;/p>
+&lt;p>Modify the following fields in chart/app/Chart.yaml, and specify the current application name as &lt;code>dubbo-go-client&lt;/code>. When deploying, a service named dubbo-go-client will be created and associated with all versions of the current application. For a client-only application, you don’t need to create a sevice, and it can be modified by the developer in the template. In this tutorial, we create it by default.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">description&lt;/span>: dubbo-go-client
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Modify the following fields in chart/app/values.yaml, and specify the image to be deployed and the currently developed application version dubbogoAppVersion as v1.&lt;/p>
+&lt;p>The deployed image needs to be consistent with the image built above. The current application version is used for mesh traffic rule control.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">image&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repository&lt;/span>: xxx/dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pullPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tag&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo-go-mesh version control labels&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">version&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, the build parameters and release parameters have been specified, ready to build and deploy.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="use-templates-to-build-and-deploy-dubbo-go-applications-1">Use templates to build and deploy Dubbo-go applications&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>Build and push images&lt;/p>
+&lt;p>&lt;code>$ make build&lt;/code> (locally for amd64 machines)&lt;/p>
+&lt;p>or&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (Local is arm64 machine, depends on docker buildx command)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Publish the Dubbo-go Client application to the cluster&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make deploy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install dubbo-go-client ./chart/app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME: dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LAST DEPLOYED: Thu Apr &lt;span style="color:#2aa198">7&lt;/span> 11:49:55 &lt;span style="color:#2aa198">2022&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAMESPACE: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>STATUS: deployed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REVISION: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TEST SUITE: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm list
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME NAMESPACE REVISION UPDATED STATUS CHART APP VERSION
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:49:55.517898 +0800 CST deployed dubbo-go-client-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:23:18.397658 +0800 CST deployed dubbo-go-server-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen that the deployment through helm is successful, and there are two applications, Client and Server, in the cluster.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="33-verify-application">3.3 Verify application&lt;/h3>
+&lt;h4 id="view-resource-deployment-1">View resource deployment&lt;/h4>
+&lt;p>View the deployed client and server two deployments.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME READY UP-TO-DATE AVAILABLE AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 22m
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 49m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Check the client call log&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:55.777Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:56.778Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:57.779Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:58.781Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:13:59.782Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:14:00.784Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T04:14:01.785Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The verification call was successful&lt;/p>
+&lt;h2 id="4-summary">4. Summary&lt;/h2>
+&lt;p>The application template provided by dubbogo-cli can conveniently support developers to build, push, and deploy images.&lt;/p>
+&lt;p>In the Istio environment, the server application registers its own service information on Isito, and the client monitors the xds resource and queries the istio debug port for interface-level service discovery. Developers don&amp;rsquo;t need to care about concepts such as service name, host name, and cluster name. They only need to introduce interfaces and initiate calls.&lt;/p></description></item><item><title>Docs3-V2: traffic management</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/traffic_management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/traffic_management/</guid><description>
+&lt;p>In this section, we will continue the previous task &lt;a href="../deploy/">[Deploy Dubbo-go application in Istio environment]&lt;/a>.&lt;/p>
+&lt;p>In the previous task, we deployed a set of Dubbo-go Server and Client applications in the cluster, and verified the success of service discovery and invocation. In this section, we will create a new version of the server-side application. By configuring VirtualService and DestinationRule, routing management and traffic transfer capabilities are realized&lt;/p>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>The dubbo-go cli tool and dependent tools have been installed, grpc_cli (for local debugging).&lt;/li>
+&lt;li>The docker, helm, and kubectl environments have been installed. (arm machines need to support docker buildx)&lt;/li>
+&lt;li>Task &lt;a href="../deploy/">[Deploy Dubbo-go application in Istio environment]&lt;/a> completed&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-develop-multi-version-dubbo-go-applications">2. Develop multi-version Dubbo-go applications.&lt;/h2>
+&lt;h3 id="21-use-dubbogo-cli-to-create-another-project-template">2.1 Use dubbogo-cli to create another project template&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-develop-and-deploy-client-dubbo-go-application-v2">2.2 Develop and deploy client Dubbo-go application v2:&lt;/h3>
+&lt;h4 id="write-business-logic">Write business logic&lt;/h4>
+&lt;ul>
+&lt;li>Modify the implementation method of package/service/service.go, and return the version number as v2.0.0&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterServerImpl) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>Modify the following configuration file, use the xds protocol as the registration center, and load the service structure named GreeterServerImpl.&lt;/p>
+&lt;p>conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">xds&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: xds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: istiod.istio-system.svc.cluster.local:15010
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterServerImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from stub&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, the application development is complete.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="configure-build-and-deployment-parameters">Configure build and deployment parameters&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>Specify the image to be built:&lt;/p>
+&lt;p>Modify the following fields in the Makefile, specify the address and version of the image to be built, and change the image tag to 2.0.0.&lt;/p>
+&lt;p>Specify the name that needs to be installed through helm.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>IMAGE = xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TAG = 2.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HELM_INSTALL_NAME = dubbo-go-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Specify the application and image to be deployed:&lt;/p>
+&lt;p>Modify the following fields in chart/app/Chart.yaml, and specify the current application name as &lt;code>dubbo-go-server&lt;/code>. When we created the v1 version of the service, we already had the service of the application. The template will not be created during this deployment service.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">description&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Modify the following fields in chart/app/values.yaml, specify the image to be deployed as 2.0.0, and the currently developed application version dubbogoAppVersion as v2.&lt;/p>
+&lt;p>The deployed image needs to be consistent with the image built above. The current application version is used for mesh traffic rule control.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">image&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repository&lt;/span>: xxx/dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pullPolicy&lt;/span>: Always
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tag&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo-go-mesh version control labels&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">version&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this point, the build parameters and release parameters have been specified, ready to build and deploy.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="use-templates-to-build-and-deploy-dubbo-go-applications">Use templates to build and deploy Dubbo-go applications&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>Build and push images&lt;/p>
+&lt;p>&lt;code>$ make build&lt;/code> (locally for amd64 machines)&lt;/p>
+&lt;p>or&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (Local is arm64 machine, depends on docker buildx command)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Publish Dubbo-go Server v2 to the cluster&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ make deploy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME: dubbo-go-server-v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LAST DEPLOYED: Thu Apr &lt;span style="color:#2aa198">7&lt;/span> 12:29:28 &lt;span style="color:#2aa198">2022&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAMESPACE: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>STATUS: deployed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REVISION: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TEST SUITE: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm list
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME NAMESPACE REVISION UPDATED STATUS CHART dubbo-go-client default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:49:55.517898 +0800 CST deployed dubbo-go-client-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 11:23:18.397658 +0800 CST deployed dubbo-go-server-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v2 default &lt;span style="color:#2aa198">1&lt;/span> 2022-04-07 12:29:28.497476 +0800 CST deployed dubbo-go-client-0.0.1 1.16.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen that the deployment through helm is successful, and there is already a Client application and two versions of Server in the cluster.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="23-verify-application">2.3 Verify application&lt;/h3>
+&lt;h4 id="view-resource-deployment">View resource deployment&lt;/h4>
+&lt;p>Looking at the deployed deployment, the server contains two versions.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME READY UP-TO-DATE AVAILABLE AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 40m
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v2 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 77s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server-v1 1/1 &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> 67m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>View the deployed service. Two versions of the deployment share the same service.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get svc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-client ClusterIP 192.168.8.176 &amp;lt;none&amp;gt; 20000/TCP 41m
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-server ClusterIP 192.168.216.253 &amp;lt;none&amp;gt; 20000/TCP 67m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Check the Client application log to verify that the request is called to two versions of the application.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:40.384Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:41.386Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:42.388Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:43.389Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:44.390Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:45.392Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:46.393Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:47.394Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:48.396Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:06:49.397Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>So far, we have successfully developed and deployed multi-version applications.&lt;/p>
+&lt;h2 id="3-configure-request-routing">3. Configure request routing&lt;/h2>
+&lt;h3 id="31-configure-target-rules">3.1 Configure target rules&lt;/h3>
+&lt;p>Execute the following command to create a target rule that subdivides dubbo-go-server into two subsets. v1 and v2&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f destinationrule.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>destinationrule.yaml content:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DestinationRule
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subsets&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v1 &lt;span style="color:#586e75"># corresponds to the version label specified in chart/app/values.yaml in the application template&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbogoAppVersion&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-apply-virtual-service">3.2 Apply Virtual Service&lt;/h3>
+&lt;p>Execute the following command to create a route that routes all traffic to the v1 application.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f virtualservice.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>virtualservice.yaml content&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-verify-that-the-routing-takes-effect">3.3 Verify that the routing takes effect&lt;/h3>
+&lt;p>All traffic will go to the v1 app.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:44.353Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:45.354Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:46.356Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:47.357Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:48.359Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:49.361Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-routing-based-on-user-identity">4. Routing based on user identity&lt;/h2>
+&lt;p>With the above foundation of multi-version application routing, we can implement flexible traffic management through some strategies.&lt;/p>
+&lt;h3 id="41-add-user-identity-for-client-application">4.1 Add user identity for client application&lt;/h3>
+&lt;p>We hope that traffic with the user: admin identifier can experience the new v2 version of the application.&lt;/p>
+&lt;p>Go back to the previously created dubbo-go-client project, modify the main function of cmd/app.go, and add the calling identifier: &lt;code>user: admin&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>client &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api. GreeterClientImpl{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config. &lt;span style="color:#268bd2">SetConsumerService&lt;/span>(client)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>request &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name: &lt;span style="color:#2aa198">&amp;#34;Laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ctx &lt;span style="color:#719e07">:=&lt;/span> context. &lt;span style="color:#268bd2">Background&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ctx = context.&lt;span style="color:#268bd2">WithValue&lt;/span>(ctx, constant.AttachmentKey, &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#dc322f">string&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;user&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;admin&amp;#34;&lt;/span>, &lt;span style="color:#586e75">// Use the context context to add identity to the call
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> rsp, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">SayHello&lt;/span>(ctx, request); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server error = %s&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}&lt;span style="color:#719e07">else&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;call server response = %+v&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time. &lt;span style="color:#268bd2">Sleep&lt;/span>(time. Second)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>Build and push mirrors, overwriting previous commits. You can also upgrade the released image version.&lt;/p>
+&lt;p>&lt;code>$ make build&lt;/code> (locally for amd64 machines)&lt;/p>
+&lt;p>or&lt;/p>
+&lt;p>&lt;code>$ make buildx-publish&lt;/code> (Local is arm64 machine, depends on docker buildx command)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Remove dubbo-go-client application&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>$ make remove
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm uninstall dubbo-go-client
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>release &amp;#34;dubbo-go-client&amp;#34; uninstalled
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Republish the app.&lt;/p>
+&lt;p>&lt;code>$ make deploy&lt;/code>&lt;/p>
+&lt;p>After publishing, the verification call is successful because of the previous routing configuration. All traffic goes to the v1 version.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:44.353Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:45.354Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:46.356Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:47.357Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:48.359Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:40:49.361Z INFO cmd/app.go:29 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h3 id="42-create-a-route-based-on-user-identity">4.2 Create a route based on user identity&lt;/h3>
+&lt;p>Execute the following command to modify/create a route that routes all traffic with the user: admin identifier in the request header to the v2 version.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f virtualservice.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>virtualservice.yaml content&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">headers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">user&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: admin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="43-verify-that-the-routing-takes-effect">4.3 Verify that the routing takes effect&lt;/h3>
+&lt;p>All traffic will go to the v2 app.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:18.714Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:19.716Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:20.717Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:21.718Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:22.720Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:23.722Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:52:24.723Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="5-weight-based-routing">5. Weight-based routing&lt;/h2>
+&lt;h3 id="51-create-weight-based-routing">5.1 Create weight-based routing&lt;/h3>
+&lt;p>Continuing the above tasks, we execute the following commands to modify/create a route that imports 10% of the traffic into the new version of the application for grayscale testing.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f virtualservice.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>virtualservice.yaml content&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.istio.io/v1alpha3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">90&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: dubbo-go-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="52-verify-that-the-routing-takes-effect">5.2 Verify that the routing takes effect&lt;/h3>
+&lt;p>A small amount of traffic will go to the v2 release.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl get pods | grep client | awk &lt;span style="color:#2aa198">&amp;#39;{print $1}&amp;#39;&lt;/span> | xargs kubectl logs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:52.035Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:53.036Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:54.037Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:55.039Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:56.041Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:57.043Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:58.045Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:55:59.047Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:00.049Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:01.050Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:02.053Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-04-07T05:56:03.055Z INFO cmd/app.go:35 call server &lt;span style="color:#268bd2">response&lt;/span> &lt;span style="color:#719e07">=&lt;/span> name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;v1.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Use Pixiu gateway to access Ingress traffic</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/</guid><description/></item><item><title>Docs3-V2: Proxyless Service Mesh</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/proxyless_service_mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/proxyless_service_mesh/</guid><description>
+&lt;h2 id="1-what-is-proxyless-service-mesh-no-proxy-service-mesh-">1. What is Proxyless Service-Mesh (No Proxy Service Mesh) ?&lt;/h2>
+&lt;h3 id="11-brief-analysis-of-service-mesh">1.1 Brief Analysis of Service Mesh&lt;/h3>
+&lt;p>Istio is the most popular open source service mesh today. It consists of a control plane and a data plane. Its architecture is as follows. The picture is taken from &lt;a href="https://istio.io/">istio official website&lt;/a>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/service-mesh.svg" alt="After using Istio">&lt;/p>
+&lt;p>The control plane located in the lower half of the figure is responsible for the delivery of resources such as configuration, service information, and certificates. The data plane located in the upper part pays attention to the communication traffic between services; the traditional service grid intercepts all business network traffic through proxy, and the proxy needs to perceive the configuration resources issued by the control plane, so as to control the direction of network traffic as required .&lt;/p>
+&lt;p>In the Istiod environment, its control plane is a process called istiod and the network proxy is envoy. istiod obtains service information by monitoring K8S resources such as Service and Endpoint, and sends these resources to the network agent on the data plane through the XDS protocol. Envoy is an independent process that runs with the business application Pod in the form of a sidecar (sidecar). It shares the same host network with the application process and hijacks the network traffic of the business application by modifying the routing table.&lt;/p>
+&lt;p>Service Mesh can solve many problems in microservice scenarios. With the expansion of cluster size and the growth of business complexity, container orchestration solutions based on native k8s will be difficult to cope with, and developers have to face huge service governance challenges. Service Mesh solves this problem very well. It encapsulates service governance requirements in the control plane and proxy, and business developers only need to focus on business logic. After the application is deployed, the operation and maintenance personnel only need to modify the configuration to implement functions such as fault recovery, load balancing, and gray release, which greatly improves the efficiency of R&amp;amp;D and iteration.&lt;/p>
+&lt;p>Istio&amp;rsquo;s sidecar accompanies the entire life cycle of the business application process through container injection, and is non-invasive to the business application, which solves the problems of business application migration, multi-language, and infrastructure coupling. But this also brings problems of high resource consumption and increased request delay.&lt;/p>
+&lt;p>Service provides a good idea for service governance, decoupling infrastructure from business logic, so that application developers only need to focus on business. On the other hand, due to the disadvantages of sidecar, we can consider using sdk instead of sidecar to support the data plane.&lt;/p>
+&lt;h3 id="12-proxyless-service-mesh">1.2 Proxyless Service-Mesh&lt;/h3>
+&lt;p>Agentless service grid is a new concept proposed in recent years. Open source communities such as isito, gRPC, and brpc have all explored and practiced in this direction. The agentless service grid framework is introduced by business applications in the form of SDK, and is responsible for communication and governance between services. The configuration from the control plane is directly sent to the service framework, and the service framework replaces the functions of the above sidecar.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/894c0e52-9d34-4490-b49b-24973ef4aabc.png" alt="img">&lt;/p>
+&lt;p>The main capabilities of the service framework (SDK) can be summarized as the following three points:&lt;/p>
+&lt;ol>
+&lt;li>Connect to the control plane and monitor configuration resources.&lt;/li>
+&lt;li>Docking applications, providing developers with a convenient interface.&lt;/li>
+&lt;li>Connect to the network and respond to traffic rules according to resource changes.&lt;/li>
+&lt;/ol>
+&lt;h3 id="13-advantages-and-disadvantages-of-proxyless">1.3 Advantages and disadvantages of Proxyless&lt;/h3>
+&lt;p>advantage:&lt;/p>
+&lt;ul>
+&lt;li>Performance: The network call in the agentless mode is a point-to-point direct communication, and the network delay will be much smaller than that in the agent mode.&lt;/li>
+&lt;li>Stability: The proxyless mode is a single process, with a simple topology, easy debugging, and high stability.&lt;/li>
+&lt;li>Framework integration: There are already many sdk-mode service frameworks on the market, and after switching to mesh, they have the ability to reuse frameworks&lt;/li>
+&lt;li>Resource consumption: no sidecar, low resource consumption&lt;/li>
+&lt;/ul>
+&lt;p>shortcoming:&lt;/p>
+&lt;ul>
+&lt;li>Language binding: need to develop sdk in multiple languages&lt;/li>
+&lt;li>Low portability: It is impossible to upgrade the infrastructure non-intrusively by switching the form of sidecar.&lt;/li>
+&lt;/ul>
+&lt;p>Generally speaking, the Proxyless architecture is more suitable for use in production environments due to its high performance and high stability.&lt;/p>
+&lt;h2 id="2-dubbo-go-and-proxyless-service-mesh">2. Dubbo-go and Proxyless Service-Mesh&lt;/h2>
+&lt;h3 id="21-design-of-dubbo-go-in-proxyless-service-mesh-scene">2.1 Design of Dubbo-go in Proxyless Service-Mesh scene&lt;/h3>
+&lt;h4 id="service-registration-discovery">Service Registration Discovery&lt;/h4>
+&lt;p>Dubbo-go itself has scalable service registration and discovery capabilities, and we have adapted the implementation of the registration center for the service mesh scenario. Developers can register dubbo-go application information on the istiod control plane. The client application can query the registered interface data to complete the service discovery process.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/454d1e31-0be3-41fe-97ec-f52673ebf74f.png" alt="img">&lt;/p>
+&lt;ol>
+&lt;li>Developers use the dubbogo-cli tool to create application templates and publish Deployment / Service to the cluster.&lt;/li>
+&lt;li>The server pulls the full amount of CDS and EDS, compares the local IP, and gets the host name of the current application. And register all the mappings from interface names to host names of this application on Istiod.&lt;/li>
+&lt;li>The client pulls the mapping from the full interface name to the host name from istiod and caches it locally. When a call needs to be made, the local cache is queried, the interface name is converted to a host name, and then pulled to the full endpoint corresponding to the current cluster through CDS and EDS.&lt;/li>
+&lt;li>All endpoints pass through Dubbo-go&amp;rsquo;s built-in Mesh Router to filter out the final subset of endpoints and make requests according to the configured load balancing strategy.&lt;/li>
+&lt;/ol>
+&lt;p>Developers only need to pay attention to the interface throughout the process, and do not need to care about the host name and port information at all. That is, the server developer only needs to implement the pb interface and expose it using the framework; the client developer only needs to introduce the pb interface and initiate a call directly.&lt;/p>
+&lt;h4 id="traffic-management">Traffic management&lt;/h4>
+&lt;p>Dubbo-go has routing capabilities, subscribes to routing configuration from istiod through the xds protocol client, and updates to local routing rules in real time, so as to realize service management. Dubbo-go is compatible with the traffic governance rules of the istio ecology. By configuring Virtual Service and Destination Rule, the marked traffic can be routed to a specified subset, and it can also be used more deeply in scenarios such as grayscale release and flow switching.&lt;/p>
+&lt;h4 id="cloud-native-scaffolding">Cloud Native Scaffolding&lt;/h4>
+&lt;p>dubbogo-cli is a sub-project of the Apache/dubbo-go ecosystem, which provides developers with convenient functions such as application template creation, tool installation, and interface debugging to improve user R&amp;amp;D efficiency.&lt;/p>
+&lt;p>For details, please refer to &lt;a href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/refer/use_dubbogo_cli/">[dubbogo-cli tool]&lt;/a>&lt;/p>
+&lt;h2 id="3-advantages-of-dubbo-go-mesh">3. Advantages of Dubbo-go-Mesh&lt;/h2>
+&lt;h3 id="31-interface-level-service-discovery">3.1 Interface-level service discovery&lt;/h3>
+&lt;p>The previous article introduced the advantages of discovery through interface-level service registration, that is, developers do not need to care about downstream host names and port numbers, but only need to introduce interface stubs, or implement interfaces, and start them through the framework.&lt;/p>
+&lt;h3 id="32-high-performance">3.2 High Performance&lt;/h3>
+&lt;p>We deployed the istio environment in the k8s cluster, and tested the gRPC service call in sidecar mode and the dubbo-go application service call in Proxyless mode. It is found that proxyless is an order of magnitude less than sidecar mode in terms of request time consumption, that is, the performance is improved by about ten times.&lt;/p>
+&lt;h3 id="33-cross-ecology">3.3 Cross-ecology&lt;/h3>
+&lt;p>Dubbo-go is a service framework that spans multiple ecosystems.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>mesh ecology&lt;/p>
+&lt;p>Developers can use Dubbo-go for application development while using the powerful capabilities provided by the istio ecosystem.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>gRPC ecology&lt;/p>
+&lt;ul>
+&lt;li>Dubbo-go supports interoperability with gRPC services, HTTP2 protocol stack.&lt;/li>
+&lt;li>Dubbo-go uses pb serialization by default, high performance.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Dubbo Ecology&lt;/p>
+&lt;ul>
+&lt;li>Multilingual advantage, can realize go-java application intercommunication.&lt;/li>
+&lt;li>Compatible with pixiu gateway, convenient for service exposure and protocol conversion.&lt;/li>
+&lt;li>Use Dubbo-go ecological components.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul></description></item></channel></rss>

@@ -1,0 +1,180 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – golang</title><link>https://dubbo.apache.org/en/docs/v3.0/languages/golang/</link><description>Recent content in golang on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs/v3.0/languages/golang/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Go language definition service</title><link>https://dubbo.apache.org/en/docs/v3.0/languages/golang/go-specific/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/languages/golang/go-specific/</guid><description/></item><item><title>Docs: Go quick start</title><link>https://dubbo.apache.org/en/docs/v3.0/languages/golang/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/languages/golang/quick-start/</guid><description>
+&lt;p>It is recommended to use IDL to define cross-language services and coding formats.&lt;/p>
+&lt;p>The following shows the service definition and development methods of the Golang language version. If you have a legacy system or do not have multi-language development requirements, you can refer to the following usage methods.&lt;/p>
+&lt;h1 id="quick-start">Quick start&lt;/h1>
+&lt;p>use &lt;code>hello world&lt;/code> example to show how to start with the Dubbo-go framework.&lt;/p>
+&lt;p>Protocol: Dubbo&lt;/p>
+&lt;p>Coding: Hessian2&lt;/p>
+&lt;p>Registration Center: Zookeeper&lt;/p>
+&lt;h2 id="environment">environment&lt;/h2>
+&lt;ul>
+&lt;li>Go programming environment&lt;/li>
+&lt;li>Zookeeper service, you can also use a remote instance&lt;/li>
+&lt;/ul>
+&lt;h2 id="server">Server&lt;/h2>
+&lt;h3 id="the-first-step-writing-provider-structure-and-method-for-providing-services">The first step: writing &lt;code>Provider&lt;/code> structure and method for providing services&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/user.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/user.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>Write structure which needs to be transferred, since we are using &lt;code>Hessian2&lt;/code>, so the &lt;code>User&lt;/code> class needs to implement the &lt;code>JavaClassName&lt;/code> method. It will include class names.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Id &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Time time.Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>2.Writing business logic in &lt;code>UserProvider&lt;/code> which is the same as what we do in dubbo java.
+Need to implement the &lt;code>Reference&lt;/code> method, the return value is uniquely identified in the service, corresponding to the dubbo &lt;code>beans&lt;/code> and &lt;code>path&lt;/code> fields.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, req []&lt;span style="color:#268bd2">interface&lt;/span>{}) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;req:%#v&amp;#34;&lt;/span>, req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rsp &lt;span style="color:#719e07">:=&lt;/span> User{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;hellowworld&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">18&lt;/span>, time.&lt;span style="color:#268bd2">Now&lt;/span>()}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;rsp:%#v&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>rsp, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">Reference&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>Register services and objects&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetProviderService&lt;/span>(&lt;span style="color:#b58900">new&lt;/span>(UserProvider))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ------for hessian2------
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-write-the-main-program">Step 2: Write the main program&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/server.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/server.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>Introduce the necessary dubbo-go package&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> hessian &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-hessian2&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/protocol&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/proxy/proxy_factory&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/filter/impl&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/cluster_impl&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/loadbalance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/zookeeper&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/protocol/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>main function&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">Load&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-write-a-configuration-file-and-configure-environment-variables">Step 3: Write a configuration file and configure environment variables&lt;/h3>
+&lt;ol>
+&lt;li>Reference to &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/log.yml">log&lt;/a> and &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/server.yml">server&lt;/a> to edit configuration file。&lt;/li>
+&lt;/ol>
+&lt;p>Mainly edit the following parts:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;code>registries&lt;/code>: The number and address of zk server&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>services&lt;/code>: Service specific information in the configuration node, modify &lt;code>interfacec&lt;/code> to the interface to the corresponding service name, modify &lt;code>key&lt;/code> to the value which is the same as the first step &lt;code>Referenc&lt;/code> return value.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;ol start="2">
+&lt;li>Configure the above two configuration files as environment variables&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_PROVIDER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="client">Client&lt;/h2>
+&lt;h3 id="the-first-step-writing-the-client-provider">The first step: writing the client &lt;code>Provider&lt;/code>&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/user.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/user.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>
+&lt;p>Refer to the first point of the first step on the server side.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Different from the server side, the method of providing the service is used as the parameter of the structure, and there is no need to write specific business logic. In addition, &lt;code>Provider&lt;/code> does not correspond to the interface in dubbo, but corresponds to an implementation.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> GetUser &lt;span style="color:#268bd2">func&lt;/span>(ctx context.Context, req []&lt;span style="color:#268bd2">interface&lt;/span>{}, rsp &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">Reference&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>Register services and objects&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(userProvider)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-write-the-client-main-program">Step 2: Write the client main program&lt;/h3>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/client.go">https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/client.go&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;ol>
+&lt;li>Introduce the necessary dubbo-go package&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> hessian &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-hessian2&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/config&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/protocol&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/common/proxy/proxy_factory&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/filter/impl&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/cluster_impl&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/cluster/loadbalance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/registry/zookeeper&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go/protocol/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>main function&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">Load&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> time.&lt;span style="color:#268bd2">Sleep&lt;/span>(&lt;span style="color:#2aa198">3e9&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;\n\n\nstart to test dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> err &lt;span style="color:#719e07">:=&lt;/span> userProvider.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;A001&amp;#34;&lt;/span>}, user)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v\n&amp;#34;&lt;/span>, user)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#b58900">println&lt;/span>(format &lt;span style="color:#dc322f">string&lt;/span>, args &lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{}) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;\033[32;40m&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>format&lt;span style="color:#719e07">+&lt;/span>&lt;span style="color:#2aa198">&amp;#34;\033[0m\n&amp;#34;&lt;/span>, args&lt;span style="color:#719e07">...&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-write-a-configuration-file-and-configure-environment-variables-1">Step 3: Write a configuration file and configure environment variables&lt;/h3>
+&lt;ol>
+&lt;li>Refer to &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/log.yml">log&lt;/a> and &lt;a href="https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/client.yml">client&lt;/a> to modify configuration file。&lt;/li>
+&lt;/ol>
+&lt;p>Mainly edit the following parts:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;code>registries&lt;/code>: The number and address of zk server&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>services&lt;/code>: Service specific information in the configuration node, modify &lt;code>interfacec&lt;/code> to the interface to the corresponding service name, modify &lt;code>key&lt;/code> to the value which is the same as the first step &lt;code>Reference&lt;/code> return value.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;ol start="2">
+&lt;li>Configure the above two configuration files as environment variables. In order to prevent the log environment variables from conflicting with the server-side log environment variables, it is recommended that all environment variables should not be configured globally, and they can take effect at present.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">CONF_CONSUMER_FILE_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">APP_LOG_CONF_FILE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

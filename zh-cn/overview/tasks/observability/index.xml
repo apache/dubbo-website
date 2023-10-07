@@ -1,0 +1,265 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 观测服务</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/</link><description>Recent content in 观测服务 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/tasks/observability/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 使用 Admin 可视化查看集群状态</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/admin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/observability/admin/</guid><description>
+&lt;p>前面章节我们提到 Dubbo 框架提供了丰富的服务治理功能如流量控制、动态配置、服务 Mock、服务测试等，而 Dubbo Admin 控制台的一部分重要作用在于将 dubbo 框架提供的服务治理能力提供一个开箱即用的可视化平台。本文将介绍 Dubbo Admin 控制台所提供的功能，让大家快速了解和使用 Admin 并对 Dubbo 所提供的服务治理能力有个更直观的了解。&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo Admin 已经升级为 Dubbo 服务治理统一入口，涵盖的范围非常广泛，本文讲解的只是 Admin 可视化控制台部分。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="安装-admin">安装 Admin&lt;/h2>
+&lt;p>首先，需要正确 &lt;a href="../../../reference/admin/architecture/">安装&amp;amp;配置 Dubbo Admin&lt;/a> 控制台&lt;/p>
+&lt;h2 id="功能介绍">功能介绍&lt;/h2>
+&lt;p>Admin 控制台提供了从开发、测试到流量治理等不同层面的丰富功能，功能总体上可分为以下几类：&lt;/p>
+&lt;ul>
+&lt;li>服务状态与依赖关系查询&lt;/li>
+&lt;li>服务在线测试与文档管理&lt;/li>
+&lt;li>集群状态监控&lt;/li>
+&lt;li>实例诊断&lt;/li>
+&lt;li>流量管控&lt;/li>
+&lt;/ul>
+&lt;h3 id="服务状态与依赖关系查询">服务状态与依赖关系查询&lt;/h3>
+&lt;p>服务状态查询以接口为维度展示 dubbo 集群信息，包含服务提供者、消费者信息和服务的元数据等。元数据包含了服务定义、方法名和参数列表等信息。Admin 支持最新版本 dubbo3 所提供的应用级发现模型，以统一的页面交互展示了应用级&amp;amp;接口级地址信息，并以特殊的标记对记录进行区分。&lt;/p>
+&lt;h4 id="基于服务名查询">基于服务名查询&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/1-search-by-service.png" alt="img">&lt;/p>
+&lt;h4 id="基于应用名查询">基于应用名查询&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/1-search-by-appname.png" alt="img">&lt;/p>
+&lt;h4 id="基于实例地址查询">基于实例地址查询&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/1-search-by-ip.png" alt="img">&lt;/p>
+&lt;h4 id="服务实例详情">服务实例详情&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/1-service-detail.png" alt="img">&lt;/p>
+&lt;h3 id="服务在线测试与文档管理">服务在线测试与文档管理&lt;/h3>
+&lt;h4 id="服务测试">服务测试&lt;/h4>
+&lt;p>服务测试相，主要用于模拟服务消费方，验证 Dubbo 服务的使用方式与正确性。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/2-service-test2.png" alt="img">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/2-service-test.png" alt="img">&lt;/p>
+&lt;h4 id="服务-mock">服务 Mock&lt;/h4>
+&lt;p>服务Mock通过无代码嵌入的方式将Consumer对Provider的请求进行拦截，动态的对Consumer的请求进行放行或返回用户自定义的Mock数据。从而解决在前期开发过程中，Consumer所依赖的Provider未准备就绪时，造成Consumer开发方的阻塞问题。
+只需要以下两步，即可享受服务Mock功能带来的便捷：&lt;/p>
+&lt;p>第一步：
+Consumer应用引入服务Mock依赖，添加JVM启动参数-Denable.dubbo.admin.mock=true开启服务Mock功能。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;denpendency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-mock-admin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/denpendency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>第二步：在Dubbo Admin中配置对应的Mock数据。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/2-service-mock.png" alt="img">&lt;/p>
+&lt;h4 id="服务文档管理">服务文档管理&lt;/h4>
+&lt;p>Admin 提供的接口文档，相当于 swagger 对于 RESTful 风格的 Web 服务的作用。使用该功能可以有效的管理 Dubbo 接口文档。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/2-service-doc.png" alt="img">&lt;/p>
+&lt;h3 id="集群状态监控">集群状态监控&lt;/h3>
+&lt;h4 id="首页大盘">首页大盘&lt;/h4>
+&lt;p>TBD&lt;/p>
+&lt;h4 id="grafana">Grafana&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/3-grafana.png" alt="img">&lt;/p>
+&lt;h4 id="tracing">Tracing&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/3-tracing-zipkin.png" alt="img">&lt;/p>
+&lt;h3 id="流量管控">流量管控&lt;/h3>
+&lt;p>Admin 提供了四种路由规则的可视化管理支持，分别是条件路由规则、标签路由规则、动态配置规则、脚本路由规则，所提供的功能可以轻松实现黑白名单、灰度环境隔离、多套测试环境、金丝雀发布等服务治理诉求。接下来以条件路由为例，可以可视化的创建条件路由规则。&lt;/p>
+&lt;h4 id="条件路由">条件路由&lt;/h4>
+&lt;p>条件路由可以编写一些自定义路由规则实现服务治理的需求比如同区域优先、参数路由、黑白名单、读写分离等。路由规则在发起一次RPC调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起RPC调用的备选地址。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/admin/4-traffic-management.png" alt="img">&lt;/p>
+&lt;p>请参考 &lt;a href="../../traffic-management/">流量管控任务&lt;/a> 中关于如何进行路由规则配置的更多详细描述。&lt;/p></description></item><item><title>Overview: 全链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/</guid><description>
+&lt;section id="section-0" style="">
+&lt;div class="td-content list-page">
+&lt;div class="lead">&lt;/div>
+&lt;header class="article-meta">&lt;/header>
+&lt;div class="row">
+&lt;div class="col-sm col-md-6 mb-4">
+&lt;div class="h-100 card shadow">
+&lt;div class="card-body">
+&lt;h4 class="card-title">
+&lt;a href='https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/zipkin/'>Zipkin 全链路追踪&lt;/a>
+&lt;/h4>
+&lt;p>演示如果通过 Zipkin 实现对 Dubbo 服务的全链路追踪。
+&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;div class="col-sm col-md-6 mb-4">
+&lt;div class="h-100 card shadow">
+&lt;div class="card-body">
+&lt;h4 class="card-title">
+&lt;a href='https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/skywalking/'>Skywalking 全链路追踪&lt;/a>
+&lt;/h4>
+&lt;p>演示如果通过 Skywalking 实现对 Dubbo 服务的全链路追踪。
+&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;div class="col-sm col-md-6 mb-4">
+&lt;div class="h-100 card shadow">
+&lt;div class="card-body">
+&lt;h4 class="card-title">
+&lt;a href='https://dubbo.apache.org/zh-cn/overview/tasks/observability/tracing/otlp/'>OTlp 全链路追踪&lt;/a>
+&lt;/h4>
+&lt;p>演示如果通过 OpenTelemetry 的 Otlp Collector 实现对 Dubbo 服务的全链路追踪。
+&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;hr>
+&lt;/div>
+&lt;/section>
+&lt;h2 id="说明">说明&lt;/h2>
+&lt;p>目前 Dubbo 内置了 &lt;a href="https://micrometer.io/">Micrometer&lt;/a>（Micrometer 为最流行的可观察性系统在检测客户端上提供了一个统一的门面，相当于日志领域的SLF4J，SpringBoot3 内置的可观测门面组件）。&lt;/p>
+&lt;h2 id="tracing相关概念">Tracing相关概念&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>Span：基本工作单元。例如，发送 RPC 是一个新的 span，发送对 RPC 的响应也是如此。Span还有其他数据，例如description、带时间戳的事件、键值注释（标签）、导致它们的跨度的 ID 和进程 ID（通常是 IP 地址）。跨度可以启动和停止，并且它们会跟踪它们的时间信息。创建跨度后，您必须在将来的某个时间点停止它。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Trace：一组形成树状结构的跨度。例如，如果您运行分布式大数据存储，则可能会通过请求形成跟踪PUT。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Annotation/Event : 用于及时记录一个事件的存在。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Tracing context：为了使分布式跟踪工作，跟踪上下文（跟踪标识符、跨度标识符等）必须通过进程（例如通过线程）和网络传播。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Log correlation：部分跟踪上下文（例如跟踪标识符、跨度标识符）可以填充到给定应用程序的日志中。然后可以将所有日志收集到一个存储中，并通过跟踪 ID 对它们进行分组。这样就可以从所有按时间顺序排列的服务中获取单个业务操作（跟踪）的所有日志。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Latency analysis tools：一种收集导出跨度并可视化整个跟踪的工具。允许轻松进行延迟分析。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Tracer: 处理span生命周期的库（Dubbo 目前支持 OpenTelemetry 和 Brave）。它可以通过 Exporter 创建、启动、停止和报告 Spans 到外部系统（如 Zipkin、Jagger 等）。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Exporter: 将产生的 Trace 信息通过 http 等接口上报到外部系统，比如上报到 Zipkin。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="springboot-starters">SpringBoot Starters&lt;/h2>
+&lt;p>对于 SpringBoot 用户，Dubbo 提供了 Tracing 相关的 starters，自动装配 Micrometer 相关的配置代码，且用户可自由选择 Tracer 和Exporter。&lt;/p>
+&lt;h3 id="opentelemetry-作为-tracer将-trace-信息-export-到-zipkin">OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;dubbo-spring-boot-tracing-otel-zipkin-starter&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="opentelemetry-作为-tracer将-trace-信息-export-到-otlp-collector">OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 OTlp Collector&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;dubbo-spring-boot-tracing-otel-otlp-starter&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="brave-作为-tracer将-trace-信息-export-到-zipkin">Brave 作为 Tracer，将 Trace 信息 export 到 Zipkin&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;dubbo-spring-boot-tracing-brave-zipkin-starter&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="自由组装-tracer-和-exporter">自由组装 Tracer 和 Exporter&lt;/h3>
+&lt;p>如果用户基于 Micrometer 有自定义的需求，想将 Trace 信息上报至其他外部系统观测，可参照如下自由组装 Tracer 和 Exporter：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span> &amp;lt;!-- 自动装配 --&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;dubbo-spring-boot-observability-starter&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;!-- otel作为tracer --&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;io.micrometer&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;micrometer-tracing-bridge-otel&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;!-- export到zipkin --&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;io.opentelemetry&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;opentelemetry-exporter-zipkin&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span> &amp;lt;!-- 自动装配 --&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;dubbo-spring-boot-observability-starter&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;!-- brave作为tracer --&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;io.micrometer&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;micrometer-tracing-bridge-brave&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;!-- export到zipkin --&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;io.zipkin.reporter2&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;zipkin-reporter-brave&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>后续还会补齐更多的 starters，如 Jagger、SkyWalking等。&lt;/p>
+&lt;h2 id="dubbo-bootstrap-api">Dubbo Bootstrap API&lt;/h2>
+&lt;p>对于像非 SpringBoot 的项目，可以使用 Dubbo API 使用Tracing。&lt;/p>
+&lt;p>详细案例可参考&lt;a href="https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-sample-api-tracing-otel-zipkin">代码地址&lt;/a>&lt;/p></description></item><item><title>Overview: 使用 Grafana 可视化查看集群 Metrics 指标</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/</guid><description>
+&lt;p>指标可视化页面目前推荐的方式是使用 Grafana 来配置 Dubbo 的可观测性监控大盘。&lt;/p>
+&lt;h2 id="在您开始之前">在您开始之前&lt;/h2>
+&lt;ul>
+&lt;li>一个可以访问的 Kubernetes 集群&lt;/li>
+&lt;li>正确安装并配置 &lt;a href="../../../reference/integrations/prometheus">普罗米修斯服务&lt;/a>&lt;/li>
+&lt;li>安装 &lt;a href="../../../reference/integrations/grafana">Grafana&lt;/a>&lt;/li>
+&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a> 并开启指标采集&lt;/li>
+&lt;/ul>
+&lt;h2 id="确认组件正常运行">确认组件正常运行&lt;/h2>
+&lt;h3 id="kubernetes">Kubernetes&lt;/h3>
+&lt;p>确保 Prometheus 正常运行&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl -n dubbo-system get svc prometheus
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus ClusterIP 10.0.250.230 &amp;lt;none&amp;gt; 9090/TCP 180s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>确保 Grafana 正常运行&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl -n dubbo-system get svc grafana
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT&lt;span style="color:#719e07">(&lt;/span>S&lt;span style="color:#719e07">)&lt;/span> AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grafana ClusterIP 10.0.244.130 &amp;lt;none&amp;gt; 3000/TCP 180s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="查看-grafana-可视化面板">查看 Grafana 可视化面板&lt;/h2>
+&lt;p>示例程序启动后会自动模拟服务调用，只需等待一会能在 Grafana 中可视化的看到 Metrics 指标。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>如果是通过 &lt;a href="../../../reference/admin/architecture/">Dubbo 控制面&lt;/a> 安装的 Grafana，则可以访问 Admin 控制台并在左侧菜单中找到 Grafana 可视化监控入口&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果是独立安装的 Grafana 组件，则可以直接访问 Grafana 可视化控制台地址：&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ kubectl port-forward service/grafana 3000:3000
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在浏览器打开 Grafana 控制台：http://localhost:3000&lt;/p>
+&lt;h3 id="服务统计视图">服务统计视图&lt;/h3>
+&lt;p>支持基于应用、实例粒度的统计视图，同时对于每一种指标统计粒度，你还可以进一步查看：&lt;/p>
+&lt;ol>
+&lt;li>提供者流量视图&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-1.png" alt="grafana-dashboard-1.png">&lt;/p>
+&lt;ol start="2">
+&lt;li>消费者流量视图&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-1.png" alt="grafana-dashboard-1.png">&lt;/p>
+&lt;ol start="3">
+&lt;li>注册中心视图&lt;/li>
+&lt;/ol>
+&lt;p>TBD&lt;/p>
+&lt;ol start="4">
+&lt;li>配置中心视图&lt;/li>
+&lt;/ol>
+&lt;p>TBD&lt;/p>
+&lt;h3 id="jvm-实例视图">JVM 实例视图&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/advantages/grafana-dashboard-2.png" alt="grafana-dashboard-2.png">&lt;/p>
+&lt;h3 id="关于-dubbo-官方提供的-grafana-dashboard">关于 Dubbo 官方提供的 Grafana Dashboard&lt;/h3>
+&lt;p>Dubbo 提供了丰富的指标面板，以上视图面板均可以在 Grafana 官方面板库中找到：您可以直接导入如下模版，并配置好数据源即可。&lt;/p>
+&lt;p>&lt;strong>Apache Dubbo Observability Dashboard：&lt;/strong> &lt;a href="https://grafana.com/grafana/dashboards/18469">https://grafana.com/grafana/dashboards/18469&lt;/a>&lt;/p>
+&lt;p>&lt;strong>JVM (Micrometer) Dashboard：&lt;/strong> &lt;a href="https://grafana.com/grafana/dashboards/4701">https://grafana.com/grafana/dashboards/4701&lt;/a>&lt;/p></description></item><item><title>Overview: 从 Prometheus 查询 Metrics 监控指标</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/observability/prometheus/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/observability/prometheus/</guid><description>
+&lt;h2 id="准备条件">准备条件&lt;/h2>
+&lt;p>本文演示如何在 Kubernetes 环境下部署 Prometheus 并实现对 Dubbo 集群的监控数据统计与查询，你需要完成或具备以下内容：&lt;/p>
+&lt;ul>
+&lt;li>本地或远端 Kubernetes 集群&lt;/li>
+&lt;li>确保 &lt;a href="../../../reference/integrations/prometheus/#%E5%AE%89%E8%A3%85">Prometheus 正确安装&lt;/a>&lt;/li>
+&lt;li>部署 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot">示例应用&lt;/a> 并开启指标采集&lt;/li>
+&lt;li>使用 Prometheus dashboard 查询数据指标&lt;/li>
+&lt;/ul>
+&lt;h2 id="确保-prometheus-正确运行">确保 Prometheus 正确运行&lt;/h2>
+&lt;p>验证 Prometheus 已经正确部署&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>kubectl -n dubbo-system get svc prometheus-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus-server ClusterIP 10.109.160.254 &amp;lt;none&amp;gt; 9090/TCP 4m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="查询-prometheus">查询 Prometheus&lt;/h2>
+&lt;p>获得 Prometheus 访问地址 &lt;code>kubectl port-forward service/prometheus-server 9090:9090&lt;/code>，
+打开浏览器，访问 localhost:9090/graph 即可打开 Prometheus 控制台。&lt;/p>
+&lt;p>接下来，执行 Prometheus 查询命令。可以在此确认 &lt;a href="../../../reference/proposals/metrics/">Dubbo 支持的 Metrics 指标&lt;/a>。&lt;/p>
+&lt;p>&lt;strong>1. 在 “Expression” 一览，输入 &lt;code>dubbo_consumer_qps_total&lt;/code>，返回以下结果&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/prometheus.png" alt="img">&lt;/p></description></item></channel></rss>
