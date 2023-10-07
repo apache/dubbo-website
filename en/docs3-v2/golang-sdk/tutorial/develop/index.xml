@@ -1,0 +1,100 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Develop Services</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/</link><description>Recent content in Develop Services on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Apply Template</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/template/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/template/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-use-dubbogo-cli-to-create-a-project-template">2. Use dubbogo-cli to create a project template&lt;/h2>
+&lt;p>Run &lt;code>dubbogo-cli newApp .&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>$ mkdir cli-create-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd cli-create-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ tree .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├──build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── chart
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── serviceaccount.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── nacos_env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── app.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── conf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── dubbogo.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── pkg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service.go
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The generated project includes several directories:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>api: place interface files: proto file and generated pb.go file&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>build: place build related files&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>chart: place the chart package for publishing, the chart package of the basic environment: nacos, mesh (under development)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>cmd: program entry&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>conf: framework configuration&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>pkg/service: RPC service implementation&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Makefile:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Image, application name:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>IMAGE = $(your_repo)/$(namespace)/$(image_name)
+TAG = 1.0.0&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>APPNAME = dubbo-go-app # For helm publishing, corresponding to chart name, application name and service name (service name)&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Provide scripts such as:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>make build # Package the image and push it&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>make buildx-publish # The arm architecture locally packs the amd64 image and pushes it, relying on docker buildx&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>make deploy # Publish the application through helm&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>make remove # Delete the published helm application&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>make proto-gen # generate pb.go file under api/&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: Registry</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/</guid><description/></item><item><title>Docs3-V2: Protocol Configuration</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/protocol/</guid><description/></item><item><title>Docs3-V2: Heterogeneous System Interoperability</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/interflow/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/interflow/</guid><description/></item><item><title>Docs3-V2: Configuration Center</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/config-center/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/config-center/</guid><description/></item><item><title>Docs3-V2: Advanced Features</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/</guid><description/></item></channel></rss>

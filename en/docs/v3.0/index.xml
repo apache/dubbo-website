@@ -1,0 +1,150 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Dubbo 3.0</title><link>https://dubbo.apache.org/en/docs/v3.0/</link><description>Recent content in Dubbo 3.0 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs/v3.0/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Load Balance</title><link>https://dubbo.apache.org/en/docs/v3.0/loadbalance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/loadbalance/</guid><description>
+&lt;p>Dubbo offers a number of balancing strategies for cluster load balancing, which defaults to &lt;code>random&lt;/code>.&lt;/p>
+&lt;p>You can extend the load balancing strategy by yourself, see: &lt;a href="../../v2.7/dev/impls/load-balance/">LoadBalance extension&lt;/a>&lt;/p>
+&lt;h2 id="loadbalance-strategy">LoadBalance strategy&lt;/h2>
+&lt;h3 id="random-loadbalance">Random LoadBalance&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Ramdom&lt;/strong>, set random probabilities by weight.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>The probability of collisions on one section is high, but the larger the amount of calls, the more uniform the distribution. And when use weight based on probability the distribution turns out to be uniform, which also helps to dynamically adjust the provider weights.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="roundrobin-loadbalance">RoundRobin LoadBalance&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>RoundRobin&lt;/strong>, use the weight&amp;rsquo;s common advisor to determine round robin ratio.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Traffic flow to slower providers may cause requests piled up, e.g., if there&amp;rsquo;s a provider processing requests in a very slow speed, but it&amp;rsquo;s still alive, which means it can receive request as normal. According to RoundRobin policy, consumers will continuously send requests to this provider on predetermined pace, have no aware of the provider&amp;rsquo;s bad status. Finally, we will get many requests stuck on this unhealthy provider.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="leastactive-loadbalance">LeastActive LoadBalance&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>LeastActive&lt;/strong>, a random mechanism based on actives, &lt;code>actives&lt;/code> means the num of requests a consumer have sent but not return yet。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Slower providers will receive fewer requests, cause slower provider have higher &lt;code>actives&lt;/code>.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="consistenthash-loadbalance">ConsistentHash LoadBalance&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>ConsistentHash&lt;/strong>, the provider always receive the same parameters of the request.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>When a provider fails, the original request to the provider, based on the virtual node algorithm, averages to other providers, does not cause drastic changes.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Algorithm reference：http://en.wikipedia.org/wiki/Consistent_hashing&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>By default only the first parameter Hash, if you want to modify, please configure &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.arguments&amp;quot; value=&amp;quot;0,1&amp;quot; /&amp;gt;&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>By default 160 virtual nodes, if you want to modify, please configure &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.nodes&amp;quot; value=&amp;quot;320&amp;quot; /&amp;gt;&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>See the algorithm at &lt;a href="http://en.wikipedia.org/wiki/Consistent_hashing">http://en.wikipedia.org/wiki/Consistent_hashing&lt;/a>&lt;/p>
+&lt;h3 id="shortestresponse-loadbalance">ShortestResponse LoadBalance&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>Give priority to the shorter response time of the current interval of time. If there are multiple invokers and the same weight, then randomly is called.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Providers with faster response times can handle more requests.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Disadvantages: It may cause traffic to be too concentrated on high-performance nodes.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>The response time is the average response time of providers in the interval of time. The interval of time is 30 seconds by default.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="configuration">Configuration&lt;/h2>
+&lt;h3 id="server-service-level-and-client-service-level">Server Service Level and Client Service Level&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="server-method-level-and-client-method-level">Server Method Level and Client Method Level&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs: What's new in Apache Dubbo 3.x?</title><link>https://dubbo.apache.org/en/docs/v3.0/whats-new-in-dubbo3/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/whats-new-in-dubbo3/</guid><description>
+&lt;h2 id="new-service-discovery-mechanism">New Service Discovery Mechanism&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>Performance improvements&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Support for connecting with other microservices such as Spring Cloud, Kubernetes, gRPC, etc.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="triple-the-new-protocol-based-on-http2">Triple: The new protocol based on HTTP/2&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>Compatible with gRPC&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Multi-language friendly: You can use Protobuf to encode data&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Support for streams such as Request Stream, Response Stream, and Bidirectional Stream.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="cloud-native">Cloud-Native&lt;/h2>
+&lt;ul>
+&lt;li>Deployment of Dubbo 3.x Applications in Kubernetes, VM, and Container.&lt;/li>
+&lt;/ul>
+&lt;h2 id="package-distribution">Package distribution&lt;/h2>
+&lt;ul>
+&lt;li>Dubbo 3.x only includes the core dependency package and now the user has to include each optional dependency.&lt;/li>
+&lt;/ul>
+&lt;p>Example&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo.version&amp;gt;&lt;/span>3.0.0&lt;span style="color:#268bd2">&amp;lt;/dubbo.version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-registry-redis&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="removed-dependencies">Removed dependencies&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>org.eclipse.collections:eclipse-collections&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>com.google.guava:guava&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="dependency-changes">Dependency changes&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>Upgrade to Jetty 9.4.43.v20210629&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Upgrade to Apollo Client 1.8.0&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Upgrade to Snakeyaml 1.29&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Upgrade to Tomcat Embed 8.5.69&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Upgrade to Nacos Client 2.0.2&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Upgrade to Swagger 1.5.24&lt;/p>
+&lt;/li>
+&lt;/ul></description></item><item><title>Docs: Function Reference Manual</title><link>https://dubbo.apache.org/en/docs/v3.0/references/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/references/</guid><description/></item><item><title>Docs: Multi-language implementation</title><link>https://dubbo.apache.org/en/docs/v3.0/languages/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs/v3.0/languages/</guid><description/></item></channel></rss>

@@ -1,0 +1,56 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 服务调试</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/debugging/</link><description>Recent content in 服务调试 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/debugging/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 使用 grpc_cli 调试 Dubbo-go 服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/debugging/grpc_cli/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/debugging/grpc_cli/</guid><description>
+&lt;p>grpc_cli 工具是 gRPC 生态用于调试服务的工具，在 server 开启&lt;a href="https://github.com/grpc/grpc/blob/master/doc/server-reflection.md">反射服务&lt;/a>的前提下，可以获取到服务的 proto 文件、服务名、方法名、参数列表，以及发起 gRPC 调用。&lt;/p>
+&lt;p>Triple 协议兼容 gRPC 生态，并默认开启 gRPC 反射服务，因此可以直接使用 grpc_cli 调试 triple 服务。&lt;/p>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;li>安装grpc_cli，参考 &lt;a href="https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md">grpc_cli 文档&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-使用-grpc_cli-工具进行-triple-服务调试">2. 使用 grpc_cli 工具进行 Triple 服务调试&lt;/h2>
+&lt;h3 id="21-启动-demo-应用-server">2.1 启动 demo 应用 server&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ mkdir grpc_cli_test
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> grpc_cli_test
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newDemo .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ go mod tidy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> go-server/cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-使用-grpc_cli-进行服务调试">2.2 使用 grpc_cli 进行服务调试&lt;/h3>
+&lt;ol>
+&lt;li>查看 triple 服务的接口定义&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ grpc_cli ls localhost:20000 -l
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>filename: samples_api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>package: api;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service Greeter &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHello&lt;span style="color:#719e07">(&lt;/span>api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpc SayHelloStream&lt;span style="color:#719e07">(&lt;/span>stream api.HelloRequest&lt;span style="color:#719e07">)&lt;/span> returns &lt;span style="color:#719e07">(&lt;/span>stream api.User&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>
+&lt;p>查看请求参数类型&lt;/p>
+&lt;p>例如开发者期望测试上述端口的 SayHello 方法，尝试获取 HelloRequest 的具体定义，需要执行如下指令，可查看到对应参数的定义。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ grpc_cli &lt;span style="color:#b58900">type&lt;/span> localhost:20000 api.HelloRequest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>message HelloRequest &lt;span style="color:#719e07">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string &lt;span style="color:#268bd2">name&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#268bd2">json_name&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>
+&lt;p>请求接口&lt;/p>
+&lt;p>已经知道了请求参数的具体类型，可以发起调用来测试对应服务。查看返回值是否符合预期。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ grpc_cli call localhost:20000 SayHello &lt;span style="color:#2aa198">&amp;#34;name: &amp;#39;laurence&amp;#39;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>connecting to localhost:20000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>name: &lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>age: &lt;span style="color:#2aa198">21&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Received trailing metadata from server:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept-encoding : identity,gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-accept-encoding : identity,deflate,gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Rpc succeeded with OK status
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>​ 可看到获得了正确的返回值。在 server 侧可以观察到被正确请求的日志：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>Dubbo3 GreeterProvider get user &lt;span style="color:#268bd2">name&lt;/span> &lt;span style="color:#719e07">=&lt;/span> laurence
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

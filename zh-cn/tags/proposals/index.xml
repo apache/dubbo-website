@@ -1,0 +1,144 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Proposals</title><link>https://dubbo.apache.org/zh-cn/tags/proposals/</link><description>Recent content in Proposals on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 30 Jan 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Dubbo3 应用级服务发现设计</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</guid><description>
+&lt;h2 id="objective">Objective&lt;/h2>
+&lt;ul>
+&lt;li>显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。&lt;/li>
+&lt;li>适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。&lt;/li>
+&lt;/ul>
+&lt;h2 id="background">Background&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/arc.png" alt="interface-arc">&lt;/p>
+&lt;p>我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。&lt;/p>
+&lt;p>在这个过程中：&lt;/p>
+&lt;ul>
+&lt;li>每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；&lt;/li>
+&lt;li>注册中心通过这个 key 对 provider 实例地址进行聚合；&lt;/li>
+&lt;li>Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data1.png" alt="interface-data1">&lt;/p>
+&lt;p>这里，我们对接口级地址发现的内部数据结构进行详细分析。&lt;/p>
+&lt;p>首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。&lt;/p>
+&lt;p>然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data2.png" alt="interface-data2">&lt;/p>
+&lt;p>这里把 URL 地址数据划分成了几份：&lt;/p>
+&lt;ul>
+&lt;li>首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体&lt;/li>
+&lt;li>其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明&lt;/li>
+&lt;li>下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。&lt;/li>
+&lt;li>最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。&lt;/li>
+&lt;/ul>
+&lt;p>结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：&lt;/p>
+&lt;ul>
+&lt;li>第一，地址发现聚合的 key 就是 RPC 粒度的服务&lt;/li>
+&lt;li>第二，注册中心同步的数据不止包含地址，还包含了各种元数据以及配置&lt;/li>
+&lt;li>得益于 1 与 2，Dubbo 实现了支持应用、RPC 服务、方法粒度的服务治理能力&lt;/li>
+&lt;/ul>
+&lt;p>这就是一直以来 Dubbo2 在易用性、服务治理功能性、可扩展性上强于很多服务框架的真正原因。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-defect.png" alt="interface-defect">&lt;/p>
+&lt;p>一个事物总是有其两面性，Dubbo2 地址模型带来易用性和强大功能的同时，也给整个架构的水平可扩展性带来了一些限制。这个问题在普通规模的微服务集群下是完全感知不到的，而随着集群规模的增长，当整个集群内应用、机器达到一定数量时，整个集群内的各个组件才开始遇到规模瓶颈。在总结包括阿里巴巴、工商银行等多个典型的用户在生产环境特点后，我们总结出以下两点突出问题（如图中红色所示）：&lt;/p>
+&lt;ul>
+&lt;li>首先，注册中心集群容量达到上限阈值。由于所有的 URL 地址数据都被发送到注册中心，注册中心的存储容量达到上限，推送效率也随之下降。&lt;/li>
+&lt;li>而在消费端这一侧，Dubbo2 框架常驻内存已超 40%，每次地址推送带来的 cpu 等资源消耗率也非常高，影响正常的业务调用。&lt;/li>
+&lt;/ul>
+&lt;p>为什么会出现这个问题？我们以一个具体 provider 示例进行展开，来尝试说明为何应用在接口级地址模型下容易遇到容量问题。
+青蓝色部分，假设这里有一个普通的 Dubbo Provider 应用，该应用内部定义有 10 个 RPC Service，应用被部署在 100 个机器实例上。这个应用在集群中产生的数据量将会是 “Service 数 * 机器实例数”，也就是 10 * 100 = 1000 条。数据被从两个维度放大：&lt;/p>
+&lt;ul>
+&lt;li>从地址角度。100 条唯一的实例地址，被放大 10 倍&lt;/li>
+&lt;li>从服务角度。10 条唯一的服务元数据，被放大 100 倍&lt;/li>
+&lt;/ul>
+&lt;h2 id="proposal">Proposal&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-principle.png" alt="app-principle">&lt;/p>
+&lt;p>面对这个问题，在 Dubbo3 架构下，我们不得不重新思考两个问题：&lt;/p>
+&lt;ul>
+&lt;li>如何在保留易用性、功能性的同时，重新组织 URL 地址数据，避免冗余数据的出现，让 Dubbo3 能支撑更大规模集群水平扩容？&lt;/li>
+&lt;li>如何在地址发现层面与其他的微服务体系如 Kubernetes、Spring Cloud 打通？&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-data1.png" alt="app-data1">&lt;/p>
+&lt;p>Dubbo3 的应用级服务发现方案设计本质上就是围绕以上两个问题展开。其基本思路是：地址发现链路上的聚合元素也就是我们之前提到的 Key 由服务调整为应用，这也是其名称叫做应用级服务发现的由来；另外，通过注册中心同步的数据内容上做了大幅精简，只保留最核心的 ip、port 地址数据。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-data2.png" alt="app-data2">&lt;/p>
+&lt;p>这是升级之后应用级地址发现的内部数据结构进行详细分析。
+对比之前接口级的地址发现模型，我们主要关注橙色部分的变化。首先，在 provider 实例这一侧，相比于之前每个 RPC Service 注册一条地址数据，一个 provider 实例只会注册一条地址到注册中心；而在注册中心这一侧，地址以应用名为粒度做聚合，应用名节点下是精简过后的 provider 实例地址；&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-metadataservice.png" alt="app-metadataservice">&lt;/p>
+&lt;p>应用级服务发现的上述调整，同时实现了地址单条数据大小和总数量的下降，但同时也带来了新的挑战：我们之前 Dubbo2 强调的易用性和功能性的基础损失了，因为元数据的传输被精简掉了，如何精细的控制单个服务的行为变得无法实现。&lt;/p>
+&lt;p>针对这个问题，Dubbo3 的解法是引入一个内置的 MetadataService 元数据服务，由中心化推送转为 Consumer 到 Provider 的点对点拉取，在这个模式下，元数据传输的数据量将不在是一个问题，因此可以在元数据中扩展出更多的参数、暴露更多的治理数据。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-workflow.png" alt="app-metadataservice">&lt;/p>
+&lt;p>这里我们个重点看消费端 Consumer 的地址订阅行为，消费端从分两步读取地址数据，首先是从注册中心收到精简后的地址，随后通过调用 MetadataService 元数据服务，读取对端的元数据信息。在收到这两部分数据之后，消费端会完成地址数据的聚合，最终在运行态还原出类似 Dubbo2 的 URL 地址格式。因此从最终结果而言，应用级地址模型同时兼顾了地址传输层面的性能与运行层面的功能性。&lt;/p>
+&lt;p>以上就是的应用级服务发现背景、工作原理部分的所有内容，接下来我们看一下饿了么升级到 Dubbo3 尤其是应用级服务发现的过程。&lt;/p></description></item><item><title>Blog: Dubbo Go 中 metrics 的设计</title><link>https://dubbo.apache.org/zh-cn/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</guid><description>
+&lt;p>最近因为要在 Apache/dubbo-go（以下简称 dubbo-go ）里面实现类似的这个 metrics 功能，于是花了很多时间去了解现在 Dubbo 里面的 metrics 是怎么实现的。该部分，实际上是被放在一个独立的项目里面，即
+metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter">https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter&lt;/a> 下 metrics 子目录。&lt;/p>
+&lt;p>总体上来说，Dubbo 的 metrics 是一个从设计到实现都非常优秀的模块，理论上来说，大部分的 Java 项目是可以直接使用 metrics 的。但也因为兼顾性能、扩展性等各种非功能特性，所以初看代码会有种无从下手的感觉。&lt;/p>
+&lt;p>今天这篇文章将会从比较大的概念和抽象上讨论一下 dubbo-go 中的 metrics 模块的设计——实际上也就是 Dubbo 中的 metrics 的设计。因为我仅仅是将 Dubbo 里面的相关内容在 dubbo-go 中复制一份。&lt;/p>
+&lt;p>目前 dubbo-go 的 metrics 刚刚开始起步，第一个 PR 是： &lt;a href="https://github.com/apache/dubbo-go/pull/278">https://github.com/apache/dubbo-go/pull/278&lt;/a>&lt;/p>
+&lt;h2 id="总体设计">总体设计&lt;/h2>
+&lt;h3 id="metrics">Metrics&lt;/h3>
+&lt;p>要想理解 metrics 的设计，首先要理解，我们需要收集一些什么数据。我们可以轻易列举出来在 RPC 领域里面我们所关心的各种指标，诸如每个服务的调用次数，响应时间；如果更加细致一点，还有各种响应时间的分布，平均响应时间，999线……&lt;/p>
+&lt;p>但是上面列举的是从数据的内容上划分的。 metrics 在抽象上，则是摒弃了这种划分方式，而是结合了数据的特性和表现形式综合划分的。&lt;/p>
+&lt;p>从源码里面很容易找到这种划分的抽象。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p1.png" alt="img">&lt;/p>
+&lt;p>metrics 设计了 Metric 接口作为所有数据的顶级抽象：&lt;/p>
+&lt;p>在 Dubbo 里面，其比较关键的子接口是：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p2.webp" alt="img">&lt;/p>
+&lt;p>为了大家理解，这里我抄一下这些接口的用途：&lt;/p>
+&lt;ul>
+&lt;li>Gauge: 一种实时数据的度量，反映的是瞬态的数据，不具有累加性，例如当前 JVM 的线程数；&lt;/li>
+&lt;li>Counter: 计数器型指标，适用于记录调用总量等类型的数据；&lt;/li>
+&lt;li>Histogram : 直方分布指标，例如，可以用于统计某个接口的响应时间，可以展示 50%, 70%, 90% 的请求响应时间落在哪个区间内；&lt;/li>
+&lt;li>Meter: 一种用于度量一段时间内吞吐率的计量器。例如，一分钟内，五分钟内，十五分钟内的qps指标；&lt;/li>
+&lt;li>Timer: Timer相当于Meter+Histogram的组合，同时统计一段代码，一个方法的qps，以及执行时间的分布情况；&lt;/li>
+&lt;/ul>
+&lt;p>目前 dubbo-go 只实现了 FastCompass ，它也是 Metric 的子类：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p3.webp" alt="img">&lt;/p>
+&lt;p>这个接口功能很简单，就是用于收集一段时间之内的 subCategory 执行的次数和响应时间。 subCategory 是一个比较宽泛的概念，无论是在 Dubbo 还是在 dubbo-go 里面，一个典型的 subCategory
+就会是某个服务。&lt;/p>
+&lt;p>这里的设计要点在于，它是从什么角度上去做这些数据的抽象的。&lt;/p>
+&lt;p>很多人在开发这种采集数据的相关系统或者功能的时候，最容易陷入的就是从数据内容上做抽象，例如抽象一个接口，里面的方法就是获得服务的调用次数或者平均响应时间等。&lt;/p>
+&lt;p>这种抽象并非不可以，尤其是在简单系统里面，还非常好用。唯独在通用性和扩展性上要差很多。&lt;/p>
+&lt;h3 id="metricmanager">MetricManager&lt;/h3>
+&lt;p>在我们定义了 Metric 之后，很容易就想到，我要有一个东西来管理这些 Metric 。这就是 MetricManager ——对应到 Dubbo 里面的 IMetricManager 接口。&lt;/p>
+&lt;p>MetricManager 接口目前在 dubbo-go 里面还很简单：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p4.webp" alt="img">&lt;/p>
+&lt;p>本质上来说，我在前面提到的那些 Metric 的子类，都可以从这个 MetricManager 里面拿到。它是对外的唯一入口。&lt;/p>
+&lt;p>因此无论是上报采集的数据，还是某些功能要用这些采集的数据，最重要的就是获得一个 MetricManager 的实例。例如我们最近正在开发的接入 Prometheus 就是拿到这个 MetriManger 实例，而后从里面拿到
+FastCompass 的实例，而后采集这些数据：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p5.webp" alt="img">&lt;/p>
+&lt;h3 id="metricregistry">MetricRegistry&lt;/h3>
+&lt;p>MetricRegistry 是一个对 Metric 集合的抽象。 MetricManager 的默认实现里面，就是使用 MetricRegistry 来管理 Metric 的:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p6.webp" alt="img">&lt;/p>
+&lt;p>所以，本质上它就是提供了一些注册 Metric 然后再从里面捞出来的方法。&lt;/p>
+&lt;p>于是，这就有一个问题了：为什么我在有了 MetricManager 之后，还有有一个MetricRegistry？似乎这两个功能有些重叠？&lt;/p>
+&lt;p>答案大概是两个方面：&lt;/p>
+&lt;p>1、除了管理所有的 Metric 之外，还承担着额外的功能，这些功能典型的就是 IsEnabled 。而实际上，在未来我们会赋予它管理生命周期的责任，比如说在 Dubbo 里面，该接口就还有一个 clear 方法；&lt;/p>
+&lt;p>2、 metrics 里面还有一个 group 的概念，而这只能由 MetricManager 来进行管理，至少交给 MetricRegistry 是不合适的。&lt;/p>
+&lt;p>metrics 的 group 说起来也很简单。比如在 Dubbo 框架里面采集的数据，都会归属于 Dubbo 这个 group 。也就是说，如果我想将非框架层面采集的数据——比如纯粹的业务数据——分隔出来，就可以借用一个 business
+group 。又或者我采集到的机器自身的数据，可以将其归类到 system 这个 group 下。&lt;/p>
+&lt;p>所以 MetricManger 和 MetricRegistry 的关系是：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p7.webp" alt="img">&lt;/p>
+&lt;h3 id="clock">Clock&lt;/h3>
+&lt;p>Clock 抽象是一个初看没什么用，再看会觉得其抽象的很好。Clock 里面就两个方法：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p8.webp" alt="img">&lt;/p>
+&lt;p>一个是获得时间戳，另外一个则是获得时间周期(Tick)。比如通常采集数据可能是每一分钟采集一次，所以你得知道现在处在哪个时间周期里面。Clock 就提供了这种抽象。&lt;/p>
+&lt;p>很多人在实现自己的这种 metrics 的框架的时候，大多数都是直接使用系统的时钟，也就是系统的时间戳。于是所有的 Metic 在采集数据或者上报数据的时候，不得不自己去处理这种时钟方面的问题。&lt;/p>
+&lt;p>这样不同的 Metric 之间就很难做到时钟的同步。比如说可能在某个 Metric1 里面，采集周期是当前这一分钟，而 Metric2 是当前这一分钟的第三十秒到下一分钟的第三十秒。虽然它们都是一分钟采集一次，但是这个周期就对不上了。&lt;/p>
+&lt;p>另外一个有意思的地方在于，Clock 提供的这种抽象，允许我们不必真的按照现实时间的时间戳来处理。比如说，可以考虑按照 CPU 的运行时间来设计 Clock 的实现。&lt;/p>
+&lt;h2 id="例子">例子&lt;/h2>
+&lt;p>就用这一次 PR 的内容来展示一下这个设计。&lt;/p>
+&lt;p>在 dubbo-go 里面这次实现了 metricsFilter ，它主要就是收集调用次数和响应时间，其核心是：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p9.webp" alt="img">&lt;/p>
+&lt;p>report 其实就是把 metrics reports 给 MetricManager ：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p10.webp" alt="img">&lt;/p>
+&lt;p>所以，这里面可以看出来，如果我们要收集什么数据，也是要先获得 MetricManager 的实例。&lt;/p>
+&lt;p>FastCompass 的实现里面会将这一次调用的服务及其响应时间保存下来。而后在需要的时候再取出来。&lt;/p>
+&lt;p>所谓的需要的时候，通常就是上报给监控系统的时候。比如前面的提到的上报给 Prometheus。&lt;/p>
+&lt;p>所以这个流程可以抽象表达为：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p11.webp" alt="img">&lt;/p>
+&lt;p>这是一个更加宽泛的抽象。也就是意味着，我们除了可以从这个 metricFilter 里面收集数据，也可以从自身的业务里面去收集数据。比如说统计某段代码的执行时间，一样可以使用 FastCompass 。&lt;/p>
+&lt;p>而除了 Prometheus ，如果用户自己的公司里面有监控框架，那么他们可以自己实现自己的上报逻辑。而上报的数据则只需要拿到 MetricManager 实例就能拿到。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>本质上来说，整个 metrics 可以看做是一个巨大无比的 provider-consumer 模型。&lt;/p>
+&lt;p>不同的数据会在不同的地方和不同时间点上被采集。有些人在读这些源码的时候会有点困惑，就是这些数据什么时间点会被采集呢？&lt;/p>
+&lt;p>它们只会在两类时间点采集：&lt;/p>
+&lt;p>1、实时采集。如我上面举例的 metricsFilter ，一次调用过来，它的数据就被采集了；&lt;/p>
+&lt;p>2、另外一个则是如同 Prometheus 。每次 Prometheus 触发了 collect 方法，那么它就会把每种（如 Meter, Gauge ）里面的数据收集过来，然后上报，可以称为是定时采集；&lt;/p>
+&lt;p>Dubbo 里面采集了非常多的数据：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/metrics/p12.webp" alt="img">&lt;/p>
+&lt;p>这些具体的实现，我就不一一讨论了，大家有兴趣可以去看看源码。这些数据，也是我们 dubbo-go 后面要陆续实现的东西，欢迎大家持续关注，或者来贡献代码。&lt;/p>
+&lt;h2 id="作者信息">作者信息&lt;/h2>
+&lt;p>邓明，毕业于南京大学，就职于 eBay Payment 部门，负责退款业务开发。&lt;/p></description></item></channel></rss>

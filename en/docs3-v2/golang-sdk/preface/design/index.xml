@@ -1,0 +1,150 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Architecture</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/</link><description>Recent content in Architecture on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: AOP and Extensibility Mechanisms</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/aop_and_extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/aop_and_extension/</guid><description>
+&lt;h2 id="1-extension-module-and-init-method">1. extension module and init method&lt;/h2>
+&lt;h3 id="11-interface-and-implementation">1.1 Interface and implementation&lt;/h3>
+&lt;p>An interface in golang is often accompanied by multiple implementation classes, dubbo-go provides a pluggable and extensible mechanism for interface implementation classes. Reduce the coupling between modules, making it easier for developers to introduce and customize components.&lt;/p>
+&lt;h3 id="12-init-method-in-golang">1.2 init method in golang&lt;/h3>
+&lt;p>The init method is a special method in golang. After the user introduces a group of modules, the init method in these modules will be executed first when the program starts to perform loading logic. This method is an important way for dubbogo to register extension components.&lt;/p>
+&lt;h3 id="13-extension-module">1.3 extension module&lt;/h3>
+&lt;p>In the framework source code, there is a special module: common/extension, which is responsible for caching the implementation of all extensible components.&lt;/p>
+&lt;p>Take the load balancing module as an example: common/extension/loadbalance.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> extension
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> loadbalances = &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">func&lt;/span>() loadbalance. LoadBalance)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// SetLoadbalance sets the loadbalance extension with @name
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// For example: random/round_robin/consistent_hash/least_active/...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">SetLoadbalance&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>, fcn &lt;span style="color:#268bd2">func&lt;/span>() loadbalance. LoadBalance) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>loadbalances[name] = fcn
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// GetLoadbalance finds the loadbalance extension with @name
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">GetLoadbalance&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>) loadbalance. LoadBalance {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> loadbalances[name] &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;loadbalance for &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; is not existing, make sure you have import the package.&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> loadbalances[name]()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This module contains Get method and Set method. Get returns the instantiated LoadBalance interface, the Set method is used to register factory functions, and map is used to cache factory functions.&lt;/p>
+&lt;p>When the user imports _ &amp;ldquo;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance/random&amp;rdquo;, the init function of the corresponding module will be loaded, and the Set method will be called to register the unique key and factory function and add them to the above map.&lt;/p>
+&lt;p>cluster/loadbalance/random/loadbalance.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;math/rand&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/constant&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/extension&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/protocol&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>extension.&lt;span style="color:#268bd2">SetLoadbalance&lt;/span>(constant.LoadBalanceKeyRandom, NewRandomLoadBalance)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>So far, when all init methods are executed, the instantiated object can be obtained through the extension module Get method.&lt;/p>
+&lt;h3 id="14-imports-module">1.4 imports module&lt;/h3>
+&lt;p>dubbogo puts all built-in modules in imports/imports.go. When users use the framework, they need to import this module to use the basic capabilities provided by the framework.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>_ &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-component-loading-process">2. Component loading process&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>The user introduces _ &amp;ldquo;dubbo.apache.org/dubbo-go/v3/imports&amp;rdquo; into the code&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>The program starts, the init function is executed in sequence, and the factory function/instantiated object is registered to the extension module.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>The framework starts, loads the configuration, obtains the key of the module to be loaded in the configuration, and obtains the instantiated object according to the key.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Users can also manually call the Get method of the extension to obtain the instantiated object and use it directly.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="3-custom-components">3. Custom components&lt;/h2>
+&lt;p>On the basis of the above introduction, developers can follow the example of built-in modules and write custom extension components.&lt;/p>
+&lt;h2 id="4-aspect-oriented-programming-design-aop">4. Aspect-Oriented Programming Design (AOP)&lt;/h2>
+&lt;p>In the Dubbo-go service framework, many interfaces are designed based on the idea of AOP. For example Invoker, Filter, LoadBalance, Router.&lt;/p>
+&lt;p>Multiple implementations of these interfaces often form a set of call chains, and a single implementation class only handles the logic it cares about.&lt;/p>
+&lt;p>Related reading: &lt;a href="https://en.wikipedia.org/wiki/Aspect-oriented_programming">[AOP wikipedia]&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: Architecture</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/architecture/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/architecture/architecture.png" alt="architecture">&lt;/p>
+&lt;h4 id="node-description">Node description&lt;/h4>
+&lt;ul>
+&lt;li>&lt;code>Registry&lt;/code> : The registry responsible for service registration and discovery in dubbo-go&lt;/li>
+&lt;li>&lt;code>Consumer&lt;/code> : The service consumer who invokes the remote service&lt;/li>
+&lt;li>&lt;code>Provider&lt;/code> : The service provider of the exposed service&lt;/li>
+&lt;/ul>
+&lt;h4 id="process-description">Process description&lt;/h4>
+&lt;ul>
+&lt;li>&lt;code>0.register&lt;/code> : When the service provider starts, it will automatically register its own service to the registration center&lt;/li>
+&lt;li>&lt;code>1. subscribe&lt;/code> : The service consumer will subscribe to the registration center for the services it needs when it starts&lt;/li>
+&lt;li>&lt;code>2. notify&lt;/code>: The registration center returns the service registration information to the service consumer. When the subscribed service changes, it will push the changed data to the consumer&lt;/li>
+&lt;li>&lt;code>3. invoke&lt;/code>: The service consumer selects a suitable service address to initiate a request through the load balancing algorithm according to the service address obtained from the registration center&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: Dubbo's application and interface</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/app_and_interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/app_and_interface/</guid><description>
+&lt;h2 id="dubbogo-service-level">Dubbogo service level&lt;/h2>
+&lt;p>Dubbogo has two service levels: App Level and Interface Level, which are closely related to the &lt;strong>framework configuration&lt;/strong> structure.&lt;/p>
+&lt;p>As shown in the figure below, you can see that the components at the application level are marked in light red, and the components at the interface level are marked in light blue:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png" alt="img">&lt;/p>
+&lt;h2 id="1-application-level-components">1. Application level components&lt;/h2>
+&lt;p>Features of application-level components: shared by all interface-level components of the current application.&lt;/p>
+&lt;p>The main components at the application level are as follows:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Application information module&lt;/p>
+&lt;p>Contains information related to application dimensions, including application name, version number, data reporting method, etc.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Consumer module&lt;/p>
+&lt;p>The Consumer module is responsible for client-related information, including one or more Reference structures, as well as timeouts, consumer filters, and other related information.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>-Provider module&lt;/p>
+&lt;p>The Provider module is responsible for server-related information, including one or more service (Service) structures, server-side filters (provider filters) and other related information.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Registry module&lt;/p>
+&lt;p>The registration center module is responsible for defining a series of registration centers to be used, such as middleware such as ZK, Nacos, etcd supported by the framework. The registration module at the application level is only responsible for the declaration, which is referenced by the components at the interface level, and the user-defined registry ID (registryID) is used as an index when citing.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Protocol module&lt;/p>
+&lt;p>Protocol modules only exist on the server side.&lt;/p>
+&lt;p>The protocol module cares about the exposed information of the service, such as protocol name, service listening IP, port number and other information. The protocol module belongs to the application level and is only responsible for declaration, and is referenced by the interface-level components with the user-defined protocol ID (protocolID) as the index.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Metadata Center Module&lt;/p>
+&lt;p>The metadata center is similar to the registration center module, which is responsible for declaring the metadata center that the framework needs to use, so that the metadata can be successfully reported.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Configuration center module&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Routing module&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>log module&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Monitoring module&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-interface-level-components">2. Interface level components&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>Service module&lt;/p>
+&lt;p>The service module is used for any exposed service, declares the information required for interface exposure, including interface name, protocol, serialization method, etc., and is responsible for the exposure of a single service interface.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Reference module&lt;/p>
+&lt;p>The drinking module is used by the client of the remote service that needs to be called. It declares the information required to request the interface, including interface name, protocol, serialization method, etc., is responsible for the abstraction of specific protocols, and participates in the generation of the client.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-description">3. Description&lt;/h2>
+&lt;p>The exposed services are at the interface level. A user-defined Provider Struct/a user-defined Consumer Struct corresponds to a Service/Reference module. An application can have both a Consumer module and a Provider module at the same time, so multiple Service/Reference modules can exist at the same time. .&lt;/p></description></item></channel></rss>

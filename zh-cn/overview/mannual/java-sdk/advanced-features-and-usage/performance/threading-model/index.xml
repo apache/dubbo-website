@@ -1,0 +1,184 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 线程模型</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/</link><description>Recent content in 线程模型 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 服务端线程模型</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/provider/</guid><description>
+&lt;h2 id="功能说明">功能说明&lt;/h2>
+&lt;p>Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。&lt;/p>
+&lt;h3 id="dubbo协议provider端线程模型">Dubbo协议—Provider端线程模型&lt;/h3>
+&lt;p>介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：&lt;/p>
+&lt;ul>
+&lt;li>建立连接：connected，主要是的职责是在channel记录read、write的时间，以及处理建立连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（onconnect），即在该操作中执行。&lt;/li>
+&lt;li>断开连接：disconnected，主要是的职责是在channel移除read、write的时间，以及处理端开连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（ondisconnect），即在该操作中执行。&lt;/li>
+&lt;li>发送消息：sent，包括发送请求和发送响应。记录write的时间。&lt;/li>
+&lt;li>接收消息：received，包括接收请求和接收响应。记录read的时间。&lt;/li>
+&lt;li>异常捕获：caught，用于处理在channel上发生的各类异常。&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Provider线程模型可以分为五类，也就是AllDispatcher、DirectDispatcher、MessageOnlyDispatcher、ExecutionDispatcher、ConnectionOrderedDispatcher。&lt;/p>
+&lt;h3 id="triple协议provider端线程模型">Triple协议—Provider端线程模型&lt;/h3>
+&lt;p>下图为Triple协议 Provider端的线程模型&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/triple-provider.png" alt="triple-provider">&lt;/p>
+&lt;p>Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。&lt;/p>
+&lt;h3 id="all-dispatcher">All Dispatcher&lt;/h3>
+&lt;p>下图是All Dispatcher的线程模型说明图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-alldispatcher.png" alt="dubbo-provider-alldispatcher">&lt;/p>
+&lt;ul>
+&lt;li>在IO线程中执行的操作有：
+&lt;ol>
+&lt;li>sent操作在IO线程上执行。&lt;/li>
+&lt;li>序列化响应在IO线程上执行。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>在Dubbo线程中执行的操作有：
+&lt;ol>
+&lt;li>received、connected、disconnected、caught都是在Dubbo线程上执行的。&lt;/li>
+&lt;li>反序列化请求的行为在Dubbo中做的。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="direct-dispatcher">Direct Dispatcher&lt;/h3>
+&lt;p>下图是Direct Dispatcher的线程模型说明图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-directDispatcher.png" alt="dubbo-provider-directDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>在IO线程中执行的操作有：
+&lt;ol>
+&lt;li>received、connected、disconnected、caught、sent操作在IO线程上执行。&lt;/li>
+&lt;li>反序列化请求和序列化响应在IO线程上执行。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;ol>
+&lt;li>并没有在Dubbo线程操作的行为。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="execution-dispatcher">Execution Dispatcher&lt;/h3>
+&lt;p>下图是Execution Dispatcher的线程模型说明图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-executionDispatcher.png" alt="dubbo-provider-ExecutionDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>在IO线程中执行的操作有：
+&lt;ol>
+&lt;li>sent、connected、disconnected、caught操作在IO线程上执行。&lt;/li>
+&lt;li>序列化响应在IO线程上执行。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>在Dubbo线程中执行的操作有：
+&lt;ol>
+&lt;li>received都是在Dubbo线程上执行的。&lt;/li>
+&lt;li>反序列化请求的行为在Dubbo中做的。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="message-only-dispatcher">Message Only Dispatcher&lt;/h3>
+&lt;p>在Provider端，Message Only Dispatcher和Execution Dispatcher的线程模型是一致的，所以下图和Execution Dispatcher的图一致，区别在Consumer端。见下方Consumer端的线程模型。&lt;/p>
+&lt;p>下图是Message Only Dispatcher的线程模型说明图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-executionDispatcher.png" alt="dubbo-provider-ExecutionDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>在IO线程中执行的操作有：
+&lt;ol>
+&lt;li>sent、connected、disconnected、caught操作在IO线程上执行。&lt;/li>
+&lt;li>序列化响应在IO线程上执行。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>在Dubbo线程中执行的操作有：
+&lt;ol>
+&lt;li>received都是在Dubbo线程上执行的。&lt;/li>
+&lt;li>反序列化请求的行为在Dubbo中做的。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="connection-ordered-dispatcher">Connection Ordered Dispatcher&lt;/h3>
+&lt;p>下图是Connection Ordered Dispatcher的线程模型说明图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbbo-provider-connectionOrderedDispatcher.png" alt="dubbbo-provider-connectionOrderedDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>在IO线程中执行的操作有：
+&lt;ol>
+&lt;li>sent操作在IO线程上执行。&lt;/li>
+&lt;li>序列化响应在IO线程上执行。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>在Dubbo线程中执行的操作有：
+&lt;ol>
+&lt;li>received、connected、disconnected、caught都是在Dubbo线程上执行的。但是connected和disconnected两个行为是与其他两个行为通过线程池隔离开的。并且在Dubbo connected thread pool中提供了链接限制、告警灯能力。&lt;/li>
+&lt;li>反序列化请求的行为在Dubbo中做的。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>异步处理，连接管理，资源管理，负载均衡，容错等。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>线程模型&lt;/th>
+&lt;th>配置&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>All Dispatcher&lt;/td>
+&lt;td>all&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Direct Dispatcher&lt;/td>
+&lt;td>direct&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Execution Dispatcher&lt;/td>
+&lt;td>execution&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Message Only Dispatcher&lt;/td>
+&lt;td>message&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Connection Ordered Dispatcher&lt;/td>
+&lt;td>connection&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="线程模型示例">线程模型示例&lt;/h3>
+&lt;p>拿yaml的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: -&lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dispatcher&lt;/span>: all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">id&lt;/span>: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 消费端线程模型</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</guid><description>
+&lt;h2 id="功能说明">功能说明&lt;/h2>
+&lt;p>2.7.5 版本对整个调用链路做了全面的优化，根据压测结果显示，总体 QPS 性能提升将近 30%，同时也减少了调用过程中的内存分配开销。其中一个值得提及的设计点是 2.7.5 引入了 Servicerepository 的概念，在服务注册阶段提前生成 ServiceDescriptor 和 MethodDescriptor，以减少 RPC 调用阶段计算 Service 原信息带来的资源消耗。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>并发请求，负载均衡，连接管理，超时处理，容错等。&lt;/p>
+&lt;h2 id="实现方式">实现方式&lt;/h2>
+&lt;h3 id="消费端线程池模型优化">消费端线程池模型优化&lt;/h3>
+&lt;p>对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 &lt;a href="https://github.com/apache/dubbo/issues/2013">Need a limited Threadpool in consumer side #2013&lt;/a>&lt;/p>
+&lt;p>改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。&lt;/p>
+&lt;h3 id="老的线程池模型">老的线程池模型&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/consumer-threadpool0.png" alt="消费端线程池.png">&lt;/p>
+&lt;p>我们重点关注 Consumer 部分：&lt;/p>
+&lt;ol>
+&lt;li>业务线程发出请求，拿到一个 Future 实例。&lt;/li>
+&lt;li>业务线程紧接着调用 future.get 阻塞等待业务结果返回。&lt;/li>
+&lt;li>当业务数据返回后，交由独立的 Consumer 端线程池进行反序列化等处理，并调用 future.set 将反序列化后的业务结果置回。&lt;/li>
+&lt;li>业务线程拿到结果直接返回&lt;/li>
+&lt;/ol>
+&lt;h3 id="275-版本引入的线程池模型">2.7.5 版本引入的线程池模型&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/consumer-threadpool1.png" alt="消费端线程池新.png">&lt;/p>
+&lt;ol>
+&lt;li>业务线程发出请求，拿到一个 Future 实例。&lt;/li>
+&lt;li>在调用 future.get() 之前，先调用 ThreadlessExecutor.wait()，wait 会使业务线程在一个阻塞队列上等待，直到队列中被加入元素。&lt;/li>
+&lt;li>当业务数据返回后，生成一个 Runnable Task 并放入 ThreadlessExecutor 队列&lt;/li>
+&lt;li>业务线程将 Task 取出并在本线程中执行：反序列化业务数据并 set 到 Future。&lt;/li>
+&lt;li>业务线程拿到结果直接返回&lt;/li>
+&lt;/ol>
+&lt;p>这样，相比于老的线程池模型，由业务线程自己负责监测并解析返回结果，免去了额外的消费端线程池开销。&lt;/p>
+&lt;p>关于性能优化，在接下来的版本中将会持续推进，主要从以下两个方面入手：&lt;/p>
+&lt;ol>
+&lt;li>RPC 调用链路。目前能看到的点包括：进一步减少执行链路的内存分配、在保证协议兼容性的前提下提高协议传输效率、提高 Filter、Router 等计算效率。&lt;/li>
+&lt;li>服务治理链路。进一步减少地址推送、服务治理规则推送等造成的内存、cpu 资源消耗。&lt;/li>
+&lt;/ol></description></item></channel></rss>
