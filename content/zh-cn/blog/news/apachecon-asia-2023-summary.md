@@ -13,7 +13,7 @@ description: >
 * [Opensergo & Dubbo 微服务治理最佳实践](/zh-cn/blog/2023/10/07/opensergo-dubbo-微服务治理最佳实践/)
 * [Seata 微服务架构下的一站式分布式事务解决方案](/zh-cn/blog/2023/10/07/seata-微服务架构下的一站式分布式事务解决方案/)
 * [启动速度提升 10 倍：Apache Dubbo-静态化 GraalVM Native Image 深度解析](/zh-cn/blog/2023/10/07/启动速度提升10倍apache-dubbo-静态化-graalvm-native-image-深度解析/)
-* [政采云基于 Dubbo 的混合云数据跨网实践](/zh-cn/blog/2023/10/07/政采云基于Dubbo的混合云数据跨网实践/)
+* [政采云基于 Dubbo 的混合云数据跨网实践](/zh-cn/blog/2023/10/07/政采云基于dubbo的混合云数据跨网实践/)
 * 工商银行分布式建设及转型实践
 
 ![dubbo-members-justin](/imgs/blog/2023/8/apachecon-summary/dubbo-members-justin.jpg)
