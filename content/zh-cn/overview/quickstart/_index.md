@@ -2,11 +2,11 @@
 aliases:
     - /zh/overview/quickstart/
 description: Dubbo 入门
-linkTitle: 入门
+linkTitle: 快速开始
 no_list: true
 title: Dubbo 入门
 type: docs
-weight: 2
+weight: 3
 ---
 
 

@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/load-balance/
+    - /zh-cn/overview/core-features/load-balance/
 description: 负载均衡
 linkTitle: 负载均衡
 title: 负载均衡

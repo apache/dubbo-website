@@ -2,6 +2,7 @@
 aliases:
     - /zh/overview/core-features/service-discovery/
     - /zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/
+    - /zh-cn/overview/core-features/service-discovery/
 description: 服务发现
 feature:
     description: |

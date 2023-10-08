@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/more/
+    - /zh-cn/overview/core-features/more/
 description: 高级功能指南
 linkTitle: 更多高级功能
 title: 更多高级功能

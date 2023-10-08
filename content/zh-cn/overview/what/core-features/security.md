@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/security/
+    - /zh-cn/overview/core-features/security/
 description: 认证鉴权
 feature:
     description: |

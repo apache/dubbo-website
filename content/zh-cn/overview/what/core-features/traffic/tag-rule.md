@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/traffic/tag-rule/
+    - /zh-cn/overview/core-features/traffic/tag-rule/
 description: ""
 linkTitle: 标签路由
 title: 标签路由规则

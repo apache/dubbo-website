@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/traffic/
+    - /zh-cn/overview/core-features/traffic/
 description: 流量管控
 feature:
     description: |
