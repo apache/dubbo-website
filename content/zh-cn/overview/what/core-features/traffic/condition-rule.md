@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/traffic/condition-rule/
+    - /zh-cn/overview/core-features/traffic/condition-rule/
 description: ""
 linkTitle: 条件路由
 title: 条件路由规则

@@ -2,6 +2,7 @@
 aliases:
     - /zh/overview/core-features/service-mesh/
     - /zh-cn/overview/mannual/java-sdk/concepts-and-architecture/mesh/
+    - /zh-cn/overview/core-features/service-mesh/
 description: 服务网格
 feature:
     description: |

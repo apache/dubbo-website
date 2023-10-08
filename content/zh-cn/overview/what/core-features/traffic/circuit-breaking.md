@@ -1,4 +1,6 @@
 ---
+aliases:
+  - /zh-cn/overview/core-features/traffic/circuit-breaking/
 description: ""
 linkTitle: 限流 & 熔断
 title: 限流 & 熔断
