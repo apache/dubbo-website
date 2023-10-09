@@ -5,7 +5,7 @@ description: Load Balancing
 linkTitle: Load Balancing
 title: Load Balancing
 type: docs
-weight: 3
+weight: 20
 ---
 
 During cluster load balancing, Dubbo provides multiple balancing strategies, with the default being the `weighted random` strategy, which is a weight-based random load balancing strategy.

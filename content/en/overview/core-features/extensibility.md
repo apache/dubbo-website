@@ -9,7 +9,7 @@ feature:
 linkTitle: Extensibility Adaptation
 title: Extensibility Adaptation
 type: docs
-weight: 6
+weight: 50
 ---
 
 From its design, Dubbo is highly extendable. Through these extension points, you can:
