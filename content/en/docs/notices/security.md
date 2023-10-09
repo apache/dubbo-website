@@ -7,13 +7,29 @@ description: "Dubbo Security information, such impact of vulnerabilities in upst
 weight: 90
 ---
 
-## 1. Log4j CVE-2021-44228
+## Reporting security issues
+
+The Apache Software Foundation takes a very active stance in eliminating security problems and denial of service attacks against its products.
+
+We strongly encourage folks to report such problems to our private security mailing list first, before disclosing them in a public forum.
+
+Please note that the security mailing list should only be used for reporting undisclosed security vulnerabilities and managing the process of fixing such vulnerabilities. We cannot accept regular bug reports or other queries at this address. All mail sent to this address that does not relate to an undisclosed security problem in our source code will be ignored.
+
+If you need to report a bug that isn't an undisclosed security vulnerability, please use the bug reporting page.
+
+The private security mailing address is: security@dubbo.apache.org
+
+For more information about how the ASF deals with security potential problems see https://www.apache.org/security/
+
+## Security issues in dependencies
+
+### Log4j CVE-2021-44228
 
 Recently, the mainstream log framework [log4j2](https://logging.apache.org/log4j/2.x/) was reported with a severe security vulnerability [cve-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228).
 
 The following is a summary of the impact of this vulnerability cve-2021-44228 on the Apache Dubbo framework and the user's guide.
 
-### Potential Influence on Dubbo
+#### Potential Influence on Dubbo
 
 **CVE-2021-44228 has no security impact on use of Dubbo framework**
 
@@ -52,7 +68,10 @@ The following is the dependency analysis of Dubbo components on log4j2, involvin
 [INFO] \- org. apache. logging. log4j:log4j-api:jar:2.13. 3:compile
 ```
 
-## 2. Third-party Deserialization Library Vulnerabilities
+## Security Model
+
+### Third-party Deserialization Library Vulnerabilities
+
 Dubbo supports the extension of serialization protocol. Theoretically, users can enable serialization protocol with arbitrary order based on the extension mechanism, which brings great flexibility, but at the same time, they should be aware of the potential security risks.
 Data deserialization is one of the most vulnerable links to be exploited by attackers. Attackers use it to steal or destroy server-side data, such as rce attack. 
 Before switching the serialization protocol or implementation, the user should fully investigate the security guarantee of target serialization protocol and its framework implementation, and set corresponding security measures in advance (such as setting Black / white list). The Dubbo framework itself cannot guarantee the security of the target serialization mechanism.
@@ -72,7 +91,7 @@ For the above serialization extension, after finding or receiving the relevant v
 
 If you have any questions or security issues, please send mail to here security@dubbo.apache.org
 
-## Some suggestions to deal with the security vulnerability of deserialization
+#### Some suggestions to deal with the security vulnerability of deserialization
 
 * External network access restrictions
 

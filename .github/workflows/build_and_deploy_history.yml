@@ -1,0 +1,42 @@
+name: Website History Deploy
+
+on:
+  push:
+    branches:
+      - 'history/**'
+
+jobs:
+  deploy_main:
+    runs-on: ubuntu-latest
+    name: Build and Deploy To Main
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+      - name: Setup Docsy
+        run: git submodule update --init --recursive && sudo npm install -D --save autoprefixer && sudo npm install -D --save postcss-cli
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+          extended: true
+      - name: Build
+        env:
+          HUGO_ENV: production
+        run: hugo mod clean && hugo --minify
+      - name: Copy htaccess files
+        run: cp .htaccess ./public
+      - name: Copy other files
+        run: cp .asf.yaml ./public
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: ${{ github.ref_name }}-staging
+          publish_dir: ./public
+          keep_files: true
