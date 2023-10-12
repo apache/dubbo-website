@@ -1,6 +1,4 @@
 ---
-aliases:
-    - /en/overview/core-features/load-balance/
 description: Load Balancing
 linkTitle: Load Balancing
 title: Load Balancing

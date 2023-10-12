@@ -1,6 +1,4 @@
 ---
-aliases:
-    - /en/overview/what/ecosystem/
 description: Microservices Ecosystem
 feature:
     description: |

@@ -1,6 +1,4 @@
 ---
-aliases:
-    - /en/overview/core-features/extensibility/
 description: Extensibility Adaptation
 feature:
     description: |
