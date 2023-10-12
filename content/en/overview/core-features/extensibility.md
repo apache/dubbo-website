@@ -29,9 +29,9 @@ Dubbo's extensibility allows the project to be conveniently divided into various
 ## Microservices Ecosystem Based on Extension Points
 Numerous extension points and abstractions form the foundation for Dubbo's integration with various microservices ecosystem components and the realization of microservices governance capabilities.
 
-* [Full-link Tracing](../../../zh-cn/overview/tasks/observability/tracing/)
-* [Data Consistency](../../../zh-cn/overview/tasks/ecosystem/transaction/)
-* [Rate Limiting & Fallback](../../../zh-cn/overview/core-features/traffic/circuit-breaking/)
+* [Full-link Tracing](../../../../zh-cn/overview/tasks/observability/tracing/)
+* [Data Consistency](../../../../zh-cn/overview/tasks/ecosystem/transaction/)
+* [Rate Limiting & Fallback](../../../../zh-cn/overview/core-features/traffic/circuit-breaking/)
 
 Dubbo's SDKs for various languages adopt the "microkernel + plugin" design pattern. Almost all core nodes in every process are defined as extension points. Officially released components are also released in the form of extension point implementations, so Dubbo can treat all official and third-party component extensions equally.
 * Extensibility adaptation is key to realizing Dubbo's microservices ecosystem. Ecosystem components, such as full-link tracing and service registry implementations, are adapted based on extension points like Filter, Registry, and DynamicConfiguration.
@@ -80,7 +80,7 @@ This section primarily discusses Dubbo's service governance from an architectura
 The registry is the foundation for Dubbo's service discovery capability, with official support for registries like Zookeeper, Nacos, Etcd, Consul, and Eureka.
 
 ### Config Center
-The configuration center is a key component for dynamically controlling Dubbo's behavior. All rules dispatched in [Traffic Management](../../../zh-cn/overview/tasks/traffic-management) are first saved in the configuration center.
+The configuration center is a key component for dynamically controlling Dubbo's behavior. All rules dispatched in [Traffic Management](../../../../zh-cn/overview/tasks/traffic-management) are first saved in the configuration center.
 
 ### Metadata Center
 In contrast to the configuration center, from a user's perspective, the metadata center is read-only.
@@ -88,13 +88,15 @@ In contrast to the configuration center, from a user's perspective, the metadata
 ## Custom Extension Examples
 The following examples demonstrate how to extend Dubbo to address practical problems.
 
-* [Custom RPC Protocol](../../../zh-cn/overview/tasks/extensibility/protocol/)
-* [Custom Traffic Routing Rule](../../../zh-cn/overview/tasks/extensibility/router/)
-* [Custom Registry](../../../zh-cn/overview/tasks/extensibility/registry/)
-* [Custom Interceptor](../../../zh-cn/overview/tasks/extensibility/filter/)
+* [Custom RPC Protocol](../../../../zh-cn/overview/tasks/extensibility/protocol/)
+* [Custom Traffic Routing Rule](../../../../zh-cn/overview/tasks/extensibility/router/)
+* [Custom Registry](../../../../zh-cn/overview/tasks/extensibility/registry/)
+* [Custom Interceptor](../../../../zh-cn/overview/tasks/extensibility/filter/)
 
 ## More Extension Points
 This article lists some of the commonly used extension points in Dubbo. However, there are many more extension points available for flexible customization. Each SDK for different languages may have variations in extension definitions and configuration methods.
 
-* [Java Extension Manual](../../../zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/)
-* [Go Extension Manual](../../../zh-cn/overview/mannual/golang-sdk/preface/design/aop_and_extension/)
+* [Java Extension Manual](../../../../zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/)
+* [Go Extension Manual](../../../../zh-cn/overview/mannual/golang-sdk/preface/design/aop_and_extension/)
+* [Java Extension Manual](../../../../zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/)
+* [Go Extension Manual](../../../../zh-cn/overview/mannual/golang-sdk/preface/design/aop_and_extension/)
