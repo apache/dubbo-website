@@ -59,8 +59,8 @@ Dubbo allows providers to configure a default load balancing strategy so that al
 Each application can configure different services to use different load balancing strategies and can even specify different strategies for different methods of the same service.
 
 For configuration details, refer to the implementations in different languages:
-* [Java](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/#usage)
+* [Java](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/#usage/)
 * [Golang](/zh-cn/overview/mannual/golang-sdk/)
 
 ## Custom Extensions
-Load balancing strategies support custom extension implementations. For details, please see [Dubbo's Extensibility](./extensibility).
+Load balancing strategies support custom extension implementations. For details, please see [Dubbo's Extensibility](./extensibility/).
