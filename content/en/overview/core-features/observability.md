@@ -1,7 +1,7 @@
 ---
 type: docs
-title: "observability"
-linkTitle: "observability"
+title: "Observability"
+linkTitle: "Observability"
 weight: 60
 description: ""
 feature:
