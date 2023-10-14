@@ -63,4 +63,4 @@ For configuration details, refer to the implementations in different languages:
 * [Golang](/zh-cn/overview/mannual/golang-sdk/)
 
 ## Custom Extensions
-Load balancing strategies support custom extension implementations. For details, please see [Dubbo's Extensibility](../core-features/extensibility).
+Load balancing strategies support custom extension implementations. For details, please see [Dubbo's Extensibility](/en/overview/core-features/extensibility/).
