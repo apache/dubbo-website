@@ -51,7 +51,7 @@ In addition to interacting with the registry, Dubbo 3's complete address discove
 
 The complete workflow is shown above. First, the consumer receives the address (IP:port) information from the registry, then establishes a connection with the provider and reads the metadata configuration information from the Metadata Service. These two pieces of information together form the effective, service-oriented address list for Dubbo's consumer side. Both of these steps occur before the actual RPC service invocation takes place.
 
-> For the definition of MetadataService and a complete analysis of the service discovery process, please refer to [Detailed Application-Level Service Discovery](/zh-cn/blog/proposals/service-discovery/).
+> For the definition of MetadataService and a complete analysis of the service discovery process, please refer to [Detailed Application-Level Service Discovery](/en/blog/proposals/service-discovery/).
 
 > For data synchronization in microservices' service discovery models, REST has defined a very interesting maturity model. Interested readers can refer to the link here https://www.martinfowler.com/articles/richardsonMaturityModel.html. According to the article's 4-level maturity definition, Dubbo's current model based on interface granularity corresponds to the highest L4 level.
 

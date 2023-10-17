@@ -89,7 +89,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-Deploy and open the [Dubbo Admin Dashboard](/zh-cn/tasks/deploy), and you will see the service deployment and invocation data.
+Deploy and open the [Dubbo Admin Dashboard](/zh-cn/tasks/deploy/), and you will see the service deployment and invocation data.
 
 Dubbo Admin can also improve development and testing efficiency through additional capabilities like:
 * Document management for regular services and IDL documents
@@ -108,8 +108,8 @@ For more complex microservices scenarios, Dubbo also provides more advanced gove
 
 This guide provides an overview of the workflow for developing microservices with Dubbo. For detailed step-by-step instructions, please refer to:
 * [Getting Started with Java Microservices](/en/overview/quickstart/)
-* [Getting Started with Go Microservices](/en/overview/quickstart/go)
-* [Getting Started with Rust Microservices](/en/overview/quickstart/rust)
+* [Getting Started with Go Microservices](/en/overview/quickstart/go/)
+* [Getting Started with Rust Microservices](/en/overview/quickstart/rust/)
 * [Getting Started with Node.js Microservices](https://github.com/apache/dubbo-js)
 
 
