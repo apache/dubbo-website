@@ -89,7 +89,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-Deploy and open the [Dubbo Admin Dashboard](/zh-cn/tasks/deploy/), and you will see the service deployment and invocation data.
+Deploy and open the [Dubbo Admin Dashboard](/zh-cn/overview/tasks/deploy/), and you will see the service deployment and invocation data.
 
 Dubbo Admin can also improve development and testing efficiency through additional capabilities like:
 * Document management for regular services and IDL documents
