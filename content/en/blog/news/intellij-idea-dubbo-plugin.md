@@ -10,8 +10,6 @@ description: >
 
 The most popular Java IDE, IntelliJ IDEA, has collaborated with the open-source microservice framework Apache Dubbo community, bringing good news to microservice developers. Along with IntelliJ IDEA version 2023.2, Jetbras has officially released the new **Apache Dubbo in Spring Framework** plugin version.
 
-! IntelliJ IDEA ❤️ Apache Dubbo] ()
-
 This plugin can help developers with Dubbo project initialization and facilitate the identification of Dubbo services and their dependencies during the project development process. Developing microservices based on Apache Dubbo will become very simple.
 
 

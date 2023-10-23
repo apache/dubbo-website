@@ -10,7 +10,7 @@ description: >
 
 最受欢迎的 Java 集成开发环境 IntelliJ IDEA 与开源微服务框架 Apache Dubbo 社区强强合作，给广大微服务开发者带来了福音。与 IntelliJ IDEA 2023.2 版本一起，**Jetbrains 官方发布了一款全新插件 - Apache Dubbo in Spring Framework**。
 
-![IntelliJ IDEA loves️ Apache Dubbo]()
+![IntelliJ IDEA loves️ Apache Dubbo](/imgs/blog/2023/10/plugin/img_6.png)
 
 这款插件可以帮助开发者解决 Dubbo 项目初始化问题，同时方便识别项目开发过程中的 Dubbo 服务及其依赖关系，基于 Apache Dubbo 的微服务开发将变得非常简单。
 
