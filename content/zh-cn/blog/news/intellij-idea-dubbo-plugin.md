@@ -22,7 +22,7 @@ description: >
 
 ### 方式一
 使用浏览器打开插件 [Apache Dubbo in Spring Framework](https://plugins.jetbrains.com/plugin/20938-apache-dubbo-in-spring-framework) 官方地址，在页面右上角，点击 “Install to IntelliJ IDEA 2023.2” 按钮即可完成插件安装。
-![image.png](/imgs/blog/2023/10/plugin/img——1.png)
+![image.png](/imgs/blog/2023/10/plugin/img_1.png)
 
 ### 方式二
 打开 Preferences -> Plugins，输入 'Apache Dubbo' 搜索插件，安装即可。
