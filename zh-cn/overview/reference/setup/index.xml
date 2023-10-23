@@ -1,0 +1,155 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 安装</title><link>https://dubbo.apache.org/zh-cn/overview/reference/setup/</link><description>Recent content in 安装 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/setup/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 安装 Dubbo Admin 及服务治理组件</title><link>https://dubbo.apache.org/zh-cn/overview/reference/setup/install/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/setup/install/</guid><description>
+&lt;h2 id="dubboctl-安装">Dubboctl 安装&lt;/h2>
+&lt;h3 id="download">Download&lt;/h3>
+&lt;p>下载 Dubbo Admin 发行版本&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl -L https://dubbo.apache.org/installer.sh | &lt;span style="color:#268bd2">VERSION&lt;/span>&lt;span style="color:#719e07">=&lt;/span>0.1.0 sh -
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Admin 要组织好发行版本&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>将 dubboctl 放入可执行路径&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>ln -s dubbo-admin-0.1.0/bin/dubboctl /usr/local/bin/dubboctl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="install">Install&lt;/h3>
+&lt;p>安装过程会依次：&lt;/p>
+&lt;ol>
+&lt;li>安装 Admin 自定义的一些资源&lt;/li>
+&lt;li>拉起 Admin、Nacos、Zookeeper 等不同的组件服务&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl install &lt;span style="color:#586e75"># 使用默认 manifests 安装&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubboctl manifests| kubectl apply -f -
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl install --set &lt;span style="color:#268bd2">profile&lt;/span>&lt;span style="color:#719e07">=&lt;/span>minimal &lt;span style="color:#586e75"># 指定不同的 profile，即安装组件的组合&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl install --set admin.nacos.enabled&lt;span style="color:#719e07">=&lt;/span>true, admin.nacos.namespace&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">test&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 指定不同的覆盖参数&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>检查安装效果&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl get pod -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="打开-admin-控制台">打开 Admin 控制台&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl port-forward svc/dubbo-admin -n dubbo-system 38080:38080
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打开浏览器，访问： &lt;code>http://127.0.0.1:38080/&lt;/code>&lt;/p>
+&lt;h2 id="helm-安装">Helm 安装&lt;/h2>
+&lt;h3 id="前置条件">前置条件&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://helm.sh/docs/intro/install/">Install the Helm client&lt;/a>, version 3.6 or above.&lt;/li>
+&lt;li>Kubernetes 集群&lt;/li>
+&lt;li>配置 helm repository&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ helm repo add dubbo https://dubbo.apache.org/charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm repo update
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="安装步骤">安装步骤&lt;/h3>
+&lt;h4 id="安装方式一">安装方式一&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>helm install dubbo-admin dubbo/dubbo-stack -n dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install dubbo-admin-nacos dubbo/dubbo-stack -n dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install dubbo-admin-zookeeper dubbo/dubbo-stack -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>helm install dubbo-admin-grafana dubbo/dubbo-stack -n dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install dubbo-admin-prometheus dubbo/dubbo-stack -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="安装方式二">安装方式二&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>helm install dubbo-admin-all dubbo/dubbo-stack -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>引发的问题。需要明确哪些组件是保证生产可用的，哪些是仅作展示的，比如 nacos/zookeeper/admin 保障生产可用，prometheus/grafana 是仅作展示
+如果基于以上结论，则大部分情况下，dubbo-admin-all 是不推荐保生产安装的；更推荐使用类似 dubbo-admin-nacos 生产保障包，然后自己用 prometheus 社区的生产安装包&lt;/p>
+&lt;/blockquote>
+&lt;p>检查安装状态&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>helm ls -n dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl get deployments -n dubbo-system --output wide
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="vm-安装">VM 安装&lt;/h2>
+&lt;h3 id="download-1">Download&lt;/h3>
+&lt;p>下载 Dubbo Admin 发行版本&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl -L https://dubbo.apache.org/installer.sh | &lt;span style="color:#268bd2">VERSION&lt;/span>&lt;span style="color:#719e07">=&lt;/span>0.1.0 sh -
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Admin 要组织好发行版本&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>将 dubboctl 放入可执行路径&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>ln -s dubbo-admin-0.1.0/bin/dubbo-admin /usr/local/bin/dubbo-admin
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="run">Run&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubbo-admin run -f override-configuration.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configuration">Configuration&lt;/h3>
+&lt;p>配置用于控制 dubbo-admin 的行为&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Environment type. Available values are: &amp;#34;kubernetes&amp;#34; or &amp;#34;universal&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">environment: universal # ENV&lt;/span>: DUBBO_ENVIRONMENT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Mode in which Dubbo CP is running. Available values are: &amp;#34;standalone&amp;#34;, &amp;#34;global&amp;#34;, &amp;#34;zone&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">mode: standalone # ENV&lt;/span>: DUBBO_MODE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Resource Store configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">store&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Type of Store used in the Control Plane. Available values are: &amp;#34;kubernetes&amp;#34;, &amp;#34;postgres&amp;#34; or &amp;#34;memory&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type: memory # ENV&lt;/span>: DUBBO_STORE_TYPE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Kubernetes Store configuration (used when store.type=kubernetes)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">kubernetes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Namespace where Control Plane is installed to.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">systemNamespace: dubbo-system # ENV&lt;/span>: DUBBO_STORE_KUBERNETES_SYSTEM_NAMESPACE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Postgres Store configuration (used when store.type=postgres)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">mysql&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Host of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host: 127.0.0.1 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_HOST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Port of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port: 15432 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_PORT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># User of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">user: dubbo # ENV&lt;/span>: DUBBO_STORE_POSTGRES_USER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Password of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password: dubbo # ENV&lt;/span>: DUBBO_STORE_POSTGRES_PASSWORD
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Database name of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dbName: dubbo # ENV&lt;/span>: DUBBO_STORE_POSTGRES_DB_NAME
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Connection Timeout to the DB in seconds&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">connectionTimeout: 5 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_CONNECTION_TIMEOUT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Maximum number of open connections to the database&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># `0` value means number of open connections is unlimited&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxOpenConnections: 50 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_MAX_OPEN_CONNECTIONS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Maximum number of connections in the idle connection pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># &amp;lt;0 value means no idle connections and 0 means default max idle connections&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxIdleConnections: 50 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_MAX_IDLE_CONNECTIONS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># TLS settings&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tls&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Mode of TLS connection. Available values are: &amp;#34;disable&amp;#34;, &amp;#34;verifyNone&amp;#34;, &amp;#34;verifyCa&amp;#34;, &amp;#34;verifyFull&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">mode: disable # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_MODE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Path to TLS Certificate of the client. Used in verifyCa and verifyFull modes&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">certPath: # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_CERT_PATH
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Path to TLS Key of the client. Used in verifyCa and verifyFull modes&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">keyPath: # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_KEY_PATH
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Path to the root certificate. Used in verifyCa and verifyFull modes.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">caPath: # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_ROOT_CERT_PATH
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># MinReconnectInterval controls the duration to wait before trying to&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># re-establish the database connection after connection loss. After each&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># consecutive failure this interval is doubled, until MaxReconnectInterval&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># is reached. Successfully completing the connection establishment procedure&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># resets the interval back to MinReconnectInterval.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">minReconnectInterval&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;10s&amp;#34;&lt;/span> &lt;span style="color:#586e75"># ENV: DUBBO_STORE_POSTGRES_MIN_RECONNECT_INTERVAL&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># MaxReconnectInterval controls the maximum possible duration to wait before trying&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># to re-establish the database connection after connection loss.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxReconnectInterval&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;60s&amp;#34;&lt;/span> &lt;span style="color:#586e75"># ENV: DUBBO_STORE_POSTGRES_MAX_RECONNECT_INTERVAL&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">server&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">38080&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">config-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">external-services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Prometheus service name is &amp;#34;metrics&amp;#34; and is in the &amp;#34;telemetry&amp;#34; namespace&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># http://prometheus.&amp;lt;dubbo_namespace_name&amp;gt;:9090&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;http://metrics.telemetry:9090/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Enabled by default. Kiali will anyway fallback to disabled if&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Jaeger is unreachable.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Jaeger service name is &amp;#34;tracing&amp;#34; and is in the &amp;#34;telemetry&amp;#34; namespace.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Make sure the URL you provide corresponds to the non-GRPC enabled endpoint&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># if you set &amp;#34;use_grpc&amp;#34; to false.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">in_cluster_url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://tracing.telemetry:16685/jaeger&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">use_grpc&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Public facing URL of Jaeger&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://my-jaeger-host/jaeger&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">grafana&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Grafana service name is &amp;#34;grafana&amp;#34; and is in the &amp;#34;telemetry&amp;#34; namespace.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">in_cluster_url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://grafana.telemetry:3000/&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Public facing URL of Grafana&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://my-ingress-host/grafana&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 更多配置&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="打开-admin-控制台-1">打开 Admin 控制台&lt;/h3>
+&lt;p>打开浏览器，访问： &lt;code>http://127.0.0.1:38080/&lt;/code>&lt;/p></description></item></channel></rss>

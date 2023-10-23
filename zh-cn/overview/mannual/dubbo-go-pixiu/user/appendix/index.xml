@@ -1,0 +1,394 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 附录</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/appendix/</link><description>Recent content in 附录 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/appendix/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: HTTP to Dubbo 默认转换协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/appendix/http-to-dubbo-default-stragety/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/appendix/http-to-dubbo-default-stragety/</guid><description>
+&lt;h1 id="背景">背景&lt;/h1>
+&lt;p>​ 通过 Http 提供一个统一的服务提供者视图，用户不用在乎后端Dubbo服务的版本差异，协议差异，通过简单地在Http请求中传递rpc调用的参数，完成一次Rpc调用，通过实现http调用后端dubbo服务，进一步简化后端服务设计的复杂性。&lt;/p>
+&lt;h1 id="目的">目的&lt;/h1>
+&lt;p>​ 统一Http调用后端dubbo服务的形式，方便网关产品实现 Http 调用转 dubbo 调用的实现，Dubbo能和网关更好的融合。&lt;/p>
+&lt;h1 id="conception">Conception&lt;/h1>
+&lt;h2 id="dubbo-rpc-调用的基本形式">Dubbo RPC 调用的基本形式&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/user/appendix/img1.png" alt="img">&lt;/p>
+&lt;p>希望通过提供Http调用Dubbo的方式简化 Consumer 的Rpc调用流程&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/user/appendix/img2.png" alt="img">&lt;/p>
+&lt;p>网关会在整个服务调用的过程中承担更多的原本客户端的功能，比如负载均衡，服务治理，安全等能力，外部用户调用服务的时候将更多的关注与调用本身。&lt;/p>
+&lt;h2 id="http-request-和-http-response-的格式">Http request 和 Http response 的格式&lt;/h2>
+&lt;p>request的URL和Header中包含RPC调用的元信息，包含服务名，方法名，服务分组，服务版本，request 的 body 中包含请求的参数，参数是 &lt;strong>json list&lt;/strong> 的格式, 如果没有参数则为 &lt;em>&lt;strong>null&lt;/strong>&lt;/em>&lt;/p>
+&lt;p>http response 中包含请求的处理状态，返回结果或者调用的错误类型以及错误具体信息，返回的body中只包含一个 &lt;em>&lt;strong>json object&lt;/strong>&lt;/em>，这个object中包含 &lt;em>&lt;strong>code&lt;/strong>&lt;/em>，&lt;em>&lt;strong>result&lt;/strong>&lt;/em>，&lt;em>&lt;strong>error&lt;/strong>&lt;/em>&lt;/p>
+&lt;p>通过 code 表示返回的具体状态，result 和 error 在返回中只会返回其中一个，分别是调用的返回结果，调用返回的错误信息。&lt;/p>
+&lt;h3 id="http-request">Http request&lt;/h3>
+&lt;h4 id="http-请求的方法">Http 请求的方法&lt;/h4>
+&lt;p>只能为 &lt;strong>POST&lt;/strong> 方法&lt;/p>
+&lt;h4 id="http-请求的-url">Http 请求的 URL&lt;/h4>
+&lt;p>格式：&lt;code>[http://host/ {service} / {method](http://host/service/method)}&lt;/code> or &lt;code>[https://host/ {service} / {method](https://host/service/method)}&lt;/code>&lt;/p>
+&lt;ul>
+&lt;li>service 是调用的服务名，对应于Dubbo message body中的 service Name&lt;/li>
+&lt;li>method 是调用的方法名，对应于Dubbo message body中的 method Name&lt;/li>
+&lt;/ul>
+&lt;p>服务名和方法名都应该和后端服务的声明一致&lt;/p>
+&lt;p>如果URL中无法获取到service和method，应该直接返回&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>http code&lt;/th>
+&lt;th>code&lt;/th>
+&lt;th>detail&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>400&lt;/td>
+&lt;td>3&lt;/td>
+&lt;td>service or method not provided&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h4 id="http-请求的header">Http 请求的Header&lt;/h4>
+&lt;p>Header中必须包含以下条目：&lt;/p>
+&lt;ul>
+&lt;li>x-dubbo-service-protocol&lt;/li>
+&lt;/ul>
+&lt;p>表明这个Http 请求是一个Http转dubbo的请求，目前支持Dubbo 协议和 triple 协议，可配置的选项为：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;ul>
+&lt;li>x-dubbo-service-protocol: triple&lt;/li>
+&lt;li>x-dubbo-service-protocol: dubbo&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>​ 前者表示这是转化为triple协议，后者表示转化为dubbo协议&lt;/p>
+&lt;p>可选参数：&lt;/p>
+&lt;ul>
+&lt;li>x-dubbo-service-version 如果提供了应该填充到Dubbo message 的Serviceversion字段中.&lt;/li>
+&lt;li>x-dubbo-service-group 如果提供了应该在attachment 添加 group 字段并把对应的值进行填充。&lt;/li>
+&lt;/ul>
+&lt;h4 id="http-请求的body">Http 请求的Body&lt;/h4>
+&lt;p>body中包含请求的参数，body中只包含一个 &lt;em>&lt;strong>Json object&lt;/strong>&lt;/em> 对象&lt;/p>
+&lt;p>这个对象目前包含两个字段：&lt;/p>
+&lt;ul>
+&lt;li>param&lt;/li>
+&lt;/ul>
+&lt;p>param 的值类型为 list，标识调用方法的参数，顺序和方法签名中的参数顺序一致&lt;/p>
+&lt;p>这里使用object组装请求参数是为了协议能够向后兼容，body中的对象可能会增加新的字段。&lt;/p>
+&lt;h5 id="基本类型在-json-java-go-中的映射关系">基本类型在 Json Java Go 中的映射关系&lt;/h5>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Json Type&lt;/th>
+&lt;th>Java Type&lt;/th>
+&lt;th>Golang Type&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Integer&lt;/td>
+&lt;td>java.lang.Long&lt;/td>
+&lt;td>int64&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Double&lt;/td>
+&lt;td>java.lang.Double&lt;/td>
+&lt;td>float64&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>String&lt;/td>
+&lt;td>java.lang.String&lt;/td>
+&lt;td>string&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Null&lt;/td>
+&lt;td>null&lt;/td>
+&lt;td>nil&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Bool&lt;/td>
+&lt;td>java.lang.Boolean&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>List&lt;/td>
+&lt;td>java.lang.List&lt;/td>
+&lt;td>silice&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Object&lt;/td>
+&lt;td>java.lang.Map&lt;/td>
+&lt;td>map&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>通过对基本类型映射关系的定义简化网关配置，对于只使用基本配置的转化，网关应该可以在不使用额外配置的情况下完成转化的&lt;/p>
+&lt;h5 id="body-处理异常时的处理策略">Body 处理异常时的处理策略&lt;/h5>
+&lt;ol>
+&lt;li>调用方提供的请求参数 Json 解析错误，返回状态码 400&lt;/li>
+&lt;li>调用的时候，无法确定参数的具体类型，例如，用户使用的自定义类型，但是没有在网关配置具体的类型名，应该返回状态码 400&lt;/li>
+&lt;/ol>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>http code&lt;/th>
+&lt;th>code&lt;/th>
+&lt;th>detail&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>400&lt;/td>
+&lt;td>3&lt;/td>
+&lt;td>argument parse error&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>400&lt;/td>
+&lt;td>3&lt;/td>
+&lt;td>argument type info not found&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>在以上条件都符合时，一个Http 调用可以被转化成为 Dubbo 协议的调用，只要网关能够成功进行请求的转化，则网关回复调用方的时候，Http 状态码都应该是 200 OK，至于调用方调用后端服务出现错误的信息，应该放在 body 中的 code 以及 error 字段中。&lt;/p>
+&lt;h3 id="http-response">http response&lt;/h3>
+&lt;p>在请求经过后端返回之后，需要将一下信息传递给调用方：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>name&lt;/th>
+&lt;th>description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>status&lt;/td>
+&lt;td>返回的状态，在dubbo response 的header的status 中&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>返回值&lt;/td>
+&lt;td>调用成功返回的结果，如果没有返回值，则result 的值为 null&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>返回异常&lt;/td>
+&lt;td>调用失败，产生异常，返回异常的具体message&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>返回值和返回异常只能出现一项&lt;/p>
+&lt;p>code 和 grpc 中的 status code 一致 详细的 code 及其含义见 &lt;a href="https://grpc.github.io/grpc/core/md_doc_statuscodes.html">https://grpc.github.io/grpc/core/md_doc_statuscodes.html&lt;/a>&lt;/p>
+&lt;h4 id="返回异常的处理">返回异常的处理：&lt;/h4>
+&lt;p>dubbo 中的异常以hessian2 的 class 类型返回，返沪的error中只需要对应的message 字段即可&lt;/p>
+&lt;h2 id="dubbo-协议的具体转化">Dubbo 协议的具体转化&lt;/h2>
+&lt;h3 id="dubbo-协议的具体介绍-可以见文章">Dubbo 协议的具体介绍 可以见文章&lt;/h3>
+&lt;p>&lt;a href="https://dubbo.apache.org/en/blog/2018/10/05/introduction-to-the-dubbo-protocol/">https://dubbo.apache.org/en/blog/2018/10/05/introduction-to-the-dubbo-protocol/&lt;/a>&lt;/p>
+&lt;h3 id="dubbo-协议的-message-格式">Dubbo 协议的 message 格式&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo_protocol_header.png" alt="img">&lt;/p>
+&lt;h4 id="dubbo-header的封装要求">Dubbo Header的封装要求&lt;/h4>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>bits&lt;/th>
+&lt;th>Name&lt;/th>
+&lt;th>description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>0 - 15&lt;/td>
+&lt;td>Magic Number&lt;/td>
+&lt;td>必须为 0xdabb&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>16&lt;/td>
+&lt;td>message 的类型&lt;/td>
+&lt;td>必须为 1 （request）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>17&lt;/td>
+&lt;td>2-way&lt;/td>
+&lt;td>必须为 1 （需要服务端返回值）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>18&lt;/td>
+&lt;td>Event&lt;/td>
+&lt;td>必须为 0 不支持事件类型&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>19 - 23&lt;/td>
+&lt;td>序列化类型&lt;/td>
+&lt;td>可以扩展实现Hessian，Json等序列化类型，类型编号如下表&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>24 - 31&lt;/td>
+&lt;td>Status&lt;/td>
+&lt;td>表示 response 的状态，见Status 处理要求&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>32 - 95&lt;/td>
+&lt;td>Request Id&lt;/td>
+&lt;td>客户端的请求ID，可以根据需要自行定义&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>96 - 127&lt;/td>
+&lt;td>Data length&lt;/td>
+&lt;td>请求体的长度，请求体的大小&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>序列化类型编号：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Serialization Type&lt;/th>
+&lt;th>Code&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Hessian2&lt;/td>
+&lt;td>2&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Java&lt;/td>
+&lt;td>3&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Compact Java&lt;/td>
+&lt;td>4&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Fast Json&lt;/td>
+&lt;td>6&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Native Java&lt;/td>
+&lt;td>7&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>请求Header中的字段应该以大端的形式封装，发送到服务端&lt;/p>
+&lt;h4 id="dubbo-body">Dubbo Body&lt;/h4>
+&lt;p>请求的body应该包含以下内容：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>name&lt;/th>
+&lt;th>description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Dubbo Version&lt;/td>
+&lt;td>根据网关的配置，或者Http请求获取&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Service Name&lt;/td>
+&lt;td>服务名&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Method Name&lt;/td>
+&lt;td>调用方法名，采用泛化调用的方式，此项目固定为“$invoke”&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Method parameter types&lt;/td>
+&lt;td>参数类型，泛化调用有固定值 &amp;ldquo;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;&amp;rdquo;&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Method arguments&lt;/td>
+&lt;td>使用配置的序列化方式将对应的参数序列化，按照用户传入的参数的顺序放入参数&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>以上的各个项目在使用了指定的序列化形式之后，按照上表指定的顺序进行序列化。&lt;/p>
+&lt;p>attachment 目前不转化&lt;/p>
+&lt;p>&lt;em>&lt;strong>注意&lt;/strong>&lt;/em>：&lt;/p>
+&lt;p>使用文本类型的序列化（Json） 在每一个序列化对象后边要加上行分割符( &lt;em>&lt;strong>&amp;quot;\n&amp;quot;&lt;/strong>&lt;/em> or &lt;em>&lt;strong>&amp;quot;\r\n&amp;quot;&lt;/strong>&lt;/em> )&lt;/p>
+&lt;p>Java 中在使用FastJson 编解码的时候使用了BufferedReader，每次取buffer中的对象的时候，会先调用BufferReader的readLine方法，此方法分割行依靠 ‘/n’ ， ’/r/n‘&lt;/p>
+&lt;p>以下给出了Dubbo 协议中返回header中的status对应于GRPC status的对应列表&lt;/p>
+&lt;h5 id="status-的处理">Status 的处理&lt;/h5>
+&lt;p>Dubbo resposne status 中，OK延续使用grpc的 OK code，其余的 status Number编号紧接着 grpc 的16个 code进行编号&lt;/p>
+&lt;p>对应的error详情是 response 中异常的 message。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Dubbo State&lt;/th>
+&lt;th>Number&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>ResponseStatus::Ok&lt;/td>
+&lt;td>0&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::ClientTimeout&lt;/td>
+&lt;td>130&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::ServerTimeout&lt;/td>
+&lt;td>131&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::ServiceNotFound&lt;/td>
+&lt;td>12&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::ServerThreadpoolExhaustedError&lt;/td>
+&lt;td>13&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::ClientError&lt;/td>
+&lt;td>\&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::ServerError&lt;/td>
+&lt;td>13&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::ServiceError&lt;/td>
+&lt;td>13&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::BadResponse&lt;/td>
+&lt;td>13&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ResponseStatus::BadRequest&lt;/td>
+&lt;td>3&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="triple-协议的具体转化">Triple 协议的具体转化&lt;/h2>
+&lt;p>Triple 是基于GRPC的，定义在Http2 协议之上&lt;/p>
+&lt;h3 id="triple中rpc调用的元信息">Triple中RPC调用的元信息&lt;/h3>
+&lt;h4 id="triple-通过-url-传递调用的服务名和方法名">Triple 通过 URL 传递调用的服务名和方法名&lt;/h4>
+&lt;p>格式： &lt;code>[http://host/ {service} / {method](http://host/service/method)}&lt;/code>&lt;/p>
+&lt;p>我们的规范兼容 Triple 通过http2传递参数的形式，尽量做到dubbo 和 triple 的统一。&lt;/p>
+&lt;h4 id="header-frame">Header Frame&lt;/h4>
+&lt;p>header 中应该包含以下条目&lt;/p>
+&lt;ul>
+&lt;li>Content-Type：&lt;em>&lt;strong>application/grpc-proto&lt;/strong>&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>标识这是一个 triple 协议的rpc调用&lt;/p>
+&lt;ul>
+&lt;li>x-dubbo-service-group&lt;/li>
+&lt;/ul>
+&lt;p>指明调用的服务的分组&lt;/p>
+&lt;ul>
+&lt;li>x-dubbo-service-version&lt;/li>
+&lt;/ul>
+&lt;p>指明调用的服务的版本&lt;/p>
+&lt;h4 id="data-frame">Data frame&lt;/h4>
+&lt;p>Triple协议将请求参数放在Body中，在triple中，如果服务中的方法定义能够使用pb序列化，则只有一层序列化，如果需要用到其他的序列化，则需要使用TripleRequestWrapper&lt;/p>
+&lt;p>对参数进行包装。&lt;/p>
+&lt;p>我们推广使用 &lt;em>&lt;strong>Triple + pb&lt;/strong>&lt;/em> 的序列化形式，服务的提供方需要给出服务的 proto 定义，对于triple协议网关对于&lt;em>&lt;strong>triple + pb&lt;/strong>&lt;/em> 的转化是比较容易实现的，如果用户没有提供proto定义，需要返回信息：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>http code&lt;/th>
+&lt;th>code&lt;/th>
+&lt;th>detail&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>400&lt;/td>
+&lt;td>3&lt;/td>
+&lt;td>argument type info not found&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="heading">&lt;/h3></description></item></channel></rss>

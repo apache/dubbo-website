@@ -1,0 +1,88 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Rate Limit</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/</link><description>Recent content in Rate Limit on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Dubbo Go's built-in current limit usage tutorial</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/internally/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/internally/</guid><description/></item><item><title>Docs3-V2: Current Limiting Tutorial Based on Sentinel</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/sentinel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/sentinel/</guid><description/></item><item><title>Docs3-V2: Polaris-Based Current Limiting Tutorial</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/polaris/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/polaris/</guid><description/></item><item><title>Docs3-V2: Set current limit for the server</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/tps_limiter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/tps_limiter/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-modify-the-current-limiting-logic-and-verify">2. Modify the current limiting logic and verify&lt;/h2>
+&lt;p>Dubbo-go provides users with built-in flow-limiting rejection logic, and supports users to define the required flow-limiting mechanism and rejection logic according to their own business scenarios.&lt;/p>
+&lt;p>Under normal circumstances, no flow limit is set. When the user configures the flow limit logic and parameters on the server side, it will&lt;/p>
+&lt;h3 id="21-configure-current-limiting-parameters">2.1 Configure current limiting parameters&lt;/h3>
+&lt;p>go-server/conf/dubbogo.yaml: Configure current limiting parameters&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limiter&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;method-service&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.strategy&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;slidingWindow&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.rejected.handler&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;default&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.interval&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.rate&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Parameter Description:&lt;/p>
+&lt;ul>
+&lt;li>tps.limiter: current limiter selection. method-service is a current limiter built into the framework, which can configure service and method-level current limit logic, which can be customized.&lt;/li>
+&lt;li>tps.limit.strategy: selection of current limiting strategy, slidingWindow is a built-in current limiting strategy of the framework, which can reject requests exceeding the traffic limit in the window in the form of a sliding window.&lt;/li>
+&lt;li>tps.limit.rejected.handler: rejection strategy, default is the default rejection method, returns an empty object, can be customized&lt;/li>
+&lt;li>tps.limit.interval: current limit window interval, the unit is ms.&lt;/li>
+&lt;li>tps.limit.rate: The traffic limit in the window, the unit is the number of requests.&lt;/li>
+&lt;/ul>
+&lt;p>According to the above configuration, the server only allows the current interface to be called three times within one second.&lt;/p>
+&lt;h3 id="22-initiate-a-super-flow-request-to-verify-the-current-limiting-capability">2.2 Initiate a super-flow request to verify the current-limiting capability&lt;/h3>
+&lt;p>Set the client&amp;rsquo;s request logic to request five times per second, and calculate the success rate.&lt;/p>
+&lt;p>go-client/cmd/client.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config. &lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;start to test dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name: &lt;span style="color:#2aa198">&amp;#34;Laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>goodCount &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>badCount &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Millisecond&lt;span style="color:#719e07">*&lt;/span>&lt;span style="color:#2aa198">200&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reply, _ &lt;span style="color:#719e07">:=&lt;/span> grpcGreeterImpl.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> reply.Name &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>badCount&lt;span style="color:#719e07">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>} &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>goodCount&lt;span style="color:#719e07">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> badCount &lt;span style="color:#719e07">+&lt;/span> goodCount &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">5&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">break&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Success rate = %v\n&amp;#34;&lt;/span>, &lt;span style="color:#b58900">float64&lt;/span>(goodCount)&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#b58900">float64&lt;/span>(goodCount &lt;span style="color:#719e07">+&lt;/span> badCount))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen in the log that the request success rate is 0.6, and only three requests are allowed to be executed per second.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:62 Success &lt;span style="color:#268bd2">rate&lt;/span> &lt;span style="color:#719e07">=&lt;/span> 0.6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:62 Success &lt;span style="color:#268bd2">rate&lt;/span> &lt;span style="color:#719e07">=&lt;/span> 0.6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:62 Success &lt;span style="color:#268bd2">rate&lt;/span> &lt;span style="color:#719e07">=&lt;/span> 0.6
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see the rejection information in the server log:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>ERROR tps/filter.go:84 The invocation was rejected due to over the limiter limitation...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: dubbogo 3.0 flexible service</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/adaptive-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/limit/adaptive-service/</guid><description>
+&lt;h1 id="flexible-load-balancing-flexible-service">Flexible load balancing (flexible service)&lt;/h1>
+&lt;p>Flexible service is a decentralized intelligent load balancing component, and it is also one of the major new features in Dubbo-go version 3.0. Flexible services are still in the early experimental stage, and this feature will continue to be optimized in subsequent versions, and we will work with the Dubbo community to explore a set of best practices suitable for microservice scenarios.&lt;/p>
+&lt;p>The traditional load balancing algorithm is implemented by algorithms such as random nodes and RoundRobin. Their limitation is that they do not know the load situation of the current service provider, and the algorithm always calls different service providers with as fair a probability as possible. In practice, fairness does not mean high performance, and cluster service performance is also related to multiple factors such as service load and task complexity. In order to solve the shortcomings of traditional load balancing algorithms, Dubbo-go introduced flexible services in version 3.0, realizing dynamic capacity evaluation and distribution functions.&lt;/p>
+&lt;p>Capacity assessment is the core of flexible services, which can dynamically assess the capacity level of the server. In the process of capacity evaluation, the two core indicators are TPS and response time. It is necessary to balance the relationship between system utilization and system performance, so that the whole is in the best state.&lt;/p>
+&lt;ul>
+&lt;li>TPS reflects system utilization from the perspective of service providers. Before the system pressure is saturated, the greater the number of requests, the higher the system utilization rate. However, if the request volume is further increased until the system is oversaturated, the problem of overload occurs, resulting in a downward trend in overall efficiency.&lt;/li>
+&lt;li>Response time reflects system performance from the perspective of service callers. Before the system pressure is not saturated, the response time increases linearly with the number of requests, but when the amount of requests is further increased until the system is oversaturated, the response time and the number of requests increase exponentially.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/samples/adaptive-service/adaptive.png" alt="img">&lt;/p>
+&lt;p>Flexible services are collected during the call&lt;/p>
+&lt;p>In Dubbo-go version 3.0, service flexible load balancing is supported. In the microservice scenario, the client will collect the hardware resource consumption of the downstream server instance of the service during the invocation process, and select the most suitable downstream instance for invocation through capacity evaluation and screening strategies, thereby improving the overall system performance.&lt;/p>
+&lt;p>Service flexibility will continue to be optimized in subsequent iterations, seeking to explore best practices with the Dubbo community.&lt;/p></description></item></channel></rss>
