@@ -21,7 +21,7 @@ weight: 1
 
 参考 [Zipkin's quick start](https://zipkin.io/pages/quickstart.html) 安装 Zipkin。
 
-这里我们使用 Docker 来掩饰如何快速的启动 Zipkin 服务。
+这里我们使用 Docker 来演示如何快速的启动 Zipkin 服务。
 
 ```bash
 docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
