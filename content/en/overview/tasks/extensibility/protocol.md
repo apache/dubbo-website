@@ -75,7 +75,7 @@ Two deployment and running methods, choose one
 * Deploy `[Extensibility Protocol Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)`
 
 ### Using Local IDE
-* Deploy [Nacos](https://nacos.io/en/docs/quick-start.html) version 2.2.0
+* Deploy [Nacos](https://nacos.io/en-us/) version 2.2.0
 * Modify the configuration file in [Provider](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-provider/src/main/resources/application.properties) to enable the local nacos address
     ```properties
     # Specify the application name of Dubbo
