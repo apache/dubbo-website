@@ -15,19 +15,27 @@ weight: 2
 
 ## 前置条件
 
-因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `protoc-gen-go`、`protoc-gen-go-triple`。
+因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `protoc`、`protoc-gen-go`、`protoc-gen-go-triple`。
 
-```shell
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install github.com/apache/dubbo-go/compiler/protoc-gen-go-triple@latest
-```
+1. 安装 `protoc`
 
-确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 验证，如果该命令不能正常工作的话，请执行以下命令：
+    查看 <a href="/zh-cn/overview/reference/protoc-installation/" target="_blank">Protocol Buffer Compiler 安装指南</a>
 
-```shell
-[ -n "$(go env GOBIN)" ] && export PATH="$(go env GOBIN):${PATH}"
-[ -n "$(go env GOPATH)" ] && export PATH="$(go env GOPATH)/bin:${PATH}"
-```
+2. 安装 `protoc` 插件
+
+    接下来，我们安装插件 `protoc-gen-go`、`protoc-gen-go-triple`。
+
+    ```shell
+    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+    go install github.com/apache/dubbo-go/compiler/protoc-gen-go-triple@latest
+    ```
+
+    确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 验证，如果该命令不能正常工作的话，请执行以下命令：
+
+    ```shell
+    [ -n "$(go env GOBIN)" ] && export PATH="$(go env GOBIN):${PATH}"
+    [ -n "$(go env GOPATH)" ] && export PATH="$(go env GOPATH)/bin:${PATH}"
+    ```
 
 ## 快速运行示例
 ### 下载示例源码
