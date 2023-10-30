@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh-cn/overview/what/ecosystem/
+    - /zh-cn/overview/core-features/ecosystem/
 description: 微服务生态
 feature:
     description: |

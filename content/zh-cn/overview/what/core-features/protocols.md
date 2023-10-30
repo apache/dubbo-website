@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/protocols/
+    - /zh-cn/overview/core-features/protocols/
 description: 通信协议
 feature:
     description: |

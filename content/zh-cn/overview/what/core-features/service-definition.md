@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/service-definition/
+    - /zh-cn/overview/core-features/service-definition/
 description: 微服务开发
 linkTitle: 微服务开发
 title: 微服务开发

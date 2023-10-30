@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/traffic/script-rule/
+    - /zh-cn/overview/core-features/traffic/script-rule/
 description: ""
 linkTitle: 脚本路由
 title: 脚本路由规则

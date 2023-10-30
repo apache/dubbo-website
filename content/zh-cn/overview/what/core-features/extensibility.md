@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/extensibility/
+    - /zh-cn/overview/core-features/extensibility/
 description: 扩展适配
 feature:
     description: |

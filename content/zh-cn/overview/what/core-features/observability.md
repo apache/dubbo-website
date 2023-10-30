@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/observability/
+    - /zh-cn/overview/core-features/observability/
 description: 观测服务
 feature:
     description: |

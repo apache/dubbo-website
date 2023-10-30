@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/overview/core-features/traffic/configuration-rule/
+    - /zh-cn/overview/core-features/traffic/configuration-rule/
 description: ""
 linkTitle: 动态配置
 title: 动态配置规则
