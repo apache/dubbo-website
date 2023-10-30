@@ -3,13 +3,12 @@ aliases:
     - /zh/overview/mannual/
     - /zh/docs3-v2/
     - /zh-cn/docs3-v2/
-always_unfold: true
-description: Dubbo SDK 手册
+description: Dubbo SDK 用户手册
 feature:
     description: |
         提供 Java、Golang、Rust、Node.js、Python 等多语言 SDK 实现，支持基于 IDL 的跨语言服务定义和基于 Protobuf、Json 的数据编码
     title: 多语言 SDK
-linkTitle: SDK 手册
+linkTitle: SDK 用户手册
 no_list: true
 title: Dubbo SDK 用户手册
 type: docs
@@ -40,7 +39,7 @@ weight: 6
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./golang-sdk" >}}'>Golang SDK</a>
+                    <a href='{{< relref "./golang-sdk" >}}'>Go SDK</a>
                 </h4>
                 <p>Dubbo Golang SDK 手册</p>
             </div>
@@ -50,9 +49,9 @@ weight: 6
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./erlang-sdk" >}}'>Erlang SDK</a>
+                    <a href='{{< relref "./nodejs-sdk" >}}'>Node.js</a>
                 </h4>
-                <p>Dubbo Erlang SDK 手册</p>
+                <p>Dubbo Node.js SDK 手册</p>
             </div>
         </div>
     </div>
@@ -60,9 +59,9 @@ weight: 6
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./dubbo-go-pixiu" >}}'>Dubbo Go Pixiu</a>
+                    <a href='{{< relref "./web-sdk" >}}'>Web SDK</a>
                 </h4>
-                <p>Dubbo Go Pixiu 手册</p>
+                <p>Dubbo Web SDK 手册</p>
             </div>
         </div>
     </div>
@@ -72,11 +71,10 @@ weight: 6
                 <h4 class="card-title">
                     <a href='{{< relref "./rust-sdk" >}}'>Rust SDK</a>
                 </h4>
-                <p>Rust SDK 手册</p>
+                <p>Dubbo Rust SDK 手册</p>
             </div>
         </div>
     </div>
-
 </div>
 <hr>
 </div>

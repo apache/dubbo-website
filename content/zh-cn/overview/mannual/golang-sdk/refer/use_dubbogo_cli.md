@@ -5,13 +5,11 @@ aliases:
 description: 使用 dubbogo-cli 工具
 title: 使用 dubbogo-cli 工具
 type: docs
-weight: 2
+weight: 3
 ---
-
-
-
-
-
+{{% alert title="废弃警告" color="warning" %}}
+自 dubbo-go 3.1.0 版本开始，本工具不再适用。本工具已经停止维护，未来将由 dubboctl 代替，请关注社区动态了解 dubboctl 最新进展。
+{{% /alert %}}
 
 ## 1. 安装
 
