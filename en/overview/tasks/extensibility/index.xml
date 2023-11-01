@@ -1,0 +1,363 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Custom Extensions</title><link>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/</link><description>Recent content in Custom Extensions on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/overview/tasks/extensibility/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Protocol</title><link>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/protocol/</guid><description>
+&lt;p>Dubbo has implemented a lot of built-in functionalities through protocol extensions and also supports many commonly used protocols. You can see all custom protocols in the &lt;code>org.apache.dubbo.rpc.Protocol&lt;/code> file. For example, in Dubbo 3, we have:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Built-in functionalities implemented by Dubbo through protocol extension&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.cluster.filter.ProtocolFilterWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>qos&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.qos.protocol.QosProtocolWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>registry&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.registry.integration.InterfaceCompatibleRegistryProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service-discovery-registry&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.registry.integration.RegistryProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>listener&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mock&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.support.MockProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>serializationwrapper&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.ProtocolSerializationWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>securitywrapper&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.ProtocolSecurityWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Commonly used protocols supported by Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>injvm&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rest&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.rest.RestProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.grpc.GrpcProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.tri.TripleProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>As you can see, Dubbo has implemented a series of functionalities like filtering, monitoring, service discovery, listeners, mock, serialization, and security through protocol extensions. It also supports &lt;code>dubbo&lt;/code>, &lt;code>injvm&lt;/code>, &lt;code>rest&lt;/code>, &lt;code>grpc&lt;/code>, and &lt;code>tri&lt;/code> protocols for external use.&lt;/p>
+&lt;p>There are two ways to customize a private protocol. The first is to wrap an existing protocol and add some specific business logic. The other is to fully customize a new protocol. The former is simpler and has extensive usage in Dubbo, like &lt;code>ProtocolFilterWrapper&lt;/code>, &lt;code>QosProtocolWrapper&lt;/code>, &lt;code>ProtocolListenerWrapper&lt;/code>, etc. The latter is more complex, but Dubbo has implemented most of the commonly used protocols which are well-tested in production environments.&lt;/p>
+&lt;p>This article will demonstrate how to implement a custom protocol based on an existing protocol.&lt;/p>
+&lt;h2 id="prerequisites">Prerequisites&lt;/h2>
+&lt;p>Two deployment and running methods, choose one&lt;/p>
+&lt;h3 id="based-on-kubernetes">Based on Kubernetes&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>Install &lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubernetes&lt;/a> environment&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-provider/src/main/resources/application.properties">Provider&lt;/a> to enable the address of nacos deployed in Kubernetes&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Custom protocol edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-consumer/src/main/resources/application.properties">Consumer&lt;/a> to enable the address of nacos deployed in Kubernetes&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Custom protocol edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Deploy &lt;code>[Extensibility Protocol Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="using-local-ide">Using Local IDE&lt;/h3>
+&lt;ul>
+&lt;li>Deploy &lt;a href="https://nacos.io/en-us/">Nacos&lt;/a> version 2.2.0&lt;/li>
+&lt;li>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-provider/src/main/resources/application.properties">Provider&lt;/a> to enable the local nacos address
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable local nacos address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Custom protocol edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-consumer/src/main/resources/application.properties">Consumer&lt;/a> to enable the local nacos address
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable local nacos address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Custom protocol edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="task-details">Task Details&lt;/h2>
+&lt;p>Implement a custom protocol &lt;code>edubbo&lt;/code> based on the existing &lt;code>dubbo&lt;/code> protocol.&lt;/p>
+&lt;h2 id="implementation-method">Implementation Method&lt;/h2>
+&lt;p>Wrap the existing &lt;code>dubbo&lt;/code> protocol to implement the &lt;code>edubbo&lt;/code> protocol.&lt;/p>
+&lt;h4 id="code-structure">Code Structure&lt;/h4>
+&lt;h5 id="common">Common&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-protocol
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-common
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-EnhancedProtocol.java &lt;span style="color:#2aa198">(Implement Protocol interface)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="provider">Provider&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-protocol
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolProviderApplication.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolServiceImpl.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Provider configuration file)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.Protocol &lt;span style="color:#2aa198">(Plain text file)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer">Consumer&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-protocol
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolConsumerApplication.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolConsumerTask.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Consumer configuration file)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.Protocol &lt;span style="color:#2aa198">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Plain &lt;span style="color:#2aa198">text file)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="code-details">Code Details&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.protocol.common;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.URL;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Protocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Exporter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.ProtocolServer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.model.FrameworkModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">EnhancedProtocol&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Protocol {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">EnhancedProtocol&lt;/span>(FrameworkModel frameworkModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> DubboProtocol(frameworkModel);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Protocol protocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">getDefaultPort&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.protocol.getDefaultPort();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Exporter&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">export&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> invoker) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// do something&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.protocol.export(invoker);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">refer&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> type, URL url) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// do something&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.protocol.refer(type, url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">destroy&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.protocol.destroy();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>ProtocolServer&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getServers&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> protocol.getServers();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="spi-configuration">SPI Configuration&lt;/h4>
+&lt;h5 id="provider-1">Provider&lt;/h5>
+&lt;p>Add the following configuration to the &lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol&lt;/code> file:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>edubbo&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.protocol.common.EnhancedProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer-1">Consumer&lt;/h5>
+&lt;p>Add the following configuration to the &lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol&lt;/code> file:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>edubbo&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.protocol.common.EnhancedProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="configuration-file">Configuration File&lt;/h4>
+&lt;h5 id="provider-2">Provider&lt;/h5>
+&lt;p>Add the following configuration to the &lt;code>resources/application.properties&lt;/code> file:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Custom protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer-2">Consumer&lt;/h5>
+&lt;p>Add the following configuration to the &lt;code>resources/application.properties&lt;/code> file:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Custom protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="execution-results">Execution Results&lt;/h2>
+&lt;p>Run the task using the &lt;strong>Using Local IDE&lt;/strong> method, and the results are as follows:&lt;/p>
+&lt;h4 id="register-protocol">Register Protocol&lt;/h4>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-protocol-output2.jpg" alt="dubbo-samples-extensibility-protocol-output2.jpg">&lt;/p>
+&lt;h4 id="output-result">Output Result&lt;/h4>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-protocol-output1.png" alt="dubbo-samples-extensibility-protocol-output1.png">&lt;/p>
+&lt;p>In summary, Dubbo provides a powerful and flexible protocol extension mechanism. This tutorial demonstrates how to create a custom protocol &lt;code>edubbo&lt;/code> based on the existing &lt;code>dubbo&lt;/code> protocol, which allows users to add custom logic without changing the underlying architecture.&lt;/p></description></item><item><title>Overview: Registry</title><link>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/registry/</guid><description/></item><item><title>Overview: Router</title><link>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/router/</guid><description>
+&lt;p>By creating custom routers, you can implement specific routing methods based on the characteristics of your business scenario.&lt;/p>
+&lt;h2 id="prerequisites">Prerequisites&lt;/h2>
+&lt;p>Choose one of the two deployment and running methods&lt;/p>
+&lt;h3 id="based-on-kubernetes">Based on Kubernetes&lt;/h3>
+&lt;ul>
+&lt;li>Install &lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubernetes&lt;/a> environment&lt;/li>
+&lt;li>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-router-provider/src/main/resources/application.properties">Provider&lt;/a> to enable the address of nacos deployed in Kubernetes
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># (The configuration remains the same as in the original documentation)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a> to enable the address of nacos deployed in Kubernetes
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># (The configuration remains the same as in the original documentation)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>Deploy &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml">Extensibility Router Task&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="using-local-ide">Using Local IDE&lt;/h3>
+&lt;ul>
+&lt;li>Deploy &lt;a href="https://nacos.io/en-us/">Nacos&lt;/a> version 2.2.0&lt;/li>
+&lt;li>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties">Provider&lt;/a> to enable the local nacos address
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># (The configuration remains the same as in the original documentation)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>Modify the configuration file in &lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a> to enable the local nacos address
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># (The configuration remains the same as in the original documentation)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="task-details">Task Details&lt;/h2>
+&lt;p>The task is to stick to the first Provider that starts providing the service. If that Provider goes offline, choose a new Provider.&lt;/p>
+&lt;h2 id="implementation-method">Implementation Method&lt;/h2>
+&lt;p>Create a custom router in the Consumer. In this router, save the Provider that was used for the first invocation. For subsequent invocations, if the list of Providers includes the one used during the first invocation, continue to use it; otherwise, choose a new Provider.&lt;/p>
+&lt;h4 id="code-structure">Code Structure&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-router
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-router
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-StickFirstStateRouter.java &lt;span style="color:#2aa198">(Implement StateRouter interface)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-StickFirstStateRouterFactory.java &lt;span style="color:#2aa198">(Implement StateRouterFactory interface)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Consumer configuration file)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory &lt;span style="color:#2aa198">(Plain text file)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="code-details">Code Details&lt;/h4>
+&lt;ul>
+&lt;li>StickFirstStateRouter&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.router.consumer.router;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.URL;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.config.configcenter.ConfigChangeType;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.config.configcenter.ConfigChangedEvent;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.config.configcenter.ConfigurationListener;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.logger.LoggerFactory;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.utils.CollectionUtils;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.utils.Holder;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invocation;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.AbstractStateRouter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.BitList;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StickFirstStateRouter&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> AbstractStateRouter&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ConfigurationListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">StickFirstStateRouter&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;STICK_FIRST_ROUTER&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ErrorTypeAwareLogger logger &lt;span style="color:#719e07">=&lt;/span> LoggerFactory.getErrorTypeAwareLogger(StickFirstStateRouter.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">volatile&lt;/span> BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> firstInvokers;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">doRoute&lt;/span>(BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation, &lt;span style="color:#dc322f">boolean&lt;/span> needToPrintMessage, Holder&lt;span style="color:#719e07">&amp;lt;&lt;/span>RouterSnapshotNode&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> routerSnapshotNodeHolder, Holder&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> messageHolder) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (CollectionUtils.isEmpty(invokers)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (needToPrintMessage) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> messageHolder.set(&lt;span style="color:#2aa198">&amp;#34;Directly Return. Reason: Invokers from previous router is empty.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invokers;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> copy &lt;span style="color:#719e07">=&lt;/span> invokers.clone();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (CollectionUtils.isEmpty(copy)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> BitList&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>(BitList.emptyList());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers.add(copy.get(0));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> copy.and(invokers);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span>(CollectionUtils.isEmpty(&lt;span style="color:#719e07">this&lt;/span>.firstInvokers)){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers.add(copy.get(0));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">process&lt;/span>(ConfigChangedEvent event) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (logger.isDebugEnabled()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.debug(&lt;span style="color:#2aa198">&amp;#34;Notification of tag rule, change type is: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> event.getChangeType() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, raw rule is:\n &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event.getContent());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Reset&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (event.getChangeType().equals(ConfigChangeType.DELETED)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">stop&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.stop();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>StickFirstStateRouterFactory&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.router.consumer.router;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.URL;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.StateRouter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StickFirstStateRouterFactory&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> StateRouterFactory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> StateRouter&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getRouter&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> interfaceClass, URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StickFirstStateRouter&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="spi-configuration">SPI Configuration&lt;/h4>
+&lt;p>Add the following configuration to the &lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory&lt;/code> file:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>stickfirst&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.router.consumer.router.StickFirstStateRouterFactory&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="configuration-file">Configuration File&lt;/h4>
+&lt;p>Add the following configuration to the &lt;code>resources/application.properties&lt;/code> file:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Configure custom router&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.router&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">stickfirst&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="execution-results">Execution Results&lt;/h2>
+&lt;p>Run the task using the &lt;strong>Using Local IDE&lt;/strong> method, and the results are as follows:&lt;/p>
+&lt;p>&lt;img src="https://cn.dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-router-output.png" alt="dubbo-samples-extensibility-router-output.png">&lt;/p>
+&lt;p>To summarize, Dubbo&amp;rsquo;s extensibility allows you to create custom routers, providing a way to customize the routing logic based on your business requirements. This tutorial demonstrates how to create a &amp;ldquo;Stick to the First Provider&amp;rdquo; routing strategy, which can be useful for optimizing network traffic and reducing latency.&lt;/p></description></item><item><title>Overview: Custom extension</title><link>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/tasks/extensibility/filter/</guid><description/></item></channel></rss>
