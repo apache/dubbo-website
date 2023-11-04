@@ -179,7 +179,7 @@ public class UserController {
 根据以上 Controller 定义，我们可以分别访问以下地址进行验证：
 
 - OpenFeign 方式：`http://localhost:8099/dubbo/rest/test1`、
-- RestTemplage 方式：`http://localhost:8099/dubbo/rest/test1`
+- RestTemplate 方式：`http://localhost:8099/dubbo/rest/test1`
 
 ### 为 Dubbo Server 发布更多的服务
 我们可以利用 Dubbo 的多协议发布机制，为一些服务配置多协议发布。接下来，我们就为上面提到的 Dubbo server 服务增加 dubbo tcp 协议发布，从而达到以下部署效果，让这个 Dubbo 应用同时服务 Dubbo 微服务体系和 Spring Cloud 微服务体系。
