@@ -18,7 +18,7 @@ description: 基于 Triple 实现 Web 移动端后端全面打通
 
 ![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img.png)
 
-在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说API sinks或者神域等HTTP网关。
+在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说Apisix或者ShenYu等HTTP网关。
 
 ![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_1.png)
 
