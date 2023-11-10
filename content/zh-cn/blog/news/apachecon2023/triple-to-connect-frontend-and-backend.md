@@ -18,7 +18,7 @@ description: 基于 Triple 实现 Web 移动端后端全面打通
 
 ![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img.png)
 
-在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说API sinks或者神域等HTTP网关。
+在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说Apisix或者ShenYu等HTTP网关。
 
 ![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_1.png)
 
@@ -48,7 +48,7 @@ description: 基于 Triple 实现 Web 移动端后端全面打通
 
 基于此，我们想推出一个全新的Triple协议。为了解决上述的所有问题，我们参考了gRPC、gRPC Web、通用HTTP等多种协议，做到浏览器访问，支持Streaming，还支持同时运行在 HTTP/1、HTTP/2 协议上。因为目前HTTP/3还没有大规模推广，未来也会支持HTTP/3。
 
-最终的设计实现是完全基于HTTP的，且对人类、开发调试友好。我们可以通过简单的浏览器访问或者curl访问，尤其是对unary RPC。此外，我们和gRPC是完全互通的，用HTTP的业务不用担心兼容性的问题，也不用担心签协议的问题。为了稳定性，我们只会采用业界流行的网络库，比如Java的native、Go的基础的net包。
+最终的设计实现是完全基于HTTP的，且对人类、开发调试友好。我们可以通过简单的浏览器访问或者curl访问，尤其是对unary RPC。此外，我们和gRPC是完全互通的，用HTTP的业务不用担心兼容性的问题，也不用担心签协议的问题。为了稳定性，我们只会采用业界流行的网络库，比如Java的netty、Go的基础的net包。
 
 ![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_4.png)
 
