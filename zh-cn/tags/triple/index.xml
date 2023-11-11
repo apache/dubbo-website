@@ -8,7 +8,7 @@
 &lt;/ul>
 &lt;h2 id="一rpc-协议开发微服务">一、RPC 协议开发微服务&lt;/h2>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img.png" alt="dubbo-triple-协议">&lt;/p>
-&lt;p>在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说API sinks或者神域等HTTP网关。&lt;/p>
+&lt;p>在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说Apisix或者ShenYu等HTTP网关。&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_1.png" alt="dubbo-triple-协议">&lt;/p>
 &lt;p>上图展示的是我们的流程，但是存在一些问题。&lt;/p>
 &lt;p>如果我们的服务是非常轻的，我们只需要一个转发层，我们是不是很麻烦。无论是配网关还是起一个webserver去转发，肯定都很麻烦。&lt;/p>
@@ -23,7 +23,7 @@
 &lt;p>但还有个问题，虽然我们兼容了gRPC，但gRPC是基于TPC的，所以如果前端或者其他第三方系统只有HTTP，它还是接受不了我们的系统。&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_3.png" alt="dubbo-triple-协议">&lt;/p>
 &lt;p>基于此，我们想推出一个全新的Triple协议。为了解决上述的所有问题，我们参考了gRPC、gRPC Web、通用HTTP等多种协议，做到浏览器访问，支持Streaming，还支持同时运行在 HTTP/1、HTTP/2 协议上。因为目前HTTP/3还没有大规模推广，未来也会支持HTTP/3。&lt;/p>
-&lt;p>最终的设计实现是完全基于HTTP的，且对人类、开发调试友好。我们可以通过简单的浏览器访问或者curl访问，尤其是对unary RPC。此外，我们和gRPC是完全互通的，用HTTP的业务不用担心兼容性的问题，也不用担心签协议的问题。为了稳定性，我们只会采用业界流行的网络库，比如Java的native、Go的基础的net包。&lt;/p>
+&lt;p>最终的设计实现是完全基于HTTP的，且对人类、开发调试友好。我们可以通过简单的浏览器访问或者curl访问，尤其是对unary RPC。此外，我们和gRPC是完全互通的，用HTTP的业务不用担心兼容性的问题，也不用担心签协议的问题。为了稳定性，我们只会采用业界流行的网络库，比如Java的netty、Go的基础的net包。&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_4.png" alt="dubbo-triple-协议">&lt;/p>
 &lt;p>虽然Triple协议和gRPC协议都基于HTTP，但gRPC是基于HTTP/2的，而Triple是基于HTTP/1和HTTP/2的。&lt;/p>
 &lt;p>我们在进入gRPC的同时，我们为了易用性扩展了一些功能。比如请求里我们支持application Json，curl访问，此外上一版的协议，为了支持传统定义接口的方式，我们有一个二次序列化的过程。我们想在这里通过一个特殊的tag来决定我们的body的结构，解决二次序列化的问题。同时这个东西是可以扩展的，理论上HTTP的所有future我们在Triple协议上都可以实现，也可以拓展。&lt;/p>
