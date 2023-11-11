@@ -2,7 +2,6 @@
 aliases:
     - /zh/docs3-v2/java-sdk/
     - /zh-cn/docs3-v2/java-sdk/
-always_unfold: true
 content:
     - 快速开始:
         - description: 快速体验 Dubbo Java 微服务开发
