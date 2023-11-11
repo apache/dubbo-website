@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/rust-sdk/quick-start/
-    - /zh-cn/docs3-v2/rust-sdk/quick-start/
+    - /zh/overview/quickstart/nodejs/
+    - /zh-cn/overview/quickstart/nodejs/
 description: 使用 Node.js 开发后端微服务
 linkTitle: 快速开始
 title: 快速开始

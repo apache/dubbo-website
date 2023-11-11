@@ -2,6 +2,8 @@
 aliases:
     - /zh/docs3-v2/rust-sdk/quick-start/
     - /zh-cn/docs3-v2/rust-sdk/quick-start/
+    - /zh/overview/quickstart/rust/
+    - /zh-cn/overview/quickstart/rust/
 description: 使用 Rust 快速开发 Dubbo 服务。
 linkTitle: 快速开始
 title: 快速开始

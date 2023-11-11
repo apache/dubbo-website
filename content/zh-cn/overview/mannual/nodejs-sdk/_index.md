@@ -1,6 +1,6 @@
 ---
 description: Node.js SDK 使用手册
-linkTitle: Node.js SDK
+linkTitle: Node.js
 title: Node.js SDK 手册
 type: docs
 weight: 3

@@ -3,6 +3,7 @@ aliases:
     - /zh/overview/mannual/
     - /zh/docs3-v2/
     - /zh-cn/docs3-v2/
+always_unfold: true
 description: Dubbo SDK 用户手册
 feature:
     description: |

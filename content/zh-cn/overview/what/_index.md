@@ -3,7 +3,7 @@ aliases:
     - /zh/overview/what/
 description: ""
 hide_summary: true
-linkTitle: 了解 Dubbo
+linkTitle: 介绍
 no_list: true
 title: Dubbo 介绍
 type: docs
