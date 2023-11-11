@@ -1,0 +1,636 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Registration Center Description</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/</link><description>Recent content in Registration Center Description on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Overview</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/overview/</guid><description>
+&lt;p>The registration center is the core component of Dubbo service governance. Dubbo relies on the coordination of the registration center to realize service (address) discovery. Automatic service discovery is the basis for microservices to achieve dynamic scaling, load balancing, and traffic management. Dubbo&amp;rsquo;s service discovery mechanism has experienced interface-level service discovery in the Dubbo2 era and application-level service discovery in the Dubbo3 era. For details, see [Service Discovery Mechanism](/en/docs3-v2/java-sdk/concepts-and-architecture/service -discovery/) analysis to understand the specific evolution process.&lt;/p>
+&lt;h2 id="basic-usage">Basic usage&lt;/h2>
+&lt;p>The Dubbo registry component must be specified when developing an application. The configuration is very simple, just specify the cluster address of the registry:&lt;/p>
+&lt;p>Taking Spring Boot development as an example, add a registry configuration item in application.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: {protocol}://{cluster-address}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Among them, protocol is the selected configuration center type, and cluster-address is the cluster address for accessing the registration center, such as&lt;/p>
+&lt;p>&lt;code>address: nacos://localshot:8848&lt;/code>&lt;/p>
+&lt;p>If you need a cluster format address, you can use the backup parameter&lt;/p>
+&lt;p>&lt;code>address: nacos://localshot:8848?backup=localshot:8846,localshot:8847&lt;/code>&lt;/p>
+&lt;blockquote>
+&lt;p>The application must specify the Dubbo registration center, even if the registration center is not enabled (you can set the address to be empty address=&amp;lsquo;N/A&amp;rsquo; ).&lt;/p>
+&lt;/blockquote>
+&lt;p>In addition to the rest, depending on each configuration center, you can refer to the &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/config/properties/#registry">registry configuration reference manual&lt;/a> or expand through the parameters parameter.&lt;/p>
+&lt;h2 id="configuration-center-and-metadata-center">Configuration Center and Metadata Center&lt;/h2>
+&lt;p>The configuration center and metadata center are the basic components to realize Dubbo&amp;rsquo;s high-level service governance capabilities. Compared with the registration center, the configuration of these two components is usually optional.&lt;/p>
+&lt;p>In order to be compatible with configurations of 2.6 and older versions, Dubbo will use it as both a metadata center and a configuration center for some registry types (such as Zookeeper, Nacos, etc.).&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Default behavior after frame resolution&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config-center
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metadata-report
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The default behavior can be adjusted or controlled by the following two parameters&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">use-as-config-center&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">use-as-metadata-report&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="registration-center-ecology">Registration Center Ecology&lt;/h2>
+&lt;p>The mainstream registry implementations currently supported by the Dubbo backbone include&lt;/p>
+&lt;ul>
+&lt;li>Zookeeper&lt;/li>
+&lt;li>Nacos&lt;/li>
+&lt;li>Redis&lt;/li>
+&lt;/ul>
+&lt;p>It also supports service discovery of Kubernetes and Mesh systems.&lt;/p>
+&lt;p>In addition, &lt;a href="https://github.com/apache/dubbo-spi-extensions">Dubbo extension ecology&lt;/a> also provides registry extension implementations such as Consul, Eureka, and Etcd. Also welcome to contribute more registry implementations to the Dubbo ecosystem through &lt;a href="../../spi/">registry spi extension&lt;/a>.&lt;/p>
+&lt;p>Dubbo also supports [specifying multiple registries] (../multiple-registry/) in an application, and grouping services according to registries, which makes service group management or service migration easier.&lt;/p></description></item><item><title>Docs3-V2: Zookeeper</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/zookeeper/</guid><description>
+&lt;h2 id="1-precondition">1 precondition&lt;/h2>
+&lt;ul>
+&lt;li>Understand &lt;a href="../../../quick-start/spring-boot/">Dubbo basic development steps&lt;/a>&lt;/li>
+&lt;li>Install and start &lt;a href="https://zookeeper.apache.org/">Zookeeper&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-instructions-for-use">2 Instructions for use&lt;/h2>
+&lt;p>Check out &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper">full sample code&lt;/a> here&lt;/p>
+&lt;h3 id="21-add-maven-dependency">2.1 Add Maven dependency&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo.version&amp;gt;&lt;/span>3.0.8&lt;span style="color:#268bd2">&amp;lt;/dubbo.version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- This dependency helps to introduce Curator and Zookeeper dependencies that are necessary for Dubbo to work with zookeeper as transitive dependencies --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-dependencies-zookeeper&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>dubbo-dependencies-zookeeper&lt;/code> will automatically add Zookeeper-related client dependencies to the application, reducing the cost of using Zookeeper for users. If there is a version compatibility problem during use, users can also add it by themselves instead of using &lt;code>dubbo-dependencies-zookeeper&lt;/code> Curator, Zookeeper Client and other dependencies.&lt;/p>
+&lt;p>Since Dubbo uses Curator as a programming client interacting with Zookeeper Server, special attention should be paid to the compatibility between Zookeeper Server and Dubbo version dependencies&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Zookeeper Server Version&lt;/th>
+&lt;th>Dubbo Version&lt;/th>
+&lt;th>Dubbo Zookeeper Dependency Package&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>3.4.x and below&lt;/td>
+&lt;td>3.0.x and above&lt;/td>
+&lt;td>dubbo-dependencies-zookeeper&lt;/td>
+&lt;td>transitive dependencies Curator 4.x, Zookeeper 3.4.x&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>3.5.x and above&lt;/td>
+&lt;td>3.0.x and above&lt;/td>
+&lt;td>dubbo-dependencies-zookeeper-curator5&lt;/td>
+&lt;td>transitive dependencies Curator 5.x, Zookeeper 3.7.x&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>3.4.x and above&lt;/td>
+&lt;td>2.7.x and below&lt;/td>
+&lt;td>dubbo-dependencies-zookeeper&lt;/td>
+&lt;td>transitive dependencies Curator 4.x, Zookeeper 3.4.x&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>3.5.x and above&lt;/td>
+&lt;td>2.7.x and below&lt;/td>
+&lt;td>None&lt;/td>
+&lt;td>Need to add Curator, Zookeeper and other related client dependencies&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="22-configure-and-enable-zookeeper">2.2 Configure and enable Zookeeper&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">zookeeper://localhost:2181&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://localhost:2181&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>address&lt;/code> is the only attribute that must be specified to enable the zookeeper registration center, and in a production environment, &lt;code>address&lt;/code> is usually specified as the cluster address, such as&lt;/p>
+&lt;p>&lt;code>address=zookeeper://10.20.153.10:2181?backup=10.20.153.11:2181,10.20.153.12:2181&lt;/code>&lt;/p>
+&lt;p>It is also possible to configure protocol and address separately, such as&lt;/p>
+&lt;p>&lt;code>&amp;lt;dubbo:registry protocol=&amp;quot;zookeeper&amp;quot; address=&amp;quot;10.20.153.10:2181,10.20.153.11:2181,10.20.153.12:2181&amp;quot; /&amp;gt;&lt;/code>&lt;/p>
+&lt;h2 id="3-advanced-configuration">3 Advanced configuration&lt;/h2>
+&lt;h3 id="31-authentication-and-authorization">3.1 Authentication and Authorization&lt;/h3>
+&lt;p>If Zookeeper enables authentication, Dubbo supports passing in the identity by specifying username and password.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: hello
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: &lt;span style="color:#2aa198">1234&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can also directly expand the parameters on the address &lt;code>address=zookeeper://hello:1234@localhost:2181&lt;/code>&lt;/p>
+&lt;h3 id="32-group-isolation">3.2 Group isolation&lt;/h3>
+&lt;p>By specifying the &lt;code>group&lt;/code> attribute, the logical isolation of microservice addresses can be achieved within the same Zookeeper cluster. For example, multiple sets of development environments can be isolated in one cluster, and isolation can be achieved at the address discovery level.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: daily1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-other-extended-configurations">3.3 Other extended configurations&lt;/h3>
+&lt;p>Configure connection and session expiration time&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span> * &lt;span style="color:#2aa198">1000&lt;/span>* &lt;span style="color:#586e75"># Connection timeout, default 30s&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">session&lt;/span>: &lt;span style="color:#2aa198">60&lt;/span> * &lt;span style="color:#2aa198">1000&lt;/span>* &lt;span style="color:#586e75"># Session timeout, default 60s&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The Zookeeper registry also supports some other control parameters, for details, see &lt;a href="../../config/properties#registry">Registry configuration item manual&lt;/a>&lt;/p>
+&lt;h2 id="4-how-it-works">4 How it works&lt;/h2>
+&lt;h3 id="41-dubbo2-node-structure">4.1 Dubbo2 node structure&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/zookeeper.jpg" alt="/user-guide/images/zookeeper.jpg">&lt;/p>
+&lt;p>process:&lt;/p>
+&lt;ul>
+&lt;li>When the service provider starts: write its own URL address to the &lt;code>/dubbo/com.foo.BarService/providers&lt;/code> directory.&lt;/li>
+&lt;li>When the service consumer starts: subscribe to the provider URL address under the &lt;code>/dubbo/com.foo.BarService/providers&lt;/code> directory. And write your own URL address to &lt;code>/dubbo/com.foo.BarService/consumers&lt;/code> directory&lt;/li>
+&lt;li>When monitoring center starts: subscribe to all provider and consumer URL addresses under &lt;code>/dubbo/com.foo.BarService&lt;/code> directory.&lt;/li>
+&lt;/ul>
+&lt;p>The following functions are supported:&lt;/p>
+&lt;ul>
+&lt;li>When the provider has abnormal downtime such as power failure, the registration center can automatically delete the provider information&lt;/li>
+&lt;li>When the registration center restarts, the registration data and subscription requests can be automatically restored&lt;/li>
+&lt;li>When the session expires, the registration data and subscription request can be automatically restored&lt;/li>
+&lt;li>When &lt;code>&amp;lt;dubbo:registry check=&amp;quot;false&amp;quot; /&amp;gt;&lt;/code> is set, the failed registration and subscription requests will be recorded, and the background will retry periodically&lt;/li>
+&lt;li>You can set zookeeper login information through &lt;code>&amp;lt;dubbo:registry username=&amp;quot;admin&amp;quot; password=&amp;quot;1234&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
+&lt;li>The root node of zookeeper can be set through &lt;code>&amp;lt;dubbo:registry group=&amp;quot;dubbo&amp;quot; /&amp;gt;&lt;/code>, if not configured, the default root node will be used.&lt;/li>
+&lt;li>Support &lt;code>*&lt;/code> wildcard &lt;code>&amp;lt;dubbo:reference group=&amp;quot;*&amp;quot; version=&amp;quot;*&amp;quot; /&amp;gt;&lt;/code>, you can subscribe to all groups of services and providers of all versions&lt;/li>
+&lt;/ul>
+&lt;h3 id="42-dubbo3-node-structure">4.2 Dubbo3 node structure&lt;/h3></description></item><item><title>Docs3-V2: Nacos</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/nacos/</guid><description>
+&lt;h2 id="1-precondition">1 precondition&lt;/h2>
+&lt;ul>
+&lt;li>Understand &lt;a href="../../../quick-start/spring-boot/">Dubbo basic development steps&lt;/a>&lt;/li>
+&lt;li>Install and start &lt;a href="https://nacos.io/zh-cn/docs/quick-start.html">Nacos service&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>When Dubbo uses &lt;code>3.0.0&lt;/code> and above, it needs to use Nacos &lt;code>2.0.0&lt;/code> and above.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="2-instructions-for-use">2 Instructions for use&lt;/h2>
+&lt;p>Check here &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-nacos/dubbo-samples-nacos-registry">full sample code&lt;/a>&lt;/p>
+&lt;h3 id="21-add-dependencies">2.1 Add dependencies&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.0.9&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.nacos&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>nacos-client&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.1.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Introduce Dubbo Nacos extension, or you can add Nacos dependency directly as shown above--&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!--
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;artifactId&amp;gt;dubbo-registry-nacos&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;version&amp;gt;3.0.9&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Add Dubbo and Nacos dependencies&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo &lt;code>3.0.0&lt;/code> and above require nacos-client &lt;code>2.0.0&lt;/code> and above&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="22-configure-and-enable-nacos">2.2 Configure and enable Nacos&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;nacos://localhost:8848&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>To enable the app, see what it looks like after registration or how it works, see [How it works](#4-How it works).&lt;/p>
+&lt;h2 id="3-advanced-configuration">3 Advanced configuration&lt;/h2>
+&lt;h3 id="31-authentication">3.1 Authentication&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848?username=nacos&amp;amp;password=nacos
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">nacos://nacos:nacos@localhost:8848&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-custom-namespace">3.2 Custom namespace&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848?namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.namespace&lt;/span>: 5cbb70a5-xxx-xxx-xxx-d43479ae0932
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-custom-grouping">3.3 Custom grouping&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>If not configured, the group is specified by Nacos by default. Group and namespace represent different isolation levels in Nacos. Generally speaking, namespace is used to isolate different users or environments, and group is used to further group data in the same environment.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="34-register-interface-level-consumers">3.4 Register interface-level consumers&lt;/h3>
+&lt;p>After Dubbo3.0.0, the parameter of whether to register consumers is added. If you need to register consumers to the nacos registration center, you need to set the parameter (register-consumer-url) to true, and the default is false.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848?register-consumer-url=true
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.register-consumer-url&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="35-more-configurations">3.5 More configurations&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Parameter name&lt;/th>
+&lt;th>Chinese description&lt;/th>
+&lt;th>Default value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>username&lt;/td>
+&lt;td>username to connect to Nacos Server&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>paasword&lt;/td>
+&lt;td>password to connect to Nacos Server&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>backup&lt;/td>
+&lt;td>backup address&lt;/td>
+&lt;td>null&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namespace&lt;/td>
+&lt;td>Namespace ID&lt;/td>
+&lt;td>public&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>group&lt;/td>
+&lt;td>group name&lt;/td>
+&lt;td>DEFAULT_GROUP&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>register-consumer-url&lt;/td>
+&lt;td>Whether to register the consumer side&lt;/td>
+&lt;td>false&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>com.alibaba.nacos.naming.log.filename&lt;/td>
+&lt;td>initialization log file name&lt;/td>
+&lt;td>naming.log&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>endpoint&lt;/td>
+&lt;td>Connect to the connection point specified by Nacos Server, please refer to &lt;a href="https://nacos.io/zh-cn/blog/address-server.html">documentation&lt;/a>&lt;/td>
+&lt;td>empty&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>endpointPort&lt;/td>
+&lt;td>Connect to the connection point port specified by Nacos Server, you can refer to &lt;a href="https://nacos.io/zh-cn/blog/address-server.html">documentation&lt;/a>&lt;/td>
+&lt;td>empty&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>endpointQueryParams&lt;/td>
+&lt;td>endpoint query parameter query&lt;/td>
+&lt;td>null&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>isUseCloudNamespaceParsing&lt;/td>
+&lt;td>whether to parse namespace parameters in the cloud environment&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>isUseEndpointParsingRule&lt;/td>
+&lt;td>whether to enable endpoint parameter rule parsing&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingLoadCacheAtStart&lt;/td>
+&lt;td>whether to read the local cache first at startup&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingCacheRegistryDir&lt;/td>
+&lt;td>Specify the cache subdirectory, the location is &amp;hellip;/nacos/{SUB_DIR}/naming&lt;/td>
+&lt;td>empty&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingClientBeatThreadCount&lt;/td>
+&lt;td>client heartbeat thread pool size&lt;/td>
+&lt;td>half of the number of CPUs of the machine&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingPollingThreadCount&lt;/td>
+&lt;td>Client timing polling thread pool size for data update&lt;/td>
+&lt;td>half of the CPU number of the machine&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingRequestDomainMaxRetryCount&lt;/td>
+&lt;td>Number of retries requested by client to Nacos Server via HTTP&lt;/td>
+&lt;td>3&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingPushEmptyProtection&lt;/td>
+&lt;td>When the service does not have a valid (healthy) instance, whether to enable the protection, after enabling it, the old service instance will be used&lt;/td>
+&lt;td>false&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>push.receiver.udp.port&lt;/td>
+&lt;td>port of client UDP&lt;/td>
+&lt;td>null&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>After the nacos-server@&lt;code>1.0.0&lt;/code> version, the client is supported to control some behaviors of the instance by reporting some instances containing specific metadata to the server.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Parameter name&lt;/th>
+&lt;th>Chinese description&lt;/th>
+&lt;th>Default value&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>preserved.heart.beat.timeout&lt;/td>
+&lt;td>The time (in milliseconds) from healthy to unhealthy after the instance does not send a heartbeat&lt;/td>
+&lt;td>15000&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.ip.delete.timeout&lt;/td>
+&lt;td>The instance is deleted by the server after the instance does not send a heartbeat (milliseconds)&lt;/td>
+&lt;td>30000&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.heart.beat.interval&lt;/td>
+&lt;td>Interval time for the instance to report the heartbeat on the client (milliseconds)&lt;/td>
+&lt;td>5000&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.instance.id.generator&lt;/td>
+&lt;td>The id generation strategy of this instance, when the value is &lt;code>snowflake&lt;/code>, it will increase from 0&lt;/td>
+&lt;td>simple&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.register.source&lt;/td>
+&lt;td>Registration instance registration service framework type (such as Dubbo, Spring Cloud, etc.)&lt;/td>
+&lt;td>empty&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>These parameters can be configured to Nacos through parameter expansion in a manner similar to &lt;code>namespace&lt;/code>, such as&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.registry.parameters.preserved.heart.beat.timeout&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">5000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-how-it-works">4 How it works&lt;/h2>
+&lt;p>The following is just to show the working principle of Nacos as the Dubbo registration center. It is recommended to use &lt;a href="https://github.com/apache/dubbo-admin">Dubbo Admin&lt;/a> for Dubbo service operation and maintenance&lt;/p>
+&lt;h3 id="41-dubbo2-registration-data">4.1 Dubbo2 registration data&lt;/h3>
+&lt;p>Then, restart your Dubbo application, and Dubbo&amp;rsquo;s service provision and consumption information can be displayed in the Nacos console:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-1.png" alt="dubbo-registry-nacos-1.png">&lt;/p>
+&lt;p>As shown in the figure, the service name prefixed with &lt;code>providers:&lt;/code> is the meta information of the service provider, and &lt;code>consumers:&lt;/code> represents the meta information of the service consumer. Click &amp;ldquo;&lt;strong>Details&lt;/strong>&amp;rdquo; to view the service status details:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-2.png" alt="image-dubbo-registry-nacos-2.png">&lt;/p>
+&lt;h3 id="42-dubbo3-registration-data">4.2 Dubbo3 registration data&lt;/h3>
+&lt;p>The &amp;ldquo;service name&amp;rdquo; for application-level service discovery is the application name&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo3 adopts the dual registration mode of &amp;ldquo;application-level service discovery + interface-level service discovery&amp;rdquo; by default, so you will find that application-level services (application names) and interface-level services (interface names) appear in the Nacos console at the same time, you can configure &lt;code>dubbo .registry.register-mode=instance/interface/all&lt;/code> to change the registration behavior.&lt;/p>
+&lt;/blockquote></description></item><item><title>Docs3-V2: Multicast</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/multicast/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/multicast/</guid><description>
+&lt;p>The Multicast registration center does not need to start any central nodes, as long as the broadcast address is the same, they can discover each other.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/multicast.jpg" alt="/user-guide/images/multicast.jpg">&lt;/p>
+&lt;h2 id="1-instructions-for-use">1 Instructions for use&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;multicast://224.5.6.7:1234&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;multicast&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;224.5.6.7:1234&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="notice">Notice:&lt;/h4>
+&lt;p>In order to reduce the amount of broadcasting, Dubbo uses unicast to send provider address information to consumers by default.
+If multiple consumer processes are started on a machine at the same time, the consumer must declare &lt;code>unicast=false&lt;/code>, otherwise only one consumer can receive the message; when the server and the consumer run on the same machine, the consumer It is also necessary to declare &lt;code>unicast=false&lt;/code>, otherwise the consumer cannot receive the message, resulting in No provider available for the service exception:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-consumer&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;unicast&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:application&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;unicast&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:consumer&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-how-it-works">2 How it works&lt;/h2>
+&lt;h3 id="21-basic-process">2.1 Basic process&lt;/h3>
+&lt;ol start="0">
+&lt;li>The provider broadcasts its own address when it starts&lt;/li>
+&lt;li>Broadcast subscription request when consumer starts&lt;/li>
+&lt;li>When the provider receives the subscription request, it will unicast its own address to the subscribers. If &lt;code>unicast=false&lt;/code> is set, it will broadcast to the subscribers&lt;/li>
+&lt;li>When the consumer receives the provider&amp;rsquo;s address, it connects to the address to make an RPC call.&lt;/li>
+&lt;/ol>
+&lt;h3 id="22-restrictions-on-use">2.2 Restrictions on Use&lt;/h3>
+&lt;p>Multicast is limited by the network structure and is only suitable for small-scale applications or development stages. Multicast address segment: 224.0.0.0 - 239.255.255.255&lt;/p></description></item><item><title>Docs3-V2: Redis</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/redis/</guid><description>
+&lt;h2 id="precondition">precondition&lt;/h2>
+&lt;ul>
+&lt;li>Understand &lt;a href="../../../quick-start/spring-boot/">Dubbo basic development steps&lt;/a>&lt;/li>
+&lt;li>Install and start the &lt;a href="http://redis.io">Redis&lt;/a> service&lt;/li>
+&lt;/ul>
+&lt;h2 id="instructions-for-use">Instructions for use&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;redis&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;redis&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="options">options&lt;/h2>
+&lt;ul>
+&lt;li>You can set the prefix of the key in redis through &lt;code>&amp;lt;dubbo:registry group=&amp;quot;dubbo&amp;quot; /&amp;gt;&lt;/code>, the default is &lt;code>dubbo&lt;/code>.&lt;/li>
+&lt;li>The redis cluster strategy can be set via &lt;code>&amp;lt;dubbo:registry cluster=&amp;quot;replicate&amp;quot; /&amp;gt;&lt;/code>, the default is &lt;code>failover&lt;/code>:
+&lt;ul>
+&lt;li>&lt;code>failover&lt;/code>: Only write and read any one, and retry another one when it fails, the server needs to configure data synchronization by itself&lt;/li>
+&lt;li>&lt;code>replicate&lt;/code>: Write to all servers at the same time on the client side, only read a single server, the server side does not need to be synchronized, the registration center cluster increases, and the performance pressure will also be greater&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="working-principle">working principle&lt;/h2>
+&lt;p>A registry implemented based on Redis [^1].&lt;/p>
+&lt;p>Redis expired data detects dirty data through heartbeat, the server time must be synchronized, and there is a certain pressure on the server, otherwise the expiration detection will be inaccurate&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-redis-registry.jpg" alt="/user-guide/images/dubbo-redis-registry.jpg">&lt;/p>
+&lt;p>Use Redis&amp;rsquo;s Key/Map structure to store data structures:&lt;/p>
+&lt;ul>
+&lt;li>The main key is the service name and type&lt;/li>
+&lt;li>The Key in the Map is the URL address&lt;/li>
+&lt;li>The Value in the Map is the expiration time, which is used to judge dirty data, and the dirty data will be deleted by the monitoring center [^3]&lt;/li>
+&lt;/ul>
+&lt;p>Use Redis&amp;rsquo;s Publish/Subscribe events to notify data changes:&lt;/p>
+&lt;ul>
+&lt;li>Differentiate the event type by the value of the event: &lt;code>register&lt;/code>, &lt;code>unregister&lt;/code>, &lt;code>subscribe&lt;/code>, &lt;code>unsubscribe&lt;/code>&lt;/li>
+&lt;li>Ordinary consumers directly subscribe to the Key of the specified service provider, and will only receive &lt;code>register&lt;/code>, &lt;code>unregister&lt;/code> events of the specified service&lt;/li>
+&lt;li>The monitoring center subscribes to &lt;code>/dubbo/*&lt;/code> through the &lt;code>psubscribe&lt;/code> function, and will receive all change events of all services&lt;/li>
+&lt;/ul>
+&lt;p>Call process:&lt;/p>
+&lt;ol start="0">
+&lt;li>When the service provider starts, add the address of the current provider to &lt;code>Key:/dubbo/com.foo.BarService/providers&lt;/code>&lt;/li>
+&lt;li>And send &lt;code>register&lt;/code> event to &lt;code>Channel:/dubbo/com.foo.BarService/providers&lt;/code>&lt;/li>
+&lt;li>When the service consumer starts, subscribe to &lt;code>register&lt;/code> and &lt;code>unregister&lt;/code> events from &lt;code>Channel:/dubbo/com.foo.BarService/providers&lt;/code>&lt;/li>
+&lt;li>Add the address of the current consumer to &lt;code>Key:/dubbo/com.foo.BarService/consumers&lt;/code>&lt;/li>
+&lt;li>After receiving the &lt;code>register&lt;/code> and &lt;code>unregister&lt;/code> events, the service consumer obtains the provider address list from &lt;code>Key:/dubbo/com.foo.BarService/providers&lt;/code>&lt;/li>
+&lt;li>When the service monitoring center starts, subscribe to &lt;code>register&lt;/code> and &lt;code>unregister&lt;/code>, and &lt;code>subscribe&lt;/code> and &lt;code>unsubscribe&lt;/code> events from &lt;code>Channel:/dubbo/*&lt;/code>&lt;/li>
+&lt;li>After receiving the &lt;code>register&lt;/code> and &lt;code>unregister&lt;/code> events, the service monitoring center obtains the provider address list from &lt;code>Key:/dubbo/com.foo.BarService/providers&lt;/code>&lt;/li>
+&lt;li>After receiving the &lt;code>subscribe&lt;/code> and &lt;code>unsubscribe&lt;/code> events, the service monitoring center obtains the consumer address list from &lt;code>Key:/dubbo/com.foo.BarService/consumers&lt;/code>&lt;/li>
+&lt;/ol></description></item><item><title>Docs3-V2: Multiple Registries</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/multiple-registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/multiple-registry/</guid><description>
+&lt;h2 id="1-associated-service-and-multiple-registration-centers">1 Associated service and multiple registration centers&lt;/h2>
+&lt;h3 id="11-global-default-registration-center">1.1 Global Default Registration Center&lt;/h3>
+&lt;p>The Dubbo registry and services are configured independently. Usually, developers do not need to set the relationship between services and registry components. The Dubbo framework will automatically perform the following actions:&lt;/p>
+&lt;ul>
+&lt;li>For all Service services, register the service address with all global default registries.&lt;/li>
+&lt;li>For all Reference services, subscribe service addresses from all global default registries.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registries
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> beijing Registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> shanghai Registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2182
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above takes Spring Boot development as an example (XML and API methods are similar) to configure two global default registries, beijingRegistry and shanghaiRegistry, and the services DemoService and HelloService will be registered to the two default registries respectively.&lt;/p>
+&lt;p>In addition to the framework mentioned above to automatically set the global registry for the service, there are two ways to flexibly adjust the association between the service and multiple registry.&lt;/p>
+&lt;h3 id="12-set-the-global-default-registration-center">1.2 Set the global default registration center&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registries
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> beijing Registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">default&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> shanghai Registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2182
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">default&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>default&lt;/code> is used to set the global default registry, the default value is &lt;code>true&lt;/code> which is regarded as the global registry. Services that do not specify a registry id will automatically register or subscribe to the global default registry.&lt;/p>
+&lt;h3 id="13-display-associated-services-and-registry">1.3 Display associated services and registry&lt;/h3>
+&lt;p>By adding the registry configuration to the Dubbo service definition component, the service is associated with the registry.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboServiceregistry&lt;/span> &lt;span style="color:#719e07">=&lt;/span> {&lt;span style="color:#2aa198">&amp;#34;beijingRegistry&amp;#34;&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboServiceregistry&lt;/span> &lt;span style="color:#719e07">=&lt;/span> {&lt;span style="color:#2aa198">&amp;#34;shanghaiRegistry&amp;#34;&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After adding the above configuration, DemoService will only be registered to beijingRegistry, and HelloService will be registered to shanghaiRegistry.&lt;/p>
+&lt;h2 id="2-multi-registry-subscription">2 Multi-registry subscription&lt;/h2>
+&lt;p>Since service subscription involves address aggregation and routing address selection, the logic will be more complicated. From the perspective of a single service subscription, if there is a multi-registry subscription, it can be divided into two scenarios according to whether the addresses between the registries are aggregated.&lt;/p>
+&lt;h3 id="21-multi-registry-addresses-are-not-aggregated">2.1 Multi-registry addresses are not aggregated&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hangzhouRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;qingdaoRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.151:9010&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For the independently configured registry component shown above, the address list is completely isolated on the consumer side by default, and the load balancing address selection needs to go through two steps:&lt;/p>
+&lt;ol>
+&lt;li>Site selection among the registration center clusters, select a cluster&lt;/li>
+&lt;li>Select the address in the registration center cluster, and perform address screening in the cluster&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/registry/no-aggregation.png" alt="multi-registris-no-aggregation">&lt;/p>
+&lt;p>Below we will focus on how to control &lt;strong>Registration center inter-cluster site selection&lt;/strong>, the optional strategies are as follows
+&lt;strong>random&lt;/strong>
+Each request is randomly assigned to a registry cluster&lt;/p>
+&lt;blockquote>
+&lt;p>There will be an availability check in the random process, that is, each cluster must ensure that at least one address is available before it can be selected.&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;strong>preferred priority&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hangzhouRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090&amp;#34;&lt;/span> preferred=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;qingdaoRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.151:9010&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If there is a registry cluster configured with &lt;code>preferred=&amp;quot;true&amp;quot;&lt;/code>, all traffic will be routed to this cluster.&lt;/p>
+&lt;p>&lt;strong>weighted&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hangzhouRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090&amp;#34;&lt;/span> weight=&lt;span style="color:#2aa198">&amp;#34;100&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;qingdaoRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.151:9010&amp;#34;&lt;/span> weight=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Based on weighted random load balancing, there will be about 10:1 traffic distribution among the above clusters.&lt;/p>
+&lt;p>&lt;strong>same zone priority&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hangzhouRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090&amp;#34;&lt;/span> zone=&lt;span style="color:#2aa198">&amp;#34;hangzhou&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;qingdaoRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.151:9010&amp;#34;&lt;/span> zone=&lt;span style="color:#2aa198">&amp;#34;qingdao&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RpcContext.getContext().setAttachment(&lt;span style="color:#2aa198">&amp;#34;registry_zone&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;qingdao&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>According to the traffic parameters carried in the Invocation or the parameters set through the context context on the current node, the traffic will be accurately guided to the corresponding cluster.&lt;/p>
+&lt;h3 id="22-multi-registry-address-aggregation">2.2 Multi-registry address aggregation&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;multiple://127.0.0.1:2181?separator=;&amp;amp;reference-registry=zookeeper://address11?backup=address12,address13;zookeeper://address21?backup=address22,address23&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here, a registration center starting with a special multiple protocol is added, where:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>multiple://127.0.0.1:2181&lt;/code> has no specific meaning, it is just a placeholder in a specific format, and the address can be specified at will&lt;/li>
+&lt;li>&lt;code>reference-registry&lt;/code> specifies the list of registry clusters to be aggregated. In the example, there are two clusters, &lt;code>zookeeper://address11?backup=address12,address13&lt;/code> and &lt;code>zookeeper://address21?backup=address22&lt;/code> ,address23&lt;code>, which also specifies the cluster separator &lt;/code>separator=&amp;quot;;&amp;quot;`&lt;/li>
+&lt;/ul>
+&lt;p>As shown in the figure below, the addresses of different registration center clusters will be aggregated into one address pool for load balancing or routing address selection on the consumer side.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/registry/aggregation.png" alt="multi-registris-aggregation">&lt;/p>
+&lt;p>In version 3.1.0 and later, it is also supported to set specific attachments attributes on each registry cluster to achieve specific marking of addresses under the registry cluster, and then cooperate with Router component extensions such as TagRouter to realize cross-machine rooms traffic management capabilities.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;multiple://127.0.0.1:2181?separator=;&amp;amp;reference-registry=zookeeper://address11?attachments=zone=hangzhou,tag=middleware;zookeeper://address21&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After adding &lt;code>attachments=zone=hangzhou,tag=middleware&lt;/code>, all URL addresses from the registration center will automatically carry the two identifiers of &lt;code>zone&lt;/code> and &lt;code>tag&lt;/code>, which facilitates more flexible traffic management on the consumer side.&lt;/p>
+&lt;h2 id="3-scenario-example">3 Scenario example&lt;/h2>
+&lt;h3 id="31-scenario-1-cross-region-registration-service">3.1 Scenario 1: Cross-region registration service&lt;/h3>
+&lt;p>For example: Some services of the Chinese website are too late to be deployed in Qingdao, and are only deployed in Hangzhou, while other applications in Qingdao need to reference this service, so the service can be registered to two registration centers at the same time.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hangzhouRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;qingdaoRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.151:9010&amp;#34;&lt;/span> default=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Register with multiple registries --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.HelloService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;hangzhouRegistry,qingdaoRegistry&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-scenario-2-isolation-based-on-business">3.2 Scenario 2: Isolation based on business&lt;/h3>
+&lt;p>Some CRM services are specially designed for international websites, and some services are specially designed for Chinese websites.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Multi-registry configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;chinaRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;intlRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.154.177:9010&amp;#34;&lt;/span> default=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Register with the Chinese Station Registration Center --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.HelloService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;chinaRegistry&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Register with the International Station Registration Center --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.DemoService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;intlRegistry&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-scenario-3-invoking-services-based-on-business">3.3 Scenario 3: Invoking services based on business&lt;/h3>
+&lt;p>CRM needs to call the PC2 service of the Chinese station and the international station at the same time. PC2 is deployed in both the Chinese station and the international station. The interface and version number are the same, but the connected database is different.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Multi-registry configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;chinaRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;intlRegistry&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.154.177:9010&amp;#34;&lt;/span> default=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Quote Chinese station service --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;chinaHelloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.HelloService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;chinaRegistry&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Reference international station service --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;intlHelloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.HelloService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;intlRegistry&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If only the test environment temporarily needs to connect to two different registration centers, use vertical symbols to separate multiple different registration center addresses:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Multi-registry configuration, separated by a vertical sign means connecting to multiple different registries at the same time, and multiple cluster addresses of the same registrant are separated by commas --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.141.150:9090|10.20.154.177:9010&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Reference service --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.HelloService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Simple Registry</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/simple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/registry/simple/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This function has been removed in Dubbo 2.7, please select &lt;a href="../">other registry&lt;/a> for migration.&lt;/p>
+&lt;/div>
+&lt;p>The Simple registry itself is an ordinary Dubbo service, which can reduce third-party dependencies and make the overall communication method consistent.&lt;/p>
+&lt;h2 id="configuration">configuration&lt;/h2>
+&lt;p>Expose the Simple registry as a Dubbo service:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema /dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Current application information configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;simple-registry&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Expose service protocol configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;9090&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Expose service configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.registry.RegistryService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;registryService&amp;#34;&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;N/A&amp;#34;&lt;/span> ondisconnect=&lt;span style="color:#2aa198">&amp;#34;disconnect&amp;#34;&lt;/span> callbacks=&lt;span style="color:#2aa198">&amp;#34;1000&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;subscribe&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&amp;lt;dubbo:argument&lt;/span> index=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span> callback=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&amp;lt;/dubbo:method&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;unsubscribe&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&amp;lt;dubbo:argument&lt;/span> index=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span> callback=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&amp;lt;/dubbo:method&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Implementation of a simple registration center, which can be expanded by itself to achieve cluster and state synchronization --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;registryService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.registry.simple.SimpleRegistryService&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Quoting the Simple Registry service:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:9090&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.registry.RegistryService&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;simple&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> ... &lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:9090&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;simple&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="applicability-notes">Applicability Notes&lt;/h2>
+&lt;p>This &lt;code>SimpleRegistryService&lt;/code> is just a simple implementation and does not support clustering. It can be used as a reference for a custom registry, but it is not suitable for direct use in a production environment.&lt;/p></description></item></channel></rss>

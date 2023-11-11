@@ -1,0 +1,762 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 升级和兼容性</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/</link><description>Recent content in 升级和兼容性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 2.x 升级至 3.x</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/2.x-to-3.x-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/2.x-to-3.x-compatibility-guide/</guid><description>
+&lt;h2 id="升级到-dubbo-3x-的收益">升级到 Dubbo 3.X 的收益&lt;/h2>
+&lt;p>Dubbo3 依旧保持了 2.x 的经典架构，以解决微服务进程间通信为主要职责，通过丰富的服务治理（如地址发现、流量管理等）能力来更好的管控微服务集群；Dubbo3 对原有框架的升级是全面的，体现在核心 Dubbo 特性的几乎每个环节，通过升级实现了稳定性、性能、伸缩性、易用性的全面提升。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/architecture-1.png" alt="architecture-1">&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>通用的通信协议。&lt;/strong> 全新的 RPC 协议应摒弃私有协议栈，以更通用的 HTTP/2 协议为传输层载体，借助 HTTP 协议的标准化特性，解决流量通用性、穿透性等问题，让协议能更好的应对前后端对接、网关代理等场景；支持 Stream 通信模式，满足不同业务通信模型诉求的同时给集群带来更大的吞吐量。&lt;/li>
+&lt;li>&lt;strong>面向百万集群实例，集群高度可伸缩。&lt;/strong> 随着微服务实践的推广，微服务集群实例的规模也在不停的扩展，这得益于微服务轻量化、易于水平扩容的特性，同时也给整个集群容量带来了负担，尤其是一些中心化的服务治理组件；Dubbo3 需要解决实例规模扩展带来的种种资源瓶颈问题，实现真正的无限水平扩容。&lt;/li>
+&lt;li>&lt;strong>全面拥抱云原生。&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;h2 id="dubbo-30-新特性">Dubbo 3.0 新特性&lt;/h2>
+&lt;p>Dubbo 3.0 提供的新特性包括：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>新的地址发现模型（应用级服务发现）。&lt;/strong>
+&lt;ul>
+&lt;li>查看&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/">应用级服务发现迁移示例&lt;/a>。&lt;/li>
+&lt;li>查看&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/">应用级服务发现的迁移步骤&lt;/a>&lt;/li>
+&lt;li>查看&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/">应用级服务发现地址迁移规则说明&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;strong>下一代基于 HTTP/2 的 Triple 协议。&lt;/strong>
+&lt;ul>
+&lt;li>查看&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/migration-triple/">Triple 协议迁移步骤&lt;/a>&lt;/li>
+&lt;li>查看 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/guide/">Triple 协议使用方式&lt;/a>&lt;/li>
+&lt;li>查看 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/overview/">Triple 协议设计与实现&lt;/a>。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;strong>统一的路由规则。&lt;/strong>
+&lt;ul>
+&lt;li>查看&lt;a href="https://dubbo.apache.org/zh-cn/overview/tasks/traffic-management/">统一路由规则设计与实现&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="升级前的兼容性检查">升级前的兼容性检查&lt;/h2>
+&lt;p>在跨版本升级的过程中，存在的风险点从大到小分别有：直接修改 Dubbo 源码 -&amp;gt; 基于 Dubbo SPI 扩展点进行扩展 -&amp;gt; 基于 API 或者 Spring 的使用方式。&lt;/p>
+&lt;h3 id="1-直接修改-dubbo-源码">1. 直接修改 Dubbo 源码&lt;/h3>
+&lt;p>对于直接修改 Dubbo 源码这部分的需要修改方自行判断是否在高版本中正常工作，对于这种非标准行为，Dubbo 无法保证其先前的兼容性。此外，通过 javagent 或者 asm 等通过运行时对 Dubbo 的修改也在此范围内。此类修改大部分可以通过后文提供的扫描工具检测出来。&lt;/p>
+&lt;h3 id="2-spi-扩展">2. SPI 扩展&lt;/h3>
+&lt;h4 id="不兼容项">不兼容项&lt;/h4>
+&lt;p>对于 SPI 扩展的，除了应用级服务方向和 EventDispatcher 两个机制在 3.x 中做了破坏性的修改，在 2.7.x 中提供的绝大多数的扩展在 3.x 中也都提供。此部分需要关注的有两个方面：&lt;/p>
+&lt;ul>
+&lt;li>事件总线：出于事件管理的复杂度原因，EventDispatcher 和 EventListener 在 Dubbo 3.x 的支持已经删除。如果有对应扩展机制的使用请考虑重构为对应 Dubbo 功能的扩展。&lt;/li>
+&lt;li>应用级服务发现：Dubbo 2.7 中的应用级服务发现的整体机制在 Dubbo 3.x 中已经被完整重构，功能的性能与稳定性有了很大程度上的提高。因此我们建议您不要使用 Dubbo 2.7 中的应用级服务发现机制，如果有对应的扩展可以在升级到 Dubbo 3.x 之后基于新的代码重新验证实现（绝大多数应用级服务发现的 API 是向前兼容的）。&lt;/li>
+&lt;/ul>
+&lt;h4 id="优化项可选">优化项（可选）&lt;/h4>
+&lt;p>此外，Dubbo 3.x 中对部分扩展点的工作机制进行了优化，可以较大程度上提升应用的性能。&lt;/p>
+&lt;ul>
+&lt;li>1）拦截器机制&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo 中可以基于 Filter 拦截器对请求进行拦截处理。在 Dubbo 2.7 中支持在路由选址后再对请求进行拦截处理。Dubbo 3.x 中抽象了全新的 ClusterFilter 机制，可以在很大程度上降低内存的占用，对与超大规模集群有较大的收益。
+如果您有一些 Consumer 侧的拦截器是基于 Filter 机制实现的，如果没有和远端的 IP 地址强绑定的逻辑，我们建议您将对应的 &lt;code>org.apache.dubbo.rpc.Filter&lt;/code> SPI 扩展点迁移到 &lt;code>org.apache.dubbo.rpc.cluster.filter.ClusterFilter&lt;/code> 这个新的 SPI 扩展点。两个接口的方法定义是完全一样的。&lt;/p>
+&lt;ul>
+&lt;li>2）Router -&amp;gt; StateRouter&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo 中提供了 Router 这个可以动态进行选址路由的能力，同时绝大多数的服务治理能力也都是基于这个 Router 扩展点实现的。在 Dubbo 3.x 中，Dubbo 在 Router 的基础上抽象了全新的 StateRouter 机制，可以在选址性能以及内存占用上有大幅优化。关于 StateRouter 的更多介绍我们会在后续的文档中发布。&lt;/p>
+&lt;h3 id="3-api--spring-使用">3. API / Spring 使用&lt;/h3>
+&lt;p>对于基于 API 或者 Spring 的使用，Dubbo 3.x 和 2.7.x 的使用方式是对齐的，在 Dubbo 3.x 中对部分无效的配置进行了强校验，这部分异常会在启动过程中直接报错，请按照提示修改即可。&lt;/p>
+&lt;h2 id="升级流程">升级流程&lt;/h2>
+&lt;h3 id="1-依赖升级">1. 依赖升级&lt;/h3>
+&lt;p>如果使用 Nacos 作为注册中心，由于 Nacos 特性支持的原因，在升级到 Dubbo 3.x 之前需要将 Nacos Server 升级到 2.x（参考文档 &lt;a href="https://nacos.io/zh-cn/docs/v2/upgrading/2.0.0-upgrading.html">https://nacos.io/zh-cn/docs/v2/upgrading/2.0.0-upgrading.html&lt;/a>），然后再将应用的 Nacos Client 也对应升级。如果使用 Zookeeper 注册中心则不需要处理。
+如果您是使用 Spring Cloud Alibaba Dubbo 进行接入的，由于 Dubbo 部分内部 API 进行了变更，请升级到 xxx。&lt;/p>
+&lt;p>Dubbo 依赖请升级到最新的 3.1.3 版本，Dubbo 和对应的 springboot starter GAV 如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.1.3&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.1.3&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-灰度升级">2. 灰度升级&lt;/h3>
+&lt;p>Dubbo 3 升级对于发布流程没有做特殊限制，按照正常业务发布即可。
+由于 Dubbo 是进行跨大版本的变更升级，发布中请尽可能多分批次发布，同时拉大第一批和第二批发布的时间间隔，做好充足的观察。
+发布过程中，我们建议您先升级应用的下游（也即是服务提供者），在验证服务处理正常以后再继续后续发布。&lt;/p>
+&lt;h3 id="3-升级观测指标">3. 升级观测指标&lt;/h3>
+&lt;p>在发布的过程中，有以下几个纬度的指标可以判断升级是否出现问题。&lt;/p>
+&lt;ul>
+&lt;li>机器的 CPU、内存使用情况&lt;/li>
+&lt;li>接口请求成功率&lt;/li>
+&lt;li>接口请求 RT&lt;/li>
+&lt;li>日志的报错信息&lt;/li>
+&lt;li>自定义扩展行为是否符合预期&lt;/li>
+&lt;/ul>
+&lt;h2 id="注意事项">注意事项&lt;/h2>
+&lt;h3 id="1-应用级服务发现">1. 应用级服务发现&lt;/h3>
+&lt;p>由于 Dubbo 2.7 的应用级服务发现模型存在设计上的问题，在 Dubbo 3.x 中做了大量格式上的修改，所以 2.7.x 和 3.x 的应用级服务发现可能存在无法互相订阅调用的可能性。虽然 Dubbo 会剔除识别不了的实例，但是从稳定性的角度出发，如果您在 2.7.x 中开启了应用级服务发现特性（在 2.7.x 中非默认注册），我们建议先在 2.7.x 中关闭，待升级到 3.x 之后再开启。&lt;/p></description></item><item><title>Overview: 3.0 升级至 3.1</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.0-to-3.1-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.0-to-3.1-compatibility-guide/</guid><description>
+&lt;h2 id="功能修改点">功能修改点&lt;/h2>
+&lt;h3 id="1-nacos-group-对齐应用级服务发现">1. Nacos Group 对齐（应用级服务发现）&lt;/h3>
+&lt;p>在 Dubbo 2.7.x 中，配置在 Nacos Registry URL 上的 group 值是对齐 Nacos 注册中心中的 group 分组的。（group 可以当成类似 namespace 的软隔离）&lt;/p>
+&lt;p>在 Dubbo 3.0.x 中，配置在 Nacos Registry URL 上的 group 默认不使用，全部使用 DEFAULT_GROUP。（group 不再提供隔离功能）&lt;/p>
+&lt;p>在 Dubbo 3.1.x 中，配置在 Nacos Registry URL 上的 group 值将会重新对齐 Nacos 注册中心中的 group 分组的。&lt;/p>
+&lt;p>注意事项：&lt;/p>
+&lt;ol>
+&lt;li>请检查注册中心 URL 上是否已经配置了 group 属性，如果是的话需要检查服务端和消费端的 group 是否都一致，如果不一致请修改为一致&lt;/li>
+&lt;li>如果不希望 group 重新对齐到 Nacos 注册中心中的 group 分组，可以配置 &lt;code>dubbo.nacos-service-discovery.use-default-group=false&lt;/code> 全局属性值忽略该功能&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 3.1 升级至 3.2</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.1-to-3.2-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.1-to-3.2-compatibility-guide/</guid><description>
+&lt;p>对于绝大多数的用户，升级到 Dubbo 3.2.0 是完全平滑的，仅需要修改依赖包版本即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="兼容性-checklist">兼容性 CheckList&lt;/h1>
+&lt;h2 id="1-序列化检查模式重要">1. 序列化检查模式（重要！！！）&lt;/h2>
+&lt;p>在 Dubbo 3.2.0 版本中，Dubbo 将默认开启序列化白名单的强校验，以提升 Dubbo 的安全性，避免远程命令执行的问题。
+对于一些使用了泛型等可能存在扫描不全或者是&lt;strong>服务规模较大&lt;/strong>的用户，我们建议您添加 &lt;code>-Ddubbo.application.serialize-check-status=WARN&lt;/code> 配置。
+观察一段时间后（通过日志、QoS 命令），如果没有触发安全告警，则可以配置强校验模式。&lt;/p>
+&lt;p>关于自定义白名单的配置，可以参考官网的 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/">文档 / SDK 手册 / Java SDK / 高级特性和用法 / 提升安全性 / 类检查机制&lt;/a> 一文进行配置。&lt;/p>
+&lt;h4 id="q1为什么要开启序列化白名单的强校验">Q1：为什么要开启序列化白名单的强校验？&lt;/h4>
+&lt;p>由于 Java 本身机制的问题，Dubbo 支持的非 IDL 序列化天然允许访问任意类，这将可能导致远程命令执行（RCE）风险。&lt;/p>
+&lt;h4 id="q2升级到-32-的最佳实践是什么">Q2：升级到 3.2 的最佳实践是什么？&lt;/h4>
+&lt;p>我们建议&lt;strong>所有用户&lt;/strong>在升级 Dubbo 3.2.0 版本前添加 &lt;code>-Ddubbo.application.serialize-check-status=WARN&lt;/code> 配置以保证最佳的兼容性。否则可能导致线上数据异常的情况！&lt;/p>
+&lt;hr>
+&lt;h2 id="2-默认序列化切换">2. 默认序列化切换&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始默认序列化方式从 &lt;code>hessian2&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>，对于升级到 3.2.0 的应用，Dubbo 会自动尝试采用 &lt;code>fastjson2&lt;/code> 进行序列化。&lt;/p>
+&lt;h4 id="q1会不会影响和低版本的-dubbo-互通">Q1：会不会影响和低版本的 Dubbo 互通？&lt;/h4>
+&lt;p>不会。与低版本互通仍使用 &lt;code>hessian-lite&lt;/code>。原理可参考&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/">序列化协议升级指南&lt;/a>一文。&lt;/p>
+&lt;h4 id="q2为什么要切换默认序列化方式">Q2：为什么要切换默认序列化方式？&lt;/h4>
+&lt;p>&lt;code>fastjson2&lt;/code> 是一款高性能的序列化框架，性能优于 &lt;code>hessian2&lt;/code>，原生支持 JDK17、Native 等，以及完全向前兼容 &lt;code>hessian2&lt;/code> 所有功能。
+由于 &lt;code>hessian-lite&lt;/code> 在未来维护难度越来越大，我们决定将默认序列化方式从 &lt;code>hessian2&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>。&lt;/p>
+&lt;h4 id="q3和原生的-json-是什么关系">Q3：和原生的 JSON 是什么关系？&lt;/h4>
+&lt;p>Dubbo 中使用 &lt;code>fastjson2&lt;/code> 的 JSONB 格式，而不是原生的 JSON 格式。JSONB 格式和JSON格式对应，能完全表示JSON，是一种二进制格式。
+具体协议格式可以参考：&lt;a href="https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn">JSONB 格式&lt;/a>&lt;/p>
+&lt;h4 id="q4如果我不想使用-fastjson2怎么办">Q4：如果我不想使用 &lt;code>fastjson2&lt;/code>，怎么办？&lt;/h4>
+&lt;p>如果你不想使用 &lt;code>fastjson2&lt;/code>，可以配置 &lt;code>prefer-serialization&lt;/code> 为 &lt;code>hessian2&lt;/code> 覆盖默认配置。（如 &lt;code>dubbo.provider.prefer-serialization=fastjson2,hessian2&lt;/code>） 如果没有特殊的需求，我们不建议仍继续使用 &lt;code>hessian2&lt;/code>。&lt;/p>
+&lt;hr>
+&lt;h2 id="3-默认关闭推空保护">3. 默认关闭推空保护&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始默认关闭推空保护，即使注册中心推送空地址，Dubbo 也将不会保留最后一批 provider 信息。
+如果需要开启推空保护，可以配置 &lt;code>dubbo.application.enable-empty-protection&lt;/code> 为 &lt;code>true&lt;/code>。&lt;/p>
+&lt;h4 id="q1关闭推空保护对我有什么影响">Q1：关闭推空保护对我有什么影响？&lt;/h4>
+&lt;p>在绝大部分场景下没有影响。
+推空保护的目的是在注册中心出现故障并且主动推送空地址的时候，Dubbo 保留最后一批 provider 信息，以保证服务可用。
+但是在大多数注册中心出现故障的时候，注册中心也不会推送空地址，只有一些特殊情况才会出现。
+但如果开启推空保护，将对 Dubbo 的 Fallback 逻辑、心跳逻辑等造成较大的影响，给开发使用 Dubbo 带来困扰。&lt;/p>
+&lt;h4 id="q2我想开启推空保护怎么办">Q2：我想开启推空保护，怎么办？&lt;/h4>
+&lt;p>如果在生产上为了高可用，需要开启推空保护，可以配置 &lt;code>dubbo.application.enable-empty-protection&lt;/code> 为 &lt;code>true&lt;/code>。
+目前已知开启推空保护会导致服务端应用从 &lt;code>2.6.x&lt;/code>、&lt;code>2.7.x&lt;/code> 等仅支持接口级服务发现的版本升级到 &lt;code>3.x&lt;/code> 之后回滚到原来版本出现异常，极端场景下会导致服务调用失败。
+此外，开启推空保护后在服务端地址真的为空的时候出现较多的心跳异常、日志异常等。&lt;/p>
+&lt;hr>
+&lt;h2 id="4-传递依赖变更">4. 传递依赖变更&lt;/h2>
+&lt;ul>
+&lt;li>Dubbo 3.2.0 版本开始默认不再在 &lt;code>dubbo-all&lt;/code> 中 shade &lt;code>hessian-lite&lt;/code> 的代码，而是使用传递依赖传递。如果你的应用中不需要使用 &lt;code>hessian-lite&lt;/code>，可以将 &lt;code>hessian-lite&lt;/code> 从依赖中移除。&lt;/li>
+&lt;li>Dubbo 3.2.0 版本开始在 &lt;code>dubbo-all&lt;/code> 中不再传递 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code> 依赖，如果你的应用中需要使用 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code>，请手动将 &lt;code>gson&lt;/code>、&lt;code>fastjson&lt;/code> 依赖添加到应用中。&lt;/li>
+&lt;li>Dubbo 3.2.0 版本在 &lt;code>dubbo-all&lt;/code> 中传递 &lt;code>fastjson2&lt;/code> 依赖。&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="5-默认内部序列化工具切换">5. 默认内部序列化工具切换&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始默认&lt;strong>内部&lt;/strong>序列化工具从 &lt;code>fastjson&lt;/code> 切换为 &lt;code>fastjson2&lt;/code>。&lt;/p>
+&lt;h4 id="q1会不会影响-rpc-请求流量">Q1：会不会影响 RPC 请求流量？&lt;/h4>
+&lt;p>不会。内部序列化工具为 Dubbo 内部解析参数时使用，非 RPC 传输序列化协议。&lt;/p>
+&lt;h4 id="q2为什么要切换默认内部序列化工具">Q2：为什么要切换默认内部序列化工具？&lt;/h4>
+&lt;p>Dubbo 3.2.0 版本开始默认传递依赖不再传递 &lt;code>fastjson&lt;/code> 和 &lt;code>gson&lt;/code>。出于兼容性考虑，默认内部序列化工具切换为 &lt;code>fastjson2&lt;/code>。&lt;/p>
+&lt;h4 id="q3如果我的环境中没有-fastjson2怎么办">Q3：如果我的环境中没有 &lt;code>fastjson2&lt;/code>，怎么办？&lt;/h4>
+&lt;p>Dubbo 支持多种序列化框架自动切换，如果你的环境中没有 &lt;code>fastjson2&lt;/code>，Dubbo 会自动尝试切换到 &lt;code>fastsjon&lt;/code> 或 &lt;code>gson&lt;/code>。&lt;/p>
+&lt;h4 id="q4我想指定-dubbo-内部序列化工具怎么办">Q4：我想指定 Dubbo 内部序列化工具，怎么办？&lt;/h4>
+&lt;p>可以配置 &lt;code>dubbo.json-framework.prefer&lt;/code> 参数，如 &lt;code>-Ddubbo.json-framework.prefer=gson&lt;/code>。&lt;/p>
+&lt;hr>
+&lt;h2 id="6-triple-协议支持传递自定义异常">6. Triple 协议支持传递自定义异常&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始 Triple 协议支持回传自定义异常，而不是只能回传 &lt;code>RpcException&lt;/code>。如果服务接口会抛出异常的，在 Dubbo 3.2.0 版本以后将默认按照 Dubbo 协议一样回传自定义异常对象。&lt;/p>
+&lt;hr>
+&lt;h2 id="7-triple-协议版本号对齐">7. Triple 协议版本号对齐&lt;/h2>
+&lt;p>Dubbo 3.2.0 版本开始，Triple 协议的通信要求客户端和服务端的版本号和分组一致，否则会找不到服务。与原生 gRPC SDK 互通时，Dubbo 侧不能配置分组和版本号。&lt;/p>
+&lt;h4 id="q1dubbo-320-以前是怎么样的">Q1：Dubbo 3.2.0 以前是怎么样的？&lt;/h4>
+&lt;p>1）Triple 会认为空版本号和 1.0.0 版本号一致，如果您的服务端和客户端版本号不一致，但是都是空版本号或者都是 1.0.0 版本号，是可以正常通信的。
+2）对于没有匹配到版本号的服务，Triple 会尝试匹配任意版本号的服务，如果匹配到任意版本号的服务，也是可以正常通信的。&lt;/p>
+&lt;h4 id="q2如何保证和原来行为是对齐的">Q2：如何保证和原来行为是对齐的？&lt;/h4>
+&lt;p>通过配置 &lt;code>-Ddubbo.rpc.tri.ignore-1.0.0-version=true -Ddubbo.rpc.tri.resolve-fallback-to-default=true&lt;/code> 可以实现和 Dubbo 3.2.0 以前的行为。&lt;/p></description></item><item><title>Overview: 3.2 升级至 3.3</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.2-to-3.3-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/3.2-to-3.3-compatibility-guide/</guid><description>
+&lt;h2 id="功能修改点">功能修改点&lt;/h2>
+&lt;h3 id="1-移除了dubbo-native-plugin">1. 移除了dubbo-native-plugin&lt;/h3>
+&lt;p>在 3.3 版本中，移除了 dubbo-native-plugin。并且dubbo-native-plugin相关的功能都将迁移至dubbo-maven-plugin。&lt;/p>
+&lt;p>为什么要做这个迁移和调整？&lt;/p>
+&lt;ol>
+&lt;li>为了提升用户的使用体验，后续dubbo有关maven的插件能力都将统一使用dubbo-maven-plugin来提供。方便Dubbo用户使用和接入。而不需要一个特性对应一个插件，导致用户需要依赖多个plugin。&lt;/li>
+&lt;li>更加有利于后续Dubbo提供maven plugin能力时的维护和特性增强。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 应用级服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/</guid><description/></item><item><title>Overview: 序列化协议升级</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/</guid><description>
+&lt;p>在 &lt;code>3.1.0&lt;/code> 版本中，Dubbo 默认支持的序列化协议新增对 Fastjson2 的支持。部分用户可能会考虑在现有的系统中对序列化协议进行升级，但服务端和客户端版本的差异可能导致客户端并不支持服务端的序列化协议。&lt;/p>
+&lt;p>在 &lt;code>3.2.0&lt;/code> 版本中, Dubbo 的服务端引入新的配置 &lt;code>prefer-serialization&lt;/code>，该特性可以完美解决服务端序列化升级过程中可能带来的风险。&lt;/p>
+&lt;h3 id="最佳实践">最佳实践&lt;/h3>
+&lt;p>序列化协议升级，需要分两步走：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>首先需要推动服务端的序列化协议升级，同时在服务端的暴露配置中需要添加 &lt;code>prefer-serialization&lt;/code> 配置。&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>比如：升级前的序列化协议是 hessian2，升级之后的序列化协议是 Fastjson2 那么在服务端的暴露配置中就应该添加如下所示的配置。&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>dubbo.provider.prefer-serialization=fastjson2,hessian2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.serialization=hessian2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;strong>其次，客户端需要升级至和服务端相同版本&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;h3 id="实现原理">实现原理&lt;/h3>
+&lt;p>dubbo 客户端序列化协议是根据服务端的注册配置来选择的（即服务端的&lt;code>serialization&lt;/code>配置）。在请求阶段 dubbo 会把客户端的序列化协议组装到请求头上，服务端在进行反序列化时会根据请求头来确定反序列化协议。所以，如果服务端和客户端的版本不一致就可能会出现客户端序列化不了的情况。&lt;/p>
+&lt;p>为了解决这个情况，&lt;code>3.2.0&lt;/code> 在客户端序列化的时候会优先使用 &lt;code>prefer-serialization&lt;/code> 配置的协议，如果不支持 &lt;code>prefer-serialization&lt;/code> 相关的协议，才会使用 &lt;code>serialization&lt;/code> 配置的协议。（可以把 &lt;code>serialization&lt;/code> 理解为一个兜底的配置）&lt;/p></description></item><item><title>Overview: Protobuf 与 Interface</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/protobufinterface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/protobufinterface/</guid><description>
+&lt;p>本文对比了Protobuf和Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。&lt;/p>
+&lt;h2 id="1-数据类型">1. 数据类型&lt;/h2>
+&lt;h3 id="11-基本类型">1.1. 基本类型&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>ptoto类型&lt;/th>
+&lt;th>java类型&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>double&lt;/td>
+&lt;td>double&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>float&lt;/td>
+&lt;td>float&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint32&lt;/td>
+&lt;td>int[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint64&lt;/td>
+&lt;td>long[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed32&lt;/td>
+&lt;td>int[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed64&lt;/td>
+&lt;td>long[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bool&lt;/td>
+&lt;td>boolean&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>string&lt;/td>
+&lt;td>String&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bytes&lt;/td>
+&lt;td>ByteString&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+在Java中，无符号的32位和64位整数使用它们的有符号对数来表示，顶部位只存储在符号位中。
+&lt;/div>
+&lt;h2 id="2-复合类型">2. 复合类型&lt;/h2>
+&lt;h3 id="21-枚举">2.1. 枚举&lt;/h3>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">enum&lt;/span> TrafficLightColor {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_INVALID &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_UNSET &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_GREEN &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_YELLOW &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_RED &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">4&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>枚举是常量，因此采用大写&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="22-数组">2.2. 数组&lt;/h3>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message VipIDToRidReq {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> repeated uint32 vipID &lt;span style="color:#719e07">=&lt;/span> 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>底层实际上是1个ArrayList&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="23-集合">2.3. 集合&lt;/h3>
+&lt;p>PB不支持无序、不重复的集合，只能 &lt;code>借用数组实现&lt;/code>，需要 &lt;code>自行去重&lt;/code>。&lt;/p>
+&lt;h3 id="24-字典">2.4. 字典&lt;/h3>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message BatchOnlineRes {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32, uint32&lt;span style="color:#719e07">&amp;gt;&lt;/span> onlineMap &lt;span style="color:#719e07">=&lt;/span> 1;&lt;span style="color:#586e75">//在线状态&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234654-e4568080-db46-11eb-9700-b30022ebee21.png" alt="image">&lt;/p>
+&lt;h3 id="25-嵌套">2.5. 嵌套&lt;/h3>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message BatchAnchorInfoRes {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32, AnchorInfo&lt;span style="color:#719e07">&amp;gt;&lt;/span> list &lt;span style="color:#719e07">=&lt;/span> 1; &lt;span style="color:#586e75">//用户信息map列表&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/*
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">* 对应接口的功能: 批量或单个获取用户信息
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>message AnchorInfo {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> uint32 ownerUid &lt;span style="color:#719e07">=&lt;/span> 1 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;uid&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string nickName &lt;span style="color:#719e07">=&lt;/span> 2 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nn&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户昵称&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string smallAvatar &lt;span style="color:#719e07">=&lt;/span> 3 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;savt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像全路径-小&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string middleAvatar &lt;span style="color:#719e07">=&lt;/span> 4 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像全路径-中&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string bigAvatar &lt;span style="color:#719e07">=&lt;/span> 5 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;bavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像全路径-大&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string avatar &lt;span style="color:#719e07">=&lt;/span> 6 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;avt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png" alt="image">&lt;/p>
+&lt;h2 id="3-字段默认值">3. 字段默认值&lt;/h2>
+&lt;ul>
+&lt;li>对于字符串，默认值为空字符串。&lt;/li>
+&lt;li>对于字节，默认值为空字节。&lt;/li>
+&lt;li>对于bools，默认值为false。&lt;/li>
+&lt;li>对于数字类型，默认值为零。&lt;/li>
+&lt;li>对于枚举，默认值为第一个定义的枚举值，它必须为0。&lt;/li>
+&lt;li>对于消息字段，未设置字段。 它的确切值是语言相关的。 有关详细信息，请参阅生成的代码指南。&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-整体结构">4. 整体结构&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Feature&lt;/th>
+&lt;th>Java Interface&lt;/th>
+&lt;th>Protobuf&lt;/th>
+&lt;th>备注&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>方法重载&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>泛型/模板化&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>方法继承&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>嵌套定义&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>部分支持&lt;/td>
+&lt;td>PB仅支持message和enum嵌套&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>import文件&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>字段为null&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>多个入参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB仅支持单入参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0个入参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB必须有入参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0个出参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB必须有出参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为抽象类&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为具象类&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为接口&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为具象类&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为基础类型&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为结构体&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="5-社区资料">5. 社区资料&lt;/h2>
+&lt;ul>
+&lt;li>社区主页地址：https://developers.google.cn/protocol-buffers/&lt;/li>
+&lt;li>社区开源地址：https://github.com/google/protobuf&lt;/li>
+&lt;li>相关jar的maven：https://search.maven.org/search?q=com.google.protobuf&lt;/li>
+&lt;/ul></description></item><item><title>Overview: Dubbo 协议迁移至 Triple 协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/migration-triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/migration-triple/</guid><description>
+&lt;h2 id="triple-协议介绍">Triple 协议介绍&lt;/h2>
+&lt;p>根据 Triple 设计的目标，&lt;code>Triple&lt;/code> 协议有以下优势:&lt;/p>
+&lt;ul>
+&lt;li>具备跨语言交互的能力，传统的多语言多 SDK 模式和 Mesh 化跨语言模式都需要一种更通用易扩展的数据传输协议。&lt;/li>
+&lt;li>提供更完善的请求模型，除了支持传统的 Request/Response 模型（Unary 单向通信），还支持 Stream（流式通信） 和 Bidirectional（双向通信）。&lt;/li>
+&lt;li>易扩展、穿透性高，包括但不限于 Tracing / Monitoring 等支持，也应该能被各层设备识别，网关设施等可以识别数据报文，对 Service Mesh 部署友好，降低用户理解难度。&lt;/li>
+&lt;li>完全兼容 grpc，客户端/服务端可以与原生grpc客户端打通。&lt;/li>
+&lt;li>可以复用现有 grpc 生态下的组件, 满足云原生场景下的跨语言、跨环境、跨平台的互通需求。&lt;/li>
+&lt;/ul>
+&lt;p>当前使用其他协议的 Dubbo 用户，框架提供了兼容现有序列化方式的迁移能力，在不影响线上已有业务的前提下，迁移协议的成本几乎为零。&lt;/p>
+&lt;p>需要新增对接 Grpc 服务的 Dubbo 用户，可以直接使用 Triple 协议来实现打通，不需要单独引入 grpc client 来完成，不仅能保留已有的 Dubbo 易用性，也能降低程序的复杂度和开发运维成本，不需要额外进行适配和开发即可接入现有生态。&lt;/p>
+&lt;p>对于需要网关接入的 Dubbo 用户，Triple 协议提供了更加原生的方式，让网关开发或者使用开源的 grpc 网关组件更加简单。网关可以选择不解析 payload ，在性能上也有很大提高。在使用 Dubbo 协议时，语言相关的序列化方式是网关的一个很大痛点，而传统的 HTTP 转 Dubbo 的方式对于跨语言序列化几乎是无能为力的。同时，由于 Triple 的协议元数据都存储在请求头中，网关可以轻松的实现定制需求，如路由和限流等功能。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;code>Triple&lt;/code> 协议的格式和原理请参阅 &lt;a href="https://dubbo.apache.org/zh-cn/docs/concepts/rpc-protocol/">RPC 通信协议&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="dubbo2-协议迁移流程">Dubbo2 协议迁移流程&lt;/h2>
+&lt;p>Dubbo2 的用户使用 dubbo 协议 + 自定义序列化，如 hessian2 完成远程调用。&lt;/p>
+&lt;p>而 Grpc 的默认仅支持 Protobuf 序列化，对于 Java 语言中的多参数以及方法重载也无法支持。&lt;/p>
+&lt;p>Dubbo3的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 能够平滑升级， Dubbo 框架侧做了很多工作来保证升级的无感，目前默认的序列化和 Dubbo2 保持一致为&lt;code>hessian2&lt;/code>。&lt;/p>
+&lt;p>所以，如果决定要升级到 Dubbo3 的 &lt;code>Triple&lt;/code> 协议，只需要修改配置中的协议名称为 &lt;code>tri&lt;/code> (注意: 不是triple)即可。&lt;/p>
+&lt;p>接下来我们我们以一个使用 Dubbo2 协议的&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration">工程&lt;/a> 来举例，如何一步一步安全的升级。&lt;/p>
+&lt;ol>
+&lt;li>仅使用 &lt;code>dubbo&lt;/code> 协议启动 &lt;code>provider&lt;/code> 和 &lt;code>consumer&lt;/code>，并完成调用。&lt;/li>
+&lt;li>使用 &lt;code>dubbo&lt;/code> 和 &lt;code>tri&lt;/code> 协议 启动&lt;code>provider&lt;/code>，以 &lt;code>dubbo&lt;/code> 协议启动 &lt;code>consumer&lt;/code>，并完成调用。&lt;/li>
+&lt;li>仅使用 &lt;code>tri&lt;/code> 协议 启动 &lt;code>provider&lt;/code>和 &lt;code>consumer&lt;/code>，并完成调用。&lt;/li>
+&lt;/ol>
+&lt;h3 id="定义服务">定义服务&lt;/h3>
+&lt;ol>
+&lt;li>定义接口&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IWrapperGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//... &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 这是一个普通接口，没有使用 pb 序列化
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>实现类如下&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">IGreeter2Impl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> IWrapperGreeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String request) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="仅使用-triple-协议">仅使用 triple 协议&lt;/h3>
+&lt;p>当所有的 consuemr 都升级至支持 &lt;code>Triple&lt;/code> 协议的版本后，provider 可切换至仅使用 &lt;code>Triple&lt;/code> 协议启动&lt;/p>
+&lt;p>结构如图所示:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-only-tri-strust.png" alt="strust">&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java">Provider&lt;/a>
+和 &lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java">Consumer&lt;/a> 完成调用，输出如下:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png" alt="result">&lt;/p>
+&lt;h3 id="仅使用-dubbo-协议">仅使用 dubbo 协议&lt;/h3>
+&lt;p>为保证兼容性，我们先将部分 provider 升级到 &lt;code>dubbo3&lt;/code> 版本并使用 &lt;code>dubbo&lt;/code> 协议。&lt;/p>
+&lt;p>使用 &lt;code>dubbo&lt;/code> 协议启动一个 &lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java">&lt;code>Provider&lt;/code>&lt;/a> 和 &lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java">&lt;code>Consumer&lt;/code>&lt;/a> ,完成调用，输出如下:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png" alt="result">&lt;/p>
+&lt;h3 id="同时使用两协议">同时使用两协议&lt;/h3>
+&lt;p>对于线上服务的升级，不可能一蹴而就同时完成 provider 和 consumer 升级, 需要按步操作，保证业务稳定。
+第二步, provider 提供双协议的方式同时支持 dubbo + tri 两种协议的客户端。&lt;/p>
+&lt;p>结构如图所示:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-dubbo-tri-strust.png" alt="strust">&lt;/p>
+&lt;blockquote>
+&lt;p>按照推荐升级步骤，provider 已经支持了tri协议，所以 dubbo3的 consumer 可以直接使用 tri 协议&lt;/p>
+&lt;/blockquote>
+&lt;p>使用&lt;code>dubbo&lt;/code>协议和&lt;code>triple&lt;/code>协议启动&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java">&lt;code>Provider&lt;/code>&lt;/a>和&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java">&lt;code>Consumer&lt;/code>&lt;/a>,完成调用，输出如下:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png" alt="result">&lt;/p>
+&lt;h3 id="实现原理">实现原理&lt;/h3>
+&lt;p>通过上面介绍的升级过程，我们可以很简单的通过修改协议类型来完成升级。框架是怎么帮我们做到这些的呢？&lt;/p>
+&lt;p>通过对 &lt;code>Triple&lt;/code> 协议的介绍，我们知道Dubbo3的 &lt;code>Triple&lt;/code> 的数据类型是 &lt;code>protobuf&lt;/code> 对象，那为什么非 &lt;code>protobuf&lt;/code> 的 java 对象也可以被正常传输呢。&lt;/p>
+&lt;p>这里 Dubbo3 使用了一个巧妙的设计，首先判断参数类型是否为 &lt;code>protobuf&lt;/code> 对象，如果不是。用一个 &lt;code>protobuf&lt;/code> 对象将 &lt;code>request&lt;/code> 和 &lt;code>response&lt;/code> 进行 wrapper，这样就屏蔽了其他各种序列化带来的复杂度。在 &lt;code>wrapper&lt;/code> 对象内部声明序列化类型，来支持序列化的扩展。&lt;/p>
+&lt;p>wrapper 的&lt;code>protobuf&lt;/code>的 IDL如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-proto" data-lang="proto">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.triple;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">TripleRequestWrapper&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// hessian4
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// json
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> serializeType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">repeated&lt;/span> &lt;span style="color:#dc322f">bytes&lt;/span> args &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">repeated&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> argTypes &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">TripleResponseWrapper&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> serializeType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">bytes&lt;/span> data &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> type &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>对于请求，使用&lt;code>TripleRequestWrapper&lt;/code>进行包装，对于响应使用&lt;code>TripleResponseWrapper&lt;/code>进行包装。&lt;/p>
+&lt;blockquote>
+&lt;p>对于请求参数，可以看到 args 被&lt;code>repeated&lt;/code>修饰，这是因为需要支持 java 方法的多个参数。当然，序列化只能是一种。序列化的实现沿用 Dubbo2 实现的 spi&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="多语言用户">多语言用户&lt;/h2>
+&lt;p>使用 &lt;code>protobuf&lt;/code> 建议新服务均使用该方式，对于 Dubbo3 和 Triple 来说，主推的是使用 &lt;code>protobuf&lt;/code> 序列化，并且使用 &lt;code>proto&lt;/code> 定义的 &lt;code>IDL&lt;/code> 来生成相关接口定义。以 &lt;code>IDL&lt;/code> 做为多语言中的通用接口约定，加上 &lt;code>Triple&lt;/code> 与 &lt;code>Grpc&lt;/code> 的天然互通性，可以轻松地实现跨语言交互，例如 Go 语言等。&lt;/p>
+&lt;p>将编写好的 &lt;code>.proto&lt;/code> 文件使用 &lt;code>dubbo-compiler&lt;/code> 插件进行编译并编写实现类，完成方法调用：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png" alt="result">&lt;/p>
+&lt;p>从上面升级的例子我们可以知道，&lt;code>Triple&lt;/code> 协议使用 &lt;code>protbuf&lt;/code> 对象序列化后进行传输，所以对于本身就是 &lt;code>protobuf&lt;/code> 对象的方法来说，没有任何其他逻辑。&lt;/p>
+&lt;p>使用 &lt;code>protobuf&lt;/code> 插件编译后接口如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">PbGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String JAVA_SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> inited &lt;span style="color:#719e07">=&lt;/span> PbGreeterDubbo.init();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.sample.tri.GreeterReply &lt;span style="color:#268bd2">greet&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">greetAsync&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> CompletableFuture.supplyAsync(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> greet(request));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">greetServerStream&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterRequest&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">greetStream&lt;/span>(org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="triple-新特性-stream-流">Triple 新特性 Stream 流&lt;/h2>
+&lt;p>Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:&lt;/p>
+&lt;ul>
+&lt;li>接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送&lt;/li>
+&lt;li>流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的&lt;/li>
+&lt;li>推送类场景，多个消息在同一个调用的上下文中被发送和处理&lt;/li>
+&lt;/ul>
+&lt;p>Stream 分为以下三种:&lt;/p>
+&lt;ul>
+&lt;li>SERVER_STREAM(服务端流)
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-server-stream.png" alt="SERVER_STREAM">&lt;/li>
+&lt;li>CLIENT_STREAM(客户端流)
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-client-stream.png" alt="CLIENT_STREAM">&lt;/li>
+&lt;li>BIDIRECTIONAL_STREAM(双向流)
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-bi-stream.png" alt="BIDIRECTIONAL_STREAM">&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>由于 &lt;code>java&lt;/code> 语言的限制，BIDIRECTIONAL_STREAM 和 CLIENT_STREAM 的实现是一样的。&lt;/p>
+&lt;/blockquote>
+&lt;p>在 Dubbo3 中，流式接口以 &lt;code>SteamObserver&lt;/code> 声明和使用，用户可以通过使用和实现这个接口来发送和处理流的数据、异常和结束。&lt;/p>
+&lt;blockquote>
+&lt;p>对于 Dubbo2 用户来说，可能会对StreamObserver感到陌生，这是Dubbo3定义的一种流类型，Dubbo2 中并不存在 Stream 的类型，所以对于迁移场景没有任何影响。&lt;/p>
+&lt;/blockquote>
+&lt;p>流的语义保证&lt;/p>
+&lt;ul>
+&lt;li>提供消息边界，可以方便地对消息单独处理&lt;/li>
+&lt;li>严格有序，发送端的顺序和接收端顺序一致&lt;/li>
+&lt;li>全双工，发送不需要等待&lt;/li>
+&lt;li>支持取消和超时&lt;/li>
+&lt;/ul>
+&lt;h2 id="非-pb-序列化的流">非 PB 序列化的流&lt;/h2>
+&lt;ol>
+&lt;li>api&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IWrapperGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloStream&lt;/span>(StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHelloServerStream&lt;/span>(String request, StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Stream 方法的方法入参和返回值是严格约定的，为防止写错而导致问题，Dubbo3 框架侧做了对参数的检查, 如果出错则会抛出异常。
+对于 &lt;code>双向流(BIDIRECTIONAL_STREAM)&lt;/code>, 需要注意参数中的 &lt;code>StreamObserver&lt;/code> 是响应流，返回参数中的 &lt;code>StreamObserver&lt;/code> 为请求流。&lt;/p>
+&lt;/blockquote>
+&lt;ol start="2">
+&lt;li>实现类&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">WrapGreeterImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> WrapGreeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloStream&lt;/span>(StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onNext(&lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onCompleted();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHelloServerStream&lt;/span>(String request, StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> 10; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onNext(&lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onCompleted();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>调用方式&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>delegate.sayHelloServerStream(&lt;span style="color:#2aa198">&amp;#34;server stream&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> request &lt;span style="color:#719e07">=&lt;/span> delegate.sayHelloStream(&lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> n; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> request.onNext(&lt;span style="color:#2aa198">&amp;#34;stream request&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> i);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>request.onCompleted();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="protobuf-序列化的流">Protobuf 序列化的流&lt;/h2>
+&lt;p>对于 &lt;code>Protobuf&lt;/code> 序列化方式，推荐编写 &lt;code>IDL&lt;/code> 使用 &lt;code>compiler&lt;/code> 插件进行编译生成。生成的代码大致如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">PbGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String JAVA_SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> inited &lt;span style="color:#719e07">=&lt;/span> PbGreeterDubbo.init();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">greetServerStream&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterRequest&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">greetStream&lt;/span>(org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="流的实现原理">流的实现原理&lt;/h2>
+&lt;p>&lt;code>Triple&lt;/code>协议的流模式是怎么支持的呢？&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>从协议层来说，&lt;code>Triple&lt;/code> 是建立在 &lt;code>HTTP2&lt;/code> 基础上的，所以直接拥有所有 &lt;code>HTTP2&lt;/code> 的能力，故拥有了分 &lt;code>stream&lt;/code> 和全双工的能力。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>框架层来说，&lt;code>StreamObserver&lt;/code> 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="triple-与应用级注册发现">Triple 与应用级注册发现&lt;/h2>
+&lt;p>关于 Triple 协议的应用级服务注册和发现和其他语言是一致的，可以通过下列内容了解更多。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/docs/concepts/service-discovery/">服务发现&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/docs/migration/migration-service-discovery/">应用级地址发现迁移指南&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="与-grpc-互通">与 GRPC 互通&lt;/h2>
+&lt;p>通过对于协议的介绍，我们知道 &lt;code>Triple&lt;/code> 协议是基于 &lt;code>HTTP2&lt;/code> 并兼容 &lt;code>GRPC&lt;/code>。为了保证和验证与&lt;code>GRPC&lt;/code>互通能力，Dubbo3 也编写了各种从场景下的测试。详细的可以通过&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/README.MD">这里&lt;/a> 了解更多。&lt;/p>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">未来: Everything on Stub&lt;/h4>
+&lt;p>用过 &lt;code>Grpc&lt;/code> 的同学应该对 &lt;code>Stub&lt;/code> 都不陌生。
+Grpc 使用 &lt;code>compiler&lt;/code> 将编写的 &lt;code>proto&lt;/code> 文件编译为相关的 protobuf 对象和相关 rpc 接口。默认的会同时生成几种不同的 &lt;code>stub&lt;/code>&lt;/p>
+&lt;ul>
+&lt;li>blockingStub&lt;/li>
+&lt;li>futureStub&lt;/li>
+&lt;li>reactorStub&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>&lt;code>stub&lt;/code> 用一种统一的使用方式帮我们屏蔽了不同调用方式的细节。不过目前 &lt;code>Dubbo3&lt;/code> 暂时只支持传统定义接口并进行调用的使用方式。&lt;/p>
+&lt;p>在不久的未来，&lt;code>Triple&lt;/code> 也将实现各种常用的 &lt;code>Stub&lt;/code>，让用户写一份&lt;code>proto&lt;/code>文件，通过 &lt;code>comipler&lt;/code> 可以在任意场景方便的使用，请拭目以待。&lt;/p>
+&lt;/div></description></item><item><title>Overview: 查看历史版本文档</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/version/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/version/</guid><description>
+&lt;section id="section-0" style="">
+&lt;div class="td-content list-page">
+&lt;div class="lead">&lt;/div>&lt;header class="article-meta">
+&lt;/header>&lt;div class="row">
+&lt;div class="col-sm col-md-6 mb-4 mb-md-0">
+&lt;div class="h-100 card shadow" href="#">
+&lt;div class="card-body">
+&lt;h4 class="card-title">
+&lt;a target="_blank" href='https://dubbo.apache.org/zh-cn/docs/'>Early 3.0 Version&lt;/a>
+&lt;/h4>
+&lt;p>早期 3.0 版本文档&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;div class="col-sm col-md-6 mb-4 mb-md-0">
+&lt;div class="h-100 card shadow">
+&lt;div class="card-body">
+&lt;h4 class="card-title">
+&lt;a target="_blank" href='https://dubbo.apache.org/zh-cn/docsv2.7/'>2.7.x Version&lt;/a>
+&lt;/h4>
+&lt;p>2.7.x 版本文档&lt;/p>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;hr>
+&lt;/div>
+&lt;/section></description></item></channel></rss>

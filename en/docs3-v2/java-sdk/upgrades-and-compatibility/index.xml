@@ -1,0 +1,731 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Upgrade Compatibility</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/</link><description>Recent content in Upgrade Compatibility on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: 2.x to 3.x Operation Guide</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/2.x-to-3.x-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/2.x-to-3.x-compatibility-guide/</guid><description>
+&lt;h2 id="benefits-of-upgrading-to-dubbo-3x">Benefits of upgrading to Dubbo 3.X&lt;/h2>
+&lt;p>Dubbo3 still maintains the classic architecture of 2.x. Its main responsibility is to solve the communication between microservice processes, and to better manage and control microservice clusters through rich service governance (such as address discovery, traffic management, etc.); The upgrade of the framework is comprehensive, reflected in almost every aspect of the core Dubbo features, through the upgrade to achieve a comprehensive improvement in stability, performance, scalability, and ease of use.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/architecture-1.png" alt="architecture-1">&lt;/p>
+&lt;ul>
+&lt;li>**Universal communication protocol. ** The new RPC protocol should abandon the private protocol stack, use the more general HTTP/2 protocol as the transport layer carrier, and use the standardized features of the HTTP protocol to solve the problems of traffic versatility and penetration, so that the protocol can better respond Scenarios such as front-end and back-end docking, gateway proxy, etc.; supports the Stream communication mode, which meets the demands of different business communication models and brings greater throughput to the cluster.&lt;/li>
+&lt;li>**For millions of cluster instances, the cluster is highly scalable. ** With the promotion of micro-service practices, the scale of micro-service cluster instances is also constantly expanding, which benefits from the characteristics of light-weight micro-services and easy horizontal expansion, but also brings a burden to the entire cluster capacity, especially It is some centralized service governance components; Dubbo3 needs to solve various resource bottlenecks caused by the expansion of instance scale, and realize truly unlimited horizontal expansion.&lt;/li>
+&lt;li>**Comprehensively embrace cloud native. **&lt;/li>
+&lt;/ul>
+&lt;h2 id="dubbo-30-new-features">Dubbo 3.0 new features&lt;/h2>
+&lt;p>The new features provided by Dubbo 3.0 include:&lt;/p>
+&lt;ul>
+&lt;li>** New address discovery model (application-level service discovery). **
+&lt;ul>
+&lt;li>See &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/">Application-Level Service Discovery Migration Samples&lt;/a>.&lt;/li>
+&lt;li>See &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/">Migration steps for application-level service discovery&lt;/a>&lt;/li>
+&lt;li>See &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/">Description of application-level service discovery address migration rules&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>**The next generation of the HTTP/2-based Triple protocol. **
+&lt;ul>
+&lt;li>See &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/">Triple Protocol Migration Steps&lt;/a>&lt;/li>
+&lt;li>See &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/triple/guide/">Triple protocol usage&lt;/a>&lt;/li>
+&lt;li>See &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/triple/overview/">Triple Protocol Design and Implementation&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>**Unified routing rules. **
+&lt;ul>
+&lt;li>See &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/">Design and Implementation of Unified Routing Rules&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="compatibility-check-before-upgrade">Compatibility check before upgrade&lt;/h2>
+&lt;p>In the process of cross-version upgrade, the existing risks are from big to small: directly modify Dubbo source code -&amp;gt; expand based on Dubbo SPI extension points -&amp;gt; use methods based on API or Spring.&lt;/p>
+&lt;h3 id="1-directly-modify-dubbo-source-code">1. Directly modify Dubbo source code&lt;/h3>
+&lt;p>For those who need to directly modify this part of Dubbo source code, the modifying party must judge whether it works normally in the higher version. For this non-standard behavior, Dubbo cannot guarantee its previous compatibility. In addition, the modification of Dubbo at runtime through javagent or asm is also within this scope. Most of these modifications can be detected by the scanning tools provided below.&lt;/p>
+&lt;h3 id="2-spi-extension">2. SPI extension&lt;/h3>
+&lt;h4 id="incompatibilities">Incompatibilities&lt;/h4>
+&lt;p>For SPI extensions, except that the two mechanisms of application-level service direction and EventDispatcher have been destructively modified in 3.x, most of the extensions provided in 2.7.x are also provided in 3.x. There are two areas to focus on in this section:&lt;/p>
+&lt;ul>
+&lt;li>Event bus: Due to the complexity of event management, the support of EventDispatcher and EventListener in Dubbo 3.x has been removed. If there is a use of the corresponding extension mechanism, please consider refactoring to an extension corresponding to the Dubbo function.&lt;/li>
+&lt;li>Application-level service discovery: The overall mechanism of application-level service discovery in Dubbo 2.7 has been completely refactored in Dubbo 3.x, and the performance and stability of functions have been greatly improved. Therefore, we recommend that you do not use the application-level service discovery mechanism in Dubbo 2.7. If there is a corresponding extension, you can re-verify the implementation based on the new code after upgrading to Dubbo 3.x (most APIs for application-level service discovery are forward Compatible).&lt;/li>
+&lt;/ul>
+&lt;h4 id="optimization-items-optional">Optimization items (optional)&lt;/h4>
+&lt;p>In addition, Dubbo 3.x has optimized the working mechanism of some extension points, which can greatly improve the performance of the application.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;ol>
+&lt;li>Interceptor mechanism&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo can intercept requests based on Filter interceptors. In Dubbo 2.7, it is supported to intercept the request after the routing address is selected. In Dubbo 3.x, a new ClusterFilter mechanism is abstracted, which can greatly reduce the memory usage, and has great benefits for ultra-large-scale clusters.
+If you have some interceptors on the consumer side that are implemented based on the Filter mechanism, and if there is no logic that is strongly bound to the remote IP address, we recommend that you add the corresponding &lt;code>org.apache.dubbo.rpc.Filter&lt;/code> SPI extension point Migrated to the new SPI extension point &lt;code>org.apache.dubbo.rpc.cluster.filter.ClusterFilter&lt;/code>. The method definitions of the two interfaces are exactly the same.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;ol start="2">
+&lt;li>Router -&amp;gt; StateRouter&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo provides Router, the ability to dynamically select and route, and most of the service governance capabilities are also implemented based on this Router extension point. In Dubbo 3.x, Dubbo abstracts a new StateRouter mechanism based on Router, which can greatly optimize address selection performance and memory usage. We will publish more about StateRouter in subsequent documents.&lt;/p>
+&lt;h3 id="3-api--spring-usage">3. API / Spring usage&lt;/h3>
+&lt;p>For the use based on API or Spring, Dubbo 3.x and 2.7.x are used in the same way. In Dubbo 3.x, some invalid configurations are strongly checked, and this part of the exception will directly report an error during the startup process. , please follow the prompts to modify.&lt;/p>
+&lt;h2 id="upgrade-process">Upgrade process&lt;/h2>
+&lt;h3 id="1-dependency-upgrade">1. Dependency upgrade&lt;/h3>
+&lt;p>If you use Nacos as the registration center, due to the support of Nacos features, you need to upgrade Nacos Server to 2.x before upgrading to Dubbo 3.x (refer to the document &lt;a href="https://nacos.io/zh-cn/docs/v2/upgrading/2.0.0-upgrading.html">https://nacos.io/zh-cn/docs/v2 /upgrading/2.0.0-upgrading.html&lt;/a>), and then upgrade the Nacos Client of the application . No processing is required if using a Zookeeper registry.
+If you are using Spring Cloud Alibaba Dubbo for access, please upgrade to xxx due to changes in some internal APIs of Dubbo.&lt;/p>
+&lt;p>Please upgrade to the latest version 3.1.3 for Dubbo dependencies. Dubbo and the corresponding springboot starter GAV are as follows.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.1.3&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.1.3&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-gray-scale-upgrade">2. Gray scale upgrade&lt;/h3>
+&lt;p>The Dubbo 3 upgrade has no special restrictions on the release process, and it can be released according to normal business.
+Since Dubbo is undergoing changes and upgrades across major versions, please release as many batches as possible during the release, and at the same time increase the time interval between the first batch and the second batch of releases, and make sufficient observations.
+During the publishing process, we recommend that you first upgrade the downstream of the application (that is, the service provider), and then proceed with subsequent publishing after verifying that the service is processed normally.&lt;/p>
+&lt;h3 id="3-upgrade-observation-indicators">3. Upgrade observation indicators&lt;/h3>
+&lt;p>During the release process, there are the following latitude indicators to judge whether there is a problem with the upgrade.&lt;/p>
+&lt;ul>
+&lt;li>CPU, memory usage of the machine&lt;/li>
+&lt;li>Interface request success rate&lt;/li>
+&lt;li>Interface Request RT&lt;/li>
+&lt;li>Log error message&lt;/li>
+&lt;li>Does the custom extension behave as expected&lt;/li>
+&lt;/ul>
+&lt;h2 id="precautions">Precautions&lt;/h2>
+&lt;h3 id="1-application-level-service-discovery">1. Application-level service discovery&lt;/h3>
+&lt;p>Due to design problems in the application-level service discovery model of Dubbo 2.7, a large number of format changes have been made in Dubbo 3.x, so the application-level service discovery of 2.7.x and 3.x may not be able to subscribe to each other. sex. Although Dubbo will eliminate unrecognized instances, from the perspective of stability, if you enable the application-level service discovery feature in 2.7.x (not registered by default in 2.7.x), we recommend first Turn it off, and turn it on again after upgrading to 3.x.&lt;/p></description></item><item><title>Docs3-V2: Guide to Migrating Dubbo Protocol to Triple Protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/</guid><description>
+&lt;h2 id="triple-introduction">Triple Introduction&lt;/h2>
+&lt;p>For the format and principle of the &lt;code>Triple&lt;/code> protocol, please refer to &lt;a href="https://dubbo.apache.org/zh-cn/docs/concepts/rpc-protocol/">RPC Communication Protocol&lt;/a>&lt;/p>
+&lt;p>According to the goals of Triple design, the &lt;code>Triple&lt;/code> protocol has the following advantages:&lt;/p>
+&lt;ul>
+&lt;li>Capable of cross-language interaction. Both the traditional multi-language and multi-SDK mode and the Mesh cross-language mode require a more general and scalable data transmission protocol.&lt;/li>
+&lt;li>Provide a more complete request model. In addition to supporting the traditional Request/Response model (Unary one-way communication), it also supports Stream (streaming communication) and Bidirectional (two-way communication).&lt;/li>
+&lt;li>Easy to expand, high penetration, including but not limited to Tracing / Monitoring and other support, should also be recognized by devices at all levels, gateway facilities, etc. can identify data packets, friendly to Service Mesh deployment, and reduce the difficulty of understanding for users.&lt;/li>
+&lt;li>Fully compatible with grpc, the client/server can communicate with the native grpc client.&lt;/li>
+&lt;li>Components in the existing grpc ecosystem can be reused to meet cross-language, cross-environment, and cross-platform intercommunication requirements in cloud-native scenarios.&lt;/li>
+&lt;/ul>
+&lt;p>For Dubbo users currently using other protocols, the framework provides migration capabilities compatible with existing serialization methods. Without affecting existing online businesses, the cost of migrating protocols is almost zero.&lt;/p>
+&lt;p>Dubbo users who need to add new connection to Grpc service can directly use the Triple protocol to achieve the connection, and do not need to introduce the grpc client separately to complete it. Not only can the existing Dubbo ease of use be retained, but also the complexity of the program and the development and maintenance can be reduced. Cost, it can be connected to the existing ecology without additional adaptation and development.&lt;/p>
+&lt;p>For Dubbo users who need gateway access, the Triple protocol provides a more native way to make gateway development or use open source grpc gateway components easier. The gateway can choose not to parse the payload, which greatly improves the performance. When using the Dubbo protocol, the language-related serialization method is a big pain point for the gateway, and the traditional HTTP-to-Dubbo method is almost powerless for cross-language serialization. At the same time, since Triple&amp;rsquo;s protocol metadata is stored in the request header, the gateway can easily implement customized requirements, such as routing and current limiting.&lt;/p>
+&lt;h2 id="dubbo2-protocol-migration-process">Dubbo2 protocol migration process&lt;/h2>
+&lt;p>Dubbo2 users use dubbo protocol + custom serialization, such as hessian2 to complete remote calls.&lt;/p>
+&lt;p>By default, Grpc only supports Protobuf serialization, and it cannot support multi-parameter and method overloading in the Java language.&lt;/p>
+&lt;p>At the beginning of Dubbo3, one goal was to be perfectly compatible with Dubbo2. Therefore, in order to ensure the smooth upgrade of Dubbo2, the Dubbo framework has done a lot of work to ensure that the upgrade is seamless. Currently, the default serialization is consistent with Dubbo2 as &lt;code>hessian2&lt;/code>.&lt;/p>
+&lt;p>Therefore, if you decide to upgrade to the &lt;code>Triple&lt;/code> protocol of Dubbo3, you only need to modify the protocol name in the configuration to &lt;code>tri&lt;/code> (note: not triple).&lt;/p>
+&lt;p>Next we use a [project] (&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/">https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/&lt;/a> org/apache/dubbo/sample/tri/migration) as an example, how to upgrade safely step by step.&lt;/p>
+&lt;ol>
+&lt;li>Only use the &lt;code>dubbo&lt;/code> protocol to start &lt;code>provider&lt;/code> and &lt;code>consumer&lt;/code>, and complete the call.&lt;/li>
+&lt;li>Use &lt;code>dubbo&lt;/code> and &lt;code>tri&lt;/code> protocols to start &lt;code>provider&lt;/code>, use &lt;code>dubbo&lt;/code> protocol to start &lt;code>consumer&lt;/code>, and complete the call.&lt;/li>
+&lt;li>Start &lt;code>provider&lt;/code> and &lt;code>consumer&lt;/code> using only &lt;code>tri&lt;/code> protocol, and complete the call.&lt;/li>
+&lt;/ol>
+&lt;h3 id="define-the-service">Define the service&lt;/h3>
+&lt;ol>
+&lt;li>Define the interface&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IWrapperGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * This is a normal interface, not serialized using pb
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>The implementation class is as follows&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">IGreeter2Impl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> IWrapperGreeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String request) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="only-use-dubbo-protocol">Only use dubbo protocol&lt;/h3>
+&lt;p>To ensure compatibility, we first upgrade some providers to the &lt;code>dubbo3&lt;/code> version and use the &lt;code>dubbo&lt;/code> protocol.&lt;/p>
+&lt;p>Start a [&lt;code>Provider&lt;/code>] using the &lt;code>dubbo&lt;/code> protocol (&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org">https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org&lt;/a> /apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) and &lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java">&lt;code>Consumer&lt;/code>&lt;/a>, complete the call, the output is as follows:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png" alt="result">&lt;/p>
+&lt;h3 id="use-dubbo-and-triple-protocol-at-the-same-time">Use dubbo and triple protocol at the same time&lt;/h3>
+&lt;p>For the upgrade of online services, it is impossible to complete the provider and consumer upgrades at the same time. It needs to be operated step by step to ensure business stability.
+In the second step, the provider provides a dual-protocol way to support dubbo + tri clients at the same time.&lt;/p>
+&lt;p>The structure is shown in the figure:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-dubbo-tri-strust.png" alt="trust">&lt;/p>
+&lt;blockquote>
+&lt;p>According to the recommended upgrade steps, the provider already supports the tri protocol, so the consumer of dubbo3 can directly use the tri protocol&lt;/p>
+&lt;/blockquote>
+&lt;p>Start [&lt;code>Provider&lt;/code>] using &lt;code>dubbo&lt;/code> protocol and &lt;code>triple&lt;/code> protocol (&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main">https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main&lt;/a> /java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java) and [&lt;code>Consumer&lt;/code>](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/">https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/&lt;/a> dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java), complete the call, the output is as follows:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png" alt="result">&lt;/p>
+&lt;h3 id="only-use-triple-protocol">Only use triple protocol&lt;/h3>
+&lt;p>When all consuemr are upgraded to a version that supports the &lt;code>Triple&lt;/code> protocol, the provider can be switched to only use the &lt;code>Triple&lt;/code> protocol to start&lt;/p>
+&lt;p>The structure is shown in the figure:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-only-tri-strust.png" alt="trust">&lt;/p>
+&lt;p>[Provider](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/">https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/&lt;/a> migration/ApiMigrationTriProvider.java)
+and [Consumer](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri">https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri&lt;/a> /migration/ApiMigrationTriConsumer.java) to complete the call, the output is as follows:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png" alt="result">&lt;/p>
+&lt;h3 id="implementation-principle">Implementation principle&lt;/h3>
+&lt;p>Through the upgrade process described above, we can easily complete the upgrade by modifying the protocol type. How does the framework help us do this?&lt;/p>
+&lt;p>Through the introduction of the &lt;code>Triple&lt;/code> protocol, we know that the data type of &lt;code>Triple&lt;/code> in Dubbo3 is a &lt;code>protobuf&lt;/code> object, so why non-&lt;code>protobuf&lt;/code> java objects can also be transmitted normally.&lt;/p>
+&lt;p>Here Dubbo3 uses an ingenious design, first judge whether the parameter type is a &lt;code>protobuf&lt;/code> object, if not. Use a &lt;code>protobuf&lt;/code> object to wrap &lt;code>request&lt;/code> and &lt;code>response&lt;/code>, which shields the complexity brought by other serialization. Declare the serialization type inside the &lt;code>wrapper&lt;/code> object to support serialization extensions.&lt;/p>
+&lt;p>The IDL of &lt;code>protobuf&lt;/code> of wrapper is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-proto" data-lang="proto">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.triple;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">TripleRequestWrapper&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//hessian4
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// json
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> serializeType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">repeated&lt;/span> &lt;span style="color:#dc322f">bytes&lt;/span> args &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">repeated&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> argTypes &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">TripleResponseWrapper&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> serializeType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">bytes&lt;/span> data &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> type &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For requests, use &lt;code>TripleRequestWrapper&lt;/code> for wrapping, and for responses, use &lt;code>TripleResponseWrapper&lt;/code> for wrapping.&lt;/p>
+&lt;blockquote>
+&lt;p>For request parameters, you can see that args is modified by &lt;code>repeated&lt;/code>, this is because multiple parameters of the java method need to be supported. Of course, serialization can only be one. The implementation of serialization follows the spi implemented by Dubbo2&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="multilingual-users-using-protobuf">Multilingual users (using Protobuf)&lt;/h2>
+&lt;blockquote>
+&lt;p>It is recommended that all new services use this method&lt;/p>
+&lt;/blockquote>
+&lt;p>For Dubbo3 and Triple, the main recommendation is to use &lt;code>protobuf&lt;/code> serialization, and use &lt;code>IDL&lt;/code> defined by &lt;code>proto&lt;/code> to generate related interface definitions. Using &lt;code>IDL&lt;/code> as a common interface convention in multiple languages, coupled with the natural interoperability of &lt;code>Triple&lt;/code> and &lt;code>Grpc&lt;/code>, can easily achieve cross-language interaction, such as Go language.&lt;/p>
+&lt;p>Use the &lt;code>dubbo-compiler&lt;/code> plug-in to compile the prepared &lt;code>.proto&lt;/code> file and write the implementation class to complete the method call:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png" alt="result">&lt;/p>
+&lt;p>From the upgrade example above, we can know that the &lt;code>Triple&lt;/code> protocol uses &lt;code>protbuf&lt;/code> objects to be serialized for transmission, so there is no other logic for methods that are themselves &lt;code>protobuf&lt;/code> objects.&lt;/p>
+&lt;p>The interface after compiling with the &lt;code>protobuf&lt;/code> plugin is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">PbGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String JAVA_SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> inited &lt;span style="color:#719e07">=&lt;/span> PbGreeterDubbo.init();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.sample.tri.GreeterReply &lt;span style="color:#268bd2">greet&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">greetAsync&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> CompletableFuture. &lt;span style="color:#268bd2">supplyAsync&lt;/span>(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> greet(request));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">greetServerStream&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterRequest&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">greetStream&lt;/span>(org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="open-the-new-feature-of-triple---stream-stream">Open the new feature of Triple - Stream (stream)&lt;/h2>
+&lt;p>Stream is a new call type provided by Dubbo3. It is recommended to use stream in the following scenarios:&lt;/p>
+&lt;ul>
+&lt;li>The interface needs to send a large amount of data. These data cannot be placed in an RPC request or response, and need to be sent in batches. However, if the application layer cannot solve the order and performance problems in the traditional multiple RPC method, if the order needs to be guaranteed , it can only be sent serially&lt;/li>
+&lt;li>In streaming scenarios, data needs to be processed in the order they are sent, and the data itself has no definite boundary&lt;/li>
+&lt;li>In push scenarios, multiple messages are sent and processed in the context of the same call&lt;/li>
+&lt;/ul>
+&lt;p>Stream is divided into the following three types:&lt;/p>
+&lt;ul>
+&lt;li>SERVER_STREAM (server stream)
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-server-stream.png" alt="SERVER_STREAM">&lt;/li>
+&lt;li>CLIENT_STREAM (client stream)
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-client-stream.png" alt="CLIENT_STREAM">&lt;/li>
+&lt;li>BIDIRECTIONAL_STREAM (bidirectional stream)
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-bi-stream.png" alt="BIDIRECTIONAL_STREAM">&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>Due to the limitations of the &lt;code>java&lt;/code> language, the implementation of BIDIRECTIONAL_STREAM and CLIENT_STREAM is the same.&lt;/p>
+&lt;/blockquote>
+&lt;p>In Dubbo3, the stream interface is declared and used as &lt;code>SteamObserver&lt;/code>, and users can use and implement this interface to send and handle stream data, exceptions, and end.&lt;/p>
+&lt;blockquote>
+&lt;p>For Dubbo2 users, they may be unfamiliar with StreamObserver, which is a stream type defined by Dubbo3. There is no Stream type in Dubbo2, so it has no impact on migration scenarios.&lt;/p>
+&lt;/blockquote>
+&lt;p>Stream Semantic Guarantees&lt;/p>
+&lt;ul>
+&lt;li>Provide message boundaries, which can easily process messages separately&lt;/li>
+&lt;li>Strictly ordered, the order of the sender is consistent with the order of the receiver&lt;/li>
+&lt;li>Full duplex, no need to wait for sending&lt;/li>
+&lt;li>Support cancellation and timeout&lt;/li>
+&lt;/ul>
+&lt;h3 id="non-pb-serialized-stream">Non-PB serialized stream&lt;/h3>
+&lt;ol>
+&lt;li>api&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IWrapperGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloStream&lt;/span>(StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHelloServerStream&lt;/span>(String request, StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>The method input parameters and return values of the Stream method are strictly agreed. In order to prevent problems caused by writing errors, the Dubbo3 framework side checks the parameters, and throws an exception if there is an error.
+For &lt;code>BIDIRECTIONAL_STREAM&lt;/code>, it should be noted that &lt;code>StreamObserver&lt;/code> in the parameter is the response stream, and &lt;code>StreamObserver&lt;/code> in the return parameter is the request stream.&lt;/p>
+&lt;/blockquote>
+&lt;ol start="2">
+&lt;li>Implementation class&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">WrapGreeterImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> WrapGreeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloStream&lt;/span>(StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onNext(&lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable. &lt;span style="color:#268bd2">printStackTrace&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onCompleted();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHelloServerStream&lt;/span>(String request, StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> 10; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onNext(&lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onCompleted();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>Call method&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>delegate.sayHelloServerStream(&lt;span style="color:#2aa198">&amp;#34;server stream&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable. &lt;span style="color:#268bd2">printStackTrace&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> request &lt;span style="color:#719e07">=&lt;/span> delegate.sayHelloStream(&lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable. &lt;span style="color:#268bd2">printStackTrace&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> n; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> request.onNext(&lt;span style="color:#2aa198">&amp;#34;stream request&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> i);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>request.onCompleted();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="serialized-stream-using-protobuf">Serialized stream using Protobuf&lt;/h2>
+&lt;p>For the &lt;code>Protobuf&lt;/code> serialization method, it is recommended to write &lt;code>IDL&lt;/code> and use the &lt;code>compiler&lt;/code> plugin to compile and generate. The generated code is roughly as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">PbGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String JAVA_SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.tri.PbGreeter&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> inited &lt;span style="color:#719e07">=&lt;/span> PbGreeterDubbo.init();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">greetServerStream&lt;/span>(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterRequest&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">greetStream&lt;/span>(org.apache.dubbo.common.stream.StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.sample.tri.GreeterReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> responseObserver);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="implementation-principle-of-stream">Implementation principle of stream&lt;/h3>
+&lt;p>How does the streaming mode of the &lt;code>Triple&lt;/code> protocol support it?&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>From the perspective of the protocol layer, &lt;code>Triple&lt;/code> is built on the basis of &lt;code>HTTP2&lt;/code>, so it directly has all the capabilities of &lt;code>HTTP2&lt;/code>, so it has the ability to split &lt;code>stream&lt;/code> and full-duplex.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>In terms of the framework layer, &lt;code>StreamObserver&lt;/code> is provided to users as a stream interface to provide stream processing for input and output parameters. The framework makes corresponding interface calls when sending and receiving stream data, so as to ensure the integrity of the life cycle of the stream.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="triple-and-application-level-registration-discovery">Triple and application-level registration discovery&lt;/h2>
+&lt;p>The application-level service registration and discovery of the Triple protocol is consistent with other languages, and you can learn more about it through the following content.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/docs/concepts/service-discovery/">Service Discovery&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/docs/migration/migration-service-discovery/">Application-level address discovery migration guide&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="intercommunicate-with-grpc">Intercommunicate with GRPC&lt;/h2>
+&lt;p>Through the introduction of the protocol, we know that the &lt;code>Triple&lt;/code> protocol is based on &lt;code>HTTP2&lt;/code> and compatible with &lt;code>GRPC&lt;/code>. In order to ensure and verify the interoperability with &lt;code>GRPC&lt;/code>, Dubbo3 has also written various tests in slave scenarios. For details, you can learn more through &lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/README.MD">here&lt;/a>.&lt;/p>
+&lt;h2 id="future-everything-on-stub">Future: Everything on Stub&lt;/h2>
+&lt;p>Students who have used &lt;code>Grpc&lt;/code> should be familiar with &lt;code>Stub&lt;/code>.
+Grpc uses &lt;code>compiler&lt;/code> to compile the written &lt;code>proto&lt;/code> file into related protobuf objects and related rpc interfaces. By default several different &lt;code>stubs&lt;/code> will be generated at the same time&lt;/p>
+&lt;p>-blockingStub&lt;/p>
+&lt;ul>
+&lt;li>futureStub
+-reactorStub
+-&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>&lt;code>stub&lt;/code> helps us shield the details of different calling methods in a unified way. However, currently &lt;code>Dubbo3&lt;/code> only supports the traditional way of defining and calling interfaces.&lt;/p>
+&lt;p>In the near future, &lt;code>Triple&lt;/code> will also implement various commonly used &lt;code>Stub&lt;/code>, allowing users to write a &lt;code>proto&lt;/code> file, which can be conveniently used in any scene through &lt;code>comipler&lt;/code>, please wait and see.&lt;/p></description></item><item><title>Docs3-V2: 3.1 upgrade to 3.2</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/3.1-to-3.2-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/3.1-to-3.2-compatibility-guide/</guid><description>
+&lt;p>For the vast majority of users, upgrading to Dubbo 3.2.0 is completely smooth, and only needs to modify the version of the dependent package.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="compatibility-checklist">Compatibility CheckList&lt;/h1>
+&lt;h2 id="1-serialization-check-mode-important">1. Serialization check mode (important!!!)&lt;/h2>
+&lt;p>In Dubbo 3.2.0 version, Dubbo will enable the strong verification of the serialized whitelist by default to improve the security of Dubbo and avoid the problem of remote command execution.
+For some users who use generics and may have incomplete scanning or &lt;strong>large service scale&lt;/strong>, we recommend that you add &lt;code>-Ddubbo.application.serialize-check-status=WARN&lt;/code> configuration.
+After observing for a period of time (via logs and QoS commands), if no security alarm is triggered, you can configure the strong check mode.&lt;/p>
+&lt;p>For the configuration of the custom whitelist, please refer to &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/security/class-check/">Documentation/SDK Manual/Java SDK/Advanced Features and Usage/Improve Security/Class Inspection Mechanism&lt;/a> article to configure.&lt;/p>
+&lt;h4 id="q1-why-do-you-need-to-enable-strong-verification-of-the-serialization-whitelist">Q1: Why do you need to enable strong verification of the serialization whitelist?&lt;/h4>
+&lt;p>Due to the problem of Java&amp;rsquo;s own mechanism, the non-IDL serialization supported by Dubbo naturally allows access to arbitrary classes, which may lead to remote command execution (RCE) risks.&lt;/p>
+&lt;h4 id="q2-what-are-the-best-practices-for-upgrading-to-32">Q2: What are the best practices for upgrading to 3.2?&lt;/h4>
+&lt;p>We recommend &lt;strong>all users&lt;/strong> to add &lt;code>-Ddubbo.application.serialize-check-status=WARN&lt;/code> configuration before upgrading Dubbo 3.2.0 to ensure the best compatibility. Otherwise, it may lead to abnormal online data!&lt;/p>
+&lt;hr>
+&lt;h2 id="2-default-serialization-switch">2. Default serialization switch&lt;/h2>
+&lt;p>Starting from Dubbo version 3.2.0, the default serialization method is switched from &lt;code>hessian2&lt;/code> to &lt;code>fastjson2&lt;/code>. For applications upgraded to 3.2.0, Dubbo will automatically try to use &lt;code>fastjson2&lt;/code> for serialization.&lt;/p>
+&lt;h4 id="q1-will-it-affect-the-intercommunication-with-lower-versions-of-dubbo">Q1: Will it affect the intercommunication with lower versions of Dubbo?&lt;/h4>
+&lt;p>Won&amp;rsquo;t. Interoperability with lower versions still uses &lt;code>hessian-lite&lt;/code>. For the principle, please refer to &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/">Serialization Protocol Upgrade Guide&lt;/a>.&lt;/p>
+&lt;h4 id="q2-why-switch-the-default-serialization-method">Q2: Why switch the default serialization method?&lt;/h4>
+&lt;p>&lt;code>fastjson2&lt;/code> is a high-performance serialization framework with better performance than &lt;code>hessian2&lt;/code>, natively supports JDK17, Native, etc., and is fully forward compatible with all functions of &lt;code>hessian2&lt;/code>.
+Since &lt;code>hessian-lite&lt;/code> will become more and more difficult to maintain in the future, we decided to switch the default serialization method from &lt;code>hessian2&lt;/code> to &lt;code>fastjson2&lt;/code>.&lt;/p>
+&lt;h4 id="q3-what-is-the-relationship-with-native-json">Q3: What is the relationship with native JSON?&lt;/h4>
+&lt;p>Dubbo uses the JSONB format of &lt;code>fastjson2&lt;/code> instead of the native JSON format. The JSONB format corresponds to the JSON format, can fully represent JSON, and is a binary format.
+For the specific protocol format, please refer to: &lt;a href="https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn">JSONB format&lt;/a>&lt;/p>
+&lt;h4 id="q4-what-if-i-dont-want-to-use-fastjson2">Q4: What if I don&amp;rsquo;t want to use &lt;code>fastjson2&lt;/code>?&lt;/h4>
+&lt;p>If you don&amp;rsquo;t want to use &lt;code>fastjson2&lt;/code>, you can configure &lt;code>prefer-serialization&lt;/code> to override the default configuration for &lt;code>hessian2&lt;/code>. (such as &lt;code>dubbo.provider.prefer-serialization=fastjson2,hessian2&lt;/code>) If there is no special requirement, we do not recommend continuing to use &lt;code>hessian2&lt;/code>.&lt;/p>
+&lt;hr>
+&lt;h2 id="3-push-short-protection-is-disabled-by-default">3. Push short protection is disabled by default&lt;/h2>
+&lt;p>Since version 3.2.0 of Dubbo, the push protection is turned off by default. Even if the registration center pushes an empty address, Dubbo will not keep the last batch of provider information.
+If you need to enable empty protection, you can configure &lt;code>dubbo.application.enable-empty-protection&lt;/code> to &lt;code>true&lt;/code>.&lt;/p>
+&lt;h4 id="q1-how-does-disabling-push-short-protection-affect-me">Q1: How does disabling push short protection affect me?&lt;/h4>
+&lt;p>In most scenarios it has no effect.
+The purpose of push empty protection is that when the registration center fails and actively pushes empty addresses, Dubbo keeps the last batch of provider information to ensure service availability.
+However, when most registration centers fail, the registration center will not push empty addresses, only in some special cases.
+However, if the push short protection is turned on, it will have a greater impact on Dubbo&amp;rsquo;s Fallback logic, heartbeat logic, etc., and bring troubles to the development and use of Dubbo.&lt;/p>
+&lt;h4 id="q2-i-want-to-enable-short-push-protection-what-should-i-do">Q2: I want to enable short push protection, what should I do?&lt;/h4>
+&lt;p>If you need to enable push empty protection for high availability in production, you can configure &lt;code>dubbo.application.enable-empty-protection&lt;/code> to &lt;code>true&lt;/code>.
+At present, it is known that turning on the push-out protection will cause the server-side application to upgrade from `2.6. In this scenario, the service call will fail.
+In addition, after the push-to-empty protection is turned on, when the server address is really empty, there will be more heartbeat exceptions and log exceptions.&lt;/p>
+&lt;hr>
+&lt;h2 id="4-transitive-dependency-changes">4. Transitive dependency changes&lt;/h2>
+&lt;ul>
+&lt;li>Dubbo version 3.2.0 no longer shade &lt;code>hessian-lite&lt;/code> code in &lt;code>dubbo-all&lt;/code> by default, but use transitive dependency transfer instead. If you don&amp;rsquo;t need to use &lt;code>hessian-lite&lt;/code> in your application, you can remove &lt;code>hessian-lite&lt;/code> from dependencies.&lt;/li>
+&lt;li>From version 3.2.0 of Dubbo, &lt;code>gson&lt;/code>, &lt;code>fastjson&lt;/code> dependencies are no longer passed in &lt;code>dubbo-all&lt;/code>, if you need to use &lt;code>gson&lt;/code>, &lt;code>fastjson&lt;/code> in your application, please manually install &lt;code>gson&lt;/code>, &lt;code>fastjson&lt;/code> ` Dependencies are added to the application.&lt;/li>
+&lt;li>Dubbo 3.2.0 version passes &lt;code>fastjson2&lt;/code> dependency in &lt;code>dubbo-all&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="5-default-internal-serialization-tool-switch">5. Default internal serialization tool switch&lt;/h2>
+&lt;p>Since version 3.2.0 of Dubbo, the default &lt;strong>internal&lt;/strong> serialization tool is switched from &lt;code>fastjson&lt;/code> to &lt;code>fastjson2&lt;/code>.&lt;/p>
+&lt;h4 id="q1-will-it-affect-the-rpc-request-traffic">Q1: Will it affect the RPC request traffic?&lt;/h4>
+&lt;p>Won&amp;rsquo;t. The internal serialization tool is used when Dubbo internally parses parameters, not the RPC transmission serialization protocol.&lt;/p>
+&lt;h4 id="q2-why-switch-the-default-internal-serialization-tool">Q2: Why switch the default internal serialization tool?&lt;/h4>
+&lt;p>From version 3.2.0 of Dubbo, the default transitive dependencies no longer pass &lt;code>fastjson&lt;/code> and &lt;code>gson&lt;/code>. For compatibility reasons, the default internal serialization tool is switched to &lt;code>fastjson2&lt;/code>.&lt;/p>
+&lt;h4 id="q3-what-if-there-is-no-fastjson2-in-my-environment">Q3: What if there is no &lt;code>fastjson2&lt;/code> in my environment?&lt;/h4>
+&lt;p>Dubbo supports automatic switching of various serialization frameworks. If there is no &lt;code>fastjson2&lt;/code> in your environment, Dubbo will automatically try to switch to &lt;code>fastsjon&lt;/code> or &lt;code>gson&lt;/code>.&lt;/p>
+&lt;h4 id="q4-i-want-to-specify-the-internal-serialization-tool-of-dubbo-what-should-i-do">Q4: I want to specify the internal serialization tool of Dubbo, what should I do?&lt;/h4>
+&lt;p>You can configure &lt;code>dubbo.json-framework.prefer&lt;/code> parameters, such as &lt;code>-Ddubbo.json-framework.prefer=gson&lt;/code>.&lt;/p>
+&lt;hr>
+&lt;h2 id="6-triple-protocol-supports-passing-custom-exceptions">6. Triple protocol supports passing custom exceptions&lt;/h2>
+&lt;p>Starting from Dubbo version 3.2.0, the Triple protocol supports returning custom exceptions instead of only returning &lt;code>RpcException&lt;/code>. If the service interface throws an exception, after Dubbo 3.2.0, the custom exception object will be returned by default according to the Dubbo protocol.&lt;/p>
+&lt;hr>
+&lt;h2 id="7-triple-protocol-version-number-alignment">7. Triple protocol version number alignment&lt;/h2>
+&lt;p>Starting from Dubbo version 3.2.0, the communication of the Triple protocol requires the version number and grouping of the client and server to be consistent, otherwise the service will not be found. When interoperating with the native gRPC SDK, the Dubbo side cannot configure groups and version numbers.&lt;/p>
+&lt;h4 id="q1-how-was-dubbo-before-320">Q1: How was Dubbo before 3.2.0?&lt;/h4>
+&lt;ol>
+&lt;li>Triple will think that the empty version number is consistent with the 1.0.0 version number. If your server and client version numbers are inconsistent, but they are both empty version numbers or 1.0.0 version numbers, they can communicate normally.&lt;/li>
+&lt;li>For a service that does not match a version number, Triple will try to match a service with any version number. If it matches a service with any version number, it can also communicate normally.&lt;/li>
+&lt;/ol>
+&lt;h4 id="q2-how-to-ensure-that-it-is-aligned-with-the-original-behavior">Q2: How to ensure that it is aligned with the original behavior?&lt;/h4>
+&lt;p>By configuring &lt;code>-Ddubbo.rpc.tri.ignore-1.0.0-version=true -Ddubbo.rpc.tri.resolve-fallback-to-default=true&lt;/code>, the previous behavior of Dubbo 3.2.0 can be achieved.&lt;/p></description></item><item><title>Docs3-V2: Application Level Service Discovery</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/</guid><description/></item><item><title>Docs3-V2: Serialization Protocol Upgrade Guide</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/serialization-upgrade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/serialization-upgrade/</guid><description>
+&lt;p>In version 3.1.0, the serialization protocol supported by Dubbo by default adds support for Fastjson2. Some users may consider upgrading the serialization protocol in the existing system, but the difference between the server and client versions may cause the client to not support the serialization protocol of the server. In version 3.2.0, Dubbo&amp;rsquo;s server introduces a new configuration &lt;code>prefer-serialization&lt;/code>, which can perfectly solve the possible risks in the server-side serialization upgrade process.&lt;/p>
+&lt;h3 id="best-practices">Best Practices&lt;/h3>
+&lt;p>Serialization protocol upgrade needs to be done in two steps:&lt;/p>
+&lt;ul>
+&lt;li>**First, it is necessary to promote the serialization protocol upgrade of the server, and at the same time, the &lt;code>prefer-serialization&lt;/code> configuration needs to be added to the exposed configuration of the server. For example: the serialization protocol before the upgrade is hessian2, and the serialization protocol after the upgrade is Fastjson2, then the configuration shown below should be added to the exposed configuration of the server **&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>dubbo.provider.prefer-serialization=fastjson2,hessian2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.serialization=hessian2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;strong>Secondly, the client needs to be upgraded to the same version as the server&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;h3 id="implementation-principle">Implementation principle&lt;/h3>
+&lt;p>The dubbo client serialization protocol is selected according to the registration configuration of the server (that is, the &lt;code>serialization&lt;/code> configuration of the server). In the request phase, dubbo will assemble the serialization protocol of the client into the request header, and the server will determine the deserialization protocol according to the request header when performing deserialization.&lt;/p>
+&lt;ul>
+&lt;li>**So, if the versions of the server and the client are inconsistent, the client may not be able to serialize. ** In order to solve this situation, 3.2.0 will use the protocol configured by &lt;code>prefer-serialization&lt;/code> first when serializing the client. If the protocol related to &lt;code>prefer-serialization&lt;/code> is not supported, the protocol configured by &lt;code>serialization&lt;/code> will be used . (You can think of &lt;code>serialization&lt;/code> as a bottom-up configuration)&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: Comparison of Protobuf and Interface</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/protobufinterface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/protobufinterface/</guid><description>
+&lt;h2 id="1-data-type">1. Data type&lt;/h2>
+&lt;h3 id="11-basic-types">1.1. Basic types&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>ptoto type&lt;/th>
+&lt;th>java type&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>double&lt;/td>
+&lt;td>double&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>float&lt;/td>
+&lt;td>float&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint32&lt;/td>
+&lt;td>int[Note]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint64&lt;/td>
+&lt;td>long[Note]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed32&lt;/td>
+&lt;td>int[Note]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed64&lt;/td>
+&lt;td>long[Note]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bool&lt;/td>
+&lt;td>boolean&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>string&lt;/td>
+&lt;td>String&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bytes&lt;/td>
+&lt;td>ByteString&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;blockquote>
+&lt;p>[Note] In Java, unsigned 32-bit and 64-bit integers are represented using their signed logarithms, with the top bit only stored in the sign bit.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="2-composite-types">2. Composite types&lt;/h2>
+&lt;h3 id="21-enumeration">2.1. Enumeration&lt;/h3>
+&lt;ul>
+&lt;li>Original pb code&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">enum&lt;/span> TrafficLightColor {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_INVALID &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_UNSET &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_GREEN &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_YELLOW &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_RED &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">4&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Generated java code&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>Enumerations are constants, so use uppercase&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="22-arrays">2.2. Arrays&lt;/h3>
+&lt;ul>
+&lt;li>Original pb code&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message VipIDToRidReq {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> repeated uint32 vipID &lt;span style="color:#719e07">=&lt;/span> 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Generated java code&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>The bottom layer is actually an ArrayList&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="23-collections">2.3. Collections&lt;/h3>
+&lt;p>PB does not support unordered and non-repeating collections, and can only &lt;code>borrow arrays to implement&lt;/code>, and needs to &lt;code>remove duplicates by itself&lt;/code>.&lt;/p>
+&lt;h3 id="24-dictionaries">2.4. Dictionaries&lt;/h3>
+&lt;ul>
+&lt;li>Original pb code&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message BatchOnlineRes {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32, uint32&lt;span style="color:#719e07">&amp;gt;&lt;/span> onlineMap &lt;span style="color:#719e07">=&lt;/span> 1;&lt;span style="color:#586e75">//online status&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Generated java code&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234654-e4568080-db46-11eb-9700-b30022ebee21.png" alt="image">&lt;/p>
+&lt;h3 id="25-nesting">2.5. Nesting&lt;/h3>
+&lt;ul>
+&lt;li>Original pb code&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message BatchAnchorInfoRes {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32, AnchorInfo&lt;span style="color:#719e07">&amp;gt;&lt;/span> list &lt;span style="color:#719e07">=&lt;/span> 1; &lt;span style="color:#586e75">//user information map list&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/*
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">* The function of the corresponding interface: get user information in batches or individually
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>message AnchorInfo {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> uint32 ownerUid &lt;span style="color:#719e07">=&lt;/span> 1 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;uid&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//user id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string nickName &lt;span style="color:#719e07">=&lt;/span> 2 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nn&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//User nickname&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string smallAvatar &lt;span style="color:#719e07">=&lt;/span> 3 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;savt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//full path of user avatar - small&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string middleAvatar &lt;span style="color:#719e07">=&lt;/span> 4 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//Full path of user avatar - middle&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string bigAvatar &lt;span style="color:#719e07">=&lt;/span> 5 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;bavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//Full path of user avatar - big&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string avatar &lt;span style="color:#719e07">=&lt;/span> 6 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;avt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//User avatar&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Generated java code&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png" alt="image">&lt;/p>
+&lt;h2 id="3-field-default-value">3. Field default value&lt;/h2>
+&lt;ul>
+&lt;li>For strings, the default is the empty string.&lt;/li>
+&lt;li>For bytes, the default is the null byte.&lt;/li>
+&lt;li>For bools, the default is false.&lt;/li>
+&lt;li>For numeric types, the default value is zero.&lt;/li>
+&lt;li>For enums, the default is the first defined enum value, which must be 0.&lt;/li>
+&lt;li>For the message field, the field is not set. Its exact value is language dependent. See the generated code guide for details.&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-overall-structure">4. Overall structure&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Feature&lt;/th>
+&lt;th>Java Interface&lt;/th>
+&lt;th>Protobuf&lt;/th>
+&lt;th>Remarks&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Method Overloading&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Generic/templated&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>method inheritance&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Nested definition&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>Partial support&lt;/td>
+&lt;td>PB only supports message and enum nesting&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>import file&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>field is null&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Multiple input parameters&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB only supports single input parameters&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0 input parameters&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB must have input parameters&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0 output parameters&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB must have output parameters&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>The input/output parameters are abstract classes&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>The input/output parameters of PB must be concrete classes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>The input/output parameters are interfaces&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>The input/output parameters of PB must be concrete&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>The input parameter/output parameter is the basic type&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>The input parameter/output parameter of PB must be a structure&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="5-community-profile">5. Community profile&lt;/h2>
+&lt;ul>
+&lt;li>Community homepage address: &lt;a href="https://developers.google.cn/protocol-buffers/">https://developers.google.cn/protocol-buffers/&lt;/a>&lt;/li>
+&lt;li>Community open source address: &lt;a href="https://github.com/google/protobuf">https://github.com/google/protobuf&lt;/a>&lt;/li>
+&lt;li>Maven of related jars: &lt;a href="https://search.maven.org/search?q=com.google.protobuf">https://search.maven.org/search?q=com.google.protobuf&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: 3.0 to 3.1 Operation Guide</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/3.0-to-3.1-compatibility-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/3.0-to-3.1-compatibility-guide/</guid><description>
+&lt;h2 id="function-modification-points">Function modification points&lt;/h2>
+&lt;h3 id="1-nacos-group-alignment-application-level-service-discovery">1. Nacos Group alignment (application-level service discovery)&lt;/h3>
+&lt;p>In Dubbo 2.7.x, the group value configured on the Nacos Registry URL is aligned with the group group in the Nacos Registry. (group can be regarded as a soft isolation similar to namespace)&lt;/p>
+&lt;p>In Dubbo 3.0.x, the group configured on the Nacos Registry URL is not used by default, and all use DEFAULT_GROUP. (group no longer provides isolation)&lt;/p>
+&lt;p>In Dubbo 3.1.x, the group value configured on the Nacos Registry URL will realign the group grouping in the Nacos Registry.&lt;/p>
+&lt;p>Precautions:&lt;/p>
+&lt;ol>
+&lt;li>Please check whether the group attribute has been configured on the URL of the registration center. If so, check whether the group of the server and the consumer are consistent. If not, please modify it to be consistent.&lt;/li>
+&lt;li>If you do not want the group to be realigned to the group grouping in the Nacos registry, you can configure the &lt;code>dubbo.nacos-service-discovery.use-default-group=false&lt;/code> global property value to ignore this function&lt;/li>
+&lt;/ol></description></item></channel></rss>

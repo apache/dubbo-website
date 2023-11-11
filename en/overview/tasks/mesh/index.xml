@@ -1,0 +1,386 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Mesh Deployment Solution</title><link>https://dubbo.apache.org/en/overview/tasks/mesh/</link><description>Recent content in Mesh Deployment Solution on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/tasks/mesh/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Dubbo proxy mesh using Envoy &amp; Istio</title><link>https://dubbo.apache.org/en/overview/tasks/mesh/dubbo-mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/tasks/mesh/dubbo-mesh/</guid><description>
+&lt;p>By following the steps below, you can easily learn how to develop a Dubbo service that conforms to the Service Mesh architecture, deploy it to Kubernetes, and access Istio&amp;rsquo;s traffic management system. Check here &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s">Complete sample source code&lt;/a>&lt;/p>
+&lt;h2 id="1-overall-objective">1 Overall Objective&lt;/h2>
+&lt;ul>
+&lt;li>Deploy Dubbo application to Kubernetes&lt;/li>
+&lt;li>Istio automatically injects Envoy and implements traffic interception&lt;/li>
+&lt;li>Traffic governance based on Istio rules&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-basic-process-and-working-principle">2 Basic process and working principle&lt;/h2>
+&lt;p>This example demonstrates how to deploy an application developed by Dubbo under the Istio system to realize Envoy&amp;rsquo;s automatic proxying of Dubbo services. The overall architecture of the example is shown in the figure below.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/mesh/thinsdk-envoy.png" alt="thinsdk">&lt;/p>
+&lt;p>The steps you will need to complete the example are as follows:&lt;/p>
+&lt;ol>
+&lt;li>Create a Dubbo application ( &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s">dubbo-samples-mesh-k8s&lt;/a> )&lt;/li>
+&lt;li>Build the container image and push it to the mirror warehouse (&lt;a href="https://hub.docker.com/r/apache/dubbo-demo">the official image of this example&lt;/a> )&lt;/li>
+&lt;li>Deploy Dubbo Provider and Dubbo Consumer to Kubernetes respectively and verify that Envoy proxy injection is successful&lt;/li>
+&lt;li>Verify Envoy discovers the service address, normally intercepts RPC traffic and implements load balancing&lt;/li>
+&lt;li>Proportional traffic forwarding based on Istio VirtualService&lt;/li>
+&lt;/ol>
+&lt;h2 id="3-detailed-steps">3 detailed steps&lt;/h2>
+&lt;h3 id="31-environmental-requirements">3.1 Environmental requirements&lt;/h3>
+&lt;p>Please ensure that the following environment is installed locally to provide container runtime, Kubernetes cluster and access tools&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://www.docker.com/get-started/">Docker&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://minikube.sigs.k8s.io/docs/start/">Minikube&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubectl&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://istio.io/latest/docs/setup/getting-started/">Istio&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/ahmetb/kubectx">Kubens(optional)&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Start the local Kubernetes cluster with the following command&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>minikube start
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Check that the cluster is up and running with kubectl, and that kubectl is bound to the default local cluster&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl cluster-info
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-create-an-independent-namespace-and-enable-automatic-injection">3.2 Create an independent namespace and enable automatic injection&lt;/h3>
+&lt;p>Use the following command to create an independent Namespace &lt;code>dubbo-demo&lt;/code> for the sample project, and enable sidecar automatic injection at the same time.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Initialize the namespace&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/Namespace.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># switch namespace&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubens dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo-demo enable automatic injection&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl label namespace dubbo-demo istio-injection&lt;span style="color:#719e07">=&lt;/span>enabled
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-deploy-to-kubernetes">3.3 Deploy to Kubernetes&lt;/h3>
+&lt;h4 id="331-deploy-provider">3.3.1 Deploy Provider&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy the Service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Service.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy Deployment&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Deployment.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above command creates a Service named &lt;code>dubbo-samples-mesh-provider&lt;/code>, note that the service name here is the same as the dubbo application name in the project.&lt;/p>
+&lt;p>Then the Deployment deploys a 2-copy pod instance, and the Provider is started.&lt;/p>
+&lt;p>You can check the startup log with the following command.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod list&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl get pods -l &lt;span style="color:#268bd2">app&lt;/span>&lt;span style="color:#719e07">=&lt;/span>dubbo-samples-mesh-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod deployment logs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl logs your-pod-id
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this time, there should be a dubbo provider container instance and an Envoy Sidecar container instance in the pod.&lt;/p>
+&lt;h4 id="332-deploy-consumer">3.3.2 Deploy Consumer&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy the Service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/consumer/Service.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy Deployment&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/consumer/Deployment.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Deploying consumer and provider is the same, here also keep K8S Service and Dubbo consumer application name (in [dubbo.properties](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/3-extensions/registry">https://github.com/apache/dubbo-samples/blob/master/3-extensions/registry&lt;/a> //dubbo-samples-mesh-k8s/dubbo-samples-mesh-consumer/src/main/resources/spring/dubbo-consumer.properties) consistent: &lt;code>dubbo.application.name=dubbo-samples-mesh- consumer&lt;/code>.&lt;/p>
+&lt;blockquote>
+&lt;p>The provider service (application) name of consumption is also specified in the Dubbo Consumer service statement &lt;code>@DubboReference(version = &amp;quot;1.0.0&amp;quot;, providedBy = &amp;quot;dubbo-samples-mesh-provider&amp;quot;, lazy = true)&lt;/code>&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="34-check-the-normal-communication-between-provider-and-consumer">3.4 Check the normal communication between Provider and Consumer&lt;/h3>
+&lt;p>After performing step 3.3, check the startup log to see that the consumer has completed consumption of the provider service.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod list&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl get pods -l &lt;span style="color:#268bd2">app&lt;/span>&lt;span style="color:#719e07">=&lt;/span>dubbo-samples-mesh-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod deployment logs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl logs your-pod-id
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod isitio-proxy logs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl logs your-pod-id -c istio-proxy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see that the consumer pod log output is as follows (the Triple protocol is load balanced by the Envoy proxy):&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke &lt;span style="color:#2aa198">0&lt;/span> &lt;span style="color:#268bd2">end&lt;/span> &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10/08/22 07:07:36:036 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &amp;lt;-message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.22:50052, client: 172.18. 96.22, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#268bd2">end&lt;/span> &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10/08/22 07:07:42:042 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &amp;lt;-message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.18:50052, client: 172.18. 96.18, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The consumer istio-proxy log output is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>2022-07-15T05:35:14.418Z&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#2aa198">&amp;#34;POST /org.apache.dubbo.samples.Greeter/greet HTTP/2&amp;#34;&lt;/span> &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- via_upstream - &lt;span style="color:#2aa198">&amp;#34;-&amp;#34;&lt;/span> &lt;span style="color:#2aa198">19&lt;/span> &lt;span style="color:#2aa198">160&lt;/span> &lt;span style="color:#2aa198">2&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">&amp;#34;-&amp;#34;&lt;/span> &lt;span style="color:#2aa198">&amp;#34;-&amp;#34;&lt;/span> &lt;span style="color:#2aa198">&amp;#34;6b8a5a03-5783-98bf-9bee-f93ea6e3d68e&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;dubbo-samples-mesh-provider:50052&amp;#34;&lt;/span> &lt;span style="color:#2aa198">&amp;#34;172.17.0.4:50052&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>outbound|50052&lt;span style="color:#719e07">||&lt;/span>dubbo-samples-mesh-provider.dubbo-demo.svc.cluster.local 172.17.0.7:52768 10.101.172.129:50052 172.17.0.7:38488 - default
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see the provider pod log output as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10/08/22 07:08:47:047 UTC&lt;span style="color:#719e07">]&lt;/span> tri-protocol-50052-thread-8 INFO impl.GreeterImpl: Server &lt;span style="color:#b58900">test&lt;/span> dubbo tri mesh received greet request name: &lt;span style="color:#2aa198">&amp;#34;service mesh&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10/08/22 07:08:57:057 UTC&lt;span style="color:#719e07">]&lt;/span> tri-protocol-50052-thread-9 INFO impl.GreeterImpl: Server &lt;span style="color:#b58900">test&lt;/span> dubbo tri mesh received greet request name: &lt;span style="color:#2aa198">&amp;#34;service mesh&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The log output of provider istio-proxy is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>2022-07-15T05:25:34.061Z&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#2aa198">&amp;#34;POST /org.apache.dubbo.samples.Greeter/greet HTTP/2&amp;#34;&lt;/span> &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- via_upstream - &lt;span style="color:#2aa198">&amp;#34;-&amp;#34;&lt;/span> &lt;span style="color:#2aa198">19&lt;/span> &lt;span style="color:#2aa198">162&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#2aa198">&amp;#34;-&amp;#34;&lt;/span> &lt;span style="color:#2aa198">&amp;#34;-&amp;#34;&lt;/span> &lt;span style="color:#2aa198">&amp;#34;201e6976-da10-96e1-8da7-ad032e58db47&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;dubbo-samples-mesh-provider:50052&amp;#34;&lt;/span> &lt;span style="color:#2aa198">&amp;#34;172.17.0.10:50052&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> inbound|50052&lt;span style="color:#719e07">||&lt;/span> 127.0.0.6:47013 172.17.0.10:50052 172.17.0.7:60244
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> outbound_.50052_._.dubbo-samples-mesh-provider.dubbo-demo.svc.cluster.local default
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="35-traffic-governance---virtualservice-implements-proportional-traffic-forwarding">3.5 Traffic Governance - VirtualService implements proportional traffic forwarding&lt;/h3>
+&lt;p>Deploy the v2 version of the demo provider&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Deployment-v2.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Set VirtualService and DestinationRule, and observe that traffic is directed to provider v1 and provider v2 respectively in a ratio of 4:1.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/traffic/virtual-service.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>From the log output of the consumer side, observe the traffic distribution effect as shown in the figure below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 100 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:15:58:058 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.18:50052, client: 172.18. 96.18, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 101 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:03:003 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.22:50052, client: 172.18. 96.22, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 102 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:08:008 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.18:50052, client: 172.18. 96.18, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 103 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:13:013 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v2: 172.18.96.6:50052, client: 172.18. 96.6, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 104 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:18:018 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.22:50052, client: 172.18. 96.22, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 105 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:24:024 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.18:50052, client: 172.18. 96.18, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 106 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:29:029 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.22:50052, client: 172.18. 96.22, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 107 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:34:034 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.18:50052, client: 172.18. 96.18, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 108 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:39:039 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.22:50052, client: 172.18. 96.22, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">=====================&lt;/span> dubbo invoke 109 end &lt;span style="color:#719e07">======================&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>10&lt;span style="color:#719e07">/&lt;/span>08&lt;span style="color:#719e07">/&lt;/span>22 07:16:44:044 UTC&lt;span style="color:#719e07">]&lt;/span> main INFO action.GreetingServiceConsumer: consumer Unary reply &lt;span style="color:#719e07">&amp;lt;-&lt;/span>message: &lt;span style="color:#2aa198">&amp;#34;hello, service mesh, response from provider-v1: 172.18.96.18:50052, client: 172.18. 96.18, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="36-view-dashboard">3.6 View dashboard&lt;/h3>
+&lt;p>See &lt;a href="https://istio.io/latest/docs/setup/getting-started/#dashboard">How to start the dashboard&lt;/a> on the Istio official website.&lt;/p>
+&lt;h2 id="4-modified-example">4 Modified Example&lt;/h2>
+&lt;blockquote>
+&lt;ol>
+&lt;li>Modifying the example is not a necessary step, this section is for readers who want to adjust the code and see the deployment effect.&lt;/li>
+&lt;li>Note that the project source code storage path must be in English, otherwise protobuf compilation will fail.&lt;/li>
+&lt;/ol>
+&lt;/blockquote>
+&lt;p>Modify Dubbo Provider configuration &lt;code>dubbo-provider.properties&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">dubbo-samples-mesh-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.metadataServicePort&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20885&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">N/A&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">tri&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">50052&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosEnable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># In order for the Kubernetes cluster to access the probe normally, it is necessary to enable QOS to allow remote access, which may bring security Risk, please carefully evaluate before opening&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosAcceptForeignIp&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Modify Dubbo Consumer configuration &lt;code>dubbo-consumer.properties&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">dubbo-samples-mesh-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.metadataServicePort&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20885&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">N/A&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">tri&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.timeout&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">30000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosEnable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># In order for the Kubernetes cluster to access the probe normally, it is necessary to enable QOS to allow remote access. This operation may bring security risks. Please evaluate it carefully before opening it&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosAcceptForeignIp&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Flag to enable mesh sidecar proxy mode&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.meshEnable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After completing the code modification, package the image through the Dockerfile provided by the project&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Package and push the image&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mvn compile jib:build
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>The Jib plugin will automatically package and publish the image. Note that for local development, you need to change the docker registry organization apache/dubbo-demo in the jib plug-in configuration to an organization with your own authority (including dubboteam in other kubernetes manifests to ensure that kubernetes deploys your own customized image) , if you encounter jib plug-in authentication problems, please refer to [corresponding link](&lt;a href="https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-">https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-&lt;/a> registry-responds-with-unauthorized) to configure docker registry authentication information.
+You can specify &lt;code>mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth directly on the command line .username=x&lt;/code>, or use docker-credential-helper.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="5-common-commands">5 Common commands&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dump current Envoy configs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl &lt;span style="color:#b58900">exec&lt;/span> -it &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> pod id&lt;span style="color:#2aa198">}&lt;/span> -c istio-proxy curl http://127.0.0.1:15000/config_dump &amp;gt; config_dump
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enter the istio-proxy container&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl &lt;span style="color:#b58900">exec&lt;/span> -it &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> pod id&lt;span style="color:#2aa198">}&lt;/span> -c istio-proxy -- /bin/bash
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View container logs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl logs &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> pod id&lt;span style="color:#2aa198">}&lt;/span> -n &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> namespace&lt;span style="color:#2aa198">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl logs &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> pod id&lt;span style="color:#2aa198">}&lt;/span> -n &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> namespace&lt;span style="color:#2aa198">}&lt;/span> -c istio-proxy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable automatic sidecar injection&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl label namespace &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> namespace&lt;span style="color:#2aa198">}&lt;/span> istio-injection&lt;span style="color:#719e07">=&lt;/span>enabled --overwrite
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Turn off automatic sidecar injection&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl label namespace &lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">your&lt;/span> namespace&lt;span style="color:#2aa198">}&lt;/span> istio-injection&lt;span style="color:#719e07">=&lt;/span>disabled --overwrite
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="6-notes">6 Notes&lt;/h2>
+&lt;ol>
+&lt;li>In the example, both the producer and the consumer belong to the same namespace; if you need to call a provider of a different namespace, you need to configure it as follows (&lt;strong>dubbo version&amp;gt;=3.1.2&lt;/strong>):&lt;/li>
+&lt;/ol>
+&lt;p>Annotation method:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboReference&lt;/span>(providedBy &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;istio-demo-dubbo-producer&amp;#34;&lt;/span>, providerPort &lt;span style="color:#719e07">=&lt;/span> 20885, providerNamespace &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;istio-demo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>xml way&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.basic.api.DemoService&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> provider-port=&lt;span style="color:#2aa198">&amp;#34;20885&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> provided-by=&lt;span style="color:#2aa198">&amp;#34;istio-dubbo-producer&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> provider-namespace=&lt;span style="color:#2aa198">&amp;#34;istio-demo&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Istio + Proxyless</title><link>https://dubbo.apache.org/en/overview/tasks/mesh/proxyless/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/tasks/mesh/proxyless/</guid><description>
+&lt;p>Proxyless mode means that Dubbo communicates directly with Istiod, and implements service discovery and service governance capabilities through the xDS protocol.
+In this example, a simple example will be used to demonstrate how to use the Proxyless mode.&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds">Sample Address&lt;/a>&lt;/p>
+&lt;h2 id="code-structure">code structure&lt;/h2>
+&lt;p>This section mainly introduces the code structure of the example used in this article. By imitating the relevant configuration in this example and modifying the existing project code, the existing project can quickly run in Proxyless Mesh mode.&lt;/p>
+&lt;h3 id="1-interface-definition">1. Interface definition&lt;/h3>
+&lt;p>In order to make the example simple enough, a simple interface definition is used here, and only the parameters are spliced ​​to be returned.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">GreetingService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-interface-implementation">2. Interface implementation&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AnnotatedGreetingService&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> GreetingService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;greeting service received: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hello, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;! from host: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> NetUtils. &lt;span style="color:#268bd2">getLocalHost&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-client-subscription-method">3. Client subscription method&lt;/h3>
+&lt;p>**Because the native xDS protocol cannot support the mapping from interface to application name, it is necessary to configure the &lt;code>providedBy&lt;/code> parameter to mark which application this service comes from. **&lt;/p>
+&lt;p>In the future, we will realize automatic &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/">service mapping&lt;/a> relationship acquisition based on the control plane of Dubbo Mesh, and there will be no need for independent configuration parameters at that time. Dubbo can be run under the Mesh system, so stay tuned.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;annotated Consumer&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GreetingServiceConsumer&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboReference&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>, providedBy &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dubbo-samples-xds-provider&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> GreetingService greetingService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">doSayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> greetingService.sayHello(name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4-server-configuration">4. Server configuration&lt;/h3>
+&lt;p>The server configuration registration center is the address of istio, and the protocol is xds.&lt;/p>
+&lt;p>We recommend configuring &lt;code>protocol&lt;/code> to be the tri protocol (fully compatible with the grpc protocol) for a better experience in the istio system.&lt;/p>
+&lt;p>In order to make Kubernetes aware of the state of the application, it is necessary to configure &lt;code>qosAcceptForeignIp&lt;/code> parameter so that Kubernetes can obtain the correct application state, [alignment lifecycle](/en/docs3-v2/java-sdk/advanced-features-and-usage/ others/dubbo-kubernetes-probe/).&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">dubbo-samples-xds-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.metadataServicePort&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20885&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">xds://istiod.istio-system.svc:15012&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">tri&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">50052&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosAcceptForeignIp&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="5-client-configuration">5. Client Configuration&lt;/h3>
+&lt;p>The client configuration registration center is the address of istio, and the protocol is xds.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">dubbo-samples-xds-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.metadataServicePort&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20885&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">xds://istiod.istio-system.svc:15012&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosAcceptForeignIp&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="quick-start">Quick start&lt;/h2>
+&lt;h3 id="step-1-build-the-kubernetes-environment">Step 1: Build the Kubernetes environment&lt;/h3>
+&lt;p>Currently Dubbo only supports Mesh deployment in the Kubernetes environment, so you need to build the Kubernetes environment before running and starting this example.&lt;/p>
+&lt;p>Build reference documents:&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;a href="https://kubernetes.io/zh-cn/docs/tutorials/hello-minikube/">minikube(https://kubernetes.io/zh-cn/docs/tutorials/hello-minikube/)&lt;/a>&lt;/p>
+&lt;p>[kubeadm(https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/)](&lt;a href="https://kubernetes.io/zh-cn/docs/setup/production-environment/tools">https://kubernetes.io/zh-cn/docs/setup/production-environment/tools&lt;/a> /)&lt;/p>
+&lt;p>&lt;a href="https://k3s.io/">k3s(https://k3s.io/)&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="step-2-build-the-istio-environment">Step 2: Build the Istio environment&lt;/h3>
+&lt;p>Build the Istio environment reference document:&lt;/p>
+&lt;p>&lt;a href="https://istio.io/latest/docs/setup/getting-started/">Istio Installation Documentation (https://istio.io/latest/docs/setup/getting-started/)&lt;/a>&lt;/p>
+&lt;p>Note: When installing Istio, you need to enable [first-party-jwt support](&lt;a href="https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-">https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-&lt;/a> tokens) (add the parameter &lt;code>--set values.global.jwtPolicy=first-party-jwt&lt;/code> when using the &lt;code>istioctl&lt;/code> tool to install)**, otherwise it will cause the problem of client authentication failure.&lt;/p>
+&lt;p>Attached installation command reference:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>curl -L https://istio.io/downloadIstio | sh -
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> istio-1.xx.x
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#268bd2">$PWD&lt;/span>/bin:&lt;span style="color:#268bd2">$PATH&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>istioctl install --set &lt;span style="color:#268bd2">profile&lt;/span>&lt;span style="color:#719e07">=&lt;/span>demo --set values.global.jwtPolicy&lt;span style="color:#719e07">=&lt;/span>first-party-jwt -y
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-pull-the-code-and-build">Step 3: Pull the code and build&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/dubbo-samples-xds
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mvn clean package -DskipTests
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-4-build-the-image">Step 4: Build the image&lt;/h3>
+&lt;p>Since Kubernetes adopts containerized deployment, the code needs to be packaged in a mirror before deployment.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ./dubbo-samples-xds-provider/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo-samples-xds/dubbo-samples-xds-provider/Dockerfile&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker build -t apache/dubbo-demo:dubbo-samples-xds-provider_0.0.1 .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ../dubbo-samples-xds-consumer/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo-samples-xds/dubbo-samples-xds-consumer/Dockerfile&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker build -t apache/dubbo-demo:dubbo-samples-xds-consumer_0.0.1 .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ../
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-5-create-namespace">Step 5: Create namespace&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Initialize the namespace&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-xds/deploy/Namespace.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># switch namespace&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubens dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-6-deploy-the-container">Step 6: Deploy the container&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ./dubbo-samples-xds-provider/src/main/resources/k8s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo-samples-xds/dubbo-samples-xds-provider/src/main/resources/k8s/Deployment.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo-samples-xds/dubbo-samples-xds-provider/src/main/resources/k8s/Service.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f Deployment.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f Service.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ../../../../../dubbo-samples-xds-consumer/src/main/resources/k8s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo-samples-xds/dubbo-samples-xds-consumer/src/main/resources/k8s/Deployment.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f Deployment.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ../../../../../
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Looking at the log of the consumer, you can observe the following log:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>result: hello, xDS Consumer! from host: 172.17.0.5
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>result: hello, xDS Consumer! from host: 172.17.0.5
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>result: hello, xDS Consumer! from host: 172.17.0.6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>result: hello, xDS Consumer! from host: 172.17.0.6
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="common-problem">common problem&lt;/h2>
+&lt;ol>
+&lt;li>Configure a separate Istio cluster &lt;code>clusterId&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>Usually the &lt;code>clusterId&lt;/code> of Istio under the Kubernetes system is &lt;code>Kubernetes&lt;/code>, if you are using a self-built istio production cluster or a cluster provided by a cloud vendor, you may need to configure &lt;code>clusterId&lt;/code>.&lt;/p>
+&lt;p>Configuration method: Specify the &lt;code>ISTIO_META_CLUSTER_ID&lt;/code> environment variable as the desired &lt;code>clusterId&lt;/code>.&lt;/p>
+&lt;p>Reference configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-samples-xds-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demo&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">2&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demo&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: ISTIO_META_CLUSTER_ID
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: Kubernetes
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-samples-xds-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: xxx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>How to get &lt;code>clusterId&lt;/code>:&lt;/p>
+&lt;blockquote>
+&lt;p>kubectl describe pod -n istio-system istiod-58b4f65df9-fq2ks
+Read the value of &lt;code>CLUSTER_ID&lt;/code> in the environment variable&lt;/p>
+&lt;/blockquote>
+&lt;ol start="2">
+&lt;li>Istio authentication failed&lt;/li>
+&lt;/ol>
+&lt;p>Since the current Dubbo version does not support istio&amp;rsquo;s &lt;code>third-party-jwt&lt;/code> authentication, it is necessary to configure &lt;code>jwtPolicy&lt;/code> to &lt;code>first-party-jwt&lt;/code>.&lt;/p>
+&lt;ol start="3">
+&lt;li>providedBy&lt;/li>
+&lt;/ol>
+&lt;p>Since the current Dubbo version is limited by the communication model of istio and cannot obtain the application name corresponding to the interface, it is necessary to configure the &lt;code>providedBy&lt;/code> parameter to mark which application the service comes from.
+In the future, we will realize automatic &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/">service mapping&lt;/a> relationship acquisition based on the control plane of Dubbo Mesh, and there will be no need for independent configuration parameters at that time. Dubbo can be run under the Mesh system, so stay tuned.&lt;/p>
+&lt;ol start="4">
+&lt;li>protocol name&lt;/li>
+&lt;/ol>
+&lt;p>In Proxyless mode, application-level service discovery uses &lt;code>Kubernetes Native Service&lt;/code> for application service discovery, but due to the limitation of istio, it currently only supports traffic interception and forwarding of &lt;code>http&lt;/code> protocol and &lt;code>grpc&lt;/code> protocol, so &lt;code>Kubernetes Service&lt;/code> is configured in When you need to specify the &lt;code>spec.ports.name&lt;/code> property to start with &lt;code>http&lt;/code> or &lt;code>grpc&lt;/code>.
+Therefore we recommend using the triple protocol (fully compatible with the grpc protocol). Here, even if &lt;code>name&lt;/code> is configured to start with &lt;code>grpc&lt;/code>, it is actually a &lt;code>dubbo&lt;/code> protocol that can also perform normal service discovery, but it affects the function of traffic routing.&lt;/p>
+&lt;p>Reference configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-samples-xds-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">clusterIP&lt;/span>: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demo&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: grpc-tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: TCP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">50052&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">targetPort&lt;/span>: &lt;span style="color:#2aa198">50052&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>metadataServicePort&lt;/li>
+&lt;/ol>
+&lt;p>Since the metadata discovered by Dubbo 3 application-level services cannot be obtained from istio, it is necessary to use the service introspection mode. This requires that the port of &lt;code>Dubbo MetadataService&lt;/code> is unified in the whole cluster.&lt;/p>
+&lt;p>Reference configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.metadataServicePort&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20885&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the future, we will realize automatic acquisition of &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/concepts-and-architecture/service-discovery/">service metadata&lt;/a> based on the control plane of Dubbo Mesh, and no independent configuration parameters will be required at that time. Dubbo can be run under the Mesh system, so stay tuned.&lt;/p>
+&lt;ol start="6">
+&lt;li>qosAcceptForeignIp&lt;/li>
+&lt;/ol>
+&lt;p>Due to the limitations of the working principle of the Kubernetes probe detection mechanism, the originator of the detection request is not &lt;code>localhost&lt;/code>, so you need to configure the &lt;code>qosAcceptForeignIp&lt;/code> parameter to enable global access.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.qosAcceptForeignIp&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note: There are dangerous commands on the qos port, please evaluate the security of the network first. Even if the qos is not open, it only affects the inability of Kubernetes to obtain the life cycle status of Dubbo.&lt;/p>
+&lt;ol start="7">
+&lt;li>Do not need to enable injection&lt;/li>
+&lt;/ol>
+&lt;p>In Proxyless mode, the pod does not need to enable envoy injection. Please make sure that there is no &lt;code>istio-injection=enabled&lt;/code> label in the namespace.&lt;/p>
+&lt;ol start="8">
+&lt;li>Plain text connection istiod&lt;/li>
+&lt;/ol>
+&lt;p>In Proxyless mode, connect to istiod through ssl by default, and also support connecting to istiod through clear text.&lt;/p>
+&lt;p>Plain text connection reference configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.registry.secure&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">plaintext&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

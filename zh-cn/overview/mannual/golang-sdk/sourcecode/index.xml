@@ -1,0 +1,54 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 源码解读</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/</link><description>Recent content in 源码解读 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 网络协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/protocol/</guid><description>
+&lt;p>对于 Dubbogo 微服务框架，网络协议为远程过程调用中负责网络通信的模块，负责应用层到网络层的数据序列化、打包、请求发起、网络端口监听等功能。Dubbogo 为协议抽象了一套接口如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Protocol &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Export service for remote invocation
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Export&lt;/span>(invoker Invoker) Exporter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Refer a remote service
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Refer&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) Invoker
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Destroy will destroy all invoker and exporter, so it only is called once.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Destroy&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该接口包含三个方法。其中 Export 方法负责服务的暴露过程。入参 invoker 为dubbo 的概念，其封装了一个可以被调用的实例。在具体网络协议（例如Triple）实现的 Export 方法中，会针对特定的协议，将封装有一定逻辑的可调用实例 Invoker 以网络端口监听的形式暴露给外部服务，来自外部针对该网络端口的请求将会被 Export 方法开启的监听协程获取，进而根据网络协议进行拆解包和反序列化，得到解析后的请求数据。&lt;/p>
+&lt;p>Refer 方法负责服务的引用过程，其入参 url 为 dubbo 框架通用的结构，可以描述一个希望引用的服务，url 参数中包含了多个希望引用服务的参数，例如对应服务的接口名(interface)，版本号(version)，使用协议(protocol) 等等。在具体网络协议（例如Triple）实现的 Refer 方法中，会将特定的网络协议封装到 Invoker 可调用实例的方法中，用户层发起的 RPC 调用即可直接通过返回的 Invoker 对象，发起特定协议的网络请求。&lt;/p>
+&lt;p>Destroy 方法作用为销毁当前暴露的服务，用于服务下线场景。Dubbogo 框架有优雅下线机制，可以在服务进程终止前以监听信号的形式，下线所有已启动的服务。&lt;/p></description></item><item><title>Overview: 注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/registry/</guid><description>
+&lt;p>Dubbogo 为注册中心抽象了一套接口如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Registry Extension - Registry
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Registry &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> common.Node
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Register is used for service provider calling, register services
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// to registry. And it is also used for service consumer calling, register
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// services cared about, for dubbo&amp;#39;s admin monitoring.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Register&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// UnRegister is required to support the contract:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. If it is the persistent stored data of dynamic=false, the
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// registration data can not be found, then the IllegalStateException
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// is thrown, otherwise it is ignored.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 2. Unregister according to the full url match.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// url Registration information, is not allowed to be empty, e.g:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// dubbo://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">UnRegister&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Subscribe is required to support the contract:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// When creating new registry extension, pls select one of the
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// following modes.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Will remove in dubbogo version v1.1.0
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// mode1: return Listener with Next function which can return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// subscribe service event from registry
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Deprecated!
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// subscribe(event.URL) (Listener, error)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Will replace mode1 in dubbogo version v1.1.0
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// mode2: callback mode, subscribe with notify(notify listener).
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Subscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// UnSubscribe is required to support the contract:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. If don&amp;#39;t subscribe, ignore it directly.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 2. Unsubscribe by full URL match.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// url Subscription condition, not allowed to be empty, e.g.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// consumer://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// listener A listener of the change event, not allowed to be empty
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">UnSubscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该接口主要包含四个方法，分别是注册、反注册、订阅、取消订阅。顾名思义，概括了客户端和服务端与注册中心交互的动作。针对普通接口级服务注册发现场景，在Provider 服务启动时，会将自身服务接口信息抽象为一个 url，该 url 包含了客户端发起调用所需的所有信息（ip、端口、协议等），服务端的注册中心组件会将该 url 写入注册中心（例如zk）。客户端启动后，在服务引用 Refer 步骤会通过注册中心组件订阅（Subscribe）需要的服务信息，获取到的服务信息以异步事件更新的形式写入客户端缓存，从而在服务发现成功后，可以根据拿到的服务 url 参数，向对应服务提供者发起调用。&lt;/p>
+&lt;h2 id="heading">&lt;/h2></description></item></channel></rss>

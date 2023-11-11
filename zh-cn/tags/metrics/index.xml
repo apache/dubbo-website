@@ -1,0 +1,177 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – metrics</title><link>https://dubbo.apache.org/zh-cn/tags/metrics/</link><description>Recent content in metrics on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 07 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/metrics/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Apache Dubbo 云原生可观测性的探索与实践</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E4%BA%91%E5%8E%9F%E7%94%9F%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7%E7%9A%84%E6%8E%A2%E7%B4%A2%E4%B8%8E%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E4%BA%91%E5%8E%9F%E7%94%9F%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7%E7%9A%84%E6%8E%A2%E7%B4%A2%E4%B8%8E%E5%AE%9E%E8%B7%B5/</guid><description>
+&lt;p>摘要：本文整理自平安壹钱包中间件资深工程师、Apache Dubbo committer宋小生在 Community Over Code 2023 大会上的分享。本篇内容主要分为五个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、可观测性建设&lt;/li>
+&lt;li>二、多维指标体系&lt;/li>
+&lt;li>三、链路追踪门面&lt;/li>
+&lt;li>四、日志管理分析&lt;/li>
+&lt;li>五、稳定性的实践&lt;/li>
+&lt;/ul>
+&lt;h2 id="一可观测性建设">一、可观测性建设&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>首先介绍一下云原生升级的挑战。目前大部分公司里基本上都有CICD、OPS来帮助开发、测试、运维提升开发的效率与质量，也会有容器化来帮助提升产线运维的效率与质量。但在云原生时代，大规模容器的频繁变更会带来很多稳定性的问题。这些稳定性问题，包含了很多我们可以提前规避掉的已知的异常，也包含了很多我们无法避免的异常，比如网络故障、机器宕机等系统无法提前测出来的问题。&lt;/p>
+&lt;p>如果我们能提前发现这些问题，其实是可以规避掉很多风险的。所以我们通过可观测系统及时的感知到了这些问题，高效的分析异常，快速的恢复系统。因此可以判定，在云原生时代，可观测系统的建设是非常重要的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_1.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Dubbo作为微服务RPG的框架，直接建设一个大而全的可观测性系统或者平台是不现实的，而且它的定位也不是很符合。可观测性系统更强调关联性，通过单维度或者多维度进行系统的观测与问题的诊断。&lt;/p>
+&lt;p>首先看一下可度量系统的健康状态的指标。Dubbo通过采集系统内部的Dubbo指标的同时，把指标内部的数据暴露给外部的监控系统。这些监控指标中间包含了很多的应用信息、主机信息、Dubbo服务标签信息等等。当我们发现问题的时候，可以通过这些标签信息关联到全链路系统。之后全链路系统可以做到请求级或者应用级的系统性能分析或者系统异常诊断。&lt;/p>
+&lt;p>Dubbo侧通过适配各大厂商门面的形式，只需进行非常简易的依赖就引入或者配置就可以直接把数据导出到各大全链路平台。无论企业使用哪个流行平台，在后期升级Dubbo后都可以直接把链路导出去。&lt;/p>
+&lt;p>另外，链路系统还包含全链路的Traceid或者局部的磁盘ID。通过全链路的ID，我们可以在链路系统直接跳转到日志平台。在日志平台里包含非常详细的日志上下文，这些日志上下文可以提供非常精确的异常问题诊断。&lt;/p>
+&lt;p>Dubbo也提供了非常详细的错误码机制和专家建议的形式，在官网上通过日志的形式可以直接通过错误码的形式直接导航到官网上的帮助文档。&lt;/p>
+&lt;h2 id="二多维指标体系">二、多维指标体系&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_2.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Dubbo在多维度指标体系实践的时候，我们主要从两个维度来看它。&lt;/p>
+&lt;p>第一个是纵向的维度。Dubbo指标在采集的时候有一个接入导出的流程。Dubbo为用户和开发者提供了简单易用的接入门面。接入后服务在运行过程中通过指标器进行指标的采集。Dubbo中提供了非常多的指标采集器，包括聚合和非聚合的指标采集等等。&lt;/p>
+&lt;p>然后采集的指标会通过变量值临时存储在内存里，之后会有部分指标（QPS等带有滑动窗口的最小值、最大值的聚合指标）进行聚合计算，最后这些指标会导出到外部系统。我们支持在Dubbo QPS服务质量中进行指标导出，或者把指标导出到Prometheus，或者http直接访问也可以进行指标的查询。&lt;/p>
+&lt;p>第二个是横向的维度。Dubbo指标采集覆盖了非常容易出现异常的地方。比如Dubbo 3提供了三大中心，包括注册中心、元数据中心、配置中心，存在外部网络交互的地方是非常容易出现问题的。&lt;/p>
+&lt;p>另外一个比较关键的是RPC电路上的采集，比如请求相应的时间、异常、nity网络、IO的指标等等。此外还有一些关于Dubbo线程池的指标采集。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_3.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>前面说的是比较大面上的指标采集，具体Dubbo的采集需要哪些指标我们也调研了很多比较流行的方法论。&lt;/p>
+&lt;ul>
+&lt;li>图中第一张图是谷歌SRE书的四大黄金指标。它是谷歌总结大规模的分布式服务监控总结出来的，它可以进行请求级别的服务质量的衡量，主要包含延迟、流量、错误以及饱和度。&lt;/li>
+&lt;li>图中第二张图是RED 方法。它更侧重于请求，从外部视角来查看服务的健康状态，主要包含速率、错误与持续时间。&lt;/li>
+&lt;li>图中第三张图是USE 方法。它更侧重于系统内部的资源使用情况，包含利用率、饱和度与错误。&lt;/li>
+&lt;/ul>
+&lt;p>可以看到，以上三个指标的方法论中都包含的指标是错误，错误也是每个开发者比较关注的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_4.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>然后我们进行了指标的系统完善。在Dubbo 3.2版本中，多维度指标体系已经完成，而且也在快速持续的版本迭代中。在这个版本中我们只需要引入一个快速集成的Spring Boot中的Starter包就可以实现指标的自动采集。之后我们通过Dubbo的QPS服务质量端口可以直接访问到。如果是本机可以通过浏览器，如果是服务器可以通过科尔命令访问52端口，后面加一个Metric路径，这样就可以看到非常详细的默认指标的导出。&lt;/p>
+&lt;p>可以看到这些指标有Dubbo前缀，类型是Dubbo的不同模块，比如消费者提供的请求级别，三大注册中心一起线程。&lt;/p>
+&lt;p>下面是Dubbo当前指标的行为，比如响应时间最后会加一些单位，这个格式参考的是Prometheus的官方格式。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_5.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>多维度指标体系有些人可能会直接复用Spring Boot默认的manager管理端口，Dubbo也适配了一下Spring Boot Actuator的扩展。&lt;/p>
+&lt;p>操作和刚刚一样，只是引入Spring Boot Starter包。后面也无需做任何其他的配置，就可以在Spring端口里看到详细的指标了。包括Spring Boot内置的jvm指标、Dubbo指标等等。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_6.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>指标体系接入之后，我们如果直接通过命令行访问只能看到一些瞬时的数据，但在监控指标体系我们其实更关注的是多维度的向量数据。如果我们把这些数据看作是一个点其实是比较难看出问题的，所以我们需要把这些数据存储起来，看作是一个实际化的向量数据。&lt;/p>
+&lt;p>Dubbo默认提供对Prometheus采集的介入。Prometheus作为指标存储与监控一体的监控系统，提供了很多的服务发现模型。比如我们直接把服务部署在K8s上，可以直接基于K8s标签的服务发现机制进行指标采集。如果公司有自建的cmdb系统，可以自己扩展http接口进行指标采集。此外,文件或者静态的服务发现机制只要能发现Dubbo服务的IP和服务接口，也可以进行指标采集。采集到的指标会自动存储在Prometheus的实际数据库里。&lt;/p>
+&lt;p>上图是我们通过Prometheus的查询框查询出来的响应时间的最新指标。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_7.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Prometheus的指标更侧重于存储与报警，如果我们想更直观的体现还需要接入Grafana。Grafana的目标是为企业提供简易接入的监控面板，上图是一个简易的全局大盘。&lt;/p>
+&lt;p>我们通过应用级别的筛选/机器IP维度的查询/服务接口的维度，查询服务的健康状态。可以看到，这些指标基本上都是基于前面总结的方法论实现的。比如QPS、请求数量、成功率、失败率、请求的时延等等。&lt;/p>
+&lt;p>此外，还有一些应用信息的指标，比如升级Dubbo 3时，想看到哪些应用已经升级到新的版本，就可以看到新的应用的版本号，也会有应用信息的实例IP分布，还有一些现成资源。&lt;/p>
+&lt;h2 id="三链路追踪门面">三、链路追踪门面&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_8.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>刚才说的指标比较抽象，它更利于帮助我们发现问题，接下来进行一些简单问题的诊断。微服务系统往往是多个系统之间有关联关系，所以服务之间的诊断更依赖于全链路系统。&lt;/p>
+&lt;p>全链路系统Dubbo，当时考虑使用Agent的方式，这种方式对于用户接入是非常方便的，在代理层直接注入一些指标采集的方式即可。如果用这种方式在企业里做全链路的覆盖是非常方便的，但如果Dubbo只做Dubbo的指标采集，风险会比较大。因为Agent接入后会进行字节码修改等不兼容的问题，有些时候很难在前期发现。&lt;/p>
+&lt;p>另外，Dubbo也调研了一些开源的链路追踪门面。Dubbo选择通过原生内置门面的形式，让专业的事情交给专业人做。Dubbo通过适配各大厂商的全链路追踪系统，快速适配接入的用户，只需增加少量的配置就可以实现链路数据的导出。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_9.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>在链路追踪门面的选型方面，我们参考了业界比较流行的几个链路，从中挑选了两个进行选型，分别是OpenTelemetry和Micrometer。&lt;/p>
+&lt;p>OpenTelemetry，大家应该非常熟悉，它支持多语言，规范标准统一的API，支持大部分流行的第三方厂商的全链路追踪系统，是CNCF孵化的项目之一，很多中间件应用都已经接入了这种规范。&lt;/p>
+&lt;p>Micrometer，大家可能对的印象是指标采集的接入。它的缺点是只能支持Java，但它在语言方面，它是Spring Boot 3默认的指标采集，链路采集默认支持micrometer-tracing的功能。此外，Micrometer它还可以通过桥接包直接转化为open的协议，间接也支持各种第三方的采集。并且Micrometer自身也通过调节机制调节了很多的全链路厂商。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_10.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>我们为了和前面使用到的指标采集进行统一，使用Micrometer后无需额外引入第三方的依赖，只需使用Micrometer Tracing的桥接包，就可以快速的接入。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_11.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>上图是链路追踪系统的简单结构。Dubbo的边路采集主要采集rpc请求的链路。在消费者发起请求的时候，如果存在链路ID就直接复用，没有的话会产生链路ID，然后把她们上报给采集器。同样消费者也会通过rpc的上下文把链路数据透传给提供端。提供端拿到这个链路数据后，会对它进行父子关系的关联。最后把这些链路数据上报采集器。&lt;/p>
+&lt;p>采集器在前面的时候主要是内存级别的操作，对系统的损耗比较小。后面将进行异步的导出，和前面指标体系是一样的。内存级的同步采集，异步的把数据导出到第三方的链路系统。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_12.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>链路系统接入也比较简单，主要是引入Spring Boot Starter的依赖包，进行一些比较简单的配置，包括不同厂商的导出地址等等。&lt;/p>
+&lt;p>链路系统可以帮助大家分析性能与异常，但一些系统问题原因的排查可能需要更详细的日志上下文来进行关联。这个时候这个链路系统会把数据放到mdc日志系统的上下文里面，然后在日志上下文里把链路系统编入的内容取出来，展示到日志的文件里。&lt;/p>
+&lt;p>日志文件可能也会接触到第三方的日志平台，如果你有二次开发能力，可以在这种系统平台里加上链接，让这些Traceid自动跳转，即全链路系统自动跳转到日志平台，日志平台也可以自动跳转到全链路系统，查询问题会非常高效。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_13.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>上图是接入Zipkin的展示页面。可以看到它可以进行应用级的性能分析和接口级的性能分析。还可以看到一些Dubbo元数据，它的标签可以和指标大盘指标体系进行关联关系。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_14.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>这是Skywalking的格式，包括列表形式、表格形式等等。它通过Traceid搜到全链路的请求链路，也可以进行性能和异常的诊断。&lt;/p>
+&lt;h2 id="四日志管理分析">四、日志管理分析&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_15.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Dubbo通过日志里面的形式适配了各大日志组件。因为我们的日志组件在后期发展的体系是非常多的，可能是历史原因，Dubbo已经通过门面的形式适配了各大日志组件。&lt;/p>
+&lt;p>系统运行过程中，非常容易出现问题的地方包括，服务的注册与发现，注册服务发现模型，服务提供端的注册，服务消费端的订阅与通知，服务rpc请求链路。&lt;/p>
+&lt;p>当出现这些问题的时候，系统会出现异常。如果我们直接查看异常/网上检索/通过源码形式分析的话，不仅比较困难而且非常耗时。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_16.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>基于此，Dubbo做了一个专家建议帮助的文档手册。升级到Dubbo 3版本后，可以看到日志里有一个帮助文档的sq链接的形式。这个帮助手册套里提供了一些问题可能出现的原因和排查问题的解决思路。&lt;/p>
+&lt;p>对排查问题比较感兴趣的同学，可以直接打开官网看一下。里面包含了非常多资深专家提供的问题诊断的思路，希望社区里的用户和开发者和我们一起共同建设。&lt;/p>
+&lt;h2 id="五稳定性的实践">五、稳定性的实践&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_17.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>最后我们结合指标、链路、日志进行稳定性实践的介绍。主要分为两个部分：观测系统的异常和快速的恢复。&lt;/p>
+&lt;p>观测系统的异常，在整体全链路系统建设之后，我们有运营人员主动的盯监控大盘发现告警，也有通过邮件、短信、钉钉的形式被动的收到告警。无论通过哪种形式，收到告警之后可以尝试使用可观测的思维，通过一些常见的、和异常相关的指标进行排查。&lt;/p>
+&lt;p>通过这个方法，你可能会发现一些问题，但不一定是病因。这个时候你可以通过指标发生问题的地方找到全链路系统，之后分析哪个系统的哪一段有问题。如果排查不到问题，再通过链路系统的全链路ID关联到日志，通过日志里排查详细原因。如果日志也排查不到问题，可能就需要你在系统流量摘掉之后，通过工具进行详细的根因分析。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_18.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>快速的恢复，有了前面的原因定位后，基本上就可以知道哪里有问题了。这个时候可以根据你的原因进行流量的治理。比如切换机房流量，对流量进行限流，或者你的系统有异常的时候进行系统的回滚。&lt;/p></description></item><item><title>Blog: 手把手教你部署Dubbo应用到Kubernetes – Apache Dubbo Kubernetes 最佳实践</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E9%83%A8%E7%BD%B2dubbo%E5%BA%94%E7%94%A8%E5%88%B0kubernetes-apache-dubbo-kubernetes-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E9%83%A8%E7%BD%B2dubbo%E5%BA%94%E7%94%A8%E5%88%B0kubernetes-apache-dubbo-kubernetes-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</guid><description>
+&lt;p>精进云原生 – Dubbo Kubernetes 最佳实践&lt;/p>
+&lt;p>摘要：本文整理自阿里云研发工程师、Apache Dubbo PMC江河清的分享。本篇内容主要分为六个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、使用 Dubbo Starter 初始化项目&lt;/li>
+&lt;li>二、开发微服务之协议选型&lt;/li>
+&lt;li>三、基于 Kubernetes 快速初始化环境&lt;/li>
+&lt;li>四、快速部署应用到 Kubernetes 集群中&lt;/li>
+&lt;li>五、云原生微服务可观测最佳实践&lt;/li>
+&lt;li>六、在 Kubernetes 中管理微服务应用&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上图是从 Istio 借鉴的一个demo，它包含了四个组件，分别是Product Page、Reviews、Details、Ratings，它就是一个全链路的串联，实现了整体的微服务架构，它的功能可以实现我们简单的调用。&lt;/p>
+&lt;h2 id="一使用-dubbo-starter-初始化项目">一、使用 Dubbo Starter 初始化项目&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_1.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>首先介绍一下Starter的功能。对于很多开发来说，在Java体系下创建出新的应用，无外乎就是用IDE创建一个新的项目，或者用maven的artifact，或者基于Spring的Initializer。&lt;/p>
+&lt;p>上图使我们基于Spring的Initializer建立了我们自己的初始化项目的工程。我们点击最上面的网址就能直接看到这个页面了，你需要输入对应的group和artifact。然后选择你希望用到的组件，比如Nacos、Prometheus的组件等等。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_2.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>除此之外，我们在IDE里提供了一个Dubbo的插件。这个插件可以通过上图的方式进行安装，或者如果你的仓库里已经用到了Dubbo的配置，它会提示你可以直接安装。安装完成后在右边就会有一个对应的初始化的项目了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_3.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上图是一个示例，它在这里建立了一个Dubbo的项目，然后你需要在这里选中所需要的组件信息，最后点击创建，之后它就会帮你在本地直接创建出一个全新的项目，然后你就可以在这个模版上开发了。&lt;/p>
+&lt;h2 id="二开发微服务之协议选型">二、开发微服务之协议选型&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_4.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>我们会用到最新的Triple协议，它整体支持兼容gRPC、HTTP/1、HTTP/2。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_5.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这里主要想和大家分享的点是，我们基于curl访问的能力，比如POSTMAN、HttpClient都是支持的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_6.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>下面来看一下我们的项目，这是刚才建立的一个项目，我现在把应用启动起来，配置一些注册中心的地址，这就是一个标准的Spring的启动的流程。这里定义了一个接口，这个接口返回了一个&amp;quot;hello&amp;quot;的内容信息。然后我用一个简单的命令，就可以直接返回我的hello world的结果了。这样对我们本身的测试来说有很大的帮助，也就是本地启动之后，就可以直接测试接口。&lt;/p>
+&lt;h2 id="三基于-kubernetes-快速初始化环境">三、基于 Kubernetes 快速初始化环境&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_7.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>假设我们已经把前面四个应用的代码全部开发完成了，接下来我要把它部署到K8s环境上。部署之前有一个非常重要的步骤，需要先初始化环境。比如Nacos、ZK、Skywalking、Zipkin、Prometheus等组件，我们都需要将它们安装上去，因为它们是应用前置依赖的各种组件。这些组件的安装流程都很复杂，那么我们如何简化这个流程呢？&lt;/p>
+&lt;p>Dubbo提供了一个命令，这个命令可以一键帮你在K8s体系下拉起上图左边的所有组件。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_8.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这里有一个简单的例子，拉起来之后，它会把所有的组件都会帮你拉起来。这里埋一个点，这里的Prometheus我们后面还会继续使用。整个Nacos的地址，Zookeeper的地址都会直接提供给你。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_9.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这也是一个的例子。执行一个简单的命令，然后本地会把kubectl的配置都准备好，它就会自动的帮你把组件都创建起来。也就是我们一键就可以获取到所有service的部署。&lt;/p>
+&lt;h2 id="四快速部署应用到-kubernetes-集群中">四、快速部署应用到 Kubernetes 集群中&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_10.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>部署应用有三个重要的点，分别是应用容器化、无状态部署、生命周期对齐。&lt;/p>
+&lt;p>首先介绍一下应用容器化。想要将应用容器化，首先需要建一个dockerfile，引入一个jdk的包，把启动命令和启动脚本拉进去。然后还要写一个Java的编译的脚本，把Java编译的jar包结果拉进去。这个过程非常复杂，所以我们可以用一下Jib的插件。这个插件是maven的一个plugin，我只需要把这些配进去，指定成我的Image就足够了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_11.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>可以看到，我只需要把我的pom里添加一个对应的配置项依赖，通过一键maven的编译模式，它就可以在maven打包的过程中帮你构建完镜像，然后直接推送到远端仓库。这一切都只需要这一个命令就可以完成，而且一次性配置之后，未来你所有的镜像更新都可以自动化的去做，不需要再去写繁琐的dockerfile。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_12.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>其次介绍一下无状态部署。刚才我们把镜像打出来了，这只是第一步，紧接着我们要让镜像run起来。我们可以基于K8s的deployment的模式，它是从K8s的官网上直接拉下来的。拉下来之后我们可以指定对应的应用名、镜像信息等等，这是K8s无法绕过去的，相对于说它需要配置这样的一个demo，当然也会有云厂商平台提供一个可视化的界面给你，它的底层配置的就是这样的一个yarml。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_13.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这是一个简单的例子，把deployment配置完之后，指定了刚才的镜像。同时我声明了一个service，这个service非常重要，它后面会作为from_end应用入口的配置，但它是一个Ingress网关。可以看到apply镜像之后，我们就可以在K8s体系上把这个环境run起来了。&lt;/p>
+&lt;p>这里做一个简单的测试，我引入一个curl的容器，同样我们可以用刚才curl的命令访问我新部署好的容器节点，可以看到它返回了hello world的数据信息。&lt;/p>
+&lt;p>综上，我们通过deployment的部署，可以在K8s上把容器run起来，同时它还可以对外提供服务，对外提供的服务我可以通过下面curl的命令进行调用。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_14.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>最后介绍一下生命周期对齐。整体部署上了之后，大家都会进行多Pod部署，所以就会涉及到分批的行为。如果现在分了两批，且我希望我的业务中间是不中断的，这个时候就需要让K8s帮我们进行分批处理。因为K8s只知道进程起来了，所以我们需要让K8s感知到这个应用当前的状态是否startup了。然后还需要让K8s知道是否ready，以及是否存活。这是K8s提供的流程，那么怎么和Dubbo的流程相匹配呢？&lt;/p>
+&lt;p>上图右侧有一些Dubbo原生提供的ports信息，我们会对外发布这样的Dubbo的状态信息，可以让你和K8s的生命周期完整的对齐。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_15.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上图是一个例子。在整个应用启动的时候，这里sleep了20秒，然后配置了对应的Pro信息。&lt;/p>
+&lt;p>我们简单推测一下，我在前面设置了等待20秒，那么我的应用肯定要超过20秒才能起来。因为修改了代码，所以这里需要重新编译一下，用一键maven的编译模式直接推上去。接下来要把deployment apply进去，进去之后Pod的状态全都是not ready的，都是零的状态。&lt;/p>
+&lt;p>因为前面sleep了20秒的时候，Dubbo还没启动完，所以都是not ready的状态。我们等sleep的阶段过了，它就会变成ready的状态，然后再进行分批这就是生命周期对齐的过程。&lt;/p>
+&lt;p>所以K8s知道应用什么时候启动成功了，什么时候启动失败了，才能进行更好的调度。&lt;/p>
+&lt;h2 id="五云原生微服务可观测最佳实践">五、云原生微服务可观测最佳实践&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_16.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>部署上去之后，我们还会涉及到整个应用的可观测。因为我们的应用可能部署了非常多节点，我需要感知应用的状态。&lt;/p>
+&lt;p>可观测体系包括Metrics体系和Tracing体系。Metrics体系包括几个指标，比如谷歌的四个环境指标，延迟、流量等等。对应到Dubbo，会提供QPS、RT等等指标，它都是在这样体系下的Metrics的最佳实践。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_17.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>前面在部署初始化环境的时候，提了Prometheus的服务，现在就有用了。当我把Prometheus环境部署完之后，我们只需配置几行简单的Metrics采集信息。然后Prometheus就会帮你在你的节点上面采集很多的Metrics信息，然后得到右边的panel信息，这个panel也是Dubbo官方提供的，可以直接看到Dubbo的状态信息。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_18.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上面是一个演示的例子。我们在前面的deployment的例子上加上Metrics的采集信息，然后把它apply进去之后，我们就可以用整个Grafana导出过来。跑了一段时间之后，就会有对应的流量信息，比如QPS信息、RT信息、成功率等等。&lt;/p>
+&lt;p>得到这些指标后，我们还可以做一个告警。比如QPS从100突然跌到了0，或者成功率突然跌了很多，这种情况我们需要做一个警示，让大家知道当前发生的问题。我们可以基于Prometheus采集，做一个主动的推送，这就是告警的过程。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_19.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>Tracing包括内置的Tracing、agent注入的方案。目前主流的Go语言和其他语言大多都会用sdk依赖一个open去做一个Tracing。因为Go构体系下的agent注入也不太完善，Dubbo本身也提供了默认Tracing的能力支持。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_20.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>大家可以看到，在这里你只需要依赖dependency里面加上Dubbo的starter，配置项里把Tracing能力打开，开启一个指标的上报，9411是我们Zipkin的一个后端。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_21.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这也是一个例子，我只需要配置这些配置，它的数据就会报到Zipkin上去，这里的dependency直接加上。&lt;/p>
+&lt;p>同样的，用刚才的命令进行打包，把镜像推送上去，然后我们等待一下。推送的过程中可以看一下Zipkin这个组件，它也是在最前面我们在K8s初始化环境的时候一起拉起的，所以这一切你只需要在前面一次性部署的时候就可以拥有了。&lt;/p>
+&lt;p>然后我们简单的执行一个curl命令，因为我需要让我的环境有流量。部署完之后，用curl命令还是执行一下我们的获取，这个其实已经把后端开发完了，它返回了真实的结果。&lt;/p>
+&lt;p>接下来我们去Zipkin上看看能不能找到这条Tracing。首先把9411映射过来，我们可以看到curry一下，这里就会有对应的指标信息。整个全链路的调用信息这里都可以看到，这就是全链路的接入的流程。相当于你只需要把前面的dependency加上，把上报的配置加上，之后的一切我都会帮你在后面完成以及上报。你看到对应的结果，就可以知道全链路上发生了什么事情。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_22.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>除此之外，还可以基于agent的方式。如果我们基于K8s部署，我们接入一个agent也是非常方便的。你可以基于一个initContainer把整个Java的配置项信息直接注入进去，这样在skywalking上就可以看到一个对应的全链路的信息。因为和前面是类似的，这里就不再赘述它的demo的工程了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_23.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>对于整个可观测来说，我们可以通过Metrics看到QPS、RT等信息，通过Tracing看到全链路的访问信息。这里提供给我们一个很好的方案，就是我们要先去做服务的观测，基于服务的观测更好的排查整体的问题，第一时间知道应用挂没挂。比如半夜两点，它的可用率跌到零了。这个时候可以通过一系列的自动化机制告诉你应用出了问题，快速的进行恢复。这里的快速恢复可以使用回滚，将流量隔离的方案他都可以快速的执行。&lt;/p>
+&lt;p>基于这样快速的从观测到排查，再到快速恢复的链条，可以构建整个生产环境下的安全稳定的体系。所以我们观测完之后的目标就是保证整个应用的稳定。&lt;/p>
+&lt;h2 id="六在-kubernetes-中管理微服务应用">六、在 Kubernetes 中管理微服务应用&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_24.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>K8s给我们带来的收益包括快速扩缩容，即我可以很快的基于K8s从一个Pod变成多个Pod。因为K8s是基于整个Image的部署的流程，当镜像打包出来后，你的环境就是固定的，只需要去横向的扩容即可。&lt;/p>
+&lt;p>横向的快速扩容也会涉及到几个瓶颈的点，如果我需要让我的应用能够快速扩容，比如我的应用提起来就要几十分钟，这种情况即使快速扩容了，等扩容完之后你的业务峰值也过去了，这里就会引入到Native Image。&lt;/p>
+&lt;p>基于Native Image，我们可以很好的实现整个Serverless的横向的扩容。如果可以实现毫秒级的启动，我可以在流量来的波峰，直接让我的Pod横向扩容好几倍，当它的流量下去的时候就直接下掉，这样就实现了成本的压缩。&lt;/p>
+&lt;p>另外还有一个问题是怎么知道什么时候要扩容？这就需要基于Metrics的观测，基于一些历史数据的分析，知道在某个时间点会有多少的流量，然后提前扩容，或者做一个自动化的扩容。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_25.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这里我举一个简单的例子，比如我的rating上出了一些问题，我需要把它的故障摘除掉，返回一个磨合的结果。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_26.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这个时候你只需要在上面去配置一个上图的规则，它就会返回。这就是Admin的使用流程，这里就不再展开了，还有刚刚提到的我们在做Go版本的重构能力，后面也都会有更好的建设。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_27.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>除此之外，基于 istio的Service Mesh治理，我们前面协议选型的时候选了Triple协议，它完全是based on HTTP标准的。因此我们使用istio的整个体系之后，你只需要挂上subcard它就会帮你去做流量治理。这一切的前提是你的协议一定是istio可见的。&lt;/p>
+&lt;p>比如你原来用是Dubbo 2的Dubbo的协议，它是一个私有的tcp协议，对于istio来说它很难分辨你的协议内容。如果你用了Triple协议，我们可以基于HTTP标准，你就可以知道你的header里有什么东西，可以去做一个流量的转发。所以它完全拥抱Mesh的体系，可以支持我们所有istio的治理能力。&lt;/p></description></item></channel></rss>

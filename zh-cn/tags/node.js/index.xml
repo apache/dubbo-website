@@ -1,0 +1,327 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – node.js</title><link>https://dubbo.apache.org/zh-cn/tags/node.js/</link><description>Recent content in node.js on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 07 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/node.js/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Apache Dubbo 首个 Node.js 3.0-alpha 版本正式发布</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E9%A6%96%E4%B8%AA-node.js-3.0-alpha-%E7%89%88%E6%9C%AC%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E9%A6%96%E4%B8%AA-node.js-3.0-alpha-%E7%89%88%E6%9C%AC%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83/</guid><description>
+&lt;h1 id="关于-apache-dubbo3">关于 Apache Dubbo3&lt;/h1>
+&lt;p>Apache Dubbo 是一款易用、高性能的 WEB 和 RPC 框架，同时为构建企业级微服务提供服务发现、流量治理、可观测、认证鉴权等能力、工具与最佳实践。经过近几年发展，Dubbo3 已在阿里巴巴集团各条业务线实现全面推广，成功取代运行多年的 HSF 框架；同时 Dubbo3 的多语言体系也有了快速发展，目前涵盖的多语言体系有：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/apache/dubbo">apache/dubbo&lt;/a> (java)&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-go">apache/dubbo-go&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-js">apache/dubbo-js&lt;/a> (web、node.js)&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-rust">apache/dubbo-rust&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>基于 Dubbo3 定义的 &lt;strong>Triple&lt;/strong> 协议，你可以轻松编写浏览器、移动端、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Node.js SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/nodejs/img.png" alt="image.png">&lt;/p>
+&lt;h1 id="关于-dubbo3-nodejs-首个发布版">关于 Dubbo3 Node.js 首个发布版&lt;/h1>
+&lt;p>Dubbo-js 项目于 9 月份刚刚发布了支持 Dubbo3 协议的首个 alpha 版本，该项目是 Dubbo3 的 Typescript 版本实现，提供了 Web、Node.js 两种发布包。其中，Web 框架能让开发者直接在浏览器页面访问后端服务，Node.js 则进一步丰富了后端微服务技术栈的选择。当前 Node.js 版本主要是实现了 Triple 协议的完整支持，接下来的版本中，社区将继续完善地址发现、负载均衡等服务治理能力。目前 dubbo-js 项目快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎搜索钉钉群：&lt;strong>29775027779&lt;/strong> 加入开发者群组。&lt;/p>
+&lt;h1 id="nodejs-微服务开发完整示例">Node.js 微服务开发完整示例&lt;/h1>
+&lt;p>本示例基于最新发布的 Node.js 版本，演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。&lt;/p>
+&lt;h2 id="前置条件">前置条件&lt;/h2>
+&lt;p>因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 &lt;code>@bufbuild/protoc-gen-es&lt;/code>、&lt;code>@bufbuild/protobuf&lt;/code>、&lt;code>@apachedubbo/protoc-gen-apache-dubbo-es&lt;/code>、&lt;code>@apachedubbo/dubbo&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install @bufbuild/protoc-gen-es @bufbuild/protobuf @apachedubbo/protoc-gen-apache-dubbo-es @apachedubbo/dubbo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="定义服务">定义服务&lt;/h2>
+&lt;p>现在，使用 Protocol Buffer (IDL) 来定义一个 Dubbo 服务。&lt;/p>
+&lt;p>创建目录，并生成文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mkdir -p proto &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> touch proto/example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>写入内容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> apache&lt;span style="color:#719e07">.&lt;/span>dubbo.demo.example.v1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayResponse&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> ExampleService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Say(SayRequest) &lt;span style="color:#719e07">returns&lt;/span> (SayResponse) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个文件声明了一个叫做 &lt;code>ExampleService&lt;/code> 的服务，为这个服务定义了 &lt;code>Say&lt;/code> 方法以及它的请求参数 &lt;code>SayRequest&lt;/code> 和返回值 &lt;code>SayResponse&lt;/code>。&lt;/p>
+&lt;h2 id="生成代码">生成代码&lt;/h2>
+&lt;p>创建 gen 目录，做为生成文件放置的目标目录&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>mkdir -p gen
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行以下命令，在 gen 目录下生成代码文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#268bd2">$PATH&lt;/span>:&lt;span style="color:#719e07">$(&lt;/span>&lt;span style="color:#b58900">pwd&lt;/span>&lt;span style="color:#719e07">)&lt;/span>/node_modules/.bin &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> protoc -I proto &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --es_out gen &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --es_opt &lt;span style="color:#268bd2">target&lt;/span>&lt;span style="color:#719e07">=&lt;/span>ts &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --apache-dubbo-es_out gen &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --apache-dubbo-es_opt &lt;span style="color:#268bd2">target&lt;/span>&lt;span style="color:#719e07">=&lt;/span>ts &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行命令后，应该可以在目标目录中看到以下生成的文件:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>├── gen
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── example_dubbo.ts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── example_pb.ts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── example.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="实现服务">实现服务&lt;/h2>
+&lt;p>接下来我们就需要添加业务逻辑了，实现 ExampleService ，并将其注册到 DubboRouter 中。&lt;/p>
+&lt;p>创建 dubbo.ts 文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { DubboRouter } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { ExampleService } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./gen/example_dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">export&lt;/span> &lt;span style="color:#719e07">default&lt;/span> (router: &lt;span style="color:#dc322f">DubboRouter&lt;/span>) &lt;span style="color:#719e07">=&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// registers apache.dubbo.demo.example.v1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> router.service(ExampleService, {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// implements rpc Say
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">async&lt;/span> say(req) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sentence&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#586e75">`You said: &lt;/span>&lt;span style="color:#2aa198">${&lt;/span>req.sentence&lt;span style="color:#2aa198">}&lt;/span>&lt;span style="color:#586e75">`&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }, { serviceGroup&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;dubbo&amp;#39;&lt;/span>, serviceVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;1.0.0&amp;#39;&lt;/span> });
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="启动-server">启动 Server&lt;/h2>
+&lt;p>Dubbo 服务可以嵌入到普通的 Node.js 服务器、Next.js、Express 或 Fastify 中。
+在这里我们将使用 Fastify，所以让我们安装 Fastify 以及我们为 Fastify 准备的插件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npm install fastify @apachedubbo/dubbo-fastify
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建 server.ts 文件，新建一个 Server，把上一步中实现的 &lt;code>ExampleService&lt;/code> 注册给它。
+接下来就可以直接初始化和启动 Server 了，它将在指定的端口接收请求。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { fastify } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;fastify&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { fastifyDubboPlugin } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo-fastify&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> routes &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">async&lt;/span> &lt;span style="color:#268bd2">function&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> server &lt;span style="color:#719e07">=&lt;/span> fastify();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">await&lt;/span> server.register(fastifyDubboPlugin, {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> routes,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> server.&lt;span style="color:#268bd2">get&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>, (_, reply) &lt;span style="color:#719e07">=&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reply.&lt;span style="color:#268bd2">type&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;text/plain&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reply.send(&lt;span style="color:#2aa198">&amp;#34;Hello World!&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">await&lt;/span> server.listen({ host&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;localhost&amp;#34;&lt;/span>, port: &lt;span style="color:#dc322f">8080&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> console.log(&lt;span style="color:#2aa198">&amp;#34;server is listening at&amp;#34;&lt;/span>, server.addresses());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">void&lt;/span> main();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>最后，运行代码启动服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npx tsx server.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="访问服务">访问服务&lt;/h2>
+&lt;p>最简单方式是使用 HTTP/1.1 POST 请求访问服务，参数则作以标准 JSON 格式作为 HTTP 负载传递。如下是使用 cURL 命令的访问示例:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#39;Content-Type: application/json&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#39;TRI-Service-Version: 1.0.0&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#39;TRI-Service-group: dubbo&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;sentence&amp;#34;: &amp;#34;Hello World&amp;#34;}&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:8080/apache.dubbo.demo.example.v1.ExampleService/Say
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以使用标准的 Dubbo client 请求服务，我们首先需要从生成代码即 dubbo-node 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起起 RPC 调用了。&lt;/p>
+&lt;p>创建 client.ts 文件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { createPromiseClient } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { ExampleService } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./gen/example_dubbo&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { createDubboTransport } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#34;@apachedubbo/dubbo-node&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">const&lt;/span> transport &lt;span style="color:#719e07">=&lt;/span> createDubboTransport({
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> baseUrl&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;http://localhost:8080&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">async&lt;/span> &lt;span style="color:#268bd2">function&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> client &lt;span style="color:#719e07">=&lt;/span> createPromiseClient(ExampleService, transport, { serviceVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;1.0.0&amp;#39;&lt;/span>, serviceGroup&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;dubbo&amp;#39;&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">const&lt;/span> res &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">await&lt;/span> client.say({ sentence&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello World&amp;#34;&lt;/span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> console.log(res);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">void&lt;/span> main();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行客户端&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>npx tsx client.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="总结">总结&lt;/h1>
+&lt;p>当前 Node.js 版本主要是实现了 Triple 协议的完整支持，接下来的版本中，社区将继续完善地址发现、负载均衡等服务治理能力。目前 dubbo-js 项目快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎搜索钉钉群：&lt;strong>29775027779&lt;/strong> 加入开发者群组。&lt;/p></description></item><item><title>Blog: 从跨语言调用到dubbo2.js</title><link>https://dubbo.apache.org/zh-cn/blog/2018/08/14/%E4%BB%8E%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E5%88%B0dubbo2.js/</link><pubDate>Tue, 14 Aug 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/08/14/%E4%BB%8E%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E5%88%B0dubbo2.js/</guid><description>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/dubbo/dubbo2.js">dubbo2.js&lt;/a> 是 &lt;a href="https://www.qianmi.com/">千米网&lt;/a> 贡献给 dubbo 社区的一款 nodejs dubbo 客户端，它提供了 nodejs 对原生 dubbo 协议的支持，使得 nodejs 和 java 这两种异构语言的 rpc 调用变得便捷，高效。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="微服务跨语言调用">微服务跨语言调用&lt;/h2>
+&lt;p>微服务架构已成为目前互联网架构的趋势，关于微服务的讨论，几乎占据了各种技术大会的绝大多数版面。国内使用最多的服务治理框架非阿里开源的 dubbo 莫属，千米网也选择了 dubbo 作为微服务治理框架。另一方面，和大多数互联网公司一样，千米的开发语言是多样的，大多数后端业务由 java 支撑，而每个业务线有各自开发语言的选择权，便出现了 nodejs，python，go 多语言调用的问题。
+跨语言调用是一个很大的话题，也是一个很有挑战的技术活，目前业界经常被提及的解决方案有如下几种，不妨拿出来老生常谈一番：&lt;/p>
+&lt;ul>
+&lt;li>spring cloud。spring cloud 提供了一整套微服务开发组件，它主要面向 java 开发，但由于其使用的协议是基于 restful 风格的 http 协议，这使得其天然具备跨语言能力，异构语言只需要提供 http 客户端，便可以实现跨语言调用。&lt;/li>
+&lt;li>service mesh。号称下一代微服务框架的 service mesh，其解决跨语言问题的核心在于 SideCar ，SideCar 在 service mesh 的发展过程中概念不断的迁移，但本质都是完成了一件事：处理服务间通信，负责实现请求的可靠传递。&lt;/li>
+&lt;li>motan。&lt;a href="https://github.com/weibocom/motan">motan&lt;/a> 是新浪微博开源的一款跨语言服务治理框架，在其早期版本中仅支持 motan-java，随着版本演进，在目前最新版本(1.1.0)中，提供了 motan-go，motan-php，motan-openresty 等跨语言特性。类似于 service mesh 中的 SideCar，motan 借助于 motan-go 作为 agent 完成协议的转发，并且依赖于定制协议：motan2，实现跨语言调用。&lt;/li>
+&lt;/ul>
+&lt;p>当我们再聊跨语言调用时我们在聊什么？纵观上述几个较为通用，成熟的解决方案，可以得出结论：解决跨语言调用的思路无非是两种：&lt;/p>
+&lt;ul>
+&lt;li>寻找一个通用的协议&lt;/li>
+&lt;li>使用 agent 完成协议的适配&lt;/li>
+&lt;/ul>
+&lt;p>如果一个新型的团队面临技术选型，我认为上述的方案都可以纳入参考，可考虑到遗留系统的兼容性问题&lt;/p>
+&lt;ul>
+&lt;li>旧系统的迁移成本&lt;/li>
+&lt;/ul>
+&lt;p>这也关键的选型因素。我们做出的第一个尝试，便是在 RPC 协议上下功夫。&lt;/p>
+&lt;h2 id="通用协议的跨语言支持">通用协议的跨语言支持&lt;/h2>
+&lt;h3 id="springmvc的美好时代">springmvc的美好时代&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/springmvc.png" alt="springmvc">&lt;/p>
+&lt;p>在没有实现真正的跨语言调用之前，想要实现“跨语言”大多数方案是使用 http 协议做一层转换，最常见的手段莫过于借助 springmvc 提供的 controller/restController，间接调用 dubbo provider。这种方案的优势和劣势显而易见&lt;/p>
+&lt;ul>
+&lt;li>优势是简单，是最通俗的解决方案。&lt;/li>
+&lt;li>劣势是使得调用链路变长，tcp 通信之上又多了一层 http 通信；开发体验差，为了将 rpc 接口暴露出去，需要额外编写一份 controller 层的代码。&lt;/li>
+&lt;/ul>
+&lt;h3 id="通用协议的支持">通用协议的支持&lt;/h3>
+&lt;p>事实上，大多数服务治理框架都支持多种协议，dubbo 框架除默认的 dubbo 协议之外，还有当当网扩展的 &lt;a href="https://dangdangdotcom.github.io/dubbox/rest.html">rest&lt;/a> 协议和千米网扩展的 &lt;a href="https://github.com/apache/dubbo-rpc-jsonrpc">json-rpc&lt;/a> 协议可供选择。这两者都是通用的跨语言协议。&lt;/p>
+&lt;p>rest 协议为满足 JAX-RS 2.0 标准规范，在开发过程中引入了 @Path，@POST，@GET 等注解，习惯于编写传统 rpc 接口的人可能不太习惯 rest 风格的 rpc 接口。一方面这样会影响开发体验，另一方面，独树一帜的接口风格使得它与其他协议不太兼容，旧接口的共生和迁移都无法实现。如果没有遗留系统，rest 协议无疑是跨语言方案最简易的实现，绝大多数语言支持 rest 协议。&lt;/p>
+&lt;p>和 rest 协议类似，json-rpc 的实现也是文本序列化&amp;amp;http 协议。dubbox 在 restful 接口上已经做出了尝试，但是 rest 架构和 dubbo 原有的 rpc 架构是有区别的，rest 架构需要对资源(Resources)进行定义， 需要用到 http 协议的基本操作 GET、POST、PUT、DELETE。在我们看来，restful 更合适互联网系统之间的调用，而 rpc 更适合一个系统内的调用。使用 json-rpc 协议使得旧接口得以兼顾，开发习惯仍旧保留，同时获得了跨语言的能力。&lt;/p>
+&lt;p>千米网在早期实践中采用了 json-rpc 作为 dubbo 的跨语言协议实现，并开源了基于 json-rpc 协议下的 python 客户端 &lt;a href="https://github.com/dubbo/dubbo-client-py">dubbo-client-py&lt;/a> 和 node 客户端 &lt;a href="https://github.com/QianmiOpen/dubbo-node-client">dubbo-node-client&lt;/a>，使用 python 和 nodejs 的小伙伴可以借助于它们直接调用 dubbo-provider-java 提供的 rpc 服务。系统中大多数 java 服务之间的互相调用还是以 dubbo 协议为主，考虑到新旧协议的适配，在不影响原有服务的基础上，我们配置了双协议。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;jsonrpc&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>dubbo 协议主要支持 java 间的相互调用，适配老接口；json-rpc 协议主要支持异构语言的调用。&lt;/p>
+&lt;h3 id="定制协议的跨语言支持">定制协议的跨语言支持&lt;/h3>
+&lt;p>微服务框架所谓的协议(protocol)可以简单理解为：报文格式和序列化方案。服务治理框架一般都提供了众多的协议配置项供使用者选择，除去上述两种通用协议，还存在一些定制化的协议，如 dubbo 框架的默认协议：dubbo 协议以及 motan 框架提供的跨语言协议：motan2。&lt;/p>
+&lt;h4 id="motan2协议的跨语言支持">motan2协议的跨语言支持&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/motan-protocol.png" alt="motan2">&lt;/p>
+&lt;p>motan2 协议被设计用来满足跨语言的需求主要体现在两个细节中—MetaData 和 motan-go。在最初的 motan 协议中，协议报文仅由 Header+Body 组成，这样导致 path，param，group 等存储在 Body 中的数据需要反序列得到，这对异构语言来说是很不友好的，所以在 motan2 中修改了协议的组成；weibo 开源了 &lt;a href="https://github.com/weibocom/motan-go/">motan-go&lt;/a> ，&lt;a href="https://github.com/weibocom/motan-php">motan-php&lt;/a>，&lt;a href="https://github.com/weibocom/motan-openresty">motan-openresty&lt;/a> ,并借助于 motan-go 充当了 agent 这一翻译官的角色，使用 simple 序列化方案来序列化协议报文的 Body 部分（simple 序列化是一种较弱的序列化方案）。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/motan-agent.png" alt="agent">&lt;/p>
+&lt;p>仔细揣摩下可以发现这么做和双协议的配置区别并不是大，只不过这里的 agent 是隐式存在的，与主服务共生。明显的区别在于 agent 方案中异构语言并不直接交互。&lt;/p>
+&lt;h4 id="dubbo协议的跨语言支持">dubbo协议的跨语言支持&lt;/h4>
+&lt;p>dubbo 协议设计之初只考虑到了常规的 rpc 调用场景，它并不是为跨语言而设计，但跨语言支持从来不是只有支持、不支持两种选择，而是要按难易&lt;/p>
+&lt;p>程度来划分。是的，dubbo 协议的跨语言调用可能并不好做，但并非无法实现。千米网便实现了这一点，nodejs 构建的前端业务是异构语言的主战场，最终实现了 dubbo2.js，打通了 nodejs 和原生 dubbo 协议。作为本文第二部分的核心内容，重点介绍下我们使用 dubbo2.js 干了什么事。&lt;/p>
+&lt;h5 id="dubbo协议报文格式">Dubbo协议报文格式&lt;/h5>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-protocol.png" alt="dubbo协议">&lt;/p>
+&lt;p>dubbo协议报文消息头详解：&lt;/p>
+&lt;ul>
+&lt;li>magic：类似java字节码文件里的魔数，用来判断是不是 dubbo 协议的数据包。魔数是常量 0xdabb&lt;/li>
+&lt;li>flag：标志位, 一共8个地址位。低四位用来表示消息体数据用的序列化工具的类型（默认 hessian），高四位中，第一位为 1 表示是 request 请求，第二位为 1 表示双向传输（即有返回 response），第三位为 1 表示是心跳 ping 事件。&lt;/li>
+&lt;li>status：状态位, 设置请求响应状态，dubbo 定义了一些响应的类型。具体类型见&lt;code>com.alibaba.dubbo.remoting.exchange.Response&lt;/code>&lt;/li>
+&lt;li>invoke id：消息 id, long 类型。每一个请求的唯一识别 id（由于采用异步通讯的方式，用来把请求 request 和返回的 response 对应上）&lt;/li>
+&lt;li>body length：消息体 body 长度, int 类型，即记录 Body Content 有多少个字节&lt;/li>
+&lt;li>body content：请求参数，响应参数的抽象序列化之后存储于此。&lt;/li>
+&lt;/ul>
+&lt;p>协议报文最终都会变成字节，使用 tcp 传输，任何语言只要支持网络模块，有类似 Socket 之类的封装，那么通信就不成问题。那，跨语言难在哪儿？以其他语言调用 java 来说，主要有两个难点：&lt;/p>
+&lt;ol>
+&lt;li>异构语言如何表示 java 中的数据类型，特别是动态语言，可能不存在严格的数据类型&lt;/li>
+&lt;li>序列化方案如何做到跨语言&lt;/li>
+&lt;/ol>
+&lt;h2 id="dubbo2js解决方案">dubbo2.js解决方案&lt;/h2>
+&lt;p>上面我们分析出了两个难点，dubbo2.js 解决这两个问题的关键依赖于两个类库：&lt;a href="https://github.com/node-modules/js-to-java">js-to-java&lt;/a>，&lt;a href="https://github.com/node-modules/hessian.js">hessian.js&lt;/a> 。js-to-java 使得 nodejs 具备 java 对象的表达能力，而 hessian.js 提供了序列化能力。借助于 nodejs 的 socket ，复制一套 dubbo 协议的报文格式，最终便实现了 nodejs 对 java-dubbo-provider 的调用。&lt;/p>
+&lt;h2 id="dubbo2js快速入门">dubbo2.js快速入门&lt;/h2>
+&lt;p>为了让对 dubbo2.js 感兴趣的读者有一个直观的体验，本节呈现一个快速入门示例，让你体会到使用 dubbo2.js 调用 dubbo 服务是一件多么轻松的事。&lt;/p>
+&lt;h3 id="1-创建-dubbo-java-provider">1. 创建 dubbo-java-provider&lt;/h3>
+&lt;p>后端 dubbo 服务使用 java 来提供，这服务大多数的业务场景。首先定义服务接口：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoProvider&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">echo&lt;/span>() ;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">test&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UserResponse &lt;span style="color:#268bd2">getUserInfo&lt;/span>(UserRequest request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其次，实现服务：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoProviderImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoProvider {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;[&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SimpleDateFormat(&lt;span style="color:#2aa198">&amp;#34;HH:mm:ss&amp;#34;&lt;/span>).format(&lt;span style="color:#719e07">new&lt;/span> Date()) &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;] Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, request from consumer: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getRemoteAddress());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, response form provider: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getLocalAddress();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">echo&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;receive....&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;pang&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">test&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> UserResponse &lt;span style="color:#268bd2">getUserInfo&lt;/span>(UserRequest request) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UserResponse response &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> UserResponse();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.setStatus(&lt;span style="color:#2aa198">&amp;#34;ok&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> map &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map.put(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map.put(&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.setInfo(map);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> response;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>暴露服务：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://code.alibabatech.com/schema/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 提供方应用信息，用于计算依赖关系 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;localhost:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 用dubbo协议在20880端口暴露服务 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 和本地bean一样实现服务 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoProvider&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.demo.provider.DemoProviderImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 声明需要暴露的服务接口 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.demo.DemoProvider&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoProvider&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们完成了服务端的所有配置，启动启动类即可在本地注册一个 dubbo 服务。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Provider&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassPathXmlApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ClassPathXmlApplicationContext(&lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;META-INF/spring/dubbo-demo-provider.xml&amp;#34;&lt;/span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.in.read();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-实现-nodejs-的-dubbo-客户端">2. 实现 nodejs 的 dubbo 客户端&lt;/h3>
+&lt;p>安装 dubbo2.js：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>npm install dubbo2.js --save
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置 dubboConfig.ts：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> { Dubbo, java, TDubboCallResult } &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#39;dubbo2.js&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">const&lt;/span> dubbo &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Dubbo({
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application&lt;span style="color:#719e07">:&lt;/span> {name&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;demo-provider&amp;#39;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> register&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;localhost:2181&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubboVersion&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;2.0.0&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> interfaces&lt;span style="color:#719e07">:&lt;/span> [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#39;com.alibaba.dubbo.demo.DemoProvider&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">interface&lt;/span> IDemoService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sayHello(name: &lt;span style="color:#dc322f">string&lt;/span>)&lt;span style="color:#719e07">:&lt;/span> TDubboCallResult&amp;lt;&lt;span style="color:#268bd2">string&lt;/span>&amp;gt;;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">export&lt;/span> &lt;span style="color:#268bd2">const&lt;/span> demoService &lt;span style="color:#719e07">=&lt;/span> dubbo.proxyService&amp;lt;&lt;span style="color:#268bd2">IDemoService&lt;/span>&amp;gt;({
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubboInterface&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;com.alibaba.dubbo.demo.DemoProvider&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> version&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;1.0.0&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methods&lt;span style="color:#719e07">:&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sayHello(name: &lt;span style="color:#dc322f">string&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> [java.&lt;span style="color:#b58900">String&lt;/span>(name)];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> echo() {},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> test() {},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> getUserInfo() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> java.combine(&lt;span style="color:#2aa198">&amp;#39;com.alibaba.dubbo.demo.UserRequest&amp;#39;&lt;/span>, {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: &lt;span style="color:#dc322f">1&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;nodejs&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> email&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;node@qianmi.com&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>使用 typescript 可以带来更好的开发体验。&lt;/p>
+&lt;/blockquote>
+&lt;p>编写调用类 main.ts：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-typescript" data-lang="typescript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">import&lt;/span> {demoService} &lt;span style="color:#268bd2">from&lt;/span> &lt;span style="color:#2aa198">&amp;#39;./dubboConfig&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>demoService.sayHello(&lt;span style="color:#2aa198">&amp;#39;kirito&amp;#39;&lt;/span>).then(({res,err})&lt;span style="color:#719e07">=&amp;gt;&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> console.log(res)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-执行调用">3. 执行调用&lt;/h3>
+&lt;p>Debug 模式启动 nodejs 客户端：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">DEBUG&lt;/span>&lt;span style="color:#719e07">=&lt;/span>dubbo* ts-node main.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看运行结果：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>Hello kirito, response form provider: 172.19.6.151:20880
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Congratulation！&lt;/p>
+&lt;h2 id="dubbo2js特性">dubbo2.js特性&lt;/h2>
+&lt;ul>
+&lt;li>支持 zookeeper 注册中心&lt;/li>
+&lt;li>支持原生 dubbo 协议&lt;/li>
+&lt;li>支持服务直连&lt;/li>
+&lt;li>全链路跟踪&lt;/li>
+&lt;li>dubbo 接口自动生成&lt;/li>
+&lt;/ul>
+&lt;h2 id="更多细节">更多细节&lt;/h2>
+&lt;p>本文中的示例代码，提供在此处，&lt;a href="https://github.com/dubbo/dubbo2.js">https://github.com/dubbo/dubbo2.js&lt;/a> 。如果你对 dubbo 协议不甚了解，想要理解它的工作原理，项目中提供了一个子 moudle — java-socket-consumer，使用面向过程的思路实现了 java-socket-consumer，完成了原生 socket 发送 dubbo 协议报文，完成方法调用，并获取响应的全流程。&lt;/p></description></item></channel></rss>

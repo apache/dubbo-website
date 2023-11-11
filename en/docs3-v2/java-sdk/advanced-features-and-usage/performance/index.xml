@@ -1,0 +1,1145 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Diagnostics and Tuning</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/</link><description>Recent content in Diagnostics and Tuning on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Request time-consuming sampling</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/</guid><description>
+&lt;h2 id="function-description">Function Description&lt;/h2>
+&lt;p>The performance sampling function can detect the time consumption of various parts of the Dubbo processing link. When a timeout occurs, &lt;code>( usageTime / timeout &amp;gt; profilerWarnPercent * 100 )&lt;/code> records the time consumption of calls through logs.&lt;/p>
+&lt;p>This function is divided into &lt;code>simple profiler&lt;/code> and &lt;code>detail profiler&lt;/code> two modes, where &lt;code>simple profiler&lt;/code> mode is enabled by default, and &lt;code>detail profiler&lt;/code> mode is disabled by default.
+Compared with the &lt;code>simple profiler&lt;/code> mode, the &lt;code>detail profiler&lt;/code> collects more time-consuming processing of each filter, specific time-consuming protocols, etc.
+In the &lt;code>simple profiler&lt;/code> mode, if you find that there is a long time-consuming situation inside the Dubbo framework, you can enable the &lt;code>detail profiler&lt;/code> mode to better troubleshoot the problem.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>Scenarios that need to collect and analyze the precise time consumption of Dubbo requests, such as service timeouts for unknown reasons, etc.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;p>&lt;code>simple profiler&lt;/code> is automatically enabled by default, and for requests whose processing time exceeds 3/4 of the timeout time, the slow call information will be printed out through the log. If you need to enable the &lt;code>detail profiler&lt;/code> mode or modify the timeout alarm ratio, you can refer to the &lt;a href="../../../reference-manual/qos/profiler/">performance sampling command&lt;/a> document.&lt;/p>
+&lt;h3 id="output-example">output example&lt;/h3>
+&lt;h4 id="log-description">Log description&lt;/h4>
+&lt;p>The meaning of each field in the log is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[Dubbo-Consumer] execute service interface#method cost actual time-consuming, this invocation almost (maybe already) timeout. Timeout: timeout
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>request context
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: start request time (nano time)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: the start time of the current node; Usage: the total time spent on the current node, the time-consuming ratio of the current node ] Description of the current node
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: the start time of the current node; Usage: the total time spent on the current node, the time-consuming ratio of the current node ] Description of the current node
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For the request time-consuming, here are two examples:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>methodA() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (1)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodB (2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (3)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodB() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (4)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodC (5)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (6)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodC() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (7)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0 ms; Usage: (1) + (2) + (3) ms] execute methodA
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) ms; Usage: (4) + (5) + (6) = (2) ms ] execute methodB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (4) ms; Usage: (7) = (5) ms ] execute methodC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(1) (2) (3) ... are all time placeholders
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>methodA() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (1)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodB (2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodE (3)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (4)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodB() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (5)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methodC (6)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> method D (7)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (8)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodC() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (9)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodD() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (10)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>methodE() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> do something (11)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0 ms; Usage: (1) + (2) + (3) + (4) ms] execute methodA
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) ms; Usage: (5) + (6) + (7) + (8) = (2) ms ] execute methodB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (5) ms; Usage: (9) = (6) ms ] execute methodC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (5) + (6) ms; Usage: (10) = (7) ms ] execute methodD
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: (1) + (2) ms; Usage: (11) = (3) ms ] execute methodE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(1) (2) (3) ... are all time placeholders
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="simple-profiler">simple profiler&lt;/h4>
+&lt;p>Consumer side:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:08:35:035 CST] main WARN proxy.InvokerInvocationHandler: [DUBBO] [Dubbo-Consumer] execute service org.apache.dubbo.samples.api.GreetingsService#sayHi cost 1003.015746 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285821581299853
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 1003.015746ms, 100% ] Receive request. Client invoke begin. ServiceKey: org.apache.dubbo.samples.api.GreetingsService MethodName:sayHi
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 7.987015ms; Usage: 994.207928ms, 99% ] Invoker invoke. Target Address: xx.xx.xx.xx:20880, dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx. xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Provider side:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:08:35:035 CST] DubboServerHandler-30.227.64.173:20880-thread-2 WARN filter.ProfilerServerFilter: [DUBBO] [Dubbo-Provider] execute service org.apache.dubbo.samples.api .GreetingsService:0.0.0#sayHi cost 808.494672 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>client: xx.xx.xx.xx:51604
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>input=281;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo=2.0.2;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285821754461125
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 808.494672ms, 100% ] Receive request. Server invoke begin.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.030912ms; Usage: 804.236342ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="detail-profiler">detail profiler&lt;/h4>
+&lt;p>Consumer side:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:10:59:059 CST] main WARN proxy.InvokerInvocationHandler: [DUBBO] [Dubbo-Consumer] execute service org.apache.dubbo.samples.api.GreetingsService#sayHi cost 990.828336 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285965458479241
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 990.828336ms, 100% ] Receive request. Client invoke begin. ServiceKey: org.apache.dubbo.samples.api.GreetingsService MethodName:sayHi
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 0.852044ms; Usage: 989.899439ms, 99% ] Filter org.apache.dubbo.rpc.cluster.filter.support.ConsumerContextFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.814858ms; Usage: 988.924876ms, 99% ] Filter org.apache.dubbo.rpc.protocol.dubbo.filter.FutureFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.853211ms; Usage: 988.877928ms, 99% ] Filter org.apache.dubbo.monitor.support.MonitorClusterFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.873243ms; Usage: 988.661708ms, 99% ] Filter org.apache.dubbo.rpc.cluster.router.RouterSnapshotFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 2.159140ms; Usage: 0.504939ms, 0% ] Router route.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 8.125823ms; Usage: 981.748366ms, 99% ] Cluster org.apache.dubbo.rpc.cluster.support.FailoverClusterInvoker invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 8.258359ms; Usage: 981.612033ms, 99% ] Invoker invoke. Target Address: xx.xx.xx.xx:20880, dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx. xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Provider side:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:10:59:059 CST] DubboServerHandler-30.227.64.173:20880-thread-2 WARN filter.ProfilerServerFilter: [DUBBO] [Dubbo-Provider] execute service org.apache.dubbo.samples.api .GreetingsService:0.0.0#sayHi cost 811.017347 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>client: xx.xx.xx.xx:52019
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invocation context:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>input=281;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>path=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>remote.application=first-dubbo-consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo=2.0.2;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>interface=org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>version=0.0.0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>timeout=1000;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>thread info:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Start time: 285965612316294
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>+-[ Offset: 0.000000ms; Usage: 811.017347ms, 100% ] Receive request. Server invoke begin.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.096880ms; Usage: 809.916668ms, 99% ] Filter org.apache.dubbo.rpc.filter.EchoFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.133478ms; Usage: 809.866204ms, 99% ] Filter org.apache.dubbo.rpc.filter.ClassLoaderFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.157563ms; Usage: 809.838572ms, 99% ] Filter org.apache.dubbo.rpc.filter.GenericFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.202075ms; Usage: 809.736843ms, 99% ] Filter org.apache.dubbo.rpc.filter.ContextFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.433193ms; Usage: 809.504401ms, 99% ] Filter org.apache.dubbo.auth.filter.ProviderAuthFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.470760ms; Usage: 809.464291ms, 99% ] Filter org.apache.dubbo.rpc.filter.ExceptionFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.489103ms; Usage: 809.440183ms, 99% ] Filter org.apache.dubbo.monitor.support.MonitorFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.515757ms; Usage: 809.381893ms, 99% ] Filter org.apache.dubbo.rpc.filter.TimeoutFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.526632ms; Usage: 809.366553ms, 99% ] Filter org.apache.dubbo.rpc.protocol.dubbo.filter.TraceFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.536964ms; Usage: 809.335907ms, 99% ] Filter org.apache.dubbo.rpc.filter.ClassLoaderCallbackFilter invoke.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> +-[ Offset: 1.558545ms; Usage: 804.276436ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note: If the log is empty due to the mismatch of the log framework, you can refer to &lt;a href="../../others/logger-management/">Log Framework Adaptation and Runtime Management&lt;/a> to dynamically modify the log output framework.&lt;/p></description></item><item><title>Docs3-V2: Threading Model</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/</guid><description/></item><item><title>Docs3-V2: Routing Status Collection</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/router-snapshot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/router-snapshot/</guid><description>
+&lt;h2 id="function-description">Function Description&lt;/h2>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>Many of Dubbo&amp;rsquo;s traffic management capabilities are implemented based on Router. In a production environment, if traffic results do not meet expectations, you can use the routing status command to check the routing status to locate possible problems.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="view-route-cache-status">View route cache status&lt;/h3>
+&lt;p>When Dubbo receives the address change, it will push the address information to all &lt;code>Routers&lt;/code>, and these &lt;code>Routers&lt;/code> can calculate the routing packets in advance at this stage and cache them to avoid the need to traverse all provider calculations when calling grouping parameters.
+The &lt;code>StateRouter&lt;/code> introduced in Dubbo 3 provides the ability to obtain the status of each route in real time through the qos command tool.&lt;/p>
+&lt;p>The operation and maintenance personnel can obtain the status of the route through the &lt;code>getRouterSnapshot&lt;/code> command. For specific commands, please refer to the &lt;a href="../../../reference-manual/qos/router-snapshot/#getroutersnapshot-command">getRouterSnapshot command&lt;/a> document.&lt;/p>
+&lt;p>**Note: This feature only supports &lt;code>StateRoute&lt;/code>, and &lt;code>StateRouter&lt;/code> needs to implement the &lt;code>doBuildSnapshot&lt;/code> interface based on &lt;code>AbstractStateRouter&lt;/code>. **&lt;/p>
+&lt;h3 id="view-the-route-calculation-result-of-the-actual-request">View the route calculation result of the actual request&lt;/h3>
+&lt;p>By default in Dubbo 3, the node status of route calculation is printed when the route filter is empty. Operation and maintenance personnel can judge whether the calculation result of each route meets expectations through logs.&lt;/p>
+&lt;h4 id="log-format">Log format&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>No provider available after route for the service service from registry registration center address on the consumer consumer IP using the dubbo version 3.0.7. Router snapshot is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: Number of input addresses of the current node) (Current Node Output: Number of calculation results of the current node) (Chain Node Output: Number of intersection results of the current node and subsequent nodes) ] Input: Examples of input addresses (up to 5 are displayed) -&amp;gt; Chain Node Output: Example of addresses output by the current node (up to 5 are displayed)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [Route name (Input: number of input addresses of the current node) (Current Node Output: number of calculation results of the current node) (Chain Node Output: number of intersection results of the current node and subsequent nodes) Router message: routing log] Current Node Output: current node Example of addresses output (up to 5 displayed)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [routing name (Input: current node input address number) (Current Node Output: current node calculation result number) (Chain Node Output: current node and subsequent node intersection result number) Router message: routing log] Current Node Output: current input Examples of addresses for (show up to 5)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="notice">Notice:&lt;/h4>
+&lt;ul>
+&lt;li>The routing log needs to rely on the routing implementation to judge the &lt;code>needToPrintMessage&lt;/code> parameter, and write the &lt;code>messageHolder&lt;/code> routing log when needed&lt;/li>
+&lt;li>Since the result of multi-level routing is the intersection of the results, the calculation result of the current node may be empty after the intersection with the subsequent level&lt;/li>
+&lt;/ul>
+&lt;h4 id="log-example">Log example&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/07/22 07:42:46:046 CST] main WARN cluster.RouterChain: [DUBBO] No provider available after route for the service org.apache.dubbo.samples.governance.api.DemoService from registry 30.227.64.173 on the consumer 30.227.64.173 using the dubbo version 3.0.7. Router snapshot is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: 2) (Current Node Output: 2) (Chain Node Output: 0) ] Input: 30.227.64.173:20881,30.227.64.173:20880 -&amp;gt; Chain Node Output: Empty
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ MockInvokersSelector (Input: 2) (Current Node Output: 2) (Chain Node Output: 0) Router message: invocation.need.mock not set. Return normal Invokers. ] Current Node Output: 30.227.64.173:20881,30.223.64.17 :20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ StandardMeshRuleRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 0) Router message: MeshRuleCache has not been built. Skip route. ] Current Node Output: 30.227.64.173:20881,30.227.624.1803:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ TagStateRouter (Input: 2) (Current Node Output: 0) (Chain Node Output: 0) Router message: FAILOVER: return all Providers without any tags ] Current Node Output: Empty, dubbo version: 3.0.7, current host: 30.227 .64.173
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="open-route-full-sampling">Open route full sampling&lt;/h4>
+&lt;p>In some special cases, the request may be called to the wrong server, but because the address selection is not empty, the process information of the route cannot be seen. At this time, you can [Enable full route sampling through qos](../../. ./reference-manual/qos/router-snapshot/). The latest routing snapshot can be obtained remotely through the &lt;code>getRecentRouterSnapshot&lt;/code> command of qos.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;getRecentRouterSnapshot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1658224330156 - Router snapshot service com.dubbo.dubbointegration.BackendService from registry 172.18.111.184 on the consumer 172.18.111.184 using the dubbo version 3.0.9 is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) ] Input: 172.18.111.187:20880,172.18.111.183:20880 -&amp;gt; Chain Node Output: 172.18.111.187:20880.3172.18 :20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ MockInvokersSelector (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: invocation.need.mock not set. Return normal Invokers. ] Current Node Output: 172.18.111.187:20880,172.183.111. :20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ StandardMeshRuleRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: MeshRuleCache has not been built. Skip route. ] Current Node Output: 172.18.111.187:20880,172.1803:1121.88
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ TagStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Disable Tag Router. Reason: tagRouterRule is invalid or disabled ] Current Node Output: 172.18.111.187:20880,172.183.111. 20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ ServiceStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880 ,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ AppStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880 ,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1658224330156 - Router snapshot service com.dubbo.dubbointegration.BackendService from registry 172.18.111.184 on the consumer 172.18.111.184 using the dubbo version 3.0.9 is below:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[ Parent (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) ] Input: 172.18.111.187:20880,172.18.111.183:20880 -&amp;gt; Chain Node Output: 172.18.111.187:20880.3172.18 :20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ MockInvokersSelector (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: invocation.need.mock not set. Return normal Invokers. ] Current Node Output: 172.18.111.187:20880,172.183.111. :20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ StandardMeshRuleRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: MeshRuleCache has not been built. Skip route. ] Current Node Output: 172.18.111.187:20880,172.1803:1121.88
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ TagStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Disable Tag Router. Reason: tagRouterRule is invalid or disabled ] Current Node Output: 172.18.111.187:20880,172.183.111. 20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ ServiceStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880 ,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [ AppStateRouter (Input: 2) (Current Node Output: 2) (Chain Node Output: 2) Router message: Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty. ] Current Node Output: 172.18.111.187:20880 ,172.18.111.183:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>···
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="notice-1">Notice:&lt;/h4>
+&lt;p>If the log is empty due to the mismatch of the log framework, you can refer to &lt;a href="../../others/logger-management/">Log Framework Adaptation and Runtime Management&lt;/a> to dynamically modify the log output framework.&lt;/p></description></item><item><title>Docs3-V2: Service Reference Configuration Object Cache</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/reference-config-cache/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/reference-config-cache/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>The &lt;code>ReferenceConfig&lt;/code> instance is heavy, encapsulates the connection to the registry and the connection to the provider, and needs to be cached. Otherwise repeatedly generating &lt;code>ReferenceConfig&lt;/code> may cause performance problems and have memory and connection leaks. It&amp;rsquo;s easy to overlook this problem when programming in the API way.&lt;/p>
+&lt;p>Therefore, since &lt;code>2.4.0&lt;/code> version, dubbo provides a simple tool class &lt;code>ReferenceConfigCache&lt;/code> for caching &lt;code>ReferenceConfig&lt;/code> instances.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>There are scenarios such as gateways that dynamically create subscriptions. Because ReferenceConfig itself is very heavy, it will create a lot of intermediate objects, and proxy itself can be reused, so the properties of this part can be cached through ReferenceConfigCache.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="eliminate-and-destroy">Eliminate and destroy&lt;/h3>
+&lt;p>Eliminating the &lt;code>ReferenceConfig&lt;/code> in the Cache will destroy the &lt;code>ReferenceConfig&lt;/code> and release the corresponding resources.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>XxxService&lt;span style="color:#719e07">&amp;gt;&lt;/span> reference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>XxxService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setInterface(XxxService.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setVersion(&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> …
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ReferenceConfigCache cache &lt;span style="color:#719e07">=&lt;/span> ReferenceConfigCache. &lt;span style="color:#268bd2">getCache&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The reference object will be cached in the cache.get method, and the ReferenceConfig.get method will be called to start the ReferenceConfig&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>XxxService xxxService &lt;span style="color:#719e07">=&lt;/span> cache. &lt;span style="color:#268bd2">get&lt;/span>(reference);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Notice! The Cache will hold the ReferenceConfig, do not call the destroy method of the ReferenceConfig outside, causing the ReferenceConfig in the Cache to become invalid!&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Use the xxxService object&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>xxxService. &lt;span style="color:#268bd2">sayHello&lt;/span>();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfigCache cache &lt;span style="color:#719e07">=&lt;/span> ReferenceConfigCache. &lt;span style="color:#268bd2">getCache&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cache.destroy(reference);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The default &lt;code>ReferenceConfigCache&lt;/code> considers &lt;code>ReferenceConfig&lt;/code> of the same service group, interface, and version to be the same, and caches a copy. That is, the service group, interface, and version are cached keys.&lt;/p>
+&lt;h3 id="modify-strategy">Modify strategy&lt;/h3>
+&lt;p>You can modify this strategy to pass a &lt;code>KeyGenerator&lt;/code> when &lt;code>ReferenceConfigCache.getCache&lt;/code>. See methods of the &lt;code>ReferenceConfigCache&lt;/code> class for details.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>KeyGenerator keyGenerator &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ReferenceConfigCache cache &lt;span style="color:#719e07">=&lt;/span> ReferenceConfigCache. &lt;span style="color:#268bd2">getCache&lt;/span>(keyGenerator);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Load Balancing</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/</guid><description>
+&lt;p>When cluster load balancing, Dubbo provides a variety of balancing strategies, the default is &lt;code>random&lt;/code> random calls.&lt;/p>
+&lt;p>In terms of specific implementation, Dubbo provides client load balancing, that is, the Consumer uses the load balancing algorithm to determine which Provider instance to submit the request to.&lt;/p>
+&lt;p>You can expand the load balancing strategy by yourself, see: &lt;a href="../../../reference-manual/spi/description/load-balance">Load Balance Extension&lt;/a>&lt;/p>
+&lt;h2 id="load-balancing-strategy">load balancing strategy&lt;/h2>
+&lt;p>Currently Dubbo has the following built-in load balancing algorithms, which users can directly configure and use:&lt;/p>
+&lt;p>| Algorithms | Features | Remarks |
+| :&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash; | :&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash; &amp;ndash; | :&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- |
+| RandomLoadBalance | Weighted random | Default algorithm, same weight by default |
+| RoundRobinLoadBalance | Weighted round-robin | Based on Nginx&amp;rsquo;s smooth weighted round-robin algorithm, the default weight is the same, |
+| LeastActiveLoadBalance | Least Active Priority + Weighted Random | Behind it is the idea that those who can do more work |
+| ShortestResponseLoadBalance | Shortest Response First + Weighted Random | More focus on response speed |
+| ConsistentHashLoadBalance | Consistent Hash | Definite input parameters, definite provider, suitable for stateful requests |&lt;/p>
+&lt;h3 id="random">Random&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>Weighted random&lt;/strong>, set random probability by weight.&lt;/li>
+&lt;li>The probability of collision on a section is high, but the greater the call volume, the more uniform the distribution, and the weight is also more uniform after using the probability, which is conducive to dynamically adjusting the provider weight.&lt;/li>
+&lt;li>Disadvantages: There is a problem of accumulating requests from slow providers. For example: the second machine is very slow, but it is not hung up. When the request is transferred to the second machine, it is stuck there. Over time, all requests are stuck in the second machine. on stage.&lt;/li>
+&lt;/ul>
+&lt;h3 id="roundrobin">RoundRobin&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>Weighted polling&lt;/strong>, set the polling ratio according to the weight after the convention, and call the node cyclically&lt;/li>
+&lt;li>Disadvantage: There is also the problem of accumulating requests for slow providers.&lt;/li>
+&lt;/ul>
+&lt;p>During the weighted round-robin process, if the weight of a node is too large, there will be a problem of too concentrated calls within a certain period of time.
+For example, ABC three nodes have the following weights: &lt;code>{A: 3, B: 2, C: 1}&lt;/code>
+Then according to the most primitive polling algorithm, the calling process will become: &lt;code>A A A B B C&lt;/code>&lt;/p>
+&lt;p>In this regard, Dubbo has optimized it by referring to Nginx&amp;rsquo;s smooth weighted round-robin algorithm. The calling process can be abstracted into the following table:&lt;/p>
+&lt;p>| Pre-round sum weight | Current round winner | Total weight | Post-round weight (winner minus total weight) |
+| :&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | :&amp;mdash;&amp;mdash;- | :&amp;mdash;&amp;mdash;- | :&amp;mdash;&amp;mdash;&amp;mdash;- &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash; |
+| Starting round | \ | \ | &lt;code>A(0), B(0), C(0)&lt;/code> |
+| &lt;code>A(3), B(2), C(1)&lt;/code> | A | 6 | &lt;code>A(-3), B(2), C(1)&lt;/code> |
+| &lt;code>A(0), B(4), C(2)&lt;/code> | B | 6 | &lt;code>A(0), B(-2), C(2)&lt;/code> |
+| &lt;code>A(3), B(0), C(3)&lt;/code> | A | 6 | &lt;code>A(-3), B(0), C(3)&lt;/code> |
+| &lt;code>A(0), B(2), C(4)&lt;/code> | C | 6 | &lt;code>A(0), B(2), C(-2)&lt;/code> |
+| &lt;code>A(3), B(4), C(-1)&lt;/code> | B | 6 | &lt;code>A(3), B(-2), C(-1)&lt;/code> |
+| &lt;code>A(6), B(0), C(0)&lt;/code> | A | 6 | &lt;code>A(0), B(0), C(0)&lt;/code> |&lt;/p>
+&lt;p>We found that after the total weight (3+2+1) rounds, the cycle returns to the starting point, the node traffic is smooth throughout the process, and even in a short period of time, the probability is distributed according to expectations.&lt;/p>
+&lt;p>If users have the requirement of weighted polling, they can use this algorithm with confidence.&lt;/p>
+&lt;h3 id="leastactive">LeastActive&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>Weighted least active call priority&lt;/strong>, the lower the active number, the higher the priority call, the same active number will be weighted randomly. The active number refers to the count difference before and after the call (for a specific provider: the number of requests sent - the number of responses returned), which indicates the amount of tasks accumulated by a specific provider. The lower the active number, the stronger the processing capability of the provider.&lt;/li>
+&lt;li>Make the slow provider receive fewer requests, because the slower the provider, the greater the count difference before and after the call; relatively, the node with the stronger processing capacity can handle more requests.&lt;/li>
+&lt;/ul>
+&lt;p>###ShortestResponse&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Weighted Shortest Response Priority&lt;/strong>, in the latest sliding window, the shorter the response time, the higher the priority to call. The same response time is weighted randomly.&lt;/li>
+&lt;li>Make providers with faster response times handle more requests.&lt;/li>
+&lt;li>Disadvantage: It may cause traffic to be too concentrated on high-performance nodes.&lt;/li>
+&lt;/ul>
+&lt;p>Response time here = the average response time of a provider within the window time, and the default window time is 30s.&lt;/p>
+&lt;p>###ConsistentHash&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Consistent Hash&lt;/strong>, requests with the same parameters are always sent to the same provider.&lt;/li>
+&lt;li>When a certain provider is down, the request originally sent to the provider will be spread to other providers based on the virtual node, and will not cause drastic changes.&lt;/li>
+&lt;li>Algorithm see: &lt;a href="http://en.wikipedia.org/wiki/Consistent_hashing">Consistent Hashing | WIKIPEDIA&lt;/a>&lt;/li>
+&lt;li>By default only the first parameter Hash, if you want to modify, please configure &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.arguments&amp;quot; value=&amp;quot;0,1&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
+&lt;li>160 virtual nodes are used by default, if you want to modify, please configure &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.nodes&amp;quot; value=&amp;quot;320&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="configuration">configuration&lt;/h2>
+&lt;h3 id="server-service-level">Server service level&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="client-service-level">Client service level&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="server-method-level">Server method level&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="client-method-level">Client method level&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Registration Information Simplified</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>There are nearly &lt;a href="https://dubbo.apache.org/zh-cn/docs/references/xml/dubbo-parameter">30 configuration items&lt;/a> in the service configuration items in Dubbo provider. Excluding the need for registry service governance, a large part of configuration items are used by the provider itself and do not need to be transparently passed to consumers. This part of data does not need to enter the registry, but only needs to be stored persistently in the form of key-value.&lt;/p>
+&lt;p>The configuration items in Dubbo consumer also have &lt;a href="https://dubbo.apache.org/zh-cn/docs/references/xml/dubbo-consumer">20+ configuration items&lt;/a>. In the registration center, only a small amount of configuration such as application, version, group, ip, and dubbo version need to be concerned in the service consumer list, and other configurations can also be stored persistently in the form of key-value.
+These data are registered into the registration center in the dimension of service, which leads to the expansion of the data volume, which in turn leads to an increase in the network overhead of the registration center (such as zookeeper) and a decrease in performance.&lt;/p>
+&lt;h4 id="design-goals-and-objectives">Design goals and objectives&lt;/h4>
+&lt;p>It is desirable to simplify the number of provider and consumer configurations that go into the registry.
+It is expected that some configuration items will be stored in other forms. These configuration items need to be satisfied: not on the service call link, and these configuration items are not on the core link of the registration center (service query, service list).&lt;/p>
+&lt;h4 id="configuration">Configuration&lt;/h4>
+&lt;p>Simplify the configuration of the registry, only supported in versions after 2.7.
+After enabling provider or consumer to simplify the configuration, the default reserved configuration items are as follows:&lt;/p>
+&lt;p>provider:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Constant Key&lt;/th>
+&lt;th>Key&lt;/th>
+&lt;th>remark&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>APPLICATION_KEY&lt;/td>
+&lt;td>application&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CODEC_KEY&lt;/td>
+&lt;td>codec&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>EXCHANGER_KEY&lt;/td>
+&lt;td>exchanger&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>SERIALIZATION_KEY&lt;/td>
+&lt;td>serialization&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CLUSTER_KEY&lt;/td>
+&lt;td>cluster&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CONNECTIONS_KEY&lt;/td>
+&lt;td>connections&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>DEPRECATED_KEY&lt;/td>
+&lt;td>deprecated&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>GROUP_KEY&lt;/td>
+&lt;td>group&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>LOADBALANCE_KEY&lt;/td>
+&lt;td>loadbalance&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>MOCK_KEY&lt;/td>
+&lt;td>mock&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>PATH_KEY&lt;/td>
+&lt;td>path&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>TIMEOUT_KEY&lt;/td>
+&lt;td>timeout&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>TOKEN_KEY&lt;/td>
+&lt;td>token&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>VERSION_KEY&lt;/td>
+&lt;td>version&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>WARMUP_KEY&lt;/td>
+&lt;td>warmup&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>WEIGHT_KEY&lt;/td>
+&lt;td>weight&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>DUBBO_VERSION_KEY&lt;/td>
+&lt;td>dubbo&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RELEASE_KEY&lt;/td>
+&lt;td>release&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>SIDE_KEY&lt;/td>
+&lt;td>side&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>consumer:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Constant Key&lt;/th>
+&lt;th>Key&lt;/th>
+&lt;th>remark&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>APPLICATION_KEY&lt;/td>
+&lt;td>application&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>VERSION_KEY&lt;/td>
+&lt;td>version&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>GROUP_KEY&lt;/td>
+&lt;td>group&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>DUBBO_VERSION_KEY&lt;/td>
+&lt;td>dubbo&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Constant Key represents a field from the class org.apache.dubbo.common.Constants.&lt;/p>
+&lt;p>The following introduces several commonly used methods. All samples, you can view &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master">sample-2.7&lt;/a>&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>A large amount of data leads to an increase in the network overhead of the registration center and a decrease in performance.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;p>&lt;strong>EXISTING FUNCTIONALITY sample&lt;/strong> A simple demonstration of the current state of affairs. Through this demonstration, analyze why simplified configuration is needed.&lt;/p>
+&lt;p>Refer to the sample subproject: dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-nosimple (before running the sample, first run ZKClean to clean up the configuration items)&lt;/p>
+&lt;h5 id="dubbo-providerxml-configuration">dubbo-provider.xml configuration:&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>&amp;lt;dubbo:application name=&amp;#34;simplified-registry-nosimple-provider&amp;#34;/&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;dubbo:registry address=&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;/&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;bean id=&amp;#34;demoService&amp;#34; class=&amp;#34;org.apache.dubbo.samples.simplified.registry.nosimple.impl.DemoServiceImpl&amp;#34;/&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;dubbo:service async=&amp;#34;true&amp;#34; interface=&amp;#34;org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> version=&amp;#34;1.2.3&amp;#34; group=&amp;#34;dubbo-simple&amp;#34; ref=&amp;#34;demoService&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> executes=&amp;#34;4500&amp;#34; retries=&amp;#34;7&amp;#34; owner=&amp;#34;vict&amp;#34; timeout=&amp;#34;5300&amp;#34;/&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After starting the provider&amp;rsquo;s main method, view the content of the zookeeper leaf node (path: /dubbo/org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService/providers directory) as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo%3A%2F%2F30.5.124.158%3A20880%2Forg.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>%3Fanyhost%3Dtrue%26application%3Dsimplified-registry-xml-provider%26async%3Dtrue%26dubbo%3D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2.0.2%26executes%3D4500%26generic%3Dfalse%26group%3Ddubbo-simple%26interface%3D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService%26methods%3D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sayHello%26owner%3Dvict%26pid%3D2767%26retries%3D7%26revision%3D1.2.3%26side%3D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>provider%26timeout%3D5300%26timestamp%3D1542361152795%26valid%3Dtrue%26version%3D1.2.3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see that there are: &lt;code>executes&lt;/code>, &lt;code>retries&lt;/code>, &lt;code>owner&lt;/code>, &lt;code>timeout&lt;/code>. But not all these fields need to be passed to dubbo ops or dubbo consumer. Similarly, the consumer also has this problem, which can be viewed by starting the main method of the consumer in the example.&lt;/p>
+&lt;h3 id="method-1-configure-dubboproperties">Method 1. Configure dubbo.properties&lt;/h3>
+&lt;p>The sample is under the dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-xml project (before running the sample, first run ZKClean to clean up the configuration items)&lt;/p>
+&lt;h5 id="dubboproperties">dubbo.properties&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.registry.simplified&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.extra-keys&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">retries,owner&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Compared with the &lt;strong>existing function sample&lt;/strong> above, in the above sample, the four configuration items of executes, retries, owner, and timeout have all entered the registration center. But this example is not, the configuration is divided into:&lt;/p>
+&lt;ul>
+&lt;li>Configuration: dubbo.registry.simplified=true, by default, timeout is in the default configuration item list, so it will still enter the registry;&lt;/li>
+&lt;li>Configuration: dubbo.registry.extra-keys=retries,owner, so retries, owner will also enter the registry.&lt;/li>
+&lt;/ul>
+&lt;p>configuration type:&lt;/p>
+&lt;ul>
+&lt;li>provider side configuration&lt;/li>
+&lt;li>consumer side configuration&lt;/li>
+&lt;/ul>
+&lt;h4 id="provider-side-configuration">Provider side configuration:&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- optional --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;simplified-registry-xml-provider&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.simplified.registry.nosimple.impl.DemoServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> async=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.2.3&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;dubbo-simple&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> executes=&lt;span style="color:#2aa198">&amp;#34;4500&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;7&amp;#34;&lt;/span> owner=&lt;span style="color:#2aa198">&amp;#34;vict&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;5300&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Get the value of the leaf node of zookeeper:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo%3A%2F%2F30.5.124.149%3A20880%2Forg.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService%3F
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>application%3Dsimplified-registry-xml-provider%26dubbo%3D2.0.2%26group%3Ddubbo-simple%26owner%3D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>vict%26retries%3D7%26timeout%3D5300%26timestamp%3D1542594503305%26version%3D1.2.3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer-side-configuration">consumer side configuration&lt;/h4>
+&lt;ul>
+&lt;li>Configuration: dubbo.registry.simplified=true&lt;/li>
+&lt;li>Default: application, version, group, and dubbo are in the default configuration item list, so they will still enter the registration center.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- optional --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;simplified-registry-xml-consumer&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span> username=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> password=&lt;span style="color:#2aa198">&amp;#34;yyy&amp;#34;&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> owner=&lt;span style="color:#2aa198">&amp;#34;vvv&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;4&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;6&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;4500&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.2.3&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;dubbo-simple&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Get the value of the leaf node of zookeeper:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>consumer%3A%2F%2F30.5.124.149%2Forg.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService%3F
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>actives%3D6%26application%3Dsimplified-registry-xml-consumer%26category%3D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>consumers%26check%3Dfalse%26dubbo%3D2.0.2%26group%3Ddubbo-simple%26owner%3Dvvv%26version%3D1.2.3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="method-2-configuration-declaration-spring-bean">Method 2. Configuration declaration spring bean&lt;/h3>
+&lt;p>The sample is under the dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-annotation project (before running the sample, first run ZKClean to clean up the configuration items)&lt;/p>
+&lt;p>The effect of dubbo.properties in the above sample is the same.&lt;/p>
+&lt;ul>
+&lt;li>Default: timeout is in the default configuration item list, so it will still enter the registration center;&lt;/li>
+&lt;li>Configuration: retries, owner enter the registry as an additional key, so retries, owner will also enter the registry.&lt;/li>
+&lt;/ul>
+&lt;p>configuration type:&lt;/p>
+&lt;p>-Provider configuration
+-Consumer configuration&lt;/p>
+&lt;h4 id="provider-configuration">Provider configuration&lt;/h4>
+&lt;h5 id="private-side-bean-configuration">private side bean configuration:&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Equivalent to dubbo.properties configuration, configured in the form of @Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> RegistryConfig &lt;span style="color:#268bd2">registryConfig&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setSimplified(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setExtraKeys(&lt;span style="color:#2aa198">&amp;#34;retries,owner&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> registryConfig;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// expose the service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.1.8&amp;#34;&lt;/span>, group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;d-test&amp;#34;&lt;/span>, executes &lt;span style="color:#719e07">=&lt;/span> 4500, retries &lt;span style="color:#719e07">=&lt;/span> 7, owner &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;victanno&amp;#34;&lt;/span>, timeout &lt;span style="color:#719e07">=&lt;/span> 5300)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AnnotationServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> AnnotationService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;async provider received: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;annotation: hello, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer-configuration">Consumer configuration&lt;/h4>
+&lt;p>It is the same as &lt;strong>consumer side configuration&lt;/strong> in the sample above.&lt;/p>
+&lt;p>Default: application, version, group, and dubbo are in the default configuration item list, so they will still enter the registration center.&lt;/p>
+&lt;h5 id="consumer-side-bean-configuration">consumer side bean configuration:&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> RegistryConfig &lt;span style="color:#268bd2">registryConfig&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setSimplified(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> registryConfig;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Consumer Services:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;annotationAction&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AnnotationAction&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Reference&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.1.8&amp;#34;&lt;/span>, group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;d-test&amp;#34;&lt;/span>, owner &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;vvvanno&amp;#34;&lt;/span>, retries &lt;span style="color:#719e07">=&lt;/span> 4, actives &lt;span style="color:#719e07">=&lt;/span> 6, timeout &lt;span style="color:#719e07">=&lt;/span> 4500)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> AnnotationService annotationService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">doSayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> annotationService.sayHello(name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="notice">Notice:&lt;/h4>
+&lt;p>If there are both provider and consumer in an application, the configuration needs to be merged into:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> RegistryConfig &lt;span style="color:#268bd2">registryConfig&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setSimplified(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//Only valid for provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setExtraKeys(&lt;span style="color:#2aa198">&amp;#34;retries,owner&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> registryConfig;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="hint">hint:&lt;/h4>
+&lt;p>This version also retains a large number of configuration items, and in the next version, all configuration items will be gradually deleted.&lt;/p></description></item><item><title>Docs3-V2: Call Result Cache</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;h4 id="cache-type">cache type&lt;/h4>
+&lt;ul>
+&lt;li>&lt;code>lru&lt;/code> deletes redundant caches based on the least recently used principle, keeping the hottest data cached.&lt;/li>
+&lt;li>&lt;code>threadlocal&lt;/code> The current thread cache, such as a page rendering, uses many portals, and each portal needs to check user information. Through thread caching, this redundant access can be reduced.&lt;/li>
+&lt;li>&lt;code>jcache&lt;/code> integrates with &lt;a href="http://jcp.org/en/jsr/detail?id=107%27">JSR107&lt;/a> to bridge various cache implementations.&lt;/li>
+&lt;/ul>
+&lt;p>Cache Type Extensible &lt;a href="../../../reference-manual/spi/description/cache">Cache Extensions&lt;/a>&lt;/p>
+&lt;p>About &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache">sample code&lt;/a>&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>The result cache is used to speed up access to popular data. Dubbo provides a declarative cache to reduce the workload of users adding cache.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> cache=&lt;span style="color:#2aa198">&amp;#34;lru&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;findBar&amp;#34;&lt;/span> cache=&lt;span style="color:#2aa198">&amp;#34;lru&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Concurrency Control</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/</guid><description>
+&lt;h2 id="configuration-example">Configuration example&lt;/h2>
+&lt;h3 id="example-1">Example 1&lt;/h3>
+&lt;p>To limit each method of &lt;code>com.foo.BarService&lt;/code>, the concurrent execution on the server side (or the number of threads in the thread pool) cannot exceed 10:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> executes=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="example-2">Example 2&lt;/h3>
+&lt;p>To limit the &lt;code>sayHello&lt;/code> method of &lt;code>com.foo.BarService&lt;/code>, the concurrent execution on the server side (or the number of threads in the thread pool) cannot exceed 10:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> executes=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="example-3">Example 3&lt;/h3>
+&lt;p>Limit each method of &lt;code>com.foo.BarService&lt;/code> to no more than 10 concurrent executions per client (or the number of requests occupying a connection):&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="example-4">Example 4&lt;/h3>
+&lt;p>Limit the &lt;code>sayHello&lt;/code> method of &lt;code>com.foo.BarService&lt;/code> to no more than 10 concurrent executions (or the number of requests that occupy a connection) per client:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If both &lt;code>&amp;lt;dubbo:service&amp;gt;&lt;/code> and &lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code> are configured with actives, &lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code> takes precedence, see: [Configuration override strategy](../../../reference- manual/config/principle/).&lt;/p>
+&lt;h2 id="load-balance">Load Balance&lt;/h2>
+&lt;p>The &lt;code>loadbalance&lt;/code> attribute of the client side of the configuration service is &lt;code>leastactive&lt;/code>, and this Loadbalance will call the Provider with the smallest number of concurrency (Consumer-side concurrency).&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;leastactive&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;leastactive&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Connection Control</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="server-connection-control">Server connection control&lt;/h3>
+&lt;p>Limit the number of connections accepted by the server to no more than 10 &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="client-connection-control">Client connection control&lt;/h3>
+&lt;p>Limit the client service to use no more than 10 connections &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If both &lt;code>&amp;lt;dubbo:service&amp;gt;&lt;/code> and &lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code> are configured with connections, &lt;code>&amp;lt;dubbo:reference&amp;gt;&lt;/code> takes precedence, see: [Configuration override strategy](../../../reference- manual/config/principle/)&lt;/p>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>Because it is connected to the Server, it is configured on the Provider&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2">
+&lt;p>If it is a long connection, such as the Dubbo protocol, connections indicates the number of long connections established by the service for each provider&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div></description></item><item><title>Docs3-V2: Delayed Connection</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/lazy-connect/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/lazy-connect/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>Delayed connections are used to reduce the number of long connections. When a call is initiated, create a persistent connection.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> lazy=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>This configuration is only valid for the dubbo protocol that uses long connections.&lt;/p>
+&lt;/blockquote></description></item><item><title>Docs3-V2: Stick Connection</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/stickiness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/stickiness/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>Sticky connections are used for stateful services, so that the client always initiates calls to the same provider as much as possible, unless the provider hangs up and connects to another one.&lt;/p>
+&lt;p>Sticky connection will automatically enable &lt;a href="../lazy-connect">Delayed Connection&lt;/a> to reduce the number of long connections.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;xxxService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService&amp;#34;&lt;/span> sticky=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo supports method-level sticky connections, if you want more fine-grained control, you can also configure it like this.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;xxxService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> sticky=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Support Graal VM</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/</guid><description>
+&lt;p>dubbo3.0 supports native-image document&lt;/p>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>This document will introduce the process of connecting dubbo3.0 project to GraalVM and compiling native-image into binary.&lt;/p>
+&lt;p>More information about GraalVm can be read &lt;a href="https://www.graalvm.org/docs/getting-started/container-images/">https://www.graalvm.org/docs/getting-started/container-images/&lt;/a> this document.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;p>Before compiling our dubbo project, we need to make sure that we are based on the graalVm environment.&lt;/p>
+&lt;h3 id="install-graalvm">Install GraalVM&lt;/h3>
+&lt;p>Go to &lt;a href="https://www.graalvm.org/">https://www.graalvm.org/&lt;/a> official website and select the latest version to install according to your own system:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg" alt="img">&lt;/p>
+&lt;p>After the installation is complete, modify the path to configure JAVA_HOME, and check the local jdk after it takes effect, you can see the following:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg" alt="img">
+Here we use GraalVM based on jdk1.8 version.&lt;/p>
+&lt;ul>
+&lt;li>To install native-image, just execute gu install native-image.&lt;/li>
+&lt;/ul>
+&lt;ol>
+&lt;li>Pull the dubbo code and switch to the &lt;a href="https://github.com/apache/dubbo">apache:3.0&lt;/a> branch.&lt;/li>
+&lt;li>Manually execute the generated SPI code.&lt;/li>
+&lt;/ol>
+&lt;p>Since the current compilation of native-image does not support code dynamic generation and compilation, the part related to code dynamic generation needs to be generated manually. Here is a tool function:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg" alt="img">
+Execute CodeGenerator to generate SPI code under the dubbo-native module.&lt;/p>
+&lt;h3 id="execute-install-in-the-root-directory">Execute install in the root directory&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>MacdeMacBook&lt;span style="color:#719e07">-&lt;/span>pro&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>:incubator&lt;span style="color:#719e07">-&lt;/span>dubbo mac$ pwd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">/&lt;/span>Users&lt;span style="color:#719e07">/&lt;/span>mac&lt;span style="color:#719e07">/&lt;/span>Documents&lt;span style="color:#719e07">/&lt;/span>Mi&lt;span style="color:#719e07">/&lt;/span>project&lt;span style="color:#719e07">/&lt;/span>incubator&lt;span style="color:#719e07">-&lt;/span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>MacdeMacBook&lt;span style="color:#719e07">-&lt;/span>pro&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>:incubator&lt;span style="color:#719e07">-&lt;/span>dubbo mac$ mvn clean &lt;span style="color:#719e07">package&lt;/span> install &lt;span style="color:#719e07">-&lt;/span>Dmaven.test.skip=&lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="compile-the-demo-project">Compile the demo project&lt;/h3>
+&lt;p>Here we provide a sample project that can be directly compiled, dubbo-demo/dubbo-demo-native. After the above steps are installed, first go to the provider of dubbo-demo-native and execute native-image compilation:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span> mvn clean &lt;span style="color:#719e07">package&lt;/span> &lt;span style="color:#719e07">-&lt;/span>P native &lt;span style="color:#719e07">-&lt;/span>Dmaven.test.skip=&lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here, since we have introduced the native-image plug-in in maven, the plug-in can be executed directly -P native.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo3.0-graalvm-support/native_image_build.jpg" alt="img">
+After the compilation is successful, you can see the generated binary file under the target, start a zookeeper locally, and execute the binary directly. It can be seen that the startup is successful as follows:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo3.0-graalvm-support/run_provider.jpg" alt="img">
+The consumer side also executes compilation, and a binary file is also generated under the consumer target: demo-native-consumer. Execute this binary and you can see the result of the call as follows:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo3.0-graalvm-support/run_consumer.jpg" alt="img">&lt;/p>
+&lt;h3 id="specific-steps">Specific steps&lt;/h3>
+&lt;p>In fact, we have done some work under this demo to ensure that the project can be compiled and executed. There are mainly the following steps&lt;/p>
+&lt;ul>
+&lt;li>Introduce dubbo-native dependency&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>&amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;dubbo-native&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;${project.version}&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Under this module is the SPI code we generated.&lt;/p>
+&lt;ul>
+&lt;li>Introduce native-image plugin&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>&amp;lt;plugin&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;org.graalvm.nativeimage&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;native-image-maven-plugin&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;21.0.0.2&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;executions&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;execution&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;goals&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;goal&amp;gt;native-image&amp;lt;/goal&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/goals&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;phase&amp;gt;package&amp;lt;/phase&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/execution&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/executions&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;configuration&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;skip&amp;gt;false&amp;lt;/skip&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;imageName&amp;gt;demo-native-provider&amp;lt;/imageName&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;mainClass&amp;gt;org.apache.dubbo.demo.graalvm.provider.Application&amp;lt;/mainClass&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;buildArgs&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --no-fallback
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.MDC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.LoggerFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.helpers.Loader
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.Logger
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.helpers.LogLog
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.LogManager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.apache.log4j.spi.LoggingEvent
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.Log4jLoggerFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.slf4j.impl.Log4jLoggerAdapter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-build-time=org.eclipse.collections.api.factory.Sets
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.Epoll
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.Native
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.EpollEventLoop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.epoll.EpollEventArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.DefaultFileRegion
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.KQueueEventLoop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.kqueue.Native
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Errors
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.IovArray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Limits
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.util.internal.logging.Log4JLogger
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.unix.Socket
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --initialize-at-run-time=io.netty.channel.ChannelHandlerMask
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --report-unsupported-elements-at-runtime
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --allow-incomplete-classpath
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --enable-url-protocols=http
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> -H:+ReportExceptionStackTraces
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/buildArgs&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/configuration&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/plugin&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It defines the name of the generated image and some parameters for building the image.&lt;/p>
+&lt;ul>
+&lt;li>mount native-image-agent&lt;/li>
+&lt;/ul>
+&lt;p>Since we need to specify some reflection, JNI and other classes first, we need to use the agent to run it in a normal way to generate information in the form of json for these classes.&lt;/p>
+&lt;p>In the startup parameters add:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>-agentlib:native-image-agent=config-output-dir=/tmp/config/,config-write-period-secs=300,config-write-initial-delay-secs=5
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Start in the normal way, create a folder META-INF.native-image under the resources of the project, and paste the files generated in the local directory:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo3.0-graalvm-support/resources.jpg" alt="img">
+(There may be missing class information that is not generated, which needs to be added manually according to the error message when compiling or running.)&lt;/p>
+&lt;p>** After completing the above steps, the project can be compiled. **&lt;/p></description></item><item><title>Docs3-V2: Export thread stack</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/dump/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/dump/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>Dubbo automatically exports the thread stack through Jstack to keep the scene, which is convenient for troubleshooting.&lt;/p>
+&lt;p>default policy&lt;/p>
+&lt;ul>
+&lt;li>Export path: the user&amp;rsquo;s home directory identified by user.home&lt;/li>
+&lt;li>Export Interval: The shortest interval allows an export every 10 minutes&lt;/li>
+&lt;li>Export switch: open by default&lt;/li>
+&lt;/ul>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>When the business thread pool is full, we need to know which resources and conditions the threads are waiting for in order to find the bottleneck or abnormal point of the system.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="export-switch-control">Export switch control&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.dump.enable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span> dump-enable=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dump-enable&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="specify-the-export-path">Specify the export path&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.dump.directory&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">/tmp&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span> dump-directory=&lt;span style="color:#2aa198">&amp;#34;/tmp&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dump-directory&lt;/span>: /tmp
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Kryo and FST Serialization</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/</guid><description>
+&lt;h2 id="table-of-contents">Table of contents&lt;/h2>
+&lt;ul>
+&lt;li>Serialization talk&lt;/li>
+&lt;li>Enable Kryo and FST&lt;/li>
+&lt;li>Register the class to be serialized&lt;/li>
+&lt;li>No parameter constructor and Serializable interface&lt;/li>
+&lt;li>Serialization performance analysis and testing
+&lt;ul>
+&lt;li>test environment&lt;/li>
+&lt;li>Test script&lt;/li>
+&lt;li>Comparison of byte sizes generated by different serializations in Dubbo RPC&lt;/li>
+&lt;li>Comparison of response time and throughput of different serializations in Dubbo RPC&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>future&lt;/li>
+&lt;/ul>
+&lt;h2 id="serialization-talk">Serialization talk&lt;/h2>
+&lt;p>dubbo RPC is the core high-performance, high-throughput remote call method in the dubbo system. I like to call it a multiplexed TCP long connection call. Simply put:&lt;/p>
+&lt;ul>
+&lt;li>Long connection: avoiding the need to create a new TCP connection each time, improving the response speed of the call&lt;/li>
+&lt;li>Multiplexing: A single TCP connection can alternately transmit multiple request and response messages, reducing the waiting idle time of the connection, thereby reducing the number of network connections under the same concurrent number and improving system throughput.&lt;/li>
+&lt;/ul>
+&lt;p>dubbo RPC is mainly used for remote calls between two dubbo systems, especially suitable for Internet scenarios with high concurrency and small data.&lt;/p>
+&lt;p>Serialization also plays a vital role in the response speed, throughput, and network bandwidth consumption of remote calls, and is one of the most critical factors for us to improve the performance of distributed systems.&lt;/p>
+&lt;p>In dubbo RPC, multiple serialization methods are supported at the same time, for example:&lt;/p>
+&lt;ol>
+&lt;li>Dubbo serialization: Ali has not yet developed a mature and efficient java serialization implementation, and Ali does not recommend using it in a production environment&lt;/li>
+&lt;li>Hessian2 serialization: Hessian is a cross-language efficient binary serialization method. But here is actually not the original hessian2 serialization, but the hessian lite modified by Ali, which is the default serialization method enabled by dubbo RPC&lt;/li>
+&lt;li>JSON serialization: There are currently two implementations, one is to use Ali&amp;rsquo;s fastjson library, and the other is to use the simple json library implemented by dubbo, but the implementation is not particularly mature, and the text sequence of json The serialization performance is generally not as good as the above two binary serializations.&lt;/li>
+&lt;li>Java serialization: It is mainly implemented by using the Java serialization that comes with the JDK, and the performance is not ideal.&lt;/li>
+&lt;/ol>
+&lt;p>In general, the performance of the four main serialization methods decreases from top to bottom. For dubbo RPC, which pursues high-performance remote calls, there are actually only two high-efficiency serialization methods, 1 and 2, that are more suitable, and the first dubbo serialization is still immature, so only 2 is actually available. So dubbo RPC uses hessian2 serialization by default.&lt;/p>
+&lt;p>But hessian is an older serialization implementation, and it is cross-language, so it is not optimized for java alone. In fact, dubbo RPC is a remote call from Java to Java. In fact, there is no need to adopt cross-language serialization (of course, cross-language serialization is certainly not excluded).&lt;/p>
+&lt;p>In recent years, various new efficient serialization methods have emerged one after another, constantly refreshing the upper limit of serialization performance, the most typical ones include:&lt;/p>
+&lt;ul>
+&lt;li>Specifically for the Java language: Kryo, FST, etc.&lt;/li>
+&lt;li>Cross-language: Protostuff, ProtoBuf, Thrift, Avro, MsgPack, etc.&lt;/li>
+&lt;/ul>
+&lt;p>The performance of most of these serialization methods is significantly better than hessian2 (even including the immature dubbo serialization).&lt;/p>
+&lt;p>In view of this, we introduce two efficient Java serialization implementations, Kryo and FST, for dubbo to gradually replace hessian2.&lt;/p>
+&lt;p>Among them, Kryo is a very mature serialization implementation, which has been widely used in Twitter, Groupon, Yahoo and many famous open source projects (such as Hive and Storm). While FST is a newer serialization implementation, it still lacks enough mature use cases, but I think it is still very promising.&lt;/p>
+&lt;p>In production-oriented applications, I recommend Kryo as the preferred choice for now.&lt;/p>
+&lt;h2 id="enable-kryo-and-fst">Enable Kryo and FST&lt;/h2>
+&lt;p>Using Kryo and FST is very simple, just add the corresponding dependencies first:
+More plugins: &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions">Dubbo SPI Extensions&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-kryo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-fst&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then add an attribute in the XML configuration of dubbo RPC:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fst&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="register-the-class-to-be-serialized">Register the class to be serialized&lt;/h2>
+&lt;p>To make Kryo and FST fully perform with high performance, it is best to register those classes that need to be serialized in the dubbo system. For example, we can implement the following callback interface:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">SerializationOptimizerImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> SerializationOptimizer {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Collection&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getSerializableClasses&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> classes &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> LinkedList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(BidRequest.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes. &lt;span style="color:#268bd2">add&lt;/span>(BidResponse. &lt;span style="color:#268bd2">class&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">classes&lt;/span>. add(Device. &lt;span style="color:#268bd2">class&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">classes&lt;/span>. add(Geo. &lt;span style="color:#268bd2">class&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">classes&lt;/span>. add(Impression. &lt;span style="color:#268bd2">class&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">classes&lt;/span>.add(SeatBid.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> classes;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then add in XML configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span> optimizer=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.SerializationOptimizerImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After registering these classes, serialization performance may be greatly improved, especially for small numbers of nested objects.&lt;/p>
+&lt;p>Of course, when serializing a class, many classes may be cascaded, such as Java collection classes. In response to this situation, we have automatically registered common classes in the JDK, so you don&amp;rsquo;t need to register them repeatedly (of course, there is no effect if you register repeatedly), including:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Gregorian Calendar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>InvocationHandler
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BigDecimal
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BigInteger
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>pattern
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BitSet
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>URIs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>UUID
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HashMap
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ArrayList
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LinkedList
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HashSet
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TreeSet
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hashtable
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>date
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Calendar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ConcurrentHashMap
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SimpleDateFormat
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>vector
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BitSet
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>StringBuffer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String Builder
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>object
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Object[]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String[]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>byte[]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>char[]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>int[]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>float[]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>double[]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Since registering classes to be serialized is only for performance optimization purposes, it doesn&amp;rsquo;t matter if you forget to register some classes. In fact, even without registering any classes, the performance of Kryo and FST is generally better than that of hessian and dubbo serialization.&lt;/p>
+&lt;blockquote>
+&lt;p>Of course, someone may ask why not use configuration files to register these classes? This is because there are often a large number of classes to be registered, resulting in lengthy configuration files; and without good IDE support, writing and refactoring configuration files are much more troublesome than java classes; finally, these registered classes are generally It is not necessary to make dynamic modifications after the project is compiled and packaged.&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>In addition, some people will also think that manually registering the serialized class is a relatively cumbersome work, can it be marked with annotation, and then the system will automatically discover and register. But the limitation of annotation here is that it can only be used to mark classes that you can modify, and many classes referenced in serialization are likely to be things that you cannot modify (such as third-party libraries or JDK system classes or classes of other projects ). In addition, adding annotation after all slightly &amp;ldquo;polluted&amp;rdquo; the code, making the application code a little bit more dependent on the framework.&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>In addition to annotation, we can also consider other ways to automatically register serialized classes, such as scanning the class path, automatically discovering classes that implement the Serializable interface (even including Externalizable) and registering them. Of course, we know that there may be a lot of Serializable classes on the classpath, so we can also consider using package prefixes to limit the scanning range to a certain extent.&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>Of course, in the automatic registration mechanism, it is especially necessary to consider how to ensure that both the service provider and the consumer register classes in the same order (or ID) to avoid misalignment. After all, the number of classes that can be discovered and registered at both ends may be the same. are different.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="no-parameter-constructor-and-serializable-interface">No parameter constructor and Serializable interface&lt;/h2>
+&lt;p>If the class to be serialized does not contain a parameterless constructor, the performance of Kryo&amp;rsquo;s serialization will be greatly reduced, because at this time we will use Java&amp;rsquo;s serialization to transparently replace Kryo&amp;rsquo;s serialization at the bottom layer. Therefore, it is a best practice to add a no-argument constructor for each serialized class as much as possible (of course, if a java class does not customize a constructor, it will have a no-argument constructor by default).&lt;/p>
+&lt;p>In addition, Kryo and FST do not require the serialized class to implement the Serializable interface, but we still recommend that every serialized class implement it, because this can maintain compatibility with Java serialization and dubbo serialization. In addition It also makes it possible for us to adopt some of the above automatic registration mechanisms in the future.&lt;/p>
+&lt;h2 id="serialization-performance-analysis-and-testing">Serialization performance analysis and testing&lt;/h2>
+&lt;p>In this article, we mainly discuss serialization, but when doing performance analysis and testing, we do not deal with each serialization method separately, but put them in dubbo RPC for comparison, because this is more realistic.&lt;/p>
+&lt;h3 id="test-environment">test environment&lt;/h3>
+&lt;p>Roughly as follows:&lt;/p>
+&lt;ul>
+&lt;li>Two independent servers&lt;/li>
+&lt;li>Quad-core Intel(R) Xeon(R) CPU E5-2603 0 @ 1.80GHz&lt;/li>
+&lt;li>8G memory&lt;/li>
+&lt;li>The network between virtual machines passes through a 100M switch&lt;/li>
+&lt;li>CentOS 5&lt;/li>
+&lt;li>JDK 7&lt;/li>
+&lt;li>Tomcat 7&lt;/li>
+&lt;li>JVM parameters -server -Xms1g -Xmx1g -XX:PermSize=64M -XX:+UseConcMarkSweepGC&lt;/li>
+&lt;/ul>
+&lt;p>Of course, the test environment is limited, so the current test results may not be very authoritative and representative.&lt;/p>
+&lt;h3 id="test-script">Test script&lt;/h3>
+&lt;p>Keeping close to dubbo&amp;rsquo;s own benchmarks:&lt;/p>
+&lt;p>10 concurrent clients continuously making requests:&lt;/p>
+&lt;ul>
+&lt;li>Pass in a nested complex object (but the amount of individual data is small), do not do any processing, and return as it is&lt;/li>
+&lt;li>Pass in 50K strings, do not do any processing, and return as they are (TODO: the result has not been listed yet)&lt;/li>
+&lt;/ul>
+&lt;p>Run a 5-minute performance test. (Quoting dubbo&amp;rsquo;s own test considerations: &amp;ldquo;It mainly examines the performance of serialization and network IO, so the server does not have any business logic. The reason for taking 10 concurrency is to consider that the rpc protocol may have a high CPU usage rate under high concurrency. to the bottleneck.&amp;rdquo;)&lt;/p>
+&lt;h3 id="comparison-of-byte-sizes-generated-by-different-serializations-in-dubbo-rpc">Comparison of byte sizes generated by different serializations in Dubbo RPC&lt;/h3>
+&lt;p>The size of the number of bytes generated by serialization is a relatively deterministic indicator, which determines the network transmission time and bandwidth occupation of the remote call.&lt;/p>
+&lt;p>The results for complex objects are as follows (lower numbers are better):&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Serialization Implementation&lt;/th>
+&lt;th>Request Bytes&lt;/th>
+&lt;th>Response Bytes&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Kryo&lt;/td>
+&lt;td>272&lt;/td>
+&lt;td>90&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>FST&lt;/td>
+&lt;td>288&lt;/td>
+&lt;td>96&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo Serialization&lt;/td>
+&lt;td>430&lt;/td>
+&lt;td>186&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Hessian&lt;/td>
+&lt;td>546&lt;/td>
+&lt;td>329&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>FastJson&lt;/td>
+&lt;td>461&lt;/td>
+&lt;td>218&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Json&lt;/td>
+&lt;td>657&lt;/td>
+&lt;td>409&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Java Serialization&lt;/td>
+&lt;td>963&lt;/td>
+&lt;td>630&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="comparison-of-different-serialization-response-time-and-throughput-in-dubbo-rpc">Comparison of different serialization response time and throughput in Dubbo RPC&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Remote call method&lt;/th>
+&lt;th>Average response time&lt;/th>
+&lt;th>Average TPS (transactions per second)&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>REST: Jetty + JSON&lt;/td>
+&lt;td>7.806&lt;/td>
+&lt;td>1280&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Jetty + JSON + GZIP&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Jetty + XML&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Jetty + XML + GZIP&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;td>TODO&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Tomcat + JSON&lt;/td>
+&lt;td>2.082&lt;/td>
+&lt;td>4796&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>REST: Netty + JSON&lt;/td>
+&lt;td>2.182&lt;/td>
+&lt;td>4576&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: FST&lt;/td>
+&lt;td>1.211&lt;/td>
+&lt;td>8244&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: kyro&lt;/td>
+&lt;td>1.182&lt;/td>
+&lt;td>8444&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: dubbo serialization&lt;/td>
+&lt;td>1.43&lt;/td>
+&lt;td>6982&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: hessian2&lt;/td>
+&lt;td>1.49&lt;/td>
+&lt;td>6701&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo: fastjson&lt;/td>
+&lt;td>1.572&lt;/td>
+&lt;td>6352&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/rt.png" alt="rt">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/tps.png" alt="tps">&lt;/p>
+&lt;h3 id="test-summary">Test Summary&lt;/h3>
+&lt;p>As far as the current results are concerned, we can see that Kryo and FST have significantly improved compared to the original serialization method in Dubbo RPC, regardless of the size of generated bytes, average response time and average TPS.&lt;/p>
+&lt;h2 id="future">future&lt;/h2>
+&lt;p>In the future, when Kryo or FST is mature enough in dubbo, we will probably change the default serialization of dubbo RPC from hessian2 to one of them.&lt;/p></description></item></channel></rss>

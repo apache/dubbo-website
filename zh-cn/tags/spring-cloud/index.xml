@@ -1,0 +1,149 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – spring-cloud</title><link>https://dubbo.apache.org/zh-cn/tags/spring-cloud/</link><description>Recent content in spring-cloud on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 07 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/spring-cloud/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 微服务最佳实践，零改造实现 Spring Cloud &amp; Apache Dubbo 互通</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E9%9B%B6%E6%94%B9%E9%80%A0%E5%AE%9E%E7%8E%B0-spring-cloud-apache-dubbo-%E4%BA%92%E9%80%9A/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E9%9B%B6%E6%94%B9%E9%80%A0%E5%AE%9E%E7%8E%B0-spring-cloud-apache-dubbo-%E4%BA%92%E9%80%9A/</guid><description>
+&lt;p>&lt;strong>本文以实际项目和代码为示例，一步一步演示如何以最低成本实现 Apache Dubbo 体系与 Spring Cloud 体系的互通，进而实现不同微服务体系的混合部署、迁移等，帮助您解决实际架构及业务问题。&lt;/strong>&lt;/p>
+&lt;h2 id="背景与目标">背景与目标&lt;/h2>
+&lt;p>如果你在微服务开发过程中正面临以下一些业务场景需要解决，那么这篇文章可以帮到您：&lt;/p>
+&lt;ul>
+&lt;li>您已经有一套基于 Dubbo 构建的微服务应用，这时你需要将部分服务通过 REST HTTP 的形式（非接口、方法模式）发布出去，供一些标准的 HTTP 端调用（如 Spring Cloud 客户端），整个过程最好是不用改代码，直接为写好的 Dubbo 服务加一些配置、注解就能实现。&lt;/li>
+&lt;li>您已经有一套基于 Spring Cloud 构建的微服务体系，而后又构建了一套 Dubbo 体系的微服务，你想两套体系共存，因此现在两边都需要调用到对方发布的服务。也就是 Dubbo 应用作为消费方要调用到 Spring Cloud 发布的 HTTP 接口，Dubbo 应用作为提供方还能发布 HTTP 接口给 Spring Cloud 调用&lt;/li>
+&lt;li>出于一些历史原因，你正规划从一个微服务体系迁移到另外一个微服务体系，前提条件是要保证中间过程的平滑迁移。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img.png" alt="image.png">&lt;/p>
+&lt;p>对于以上几个场景，我们都可以借助 Dubbo3 内置的 REST 编程范式支持实现，这让 Dubbo 既可以作为消费方调用 HTTP 接口的服务，又可以作为提供方对外发布 REST 风格的 HTTP 服务，同时整个编码过程支持业界常用的 REST 编程范式（如 JAX-RS、Spring MVC 等），因此可以做到基本不改动任何代码的情况下实现 Dubbo 与 Spring Cloud 体系的互相调用。&lt;/p>
+&lt;ul>
+&lt;li>关于这一部分更多的设计与理论阐述请参见这里的 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/">博客文章&lt;/a>。&lt;/li>
+&lt;li>关于 Dubbo REST 的更多配置方式请参见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rest/">rest 使用参考手册&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="示例一dubbo-调用-spring-cloud">示例一：Dubbo 调用 Spring Cloud&lt;/h2>
+&lt;p>在已经有一套 Spring Cloud 微服务体系的情况下，演示如何使用 Dubbo 调用 Spring Cloud 服务（包含自动的地址发现与协议传输）。在注册中心方面，本示例使用 Nacos 作为注册中心，对于 Zookeeper、Consul 等两种体系都支持的注册中心同样适用。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img_1.png" alt="dubbo-call-spring-cloud">&lt;/p>
+&lt;p>设想你已经有一套 Spring Cloud 的微服务体系，现在我们将引入 Dubbo 框架，让 Dubbo 应用能够正常的调用到 Spring Cloud 发布的服务。本示例完整源码请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-springcloud/dubbo-call-sc">samples/dubbo-call-sc&lt;/a>。&lt;/p>
+&lt;h3 id="启动-spring-cloud-server">启动 Spring Cloud Server&lt;/h3>
+&lt;p>示例中 Spring Cloud 应用的结构如下&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img_2.png" alt="springcloud-server.png">&lt;/p>
+&lt;p>应用配置文件如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">server&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8099&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spring&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: spring-cloud-provider-for-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cloud&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serverAddr&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span> &lt;span style="color:#586e75">#注册中心&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下是一个非常简单的 Controller 定义，发布了一个 &lt;code>/users/list/&lt;/code>的 http 端点&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RestController&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserController&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GetMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/list&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>User&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getUser&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> Collections.singletonList(&lt;span style="color:#719e07">new&lt;/span> User(1L, &lt;span style="color:#2aa198">&amp;#34;spring cloud server&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动 &lt;code>SpringCloudApplication&lt;/code>，通过 cURL 或浏览器访问 &lt;code>http://localhost:8099/users/list&lt;/code> 可以测试应用启动成功。&lt;/p>
+&lt;h3 id="使用-dubbo-client-调用服务">使用 Dubbo Client 调用服务&lt;/h3>
+&lt;p>Dubbo client 也是一个标准的 Dubbo 应用，项目基本结构如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img_3.png" alt="dubbo-consumer.png">&lt;/p>
+&lt;p>其中，一个比较关键的是如下接口定义（正常情况下，以下接口可以直接从原有的 Spring Cloud client 应用中原样拷贝过来即可，无需做任何修改）。&lt;/p>
+&lt;blockquote>
+&lt;p>如果之前没有基于 OpenFeign 的 Spring Cloud 消费端应用，那么就需要自行定义一个接口，此时不一定要使用 OpenFeign 注解，使用 Spring MVC 标准注解即可。&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@FeignClient&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;spring-cloud-provider-for-dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserServiceFeign&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(value&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;/users/list&amp;#34;&lt;/span>, method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, produces &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;application/json&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>User&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">users&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 &lt;code>DubboReference&lt;/code> 注解将 UserServiceFeign 接口注册为 Dubbo 服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboReference&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> UserServiceFeign userService;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来，我们就可以用 Dubbo 标准的方式对服务发起调用了&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>List&lt;span style="color:#719e07">&amp;lt;&lt;/span>User&lt;span style="color:#719e07">&amp;gt;&lt;/span> users &lt;span style="color:#719e07">=&lt;/span> userService.users();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 &lt;code>DubboConsumerApplication&lt;/code> 启动 Dubbo 应用，验证可以成功调用到 Spring Cloud 服务。&lt;/p>
+&lt;h2 id="示例二spring-cloud-调用-dubbo">示例二：Spring Cloud 调用 Dubbo&lt;/h2>
+&lt;p>在接下来的示例中，我们将展示如何将 Dubbo server 发布的服务开放给 Spring Cloud client 调用。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img_4.png" alt="spring-cloud-call-dubbo">&lt;/p>
+&lt;p>示例的相关源码在 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-springcloud/sc-call-dubbo">samples/sc-call-dubbo&lt;/a>&lt;/p>
+&lt;h3 id="启动-dubbo-server">启动 Dubbo Server&lt;/h3>
+&lt;p>Dubbo server 应用的代码结构非常简单，是一个典型的 Dubbo 应用。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img_5.png" alt="dubbo-server.png">&lt;/p>
+&lt;p>相比于普通的 Dubbo 服务定义，我们要在接口上加上如下标准 Spring MVC 注解：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RestController&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GetMapping&lt;/span>(value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/list&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>User&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getUsers&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>除了以上注解之外，其他服务发布等流程都一致，使用 &lt;code>DubboService&lt;/code> 注解发布服务即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>User&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getUsers&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> Collections.singletonList(&lt;span style="color:#719e07">new&lt;/span> User(1L, &lt;span style="color:#2aa198">&amp;#34;Dubbo provider!&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在服务配置上，特别注意我们需要将服务的协议配置为 rest &lt;code>protocol: rest&lt;/code>，地址发现模式使用 &lt;code>register-mode: instance&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://127.0.0.1:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">register-mode&lt;/span>: instance
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: rest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8090&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动 Dubbo 应用，此时访问以下地址可以验证服务运行正常：&lt;code>http://localhost:8090/users/list&lt;/code>&lt;/p>
+&lt;h3 id="使用-spring-cloud-调用-dubbo">使用 Spring Cloud 调用 Dubbo&lt;/h3>
+&lt;p>使用 OpenFeign 开发一个标准的 Spring Cloud 应用，即可调用以上发布的 Dubbo 服务，项目代码结构如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img_6.png" alt="springcloud-consumer.png">&lt;/p>
+&lt;p>其中，我们定义了一个 OpenFeign 接口，用于调用上面发布的 Dubbo rest 服务。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@FeignClient&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dubbo-provider-for-spring-cloud&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserServiceFeign&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/users/list&amp;#34;&lt;/span>, method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>User&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getUsers&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>定义以下 controller 作为 OpenFeign 和 RestTemplate 测试入口。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserController&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> RestTemplate restTemplate;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> UserServiceFeign userServiceFeign;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">UserController&lt;/span>(RestTemplate restTemplate,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UserServiceFeign userServiceFeign) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.restTemplate &lt;span style="color:#719e07">=&lt;/span> restTemplate;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.userServiceFeign &lt;span style="color:#719e07">=&lt;/span> userServiceFeign;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/rest/test1&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">doRestAliveUsingEurekaAndRibbon&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String url &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;http://dubbo-provider-for-spring-cloud/users/list&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;url: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> restTemplate.getForObject(url, String.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/rest/test2&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>User&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">doRestAliveUsingFeign&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> userServiceFeign.getUsers();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>根据以上 Controller 定义，我们可以分别访问以下地址进行验证：&lt;/p>
+&lt;ul>
+&lt;li>OpenFeign 方式：&lt;code>http://localhost:8099/dubbo/rest/test1&lt;/code>、&lt;/li>
+&lt;li>RestTemplate 方式：&lt;code>http://localhost:8099/dubbo/rest/test1&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h3 id="为-dubbo-server-发布更多的服务">为 Dubbo Server 发布更多的服务&lt;/h3>
+&lt;p>我们可以利用 Dubbo 的多协议发布机制，为一些服务配置多协议发布。接下来，我们就为上面提到的 Dubbo server 服务增加 dubbo tcp 协议发布，从而达到以下部署效果，让这个 Dubbo 应用同时服务 Dubbo 微服务体系和 Spring Cloud 微服务体系。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/9/springcloud/img_7.png" alt="dubbo-multiple-protocols.png">&lt;/p>
+&lt;p>为了实现这个效果，我们只需要在配置中增加多协议配置即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">id&lt;/span>: rest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: rest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8090&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">id&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>同时，服务注解中也配置为多协议发布&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;rest,dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，我们就成功的将 UserService 服务以 dubbo 和 rest 两种协议发布了出去（多端口多协议的方式），dubbo 协议为 Dubbo 体系服务，rest 协议为 Spring Cloud 体系服务。&lt;/p>
+&lt;blockquote>
+&lt;p>**注意：**Dubbo 为多协议发布提供了单端口、多端口两种方式，这样的灵活性对于不同部署环境下的服务会有比较大的帮助。在确定您需要的多协议发布方式前，请提仔细阅读以下 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-protocols">多协议配置&lt;/a> 文档。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>基于 Dubbo 的 rest 编程范式、多协议发布等特性，可以帮助你轻松的实现从 Dubbo 到 Spring Cloud 或者从 Spring Cloud 到 Dubbo 的平滑迁移（无改造成本），同时也可以实现 Dubbo 与 Spring Cloud 两套体系的共存。&lt;/p></description></item></channel></rss>

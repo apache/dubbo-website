@@ -1,0 +1,543 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Admin 控制台操作手册</title><link>https://dubbo.apache.org/zh-cn/overview/reference/admin/</link><description>Recent content in Admin 控制台操作手册 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/admin/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Admin 整体架构与安装步骤</title><link>https://dubbo.apache.org/zh-cn/overview/reference/admin/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/admin/architecture/</guid><description>
+&lt;p>回顾 &lt;a href="../../../what/overview/">Dubbo 服务治理体系的总体架构&lt;/a>，Admin 是服务治理控制面中的一个核心组件，负责微服务集群的服务治理、可视化展示等。&lt;/p>
+&lt;h2 id="admin-部署架构">Admin 部署架构&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/admin-core-components.png" alt="admin-core-components.png">&lt;/p>
+&lt;p>总体上来说，Admin 部署架构分为以下几个部分：&lt;/p>
+&lt;ul>
+&lt;li>Admin 主进程，包括服务发现元数据管理、可视化控制台、安全认证策略管控、其他定制化服务治理能力等组件。&lt;/li>
+&lt;li>强依赖组件，包括 Mysql 数据库、注册/配置/元数据中心（可以是 Kubernetes、Nacos、Zookeeper 等）&lt;/li>
+&lt;li>可选依赖组件，包括 Prometheus、Grafana、Zipkin 等&lt;/li>
+&lt;/ul>
+&lt;h2 id="安装-admin">安装 Admin&lt;/h2>
+&lt;h3 id="dubboctl-安装">Dubboctl 安装&lt;/h3>
+&lt;h4 id="download">Download&lt;/h4>
+&lt;p>当前Dubboctl未正式发行，可按以下方式进行尝试。
+拉取Dubbo Admin并编译Dubboctl&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo-admin.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-admin/cmd/dubboctl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go build -o dubboctl .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>将 dubboctl 放入可执行路径&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>ln -s dubbo-admin/cmd/dubboctl/dubboctl /usr/local/bin/dubboctl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="install">Install&lt;/h4>
+&lt;p>安装过程会依次：&lt;/p>
+&lt;ol>
+&lt;li>将用户自定义的配置profile以及set参数覆盖于默认profile，得到最终的profile&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># default profile&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DubboOperator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">profile&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">componentsMeta&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">admin&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">grafana&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repoURL&lt;/span>: https://grafana.github.io/helm-charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">6.52.4&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zookeeper&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repoURL&lt;/span>: https://charts.bitnami.com/bitnami
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">11.1.6&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repoURL&lt;/span>: https://prometheus-community.github.io/helm-charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">20.0.2&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">skywalking&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repoURL&lt;/span>: https://apache.jfrog.io/artifactory/skywalking-helm
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">4.3.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zipkin&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">repoURL&lt;/span>: https://openzipkin.github.io/zipkin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">0.3.0&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>建议使用自定义profile进行配置，在componentsMeta中开启或关闭组件，在components下配置各组件。其中components下各组件的配置值都是helm chart的values，各组件的具体配置请参考：
+Grafana: &lt;a href="https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md">https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md&lt;/a>
+Zookeeper: &lt;a href="https://github.com/bitnami/charts/tree/main/bitnami/zookeeper/#installing-the-chart">https://github.com/bitnami/charts/tree/main/bitnami/zookeeper/#installing-the-chart&lt;/a>
+Prometheus: &lt;a href="https://github.com/prometheus-community/helm-charts/tree/main/charts">https://github.com/prometheus-community/helm-charts/tree/main/charts&lt;/a>
+Skywalking: &lt;a href="https://github.com/apache/skywalking-kubernetes/blob/master/chart/skywalking/README.md">https://github.com/apache/skywalking-kubernetes/blob/master/chart/skywalking/README.md&lt;/a>
+Zipkin: &lt;a href="https://github.com/Financial-Times/zipkin-helm">https://github.com/Financial-Times/zipkin-helm&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># customization profile&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DubboOperator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">profile&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">componentsMeta&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">admin&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">grafana&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">6.31.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">components&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">admin&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">grafana&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">testFramework&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>根据profile拉取所需组件并生成manifest，目前Admin，Nacos已在本地，无需拉取；Grafana，Zookeeper，Prometheus，Skywalking，Zipkin将从官方chart库拉取，具体地址和版本可见上方default profile&lt;/li>
+&lt;li>将manifest应用于k8s集群&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl manifest install &lt;span style="color:#586e75"># 使用默认 manifests 安装&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubboctl manifest generate | kubectl apply -f -
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl install --set spec.components.admin.replicas&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">2&lt;/span> &lt;span style="color:#586e75"># 设置组件的配置&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl install --set spec.componentsMeta.admin.enabled&lt;span style="color:#719e07">=&lt;/span>true, spec.componentsMeta.grafana.enabled&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 开启或关闭组件&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl install --set spec.componentsMeta.grafana.repoURL&lt;span style="color:#719e07">=&lt;/span>https://grafana.github.io/helm-charts, spec.componentsMeta.grafana.version&lt;span style="color:#719e07">=&lt;/span>6.31.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 设置需远程拉取组件的仓库地址与版本&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>检查安装效果&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl get pod -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="打开-admin-控制台">打开 Admin 控制台&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl port-forward svc/dubbo-admin -n dubbo-system 38080:38080
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打开浏览器，访问： &lt;code>http://127.0.0.1:38080/&lt;/code>&lt;/p>
+&lt;h3 id="helm-安装">Helm 安装&lt;/h3>
+&lt;p>获取图表&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>helm repo add https://charts.bitnami.com/bitnami
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm repo add https://prometheus-community.github.io/helm-charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm repo add https://grafana.github.io/helm-charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm repo add https://apache.jfrog.io/artifactory/skywalking-helm
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm repo add https://openzipkin.github.io/zipkin
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装 zookeeper&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>helm install zookeeper bitnami/zookeeper -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装 prometheus&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>helm install prometheus prometheus-community/prometheus -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装 grafana&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>helm install grafana grafana/grafana -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装 skywalking&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>helm install skywalking skywalking/skywalking -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装 zipkin&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>helm install zipkin openzipkin/zipkin -n dubbo-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>检查安装状态&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>helm ls -n dubbo-system ；kubectl get pods -n dubbo-system --output wide
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="vm-安装">VM 安装&lt;/h3>
+&lt;h4 id="download-1">Download&lt;/h4>
+&lt;p>下载 Dubbo Admin 发行版本&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl -L https://dubbo.apache.org/installer.sh | &lt;span style="color:#268bd2">VERSION&lt;/span>&lt;span style="color:#719e07">=&lt;/span>0.1.0 sh -
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Admin 要组织好发行版本&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>将 dubboctl 放入可执行路径&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>ln -s dubbo-admin-0.1.0/bin/dubbo-admin /usr/local/bin/dubbo-admin
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="run">Run&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubbo-admin run -f override-configuration.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置手册-configuration">配置手册 (Configuration)&lt;/h2>
+&lt;p>配置用于控制 dubbo-admin 的行为&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Environment type. Available values are: &amp;#34;kubernetes&amp;#34; or &amp;#34;universal&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">environment: universal # ENV&lt;/span>: DUBBO_ENVIRONMENT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Mode in which Dubbo CP is running. Available values are: &amp;#34;standalone&amp;#34;, &amp;#34;global&amp;#34;, &amp;#34;zone&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">mode: standalone # ENV&lt;/span>: DUBBO_MODE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Resource Store configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">store&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Type of Store used in the Control Plane. Available values are: &amp;#34;kubernetes&amp;#34;, &amp;#34;postgres&amp;#34; or &amp;#34;memory&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type: memory # ENV&lt;/span>: DUBBO_STORE_TYPE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Kubernetes Store configuration (used when store.type=kubernetes)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">kubernetes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Namespace where Control Plane is installed to.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">systemNamespace: dubbo-system # ENV&lt;/span>: DUBBO_STORE_KUBERNETES_SYSTEM_NAMESPACE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Postgres Store configuration (used when store.type=postgres)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">mysql&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Host of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host: 127.0.0.1 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_HOST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Port of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port: 15432 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_PORT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># User of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">user: dubbo # ENV&lt;/span>: DUBBO_STORE_POSTGRES_USER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Password of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password: dubbo # ENV&lt;/span>: DUBBO_STORE_POSTGRES_PASSWORD
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Database name of the Postgres DB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dbName: dubbo # ENV&lt;/span>: DUBBO_STORE_POSTGRES_DB_NAME
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Connection Timeout to the DB in seconds&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">connectionTimeout: 5 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_CONNECTION_TIMEOUT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Maximum number of open connections to the database&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># `0` value means number of open connections is unlimited&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxOpenConnections: 50 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_MAX_OPEN_CONNECTIONS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Maximum number of connections in the idle connection pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># &amp;lt;0 value means no idle connections and 0 means default max idle connections&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxIdleConnections: 50 # ENV&lt;/span>: DUBBO_STORE_POSTGRES_MAX_IDLE_CONNECTIONS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># TLS settings&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tls&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Mode of TLS connection. Available values are: &amp;#34;disable&amp;#34;, &amp;#34;verifyNone&amp;#34;, &amp;#34;verifyCa&amp;#34;, &amp;#34;verifyFull&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">mode: disable # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_MODE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Path to TLS Certificate of the client. Used in verifyCa and verifyFull modes&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">certPath: # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_CERT_PATH
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Path to TLS Key of the client. Used in verifyCa and verifyFull modes&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">keyPath: # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_KEY_PATH
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Path to the root certificate. Used in verifyCa and verifyFull modes.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">caPath: # ENV&lt;/span>: DUBBO_STORE_POSTGRES_TLS_ROOT_CERT_PATH
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># MinReconnectInterval controls the duration to wait before trying to&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># re-establish the database connection after connection loss. After each&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># consecutive failure this interval is doubled, until MaxReconnectInterval&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># is reached. Successfully completing the connection establishment procedure&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># resets the interval back to MinReconnectInterval.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">minReconnectInterval&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;10s&amp;#34;&lt;/span> &lt;span style="color:#586e75"># ENV: DUBBO_STORE_POSTGRES_MIN_RECONNECT_INTERVAL&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># MaxReconnectInterval controls the maximum possible duration to wait before trying&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># to re-establish the database connection after connection loss.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxReconnectInterval&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;60s&amp;#34;&lt;/span> &lt;span style="color:#586e75"># ENV: DUBBO_STORE_POSTGRES_MAX_RECONNECT_INTERVAL&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">server&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">38080&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">config-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">external-services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Prometheus service name is &amp;#34;metrics&amp;#34; and is in the &amp;#34;telemetry&amp;#34; namespace&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># http://prometheus.&amp;lt;dubbo_namespace_name&amp;gt;:9090&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;http://metrics.telemetry:9090/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Enabled by default. Kiali will anyway fallback to disabled if&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Jaeger is unreachable.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Jaeger service name is &amp;#34;tracing&amp;#34; and is in the &amp;#34;telemetry&amp;#34; namespace.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Make sure the URL you provide corresponds to the non-GRPC enabled endpoint&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># if you set &amp;#34;use_grpc&amp;#34; to false.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">in_cluster_url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://tracing.telemetry:16685/jaeger&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">use_grpc&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Public facing URL of Jaeger&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://my-jaeger-host/jaeger&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">grafana&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Grafana service name is &amp;#34;grafana&amp;#34; and is in the &amp;#34;telemetry&amp;#34; namespace.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">in_cluster_url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://grafana.telemetry:3000/&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Public facing URL of Grafana&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;http://my-ingress-host/grafana&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 更多配置&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="打开-admin-控制台-1">打开 Admin 控制台&lt;/h4>
+&lt;p>打开浏览器，访问： &lt;code>http://127.0.0.1:38080/&lt;/code>&lt;/p></description></item><item><title>Overview: Admin 服务查询</title><link>https://dubbo.apache.org/zh-cn/overview/reference/admin/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/admin/search/</guid><description>
+&lt;p>Admin 支持可视化的展示 Dubbo 微服务集群的状态，方便用户从全局掌握集群的应用、服务和实例分布，Admin 还可以通过查询的方式了解某一个服务更详细的信息：&lt;/p>
+&lt;ul>
+&lt;li>首页集群大盘，展示集群应用、服务、示例的总体分布，集群总体流量情况等&lt;/li>
+&lt;li>支持根据应用名、服务名(可包含版本&amp;amp;分组)、实例 IP 查询详细信息&lt;/li>
+&lt;li>支持服务名/应用名的自动补全&lt;/li>
+&lt;li>支持查看单条服务实例的详情&lt;/li>
+&lt;/ul>
+&lt;h2 id="首页大盘">首页大盘&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/dashboard.png" alt="admin-dashboard">&lt;/p>
+&lt;h2 id="根据-dubbo-服务名查询">根据 Dubbo 服务名查询&lt;/h2>
+&lt;p>精确输入&lt;code>接口名:版本&lt;/code> 查询服务&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/admin-search-service.png" alt="admin-search-service">&lt;/p>
+&lt;p>通过 &lt;code>*&lt;/code> 通配符模糊查询服务&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/admin-search-service.png" alt="admin-search-service2">&lt;/p>
+&lt;h2 id="根据应用名查询">根据应用名查询&lt;/h2>
+&lt;p>输入应用名查询某应用关联的所有服务（包含提供和消费的服务）&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/admin-search-application.png" alt="admin-search-application">&lt;/p>
+&lt;h2 id="根据实例-ip-名查询">根据实例 IP 名查询&lt;/h2>
+&lt;p>输入实例 IP 查询某实例关联的所有服务（包含提供和消费的服务）&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/admin-search-ip.png" alt="admin-search-ip">&lt;/p>
+&lt;blockquote>
+&lt;p>支持基于端口过滤服务&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="查看服务实例详情">查看服务实例详情&lt;/h2>
+&lt;p>在服务列表点击 &lt;code>详情&lt;/code> 查看服务详细情况&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/admin-search-service-detail.png" alt="admin-search-service-detail">&lt;/p></description></item><item><title>Overview: Admin 服务测试功能简介</title><link>https://dubbo.apache.org/zh-cn/overview/reference/admin/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/admin/test/</guid><description>
+&lt;p>服务测试功能通常提供给 Dubbo 服务的开发者使用，用来对自己发布的服务进行自测。通过在 Admin 控制台上模拟真实的消费端进程，对服务提供者发起调用，并验证调用结果是否符合预期。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="准备用例">准备用例&lt;/h3>
+&lt;ol>
+&lt;li>
+&lt;p>启动用例&lt;/p>
+&lt;p>可以参考 &lt;a href="../../../quickstart/java/">快速开始&lt;/a> 启动一个简单的 Dubbo 服务，对于服务测试来说，只需要启动 provider 即可。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>查询服务&lt;/p>
+&lt;p>完成服务端部署后，可以到 Admin 的 &lt;code>服务测试&lt;/code> 页面查询对应的服务:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/admin/testSearch.jpg" alt="testSearch">&lt;/p>
+&lt;p>这里的信息和元数据类似，包含方法名，参数类型和返回值信息，点击右边的标签就可以进入服务测试页面&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="执行服务测试">执行服务测试&lt;/h3>
+&lt;p>服务测试页面包含了两个 json 编辑器，参数类型的信息都是以 json 格式保存。&lt;/p>
+&lt;p>如以下示例所示，在左侧编辑器中填入对应的参数值(本例中数类型是 &lt;code>String&lt;/code> )，填写完成后点击 &lt;code>执行&lt;/code> 即可对服务端发起调用，调用结果展示在右边的编辑器中。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/admin/testSuccess.jpg" alt="testSuccess">&lt;/p>
+&lt;p>如果调用失败，会显示详细的失败原因，下面来看一下调用失败的例子：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/admin/testFail.jpg" alt="testFail">&lt;/p>
+&lt;p>本例中，先关掉 Dubbo 服务提供者的进程，再执行服务测试，可以看到返回的结果是&lt;code>找不到服务提供者&lt;/code>的异常。和普通调用一样，业务和框架的异常都会返回在结果中，方便业务排查。&lt;/p>
+&lt;h3 id="复合类型参数的填写">复合类型参数的填写&lt;/h3>
+&lt;p>考虑 &lt;code>UserService&lt;/code> 中的以下方法和类型：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//org.apache.dubbo.demo.api.UserService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Result &lt;span style="color:#268bd2">getUser&lt;/span>(String name, UserInfoDO userInfoDO);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserInfoDO&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> LocationDO locationDO;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> DepartmentDO departmentDO;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">toString&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;UserInfoDO{&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;id=&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;, locationDO=&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> locationDO.toString() &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;, departmentDO=&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> departmentDO.toString() &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#39;}&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DepartmentDO&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String departName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> LocationDO departLocation;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">toString&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;DepartmentDO{&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;departName=&amp;#39;&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> departName &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#39;\&amp;#39;&amp;#39;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;, departLocation=&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> departLocation.toString() &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#39;}&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">LocationDO&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String address;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> postNum;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">toString&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;LocationDO{&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;address=&amp;#39;&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> address &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#39;\&amp;#39;&amp;#39;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;, postNum=&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> postNum &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#39;}&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>参数是比较复杂的符合类型参数，服务测试的时候，会逐层展开填写每一个field的值，如下图所示：
+&lt;img src="https://dubbo.apache.org/imgs/blog/admin/complex.jpg" alt="complex">
+同样可以调用成功并且返回结果&lt;/p>
+&lt;h2 id="原理">原理&lt;/h2>
+&lt;h3 id="数据来源">数据来源&lt;/h3>
+&lt;p>服务测试中，最重要的就是完整的方法签名信息，和参数的类型信息，有了这些信息才能够一步步填入每个参数的值，拼装出完整的服务消费者。因此，使用服务测试的前提是在 Dubbo 中开启元数据中心（默认开启，Zookeeper、Nacos、Redis 等默认以注册中心做为元数据中心），Dubbo Admin 的方法签名和参数类型信息就是元数据中心来的：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/admin/metadata.png" alt="medatada">&lt;/p>
+&lt;p>如图所示，服务端在运行的时候会将服务的元数据信息注册到元数据中心，格式如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;methods&amp;#34;&lt;/span>: [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;parameterTypes&amp;#34;&lt;/span>: [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.model.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;returnType&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.model.Result&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;types&amp;#34;&lt;/span>: [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;char&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;long&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.model.Result&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;properties&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;msg&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;properties&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;value&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;char[]&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;hash&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;userName&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;properties&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;value&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;char[]&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;hash&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.model.User&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;properties&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;id&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;java.lang.Long&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;properties&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;value&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;long&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;username&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;java.lang.Sring&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;properties&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;value&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;char[]&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;hash&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>与服务测试相关的就是&lt;code>methods&lt;/code>和&lt;code>types&lt;/code>所包含的方法和类型信息，Dubbo Admin根据这些信息，将参数渲染到服务测试页面的Json Editor中，由用户来输入每个参数，每个成员变量的值。&lt;/p>
+&lt;h3 id="泛化调用">泛化调用&lt;/h3>
+&lt;p>有了参数类型，下一个问题就是怎么能够调用到服务端，在传统的Dubbo RPC调用中，客户端需要依赖服务端的API jar包 (参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer">Quick Start&lt;/a> 中的消费端示例，这对于 Dubbo Admin 来说不太可能，因为服务的上下线是动态的，Dubbo Admin 无法动态增加 jar 包依赖，因此需要用到 Dubbo 中的&lt;a href="../../../mannual/java-sdk/advanced-features-and-usage/service/generic-reference/">&lt;strong>泛化调用&lt;/strong>&lt;/a>，指的是在没有服务端API接口的情况下，客户端直接通过 &lt;code>GenericService&lt;/code> 接口来发起服务调用，返回值中的数据对象都用Map来表示。泛化调用在服务端不需要做特殊处理，只需要客户端发起即可。&lt;/p></description></item><item><title>Overview: Admin 服务 Mock 功能简介</title><link>https://dubbo.apache.org/zh-cn/overview/reference/admin/mock/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/admin/mock/</guid><description>
+&lt;p>Mock 功能是设计用来提升微服务研发与测试效率的，它可以短路 Consumer 侧发起的远程调用，提前返回预先设定好的 Mock 值，这样即使在没有 Provider 可用的情况下，消费端也能正常的推进开发、测试进程。除此之外，mock 也可用于快速模拟负责返回值的测试数据、模拟服务端异常等场景&lt;/p>
+&lt;p>需要注意的是，Mock 能力仅限用于测试环境，应避免将其用于生产环境。&lt;/p>
+&lt;h1 id="设计背景">设计背景&lt;/h1>
+&lt;p>在跨团队或是多应用开发时，在前期开发中往往会出现依赖的服务还未开发完成的情况，这样就会导致流程的阻塞，影响研发效率。基于这种情况，Dubbo Admin 提供了 mock 能力来解耦 Consumer 与 Provider 之间的依赖，以确保在 Provider 未就绪的情况下 Consumer 仍能正常开展测试，提高研发效率。&lt;/p>
+&lt;p>Dubbo 框架本身设计有服务降级（有时也称为 mock）能力，通过配置 &lt;code>org.apache.dubbo.config.ReferenceConfig&lt;/code> 的 mock 字段（可设置为true或是对应接口的Mock实现）或动态配置规则，此时就可以启动服务降级能力。这种服务降级能力是为生产环境的限流降级准备的，虽然也可以用于本地开发测试场景，但灵活度并不高，基于提升开发效率的根本诉求，我们设计了基于 Admin 的服务降级能力。&lt;/p>
+&lt;p>Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用于开发测试阶段的，目标是提升微服务场景下的整体研发效率。需求详见：&lt;a href="https://github.com/apache/dubbo-admin/issues/757">Dubbo Admin Mock需求&lt;/a>。&lt;/p>
+&lt;h2 id="架构设计">架构设计&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/mock-architecture.png" alt="admin-mock-architecture.png">&lt;/p>
+&lt;p>&lt;strong>实现 Mock 能力，Dubbo 框架与 Admin 侧要支持的能力&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Dubbo Admin
+&lt;ul>
+&lt;li>规则管理
+&lt;ul>
+&lt;li>规则新增&lt;/li>
+&lt;li>规则查询&lt;/li>
+&lt;li>规则修改&lt;/li>
+&lt;li>规则删除&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>请求历史记录&lt;/li>
+&lt;li>Mock 请求数据查询&lt;/li>
+&lt;li>MockService Provider
+&lt;ul>
+&lt;li>根据规则生成 Mock 数据&lt;/li>
+&lt;li>响应 Consumer Mock 请求&lt;/li>
+&lt;li>保存请求和返回数据&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Dubbo
+&lt;ul>
+&lt;li>根据 mock 开关配置，转发请求到 Admin 注册的 MockService&lt;/li>
+&lt;li>处理 mock 返回值并转换为匹配方法签名的强类型数据&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Mock 请求原理时序图&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/mock-workflow.png" alt="admin-mock-workflow.png">&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>在 Consumer 应用中添加依赖&lt;/p>
+&lt;p>开启 Mock 前，请确保在消费端应用中引入以下依赖：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-mock-admin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>查看 &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/">dubbo-mock-admin 的可用版本&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>配置 &lt;code>-Denable.dubbo.admin.mock=true&lt;/code> 参数开启 Mock 并重启进程&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>打开 Admin 配置 Mock 规则&lt;/p>
+&lt;p>用户可以通过在控制台上指定需要被 mock 的消费端IP、服务名和方法和具体的 mock 行为，实现对调用结果的 mock。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console/mock-rule-screenshot.png" alt="admin-mock">&lt;/p>
+&lt;p>一些支持的规则类型与示例&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>数字类型：123
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>字符串：&amp;#34;hello, world!&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>数组、列表：[1, 2, 3]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>枚举：&amp;#34;ENUM_TYPE&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Map、对象：
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;prop1&amp;#34;: &amp;#34;value1&amp;#34;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;prop2&amp;#34;: [&amp;#34;a&amp;#34;, &amp;#34;b&amp;#34;, &amp;#34;c&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>null: null
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>此时，消费端再次发起远程调用，就会得到预期 Mock 返回值。&lt;/p>
+&lt;blockquote>
+&lt;p>注意事项&lt;/p>
+&lt;ol>
+&lt;li>Mock 仅限用于测试开发环境，因此为了确保核心依赖的稳定性，社区没有将 mock 组件打包在核心框架包中，用户可以自行决策是否将其作为应用的默认依赖在公司内推广&lt;/li>
+&lt;li>即使添加了 mock 二进制依赖，mock 功能也不会默认开启，需要设置 &lt;code>-Denable.dubbo.admin.mock=true&lt;/code> 后才能开启。&lt;/li>
+&lt;/ol>
+&lt;/blockquote>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="实现原理">实现原理&lt;/h2>
+&lt;p>Consumer 调用发起的调用会被本地的 MockServiceFilter 拦截，如果 mock 开关开启，则 MockServiceFilter 将请求转发到 MockService (由 Dubbo Admin 发布的服务)，MockService 根据请求的服务、方法等查询用户预先配置的 mock 规则，如果查询到则返回规则中的 mock 值，Consumer 收到 mock 值后调用成功返回。&lt;/p>
+&lt;h3 id="mock-返回值如何定义">Mock 返回值如何定义？&lt;/h3>
+&lt;p>当前 Admin 支持录入 JSON 或者基本类型数据，如：&lt;/p>
+&lt;ul>
+&lt;li>返回数字值 (当方法签名返回值是数字类型)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>123
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>返回字符串 (当方法签名返回值是字符串类型)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>&amp;#34;hello, world!&amp;#34;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>返回 JSON (当方法签名返回值是 Map 或对象类型)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;prop1&amp;#34;: &amp;#34;value1&amp;#34;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;prop2&amp;#34;: [&amp;#34;a&amp;#34;, &amp;#34;b&amp;#34;, &amp;#34;c&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>返回数组 (当方法签名返回值是数组或列表)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[1, 2, 3]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="消费端如何发起-mockservice-调用">消费端如何发起 MockService 调用？&lt;/h3>
+&lt;p>&lt;code>dubbo-mock-admin&lt;/code> 将为消费端引入 MockServiceFilter 请求拦截器，如果用户打开 mock 开关，那么 Filter 会将请求转发到 Admin MockService 服务。&lt;/p>
+&lt;h3 id="mock-值如何转换为原始类型值">Mock 值如何转换为原始类型值？&lt;/h3>
+&lt;p>MockService 支持返回标准 JSON 格式或者基本类型数据，消费端会基于 Dubbo 内置类型转换器将 JSON 等值转为原始对象类型。&lt;/p>
+&lt;h3 id="未来优化点">未来优化点&lt;/h3>
+&lt;ul>
+&lt;li>保存 Mock 开关到配置中心，用户可以通过 Admin 动态控制开关。&lt;/li>
+&lt;li>开启 Mysql 数据库链接池&lt;/li>
+&lt;/ul>
+&lt;h3 id="表结构设计">表结构设计&lt;/h3>
+&lt;p>Admin 依赖 Mysql 数据库存储用户配置的 mock 规则，具体的表结构设计如下。&lt;/p>
+&lt;h4 id="mock-rule">Mock Rule&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>mock_rule&lt;span style="color:#719e07">`&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;主键&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>service_name&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;服务名&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>method_name&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;方法名&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>&lt;span style="color:#719e07">rule&lt;/span>&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">text&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;规则&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>created_at&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">CURRENT_TIMESTAMP&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;创建时间&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>updated_at&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">CURRENT_TIMESTAMP&lt;/span> &lt;span style="color:#719e07">ON&lt;/span> &lt;span style="color:#719e07">UPDATE&lt;/span> &lt;span style="color:#719e07">CURRENT_TIMESTAMP&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;更新时间&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8 &lt;span style="color:#719e07">COMMENT&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#39;服务mock方法表&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="mock-log">Mock Log&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>mock_log&lt;span style="color:#719e07">`&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">10&lt;/span>) unsigned &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;主键id&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>method_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;规则id&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>request&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">text&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;请求数据&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>response&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">text&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;返回值&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>created_at&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">CURRENT_TIMESTAMP&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;创建时间&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>updated_at&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">CURRENT_TIMESTAMP&lt;/span> &lt;span style="color:#719e07">ON&lt;/span> &lt;span style="color:#719e07">UPDATE&lt;/span> &lt;span style="color:#719e07">CURRENT_TIMESTAMP&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;更新时间&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8 &lt;span style="color:#719e07">COMMENT&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#39;mock请求记录表&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Admin 文档管理功能介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/admin/documentation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/admin/documentation/</guid><description>
+&lt;p>// TBD&lt;/p></description></item></channel></rss>

@@ -1,0 +1,262 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 0 - Common 层</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/</link><description>Recent content in 0 - Common 层 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 0-1 - 线程池资源枯竭</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/1/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/1/</guid><description>
+&lt;p>服务端的线程资源耗尽了。
+默认情况下，Dubbo 服务端的业务线程数是 200 个。如果多个并发请求量超过了 200，就会拒绝新的请求，抛出此错误。&lt;/p>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>Consumer 的并发请求量太大，导致 Provider 端创建的线程数量超限。&lt;/li>
+&lt;li>可能 Provider 端在执行业务的时候，由于业务调用外部应用接口，导致线程出现阻塞，从而导致线程池回收不了线程。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ul>
+&lt;li>开启 Dubbo 的访问日志功能，排查是否有短时间内大量调用 RPC 服务的情况。&lt;/li>
+&lt;li>通过 &lt;code>jps&lt;/code> 和 &lt;code>jstack&lt;/code> 指令检查线程池中各个线程的状态，看下是否有业务调用外部应用接口造成阻塞。&lt;/li>
+&lt;li>如果是 Consumer 的并发请求量太大，那么调整 Provider 端的 &lt;code>dubbo.provider.threads&lt;/code> 参数，将 Dubbo 的线程池的数目调大。&lt;/li>
+&lt;li>如果 Provider 业务的 QPS 实在太大，目前的服务器数目处理不完，那么增加 Provider 端服务器的数量，让更多的服务器分担压力。&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>这个错误码的 FAQ 页面参考了空冥同学的 &lt;a href="https://github.com/StabilityMan/StabilityGuide/blob/master/docs/diagnosis/plugin/rpc/%E7%B3%BB%E7%BB%9F%E7%A8%B3%E5%AE%9A%E6%80%A7%E2%80%94%E2%80%94Dubbo%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.md">《Dubbo 常见错误及解决方法》&lt;/a> 。
+所引文章通过 &lt;a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0&lt;/a> 协议赋予了汇编的权利。在此向原作者表示感谢。&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: 0-2 - 非法属性值</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/2/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>这个提示是指用户配置的值与属性本身所需的数据类型并不匹配。比如 &lt;code>dubbo.comsumer.threads&lt;/code> 属性只能接受数值属性，但是用户所输入的值混入了字母。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>根据&lt;a href="../../../reference-manual/config/properties">配置项参考手册&lt;/a>，查找出错的配置项，检查该项指定的类型，检查是否出现类型不一致的情况。&lt;/p></description></item><item><title>Overview: 0-3 - 无法访问缓存路径</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/3/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/3/</guid><description>
+&lt;p>其它模块复用了 Common 层的基于文件的缓存机制（目前是元数据模块），而 Common 层的文件缓存机制无法访问它指定的目录。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2022-08-29 00:35:00,189 ERROR [org.apache.dubbo.common.cache.FileCacheStoreFactory:?] - [DUBBO] Cache store path can&amp;#39;t be created: , dubbo version: , current host: 10.0.1.1, error code: 0-3. This may be caused by inaccessible of cache path, go to https://dubbo.apache.org/faq/0/3 to find instructions.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>java.nio.file.FileAlreadyExistsException: [Path]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:87)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.base/sun.nio.fs.WindowsFileSystemProvider.createDirectory(WindowsFileSystemProvider.java:521)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.base/java.nio.file.Files.createDirectory(Files.java:700)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.base/java.nio.file.Files.createAndCheckIsDirectory(Files.java:807)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at java.base/java.nio.file.Files.createDirectories(Files.java:753)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> at org.apache.dubbo.common.cache.FileCacheStoreFactory.getInstance(FileCacheStoreFactory.java:90)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>多个 Dubbo 进程（或其他 Java 进程）使用了同一个缓存文件。&lt;/li>
+&lt;li>由于缓存文件所在目录的文件系统权限问题，导致读写失败。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>根据下面显示的实际异常找到访问不了的目录，确定下它的文件访问权限。&lt;/li>
+&lt;li>确定下是否有别的 Dubbo 实例正在访问这个路径。&lt;/li>
+&lt;li>尝试配置 &lt;strong>Java System Property（用 -D 配置的 Java 系统属性）&lt;/strong> &lt;code>dubbo.meta.cache.filePath&lt;/code> 和 &lt;code>dubbo.mapping.cache.filePath&lt;/code>，将它指定成一个当前用户能够完全控制的目录下。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 0-4 - 缓存条目超限</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/4/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/4/</guid><description>
+&lt;p>其它模块复用了 Common 层的基于文件的缓存机制（目前是元数据模块），而 Common 层的文件缓存机制 “发觉” 条目超限。&lt;/p>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>用户不合理地配置了 &lt;strong>Java System Property&lt;/strong> （用 -D 配置的 Java 系统属性） &lt;code>dubbo.mapping.cache.entrySize&lt;/code> 或者 &lt;code>dubbo.meta.cache.entrySize&lt;/code>&lt;/p>
+&lt;p>&lt;strong>默认值&lt;/strong>&lt;/p>
+&lt;style>
+.sheet-border, .sheet-border tr, .sheet-border tr td {
+border-width: 1px;
+border-color: black;
+text-align: center;
+}
+.sheet-border tr td {
+height: 48px;
+width: 83px;
+border-style: solid;
+padding: 0.6rem 0.6rem;
+}
+.sheet-header td {
+font-weight: bold;
+background: #cccccc;
+}
+&lt;/style>
+&lt;table class="sheet-border">
+&lt;tr class="sheet-header">
+&lt;td>dubbo.mapping.cache.entrySize&lt;/td>
+&lt;td>dubbo.meta.cache.entrySize&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>10000&lt;/td>
+&lt;td>100&lt;/td>
+&lt;/tr>
+&lt;/table>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>尝试重新配置上述 &lt;strong>Java System Property（用 -D 配置的 Java 系统属性）&lt;/strong>。&lt;/li>
+&lt;li>如果确实没有配置这些 &lt;strong>System Property&lt;/strong>，请到 &lt;a href="https://github.com/apache/dubbo/issues">GitHub Issue Tracker&lt;/a> 下发 Issue。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 0-5 - 缓存文件大小超限</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/5/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/5/</guid><description>
+&lt;p>其它模块复用了 Common 层的基于文件的缓存机制（目前是元数据模块），而 Common 层的文件缓存机制 “发觉” 文件大小超限。&lt;/p>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>用户不合理地配置了 Java System Property （用 -D 配置的 Java 系统属性） &lt;code>dubbo.mapping.cache.maxFileSize&lt;/code> 或者 &lt;code>dubbo.meta.cache.maxFileSize&lt;/code>&lt;/li>
+&lt;li>缓存文件因文件系统或磁盘错误而被破坏。&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>&lt;code>dubbo.mapping.cache.maxFileSize&lt;/code> 和 &lt;code>dubbo.meta.cache.maxFileSize&lt;/code> 没有显示默认值，
+而根据 &lt;code>org.apache.dubbo.common.cache.FileCacheStore.LimitedLengthBufferedWriter&lt;/code> 的逻辑而查到的最大文件大小的默认值为：&lt;code>Long.MAX_VALUE&lt;/code> ( 2&lt;sup>63&lt;/sup>-1 ) 。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>尝试重新配置上述 &lt;strong>Java System Property（用 -D 配置的 Java 系统属性）&lt;/strong>。&lt;/li>
+&lt;li>删除缓存文件夹重启 &lt;strong>Provider&lt;/strong> 和 &lt;strong>Consumer&lt;/strong> （缓存文件夹的位置一般在 &lt;code>~/.dubbo&lt;/code>。如果配置了 &lt;code>dubbo.meta.cache.filePath&lt;/code> 和 &lt;code>dubbo.mapping.cache.filePath&lt;/code> 则为该路径）。&lt;/li>
+&lt;li>如果确实没有配置这些 &lt;strong>System Property&lt;/strong>，请到 &lt;a href="https://github.com/apache/dubbo/issues">GitHub Issue Tracker&lt;/a> 下发 Issue。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 0-6 - 线程中断异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/6/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/6/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>运行中的线程在处于 &lt;code>wait、sleep、join&lt;/code> 时，被显示调用 &lt;code>interrupt()&lt;/code>&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>正常运行的线程在调用了 &lt;code>interrupt()&lt;/code> 方法后，将对当前线程中断状态设置为 true，但线程的执行并不会受到影响。
+可根据实际情况进行操作或检查业务代码有无被错误使用。&lt;/p></description></item><item><title>Overview: 0-7 - 未找到反射类</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/7/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/7/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>一般是 &lt;code>Class.forName(className)&lt;/code> 执行此方法时，找不到 &lt;code>className&lt;/code> 当前类。&lt;/li>
+&lt;li>业务代码上显示排除了当前 &lt;code>className&lt;/code> 类，导致加载时未找到。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>检查 &lt;code>Class.forName(className)&lt;/code> 中，&lt;code>className&lt;/code> 是否存在。&lt;/li>
+&lt;li>排查业务代码，有没有使用配置或扫描注解 &lt;code>exclude&lt;/code> 排除了一些类或包。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 0-8 - 反射失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/8/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/8/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>在反射调用某方法时，未对当前方法设置正确的参数类型值，也就是参数类型不匹配。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>检查是否存在未正确设置相匹配的类型值。&lt;/p></description></item><item><title>Overview: 0-9 - 通知事件失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/9/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/9/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>自定义的监听器，在处理上产生了运行时异常。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>检查实现 &lt;code>org.apache.dubbo.rpc.ExporterListener&lt;/code> 接口的业务类，实现方法可能存在代码逻辑错误。&lt;/p></description></item><item><title>Overview: 0-10 - 当前调用不在支持</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/10/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/10/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>当前调用的方法可能已经被弃用或声明了 &lt;code>@Deprecated&lt;/code>，不影响执行结果。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>请使用其它可替代的 API 方法。&lt;/p></description></item><item><title>Overview: 0-11 - 服务停止失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/11/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/11/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>连接没有及时关闭或内存不足，导致服务在停止时会出现一些异常。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>在响应内容完成后进行关闭连接。&lt;/p></description></item><item><title>Overview: 0-12 - 未知异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/12/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/12/</guid><description>
+&lt;p>未知异常，一般为API使用或配置异常&lt;/p>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>转码异常、不支持的加解密方法等等&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>可根据堆栈信息，进行业务代码行定位。&lt;/p></description></item><item><title>Overview: 0-13 - 指标收集器发生异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/13/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/13/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>指标数据在推送过程中发生错误，推送的服务器连接不上或一些配置错误，目前支持 Prometheus。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>请参考配置项参考手册&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#metrics">配置项参考手册&lt;/a>。&lt;/p></description></item><item><title>Overview: 0-14 - 监控异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/14/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/14/</guid><description>
+&lt;p>用来统计 RPC 调用次数和调用耗时时间，扩展接口为 MonitorFactory，对应的实现类为 DubboMonitorFactroy。&lt;/p>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>用户可以实现该层的 MonitorFactory 扩展接口，实现自定义监控统计策略。
+在自定义监控统计策略的实现类，发生了业务运行时异常。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>检查 &lt;code>org.apache.dubbo.monitor.MonitorFactory&lt;/code> 接口的业务类，实现方法可能存在代码逻辑错误。&lt;/p></description></item><item><title>Overview: 0-15 - 加载扩展类时发生异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/15/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/15/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>&lt;code>clazz&lt;/code> 类并没有实现当前扩展点的接口类。&lt;/li>
+&lt;li>扩展名可能是个接口或者不存在。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>检查扩展类声明，并没有与之相匹配的扩展实现类。&lt;/li>
+&lt;li>扩展实现类需实现扩展点接口类以及方法。&lt;/li>
+&lt;/ol>
+&lt;p style="margin-top: 3rem;"> &lt;/p></description></item><item><title>Overview: 0-16 - 没有可用的执行器</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/16/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/16/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>内部执行器不可用，此时返回空。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>不需要进行干预，dubbo 内部会执行&lt;code>createExecutorIfAbsent&lt;/code> 方法构建一个新的执行器。&lt;/p>
+&lt;p style="margin-top: 3rem;"> &lt;/p></description></item><item><title>Overview: 0-17 - 执行器在关闭时发生未知异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/17/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/17/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>可能使用了自定义的执行器，在编写销毁方法时，产生了异常。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>检查是否自定义实现 &lt;code>org.apache.dubbo.common.threadpool.manager.ExecutorRepository&lt;/code>,检查自定义的 &lt;code>shutdown&lt;/code> 方法。&lt;/p></description></item><item><title>Overview: 0-18 - 线程池执行器被错误使用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/18/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/18/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>自定义设置了线程数量，系统内部发生了未知异常。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>可通过一些第三方的工具或者 &lt;code>jstack [PID] &amp;gt; jstack.log&lt;/code> 分析堆栈信息，进行定位。&lt;/p></description></item><item><title>Overview: 0-19 - 处理任务时发生异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/19/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/19/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>自定义业务类处理逻辑不当。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>可通过一些第三方的工具或者 &lt;code>jstack [PID] &amp;gt; jstack.log&lt;/code> 分析堆栈信息，进行定位。&lt;/p></description></item><item><title>Overview: 0-20 - 存储堆栈信息时发生异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/20/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/20/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>JVM设置了参数 &lt;code>-XX:+DisableAttachMechanism&lt;/code>&lt;/li>
+&lt;li>设置了系统不存在的堆栈转储路径，不存在情况，系统会尝试进行创建，创建时发生了 &lt;code>SecurityException&lt;/code>, 可能是没有权限。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>检查 JVM 是否设置了如上参数。&lt;/li>
+&lt;li>检查当前启动服务的账号，是否有权限进行创建文件夹。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 0-21 - 构建的实例过多</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/21/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/21/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>一般指 &lt;code>org.apache.dubbo.common.timer.HashedWheelTimer&lt;/code> 创建的实例过多。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>不影响实例的构建，可能存在内存泄露的风险。&lt;/p></description></item><item><title>Overview: 0-22 - 输入输出流异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/22/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/22/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>读取不再可用的本地文件。&lt;/li>
+&lt;li>尝试读取/写入文件但没有权限。&lt;/li>
+&lt;li>尝试写入文件但磁盘空间不再可用。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>检查本地文件是否存在。&lt;/li>
+&lt;li>检查文件权限。&lt;/li>
+&lt;li>检查磁盘空间。&lt;/li>
+&lt;/ol>
+&lt;p>可通过一些第三方的工具或者 &lt;code>jstack [PID] &amp;gt; jstack.log&lt;/code> 分析堆栈信息，进行定位。&lt;/p></description></item><item><title>Overview: 0-23 - 序列化数据转换异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/23/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/23/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>待序列化数据中存在循环引用，导致堆栈溢出。&lt;/li>
+&lt;li>引用的 jar 包版本低或存在兼容性问题。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>如使用 FastJson，去掉 &lt;code>SerializerFeature.DisableCircularReferenceDetec&lt;/code>&lt;/li>
+&lt;li>检查下或升级版本进行尝试。&lt;/li>
+&lt;/ol>
+&lt;p>可通过一些第三方的工具或者 &lt;code>jstack [PID] &amp;gt; jstack.log&lt;/code> 分析堆栈信息，进行定位。&lt;/p></description></item><item><title>Overview: 0-24 - 覆盖字段值异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/24/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/24/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>实体类未设置 setter/getter 方法。&lt;/li>
+&lt;li>可能存在嵌套的属性。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>检查实体类并设置 setter/getter 方法。&lt;/li>
+&lt;li>根据堆栈信息，检查是否使用嵌套注解。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 0-25 - 加载映射错误</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/25/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/25/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>文件访问权限不足&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>检查文件权限。
+可通过一些第三方的工具或者 &lt;code>jstack [PID] &amp;gt; jstack.log&lt;/code> 分析堆栈信息，进行定位。&lt;/p></description></item><item><title>Overview: 0-26 - 元数据发布服务时的警告信息</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/26/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/26/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>元数据在存储接口与应用的映射关系时，显示的提醒类消息。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>一般可根据堆栈信息进行分析，也可不处理。&lt;/p></description></item><item><title>Overview: 0-27 - 线程池隔离配置异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/27/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/27/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>未开启应用的线程池隔离能力，但是却在 &lt;code>ServiceConfig&lt;/code> 中配置了隔离的线程池信息。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>配置开启应用的线程池隔离能力：&lt;code>dubbo.application.executor-management-mode=isolation&lt;/code>&lt;/p></description></item><item><title>Overview: 0-28 - 操作了可能会引起危险的行为</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/28/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/28/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>你执行了以下操作之一：&lt;/p>
+&lt;ul>
+&lt;li>尝试或已经调整了 accesslog 的输出位置&lt;/li>
+&lt;/ul>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>请检查应用配置中的 &lt;code>accesslog.fixed.path=true&lt;/code> 开关是否处于开启状态，如未开启则可忽略；如果当前是开启状态，则请确认是否 acesslog 路径切换的行为是否为可信任的人所执行，以避免可能的安全风险。&lt;/p></description></item><item><title>Overview: 0-29 - 未找到Tracer依赖</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/29/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/29/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>你已在配置文件中开启了tracing，但未找到Tracer依赖。&lt;/p>
+&lt;p>目前Tracer支持两种，OpenTelemetry和Brave。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>选择一个Tracer依赖到你的项目中：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-otel&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;optional&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/optional&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-brave&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;optional&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/optional&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 0-99 - 调用了过时 (Deprecated) 的方法</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/99/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/0/99/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>用户调用了过时 (Deprecated) 的方法。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>检查用户代码有没有调用了什么在目前所用的版本声明为 @Deprecated 的方法，如果有则按照其对应方法替代，如无则忽略即可。&lt;/p></description></item></channel></rss>

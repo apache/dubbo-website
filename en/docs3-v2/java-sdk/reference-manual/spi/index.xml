@@ -1,0 +1,65 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – SPI Extension Manual</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/</link><description>Recent content in SPI Extension Manual on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Dubbo SPI Overview</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/overview/</guid><description>
+&lt;h2 id="extended-design-ideas">Extended Design Ideas&lt;/h2>
+&lt;p>Scalability is what any system pursues, and it is equally applicable to Dubbo.&lt;/p>
+&lt;h3 id="what-is-scalability">What is scalability&lt;/h3>
+&lt;p>Scalability is a design concept that represents our vision for the future. We hope that based on the existing architecture or design, when some aspects change in the future, we can adapt to this with minimal changes. kind of change.&lt;/p>
+&lt;h3 id="advantages-of-scalability">Advantages of Scalability&lt;/h3>
+&lt;p>The advantage of scalability is mainly manifested in the decoupling between modules, which conforms to the principle of opening and closing, which is open to expansion and closed to modification. When a new function is added to the system, there is no need to modify the structure and code of the existing system, just add an extension.&lt;/p>
+&lt;h3 id="extended-implementation">Extended implementation&lt;/h3>
+&lt;p>Generally speaking, the system will use Factory, IoC, OSGI, etc. to manage the extension (plug-in) life cycle. Considering the applicability of Dubbo, I don&amp;rsquo;t want to strongly rely on IoC containers such as Spring.
+And building a small IoC container by myself feels a bit over-designed, so choose the simplest Factory way to manage extensions (plug-ins). In Dubbo, all internal and third-party implementations are equal.&lt;/p>
+&lt;h3 id="scalability-in-dubbo">Scalability in Dubbo&lt;/h3>
+&lt;ul>
+&lt;li>Treat third-party implementations equally. In Dubbo, all internal implementations and third-party implementations are equal, and users can replace the native implementations provided by Dubbo based on their own business needs.&lt;/li>
+&lt;li>Each extension point only encapsulates one change factor to maximize reuse. The implementers of each extension point often only care about one thing. If users need to expand, they only need to expand the extension points they care about, which greatly reduces the workload of users.&lt;/li>
+&lt;/ul>
+&lt;h2 id="features-of-dubbo-extension">Features of Dubbo extension&lt;/h2>
+&lt;p>The extension capability in Dubbo is enhanced from the JDK standard SPI extension point discovery mechanism, which improves the following problems of the JDK standard SPI:&lt;/p>
+&lt;ul>
+&lt;li>The JDK standard SPI will instantiate all the implementations of the extension point at one time. If there is an extension implementation, it will be time-consuming to initialize, but if it is not used, it will be loaded, which will be a waste of resources.&lt;/li>
+&lt;li>If the extension point fails to load, even the name of the extension point cannot be obtained. For example: JDK standard ScriptEngine, get the name of the script type through getName(), but if RubyScriptEngine fails to load the RubyScriptEngine class because the jruby. When the user executes the ruby script, it will report that ruby is not supported, not the real reason for the failure.&lt;/li>
+&lt;/ul>
+&lt;p>Based on the expansion capabilities provided by Dubbo, users can easily expand other protocols, filters, routes, etc. based on their own needs. The following introduces the characteristics of Dubbo&amp;rsquo;s extension capabilities.&lt;/p>
+&lt;ul>
+&lt;li>Load on demand. Dubbo&amp;rsquo;s extension capability does not instantiate all implementations at once, but instantiates with extended classes to reduce resource waste.&lt;/li>
+&lt;li>Increase the IOC capability of the extended class. Dubbo&amp;rsquo;s extension ability is not just to discover the extension service implementation class, but to go further on this basis. If the attributes of the extension class depend on other objects, Dubbo will automatically complete the injection function of the dependent object.&lt;/li>
+&lt;li>Increase the AOP capability of extended classes. Dubbo&amp;rsquo;s extension capability will automatically discover the wrapper class of the extension class, complete the construction of the wrapper class, and enhance the function of the extension class.&lt;/li>
+&lt;li>Possess the ability to dynamically select the extension implementation. The Dubbo extension will dynamically select the corresponding extension class at runtime based on parameters, which improves Dubbo&amp;rsquo;s scalability.&lt;/li>
+&lt;li>The extension implementation can be sorted. The execution order of the extension implementation can be specified based on user requirements.&lt;/li>
+&lt;li>Provides the Adaptive capability of the extension point. This capability enables some extension classes to take effect on the consumer side, and some extension classes to take effect on the provider side.&lt;/li>
+&lt;/ul>
+&lt;p>From the design goal of Dubbo extension, it can be seen that some features implemented by Dubbo, such as dynamic selection of extension implementation, IOC, AOP, etc., can provide users with very flexible expansion capabilities.&lt;/p>
+&lt;h2 id="dubbo-extension-loading-process">Dubbo extension loading process&lt;/h2>
+&lt;p>The whole process of Dubbo loading extension is as follows:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/extension-load.png" alt="//imgs/v3/concepts/extension-load.png">&lt;/p>
+&lt;p>There are 4 main steps:&lt;/p>
+&lt;ul>
+&lt;li>Read and parse configuration files&lt;/li>
+&lt;li>Cache all extension implementations&lt;/li>
+&lt;li>Based on the extension name executed by the user, instantiate the corresponding extension implementation&lt;/li>
+&lt;li>Perform IOC injection of extended instance attributes and instantiate extended wrapper classes to realize AOP features&lt;/li>
+&lt;/ul>
+&lt;h2 id="how-to-use-dubbos-extension-capability-to-expand">How to use Dubbo&amp;rsquo;s extension capability to expand&lt;/h2>
+&lt;p>The following takes the extension protocol as an example to illustrate how to use the extension capabilities provided by Dubbo to extend the Triple protocol.&lt;/p>
+&lt;p>(1) Place a text file in the protocol implementation jar package: META-INF/dubbo/org.apache.dubbo.remoting.api.WireProtocol&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>tri=org.apache.dubbo.rpc.protocol.tri.TripleHttp2Protocol
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>(2) Implementation class content&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TripleHttp2Protocol&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> Http2WireProtocol {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Instructions: Http2WireProtocol implements the WireProtocol interface&lt;/p>
+&lt;p>(3) In the Dubbo configuration module, each extension point has a corresponding configuration attribute or label, and the configuration specifies which extension to use. for example:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>&amp;lt;dubbo:protocol name=&amp;#34;tri&amp;#34; /&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>As can be seen from the above expansion steps, the user basically completes the expansion under the black box.&lt;/p>
+&lt;h2 id="dubbo-extended-application">Dubbo extended application&lt;/h2>
+&lt;p>Dubbo&amp;rsquo;s expansion capability is very flexible, and it is ubiquitous in the realization of its own functions.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/extension-use.png" alt="//imgs/v3/concepts/extension-use.png">&lt;/p>
+&lt;p>Dubbo&amp;rsquo;s extensibility makes it easy to divide the Dubbo project into sub-modules one by one to realize the hot-swappable feature. Users can completely replace Dubbo&amp;rsquo;s native implementation based on their own needs to meet their own business needs.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;ul>
+&lt;li>If you need to customize the load balancing strategy, you can use Dubbo&amp;rsquo;s scalability.&lt;/li>
+&lt;li>If you need to implement a custom registry, you can use Dubbo&amp;rsquo;s extension capabilities.&lt;/li>
+&lt;li>If you need to implement custom filters, you can use Dubbo&amp;rsquo;s extension capabilities.&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo extensions treat internal implementations and third-party implementations equally. For more usage scenarios, see &lt;a href="../description/">SPI extension implementation&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: Dubbo SPI extension implementation description</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/description/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/description/</guid><description/></item></channel></rss>

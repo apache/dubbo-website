@@ -1,0 +1,98 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 6 - 网络传输层</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/</link><description>Recent content in 6 - 网络传输层 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 6-1 - 服务端连接失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/1/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/1/</guid><description>
+&lt;p>网络通信层，在连接服务提供者服务时失败&lt;/p>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>服务提供者的网络异常断开或受防火墙及第三方工具的拦截，无法对外提供服务。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>如果为 rest 连接，检查请求的服务端配置是否正确。&lt;/li>
+&lt;li>检查网络通信是否正常，可使用一些简单的 cmd 命令进行检测，如 &lt;code>ping&lt;/code> 等。&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 6-2 - 客户端超时</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/2/</guid><description>
+&lt;p>超时是调用端发生在请求发出后，无法在指定的时间内获得对应的响应。&lt;/p>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>服务端确实处理比较慢，无法在指定的时间返回结果，调用端就自动返回一个超时的异常响应来结束此次调用。&lt;/li>
+&lt;li>服务端如果响应的比较快，但当客户端 Load 很高，负载压力很大的时候，会因为客户端请求发不出去、响应卡在 TCP Buffer 等问题，造成超时。因为客户端接收到服务端发来的数据或者请求服务端的数据，都会在系统层面排队，如果系统负载比较高，在内核态的时间占比就会加长，从而造成客户端获取到值时已经超时。&lt;/li>
+&lt;li>通常是业务处理太慢，可在服务提供方机器上执行：&lt;code>jstack [PID] &amp;gt; jstack.log&lt;/code> 分析线程都卡在哪个方法调用上，这里就是慢的原因。如果不能调优性能，请调高 timeout 阈值。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>两边可能有 GC，检查服务端和客户端 GC 日志，耗时很长的 GC，会导致超时。超时的发生很可能意味着调用端或者服务端的资源（CPU，内存或者网络）出现了瓶颈，需要检查服务端的问题还是调用端的问题来排除 GC 抖动等嫌疑。&lt;/li>
+&lt;li>检查服务端的网络质量，比如重传率来排除网络嫌疑。&lt;/li>
+&lt;li>借助链路跟踪的分析服务（比如阿里的 &lt;a href="https://help.aliyun.com/document_detail/63796.html">ARMS&lt;/a> ，开源的 &lt;a href="https://github.com/opentracing/opentracing-java">OpenTracing&lt;/a>
+系的实现 &lt;a href="https://github.com/openzipkin/zipkin">Zipkin&lt;/a> 、&lt;a href="https://github.com/apache/skywalking">SkyWalking&lt;/a> 等）来分析下各个点的耗时情况。&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>这个错误码的 FAQ 页面参考了空冥同学的 &lt;a href="https://github.com/StabilityMan/StabilityGuide/blob/master/docs/diagnosis/plugin/rpc/%E7%B3%BB%E7%BB%9F%E7%A8%B3%E5%AE%9A%E6%80%A7%E2%80%94%E2%80%94Dubbo%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.md">《Dubbo 常见错误及解决方法》&lt;/a> 。
+所引文章通过 &lt;a href="http://creativecommons.org/licenses/by/4.0/">CC-BY-4.0&lt;/a> 协议赋予了汇编的权利。在此向原作者表示感谢。&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: 6-3 - 网络连接关闭失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/3/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/3/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>非优雅关闭服务，此时服务端可能在对外输出流未完成。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>一般为提示类警告信息，不影响后续的程序执行。&lt;/p></description></item><item><title>Overview: 6-4 - 网络通讯层未知异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/4/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/4/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;blockquote>
+&lt;p>该错误码的意义已经调整。对于 Dubbo 3.1.4、3.2.0-beta.3 及其之前的版本的该错误码的出错，请参考错误码 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/99/0/">99-0&lt;/a>。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>（该错误码目前空缺）&lt;/p></description></item><item><title>Overview: 6-5 - 网络连接断开失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/5/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/5/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>超时是调用端发生在请求发出后，无法在指定的时间内获得对应的响应，出现客户端主动断开连接&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>一般为提示类警告信息，不影响后续的程序执行。&lt;/p></description></item><item><title>Overview: 6-6 - 不支持的消息</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/6/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/6/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>返回的数据序列化错误，或超出序列化最大值&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>可通过一些第三方的工具或者 &lt;code>jstack [PID] &amp;gt; jstack.log&lt;/code> 分析堆栈信息，进行定位。&lt;/p>
+&lt;p>各组件支持的具体配置项及含义请参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/">配置项手册&lt;/a>&lt;/p></description></item><item><title>Overview: 6-7 - 线程连接数超限警告</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/7/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/7/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>连接数超过限制时的提醒消息,配置或连接数超过配置数的警告提醒。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>默认配置项 &lt;code>connect.queue.warning.size=1000&lt;/code>,可通过配置进行调整。&lt;/p></description></item><item><title>Overview: 6-8 - 返回数据解码失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/8/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/8/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>返回数据格式错误或解码失败&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>可通过 debug/warn 日志模式，输出具体服务类名称和返回的消息及堆栈信息。&lt;/p></description></item><item><title>Overview: 6-9 - 序列号ID存在重复</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/9/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/9/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;ol>
+&lt;li>返回了一个空对象。&lt;/li>
+&lt;li>自定义序列号类，&lt;code>org.apache.dubbo.common.serialize.Serialization#getContentTypeId&lt;/code> 与系统内置存在重复，
+此时在加载时，以首个加载到的 SPI 实例为准。其他项将跳过。&lt;/li>
+&lt;/ol>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;ol>
+&lt;li>检查返回结果。&lt;/li>
+&lt;li>内置值可参考类 &lt;code>org.apache.dubbo.common.serialize.Constants&lt;/code>&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 6-10 - 超过有效载荷限制异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/10/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/10/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;blockquote>
+&lt;p>默认 &lt;code>payload=8M&lt;/code>,请检查各项配置&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>各组件支持的具体配置项及含义请参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/">配置项手册&lt;/a>&lt;/p></description></item><item><title>Overview: 6-11 - 字符集不被支持</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/11/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/11/</guid><description>
+&lt;h2 id="可能的原因">可能的原因&lt;/h2>
+&lt;blockquote>
+&lt;p>默认 &lt;code>UTF-8&lt;/code> 字符集&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="排查和解决步骤">排查和解决步骤&lt;/h2>
+&lt;p>结果会最终以 &lt;code>UTF-8&lt;/code> 字符集进行处理。&lt;/p></description></item><item><title>Overview: 6-12 - ZK客户端销毁时发生错误</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/12/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/12/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>客户端与服务端连接已被拒绝
+客户端在销毁时，可能服务端正在进行选举或者其他操作，导致发生的异常。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>关闭方法，可针对堆栈信息进行查询。一般可不处理。&lt;/p></description></item><item><title>Overview: 6-13 - 流关闭异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/13/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/13/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>当前流已关闭 &lt;code>Stream is closed&lt;/code> 或流关闭时，其他线程正在读取。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>一般为代码关闭流的顺序上发生了颠倒。&lt;/p></description></item><item><title>Overview: 6-14 - 服务端响应失败</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/14/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/14/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>在服务端与客户端交互发生数据时，客户端异常关闭。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>客户端异常终止或服务器宕机。&lt;/p></description></item><item><title>Overview: 6-15 - 跳过未读完的流数据</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/15/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/15/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>解码时，如流中还有未读数据时会跳过未读完的流&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>解码时会把数据全部一次性读取&lt;/p></description></item><item><title>Overview: 6-16 - 重连时发生异常</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/16/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/faq/6/16/</guid><description>
+&lt;h3 id="可能的原因">可能的原因&lt;/h3>
+&lt;p>每次发生重连时提示，网络不稳定造成的延迟重连。&lt;/p>
+&lt;h3 id="排查和解决步骤">排查和解决步骤&lt;/h3>
+&lt;p>检查是否有网络丢包情况。&lt;/p></description></item></channel></rss>

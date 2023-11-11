@@ -1,0 +1,82 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Use Pixiu gateway to access Ingress traffic</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/</link><description>Recent content in Use Pixiu gateway to access Ingress traffic on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Access Ingress Traffic</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/http_triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/http_triple/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;p>-kubectl&lt;/p>
+&lt;ul>
+&lt;li>A k8s cluster with kubeconfig configured&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-use-the-http-protocol-to-call-the-triple-application-through-the-gateway">2. Use the HTTP protocol to call the Triple application through the gateway&lt;/h2>
+&lt;p>The Dubbo-go-pixiu gateway supports calling GO/Java Dubbo clusters. In the Dubbo-go 3.0 scenario, we can use the Pixiu gateway to request the Pixiu gateway with the HTTP protocol outside the cluster, perform protocol conversion at the gateway layer, and further call the Dubbo-go service in the cluster.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/tasks/pixiu/http_triple/triple-pixiu.png" alt="image.png">&lt;/p>
+&lt;p>The path for users to call Dubbo-go service is http://$(app_name)/$(service_name)/$(method).&lt;/p>
+&lt;p>For example, a proto file has the following definition:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.quickstart.samples;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> UserProvider {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> SayHello (HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (User) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And configure the application name in dubbogo.yml when the dubbo-go service is started: my-dubbogo-app:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: my-dubbogo-app
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The pixiu gateway can resolve the route whose path is my-dubbogo-app/org.apache.dubbo.quickstart.samples.UserProvider/SayHello and forward it to the corresponding service. The body from the external HTTP request is a json serialized request parameter, such as {&amp;ldquo;name&amp;rdquo;:&amp;ldquo;test&amp;rdquo;}.&lt;/p>
+&lt;p>We currently recommend using Nacos as the registry.&lt;/p>
+&lt;p>Users can deploy our demo in their own clusters. It is better for the cluster to have the ability to expose lb type services, so that the services in the cluster can be accessed from the public network, and you can also make requests directly in the cluster.&lt;/p>
+&lt;p>For your cluster, execute:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f https://raw.githubusercontent.com/dubbogo/triple-pixiu-demo/master/deploy/pixiu-triple-demo.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The following resources will be created under the dubbogo-triple-nacos namespace, including three triple-servers, one pixiu gateway, and one nacos server. And expose the service to the public network through Servcie.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>namespace/dubbogo-triple-nacos created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service/dubbo-go-nacos created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>deployment.apps/dubbogo-nacos-deployment created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>deployment.apps/pixiu created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>deployment.apps/server created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service/pixiu created
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Obtain pixiu public network ip and call it&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>$ kubectl get svc -n dubbogo-triple-nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-nacos ClusterIP 192.168.123.204 &amp;lt;none&amp;gt; 8848/TCP 32s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>pixiu LoadBalancer 192.168.156.175 30.XXX.XXX.XX 8881:30173/TCP 32s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Call the demo service through curl and get the response result.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ curl -X POST -d &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;name&amp;#34;:&amp;#34;laurence&amp;#34;}&amp;#39;&lt;/span> http://30.XXX.XXX.XX:8881/dubbogoDemoServer/org.apache.dubbo.laurence.samples.UserProvider/SayHello
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;Hello Laurence&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;age&amp;#34;&lt;/span>:21&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Use Pixiu to expose Dubbo-go service</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/pixiu-nacos-triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/pixiu-nacos-triple/</guid><description>
+&lt;p>The Dubbo-go-pixiu gateway supports calling GO/Java Dubbo clusters. In the Dubbo-go 3.0 scenario, we can use the Pixiu gateway to request the Pixiu gateway with the HTTP protocol outside the cluster, perform protocol conversion at the gateway layer, and further call the Dubbo-go service in the cluster.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/samples/pixiu-nacos-triple/triple-pixiu.png" alt="img">&lt;/p>
+&lt;p>The path for the user to call the Dubbo-go service is http://$(app_name)/$(service_name)/$(method)&lt;/p>
+&lt;p>For example, a proto file has the following definition:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.quickstart.samples;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> UserProvider {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> SayHello (HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (User) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And configure the application name in dubbogo.yml when the dubbo-go service is started: my-dubbogo-app:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: my-dubbogo-app
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The pixiu gateway can resolve the route whose path is http://my-dubbogo-app/org.apache.dubbo.quickstart.samples.UserProvider/SayHello and forward it to the corresponding service. The body from the external HTTP request is a json serialized request parameter, such as {&amp;ldquo;name&amp;rdquo;:&amp;ldquo;test&amp;rdquo;}.&lt;/p>
+&lt;p>We currently recommend using Nacos as the registry.&lt;/p>
+&lt;p>Users can deploy our demo in their own clusters. It is better for the cluster to have the ability to expose lb type services, so that the services in the cluster can be accessed from the public network, and you can also make requests directly in the cluster. For your cluster, execute:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl apply -f https://raw.githubusercontent.com/dubbogo/triple-pixiu-demo/master/deploy/pixiu-triple-demo.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The following resources will be created under the dubbogo-triple-nacos namespace, including three triple-servers, one pixiu gateway, and one nacos server. And expose the service to the public network through Servcie.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>namespace/dubbogo-triple-nacos created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service/dubbo-go-nacos created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>deployment.apps/dubbogo-nacos-deployment created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>deployment.apps/pixiu created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>deployment.apps/server created
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service/pixiu created
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Obtain pixiu public network ip and call it&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>$ kubectl get svc -n dubbogo-triple-nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo-go-nacos ClusterIP 192.168.123.204 &amp;lt;none&amp;gt; 8848/TCP 32s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>pixiu LoadBalancer 192.168.156.175 30.XXX.XXX.XX 8881:30173/TCP 32s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Call the demo service through curl and get the response result.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ curl -X POST -d &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;name&amp;#34;:&amp;#34;laurence&amp;#34;}&amp;#39;&lt;/span> http://30.XXX.XXX.XX:8881/dubbogoDemoServer/org.apache.dubbo.laurence.samples.UserProvider/SayHello
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;Hello Laurence&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;age&amp;#34;&lt;/span>:21&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

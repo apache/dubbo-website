@@ -1,0 +1,587 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Traffic Governance Rules</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/</link><description>Recent content in Traffic Governance Rules on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Routing Rules</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/routing-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/routing-rule/</guid><description>
+&lt;p>Routing rules play a role in filtering the address of the target server before initiating an RPC call, and the filtered address list will be used as an alternative address for the consumer to finally initiate an RPC call.&lt;/p>
+&lt;ul>
+&lt;li>Conditional routing. Supports configuring routing rules at the granularity of services or consumer applications.&lt;/li>
+&lt;li>Label routing. Configure routing rules at the granularity of Provider applications.&lt;/li>
+&lt;/ul>
+&lt;p>In the future, we plan to continue to enhance the script routing function based on the 2.6.x version.&lt;/p>
+&lt;h2 id="conditional-routing">Conditional Routing&lt;/h2>
+&lt;p>You can write routing rules in the service management console &lt;a href="https://github.com/apache/dubbo-admin">Dubbo-Admin&lt;/a> at any time&lt;/p>
+&lt;h3 id="introduction">Introduction&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>Application granularity&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># The consumer of app1 can only consume all service instances with port 20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># The consumers of app2 can only consume all service instances with port 20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: governance-conditionrouter-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - application=app1 =&amp;gt; address=*:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - application=app2 =&amp;gt; address=*:20881
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Service Granularity&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># The sayHello method of DemoService can only consume all service instances with port 20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># The sayHi method of DemoService can only consume all service instances with port 20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.governance.api.DemoService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=sayHello =&amp;gt; address=*:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=sayHi =&amp;gt; address=*:20881
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h3 id="detailed-rules">Detailed rules&lt;/h3>
+&lt;h4 id="the-meaning-of-each-field">The meaning of each field&lt;/h4>
+&lt;ul>
+&lt;li>&lt;code>scope&lt;/code> indicates the granularity of routing rules, and the value of scope will determine the value of key. &lt;strong>Required&lt;/strong>.
+&lt;ul>
+&lt;li>service service granularity&lt;/li>
+&lt;li>application application granularity&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;code>Key&lt;/code> specifies which service or application the rule body acts on. &lt;strong>Required&lt;/strong>.
+&lt;ul>
+&lt;li>When scope=service, the key value is a combination of [{group}:]{service}[:{version}]&lt;/li>
+&lt;li>When scope=application, the key value is the application name&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;code>enabled=true&lt;/code> Whether the current routing rule is valid, it can be left blank, and it is valid by default.&lt;/li>
+&lt;li>&lt;code>force=false&lt;/code> When the routing result is empty, whether to enforce it, if not enforced, the routing rule with an empty routing result will automatically fail, you can leave it blank, the default is &lt;code>false&lt;/code>.&lt;/li>
+&lt;li>Whether &lt;code>runtime=false&lt;/code> executes the routing rules every time it is called, otherwise it only pre-executes and caches the results when the provider address list changes, and directly obtains the routing results from the cache when calling. If parameter routing is used, it must be set to &lt;code>true&lt;/code>. It should be noted that the setting will affect the performance of the call. It can be left blank. The default is &lt;code>false&lt;/code>.&lt;/li>
+&lt;li>&lt;code>priority=1&lt;/code> is the priority of routing rules, used for sorting, the higher the priority, the higher the execution, it can be left blank, the default is &lt;code>0&lt;/code>.&lt;/li>
+&lt;li>&lt;code>conditions&lt;/code> defines specific routing rule content. &lt;strong>Required&lt;/strong>.&lt;/li>
+&lt;/ul>
+&lt;h4 id="conditions-rule-body">Conditions rule body&lt;/h4>
+&lt;pre>&lt;code>The `conditions` part is the main body of the rule, which consists of 1 to any number of rules. Below we describe the configuration syntax of each rule in detail:
+&lt;/code>&lt;/pre>
+&lt;ol>
+&lt;li>&lt;strong>Format&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Before &lt;code>=&amp;gt;&lt;/code> is the consumer matching condition, all parameters are compared with the consumer’s URL, and when the consumer meets the matching condition, the following filtering rules will be executed for the consumer.&lt;/li>
+&lt;li>After &lt;code>=&amp;gt;&lt;/code>, it is the filter condition of the provider&amp;rsquo;s address list. All parameters are compared with the provider&amp;rsquo;s URL, and consumers only get the filtered address list in the end.&lt;/li>
+&lt;li>If the matching condition is empty, it means to apply to all consumers, such as: &lt;code>=&amp;gt; host != 10.20.153.11&lt;/code>&lt;/li>
+&lt;li>If the filter condition is empty, access is prohibited, such as: &lt;code>host = 10.20.153.10 =&amp;gt;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;ol start="2">
+&lt;li>&lt;strong>Expression&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>Parameter support:&lt;/p>
+&lt;ul>
+&lt;li>Service call information, such as: method, argument, etc., currently does not support parameter routing&lt;/li>
+&lt;li>Fields of the URL itself, such as: protocol, host, port, etc.&lt;/li>
+&lt;li>and all parameters on the URL, such as: application, organization, etc.&lt;/li>
+&lt;/ul>
+&lt;p>Conditional support:&lt;/p>
+&lt;ul>
+&lt;li>The equal sign &lt;code>=&lt;/code> means &amp;ldquo;match&amp;rdquo;, such as: &lt;code>host = 10.20.153.10&lt;/code>&lt;/li>
+&lt;li>The inequality sign &lt;code>!=&lt;/code> means &amp;ldquo;no match&amp;rdquo;, such as: &lt;code>host != 10.20.153.10&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>Value support:&lt;/p>
+&lt;ul>
+&lt;li>Separate multiple values with comma &lt;code>,&lt;/code>, such as: &lt;code>host != 10.20.153.10,10.20.153.11&lt;/code>&lt;/li>
+&lt;li>End with an asterisk &lt;code>*&lt;/code>, which means wildcard, such as: &lt;code>host != 10.20.*&lt;/code>&lt;/li>
+&lt;li>Start with a dollar sign &lt;code>$&lt;/code>, which means to quote consumer parameters, such as: &lt;code>host = $host&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;ol start="3">
+&lt;li>&lt;strong>Condition Example&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>Exclude pre-release machines:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>=&amp;gt; host != 172.22.3.91
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>whitelist:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>register.ip != 10.20.153.10,10.20.153.11 =&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">Attention&lt;/h4>
+A service can only have one whitelist rule, otherwise the two rules will be filtered out
+&lt;/div>
+&lt;ul>
+&lt;li>Blacklist:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>register.ip = 10.20.153.10,10.20.153.11 =&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>The service is hosted on the application, and only a part of the machine is exposed to prevent the entire cluster from hanging:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>=&amp;gt; host = 172.22.3.1*,172.22.3.2*
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Additional machines for important applications:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>application != kylin =&amp;gt; host != 172.22.3.95,172.22.3.96
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Read and write separation:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>method = find*,list*,get*,is* =&amp;gt; host = 172.22.3.94,172.22.3.95,172.22.3.96
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>method != find*,list*,get*,is* =&amp;gt; host = 172.22.3.97,172.22.3.98
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Separation of front and back:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>application = bops =&amp;gt; host = 172.22.3.91,172.22.3.92,172.22.3.93
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>application != bops =&amp;gt; host = 172.22.3.94,172.22.3.95,172.22.3.96
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Isolate network segments in different computer rooms:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>host != 172.22.3.* =&amp;gt; host != 172.22.3.*
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>The provider and consumer are deployed in the same cluster, and the local machine only accesses the local service:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>=&amp;gt; host = $host
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="label-routing-rules">Label Routing Rules&lt;/h2>
+&lt;h3 id="introduction-1">Introduction&lt;/h3>
+&lt;p>Label routing divides one or more service providers into the same group and constrains traffic to flow only in the specified group, so as to achieve the purpose of traffic isolation, which can be used as the capability basis for scenarios such as blue-green release and grayscale release.&lt;/p>
+&lt;h4 id="provider">Provider&lt;/h4>
+&lt;p>Tags mainly refer to the grouping of provider-side application instances. Currently, there are two ways to complete instance grouping, namely &lt;code>dynamic rule marking&lt;/code> and &lt;code>static rule marking&lt;/code>, where dynamic rules have a higher priority than static rules , and when two rules exist at the same time and conflict occurs, the dynamic rule will prevail.&lt;/p>
+&lt;p>-Dynamic rule marking, you can issue label grouping rules in the &lt;strong>Service Governance Console&lt;/strong> at any time&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># The governance-tagrouter-provider application adds two tag groups tag1 and tag2&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># tag1 contains an instance 127.0.0.1:20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># tag2 contains an instance 127.0.0.1:20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">key&lt;/span>: governance-tagrouter-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tags&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: tag2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>static marking&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> tag=&lt;span style="color:#2aa198">&amp;#34;tag1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> tag=&lt;span style="color:#2aa198">&amp;#34;tag1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#2aa198">-jar xxx-provider.jar -Ddubbo.provider.tag={the tag you want, may come from OS ENV}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h4 id="consumer">Consumer&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RpcContext.getContext().setAttachment(Constants.TAG_KEY,&lt;span style="color:#2aa198">&amp;#34;tag1&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The scope of the request tag is each invocation. Use attachment to pass the request tag. Note that the value stored in the attachment will continue to be passed in a complete remote call. Thanks to this feature, we only need to call , through the setting of one line of code, the continuous transmission of tags is achieved.&lt;/p>
+&lt;blockquote>
+&lt;p>Currently only supports hardcoding to set dubboTag. Note that RpcContext is thread-bound and use the TagRouter feature elegantly. It is recommended to set dubboTag through servlet filter (in web environment) or custom SPI filter.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="detailed-rules-1">Detailed rules&lt;/h3>
+&lt;h4 id="format">Format&lt;/h4>
+&lt;ul>
+&lt;li>&lt;code>Key&lt;/code> specifies which application the rule body applies to. &lt;strong>Required&lt;/strong>.&lt;/li>
+&lt;li>&lt;code>enabled=true&lt;/code> Whether the current routing rule is valid, it can be left blank, and it is valid by default.&lt;/li>
+&lt;li>&lt;code>force=false&lt;/code> When the routing result is empty, whether to enforce it, if not enforced, the routing rule with an empty routing result will automatically fail, you can leave it blank, the default is &lt;code>false&lt;/code>.&lt;/li>
+&lt;li>Whether &lt;code>runtime=false&lt;/code> executes the routing rules every time it is called, otherwise it only pre-executes and caches the results when the provider address list changes, and directly obtains the routing results from the cache when calling. If parameter routing is used, it must be set to &lt;code>true&lt;/code>. It should be noted that the setting will affect the performance of the call. It can be left blank. The default is &lt;code>false&lt;/code>.&lt;/li>
+&lt;li>&lt;code>priority=1&lt;/code> is the priority of routing rules, used for sorting, the higher the priority, the higher the execution, it can be left blank, the default is &lt;code>0&lt;/code>.&lt;/li>
+&lt;li>&lt;code>tags&lt;/code> defines specific tag grouping content, can define any n (n&amp;gt;=1) tags and specify an instance list for each tag. &lt;strong>Required&lt;/strong>.
+&lt;ul>
+&lt;li>name, label name&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>addresses, the list of instances contained in the current label&lt;/li>
+&lt;/ul>
+&lt;h4 id="downgrading-conventions">Downgrading Conventions&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>When &lt;code>dubbo.tag=tag1&lt;/code>, the provider marked with &lt;code>tag=tag1&lt;/code> is preferred. If there is no service corresponding to the request tag in the cluster, the provider with an empty request tag will be downgraded by default; if you want to change this default behavior, that is, no provider matching tag1 will return an exception, you need to set &lt;code>dubbo.force.tag= true&lt;/code>.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>When &lt;code>dubbo.tag&lt;/code> is not set, only the provider whose tag is empty will be matched. Even if there is an available service in the cluster, if the tag does not match, it cannot be called. This is different from Convention 1. Requests with tags can be downgraded to untagged services, but requests without tags/with other types of tags can never be accessed to other tabbed services.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">Prompt&lt;/h4>
+Custom routing reference &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/description/router/">routing extension&lt;/a>
+&lt;/div></description></item><item><title>Docs3-V2: Configuration Rules</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/config-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/config-rule/</guid><description>
+&lt;h2 id="override-rules">override rules&lt;/h2>
+&lt;p>Overriding rules is a capability designed by Dubbo to dynamically adjust the behavior of RPC calls without restarting the application. Starting from version 2.7.0, dynamic configuration adjustments are supported at two granularities of &lt;strong>service&lt;/strong> and &lt;strong>application&lt;/strong>.&lt;/p>
+&lt;h3 id="overview">Overview&lt;/h3>
+&lt;p>Please view or modify override rules in the service governance console.&lt;/p>
+&lt;p>&lt;strong>Application Granularity&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Change the weight of all services (scope:application) provided by the application demo (key:demo) on port 20880 (side:provider) to 1000 (weight:1000).&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Service Granularity&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># All consumer (side:consumer) DemoService service (key:org.apache.dubbo.samples.governance.api.DemoService) application instance (addresses:[0.0.0.0]), the timeout is changed to 6000ms&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.governance.api.DemoService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">0.0.0.0&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">6000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="detailed-rules">Detailed Rules&lt;/h2>
+&lt;h3 id="configuration-template">Configuration template&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application/service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: app-name/group+service+version
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">providerAddresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;1.1.1.1:20880&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;2.2.2.2:20881&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cluster&lt;/span>: failfase
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadbalance&lt;/span>: random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;0.0.0.0:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">applications/services&lt;/span>: []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threadpool&lt;/span>: fixed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threads&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">iothreads&lt;/span>: &lt;span style="color:#2aa198">4&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dispatcher&lt;/span>: all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>in:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>configVersion&lt;/code> means dubbo version&lt;/li>
+&lt;li>&lt;code>scope&lt;/code> indicates the scope of configuration, which is the granularity of application or service. &lt;strong>Required&lt;/strong>.&lt;/li>
+&lt;li>&lt;code>key&lt;/code> specifies which service or application the rule body acts on. &lt;strong>Required&lt;/strong>.
+&lt;ul>
+&lt;li>When scope=service, the key value is a combination of [{group}:]{service}[:{version}]&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>When scope=application, the key value is the application name&lt;/li>
+&lt;li>&lt;code>enabled=true&lt;/code> Whether the overriding rule is valid, it can be left blank, and it is valid by default.&lt;/li>
+&lt;li>&lt;code>configs&lt;/code> defines specific coverage rule content, and n (n&amp;gt;=1) rule bodies can be specified. &lt;strong>Required&lt;/strong>.
+&lt;ul>
+&lt;li>side,&lt;/li>
+&lt;li>applications&lt;/li>
+&lt;li>services
+-parameters&lt;/li>
+&lt;li>addresses&lt;/li>
+&lt;li>providerAddresses&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>For most configuration scenarios, you only need to clarify the following questions to know how to write the configuration:&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Whether you want to modify the configuration of the entire application or a service.&lt;/p>
+&lt;ul>
+&lt;li>Application: &lt;code>scope: application, key: app-name&lt;/code> (you can also use &lt;code>services&lt;/code> to specify certain services).&lt;/li>
+&lt;li>Service: &lt;code>scope: service, key:group+service+version&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Whether the modification is applied to the consumer or the provider.&lt;/p>
+&lt;ul>
+&lt;li>Consumer: &lt;code>side: consumer&lt;/code>, when acting on the consumer side (you can further use &lt;code>providerAddress&lt;/code>, &lt;code>applications&lt;/code> to select specific provider examples or applications).&lt;/li>
+&lt;li>Provider: &lt;code>side: provider&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Whether the configuration takes effect only for certain specific instances.&lt;/p>
+&lt;ul>
+&lt;li>All instances: &lt;code>addresses: [&amp;quot;0.0.0.0&amp;quot;]&lt;/code> or &lt;code>addresses: [&amp;quot;0.0.0.0:*&amp;quot;]&lt;/code> depends on the side value.&lt;/li>
+&lt;li>Specified instances: &lt;code>addersses[list of instance addresses]&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Which property is to be modified.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="example">Example&lt;/h3>
+&lt;p>&lt;strong>1. Disable provider: (Usually used to temporarily kick off a provider machine, similarly, please use routing rules to prohibit consumer access)&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">disabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>2. Adjust the weight: (usually used for capacity evaluation, the default weight is 200)&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">addresses&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:20880&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">weight&lt;/span>: &lt;span style="color:#2aa198">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>3. Adjust the load balancing strategy: (the default load balancing strategy is random)&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v2.7
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>- &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadbalance&lt;/span>: random
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>4. Service downgrade: (Usually used to temporarily shield a non-critical service that has an error)&lt;/strong>&lt;/p>
+&lt;pre>&lt;code>```yaml
+&lt;/code>&lt;/pre>
+&lt;hr>
+&lt;p>configVersion: v2.7
+scope: service
+key: org.apache.dubbo.samples.governance.api.DemoService
+enabled: true
+configs:&lt;/p>
+&lt;ul>
+&lt;li>side: consumer
+parameters:
+force: return null
+&amp;hellip;
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: Mesh Routing Rules</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/traffic/mesh-style/</guid><description>
+&lt;h3 id="basic-idea">Basic idea&lt;/h3>
+&lt;p>Based on the routing chain, the Pipeline processing method is adopted, as shown in the following figure:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/route-rule1.png" alt="route-rule1.png">&lt;/p>
+&lt;p>The logic of the routing chain can be simply understood as target = rn(&amp;hellip;r3(r2(r1(src)))). For the internal logic of each router, it can be abstracted as n disjoint address pools addrs-pool-1 &amp;hellip; addrs-pool- n According to the implementation-defined rules, the intersection is taken as the output addrs-out. By analogy, the calculation of the entire routing chain is completed.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/route-rule2.png" alt="route-rule2.png">&lt;/p>
+&lt;p>On the other hand, if router(n) needs to execute fallback logic, then the fallback logic should be determined after router(n)&lt;/p>
+&lt;h3 id="fallback-processing-principle">fallback processing principle&lt;/h3>
+&lt;p>After multiple conditional components between multiple routers, it is easy for the address to be filtered to be empty, so we need to perform fallback processing for this situation to ensure that the business can successfully find a valid address under the premise of correctness.&lt;/p>
+&lt;p>First we look at the following rules&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - demo // Uniformly defined as the application name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">service&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">exact&lt;/span>: com.taobao.hsf.demoService:1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">exact&lt;/span>: com.taobao.hsf.demoService:2.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route details&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: sayHello-String-method-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-method&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name_match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .....
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">argp&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - string
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: sayHello-method-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-method&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name_match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;s-method&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: interface-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">service&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ....
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DestinationRule
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subsets&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">sigma.ali/mg&lt;/span>: v1-host
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">sigma.ali/mg&lt;/span>: v2-host
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sigma.ali/mg:v3-host
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Let&amp;rsquo;s take script routing as an example. The matching conditions of this script routing follow a principle, that is, the matching range is a process from precise to broad. In this example, it is sayHello(string) parameter -&amp;gt; sayHello method -&amp;gt; A matching lookup process for interface-level routing.&lt;/p>
+&lt;p>So if we have met a certain condition, but the selected subset address is empty, how will we perform fallback processing?&lt;/p>
+&lt;p>Take the condition of matching sayHello(string) parameters as an example. We selected the v1 subset. If it is empty, we can go up to the next level to find the address, that is, to find the address at the method level. The specific configuration is as follows&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: sayHello-String-method-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-method&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name_match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .....
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">argp&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - string
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At this time, the address we selected is the v2 method-level address. If v2 still has no address, according to the definition of the rules, we can fallback to the v3 interface level.&lt;/p>
+&lt;p>Suppose we have a method matching, if there is no address, we need to report an error directly without fallback, we can configure it like this&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - demo // Uniformly defined as the application name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">service&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">exact&lt;/span>: com.taobao.hsf.demoService:1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">exact&lt;/span>: com.taobao.hsf.demoService:2.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route details&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: sayHello-String-method-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-method&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name_match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .....
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">argp&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - string
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: sayHello-method-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-method&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name_match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;s-method&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">fallback&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: some-method-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-method&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name_match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;some-method&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v4
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: interface-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">-destination&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subset&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">service&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ....
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DestinationRule
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo-route
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subsets&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">sigma.ali/mg&lt;/span>: v1-host
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">sigma.ali/mg&lt;/span>: v2-host
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: v3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sigma.ali/mg:v3-host
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>From this rule, we can see that when the some-method condition is matched, it corresponds to the v4 subset, then when v4 is empty, because no fallback is configured, an error will be reported directly at this time&lt;/p>
+&lt;h4 id="summary-of-fallback-processing-principles">Summary of fallback processing principles&lt;/h4>
+&lt;ul>
+&lt;li>We should configure the fallback processing logic of Destination in the VirtualService route&lt;/li>
+&lt;li>In fallback subset, if the corresponding subset is also configured with fallback subset, it should also be processed recursively; the relationship between fallback subsets should also be from specific to broad&lt;/li>
+&lt;li>When we write matching conditions, we should follow the principle of moving from specific conditions to broad conditions&lt;/li>
+&lt;/ul>
+&lt;h3 id="assembly-mode-of-routechain-currently-not-implemented">Assembly mode of RouteChain (currently not implemented)&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/route-rule3.png" alt="route-rule3.png">&lt;/p>
+&lt;p>We see the above figure, in the routing process, we are the processing method of Pipeline, the Router nodes of Pipeline exist in order, and each Router has a unique corresponding VirtualService and &lt;strong>multiple&lt;/strong> corresponding DestinationRules for description .&lt;/p>
+&lt;p>Take the routing rule configuration stored on Nacos as an example, the format of the configuration is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">DataId&lt;/span>: Demo.rule.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">GROUP&lt;/span>: HSF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">content&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Virtual Service A
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DestinationRule A1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DestinationRule A2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Virtual Service B
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DestinationRule B
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>VirtualServiceC
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DestinationRule C
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>VirtualService A&lt;/code> and &lt;code>DestinationRule A1&lt;/code>, &lt;code>DestinationRule A2&lt;/code> form a Router A, &lt;code>VirtualService B&lt;/code> and &lt;code>DestinationRule B&lt;/code> form a Router B, and so on to complete the assembly of the entire router chain.&lt;/p></description></item></channel></rss>
