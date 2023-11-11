@@ -23,7 +23,7 @@ content:
 description: Java SDK 手册
 hide_feedback: true
 hide_summary: true
-linkTitle: Java
+linkTitle: Java SDK
 no_list: true
 title: Java SDK 手册
 type: docs
