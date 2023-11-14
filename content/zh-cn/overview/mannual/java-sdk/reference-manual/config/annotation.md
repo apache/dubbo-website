@@ -16,7 +16,7 @@ weight: 3
 
 本文以 Spring Boot + Annotation 模式描述 Dubbo 应用开发，在此查看无 Spring Boot 的 Spring 注解开发模式
 
-> [完整示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
+> [完整示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-annotation)
 
 在 Dubbo Spring Boot 开发中，你只需要增加几个注解，并配置 `application.properties` 或 `application.yml` 文件即可完成 Dubbo 服务定义：
 * 注解有 `@DubboService`、`@DubboReference` 与 `EnableDubbo`。其中 `@DubboService` 与 `@DubboReference` 用于标记 Dubbo 服务，`EnableDubbo` 启动 Dubbo 相关配置并指定 Spring Boot 扫描包路径。

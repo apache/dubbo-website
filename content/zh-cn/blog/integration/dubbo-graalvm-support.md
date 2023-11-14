@@ -139,7 +139,7 @@ Dubbo AOT 做的事情与 Spring AOT 非常类似，只不过 Dubbo AOT 是专�
 
 接下来，我们通过一个 Spring6 + Dubbo3 的示例微服务应用，演示如何使用 Spring AOT、Dubbo AOT 等，来实现应用的 Native Image 打包。
 
-完整的代码示例可在这里下载：[dubbo-samples-native-image](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-native-image)
+完整的代码示例可在这里下载：[dubbo-samples-native-image](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry)
 
 ### 第一步：安装GraalVM
 

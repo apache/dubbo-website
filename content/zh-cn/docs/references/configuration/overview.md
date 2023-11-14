@@ -114,7 +114,7 @@ provider的属性是service属性的默认值，覆盖规则类似上面的consu
 
 #### Spring XML
 
-> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
+> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml)
 
 ```xml
   <!-- dubbo-provier.xml -->
@@ -132,7 +132,7 @@ provider的属性是service属性的默认值，覆盖规则类似上面的consu
 
 #### Spring Annotation
 
-> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
+> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-annotation)
 
 ```java
   // AnnotationService服务实现
