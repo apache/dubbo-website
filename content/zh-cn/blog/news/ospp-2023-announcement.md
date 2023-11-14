@@ -58,7 +58,7 @@ Apache Dubbo 是国内最具影响力的开源软件项目之一，由阿里巴�
 
 1. 扫码关注回复 "Apache Dubbo" 官网微信公众号，回复 “编程之夏” 加入微信沟通群
 
-    ![qrcode_for_gh_a84d4cf4c871_258 (1).jpg](https://intranetproxy.alipay.com/skylark/lark/0/2023/jpeg/54037/1684119089728-eae2eb7d-4098-430e-a69e-a3939265e22b.jpeg#clientId=ub09992a8-5524-4&from=paste&height=129&id=u938740a9&originHeight=258&originWidth=258&originalType=binary&ratio=2&rotation=0&showTitle=false&size=27895&status=done&style=none&taskId=ud0f6af1b-fed8-4a07-aa5a-4e3f3bce229&title=&width=129)
+    ![qrcode_for_gh_a84d4cf4c871_258 (1).jpg](/imgs/blog/news/ospp-2023-announcement/1684119089728-eae2eb7d-4098-430e-a69e-a3939265e22b.jpeg)
 
 2. 钉钉群：22895027434（Dubbo 2023 编程之夏群），搜索并加入咨询问题
 3. 发送邮件到 Apache Dubbo 邮件组：dev@dubbo.apache.org

@@ -93,7 +93,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:valu
 
 #### Spring XML
 
-> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
+> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml)
 
 ```xml
   <!-- dubbo-provier.xml -->
@@ -111,7 +111,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:valu
 
 #### Spring Annotation
 
-> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
+> 参见[示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-annotation)
 
 ```java
   // AnnotationService服务实现

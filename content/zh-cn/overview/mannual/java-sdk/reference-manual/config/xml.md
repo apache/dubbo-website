@@ -17,7 +17,7 @@ weight: 4
 Dubbo 有基于 Spring Schema 扩展的自定义配置组件，使用 XML 能达到的配置能力总体与 [配置参考手册](../properties) 对等。
 
 
-> [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
+> [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml)
 
 ## 服务提供者
 

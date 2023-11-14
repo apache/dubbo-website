@@ -12,7 +12,7 @@ weight: 1
 
 有关 XML 的详细配置项，请参见：[配置参考手册](../../references/xml)。如果不想使用 Spring 配置，而希望通过 API 的方式进行调用，请参见：[API配置](../api)。想知道如何使用配置，请参见：[快速启动](../../quick-start)。
 
-请在此查看文档描述的[完整示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
+请在此查看文档描述的[完整示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml)
 
 ## provider.xml 示例
 
