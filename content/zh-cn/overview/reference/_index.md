@@ -14,16 +14,6 @@ weight: 7
     <div class="lead"></div><header class="article-meta">
     </header><div class="row">
     <div class="col-sm col-md-6 mb-4 mb-md-0">
-        <div class="h-100 card shadow" href="#">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <a  href='{{< relref "./admin" >}}'>Dubbo Admin</a>
-                </h4>
-                <p>Dubbo Admin 使用指南</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm col-md-6 mb-4 mb-md-0">
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">

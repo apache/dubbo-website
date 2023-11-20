@@ -2,6 +2,8 @@
 aliases:
     - /zh/docs3-v2/erlang-sdk/service/
     - /zh-cn/docs3-v2/erlang-sdk/service/
+    - /zh-cn/overview/mannual/erlang-sdk/service/
+    - /zh-cn/overview/reference/erlang-sdk/service/
 description: 在 erlang 中配置服务提供者
 linkTitle: 提供者配置
 title: 提供者配置

@@ -7,7 +7,7 @@ linkTitle: 介绍
 no_list: true
 title: Dubbo 介绍
 type: docs
-weight: 3
+weight: 2
 ---
 
 

@@ -1,32 +1,21 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/quickstart/quickstart_triple/
-    - /zh-cn/docs3-v2/golang-sdk/quickstart/quickstart_triple/
-description: 完成一次 RPC 调用
+    - /zh/overview/quickstart/go/quickstart_triple/
+    - /zh-cn/overview/quickstart/go/quickstart_triple/
+description: 2 - 完成一次 RPC 调用
 title: 完成一次 RPC 调用
 type: docs
-weight: 2
+weight: 3
 ---
 
 ## 1. 生成 Demo 项目
 
 使用安装好的 dubbogo-cli 工具，创建 demo 工程。
 
-创建并切换目录
-
 ```bash
-$ mkdir quickstart && cd quickstart
-```
-
-使用 dubbogo-cli 工具创建新项目
-
-```bash
+$ mkdir quickstart
+$ cd quickstart 
 $ dubbogo-cli newDemo .
-```
-
-查看项目结构
-
-```bash
 $ tree .
 .
 ├── api
@@ -45,6 +34,7 @@ $ tree .
 │       └── dubbogo.yaml
 └── go.mod
 ```
+
 可看到生成的项目中包含一个 client 项目和一个 server 项目，以及相关的配置文件。
 
 ### 1.1 查看接口描述文件 sample_api.proto
@@ -76,11 +66,9 @@ message User {
 }
 ```
 
-demo 项目中，默认生成了一个接口描述文件，接口服务名为 api.Greeter, 包含两个 RPC 方法，入参为 HelloRequest，返回值为 User，两个方法分别为普通 RPC 方法和 Streaming 类型 RPC 方法。
+demo项目中，默认生成了一个接口描述文件，接口服务名为 api.Greeter, 包含两个 RPC 方法，入参为 HelloRequest，返回值为 User，两个方法分别为普通 RPC 方法和 Streaming 类型 RPC 方法。
 
-### 1.2 编译接口 (可选)
-
-使用安装好的编译工具编译 pb 接口。
+### 1.2 (*可选) 使用安装好的编译工具编译 pb 接口
 
 ```bash
 $ cd api
@@ -93,7 +81,7 @@ $ protoc --go_out=. --go-triple_out=. ./samples_api.proto
 
 在 demo 工程中，预先生成好了这两个文件，修改 .proto 文件后重新执行命令生成，即可覆盖。
 
-## 2. 开启一次 RPC 调用
+## 2. 开启一次RPC调用
 
 项目根目录执行
 

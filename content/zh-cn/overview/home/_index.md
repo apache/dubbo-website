@@ -53,6 +53,7 @@ hide_feedback: true
 hide_summary: true
 linkTitle: 主页
 main_menu: true
+toc_hide: true
 menu:
     main:
         name: 文档

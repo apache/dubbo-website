@@ -2,6 +2,8 @@
 aliases:
     - /zh/docs3-v2/erlang-sdk/serialization/
     - /zh-cn/docs3-v2/erlang-sdk/serialization/
+    - /zh-cn/overview/mannual/erlang-sdk/serialization/
+    - /zh-cn/overview/reference/erlang-sdk/serialization/
 description: 在 erlang 中配置序列化方式
 linkTitle: 序列化配置项
 title: 序列化配置项
