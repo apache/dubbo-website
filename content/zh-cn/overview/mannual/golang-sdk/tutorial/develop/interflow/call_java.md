@@ -49,7 +49,7 @@ JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
 
   - Hessian 序列化
 
-  POJO for Go，需参考 [Dubbogo Hessian 序列化支持文档](https://www.yuque.com/docs/share/c698bd6e-e4d6-47db-bc1c-c757cc9b4f3e?)
+  POJO for Go，需参考 [Dubbogo Hessian 序列化支持文档](https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/interflow/call_java/)
 
   ```go
   type User struct {
