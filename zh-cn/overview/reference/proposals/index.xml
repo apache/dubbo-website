@@ -1527,4 +1527,126 @@ exploreRatio=max(MinExploreRatio,exploreRatio-0.02)&lt;/p>
 &lt;p>针对这个问题，Dubbo3 的解法是引入一个内置的 MetadataService 元数据服务，由中心化推送转为 Consumer 到 Provider 的点对点拉取，在这个模式下，元数据传输的数据量将不在是一个问题，因此可以在元数据中扩展出更多的参数、暴露更多的治理数据。&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-workflow.png" alt="app-metadataservice">&lt;/p>
 &lt;p>这里我们个重点看消费端 Consumer 的地址订阅行为，消费端从分两步读取地址数据，首先是从注册中心收到精简后的地址，随后通过调用 MetadataService 元数据服务，读取对端的元数据信息。在收到这两部分数据之后，消费端会完成地址数据的聚合，最终在运行态还原出类似 Dubbo2 的 URL 地址格式。因此从最终结果而言，应用级地址模型同时兼顾了地址传输层面的性能与运行层面的功能性。&lt;/p>
-&lt;p>以上就是的应用级服务发现背景、工作原理部分的所有内容，接下来我们看一下饿了么升级到 Dubbo3 尤其是应用级服务发现的过程。&lt;/p></description></item></channel></rss>
+&lt;p>以上就是的应用级服务发现背景、工作原理部分的所有内容，接下来我们看一下饿了么升级到 Dubbo3 尤其是应用级服务发现的过程。&lt;/p></description></item><item><title>Overview: Triple协议Http标准能力增强-多Content-Type支持</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/support-more-content-types/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/support-more-content-types/</guid><description>
+&lt;h3 id="triple协议http标准能力增强-多content-type支持">&lt;strong>Triple协议Http标准能力增强-多Content-Type支持&lt;/strong>&lt;/h3>
+&lt;blockquote>
+&lt;p>本文主要介绍Triple对更多HTTP标准Content-Type的支持方式，以及服务该如何接收这些请求。&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="概述">&lt;strong>概述&lt;/strong>&lt;/h4>
+&lt;p>Triple目前支持两种序列化方式：Json和protobuf，对应的ContentType：&lt;/p>
+&lt;ul>
+&lt;li>application/json&lt;/li>
+&lt;li>application/grpc+proto&lt;/li>
+&lt;/ul>
+&lt;p>这在消费者和提供者都是后端服务时没有问题。但对于浏览器客户端，其可能发送更多类型的ContentType，需要服务端支持解码，如：&lt;/p>
+&lt;ul>
+&lt;li>multipart/formdata&lt;/li>
+&lt;li>text/plain&lt;/li>
+&lt;li>application/x-www-form-urlencoded&lt;/li>
+&lt;li>application/xml&lt;/li>
+&lt;/ul>
+&lt;p>Rest已基本实现上述解码能力，使Triple实现这些能力是让Triple服务端与浏览器客户端完全互通的重要一步。&lt;/p>
+&lt;h4 id="用法">&lt;strong>用法&lt;/strong>&lt;/h4>
+&lt;h5 id="multipartformdata">&lt;strong>multipart/formdata&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetPojo &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> multipart/form-data; boundary=example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;username&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: text/plain
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LuYue
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userdetail&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;location&amp;#34;:&amp;#34;beijing&amp;#34;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;username&amp;#34;:&amp;#34;LuYue&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userimg&amp;#34;;filename=&amp;#34;user.jpeg&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: image/jpeg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;binary-image data&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary--
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接收：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetPojo&lt;/span>(String username, User user, &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> attachment) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//LuYue&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//user.name=Luyue;user.location=beijing&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//&amp;lt;binary-image data&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#719e07">new&lt;/span> String(attachment, StandardCharsets.UTF_8));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>每一个 part 根据其 Content-Type 解码&lt;/li>
+&lt;li>若方法参数是 byte[] 或 Byte[]，对应字段不会解码&lt;/li>
+&lt;li>响应使用 application/json 编码&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationx-www-form-urlencoded">application/x-www-form-urlencoded&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetUrlForm &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/x-www-form-urlencoded
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 33
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello=World&amp;amp;Apache=Dubbo&amp;amp;id=10086
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>两种接收方式：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(String hello,String apache,&lt;span style="color:#dc322f">long&lt;/span> id){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>hello);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>apache);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String,Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> params){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>params.get(&lt;span style="color:#2aa198">&amp;#34;Hello&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>params.get(&lt;span style="color:#2aa198">&amp;#34;Apache&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>params.get(&lt;span style="color:#2aa198">&amp;#34;Id&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>若参数为Map，则解码为Map&amp;lt;String,String&amp;gt;传入&lt;/li>
+&lt;li>若参数均为String或数值类型，按照参数列表逐个解码传入&lt;/li>
+&lt;li>响应使用 application/json 编码&lt;/li>
+&lt;/ul>
+&lt;h5 id="textplain">text/plain&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetString &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> text/plain; charset=UTF-8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>World!
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接收：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(String world){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span> world);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>charset支持ASCII、UTF-8、UTF-16等，默认UTF-8&lt;/li>
+&lt;li>响应使用 application/json 编码&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationxml">application/xml&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetXml &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 86
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34; standalone=&amp;#34;yes&amp;#34;?&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;User&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;username&amp;gt;&lt;/span>JohnDoe&lt;span style="color:#268bd2">&amp;lt;/username&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;location&amp;gt;&lt;/span>New York&lt;span style="color:#268bd2">&amp;lt;/location&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/User&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接收：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetXml&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getUsername());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getLocation());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received xml.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>该实现与Rest的XMLCodec相同&lt;/li>
+&lt;li>响应使用 application/xml 编码&lt;/li>
+&lt;/ul></description></item></channel></rss>
