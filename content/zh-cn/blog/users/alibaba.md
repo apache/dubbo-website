@@ -10,7 +10,7 @@ weight: 1
 ## 1 阿里电商
 ![image.png](/imgs/blog/users/tmall.png) ![image.png](/imgs/blog/users/taobao.png) ![image.png](/imgs/blog/users/kaola.png) ......
 
-整个电商体系的所有核心应用，包括交易相关、导购相关都都升级到了 Dubbo3 体系，用来替换原有的 HSF 框架，阿里电商是对 Dubbo3 实践最广泛、需求最强烈的体系，基于 Dubbo3 实现了以下关键目标。
+整个电商体系的所有核心应用，包括交易相关、导购相关都都升级到了 Dubbo3 体系，用来升级原有的 HSF 框架，阿里电商是对 Dubbo3 实践最广泛、需求最强烈的体系，基于 Dubbo3 实现了以下关键目标。
 2022 618大促、双11 大促期间 超 2000+ 应用、40w 节点均跑在 Dubbo3 之上。
 
 - 应用级服务发现，解决了大促期间地址推送降级的问题，部分关键链路提升单机资源利用率 40%，大促期间地址推送SLA保障、资源利用率。
