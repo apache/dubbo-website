@@ -338,4 +338,133 @@ Execute from another host or container&lt;/li>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>telnet 30.5.97.6 &lt;span style="color:#2aa198">20881&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ls
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invoke org.apache.dubbo.test.docker.DemoService.hello&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Logging Framework Configuration and Usage</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-howto/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-howto/</guid><description>
+&lt;h2 id="feature-description">Feature Description&lt;/h2>
+&lt;p>Prior to dubbo 3.3.0-beta.3, dubbo and dubbo-samples were using a mix of log4j and logback, leading to frequent conflicts and errors due to some modules lacking log configuration. Therefore, after 3.3.0-beta.3, the logging components have been upgraded to log4j2 for simplicity and reduced maintenance costs. This document explains how to configure and use the logging framework to avoid conflicts caused by indirectly introducing multiple logging frameworks.&lt;/p>
+&lt;h2 id="how-to-use">How To Use&lt;/h2>
+&lt;h3 id="usage-conventions">Usage Conventions&lt;/h3>
+&lt;ul>
+&lt;li>Please use log4j2 as the logging framework, and avoid using log4j and logback. Except for some legacy scenarios, using a single logging framework can reduce usage cost and prevent conflicts.&lt;/li>
+&lt;li>Avoid passing logging framework dependencies upstream, which can be resolved by setting scope to &lt;code>test&lt;/code> or &lt;code>provider&lt;/code> in maven, or by setting &lt;code>&amp;lt;optional&amp;gt;true&amp;lt;/optional&amp;gt;&lt;/code>. As a service framework, dubbo should ideally avoid passing non-essential dependencies and leave the choice of logging framework to the user.&lt;/li>
+&lt;/ul>
+&lt;h3 id="usage-scenarios">Usage Scenarios&lt;/h3>
+&lt;h4 id="1-general-dubbo-module">1. General dubbo Module&lt;/h4>
+&lt;p>Most modules are of this type, generally requiring logging frameworks for unit testing.&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Include Maven dependency, note if parent has already included it, then there&amp;rsquo;s no need to add it again:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>test&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Add log4j2 logging configuration &lt;code>src/test/resources/log4j2-test.xml&lt;/code>, the reason for using this name is to ensure the highest priority.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%d{HH:mm:ss.SSS} |-%highlight{%-5p} [%t] %40.40c:%-3L -| %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect,org.junit,org.mockito)}&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="2-non-spring-boot-demo-module">2. Non spring-boot Demo Module&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>Include Maven dependency, note if parent has already included it, then there&amp;rsquo;s no need to add it again&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Add log4j2 logging configuration &lt;code>src/test/resources/log4j2-test.xml&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%style{%d{HH:mm:ss.SSS}}{Magenta} %style{|-}{White}%highlight{%-5p} [%t] %style{%40.40c}{Cyan}:%style{%-3L}{Blue} %style{-|}{White} %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect)}&amp;#34;&lt;/span> disableAnsi=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="3-spring-boot-demo-module">3. Spring-boot Demo Module&lt;/h4>
+&lt;p>Spring-boot supports introducing log4j2 dependencies via a starter, but note that spring-boot defaults to using logback, so it needs to be excluded in &lt;code>&amp;lt;dependencyManagement&amp;gt;&lt;/code>&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Exclude spring-boot-starter-logging&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-dependencies&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>import&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-logging&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Include Maven dependency:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-log4j2&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Add log4j2 logging configuration &lt;code>src/main/resources/log4j2.xml&lt;/code>&lt;/p>
+&lt;p>Optional, as spring-boot comes with a default logging configuration.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="4-spring-boot-native-demo-module">4. Spring-boot native Demo Module&lt;/h4>
+&lt;p>Since log4j2 does not yet support native, use logback as the logging framework. No changes are necessary, retain the existing approach and ensure not to indirectly introduce log4j or slf4j-log4j12.&lt;/p>
+&lt;h2 id="common-logging-framework-issues">Common Logging Framework Issues&lt;/h2>
+&lt;h4 id="1-missing-logging-framework">1. Missing Logging Framework&lt;/h4>
+&lt;p>Console output:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: No SLF4J providers were found.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Defaulting to no-operation (NOP) logger implementation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See SLF4J Error Codes for further details.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Solution: Add log4j2 dependency&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-logging-framework-conflict">2. Logging Framework Conflict&lt;/h4>
+&lt;p>Console output:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: Class path contains multiple SLF4J bindings.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../slf4j-log4j12-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../logback-classic-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../log4j-slf4j-impl-2.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Exception in thread &amp;#34;main&amp;#34; java.lang.IllegalArgumentException: LoggerFactory is not a Logback LoggerContext but Logback is on the classpath
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Solution: Exclude all dependencies except for log4j-slf4j-impl. It&amp;rsquo;s highly recommended to use &lt;a href="https://plugins.jetbrains.com/plugin/7179-maven-helper">Maven Helper - IntelliJ IDEs Plugin&lt;/a> for dependency analysis and exclusion.&lt;/p>
+&lt;h4 id="3-other-issues">3. Other Issues&lt;/h4>
+&lt;p>Refer to: &lt;a href="https://www.slf4j.org/codes.html">SLF4J Error Codes&lt;/a>&lt;/p></description></item></channel></rss>
