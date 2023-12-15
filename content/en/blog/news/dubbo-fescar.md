@@ -227,10 +227,10 @@ sh seata-server.sh -p 8091 -h 127.0.0.1 -m file
 
 ### Step 5: Run example
 
-- Start AccountService ([DubboAccountServiceStarter](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java)).
-- Start StockService ([DubboStorageServiceStarter](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java)).
-- Start OrderService  ([DubboOrderServiceStarter](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java)).
-- Run BusinessService for test ([DubboBusinessTester](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java)).
+- Start AccountService ([DubboAccountServiceStarter](https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java)).
+- Start StockService ([DubboStorageServiceStarter](https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java)).
+- Start OrderService  ([DubboOrderServiceStarter](https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java)).
+- Run BusinessService for test ([DubboBusinessTester](https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java)).
 
 ### Related projects
 * Seata:          https://github.com/seata/seata
