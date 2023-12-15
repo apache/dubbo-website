@@ -2,6 +2,7 @@
 title: "RPC 协议安全"
 linkTitle: "RPC 协议安全"
 weight: 2
+type: docs
 description: "在 Dubbo 中更安全的使用 RPC 协议"
 ---
 

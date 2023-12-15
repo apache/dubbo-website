@@ -3,6 +3,7 @@ title: "RPC Protocol Security"
 linkTitle: "RPC protocol security"
 weight: 2
 description: "Use RPC protocol more securely in Dubbo"
+type: docs
 ---
 
 Dubbo supports the extension of the RPC protocol. In theory, users can enable any RPC protocol based on this extension mechanism. This brings great flexibility, but at the same time, users must be aware of the hidden security risks.

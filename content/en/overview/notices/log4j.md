@@ -5,6 +5,7 @@ description: "Log4j CVE-2021-44228 vulnerability impact"
 aliases:
 - /zh-cn/blog/1/01/01/Security Vulnerability/
 weight: 90
+type: docs
 ---
 
 Recently, the mainstream logging component [log4j2](https://logging.apache.org/log4j/2.x/) broke out [security vulnerability CVE-2021-44228](https://cve.mitre.org/cgi- bin/cvename.cgi?name=CVE-2021-44228).

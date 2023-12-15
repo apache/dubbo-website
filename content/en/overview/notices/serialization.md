@@ -5,6 +5,7 @@ weight: 1
 aliases:
   - /zh-cn/blog/1/01/01/Serialization Protocol Security/
 description: "Use serialization protocol more safely in Dubbo"
+type: docs
 ---
 
 # Overview

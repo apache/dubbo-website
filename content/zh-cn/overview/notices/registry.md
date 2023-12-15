@@ -2,6 +2,7 @@
 title: "注册中心安全"
 linkTitle: "注册中心安全"
 weight: 3
+type: docs
 description: "在 Dubbo 中更安全的使用注册中心"
 ---
 

@@ -2,6 +2,7 @@
 title: "序列化安全"
 linkTitle: "序列化安全"
 weight: 1
+type: docs
 aliases:
   - /zh-cn/blog/1/01/01/序列化协议安全/
 description: "在 Dubbo 中更安全的使用序列化协议"

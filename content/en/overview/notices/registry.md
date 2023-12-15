@@ -3,6 +3,7 @@ title: "Registration Center Security"
 linkTitle: "Registration Center Security"
 weight: 3
 description: "Use the registration center more safely in Dubbo"
+type: docs
 ---
 
 Dubbo supports the extension of the registration center. In theory, users can enable any registration center based on this extension mechanism. This brings great flexibility, but at the same time, users must be aware of the hidden security risks.

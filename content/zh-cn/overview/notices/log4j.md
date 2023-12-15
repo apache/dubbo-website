@@ -6,6 +6,7 @@ description: "Log4j CVE-2021-44228 漏洞影响"
 aliases:
 - /zh-cn/blog/1/01/01/安全漏洞/
 weight: 90
+type: docs
 ---
 
 最近，主流日志组件 [log4j2](https://logging.apache.org/log4j/2.x/) 爆出[安全漏洞 CVE-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228)。
