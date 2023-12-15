@@ -8,7 +8,7 @@ weight: 90
 type: docs
 ---
 
-Recently, the mainstream logging component [log4j2](https://logging.apache.org/log4j/2.x/) broke out [security vulnerability CVE-2021-44228](https://cve.mitre.org/cgi- bin/cvename.cgi?name=CVE-2021-44228).
+Recently, the mainstream logging component [log4j2](https://logging.apache.org/log4j/2.x/) broke out [security vulnerability CVE-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228).
 
 The following is a summary of the impact of vulnerability CVE-2021-44228 on the Apache Dubbo framework and user response guidelines.
 
