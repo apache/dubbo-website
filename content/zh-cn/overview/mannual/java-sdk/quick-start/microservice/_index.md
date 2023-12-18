@@ -1,10 +1,7 @@
 ---
-aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/
-description: Dubbo 配置指南
-linkTitle: Spring Boot
-title: Spring Boot
+description: 讲解如何基于 Spring Boot 开发 Dubbo 开发微服务应用，同时快速部署 Dubbo 应用。
+linkTitle: 开发微服务应用
+title: 如何使用 Dubbo 开发微服务应用
 type: docs
 weight: 10
 ---

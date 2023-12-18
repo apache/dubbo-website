@@ -18,7 +18,7 @@ weight: 100
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href='{{< relref "../../../../../docs/" >}}'>Early 3.0 Version</a>
+                    <a target="_blank" href='{{< relref "../../../../../../docs/" >}}'>Early 3.0 Version</a>
                 </h4>
                 <p>早期 3.0 版本文档</p>
             </div>
@@ -28,7 +28,7 @@ weight: 100
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a target="_blank" href='{{< relref "../../../../../docsv2.7/" >}}'>2.7.x Version</a>
+                    <a target="_blank" href='{{< relref "../../../../../../docsv2.7/" >}}'>2.7.x Version</a>
                 </h4>
                 <p>2.7.x 版本文档</p>
             </div>

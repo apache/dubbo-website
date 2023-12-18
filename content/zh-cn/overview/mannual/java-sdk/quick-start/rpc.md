@@ -1,14 +1,13 @@
-springboot---
+---
 description: 使用轻量的 Java SDK 开发 RPC Server 和 Client
-linkTitle: Java
+linkTitle: RPC Server与Client
 title: 使用轻量的 Java SDK 开发 RPC Server 和 Client
 type: docs
 weight: 1
 ---
+本示例演示如何使用轻量 Dubbo SDK 开发 RPC Server 与 Client，示例使用 Java Interface 方式定义、发布和访问 RPC 服务，底层使用 Triple 协议通信。本示例完整代码请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>。
 
 基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Java SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
-
-本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Java Interface 方式定义、发布和访问 RPC 服务。本示例完整代码请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>。
 
 ## Maven 依赖
 
@@ -105,11 +104,6 @@ public class Application {
 
 ## 更多内容
 
-- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)
-- 查看 [更多 API 使用示例](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)
-- 您可以继续使用 API 为应用添加更多微服务治理能力，但我们更推进您使用 [Dubbo Spring Boot 开发微服务应用](../../microservice/develop/)
-
-
-
-
-
+- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)，或者 [使用其他通信协议]()
+- 作为 RPC 框架，Dubbo 支持异步调用、连接管理、context上下文等，请参考 [RPC 框架核心功能]()
+- 您可以继续 [使用 API 为应用添加更多微服务治理能力]()，但我们更推进您使用 [Dubbo Spring Boot 开发微服务应用](../../microservice/develop/)
