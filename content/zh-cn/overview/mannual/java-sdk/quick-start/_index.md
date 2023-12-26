@@ -10,5 +10,5 @@ description: ""
 linkTitle: 快速入门
 title: 快速入门
 type: docs
-weight: 1
+weight: 2
 ---

@@ -14,7 +14,7 @@ type: docs
 weight: 2
 ---
 
-
+部署文档中增加 Linux、全托管、半托管等部署架构说明，以沿着这几种模式展开
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

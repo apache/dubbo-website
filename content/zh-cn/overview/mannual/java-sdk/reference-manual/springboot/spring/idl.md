@@ -1,24 +1,23 @@
 ---
-description: "使用 Dubbo 开发 Triple 协议通信服务"
-linkTitle: Triple 协议
-title: 使用 Dubbo 开发 Triple 协议通信服务
+aliases:
+    - /zh/docs3-v2/java-sdk/quick-start/idl/
+    - /zh-cn/docs3-v2/java-sdk/quick-start/idl/
+description: 从零演示如何基于 IDL 方式来定义 Dubbo 服务并使用 Triple 协议
+linkTitle: 基于 IDL 定义跨语言服务
+title: 基于 IDL 定义跨语言服务
 type: docs
-weight: 1
+weight: 11
 ---
 
-本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 Triple 协议服务。示例采用 Java 语言编写，其他语言的 Triple 协议方式请参考上一篇多语言部分文档，更多详细说明可参考多语言sdk。
+使用 IDL 定义服务具有更好的跨语言友好性，对于 Dubbo3 新用户而言，我们推荐使用这种方式。可在此查看[本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-triple-unary)。
 
-* Dubbo Java 之前 (3.3.0) 的各个发行版本均默认使用 `dubbo` 通信协议（基于 TCP 的高性能私有协议），考虑到对过往版本的兼容性，老用户请参考文档了解[如何实现协议的平滑迁移](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/migration)。对于没有历史包袱的新用户，建议在一开始就通过配置开启 `triple` 协议。
-* 更多 Triple 协议使用请参见
-  * [流式通信 Streaming RPCs](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/streaming)
-  * [实现与标准 gRPC 协议互调](../grpc)
-  * [基于 Java Interface 的开发模式(无 IDL 模式)](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/pojo)
-  * [如何在其他语言和浏览器上使用 Triple 协议](/zh-cn/overview/tasks/rpc/develop/web/)
+然而 Triple 协议并不是和 IDL 强绑定的，也可以[使用 Java Interface + Pojo 的方式定义服务](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/pojo/)并启用 Triple 协议。
 
+## 前置条件
+- [JDK](https://jdk.java.net/) 版本 >= 8
+- 已安装 [Maven](https://maven.apache.org/)
 
 ## 运行示例
-可在此查看[本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-triple-unary)。
-
 首先可通过以下命令下载示例源码
 ```shell
 git clone https://github.com/apache/dubbo-samples.git
@@ -26,13 +25,14 @@ git clone https://github.com/apache/dubbo-samples.git
 
 编译项目，由 IDL 生成代码
 ```shell
-cd dubbo-samples/1-basic/dubbo-samples-triple-unary
+cd dubbo-samples
 mvn clean compile
 ```
 
 ### 启动 Server
-运行以下命令启动 server。
+进入示例目录并运行以下命令启动 server。
 ```shell
+cd 1-basic/dubbo-samples-triple-unary
 mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryServer"
 ```
 
@@ -174,21 +174,6 @@ service Greeter{
 ### 代码生成
 执行 `mvn clean compile` 后，生成代码如下
 
-```text
-└── org
-    └── apache
-        └── dubbo
-            └── samples
-                └── tri
-                    └── unary
-                        ├── DubboGreeterTriple.java
-                        ├── Greeter.java
-                        ├── GreeterOuterClass.java
-                        ├── GreeterReply.java
-                        ├── GreeterReplyOrBuilder.java
-                        ├── GreeterRequest.java
-                        └── GreeterRequestOrBuilder.java
-```
 
 ### 服务实现
 继承生成的基础类 `DubboGreeterTriple.GreeterImplBase`，以下具体的业务逻辑实现。
@@ -205,7 +190,7 @@ public class GreeterImpl extends DubboGreeterTriple.GreeterImplBase {
 }
 ```
 
-注册服务到 server，其中 protocol 设置为 tri 代表开启 triple 协议。
+注册服务到 server
 
 ```java
 public class TriUnaryServer {
@@ -256,6 +241,3 @@ public class TriUnaryClient {
     }
 }
 ```
-
-
-
