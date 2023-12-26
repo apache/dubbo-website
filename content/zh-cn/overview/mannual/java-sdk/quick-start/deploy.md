@@ -20,12 +20,11 @@ Dubbo 社区提供了工具和解决方案来简化整个 Kubernetes 环境的�
 
 1. 安装 dubboctl（如尚未安装）
     ```sh
-    curl -L https://dubbo.apache.org/downloadDubbo.sh | sh -
+    curl -L https://dubbo-next.staged.apache.org/release/downloadDubbo.sh | sh -
 
     cd dubbo-$version
     export PATH=$PWD/bin:$PATH
     ```
-
 
 
 ## 部署应用
