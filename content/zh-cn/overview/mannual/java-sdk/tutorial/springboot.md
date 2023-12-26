@@ -6,15 +6,17 @@ type: docs
 weight: 1
 ---
 
-Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供的 `dubbo-spring-boot-starter` 高效开发 Dubbo 微服务应用。
+Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供的丰富的 `dubbo-spring-boot-starter` 高效开发 Dubbo 微服务应用。
 
 ## 创建 Spring Boot 项目
-创建 Dubbo 应用最快捷的方式就是使用官方项目脚手架工具 - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务。它可以帮助开发者创建 Spring Boot 结构应用，通过加入 `dubbo-spring-boot-starter` 依赖为应用引入 Dubbo 特性 (包括必要的默认配置)。
+创建 Dubbo 应用最快捷的方式就是使用官方项目脚手架工具 - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务。它可以帮助开发者创建 Spring Boot 结构应用，自动管理 `dubbo-spring-boot-starter` 等依赖和必要配置。
 
 另外，Jetbrain 官方也提供了 Apache Dubbo 项目插件，可用于快速创建 Dubbo Spring Boot 项目，能力与 start.dubbo.apache.org 对等，具体安装使用请查看 [博客文章](zh-cn/blog/2023/10/23/intellij-idea%EF%B8%8Fapache-dubboidea官方插件正式发布/)
 
 ## dubbo-spring-boot-starter
 在 [快速开始](/zh-cn/overview/mannual/java-sdk/quick-start/) 中，我们已经详细介绍了典型的 Dubbo Spring Boot 工程源码及其项目结构，不熟悉的开发者可以前往查看。
+
+`dubbo-spring-boot-starter` 可为项目引入 dubbo 核心依赖，自动扫描 dubbo 相关配置与注解。
 
 ### Maven 依赖
 
@@ -23,67 +25,51 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
 ```xml
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!-- Dubbo -->
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-bom</artifactId>
-                <version>${dubbo.version}</version>
+                <version>3.3.0-beta.1</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <!-- Zookeeper -->
-            <!-- NOTICE: Dubbo only provides dependency management module for Zookeeper, add Nacos or other product dependency directly if you want to use them. -->
-            <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo-dependencies-zookeeper</artifactId>
-                <version>${dubbo.version}</version>
-                <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
 ```
 
-然后在相应的模块的 pom 中增加
+然后在相应的模块的 pom 中增加必要的 starter 依赖：
 ```xml
     <dependencies>
-        <!-- dubbo -->
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-dependencies-zookeeper</artifactId>
-            <type>pom</type>
-        </dependency>
-
-        <!-- dubbo starter -->
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-spring-boot-starter</artifactId>
         </dependency>
-
-        <!-- spring starter -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-zookeeper-spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
 ```
 
+以下是 Dubbo 官方提供的 starter 列表
+* `dubbo-spring-boot-starter`，管理 dubbo 核心依赖，同时用于识别 application.properties 或 application.yml 中 `dubbo.` 开头的配置项，扫描 @DubboService 等注解。
+* `dubbo-nacos-spring-boot-starter`，管理 nacos-client 等依赖，使用 Nacos 作为注册中心、配置中心时引入。
+* `dubbo-zookeeper-spring-boot-starter`，管理 zookeeper、curator 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入（Zookeeper server 3.4 及以下版本使用）。
+* `dubbo-zookeeper-curator5-spring-boot-starter`，管理 zookeeper、curator5 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入。
+* `dubbo-sentinel-spring-boot-starter`，管理 sentinel 等依赖，使用 Sentinel 进行限流降级时引入。
+* `dubbo-seata-spring-boot-starter`，管理 seata 等依赖，使用 Seata 作为分布式事务解决方案时引入。
+* `dubbo-observability-spring-boot-starter`，加入该依赖将自动开启 Dubbo 内置的 metrics 采集，可用于后续的 Prometheus、Grafana 等监控系统。
+* `dubbo-tracing-brave-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 Brave/Zipkin 作为 Tracer，将 Trace 信息 export 到 Zipkin
+* `dubbo-tracing-otel-otlp-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 Brave/Zipkin 作为 Tracer，将 Trace 信息 export 到 Zipkin
+* `dubbo-tracing-otel-zipkin-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 Brave/Zipkin 作为 Tracer，将 Trace 信息 export 到 Zipkin
+
+{{% alert title="注意" color="info" %}}
+* 关于每个 starter 适配的第三方组件版本，请查看 [组件版本映射表]()。
+* 每个 starter 都有对应的 application.yml 配置，请到具体功能模块了解具体配置项与使用方法，我们对每个 starter 都有提供的使用示例。
+{{% /alert %}}
+
 ### application.yml 配置文件
+[参考手册 - 完整的配置项列表]()
+
 除 service、reference 之外的组件都可以在 application.yml 文件中设置，如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
 
 service、reference 组件也可以通过 `id` 与 application 中的全局组件做关联，以下面配置为例：
@@ -213,19 +199,6 @@ dubbo.reference.org.apache.dubbo.springboot.demo.DemoService.timeout=6000
 ```
 
 > properties 格式配置目前结构性不太强，比如体现在 key 字段冗余较多，后续会考虑提供对于 yaml 格式的支持。
-
-
-### 更多 spring-boot-starter
-
-* dubbo-nacos-spring-boot-starter
-* dubbo-zookeeper-spring-boot-starter
-* dubbo-zookeeper-curator5-spring-boot-starter
-* dubbo-sentinel-spring-boot-starter
-* dubbo-seata-spring-boot-starter
-* dubbo-observability-spring-boot-starter
-* dubbo-tracing-brave-spring-boot-starter
-* dubbo-tracing-otel-otlp-spring-boot-starter
-* dubbo-tracing-otel-zipkin-spring-boot-starter
 
 ## 更多微服务开发模式
 * 纯 API 开发模式

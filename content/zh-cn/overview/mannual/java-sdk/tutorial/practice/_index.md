@@ -1,7 +1,0 @@
----
-description: ""
-linkTitle: Kubernetes 最佳实践
-title: 最佳实践
-type: docs
-weight: 8
----

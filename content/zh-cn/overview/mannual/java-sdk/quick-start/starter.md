@@ -62,12 +62,12 @@ $ cd dubbo-samples/11-quickstart
         </dependency>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-spring-boot-zookeeper-starter</artifactId>
+            <artifactId>dubbo-zookeeper-spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
 ```
 
-其中，`dubbo-spring-boot-starter`、`dubbo-spring-boot-zookeeper-starter` 分别为我们引入了 Dubbo 内核框架与 Zookeeper 客户端相关的依赖组件。
+其中，`dubbo-spring-boot-starter`、`dubbo-zookeeper-spring-boot-starter` 分别为我们引入了 Dubbo 内核框架与 Zookeeper 客户端相关的依赖组件，更多内容可以查看 [Dubbo 支持的 Spring Boot Starter 清单]() 。
 
 ### 服务定义
 
