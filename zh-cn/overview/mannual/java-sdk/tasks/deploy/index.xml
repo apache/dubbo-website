@@ -512,4 +512,74 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>创建服务&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>kubectl create -f consumer.yaml
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看服务
-&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/consumer-provider.jpg" alt="img">&lt;/p></description></item></channel></rss>
+&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/deploy/consumer-provider.jpg" alt="img">&lt;/p></description></item><item><title>Overview: Dubbo 部署 Docker 环境</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/deploy/docker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/deploy/docker/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>一些部署场景需要动态地指定服务注册地址。例如，docker bridge网络模式需要为外部网络通信指定一个注册主机IP。Dubbo在启动阶段提供了两对系统属性，用于设置外部通信的IP和端口地址。&lt;/p>
+&lt;ul>
+&lt;li>DUBBO_IP_TO_REGISTRY &amp;mdash; 注册到注册中心的IP地址&lt;/li>
+&lt;li>DUBBO_PORT_TO_REGISTRY &amp;mdash; 注册到注册中心的端口&lt;/li>
+&lt;li>DUBBO_IP_TO_BIND &amp;mdash; 侦听IP地址&lt;/li>
+&lt;li>DUBBO_PORT_TO_BIND &amp;mdash; 侦听端口&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;ol>
+&lt;li>以上四个配置是可选的。如果没有配置，Dubbo会自动获得IP和端口。请根据部署情况，灵活选择。&lt;/li>
+&lt;li>Dubbo支持多协议. &lt;strong>如果一个应用程序同时暴露了多个不同的协议服务，并且需要为每个服务分别指定IP或端口。请在上述属性前分别添加协议前缀。&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>HESSIAN_DUBBO_PORT_TO_BIND hessian 协议绑定端口&lt;/li>
+&lt;li>DUBBO_DUBBO_PORT_TO_BIND   dubbo 协议绑定端口&lt;/li>
+&lt;li>HESSIAN_DUBBO_IP_TO_REGISTRY hessian 协议注册的IP&lt;/li>
+&lt;li>DUBBO_DUBBO_IP_TO_REGISTRY     dubbo 协议注册的IP&lt;/li>
+&lt;/ul>
+&lt;ol start="3">
+&lt;li>&lt;code>PORT_TO_REGISTRY&lt;/code>或&lt;code>IP_TO_REGISTRY&lt;/code>不会被用作默认的&lt;code>PORT_TO_BIND&lt;/code>或&lt;code>IP_TO_BIND&lt;/code>，但相反的是 true。&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>如果设置&lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>，那么 &lt;code>PORT_TO_BIND&lt;/code> &lt;code>IP_TO_BIND&lt;/code>不会受到影响。&lt;/li>
+&lt;li>如果设置&lt;code>PORT_TO_BIND=20881&lt;/code> &lt;code>IP_TO_BIND=30.5.97.6&lt;/code>，那么 &lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code> 默认情况下。&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>提供隔离的环境，从而确保在开发和部署过程中服务不会受到彼此的影响,对于微服务的开发和部署有很大帮助。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo-docker-sample&lt;/a> 本地操作过程：&lt;/p>
+&lt;ol>
+&lt;li>克隆项目到本地&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>git clone git@github.com:dubbo/dubbo-docker-sample.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>包本地的maven&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>mvn clean install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>通过docker build建立一个镜像&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-docker-sample .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>构建镜像&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD target/dubbo-docker-sample-0.0.1-SNAPSHOT.jar app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENV &lt;span style="color:#268bd2">JAVA_OPTS&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT &lt;span style="color:#b58900">exec&lt;/span> java &lt;span style="color:#268bd2">$JAVA_OPTS&lt;/span> -jar /app.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>从镜像中创建和运行容器&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 由于我们使用zk注册中心，我们先启动zk容器&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --name zkserver --restart always -d zookeeper:3.4.9
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker run -e &lt;span style="color:#268bd2">DUBBO_IP_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>30.5.97.6 -e &lt;span style="color:#268bd2">DUBBO_PORT_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span> -p 30.5.97.6:20881:20880 --link zkserver:zkserver -it --rm dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>假设主机IP是 30.5.97.6.
+通过环境变量设置提供商注册的IP地址和注册中心的端口 &lt;code>DUBBO_IP_TO_REGISTRY=30.5.97.6&lt;/code> &lt;code>DUBBO_PORT_TO_REGISTRY=20881&lt;/code>  
+通过以下方式实现端口映射&lt;code>-p 30.5.97.6:20881:20880&lt;/code>, 其中20880是由dubbo自动选择的监听端口。没有监控IP的配置，所以它将监听0.0.0.0（所有IP）。
+启动后，提供者的注册地址是30.5.97.6:20881，而容器的监听地址是：0.0.0.0:20880。  &lt;/p>
+&lt;/blockquote>
+&lt;ol start="6">
+&lt;li>测试从另一个主机或容器中执行&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>telnet 30.5.97.6 &lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invoke org.apache.dubbo.test.docker.DemoService.hello&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

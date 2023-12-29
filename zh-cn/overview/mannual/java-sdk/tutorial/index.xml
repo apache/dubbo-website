@@ -729,6 +729,16 @@
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="一致性哈希配置">一致性哈希配置&lt;/h3>
+&lt;p>默认采用第一个参数作为哈希 key，如果需要切换参数，可以指定 &lt;code>hash.arguments&lt;/code> 属性&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span> referenceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// ... init&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> parameters &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>parameters.put(&lt;span style="color:#2aa198">&amp;#34;hash.arguments&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>parameters.put(&lt;span style="color:#2aa198">&amp;#34;sayHello.hash.arguments&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;0,1&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.setParameters(parameters);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.setLoadBalance(&lt;span style="color:#2aa198">&amp;#34;consistenthash&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.get();
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 基于条件的流量路由</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tutorial/route/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tutorial/route/</guid><description>
 &lt;p>路由是 Dubbo 中的核心流量管控机制， 我们可以基于它实现金丝雀发布、按比例流量转发、同区域优先、全链路灰度等流量策略。Dubbo 中路由（Router）机制的设计与基本原理，内置的几种路由规则&lt;/p>
 &lt;h2 id="常用流量管控场景">常用流量管控场景&lt;/h2>
@@ -851,7 +861,87 @@
 &lt;h3 id="servlet">Servlet&lt;/h3>
 &lt;h3 id="kubernetes">Kubernetes&lt;/h3>
 &lt;h2 id="优雅上线">优雅上线&lt;/h2>
-&lt;h3 id="heading">&lt;/h3></description></item><item><title>Overview: 最佳实践</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tutorial/kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tutorial/kubernetes/</guid><description>
+&lt;h3 id="heading">&lt;/h3>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>优雅停机是指服务实例能安全平稳的停止，对进行中的业务不产生影响。
+一个Dubbo服务可能既作为服务提供者，又是服务消费者，当服务停止时：&lt;/p>
+&lt;ol>
+&lt;li>消费者不会再请求已停止的服务实例&lt;/li>
+&lt;li>该服务实例正在处理的请求能正常处理完成&lt;/li>
+&lt;/ol>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;ol>
+&lt;li>通过 &lt;code>kill PID&lt;/code> 停止服务&lt;/li>
+&lt;li>通过 SpringBoot Actuator 的 &lt;code>/shutdown&lt;/code> 停止服务&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>Dubbo 3.0 及以上版本支持不同类型的Java应用，包括 SpringBoot 应用、 Spring 应用、非 Spring 应用。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>设置优雅停机超时时间，缺省超时时间是 10 秒，如果超时则强制关闭。
+该参数可在 dubbo.properties 文件里配置，例如：配置为 30 秒。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 停止服务等待时间，单位：毫秒&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.service.shutdown.wait&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">30000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意事项&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用户使用 &lt;code>kill -9 PID&lt;/code> 等强制关闭指令，是不会执行优雅停机的，只有通过 &lt;code>kill PID&lt;/code> 时，才会执行。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>验证是否执行了 Dubbo 的 ShutdownHook 可在日志文件中查找关键字：&lt;code>Run shutdown hook now.&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果使用了 Spring，请升级 4.2 及以上版本，建议使用 5 以上版本&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果使用了 SpringBoot，Dubbo 的 ShutdownHook 会在 SpringBoot 的 ShutdownHook 之前执行，
+如果使用 SpringBoot 2.3及以上版本，建议配合 SpringBoot 的优雅停机使用，在配置文件 applicaion.yml 中配置：&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">server&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown&lt;/span>: graceful
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>如果 ShutdownHook 不能生效，可根据具体场景自行调用：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ApplicationModel.defaultModel().destroy();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div>
+&lt;h1 id="特性说明-1">特性说明&lt;/h1>
+&lt;p>Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会抛出异常，阻止 Spring 初始化完成，以便上线时，能及早发现问题，默认 &lt;code>check=&amp;quot;true&amp;quot;&lt;/code>。&lt;/p>
+&lt;p>可以通过 &lt;code>check=&amp;quot;false&amp;quot;&lt;/code> 关闭检查，比如，测试时，有些服务不关心，或者出现了循环依赖，必须有一方先启动。&lt;/p>
+&lt;p>另外，如果你的 Spring 容器是懒加载的，或者通过 API 编程延迟引用服务，请关闭 check，否则服务临时不可用时，会抛出异常，拿到 null 引用，如果 &lt;code>check=&amp;quot;false&amp;quot;&lt;/code>，总是会返回引用，当服务恢复时，能自动连上。&lt;/p>
+&lt;h2 id="使用场景-1">使用场景&lt;/h2>
+&lt;ul>
+&lt;li>单向依赖：有依赖关系（建议默认设置）和无依赖关系（可以设置 check=false）&lt;/li>
+&lt;li>相互依赖：即循环依赖，(不建议设置 check=false)&lt;/li>
+&lt;li>延迟加载处理&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>check 只用来启动时检查，运行时没有相应的依赖仍然会报错。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用方式-1">使用方式&lt;/h2>
+&lt;p>&lt;strong>配置含义&lt;/strong>&lt;/p>
+&lt;p>&lt;code>dubbo.reference.com.foo.BarService.check&lt;/code>，覆盖 &lt;code>com.foo.BarService&lt;/code>的 reference 的 check 值，就算配置中有声明，也会被覆盖。&lt;/p>
+&lt;p>&lt;code>dubbo.consumer.check=false&lt;/code>，是设置 reference 的 &lt;code>check&lt;/code> 的缺省值，如果配置中有显式的声明，如：&lt;code>&amp;lt;dubbo:reference check=&amp;quot;true&amp;quot;/&amp;gt;&lt;/code>，不会受影响。&lt;/p>
+&lt;p>&lt;code>dubbo.registry.check=false&lt;/code>，前面两个都是指订阅成功，但提供者列表是否为空是否报错，如果注册订阅失败时，也允许启动，需使用此选项，将在后台定时重试。&lt;/p>
+&lt;h3 id="通过-spring-配置文件">通过 spring 配置文件&lt;/h3>
+&lt;p>关闭某个服务的启动时检查&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>关闭所有服务的启动时检查&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>关闭注册中心启动时检查&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="通过-dubboproperties">通过 dubbo.properties&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.reference.com.foo.BarService.check&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.check&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.check&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="通过--d-参数">通过 -D 参数&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java -Ddubbo.reference.com.foo.BarService.check&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>java -Ddubbo.consumer.check&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>java -Ddubbo.registry.check&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 最佳实践</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tutorial/kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tutorial/kubernetes/</guid><description>
 &lt;h2 id="部署架构">部署架构&lt;/h2>
 &lt;h3 id="半托管">半托管&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>dubboctl install --profile=demo
@@ -870,4 +960,52 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="优雅上下线">优雅上下线&lt;/h2>
 &lt;p>配置 probe
 配置 pre-stop&lt;/p>
-&lt;h2 id="观测服务状态">观测服务状态&lt;/h2></description></item></channel></rss>
+&lt;h2 id="观测服务状态">观测服务状态&lt;/h2>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>&lt;a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/">Pod 的生命周期&lt;/a> 与服务调度息息相关，通过对 Kubernetes 官方探针的实现，能够使 Dubbo3 乃至整个应用的生命周期与 Pod 的生命周期，在 Pod 的整个生命周期中，影响到 Pod 的就只有健康检查这一部分, 我们可以通过配置 liveness probe（存活探针）和 readiness probe（可读性探针）来影响容器的生命周期。&lt;/p>
+&lt;p>通过 Dubbo3 的 SPI 机制，在内部实现多种“探针”，基于 Dubbo3 QOS 运维模块的 HTTP 服务，使容器探针能够获取到应用内对应探针的状态。另外，SPI 的实现机制也利于用户自行拓展内部“探针”，使整个应用的生命周期更有效的进行管控。&lt;/p>
+&lt;p>&lt;strong>三种探针对应的 SPI 接口&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>livenessProbe: &lt;code>org.apache.dubbo.qos.probe.LivenessProbe&lt;/code>&lt;/li>
+&lt;li>readinessProbe: &lt;code>org.apache.dubbo.qos.probe.ReadinessProbe&lt;/code>&lt;/li>
+&lt;li>startupProbe: &lt;code>org.apache.dubbo.qos.probe.StartupProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>接口将自动获取当前应用所有 SPI 的实现，对应接口的 SPI 实现均成功就绪则接口返回成功。&lt;/p>
+&lt;p>Dubbo3 SPI 更多扩展的介绍见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/">Dubbo SPI扩展&lt;/a>&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>&lt;code>liveness probe&lt;/code> 来确定你的应用程序是否正在运行，查看是否存活。&lt;/p>
+&lt;p>&lt;code>readiness probe&lt;/code> 来确定容器是否已经就绪可以接收流量过来,是否准备就绪,是否可以开始工作。&lt;/p>
+&lt;p>&lt;code>startup probe&lt;/code> 来确定容器内的应用程序是否已启动，如果提供了启动探测则禁用所有其他探测，直到它成功为止，如果启动探测失败则杀死容器，容器将服从其重启策略。如果容器没有提供启动探测，则默认状态为成功。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="存活检测">存活检测&lt;/h3>
+&lt;p>对于 livenessProbe 存活检测，由于 Dubbo3 框架本身无法获取到应用的存活状态，因此本接口无默认实现，且默认返回成功。开发者可以根据 SPI 定义对此 SPI 接口进行拓展，从应用层次对是否存活进行判断。&lt;/p>
+&lt;p>关于 &lt;a href="../../../reference-manual/spi/description/liveness/">liveness 存活探针&lt;/a> 扩展示例&lt;/p>
+&lt;h3 id="就绪检测">就绪检测&lt;/h3>
+&lt;p>对于 readinessProbe 就绪检测，目前 Dubbo3 默认提供了两个检测维度，一是对 Dubbo3 服务自身是否启停做判断，另外是对所有服务是否存在已注册接口，如果所有服务均已从注册中心下线（可以通过 QOS 运维进行操作）将返回未就绪的状态。&lt;/p>
+&lt;p>关于 &lt;a href="../../../reference-manual/spi/description/readiness/">readiness 就绪探针&lt;/a> 扩展示例&lt;/p>
+&lt;h3 id="启动检测">启动检测&lt;/h3>
+&lt;p>对于 startupProbe 启动检测，目前 Dubbo3 默认提供了一个检测维度，即是在所有启动流程（接口暴露、注册中心写入等）均结束后返回已就绪状态。&lt;/p>
+&lt;p>关于 &lt;a href="../../../reference-manual/spi/description/startup/">startup 启动探针&lt;/a> 扩展示例&lt;/p>
+&lt;h3 id="参考示例">参考示例&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">livenessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /live
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">readinessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /ready
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">startupProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /startup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">failureThreshold&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>QOS 当计算节点检测到内存压力时，kuberentes 会 BestEffort -&amp;gt; Burstable -&amp;gt; Guaranteed 依次驱逐 Pod。&lt;/p>
+&lt;/blockquote>
+&lt;p>目前三种探针均有对应的接口，路径为 QOS 中的命令，端口信息请根据 QOS 配置进行对应修改（默认端口为 22222）。其他参数请参考 &lt;a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes官方文档说明&lt;/a>。&lt;/p></description></item></channel></rss>

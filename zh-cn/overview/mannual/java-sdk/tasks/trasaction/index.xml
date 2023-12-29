@@ -1,0 +1,335 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 分布式事务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/trasaction/</link><description>Recent content in 分布式事务 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/trasaction/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 分布式事务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/trasaction/transaction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/trasaction/transaction/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>分布式事务提供对补偿事务的支持，能够在事务失败时回滚事务的影响，支持全局事务超时，能够指定事务完成的超时时间，对日志提供支持，能够查看分布式应用程序中所有服务中发生的事务的历史记录，能够轻松地调试和排除事务。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;ul>
+&lt;li>电商：当客户在线购买商品时，提供分布式交易。可以确保订单和付款在不同的数据库和服务中保持同步，有助于防止付款丢失和订单错误。&lt;/li>
+&lt;li>银行：当客户在账户之间转账时，提供分布式交易。可以确保资金正确转移，所有数据库和服务保持同步。&lt;/li>
+&lt;li>医疗保健：用于在患者接受医疗治疗时提供分布式事务。可以确保医疗记录、账单信息和患者信息在多个系统中保持同步。&lt;/li>
+&lt;li>供应链管理：当材料从一个地点运送到另一个地点时，提供分布式事务。可以确保库存水平、订单和装运信息在多个系统中保持同步。&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="第一步">&lt;strong>第一步&lt;/strong>&lt;/h3>
+&lt;p>首先访问: &lt;a href="https://seata.io/zh-cn/blog/download.html">https://seata.io/zh-cn/blog/download.html&lt;/a>&lt;/p>
+&lt;p>下载我们需要使用的 seata1.5.2 服务&lt;/p>
+&lt;h3 id="第二步">&lt;strong>第二步&lt;/strong>&lt;/h3>
+&lt;p>1.在你的参与全局事务的数据库中加入 undo_log 这张表(TCC,SAGA,XA 可跳过这步)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">-- for AT mode you must to init this sql for you business database. the seata server not need it.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>undo_log&lt;span style="color:#719e07">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">BIGINT&lt;/span>(&lt;span style="color:#2aa198">20&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;branch transaction id&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">100&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;global transaction id&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>context&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">128&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;undo_log context,such as serialization&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>rollback_info&lt;span style="color:#719e07">`&lt;/span> LONGBLOB &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;rollback info&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>log_status&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">INT&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;0:normal status,1:defense status&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>log_created&lt;span style="color:#719e07">`&lt;/span> DATETIME(&lt;span style="color:#2aa198">6&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;create datetime&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>log_modified&lt;span style="color:#719e07">`&lt;/span> DATETIME(&lt;span style="color:#2aa198">6&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#2aa198">&amp;#39;modify datetime&amp;#39;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">UNIQUE&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> &lt;span style="color:#719e07">`&lt;/span>ux_undo_log&lt;span style="color:#719e07">`&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span>, &lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE &lt;span style="color:#719e07">=&lt;/span> InnoDB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AUTO_INCREMENT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET &lt;span style="color:#719e07">=&lt;/span> utf8 &lt;span style="color:#719e07">COMMENT&lt;/span> &lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#39;AT transaction mode undo table&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>2.在你的 mysql 数据库中创建名为 seata 的库,并使用以下下 sql&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">-- -------------------------------- The script used when storeMode is &amp;#39;db&amp;#39; --------------------------------
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">-- the table to store GlobalSession data
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>global_table&lt;span style="color:#719e07">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">128&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>transaction_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">BIGINT&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>status&lt;span style="color:#719e07">`&lt;/span> TINYINT &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>application_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">32&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>transaction_service_group&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">32&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>transaction_name&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">128&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>timeout&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">INT&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>begin_time&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">BIGINT&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>application_data&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">2000&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>gmt_create&lt;span style="color:#719e07">`&lt;/span> DATETIME,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>gmt_modified&lt;span style="color:#719e07">`&lt;/span> DATETIME,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">KEY&lt;/span> &lt;span style="color:#719e07">`&lt;/span>idx_gmt_modified_status&lt;span style="color:#719e07">`&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>gmt_modified&lt;span style="color:#719e07">`&lt;/span>, &lt;span style="color:#719e07">`&lt;/span>status&lt;span style="color:#719e07">`&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">KEY&lt;/span> &lt;span style="color:#719e07">`&lt;/span>idx_transaction_id&lt;span style="color:#719e07">`&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>transaction_id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE &lt;span style="color:#719e07">=&lt;/span> InnoDB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET &lt;span style="color:#719e07">=&lt;/span> utf8;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">-- the table to store BranchSession data
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>branch_table&lt;span style="color:#719e07">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">BIGINT&lt;/span> &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">128&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>transaction_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">BIGINT&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>resource_group_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">32&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>resource_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">256&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>branch_type&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">8&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>status&lt;span style="color:#719e07">`&lt;/span> TINYINT,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>client_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">64&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>application_data&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">2000&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>gmt_create&lt;span style="color:#719e07">`&lt;/span> DATETIME(&lt;span style="color:#2aa198">6&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>gmt_modified&lt;span style="color:#719e07">`&lt;/span> DATETIME(&lt;span style="color:#2aa198">6&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">KEY&lt;/span> &lt;span style="color:#719e07">`&lt;/span>idx_xid&lt;span style="color:#719e07">`&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE &lt;span style="color:#719e07">=&lt;/span> InnoDB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET &lt;span style="color:#719e07">=&lt;/span> utf8;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">-- the table to store lock data
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>lock_table&lt;span style="color:#719e07">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>row_key&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">128&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">96&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>transaction_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">BIGINT&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">BIGINT&lt;/span> &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>resource_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">256&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>&lt;span style="color:#719e07">table_name&lt;/span>&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">32&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>pk&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">VARCHAR&lt;/span>(&lt;span style="color:#2aa198">36&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>gmt_create&lt;span style="color:#719e07">`&lt;/span> DATETIME,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>gmt_modified&lt;span style="color:#719e07">`&lt;/span> DATETIME,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>row_key&lt;span style="color:#719e07">`&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">KEY&lt;/span> &lt;span style="color:#719e07">`&lt;/span>idx_branch_id&lt;span style="color:#719e07">`&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE &lt;span style="color:#719e07">=&lt;/span> InnoDB
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET &lt;span style="color:#719e07">=&lt;/span> utf8;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第三步">&lt;strong>第三步&lt;/strong>&lt;/h3>
+&lt;p>在你的项目中引入 seata 依赖&lt;/p>
+&lt;p>spring-boot 应用:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;io.seata&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;seata-spring-boot-starter&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;1.5.2&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>spring 应用:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;groupId&amp;gt;io.seata&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;artifactId&amp;gt;seata-all&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;version&amp;gt;1.5.2&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第四步">&lt;strong>第四步&lt;/strong>&lt;/h3>
+&lt;p>spring-boot 应用:&lt;/p>
+&lt;p>参考 &lt;a href="https://github.com/seata/seata/tree/develop/script/client/spring">seata/script/client/spring at develop · seata/seata (github.com)&lt;/a>&lt;/p>
+&lt;p>加到你项目的 application.yml中.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">seata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application-id&lt;/span>: applicationName
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tx-service-group&lt;/span>: my_test_tx_group
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enable-auto-data-source-proxy&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span> &lt;span style="color:#586e75">#仅AT与XA模式需要为true,开启后会自动代理数据源&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">data-source-proxy-mode&lt;/span>: AT &lt;span style="color:#586e75">#可选AT&amp;amp;XA&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#namespace: 如果配置创建在非默认namespace,请在此处填写namespace的id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serverAddr&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: SEATA_GROUP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">data-id&lt;/span>: seata.properties
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>: seata-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">server-addr&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: SEATA_GROUP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#namespace: 如果配置创建在非默认namespace,请在此处填写namespace的id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>spring 应用:&lt;/p>
+&lt;p>添加 &lt;a href="https://github.com/seata/seata/tree/develop/script/client/conf">seata/script/client/conf at develop · seata/seata (github.com)&lt;/a> 下 registry.conf,由于高可用部署使用第三方配置中心,故无需 file.conf&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>registry {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> # file 、nacos 、eureka、redis、zk、consul、etcd3、sofa、custom
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type = &amp;#34;nacos&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> nacos {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application = &amp;#34;seata-server&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serverAddr = &amp;#34;127.0.0.1:8848&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> group = &amp;#34;SEATA_GROUP&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> namespace = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> username = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> password = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ##if use MSE Nacos with auth, mutex with username/password attribute
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #accessKey = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #secretKey = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ##if use Nacos naming meta-data for SLB service registry, specify nacos address pattern rules here
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #slbPattern = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> # file、nacos 、apollo、zk、consul、etcd3、springCloudConfig、custom
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type = &amp;#34;nacos&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> nacos {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serverAddr = &amp;#34;127.0.0.1:8848&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> namespace = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> group = &amp;#34;SEATA_GROUP&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> username = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> password = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ##if use MSE Nacos with auth, mutex with username/password attribute
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #accessKey = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> #secretKey = &amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dataId = &amp;#34;seata.properties&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第五步">&lt;strong>第五步&lt;/strong>&lt;/h3>
+&lt;p>运行你下载的 nacos,并参考 &lt;a href="https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fseata%2Fseata%2Ftree%2Fdevelop%2Fscript%2Fconfig-center">https://github.com/seata/seata/tree/develop/script/config-center&lt;/a> 的 config.txt 并修改&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">#仅client使用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">#事务分组叫my_test_tx_group对应的seata-server集群为default&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service.vgroupMapping.my_test_tx_group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">default&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">#以下仅server使用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.mode&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">db&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.datasource&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">druid&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.dbType&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">mysql&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.driverClassName&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">com.mysql.jdbc.Driver&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.url&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.user&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">username&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.password&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">password&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.minConn&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.maxConn&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.globalTable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">global_table&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.branchTable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">branch_table&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.queryLimit&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">100&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.lockTable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">lock_table&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>store.db.maxWait&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">5000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打开 nacos 控制台,在对应的 namespace 下创建 dataId 为 seata.properties 的配置,并填写 group 为 SEATA_GROUP,并将以上内容填入选择类型为 properties 保存
+&lt;img src="https://dubbo.apache.org/imgs/blog/Dingtalk_20220724021635.jpg" alt="Dingtalk_20220724021635.jpg.png" style="zoom:50%;" />&lt;/p>
+&lt;h3 id="第六步">&lt;strong>第六步&lt;/strong>&lt;/h3>
+&lt;p>更改 server 中的 application.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">server&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">7091&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spring&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: seata-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">logging&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>: classpath:logback-spring.xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">file&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: ${user.home}/logs/seata
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">console&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">user&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: seata
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: seata
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">seata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># support: nacos, consul, apollo, zk, etcd3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">server-addr&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#namespace: 如果配置创建在非默认namespace,请在此处填写namespace的id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: SEATA_GROUP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">##if use MSE Nacos with auth, mutex with username/password attribute&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#access-key: &amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#secret-key: &amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">data-id&lt;/span>: seata.properties
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># support: nacos, eureka, redis, zk, consul, etcd3, sofa&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>: seata-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">server-addr&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: SEATA_GROUP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cluster&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#namespace: 如果配置创建在非默认namespace,请在此处填写namespace的id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">##if use MSE Nacos with auth, mutex with username/password attribute&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#access-key: &amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">#secret-key: &amp;#34;&amp;#34; &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># server:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># service-port: 8091 #If not configured, the default is &amp;#39;${server.port} + 1000&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">security&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">secretKey&lt;/span>: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tokenValidityInMilliseconds&lt;/span>: &lt;span style="color:#2aa198">1800000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ignore&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">urls&lt;/span>: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第七步">&lt;strong>第七步&lt;/strong>&lt;/h3>
+&lt;p>在全局事务调用者(发起全局事务的服务)的接口上加入 @GlobalTransactional 示例如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@GetMapping&lt;/span>(value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;testCommit&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@GlobalTransactional&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">testCommit&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>,defaultValue &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>) Integer id,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestParam&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;sum&amp;#34;&lt;/span>, defaultValue &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>) Integer sum) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Boolean ok &lt;span style="color:#719e07">=&lt;/span> productService.reduceStock(id, sum);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (ok) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LocalDateTime now &lt;span style="color:#719e07">=&lt;/span> LocalDateTime.now();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Orders orders &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Orders();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> orders.setCreateTime(now);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> orders.setProductId(id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> orders.setReplaceTime(now);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> orders.setSum(sum);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> orderService.save(orders);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;ok&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;fail&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>spring 应用在使用 AT 或 XA 模式下需手动代理数据源选择事务模式和初始化事务扫描器&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Primary&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Bean&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;dataSource&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> DataSource &lt;span style="color:#268bd2">dataSource&lt;/span>(DataSource druidDataSource) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//AT 代理 二选一&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> DataSourceProxy(druidDataSource);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//XA 代理&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> DataSourceProxyXA(druidDataSource)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> GlobalTransactionScanner &lt;span style="color:#268bd2">globalTransactionScanner&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> GlobalTransactionScanner(&lt;span style="color:#2aa198">&amp;#34;应用名&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;my_test_tx_group&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果使用 tcc 模式,需要额外在对应的 provider 的 serviceimpl 中定义两阶段的 try 和 confirm(commit) cancel(rollback)&lt;/p>
+&lt;p>spring-boot 应用需关闭数据源代理&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">seata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enable-auto-data-source-proxy&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 定义两阶段提交 name = 该tcc的bean名称,全局唯一 commitMethod = commit 为二阶段确认方法 rollbackMethod = rollback 为二阶段取消方法
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * useTCCFence=true 为开启防悬挂
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * BusinessActionContextParameter注解 传递参数到二阶段中
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param params -入参
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return String
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@TwoPhaseBusinessAction&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;beanName&amp;#34;&lt;/span>, commitMethod &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;commit&amp;#34;&lt;/span>, rollbackMethod &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rollback&amp;#34;&lt;/span>, useTCCFence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">insert&lt;/span>(&lt;span style="color:#268bd2">@BusinessActionContextParameter&lt;/span>(paramName &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;params&amp;#34;&lt;/span>) Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.info(&lt;span style="color:#2aa198">&amp;#34;此处可以预留资源,或者利用tcc的特点,与AT混用,二阶段时利用一阶段在此处存放的消息,通过二阶段发出,比如redis,mq等操作&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 确认方法、可以另命名，但要保证与commitMethod一致 context可以传递try方法的参数
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param context 上下文
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return boolean
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">commit&lt;/span>(BusinessActionContext context) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.info(&lt;span style="color:#2aa198">&amp;#34;预留资源真正处理,或者发出mq消息和redis入库&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 二阶段取消方法
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param context 上下文
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return boolean
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">rollback&lt;/span>(BusinessActionContext context) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.info(&lt;span style="color:#2aa198">&amp;#34;预留资源释放,或清除一阶段准备让二阶段提交时发出的消息缓存&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>linux/macos&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> bin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sh seata-server.sh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>windows&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> bin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./seata-server.bat
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行 seata-server,成功后,运行自己的服务 dubbo provider&amp;amp;consumer&lt;/p>
+&lt;h3 id="第八步高可用-seata-server-搭建">&lt;strong>第八步高可用 Seata-server 搭建&lt;/strong>&lt;/h3>
+&lt;p>由于 seata-server 支持计算与存储分离模式,并支持暴露服务地址至多种注册中心,仅需按照第六步配置完毕后水平扩展即可&lt;/p>
+&lt;blockquote>
+&lt;p>详情请访问: &lt;a href="https://seata.io/">seata官网&lt;/a>&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: 分布式事务支持</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/trasaction/distributed-transaction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/trasaction/distributed-transaction/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>分布式事务基于 JTA/XA 规范实现。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>支付交易：支付交易中的分布式交易支持，如在线支付、银行转账等，确保在完成多个服务调用后支付成功。&lt;/p>
+&lt;p>库存管理：支持库存管理中的分布式事务场景，确保用户购买产品时，库存得到相应更新成功和交易成功。&lt;/p>
+&lt;p>订单处理：支持订单处理中的分布式事务场景，确保当用户下订单时，在完成多个服务调用后成功下订单。&lt;/p>
+&lt;p>数据同步：支持数据同步中的分布式事务场景，确保在完成多个服务调用后，不同服务之间的数据同步成功。&lt;/p>
+&lt;h2 id="实现方式">实现方式&lt;/h2>
+&lt;p>&lt;strong>两阶段提交&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/jta-xa.jpg" alt="/user-guide/images/jta-xa.jpg">&lt;/p>
+&lt;blockquote>
+&lt;p>在 Dubbo 中，可以采用 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/">seata&lt;/a> 来完成对分布式事务的支持。&lt;/p>
+&lt;/blockquote></description></item></channel></rss>
