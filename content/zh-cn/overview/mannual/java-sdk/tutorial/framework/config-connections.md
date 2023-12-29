@@ -1,7 +1,12 @@
 ---
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/stickiness/
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/lazy-connect/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/stickiness/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/lazy-connect/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/config-connections/
 description: Dubbo 中服务端和客户端的连接控制
 linkTitle: 连接控制
 title: 连接控制
@@ -55,3 +60,44 @@ weight: 29
 
 [^1]: 因为连接在 Server上，所以配置在 Provider 上
 [^2]: 如果是长连接，比如 Dubbo 协议，connections 表示该服务对每个提供者建立的长连接数
+
+
+
+
+## 功能说明
+允许消费者在提供者接收请求之前向提供者发送请求，消费者等待提供者准备就绪，然后将发送消费者者的请求，当消费者需要连接到提供者，提供者尚未准备好接受请求时，确保在正确的时间发送请求，防止消费者被速度慢或不可用的提供程序阻止。
+
+## 使用场景
+粘滞连接用于有状态服务，尽可能让客户端总是向同一提供者发起调用，除非该提供者挂了，再连另一台。
+
+粘滞连接将自动开启 [延迟连接](../lazy-connect)，以减少长连接数。
+
+## 使用方式
+```xml
+<dubbo:reference id="xxxService" interface="com.xxx.XxxService" sticky="true" />
+```
+
+Dubbo 支持方法级别的粘滞连接，如果你想进行更细粒度的控制，还可以这样配置。
+
+```xml
+<dubbo:reference id="xxxService" interface="com.xxx.XxxService">
+    <dubbo:method name="sayHello" sticky="true" />
+</dubbo:reference>
+```
+
+
+
+
+
+## 功能说明
+当消费者请求服务时，实际使用服务时才建立真正的连接，避免不必要的连接来减少延迟并提高系统稳定性。
+
+## 使用场景
+延迟连接用于减少长连接数。当有调用发起时，再创建长连接。
+
+## 使用方式
+```xml
+<dubbo:protocol name="dubbo" lazy="true" />
+```
+
+> 该配置只对使用长连接的 dubbo 协议生效。
