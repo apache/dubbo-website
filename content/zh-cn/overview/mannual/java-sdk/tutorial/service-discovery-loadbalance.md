@@ -2,6 +2,8 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/consistent-hash/
 description: Dubbo 提供的集群负载均衡策略
 linkTitle: 服务发现与负载均衡
 title: 服务发现与负载均衡
@@ -147,4 +149,19 @@ Dubbo 框架支持为单个服务、服务的单个方法指定独立的负载�
 <dubbo:reference interface="...">
     <dubbo:method name="..." loadbalance="roundrobin"/>
 </dubbo:reference>
+```
+
+### 一致性哈希配置
+
+默认采用第一个参数作为哈希 key，如果需要切换参数，可以指定 `hash.arguments` 属性
+
+```java
+ReferenceConfig<DemoService> referenceConfig = new ReferenceConfig<DemoService>();
+// ... init
+Map<String, String> parameters = new HashMap<String, String>();
+parameters.put("hash.arguments", "1");
+parameters.put("sayHello.hash.arguments", "0,1");
+referenceConfig.setParameters(parameters);
+referenceConfig.setLoadBalance("consistenthash");
+referenceConfig.get();
 ```

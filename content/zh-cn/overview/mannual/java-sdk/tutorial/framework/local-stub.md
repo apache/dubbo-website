@@ -40,7 +40,7 @@ weight: 11
 ```java
 package com.foo;
 public class BarServiceStub implements BarService {
-    private final BarService barService;
+    private final BarSer    vice barService;
     
     // 构造函数传入真正的远程代理对象
     public BarServiceStub(BarService barService){
