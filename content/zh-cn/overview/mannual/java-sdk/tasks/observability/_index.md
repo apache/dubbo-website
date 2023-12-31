@@ -7,7 +7,7 @@ linkTitle: 观测服务
 no_list: true
 title: 观测服务
 type: docs
-weight: 5
+weight: 4
 ---
 
 

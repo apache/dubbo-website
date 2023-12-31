@@ -7,5 +7,5 @@ description: 概念和架构
 linkTitle: 源码架构
 title: 源码架构
 type: docs
-weight: 2
+weight: 100
 ---

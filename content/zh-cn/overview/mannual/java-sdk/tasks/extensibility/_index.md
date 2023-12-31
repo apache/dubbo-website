@@ -7,7 +7,7 @@ linkTitle: 自定义扩展
 no_list: true
 title: 自定义扩展
 type: docs
-weight: 7
+weight: 6
 ---
 
 

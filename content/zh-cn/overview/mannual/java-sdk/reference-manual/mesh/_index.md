@@ -6,5 +6,6 @@ description: Dubbo Mesh 使用指南
 linkTitle: Mesh手册
 title: Mesh手册
 type: docs
-weight: 7
+weight: 98
+toc_hide: true
 ---
