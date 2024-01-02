@@ -12,7 +12,7 @@ description: Dubbo-go 3.0 应用级服务发现
 
 参考文章[**《Dubbo 迈出云原生重要一步 应用级服务发现解析》**](https://baijiahao.baidu.com/s?id=1669266413887039723&wfr=spider&for=pc)
 
-参考仓库：[dubbo-go-samples/registry/serivcediscovery](https://github.com/apache/dubbo-go-samples/tree/master/registry/servicediscovery)
+参考仓库：[dubbo-go-samples/registry/serivcediscovery](https://github.com/apache/dubbo-go-samples/tree/45a0d843b54e4922c240900e63516176cc7da4f6/registry/servicediscovery)
 
 ## 配置方案
 

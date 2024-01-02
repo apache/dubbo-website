@@ -42,7 +42,7 @@ dubbo:
     owner: zhaoyunxing
     organization: dubbo-go 
     metadata-type: local # 元数据上报方式，默认为本地
-  metadata-report: # 元数据上报配置, 不包含此字段则不开启元数据上报，应用级服务发现依赖此字段，参考例子：https://github.com/apache/dubbo-go-samples/tree/master/registry/servicediscovery
+  metadata-report: # 元数据上报配置, 不包含此字段则不开启元数据上报，应用级服务发现依赖此字段，参考例子：https://github.com/apache/dubbo-go-samples/tree/45a0d843b54e4922c240900e63516176cc7da4f6/registry/servicediscovery
     protocol: nacos # 元数据上报方式，支持nacos/zookeeper 
     address: 127.0.0.1:8848 
     username: ""
