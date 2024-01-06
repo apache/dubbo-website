@@ -7,7 +7,7 @@ linkTitle: Prometheus
 no_list: true
 title: 从 Prometheus 查询 Metrics 监控指标
 type: docs
-weight: 4
+weight: 2
 ---
 
 ## 准备条件
