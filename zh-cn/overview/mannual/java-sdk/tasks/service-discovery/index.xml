@@ -1,0 +1,616 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 注册中心、服务发现与负载均衡</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/</link><description>Recent content in 注册中心、服务发现与负载均衡 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 配置服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/registry/</guid><description>
+&lt;p>Dubbo 支持基于注册中心同步的自动实例发现机制，即 Dubbo 提供者注册实例地址到注册中心，Dubbo 消费者通过订阅注册中心变更事件自动获取最新实例变化，从而确保流量始终转发到正确的节点之上。Dubbo 目前支持 Nacos、Zookeeper、Kubernetes Service 等多种注册中心接入。&lt;/p>
+&lt;h2 id="服务发现">服务发现&lt;/h2>
+&lt;p>以下是 Dubbo 服务发现接入的一些主流注册中心实现，更多扩展实现与工作原理请查看 &lt;a href="">注册中心参考手册&lt;/a>：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>注册中心&lt;/th>
+&lt;th>配置值&lt;/th>
+&lt;th>服务发现模型&lt;/th>
+&lt;th>是否支持鉴权&lt;/th>
+&lt;th>spring-boot-starter&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Nacos&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;td>应用级、接口级&lt;/td>
+&lt;td>是&lt;/td>
+&lt;td>dubbo-nacos-spring-boot-starter&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Zookeeper&lt;/td>
+&lt;td>zookeeper&lt;/td>
+&lt;td>应用级、接口级&lt;/td>
+&lt;td>是&lt;/td>
+&lt;td>- dubbo-zookeeper-spring-boot-starter &lt;br/> - dubbo-zookeeper-curator5-spring-boot-starter&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Kubernetes Service&lt;/td>
+&lt;td>参考下文使用文档&lt;/td>
+&lt;td>应用级&lt;/td>
+&lt;td>是&lt;/td>
+&lt;td>无&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="注册中心配置">注册中心配置&lt;/h3>
+&lt;p>以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。&lt;/p>
+&lt;p>在项目中添加 macos-client 等相关依赖：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-nacos-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0-beta.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>application.yml&lt;/code> 文件增加 retistry 注册中心配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>之后启动 Dubbo 进程，provider 将自动注册服务和地址到 Nacos server，同时 consumer 自动订阅地址变化。&lt;/p>
+&lt;p>&lt;strong>Dubbo 支持配置到注册中心连接的鉴权，也支持指定命名空间、分组等以实现注册数据的隔离，此外，Dubbo 还支持设置如延迟注册、推空保护、只注册、只订阅等注册订阅行为。&lt;/strong> 以下是一些简单的配置示例，请查看 &lt;a href="">注册中心参考手册&lt;/a> 了解更多配置详情。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: group1 &lt;span style="color:#586e75"># use separated group in registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: &lt;span style="color:#2aa198">10000&lt;/span> &lt;span style="color:#586e75"># delay registering instance to registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.namespace&lt;/span>: xxx &lt;span style="color:#586e75"># set target namespace to operate in registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.key&lt;/span>: value &lt;span style="color:#586e75"># extended key value that will be used when building connection with registry.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">服务发现模型说明&lt;/h4>
+&lt;p>Dubbo3 在兼容 Dubbo2 &lt;code>接口级服务发现&lt;/code>的同时，定义了新的&lt;code>应用级服务发现&lt;/code>模型，关于它们的含义与工作原理请参考 &lt;a href="">应用级服务发现&lt;/a>。&lt;/p>
+&lt;p>Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。强烈建议新用户明确配置使用应用级服务发现。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">register-mode&lt;/span>: instance &lt;span style="color:#586e75"># 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>新用户与老用户均建议参考 &lt;a href="">应用级服务发现迁移指南&lt;/a> 了解更多配置详情。&lt;/p>
+&lt;/div>
+&lt;h3 id="多个注册中心发现服务">多个注册中心发现服务&lt;/h3>
+&lt;p>Dubbo 支持在同一应用内配置多个注册中心，一个或一组服务可同时注册到多个注册中心，一个或一组服务可同时订阅多个中心的地址，对于订阅方而言，你还可以设置如何调用来自多个注册中心的地址（优先调用某一个注册中心或者其他策略）。&lt;/p>
+&lt;p>指定全局默认的一个或注册中心，所有的服务默认都注册到或订阅配置的注册中心：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;/code>&lt;/pre>&lt;/div>&lt;p>指定某个服务注册到多个注册中心：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;/code>&lt;/pre>&lt;/div>&lt;p>指定某个服务订阅来自多个注册中心的地址：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;/code>&lt;/pre>&lt;/div>&lt;p>关于多注册中心的更多配置、使用场景说明请参见&lt;a href="">【参考手册 - 注册中心 - 多注册中心】&lt;/a>&lt;/p>
+&lt;h3 id="服务发现问题排查">服务发现问题排查&lt;/h3>
+&lt;p>相比于 client 到 server 的 RPC 直连调用，开启服务发现后，常常会遇到各种个样奇怪的调用失败问题，以下是一些常见的问题与排查方法。&lt;/p>
+&lt;p>如果你的项目开启了服务发现，但在测试中想调用某个特定的 ip，可通过设置对端 ip 地址的 &lt;a href="">直连模式&lt;/a> 绕过服务发现机制进行调用。&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>消费方找不到可用地址 (No Provider available)&lt;/strong>，这里有详细的 &lt;a href="">具体原因排查步骤&lt;/a>。&lt;/li>
+&lt;li>&lt;strong>忘记配置注册中心&lt;/strong>，从 3.3.0 开始，不配置注册中心应用也是能够正常启动的，只是应用的任何服务都不会注册到注册中心，或者从注册中心订阅地址列表。&lt;/li>
+&lt;li>&lt;strong>注册中心连不上&lt;/strong>，会有以下默认行为：&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>如 &lt;code>dubbo.regisry.check=false&lt;/code>，&lt;/li>
+&lt;li>如 &lt;code>dubbo.regisry.check=true&lt;/code>，&lt;/li>
+&lt;/ul>
+&lt;ol start="4">
+&lt;li>&lt;strong>消费方因没有有效的地址而启动报错&lt;/strong>，可以通过配置ReferenceConfig跳过可用地址列表检查，注解示例为 &lt;code>@DubboRerefence(check=false)&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h2 id="负载均衡">负载均衡&lt;/h2>
+&lt;p>Dubbo 内置了 client-based 负载均衡机制，如下是当前支持的负载均衡算法，结合上文提到的自动服务发现机制，消费端会自动使用 &lt;code>Weighted Random LoadBalance 加权随机负载均衡策略&lt;/code> 选址调用。&lt;/p>
+&lt;p>如果要调整负载均衡算法，以下是 Dubbo 框架内置的负载均衡策略：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">算法&lt;/th>
+&lt;th style="text-align:left">特性&lt;/th>
+&lt;th style="text-align:left">备注&lt;/th>
+&lt;th style="text-align:left">配置值&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">Weighted Random LoadBalance&lt;/td>
+&lt;td style="text-align:left">加权随机&lt;/td>
+&lt;td style="text-align:left">默认算法，默认权重相同&lt;/td>
+&lt;td style="text-align:left">random (默认)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">RoundRobin LoadBalance&lt;/td>
+&lt;td style="text-align:left">加权轮询&lt;/td>
+&lt;td style="text-align:left">借鉴于 Nginx 的平滑加权轮询算法，默认权重相同，&lt;/td>
+&lt;td style="text-align:left">roundrobin&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">LeastActive LoadBalance&lt;/td>
+&lt;td style="text-align:left">最少活跃优先 + 加权随机&lt;/td>
+&lt;td style="text-align:left">背后是能者多劳的思想&lt;/td>
+&lt;td style="text-align:left">leastactive&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">Shortest-Response LoadBalance&lt;/td>
+&lt;td style="text-align:left">最短响应优先 + 加权随机&lt;/td>
+&lt;td style="text-align:left">更加关注响应速度&lt;/td>
+&lt;td style="text-align:left">shortestresponse&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">ConsistentHash LoadBalance&lt;/td>
+&lt;td style="text-align:left">一致性哈希&lt;/td>
+&lt;td style="text-align:left">确定的入参，确定的提供者，适用于有状态请求&lt;/td>
+&lt;td style="text-align:left">consistenthash&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">P2C LoadBalance&lt;/td>
+&lt;td style="text-align:left">Power of Two Choice&lt;/td>
+&lt;td style="text-align:left">随机选择两个节点后，继续选择“连接数”较小的那个节点。&lt;/td>
+&lt;td style="text-align:left">p2c&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">Adaptive LoadBalance&lt;/td>
+&lt;td style="text-align:left">自适应负载均衡&lt;/td>
+&lt;td style="text-align:left">在 P2C 算法基础上，选择二者中 load 最小的那个节点&lt;/td>
+&lt;td style="text-align:left">adaptive&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="使用场景">使用场景&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>高可用性：部署服务的多个实例以确保即使一个或多个实例失败服务保持可用，负载均衡功能可用于在这些实例之间分配传入的请求确保以负载均衡方式使用每个实例的方式，还能最大限度地降低服务停机的风险。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>流量管理：限制指向特定服务实例的流量，以防止过载或确保公平的资源分配，负载均衡特性提供了 Round Robin、Weighted Round Robin、Random、Least Active Load Balancing 等多种负载均衡策略，可以用来实现流量控制。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>服务划分：将一个服务划分成多个逻辑组件，每个逻辑组件可以部署在不同的实例上，使用负载平衡以确保每个分区平衡的方式在这些实例之间分配请求，同时在实例发生故障的情况下提供故障转移功能。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>性能优化：负载平衡可用于优化服务的性能，通过跨多个实例分发请求可以利用可用的计算资源来缩短响应时间并减少延迟。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="使用方式">使用方式&lt;/h3>
+&lt;blockquote>
+&lt;p>只需要调整 &lt;code>loadbalance&lt;/code> 相应取值即可，每种负载均衡策略取值请参见文档最上方表格。&lt;/p>
+&lt;/blockquote>
+&lt;p>Dubbo 框架支持为单个服务、服务的单个方法指定独立的负载均衡策略&lt;/p>
+&lt;h4 id="服务端服务级别">服务端服务级别&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="客户端服务级别">客户端服务级别&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="服务端方法级别">服务端方法级别&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="客户端方法级别">客户端方法级别&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;roundrobin&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="一致性哈希配置">一致性哈希配置&lt;/h3>
+&lt;p>默认采用第一个参数作为哈希 key，如果需要切换参数，可以指定 &lt;code>hash.arguments&lt;/code> 属性&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span> referenceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// ... init&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> parameters &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>parameters.put(&lt;span style="color:#2aa198">&amp;#34;hash.arguments&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>parameters.put(&lt;span style="color:#2aa198">&amp;#34;sayHello.hash.arguments&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;0,1&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.setParameters(parameters);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.setLoadBalance(&lt;span style="color:#2aa198">&amp;#34;consistenthash&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.get();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 配置服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/zookeeper/</guid><description>
+&lt;h2 id="1-前置条件">1 前置条件&lt;/h2>
+&lt;ul>
+&lt;li>了解 &lt;a href="../../../quick-start/spring-boot/">Dubbo 基本开发步骤&lt;/a>&lt;/li>
+&lt;li>安装并启动 &lt;a href="https://zookeeper.apache.org/">Zookeeper&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-使用说明">2 使用说明&lt;/h2>
+&lt;p>在此查看&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper">完整示例代码&lt;/a>&lt;/p>
+&lt;h3 id="21-增加-maven-依赖">2.1 增加 Maven 依赖&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo.version&amp;gt;&lt;/span>3.0.8&lt;span style="color:#268bd2">&amp;lt;/dubbo.version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- This dependency helps to introduce Curator and Zookeeper dependencies that are necessary for Dubbo to work with zookeeper as transitive dependencies --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-dependencies-zookeeper&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>dubbo-dependencies-zookeeper&lt;/code> 将自动为应用增加 Zookeeper 相关客户端的依赖，减少用户使用 Zookeeper 成本，如使用中遇到版本兼容问题，用户也可以不使用 &lt;code>dubbo-dependencies-zookeeper&lt;/code>，而是自行添加 Curator、Zookeeper Client 等依赖。&lt;/p>
+&lt;p>由于 Dubbo 使用 Curator 作为与 Zookeeper Server 交互的编程客户端，因此，要特别注意 Zookeeper Server 与 Dubbo 版本依赖的兼容性&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Zookeeper Server 版本&lt;/th>
+&lt;th>Dubbo 版本&lt;/th>
+&lt;th>Dubbo Zookeeper 依赖包&lt;/th>
+&lt;th>说明&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>3.4.x 及以下&lt;/td>
+&lt;td>3.0.x 及以上&lt;/td>
+&lt;td>dubbo-dependencies-zookeeper&lt;/td>
+&lt;td>传递依赖 Curator 4.x 、Zookeeper 3.4.x&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>3.5.x 及以上&lt;/td>
+&lt;td>3.0.x 及以上&lt;/td>
+&lt;td>dubbo-dependencies-zookeeper-curator5&lt;/td>
+&lt;td>传递依赖 Curator 5.x 、Zookeeper 3.7.x&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>3.4.x 及以上&lt;/td>
+&lt;td>2.7.x 及以下&lt;/td>
+&lt;td>dubbo-dependencies-zookeeper&lt;/td>
+&lt;td>传递依赖 Curator 4.x 、Zookeeper 3.4.x&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>3.5.x 及以上&lt;/td>
+&lt;td>2.7.x 及以下&lt;/td>
+&lt;td>无&lt;/td>
+&lt;td>须自行添加 Curator、Zookeeper 等相关客户端依赖&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="22-配置并启用-zookeeper">2.2 配置并启用 Zookeeper&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">zookeeper://localhost:2181&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://localhost:2181&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>address&lt;/code> 是启用 zookeeper 注册中心唯一必须指定的属性，而在生产环境下，&lt;code>address&lt;/code> 通常被指定为集群地址，如&lt;/p>
+&lt;p>&lt;code>address=zookeeper://10.20.153.10:2181?backup=10.20.153.11:2181,10.20.153.12:2181&lt;/code>&lt;/p>
+&lt;p>protocol 与 address 分开配置的模式也可以，如&lt;/p>
+&lt;p>&lt;code>&amp;lt;dubbo:registry protocol=&amp;quot;zookeeper&amp;quot; address=&amp;quot;10.20.153.10:2181,10.20.153.11:2181,10.20.153.12:2181&amp;quot; /&amp;gt;&lt;/code>&lt;/p>
+&lt;h2 id="3-高级配置">3 高级配置&lt;/h2>
+&lt;h3 id="31-认证与鉴权">3.1 认证与鉴权&lt;/h3>
+&lt;p>如果 Zookeeper 开启认证，Dubbo 支持指定 username、password 的方式传入身份标识。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: hello
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: &lt;span style="color:#2aa198">1234&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以直接将参数扩展在 address 上 &lt;code>address=zookeeper://hello:1234@localhost:2181&lt;/code>&lt;/p>
+&lt;h3 id="32-分组隔离">3.2 分组隔离&lt;/h3>
+&lt;p>通过指定 &lt;code>group&lt;/code> 属性，可以在同一个 Zookeeper 集群内实现微服务地址的逻辑隔离。比如可以在一套集群内隔离出多套开发环境，在地址发现层面实现隔离。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: daily1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-其他扩展配置">3.3 其他扩展配置&lt;/h3>
+&lt;p>配置连接、会话过期时间&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span> * &lt;span style="color:#2aa198">1000&lt;/span>* &lt;span style="color:#586e75"># 连接超时时间，默认 30s&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">session&lt;/span>: &lt;span style="color:#2aa198">60&lt;/span> * &lt;span style="color:#2aa198">1000&lt;/span>* &lt;span style="color:#586e75"># 会话超时时间，默认 60s&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Zookeeper 注册中心还支持其他一些控制参数，具体可参见&lt;a href="../../config/properties#registry">Registry 配置项手册&lt;/a>&lt;/p>
+&lt;h2 id="4-工作原理">4 工作原理&lt;/h2>
+&lt;h3 id="41-dubbo2-节点结构">4.1 Dubbo2 节点结构&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/zookeeper.jpg" alt="/user-guide/images/zookeeper.jpg">&lt;/p>
+&lt;p>流程：&lt;/p>
+&lt;ul>
+&lt;li>服务提供者启动时: 向 &lt;code>/dubbo/com.foo.BarService/providers&lt;/code> 目录下写入自己的 URL 地址。&lt;/li>
+&lt;li>服务消费者启动时: 订阅 &lt;code>/dubbo/com.foo.BarService/providers&lt;/code> 目录下的提供者 URL 地址。并向 &lt;code>/dubbo/com.foo.BarService/consumers&lt;/code> 目录下写入自己的 URL 地址&lt;/li>
+&lt;li>监控中心启动时: 订阅 &lt;code>/dubbo/com.foo.BarService&lt;/code> 目录下的所有提供者和消费者 URL 地址。&lt;/li>
+&lt;/ul>
+&lt;p>支持以下功能：&lt;/p>
+&lt;ul>
+&lt;li>当提供者出现断电等异常停机时，注册中心能自动删除提供者信息&lt;/li>
+&lt;li>当注册中心重启时，能自动恢复注册数据，以及订阅请求&lt;/li>
+&lt;li>当会话过期时，能自动恢复注册数据，以及订阅请求&lt;/li>
+&lt;li>当设置 &lt;code>&amp;lt;dubbo:registry check=&amp;quot;false&amp;quot; /&amp;gt;&lt;/code> 时，记录失败注册和订阅请求，后台定时重试&lt;/li>
+&lt;li>可通过 &lt;code>&amp;lt;dubbo:registry username=&amp;quot;admin&amp;quot; password=&amp;quot;1234&amp;quot; /&amp;gt;&lt;/code> 设置 zookeeper 登录信息&lt;/li>
+&lt;li>可通过 &lt;code>&amp;lt;dubbo:registry group=&amp;quot;dubbo&amp;quot; /&amp;gt;&lt;/code> 设置 zookeeper 的根节点，不配置将使用默认的根节点。&lt;/li>
+&lt;li>支持 &lt;code>*&lt;/code> 号通配符 &lt;code>&amp;lt;dubbo:reference group=&amp;quot;*&amp;quot; version=&amp;quot;*&amp;quot; /&amp;gt;&lt;/code>，可订阅服务的所有分组和所有版本的提供者&lt;/li>
+&lt;/ul>
+&lt;h3 id="42-dubbo3-节点结构">4.2 Dubbo3 节点结构&lt;/h3></description></item><item><title>Overview: 配置服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/nacos/</guid><description>
+&lt;h3 id="nacos-注册中心">Nacos 注册中心&lt;/h3>
+&lt;p>以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。&lt;/p>
+&lt;p>在项目中添加 macos-client 等相关依赖：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-nacos-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0-beta.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>application.yml&lt;/code> 文件增加 retistry 注册中心配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>之后启动 Dubbo 进程，provider 将自动注册服务和地址到 Nacos server，同时 consumer 自动订阅地址变化。&lt;/p>
+&lt;p>&lt;strong>Dubbo 支持配置到注册中心连接的鉴权，也支持指定命名空间、分组等以实现注册数据的隔离，此外，Dubbo 还支持设置如延迟注册、推空保护、只注册、只订阅等注册订阅行为。&lt;/strong> 以下是一些简单的配置示例，请查看 &lt;a href="">注册中心参考手册&lt;/a> 了解更多配置详情。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: group1 &lt;span style="color:#586e75"># use separated group in registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: &lt;span style="color:#2aa198">10000&lt;/span> &lt;span style="color:#586e75"># delay registering instance to registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.namespace&lt;/span>: xxx &lt;span style="color:#586e75"># set target namespace to operate in registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.key&lt;/span>: value &lt;span style="color:#586e75"># extended key value that will be used when building connection with registry.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">服务发现模型说明&lt;/h4>
+&lt;p>Dubbo3 在兼容 Dubbo2 &lt;code>接口级服务发现&lt;/code>的同时，定义了新的&lt;code>应用级服务发现&lt;/code>模型，关于它们的含义与工作原理请参考 &lt;a href="">应用级服务发现&lt;/a>。&lt;/p>
+&lt;p>Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。强烈建议新用户明确配置使用应用级服务发现。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">register-mode&lt;/span>: instance &lt;span style="color:#586e75"># 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>新用户与老用户均建议参考 &lt;a href="">应用级服务发现迁移指南&lt;/a> 了解更多配置详情。&lt;/p>
+&lt;/div>
+&lt;p>以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。&lt;/p>
+&lt;p>在项目中添加 macos-client 等相关依赖：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-nacos-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0-beta.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>application.yml&lt;/code> 文件增加 retistry 注册中心配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>之后启动 Dubbo 进程，provider 将自动注册服务和地址到 Nacos server，同时 consumer 自动订阅地址变化。&lt;/p>
+&lt;p>&lt;strong>Dubbo 支持配置到注册中心连接的鉴权，也支持指定命名空间、分组等以实现注册数据的隔离，此外，Dubbo 还支持设置如延迟注册、推空保护、只注册、只订阅等注册订阅行为。&lt;/strong> 以下是一些简单的配置示例，请查看 &lt;a href="">注册中心参考手册&lt;/a> 了解更多配置详情。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;nacos://127.0.0.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: group1 &lt;span style="color:#586e75"># use separated group in registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: &lt;span style="color:#2aa198">10000&lt;/span> &lt;span style="color:#586e75"># delay registering instance to registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.namespace&lt;/span>: xxx &lt;span style="color:#586e75"># set target namespace to operate in registry server.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.key&lt;/span>: value &lt;span style="color:#586e75"># extended key value that will be used when building connection with registry.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="1-前置条件">1 前置条件&lt;/h2>
+&lt;ul>
+&lt;li>了解 &lt;a href="../../../quick-start/spring-boot/">Dubbo 基本开发步骤&lt;/a>&lt;/li>
+&lt;li>安装并启动 &lt;a href="https://nacos.io/zh-cn/docs/quick-start.html">Nacos 服务&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>当Dubbo使用&lt;code>3.0.0&lt;/code>及以上版本时，需要使用Nacos &lt;code>2.0.0&lt;/code>及以上版本。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="2-使用说明">2 使用说明&lt;/h2>
+&lt;p>在此查看&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-nacos/dubbo-samples-nacos-registry">完整示例代码&lt;/a>&lt;/p>
+&lt;h3 id="21-增加依赖">2.1 增加依赖&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.0.9&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.nacos&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>nacos-client&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.1.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Introduce Dubbo Nacos extension, or you can add Nacos dependency directly as shown above--&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!--
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;artifactId&amp;gt;dubbo-registry-nacos&amp;lt;/artifactId&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;version&amp;gt;3.0.9&amp;lt;/version&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;/dependency&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>增加 Dubbo 与 Nacos 依赖&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo &lt;code>3.0.0&lt;/code> 及以上版本需 nacos-client &lt;code>2.0.0&lt;/code> 及以上版本&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="22-配置并启用-nacos">2.2 配置并启用 Nacos&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;nacos://localhost:8848&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启用应用，查看注册后的效果或工作原理，请查看 &lt;a href="#4-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86">工作原理&lt;/a>。&lt;/p>
+&lt;h2 id="3-高级配置">3 高级配置&lt;/h2>
+&lt;h3 id="31-认证">3.1 认证&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848?username=nacos&amp;amp;password=nacos
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">nacos://nacos:nacos@localhost:8848&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-自定义命名空间">3.2 自定义命名空间&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848?namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.namespace&lt;/span>: 5cbb70a5-xxx-xxx-xxx-d43479ae0932
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-自定义分组">3.3 自定义分组&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>如果不配置的话，group 是由 Nacos 默认指定。group 和 namespace 在 Nacos 中代表不同的隔离层次，通常来说 namespace 用来隔离不同的用户或环境，group 用来对同一环境内的数据做进一步归组。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="34-注册接口级消费者">3.4 注册接口级消费者&lt;/h3>
+&lt;p>Dubbo3.0.0版本以后，增加了是否注册消费者的参数，如果需要将消费者注册到nacos注册中心上，需要将参数(register-consumer-url)设置为true，默认是false。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848?register-consumer-url=true
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: nacos://localhost:8848
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters.register-consumer-url&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="35-更多配置">3.5 更多配置&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>参数名&lt;/th>
+&lt;th>中文描述&lt;/th>
+&lt;th>默认值&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>username&lt;/td>
+&lt;td>连接Nacos Server的用户名&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>paasword&lt;/td>
+&lt;td>连接Nacos Server的密码&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>backup&lt;/td>
+&lt;td>备用地址&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namespace&lt;/td>
+&lt;td>命名空间的ID&lt;/td>
+&lt;td>public&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>group&lt;/td>
+&lt;td>分组名称&lt;/td>
+&lt;td>DEFAULT_GROUP&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>register-consumer-url&lt;/td>
+&lt;td>是否注册消费端&lt;/td>
+&lt;td>false&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>com.alibaba.nacos.naming.log.filename&lt;/td>
+&lt;td>初始化日志文件名&lt;/td>
+&lt;td>naming.log&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>endpoint&lt;/td>
+&lt;td>连接Nacos Server指定的连接点，可参考&lt;a href="https://nacos.io/zh-cn/blog/address-server.html">文档&lt;/a>&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>endpointPort&lt;/td>
+&lt;td>连接Nacos Server指定的连接点端口，可以参考&lt;a href="https://nacos.io/zh-cn/blog/address-server.html">文档&lt;/a>&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>endpointQueryParams&lt;/td>
+&lt;td>endpoint查参数询&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>isUseCloudNamespaceParsing&lt;/td>
+&lt;td>是否解析云环境中的namespace参数&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>isUseEndpointParsingRule&lt;/td>
+&lt;td>是否开启endpoint 参数规则解析&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingLoadCacheAtStart&lt;/td>
+&lt;td>启动时是否优先读取本地缓存&lt;/td>
+&lt;td>true&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingCacheRegistryDir&lt;/td>
+&lt;td>指定缓存子目录，位置为 &amp;hellip;/nacos/{SUB_DIR}/naming&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingClientBeatThreadCount&lt;/td>
+&lt;td>客户端心跳的线程池大小&lt;/td>
+&lt;td>机器的CPU数的一半&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingPollingThreadCount&lt;/td>
+&lt;td>客户端定时轮询数据更新的线程池大小&lt;/td>
+&lt;td>机器的CPU数的一半&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingRequestDomainMaxRetryCount&lt;/td>
+&lt;td>client通过HTTP向Nacos Server请求的重试次数&lt;/td>
+&lt;td>3&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>namingPushEmptyProtection&lt;/td>
+&lt;td>在服务没有有效（健康）实例时，是否开启保护，开启后则会使用旧的服务实例&lt;/td>
+&lt;td>false&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>push.receiver.udp.port&lt;/td>
+&lt;td>客户端UDP的端口&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>在nacos-server@&lt;code>1.0.0&lt;/code>版本后，支持客户端通过上报一些包含特定的元数据的实例到服务端来控制实例的一些行为。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>参数名&lt;/th>
+&lt;th>中文描述&lt;/th>
+&lt;th>默认值&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>preserved.heart.beat.timeout&lt;/td>
+&lt;td>该实例在不发送心跳后，从健康到不健康的时间（毫秒）&lt;/td>
+&lt;td>15000&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.ip.delete.timeout&lt;/td>
+&lt;td>该实例在不发送心跳后，被服务端下掉该实例的时间(毫秒)&lt;/td>
+&lt;td>30000&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.heart.beat.interval&lt;/td>
+&lt;td>该实例在客户端上报心跳的间隔时间(毫秒)&lt;/td>
+&lt;td>5000&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.instance.id.generator&lt;/td>
+&lt;td>该实例的id生成策略，值为&lt;code>snowflake&lt;/code>时，从0开始增加&lt;/td>
+&lt;td>simple&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>preserved.register.source&lt;/td>
+&lt;td>注册实例注册时服务框架类型（例如Dubbo,Spring Cloud等）&lt;/td>
+&lt;td>空&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>这些参数都可以类似 &lt;code>namespace&lt;/code> 的方式通过通过参数扩展配置到 Nacos，如&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.registry.parameters.preserved.heart.beat.timeout&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">5000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-工作原理">4 工作原理&lt;/h2>
+&lt;p>以下仅为展示 Nacos 作为 Dubbo 注册中心的工作原理，Dubbo 服务运维建议使用 &lt;a href="https://github.com/apache/dubbo-admin">Dubbo Admin&lt;/a>&lt;/p>
+&lt;h3 id="41-dubbo2-注册数据">4.1 Dubbo2 注册数据&lt;/h3>
+&lt;p>随后，重启您的 Dubbo 应用，Dubbo 的服务提供和消费信息在 Nacos 控制台中可以显示：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-1.png" alt="dubbo-registry-nacos-1.png">&lt;/p>
+&lt;p>如图所示，服务名前缀为 &lt;code>providers:&lt;/code> 的信息为服务提供者的元信息，&lt;code>consumers:&lt;/code> 则代表服务消费者的元信息。点击“&lt;strong>详情&lt;/strong>”可查看服务状态详情：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-registry-nacos-2.png" alt="image-dubbo-registry-nacos-2.png">&lt;/p>
+&lt;h3 id="42-dubbo3-注册数据">4.2 Dubbo3 注册数据&lt;/h3>
+&lt;p>应用级服务发现的 &amp;ldquo;服务名&amp;rdquo; 为应用名&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo3 默认采用 &amp;ldquo;应用级服务发现 + 接口级服务发现&amp;rdquo; 的双注册模式，因此会发现应用级服务（应用名）和接口级服务（接口名）同时出现在 Nacos 控制台，可以通过配置 &lt;code>dubbo.registry.register-mode=instance/interface/all&lt;/code> 来改变注册行为。&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: 配置服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/kubernetes/</guid><description>
+&lt;p>Dubbo 支持关于使用 &lt;a target="_blank" href="">Kubernetes Service&lt;/a> 服务发现，由于其架构复杂性，我们有专门的文档展开说明，请参考 &lt;a href="">Dubbo+Kubernetes 最佳实践&lt;/a>。&lt;/p>
+&lt;p>半托管&lt;/p>
+&lt;p>全托管架构&lt;/p>
+&lt;p>在这里都描述一下，架构图给看看&lt;/p></description></item></channel></rss>

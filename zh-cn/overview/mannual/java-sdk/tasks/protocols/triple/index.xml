@@ -1,0 +1,406 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 通信协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/</link><description>Recent content in 通信协议 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 使用 Java 接口方式开发 triple 通信服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/</guid><description>
+&lt;p>不同于 gRPC 框架，Dubbo 实现的 triple 协议易用性更好，triple 不绑定 Protobuf，你可以继续使用 &lt;code>Java 接口&lt;/code>直接定义服务。&lt;strong>对于期望平滑升级、没有多语言业务或者不熟悉 Protobuf 的用户而言，&lt;code>Java 接口&lt;/code>方式是最简单的使用 triple 的方式。&lt;/strong>&lt;/p>
+&lt;p>以下是一个使用&lt;code>Java 接口&lt;/code>开发 Dubbo 服务的基本示例，示例使用 triple 协议通信，可在此查看 &lt;a href="">本示例的完整代码&lt;/a>。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+本文使用的示例是基于原生 API 编码的，这里还有一个 &lt;a href="">Spring Boot 版本的示例&lt;/a> 供参考，同样是 &lt;code>Java接口+triple&lt;/code> 的模式，但额外加入了服务发现配置。
+&lt;/div>
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/1-basic/dubbo-samples-api
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动Server&lt;/h3>
+&lt;p>运行以下命令启动 server&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.provider.Application exec:java
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动client">启动Client&lt;/h3>
+&lt;p>有两种方式可以调用 server 发布的服务&lt;/p>
+&lt;ul>
+&lt;li>使用标准的 http 工具，如 cURL&lt;/li>
+&lt;li>使用 Dubbo SDK 开发一个 client&lt;/li>
+&lt;/ul>
+&lt;h4 id="curl">cURL&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;[&amp;#34;Dubbo&amp;#34;]&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:50052/org.apache.dubbo.samples.api.GreetingsService/sayHi/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="sdk-client">SDK Client&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.client.Application exec:java
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="源码讲解">源码讲解&lt;/h2>
+&lt;p>如果您是 Dubbo 老用户，你会发现以下内容与之前 Dubbo2 的开发模式基本一样，只是协议名称从 &lt;code>dubbo&lt;/code> 换成了 &lt;code>tri&lt;/code>。&lt;/p>
+&lt;h3 id="定义服务">定义服务&lt;/h3>
+&lt;p>首先是服务定义，使用 Java 接口定义 Dubbo 服务。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务提供者">服务提供者&lt;/h3>
+&lt;p>其次，对于提供者一侧而言，需要提供服务的具体实现：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置使用 &lt;code>triple&lt;/code> 协议：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;/code>&lt;/pre>&lt;/div>&lt;p>最后，是将服务发布出去：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务消费者">服务消费者&lt;/h3>
+&lt;p>配置服务引用，如下所示：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来，就可以发起对远程服务的 RPC 调用了：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="注意事项">注意事项&lt;/h2>
+&lt;h3 id="编码">编码&lt;/h3>
+&lt;p>通过上面介绍的升级过程，我们可以很简单的通过修改协议类型来完成升级。框架是怎么帮我们做到这些的呢？&lt;/p>
+&lt;p>通过对 &lt;code>Triple&lt;/code> 协议的介绍，我们知道Dubbo3的 &lt;code>Triple&lt;/code> 的数据类型是 &lt;code>protobuf&lt;/code> 对象，那为什么非 &lt;code>protobuf&lt;/code> 的 java 对象也可以被正常传输呢。&lt;/p>
+&lt;p>这里 Dubbo3 使用了一个巧妙的设计，首先判断参数类型是否为 &lt;code>protobuf&lt;/code> 对象，如果不是。用一个 &lt;code>protobuf&lt;/code> 对象将 &lt;code>request&lt;/code> 和 &lt;code>response&lt;/code> 进行 wrapper，这样就屏蔽了其他各种序列化带来的复杂度。在 &lt;code>wrapper&lt;/code> 对象内部声明序列化类型，来支持序列化的扩展。&lt;/p>
+&lt;p>wrapper 的&lt;code>protobuf&lt;/code>的 IDL如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-proto" data-lang="proto">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.triple;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">TripleRequestWrapper&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// hessian4
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// json
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> serializeType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">repeated&lt;/span> &lt;span style="color:#dc322f">bytes&lt;/span> args &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">repeated&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> argTypes &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">TripleResponseWrapper&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> serializeType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">bytes&lt;/span> data &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> type &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>对于请求，使用&lt;code>TripleRequestWrapper&lt;/code>进行包装，对于响应使用&lt;code>TripleResponseWrapper&lt;/code>进行包装。&lt;/p>
+&lt;blockquote>
+&lt;p>对于请求参数，可以看到 args 被&lt;code>repeated&lt;/code>修饰，这是因为需要支持 java 方法的多个参数。当然，序列化只能是一种。序列化的实现沿用 Dubbo2 实现的 spi&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="性能表现">性能表现&lt;/h3>
+&lt;p>由于链路上传输的数据额外经过了一层序列化编码（如hessian2），同时，server 端的方法调用基于反射，因此相比于 &lt;code>protobuf+triple&lt;/code> 的编码模式，Java接口方式在性能上会存在一定的下降。&lt;/p>
+&lt;p>Protobuf 模式固然有一定的性能优势，但易用性与使用成本也会陡然增加，我们建议还是优先考虑业务场景，如果没有多语言业务、dubbo2老用户，则继续保持 Java 接口模式是一个比较好、低成本的选择。&lt;/p>
+&lt;h3 id="grpc兼容性">gRPC兼容性&lt;/h3>
+&lt;p>由于 gRPC 仅支持 protobuf 模式，因此 &lt;code>接口+triple&lt;/code> 的模式无法与谷歌官方原生的 gRPC 协议互调。同时，在这种模式下，如果对于来自前端的 HTTP 流量（比如浏览器），要想通过网关接入 triple，就要走 triple 内置的 &lt;code>application/json&lt;/code> 模式，具体请参见【进阶学习-HTTP网关接入】。&lt;/p></description></item><item><title>Overview: 使用 Protobuf(IDL) 开发 triple 通信服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</guid><description>
+&lt;p>本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑下一篇基于Java接口的 triple 开发模式。&lt;/p>
+&lt;p>可在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl">本示例的完整代码&lt;/a>。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+本文使用的示例是基于原生 API 编码的，这里还有一个 &lt;a href="">Spring Boot 版本的示例&lt;/a> 供参考，同样是 &lt;code>protobuf+triple&lt;/code> 的模式，但额外加入了服务发现配置。
+&lt;/div>
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/1-basic/dubbo-samples-api-idl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn clean compile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>生成代码如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>├── build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── generated
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── source
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── unary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── DubboGreeterTriple.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── Greeter.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterOuterClass.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterReply.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterReplyOrBuilder.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterRequest.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── GreeterRequestOrBuilder.java
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动Server&lt;/h3>
+&lt;p>运行以下命令启动 server。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.unary.TriUnaryServer&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="访问服务">访问服务&lt;/h3>
+&lt;p>有两种方式可以访问 Triple 服务：&lt;/p>
+&lt;ul>
+&lt;li>以标准 HTTP 工具访问&lt;/li>
+&lt;li>以 Dubbo client sdk 访问&lt;/li>
+&lt;/ul>
+&lt;h4 id="curl-访问">cURL 访问&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;[{&amp;#34;name&amp;#34;: &amp;#34;Dubbo&amp;#34;}]&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="dubbo-client-访问">Dubbo client 访问&lt;/h4>
+&lt;p>运行以下命令，启动 Dubbo client 并完成服务调用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.unary.TriUnaryClient&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="源码讲解">源码讲解&lt;/h2>
+&lt;h3 id="项目依赖">项目依赖&lt;/h3>
+&lt;p>由于使用 IDL 开发模式，因此要添加 dubbo、protobuf-java 等依赖，同时还要配置 protobuf-maven-plugin 等插件，用于生成桩代码。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0-beta.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.google.protobuf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>protobuf-java&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.19.6&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.google.protobuf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>protobuf-java-util&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.19.6&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.xolstice.maven.plugins&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>protobuf-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.6.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;protocArtifact&amp;gt;&lt;/span>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}&lt;span style="color:#268bd2">&amp;lt;/protocArtifact&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;outputDirectory&amp;gt;&lt;/span>build/generated/source/proto/main/java&lt;span style="color:#268bd2">&amp;lt;/outputDirectory&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;protocPlugins&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;protocPlugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-compiler&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;mainClass&amp;gt;&lt;/span>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator&lt;span style="color:#268bd2">&amp;lt;/mainClass&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/protocPlugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/protocPlugins&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>compile&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务定义">服务定义&lt;/h3>
+&lt;p>使用 Protocol Buffers 定义 Greeter 服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_multiple_files &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.samples.tri.unary;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreeterRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreeterReply&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> Greeter{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> greet(GreeterRequest) &lt;span style="color:#719e07">returns&lt;/span> (GreeterReply);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务实现">服务实现&lt;/h3>
+&lt;p>在运行 &lt;code>mvn clean compile&lt;/code> 后可生成 Dubbo 桩代码。接下来继承生成的基础类 &lt;code>DubboGreeterTriple.GreeterImplBase&lt;/code>，添加具体的业务逻辑实现：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GreeterImpl&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> DubboGreeterTriple.GreeterImplBase {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> GreeterReply &lt;span style="color:#268bd2">greet&lt;/span>(GreeterRequest request) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LOGGER.info(&lt;span style="color:#2aa198">&amp;#34;Server {} received greet request {}&amp;#34;&lt;/span>, serverName, request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> GreeterReply.newBuilder()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .setMessage(&lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request.getName())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .build();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注册服务到 server，其中 protocol 设置为 tri 代表开启 triple 协议。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TriUnaryServer&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>Greeter&lt;span style="color:#719e07">&amp;gt;&lt;/span> service &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.setInterface(Greeter.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.setRef(&lt;span style="color:#719e07">new&lt;/span> GreeterImpl());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DubboBootstrap bootstrap &lt;span style="color:#719e07">=&lt;/span> DubboBootstrap.getInstance();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bootstrap.protocol(&lt;span style="color:#719e07">new&lt;/span> ProtocolConfig(CommonConstants.TRIPLE, 50052))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .service(service)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .start().await();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="编写-client-逻辑">编写 client 逻辑&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TriUnaryClient&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DubboBootstrap bootstrap &lt;span style="color:#719e07">=&lt;/span> DubboBootstrap.getInstance();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>Greeter&lt;span style="color:#719e07">&amp;gt;&lt;/span> ref &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ref.setInterface(Greeter.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ref.setUrl(&lt;span style="color:#2aa198">&amp;#34;tri://localhost:50052&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bootstrap.reference(ref).start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Greeter greeter &lt;span style="color:#719e07">=&lt;/span> ref.get();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">final&lt;/span> GreeterReply reply &lt;span style="color:#719e07">=&lt;/span> greeter.greet(GreeterRequest.newBuilder().setName(&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>).build());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="常见问题">常见问题&lt;/h2>
+&lt;h3 id="protobuf-类找不到">protobuf 类找不到&lt;/h3>
+&lt;p>由于 Triple 协议底层需要依赖 protobuf 协议进行传输，即使定义的服务接口不使用 protobuf 也需要在环境中引入 protobuf 的依赖。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.google.protobuf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>protobuf-java&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.19.4&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>同时，为了支持 &lt;code>application/json&lt;/code> 格式请求直接访问，还需要增加如下依赖。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.google.protobuf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>protobuf-java-util&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.19.4&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Streaming 通信</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</guid><description>
+&lt;p>如在本章《选择 RPC 通信协议》一节提到的，Streaming 是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:&lt;/p>
+&lt;ul>
+&lt;li>接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送&lt;/li>
+&lt;li>流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的&lt;/li>
+&lt;li>推送类场景，多个消息在同一个调用的上下文中被发送和处理&lt;/li>
+&lt;/ul>
+&lt;p>Streaming 分为以下三种:&lt;/p>
+&lt;ul>
+&lt;li>SERVER_STREAM(服务端流)&lt;/li>
+&lt;li>CLIENT_STREAM(客户端流)&lt;/li>
+&lt;li>BIDIRECTIONAL_STREAM(双向流)&lt;/li>
+&lt;/ul>
+&lt;p>以下示例演示 triple streaming 流式通信的基本使用方法，涵盖了客户端流、服务端流、双向流等三种模式，示例使用 Protocol Buffers 的服务开发模式，对于 Java 接口模式的开发者可以在本文最后查看相应说明。&lt;/p>
+&lt;p>可在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-streaming">本示例完整代码&lt;/a>。&lt;/p>
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/2-advanced/dubbo-samples-triple-streaming
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn clean compile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动server&lt;/h3>
+&lt;p>运行以下命令，启动 server：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.streaming.TriStreamServer&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动client">启动client&lt;/h4>
+&lt;p>运行以下命令，启动 client：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.streaming.TriStreamClient&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="源码解读">源码解读&lt;/h2>
+&lt;p>与 &lt;a href="">使用 Protobuf(IDL) 开发 triple 协议服务&lt;/a> 一节中提到的一样，这个示例使用 protobuf 定义服务，因此示例需要的依赖、配置等基本是一致的，请参考那一节了解完整详情。接下来，我们将重点讲解流式通信部分的内容。&lt;/p>
+&lt;h3 id="protobuf服务定义">protobuf服务定义&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_multiple_files &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.samples.tri.streaming;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreeterRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreeterReply&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> Greeter{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> biStream(stream GreeterRequest) &lt;span style="color:#719e07">returns&lt;/span> (stream GreeterReply);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> serverStream(GreeterRequest) &lt;span style="color:#719e07">returns&lt;/span> (stream GreeterReply);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在上面的 proto 文件中，我们定义了两个方法：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>biStream(stream GreeterRequest) returns (stream GreeterReply)&lt;/code> 双向流&lt;/li>
+&lt;li>&lt;code>serverStream(GreeterRequest) returns (stream GreeterReply)&lt;/code> 服务端流&lt;/li>
+&lt;/ul>
+&lt;h3 id="生成代码">生成代码&lt;/h3>
+&lt;p>参照以下grpc的文章写一份：&lt;/p>
+&lt;p>&lt;a href="https://grpc.io/docs/languages/java/basics/#generating-client-and-server-code">https://grpc.io/docs/languages/java/basics/#generating-client-and-server-code&lt;/a>&lt;/p>
+&lt;h3 id="server">Server&lt;/h3>
+&lt;h4 id="服务端流">服务端流&lt;/h4>
+&lt;h4 id="双向流">双向流&lt;/h4>
+&lt;h3 id="client">Client&lt;/h3>
+&lt;h4 id="服务端流-1">服务端流&lt;/h4>
+&lt;h4 id="双向流-1">双向流&lt;/h4>
+&lt;h2 id="其他">其他&lt;/h2>
+&lt;h3 id="java接口模式下的流式通信">Java接口模式下的流式通信&lt;/h3>
+&lt;p>对于不使用 Protobuf 的用户而言，你可以直接在接口中定义 streaming 格式的方法，这样你就能使用流式通信了。&lt;/p>
+&lt;h4 id="接口定义">接口定义&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">WrapperGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 双向流&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloStream&lt;/span>(StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 服务端流&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHelloServerStream&lt;/span>(String request, StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中，&lt;code>org.apache.dubbo.common.stream.StreamObserver&lt;/code> 是 Dubbo 框架提供的流式通信参数类型，请务必按照以上示例所示的方式定义&lt;/p>
+&lt;blockquote>
+&lt;p>Stream 方法的方法入参和返回值是严格约定的，为防止写错而导致问题，Dubbo3 框架侧做了对参数的检查, 如果出错则会抛出异常。
+对于 &lt;code>双向流(BIDIRECTIONAL_STREAM)&lt;/code>, 需要注意参数中的 &lt;code>StreamObserver&lt;/code> 是响应流，返回参数中的 &lt;code>StreamObserver&lt;/code> 为请求流。&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="实现类">实现类&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">WrapGreeterImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> WrapGreeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloStream&lt;/span>(StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onNext(&lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onCompleted();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHelloServerStream&lt;/span>(String request, StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> response) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> 10; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onNext(&lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.onCompleted();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="调用方式">调用方式&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>delegate.sayHelloServerStream(&lt;span style="color:#2aa198">&amp;#34;server stream&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> request &lt;span style="color:#719e07">=&lt;/span> delegate.sayHelloStream(&lt;span style="color:#719e07">new&lt;/span> StreamObserver&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onNext&lt;/span>(String data) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable throwable) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throwable.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onCompleted&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;onCompleted&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> n; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> request.onNext(&lt;span style="color:#2aa198">&amp;#34;stream request&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> i);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>request.onCompleted();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 使用 Dubbo 开发 gRPC 服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/grpc/</guid><description>
+&lt;p>这个示例演示了如何使用 triple 协议实现 Dubbo 服务与标准 gRPC 服务的互相调用，可在此查看 &lt;a href="">示例完整源码&lt;/a>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/protocol/triple-grpc.png" alt="triple-grpc.png">&lt;/p>
+&lt;p>就像在 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple/">Triple协议规范&lt;/a> 中所描述的，triple 协议与 gRPC 协议保持 100% 兼容，同时在易用性方面有了非常大的提升（比如支持 cURL、浏览器直接访问等），可以说 triple 是一个更好用的 gRPC 设计与实现。&lt;/p>
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/2-advanced/dubbo-samples-triple-grpc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="作为标准的-grpc-server">作为标准的 gRPC Server&lt;/h3>
+&lt;p>在这一部分，我们会发布一个 Dubbo Triple Server，然后启动一个标准的 gRPC 消费端（采用谷歌官方发布的 grpc-java 编码）来调用 Triple 服务。示例源码在 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-grpc">dubbo-samples-triple-grpc&lt;/a>，请下载源码并依照以下命令体验。&lt;/p>
+&lt;h4 id="启动-dubbo-server">启动 Dubbo server&lt;/h4>
+&lt;p>Make sure you are in &lt;code>dubbo-samples-triple-grpc&lt;/code> directory and then run the following command:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.grpc.interop.server.TriOpServer&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="使用标准-grpc-client-调用-triple-服务">使用标准 gRPC client 调用 Triple 服务&lt;/h4>
+&lt;p>Open a new terminal, enter &lt;code>dubbo-samples-triple-grpc&lt;/code> directory and then run the following command:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.grpc.interop.server.GrpcClient&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="作为标准的-grpc-client">作为标准的 gRPC Client&lt;/h3>
+&lt;p>This part showcases how Triple client written with Dubbo consumes gRPC service written with standard gRPC-java.&lt;/p>
+&lt;h4 id="启动标准-grpc-server">启动标准 gRPC server&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.grpc.interop.client.GrpcServer&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="使用-dubbo-client-调用标准-grpc-服务">使用 Dubbo client 调用标准 gRPC 服务&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.grpc.interop.client.TriOpClient&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="更多内容">更多内容&lt;/h2>
+&lt;p>本示例主要演示 triple 可以 100% 兼容谷歌发布的 gRPC 框架，而在 triple 相关部分具体代码与配置上，本示例与之前介绍的 &lt;a href="../idl/">基于 protobuf 的 triple 示例完全一致&lt;/a>，因此我们不再重复讲解源代码与开发步骤。&lt;/p>
+&lt;p>本示例演示的是 unary 模式的通信兼容性，对于 streaming 模式同样适用。&lt;/p></description></item></channel></rss>

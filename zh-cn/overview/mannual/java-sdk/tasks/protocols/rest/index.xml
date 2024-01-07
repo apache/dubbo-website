@@ -1,0 +1,53 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 通信协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/</link><description>Recent content in 通信协议 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 使用 Dubbo 开发 Web 应用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/web/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/web/</guid><description>
+&lt;p>Dubbo 支持发布底层基于 &lt;code>http+json&lt;/code> 协议的 rest 风格服务，对于框架而言支持 rest 风格服务非常重要，你可以：&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>将后端 Dubbo 接口发布为 rest 服务&lt;/strong>，让服务间使用 &lt;code>http+json&lt;/code> 协议通信，虽然这样通信效率会比 dubbo、triple 差一些，但却使得协议更简单、前端流量接入更方便。&lt;/li>
+&lt;li>&lt;strong>实现多协议服务发布&lt;/strong>，dubbo 二进制协议用于后端 RPC 通信，http 协议支持前端流量快速接入同时方便调试。这点我们在本文最后《dubbo&amp;amp;rest 多协议发布》部分有更详细的介绍，同时在 &lt;a href="">HTTP网关接入 - dubbo协议&lt;/a> 中有使用场景介绍。&lt;/li>
+&lt;/ol>
+&lt;p>接下来我们通过一个简单示例学习如何发布 &lt;code>http+json&lt;/code> 协议的 rest 风格服务，示例使用 Spring Web 注解（Dubbo 还支持 JAX-RS 注解），本示例的完整代码请参见 &lt;a href="">dubbo-samples&lt;/a>。&lt;/p>
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>你可以跟随以下步骤，尝试运行本文档对应的示例源码。&lt;/p>
+&lt;p>首先，可通过以下命令下载示例源码&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/extensions/protocol/rest/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>使用 maven 打包示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn clean install -DskipTests
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动server&lt;/h3>
+&lt;p>运行以下命令启动提供者。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -jar ./provider/target/xxx.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动client">启动client&lt;/h3>
+&lt;ul>
+&lt;li>cURL&lt;/li>
+&lt;li>Dubbo Client&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行以下命令&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>java -jar ./consumer/target/xxx.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="源码讲解">源码讲解&lt;/h2>
+&lt;h3 id="定义服务">定义服务&lt;/h3>
+&lt;p>与开发 dubbo 协议一样，我们首先需要通过 Java Interface 定义服务，同时为接口增加注解 Spring Web 注解：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务实现">服务实现&lt;/h3>
+&lt;p>服务的具体实现，与普通 dubbo 服务实现一样：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置使用 &lt;code>rest&lt;/code> 协议：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="服务消费者">服务消费者&lt;/h3>
+&lt;p>配置服务引用，如下所示：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来，就可以发起对远程服务的 RPC 调用了：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者，你可以是用任何 HTTP 工具访问刚刚发布的服务。&lt;/p>
+&lt;h2 id="dubborest-多协议发布">dubbo&amp;amp;rest 多协议发布&lt;/h2>
+&lt;p>除了单独发布 rest 服务之外，另外一个非常有用的场景是为一个服务同时发布 dubbo、http 协议，Dubbo 框架支持多协议发布，你只需要在以上示例基础上修改配置如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">extra-protocols&lt;/span>: rest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: fastjson
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果你想在不同的端口发布 dubbo、http 协议，可以使用如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: rest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8080&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: fastjson
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>关于多协议的具体使用，我们在 &lt;a href="">【HTTP网关接入 - dubbo协议 】&lt;/a>中有一个描述了一个具体场景，尤其是在单端口同时发布 dubbo、rest 协议，让服务具备高效后端 RPC 通信的同时（使用 dubbo 协议），让服务的测试、前端 HTTP 流量接入变得更简单（使用 rest 协议）。&lt;/p></description></item><item><title>Overview: 使用 Dubbo 作为消费端调用 Spring Cloud 服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/springcloud/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/springcloud/</guid><description/></item></channel></rss>

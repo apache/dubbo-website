@@ -1,0 +1,387 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 观测服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/</link><description>Recent content in 观测服务 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 日志管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/logging/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/logging/</guid><description>
+&lt;p>在 Dubbo 框架内所有的日志输出都是通过 LoggerFactory 这个静态工厂类来获得 Logger 的对象实体，并且抽离了一个 LoggerAdapter 用于对接第三方日志框架，所以就有了JDKLoggerAdapter, Log4jLoggerAdapter, SLF4JLoggerAdapter等一些实现子类，分别对接了不同 Log 第三方实现。既然 Dubbo 能够支持这么多log实现，那么这些实现在 Dubbo 中优先级是在呢么样的呢？这里的优先级是指未配置指定的 logger 提供方的情况下，由 Dubbo 框架自己选择。优先级如下：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>第三方日志框架&lt;/th>
+&lt;th>优先级&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Log4j&lt;/td>
+&lt;td>最高（默认就用这个）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>SLF4J&lt;/td>
+&lt;td>次高（上面没有采用这个）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Common Logging(jcl就是common logging)&lt;/td>
+&lt;td>次低（Log4j和SLF4J在项目中均没有就用这个）&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>JDK log&lt;/td>
+&lt;td>最低（最后的选择）&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Dubbo 日志的调用方式，针对不同的日志打印系统，采用统一的 API 调用及输出，如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * ChannelListenerDispatcher
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ChannelHandlerDispatcher&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ChannelHandler {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ErrorTypeAwareLogger logger &lt;span style="color:#719e07">=&lt;/span> LoggerFactory.getErrorTypeAwareLogger(ChannelHandlerDispatcher.class);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 采用的日志输出方式是首先从 dubbo.application.logger 系统变量中获取属性值，来判断到底采用哪种日志输出方式，如果没设置则按照默认的加载顺序加载相应的日志输出类，直到成功加载：&lt;/p>
+&lt;p>顺序为：log4jLogger &amp;gt; slf4jLogger &amp;gt; JclLogger &amp;gt; JdkLogger&lt;/p>
+&lt;p>LoggerFactory 在类加载过程中变量的初始化过程：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// search common-used logging frameworks&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">static&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String logger &lt;span style="color:#719e07">=&lt;/span> System.getProperty(&lt;span style="color:#2aa198">&amp;#34;dubbo.application.logger&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">switch&lt;/span> (logger) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> Slf4jLoggerAdapter.NAME:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter(&lt;span style="color:#719e07">new&lt;/span> Slf4jLoggerAdapter());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> JclLoggerAdapter.NAME:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter(&lt;span style="color:#719e07">new&lt;/span> JclLoggerAdapter());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> Log4jLoggerAdapter.NAME:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter(&lt;span style="color:#719e07">new&lt;/span> Log4jLoggerAdapter());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> JdkLoggerAdapter.NAME:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter(&lt;span style="color:#719e07">new&lt;/span> JdkLoggerAdapter());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">case&lt;/span> Log4j2LoggerAdapter.NAME:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter(&lt;span style="color:#719e07">new&lt;/span> Log4j2LoggerAdapter());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;lt;?&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> LoggerAdapter&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> candidates &lt;span style="color:#719e07">=&lt;/span> Arrays.asList(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Log4jLoggerAdapter.class,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Slf4jLoggerAdapter.class,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Log4j2LoggerAdapter.class,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> JclLoggerAdapter.class,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> JdkLoggerAdapter.class
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> found &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// try to use the first available adapter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (Class&lt;span style="color:#719e07">&amp;lt;?&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> LoggerAdapter&lt;span style="color:#719e07">&amp;gt;&lt;/span> clazz : candidates) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LoggerAdapter loggerAdapter &lt;span style="color:#719e07">=&lt;/span> clazz.getConstructor().newInstance();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> loggerAdapter.getLogger(LoggerFactory.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (loggerAdapter.isConfigured()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter(loggerAdapter);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> found &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Exception &lt;span style="color:#719e07">|&lt;/span> LinkageError ignored) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (found) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.err.println(&lt;span style="color:#2aa198">&amp;#34;Dubbo: Unable to find a proper configured logger to log out.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (Class&lt;span style="color:#719e07">&amp;lt;?&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> LoggerAdapter&lt;span style="color:#719e07">&amp;gt;&lt;/span> clazz : candidates) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LoggerAdapter loggerAdapter &lt;span style="color:#719e07">=&lt;/span> clazz.getConstructor().newInstance();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> loggerAdapter.getLogger(LoggerFactory.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> setLoggerAdapter(loggerAdapter);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> found &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Throwable ignored) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (found) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.err.println(&lt;span style="color:#2aa198">&amp;#34;Dubbo: Using default logger: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> loggerAdapter.getClass().getName() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;. &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;If you cannot see any log, please configure -Ddubbo.application.logger property to your preferred logging framework.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.err.println(&lt;span style="color:#2aa198">&amp;#34;Dubbo: Unable to find any available logger adapter to log out. Dubbo logs will be ignored. &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Please configure -Ddubbo.application.logger property and add corresponding logging library to classpath.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面这段静态块是在LoggerFactory里面，说明只要LoggerFactory类一加载就会去选择对应的日志提供方。大家可能会发现对日志的提供方其实是可以通过配置来指定的，因为静态块一开始是从当前jvm环境中获取dubbo.application.logger，这个参数是同java -Ddubbo.application.logger=xxxx去指定的，如果是放在容器里面，就需要配置在容器启动的jvm参数里面。&lt;/p>
+&lt;h2 id="使用log4j来提供日志输出">使用Log4j来提供日志输出&lt;/h2>
+&lt;p>你不用做过多的处理就可以开启dubbo的日志，因为dubbo默认就是使用log4j。你唯一需要做的就是配置一个name是&amp;quot;com.alibaba.dubbo&amp;quot;的logger就可以了，然后关联到对应的appender。如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;appender&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubboAppender&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.log4j.DailyRollingFileAppender&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;File&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;E:/dubbo.log&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;DatePattern&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;&amp;#39;.&amp;#39;yyyy-MM-dd&amp;#39;.log&amp;#39;&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;layout&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.log4j.PatternLayout&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;ConversionPattern&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> value=&lt;span style="color:#2aa198">&amp;#34;[%d{MMdd HH:mm:ss SSS\} %-5p] [%t] %c{3\} - %m%n&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/layout&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/appender&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;logger&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo&amp;#34;&lt;/span> additivity=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;priority&lt;/span> value =&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;dubboAppender&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/logger&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="使用logback来提供日志输出">使用logback来提供日志输出&lt;/h2>
+&lt;p>这种情况，默认是看不到dubbo的日志输出的，除非出现异常，被你当前系统的日志框架拦截住了。我这里就拿当前使用最多的日志框架logback来做示例。我们知道logback天生和slf4j进行了集成，所以要在项目里面使用logback，调用slf4j暴露的接口就可以。所以要把dubbo的日志输出切换到logback，也就变成了切换到slf4j了。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;timestamp&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;byDate&amp;#34;&lt;/span> datePattern=&lt;span style="color:#2aa198">&amp;#34;yyyyMMdd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- dubbo log --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubboRolling&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;ch.qos.logback.core.rolling.RollingFileAppender&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Encoding&amp;gt;&lt;/span>UTF-8&lt;span style="color:#268bd2">&amp;lt;/Encoding&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;file&amp;gt;&lt;/span>${LOG_HOME_DUBBO}/MTP-DUBBO.log&lt;span style="color:#268bd2">&amp;lt;/file&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;rollingPolicy&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;ch.qos.logback.core.rolling.TimeBasedRollingPolicy&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;fileNamePattern&amp;gt;&lt;/span>${LOG_HOME_DUBBO}/DEMO-%d{yyyy-MM-dd}.%i-DUBBO.zip&lt;span style="color:#268bd2">&amp;lt;/fileNamePattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;maxHistory&amp;gt;&lt;/span>30&lt;span style="color:#268bd2">&amp;lt;/maxHistory&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;TimeBasedFileNamingAndTriggeringPolicy&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;MaxFileSize&amp;gt;&lt;/span>100MB&lt;span style="color:#268bd2">&amp;lt;/MaxFileSize&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/TimeBasedFileNamingAndTriggeringPolicy&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/rollingPolicy&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;pattern&amp;gt;&lt;/span>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n&lt;span style="color:#268bd2">&amp;lt;/pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;immediateFlush&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/immediateFlush&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/appender&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;logger&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo&amp;#34;&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;DEBUG&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;dubboRolling&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/logger&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 也可以将日志信息记录或者保存到文件中。&lt;/p>
+&lt;ol>
+&lt;li>使用&lt;code>accesslog&lt;/code>输出到&lt;code>log4j&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>输出到文件&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;http://localhost/log.txt&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;http://localhost/log2.txt&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 日志框架适配及运行时管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/logger-management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/logger-management/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>日志框架适配，自 &lt;code>2.2.1&lt;/code> 开始，dubbo 开始内置 log4j、slf4j、jcl、jdk 这些日志框架的适配。&lt;/p>
+&lt;p>日志框架运行时管理，自 &lt;code>3.0.10&lt;/code> 开始，dubbo-qos 运行时管控支持查询日志配置以及动态修改使用的日志框架和日志级别。&lt;/p>
+&lt;blockquote>
+&lt;p>通过 dubbo-qos 修改的日志配置不进行持久化存储，在应用重启后将会失效。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>应用程序日志: 收集和存储分布式服务的应用程序日志,支持多种日志格式，包括文本、JSON、XML 和二进制,提供了过滤、聚合和分析日志数据,用于解决分布式应用程序的问题，监控服务的性能。&lt;/p>
+&lt;p>运行时管理: 管理分布式服务的运行时,提供设置阈值和在满足某些条件时采取纠正措施,确保服务保持稳定并高效运行实时检测和响应性能问题。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="日志框架适配">日志框架适配&lt;/h3>
+&lt;p>可以通过以下方式显式配置日志输出策略&lt;/p>
+&lt;ol>
+&lt;li>命令行&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java -Ddubbo.application.logger&lt;span style="color:#719e07">=&lt;/span>log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>&lt;code>dubbo.properties&lt;/code> 中指定&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.logger=log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>&lt;code>dubbo.xml&lt;/code> 中配置&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> logger=&lt;span style="color:#2aa198">&amp;#34;log4j&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>自定义扩展可以参考 &lt;a href="../../../reference-manual/spi/description/logger-adapter">日志适配扩展&lt;/a>&lt;/p>
+&lt;h3 id="日志框架运行时管理">日志框架运行时管理&lt;/h3>
+&lt;ol>
+&lt;li>查询日志配置
+命令：&lt;code>loggerInfo&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>示例&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; loggerInfo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>输出&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>修改日志级别
+命令：&lt;code>switchLogLevel {level}&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>level: &lt;code>ALL&lt;/code>, &lt;code>TRACE&lt;/code>, &lt;code>DEBUG&lt;/code>, &lt;code>INFO&lt;/code>, &lt;code>WARN&lt;/code>, &lt;code>ERROR&lt;/code>, &lt;code>OFF&lt;/code>&lt;/p>
+&lt;p>&lt;strong>示例&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; switchLogLevel WARN
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>输出&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;switchLogLevel WARN
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: WARN```
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>修改日志输出框架
+命令：&lt;code>switchLogger {loggerAdapterName}&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>loggerAdapterName: &lt;code>slf4j&lt;/code>, &lt;code>jcl&lt;/code>, &lt;code>log4j&lt;/code>, &lt;code>jdk&lt;/code>, &lt;code>log4j2&lt;/code>&lt;/p>
+&lt;p>&lt;strong>示例&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; switchLogger slf4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>输出&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;switchLogger slf4j
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [slf4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 日志框架配置与使用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/logger-howto/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/logger-howto/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>在dubbo 3.3.0-beta.3之前，dubbo和dubbo-samples中存在混用log4j和logback的情况，并且部分模块缺少日志配置，造成日志框架使用混乱，经常冲突报错。因此在3.3.0-beta.3之后，统一将日志组件升级替换为log4j2，配置使用上更加简洁，减少了维护成本。此文档说明了应该如何配置使用日志框架，避免间接引入多种日志框架，引起冲突报错。&lt;/p>
+&lt;h2 id="使用方法">使用方法&lt;/h2>
+&lt;h3 id="使用约定">使用约定&lt;/h3>
+&lt;ul>
+&lt;li>请使用log4j2做为日志框架，禁止使用log4j和logback.
+除部分遗留场景，统一使用一种日志框架可以降低使用成本，避免冲突&lt;/li>
+&lt;li>避免日志框架依赖被传递到上游，可以通过在maven设置scope为&lt;code>test、provider&lt;/code>或设置&lt;code>&amp;lt;optional&amp;gt;true&amp;lt;/optional&amp;gt;&lt;/code>的方式解决.
+dubbo作为一个服务框架应该尽量避免传递非必选依赖，将日志框架选择权交给用户&lt;/li>
+&lt;/ul>
+&lt;h3 id="使用场景">使用场景&lt;/h3>
+&lt;h4 id="1-普通dubbo模块">1. 普通dubbo模块&lt;/h4>
+&lt;p>绝大多数模块是此类型，一般是单元测试需要用到日志框架&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>引入maven依赖，注意如果parent已经引入则无需重复添加&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>test&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加log4j2日志配置 &lt;code>src/test/resources/log4j2-test.xml&lt;/code>，使用此名称原因是可以保证最高优先级&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%d{HH:mm:ss.SSS} |-%highlight{%-5p} [%t] %40.40c:%-3L -| %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect,org.junit,org.mockito)}&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="2-非spring-boot-demo模块">2. 非spring-boot demo模块&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>引入maven依赖，注意如果parent已经引入则无需重复添加&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加log4j2日志配置 &lt;code>src/main/resources/log4j2.xml&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%style{%d{HH:mm:ss.SSS}}{Magenta} %style{|-}{White}%highlight{%-5p} [%t] %style{%40.40c}{Cyan}:%style{%-3L}{Blue} %style{-|}{White} %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect)}&amp;#34;&lt;/span> disableAnsi=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="3-spring-boot-demo模块">3. spring-boot demo模块&lt;/h4>
+&lt;p>spring-boot支持用starter的方式引入log4j2依赖，但是注意spring-boot默认使用logback，因此需要在&lt;code>&amp;lt;dependencyManagement&amp;gt;&lt;/code>中排除&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>排除spring-boot-starter-logging&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-dependencies&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>import&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-logging&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>引入maven依赖&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-log4j2&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加log4j2日志配置 &lt;code>src/main/resources/log4j2.xml&lt;/code>&lt;/p>
+&lt;p>可选，spring-boot自带默认日志配置&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="4-spring-boot-native-demo模块">4. spring-boot native demo模块&lt;/h4>
+&lt;p>因为log4j2尚不支持native，需要使用logback来作为日志框架，因此无需任何修改，保留原有方式即可，注意不要间接引入log4j或slf4j-log4j12&lt;/p>
+&lt;h2 id="常见日志框架问题">常见日志框架问题&lt;/h2>
+&lt;h4 id="1-缺少日志框架">1. 缺少日志框架&lt;/h4>
+&lt;p>控制台输出:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: No SLF4J providers were found.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Defaulting to no-operation (NOP) logger implementation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See SLF4J Error Codes for further details.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>解决方案: 引入log4j2依赖&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-日志框架冲突">2. 日志框架冲突&lt;/h4>
+&lt;p>控制台输出:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: Class path contains multiple SLF4J bindings.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../slf4j-log4j12-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../logback-classic-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../log4j-slf4j-impl-2.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Exception in thread &amp;#34;main&amp;#34; java.lang.IllegalArgumentException: LoggerFactory is not a Logback LoggerContext but Logback is on the classpath
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>解决方案: 排除掉除了log4j-slf4j-impl的依赖, 强烈推荐使用 &lt;a href="https://plugins.jetbrains.com/plugin/7179-maven-helper">Maven Helper - IntelliJ IDEs Plugin&lt;/a> 来分析和排除依赖&lt;/p>
+&lt;h4 id="3-其他问题">3. 其他问题&lt;/h4>
+&lt;p>可以参考: &lt;a href="https://www.slf4j.org/codes.html">SLF4J Error Codes&lt;/a>&lt;/p></description></item><item><title>Overview: 调用信息记录</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/accesslog/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/observability/logging/accesslog/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>在 dubbo3 日志分为日志适配和访问日志，如果想记录每一次请求信息，可开启访问日志，类似于 apache 的访问日志。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>基于审计需要等类似 nginx accesslog 输出等。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="log4j-日志">log4j 日志&lt;/h3>
+&lt;p>将访问日志输出到当前应用的 log4j 日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="指定文件">指定文件&lt;/h3>
+&lt;p>将访问日志输出到指定文件&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> accesslog=&lt;span style="color:#2aa198">&amp;#34;http://10.20.160.198/wiki/display/dubbo/foo/bar.log&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>此日志量比较大，请注意磁盘容量。&lt;/p>
+&lt;/blockquote></description></item></channel></rss>

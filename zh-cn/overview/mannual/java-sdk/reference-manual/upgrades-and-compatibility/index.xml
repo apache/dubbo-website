@@ -180,7 +180,119 @@
 &lt;ol>
 &lt;li>为了提升用户的使用体验，后续dubbo有关maven的插件能力都将统一使用dubbo-maven-plugin来提供。方便Dubbo用户使用和接入。而不需要一个特性对应一个插件，导致用户需要依赖多个plugin。&lt;/li>
 &lt;li>更加有利于后续Dubbo提供maven plugin能力时的维护和特性增强。&lt;/li>
-&lt;/ol></description></item><item><title>Overview: 应用级服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/service-discovery/</guid><description/></item><item><title>Overview: 序列化协议升级</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/serialization-upgrade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/serialization-upgrade/</guid><description>
+&lt;/ol></description></item><item><title>Overview: 应用级服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/service-discovery/</guid><description/></item><item><title>Overview: 发布使用不同协议的多个服务，通过单端口监听</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/multi-protocols/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/multi-protocols/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>通过对protocol进行配置，dubbo3可以支持端口的协议复用。
+比如使用Triple协议启动端口复用后，可以在相同的端口上为服务增加
+Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个统一的端口复用
+服务器进行处理的，可以用于服务的协议迁移，并且可以节约端口以及相关的资源，减少运维的复杂性。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/pu-server/pu-server-flow.png" alt="pu-server-image1">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>在服务的创建阶段，通过从Config层获取到服务导出的协议配置从而创建不同的Protocol对象进行导出。在导出的过程
+中，如果不是第一次创建端口复用的Server，那么Exchanger会将Protcol层传递的数据保存到Server，用于后续处理该协议类型的消息。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>当客户端的消息传递过来后，首先会通过Server传递给ProtocolDetector，如果完成了识别，那么就会标记该客户端为对应的协议。并通过WireProtocol配置对应的处理逻辑，最后交给ChannelOperator完成底层的IO框架和对应的Dubbo框架的处理逻辑的绑定。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>以上的协议识别完成之后，Channel已经确定了如何处理远程的客户端消息，通过对应的ServerPipeline进行处理即可（在处理的过程中也会根据配置信息决定消息的处理线程）。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>在同一主机上部署多个服务或需要通过负载均衡器访问多个服务。&lt;/p>
+&lt;h2 id="参考用例">参考用例&lt;/h2>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-port-unification">https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-port-unification&lt;/a>&lt;/p>
+&lt;h2 id="配置方式">配置方式&lt;/h2>
+&lt;p>关于Dubbo支持的配置方式，可以参考&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/">配置说明&lt;/a>&lt;/p>
+&lt;h3 id="服务多协议导出">服务多协议导出&lt;/h3>
+&lt;p>ext-protocol参数支持配置多个不同的协议，协议之间通过&amp;quot;,&amp;ldquo;进行分隔。&lt;/p>
+&lt;h4 id="xml-配置">xml 配置&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;-1&amp;#34;&lt;/span> ext-protocol=&lt;span style="color:#2aa198">&amp;#34;tri,&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;greetingService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.provider.GreetingServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> delay=&lt;span style="color:#2aa198">&amp;#34;5000&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;greeting&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;5000&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.GreetingService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;greetingService&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="api-配置">API 配置&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ProtocolConfig config &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ProtocolConfig(CommonConstants.TRIPLE, &lt;span style="color:#719e07">-&lt;/span>1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config.setExtProtocol(CommonConstants.DUBBO&lt;span style="color:#719e07">+&lt;/span>&lt;span style="color:#2aa198">&amp;#34;,&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="yaml-配置">yaml 配置&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: -&lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ext-protocol&lt;/span>: dubbo,
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="properties-配置">properties 配置&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.protocol.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">tri&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.ext-protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">dubbo,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="qos接入">Qos接入&lt;/h3>
+&lt;h4 id="qos模块导入">Qos模块导入&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-qos&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成Qos模块的导入之后，相关的配置项可参考&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/qos/overview/">Qos操作手册&lt;/a>进行配置。&lt;/p>
+&lt;p>默认情况下，基于端口复用的Qos服务在模块导入后是启动的。&lt;/p>
+&lt;h2 id="使用方式-1">使用方式&lt;/h2>
+&lt;h3 id="qos使用">Qos使用&lt;/h3>
+&lt;p>将Qos协议接入到端口复用的场景下，需要在建立连接之后，客户端先向服务端发送消息，对比将Qos协议通过单个端口提供服务，端口复用版的Qos协议在处理telnet连接的情况下需要用户执行一些操作，完成协议识别（二选一）。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>直接调用命令&lt;/p>
+&lt;p>直接调用telnet支持的命令也可以完成识别，在用户不熟悉的情况下可以调用help指令完成识别&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/pu-server/qos-telnet-directcall.png" alt="pu-server-image2">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>发送telnet命令识别&lt;/p>
+&lt;p>通过telnet命令建立连接之后，执行以下几个步骤：&lt;/p>
+&lt;ol>
+&lt;li>使用 crtl + &amp;ldquo;]&amp;rdquo; 进入到telnet交互界面(telnet默认的escape character)&lt;/li>
+&lt;li>调用 &amp;ldquo;send ayt&amp;rdquo; 向服务端发送特殊识别字段(为telnet协议的一个特殊字段)&lt;/li>
+&lt;li>回车完成消息发送并进入到dubbo的交互界面&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/pu-server/qos-telnet-sendayt.png" alt="pu-server-imgs3">&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="服务引用">服务引用&lt;/h3>
+&lt;p>以&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-port-unification">dubbo-samples-port-unification&lt;/a>中的例子作为基础, 引用不同协议的服务和非端口复用情况下的配置是一致的，下面通过Consumer端的InvokerListener输出调用过程中的URL信息。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GreetingService&lt;span style="color:#719e07">&amp;gt;&lt;/span> reference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setInterface(GreetingService.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setListener(&lt;span style="color:#2aa198">&amp;#34;consumer&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setProtocol(&lt;span style="color:#719e07">this&lt;/span>.protocol);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// reference.setProtocol(CommonConstants.DUBBO);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// reference.setProtocol(CommonConstants.TRIPLE);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/pu-server/reference-service.png" alt="pu-server-imgs4">&lt;/p>
+&lt;p>文档编写中&amp;hellip;&lt;/p>
+&lt;p>Dubbo3 HTTP 协议支持仍在建设中，目前最新的 3.3 开发分支已经有初版原型供体验。正式的生产可用版本预计会在 3.4/3.4 的某个正式版本发布。&lt;/p>
+&lt;p>以下是 Dubbo3 HTTP 协议与编程模式计划支持的几种业务场景：&lt;/p>
+&lt;ul>
+&lt;li>调用 http 协议的微服务体系&lt;/li>
+&lt;li>发布 http 协议的服务&lt;/li>
+&lt;li>多协议发布，一个服务同时发布 http&amp;amp;dubbo 协议&lt;/li>
+&lt;/ul>
+&lt;h2 id="调用-http-协议的微服务体系">调用 http 协议的微服务体系&lt;/h2>
+&lt;p>一个典型的应用场景是 Dubbo 调用 Spring Cloud 开发的微服务体系。&lt;/p>
+&lt;p>不同体系的互通，最关键的两点便是地址格式与编码协议的兼容，只要 Dubbo 能自动发现 SpringCloud 体系的地址并能基于 HTTP 协议进行通信即可。Dubbo3 可以做到：&lt;/p>
+&lt;ul>
+&lt;li>支持 SpringCloud 体系的服务发现地址格式&lt;/li>
+&lt;li>支持 HTTP+JSON 的数据传输格式&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/protocol/http-usecase-1.png" alt="img">&lt;/p>
+&lt;p>基于以上分析，当我们需要调用 Spring Cloud 体系的服务时，只需要在 Dubbo 侧编写标准的 Dubbo Reference 服务引用就可以。同时，为了简化开发工作，&lt;strong>Dubbo 支持标准的 Spring Web 注解&lt;/strong>，因此，如果你可以直接在 Dubbo 中复用 Spring Cloud 中的接口定义：&lt;/p>
+&lt;p>Spring Cloud 侧的服务定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">SpringCloudRestService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//xxx&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Dubbo 侧唯一要做的工作就是定义 Dubbo Reference：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboReference&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> SpringCloudRestService restService;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="发布-http-协议的服务">发布 http 协议的服务&lt;/h2>
+&lt;h2 id="多协议发布">多协议发布&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/protocol/http-usecase-1.png" alt="img">&lt;/p></description></item><item><title>Overview: 序列化协议升级</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/serialization-upgrade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/serialization-upgrade/</guid><description>
 &lt;p>在 &lt;code>3.1.0&lt;/code> 版本中，Dubbo 默认支持的序列化协议新增对 Fastjson2 的支持。部分用户可能会考虑在现有的系统中对序列化协议进行升级，但服务端和客户端版本的差异可能导致客户端并不支持服务端的序列化协议。&lt;/p>
 &lt;p>在 &lt;code>3.2.0&lt;/code> 版本中, Dubbo 的服务端引入新的配置 &lt;code>prefer-serialization&lt;/code>，该特性可以完美解决服务端序列化升级过程中可能带来的风险。&lt;/p>
 &lt;h3 id="最佳实践">最佳实践&lt;/h3>
@@ -731,6 +843,72 @@ Grpc 使用 &lt;code>compiler&lt;/code> 将编写的 &lt;code>proto&lt;/code> �
 &lt;/ul>
 &lt;p>&lt;code>stub&lt;/code> 用一种统一的使用方式帮我们屏蔽了不同调用方式的细节。不过目前 &lt;code>Dubbo3&lt;/code> 暂时只支持传统定义接口并进行调用的使用方式。&lt;/p>
 &lt;p>在不久的未来，&lt;code>Triple&lt;/code> 也将实现各种常用的 &lt;code>Stub&lt;/code>，让用户写一份&lt;code>proto&lt;/code>文件，通过 &lt;code>comipler&lt;/code> 可以在任意场景方便的使用，请拭目以待。&lt;/p>
+&lt;/div></description></item><item><title>Overview: Dubbo2 协议迁移</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration/</guid><description>
+&lt;h2 id="迁移流程说明">迁移流程说明&lt;/h2>
+&lt;p>Dubbo2 的用户使用 dubbo 协议 + 自定义序列化，如 hessian2 完成远程调用。&lt;/p>
+&lt;p>而 Grpc 的默认仅支持 Protobuf 序列化，对于 Java 语言中的多参数以及方法重载也无法支持。&lt;/p>
+&lt;p>Dubbo3 的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 能够平滑升级， Dubbo 框架侧做了很多工作来保证升级的无感，目前默认的序列化和 Dubbo2 保持一致为 &lt;code>hessian2&lt;/code>。&lt;/p>
+&lt;p>所以，如果决定要升级到 Dubbo3 的 &lt;code>Triple&lt;/code> 协议，只需要修改配置中的协议名称为 &lt;code>tri&lt;/code> (注意: 不是 triple )即可。&lt;/p>
+&lt;p>接下来我们以一个使用 Dubbo2 协议的&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration">工程&lt;/a>来举例，如何一步一步安全的升级。&lt;/p>
+&lt;ol>
+&lt;li>仅使用 &lt;code>dubbo&lt;/code> 协议启动 &lt;code>provider&lt;/code> 和 &lt;code>consumer&lt;/code>，并完成调用。&lt;/li>
+&lt;li>仅使用 &lt;code>tri&lt;/code> 协议启动 &lt;code>provider&lt;/code> 和 &lt;code>consumer&lt;/code>，并完成调用。&lt;/li>
+&lt;li>使用 &lt;code>dubbo&lt;/code> 协议和 &lt;code>tri&lt;/code> 协议 启动 &lt;code>provider&lt;/code>，以 &lt;code>dubbo&lt;/code> 协议启动 &lt;code>consumer&lt;/code>，并完成调用。&lt;/li>
+&lt;/ol>
+&lt;h3 id="定义服务">定义服务&lt;/h3>
+&lt;ol>
+&lt;li>定义接口&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IWrapperGreeter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//... &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 这是一个普通接口，没有使用 pb 序列化
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String request);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>实现类示例&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">IGreeter2Impl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> IWrapperGreeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String request) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hello,&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="仅使用-dubbo-协议">仅使用 dubbo 协议&lt;/h3>
+&lt;p>为保证兼容性，我们先将部分 provider 升级到 &lt;code>dubbo3&lt;/code> 版本并使用 &lt;code>dubbo&lt;/code> 协议。&lt;/p>
+&lt;p>使用 &lt;code>dubbo&lt;/code> 协议启动一个 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java">&lt;code>Provider&lt;/code>&lt;/a> 和 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java">&lt;code>Consumer&lt;/code>&lt;/a> 完成调用。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">输出结果&lt;/h4>
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png" alt="result">
+&lt;/div>
+&lt;h3 id="仅使用-triple-协议">仅使用 triple 协议&lt;/h3>
+&lt;p>当所有的 consumer 都升级至支持 &lt;code>Triple&lt;/code> 协议的版本后，provider 可切换至仅使用 &lt;code>Triple&lt;/code> 协议启动&lt;/p>
+&lt;p>结构如图所示:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-only-tri-strust.png" alt="strust">&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java">Provider&lt;/a>
+和 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java">Consumer&lt;/a> 完成调用。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">输出结果&lt;/h4>
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png" alt="result">
+&lt;/div>
+&lt;h3 id="同时使用-dubbo-和-triple-协议">同时使用 dubbo 和 triple 协议&lt;/h3>
+&lt;p>对于线上服务的升级，不可能一蹴而就同时完成 provider 和 consumer 升级, 需要按步操作，&lt;/p>
+&lt;p>&lt;strong>第一步：保证业务稳定。&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>第二步：provider 提供双协议的方式同时支持 dubbo + tri 两种协议的客户端。&lt;/strong>&lt;/p>
+&lt;p>结构如图所示:
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/migrate-dubbo-tri-strust.png" alt="strust">&lt;/p>
+&lt;blockquote>
+&lt;p>按照推荐升级步骤，provider 已经支持了 tri 协议，所以 dubbo3 的 consumer 可以直接使用 tri 协议&lt;/p>
+&lt;/blockquote>
+&lt;p>使用 &lt;code>dubbo&lt;/code> 协议和 &lt;code>triple&lt;/code> 协议启动&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java">&lt;code>Provider&lt;/code>&lt;/a>和&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java">&lt;code>Consumer&lt;/code>&lt;/a> 完成调用。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">输出结果&lt;/h4>
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png" alt="result">
 &lt;/div></description></item><item><title>Overview: 查看历史版本文档</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/version/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/version/</guid><description>
 &lt;section id="section-0" style="">
 &lt;div class="td-content list-page">
