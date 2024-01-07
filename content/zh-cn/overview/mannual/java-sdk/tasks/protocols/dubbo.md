@@ -94,6 +94,9 @@ java -jar ./consumer/target/xxx.jar
 
 此外，dubbo 协议还支持配置如 payload 限制、序列化、连接数、连接超时时间、心跳等，具体请参见【参考手册 - dubbo协议】。
 
+## 发布REST风格服务
+
+
 ### 更多内容：
 * dubbo 协议规范
 * RPC 框架，如超时时间、异步调用等

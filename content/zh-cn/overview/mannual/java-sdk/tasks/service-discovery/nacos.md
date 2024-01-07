@@ -8,8 +8,57 @@ description:
 linkTitle: 使用Nacos注册中心
 title: 配置服务发现
 type: docs
-weight: 1
+weight: 4
 ---
+
+### Nacos 注册中心
+以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。
+
+在项目中添加 macos-client 等相关依赖：
+
+```xml
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
+    <version>3.3.0-beta.1</version>
+</dependency>
+```
+
+在 `application.yml` 文件增加 retistry 注册中心配置。
+
+```yml
+dubbo:
+  registry:
+    address: "nacos://127.0.0.1:8848"
+```
+
+之后启动 Dubbo 进程，provider 将自动注册服务和地址到 Nacos server，同时 consumer 自动订阅地址变化。
+
+**Dubbo 支持配置到注册中心连接的鉴权，也支持指定命名空间、分组等以实现注册数据的隔离，此外，Dubbo 还支持设置如延迟注册、推空保护、只注册、只订阅等注册订阅行为。** 以下是一些简单的配置示例，请查看 [注册中心参考手册]() 了解更多配置详情。
+
+```yml
+dubbo:
+  registry:
+    address: "nacos://127.0.0.1:8848"
+    group: group1 # use separated group in registry server.
+    delay: 10000 # delay registering instance to registry server.
+    parameters.namespace: xxx # set target namespace to operate in registry server.
+    parameters.key: value # extended key value that will be used when building connection with registry.
+```
+
+{{% alert title="服务发现模型说明" color="warning" %}}
+Dubbo3 在兼容 Dubbo2 `接口级服务发现`的同时，定义了新的`应用级服务发现`模型，关于它们的含义与工作原理请参考 [应用级服务发现]()。
+
+Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。强烈建议新用户明确配置使用应用级服务发现。
+```yml
+dubbo:
+  registry:
+    address: "nacos://127.0.0.1:8848"
+    register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
+```
+新用户与老用户均建议参考 [应用级服务发现迁移指南]() 了解更多配置详情。
+{{% /alert %}}
+
 
 以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。
 

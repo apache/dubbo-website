@@ -8,7 +8,7 @@ description:
 linkTitle: 使用Zookeeper注册中心
 title: 配置服务发现
 type: docs
-weight: 1
+weight: 3
 ---
 
 ## 1 前置条件

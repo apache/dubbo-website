@@ -12,6 +12,7 @@ Dubbo 作为一款 RPC 框架内置了高效的 RPC 通信协议，帮助解决�
  * **rest**，基于 HTTP+JSON 标准的通信协议，用于发布 REST 风格的 HTTP 服务，网关等路由组件兼容性高；
  * **多种生态扩展协议**；
 
+## 协议概览
 **开发者该如何确定使用哪一种协议那？** 以下是我们从使用场景、性能、编程易用性、多语言互通等方面对多个主流协议的对比分析：
 
 | 协议 | 性能 | 网关友好 | Streaming通信模式 | 多语言互通 | 编程API | 说明 |
@@ -47,6 +48,14 @@ dubbo:
 
 ### 服务定义方式
 使用 triple 协议时，开发者可以使用 `Java Interface`、`Protobuf(IDL)` 两种方式定义 Dubbo RPC 服务，两种服务定义模式下的协议能力是对等的，仅影响开发者的编程体验，具体选用那种开发模式，取决于使用者的业务背景。
+
+
+| | 是 | 否 | Streaming通信模式 | 多语言互通 | 编程API | 说明 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 你公司的业务是否有用 Java 之外的其他语言，跨语言互通的场景是不是普遍？ | Protobuf | Java 接口 | ccc | ddd | eee | fff |
+| 公司里的开发人员是否熟悉 Protobuf，愿意接受 Protobuf 的额外成本吗？ | Protobuf | Java 接口 | ccc | ddd | eee | fff |
+| 是否有标准 gRPC 互通诉求？ | Protobuf | Java 接口 |  |  |  |  |
+| 是不是 Dubbo2 老用户，想平滑迁移到 triple 协议？ | Java 接口 | Protobuf | ccc | ddd | eee | fff |
 
 #### 1. Java Interface
 即通过声明一个 Java 接口的方式定义服务，我们在快速开始一节中看到的示例即是这种模式，**适合于没有跨语言诉求的开发团队，具备学习成本低的优势，Dubbo2 老用户可以零成本切换协议**。
@@ -128,17 +137,22 @@ Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使�
 - 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的
 - 推送类场景，多个消息在同一个调用的上下文中被发送和处理
 
-Stream 分为以下三种:
-- SERVER_STREAM(服务端流)
-  ![SERVER_STREAM](/imgs/v3/migration/tri/migrate-server-stream.png)
-- CLIENT_STREAM(客户端流)
-  ![CLIENT_STREAM](/imgs/v3/migration/tri/migrate-client-stream.png)
-- BIDIRECTIONAL_STREAM(双向流)
-  ![BIDIRECTIONAL_STREAM](/imgs/v3/migration/tri/migrate-bi-stream.png)
+Stream 分为以下三种。
 
-在 Dubbo3 中，流式接口以 `SteamObserver` 声明和使用，用户可以通过使用和实现这个接口来发送和处理流的数据、异常和结束。
+##### SERVER_STREAM(服务端流)
+A server-streaming RPC is similar to a unary RPC, except that the server returns a stream of messages in response to a client’s request. After sending all its messages, the server’s status details (status code and optional status message) and optional trailing metadata are sent to the client. This completes processing on the server side. The client completes once it has all the server’s messages.
+![SERVER_STREAM](/imgs/v3/migration/tri/migrate-server-stream.png)
 
-对于 Dubbo2 用户来说，可能会对StreamObserver感到陌生，这是Dubbo3定义的一种流类型，Dubbo2 中并不存在 Stream 的类型，所以对于迁移场景没有任何影响。
+##### CLIENT_STREAM(客户端流)
+A client-streaming RPC is similar to a unary RPC, except that the client sends a stream of messages to the server instead of a single message. The server responds with a single message (along with its status details and optional trailing metadata), typically but not necessarily after it has received all the client’s messages.
+![CLIENT_STREAM](/imgs/v3/migration/tri/migrate-client-stream.png)
+
+##### BIDIRECTIONAL_STREAM(双向流)
+In a bidirectional streaming RPC, the call is initiated by the client invoking the method and the server receiving the client metadata, method name, and deadline. The server can choose to send back its initial metadata or wait for the client to start streaming messages.
+
+Client- and server-side stream processing is application specific. Since the two streams are independent, the client and server can read and write messages in any order. For example, a server can wait until it has received all of a client’s messages before writing its messages, or the server and client can play “ping-pong” – the server gets a request, then sends back a response, then the client sends another request based on the response, and so on.
+![BIDIRECTIONAL_STREAM](/imgs/v3/migration/tri/migrate-bi-stream.png)
+
 
 {{% alert title="流的语义保证" color="primary" %}}
 - 提供消息边界，可以方便地对消息单独处理

@@ -58,7 +58,7 @@ $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.grpc.inte
 
 ## 更多内容
 
-本示例主要演示 triple 可以 100% 兼容谷歌发布的 gRPC 框架，而在 triple 相关部分具体代码与配置上，本示例与之前介绍的 [基于 protobuf 的 triple 示例完全一致](../idl/)，因此，我们不再重复讲解。
+本示例主要演示 triple 可以 100% 兼容谷歌发布的 gRPC 框架，而在 triple 相关部分具体代码与配置上，本示例与之前介绍的 [基于 protobuf 的 triple 示例完全一致](../idl/)，因此我们不再重复讲解源代码与开发步骤。
 
 本示例演示的是 unary 模式的通信兼容性，对于 streaming 模式同样适用。
 

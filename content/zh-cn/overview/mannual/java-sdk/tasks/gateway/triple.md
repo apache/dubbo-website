@@ -10,24 +10,19 @@ type: docs
 weight: 2
 ---
 
-在 [triple协议规范]() 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，比如 triple 同时支持跑在 HTTP/1、HTTP/2 上：在后端服务之间使用高效的 triple 二进制协议；而对于前端接入层，则支持所有标准 HTTP 工具如 cURL 以标准 `application/json` 格式请求访问。
+在 [triple协议规范]() 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：
+* 在后端服务之间使用高效的 triple 二进制协议。
+* 对于前端接入层，则支持所有标准 HTTP 工具如 cURL 等以标准 `application/json` 格式请求后端服务。
 
-接下来我们就看一下，对于网关而言，如何接入后端的 triple 微服务体系。
-
-```shell
-$ curl \
-    --header "Content-Type: application/json" \
-    --data '["Dubbo"]' \
-    http://localhost:50051/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/
-```
+接下来我们就看一下，对于前端 HTTP 流量而言，如何通过一些通用的网关产品快速接入后端的 triple 微服务体系。
 
 ## 原生 HTTP 接入
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/http-to-triple.png"/>
 
-如上图所示，从浏览器/手机端过来的 HTTP 请求，网关可直接以 `application/json` 格式转发给后端 Dubbo 服务，后端服务之间则继续走 triple 二进制协议。**由于进出网关的都是标准的 HTTP 流量，网关不需要做任何的私有协议转换工作，不需要任何定制化逻辑，只专注与流量路由等职责即可。**
+如上图所示，从浏览器、手机或 Web 服务器过来的 HTTP 请求，网关可直接以 `application/json` 格式转发给后端 Dubbo 服务，后端服务之间则继续走 triple 二进制协议。**由于进出网关的都是标准的 HTTP 流量，网关不需要做任何的私有协议转换工作，不需要任何定制化逻辑，只需专注于流量路由等职责即可。**
 
-在真正的生产环境下，唯一需要网关解决的只剩下地址发现问题，即**如何动态感知后端 triple 服务的实例变化？** 好消息是，目前几款主流的开源网关产品如 Apache APISIX、Higress 等普遍支持以 Nacos、Zookeeper、Kubernetes 作为 upstream 数据源。
+在真正的生产环境下，**唯一需要网关解决的只剩下地址发现问题，即如何动态感知后端 triple 服务的实例变化？** 好消息是，目前几款主流的开源网关产品如 Apache APISIX、Higress 等普遍支持以 Nacos、Zookeeper、Kubernetes 作为 upstream 数据源。
 
 以下我们以 `APISIX + Nacos + Dubbo` 的典型用法为例，详细说明整套机制的工作流程。
 
@@ -78,12 +73,12 @@ $ curl \
 
 在前面的示例中，如类似 `http://127.0.0.1:9080/triple/demo/hello` 会是更符合前端使用的访问方式，要做到这一点，我们可以通过在 APISIX 等网关配置 uri rewrite 重写，实现前端 `/triple/demo/hello` 到后端 `/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/` 的映射。
 
-除此之外，**Dubbo 框架还内置支持为 triple 服务暴露 REST 风格的 HTTP 访问路径**，具体使用方式取决于你使用的是基于 [protobuf 的服务定义模式]()，还是基于 [java 接口的服务定义模式]()：
+除了配置网关 rewrite 重新规则之外，**Dubbo 框架还为 triple 服务暴露 REST 风格的 HTTP 访问路径提供了内置支持**，具体使用方式取决于你使用的是基于 [protobuf 的服务定义模式]()，还是基于 [java 接口的服务定义模式]()：
 * Java 接口模式，通过直接为 java 接口增加注解可以同时发布 REST 风格服务，目前支持 Spring Web 与 JAX-RS 两套注解标准。
 * Protobuf 模式，通过使用 grpc-gateway 可发布 REST 风格服务。
 
 ### Java接口模式(注解)
-通过为 Java 接口增加以下任意一种注解，即可发布 REST 风格的服务。这样配置之后，对于同一个服务，你既可以使用标准二进制 triple 格式访问服务，也可以使用 REST HTTP 方式以 JSON 格式访问服务。
+通过为 Java 接口增加以下任意一种注解，即可发布 triple 二进制、REST 风格的服务。这样配置之后，对于同一个服务，你既可以使用标准二进制 triple 格式访问服务，也可以使用 REST HTTP 方式以 JSON 格式访问服务。
 
 Spring Web 风格注解：
 ```java

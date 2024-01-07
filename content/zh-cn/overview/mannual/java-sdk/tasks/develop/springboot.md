@@ -50,6 +50,16 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
     </dependencies>
 ```
 
+dubbo-spring-boot-starter 的版本号与 Dubbbo 框架版本号完全一致，因此你可以根据想要的 dubbo 版本选择 dubbo-spring-boot-starter 版本。以下是一些 dubbo-spring-boot-starter 版本对应的 SpringBoot、JDK 依赖：
+
+| Dubbo Starter | 推荐 Spring Boot 版本 | 兼容 Spring Boot 范围 | JDK 要求 |
+| --- | --- | --- | --- |
+| 3.3.0 | 3.1.0 | [3.0.x ～ 3.2.x] | 17 |
+| 3.2.21 | 2.6.10 | [2.x ~ 3.0.x) | 8 |
+| 3.1.11 | 2.6.10 | [2.x ~ 3.0.x) | 8 |
+| 2.7.21 | 2.3.10 |  | 8 |
+| 2.6.0 |  |  | 7 |
+
 以下是 Dubbo 官方提供的 starter 列表
 * `dubbo-spring-boot-starter`，管理 dubbo 核心依赖，同时用于识别 application.properties 或 application.yml 中 `dubbo.` 开头的配置项，扫描 @DubboService 等注解。
 * `dubbo-nacos-spring-boot-starter`，管理 nacos-client 等依赖，使用 Nacos 作为注册中心、配置中心时引入。

@@ -3,7 +3,7 @@ description: "Dubbo 是一款轻量的 RPC 框架，提供 Java、Go、Node.js�
 linkTitle: RPC框架
 title: Dubbo 作为轻量 RPC 框架解决组件通信问题
 type: docs
-weight: 2
+weight: 6
 ---
 
 {{% docs/section_list %}}
