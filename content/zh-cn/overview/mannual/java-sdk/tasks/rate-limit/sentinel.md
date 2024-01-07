@@ -6,7 +6,7 @@ aliases:
     - /zh/overview/tasks/rate-limit/sentinel/
     - /zh-cn/overview/tasks/rate-limit/sentinel/
 description: "使用 Sentinel 保护您的应用，防止应用因个别服务的突发流量过载而出现稳定性问题。"
-linkTitle: Sentinel 限流
+linkTitle: 待整合-Sentinel 限流
 title: Sentinel 限流
 type: docs
 weight: 1

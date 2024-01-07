@@ -3,7 +3,7 @@ aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-management/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-management/
 description: 在 Dubbo 中适配日志框架并支持运行时动态切换使用的日志框架
-linkTitle: 日志框架适配及运行时管理
+linkTitle: 待整合-日志框架适配及运行时管理
 title: 日志框架适配及运行时管理
 type: docs
 weight: 4

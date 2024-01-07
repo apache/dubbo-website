@@ -1,6 +1,6 @@
 ---
 description: 自适应限流
-linkTitle: 自适应限流
+linkTitle: 待整合-自适应限流
 title: 自适应限流
 type: docs
 weight: 28

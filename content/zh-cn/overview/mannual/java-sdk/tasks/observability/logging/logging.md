@@ -4,7 +4,7 @@ aliases:
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/logging/
 description: 日志管理
 hide_summary: true
-linkTitle: 日志管理
+linkTitle: 待整合-日志管理
 no_list: true
 title: 日志管理
 type: docs

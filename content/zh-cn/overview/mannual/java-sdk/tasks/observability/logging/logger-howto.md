@@ -3,7 +3,7 @@ aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/others/logge-howto/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-howto/
 description: 在dubbo和dubbo-samples中如何配置与使用日志框架
-linkTitle: 日志框架配置与使用
+linkTitle: 待整合-日志框架配置与使用
 title: 日志框架配置与使用
 type: docs
 weight: 7

@@ -3,7 +3,7 @@ aliases:
   - /zh/overview/tasks/rate-limit/resilience4j/
   - /zh-cn/overview/tasks/rate-limit/resilience4j/
 description: "使用 Resilience4j 断路器、限流器、重试、隔离机制保护 Dubbo 应用"
-linkTitle: Resilience4j
+linkTitle: 待整合-Resilience4j
 title: Resilience4j
 type: docs
 weight: 3
