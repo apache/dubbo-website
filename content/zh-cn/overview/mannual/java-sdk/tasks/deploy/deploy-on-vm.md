@@ -3,198 +3,95 @@ aliases:
     - /zh/overview/tasks/deploy/deploy-on-vm/
     - /zh-cn/overview/tasks/deploy/deploy-on-vm/
 description: ""
-linkTitle: 部署到虚拟机
-title: 部署 Dubbo 应用到虚拟机环境
+linkTitle: 传统注册中心
+title: 传统基于 Zookeeper、Nacos 的注册中心部署架构，部署 Dubbo 应用到虚拟机环境
 type: docs
 weight: 1
 ---
 
+下图是使用 Nacos、Zookeeper 作为注册中心的典型 Dubbo 微服务部署架构。
 
+<img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes.png" style="max-width:650px;height:auto;" />
 
-## 总体目标
-- 虚拟机环境
-- 部署 Zookeeper
-- 部署 Dubbo-admin + Zookeeper
-- 部署 Provider + Zookeeper 与 Consumer + Zookeeper
+## 安装 Nacos
+请参考以下文档了解如何在本地 [安装 Nacos]()。
 
-## 基本流程与工作原理
+## 部署应用
+我们仍然以 [快速开始]() 中的项目为例，演示应用打包部署的具体步骤。
 
-![img](/imgs/v3/tasks/deploy/linux.jpg)
+克隆示例项目到本地：
+```shell
+$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+````
 
-## 详细步骤
-
-### zookeeper
-
-下载项目到本地
-```
-wget https://dlcdn.apache.org/zookeeper/zookeeper-x.x.x/apache-zookeeper-x.x.x-bin.tar.gz
-```
-
-> apache-zookeeper-x.x.x.tar.gz 为未编译版本, 自 3.5.5 版本以后，已编译的 jar 包后缀 `-bin`，请使用 apache-zookeeper-x.x.x-bin.tar.gz
-
-解压项目到本地
-```
-tar zxvf apache-zookeeper-x.x.x-bin.tar.gz -C /usr/local/ && cd /usr/local
+切换到示例目录：
+```shell
+$ cd dubbo-samples/11-quickstart
 ```
 
-移动项目修改为 zookeeper 并切换至 zookeeper
-```
-mv apache-zookeeper-x.x.x-bin zookeeper && cd zookeeper
+以下是两种打包部署模式：
+
+### 方式一：本地进程
+
+本地打包进程：
+```shell
+$ mvn clean package
 ```
 
-创建目录并切换此目录导入内容
-```
-mkdir data && cd data && echo 1 > myid
-```
-
-切换至 zookeeper 配置文件
-```
-cd .. && cp conf/zoo_sample.cfg conf/zoo.cfg && vim conf/zoo.cfg
+启动 Dubbo 进程：
+```shell
+$ java -jar ./quickstart-service/target/quickstart-service-0.0.1-SNAPSHOT.jar
 ```
 
-配置
-```
-# zoo.cfg
-tickTime=2000
-initLimit=10
-syncLimit=5
-dataDir=/usr/local/zookeeper/data
-clientPort=2181
-admin.serverPort=2182
+{{% alert title="提示" color="primary" %}}
+为了程序正常运行，请确保 `application.yml` 文件中的注册中心地址已经正确指向你想要的注册中心。
+{{% /alert %}}
+
+### 方式二：docker容器
+
+```shell
+$ docker build -f ./Dockerfile -t quickstart
 ```
 
-启动 zookeeper
-```
-./bin/zkServer.sh start
-```
-
-克隆项目到本地
-```
-git clone https://github.com/apache/dubbo-samples.git && cd dubbo-samples/1-basic/dubbo-samples-spring-boot
+```shell
+$ docker run quickstart -p port1:port2
+# 对于一些端口或连接注册中心的细节要写清楚
 ```
 
-打包编译
-```
-mvn clean package
-```
+{{% alert title="提示" color="primary" %}}
+Docker 容器环境下，不同容器间用于网络通信的地址需要特别关注，因此你可能需要设置 Dubbo 进程监听或者注册到注册中心的地址，请参考以下链接了解更多内容。
+{{% /alert %}}
 
-```
-[INFO] ------------------------------------------------------------------------
-[INFO] Reactor Summary:
-[INFO]
-[INFO] Dubbo Samples Spring Boot 1.0-SNAPSHOT ............. SUCCESS [  0.178 s]
-[INFO] dubbo-samples-spring-boot-interface ................ SUCCESS [  2.169 s]
-[INFO] dubbo-samples-spring-boot-provider ................. SUCCESS [12:37 min]
-[INFO] dubbo-samples-spring-boot-consumer 1.0-SNAPSHOT .... SUCCESS [  0.219 s]
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 12:54 min
-[INFO] Finished at: 2023-01-16T01:17:09-05:00
-[INFO] ------------------------------------------------------------------------
-```
+### 查看部署状态
+安装并运行 dubbo-control-plane，查看本地服务部署状态：
 
-### dubbo-admin
+1. 下载安装包
 
-克隆项目到本地
-```
-# 默认配置
-git clone https://github.com/apache/dubbo-admin.git && cd dubbo-admin
-# 修改配置
-git clone https://github.com/apache/dubbo-admin.git && cd dubbo-admin && vim dubbo-admin-server/src/main/resources/application.properties
-```
+	```shell
+	$ curl -L https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/release/downloadDubbo.sh | sh -
+	$ cd dubbo-$version/bin
+	```
 
-配置
-```
-# dubbo-admin-server/src/main/resources/application.properties
-server.port=38080
-dubbo.protocol.port=30880
-dubbo.application.qos-port=32222
+2. 运行以下命令，启动 dubbo-control-plane 进程
+	```shell
+	$ ./dubbo-cp run
+	```
 
-admin.registry.address=zookeeper://127.0.0.1:2181
-admin.config-center=zookeeper://127.0.0.1:2181
-admin.metadata-report.address=zookeeper://127.0.0.1:2181
+{{% alert title="提示" color="primary" %}}
+为了 dubbo-control-plane 正常运行，请修改 `conf/dubbo-cp.yml` 以确保其指向你想要的注册中心。
+{{% /alert %}}
 
-admin.root.user.name=root
-admin.root.user.password=root
-```
-打包编译
-```
-mvn clean package -Dmaven.test.skip=true
-```
+访问 `http://xxx` 查看服务部署详情。
 
-切换至目标服务
-```
-cd dubbo-admin/dubbo-admin-server/target
-```
+### 优雅上下线
+在使用传统注册中心的情况下，我们需要控制实例发布到注册中心、实例从注册中心摘除的时机，以实现优雅上下线：
+1. 上线阶段，通过 [延迟发布]() 机制控制实例注册到注册中心的时机，通过开启 [消费端预热]() 确保流量缓慢的被转发到新节点上。
+2. 下线阶段，通过配置 `prestop` 确保先从注册中心摘除实例注册信息，之后再进入进程销毁过程。
 
-后台运行
-```
-nohup java -jar dubbo-admin-server-0.5.0-SNAPSHOT.jar > /dev/null 2>&1 &
-```
+在下线之前，建议调用以下 http 端口，先从注册中心摘除实例，然后再尝试停止进程
 
-进入服务
+```shell
+$ curl http://offline
+$ sleep 10
+$ kill dubbo-pid
 ```
-http://<IP>:38080
-```
-
-登录页面
-![img](/imgs/v3/tasks/deploy/dubbo-admin-login.jpg)
-
-服务查询
-![img](/imgs/v3/tasks/deploy/dubbo-admin-page.jpg)
-
-### dubbo
-
-克隆项目到本地
-```
-git clone https://github.com/apache/dubbo-samples.git && cd dubbo-samples/1-basic/dubbo-samples-spring-boot
-```
-
-打包编译
-```
-mvn clean package
-```
-
-```
-[INFO] ------------------------------------------------------------------------
-[INFO] Reactor Summary:
-[INFO]
-[INFO] Dubbo Samples Spring Boot 1.0-SNAPSHOT ............. SUCCESS [  8.147 s]
-[INFO] dubbo-samples-spring-boot-interface ................ SUCCESS [ 51.524 s]
-[INFO] dubbo-samples-spring-boot-provider ................. SUCCESS [02:27 min]
-[INFO] dubbo-samples-spring-boot-consumer 1.0-SNAPSHOT .... SUCCESS [  0.284 s]
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 03:49 min
-[INFO] Finished at: 2023-01-16T09:34:39-05:00
-[INFO] ------------------------------------------------------------------------
-```
-
-#### Provider
-
-切换至目标服务
-```
-cd dubbo-samples-spring-boot-provider/target
-```
-
-后台运行
-```
-nohup java -jar dubbo-samples-spring-boot-provider-1.0-SNAPSHOT.jar > /dev/null 2>&1 &
-```
-
-#### Consumer
-
-切换至目标服务
-```
-cd dubbo-samples-spring-boot-consumer/target
-```
-
-后台运行
-```
-nohup java -jar dubbo-samples-spring-boot-consumer-1.0-SNAPSHOT.jar > /dev/null 2>&1 &
-```
-
-查看服务
-![img](/imgs/v3/tasks/deploy/consumer-provider.jpg)

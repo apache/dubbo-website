@@ -4,7 +4,7 @@ aliases:
     - /zh/overview/tasks/rate-limit/hystrix/
     - /zh-cn/overview/tasks/rate-limit/hystrix/
 description: "使用 Hystrix 对 Dubbo 服务进行熔断限流保护"
-linkTitle: Hystrix 熔断降级
+linkTitle: 待整合-Hystrix 熔断降级
 title: Hystrix 熔断降级
 type: docs
 weight: 2

@@ -8,7 +8,7 @@ linkTitle: 限流降级
 no_list: true
 title: 限流降级
 type: docs
-weight: 6
+weight: 8
 ---
 
 {{< blocks/section color="white" height="auto">}}

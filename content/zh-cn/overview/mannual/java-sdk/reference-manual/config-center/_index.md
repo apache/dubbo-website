@@ -7,7 +7,7 @@ description: Dubbo 配置中心的基本使用和工作原理
 linkTitle: 配置中心
 title: 配置中心
 type: docs
-weight: 4
+weight: 6
 ---
 
 
