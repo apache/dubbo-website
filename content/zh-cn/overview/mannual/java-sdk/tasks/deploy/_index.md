@@ -11,7 +11,7 @@ linkTitle: 打包部署
 no_list: true
 title: 打包并部署应用
 type: docs
-weight: 2
+weight: 5
 ---
 
 部署文档中增加 Linux、全托管、半托管等部署架构说明，以沿着这几种模式展开

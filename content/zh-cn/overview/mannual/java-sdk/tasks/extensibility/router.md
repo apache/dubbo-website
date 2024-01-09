@@ -10,81 +10,9 @@ type: docs
 weight: 4
 ---
 
-
-
 通过自定义路由，可以根据业务场景的特点来实现特定的路由方式。
 
 ## 开始之前
-
-有两种部署运行方式，二选一
-### 基于Kubernetes
-* 安装[Kubernetes](https://kubernetes.io/docs/tasks/tools/)环境
-* 修改[Provider](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-router-provider/src/main/resources/application.properties)中的配置文件，启用Kubernetes中部署的nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-router-provider
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # 启用Kubernetes中部署的nacos的地址
-    dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-    # Specify the port of Dubbo protocol
-    dubbo.protocol.port=20881
-    ```
-* 修改[Consumer](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties)中的配置文件，启用Kubernetes中部署的nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-filter-consumer
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    #dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # 启用Kubernetes中部署的nacos的地址
-    dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-    # 配置自定义路由
-    dubbo.consumer.router=stickfirst
-    ```
-* 部署[Extensibility Router Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)
-
-### 使用本地IDE
-* 部署[Nacos](https://nacos.io/zh-cn/docs/quick-start.html)2.2.0版本
-* 修改[Provider](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties)中的配置文件，启用本地nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-router-provider
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # 启用本地nacos的地址
-    dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # Specify the port of Dubbo protocol
-    dubbo.protocol.port=20881
-    ```
-* 修改[Consumer](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties)中的配置文件，启用本地nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-filter-consumer
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # 启用本地nacos的地址
-    dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    #dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # 配置自定义路由
-    dubbo.consumer.router=stickfirst
-    ```
 
 ## 任务详情
 

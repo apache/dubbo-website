@@ -14,6 +14,7 @@ weight: 3
 
 ## 安装 Control Plane
 在这个模式下，我们需要安装 `dubbo-control-plane`
+> 这里是要用 istio 配合一起工作（提供xds推送能力），还是dubbo-control-plane自己实现xds server？
 
 ```yaml
 dubboctl manifests install --profile=control-plane

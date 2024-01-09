@@ -6,7 +6,7 @@ aliases:
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
 description: 某些情况下希望dubbo接口异步调用，避免不必要的等待。
-linkTitle: Provider端和Consumer端异步调用
+linkTitle: 异步调用
 title: 异步调用
 type: docs
 weight: 3

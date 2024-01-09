@@ -49,14 +49,6 @@ dubbo:
 ### 服务定义方式
 使用 triple 协议时，开发者可以使用 `Java Interface`、`Protobuf(IDL)` 两种方式定义 Dubbo RPC 服务，两种服务定义模式下的协议能力是对等的，仅影响开发者的编程体验，具体选用那种开发模式，取决于使用者的业务背景。
 
-
-| | 是 | 否 | Streaming通信模式 | 多语言互通 | 编程API | 说明 |
-| --- | --- | --- | --- | --- | --- | --- |
-| 你公司的业务是否有用 Java 之外的其他语言，跨语言互通的场景是不是普遍？ | Protobuf | Java 接口 | ccc | ddd | eee | fff |
-| 公司里的开发人员是否熟悉 Protobuf，愿意接受 Protobuf 的额外成本吗？ | Protobuf | Java 接口 | ccc | ddd | eee | fff |
-| 是否有标准 gRPC 互通诉求？ | Protobuf | Java 接口 |  |  |  |  |
-| 是不是 Dubbo2 老用户，想平滑迁移到 triple 协议？ | Java 接口 | Protobuf | ccc | ddd | eee | fff |
-
 #### 1. Java Interface
 即通过声明一个 Java 接口的方式定义服务，我们在快速开始一节中看到的示例即是这种模式，**适合于没有跨语言诉求的开发团队，具备学习成本低的优势，Dubbo2 老用户可以零成本切换协议**。
 
@@ -69,7 +61,7 @@ public interface DemoService {
 
 这种模式下，序列化方式可以选用 Hessian、JSON、Kryo、JDK、自定义扩展等任意编码协议。在使用体验上，可以说与老版本 dubbo 协议没有任何区别，只需要改一个 protocol 配置项即可，因此对于 dubbo 协议迁移到 triple 也会更平滑。
 
-* 请通过【进阶学习 - 通信协议】查看 [java Interface + Triple 协议的具体使用示例]()。
+请通过【进阶学习 - 通信协议】查看 [java Interface + Triple 协议的具体使用示例]()。
 
 #### 2. Protobuf(IDL)
 使用 Protobuf(IDL) 的方式定义服务，**适合于当前或未来有跨语言诉求的开发团队，同一份 IDL 服务可同时用于 Java/Go/Node.js 等多语言微服务开发，劣势是学习成本较高**。
@@ -104,9 +96,16 @@ public interface Greeter extends org.apache.dubbo.rpc.model.DubboStub {
 }
 ```
 
-这种模式支持序列化方式有 Protobuf Binary、Protobuf JSON 两种模式。
+Protobuf 模式支持序列化方式有 Protobuf Binary、Protobuf JSON 两种模式。最后，请通过【进阶学习 - 通信协议】查看 [Protobuf (IDL) + Triple 协议的具体使用示例]()。
 
-* 请通过【进阶学习 - 通信协议】查看 [Protobuf (IDL) + Triple 协议的具体使用示例]()。
+#### 3. 我该使用哪种编程模式，如何选择？
+
+| 核心问题 | 是 | 否 |
+| --- | --- | --- |
+| 你公司的业务是否有用 Java 之外的其他语言，跨语言互通的场景是不是普遍？ | Protobuf | Java 接口 |
+| 公司里的开发人员是否熟悉 Protobuf，愿意接受 Protobuf 的额外成本吗？ | Protobuf | Java 接口 |
+| 是否有标准 gRPC 互通诉求？ | Protobuf | Java 接口 |
+| 是不是 Dubbo2 老用户，想平滑迁移到 triple 协议？ | Java 接口 | Protobuf |
 
 ### HTTP 接入方式
 triple 协议支持标准 HTTP 工具的直接访问，因此前端组件如浏览器、网关等接入非常边便捷，同时服务测试也变得更简单。

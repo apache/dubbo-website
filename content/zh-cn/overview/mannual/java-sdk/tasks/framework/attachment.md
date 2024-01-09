@@ -6,7 +6,7 @@ aliases:
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/context/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/attachment/
 description: 通过 Dubbo 中的 Attachment 在服务消费方和提供方之间隐式传递参数
-linkTitle: 调用链路传递隐式参数
+linkTitle: 传递附加参数
 title: 调用链路传递隐式参数
 type: docs
 weight: 5

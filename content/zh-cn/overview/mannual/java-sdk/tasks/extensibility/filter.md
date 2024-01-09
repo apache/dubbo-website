@@ -10,83 +10,9 @@ type: docs
 weight: 1
 ---
 
+在 [RPC框架 - Filter请求拦截]() 一节中，我们了解了 Filter 的工作机制，以及 Dubbo 框架提供的一些内置 Filter 实现。在本文中，我们来了解如何扩展自定义的过滤器实现：一个可以对返回的结果进行统一的处理、验证等统一 Filter 处理器，减少对开发人员的打扰。
 
-
-通过自定义过滤器，可以对返回的结果进行统一的处理、验证等，减少对开发人员的打扰。
-
-## 开始之前
-
-有两种部署运行方式，二选一
-### 基于Kubernetes
-* 安装[Kubernetes](https://kubernetes.io/docs/tasks/tools/)环境
-* 修改[Provider](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties)中的配置文件，启用Kubernetes中部署的nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-filter-provider
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # 启用Kubernetes中部署的nacos的地址
-    dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # Specify the port of Dubbo protocol
-    dubbo.protocol.port=20881
-
-    # Apply AppendedFilter
-    dubbo.provider.filter=appended
-    ```
-* 修改[Consumer](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties)中的配置文件，启用Kubernetes中部署的nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-filter-consumer
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # 启用Kubernetes中部署的nacos的地址
-    dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-    ```
-* 部署`[Extensibility Filter Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)`
-
-### 使用本地IDE
-* 部署[Nacos](https://nacos.io/zh-cn/docs/quick-start.html)2.2.0版本
-* 修改[Provider](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties)中的配置文件，启用本地nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-filter-provider
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # 启用本地nacos的地址
-    dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # Specify the port of Dubbo protocol
-    dubbo.protocol.port=20881
-
-    # Apply AppendedFilter
-    dubbo.provider.filter=appended
-    ```
-* 修改[Consumer](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties)中的配置文件，启用本地nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-filter-consumer
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # 启用本地nacos的地址
-    dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-    ```
+本示例的完整源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/)。除了本示例之外，Dubbo 核心仓库 apache/dubbo 以及扩展库 apache/dubbo-spi-extensions 中的众多 Filter 实现，都可以作为扩展参考实现。
 
 ## 任务详情
 
@@ -147,11 +73,20 @@ appended=org.apache.dubbo.samples.extensibility.filter.provider.AppendedFilter
 ```
 
 #### 配置文件
-在`resources/application.properties`文件中添加如下配置：
+在`resources/application.properties`文件中添加如下配置，激活刚才的自定义 Filter 实现：
 ```properties
 # Apply AppendedFilter
 dubbo.provider.filter=appended
 ```
+
+{{% alert title="注意" color="warning" %}}
+除了通过配置激活 Filter 实现之外，还可以通过为实现类增加 @Activate 注解，以在满足某些条件时自动激活 Filter 实现，如：
+```java
+@Activate(group="provider")
+public class AppendedFilter implements Filter {}
+```
+这个 Filter 实现将在 Provider 提供者端自动被激活。
+{{% /alert %}}
 
 ## 运行结果
 以**使用本地IDE**的方式来运行任务，结果如下：
