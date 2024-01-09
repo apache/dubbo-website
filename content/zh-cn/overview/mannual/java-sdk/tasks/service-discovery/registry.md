@@ -13,6 +13,8 @@ weight: 1
 Dubbo 支持基于注册中心同步的自动实例发现机制，即 Dubbo 提供者注册实例地址到注册中心，Dubbo 消费者通过订阅注册中心变更事件自动获取最新实例变化，从而确保流量始终转发到正确的节点之上。Dubbo 目前支持 Nacos、Zookeeper、Kubernetes Service 等多种注册中心接入。
 
 ## 服务发现
+
+### 注册中心配置
 以下是 Dubbo 服务发现接入的一些主流注册中心实现，更多扩展实现与工作原理请查看 [注册中心参考手册]()：
 
 | 注册中心 | 配置值 | 服务发现模型 | 是否支持鉴权 | spring-boot-starter |
@@ -21,55 +23,132 @@ Dubbo 支持基于注册中心同步的自动实例发现机制，即 Dubbo 提�
 | Zookeeper | zookeeper | 应用级、接口级 | 是 | - dubbo-zookeeper-spring-boot-starter <br/> - dubbo-zookeeper-curator5-spring-boot-starter |
 | Kubernetes Service | 参考下文使用文档 | 应用级 | 是 | 无 |
 
-### 注册中心配置
-以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。
+### 延迟注册
+## 特性说明
+如果你的服务需要预热时间，比如初始化缓存，等待相关资源就位等，可以使用 delay 进行延迟暴露。我们在 Dubbo 2.6.5 版本中对服务延迟暴露逻辑进行了细微的调整，将需要延迟暴露（delay > 0）服务的倒计时动作推迟到了 Spring 初始化完成后进行。你在使用 Dubbo 的过程中，并不会感知到此变化，因此请放心使用。
 
-在项目中添加 macos-client 等相关依赖：
+## 使用场景
+当服务完全配置并准备好向外界暴露时才会触发服务的暴露，保证服务在准备就绪时暴露，提高了服务系统可靠性。
+
+
+## 使用方式
+
+### Dubbo 2.6.5 之前版本
+
+延迟到 Spring 初始化完成后，再暴露服务[^1]
 
 ```xml
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
-</dependency>
+<dubbo:service delay="-1" />
 ```
 
-在 `application.yml` 文件增加 retistry 注册中心配置。
+延迟 5 秒暴露服务
 
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
+```xml
+<dubbo:service delay="5000" />
 ```
 
-之后启动 Dubbo 进程，provider 将自动注册服务和地址到 Nacos server，同时 consumer 自动订阅地址变化。
+### Dubbo 2.6.5 及以后版本
 
-**Dubbo 支持配置到注册中心连接的鉴权，也支持指定命名空间、分组等以实现注册数据的隔离，此外，Dubbo 还支持设置如延迟注册、推空保护、只注册、只订阅等注册订阅行为。** 以下是一些简单的配置示例，请查看 [注册中心参考手册]() 了解更多配置详情。
+所有服务都将在 Spring 初始化完成后进行暴露，如果你不需要延迟暴露服务，无需配置 delay。
 
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
-    group: group1 # use separated group in registry server.
-    delay: 10000 # delay registering instance to registry server.
-    parameters.namespace: xxx # set target namespace to operate in registry server.
-    parameters.key: value # extended key value that will be used when building connection with registry.
+延迟 5 秒暴露服务
+
+```xml
+<dubbo:service delay="5000" />
 ```
 
-{{% alert title="服务发现模型说明" color="warning" %}}
-Dubbo3 在兼容 Dubbo2 `接口级服务发现`的同时，定义了新的`应用级服务发现`模型，关于它们的含义与工作原理请参考 [应用级服务发现]()。
+### Spring 2.x 初始化死锁问题
 
-Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。强烈建议新用户明确配置使用应用级服务发现。
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
-    register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
+### 触发条件
+
+在 Spring 解析到 `<dubbo:service />` 时，就已经向外暴露了服务，而 Spring 还在接着初始化其它 Bean。如果这时有请求进来，并且服务的实现类里有调用 `applicationContext.getBean()` 的用法。
+
+1. 请求线程的 applicationContext.getBean() 调用，先同步 singletonObjects 判断 Bean 是否存在，不存在就同步 beanDefinitionMap 进行初始化，并再次同步 singletonObjects 写入 Bean 实例缓存。
+
+    ![deadlock](/imgs/user/lock-get-bean.jpg)
+
+2. 而 Spring 初始化线程，因不需要判断 Bean 的存在，直接同步 beanDefinitionMap 进行初始化，并同步 singletonObjects 写入 Bean 实例缓存。
+
+    ![/user-guide/images/lock-init-context.jpg](/imgs/user/lock-init-context.jpg)
+
+    这样就导致 getBean 线程，先锁 singletonObjects，再锁 beanDefinitionMap，再次锁 singletonObjects。
+而 Spring 初始化线程，先锁 beanDefinitionMap，再锁 singletonObjects。反向锁导致线程死锁，不能提供服务，启动不了。
+
+### 规避办法
+
+1. 强烈建议不要在服务的实现类中有 applicationContext.getBean() 的调用，全部采用 IoC 注入的方式使用 Spring的Bean。
+2. 如果实在要调 getBean()，可以将 Dubbo 的配置放在 Spring 的最后加载。
+3. 如果不想依赖配置顺序，可以使用 `<dubbo:provider delay=”-1” />`，使 Dubbo 在 Spring 容器初始化完后，再暴露服务。
+4. 如果大量使用 getBean()，相当于已经把 Spring 退化为工厂模式在用，可以将 Dubbo 的服务隔离单独的 Spring 容器。
+
+[^1]: 基于 Spring 的 ContextRefreshedEvent 事件触发暴露
+
+
+### 优雅上下线
+
+### 启动时检查
+
+Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会抛出异常，阻止 Spring 初始化完成，以便上线时，能及早发现问题，默认  `check="true"`。
+
+可以通过 `check="false"` 关闭检查，比如，测试时，有些服务不关心，或者出现了循环依赖，必须有一方先启动。
+
+另外，如果你的 Spring 容器是懒加载的，或者通过 API 编程延迟引用服务，请关闭 check，否则服务临时不可用时，会抛出异常，拿到 null 引用，如果 `check="false"`，总是会返回引用，当服务恢复时，能自动连上。
+
+## 使用场景
+
+- 单向依赖：有依赖关系（建议默认设置）和无依赖关系（可以设置 check=false）
+- 相互依赖：即循环依赖，(不建议设置 check=false)
+- 延迟加载处理
+
+> check 只用来启动时检查，运行时没有相应的依赖仍然会报错。
+
+## 使用方式
+
+**配置含义**
+
+`dubbo.reference.com.foo.BarService.check`，覆盖 `com.foo.BarService`的 reference 的 check 值，就算配置中有声明，也会被覆盖。
+
+`dubbo.consumer.check=false`，是设置 reference 的 `check` 的缺省值，如果配置中有显式的声明，如：`<dubbo:reference check="true"/>`，不会受影响。
+
+`dubbo.registry.check=false`，前面两个都是指订阅成功，但提供者列表是否为空是否报错，如果注册订阅失败时，也允许启动，需使用此选项，将在后台定时重试。
+
+### 通过 spring 配置文件
+
+关闭某个服务的启动时检查
+
+```xml
+<dubbo:reference interface="com.foo.BarService" check="false" />
 ```
-新用户与老用户均建议参考 [应用级服务发现迁移指南]() 了解更多配置详情。
-{{% /alert %}}
 
-### 多个注册中心发现服务
+关闭所有服务的启动时检查
+
+```xml
+<dubbo:consumer check="false" />
+```
+
+关闭注册中心启动时检查
+
+```xml
+<dubbo:registry check="false" />
+```
+
+### 通过 dubbo.properties
+
+```properties
+dubbo.reference.com.foo.BarService.check=false
+dubbo.consumer.check=false
+dubbo.registry.check=false
+```
+
+### 通过 -D 参数
+
+```sh
+java -Ddubbo.reference.com.foo.BarService.check=false
+java -Ddubbo.consumer.check=false
+java -Ddubbo.registry.check=false
+```
+
+### 多注册中心
 Dubbo 支持在同一应用内配置多个注册中心，一个或一组服务可同时注册到多个注册中心，一个或一组服务可同时订阅多个中心的地址，对于订阅方而言，你还可以设置如何调用来自多个注册中心的地址（优先调用某一个注册中心或者其他策略）。
 
 指定全局默认的一个或注册中心，所有的服务默认都注册到或订阅配置的注册中心：
@@ -86,7 +165,23 @@ Dubbo 支持在同一应用内配置多个注册中心，一个或一组服务�
 
 关于多注册中心的更多配置、使用场景说明请参见[【参考手册 - 注册中心 - 多注册中心】]()
 
-### 服务发现问题排查
+### 应用级vs接口级
+Dubbo3 在兼容 Dubbo2 `接口级服务发现`的同时，定义了新的`应用级服务发现`模型，关于它们的含义与工作原理请参考 [应用级服务发现]()。
+
+Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。强烈建议新用户明确配置使用应用级服务发现。
+```yml
+dubbo:
+  registry:
+    address: "nacos://127.0.0.1:8848"
+    register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
+```
+新用户与老用户均建议参考 [应用级服务发现迁移指南]() 了解更多配置详情。
+
+### 注册中心缓存
+
+### 断网恢复
+
+### 问题排查
 相比于 client 到 server 的 RPC 直连调用，开启服务发现后，常常会遇到各种个样奇怪的调用失败问题，以下是一些常见的问题与排查方法。
 
 如果你的项目开启了服务发现，但在测试中想调用某个特定的 ip，可通过设置对端 ip 地址的 [直连模式]() 绕过服务发现机制进行调用。
@@ -97,6 +192,7 @@ Dubbo 支持在同一应用内配置多个注册中心，一个或一组服务�
   * 如 `dubbo.regisry.check=false`，
   * 如 `dubbo.regisry.check=true`，
 4. **消费方因没有有效的地址而启动报错**，可以通过配置ReferenceConfig跳过可用地址列表检查，注解示例为 `@DubboRerefence(check=false)`
+5. 多网卡选择
 
 ## 负载均衡
 

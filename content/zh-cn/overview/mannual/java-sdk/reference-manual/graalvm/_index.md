@@ -4,7 +4,7 @@ aliases:
     - /zh-cn/docs3-v2/java-sdk/reference-manual/graalvm/
 description: ""
 hide_summary: true
-linkTitle: Dubbo 集成 Graalvm参考手册
+linkTitle: GraalVM
 title: Dubbo 集成 Graalvm参考手册
 type: docs
 weight: 9

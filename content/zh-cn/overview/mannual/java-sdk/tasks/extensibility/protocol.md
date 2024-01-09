@@ -10,19 +10,13 @@ type: docs
 weight: 2
 ---
 
-Dubbo 通过协议扩展实现了很多内置的功能，同时也支持很多常用的协议。所有的自定义协议在`org.apache.dubbo.rpc.Protocol`文件中可以看到，以Dubbo 3为例，具体如下：
+在 [通信协议]() 一章中，我们了解了 Dubbo 内置的几个核心 RPC 协议 `dubbo`、`rest`、和`tri` 以及它们的使用方式。本文讲解如何通过扩展 `org.apache.dubbo.rpc.Protocol` SPI，提供自定义的 RPC 协议实现。
+
+自定义一套私有协议有两种方式，第一种是对原有的协议进行包装，添加一些特定的业务逻辑。另外一种是完全自定义一套协议。前者实现简单，在`dubbo`中也是有广泛的使用，比如：`ProtocolFilterWrapper`, `QosProtocolWrapper`, `ProtocolListenerWrapper`等。后者实现相对复杂，但却具有最大的灵活性，比如 Dubbo 框架内置的协议 `dubbo`、`triple` 协议都可以算作这种实现方式。
+
+本示例的完整源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/)。除了本示例之外，Dubbo 核心仓库 apache/dubbo 以及扩展库 apache/dubbo-spi-extensions 中的众多 Protocol 实现，都可以作为扩展参考实现：
 
 ```properties
-# Dubbo通过协议扩展实现的内置功能
-filter=org.apache.dubbo.rpc.cluster.filter.ProtocolFilterWrapper
-qos=org.apache.dubbo.qos.protocol.QosProtocolWrapper
-registry=org.apache.dubbo.registry.integration.InterfaceCompatibleRegistryProtocol
-service-discovery-registry=org.apache.dubbo.registry.integration.RegistryProtocol
-listener=org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper
-mock=org.apache.dubbo.rpc.support.MockProtocol
-serializationwrapper=org.apache.dubbo.rpc.protocol.ProtocolSerializationWrapper
-securitywrapper=org.apache.dubbo.rpc.protocol.ProtocolSecurityWrapper
-
 # Dubbo对外支持的常用协议
 dubbo=org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
 injvm=org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol
@@ -30,84 +24,6 @@ rest=org.apache.dubbo.rpc.protocol.rest.RestProtocol
 grpc=org.apache.dubbo.rpc.protocol.grpc.GrpcProtocol
 tri=org.apache.dubbo.rpc.protocol.tri.TripleProtocol
 ```
-
-我们可以看到，在Dubbo中通过协议扩展的能力实现了过滤、监控数据采集、服务发现、监听器、mock、序列化、安全等一系列能力，同时对外提供了`dubbo`，`injvm`，`rest`，`grpc`和`tri`协议。
-
-自定义一套私有协议有两种方式，第一种是对原有的协议进行包装，添加一些特定的业务逻辑。另外一种是完全自定义一套协议。前者实现简单，在`dubbo`中也是有广泛的使用，比如：`ProtocolFilterWrapper`, `QosProtocolWrapper`, `ProtocolListenerWrapper`等。后者实现复杂，一般常见的协议`dubbo`都实现了，并且通过了大量生产实践的验证。
-
-本文会通过示例演示如何通过现有协议实现一套自定义协议。
-
-## 开始之前
-
-有两种部署运行方式，二选一
-### 基于Kubernetes
-* 安装[Kubernetes](https://kubernetes.io/docs/tasks/tools/)环境
-* 修改[Provider](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-provider/src/main/resources/application.properties)中的配置文件，启用Kubernetes中部署的nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-protocol-provider
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # 自定义协议edubbo
-    dubbo.provider.protocol=edubbo
-    ```
-* 修改[Consumer](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-consumer/src/main/resources/application.properties)中的配置文件，启用Kubernetes中部署的nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-protocol-consumer
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # 自定义协议edubbo
-    dubbo.consumer.protocol=edubbo
-    ```
-* 部署`[Extensibility Protocol Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)`
-
-### 使用本地IDE
-* 部署[Nacos](https://nacos.io/zh-cn/docs/quick-start.html)2.2.0版本
-* 修改[Provider](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-provider/src/main/resources/application.properties)中的配置文件，启用本地nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-protocol-provider
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # 启用本地nacos的地址
-    dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # 自定义协议edubbo
-    dubbo.provider.protocol=edubbo
-    ```
-* 修改[Consumer](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-consumer/src/main/resources/application.properties)中的配置文件，启用本地nacos的地址
-    ```properties
-    # Specify the application name of Dubbo
-    dubbo.application.name=extensibility-protocol-consumer
-
-    # Enable token verification for each invocation
-    dubbo.provider.token=true
-
-    # Specify the registry address
-    # 启用本地nacos的地址
-    dubbo.registry.address=nacos://localhost:8848?username=nacos&password=nacos
-    # dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&password=nacos
-
-    # 自定义协议edubbo
-    dubbo.consumer.protocol=edubbo
-    ```
 
 ## 任务详情
 

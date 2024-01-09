@@ -11,127 +11,53 @@ type: docs
 weight: 4
 ---
 
-### Nacos 注册中心
-以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。
+本示例演示 Nacos 作为注册中心实现自动服务发现，示例基于 Spring Boot 应用展开，可在此查看 [完整示例代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-nacos)
 
-在项目中添加 macos-client 等相关依赖：
+## 1 基本配置
 
-```xml
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
-</dependency>
-```
-
-在 `application.yml` 文件增加 retistry 注册中心配置。
-
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
-```
-
-之后启动 Dubbo 进程，provider 将自动注册服务和地址到 Nacos server，同时 consumer 自动订阅地址变化。
-
-**Dubbo 支持配置到注册中心连接的鉴权，也支持指定命名空间、分组等以实现注册数据的隔离，此外，Dubbo 还支持设置如延迟注册、推空保护、只注册、只订阅等注册订阅行为。** 以下是一些简单的配置示例，请查看 [注册中心参考手册]() 了解更多配置详情。
-
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
-    group: group1 # use separated group in registry server.
-    delay: 10000 # delay registering instance to registry server.
-    parameters.namespace: xxx # set target namespace to operate in registry server.
-    parameters.key: value # extended key value that will be used when building connection with registry.
-```
-
-{{% alert title="服务发现模型说明" color="warning" %}}
-Dubbo3 在兼容 Dubbo2 `接口级服务发现`的同时，定义了新的`应用级服务发现`模型，关于它们的含义与工作原理请参考 [应用级服务发现]()。
-
-Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。强烈建议新用户明确配置使用应用级服务发现。
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
-    register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
-```
-新用户与老用户均建议参考 [应用级服务发现迁移指南]() 了解更多配置详情。
-{{% /alert %}}
-
-
-以 Spring Boot 场景下的应用开发为例，增加以下配置使用基于 Nacos 注册中心的服务发现（Zookeeper 的使用方式类似）。
-
-在项目中添加 macos-client 等相关依赖：
-
-```xml
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
-</dependency>
-```
-
-在 `application.yml` 文件增加 retistry 注册中心配置。
-
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
-```
-
-之后启动 Dubbo 进程，provider 将自动注册服务和地址到 Nacos server，同时 consumer 自动订阅地址变化。
-
-**Dubbo 支持配置到注册中心连接的鉴权，也支持指定命名空间、分组等以实现注册数据的隔离，此外，Dubbo 还支持设置如延迟注册、推空保护、只注册、只订阅等注册订阅行为。** 以下是一些简单的配置示例，请查看 [注册中心参考手册]() 了解更多配置详情。
-
-```yml
-dubbo:
-  registry:
-    address: "nacos://127.0.0.1:8848"
-    group: group1 # use separated group in registry server.
-    delay: 10000 # delay registering instance to registry server.
-    parameters.namespace: xxx # set target namespace to operate in registry server.
-    parameters.key: value # extended key value that will be used when building connection with registry.
-```
-
-
-
-## 1 前置条件
-* 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
-* 安装并启动 [Nacos 服务](https://nacos.io/zh-cn/docs/quick-start.html)
->当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。
-
-## 2 使用说明
-在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-nacos/dubbo-samples-nacos-registry)
-
-### 2.1 增加依赖
+### 1.1 增加依赖
+增加 dubbo、nacos-client 依赖：
 ```xml
 <dependencies>
     <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo</artifactId>
-        <version>3.0.9</version>
+        <version>3.3.0-beta.1</version>
     </dependency>
     <dependency>
       <groupId>com.alibaba.nacos</groupId>
       <artifactId>nacos-client</artifactId>
       <version>2.1.0</version>
     </dependency>
-     <!-- Introduce Dubbo Nacos extension, or you can add Nacos dependency directly as shown above-->
-     <!--
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-registry-nacos</artifactId>
-            <version>3.0.9</version>
-        </dependency>
-     -->
 </dependencies>
 ```
-增加 Dubbo 与 Nacos 依赖
 
-> Dubbo `3.0.0` 及以上版本需 nacos-client `2.0.0` 及以上版本
+对于 Spring Boot 应用，可以使用如下 spring-boot-starter：
+```xml
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-spring-boot-starter</artifactId>
+    <version>3.3.0-beta.1</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
+    <version>3.3.0-beta.1</version>
+</dependency>
+```
 
-### 2.2 配置并启用 Nacos
+### 1.2 Nacos 版本
+Nacos 版本映射关系：
+| Dubbo | 推荐 Nacos 版本 | Nacos 兼容范围 |
+| --- | --- | --- |
+| 3.3.0 | 2.2.3 | 2.x |
+| 3.2.21 | 2.1.0 | 2.x |
+| 3.1.11 | 2.0.9 | 2.x |
+| 3.0.10 | 2.0.9 | 2.x |
+| 2.7.21 | 1.x | 1.x |
+| 2.6.0 | 1.x | 1.x |
+
+### 1.3 配置并启用 Nacos
 
 ```yaml
 # application.yml (Spring Boot)
@@ -149,11 +75,9 @@ dubbo.registry.address=nacos://localhost:8848
 <dubbo:registry address="nacos://localhost:8848" />
 ```
 
-启用应用，查看注册后的效果或工作原理，请查看 [工作原理](#4-工作原理)。
+## 2 高级配置
 
-## 3 高级配置
-
-### 3.1 认证
+### 2.1 认证
 
 ```yaml
 # application.yml (Spring Boot)
@@ -169,7 +93,7 @@ dubbo
 dubbo.registry.address: nacos://nacos:nacos@localhost:8848
 ```
 
-### 3.2 自定义命名空间
+### 2.2 自定义命名空间
 
 ```yaml
 # application.yml (Spring Boot)
@@ -188,7 +112,7 @@ dubbo:
    parameters.namespace: 5cbb70a5-xxx-xxx-xxx-d43479ae0932
 ```
 
-### 3.3 自定义分组
+### 2.3 自定义分组
 
 ```yaml
 # application.yml
@@ -200,8 +124,8 @@ dubbo:
 
 > 如果不配置的话，group 是由 Nacos 默认指定。group 和 namespace 在 Nacos 中代表不同的隔离层次，通常来说 namespace 用来隔离不同的用户或环境，group 用来对同一环境内的数据做进一步归组。
 
-### 3.4 注册接口级消费者
-Dubbo3.0.0版本以后，增加了是否注册消费者的参数，如果需要将消费者注册到nacos注册中心上，需要将参数(register-consumer-url)设置为true，默认是false。
+### 2.4 注册接口级消费者
+Dubbo 3.0.0 版本以后，增加了是否注册消费者的参数，如果需要将消费者注册到 nacos 注册中心上，需要将参数(register-consumer-url)设置为true，默认是false。
 ```yaml
 # application.yml
 dubbo:
@@ -218,7 +142,7 @@ dubbo:
 
 ```
 
-### 3.5 更多配置
+### 2.5 更多配置
 
 参数名 | 中文描述| 默认值
 ---|---|---
@@ -258,11 +182,64 @@ preserved.register.source|注册实例注册时服务框架类型（例如Dubbo,
   dubbo.registry.parameters.preserved.heart.beat.timeout=5000
   ```
 
-## 4 工作原理
+### 2.6 推空保护
 
-以下仅为展示 Nacos 作为 Dubbo 注册中心的工作原理，Dubbo 服务运维建议使用 [Dubbo Admin](https://github.com/apache/dubbo-admin)
+### 2.6 只注册/只订阅
+## 特性说明
+如果有两个镜像环境，两个注册中心，有一个服务只在其中一个注册中心有部署，另一个注册中心还没来得及部署，而两个注册中心的其它应用都需要依赖此服务。这个时候，可以让服务提供者方只注册服务到另一注册中心，而不从另一注册中心订阅服务。该机制通常用于提供程序相对静态且不太可能更改的场景或者提供程序和使用者互不依赖的场景。
 
-### 4.1 Dubbo2 注册数据
+```xml
+<dubbo:registry id="hzRegistry" address="10.20.153.10:9090" />
+<dubbo:registry id="qdRegistry" address="10.20.141.150:9090" subscribe="false" />
+```
+
+**或者**
+
+```xml
+<dubbo:registry id="hzRegistry" address="10.20.153.10:9090" />
+<dubbo:registry id="qdRegistry" address="10.20.141.150:9090?subscribe=false" />
+```
+
+## 特性说明
+
+为方便开发测试，经常会在线下共用一个所有服务可用的注册中心，这时，如果一个正在开发中的服务提供者注册，可能会影响消费者不能正常运行。
+
+可以让服务提供者开发方，只订阅服务(开发的服务可能依赖其它服务)，而不注册正在开发的服务，通过直连测试正在开发的服务。
+
+![/user-guide/images/subscribe-only.jpg](/imgs/user/subscribe-only.jpg)
+
+## 使用场景
+
+- 消费者是一个正在开发但尚未部署的新应用程序。消费者希望订阅未注册的服务，以确保在部署后能够访问所需的服务。
+- 消费者是正在更新或修改的现有应用程序。消费者希望订阅未注册的服务以确保它能够访问更新或修改的服务。
+- 消费者是在暂存环境中开发或测试的应用程序。消费者希望订阅未注册的服务，以确保在开发或测试时能够访问所需的服务。
+
+## 使用方式
+
+### 禁用注册配置
+
+```xml
+<dubbo:registry address="10.20.153.10:9090" register="false" />
+```
+**或者**
+
+```xml
+<dubbo:registry address="10.20.153.10:9090?register=false" />
+```
+
+### 2.6 启动检查
+关闭注册中心启动时检查
+
+```xml
+<dubbo:registry check="false" />
+```
+
+
+## 3 工作原理
+
+在前面的一节中，我们讲解了应用级服务发现与接口级服务发现的区别，以下是两种模式在 Nacos 实现中的具体存储结构。
+
+### 3.1 Dubbo2 注册数据
 
 随后，重启您的 Dubbo 应用，Dubbo 的服务提供和消费信息在 Nacos 控制台中可以显示：
 
@@ -272,10 +249,13 @@ preserved.register.source|注册实例注册时服务框架类型（例如Dubbo,
 
 ![image-dubbo-registry-nacos-2.png](/imgs/blog/dubbo-registry-nacos-2.png)
 
-### 4.2 Dubbo3 注册数据
+### 3.2 Dubbo3 注册数据
 应用级服务发现的 "服务名" 为应用名
 
-
-
 > Dubbo3 默认采用 "应用级服务发现 + 接口级服务发现" 的双注册模式，因此会发现应用级服务（应用名）和接口级服务（接口名）同时出现在 Nacos 控制台，可以通过配置 `dubbo.registry.register-mode=instance/interface/all` 来改变注册行为。
+
+### 3.3 客户端缓存
+
+### 3.4 心跳检测
+
 

@@ -7,5 +7,5 @@ description: Dubbo RPC 协议指南
 linkTitle: RPC协议
 title: RPC 协议
 type: docs
-weight: 1
+weight: 2
 ---
