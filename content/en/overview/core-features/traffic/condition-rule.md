@@ -26,6 +26,8 @@ Based on the following example rule, all invocations of the `getComment` method 
   conditions:
     - method=getComment => region=Hangzhou
   ```
+
+  You can refer to specific example code for conditional routing [here](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-configconditionrouter/src/main/java/org/apache/dubbo/samples/governance).
 ## ConditionRule
 The body of a conditional routing rule defines the target service or application on which the routing rule will take effect, the traffic filtering conditions, and the behaviors in certain specific scenarios.
 
