@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/core-features/traffic/condition-rule/
+    - /en/overview/core-features/traffic/condition-rule/
 description: ""
 linkTitle: Conditional Routing
 title:  Conditional Routing Rules
