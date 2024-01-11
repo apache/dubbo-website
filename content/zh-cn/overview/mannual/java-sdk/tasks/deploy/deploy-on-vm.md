@@ -60,6 +60,29 @@ $ docker run quickstart -p port1:port2
 
 {{% alert title="提示" color="primary" %}}
 Docker 容器环境下，不同容器间用于网络通信的地址需要特别关注，因此你可能需要设置 Dubbo 进程监听或者注册到注册中心的地址，请参考以下链接了解更多内容。
+
+见 [dubbo 通过环境变量设置 host](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
+
+有些部署场景需要动态指定服务注册的地址，如 docker bridge 网络模式下要指定注册宿主机 ip 以实现外网通信。dubbo 提供了两对启动阶段的系统属性，用于设置对外通信的ip、port地址。
+
+* **DUBBO_IP_TO_REGISTRY**：注册到注册中心的 ip 地址
+* **DUBBO_PORT_TO_REGISTRY**：注册到注册中心的 port 端口
+* **DUBBO_IP_TO_BIND**：监听 ip 地址
+* **DUBBO_PORT_TO_BIND**：监听 port 端口
+
+以上四个配置项均为可选项，如不配置 dubbo 会自动获取 ip 与端口，请根据具体的部署场景灵活选择配置。
+dubbo 支持多协议，如果一个应用同时暴露多个不同协议服务，且需要为每个服务单独指定 ip 或 port，请分别在以上属性前加协议前缀。 如：
+
+* **HESSIAN_DUBBO_PORT_TO_BIND**：hessian 协议绑定的 port
+* **DUBBO_DUBBO_PORT_TO_BIND**：dubbo 协议绑定的 port
+* **HESSIAN_DUBBO_IP_TO_REGISTRY**：hessian 协议注册的 ip
+* **DUBBO_DUBBO_IP_TO_REGISTRY**：dubbo 协议注册的 ip
+
+PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BIND，但是反过来是成立的。如：
+
+* 设置 `PORT_TO_REGISTRY=20881` 和 `IP_TO_REGISTRY=30.5.97.6`，则 `PORT_TO_BIND` 和 `IP_TO_BIND` 不受影响
+* 设置 `PORT_TO_BIND=20881` 和 `IP_TO_BIND=30.5.97.6`，则默认 `PORT_TO_REGISTRY=20881`  且 `IP_TO_REGISTRY=30.5.97.6`
+
 {{% /alert %}}
 
 ### 查看部署状态
