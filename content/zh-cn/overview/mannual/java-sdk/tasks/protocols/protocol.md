@@ -225,7 +225,7 @@ public interface DemoService {
 }
 ```
 
-jAX-RS 服务定义范例：
+JAX-RS 服务定义范例：
 ```java
 @RestController
 @RequestMapping("/demo")

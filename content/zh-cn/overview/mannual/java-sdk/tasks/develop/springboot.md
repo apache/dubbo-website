@@ -185,8 +185,8 @@ Spring Boot 注解默认只会扫描 main 类所在的 package，如果服务定
 @Configuration
 public class ProviderConfiguration {
     @Bean
-    public ServiceConfig demoService() {
-        ServiceConfig service = new ServiceConfig();
+    public ServiceBean demoService() {
+        ServiceBean service = new ServiceBean();
         service.setInterface(DemoService.class);
         service.setRef(new DemoServiceImpl());
         service.setGroup("dev");
