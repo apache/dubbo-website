@@ -4,7 +4,7 @@ weight: 4
 type: docs
 ---
 
-Refer to samples [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
+Refer to samples [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry)
 
 ## Registry registration center configuration
 

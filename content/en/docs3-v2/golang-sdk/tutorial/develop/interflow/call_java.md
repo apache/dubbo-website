@@ -147,7 +147,7 @@ JDK 8, Golang >= 1.15, Dubbo 3.0.2, zookeeper enabled,
 
 ## 1. Intercommunication based on Triple protocol (PB serialization)
 
-Reference [dubbo-go-samples/helloworld](https://github.com/apache/dubbo-go-samples/tree/master/helloworld)
+Reference [dubbo-go-samples/helloworld](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/helloworld)
 
 ### 1.1 Go-Client -> Java-Server
 
@@ -442,7 +442,7 @@ public class ApiConsumer {
 
 ## 2. Intercommunication based on Dubbo protocol (Hessian2 serialization)
 
-Reference [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/master/rpc/dubbo)
+Reference [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/dubbo)
 
 ### 2.1 Go-Client -> Java-Server
 

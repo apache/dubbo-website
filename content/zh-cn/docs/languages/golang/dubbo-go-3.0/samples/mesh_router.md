@@ -37,7 +37,7 @@ type: docs
 ## 提供能力
 ### 基于配置中心的路由配置
 
-sample示例参见[Mesh Router](https://github.com/apache/dubbo-go-samples/tree/master/route/meshroute)
+sample示例参见[Mesh Router](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/route/meshroute)
 
 #### 1. 路由规则文件注解
 

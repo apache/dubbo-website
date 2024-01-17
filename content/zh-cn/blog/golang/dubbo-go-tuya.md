@@ -34,7 +34,7 @@ dubbo-go 在涂鸦智能的使用情况如上图，接下来会为大家详细�
 
 ### 实践
 
-从上图可以看到，网关能动态加载 dubbo 接口信息，调用 dubbo 接口是基于 dubbo 泛化调用。泛化调用使 client 不需要构建 provider 的 interface 代码，在 dubbo-go 中表现为无需调用 config.SetConsumerService 和 hessian.RegisterPOJO 方法，而是将请求模型纯参数完成，这使得 client 动态新增、修改接口成为可能。在 [apache/dubbo-sample/golang/generic/default/go-client](https://github.com/apache/dubbo-go-samples/tree/master/generic/default/go-client) 中的有泛化调用的演示代码。
+从上图可以看到，网关能动态加载 dubbo 接口信息，调用 dubbo 接口是基于 dubbo 泛化调用。泛化调用使 client 不需要构建 provider 的 interface 代码，在 dubbo-go 中表现为无需调用 config.SetConsumerService 和 hessian.RegisterPOJO 方法，而是将请求模型纯参数完成，这使得 client 动态新增、修改接口成为可能。在 [apache/dubbo-sample/golang/generic/default/go-client](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/generic/default/go-client) 中的有泛化调用的演示代码。
 
 ```go
 func test() {

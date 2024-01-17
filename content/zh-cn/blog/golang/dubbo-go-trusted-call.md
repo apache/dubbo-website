@@ -77,7 +77,7 @@ type Authenticator interface {
 
 ## 示例
 
-以 [Helloworld 示例](https://github.com/apache/dubbo-go-samples/tree/master/helloworld/) 中的代码接入当前社区版本中的默认鉴权认证功能实现为例：
+以 [Helloworld 示例](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/helloworld/) 中的代码接入当前社区版本中的默认鉴权认证功能实现为例：
 
 在无需改变代码的情况下，只需要在配置上增加额外的相关鉴权配置即可，dubbo-go 服务端配置示例如下：
 

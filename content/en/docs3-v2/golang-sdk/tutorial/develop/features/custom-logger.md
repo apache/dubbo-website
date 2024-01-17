@@ -4,7 +4,7 @@ weight: 6
 type: docs
 ---
 
-Refer to samples [dubbo-go-samples/logger](https://github.com/apache/dubbo-go-samples/tree/master/logger)
+Refer to samples [dubbo-go-samples/logger](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/logger)
 
 ## 1. Log configuration
 

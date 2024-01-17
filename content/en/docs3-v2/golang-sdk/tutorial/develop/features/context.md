@@ -11,4 +11,4 @@ weight: 6
 
 ## 2. Use context to pass additional information
 
-Reference [dubbo-go-samples/context](https://github.com/apache/dubbo-go-samples/tree/master/context)
+Reference [dubbo-go-samples/context](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/context)
