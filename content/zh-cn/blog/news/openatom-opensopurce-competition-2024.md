@@ -7,11 +7,11 @@ description: >
     中国开源开放原子基金会主办，Apache Dubbo 下一代云原生微服务挑战赛启动报名！五大赛题50万奖金池等你来战
 ---
 
-通过本项赛事，我们期待参赛团队在高性能 Triple(HTTP/3) 协议设计、完善的 Benchmark 验收体系、零信任解决方案、Service Mesh架构 等方向持续探索，共同定义下一代云原生微服务体系，为开源社区和企业用户在性能、安全等方面带来收益。
-
-本文带来本赛题详细解读，官方报名渠道请查看文章最后链接与二维码。
+本文带来本赛题详细解读，<a href="https://competition.atomgit.com/competitionInfo?id=be48a38bb1daf499bd5c98ac8a3108fd" target="_blank">开放原子开源基金会官方报名渠道</a> 及更多详情请查看文章最后链接与二维码。
 
 ## 赛题解读
+我们期待参赛团队在高性能 Triple(HTTP/3) 协议设计、完善的 Benchmark 验收体系、零信任解决方案、Service Mesh架构 等方向持续探索，共同定义下一代云原生微服务体系，为开源社区和企业用户在性能、安全等方面带来收益。
+
 本赛事一共包含五道赛题：
 * 基于 HTTP/3 的高性能传输协议(Java)
 * 自动化的 Dubbo 框架与协议性能基准 Benchmark 机制与平台(语言不限)
@@ -95,13 +95,12 @@ triple 协议相关实现源码：
 
 本赛题选手可以参与开发的内容分为两部分：
 
-1. 数据面（Dubbo SDK），此部分为必做内容，即为 Dubbo SDK（Java/Go） 提供 xDS 的安全机制适配支持。如果选手决定不做控制面部分开发，则可以使用任意控制面 xDS Server 如 Istio 等辅助开发，最终跑通 SDK 整体流程即可。
-2. 控制面，此部分为选做内容，即通过控制面
+1. 数据面（Dubbo SDK），此部分为必做内容，即为 Dubbo SDK（Java/Go） 提供 xDS 的安全机制适配支持。如果选手决定不做控制面部分开发，则可以使用任意控制面 xDS Server 如 Istio 等辅助开发，流程与规则亦可直接使用 Istio 等，最终跑通 SDK 整体流程即可。
+2. 控制面，此部分为选做内容，即通过定制 Dubbo 社区提供的控制面实现，实现一整套定制化零信任解决方案。
 
 ##### 3.2.1 数据面（Dubbo SDK）开发指南：
 
-- 社区 Dubbo SDK 适配 xDS 的基本代码已经由官方提供
-- 选手可直接在此之上关注安全相关 xDS 内容的进一步解析，并将接收到的证书、规则等适配到 Dubbo 框架内不
+- 社区 Dubbo SDK 适配 xDS 的基本代码已经由官方提供，选手可直接在此之上关注安全相关 xDS 内容的进一步解析，并将接收到的证书、规则等适配到 Dubbo 框架内不
 - 选手可以考虑 Dubbo 框架认证鉴权能力的可扩展性。比如为 Dubbo 提供一套通用的认证、鉴权 API，本赛题来自 xDS 控制面的安全源成为其中的一个扩展实现；未来可以扩展其他的如非 xDS 通道的证书来源等。
 
 相关源码仓库：
@@ -154,7 +153,8 @@ triple 协议相关实现源码：
 
 1. 后端： [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
 
-2. 前端：[http://101.34.253.152/2024-1-14-v0.0.7/](http://101.34.253.152/2024-1-14-v0.0.7/)
+2. 前端交互图：[http://101.34.253.152/2024-1-14-v0.0.7/](http://101.34.253.152/2024-1-14-v0.0.7/)
+3. 前端代码框架：https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
 
 #### 4.3 参考资料
 
@@ -192,13 +192,15 @@ triple 协议相关实现源码：
 
 其中，红色部分即为跨集群的数据流向，其中红色实现部分为控制面数据流，红色虚线部分为数据面数据流。
 
-为什么要跨集群通信那？有以下场景可能会用到：
+##### 5.2.1 为什么要跨集群通信那？
 
-1. Kubernetes 迁移，
-2. Kubernetes 多集群部署
-3. 混合部署
+有以下场景可能会用到：
 
-期待交付用户的使用体验
+1. Kubernetes 迁移，之前用的是 Zookeeper 传统注册中心架构，期望迁移到 Kubernetes 集群部署，或者期望使用 kubernetes Service 服务模型
+2. Kubernetes 多集群部署，跨多个 Kubernetes 集群 Dubbo 微服务通信
+3. 混合部署，传统注册中心集群、Kubernetes 集群、Kubernetes Service（Service Mesh）架构混合部署
+
+##### 5.2.2 期待交付用户的使用体验
 
 1. Kubernetes Service：`dubboctl install --mode=kubernetes --ingress-enabled`
 2. Kubernetes：`dubboctl instaqll --mode=universal --ingress-enabled`
