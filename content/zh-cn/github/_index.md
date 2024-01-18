@@ -78,7 +78,7 @@ The Apache Dubbo Python2 implementation.
   {{< /card >}}
 {{< /cardpane >}}
 
-{{< /cardpane >}}
+{{< cardpane >}}
   {{< card header="apache/dubbo-spi-extensions" >}}
 More extensions for the Apache Dubbo Java implementation.
 <div style="width:130px;float:left;" class="mr-5">
