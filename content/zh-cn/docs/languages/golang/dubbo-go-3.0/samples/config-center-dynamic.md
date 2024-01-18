@@ -21,7 +21,7 @@ type: docs
 
 ## 2. 配置中心的配置
 
-参考仓库：[dubbo-go-samples/configcenter](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)
+参考仓库：[dubbo-go-samples/configcenter](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/configcenter)
 
 dubbogo.yml 
 

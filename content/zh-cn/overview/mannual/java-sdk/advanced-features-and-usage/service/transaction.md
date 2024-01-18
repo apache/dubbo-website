@@ -213,7 +213,7 @@ config {
 
 ### **第五步**
 
-运行你下载的 nacos,并参考 [https://github.com/seata/seata/tree/develop/script/config-center](https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fseata%2Fseata%2Ftree%2Fdevelop%2Fscript%2Fconfig-center) 的 config.txt 并修改
+运行你下载的 nacos,并参考 [https://github.com/seata/seata/tree/develop/script/config-center](https://github.com/seata/seata/tree/develop/script/config-center) 的 config.txt 并修改
 
 ```properties
 #仅client使用

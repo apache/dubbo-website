@@ -6,7 +6,7 @@ type: docs
 
 Reference article [**"Dubbo takes an important step towards cloud native application-level service discovery analysis"**](https://baijiahao.baidu.com/s?id=1669266413887039723&wfr=spider&for=pc)
 
-Reference repository: [dubbo-go-samples/registry/serivcediscovery](https://github.com/apache/dubbo-go-samples/tree/master/registry/servicediscovery)
+Reference repository: [dubbo-go-samples/registry/serivcediscovery](https://github.com/apache/dubbo-go-samples/tree/45a0d843b54e4922c240900e63516176cc7da4f6/registry/servicediscovery)
 
 ## Configuration
 

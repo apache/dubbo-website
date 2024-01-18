@@ -43,7 +43,7 @@ service Health {
 
 ### 2.1 Call the health check service through the gprc client:
 
-+ Start [triple service](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc/go-server) in dubbo-go-samples, through The following grpc client can view the status of "org.apache.dubbogo.samples.api.Greeter". The triple health check service communicates with grpc, so the health status of services based on the triple protocol can be checked through the grpc client.
++ Start [triple service](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server) in dubbo-go-samples, through The following grpc client can view the status of "org.apache.dubbogo.samples.api.Greeter". The triple health check service communicates with grpc, so the health status of services based on the triple protocol can be checked through the grpc client.
 
 ``` go
 package main
@@ -95,7 +95,7 @@ fmt.Printf("get service status = %+v\n", rsp)
 
 ### 2.2 grpc-health-probe debugging health check service:
 
-+ Start [triple service](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc/go-server) in dubbo-go-samples, provide `org.apache.dubbogo.samples.api.Greeter` service. Use grpc-health-probe to check the health status of the service, `grpc-health-probe -addr=localhost:20000 -service "org.apache.dubbogo.samples.api.Greeter"`
++ Start [triple service](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server) in dubbo-go-samples, provide `org.apache.dubbogo.samples.api.Greeter` service. Use grpc-health-probe to check the health status of the service, `grpc-health-probe -addr=localhost:20000 -service "org.apache.dubbogo.samples.api.Greeter"`
 
 ![image-health-check](/imgs/docs3-v2/golang-sdk/tasks/service_management/triple-health-check/health-check.png)
 

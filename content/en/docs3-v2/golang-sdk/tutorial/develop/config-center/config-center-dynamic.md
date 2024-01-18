@@ -10,7 +10,7 @@ The configuration center means that in a distributed scenario, the latest framew
 
 ## 2. Configuration of the configuration center
 
-Reference repository: [dubbo-go-samples/configcenter](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)
+Reference repository: [dubbo-go-samples/configcenter](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/configcenter)
 
 dubbogo.yml
 

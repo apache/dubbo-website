@@ -4,7 +4,7 @@ weight: 3
 type: docs
 ---
 
-Refer to samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/master/filter)
+Refer to samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/filter)
 
 ## 1. Filter concept
 
