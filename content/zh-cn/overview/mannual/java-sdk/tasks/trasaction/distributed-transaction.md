@@ -116,9 +116,9 @@ password: 123456
 
 #### 请依次启动以下子项目:
 * 4.1 Account Service
-* 4.2 Business Service
-* 4.3 Order Service
-* 4.4 Stock Service
+* 4.2 Order Service
+* 4.3 Stock Service
+* 4.4 Business Service
 
 ### 步骤 5：查看分布式事务执行结果
 通过访问以下链接，可以测试分布式事务成功提交流程:
