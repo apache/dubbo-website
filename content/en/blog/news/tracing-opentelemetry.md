@@ -1,7 +1,7 @@
 ---
 description: "This case shows using OpenTelemetry as the Tracer in the Dubbo project to report the Trace information to the Otlp Collector, which then forwards it to Zipkin and Jagger."
 linkTitle: Tracing Dubbo With OpenTelemetry
-date: 2018-07-12
+date: 2024-01-31
 tags: ["ecosystem", "tracing", "OpenTelemetry"]
 ---
 
