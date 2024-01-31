@@ -60,7 +60,7 @@ Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注
 > 对于微服务间服务发现模型的数据同步，REST 定义了一套非常有意思的成熟度模型，感兴趣的朋友可以参考这里的链接 https://www.martinfowler.com/articles/richardsonMaturityModel.html， 按照文章中的 4 级成熟度定义，Dubbo 当前基于接口粒度的模型可以对应到最高的 L4 级别。
 
 ## 配置方式
-Dubbo 服务发现扩展了多种注册中心组件支持，如 Nacos、Zookeeper、Consul、Redis、kubernetes 等，可以通过配置切换不通实现，同时还支持鉴权、命名空间隔离等配置。具体配置方式请查看 SDK 文档
+Dubbo 服务发现扩展了多种注册中心组件支持，如 Nacos、Zookeeper、Consul、Redis、kubernetes 等，可以通过配置切换不同实现，同时还支持鉴权、命名空间隔离等配置。具体配置方式请查看 SDK 文档
 
 * [Java](../../mannual/java-sdk/reference-manual/registry)
 * [Golang](../../mannual/golang-sdk/tutorial/develop/registry)
