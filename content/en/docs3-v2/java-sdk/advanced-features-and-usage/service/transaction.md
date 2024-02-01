@@ -10,7 +10,7 @@ description: "Use distributed transactions in Dubbo"
 
 ### **First step**
 
-First visit: [https://seata.io/zh-cn/blog/download.html](https://seata.io/zh-cn/blog/download.html)
+First visit: [https://seata.apache.org/unversioned/download/seata-server](https://seata.apache.org/unversioned/download/seata-server)
 
 Download the seata1.5.2 service we need to use
 

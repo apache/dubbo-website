@@ -26,7 +26,7 @@ weight: 1
 
 ### **第一步**
 
-首先访问: [https://seata.io/zh-cn/blog/download.html](https://seata.io/zh-cn/blog/download.html)
+首先访问: [https://seata.apache.org/unversioned/download/seata-server](https://seata.apache.org/unversioned/download/seata-server)
 
 下载我们需要使用的 seata1.5.2 服务
 
