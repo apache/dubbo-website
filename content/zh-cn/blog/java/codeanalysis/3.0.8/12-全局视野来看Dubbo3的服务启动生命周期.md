@@ -98,7 +98,7 @@ public DubboBootstrap start(boolean wait) {
                 if (isStarting()) {
                     // currently, is starting, maybe both start by module and application
                     // if it has new modules, start them
-                    //存在挂器的模块
+                    //存在挂起的模块
                     if (hasPendingModule) {
                      	//启动模块
                         startModules();
