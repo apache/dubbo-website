@@ -37,7 +37,7 @@ description: >
 - 元数据中心来维护RPC服务与应用的映射关系（即接口与应用的映射关系）来兼容接口与应用之间的对应关系
 - 让注册中心更加聚焦与地址的发现和推送能力
 
-注册中心的启动是在DefaultApplicationDeployer中的初始化方法 initialize() 中:如下所示
+元数据中心的启动是在DefaultApplicationDeployer中的初始化方法 initialize() 中:如下所示
 
 这里只看下 startMetadataCenter();方法即可
 
