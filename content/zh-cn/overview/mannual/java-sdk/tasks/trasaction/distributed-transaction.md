@@ -16,6 +16,8 @@ Apache Seata 是一款开源的分布式事务解决方案，致力于在微服�
 - 请克隆[dubbo-samples](https://github.com/apache/dubbo-samples)至本地并导入到开发工具中，并找到/2-advanced/dubbo-samples-seata子项目。
 - 请下载最新版的[seata-server二进制包](https://seata.apache.org/zh-cn/unversioned/download/seata-server)至本地。
 
+![seata-flow](/imgs/docs3-v2/java-sdk/seata/flow.png)
+
 ### 步骤 1：建立数据库并初始化相关测试数据
 - 本文将使用MySQL 5.7 (更多支持的数据库可在文末查看附录)。
 进入dubbo-samples-seata的script目录，找到dubbo_biz.sql和undo_log.sql两个数据库脚本文件，内容如下:
