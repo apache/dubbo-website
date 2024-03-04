@@ -175,7 +175,7 @@ public @interface Reference {
 
 ## 示例实战
 
-了解了 `@EnableDubbo`， `@Service`，`@Reference` 的作用，下面以一个实际的例子来展示如何使用 annotation 来开发 Dubbo 应用。以下的代码可以在 https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation 中找到。
+了解了 `@EnableDubbo`， `@Service`，`@Reference` 的作用，下面以一个实际的例子来展示如何使用 annotation 来开发 Dubbo 应用。以下的代码可以在 https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-annotation 中找到。
 
 ### 1. 接口定义
 

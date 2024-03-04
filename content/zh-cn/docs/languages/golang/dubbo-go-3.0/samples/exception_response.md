@@ -15,7 +15,7 @@ type: docs
 
 # Triple 协议异常回传
 
-参考samples [dubbo-go-samples/error](https://github.com/apache/dubbo-go-samples/tree/master/error)
+参考samples [dubbo-go-samples/error](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/error)
 
 ## 用户异常回传介绍
 

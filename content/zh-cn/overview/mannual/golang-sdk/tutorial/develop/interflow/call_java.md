@@ -49,7 +49,7 @@ JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
 
   - Hessian 序列化
 
-  POJO for Go，需参考 [Dubbogo Hessian 序列化支持文档](https://www.yuque.com/docs/share/c698bd6e-e4d6-47db-bc1c-c757cc9b4f3e?)
+  POJO for Go，需参考 [Dubbogo Hessian 序列化支持文档](https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/interflow/call_java/)
 
   ```go
   type User struct {
@@ -156,7 +156,7 @@ JDK 8，Golang >= 1.15，Dubbo 3.0.2，zookeeper 启动，
 
 ## 1. 基于 Triple 协议互通 (PB序列化)
 
-参考 [dubbo-go-samples/helloworld](https://github.com/apache/dubbo-go-samples/tree/master/helloworld)
+参考 [dubbo-go-samples/helloworld](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/helloworld)
 
 ### 1.1 Go-Client -> Java-Server
 
@@ -451,7 +451,7 @@ public class ApiConsumer {
 
 ## 2. 基于 Dubbo 协议互通 (Hessian2序列化)
 
-参考 [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/master/rpc/dubbo)
+参考 [dubbo-go-samples/rpc/dubbo](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/dubbo)
 
 ### 2.1 Go-Client -> Java-Server
 

@@ -84,4 +84,4 @@ dubbo:
 
 ## 4. 更多支持的注册中心
 
-参考 [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
+参考 [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry)

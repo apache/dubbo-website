@@ -83,7 +83,7 @@ META-INF/dubbo/org.apache.dubbo.remoting.telnet.TelnetHandler：
 xxx=com.xxx.XxxTelnetHandler
 ```
 
-## 用法
+## 命令用法
 
 ```sh
 telnet 127.0.0.1 20880

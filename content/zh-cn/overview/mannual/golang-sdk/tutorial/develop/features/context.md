@@ -20,4 +20,4 @@ weight: 6
 
 ## 2. 使用 context 传递附加信息
 
-参考 [dubbo-go-samples/context](https://github.com/apache/dubbo-go-samples/tree/master/context)
+参考 [dubbo-go-samples/context](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/context)

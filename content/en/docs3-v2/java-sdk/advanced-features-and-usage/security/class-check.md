@@ -140,8 +140,8 @@ io.dubbo.block
 
 After the configuration is successful, you can see the following prompts in the log:
 ```properties
-INFO utils.SerializeSecurityConfigurator: [DUBBO] Read serialize allow list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.allowlist
-INFO utils.SerializeSecurityConfigurator: [DUBBO] Read serialize blocked list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.blockedlist
+INFO utils.SerializeSecurityConfigurator: [DUBBO] Read serialize allow list from file:/Users/albumen/code/dubbo-integration-cases/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.allowlist
+INFO utils.SerializeSecurityConfigurator: [DUBBO] Read serialize blocked list from file:/Users/albumen/code/dubbo-integration-cases/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.blockedlist
 ```
 
 The configuration priority is: user-defined trusted class = built-in trusted class of the framework > user-defined untrusted class = built-in untrusted class of the framework > automatic class scanning trusted class.

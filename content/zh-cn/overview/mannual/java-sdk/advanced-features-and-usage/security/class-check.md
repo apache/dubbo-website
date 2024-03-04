@@ -23,10 +23,10 @@ Dubbo >= 3.1.6
 目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用。其他的序列化方式暂不支持。
 
 ### 检查模式
-检查模式分为三个级别：`STRICT` 严格检查，`WARN` 告警，`DISABLED` 禁用。
+检查模式分为三个级别：`STRICT` 严格检查，`WARN` 告警，`DISABLE` 禁用。
 `STRICT` 严格检查：禁止反序列化所有不在允许序列化列表（白名单）中的类。
 `WARN` 告警：仅禁止序列化所有在不允许序列化列表中（黑名单）的类，同时在反序列化不在允许序列化列表（白名单）中类的时候通过日志进行告警。
-`DISABLED` 禁用：不进行任何检查。
+`DISABLE` 禁用：不进行任何检查。
 
 3.1 版本中默认为 `WARN` 告警级别，3.2 版本中默认为 `STRICT` 严格检查级别。
 
@@ -91,15 +91,15 @@ INFO utils.SerializeSecurityManager:  [DUBBO] Serialize check serializable: true
 ```
 
 注 1：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的 Serializable 接口检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 `true`，另外一个配置为 `false`，则最终生效 `false` 级别的配置。
-注 2：目前暂未打通 Hessian2、Fastjson2 内置的 `Serializable` 检查配置。对于泛化调用，仅需要配置 `dubbo.application.check-serializable` 即可修改检查配置；对于 Hessian2 序列化，需要同时修改 `dubbo.application.check-serializable` 和 `dubbo.hessian.allowNonSerializable�` 两个配置；对于 Fastjson2 序列化，目前暂不支持修改。
+注 2：目前暂未打通 Hessian2、Fastjson2 内置的 `Serializable` 检查配置。对于泛化调用，仅需要配置 `dubbo.application.check-serializable` 即可修改检查配置；对于 Hessian2 序列化，需要同时修改 `dubbo.application.check-serializable` 和 `dubbo.hessian.allowNonSerializable` 两个配置；对于 Fastjson2 序列化，目前暂不支持修改。
 
 ### 自动扫描相关配置
 
-Dubbo 类自动扫描机制共有两个配置项：`AutoTrustSerializeClass�` 是否启用自动扫描和 `TrustSerializeClassLevel�` 类信任层级。
+Dubbo 类自动扫描机制共有两个配置项：`AutoTrustSerializeClass` 是否启用自动扫描和 `TrustSerializeClassLevel` 类信任层级。
 
-简单来说，在开启类自动扫描之后，Dubbo 会通过 `ReferenceConfig` 和 `ServiceConfig` 自动扫描接口所有可能会用到的相关类，并且递归信任其所在的 package。 `TrustSerializeClassLevel�` 类信任层级可以用来限制最终信任的 package 层级。如 `io.dubbo.test.pojo.User` 在 `TrustSerializeClassLevel�` 配置为 `3` 的时候，最终会信任 `io.dubbo.test` 这个 package 下所有的类。
+简单来说，在开启类自动扫描之后，Dubbo 会通过 `ReferenceConfig` 和 `ServiceConfig` 自动扫描接口所有可能会用到的相关类，并且递归信任其所在的 package。 `TrustSerializeClassLevel` 类信任层级可以用来限制最终信任的 package 层级。如 `io.dubbo.test.pojo.User` 在 `TrustSerializeClassLevel` 配置为 `3` 的时候，最终会信任 `io.dubbo.test` 这个 package 下所有的类。
 
-Dubbo 中默认配置 `AutoTrustSerializeClass�` 为 `true` 启用扫描， `TrustSerializeClassLevel�` 为 `3`。
+Dubbo 中默认配置 `AutoTrustSerializeClass` 为 `true` 启用扫描， `TrustSerializeClassLevel` 为 `3`。
 
 通过 ApplicationConfig 配置：
 ```java

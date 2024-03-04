@@ -52,7 +52,7 @@ service Health {
 
 ### 2.1 通过gprc客户端调用健康检查服务：
 
-+ 启动dubbo-go-samples中的[triple服务](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc/go-server)，通过下面的grpc客户端便可以查看"org.apache.dubbogo.samples.api.Greeter"的状态。triple健康检查服务与grpc互通，所以可以通过grpc客户端查看基于triple协议服务的健康状态。
++ 启动dubbo-go-samples中的[triple服务](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server)，通过下面的grpc客户端便可以查看"org.apache.dubbogo.samples.api.Greeter"的状态。triple健康检查服务与grpc互通，所以可以通过grpc客户端查看基于triple协议服务的健康状态。
 
 ``` go
 package main
@@ -104,7 +104,7 @@ func checkHealth(service string, conn *grpc.ClientConn) {
 
 ### 2.2 grpc-health-probe调试健康检查服务：
 
-+ 启动dubbo-go-samples中的[triple服务](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc/go-server)，提供`org.apache.dubbogo.samples.api.Greeter`服务。使用grpc-health-probe检查该服务的健康状态，`grpc-health-probe -addr=localhost:20000 -service "org.apache.dubbogo.samples.api.Greeter"`
++ 启动dubbo-go-samples中的[triple服务](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server)，提供`org.apache.dubbogo.samples.api.Greeter`服务。使用grpc-health-probe检查该服务的健康状态，`grpc-health-probe -addr=localhost:20000 -service "org.apache.dubbogo.samples.api.Greeter"`
 
 ![image-health-check](/imgs/docs3-v2/golang-sdk/tasks/service_management/triple-health-check/health-check.png)
 

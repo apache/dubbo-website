@@ -10,10 +10,10 @@ weight: 1
 ---
 
 这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例，完整代码请参考 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot3-tracing" target="_blank">dubbo-samples-tracing-zipkin</a>，此示例共包含三部分内容：
+
 * dubbo-samples-spring-boot3-tracing-provider
 * dubbo-samples-spring-boot3-tracing-consumer
 * dubbo-samples-spring-boot3-tracing-interface
-
 
 ## 快速开始
 
@@ -21,7 +21,7 @@ weight: 1
 
 参考 [Zipkin's quick start](https://zipkin.io/pages/quickstart.html) 安装 Zipkin。
 
-这里我们使用 Docker 来掩饰如何快速的启动 Zipkin 服务。
+这里我们使用 Docker 来演示如何快速的启动 Zipkin 服务。
 
 ```bash
 docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
@@ -45,7 +45,7 @@ docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
 
 ### 检查监控效果
 
-在浏览器中打开 `[http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)` 查看效果。
+在浏览器中打开 `http://localhost:9411/zipkin/` 查看效果。
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/zipkin.png)
 
@@ -151,4 +151,8 @@ public class KafkaSenderConfiguration {
 
 ### SpringBoot2案例
 
-dubbo-tracing相关的使用在SpringBoot2与3中区别不大，SpringBoot2的案例可参考[代码地址](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-tracing)。
+dubbo-tracing相关的使用在SpringBoot2与3中区别不大，SpringBoot2的案例可参考[代码地址](https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-zipkin)。
+
+### 非SpringBoot项目案例
+
+对于非SpringBoot项目，也可以使用 Dubbo Bootstrap 的 api 方式使用 tracing，详细案例可参考[代码地址](https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-sample-api-tracing-otel-zipkin)

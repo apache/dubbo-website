@@ -3,7 +3,7 @@ aliases:
     - /zh/overview/quickstart/java/spring-boot/
 description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring Boot 快速开发微服务应用。
 linkTitle: Dubbo Spring Boot Starter 开发微服务应用
-title: 3 - Dubbo Spring Boot Starter 开发微服务应用
+title: 2 - Dubbo Spring Boot Starter 开发微服务应用
 type: docs
 weight: 3
 ---
@@ -366,7 +366,7 @@ public interface DemoService {
 }
 ```
 
-在 `GreetingsService` 中，定义了 `sayHi` 这个方法。后续服务端发布的服务，消费端订阅的服务都是围绕着 `GreetingsService` 接口展开的。
+在 `DemoService` 中，定义了 `sayHello` 这个方法。后续服务端发布的服务，消费端订阅的服务都是围绕着 `DemoService` 接口展开的。
 
 ### 5. 定义服务端的实现
 

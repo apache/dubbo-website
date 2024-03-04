@@ -20,7 +20,7 @@ After the application is upgraded to Dubbo 3.0, the consumer side automatically 
 1. Global switch
 
 Application configuration (can be specified by configuration file or -D) `dubbo.application.register-mode` enables the global registration switch for instance (only register application level) and all (both interface level and application level registration). After configuring this switch , by default, application-level addresses will be registered with all registries for service discovery on the consumer side.
-> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src/main/resources/ dubbo.properties](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src /main/resources/dubbo.properties)
+> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src/main/resources/ dubbo.properties](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src /main/resources/dubbo.properties)
 
 ```
 # double registration
@@ -34,7 +34,7 @@ dubbo.application.register-mode=instance
 2. Registration center address parameter configuration
 
 Registry-type=service can be configured on the address of the registry to display the registry that specifies the registry as application-level service discovery, and the registry with this configuration will only perform application-level service discovery.
-> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources/spring/ dubbo-provider.xml](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src /main/resources/spring/dubbo-provider.xml)
+> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources/spring/ dubbo-provider.xml](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src /main/resources/spring/dubbo-provider.xml)
 
 ```xml
 <dubbo:registry address="nacos://${nacos.address:127.0.0.1}:8848?registry-type=service"/>
@@ -53,7 +53,7 @@ After upgrading to Dubbo 3.0, the default behavior is interface-level + applicat
 
 Application configuration (can be specified by configuration file or -D) `dubbo.application.service-discovery.migration` is `APPLICATION_FIRST` to enable multi-subscription mode, and configuration to `FORCE_APPLICATION` can force application-level subscription mode only.
 The specific interface subscription can be configured in `parameters` in `ReferenceConfig`, and the Key is `migration.step`, and the Value is `APPLICATION_FIRST` or `FORCE_APPLICATION` key-value pair to configure a single subscription.
-> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/test/java/ org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-servicediscovery-migration /dubbo-servicediscovery-migration-consumer/src/test/java/org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java)
+> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/test/java/ org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration /dubbo-servicediscovery-migration-consumer/src/test/java/org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java)
 
 ```java
 System.setProperty("dubbo.application.service-discovery.migration", "APPLICATION_FIRST");
@@ -69,7 +69,7 @@ return referenceConfig.get();
 3. Dynamic configuration (highest priority, configuration can be modified at runtime)
 
 This configuration needs to be pushed based on the configuration center, the Key is the application name + `.migration` (such as `demo-application.migraion`), and the Group is `DUBBO_SERVICEDISCOVERY_MIGRATION`. For details on rule body configuration, see [Guidelines for migrating from interface-level service discovery to application-level service discovery](../migration-service-discovery/).
-> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/ org/apache/dubbo/demo/consumer/UpgradeUtil.java](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-cloud-native/dubbo-servicediscovery-migration /dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java)
+> Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/ org/apache/dubbo/demo/consumer/UpgradeUtil.java](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration /dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java)
 
 ```java
 step: FORCE_INTERFACE

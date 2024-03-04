@@ -125,11 +125,12 @@ Triple协议相比传统的unary方式，多了目前提供的Streaming RPC的�
 
 通过Triple协议的Streaming RPC方式，会在consumer跟provider之间建立多条用户态的长连接，Stream。同一个TCP连接之上能同时存在多个Stream，其中每条Stream都有StreamId进行标识，对于一条Stream上的数据包会以顺序方式读写。
 
-### 总结
 
+{{% alert title="总结" color="info" %}}
 在API领域，最重要的趋势是标准化技术的崛起。Triple 协议是 Dubbo3 推出的主力协议。它采用分层设计，其数据交换格式基于Protobuf (Protocol Buffers) 协议开发，具备优秀的序列化/反序列化效率，当然还支持多种序列化方式，也支持众多开发语言。在传输层协议，Triple 选择了 HTTP/2，相较于 HTTP/1.1，其传输效率有了很大提升。此外HTTP/2作为一个成熟的开放标准，具备丰富的安全、流控等能力，同时拥有良好的互操作性。Triple 不仅可以用于Server端服务调用，也可以支持浏览器、移动App和IoT设备与后端服务的交互，同时 Triple协议无缝支持 Dubbo3 的全部服务治理能力。
 
 在Cloud Native的潮流下，跨平台、跨厂商、跨环境的系统间互操作性的需求必然会催生基于开放标准的RPC技术，而gRPC顺应了历史趋势，得到了越来越广泛地应用。在微服务领域，Triple协议的提出与落地，是 Dubbo3 迈向云原生微服务的一大步。
+{{% /alert %}}
 
 ## Dubbo2
 
@@ -201,9 +202,11 @@ Every part is a byte[] after serialization with specific serialization type, ide
     -  Return value, the real value returns from server.
 
 
-> 对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：
+{{% alert title="" color="primary" %}}
+对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：
 
 ```
 Dubbo version bytes (换行符)
 Service name bytes  (换行符)
 ```
+{{% /alert %}}

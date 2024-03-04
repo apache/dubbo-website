@@ -6,6 +6,8 @@ type: docs
 weight: 2
 ---
 
+![/dev-guide/images/dubbo_protocol_header.jpg](/imgs/dev/dubbo_protocol_header.png)
+
 ## 协议规范 Specification
 
 - Magic - Magic High & Magic Low (16 bits)

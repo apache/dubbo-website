@@ -26,7 +26,7 @@ Define a specific cluster subset and the tags that the subset is adapted to. The
 ## Provide capabilities
 ### Routing configuration based on configuration center
 
-For the sample example, see [Mesh Router](https://github.com/apache/dubbo-go-samples/tree/master/route/meshroute)
+For the sample example, see [Mesh Router](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/route/meshroute)
 
 #### 1. Routing rule file annotation
 

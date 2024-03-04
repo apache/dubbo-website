@@ -10,7 +10,7 @@ description: "Use distributed transactions in Dubbo"
 
 ### **First step**
 
-First visit: [https://seata.io/zh-cn/blog/download.html](https://seata.io/zh-cn/blog/download.html)
+First visit: [https://seata.apache.org/unversioned/download/seata-server](https://seata.apache.org/unversioned/download/seata-server)
 
 Download the seata1.5.2 service we need to use
 
@@ -197,7 +197,7 @@ config {
 
 ### **the fifth step**
 
-Run the nacos you downloaded, and refer to [https://github.com/seata/seata/tree/develop/script/config-center](https://gitee.com/link?target=https%3A%2F% 2Fgithub.com%2Fseata%2Fseata%2Ftree%2Fdevelop%2Fscript%2Fconfig-center) and modify the config.txt
+Run the nacos you downloaded, and refer to [https://github.com/seata/seata/tree/develop/script/config-center](https://github.com/seata/seata/tree/develop/script/config-center) and modify the config.txt
 
 ```properties
 #Only used by client

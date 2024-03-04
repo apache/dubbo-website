@@ -13,7 +13,7 @@ weight: 4
 
 
 
-参考samples [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/master/registry)
+参考samples [dubbo-go-samples/registry](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry)
 
 ## Registry 注册中心配置
 

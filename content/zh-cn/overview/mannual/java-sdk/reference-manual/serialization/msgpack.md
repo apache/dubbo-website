@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/what/ecosystem/serialization/msgpack/
     - /zh-cn/overview/what/ecosystem/serialization/msgpack/
-description: ""
+description: "本文介绍 MessagePack 序列化"
 linkTitle: MessagePack
 title: MessagePack
 type: docs

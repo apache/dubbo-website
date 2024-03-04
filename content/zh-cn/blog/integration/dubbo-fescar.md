@@ -228,10 +228,10 @@ sh seata-server.sh -p 8091 -h 127.0.0.1 -m file
 
 ### Step 5: 运行例子
 
-- 启动账户服务 ([DubboAccountServiceStarter](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java)).
-- 启动库存服务 ([DubboStorageServiceStarter](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java)).
-- 启动订单服务  ([DubboOrderServiceStarter](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java)).
-- 运行BusinessService入口 ([DubboBusinessTester](https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java)).
+- 启动账户服务 ([DubboAccountServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java)).
+- 启动库存服务 ([DubboStorageServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java)).
+- 启动订单服务  ([DubboOrderServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java)).
+- 运行BusinessService入口 ([DubboBusinessTester](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java)).
 
 ### 相关项目
 * Seata:          https://github.com/seata/seata

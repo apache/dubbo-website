@@ -11,4 +11,4 @@ weight: 5
 
 ## 2. Interoperability between Dubbo-go application and gRPC application
 
-Reference [dubbo-go-samples/rpc/triple/pb/dubbogo-grpc](https://github.com/apache/dubbo-go-samples/tree/master/rpc/triple/pb/dubbogo-grpc)
+Reference [dubbo-go-samples/rpc/triple/pb/dubbogo-grpc](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc)
