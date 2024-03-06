@@ -2,10 +2,11 @@
 aliases:
     - /zh/overview/tasks/mesh/migration/deploy-on-k8s/
 description: 该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo 应用部署到 Kubernetes 并复用 Kubernetes Native Service 的使用示例。 此示例的局限在于需要授予每个 Dubbo 应用访问 API-SERVER 特定资源的权限，同时直接访问和监听 API-SERVER 对中小集群来说并没有什么问题， 但对于较大规模集群而言可能给 API-SERVER 的稳定性带来一定的考验。除此之外，可以考虑配合 Dubbo 控制面将 Dubbo 应用部署到 Kuberntes 的方案， 该方案无需授予 Dubbo 应用访问 API-SERVER 的权限，也无需为 API-SERVER 引连接过多数据面造成的稳定性而担心。
-linkTitle: 协议识别
-title: 协议识别
+linkTitle: 部署到 Kubernetes 集群
+title: 部署到 Kubernetes 集群
 type: docs
-weight: 2
+toc_hide: true
+weight: 70
 ---
 
 
