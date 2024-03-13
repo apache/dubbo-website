@@ -1,73 +1,82 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 流量管控</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/</link><description>Recent content in 流量管控 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 条件路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/condition-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/condition-rule/</guid><description>
-&lt;p>条件路由规则将符合特定条件的请求转发到特定的地址实例子集上。规则首先对发起流量的请求参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。&lt;/p>
-&lt;p>以下是一个条件路由规则示例。&lt;/p>
-&lt;p>基于以下示例规则，所有 &lt;code>org.apache.dubbo.samples.CommentService&lt;/code> 服务 &lt;code>getComment&lt;/code> 方法的调用都将被转发到有 &lt;code>region=Hangzhou&lt;/code> 标记的地址子集。&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 流量管控</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/</link><description>Recent content in 流量管控 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Dubbo 路由（router）机制及其如何实现流量管控介绍</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/introduction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/introduction/</guid><description>
+&lt;p>Dubbo 提供了丰富的流量管控策略&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>地址发现与负载均衡&lt;/strong>，地址发现支持服务实例动态上下线，负载均衡确保流量均匀的分布到每个实例上。&lt;/li>
+&lt;li>&lt;strong>基于路由规则的流量管控&lt;/strong>，路由规则对每次请求进行条件匹配，并将符合条件的请求路由到特定的地址子集。&lt;/li>
+&lt;/ul>
+&lt;p>服务发现保证调用方看到最新的提供方实例地址，服务发现机制依赖注册中心 (Zookeeper、Nacos、Istio 等) 实现。在消费端，Dubbo 提供了多种负载均衡策略，如随机负载均衡策略、一致性哈希负载、基于权重的轮询、最小活跃度优先、P2C 等。&lt;/p>
+&lt;p>Dubbo 的流量管控规则可以基于应用、服务、方法、参数等粒度精准的控制流量走向，根据请求的目标服务、方法以及请求体中的其他附加参数进行匹配，符合匹配条件的流量会进一步的按照特定规则转发到一个地址子集。流量管控规则有以下几种：&lt;/p>
+&lt;ul>
+&lt;li>条件路由规则&lt;/li>
+&lt;li>标签路由规则&lt;/li>
+&lt;li>脚本路由规则&lt;/li>
+&lt;li>动态配置规则&lt;/li>
+&lt;/ul>
+&lt;p>如果底层用的是基于 HTTP 的 RPC 协议 (如 REST、gRPC、Triple 等)，则服务和方法等就统一映射为 HTTP 路径 (path)，此时 Dubbo 路由规则相当于是基于 HTTP path 和 headers 的流量分发机制。&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo 中有应用、服务和方法的概念，一个应用可以发布多个服务，一个服务包含多个可被调用的方法，从抽象的视角来看，一次 Dubbo 调用就是某个消费方应用发起了对某个提供方应用内的某个服务特定方法的调用，Dubbo 的流量管控规则可以基于应用、服务、方法、参数等粒度精准的控制流量走向。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="router工作原理">Router工作原理&lt;/h2>
+&lt;p>以下是 Dubbo 单个路由器的工作过程，路由器接收一个服务的实例地址集合作为输入，基于请求上下文 (Request Context) 和 (Router Rule) 实际的路由规则定义对输入地址进行匹配，所有匹配成功的实例组成一个地址子集，最终地址子集作为输出结果继续交给下一个路由器或者负载均衡组件处理。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/router1.png" alt="Router">&lt;/p>
+&lt;p>通常，在 Dubbo 中，多个路由器组成一条路由链共同协作，前一个路由器的输出作为另一个路由器的输入，经过层层路由规则筛选后，最终生成有效的地址集合。&lt;/p>
+&lt;ul>
+&lt;li>Dubbo 中的每个服务都有一条完全独立的路由链，每个服务的路由链组成可能不通，处理的规则各异，各个服务间互不影响。&lt;/li>
+&lt;li>对单条路由链而言，即使每次输入的地址集合相同，根据每次请求上下文的不同，生成的地址子集结果也可能不同。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/router2.png" alt="Router">&lt;/p>
+&lt;h2 id="路由规则分类">路由规则分类&lt;/h2>
+&lt;h3 id="标签路由规则">标签路由规则&lt;/h3>
+&lt;p>标签路由通过将某一个服务的实例划分到不同的分组，约束具有特定标签的流量只能在指定分组中流转，不同分组为不同的流量场景服务，从而实现流量隔离的目的。标签路由可以作为蓝绿发布、灰度发布等场景能力的基础。&lt;/p>
+&lt;p>标签路由规则是一个非此即彼的流量隔离方案，也就是匹配&lt;code>标签&lt;/code>的请求会 100% 转发到有相同&lt;code>标签&lt;/code>的实例，没有匹配&lt;code>标签&lt;/code>的请求会 100% 转发到其余未匹配的实例。如果您需要按比例的流量调度方案，请参考示例 &lt;a href="../../tasks/traffic-management/weight/">基于权重的按比例流量路由&lt;/a>。&lt;/p>
+&lt;p>&lt;code>标签&lt;/code>主要是指对 Provider 端应用实例的分组，目前有两种方式可以完成实例分组，分别是&lt;code>动态规则打标&lt;/code>和&lt;code>静态规则打标&lt;/code>。&lt;code>动态规则打标&lt;/code> 可以在运行时动态的圈住一组机器实例，而 &lt;code>静态规则打标&lt;/code> 则需要实例重启后才能生效，其中，动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。&lt;/p>
+&lt;h4 id="标签规则示例---静态打标">标签规则示例 - 静态打标&lt;/h4>
+&lt;p>静态打标需要在服务提供者实例启动前确定，并且必须通过特定的参数 &lt;code>tag&lt;/code> 指定。&lt;/p>
+&lt;h5 id="provider">Provider&lt;/h5>
+&lt;p>在 Dubbo 实例启动前，指定当前实例的标签，如部署在杭州区域的实例，指定 &lt;code>tag=gray&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> tag=&lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> tag=&lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#2aa198">-jar xxx-provider.jar -Ddubbo.provider.tag=gray&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer">Consumer&lt;/h5>
+&lt;p>发起调用的一方，在每次请求前通过 &lt;code>tag&lt;/code> 设置流量标签，确保流量被调度到带有同样标签的服务提供方。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RpcContext.getContext().setAttachment(Constants.TAG_KEY, &lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="标签规则示例---动态打标">标签规则示例 - 动态打标&lt;/h4>
+&lt;p>相比于静态打标只能通过 &lt;code>tag&lt;/code> 属性设置，且在启动阶段就已经固定下来，动态标签可以匹配任意多个属性，根据指定的匹配条件将 Provider 实例动态的划分到不同的流量分组中。&lt;/p>
+&lt;h5 id="provider-1">Provider&lt;/h5>
+&lt;p>以下规则对 &lt;code>shop-detail&lt;/code> 应用进行了动态归组，匹配 &lt;code>env: gray&lt;/code> 的实例被划分到 &lt;code>gray&lt;/code> 分组，其余不匹配 &lt;code>env: gray&lt;/code> 继续留在默认分组 (无 tag)。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.CommentService
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=getComment =&amp;gt; region=Hangzhou
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="conditionrule">ConditionRule&lt;/h2>
-&lt;p>条件路由规则主体。定义路由规则生效的目标服务或应用、流量过滤条件以及一些特定场景下的行为。&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>Field&lt;/th>
-&lt;th>Type&lt;/th>
-&lt;th>Description&lt;/th>
-&lt;th>Required&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>configVersion&lt;/td>
-&lt;td>string&lt;/td>
-&lt;td>The version of the condition rule definition, currently available version is &lt;code>v3.0&lt;/code>&lt;/td>
-&lt;td>Yes&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>scope&lt;/td>
-&lt;td>string&lt;/td>
-&lt;td>Supports &lt;code>service&lt;/code> and &lt;code>application&lt;/code> scope rules.&lt;/td>
-&lt;td>Yes&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>key&lt;/td>
-&lt;td>string&lt;/td>
-&lt;td>The identifier of the target service or application that this rule is about to apply to. &lt;br/>&lt;br/>- If &lt;code>scope:service&lt;/code>is set, then &lt;code>key&lt;/code>should be specified as the Dubbo service key that this rule targets to control.&lt;br/> - If &lt;code>scope:application&lt;/code> is set, then &lt;code>key&lt;/code>should be specified as the name of the application that this rule targets to control, application should always be a Dubbo Consumer.&lt;/td>
-&lt;td>Yes&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>enabled&lt;/td>
-&lt;td>bool&lt;/td>
-&lt;td>Whether enable this rule or not, set &lt;code>enabled:false&lt;/code> to disable this rule.&lt;/td>
-&lt;td>Yes&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>conditions&lt;/td>
-&lt;td>string[]&lt;/td>
-&lt;td>The condition routing rule definition of this configuration. Check &lt;a href="./#condition">Condition&lt;/a> for details&lt;/td>
-&lt;td>Yes&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>force&lt;/td>
-&lt;td>bool&lt;/td>
-&lt;td>The behavior when the instance subset is empty after routing. &lt;code>true&lt;/code> means return no provider exception while &lt;code>false&lt;/code> means ignore this rule.&lt;/td>
-&lt;td>No&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>runtime&lt;/td>
-&lt;td>bool&lt;/td>
-&lt;td>Whether run routing rule for every rpc invocation or use routing cache if available.&lt;/td>
-&lt;td>No&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;h2 id="condition">Condition&lt;/h2>
-&lt;p>&lt;code>Condition&lt;/code> 为条件路由规则的主体，类型为一个复合结构的 string 字符串，如 &lt;code>method=getComment =&amp;gt; region=Hangzhou&lt;/code>。其中，&lt;/p>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: shop-detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">tags&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: gray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">key&lt;/span>: env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: gray
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>这里牵涉到如何给您的实例打各种原始 label 的问题，即上面示例中的 &lt;code>env&lt;/code>，一种方式是直接写在配置文件中，如上面静态规则实例 provider 部分的配置所示，另一种方式是通过预设环境变量指定，关于这点请参考下文的 &lt;a href="#%E5%A6%82%E4%BD%95%E7%BB%99%E5%AE%9E%E4%BE%8B%E6%89%93%E6%A0%87">如何给实例打标&lt;/a> 一节。&lt;/p>
+&lt;/blockquote>
+&lt;h5 id="consumer-1">Consumer&lt;/h5>
+&lt;p>服务发起方的设置方式和之前静态打标规则保持一致，只需要在每次请求前通过 &lt;code>tag&lt;/code> 设置流量标签，确保流量被调度到带有同样标签的服务提供方。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RpcContext.getContext().setAttachment(Constants.TAG_KEY, &lt;span style="color:#2aa198">&amp;#34;Hangzhou&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>设置了以上标签的流量，将全部导流到 &lt;code>hangzhou-region&lt;/code> 划分的实例上。&lt;/p>
+&lt;blockquote>
+&lt;p>请求标签的作用域仅为一次点对点的 RPC 请求。比如，在一个 A -&amp;gt; B -&amp;gt; C 调用链路上，如果 A -&amp;gt; B 调用通过 &lt;code>setAttachment&lt;/code> 设置了 &lt;code>tag&lt;/code> 参数，则该参数不会在 B -&amp;gt; C 的调用中生效，同样的，在完成了 A -&amp;gt; B -&amp;gt; C 的整个调用同时 A 收到调用结果后，如果想要相同的 &lt;code>tag&lt;/code> 参数，则在发起其他调用前仍需要单独设置 &lt;code>setAttachment&lt;/code>。可以参考 &lt;a href="../../tasks/traffic-management/isolation/">示例任务 - 环境隔离&lt;/a> 了解更多 &lt;code>tag&lt;/code> 全链路传递解决方案。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="条件路由规则">条件路由规则&lt;/h3>
+&lt;p>条件路由与标签路由的工作模式非常相似，也是首先对请求中的参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。相比于标签路由，条件路由的匹配方式更灵活：&lt;/p>
+&lt;ul>
+&lt;li>在标签路由中，一旦给某一台或几台机器实例打了标签，则这部分实例就会被立马从通用流量集合中移除，不同标签之间不会再有交集。有点类似下图，地址集合在输入阶段就已经划分明确。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/tag-condition-compare1.png" alt="tag-condition-compare">&lt;/p>
+&lt;ul>
+&lt;li>而从条件路由的视角，所有的实例都是一致的，路由过程中不存在分组隔离的问题，每次路由过滤都是基于全量地址中执行&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/tag-condition-compare2.png" alt="tag-condition-compare">&lt;/p>
+&lt;p>条件路由规则的主体 &lt;code>conditions&lt;/code> 主要包含两部分内容：&lt;/p>
 &lt;ul>
 &lt;li>=&amp;gt; 之前的为请求参数匹配条件，指定的 &lt;code>匹配条件指定的参数&lt;/code> 将与 &lt;code>消费者的请求上下文 (URL)、甚至方法参数&lt;/code> 进行对比，当消费者满足匹配条件时，对该消费者执行后面的地址子集过滤规则。&lt;/li>
 &lt;li>=&amp;gt; 之后的为地址子集过滤条件，指定的 &lt;code>过滤条件指定的参数&lt;/code> 将与 &lt;code>提供者实例地址 (URL)&lt;/code> 进行对比，消费者最终只能拿到符合过滤条件的实例列表，从而确保流量只会发送到符合条件的地址子集。
@@ -77,29 +86,92 @@
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;h3 id="匹配过滤条件">匹配/过滤条件&lt;/h3>
-&lt;p>&lt;strong>参数支持&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>服务调用上下文，如：interface, method, group, version 等&lt;/li>
-&lt;li>请求上下文，如 attachments[key] = value&lt;/li>
-&lt;li>方法参数，如 arguments[0] = tom&lt;/li>
-&lt;li>URL 本身的字段，如：protocol, host, port 等&lt;/li>
-&lt;li>URL 上任务扩展参数，如：application, organization 等&lt;/li>
-&lt;li>支持开发者自定义扩展&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>条件支持&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>等号 = 表示 &amp;ldquo;匹配&amp;rdquo;，如：method = getComment&lt;/li>
-&lt;li>不等号 != 表示 &amp;ldquo;不匹配&amp;rdquo;，如：method != getComment&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>值支持&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>以逗号 , 分隔多个值，如：host != 10.20.153.10,10.20.153.11&lt;/li>
-&lt;li>以星号 * 结尾，表示通配，如：host != 10.20.*&lt;/li>
-&lt;li>以美元符 $ 开头，表示引用消费者参数，如：region = $region&lt;/li>
-&lt;li>整数值范围，如：userId = 1~100、userId = 101~&lt;/li>
-&lt;li>支持开发者自定义扩展&lt;/li>
-&lt;/ul></description></item><item><title>Overview: 标签路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/tag-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/tag-rule/</guid><description>
+&lt;h4 id="条件路由规则示例">条件路由规则示例&lt;/h4>
+&lt;p>基于以下示例规则，所有 &lt;code>org.apache.dubbo.demo.CommentService&lt;/code> 服务调用都将被转发到与当前消费端机器具有相同 &lt;code>region&lt;/code> 标记的地址子集。&lt;code>$region&lt;/code> 是特殊引用符号，执行过程中将读取消费端机器的实际的 &lt;code>region&lt;/code> 值替代。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.CommentService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#39;=&amp;gt; region = $region&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>针对条件路由，我们通常推荐配置 &lt;code>scope: service&lt;/code> 的规则，因为它可以跨消费端应用对所有消费特定服务 (service) 的应用生效。关于 Dubbo 规则中的 &lt;code>scope&lt;/code> 以及 &lt;code>service&lt;/code>、&lt;code>application&lt;/code> 的说明请阅读 &lt;a href="./condition-rule">条件路由规则手册&lt;/a>。&lt;/p>
+&lt;/blockquote>
+&lt;p>条件路由规则还支持设置具体的机器地址如 ip 或 port，这种情况下使用条件路由可以处理一些开发或线上机器的临时状况，实现&lt;strong>黑名单、白名单、实例临时摘除&lt;/strong>等运维效果，如以下规则可以将机器 &lt;code>172.22.3.91&lt;/code> 从服务的可用列表中排除。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>=&amp;gt; host != 172.22.3.91
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>条件路由还支持基于请求参数的匹配，示例如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=getDetail&amp;amp;arguments[0]=dubbo =&amp;gt; port=20880
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="动态配置规则">动态配置规则&lt;/h3>
+&lt;p>通过 Dubbo 提供的动态配置规则，您可以动态的修改 Dubbo 服务进程的运行时行为，整个过程不需要重启，配置参数实时生效。基于这个强大的功能，基本上所有运行期参数都可以动态调整，比如超时时间、临时开启 Access Log、修改 Tracing 采样率、调整限流降级参数、负载均衡、线程池配置、日志等级、给机器实例动态打标签等。与上文讲到的流量管控规则类似，动态配置规则支持应用、服务两个粒度，也就是说您一次可以选择只调整应用中的某一个或几个服务的参数配置。&lt;/p>
+&lt;p>当然，出于系统稳定性、安全性的考量，有些特定的参数是不允许动态修改的，但除此之外，基本上所有参数都允许动态修改，很多强大的运行态能力都可以通过这个规则实现，您可以找个示例应用去尝试一下。通常 URL 地址中的参数均可以修改，这在每个语言实现的参考手册里也记录了一些更详细的说明。&lt;/p>
+&lt;h4 id="动态配置规则示例---修改超时时间">动态配置规则示例 - 修改超时时间&lt;/h4>
+&lt;p>以下示例将 &lt;code>org.apache.dubbo.samples.UserService&lt;/code> 服务的超时参数调整为 2000ms&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.UserService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">2000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下部分指定这个配置是服务粒度，具体变更的服务名为 &lt;code>org.apache.dubbo.samples.UserService&lt;/code>。&lt;code>scope&lt;/code> 支持 &lt;code>service&lt;/code>、&lt;code>application&lt;/code> 两个可选值，如果 &lt;code>scope: service&lt;/code>，则 &lt;code>key&lt;/code> 应该配置为 &lt;code>version/service:group&lt;/code> 格式。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.UserService
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>关于 Dubbo 规则中的 &lt;code>scope&lt;/code> 以及 &lt;code>service&lt;/code>、&lt;code>application&lt;/code> 的说明请参考 &lt;a href="./configuration-rule/">动态配置参考手册&lt;/a> 或 &lt;a href="../../tasks/traffic-management/timeout/">动态配置示例&lt;/a>。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;code>parameters&lt;/code> 参数指定了新的修改值，这里将通过 &lt;code>timeout: 2000&lt;/code> 将超时时间设置为 2000ms。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">2000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="脚本路由规则">脚本路由规则&lt;/h3>
+&lt;p>脚本路由是最直观的路由方式，同时它也是当前最灵活的路由规则，因为你可以在脚本中定义任意的地址筛选规则。如果我们为某个服务定义一条脚本规则，则后续所有请求都会先执行一遍这个脚本，脚本过滤出来的地址即为请求允许发送到的、有效的地址集合。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span>: javascript
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">script&lt;/span>: |&lt;span style="color:#2aa198">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> (function route(invokers,invocation,context) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> var result = new java.util.ArrayList(invokers.size());
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> for (i = 0; i &amp;lt; invokers.size(); i ++) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> if (&amp;#34;10.20.3.3&amp;#34;.equals(invokers.get(i).getUrl().getHost())) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> result.add(invokers.get(i));
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> return result;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> } (invokers, invocation, context)); // 表示立即执行方法&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="如何给实例打标">如何给实例打标&lt;/h2>
+&lt;p>当前，有两种方式可以在启动阶段为 Dubbo 实例指定标签，一种是之前提到的应用内配置的方式，如在 xml 文件中设置 &lt;code>&amp;lt;dubbo:provider tag=&amp;quot;gray&amp;quot;/&amp;gt;&lt;/code>，应用打包部署后即自动被打标。&lt;/p>
+&lt;p>还有一种更灵活的方式，那就是通过读取所部署机器上的环境信息给应用打标，这样应用的标签就可以跟随实例动态的自动填充，避免每次更换部署环境就重新打包应用镜像的问题。当前 Dubbo 能自动读取以下环境变量配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: apache/demo-detail:latest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: DUBBO_LABELS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;region=hangzhou; env=gray&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: apache/demo-detail:latest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: DUBBO_ENV_KEYS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;REGION, ENV&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: REGION
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;hangzhou&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: ENV
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果您有不同的实例环境保存机制，可以通过扩展 &lt;code>InfraAdapter 扩展点&lt;/code> 来自定义自己的标签加载方式。如果您的应用是部署在 Kubernetes 环境下，并且已经接入了服务网格体系，则也可以使用标准 deployment 标签的方式打标，具体请跟随 &lt;a href="../../tasks/mesh/">服务网格任务示例&lt;/a> 学习。&lt;/p>
+&lt;h2 id="如何配置流量规则">如何配置流量规则&lt;/h2>
+&lt;p>Dubbo 提供了控制台 Dubbo Admin，帮助您可视化的下发流量管控规则，并实时监控规则生效情况。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/what/admin.png" alt="Admin">&lt;/p>
+&lt;p>Dubbo 还提供了 &lt;code>dubboctl&lt;/code> 命令行工具，需要有 Dubbo Admin 提前部署就绪，因为 dubboctl 是通过与 Admin 进行 http 通信完成规则下发的。&lt;/p>
+&lt;p>如果您使用的是如 Istio 的服务网格架构，还可以使用 Istioctl、kubectl 等下发 Istio 标准规则。&lt;/p>
+&lt;h2 id="接入服务网格">接入服务网格&lt;/h2>
+&lt;p>以上介绍的都是 Dubbo 体系内的流量治理规则，如果您对服务网格架构感兴趣，则可以将 Dubbo 服务接入服务网格体系，这样，您就可以使用服务网格提供的流量治理能力，如 Istio 体系的 VirtualService 等。&lt;/p>
+&lt;p>具体请参见 &lt;a href="../service-mesh">Dubbo 中的服务网格架构&lt;/a>。&lt;/p>
+&lt;h2 id="跟随示例学习">跟随示例学习&lt;/h2>
+&lt;p>我们搭建了一个 &lt;a href="../../tasks/traffic-management/">线上商城系统&lt;/a> 供您学习流量规则的具体使用。&lt;/p></description></item><item><title>Overview: 标签路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/tag-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/tag-rule/</guid><description>
 &lt;p>标签路由通过将某一个服务的实例划分到不同的分组，约束具有特定标签的流量只能在指定分组中流转，不同分组为不同的流量场景服务，从而达到实现流量隔离的目的，可以作为蓝绿发布、灰度发布等场景能力的基础。目前有两种方式可以对实例打标，分别是&lt;code>动态规则打标&lt;/code>和&lt;code>静态规则打标&lt;/code>。&lt;code>动态规则打标&lt;/code> 可以在运行时动态的圈住一组机器实例，而 &lt;code>静态规则打标&lt;/code> 则需要实例重启后才能生效，其中，动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。&lt;/p>
 &lt;p>本文要讲的就是标签路由规则就是 &lt;code>动态规则打标&lt;/code>。&lt;/p>
 &lt;p>标签路由是一套严格隔离的流量体系，对于同一个应用而言，一旦打了标签则这部分地址子集就被隔离出来，只有带有对应标签的请求流量可以访问这个地址子集，这部分地址不再接收没有标签或者具有不同标签的流量。&lt;/p>
@@ -216,7 +288,108 @@
 &lt;td>Yes&lt;/td>
 &lt;/tr>
 &lt;/tbody>
-&lt;/table></description></item><item><title>Overview: 脚本路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/script-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/script-rule/</guid><description>
+&lt;/table></description></item><item><title>Overview: 条件路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/condition-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/condition-rule/</guid><description>
+&lt;p>条件路由规则将符合特定条件的请求转发到特定的地址实例子集上。规则首先对发起流量的请求参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。&lt;/p>
+&lt;p>以下是一个条件路由规则示例。&lt;/p>
+&lt;p>基于以下示例规则，所有 &lt;code>org.apache.dubbo.samples.CommentService&lt;/code> 服务 &lt;code>getComment&lt;/code> 方法的调用都将被转发到有 &lt;code>region=Hangzhou&lt;/code> 标记的地址子集。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.CommentService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=getComment =&amp;gt; region=Hangzhou
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="conditionrule">ConditionRule&lt;/h2>
+&lt;p>条件路由规则主体。定义路由规则生效的目标服务或应用、流量过滤条件以及一些特定场景下的行为。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>configVersion&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The version of the condition rule definition, currently available version is &lt;code>v3.0&lt;/code>&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>scope&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>Supports &lt;code>service&lt;/code> and &lt;code>application&lt;/code> scope rules.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>key&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The identifier of the target service or application that this rule is about to apply to. &lt;br/>&lt;br/>- If &lt;code>scope:service&lt;/code>is set, then &lt;code>key&lt;/code>should be specified as the Dubbo service key that this rule targets to control.&lt;br/> - If &lt;code>scope:application&lt;/code> is set, then &lt;code>key&lt;/code>should be specified as the name of the application that this rule targets to control, application should always be a Dubbo Consumer.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enabled&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>Whether enable this rule or not, set &lt;code>enabled:false&lt;/code> to disable this rule.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>conditions&lt;/td>
+&lt;td>string[]&lt;/td>
+&lt;td>The condition routing rule definition of this configuration. Check &lt;a href="./#condition">Condition&lt;/a> for details&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>force&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>The behavior when the instance subset is empty after routing. &lt;code>true&lt;/code> means return no provider exception while &lt;code>false&lt;/code> means ignore this rule.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>runtime&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>Whether run routing rule for every rpc invocation or use routing cache if available.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="condition">Condition&lt;/h2>
+&lt;p>&lt;code>Condition&lt;/code> 为条件路由规则的主体，类型为一个复合结构的 string 字符串，如 &lt;code>method=getComment =&amp;gt; region=Hangzhou&lt;/code>。其中，&lt;/p>
+&lt;ul>
+&lt;li>=&amp;gt; 之前的为请求参数匹配条件，指定的 &lt;code>匹配条件指定的参数&lt;/code> 将与 &lt;code>消费者的请求上下文 (URL)、甚至方法参数&lt;/code> 进行对比，当消费者满足匹配条件时，对该消费者执行后面的地址子集过滤规则。&lt;/li>
+&lt;li>=&amp;gt; 之后的为地址子集过滤条件，指定的 &lt;code>过滤条件指定的参数&lt;/code> 将与 &lt;code>提供者实例地址 (URL)&lt;/code> 进行对比，消费者最终只能拿到符合过滤条件的实例列表，从而确保流量只会发送到符合条件的地址子集。
+&lt;ul>
+&lt;li>如果匹配条件为空，表示对所有请求生效，如：&lt;code>=&amp;gt; status != staging&lt;/code>&lt;/li>
+&lt;li>如果过滤条件为空，表示禁止来自相应请求的访问，如：&lt;code>application = product =&amp;gt;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="匹配过滤条件">匹配/过滤条件&lt;/h3>
+&lt;p>&lt;strong>参数支持&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>服务调用上下文，如：interface, method, group, version 等&lt;/li>
+&lt;li>请求上下文，如 attachments[key] = value&lt;/li>
+&lt;li>方法参数，如 arguments[0] = tom&lt;/li>
+&lt;li>URL 本身的字段，如：protocol, host, port 等&lt;/li>
+&lt;li>URL 上任务扩展参数，如：application, organization 等&lt;/li>
+&lt;li>支持开发者自定义扩展&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>条件支持&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>等号 = 表示 &amp;ldquo;匹配&amp;rdquo;，如：method = getComment&lt;/li>
+&lt;li>不等号 != 表示 &amp;ldquo;不匹配&amp;rdquo;，如：method != getComment&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>值支持&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>以逗号 , 分隔多个值，如：host != 10.20.153.10,10.20.153.11&lt;/li>
+&lt;li>以星号 * 结尾，表示通配，如：host != 10.20.*&lt;/li>
+&lt;li>以美元符 $ 开头，表示引用消费者参数，如：region = $region&lt;/li>
+&lt;li>整数值范围，如：userId = 1~100、userId = 101~&lt;/li>
+&lt;li>支持开发者自定义扩展&lt;/li>
+&lt;/ul></description></item><item><title>Overview: 脚本路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/script-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/what/core-features/traffic/script-rule/</guid><description>
 &lt;p>脚本路由为流量管理提供了最大的灵活性，所有流量在执行负载均衡选址之前，都会动态的执行一遍规则脚本，根据脚本执行的结果确定可用的地址子集。&lt;/p>
 &lt;p>脚本路由只对消费者生效且只支持应用粒度管理，因此， &lt;code>key&lt;/code> 必须设置为消费者应用名；脚本语法支持多种，以 Dubbo Java SDK 为例，脚本语法支持 Javascript、Groovy、Kotlin 等，具体可参见每个语言实现的限制。&lt;/p>
 &lt;blockquote>

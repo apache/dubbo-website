@@ -538,7 +538,417 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;div class="alert alert-warning" role="alert">
 &lt;h4 class="alert-heading">注意&lt;/h4>
 为了避免复杂化线上环境，不要在线上使用这个功能，只应在测试阶段使用。
-&lt;/div></description></item><item><title>Overview: 调用结果缓存</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/result-cache/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/result-cache/</guid><description>
+&lt;/div></description></item><item><title>Overview: 开发服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic/</guid><description>
+&lt;h2 id="泛化调用">泛化调用&lt;/h2>
+&lt;p>泛化调用（客户端泛化调用）是指在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>调用方没有接口及模型类元，知道服务的接口的全限定类名和方法名的情况下，可以通过泛化调用调用对应接口。
+比如：实现一个通用的服务测试框架&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>本示例中使用&amp;quot;发布和调用&amp;quot; 中示例代码&lt;/p>
+&lt;p>接口定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DevelopService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">invoke&lt;/span>(String param);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口实现1：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;group1&amp;#34;&lt;/span>,version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DevelopProviderServiceV1&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DevelopService{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">invoke&lt;/span>(String param) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringBuilder s &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> s.append(&lt;span style="color:#2aa198">&amp;#34;ServiceV1 param:&amp;#34;&lt;/span>).append(param);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> s.toString();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="客户端调用">客户端调用&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GenericTask&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> CommandLineRunner {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">run&lt;/span>(String... args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> GenericService genericService &lt;span style="color:#719e07">=&lt;/span> buildGenericService(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.develop.DevelopService&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;group2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;2.0&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//传入需要调用的方法，参数类型列表，参数列表&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;invoke&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;g1&amp;#34;&lt;/span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;GenericTask Response: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> JSON.toJSONString(result));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> GenericService &lt;span style="color:#268bd2">buildGenericService&lt;/span>(String interfaceClass, String group, String version) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> reference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setInterface(interfaceClass);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setVersion(version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//开启泛化调用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setGeneric(&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setTimeout(30000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setGroup(group);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceCache cache &lt;span style="color:#719e07">=&lt;/span> SimpleReferenceCache.getCache();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> cache.get(reference);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Exception e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(e.getMessage());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>泛化调用是指在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。&lt;/p>
+&lt;h2 id="使用场景-1">使用场景&lt;/h2>
+&lt;p>泛化调用主要用于实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求。比如如下场景：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>网关服务：如果要搭建一个网关服务，那么服务网关要作为所有 RPC 服务的调用端。但是网关本身不应该依赖于服务提供方的接口 API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>测试平台：如果要搭建一个可以测试 RPC 调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的 RPC 服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口 API。所以需要泛化调用的支持。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="使用方式-1">使用方式&lt;/h2>
+&lt;p>demo 可见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic">dubbo 项目中的示例代码&lt;/a>&lt;/p>
+&lt;p>API 部分以此 demo 为例讲解使用方式。&lt;/p>
+&lt;h3 id="服务定义">服务定义&lt;/h3>
+&lt;h4 id="服务接口">服务接口&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">HelloService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncComplex&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncGenericComplex&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="服务实现类">服务实现类&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;sayHello: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> Thread(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.sleep(5000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (InterruptedException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> future.complete(&lt;span style="color:#2aa198">&amp;#34;sayHelloAsync: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }).start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> future;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncComplex&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Person person &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Person(1, &lt;span style="color:#2aa198">&amp;#34;sayHelloAsyncComplex: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> Thread(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.sleep(5000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (InterruptedException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> future.complete(person);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }).start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> future;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncGenericComplex&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Person person &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Person(1, &lt;span style="color:#2aa198">&amp;#34;sayHelloAsyncGenericComplex: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> genericType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> GenericType&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>(person);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> Thread(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.sleep(5000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (InterruptedException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> future.complete(genericType);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }).start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> future;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="通过api使用泛化调用">通过API使用泛化调用&lt;/h3>
+&lt;h4 id="服务启动方">服务启动方&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>在设置 &lt;code>ServiceConfig&lt;/code> 时，使用&lt;code>setGeneric(&amp;quot;true&amp;quot;)&lt;/code>来开启泛化调用&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在设置 &lt;code>ServiceConfig&lt;/code> 时，使用 setRef 指定实现类时，要设置一个 &lt;code>GenericService&lt;/code> 的对象。而不是真正的服务实现类对象&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>其他设置与正常 Api 服务启动一致即可&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> String zookeeperAddress &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;zookeeper://&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> System.getProperty(&lt;span style="color:#2aa198">&amp;#34;zookeeper.address&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;127.0.0.1&amp;#34;&lt;/span>) &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;:2181&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> EmbeddedZooKeeper(2181, &lt;span style="color:#cb4b16">false&lt;/span>).start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建ApplicationConfig&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig.setName(&lt;span style="color:#2aa198">&amp;#34;generic-impl-provider&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建注册中心配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(zookeeperAddress);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//新建服务实现类，注意要使用GenericService接收&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> GenericService helloService &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> GenericImplOfHelloService();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建服务相关配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> service &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.setApplication(applicationConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.setRegistry(registryConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.setInterface(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.generic.call.api.HelloService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.setRef(helloService);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//重点：设置为泛化调用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//注：不再推荐使用参数为布尔值的setGeneric函数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//应该使用referenceConfig.setGeneric(&amp;#34;true&amp;#34;)代替&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.setGeneric(&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.export();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;dubbo service started&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> CountDownLatch(1).await();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="泛化调用方">泛化调用方&lt;/h4>
+&lt;p>步骤：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>在设置 &lt;code>ReferenceConfig&lt;/code> 时，使用 &lt;code>setGeneric(&amp;quot;true&amp;quot;)&lt;/code> 来开启泛化调用&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>配置完 &lt;code>ReferenceConfig&lt;/code> 后，使用 &lt;code>referenceConfig.get()&lt;/code> 获取到 &lt;code>GenericService&lt;/code> 类的实例&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>使用其 &lt;code>$invoke&lt;/code> 方法获取结果&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>其他设置与正常 Api 服务启动一致即可&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//定义泛化调用服务类&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> GenericService genericService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建ApplicationConfig&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig.setName(&lt;span style="color:#2aa198">&amp;#34;generic-call-consumer&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建注册中心配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建服务引用配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> referenceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//设置接口&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setInterface(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.generic.call.api.HelloService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig.setRegistry(registryConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setApplication(applicationConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//重点：设置为泛化调用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//注：不再推荐使用参数为布尔值的setGeneric函数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//应该使用referenceConfig.setGeneric(&amp;#34;true&amp;#34;)代替&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setGeneric(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//设置异步，不必须，根据业务而定。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setAsync(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//设置超时时间&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setTimeout(7000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取服务，由于是泛化调用，所以获取的一定是GenericService类型&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> genericService &lt;span style="color:#719e07">=&lt;/span> referenceConfig.get();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//使用GenericService类对象的$invoke方法可以代替原方法使用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//第一个参数是需要调用的方法名&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//第二个参数是需要调用的方法的参数类型数组，为String数组，里面存入参数的全类名。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//第三个参数是需要调用的方法的参数数组，为Object数组，里面存入需要的参数。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//使用CountDownLatch，如果使用同步调用则不需要这么做。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CountDownLatch latch &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CountDownLatch(1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取结果&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span> RpcContext.getContext().getCompletableFuture();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> future.whenComplete((value, t) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.err.println(&lt;span style="color:#2aa198">&amp;#34;invokeSayHello(whenComplete): &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> value);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> latch.countDown();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//打印结果&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.err.println(&lt;span style="color:#2aa198">&amp;#34;invokeSayHello(return): &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> result);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> latch.await();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="通过-spring-使用泛化调用">通过 Spring 使用泛化调用&lt;/h3>
+&lt;p>Spring 中服务暴露与服务发现有多种使用方式，如 xml，注解。这里以 xml 为例。
+步骤：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>生产者端无需改动&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>消费者端原有的 &lt;code>dubbo:reference&lt;/code> 标签加上 &lt;code>generic=true&lt;/code> 的属性。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> generic = &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.generic.call.api.HelloService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>
+&lt;p>获取到 Bean 容器，通过 Bean 容器拿到 &lt;code>GenericService&lt;/code> 实例。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>调用 &lt;code>$invoke&lt;/code> 方法获取结果&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> GenericService genericService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassPathXmlApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ClassPathXmlApplicationContext(&lt;span style="color:#2aa198">&amp;#34;spring/generic-impl-consumer.xml&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//服务对应bean的名字由xml标签的id决定&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> genericService &lt;span style="color:#719e07">=&lt;/span> context.getBean(&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获得结果&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="protobuf-对象泛化调用">Protobuf 对象泛化调用&lt;/h3>
+&lt;p>一般泛化调用只能用于生成的服务参数为 POJO 的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常 POJO，可以通过 protobuf-json 泛化调用。&lt;/p>
+&lt;p>GoogleProtobuf 序列化相关的 Demo 可以参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/serialization/dubbo-samples-protobuf">protobuf-demo&lt;/a>&lt;/p>
+&lt;h4 id="通过-spring-对-google-protobuf-对象泛化调用">通过 Spring 对 Google Protobuf 对象泛化调用&lt;/h4>
+&lt;p>在 Spring 中配置声明 generic = &amp;ldquo;protobuf-json&amp;rdquo;&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;barService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> generic=&lt;span style="color:#2aa198">&amp;#34;protobuf-json&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Java 代码获取 barService 并开始泛化调用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>GenericService barService &lt;span style="color:#719e07">=&lt;/span> (GenericService) applicationContext.getBean(&lt;span style="color:#2aa198">&amp;#34;barService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Object result &lt;span style="color:#719e07">=&lt;/span> barService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,&lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.protobuf.GooglePbBasic$CDubboGooglePBRequestType&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;{\&amp;#34;double\&amp;#34;:0.0,\&amp;#34;float\&amp;#34;:0.0,\&amp;#34;bytesType\&amp;#34;:\&amp;#34;Base64String\&amp;#34;,\&amp;#34;int32\&amp;#34;:0}&amp;#34;&lt;/span>});
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="通过-api-方式对-google-protobuf-对象泛化调用">通过 API 方式对 Google Protobuf 对象泛化调用&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> reference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 弱类型接口名&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setInterface(GenericService.class.getName());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setInterface(&lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 声明为Protobuf-json&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setGeneric(Constants.GENERIC_SERIALIZATION_PROTOBUF);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GenericService genericService &lt;span style="color:#719e07">=&lt;/span> reference.get();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> person &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;fixed64&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;int64&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 参考google官方的protobuf 3 的语法，服务的每个方法中只传输一个POJO对象&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// protobuf的泛化调用只允许传递一个类型为String的json对象来代表请求参数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String requestString &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Gson().toJson(person);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 返回对象是GoolgeProtobuf响应对象的json字符串。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService.GooglePbBasic$CDubboGooglePBRequestType&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span> {requestString});
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="googleprotobuf-对象的处理">GoogleProtobuf 对象的处理&lt;/h4>
+&lt;p>GoogleProtobuf 对象是由 Protocol 契约生成,相关知识请参考 &lt;a href="https://developers.google.com/protocol-buffers/?hl=zh-CN">ProtocolBuffers 文档&lt;/a>。假如有如下 Protobuf 契约&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-proto" data-lang="proto">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com&lt;span style="color:#719e07">.&lt;/span>xxx.XxxService.GooglePbBasic.basic;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">CDubboGooglePBRequestType&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">double&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">float&lt;/span> &lt;span style="color:#dc322f">float&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int32&lt;/span> &lt;span style="color:#dc322f">int32&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">bool&lt;/span> &lt;span style="color:#dc322f">bool&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">13&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">14&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">bytes&lt;/span> bytesType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">15&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">CDubboGooglePBResponseType&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> msg &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> CDubboGooglePBService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> sayHello (CDubboGooglePBRequestType) &lt;span style="color:#719e07">returns&lt;/span> (CDubboGooglePBResponseType);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>则对应请求按照如下方法构造&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> person &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;double&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1.000&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;float&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1.00&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;int32&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;bool&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//String 的对象需要经过base64编码&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;someBaseString&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;bytesType&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;150&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="googleprotobuf-服务元数据解析">GoogleProtobuf 服务元数据解析&lt;/h4>
+&lt;p>Google Protobuf 对象缺少标准的 JSON 格式，生成的服务元数据信息存在错误。请添加如下依赖元数据解析的依赖。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metadata-definition-protobuf&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>从服务元数据中也可以比较容易构建泛化调用对象。&lt;/p>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意事项&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>如果参数为基本类型或者 Date,List,Map 等，则不需要转换，直接调用。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果参数为其他 POJO，则使用 Map 代替。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div>
+&lt;p>如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Student&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getName&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setName&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.name &lt;span style="color:#719e07">=&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">getAge&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setAge&lt;/span>(&lt;span style="color:#dc322f">int&lt;/span> age) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.age &lt;span style="color:#719e07">=&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在调用时应该转换为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> student &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>student.put(&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>student.put(&lt;span style="color:#2aa198">&amp;#34;age&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>对于其他序列化格式，需要特殊配置&lt;/li>
+&lt;/ol>
+&lt;h2 id="特性说明-1">特性说明&lt;/h2>
+&lt;p>泛接口实现方式主要用于服务器端没有 API 接口及模型类元的情况，参数及返回值中的所有 POJO 均用 Map 表示，通常用于框架集成，比如：实现一个通用的远程服务 Mock 框架，可通过实现 GenericService 接口处理所有服务请求。&lt;/p>
+&lt;h2 id="使用场景-2">使用场景&lt;/h2>
+&lt;p>注册服务: 服务提供者在服务注册表中注册服务，例如 Zookeeper，服务注册表存储有关服务的信息，例如其接口、实现类和地址。&lt;/p>
+&lt;p>部署服务: 服务提供商将服务部署在服务器并使其对消费者可用。&lt;/p>
+&lt;p>调用服务: 使用者使用服务注册表生成的代理调用服务，代理将请求转发给服务提供商，服务提供商执行服务并将响应发送回消费者。&lt;/p>
+&lt;p>监视服务：提供者和使用者可以使用 Dubbo 框架监视服务，允许他们查看服务的执行情况，并在必要时进行调整。&lt;/p>
+&lt;h2 id="使用方式-2">使用方式&lt;/h2>
+&lt;p>在 Java 代码中实现 &lt;code>GenericService&lt;/code> 接口&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.foo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MyGenericService&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> GenericService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">$invoke&lt;/span>(String methodName, String&lt;span style="color:#719e07">[]&lt;/span> parameterTypes, Object&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> GenericException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>.equals(methodName)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Welcome &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> args&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="通过-spring-暴露泛化实现">通过 Spring 暴露泛化实现&lt;/h3>
+&lt;p>在 Spring 配置申明服务的实现&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;genericService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;com.foo.MyGenericService&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;genericService&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="通过-api-方式暴露泛化实现">通过 API 方式暴露泛化实现&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 用org.apache.dubbo.rpc.service.GenericService可以替代所有接口实现&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GenericService xxxService &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> XxxGenericService();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 该实例很重量，里面封装了所有与注册中心及服务提供方连接，请缓存&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> service &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 弱类型接口名&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service.setInterface(&lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service.setVersion(&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 指向一个通用服务实现&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service.setRef(xxxService);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 暴露及注册服务&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service.export();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 调用结果缓存</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/result-cache/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/result-cache/</guid><description>
 &lt;h2 id="功能说明">功能说明&lt;/h2>
 &lt;p>Dubbo支持了服务端结果缓存和客户端结果缓存。&lt;/p>
 &lt;h4 id="缓存类型">缓存类型&lt;/h4>

@@ -1,49 +1,111 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 序列化</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/</link><description>Recent content in 序列化 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Hessian</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/hessian/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/hessian/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>Hessian序列化是一种支持动态类型、跨语言、基于对象传输的网络协议，Java对象序列化的二进制流可以被其他语言（如，c++，python）。特性如下：&lt;/p>
-&lt;ol>
-&lt;li>自描述序列化类型。不依赖外部描述文件或者接口定义，用一个字节表示常用的基础类型，极大缩短二进制流。&lt;/li>
-&lt;li>语言无关，支持脚本语言&lt;/li>
-&lt;li>协议简单，比Java原生序列化高效&lt;/li>
-&lt;li>相比hessian1，hessian2中增加了压缩编码，其序列化二进制流大小是Java序列化的50%，序列化耗时是Java序列化的30%，反序列化耗时是Java序列化的20%。&lt;/li>
-&lt;/ol>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;blockquote>
-&lt;p>Dubbo &amp;lt; 3.2.0 版本中，默认使用 Hessian2 作为默认序列化&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="21-配置启用">2.1 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: hessian2
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">hessian2&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">hessian2&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">hessian2&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 类检查机制</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/class-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/class-check/</guid><description>
-&lt;h2 id="特性说明">特性说明&lt;/h2>
-&lt;p>该机制保证服务提供方和服务消费方类之间的兼容性和安全。&lt;/p>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>防止由于类版本不匹配、方法签名不兼容或缺少类而可能发生的潜在问题。&lt;/p>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>支持版本
-Dubbo &amp;gt;= 3.1.6&lt;/p>
-&lt;p>适用范围
-目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用。其他的序列化方式暂不支持。&lt;/p>
-&lt;h3 id="检查模式">检查模式&lt;/h3>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 序列化</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/</link><description>Recent content in 序列化 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Dubbo 序列化机制介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/serialization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/serialization/</guid><description>
+&lt;h2 id="序列化">序列化&lt;/h2>
+&lt;p>以下是 Dubbo 框架支持的序列化协议列表，根据 &lt;code>triple&lt;/code>、&lt;code>dubbo&lt;/code> 通信协议进行分类。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;span style="display:inline-block;width:100px">RPC协议&lt;/span>&lt;/th>
+&lt;th>&lt;span style="display:inline-block;width:100px">编程模式&lt;/span>&lt;/th>
+&lt;th>&lt;span style="display:inline-block;width:100px">序列化协议&lt;/span>&lt;/th>
+&lt;th>&lt;span style="display:inline-block;width:200px">配置方式&lt;/span>&lt;/th>
+&lt;th>说明&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;strong>triple&lt;/strong>&lt;/td>
+&lt;td>IDL&lt;/td>
+&lt;td>protobuf&lt;/td>
+&lt;td>默认值&lt;/td>
+&lt;td>使用 IDL 时的默认序列化方式&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>IDL&lt;/td>
+&lt;td>json&lt;/td>
+&lt;td>serialization=&amp;ldquo;json&amp;rdquo;&lt;/td>
+&lt;td>使用 IDL时，也可以选择 protobuf-json 序列化&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>protobuf + 序列化&lt;/td>
+&lt;td>serialization=&amp;ldquo;hessian&amp;rdquo;&lt;/td>
+&lt;td>这种模式下采用的是两次序列化模式，即数据先被 hessian 序列化，再由 protobuf 序列化。&lt;br/>&lt;br/>为了支持与 IDL 同等的调用模型，易用性较好但性能略有下降&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;strong>dubbo&lt;/strong>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>hessian&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>dubbo 协议默认序列化方式，具备兼容性好、高性能、跨语言的优势(java、go、c/c++、php、python、.net)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>protostuff&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>A java serialization library with built-in support for forward-backward compatibility (schema evolution) and validation.&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>gson&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>谷歌推出的一款 json 序列化库&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>avro&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>一款 Java 高性能序列化库&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>msgpack&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>具备兼容性好，提供多语言（Java、C/C++、Python等）实现等优势&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>kryo&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>fastjson2&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>fastjson&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>Java接口&lt;/td>
+&lt;td>更多扩展&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-serialization-extensions">https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-serialization-extensions&lt;/a>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="性能对比报告">性能对比报告&lt;/h2>
+&lt;p>序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。&lt;/p>
+&lt;h2 id="安全性">安全性&lt;/h2>
+&lt;p>以上所有序列化方式中，protobuf 序列化具有最高的安全性，而对于其他序列化机制而言，我们要防止因为任意类序列化反序列化引发的 RCE 攻击。&lt;/p>
+&lt;h3 id="类检查机制">类检查机制&lt;/h3>
+&lt;p>Dubbo 中的类检查机制可以以类似黑白名单的形式来保证序列化安全。该机制保证服务提供方和服务消费方类之间的兼容性和安全，防止由于类版本不匹配、方法签名不兼容或缺少类而可能发生的潜在问题。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;ul>
+&lt;li>Dubbo &amp;gt;= 3.1.6 引入此检查机制，对用户透明。&lt;/li>
+&lt;li>目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用，其他的序列化方式暂不支持。&lt;/li>
+&lt;li>3.1 版本中默认为 &lt;code>WARN&lt;/code> 告警级别，3.2 版本中默认为 &lt;code>STRICT&lt;/code> 严格检查级别，如您遇到问题可通过以下指引修改检查级别。&lt;/li>
+&lt;/ul>
+&lt;/div>
+&lt;h4 id="检查模式">检查模式&lt;/h4>
 &lt;p>检查模式分为三个级别：&lt;code>STRICT&lt;/code> 严格检查，&lt;code>WARN&lt;/code> 告警，&lt;code>DISABLE&lt;/code> 禁用。
 &lt;code>STRICT&lt;/code> 严格检查：禁止反序列化所有不在允许序列化列表（白名单）中的类。
 &lt;code>WARN&lt;/code> 告警：仅禁止序列化所有在不允许序列化列表中（黑名单）的类，同时在反序列化不在允许序列化列表（白名单）中类的时候通过日志进行告警。
@@ -61,7 +123,7 @@ Dubbo &amp;gt;= 3.1.6&lt;/p>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置成功后可以在日志中看到如下的提示：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO utils.SerializeSecurityManager: [DUBBO] Serialize check level: STRICT
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 &lt;code>STRICT&lt;/code>，另外一个配置为 &lt;code>WARN&lt;/code>，则最终生效 &lt;code>WARN&lt;/code> 级别的配置。&lt;/p>
-&lt;h3 id="serializable-接口检查">Serializable 接口检查&lt;/h3>
+&lt;h4 id="serializable-接口检查">Serializable 接口检查&lt;/h4>
 &lt;p>Serializable 接口检查模式分为两个级别：&lt;code>true&lt;/code> 开启，&lt;code>false&lt;/code> 关闭。开启检查后会拒绝反序列化所有未实现 &lt;code>Serializable&lt;/code> 的类。&lt;/p>
 &lt;p>Dubbo 中默认配置为 &lt;code>true&lt;/code> 开启检查。&lt;/p>
 &lt;p>通过 ApplicationConfig 配置：&lt;/p>
@@ -77,7 +139,7 @@ Dubbo &amp;gt;= 3.1.6&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO utils.SerializeSecurityManager: [DUBBO] Serialize check serializable: true
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注 1：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的 Serializable 接口检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 &lt;code>true&lt;/code>，另外一个配置为 &lt;code>false&lt;/code>，则最终生效 &lt;code>false&lt;/code> 级别的配置。
 注 2：目前暂未打通 Hessian2、Fastjson2 内置的 &lt;code>Serializable&lt;/code> 检查配置。对于泛化调用，仅需要配置 &lt;code>dubbo.application.check-serializable&lt;/code> 即可修改检查配置；对于 Hessian2 序列化，需要同时修改 &lt;code>dubbo.application.check-serializable&lt;/code> 和 &lt;code>dubbo.hessian.allowNonSerializable&lt;/code> 两个配置；对于 Fastjson2 序列化，目前暂不支持修改。&lt;/p>
-&lt;h3 id="自动扫描相关配置">自动扫描相关配置&lt;/h3>
+&lt;h4 id="自动扫描相关配置">自动扫描相关配置&lt;/h4>
 &lt;p>Dubbo 类自动扫描机制共有两个配置项：&lt;code>AutoTrustSerializeClass&lt;/code> 是否启用自动扫描和 &lt;code>TrustSerializeClassLevel&lt;/code> 类信任层级。&lt;/p>
 &lt;p>简单来说，在开启类自动扫描之后，Dubbo 会通过 &lt;code>ReferenceConfig&lt;/code> 和 &lt;code>ServiceConfig&lt;/code> 自动扫描接口所有可能会用到的相关类，并且递归信任其所在的 package。 &lt;code>TrustSerializeClassLevel&lt;/code> 类信任层级可以用来限制最终信任的 package 层级。如 &lt;code>io.dubbo.test.pojo.User&lt;/code> 在 &lt;code>TrustSerializeClassLevel&lt;/code> 配置为 &lt;code>3&lt;/code> 的时候，最终会信任 &lt;code>io.dubbo.test&lt;/code> 这个 package 下所有的类。&lt;/p>
 &lt;p>Dubbo 中默认配置 &lt;code>AutoTrustSerializeClass&lt;/code> 为 &lt;code>true&lt;/code> 启用扫描， &lt;code>TrustSerializeClassLevel&lt;/code> 为 &lt;code>3&lt;/code>。&lt;/p>
@@ -95,7 +157,7 @@ Dubbo &amp;gt;= 3.1.6&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-Ddubbo.application.trust-serialize-class-level&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置成功后可以通过 QoS 命令检查当前已经加载的可信类结果是否符合预期。&lt;/p>
 &lt;p>注：开启检查之后在启动的过程中会有一定的性能损耗。&lt;/p>
-&lt;h3 id="可信不可信类自定义配置">可信/不可信类自定义配置&lt;/h3>
+&lt;h4 id="可信不可信类自定义配置">可信/不可信类自定义配置&lt;/h4>
 &lt;p>除了 Dubbo 自动扫描类之外，也支持通过资源文件的方式配置可信/不可信类列表。&lt;/p>
 &lt;p>配置方式：在资源目录（resource）下定义以下文件。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># security/serialize.allowlist&lt;/span>
@@ -106,7 +168,7 @@ Dubbo &amp;gt;= 3.1.6&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>INFO &lt;span style="color:#2aa198">utils.SerializeSecurityConfigurator: [DUBBO] Read serialize allow list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.allowlist&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO &lt;span style="color:#2aa198">utils.SerializeSecurityConfigurator: [DUBBO] Read serialize blocked list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.blockedlist&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置优先级为：用户自定义可信类 = 框架内置可信类 &amp;gt; 用户自定义不可信类 = 框架内置不可信类 &amp;gt; 自动类扫描可信类。&lt;/p>
-&lt;h3 id="审计方式">审计方式&lt;/h3>
+&lt;h4 id="审计方式">审计方式&lt;/h4>
 &lt;p>Dubbo 支持通过 QoS 命令实时查看当前的配置信息以及可信/不可信类列表。目前共支持两个命令：&lt;code>serializeCheckStatus&lt;/code> 查看当前配置信息，&lt;code>serializeWarnedClasses&lt;/code> 查看实时的告警列表。&lt;/p>
 &lt;ol>
 &lt;li>&lt;code>serializeCheckStatus&lt;/code> 查看当前配置信息&lt;/li>
@@ -117,8 +179,8 @@ Dubbo &amp;gt;= 3.1.6&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\ &lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> / // // /_/ // _ |/ _ |/ /_/ /
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;serializeCheckStatus
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>CheckStatus: WARN
@@ -145,8 +207,8 @@ Dubbo &amp;gt;= 3.1.6&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &lt;span style="color:#2aa198">&amp;#39;^]&amp;#39;&lt;/span>.
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\ &lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ &lt;span style="color:#cb4b16">\ &lt;/span>/ / / // _ &lt;span style="color:#719e07">)&lt;/span> / _ &lt;span style="color:#719e07">)&lt;/span> / __ &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> / // // /_/ // _ |/ _ |/ /_/ /
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ &lt;span style="color:#cb4b16">\_&lt;/span>___//____//____/ &lt;span style="color:#cb4b16">\_&lt;/span>___/
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;serializeWarnedClasses
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>WarnedClasses:
@@ -162,584 +224,4 @@ Dubbo &amp;gt;= 3.1.6&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;warnedClasses&amp;#34;&lt;/span>:&lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test2.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test.NotSerializable&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;io.dubbo.test2.OthersSerializable&amp;#34;&lt;/span>&lt;span style="color:#719e07">]}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
 &lt;p>建议及时关注 &lt;code>serializeWarnedClasses&lt;/code> 的结果，通过返回结果是否非空来判断是否受到攻击。&lt;/p>
-&lt;/blockquote></description></item><item><title>Overview: Fastjson2</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/fastjson2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/fastjson2/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>&lt;code>FASTJSON v2&lt;/code>是&lt;code>FASTJSON&lt;/code>项目的重要升级，目标是为下一个十年提供一个高性能的&lt;code>JSON&lt;/code>库。通过同一套&lt;code>API&lt;/code>，&lt;/p>
-&lt;ul>
-&lt;li>支持&lt;code>JSON/JSONB&lt;/code>两种协议，&lt;a href="https://alibaba.github.io/fastjson2/jsonpath_cn">&lt;code>JSONPath&lt;/code>&lt;/a> 是一等公民。&lt;/li>
-&lt;li>支持全量解析和部分解析。&lt;/li>
-&lt;li>支持&lt;code>Java&lt;/code>服务端、客户端&lt;code>Android&lt;/code>、大数据场景。&lt;/li>
-&lt;li>支持&lt;code>Kotlin&lt;/code> &lt;a href="https://alibaba.github.io/fastjson2/kotlin_cn">https://alibaba.github.io/fastjson2/kotlin_cn&lt;/a>&lt;/li>
-&lt;li>支持&lt;code>JSON Schema&lt;/code> &lt;a href="https://alibaba.github.io/fastjson2/json_schema_cn">https://alibaba.github.io/fastjson2/json_schema_cn&lt;/a>&lt;/li>
-&lt;li>支持&lt;code>Android 8+&lt;/code>&lt;/li>
-&lt;li>支持&lt;code>Graal Native-Image&lt;/code>&lt;/li>
-&lt;li>支持 &lt;code>JSON Schema&lt;/code> &lt;a href="https://alibaba.github.io/fastjson2/json_schema_cn">https://alibaba.github.io/fastjson2/json_schema_cn&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-添加依赖">2.1 添加依赖&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.fastjson2&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>fastjson2&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.0.23&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注：Fastjson2 序列化仅 Dubbo &amp;gt; 3.1.0 版本支持。在 Dubbo &amp;gt; 3.2.0 中将替代 Hessian 作为默认序列化方式。&lt;/p>
-&lt;h3 id="22-配置启用">2.2 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: fastjson2
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fastjson2&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fastjson2&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fastjson2&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fastjson2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fastjson2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fastjson2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Protobuf</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/protobuf/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/protobuf/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>Protocol Buffers是一种开源跨平台的序列化数据结构的协议。其对于存储资料或在网络上进行通信的程序是很有用的。这个方法包含一个接口描述语言，描述一些数据结构，并提供程序工具根据这些描述产生代码，这些代码将用来生成或解析代表这些数据结构的字节流。&lt;/p>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-配置启用">2.1 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: protobuf
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">protobuf&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">protobuf&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">protobuf&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;protobuf&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;protobuf&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;protobuf&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Fastjson</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/fastjson/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/fastjson/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>Fastjson 是一个 Java 库，可用于将 Java 对象转换为其 JSON 表示形式。它还可用于将 JSON 字符串转换为等效的 Java 对象。 Fastjson 可以处理任意 Java 对象，包括您没有源代码的预先存在的对象。&lt;/p>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-添加依赖">2.1 添加依赖&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-fastjson&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>fastjson&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.2.83&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-配置启用">2.2 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: fastjson
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fastjson&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fastjson&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fastjson&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fastjson&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fastjson&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fastjson&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Avro</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/avro/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/avro/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>Avro是一种远程过程调用和数据序列化框架，是在Apache的Hadoop项目之内开发的。它使用JSON来定义数据类型和通讯协议，使用压缩二进制格式来序列化数据。它主要用于Hadoop，它可以为持久化数据提供一种序列化格式，并为Hadoop节点间及从客户端程序到Hadoop服务的通讯提供一种电报格式。&lt;/p>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-添加依赖">2.1 添加依赖&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-avro&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.avro&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>avro&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.11.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-配置启用">2.2 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: avro
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">avro&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">avro&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">avro&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;avro&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;avro&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;avro&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: FST</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/fst/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/fst/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>FST序列化全称是Fast Serialization，它是对Java序列化的替换实现。既然前文中提到Java序列化的两点严重不足，在FST中得到了较大的改善，FST的特征如下：&lt;/p>
-&lt;ol>
-&lt;li>比JDK提供的序列化提升了10倍，体积也减少 3-4 倍多&lt;/li>
-&lt;li>支持堆外Maps，和堆外Maps的持久化&lt;/li>
-&lt;li>支持序列化为JSON&lt;/li>
-&lt;/ol>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-添加依赖">2.1 添加依赖&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-fst&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>de.ruedigermoeller&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>fst&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.0.3&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-配置启用">2.2 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: fst
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fst&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fst&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">fst&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fst&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fst&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fst&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Gson</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/gson/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/gson/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>Gson是Google公司发布的一个开放源代码的Java库，主要用途为序列化Java对象为JSON字符串，或反序列化JSON字符串成Java对象。&lt;/p>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-添加依赖">2.1 添加依赖&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-gson&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.google.code.gson&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>gson&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.10.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-配置启用">2.2 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: gson
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">gson&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">gson&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">gson&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;gson&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;gson&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;gson&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Kryo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/kryo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/kryo/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。&lt;/p>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-添加依赖">2.1 添加依赖&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-kryo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.esotericsoftware&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>kryo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>5.4.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>de.javakaffee&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>kryo-serializers&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.45&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-配置启用">2.2 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: kryo
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">kryo&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">kryo&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">kryo&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: MessagePack</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/msgpack/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/msgpack/</guid><description>
-&lt;h2 id="1-介绍">1 介绍&lt;/h2>
-&lt;p>MessagePack是一种计算机数据交换格式。它是一种二进制形式，用于表示简单的数据结构，如数组和关联数组。MessagePack 旨在尽可能紧凑和简单。&lt;/p>
-&lt;h2 id="2-使用方式">2 使用方式&lt;/h2>
-&lt;h3 id="21-添加依赖">2.1 添加依赖&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-msgpack&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.msgpack&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>msgpack-core&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.9.3&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.msgpack&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>jackson-dataformat-msgpack&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.9.3&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-配置启用">2.2 配置启用&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># application.yml (Spring Boot)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: msgpack
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">msgpack&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">msgpack&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># or&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.reference.com.demo.DemoService.serialization&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">msgpack&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;msgpack&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;msgpack&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- or --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;msgpack&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Kryo 和 FST 序列化</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/serialization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/serialization/</guid><description>
-&lt;h2 id="功能说明">功能说明&lt;/h2>
-&lt;h3 id="序列化漫谈">序列化漫谈&lt;/h3>
-&lt;h4 id="漫谈一">漫谈一&lt;/h4>
-&lt;p>dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用。主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。&lt;/p>
-&lt;p>&lt;strong>长连接：避免了每次调用新建TCP连接，提高了调用的响应速度。&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>多路复用：单个TCP连接可交替传输多个请求和响应的消息，降低了连接的等待闲置时间，从而减少了同样并发数下的网络连接数，提高了系统吞吐量。&lt;/strong>&lt;/p>
-&lt;h4 id="漫谈二">漫谈二&lt;/h4>
-&lt;p>而序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。&lt;/p>
-&lt;p>在dubbo RPC中，同时支持多种序列化方式&lt;/p>
-&lt;p>&lt;strong>dubbo序列化：阿里尚未开发成熟的高效java序列化实现，阿里不建议在生产环境使用它&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>hessian2序列化：hessian是一种跨语言的高效二进制序列化方式。但这里实际不是原生的序列化，而是阿里修改过的hessian lite，它是dubbo RPC默认启用的序列化方式。&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>json序列化：目前有两种实现，一种是采用的阿里的fastjson库，另一种是采用dubbo中自己实现的简单json库，但其实现都不是特别成熟，而且json这种文本序列化性能一般不如上面两种二进制序列化。&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>java序列化：主要是采用JDK自带的Java序列化实现，性能很不理想。&lt;/strong>&lt;/p>
-&lt;p>在通常情况下，这四种主要序列化方式的性能从上到下依次递减。&lt;/p>
-&lt;p>对于dubbo RPC这种追求高性能的远程调用方式来说，实际上只有1、2两种高效序列化方式比较般配，而第1个dubbo序列化由于还不成熟，所以实际只剩下2可用，所以dubbo RPC默认采用hessian2序列化。&lt;/p>
-&lt;p>但hessian是一个比较老的序列化实现了，而且它是跨语言的，所以不是单独针对java进行优化的。而dubbo RPC实际上完全是一种Java to Java的远程调用，其实没有必要采用跨语言的序列化方式（当然肯定也不排斥跨语言的序列化）。&lt;/p>
-&lt;p>最近几年，各种新的高效序列化方式层出不穷，不断刷新序列化性能的上限，最典型包括：&lt;/p>
-&lt;p>&lt;strong>专门针对Java语言的：Kryo，FST等等&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>跨语言的：Protostuff，ProtoBuf，Thrift，Avro，MsgPack等等&lt;/strong>&lt;/p>
-&lt;p>这些序列化方式的性能多数都显著优于hessian2（甚至包括尚未成熟的dubbo序列化）。&lt;/p>
-&lt;p>有鉴于此，我们为dubbo引入Kryo和FST这两种高效Java序列化实现，来逐步取代hessian2。&lt;/p>
-&lt;p>其中，Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。而FST是一种较新的序列化实现，目前还缺乏足够多的成熟使用案例，但我认为它还是非常有前途的。&lt;/p>
-&lt;p>在面向生产环境的应用中，我建议目前更优先选择Kryo。&lt;/p>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>高性能微服务，大型对象图，分布式系统等&lt;/p>
-&lt;h2 id="实现方式">实现方式&lt;/h2>
-&lt;h3 id="启用kryo和fst">启用Kryo和FST&lt;/h3>
-&lt;p>使用Kryo和FST非常简单，只需要先增加对应的依赖。
-更多插件： &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions">Dubbo SPI Extensions&lt;/a>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-kryo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-serialization-fst&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在dubbo RPC的XML配置中添加一个属性即可：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fst&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="注册被序列化类">注册被序列化类&lt;/h3>
-&lt;p>要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，实现如下&lt;/p>
-&lt;p>&lt;strong>回调接口&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">SerializationOptimizerImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> SerializationOptimizer {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Collection&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getSerializableClasses&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> classes &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> LinkedList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(BidRequest.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(BidResponse.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(Device.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(Geo.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(Impression.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(SeatBid.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> classes;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在XML配置中添加：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span> optimizer=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.SerializationOptimizerImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在注册这些类后，序列化的性能可能被大大提升，特别针对小数量的嵌套对象的时候。&lt;/p>
-&lt;p>当然，在对一个类做序列化的时候，可能还级联引用到很多类，比如Java集合类。&lt;/p>
-&lt;p>针对这种情况，我们已经自动将JDK中的常用类进行了注册，所以你不需要重复注册它们（当然你重复注册了也没有任何影响)。&lt;/p>
-&lt;p>包括&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>GregorianCalendar
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>InvocationHandler
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BigDecimal
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BigInteger
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Pattern
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BitSet
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>URI
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>UUID
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HashMap
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ArrayList
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LinkedList
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HashSet
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>TreeSet
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hashtable
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Date
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Calendar
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ConcurrentHashMap
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SimpleDateFormat
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Vector
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>BitSet
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>StringBuffer
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>StringBuilder
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Object
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Object[]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String[]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>byte[]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>char[]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>int[]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>float[]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>double[]
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于注册被序列化的类仅仅是出于性能优化的目的，所以即使你忘记注册某些类也没有关系。&lt;/p>
-&lt;p>事实上，即使不注册任何类，Kryo和FST的性能依然普遍优于hessian和dubbo序列化。&lt;/p>
-&lt;blockquote>
-&lt;p>当然，有人可能会问为什么不用配置文件来注册这些类？这是因为要注册的类往往数量较多，导致配置文件冗长；而且在没有好的IDE支持的情况下，配置文件的编写和重构都比java类麻烦得多；最后，这些注册的类一般是不需要在项目编译打包后还需要做动态修改的。&lt;/p>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;p>另外，有人也会觉得手工注册被序列化的类是一种相对繁琐的工作，是不是可以用annotation来标注，然后系统来自动发现并注册。但这里annotation的局限是，它只能用来标注你可以修改的类，而很多序列化中引用的类很可能是你没法做修改的（比如第三方库或者JDK系统类或者其他项目的类）。另外，添加annotation毕竟稍微的“污染”了一下代码，使应用代码对框架增加了一点点的依赖性。&lt;/p>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;p>除了annotation，我们还可以考虑用其它方式来自动注册被序列化的类，例如扫描类路径，自动发现实现Serializable接口（甚至包括Externalizable）的类并将它们注册。当然，我们知道类路径上能找到Serializable类可能是非常多的，所以也可以考虑用package前缀之类来一定程度限定扫描范围。&lt;/p>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;p>当然，在自动注册机制中，特别需要考虑如何保证服务提供端和消费端都以同样的顺序（或者ID）来注册类，避免错位，毕竟两端可被发现然后注册的类的数量可能都是不一样的。&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="无参构造函数和serializable接口">无参构造函数和Serializable接口&lt;/h3>
-&lt;p>如果被序列化的类中不包含无参的构造函数，则在Kryo的序列化中，性能将会大打折扣，因为此时我们在底层将用Java的序列化来透明的取代Kryo序列化。所以，尽可能为每一个被序列化的类添加无参构造函数是一种最佳实践（当然一个java类如果不自定义构造函数，默认就有无参构造函数）。&lt;/p>
-&lt;p>另外，Kryo和FST本来都不需要被序列化的类实现Serializable接口，但我们还是建议每个被序列化类都去实现它，因为这样可以保持和Java序列化以及dubbo序列化的兼容性，另外也使我们未来采用上述某些自动注册机制带来可能。&lt;/p>
-&lt;h3 id="序列化性能分析与测试">序列化性能分析与测试&lt;/h3>
-&lt;p>本文我们主要讨论的是序列化，但在做性能分析和测试的时候我们并不单独处理每种序列化方式，而是把它们放到dubbo RPC中加以对比，因为这样更有现实意义。&lt;/p>
-&lt;p>&lt;strong>测试环境&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>两台独立服务器&lt;/li>
-&lt;li>4核Intel(R) Xeon(R) CPU E5-2603 0 @ 1.80GHz&lt;/li>
-&lt;li>8G内存&lt;/li>
-&lt;li>虚拟机之间网络通过百兆交换机&lt;/li>
-&lt;li>CentOS 5&lt;/li>
-&lt;li>JDK 7&lt;/li>
-&lt;li>Tomcat 7&lt;/li>
-&lt;li>JVM参数-server -Xms1g -Xmx1g -XX:PermSize=64M -XX:+UseConcMarkSweepGC&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>当然这个测试环境较有局限，故当前测试结果未必有非常权威的代表性。&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="测试脚本">测试脚本&lt;/h3>
-&lt;p>和dubbo自身的基准测试保持接近：&lt;/p>
-&lt;p>10个并发客户端持续不断发出请求：&lt;/p>
-&lt;ul>
-&lt;li>传入嵌套复杂对象（但单个数据量很小），不做任何处理，原样返回&lt;/li>
-&lt;li>传入50K字符串，不做任何处理，原样返回（TODO：结果尚未列出）&lt;/li>
-&lt;/ul>
-&lt;p>进行5分钟性能测试。（引用dubbo自身测试的考虑：主要考察序列化和网络IO的性能，因此服务端无任何业务逻辑。取10并发是考虑到rpc协议在高并发下对CPU的使用率较高可能会先打到瓶颈。）&lt;/p>
-&lt;h3 id="dubbo-rpc中不同序列化生成字节大小比较">Dubbo RPC中不同序列化生成字节大小比较&lt;/h3>
-&lt;p>序列化生成字节数的大小是一个比较有确定性的指标，它决定了远程调用的网络传输时间和带宽占用。&lt;/p>
-&lt;p>针对复杂对象的结果如下（数值越小越好）：&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>序列化实现&lt;/th>
-&lt;th>请求字节数&lt;/th>
-&lt;th>响应字节数&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>Kryo&lt;/td>
-&lt;td>272&lt;/td>
-&lt;td>90&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>FST&lt;/td>
-&lt;td>288&lt;/td>
-&lt;td>96&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Dubbo Serialization&lt;/td>
-&lt;td>430&lt;/td>
-&lt;td>186&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Hessian&lt;/td>
-&lt;td>546&lt;/td>
-&lt;td>329&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>FastJson&lt;/td>
-&lt;td>461&lt;/td>
-&lt;td>218&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Json&lt;/td>
-&lt;td>657&lt;/td>
-&lt;td>409&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Java Serialization&lt;/td>
-&lt;td>963&lt;/td>
-&lt;td>630&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;h3 id="dubbo-rpc中不同序列化响应时间和吞吐量对比">Dubbo RPC中不同序列化响应时间和吞吐量对比&lt;/h3>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th>远程调用方式&lt;/th>
-&lt;th>平均响应时间&lt;/th>
-&lt;th>平均TPS（每秒事务数）&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td>REST: Jetty + JSON&lt;/td>
-&lt;td>7.806&lt;/td>
-&lt;td>1280&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>REST: Jetty + JSON + GZIP&lt;/td>
-&lt;td>TODO&lt;/td>
-&lt;td>TODO&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>REST: Jetty + XML&lt;/td>
-&lt;td>TODO&lt;/td>
-&lt;td>TODO&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>REST: Jetty + XML + GZIP&lt;/td>
-&lt;td>TODO&lt;/td>
-&lt;td>TODO&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>REST: Tomcat + JSON&lt;/td>
-&lt;td>2.082&lt;/td>
-&lt;td>4796&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>REST: Netty + JSON&lt;/td>
-&lt;td>2.182&lt;/td>
-&lt;td>4576&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Dubbo: FST&lt;/td>
-&lt;td>1.211&lt;/td>
-&lt;td>8244&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Dubbo: kyro&lt;/td>
-&lt;td>1.182&lt;/td>
-&lt;td>8444&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Dubbo: dubbo serialization&lt;/td>
-&lt;td>1.43&lt;/td>
-&lt;td>6982&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Dubbo: hessian2&lt;/td>
-&lt;td>1.49&lt;/td>
-&lt;td>6701&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td>Dubbo: fastjson&lt;/td>
-&lt;td>1.572&lt;/td>
-&lt;td>6352&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/rt.png" alt="rt">&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/tps.png" alt="tps">&lt;/p>
-&lt;blockquote>
-&lt;p>测试总结: 就目前结果而言，我们可以看到不管从生成字节的大小，还是平均响应时间和平均TPS，Kryo和FST相比Dubbo RPC中原有的序列化方式都有非常显著的改进。&lt;/p>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;p>未来展望：当Kryo或者FST在dubbo中当应用足够成熟之后，我们很可能会将dubbo RPC的默认序列化从hessian2改为它们中间的某一个。&lt;/p>
-&lt;/blockquote></description></item></channel></rss>
+&lt;/blockquote></description></item><item><title>Overview: triple 协议支持的序列化</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/triple/</guid><description/></item><item><title>Overview: dubbo 协议支持的序列化</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/serialization/dubbo/</guid><description/></item></channel></rss>
