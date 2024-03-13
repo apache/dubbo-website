@@ -8,13 +8,13 @@ type: docs
 weight: 5
 ---
 
-本文档讲解如何安装与配置 Nacos，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Zookeeper 官方文档。
+本文档讲解如何安装与配置 Nacos，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Nacos 官方文档。
 
 ## 本地下载
 
 Nacos 依赖 <a href="https://sdkman.io/" target="_blank">Java 环境</a> 来运行，目前支持 Linux、MacOS、Windows 等环境。
 
-您可以从最新稳定版本 下载 nacos-server-$version.zip 包，解压缩二进制包：
+您可以 <a href="https://github.com/alibaba/nacos/releases" target="_blank">下载最新稳定版本 Nacos</a>，解压缩二进制包：
 
 ```shell
 unzip nacos-server-$version.zip
