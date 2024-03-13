@@ -1,12 +1,12 @@
 ---
-description: 使用轻量的 Java SDK 开发 RPC Server 和 Client
+description: 作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 RPC 服务和微服务应用
 linkTitle: 纯 API 开发模式
 title: 使用原生 API 开发 Dubbo 应用
 type: docs
 weight: 2
 ---
 
-你可能已经注意到了，本网站大部分的功能、示例都是基于 Spring Boot 编码模式展开的，但 Spring Boot 或 Spring 仅仅是 Dubbo 适配的一种应用或者微服务开发模式。**作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 Dubbo 应用**，纯 API 可以实现的业务场景包括：
+你可能已经注意到了，文档中大部分的功能、示例都是基于 Spring Boot 模式编写的，但 Spring Boot 或 Spring 仅仅是 Dubbo 适配的一种应用或者微服务开发模式。**作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 Dubbo 应用**，纯 API 可以实现的业务场景包括：
 * **轻量 RPC Server & Client**，通常用于一些应用内、基础组件、中间件等内的简单远程调用场景
 * **微服务应用**，不依赖 Spring 的情况下，直接用 API 开发微服务
 

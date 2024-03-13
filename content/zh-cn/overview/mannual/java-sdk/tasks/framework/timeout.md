@@ -7,430 +7,73 @@ aliases:
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
 description: 某些情况下希望dubbo接口异步调用，避免不必要的等待。
 linkTitle: 超时时间
-title: 异步调用
+title: 为服务调用指定 timeout 超时时间
 type: docs
 weight: 3
 ---
 
-文档完整的示例地址请参见
-* [服务调用异步](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-simple-boot)
-* [服务执行异步](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-provider)
-* [定义 CompletableFuture 方法签名的服务](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-original-future)
-
-## 异步调用
-Dubbo异步调用分为Provider端异步调用和Consumer端异步调用。
-Provider端异步执行将阻塞的业务从Dubbo内部线程池切换到业务自定义线程，
-避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。异步执行无异于节省资源或提升RPC响应性能。
-
-*<font color='#FF7D00' size=4 > 注意 </font>*
-
-> Provider 端异步执行和 Consumer 端异步调用是相互独立的，你可以任意正交组合两端配置
-> + Consumer同步 - Provider同步
-> + Consumer异步 - Provider同步
-> + Consumer同步 - Provider异步
-> + Consumer异步 - Provider异步
-
-## 使用场景
-* 对于Provider端来说，如果接口比较耗时，避免dubbo线程被阻塞，可以使用异步将线程切换到业务线程。
-* 对于Consumer端来说，调用Dubbo接口没有严格时序上的关系、不是原子操作、不影响逻辑情况下可以使用异步调用。
-
-
-## Provider异步
-
-### 1、使用CompletableFuture实现异步
-
-接口定义：
-```java
-public interface AsyncService {
-    /**
-     * 同步调用方法
-     */
-    String invoke(String param);
-    /**
-     * 异步调用方法
-     */
-    CompletableFuture<String> asyncInvoke(String param);
-}
-
-```
-服务实现：
-```java
-@DubboService
-public class AsyncServiceImpl implements AsyncService {
-
-    @Override
-    public String invoke(String param) {
-        try {
-            long time = ThreadLocalRandom.current().nextLong(1000);
-            Thread.sleep(time);
-            StringBuilder s = new StringBuilder();
-            s.append("AsyncService invoke param:").append(param).append(",sleep:").append(time);
-            return s.toString();
-        }
-        catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        return null;
-    }
-
-    @Override
-    public CompletableFuture<String> asyncInvoke(String param) {
-        // 建议为supplyAsync提供自定义线程池
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // Do something
-                long time = ThreadLocalRandom.current().nextLong(1000);
-                Thread.sleep(time);
-                StringBuilder s = new StringBuilder();
-                s.append("AsyncService asyncInvoke param:").append(param).append(",sleep:").append(time);
-                return s.toString();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return null;
-        });
-    }
-}
-
-```
-通过 return CompletableFuture.supplyAsync() ，业务执行已从 Dubbo 线程切换到业务线程，避免了对 Dubbo 线程池的阻塞。
-
-### 2、使用AsyncContext实现异步
-
-Dubbo 提供了一个类似 Servlet 3.0 的异步接口AsyncContext，在没有 CompletableFuture 签名接口的情况下，也可以实现 Provider 端的异步执行。
-
-接口定义：
-```java
-public interface AsyncService {
-    String sayHello(String name);
-}
-
-```
-
-服务实现：
-
-```java
-public class AsyncServiceImpl implements AsyncService {
-    public String sayHello(String name) {
-        final AsyncContext asyncContext = RpcContext.startAsync();
-        new Thread(() -> {
-            // 如果要使用上下文，则必须要放在第一句执行
-            asyncContext.signalContextSwitch();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // 写回响应
-            asyncContext.write("Hello " + name + ", response from provider.");
-        }).start();
-        return null;
-    }
-}
-
-```
-
-## Consumer异步
-```java
-@DubboReference
-private AsyncService asyncService;
-
-@Override
-public void run(String... args) throws Exception {
-    //调用异步接口
-    CompletableFuture<String> future1 = asyncService.asyncInvoke("async call request1");
-    future1.whenComplete((v, t) -> {
-        if (t != null) {
-            t.printStackTrace();
-        } else {
-            System.out.println("AsyncTask Response-1: " + v);
-        }
-    });
-    //两次调用并非顺序返回
-    CompletableFuture<String> future2 = asyncService.asyncInvoke("async call request2");
-    future2.whenComplete((v, t) -> {
-        if (t != null) {
-            t.printStackTrace();
-        } else {
-            System.out.println("AsyncTask Response-2: " + v);
-        }
-    });
-    //consumer异步调用
-    CompletableFuture<String> future3 =  CompletableFuture.supplyAsync(() -> {
-        return asyncService.invoke("invoke call request3");
-    });
-    future3.whenComplete((v, t) -> {
-        if (t != null) {
-            t.printStackTrace();
-        } else {
-            System.out.println("AsyncTask Response-3: " + v);
-        }
-    });
-
-    System.out.println("AsyncTask Executed before response return.");
-}
-```
-
-
-
-
-## 特性说明
-#### 背景
-
-从 2.7.0 开始，Dubbo 的所有异步编程接口开始以 [CompletableFuture](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html) 为基础
-
-基于 NIO 的非阻塞实现并行调用，客户端不需要启动多线程即可完成并行调用多个远程服务，相对多线程开销较小。
-
-![/user-guide/images/future.jpg](/imgs/user/future.jpg)
-
-
-## 使用场景
-
-将用户请求内容发送到目标请求，当目标请求遇到高流量或需要长时间处理，异步调用功能将允许立即向用户返回响应，同时目标请求继续后台处理请求，当目标请求返回结果时，将内容显示给用户。
-
-> 参考用例
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-async](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async)
+为 RPC 调用设置超时时间可以提升集群整体稳定性，避免无限等待响应结果导致的资源占用（比如大量长期无响应的请求占用线程池等）。在调用没有响应的情况下，比如 5s 之后，Dubbo 框架就会自动终止调用等待过程（抛出 TimeoutException），释放此次调用占用的资源。
 
 ## 使用方式
-### 使用 CompletableFuture 签名的接口
+有多种方式可以配置 rpc 调用超时时间，从粗粒度的全局默认值，到特定服务、特定方法级别的独立配置：
 
-需要服务提供者事先定义 CompletableFuture 签名的服务，接口定义指南如下：
+配置全局默认超时时间为 5s（不配置的情况下，所有服务的默认超时时间是 1s）。
+```yaml
+dubbo:
+  provider:
+    timeout: 5000
+```
 
-Provider端异步执行将阻塞的业务从Dubbo内部线程池切换到业务自定义线程，避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。异步执行无异于节省资源或提升RPC响应性能，因为如果业务执行需要阻塞，则始终还是要有线程来负责执行。
-
-> **Provider 端异步执行和 Consumer 端异步调用是相互独立的，任意正交组合两端配置**
-> - Consumer同步 - Provider同步
-> - Consumer异步 - Provider同步
-> - Consumer同步 - Provider异步
-> - Consumer异步 - Provider异步
-
-### 定义 CompletableFuture 签名的接口
-
-服务接口定义
+在消费端，指定 DemoService 服务调用的超时时间为 5s
 ```java
-public interface AsyncService {
-    CompletableFuture<String> sayHello(String name);
-}
+@DubboReference(timeout=5000)
+private DemoService demoService;
 ```
 
-服务实现
+在提供端，指定 DemoService 服务调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）
 ```java
-public class AsyncServiceImpl implements AsyncService {
-    @Override
-    public CompletableFuture<String> sayHello(String name) {
-        return CompletableFuture.supplyAsync(() -> {
-            System.out.println(name);
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return "async response from provider.";
-        });
-    }
-}
+@DubboService(timeout=5000)
+public class DemoServiceImpl implements DemoService{}
 ```
 
-通过 `return CompletableFuture.supplyAsync() `，业务执行已从 Dubbo 线程切换到业务线程，避免了对 Dubbo 线程池的阻塞。
-
-注意接口的返回类型是 `CompletableFuture<String>`。
-
-XML 引用服务
-```xml
-<dubbo:reference id="asyncService" timeout="10000" interface="com.alibaba.dubbo.samples.async.api.AsyncService"/>
-```
-
-调用远程服务
+在消费端，指定 DemoService sayHello 方法调用的超时时间为 5s
 ```java
-// 调用直接返回CompletableFuture
-CompletableFuture<String> future = asyncService.sayHello("async call request");
-// 增加回调
-future.whenComplete((v, t) -> {
-    if (t != null) {
-        t.printStackTrace();
-    } else {
-        System.out.println("Response: " + v);
-    }
-});
-// 早于结果输出
-System.out.println("Executed before response return.");
+@DubboReference(methods = {@Method(name = "sayHello", timeout = 5000)})
+private DemoService demoService;
 ```
 
-### 使用 AsyncContext
-
-Dubbo 提供了一个类似 Servlet 3.0 的异步接口`AsyncContext`，在没有 CompletableFuture 签名接口的情况下，也可以实现 Provider 端的异步执行。
-
-服务接口定义
+在提供端，指定 DemoService sayHello 方法调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）
 ```java
-public interface AsyncService {
-    String sayHello(String name);
-}
+@DubboService(methods = {@Method(name = "sayHello", timeout = 5000)})
+public class DemoServiceImpl implements DemoService{}
 ```
 
-服务暴露，和普通服务完全一致
-```xml
-<bean id="asyncService" class="org.apache.dubbo.samples.governance.impl.AsyncServiceImpl"/>
-<dubbo:service interface="org.apache.dubbo.samples.governance.api.AsyncService" ref="asyncService"/>
+以上配置形式的优先级从高到低依次为：`方法级别配置 > 服务级别配置 > 全局配置 > 默认值`。
+
+## Deadline 机制
+<img style="max-width:600px;height:auto;" src="/imgs/v3/tasks/framework/timeout.png"/>
+
+我们来分析一下以上调用链路以及可能出现的超时情况：
+* A 调用 B 设置了超时时间 5s，因此 `B -> C -> D` 总计耗时不应该超过 5s，否则 A 就会收到超时异常
+* 在任何情形下，只要 A 等待 5s 没有收到响应，整个调用链路就可以被终止了（如果此时 C 正在运行，则 `C -> D` 就没有发起的意义了）
+* 理论上 `B -> C`、`C -> D` 都有自己独立的超时时间设置，超时计时也是独立计算的，它们不知道 A 作为调用发起方是否超时
+
+在 Dubbo 框架中，`A -> B` 的调用就像一个开关，一旦启动，在任何情形下整个 `A -> B -> C -> D` 调用链路都会被完整执行下去，即便调用方 A 已经超时，后续的调用动作仍会继续。这在一些场景下是没有意义的，尤其是链路较长的情况下会带来不必要的资源消耗，deadline 就是设计用来解决这个问题，通过在调用链路中传递 deadline（deadline初始值等于超时时间，随着时间流逝而减少）可以确保调用链路只在有效期内执行，deadline 消耗殆尽之后，调用链路中其他尚未执行的任务将被取消。
+
+因此 deadline 机制就是将 ` B -> C -> D` 当作一个整体看待，这一系列动作必须在 5s 之内完成。随着时间流逝 deadline 会从 5s 逐步扣减，后续每一次调用实际可用的超时时间即是当前 deadline 值，比如 `C` 收到请求时已经过去了 3s，则 `C -> D` 的超时时间只剩下 2s。
+
+<img style="max-width:600px;height:auto;" src="/imgs/v3/tasks/framework/timeout-deadline.png"/>
+
+deadline 机制默认是关闭的，如果要启用 deadline 机制，需要配置以下参数：
+```yaml
+dubbo:
+  provider:
+    timeout: 5000
+    parameters.enable-timeout-countdown: true
 ```
 
-服务实现
+也可以指定某个服务调用开启 deadline 机制：
 ```java
-public class AsyncServiceImpl implements AsyncService {
-    public String sayHello(String name) {
-        final AsyncContext asyncContext = RpcContext.startAsync();
-        new Thread(() -> {
-            // 如果要使用上下文，则必须要放在第一句执行
-            asyncContext.signalContextSwitch();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // 写回响应
-            asyncContext.write("Hello " + name + ", response from provider.");
-        }).start();
-        return null;
-    }
-}
-```
-
-### 使用 RpcContext 实现消费端异步调用
-在 consumer.xml 中配置
-```xml
-<dubbo:reference id="asyncService" interface="org.apache.dubbo.samples.governance.api.AsyncService">
-      <dubbo:method name="sayHello" async="true" />
-</dubbo:reference>
-```
-
-调用代码
-```java
-// 此调用会立即返回null
-asyncService.sayHello("world");
-// 拿到调用的Future引用，当结果返回后，会被通知和设置到此Future
-CompletableFuture<String> helloFuture = RpcContext.getServiceContext().getCompletableFuture();
-// 为Future添加回调
-helloFuture.whenComplete((retValue, exception) -> {
-    if (exception == null) {
-        System.out.println(retValue);
-    } else {
-        exception.printStackTrace();
-    }
-});
-```
-
-或者，也可以这样做异步调用
-```java
-CompletableFuture<String> future = RpcContext.getServiceContext().asyncCall(
-    () -> {
-        asyncService.sayHello("oneway call request1");
-    }
-);
-
-future.get();
-```
-
-
-**异步总是不等待返回**，你也可以设置是否等待消息发出
-- `sent="true"`  等待消息发出，消息发送失败将抛出异常。
-- `sent="false"` 不等待消息发出，将消息放入 IO 队列，即刻返回。
-
-```xml
-<dubbo:method name="findFoo" async="true" sent="true" />
-```
-
-如果你只是想异步，完全忽略返回值，可以配置 `return="false"`，以减少 Future 对象的创建和管理成本
-```xml
-<dubbo:method name="findFoo" async="true" return="false" />
-```
-
-
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/attachment/)。
-{{% /pageinfo %}}
-
-
-Provider端异步执行将阻塞的业务从Dubbo内部线程池切换到业务自定义线程，避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。异步执行无异于节省资源或提升RPC响应性能，因为如果业务执行需要阻塞，则始终还是要有线程来负责执行。
-
-{{% alert title="注意" color="warning" %}}
-Provider 端异步执行和 Consumer 端异步调用是相互独立的，你可以任意正交组合两端配置
-- Consumer同步 - Provider同步
-- Consumer异步 - Provider同步
-- Consumer同步 - Provider异步
-- Consumer异步 - Provider异步
-{{% /alert %}}
-
-
-## 定义 CompletableFuture 签名的接口
-
-服务接口定义：
-
-```java
-public interface AsyncService {
-    CompletableFuture<String> sayHello(String name);
-}
-```
-
-服务实现：
-
-```java
-public class AsyncServiceImpl implements AsyncService {
-    @Override
-    public CompletableFuture<String> sayHello(String name) {
-        RpcContext savedContext = RpcContext.getContext();
-        // 建议为supplyAsync提供自定义线程池，避免使用JDK公用线程池
-        return CompletableFuture.supplyAsync(() -> {
-            System.out.println(savedContext.getAttachment("consumer-key1"));
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return "async response from provider.";
-        });
-    }
-}
-```
-
-通过 `return CompletableFuture.supplyAsync() `，业务执行已从 Dubbo 线程切换到业务线程，避免了对 Dubbo 线程池的阻塞。
-
-
-
-## 使用AsyncContext
-
-Dubbo 提供了一个类似 Servlet 3.0 的异步接口`AsyncContext`，在没有 CompletableFuture 签名接口的情况下，也可以实现 Provider 端的异步执行。
-
-服务接口定义：
-
-```java
-public interface AsyncService {
-    String sayHello(String name);
-}
-```
-
-服务暴露，和普通服务完全一致：
-
-```xml
-<bean id="asyncService" class="org.apache.dubbo.samples.governance.impl.AsyncServiceImpl"/>
-<dubbo:service interface="org.apache.dubbo.samples.governance.api.AsyncService" ref="asyncService"/>
-```
-
-服务实现：
-
-```java
-public class AsyncServiceImpl implements AsyncService {
-    public String sayHello(String name) {
-        final AsyncContext asyncContext = RpcContext.startAsync();
-        new Thread(() -> {
-            // 如果要使用上下文，则必须要放在第一句执行
-            asyncContext.signalContextSwitch();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // 写回响应
-            asyncContext.write("Hello " + name + ", response from provider.");
-        }).start();
-        return null;
-    }
-}
+@DubboReference(timeout=5000, parameters={"enable-timeout-countdown", "true"})
+private DemoService demoService;
 ```

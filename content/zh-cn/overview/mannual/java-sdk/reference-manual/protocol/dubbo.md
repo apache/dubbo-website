@@ -4,16 +4,21 @@ aliases:
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
     - /zh/overview/what/ecosystem/protocol/dubbo/
 description: Dubbo协议
-linkTitle: Dubbo协议
+linkTitle: dubbo
 title: Dubbo协议
 type: docs
-weight: 2
+weight: 3
 ---
 
 ## 特性说明
-Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。
+Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用。
 
-反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。
+
+主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。
+
+* **长连接：避免了每次调用新建TCP连接，提高了调用的响应速度。**
+* **多路复用：单个TCP连接可交替传输多个请求和响应的消息，降低了连接的等待闲置时间，从而减少了同样并发数下的网络连接数，提高了系统吞吐量。**
+
 
 ![dubbo-protocol.jpg](/imgs/user/dubbo-protocol.jpg)
 

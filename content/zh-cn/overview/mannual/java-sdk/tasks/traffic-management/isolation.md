@@ -37,6 +37,34 @@ weight: 5
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/10-task/dubbo-samples-shop/deploy/Gray.yml
 ```
 
+{{% alert title="如何为机器或实例打标？" color="info" %}}
+
+**方法一：通过 `dubbo.labels` 或 `DUBBO_LABELS` 指定需要增加到 URL 中的键值对。**
+
+```properties
+# JVM 参数
+-Ddubbo.labels = "tag1=value1; tag2=value2"
+
+# 环境变量
+DUBBO_LABELS = "tag1=value1; tag2=value2"
+```
+
+最终生成的 URL 会包含 tag1、tag2 两个 key: `dubbo://xxx?tag1=value1&tag2=value2`
+
+**方法二：通过 `dubbo.env.keys` 或 `DUBBO_ENV_KEYS` 指定要加载的环境变量，Dubbo 会尝试从环境变量加载每个 key。**
+
+```properties
+# JVM 参数
+-Ddubbo.env.keys = "DUBBO_TAG1, DUBBO_TAG2"
+
+# 环境变量
+DUBBO_ENV_KEYS = "DUBBO_TAG1, DUBBO_TAG2"
+```
+
+最终生成的 URL 会包含 DUBBO_TAG1、DUBBO_TAG2 两个 key: `dubbo://xxx?DUBBO_TAG1=value1&DUBBO_TAG2=value2`
+{{% /alert %}}
+
+
 接下来，我们开始为几个应用分别增加标签规则，将刚刚部署的实例从普通流量实例隔离出来。
 
 #### 操作步骤

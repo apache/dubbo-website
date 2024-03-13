@@ -37,6 +37,17 @@ NAME      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
 grafana   ClusterIP   10.0.244.130   <none>        3000/TCP   180s
 ```
 
+## 部署示例
+
+```yaml
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml
+```
+
+等待示例应用正常运行，通过以下命令确认应用状态：
+```yaml
+kubectl -n dubbo-demo get deployments
+```
+
 ## 查看 Grafana 可视化面板
 
 示例程序启动后会自动模拟服务调用，只需等待一会能在 Grafana 中可视化的看到 Metrics 指标。

@@ -3,251 +3,242 @@ aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
 description: 在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）
-linkTitle: 序列化协议
-title: Kryo 和 FST 序列化
+linkTitle: 序列化概述
+title: Dubbo 序列化机制介绍
 type: docs
-weight: 46
+weight: 1
 ---
 
+## 序列化
+以下是 Dubbo 框架支持的序列化协议列表，根据 `triple`、`dubbo` 通信协议进行分类。
+
+| <span style="display:inline-block;width:100px">RPC协议</span> | <span style="display:inline-block;width:100px">编程模式</span> | <span style="display:inline-block;width:100px">序列化协议</span> | <span style="display:inline-block;width:200px">配置方式</span> | 说明 |
+| --- | --- | --- | --- | --- |
+| **triple** | IDL | protobuf | 默认值 | 使用 IDL 时的默认序列化方式 |
+|  | IDL | json | serialization="json" | 使用 IDL时，也可以选择 protobuf-json 序列化 |
+|  | Java接口 | protobuf + 序列化 | serialization="hessian" | 这种模式下采用的是两次序列化模式，即数据先被 hessian 序列化，再由 protobuf 序列化。<br/><br/>为了支持与 IDL 同等的调用模型，易用性较好但性能略有下降 |
+| **dubbo** | Java接口 | hessian |  | dubbo 协议默认序列化方式，具备兼容性好、高性能、跨语言的优势(java、go、c/c++、php、python、.net) |
+|  | Java接口 | protostuff |  | A java serialization library with built-in support for forward-backward compatibility (schema evolution) and validation. |
+|  | Java接口 | gson |  | 谷歌推出的一款 json 序列化库 |
+|  | Java接口 | avro |  | 一款 Java 高性能序列化库 |
+|  | Java接口 | msgpack |  | 具备兼容性好，提供多语言（Java、C/C++、Python等）实现等优势|
+|  | Java接口 | kryo |  | Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。 |
+|  | Java接口 | fastjson2 |  | fastjson |
+|  | Java接口 | 更多扩展 |  | https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-serialization-extensions |
+
+## 性能对比报告
+
+序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。
+
+## 安全性
+
+以上所有序列化方式中，protobuf 序列化具有最高的安全性，而对于其他序列化机制而言，我们要防止因为任意类序列化反序列化引发的 RCE 攻击。
+
+### 类检查机制
+Dubbo 中的类检查机制可以以类似黑白名单的形式来保证序列化安全。该机制保证服务提供方和服务消费方类之间的兼容性和安全，防止由于类版本不匹配、方法签名不兼容或缺少类而可能发生的潜在问题。
+
+{{% alert title="注意" color="info" %}}
+* Dubbo >= 3.1.6 引入此检查机制，对用户透明。
+* 目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用，其他的序列化方式暂不支持。
+* 3.1 版本中默认为 `WARN` 告警级别，3.2 版本中默认为 `STRICT` 严格检查级别，如您遇到问题可通过以下指引修改检查级别。
+{{% /alert %}}
 
 
+#### 检查模式
+检查模式分为三个级别：`STRICT` 严格检查，`WARN` 告警，`DISABLE` 禁用。
+`STRICT` 严格检查：禁止反序列化所有不在允许序列化列表（白名单）中的类。
+`WARN` 告警：仅禁止序列化所有在不允许序列化列表中（黑名单）的类，同时在反序列化不在允许序列化列表（白名单）中类的时候通过日志进行告警。
+`DISABLE` 禁用：不进行任何检查。
 
+3.1 版本中默认为 `WARN` 告警级别，3.2 版本中默认为 `STRICT` 严格检查级别。
 
-## 功能说明
-### 序列化漫谈
-#### 漫谈一
-
-dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用。主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。
-
-**长连接：避免了每次调用新建TCP连接，提高了调用的响应速度。**
-
-**多路复用：单个TCP连接可交替传输多个请求和响应的消息，降低了连接的等待闲置时间，从而减少了同样并发数下的网络连接数，提高了系统吞吐量。**
-
-
-
-#### 漫谈二
-
-而序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。
-
-在dubbo RPC中，同时支持多种序列化方式
-
-**dubbo序列化：阿里尚未开发成熟的高效java序列化实现，阿里不建议在生产环境使用它**
-
-**hessian2序列化：hessian是一种跨语言的高效二进制序列化方式。但这里实际不是原生的序列化，而是阿里修改过的hessian lite，它是dubbo RPC默认启用的序列化方式。**
-
-**json序列化：目前有两种实现，一种是采用的阿里的fastjson库，另一种是采用dubbo中自己实现的简单json库，但其实现都不是特别成熟，而且json这种文本序列化性能一般不如上面两种二进制序列化。**
-
-**java序列化：主要是采用JDK自带的Java序列化实现，性能很不理想。**
-
-在通常情况下，这四种主要序列化方式的性能从上到下依次递减。
-
-对于dubbo RPC这种追求高性能的远程调用方式来说，实际上只有1、2两种高效序列化方式比较般配，而第1个dubbo序列化由于还不成熟，所以实际只剩下2可用，所以dubbo RPC默认采用hessian2序列化。
-
-但hessian是一个比较老的序列化实现了，而且它是跨语言的，所以不是单独针对java进行优化的。而dubbo RPC实际上完全是一种Java to Java的远程调用，其实没有必要采用跨语言的序列化方式（当然肯定也不排斥跨语言的序列化）。
-
-最近几年，各种新的高效序列化方式层出不穷，不断刷新序列化性能的上限，最典型包括：
-
-**专门针对Java语言的：Kryo，FST等等**
-
-**跨语言的：Protostuff，ProtoBuf，Thrift，Avro，MsgPack等等**
-
-这些序列化方式的性能多数都显著优于hessian2（甚至包括尚未成熟的dubbo序列化）。
-
-有鉴于此，我们为dubbo引入Kryo和FST这两种高效Java序列化实现，来逐步取代hessian2。
-
-其中，Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。而FST是一种较新的序列化实现，目前还缺乏足够多的成熟使用案例，但我认为它还是非常有前途的。
-
-在面向生产环境的应用中，我建议目前更优先选择Kryo。
-
-## 使用场景
-高性能微服务，大型对象图，分布式系统等
-
-## 实现方式
-### 启用Kryo和FST
-
-使用Kryo和FST非常简单，只需要先增加对应的依赖。
-更多插件： [Dubbo SPI Extensions](/zh-cn/download/spi-extensions)
-
-```xml
-<dependency>
-   <groupId>org.apache.dubbo.extensions</groupId>
-   <artifactId>dubbo-serialization-kryo</artifactId>
-   <version>1.0.0</version>
-</dependency>
-```
-
-```xml
-<dependency>
-   <groupId>org.apache.dubbo.extensions</groupId>
-   <artifactId>dubbo-serialization-fst</artifactId>
-   <version>1.0.0</version>
-</dependency>
-```
-
-然后在dubbo RPC的XML配置中添加一个属性即可：
-
-```xml
-<dubbo:protocol name="dubbo" serialization="kryo"/>
-```
-
-```xml
-<dubbo:protocol name="dubbo" serialization="fst"/>
-```
-
-### 注册被序列化类
-
-要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，实现如下
-
-**回调接口**
+通过 ApplicationConfig 配置：
 ```java
-public class SerializationOptimizerImpl implements SerializationOptimizer {
-
-    public Collection<Class> getSerializableClasses() {
-        List<Class> classes = new LinkedList<Class>();
-        classes.add(BidRequest.class);
-        classes.add(BidResponse.class);
-        classes.add(Device.class);
-        classes.add(Geo.class);
-        classes.add(Impression.class);
-        classes.add(SeatBid.class);
-        return classes;
-    }
-}
+ApplicationConfig applicationConfig = new ApplicationConfig();
+applicationConfig.setSerializeCheckStatus("STRICT");
 ```
 
-然后在XML配置中添加：
-
+通过 Spring XML 配置：
 ```xml
-<dubbo:protocol name="dubbo" serialization="kryo" optimizer="org.apache.dubbo.demo.SerializationOptimizerImpl"/>
+<dubbo:application name="demo-provider" serialize-check-status="STRICT"/>
 ```
 
-在注册这些类后，序列化的性能可能被大大提升，特别针对小数量的嵌套对象的时候。
-
-当然，在对一个类做序列化的时候，可能还级联引用到很多类，比如Java集合类。
-
-针对这种情况，我们已经自动将JDK中的常用类进行了注册，所以你不需要重复注册它们（当然你重复注册了也没有任何影响)。
-
-包括
-```
-GregorianCalendar
-InvocationHandler
-BigDecimal
-BigInteger
-Pattern
-BitSet
-URI
-UUID
-HashMap
-ArrayList
-LinkedList
-HashSet
-TreeSet
-Hashtable
-Date
-Calendar
-ConcurrentHashMap
-SimpleDateFormat
-Vector
-BitSet
-StringBuffer
-StringBuilder
-Object
-Object[]
-String[]
-byte[]
-char[]
-int[]
-float[]
-double[]
+通过 Spring Properties / dubbo.properties 配置：
+```properties
+dubbo.application.serialize-check-status=STRICT
 ```
 
-由于注册被序列化的类仅仅是出于性能优化的目的，所以即使你忘记注册某些类也没有关系。
+通过 System Property 配置：
+```properties
+-Ddubbo.application.serialize-check-status=STRICT
+```
 
-事实上，即使不注册任何类，Kryo和FST的性能依然普遍优于hessian和dubbo序列化。
+配置成功后可以在日志中看到如下的提示：
+```
+INFO utils.SerializeSecurityManager:  [DUBBO] Serialize check level: STRICT
+```
 
-> 当然，有人可能会问为什么不用配置文件来注册这些类？这是因为要注册的类往往数量较多，导致配置文件冗长；而且在没有好的IDE支持的情况下，配置文件的编写和重构都比java类麻烦得多；最后，这些注册的类一般是不需要在项目编译打包后还需要做动态修改的。
+注：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 `STRICT`，另外一个配置为 `WARN`，则最终生效 `WARN` 级别的配置。
 
-> 另外，有人也会觉得手工注册被序列化的类是一种相对繁琐的工作，是不是可以用annotation来标注，然后系统来自动发现并注册。但这里annotation的局限是，它只能用来标注你可以修改的类，而很多序列化中引用的类很可能是你没法做修改的（比如第三方库或者JDK系统类或者其他项目的类）。另外，添加annotation毕竟稍微的“污染”了一下代码，使应用代码对框架增加了一点点的依赖性。
+#### Serializable 接口检查
 
-> 除了annotation，我们还可以考虑用其它方式来自动注册被序列化的类，例如扫描类路径，自动发现实现Serializable接口（甚至包括Externalizable）的类并将它们注册。当然，我们知道类路径上能找到Serializable类可能是非常多的，所以也可以考虑用package前缀之类来一定程度限定扫描范围。
+Serializable 接口检查模式分为两个级别：`true` 开启，`false` 关闭。开启检查后会拒绝反序列化所有未实现 `Serializable` 的类。
 
-> 当然，在自动注册机制中，特别需要考虑如何保证服务提供端和消费端都以同样的顺序（或者ID）来注册类，避免错位，毕竟两端可被发现然后注册的类的数量可能都是不一样的。
+Dubbo 中默认配置为 `true` 开启检查。
 
-### 无参构造函数和Serializable接口
+通过 ApplicationConfig 配置：
+```java
+ApplicationConfig applicationConfig = new ApplicationConfig();
+applicationConfig.setCheckSerializable(true);
+```
 
-如果被序列化的类中不包含无参的构造函数，则在Kryo的序列化中，性能将会大打折扣，因为此时我们在底层将用Java的序列化来透明的取代Kryo序列化。所以，尽可能为每一个被序列化的类添加无参构造函数是一种最佳实践（当然一个java类如果不自定义构造函数，默认就有无参构造函数）。
+通过 Spring XML 配置：
+```xml
+<dubbo:application name="demo-provider" check-serializable="true"/>
+```
 
-另外，Kryo和FST本来都不需要被序列化的类实现Serializable接口，但我们还是建议每个被序列化类都去实现它，因为这样可以保持和Java序列化以及dubbo序列化的兼容性，另外也使我们未来采用上述某些自动注册机制带来可能。
+通过 Spring Properties / dubbo.properties 配置：
+```properties
+dubbo.application.check-serializable=true
+```
 
-### 序列化性能分析与测试
+通过 System Property 配置：
+```properties
+-Ddubbo.application.check-serializable=true
+```
 
-本文我们主要讨论的是序列化，但在做性能分析和测试的时候我们并不单独处理每种序列化方式，而是把它们放到dubbo RPC中加以对比，因为这样更有现实意义。
+配置成功后可以在日志中看到如下的提示：
+```
+INFO utils.SerializeSecurityManager:  [DUBBO] Serialize check serializable: true
+```
+
+注 1：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的 Serializable 接口检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 `true`，另外一个配置为 `false`，则最终生效 `false` 级别的配置。
+注 2：目前暂未打通 Hessian2、Fastjson2 内置的 `Serializable` 检查配置。对于泛化调用，仅需要配置 `dubbo.application.check-serializable` 即可修改检查配置；对于 Hessian2 序列化，需要同时修改 `dubbo.application.check-serializable` 和 `dubbo.hessian.allowNonSerializable` 两个配置；对于 Fastjson2 序列化，目前暂不支持修改。
+
+#### 自动扫描相关配置
+
+Dubbo 类自动扫描机制共有两个配置项：`AutoTrustSerializeClass` 是否启用自动扫描和 `TrustSerializeClassLevel` 类信任层级。
+
+简单来说，在开启类自动扫描之后，Dubbo 会通过 `ReferenceConfig` 和 `ServiceConfig` 自动扫描接口所有可能会用到的相关类，并且递归信任其所在的 package。 `TrustSerializeClassLevel` 类信任层级可以用来限制最终信任的 package 层级。如 `io.dubbo.test.pojo.User` 在 `TrustSerializeClassLevel` 配置为 `3` 的时候，最终会信任 `io.dubbo.test` 这个 package 下所有的类。
+
+Dubbo 中默认配置 `AutoTrustSerializeClass` 为 `true` 启用扫描， `TrustSerializeClassLevel` 为 `3`。
+
+通过 ApplicationConfig 配置：
+```java
+ApplicationConfig applicationConfig = new ApplicationConfig();
+applicationConfig.setAutoTrustSerializeClass(true);
+applicationConfig.setTrustSerializeClassLevel(3);
+```
+
+通过 Spring XML 配置：
+```xml
+<dubbo:application name="demo-provider" auto-trust-serialize-class="true" trust-serialize-class-level="3"/>
+```
+
+通过 Spring Properties / dubbo.properties 配置：
+```properties
+dubbo.application.auto-trust-serialize-class=true
+dubbo.application.trust-serialize-class-level=3
+```
+
+通过 System Property 配置：
+```properties
+-Ddubbo.application.auto-trust-serialize-class=true
+-Ddubbo.application.trust-serialize-class-level=3
+```
+
+配置成功后可以通过 QoS 命令检查当前已经加载的可信类结果是否符合预期。
+
+注：开启检查之后在启动的过程中会有一定的性能损耗。
+
+#### 可信/不可信类自定义配置
+
+除了 Dubbo 自动扫描类之外，也支持通过资源文件的方式配置可信/不可信类列表。
+
+配置方式：在资源目录（resource）下定义以下文件。
+
+```properties
+# security/serialize.allowlist
+io.dubbo.test
+```
+
+```properties
+# security/serialize.blockedlist
+io.dubbo.block
+```
+
+配置成功以后可以在日志看到以下提示：
+```properties
+INFO utils.SerializeSecurityConfigurator:  [DUBBO] Read serialize allow list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.allowlist
+INFO utils.SerializeSecurityConfigurator:  [DUBBO] Read serialize blocked list from file:/Users/albumen/code/dubbo-samples/99-integration/dubbo-samples-serialize-check/target/classes/security/serialize.blockedlist
+```
+
+配置优先级为：用户自定义可信类 = 框架内置可信类 > 用户自定义不可信类 = 框架内置不可信类 > 自动类扫描可信类。
+
+#### 审计方式
+
+Dubbo 支持通过 QoS 命令实时查看当前的配置信息以及可信/不可信类列表。目前共支持两个命令：`serializeCheckStatus` 查看当前配置信息，`serializeWarnedClasses` 查看实时的告警列表。
+
+1. `serializeCheckStatus` 查看当前配置信息
+
+通过控制台直接访问：
+```bash
+> telnet 127.0.0.1 22222
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+   ___   __  __ ___   ___   ____
+  / _ \ / / / // _ ) / _ ) / __ \
+ / // // /_/ // _  |/ _  |/ /_/ /
+/____/ \____//____//____/ \____/
+dubbo>serializeCheckStatus
+CheckStatus: WARN
+
+CheckSerializable: true
+
+AllowedPrefix:
+...
+
+DisAllowedPrefix:
+...
 
 
-**测试环境**
+dubbo>
+```
 
-* 两台独立服务器
-* 4核Intel(R) Xeon(R) CPU E5-2603 0 @ 1.80GHz
-* 8G内存
-* 虚拟机之间网络通过百兆交换机
-* CentOS 5
-* JDK 7
-* Tomcat 7
-* JVM参数-server -Xms1g -Xmx1g -XX:PermSize=64M -XX:+UseConcMarkSweepGC
+通过 http 请求 json 格式结果：
+```bash
+> curl http://127.0.0.1:22222/serializeCheckStatus
+{"checkStatus":"WARN","allowedPrefix":[...],"checkSerializable":true,"disAllowedPrefix":[...]}
+```
 
-> 当然这个测试环境较有局限，故当前测试结果未必有非常权威的代表性。
+2. `serializeWarnedClasses` 查看实时的告警列表
 
-### 测试脚本
-
-和dubbo自身的基准测试保持接近：
-
-10个并发客户端持续不断发出请求：
-
-* 传入嵌套复杂对象（但单个数据量很小），不做任何处理，原样返回
-* 传入50K字符串，不做任何处理，原样返回（TODO：结果尚未列出）
-
-进行5分钟性能测试。（引用dubbo自身测试的考虑：主要考察序列化和网络IO的性能，因此服务端无任何业务逻辑。取10并发是考虑到rpc协议在高并发下对CPU的使用率较高可能会先打到瓶颈。）
-
-### Dubbo RPC中不同序列化生成字节大小比较
-
-序列化生成字节数的大小是一个比较有确定性的指标，它决定了远程调用的网络传输时间和带宽占用。
-
-针对复杂对象的结果如下（数值越小越好）：
-
-| 序列化实现 | 请求字节数 | 响应字节数 | 
-| ----------- | ------------- | ------------- |
-| Kryo | 272 | 90 |
-| FST | 288 | 96 |
-| Dubbo Serialization | 430 | 186 |
-| Hessian | 546 | 329 |
-| FastJson | 461 | 218 |
-| Json | 657 | 409 |
-| Java Serialization | 963 | 630 |
+通过控制台直接访问：
+```bash
+> telnet 127.0.0.1 22222
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+   ___   __  __ ___   ___   ____
+  / _ \ / / / // _ ) / _ ) / __ \
+ / // // /_/ // _  |/ _  |/ /_/ /
+/____/ \____//____//____/ \____/
+dubbo>serializeWarnedClasses
+WarnedClasses:
+io.dubbo.test.NotSerializable
+io.dubbo.test2.NotSerializable
+io.dubbo.test2.OthersSerializable
+org.apache.dubbo.samples.NotSerializable
 
 
-### Dubbo RPC中不同序列化响应时间和吞吐量对比
+dubbo>
+```
 
-| 远程调用方式 | 平均响应时间 | 平均TPS（每秒事务数） | 
-| ----------- | ------------- | ------------- |
-| REST: Jetty + JSON | 7.806 | 1280 |
-| REST: Jetty + JSON + GZIP | TODO | TODO |
-| REST: Jetty + XML | TODO | TODO |
-| REST: Jetty + XML + GZIP | TODO | TODO |
-| REST: Tomcat + JSON | 2.082 | 4796 |
-| REST: Netty + JSON | 2.182 | 4576 |
-| Dubbo: FST | 1.211 | 8244 |
-| Dubbo: kyro | 1.182 | 8444 |
-| Dubbo: dubbo serialization | 1.43 | 6982 |
-| Dubbo: hessian2 | 1.49 | 6701 |
-| Dubbo: fastjson | 1.572 | 6352 |
+通过 http 请求 json 格式结果：
+```bash
+> curl http://127.0.0.1:22222/serializeWarnedClasses
+{"warnedClasses":["io.dubbo.test2.NotSerializable","org.apache.dubbo.samples.NotSerializable","io.dubbo.test.NotSerializable","io.dubbo.test2.OthersSerializable"]}
+```
 
-![rt](/imgs/user/rt.png)
-
-![tps](/imgs/user/tps.png)
-
-
-> 测试总结: 就目前结果而言，我们可以看到不管从生成字节的大小，还是平均响应时间和平均TPS，Kryo和FST相比Dubbo RPC中原有的序列化方式都有非常显著的改进。
-
-
-
-> 未来展望：当Kryo或者FST在dubbo中当应用足够成熟之后，我们很可能会将dubbo RPC的默认序列化从hessian2改为它们中间的某一个。
+> 建议及时关注 `serializeWarnedClasses` 的结果，通过返回结果是否非空来判断是否受到攻击。

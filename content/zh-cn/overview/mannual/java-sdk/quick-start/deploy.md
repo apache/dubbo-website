@@ -37,7 +37,7 @@ Dubbo 社区提供了工具和解决方案来简化整个 Kubernetes 环境的�
     dubboctl manifest install --profile=demo
     ```
 
-    作为示例用途，以上命令会一键安装 Zookeeper、Dubbo Control Plane、Prometheus、Grafana、Zipkin、Ingress 等组件，关于 `--profile=demo` 更多解释及可选值请参见文档说明。
+    作为演示目的，以上命令会一键安装 Zookeeper、Dubbo Control Plane、Prometheus、Grafana、Zipkin、Ingress 等组件，关于 `--profile=demo` 更多解释及配置请参见文档说明。
 
 2. 检查环境准备就绪
 

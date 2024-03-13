@@ -4,9 +4,9 @@ aliases:
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/consistent-hash/
-description:
+description: "Dubbo 支持的消费端负载均衡策略及其使用方法"
 linkTitle: 负载均衡
-title: 负载均衡
+title: 负载均衡策略与配置细节
 type: docs
 weight: 1
 ---
@@ -113,3 +113,7 @@ referenceConfig.setParameters(parameters);
 referenceConfig.setLoadBalance("consistenthash");
 referenceConfig.get();
 ```
+
+## 自适应负载均衡配置
+
+只需要在 consumer 或 provider 端将 `loadbalance` 设置为 `p2c` 或者 `adaptive` 即可，可在此查看 [工作原理](/zh-cn/overview/reference/proposals/heuristic-flow-control)

@@ -12,14 +12,12 @@ weight: 2
 以下文档将引导您从头创建一个基于 Spring Boot 的 Dubbo 应用，并为应用配置 Triple 通信协议、服务发现等微服务基础能力。
 
 ## 快速创建应用
-通过 start.dubbo.apache.org 快速创建应用
-
-可以访问 <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务创建 Dubbo 微服务应用。如下图所示依次添加组件，您可以在几十秒之内快速创建一个 Dubbo 应用。下载生成的示例应用并解压源码即可。
+通过访问 <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务创建 Dubbo 微服务应用。如下图所示依次添加组件，您可以在几十秒之内快速创建一个 Dubbo 应用。下载生成的示例应用并解压源码即可。
 
 <img style="max-width:800px;height:auto;margin-bottom:10px;" alt="项目结构截图" src="/imgs/v3/quickstart/initializer-provider.png"/>
 
 {{% alert title="直接使用官方准备好的示例" color="info" %}}
-如果你不想自己创建应用，还可以直接下载官方预先准备好的示例：
+您还可以直接下载官方预先准备好的示例项目：
 
 ```shell
 $ git clone -b main --depth 1 https://github.com/apache/dubbo-samples

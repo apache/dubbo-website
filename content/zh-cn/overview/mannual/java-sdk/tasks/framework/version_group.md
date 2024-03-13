@@ -16,18 +16,18 @@ type: docs
 weight: 4
 ---
 
+Dubbo服务中，接口并不能唯一确定一个服务，只有 `接口+分组+版本号` 的三元组才能唯一确定一个服务。
 
-## 版本与分组
-Dubbo服务中，接口并不能唯一确定一个服务，只有接口+分组+版本号才能唯一确定一个服务。
-
-## 使用场景
 * 当同一个接口针对不同的业务场景、不同的使用需求或者不同的功能模块等场景，可使用服务分组来区分不同的实现方式。同时，这些不同实现所提供的服务是可并存的，也支持互相调用。
 * 当接口实现需要升级又要保留原有实现的情况下，即出现不兼容升级时，我们可以使用不同版本号进行区分。
 
+本文示例完整源码可在以下链接查看：
+* [dubbo-samples-group](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-group)
+* [dubbo-samples-version](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-version)
+* [dubbo-samples-merge](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge)
 
 ## 使用方式
-使用 @DubboService 注解，添加 group 参数和 version 参数
-本示例中使用"发布和调用" 中示例代码
+使用 @DubboService 注解，配置 `group` 参数和 `version` 参数：
 
 接口定义：
 ```java
@@ -38,7 +38,7 @@ public interface DevelopService {
 
 接口实现1：
 ```java
-@DubboService(group = "group1",version = "1.0")
+@DubboService(group = "group1", version = "1.0")
 public class DevelopProviderServiceV1 implements DevelopService{
     @Override
     public String invoke(String param) {
@@ -50,7 +50,7 @@ public class DevelopProviderServiceV1 implements DevelopService{
 ```
 接口实现2：
 ```java
-@DubboService(group = "group2",version = "2.0")
+@DubboService(group = "group2", version = "2.0")
 public class DevelopProviderServiceV2 implements DevelopService{
     @Override
     public String invoke(String param) {
@@ -61,19 +61,15 @@ public class DevelopProviderServiceV2 implements DevelopService{
 }
 ```
 
-启动服务后，可以在注册中心看到对应的服务列表，如下：
-`![serviceList](/imgs/v3/develop/develop-service-list.png)`
-
-
 客户端接口调用：
 
 > 使用 @DubboReference 注解，添加 group 参数和 version 参数
 
 ```java
-@DubboReference(group = "group1",version = "1.0")
+@DubboReference(group = "group1", version = "1.0")
 private DevelopService developService;
 
-@DubboReference(group = "group2",version = "2.0")
+@DubboReference(group = "group2", version = "2.0")
 private DevelopService developServiceV2;
 
 @Override
@@ -84,43 +80,6 @@ public void run(String... args) throws Exception {
     System.out.println("Dubbo Remote Return ======> " + developServiceV2.invoke("2"));
 }
 ```
-
-
-
-
-
-## 特性说明
-同一个接口针对不同的业务场景、不同的使用需求或者不同的功能模块等场景，可使用服务分组来区分不同的实现方式。同时，这些不同实现所提供的服务是可并存的，也支持互相调用。
-
-## 使用场景
-当一个接口有多种实现时，可以用 group 区分。
-
-> 参考用例
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-group](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-group)
-
-## 使用方式
-
-### 注解配置
-
-#### 服务提供端(注解配置)
-
-使用 @DubboService 注解，添加 group 参数
-
-```java
-@DubboService(group = "demo")
-public class DemoServiceImpl implements DemoService {
- ...
-}
-
-@DubboService(group = "demo2")
-public class Demo2ServiceImpl implements DemoService {
- ...
-}
-```
-
-启动 Dubbo 服务，可在注册中心看到相同服务名不同分组的服务，以 Nacos 作为注册中心为例，显示如下内容：
-
-![image-service-group-1.png](/imgs/blog/service-group-1.png)
 
 #### 服务消费端(注解配置)
 
@@ -140,8 +99,6 @@ private DemoService demoService2;
 
 同样启动 Dubbo 服务后，可在注册中心看到相同服务名不同分组的引用者，以 Nacos 作为注册中心为例，显示如下内容：
 ![image-service-group-2.png](/imgs/blog/service-group-2.png)
-
-### xml配置
 
 #### 服务提供端( xml 配置)
 
@@ -197,8 +154,6 @@ private DemoService demoService2;
 
 ![image-service-group-2.png](/imgs/blog/service-group-2.png)
 
-### API配置
-
 #### 服务提供端( API 配置)
 
 使用 org.apache.dubbo.config.ServiceConfig 类，添加 group 参数
@@ -251,17 +206,12 @@ reference3.setGroup("*");
 > 总是 **只调** 一个可用组的实现
 
 
-
-## 特性说明
+## 分组聚合
 通过分组对结果进行聚合并返回聚合后的结果，比如菜单服务，用 group 区分同一接口的多种实现，现在消费方需从每种 group 中调用一次并返回结果，对结果进行合并之后返回，这样就可以实现聚合菜单项。
 
 相关代码可以参考 [dubbo 项目中的示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge)
 
-## 使用场景
-
 将多个服务提供者分组作为一个提供者进行访问。应用程序能够像访问一个服务一样访问多个服务，并允许更有效地使用资源。
-
-## 使用方式
 
 ### 搜索所有分组
 
@@ -319,7 +269,7 @@ reference3.setGroup("*");
 
 
 
-## 特性说明
+## 跨版本升级
 **按照以下的步骤进行版本迁移**
 
 1. 在低压力时间段，先升级一半提供者为新版本
@@ -330,13 +280,11 @@ reference3.setGroup("*");
 - 新老版本服务提供者
 - 新老版本服务消费者
 
-## 使用场景
 当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。
 
 >参考用例
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-version](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-version)
 
-## 使用方式
 ### 服务提供者
 老版本服务提供者配置
 ```xml
