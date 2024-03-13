@@ -5,7 +5,6 @@ aliases:
 description: 演示 Dubbo 多协议的应用场景
 hide: true
 linkTitle: 通信协议
-no_list: true
 title: 通信协议
 type: docs
 weight: 2

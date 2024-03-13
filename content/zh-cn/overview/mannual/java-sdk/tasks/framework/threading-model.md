@@ -9,21 +9,13 @@ type: docs
 weight: 2
 ---
 
-
-## 功能说明
-2.7.5 版本对整个调用链路做了全面的优化，根据压测结果显示，总体 QPS 性能提升将近 30%，同时也减少了调用过程中的内存分配开销。其中一个值得提及的设计点是 2.7.5 引入了 Servicerepository 的概念，在服务注册阶段提前生成 ServiceDescriptor 和 MethodDescriptor，以减少 RPC 调用阶段计算 Service 原信息带来的资源消耗。
-
-## 使用场景
-并发请求，负载均衡，连接管理，超时处理，容错等。
-
-## 实现方式
-### 消费端线程池模型优化
+## 消费端线程模型
 
 对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 [Need a limited Threadpool in consumer side #2013](https://github.com/apache/dubbo/issues/2013)
 
 改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。
 
-### 老的线程池模型
+**老的线程池模型**
 
 ![消费端线程池.png](/imgs/user/consumer-threadpool0.png)
 
@@ -34,9 +26,7 @@ weight: 2
 3. 当业务数据返回后，交由独立的 Consumer 端线程池进行反序列化等处理，并调用 future.set 将反序列化后的业务结果置回。
 4. 业务线程拿到结果直接返回
 
-
-
-### 2.7.5 版本引入的线程池模型
+**当前线程池模型**
 
 ![消费端线程池新.png](/imgs/user/consumer-threadpool1.png)
 
@@ -48,17 +38,10 @@ weight: 2
 
 这样，相比于老的线程池模型，由业务线程自己负责监测并解析返回结果，免去了额外的消费端线程池开销。
 
-关于性能优化，在接下来的版本中将会持续推进，主要从以下两个方面入手：
-
-1. RPC 调用链路。目前能看到的点包括：进一步减少执行链路的内存分配、在保证协议兼容性的前提下提高协议传输效率、提高 Filter、Router 等计算效率。
-2. 服务治理链路。进一步减少地址推送、服务治理规则推送等造成的内存、cpu 资源消耗。
-
-
-
-## Provider 模型功能说明
+## 提供端线程模型
 Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。
 
-### Dubbo协议—Provider端线程模型
+### Dubbo协议
 
 介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：
 
@@ -70,15 +53,31 @@ Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分
 
 Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Provider线程模型可以分为五类，也就是AllDispatcher、DirectDispatcher、MessageOnlyDispatcher、ExecutionDispatcher、ConnectionOrderedDispatcher。
 
-### Triple协议—Provider端线程模型
+#### 配置方式
+| 线程模型  | 配置值 |
+| ---- | -- |
+All Dispatcher | all
+Direct Dispatcher | direct
+Execution Dispatcher | execution
+Message Only Dispatcher | message
+Connection Ordered Dispatcher | connection
 
-下图为Triple协议 Provider端的线程模型
+拿 application.yaml 的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher
 
-![triple-provider](/imgs/v3/feature/performance/threading-model/triple-provider.png)
+```yaml
+dubbo:
+  application:
+    name: dubbo-springboot-demo-provider
+  protocol:
+    name: dubbo
+    port: -1
+    dispatcher: all
+  registry:
+    id: zk-registry
+    address: zookeeper://127.0.0.1:2181
+```
 
-Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。
-
-### All Dispatcher
+#### All Dispatcher
 
 下图是All Dispatcher的线程模型说明图：
 
@@ -91,7 +90,7 @@ Triple协议Provider线程模型目前还比较简单，目前序列化和反序
   1. received、connected、disconnected、caught都是在Dubbo线程上执行的。
   2. 反序列化请求的行为在Dubbo中做的。
 
-### Direct Dispatcher
+#### Direct Dispatcher
 
 下图是Direct Dispatcher的线程模型说明图：
 
@@ -102,7 +101,7 @@ Triple协议Provider线程模型目前还比较简单，目前序列化和反序
   2. 反序列化请求和序列化响应在IO线程上执行。
 - 1. 并没有在Dubbo线程操作的行为。
 
-### Execution Dispatcher
+#### Execution Dispatcher
 
 下图是Execution Dispatcher的线程模型说明图：
 
@@ -115,7 +114,7 @@ Triple协议Provider线程模型目前还比较简单，目前序列化和反序
   1. received都是在Dubbo线程上执行的。
   2. 反序列化请求的行为在Dubbo中做的。
 
-### Message Only Dispatcher
+#### Message Only Dispatcher
 
 在Provider端，Message Only Dispatcher和Execution Dispatcher的线程模型是一致的，所以下图和Execution Dispatcher的图一致，区别在Consumer端。见下方Consumer端的线程模型。
 
@@ -130,7 +129,7 @@ Triple协议Provider线程模型目前还比较简单，目前序列化和反序
   1. received都是在Dubbo线程上执行的。
   2. 反序列化请求的行为在Dubbo中做的。
 
-### Connection Ordered Dispatcher
+#### Connection Ordered Dispatcher
 
 下图是Connection Ordered Dispatcher的线程模型说明图：
 
@@ -144,51 +143,19 @@ Triple协议Provider线程模型目前还比较简单，目前序列化和反序
   2. 反序列化请求的行为在Dubbo中做的。
 
 
+### Triple协议
 
-## 使用场景
-异步处理，连接管理，资源管理，负载均衡，容错等。
+下图为Triple协议 Provider端的线程模型
 
-## 使用方式
+![triple-provider](/imgs/v3/feature/performance/threading-model/triple-provider.png)
 
-| 线程模型  | 配置 |
-| ---- | -- |
-All Dispatcher | all
-Direct Dispatcher | direct
-Execution Dispatcher | execution
-Message Only Dispatcher | message
-Connection Ordered Dispatcher | connection
-
-### 线程模型示例
-
-拿yaml的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher
-
-```yaml
-dubbo:
-  application:
-    name: dubbo-springboot-demo-provider
-  protocol:
-    name: dubbo
-    port: -1
-    dispatcher: all
-  registry:
-    id: zk-registry
-    address: zookeeper://127.0.0.1:2181
-  config-center:
-    address: zookeeper://127.0.0.1:2181
-  metadata-report:
-    address: zookeeper://127.0.0.1:2181
-```
+Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。
 
 
-
-## 特性说明
+## 线程池隔离
 一种新的线程池管理方式，使得提供者应用内各个服务的线程池隔离开来，互相独立，某个服务的线程池资源耗尽不会影响其他正常服务。支持线程池可配置化，由用户手动指定。
 
-## 使用场景
 使用线程池隔离来确保 Dubbo 用于调用远程方法的线程与微服务用于执行其任务的线程是分开的。可以通过防止线程阻塞或相互竞争来帮助提高系统的性能和稳定性。
-
-
-## 使用方式
 
 目前可以以 API、XML、Annotation 的方式进行配置
 
@@ -199,7 +166,7 @@ dubbo:
 - `ServiceConfig` 新增 `Executor executor` 参数，**用以服务间隔离的线程池**，可以由用户配置化、提供自己想要的线程池，若没有指定，则会根据协议配置(`ProtocolConfig`)信息构建默认的线程池用以服务隔离。
 
 > `ServiceConfig` 新增 `Executor executor` 配置参数只有指定`executor-management-mode = isolation` 才生效。
-### API
+#### API
 ```java
     public void test() {
         // provider app
@@ -249,7 +216,7 @@ dubbo:
     }
 ```
 
-### XML
+#### XML
 ```xml
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
@@ -295,7 +262,7 @@ dubbo:
 
 </beans>
 ```
-### Annotation
+#### Annotation
 ```java
 @Configuration
 @EnableDubbo(scanBasePackages = "org.apache.dubbo.config.spring.isolation.spring.annotation.provider")
@@ -408,7 +375,7 @@ public class HelloServiceImplV3 implements HelloService {
 
 
 
-## 功能说明
+## 线程池状态导出
 dubbo 通过 Jstack 自动导出线程堆栈来保留现场，方便排查问题。
 
 默认策略
@@ -417,12 +384,9 @@ dubbo 通过 Jstack 自动导出线程堆栈来保留现场，方便排查问题
 * 导出间隔: 最短间隔允许每隔10分钟导出一次
 * 导出开关: 默认打开
 
-## 使用场景
 当业务线程池满时，我们需要知道线程都在等待哪些资源、条件，以找到系统的瓶颈点或异常点。
 
-## 使用方式
-
-### 导出开关控制
+#### 导出开关控制
 ```properties
 # dubbo.properties
 dubbo.application.dump.enable=true
@@ -440,7 +404,7 @@ dubbo:
 
 
 
-### 指定导出路径
+#### 导出路径
 
 ```properties
 # dubbo.properties

@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/tasks/extensibility/router/
     - /zh-cn/overview/tasks/extensibility/router/
-description: 自定义路由策略
+description: 本文讲解如何通过扩展 Router 实现自定义路由策略，可以根据业务场景的特点来实现特定的路由方式。
 linkTitle: Router
 no_list: true
 title: Router
@@ -10,7 +10,7 @@ type: docs
 weight: 4
 ---
 
-通过自定义路由，可以根据业务场景的特点来实现特定的路由方式。
+通过自定义路由，可以根据业务场景的特点来实现特定的路由方式。本示例 router 扩展实现源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/)。
 
 ## 开始之前
 

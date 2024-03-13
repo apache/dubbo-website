@@ -2,12 +2,12 @@
 aliases:
     - /zh/overview/tasks/observability/tracing/skywalking/
     - /zh-cn/overview/tasks/observability/tracing/skywalking/
-description: ""
+description: "本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系"
 linkTitle: Skywalking
 no_list: true
 title: Skywalking
 type: docs
-weight: 2
+weight: 4
 ---
 
 本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系，完整示例请参考 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-tracing-skywalking" target="_blank">dubbo-samples-tracing-skywalking</a>。依赖的 Skywalking Agent 版本为 [skywalking micrometer-1.10 api](https://skywalking.apache.org/docs/skywalking-java/next/en/setup/service-agent/java-agent/application-toolkit-micrometer-1.10/).

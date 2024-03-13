@@ -3,15 +3,11 @@ aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/overview/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/overview/
 description: 协议概述
-linkTitle: 协议概述
+linkTitle: triple
 title: 协议概述
 type: docs
-weight: 1
+weight: 2
 ---
-
-
-
-
 
 
 ## 概述说明

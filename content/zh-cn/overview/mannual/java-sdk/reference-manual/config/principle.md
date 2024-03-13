@@ -9,16 +9,14 @@ type: docs
 weight: 5
 ---
 
+本文主要讲解 Dubbo 配置相关的 API 与工作原理，学习 Dubbo 的多种配置源、每种配置源的具体配置方式、不同配置源之间的优先级与覆盖关系。
 
+## 实现原理
 
+为了更好地管理各种配置，Dubbo 抽象了一套结构化的配置组件，各组件总体以用途划分，分别控制不同作用域的行为。
 
+![dubbo-config](/imgs/user/dubbo-config.jpg)
 
-
-* [使用 Spring Boot 快速开发 Dubbo 应用](../../../quick-start/spring-boot/)
-
-* [配置项参考手册](../properties)
-
-* [配置加载及覆盖的工作原理](../principle)
 
 组件名称 | 描述 | 范围 | 是否必须配置
 ------ | ------ | ------ | ------
@@ -37,18 +35,52 @@ ssl |  ssl/tls 安全链接相关的证书等配置 |  一个应用内只允许�
 method | 指定方法级的配置 | service 和 reference 的子配置 |  可选
 argument | 某个方法的参数配置 | method的子配置 |  可选
 
-## 实现原理
-
-为了更好地管理各种配置，Dubbo 抽象了一套结构化的配置组件，各组件总体以用途划分，分别控制不同作用域的行为。
-
-![dubbo-config](/imgs/user/dubbo-config.jpg)
-
-
-
 
 > 从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 [Blog](/zh-cn/blog/2019/10/17/dubbo-中的-url-统一模型/#rpc调用)。
 
 > 各组件支持的具体配置项及含义请参考 [配置项手册](../properties)
+
+
+{{% alert title="注意" color="info" %}}
+**背景**
+
+在每个dubbo应用中某些种类的配置类实例只能出现一次（比如`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`），有些能出现多次（比如`RegistryConfig`、`ProtocolConfig`等）。
+
+如果应用程序意外的扫描到了多个唯一配置类实例（比如用户在一个dubbo应用中错误了配置了两个`ApplicationConfig`），应该以哪种策略来处理这种情况呢？是直接抛异常？是保留前者忽略后者？是忽略前者保留后者？还是允许某一种形式的并存（比如后者的属性覆盖到前者上）？
+
+目前dubbo中的唯一配置类类型和以及某唯一配置类型找到多个实例允许的配置模式/策略如下。
+
+**唯一配置类类型**
+
+`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`。
+
+前四个属于应用级别的，最后一个属于模块级别的。
+
+**配置模式**
+
+- `strict`：严格模式。直接抛异常。
+- `override`：覆盖模式。忽略前者保留后者。
+- `ignore`：忽略模式。忽略后者保留前者。
+- `override_all`：属性覆盖模式。不管前者的属性值是否为空，都将后者的属性覆盖/设置到前者上。
+- `override_if_absent`：若不存在则属性覆盖模式。只有前者对应属性值为空，才将后者的属性覆盖/设置到前者上。
+
+注：后两种还影响配置实例的属性覆盖。因为dubbo有多种配置方式，即存在多个配置源，配置源也有优先级。比如通过xml方式配置了一个`ServiceConfig`且指定属性`version=1.0.0`，同时我们又在外部配置(配置中心)中配置了`dubbo.service.{interface}.version=2.0.0`，在没有引入`config-mode`配置项之前，按照原有的配置源优先级，最终实例的`version=2.0.0`。但是引入了`config-mode`配置项之后，配置优先级规则也不再那么严格，即如果指定`config-mode为override_all`则为`version=2.0.0`，如果`config-mode为override_if_absent`则为`version=1.0.0`，`config-mode`为其他值则遵循原有配置优先级进行属性设值/覆盖。
+
+**配置方式**
+
+配置的key为`dubbo.config.mode`，配置的值为如上描述的几种，默认的策略值为`strict`。下面展示了配置示例
+
+```properties
+# JVM -D
+-Ddubbo.config.mode=strict
+
+# 环境变量
+DUBBO_CONFIG_MODE=strict
+
+# 外部配置(配置中心)、Spring应用的Environment、dubbo.properties
+dubbo.config.mode=strict
+```
+{{% /alert %}}
 
 ### service 与 reference
 `service` 与 `reference` 是 Dubbo 最基础的两个配置项，它们用来将某个指定的接口或实现类注册为 Dubbo 服务，并通过配置项控制服务的行为。

@@ -92,6 +92,8 @@ public class TripleHttp2Protocol extends Http2WireProtocol {
 
 从上面的扩展步骤可以看出，用户基本在黑盒下就完成了扩展。
 
+## Activate
+
 ## Dubbo 扩展的应用
 
 Dubbo 的扩展能力非常灵活，在自身功能的实现上无处不在。

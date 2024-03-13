@@ -1,17 +1,17 @@
 ---
-description: "使用 Dubbo 开发 Triple 协议通信服务"
+description: "Triple 协议支持使用 Protocol Buffers (Protobuf) 定义服务，对于因为多语言、gRPC、安全性等场景选型protobuf 的用户更友好。"
 linkTitle: Protobuf(IDL)方式
 title: 使用 Protobuf(IDL) 开发 triple 通信服务
 type: docs
 weight: 2
 ---
 
-本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑下一篇基于Java接口的 triple 开发模式。
+本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑上一篇基于Java接口的 triple 开发模式。
 
 可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl)。
 
 {{% alert title="注意" color="info" %}}
-本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例]() 供参考，同样是 `protobuf+triple` 的模式，但额外加入了服务发现配置。
+本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl) 供参考，同样是 `protobuf+triple` 的模式，但额外加入了服务发现配置。
 {{% /alert %}}
 
 ## 运行示例
@@ -150,6 +150,18 @@ message GreeterReply {
 service Greeter{
   rpc greet(GreeterRequest) returns (GreeterReply);
 }
+```
+
+请注意以上 package 定义 `package org.apache.dubbo.samples.tri.unary;`，在此示例中 package 定义的路径将同时作为 java 包名和服务名前缀。这意味着 rpc 服务的完整定义是：`org.apache.dubbo.samples.tri.unary.Greeter`，与生成代码的路径完全一致。
+
+但保持一致并不是必须的，你也可以将 java 包名与服务名前缀定义分开定义，对于一些跨语言调用的场景比较有用处。如以下 IDL 定义中：
+* 完整服务名是 `greet.Greeter`，rpc 调用及服务发现过程中会使用这个值
+* java 包名则是 java_package 定义的 `org.apache.dubbo.samples.tri.unary`，生成的 java 代码会放在这个目录。
+
+```protobuf
+package greet;
+option java_package = "org.apache.dubbo.samples.tri.unary;"
+option go_package = "github.com/apache/dubbo-go-samples/helloworld/proto;greet";
 ```
 
 ### 服务实现

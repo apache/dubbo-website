@@ -1,37 +1,43 @@
 ---
-description: "Dubbo 是一款轻量的 RPC 框架，提供 Java、Go、Node.js、Javascript 等语言支持，帮助开发者构建浏览器、gRPC 兼容的 HTTP API。"
-linkTitle: 选择 RPC 通信协议
+description: "提供不同场景下的协议选型（triple、dubbo）指南，包含每个协议的基本配置方式、默认端口、适用场景等。"
+linkTitle: 选择 RPC 协议
 title: Dubbo 支持的 RPC 通信协议
 type: docs
 weight: 1
 ---
 
 Dubbo 作为一款 RPC 框架内置了高效的 RPC 通信协议，帮助解决服务间的编码与通信问题，目前支持的协议包括：
- * **triple**，基于 HTTP/1、HTTP/2 的高性能通信协议，100% 兼容 gRPC，支持 Unary、Streming 等通信模式；
- * **dubbo**，基于 TCP 的高性能私有通信协议，缺点是通用性较差，更适合在 Dubbo SDK 间使用；
- * **rest**，基于 HTTP+JSON 标准的通信协议，用于发布 REST 风格的 HTTP 服务，网关等路由组件兼容性高；
- * **多种生态扩展协议**；
+ * triple，基于 HTTP/1、HTTP/2 的高性能通信协议，100% 兼容 gRPC，支持 Unary、Streming 等通信模式；支持发布 REST 风格的 HTTP 服务。
+ * dubbo，基于 TCP 的高性能私有通信协议，缺点是通用性较差，更适合在 Dubbo SDK 间使用；
+ * 任意协议扩展，通过扩展 protocol 可以之前任意 RPC 协议，官方生态库提供 JsonRPC、thrift 等支持。
 
 ## 协议概览
+
+### 使用哪个协议？
+
 **开发者该如何确定使用哪一种协议那？** 以下是我们从使用场景、性能、编程易用性、多语言互通等方面对多个主流协议的对比分析：
 
-| 协议 | 性能 | 网关友好 | Streaming通信模式 | 多语言互通 | 编程API | 说明 |
+| <span style="display:inline-block;width:50px">协议</span> | 性能 | 网关友好 | 流式通信 | 多语言支持 | 编程API | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| triple | aaa | bbb | ccc | ddd | eee | fff |
-| dubbo | aaa | bbb | ccc | ddd | eee | fff |
-| rest | aaa | bbb | ccc | ddd | eee | fff |
+| triple | 高 | 高 | 支持，客户端流、服务端流、双向流 | 支持（Java、Go、Node.js、JavaScript、Rust） | Java Interface、Protobuf(IDL) | 在多语言兼容、性能、网关、Streaming、gRPC 等方面最均衡的协议实现，官方推荐。 |
+| dubbo | 高 | 低 | 不支持 | 支持（Java、Go） | Java Interface | 性能最高的私有协议，但前端流量接入、多语言支持等成本较高 |
+| rest | 低 | 高 | 不支持 | 支持 | Java Interface | rest 协议在前端接入、互通等方面具备最高的灵活性，但对比 rpc 存在性能、弱类型等缺点。**注意，rest 在 dubbo3 中仅是 triple 协议的一种发布形式** |
 
-
-{{% alert title="注意" color="info" %}}
-考虑到对过往版本的兼容性，当前 Dubbo 各个发行版本均默认使用 `dubbo` 通信协议。**但对于新用户而言，我们强烈建议在一开始就明确配置使用 `triple` 协议**，老用户也尽快参考文档 [实现协议的平滑迁移](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/migration)。
+{{% alert title="注意" color="warning" %}}
+自 3.3 版本开始，triple 协议支持以 rest 风格发布标准的 http 服务，因此框架中实际已不存在独立的 rest protocol 扩展实现。只是在文档说明上，我们依然选择将 triple 与 rest 作为独立的协议实现分开讲解，请大家注意。
 {{% /alert %}}
 
+### 协议默认值
 以下是几个主要协议的具体开发、配置、运行态信息：
  | 协议名称 | 配置值 | 服务定义方式 | 默认端口 | 传输层协议 | 序列化协议 | 是否默认 |
  | --- | --- | --- | --- | --- | --- | --- |
  | **triple** | tri | - Java Interface <br/> - Protobuf(IDL) | 50051 | HTTP/1、HTTP/2 | Protobuf Binary、Protobuf JSON | 否 |
  | **dubbo** | dubbo | - Java Interface | 20880 | TCP | Hessian、Fastjson2、JSON、JDK、Avro、Kryo 等 | **是** |
- | **rest** | rest | - Java Interface + SpringMVC <br/> - Java Interface + JAX-RS | 8080 | HTTP/1、HTTP/2 | JSON | 否 |
+ | **rest** | tri 或 rest | - Java Interface + SpringMVC <br/> - Java Interface + JAX-RS | 50051 | HTTP/1、HTTP/2 | JSON | 否 |
+
+ {{% alert title="注意" color="info" %}}
+ 考虑到对过往版本的兼容性，当前 Dubbo 各个发行版本均默认使用 `dubbo` 通信协议。**对于新用户而言，我们强烈建议在一开始就明确配置使用 `triple` 协议**，老用户也尽快参考文档 [实现协议的平滑迁移](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/migration)。
+ {{% /alert %}}
 
 接下来，我们一起看以下几个协议的基本使用方式。
 
@@ -100,9 +106,9 @@ Protobuf 模式支持序列化方式有 Protobuf Binary、Protobuf JSON 两种�
 
 #### 3. 我该使用哪种编程模式，如何选择？
 
-| 核心问题 | 是 | 否 |
+|  | 是 | 否 |
 | --- | --- | --- |
-| 你公司的业务是否有用 Java 之外的其他语言，跨语言互通的场景是不是普遍？ | Protobuf | Java 接口 |
+| 公司的业务是否有用 Java 之外的其他语言，跨语言互通的场景是不是普遍？ | Protobuf | Java 接口 |
 | 公司里的开发人员是否熟悉 Protobuf，愿意接受 Protobuf 的额外成本吗？ | Protobuf | Java 接口 |
 | 是否有标准 gRPC 互通诉求？ | Protobuf | Java 接口 |
 | 是不是 Dubbo2 老用户，想平滑迁移到 triple 协议？ | Java 接口 | Protobuf |
@@ -120,6 +126,8 @@ curl \
 
 以上默认使用 `org.apache.dubbo.springboot.demo.idl.Greeter/greet` 这种 HTTP 访问路径，且仅支持 post 方法，如果你想对外发布 REST 风格服务，请参考下文 REST 协议小节。
 
+具体可参考[【使用教程 - 前端网关接入】](../../gateway/triple/)
+
 ### Streaming 流式通信模式
 #### 流实现原理
 
@@ -127,10 +135,10 @@ curl \
 
 - 从协议层来说，`Triple` 是建立在 `HTTP2` 基础上的，所以直接拥有所有 `HTTP2` 的能力，故拥有了分 `streaming` 和全双工的能力。
 
-- 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
+- 框架层来说，`org.apache.dubbo.common.stream.StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
 
 #### 适用场景
-Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
+Streaming 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
 
 - 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
 - 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的
@@ -139,19 +147,21 @@ Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使�
 Stream 分为以下三种。
 
 ##### SERVER_STREAM(服务端流)
-A server-streaming RPC is similar to a unary RPC, except that the server returns a stream of messages in response to a client’s request. After sending all its messages, the server’s status details (status code and optional status message) and optional trailing metadata are sent to the client. This completes processing on the server side. The client completes once it has all the server’s messages.
-![SERVER_STREAM](/imgs/v3/migration/tri/migrate-server-stream.png)
+服务端流式 RPC 类似于 Unary RPC，不同之处在于服务端会响应客户端的请求并返回消息流。在发送完所有消息后（通常是多条消息），服务端会发送状态信息（状态代码和可选状态消息）和可选的尾部元数据给客户端，这写状态信息发送完后服务器端流就结束了。一旦客户端通过 StreamObserver 接收到了以上所有了服务器消息，流就完成了。
+
+<img alt="服务端流" style="max-width:800px;height:auto;" src="/imgs/v3/migration/tri/migrate-server-stream.png"/>
 
 ##### CLIENT_STREAM(客户端流)
-A client-streaming RPC is similar to a unary RPC, except that the client sends a stream of messages to the server instead of a single message. The server responds with a single message (along with its status details and optional trailing metadata), typically but not necessarily after it has received all the client’s messages.
-![CLIENT_STREAM](/imgs/v3/migration/tri/migrate-client-stream.png)
+客户端流式 RPC 类似于 Unary RPC，不同之处在于客户端向服务器发送消息流（通常包含多条消息）而不是单个消息。服务器以单个消息（以及其状态详细信息和可选的尾部元数据）进行响应 - 通常但不一定是在接收到所有客户端消息之后。
+
+<img alt="客户端流" style="max-width:800px;height:auto;" src="/imgs/v3/migration/tri/migrate-client-stream.png"/>
 
 ##### BIDIRECTIONAL_STREAM(双向流)
-In a bidirectional streaming RPC, the call is initiated by the client invoking the method and the server receiving the client metadata, method name, and deadline. The server can choose to send back its initial metadata or wait for the client to start streaming messages.
+在双向流 RPC 中，客户端发起方法调用，服务端则接收客户端调用中的元数据、方法名称和截止日期，这样就启动了一次完整的双向流通道。服务器可以选择返回其初始元数据，或者等待客户端开始流式传输消息。
 
-Client- and server-side stream processing is application specific. Since the two streams are independent, the client and server can read and write messages in any order. For example, a server can wait until it has received all of a client’s messages before writing its messages, or the server and client can play “ping-pong” – the server gets a request, then sends back a response, then the client sends another request based on the response, and so on.
-![BIDIRECTIONAL_STREAM](/imgs/v3/migration/tri/migrate-bi-stream.png)
+客户端和服务器端的流处理是特定于应用程序的。由于这两个流是独立的，客户端和服务器可以按任何顺序读取和写入消息。例如，服务器可以等到收到客户端的所有消息后再写消息，或者服务器和客户端可以玩“乒乓球”——服务器收到一个请求，然后发回一个响应，然后客户端根据响应发送另一个请求等等。
 
+<img alt="双向流" style="max-width:800px;height:auto;" src="/imgs/v3/migration/tri/migrate-bi-stream.png"/>
 
 {{% alert title="流的语义保证" color="primary" %}}
 - 提供消息边界，可以方便地对消息单独处理
@@ -160,7 +170,7 @@ Client- and server-side stream processing is application specific. Since the two
 - 支持取消和超时
 {{% /alert %}}
 
-关于 Streaming 的具体使用示例，请参见 【进阶学习 - 通信协议 - Streaming 流式通信】。
+关于 Streaming 的具体使用示例，请参见 [Streaming 流式通信](../triple/streaming/)。
 
 ## Dubbo 协议
 ### 基本配置
@@ -188,32 +198,33 @@ public interface DemoService {
 由于 Dubbo2 默认序列化协议是 hessian2，对于部分有拦截rpc调用payload的场景，比如sidecar等对链路payload有拦截与解析，在升级过程中需留意兼容性问题。
 {{% /alert %}}
 
-* 关于 dubbo 协议的具体使用示例请参见【进阶学习 - 通信协议】中的 [dubbo 协议示例]()。
+* 关于 dubbo 协议的具体使用示例请参见【进阶学习 - 通信协议】中的 [dubbo 协议示例](../dubbo/)。
 
 ### HTTP 接入方式
 由于 dubbo 协议无法支持 http 流量直接接入，因此需要有一层网关实现前端 http 协议到后端 dubbo 协议的转换过程（`http -> dubbo`）。Dubbo 框架提供了 `泛化调用` 能力，可以让网关在无服务接口定义的情况下对后端服务发起调用。
 
-[http -> dubbo 架构图]()
+<img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/http-to-dubbo.png"/>
 
-目前社区有很多开源网关产品支持 `http -> dubbo` 的，它们大部分都提供了可视化界面配置参数映射（泛化调用），同时还支持基于 Nacos、Zookeeper 等主流注册中心的自动地址发现，具体请查看 [【进阶学习 - HTTP网关接入】]()。
-* Higress
-* Pixiu
-* APISIX
-* Shenyu
-* Tengine
+目前社区有很多开源网关产品（Higress、Shenyu、APISIX、Tengine等）支持 `http -> dubbo` 的，它们大部分都提供了可视化界面配置参数映射（泛化调用），同时还支持基于 Nacos、Zookeeper 等主流注册中心的自动地址发现，具体请查看 [【使用教程 - HTTP网关接入】](../../gateway/dubbo/)。
 
 ## REST 协议
-通过以下配置启用 rest 协议，默认端口为 8080，如果设置 `port: -1` 则会随机选取端口（从 8080 自增，直到找到第一个可用端口）。
+在本文前面我们曾提到，自 3.3 版本开始 triple 协议支持以 rest 风格发布标准的 http 服务，因此，如果我们发布 rest 风格的服务等同于使用 triple 协议，只不过，我们要在服务定义上加入特定的注解（Spring Web、JAX-RS）。
 
 ```yaml
 dubbo:
  protocol:
-   name: rest
-   port: 8080
+   name: tri
+   port: 50051
 ```
 
-### 服务定义方式
-目前 rest 协议仅支持 `Java Interface` 服务定义模式，相比于 dubbo 和 triple 协议，rest 场景下我们需要为 Interface 增加注解，目前支持 Spring MVC、JAX_RS 两种注解。
+{{% alert title="注意" color="info" %}}
+对于老版本的 rest 用户配置是 `name: rest`，用户可以选择将改为 `name: tri`。即使不修改也没有问题，Dubbo 框架会自动将 rest 转换为 triple 协议实现。
+{{% /alert %}}
+
+所以说，rest 只是 triple 协议的一种特殊的发布形式，为了实现 rest 格式发布，我们需要为服务接口定义增加注解。
+
+### 注解
+目前 rest 协议仅支持 `Java 接口` 服务定义模式，相比于 dubbo 和 triple 协议，rest 场景下我们需要为 Interface 增加注解，支持 Spring MVC、JAX_RS 两种注解。
 
 Spring MVC 服务定义范例：
 ```java
@@ -227,32 +238,62 @@ public interface DemoService {
 
 JAX-RS 服务定义范例：
 ```java
-@RestController
-@RequestMapping("/demo")
+@Path("/demo")
 public interface DemoService {
-    @GetMapping(value = "/hello")
+    @GET
+	@Path("/hello")
     String sayHello();
 }
 ```
 
-如果你记得 triple 协议原生支持 cURL 访问，即类似  `org.apache.dubbo.springboot.demo.idl.Greeter/greet` 的访问模式。通过增加以上注解并将服务同时发布到 triple 协议、rest 协议，可以为 triple 服务额外增加 REST 风格访问支持。
+如果你记得 triple 协议原生支持 cURL 访问，即类似  `org.apache.dubbo.springboot.demo.idl.Greeter/greet` 的访问模式。通过增加以上注解后，即可为 triple 服务额外增加 REST 风格访问支持。
+
+关于 rest 协议的具体使用示例请参见【使用教程 - 通信协议】中的 [rest 协议示例](../rest/)
+
+## 多协议发布
+多协议发布是指为同一个服务同时提供多种协议访问方式，多协议可以是任意两个或多个协议的组合，比如下面的配置将同时发布了 dubbo、triple 协议：
 
 ```yaml
 dubbo:
  protocols:
-   - name: rest
-     port: 8080
-   - name: triple
+   - name: tri
      port: 50051
+   - name: dubbo
+	 port: 20880
 ```
 
-* 关于 rest 协议的具体使用示例请参见【进阶学习 - 通信协议】中的 [rest 协议示例]()。
-* 关于 Dubbo 多协议支持的更多细节请参见【进阶学习 - 通信协议】中的 [多协议发布]()。
+基于以上配置，如果应用中有服务 DemoService，则既可以通过 dubbo 协议访问 DemoService，也可以通过 triple 协议访问 DemoService，其工作原理图如下：
 
-## 多协议发布
-与 RPC 协议强相关的，Dubbo 支持从多个角度调整 RPC 调用时的行为，比如超时时间、线程池、连接数、负载大小、异步调用、隐式传参等，具体请查看 [RPC 框架与 API]() 中说明。
+<img alt="多协议" style="max-width:800px;height:auto;" src="/imgs/v3/tasks/protocol/multiple-protocols.png"/>
 
-除此之外，关于 RPC 协议还有以下相关链接可以参考：
+1. 提供者实例同时监听两个端口 20880 和 50051
+2. 同一个实例，会在注册中心注册两条地址 url
+3. 不同的消费端可以选择以不同协议调用同一个提供者发布的服务
+
+对于消费端而言，如果用户没有明确配置，默认情况下框架会自动选择 `dubbo` 协议调用。Dubbo 框架支持配置通过哪个协议访问服务，如 `@DubboReference(protocol="tri")`，或者在 application.yml 配置文件中指定全局默认值：
+
+```yaml
+dubbo:
+ consumer:
+   protocol: tri
+```
+
+### 单端口多协议
+
+除了以上发布多个端口、注册多条 url 到注册中心的方式。对于 dubbo、triple 这两个内置协议，框架提供了在单个端口上同时发布 dubbo 和 triple 协议的能力。这对于老用户来说是一个非常重要的能力，因为它可以做到不增加任何负担的情况下，让使用 dubbo 协议的用户可以额外发布 triple 协议，这样当所有的应用都实现多协议发布之后，我们就可以设置消费端去通过 triple 协议发起调用了。
+
+<img alt="单端口多协议" style="max-width:800px;height:auto;" src="/imgs/v3/tasks/protocol/multiple-protocols-on-same-port.png"/>
+
+单端口多协议的基本配置如下：
+
+ ```yaml
+ dubbo:
+  protocol:
+    name: dubbo
+    ext-protocols: tri
+ ```
+
+## 更多内容
 * triple 协议规范
 * dubbo 协议规范
 * rest 协议规范

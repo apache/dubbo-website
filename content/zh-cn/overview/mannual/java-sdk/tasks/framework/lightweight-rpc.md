@@ -1,6 +1,6 @@
 ---
 description: 使用轻量的 Java SDK 开发 RPC Server 和 Client
-linkTitle: RPC Server & RPC Client
+linkTitle: Server与Client
 title: 使用轻量的 Java SDK 开发 RPC Server 和 Client
 type: docs
 weight: 1
