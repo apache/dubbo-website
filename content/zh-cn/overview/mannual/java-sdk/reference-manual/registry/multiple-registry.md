@@ -118,6 +118,8 @@ RpcContext.getContext().setAttachment("registry_zone", "qingdao");
 
 根据 Invocation 中带的流量参数或者在当前节点通过 context 上下文设置的参数，流量会被精确的引导到对应的集群。
 
+除了通过 RpcContext 参数设置 zone 外，还可以通过扩展 `org.apache.dubbo.rpc.ZoneDetector` 实现，以更灵活的方式确定当前请求的 zone 归属。RuleConverter
+
 ### 2.2 多注册中心地址聚合
 ```xml
 <dubbo:registry address="multiple://127.0.0.1:2181?separator=;&reference-registry=zookeeper://address11?backup=address12,address13;zookeeper://address21?backup=address22,address23" />

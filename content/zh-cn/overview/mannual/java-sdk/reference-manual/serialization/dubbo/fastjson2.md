@@ -71,4 +71,3 @@ dubbo.reference.com.demo.DemoService.serialization=fastjson2
 <dubbo:reference interface="xxx" serialization="fastjson2" />
 ```
 
-## 3 支持的rpc协议

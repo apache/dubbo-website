@@ -12,10 +12,6 @@ weight: 7
 
 
 
-
-
-
-
 ## 特性说明
 当前 dubbo 支持的 thrift 协议是对 thrift 原生协议的扩展，在原生协议的基础上添加了一些额外的头信息，比如 service name，magic number 等。`2.3.0` 以上版本支持。
 
@@ -35,7 +31,7 @@ weight: 7
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
     <artifactId>dubbo-rpc-native-thrift</artifactId>
-    <version>1.0.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 

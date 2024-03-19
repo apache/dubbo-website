@@ -12,8 +12,8 @@ weight: 2
 
 
 ## 1 前置条件
-* 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
-* 安装并启动 [Zookeeper](https://zookeeper.apache.org/)
+* 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/starter/)
+* 安装并启动 [Zookeeper](/zh-cn/overview/reference/integrations/zookeeper/)
 
 ## 2 使用说明
 在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/configcenter/dubbo-samples-configcenter-annotation)
@@ -21,7 +21,7 @@ weight: 2
 ### 2.1 增加 Maven 依赖
 如果项目已经启用 Zookeeper 作为注册中心，则无需增加任何额外配置。
 
-如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](../../registry/zookeeper/#21-增加-maven-依赖)。
+如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-增加-maven-依赖)。
 
 ### 2.2 启用 Zookeeper 配置中心
 ```xml
@@ -49,10 +49,10 @@ ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-`address` 格式请参考 [zookeeper 注册中心 - 启用配置](../../registry/zookeeper/#22-配置并启用-zookeeper)
+`address` 格式请参考 [zookeeper 注册中心 - 启用配置](../../registry/zookeeper/#13-配置并启用-zookeeper)
 
 ## 3 高级配置
-如要开启认证鉴权，请参考 [zookeeper 注册中心 - 启用认证鉴权](../../registry/zookeeper/#31-认证与鉴权)
+如要开启认证鉴权，请参考 [zookeeper 注册中心 - 启用认证鉴权](../../registry/zookeeper/#21-认证与鉴权)
 
 ### 3.1 定制外部化配置 key
 **1. 启用外部化配置，并指定 key**
@@ -89,7 +89,7 @@ dubbo
 对配置中心而言，`group` 与 `namespace` 应该是全公司（集群）统一的，应该避免不同应用使用不同的值，外部化配置和治理规则也应该存放在对应的 group 与 namespace。
 
 ## 4 流量治理规则
-所有流量治理规则默认都存储在 `/dubbo/config` 节点下，具体节点结构图如下。流量治理规则的增删改建议通过 dubbo-admin 完成，更多内容可查看 Dubbo 支持的具体流量治理能力
+所有流量治理规则默认都存储在 `/dubbo/config` 节点下，具体节点结构图如下。流量治理规则的增删改建议通过 dubbo-control-plane（dubbo-admin） 完成，更多内容可查看 Dubbo 支持的具体流量治理能力
 
 ![zk-configcenter-governance](/imgs/user/zk-configcenter-governance.jpg)
 

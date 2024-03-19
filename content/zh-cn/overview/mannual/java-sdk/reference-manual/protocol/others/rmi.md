@@ -45,7 +45,7 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
     <artifactId>dubbo-rpc-rmi</artifactId>
-    <version>1.0.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 

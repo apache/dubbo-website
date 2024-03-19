@@ -24,7 +24,7 @@ MessagePack是一种计算机数据交换格式。它是一种二进制形式，
     <dependency>
       <groupId>org.apache.dubbo.extensions</groupId>
       <artifactId>dubbo-serialization-msgpack</artifactId>
-      <version>1.0.1</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
         <groupId>org.msgpack</groupId>
@@ -70,5 +70,3 @@ dubbo.reference.com.demo.DemoService.serialization=msgpack
         <!-- or -->
 <dubbo:reference interface="xxx" serialization="msgpack" />
 ```
-
-## 3 支持的rpc协议

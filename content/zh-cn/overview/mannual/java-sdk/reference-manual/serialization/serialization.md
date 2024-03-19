@@ -12,23 +12,24 @@ weight: 1
 ## 序列化
 以下是 Dubbo 框架支持的序列化协议列表，根据 `triple`、`dubbo` 通信协议进行分类。
 
-| <span style="display:inline-block;width:100px">RPC协议</span> | <span style="display:inline-block;width:100px">编程模式</span> | <span style="display:inline-block;width:100px">序列化协议</span> | <span style="display:inline-block;width:200px">配置方式</span> | 说明 |
-| --- | --- | --- | --- | --- |
-| **triple** | IDL | protobuf | 默认值 | 使用 IDL 时的默认序列化方式 |
-|  | IDL | json | serialization="json" | 使用 IDL时，也可以选择 protobuf-json 序列化 |
-|  | Java接口 | protobuf + 序列化 | serialization="hessian" | 这种模式下采用的是两次序列化模式，即数据先被 hessian 序列化，再由 protobuf 序列化。<br/><br/>为了支持与 IDL 同等的调用模型，易用性较好但性能略有下降 |
-| **dubbo** | Java接口 | hessian |  | dubbo 协议默认序列化方式，具备兼容性好、高性能、跨语言的优势(java、go、c/c++、php、python、.net) |
-|  | Java接口 | protostuff |  | A java serialization library with built-in support for forward-backward compatibility (schema evolution) and validation. |
-|  | Java接口 | gson |  | 谷歌推出的一款 json 序列化库 |
-|  | Java接口 | avro |  | 一款 Java 高性能序列化库 |
-|  | Java接口 | msgpack |  | 具备兼容性好，提供多语言（Java、C/C++、Python等）实现等优势|
-|  | Java接口 | kryo |  | Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。 |
-|  | Java接口 | fastjson2 |  | fastjson |
-|  | Java接口 | 更多扩展 |  | https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-serialization-extensions |
+| <span style="display:inline-block;width:100px">RPC协议</span> | <span style="display:inline-block;width:100px">编程模式</span> | <span style="display:inline-block;width:100px">序列化协议</span> | <span style="display:inline-block;width:200px">配置方式</span> | JDK版本 | 说明 |
+| --- | --- | --- | --- | --- | --- |
+| **triple** | IDL | protobuf <br/>protobuf-json | 默认值 | 8, 17, 21 | 使用 IDL 时的默认序列化方式，也可以选择 protobuf-json 序列化 |
+|  | Java接口 | protobuf wrapper | serialization="hessian" | 8, 17, 21 | 这种模式下采用的是两次序列化模式，即数据先被 hessian 序列化，再由 protobuf 序列化。<br/><br/>为了支持与 IDL 同等的调用模型，易用性较好但性能略有下降 |
+| **dubbo** | Java接口 | hessian | 默认值，serialization="hessian" | 8, 17, 21 | dubbo 协议默认序列化方式，具备兼容性好、高性能、跨语言的优势(java、go、c/c++、php、python、.net) |
+|  | Java接口 | protostuff | serialization="protostuff" | 8 | A java serialization library with built-in support for forward-backward compatibility (schema evolution) and validation. |
+|  | Java接口 | gson | serialization="gson" | 8, 17, 21 | 谷歌推出的一款 json 序列化库 |
+|  | Java接口 | avro | serialization="avro" | 8, 17, 21 | 一款 Java 高性能序列化库 |
+|  | Java接口 | msgpack | serialization="msgpack" | 8, 17, 21 | 具备兼容性好，提供多语言（Java、C/C++、Python等）实现等优势|
+|  | Java接口 | kryo | serialization="kryo" | 8, 17, 21 | Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。 |
+|  | Java接口 | fastjson2 | serialization="fastjson2" | 8, 17, 21 | fastjson |
+|  | Java接口 | 更多扩展|  |  | [dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-serialization-extensions) |
 
 ## 性能对比报告
 
 序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。
+
+具体请查看 [参考手册 - 性能基准报告](/zh-cn/overview/mannual/java-sdk/reference-manual/performance/)。
 
 ## 安全性
 
@@ -37,10 +38,10 @@ weight: 1
 ### 类检查机制
 Dubbo 中的类检查机制可以以类似黑白名单的形式来保证序列化安全。该机制保证服务提供方和服务消费方类之间的兼容性和安全，防止由于类版本不匹配、方法签名不兼容或缺少类而可能发生的潜在问题。
 
-{{% alert title="注意" color="info" %}}
+{{% alert title="注意" color="warning" %}}
 * Dubbo >= 3.1.6 引入此检查机制，对用户透明。
 * 目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用，其他的序列化方式暂不支持。
-* 3.1 版本中默认为 `WARN` 告警级别，3.2 版本中默认为 `STRICT` 严格检查级别，如您遇到问题可通过以下指引修改检查级别。
+* **3.1 版本中默认为 `WARN` 告警级别，3.2 版本中默认为 `STRICT` 严格检查级别，如您遇到问题可通过以下指引降低检查级别。**
 {{% /alert %}}
 
 
@@ -50,7 +51,7 @@ Dubbo 中的类检查机制可以以类似黑白名单的形式来保证序列�
 `WARN` 告警：仅禁止序列化所有在不允许序列化列表中（黑名单）的类，同时在反序列化不在允许序列化列表（白名单）中类的时候通过日志进行告警。
 `DISABLE` 禁用：不进行任何检查。
 
-3.1 版本中默认为 `WARN` 告警级别，3.2 版本中默认为 `STRICT` 严格检查级别。
+> 3.1 版本中默认为 `WARN` 告警级别，3.2 版本中默认为 `STRICT` 严格检查级别，如您遇到问题可通过以下指引降低检查级别。
 
 通过 ApplicationConfig 配置：
 ```java

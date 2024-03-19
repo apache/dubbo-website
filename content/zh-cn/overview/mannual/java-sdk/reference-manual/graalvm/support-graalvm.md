@@ -2,20 +2,22 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
-description: Dubbo 支持 GraalVM Native Image
+description: "Dubbo AOT 技术详解，如何使用 GraalVM Native Image 实现 Dubbo 应用静态化。"
 linkTitle: 支持 GraalVM Native Image
-title: 支持 Graal VM
+title: "Dubbo AOT -- 如何使用 GraalVM Native Image 实现 Dubbo 应用静态化"
 type: docs
 weight: 40
 ---
 
+在 Dubbo 3.3.0 版本中，我们正式发布了 Dubbo AOT 静态化解决方案。本文档将介绍将介绍如何借助 Dubbo AOT 技术将应用接入 GraalVM Native Image，将应用编译为 Native 二进制包的流程以及目前支持的组件。
 
-
-
-## 功能说明
-Dubbo3.2 支持 Native-Image 文档, 本文档将介绍将 dubbo3.x 项目接入 GraalVM Native Image，进行 native-image 编译为二进制的流程以及目前支持的组件。
+{{% alert title="Dubbo GraalVM 适配文档可能更新滞后" color="warning" %}}
+由于 Dubbo AOT 技术发展迅速，本文档内容可能无法总是保持及时更新，请结合以下内容了解最新内容与使用方式：
+* <a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry" target="_blank">示例项目源码</a>
+* <a href="/zh-cn/blog/2023/06/28/走向-native-化springdubbo-aot-技术示例与原理讲解/" target="_blank">博客文章与演讲</a>
 
 关于 GraalVm 的更多信息可以阅读 https://www.graalvm.org/docs/getting-started/container-images/ 此文档。
+{{% /alert %}}
 
 ## 使用场景
 - 本机映像编译：将应用程序预编译为本机映像，缩短启动时间并减少内存使用。

@@ -16,21 +16,6 @@ weight: 4
 ## 1 基本配置
 
 ### 1.1 增加依赖
-增加 dubbo、nacos-client 依赖：
-```xml
-<dependencies>
-    <dependency>
-        <groupId>org.apache.dubbo</groupId>
-        <artifactId>dubbo</artifactId>
-        <version>3.3.0-beta.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.alibaba.nacos</groupId>
-      <artifactId>nacos-client</artifactId>
-      <version>2.1.0</version>
-    </dependency>
-</dependencies>
-```
 
 对于 Spring Boot 应用，可以使用如下 spring-boot-starter：
 ```xml
@@ -46,16 +31,32 @@ weight: 4
 </dependency>
 ```
 
+非 Spring Boot 用户，可以自行增加 dubbo、nacos-client 依赖：
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.apache.dubbo</groupId>
+        <artifactId>dubbo</artifactId>
+        <version>3.3.0-beta.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.alibaba.nacos</groupId>
+      <artifactId>nacos-client</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+</dependencies>
+```
+
 ### 1.2 Nacos 版本
 Nacos 版本映射关系：
 | Dubbo | 推荐 Nacos 版本 | Nacos 兼容范围 |
 | --- | --- | --- |
-| 3.3.0 | 2.2.3 | 2.x |
+| 3.3.0 | 2.3.0 | 2.x |
 | 3.2.21 | 2.1.0 | 2.x |
 | 3.1.11 | 2.0.9 | 2.x |
 | 3.0.10 | 2.0.9 | 2.x |
-| 2.7.21 | 1.x | 1.x |
-| 2.6.0 | 1.x | 1.x |
+| 2.7.21 | 1.x最新版本 | 1.x |
+| 2.6.0 | 1.x最新版本 | 1.x |
 
 ### 1.3 配置并启用 Nacos
 

@@ -25,6 +25,29 @@ $ cd dubbo-samples/11-quickstart
 ````
 {{% /alert %}}
 
+## 本地启动应用
+接下来，让我们尝试在本地启动应用。运行以下命令启动应用：
+
+```shell
+./mvnw
+```
+
+{{% alert title="注意" color="warning" %}}
+由于配置文件中启用了注册中心，为了能够成功启动应用，您需要首先在本地启动 <a href="/zh-cn/overview/reference/integrations/nacos/" target="_blank_">Nacos</a> 或 <a href="/zh-cn/overview/reference/integrations/zookeeper/" target="_blank_">Zookeeper</a> 注册中心 server。
+{{% /alert %}}
+
+
+在应用启动成功后，本地进程使用 <a href="/zh-cn/overview/reference/protocols/triple/" target="_blank_">Triple </a>协议在指定端口发布了服务，可直接使用 cURL 测试服务是否已经正常运行：
+
+```shell
+curl \
+    --header "Content-Type: application/json" \
+    --data '["Dubbo"]' \
+    http://localhost:50051/com.example.demo.dubbo.api.DemoService/sayHello/
+```
+
+除了使用命令行之外，我们还可以在 IDE 中启动项目，调整示例或进行本地 debug。
+
 ## 源码解析
 将以上准备好的示例项目导入最喜欢的 IDE 开发工具（以 IntelliJ IDEA 为例），项目结构如下：
 
@@ -137,23 +160,6 @@ public class DemoApplication {
         SpringApplication.run(DemoApplication.class, args);
     }
 }
-```
-
-## 本地启动应用
-接下来，让我们尝试在本地启动应用。
-
-{{% alert title="注意" color="warning" %}}
-由于配置文件中启用了注册中心，为了能够成功启动应用，您需要首先在本地启动 <a href="https://nacos.io/zh-cn/docs/v2/quickstart/quick-start.html" target="_blank_">Nacos</a> 或 <a href="https://zookeeper.apache.org/doc/current/zookeeperStarted.html" target="_blank_">Zookeeper</a> 注册中心 server。
-{{% /alert %}}
-
-在应用启动成功后，本地进程使用 <a href="/zh-cn/overview/reference/protocols/triple/" target="_blank_">Triple </a>协议在指定端口发布了服务，可直接使用 cURL 测试服务是否已经正常运行：
-
-
-```shell
-curl \
-    --header "Content-Type: application/json" \
-    --data '["Dubbo"]' \
-    http://localhost:50051/com.example.demo.dubbo.api.DemoService/sayHello/
 ```
 
 ## 发布服务定义到远端仓库

@@ -12,15 +12,25 @@ weight: 5
 
 
 
-
-
-
 ## 前置条件
-* 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
+* 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/starter/)
 * 安装并启动 [Redis](http://redis.io) 服务
 
 ## 使用说明
 
+### 添加依赖
+
+从 Dubbo3 开始，redis 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/zh-cn/download/spi-extensions/#dubbo-registry)。
+
+```xml
+<dependency>
+    <groupId>org.apache.dubbo.extensions</groupId>
+    <artifactId>dubbo-registry-redis</artifactId>
+    <version>3.3.0</version>
+</dependency>
+```
+
+### 基本配置
 ```xml
 <dubbo:registry address="redis://10.20.153.10:6379" />
 ```
@@ -43,7 +53,7 @@ weight: 5
 <dubbo:registry protocol="redis" address="10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379" />
 ```
 
-## 选项
+### 其他配置项
 
 * 可通过 `<dubbo:registry group="dubbo" />` 设置 redis 中 key 的前缀，缺省为 `dubbo`。
 * 可通过 `<dubbo:registry cluster="replicate" />` 设置 redis 集群策略，缺省为 `failover`：

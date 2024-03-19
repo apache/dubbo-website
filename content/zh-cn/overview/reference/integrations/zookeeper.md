@@ -28,14 +28,14 @@ cd apache-zookeeper-3.8.3
 
 ```
 tickTime=2000
-dataDir=/var/lib/zookeeper
 clientPort=2181
+admin.enableServer=false
 ```
 
 以下是一些参数的详细解释：
 * tickTime : Zookeeper 用到的基本时间设置，tickTime 为心跳检测间隔， 2*tickTime 是最大 session 超时时间等（单位是毫秒 ms）。
-* dataDir : 存储内存数据库快照的磁盘路径
 * clientPort : 监听端口，客户端可通过这个端口方案 zookeeper server
+* admin.enableServer：运维端口，默认为 8080，建议关闭防止和 Spring Web 应用程序冲突
 
 接下来，可以以 standalone 模式启动 Zookeeper 了：
 
@@ -75,12 +75,12 @@ JLine support is enabled
 运行以下命令启动 zookeeper server：
 
 ```shell
-docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper:3.8.3
+docker run --name some-zookeeper -p 2181:2181 -e JVMFLAGS="-Dzookeeper.admin.enableServer=false" --restart always -d zookeeper:3.8.3
 ```
 
 如果你要指定 `/conf` 配置文件，可通过 mount 本地文件到 docker 容器：
 ```shell
-$ docker run --name some-zookeeper --restart always -d -v $(pwd)/zoo.cfg:/conf/zoo.cfg
+$ docker run --name some-zookeeper --restart always  -e JVMFLAGS="-Dzookeeper.admin.enableServer=false" -d -v $(pwd)/zoo.cfg:/conf/zoo.cfg
 ```
 
 ## kubernetes

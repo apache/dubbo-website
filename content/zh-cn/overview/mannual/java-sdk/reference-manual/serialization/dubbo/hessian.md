@@ -22,7 +22,7 @@ Hessian序列化是一种支持动态类型、跨语言、基于对象传输的�
 
 ## 2 使用方式
 
-> Dubbo < 3.2.0 版本中，默认使用 Hessian2 作为默认序列化
+在 Dubbo 框架中，当使用 dubbo 通信协议时，默认使用 Hessian2 作为序列化。
 
 ### 2.1 配置启用
 
@@ -55,4 +55,3 @@ dubbo.reference.com.demo.DemoService.serialization=hessian2
 <dubbo:reference interface="xxx" serialization="hessian2" />
 ```
 
-## 3 支持的rpc协议

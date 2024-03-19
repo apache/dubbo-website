@@ -38,7 +38,7 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
     <artifactId>dubbo-rpc-webservice</artifactId>
-    <version>1.0.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
