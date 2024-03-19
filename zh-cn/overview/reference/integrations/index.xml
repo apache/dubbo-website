@@ -115,14 +115,14 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> apache-zookeeper-3.8.3
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动-zookeeper">启动 Zookeeper&lt;/h4>
 &lt;p>在启动 zookeeper 之前，首先需要在根目录以下位置创建文件 &lt;code>conf/zoo.cfg&lt;/code>：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>tickTime&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">2000&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dataDir&lt;span style="color:#719e07">=/&lt;/span>&lt;span style="color:#719e07">var&lt;/span>&lt;span style="color:#719e07">/&lt;/span>lib&lt;span style="color:#719e07">/&lt;/span>zookeeper
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>clientPort&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>tickTime=2000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>clientPort=2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.enableServer=false
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下是一些参数的详细解释：&lt;/p>
 &lt;ul>
 &lt;li>tickTime : Zookeeper 用到的基本时间设置，tickTime 为心跳检测间隔， 2*tickTime 是最大 session 超时时间等（单位是毫秒 ms）。&lt;/li>
-&lt;li>dataDir : 存储内存数据库快照的磁盘路径&lt;/li>
 &lt;li>clientPort : 监听端口，客户端可通过这个端口方案 zookeeper server&lt;/li>
+&lt;li>admin.enableServer：运维端口，默认为 8080，建议关闭防止和 Spring Web 应用程序冲突&lt;/li>
 &lt;/ul>
 &lt;p>接下来，可以以 standalone 模式启动 Zookeeper 了：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>bin/zkServer.sh start
@@ -141,9 +141,9 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="docker">docker&lt;/h2>
 &lt;p>使用 docker 启动 zookeeper，请首先确保您已经在本地机器正确 &lt;a href="https://docs.docker.com/engine/install/" target="_blank">下载页面&lt;/a> 安装 docker&lt;/a>。&lt;/p>
 &lt;p>运行以下命令启动 zookeeper server：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper:3.8.3
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>docker run --name some-zookeeper -p 2181:2181 -e &lt;span style="color:#268bd2">JVMFLAGS&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;-Dzookeeper.admin.enableServer=false&amp;#34;&lt;/span> --restart always -d zookeeper:3.8.3
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果你要指定 &lt;code>/conf&lt;/code> 配置文件，可通过 mount 本地文件到 docker 容器：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ docker run --name some-zookeeper --restart always -d -v &lt;span style="color:#719e07">$(&lt;/span>&lt;span style="color:#b58900">pwd&lt;/span>&lt;span style="color:#719e07">)&lt;/span>/zoo.cfg:/conf/zoo.cfg
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ docker run --name some-zookeeper --restart always -e &lt;span style="color:#268bd2">JVMFLAGS&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;-Dzookeeper.admin.enableServer=false&amp;#34;&lt;/span> -d -v &lt;span style="color:#719e07">$(&lt;/span>&lt;span style="color:#b58900">pwd&lt;/span>&lt;span style="color:#719e07">)&lt;/span>/zoo.cfg:/conf/zoo.cfg
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="kubernetes">kubernetes&lt;/h2>
 &lt;p>您可以使用 Dubbo 社区提供的示例配置快速安装 Zookeeper 到 Kubernetes 集群。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/zookeeper.yaml
