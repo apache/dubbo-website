@@ -64,6 +64,3 @@ dubbo.reference.com.demo.DemoService.serialization=avro
 
 <!-- or -->
 <dubbo:reference interface="xxx" serialization="avro" />
-```
-
-## 3 支持的rpc协议

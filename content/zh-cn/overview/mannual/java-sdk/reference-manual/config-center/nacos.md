@@ -11,16 +11,17 @@ weight: 3
 ---
 
 ## 1 前置条件
-* 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
-* 安装并启动 [Nacos](https://nacos.io/zh-cn/docs/quick-start.html)
-> 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。
+* 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/starter/)
+* 安装并启动 [Nacos](/zh-cn/overview/reference/integrations/nacos/)
+
+> 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。请参考 [nacos 注册中心](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/nacos/#12-nacos-版本) 了解 nacos 版本适配情况。
 
 ## 2 使用说明
 
 ### 2.1 增加 Maven 依赖
 如果项目已经启用 Nacos 作为注册中心，则无需增加任何额外配置。
 
-如果未启用 Nacos 注册中心，则请参考 [为注册中心增加 Nacos 依赖](../../registry/nacos/#21-增加依赖)。
+如果未启用 Nacos 注册中心，则请参考 [为注册中心增加 Nacos 依赖](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/nacos/#11-增加依赖)。
 
 ### 2.2 启用 Nacos 配置中心
 ```xml

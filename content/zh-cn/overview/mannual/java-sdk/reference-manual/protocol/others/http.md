@@ -41,7 +41,7 @@ http短连接，协议标准化且易读，容易对接外部系统，适用于�
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
     <artifactId>dubbo-rpc-http</artifactId>
-    <version>1.0.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 

@@ -71,7 +71,7 @@ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUn
 ```shell
 curl \
     --header "Content-Type: application/json" \
-    --data '[{"name": "Dubbo"}]' \
+    --data '{"name":"Dubbo"}' \
     http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
 ```
 
@@ -90,7 +90,7 @@ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUn
 <dependency>
 	<groupId>org.apache.dubbo</groupId>
 	<artifactId>dubbo</artifactId>
-	<version>3.3.0-beta.1</version>
+	<version>${dubbo.version}</version>
 </dependency>
 <dependency>
 	<groupId>com.google.protobuf</groupId>
@@ -131,6 +131,10 @@ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUn
 	</executions>
 </plugin>
 ```
+
+{{% alert title="protoc 插件版本说明" color="warning" %}}
+
+{{% /alert %}}
 
 ### 服务定义
 使用 Protocol Buffers 定义 Greeter 服务
@@ -233,4 +237,54 @@ public class TriUnaryClient {
 	<artifactId>protobuf-java-util</artifactId>
 	<version>3.19.4</version>
 </dependency>
+```
+
+### 生成的代码无法编译
+在使用 Protobuf 时，请尽量保持 dubbo 核心库版本与 protoc 插件版本一致，并运行 `mvn clean compile` 重新生成代码。
+
+**1. 3.3.0 版本之后**
+
+3.3.0+ 版本开始使用 `dubbo-maven-plugin` 配置 protoc 插件，`dubbo-maven-plugin` 的版本必须保持和使用的内核 dubbo 版本一致：
+
+```xml
+<plugin>
+	<groupId>org.apache.dubbo</groupId>
+	<artifactId>dubbo-maven-plugin</artifactId>
+	<version>${dubbo.version}</version>
+	<configuration>
+
+	</configuration>
+</plugin>
+```
+
+**2. 3.3.0 版本之前**
+
+3.3.0 之前的版本使用 `protobuf-maven-plugin` 配置 protoc 插件，其中 `dubbo-compiler` 必须保持和使用的内核 dubbo 版本一致：
+
+```xml
+<plugin>
+	<groupId>org.xolstice.maven.plugins</groupId>
+	<artifactId>protobuf-maven-plugin</artifactId>
+	<version>0.6.1</version>
+	<configuration>
+		<protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
+		<outputDirectory>build/generated/source/proto/main/java</outputDirectory>
+		<protocPlugins>
+			<protocPlugin>
+				<id>dubbo</id>
+				<groupId>org.apache.dubbo</groupId>
+				<artifactId>dubbo-compiler</artifactId>
+				<version>${dubbo.version}</version>
+				<mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
+			</protocPlugin>
+		</protocPlugins>
+	</configuration>
+	<executions>
+		<execution>
+			<goals>
+				<goal>compile</goal>
+			</goals>
+		</execution>
+	</executions>
+</plugin>
 ```

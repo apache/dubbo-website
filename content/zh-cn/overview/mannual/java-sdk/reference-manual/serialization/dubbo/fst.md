@@ -26,7 +26,7 @@ FST序列化全称是Fast Serialization，它是对Java序列化的替换实现�
     <dependency>
       <groupId>org.apache.dubbo.extensions</groupId>
       <artifactId>dubbo-serialization-fst</artifactId>
-      <version>1.0.1</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
         <groupId>de.ruedigermoeller</groupId>
@@ -67,10 +67,7 @@ dubbo.reference.com.demo.DemoService.serialization=fst
 <dubbo:reference interface="xxx" serialization="fst" />
 ```
 
-## 3 支持的rpc协议
-
-
-## 4 注册被序列化类
+## 3 注册被序列化类
 
 要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，实现如下
 

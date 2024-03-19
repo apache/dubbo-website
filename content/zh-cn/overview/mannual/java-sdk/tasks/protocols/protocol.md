@@ -59,18 +59,17 @@ dubbo:
 即通过声明一个 Java 接口的方式定义服务，我们在快速开始一节中看到的示例即是这种模式，**适合于没有跨语言诉求的开发团队，具备学习成本低的优势，Dubbo2 老用户可以零成本切换协议**。
 
 服务定义范例：
+
 ```java
 public interface DemoService {
     String sayHello(String name);
 }
 ```
 
-这种模式下，序列化方式可以选用 Hessian、JSON、Kryo、JDK、自定义扩展等任意编码协议。在使用体验上，可以说与老版本 dubbo 协议没有任何区别，只需要改一个 protocol 配置项即可，因此对于 dubbo 协议迁移到 triple 也会更平滑。
-
-请通过【进阶学习 - 通信协议】查看 [java Interface + Triple 协议的具体使用示例]()。
+可以说只设置 `protocol="tri"` 就可以了，其他与老版本 dubbo 协议开发没有任何区别。请通过【进阶学习 - 通信协议】查看 [java Interface + Triple 协议的具体使用示例]()。
 
 #### 2. Protobuf(IDL)
-使用 Protobuf(IDL) 的方式定义服务，**适合于当前或未来有跨语言诉求的开发团队，同一份 IDL 服务可同时用于 Java/Go/Node.js 等多语言微服务开发，劣势是学习成本较高**。
+使用 Protobuf(IDL) 的方式定义服务，**适合于当前或未来有跨语言诉求的开发团队，同一份 IDL 服务可同时用于 Java/Go/Node.js 等多语言微服务开发，劣势是 protobuf 学习成本较高**。
 
 ```Protobuf
 syntax = "proto3";
@@ -102,7 +101,7 @@ public interface Greeter extends org.apache.dubbo.rpc.model.DubboStub {
 }
 ```
 
-Protobuf 模式支持序列化方式有 Protobuf Binary、Protobuf JSON 两种模式。最后，请通过【进阶学习 - 通信协议】查看 [Protobuf (IDL) + Triple 协议的具体使用示例]()。
+Protobuf 模式支持的序列化方式有 Protobuf、Protobuf-json 两种模式。请通过【进阶学习 - 通信协议】查看 [Protobuf (IDL) + Triple 协议的具体使用示例]()。
 
 #### 3. 我该使用哪种编程模式，如何选择？
 
@@ -111,7 +110,7 @@ Protobuf 模式支持序列化方式有 Protobuf Binary、Protobuf JSON 两种�
 | 公司的业务是否有用 Java 之外的其他语言，跨语言互通的场景是不是普遍？ | Protobuf | Java 接口 |
 | 公司里的开发人员是否熟悉 Protobuf，愿意接受 Protobuf 的额外成本吗？ | Protobuf | Java 接口 |
 | 是否有标准 gRPC 互通诉求？ | Protobuf | Java 接口 |
-| 是不是 Dubbo2 老用户，想平滑迁移到 triple 协议？ | Java 接口 | Protobuf |
+| 是不是 Dubbo2 老用户，想零改造迁移到 triple 协议？ | Java 接口 | Protobuf |
 
 ### HTTP 接入方式
 triple 协议支持标准 HTTP 工具的直接访问，因此前端组件如浏览器、网关等接入非常边便捷，同时服务测试也变得更简单。
@@ -126,51 +125,7 @@ curl \
 
 以上默认使用 `org.apache.dubbo.springboot.demo.idl.Greeter/greet` 这种 HTTP 访问路径，且仅支持 post 方法，如果你想对外发布 REST 风格服务，请参考下文 REST 协议小节。
 
-具体可参考[【使用教程 - 前端网关接入】](../../gateway/triple/)
-
-### Streaming 流式通信模式
-#### 流实现原理
-
-`Triple`协议的流模式
-
-- 从协议层来说，`Triple` 是建立在 `HTTP2` 基础上的，所以直接拥有所有 `HTTP2` 的能力，故拥有了分 `streaming` 和全双工的能力。
-
-- 框架层来说，`org.apache.dubbo.common.stream.StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
-
-#### 适用场景
-Streaming 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
-
-- 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
-- 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的
-- 推送类场景，多个消息在同一个调用的上下文中被发送和处理
-
-Stream 分为以下三种。
-
-##### SERVER_STREAM(服务端流)
-服务端流式 RPC 类似于 Unary RPC，不同之处在于服务端会响应客户端的请求并返回消息流。在发送完所有消息后（通常是多条消息），服务端会发送状态信息（状态代码和可选状态消息）和可选的尾部元数据给客户端，这写状态信息发送完后服务器端流就结束了。一旦客户端通过 StreamObserver 接收到了以上所有了服务器消息，流就完成了。
-
-<img alt="服务端流" style="max-width:800px;height:auto;" src="/imgs/v3/migration/tri/migrate-server-stream.png"/>
-
-##### CLIENT_STREAM(客户端流)
-客户端流式 RPC 类似于 Unary RPC，不同之处在于客户端向服务器发送消息流（通常包含多条消息）而不是单个消息。服务器以单个消息（以及其状态详细信息和可选的尾部元数据）进行响应 - 通常但不一定是在接收到所有客户端消息之后。
-
-<img alt="客户端流" style="max-width:800px;height:auto;" src="/imgs/v3/migration/tri/migrate-client-stream.png"/>
-
-##### BIDIRECTIONAL_STREAM(双向流)
-在双向流 RPC 中，客户端发起方法调用，服务端则接收客户端调用中的元数据、方法名称和截止日期，这样就启动了一次完整的双向流通道。服务器可以选择返回其初始元数据，或者等待客户端开始流式传输消息。
-
-客户端和服务器端的流处理是特定于应用程序的。由于这两个流是独立的，客户端和服务器可以按任何顺序读取和写入消息。例如，服务器可以等到收到客户端的所有消息后再写消息，或者服务器和客户端可以玩“乒乓球”——服务器收到一个请求，然后发回一个响应，然后客户端根据响应发送另一个请求等等。
-
-<img alt="双向流" style="max-width:800px;height:auto;" src="/imgs/v3/migration/tri/migrate-bi-stream.png"/>
-
-{{% alert title="流的语义保证" color="primary" %}}
-- 提供消息边界，可以方便地对消息单独处理
-- 严格有序，发送端的顺序和接收端顺序一致
-- 全双工，发送不需要等待
-- 支持取消和超时
-{{% /alert %}}
-
-关于 Streaming 的具体使用示例，请参见 [Streaming 流式通信](../triple/streaming/)。
+也可参考[【使用教程 - 前端网关接入】](../../gateway/triple/)
 
 ## Dubbo 协议
 ### 基本配置
@@ -251,6 +206,7 @@ public interface DemoService {
 关于 rest 协议的具体使用示例请参见【使用教程 - 通信协议】中的 [rest 协议示例](../rest/)
 
 ## 多协议发布
+### 多端口多协议
 多协议发布是指为同一个服务同时提供多种协议访问方式，多协议可以是任意两个或多个协议的组合，比如下面的配置将同时发布了 dubbo、triple 协议：
 
 ```yaml
@@ -290,7 +246,7 @@ dubbo:
  dubbo:
   protocol:
     name: dubbo
-    ext-protocols: tri
+    ext-protocol: tri
  ```
 
 ## 更多内容

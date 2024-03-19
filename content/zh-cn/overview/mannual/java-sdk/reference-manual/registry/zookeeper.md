@@ -22,19 +22,19 @@ weight: 3
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>${dubbo.version}</version>
 </dependency>
-<!-- 仅当 Zookeeper Server 版本是 3.4.x 及以下时，使用此依赖 -->
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-zookeeper-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
-</dependency>
-<!-- 仅当 Zookeeper Server 版本是 3.5.x 及以上时，使用此依赖
+<!-- 推荐 Zookeeper Server 3.8.0+ 版本 -->
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-zookeeper-curator5-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>${dubbo.version}</version>
+</dependency>
+<!-- 仅当 Zookeeper Server 版本是 3.4.x 及以下时，使用此依赖
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-zookeeper-spring-boot-starter</artifactId>
+    <version>${dubbo.version}</version>
 </dependency>
 -->
 ```
@@ -50,21 +50,21 @@ weight: 3
     <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo</artifactId>
-        <version>3.3.0-beta.1</version>
+        <version>${dubbo.version}</version>
     </dependency>
     <!-- This dependency helps to introduce Curator and Zookeeper dependencies that are necessary for Dubbo to work with zookeeper as transitive dependencies. -->
     <!-- 仅当 Zookeeper Server 版本是 3.4.x 及以下时，使用此依赖 -->
     <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo-dependencies-zookeeper</artifactId>
-        <version>3.3.0-beta.1</version>
+        <version>${dubbo.version}</version>
         <type>pom</type>
     </dependency>
     <!-- 仅当 Zookeeper Server 版本是 3.5.x 及以上时，使用此依赖
 	<dependency>
 		<groupId>org.apache.dubbo</groupId>
 		<artifactId>dubbo-dependencies-zookeeper-curator5</artifactId>
-		<version>3.3.0-beta.1</version>
+		<version>${dubbo.version}</version>
 		<type>pom</type>
 	</dependency>
 	-->
@@ -94,6 +94,7 @@ Dubbo 提供了 Zookeeper 依赖的辅助管理组件，开发者可根据当前
 
 {{% alert title="注意" color="info" %}}
 * Dubbo 3.3.0 版本开始正式支持 JDK 17，如果您使用 JDK 17，则必须选用 dubbo-dependencies-zookeeper-curator5 或 dubbo-zookeeper-curator5-spring-boot-starter 依赖，对应的 Zookeeper Server 推荐是 3.8.0 版本及以上。
+* 如果是自行管理 zookeeper 依赖，则须确保在项目中引入正确的 zookeeper、curator 版本依赖，可参考 Dubbo 3.3.0 版本中的 `dubbo-dependencies-zookeeper` 或 `dubbo-dependencies-zookeeper-curator5` 组件是如何实现的。
 {{% /alert %}}
 
 

@@ -24,7 +24,7 @@ Gson是Google公司发布的一个开放源代码的Java库，主要用途为序
     <dependency>
       <groupId>org.apache.dubbo.extensions</groupId>
       <artifactId>dubbo-serialization-gson</artifactId>
-      <version>1.0.1</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
         <groupId>com.google.code.gson</groupId>
@@ -65,4 +65,3 @@ dubbo.reference.com.demo.DemoService.serialization=gson
 <dubbo:reference interface="xxx" serialization="gson" />
 ```
 
-## 3 支持的rpc协议

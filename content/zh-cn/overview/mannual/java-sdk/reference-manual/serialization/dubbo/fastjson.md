@@ -24,7 +24,7 @@ Fastjson 是一个 Java 库，可用于将 Java 对象转换为其 JSON 表示�
     <dependency>
       <groupId>org.apache.dubbo.extensions</groupId>
       <artifactId>dubbo-serialization-fastjson</artifactId>
-      <version>1.0.1</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
         <groupId>com.alibaba</groupId>

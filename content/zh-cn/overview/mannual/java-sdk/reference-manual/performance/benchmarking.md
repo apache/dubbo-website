@@ -9,12 +9,6 @@ type: docs
 weight: 1
 ---
 
-
-
-
-
-
-
 ## 1 Benchmark 结论
 
 对比 2.x 版本，Dubbo3 版本

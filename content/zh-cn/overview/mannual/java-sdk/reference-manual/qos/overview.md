@@ -2,7 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/qos/overview/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/overview/
-description: dubbo 2.5.8 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
+description: "QoS 命令的设计目的、使用方法说明，包括如何开启、关闭 qos 命令等，支持 HTTP/Telnet 访问方式，"
 linkTitle: QOS 概述
 title: QOS 概述
 type: docs
@@ -140,8 +140,6 @@ dubbo.application.qos-anonymous-access-permission-level=PROTECTED
 来允许匿名访问更高级别的权限的命令。
 
 
-
-
 ```
 ➜  ~ curl "localhost:22222/ls?arg1=xxx&arg2=xxxx"
 As Provider side:
@@ -210,6 +208,4 @@ dubbo.application.qos-port=33333
 dubbo.application.qos-accept-foreign-ip=false
 dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
 dubbo.application.qos-anonymous-access-permission-level=NONE
-```
 
-## 命令列表

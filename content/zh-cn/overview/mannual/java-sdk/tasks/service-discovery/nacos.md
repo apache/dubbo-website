@@ -64,6 +64,7 @@ Nacos 版本映射关系：
 dubbo
  registry
    address: nacos://localhost:8848
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all，默认值为 all，未来版本将切换默认值为 instance
 ```
 或
 ```properties
@@ -91,6 +92,8 @@ dubbo
 ```properties
 # dubbo.properties
 dubbo.registry.address: nacos://nacos:nacos@localhost:8848
+# 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all，默认值为 all，未来版本将切换默认值为 instance
+dubbo.registry.register-mode=instance
 ```
 
 ### 2.2 自定义命名空间

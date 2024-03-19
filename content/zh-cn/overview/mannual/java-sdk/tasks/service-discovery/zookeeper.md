@@ -103,11 +103,14 @@ Dubbo 提供了 Zookeeper 依赖的辅助管理组件，开发者可根据当前
 dubbo
  registry
    address: zookeeper://localhost:2181
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all，默认值为 all，未来版本将切换默认值为 instance
 ```
 或
 ```properties
 # dubbo.properties
 dubbo.registry.address=zookeeper://localhost:2181
+# 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all，默认值为 all，未来版本将切换默认值为 instance
+dubbo.registry.register-mode=instance
 ```
 或
 ```xml

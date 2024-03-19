@@ -10,13 +10,9 @@ weight: 1
 ---
 
 
-
-
-
-
 元数据中心为 Dubbo 中的两类元数据提供了存取能力
-- 1 地址发现元数据
-- 2 服务运维元数据
+- 1 地址发现元数据，用于应用级服务发现
+- 2 服务运维元数据，用于外围运维系统如可视化控制台进行服务查询、测试等。
 
 ## 1 地址发现元数据
 Dubbo3 中引入了 [应用级服务发现机制](/zh-cn/overview/core-features/service-discovery/#面向百万实例集群的服务发现机制) 用来解决异构微服务体系互通与大规模集群实践的性能问题，应用级服务发现将全面取代 2.x 时代的接口级服务发现。
@@ -45,6 +41,8 @@ $ demo-provider,two-demo-provider,dubbo-demo-annotation-provider
 
 `接口级配置元数据`是作为地址发现的补充，相比于 Spring Cloud 等地址发现模型只能同步 ip、port 信息，Dubbo 的服务发现机制可以同步接口列表、接口定义、接口级参数配置等信息。
 这部分内容根据当前应用的自身信息、以及接口信息计算而来，并且从性能角度出发，还根据元数据生成 revision，以实现不同机器实例间的元数据聚合。
+
+> 可通过设置 `dubbo.metadata-report.report-metadata=false` 关闭元数据上报。
 
 以 Zookeeper 为例，接口配置元数据保存在以下位置，如果多个实例生成的 revision 相同，则最终会共享同一份元数据配置：
 
@@ -119,6 +117,8 @@ $ demo-provider,two-demo-provider,dubbo-demo-annotation-provider
 Dubbo 上报的服务运维元数据通常为各种运维系统所用，如服务测试、网关数据映射、服务静态依赖关系分析等。
 
 各种第三方系统可直接读取并使用这部分数据，具体对接方式可参见本章提及的几个第三方系统。
+
+> 可通过设置 `dubbo.metadata-report.report-definition=false` 关闭元数据上报。
 
 ### 2.1 Provider 上报的元数据
 provider端存储的元数据内容如下：

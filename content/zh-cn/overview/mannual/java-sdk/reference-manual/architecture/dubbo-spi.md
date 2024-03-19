@@ -9,32 +9,63 @@ type: docs
 weight: 0
 ---
 
-
-
-
-
-
 ## 1. Dubbo SPI 扩展简介
 
-SPI 全称为 Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件，加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过 SPI 机制为我们的程序提供拓展功能。SPI 机制在第三方框架中也有所应用，比如 Dubbo 就是通过 SPI 机制加载所有的组件。不过，Dubbo 并未使用 Java 原生的 SPI 机制，而是对其进行了增强，使其能够更好的满足需求。在 Dubbo 中，SPI 是一个非常重要的模块。基于 SPI，我们可以很容易的对 Dubbo 进行拓展。
-Dubbo 中，SPI 主要有两种用法，一种是加载固定的扩展类，另一种是加载自适应扩展类。这两种方式会在下面详细的介绍。
-需要特别注意的是: 在 Dubbo 中，基于 SPI 扩展加载的类是单例的。
+Dubbo 中的扩展机制与 <a href="https://www.baeldung.com/java-spi" target="_blank">JDK 标准的 SPI 扩展点</a> 原理类似。Dubbo 对其做了一定的改造与加强：
 
-### 1.1 加载固定的扩展类
+* JDK 标准的 SPI 会一次性实例化扩展点所有实现，如果有扩展实现初始化很耗时，但如果没用上也加载，会很浪费资源。
+* 如果扩展点加载失败，JDK SPI 没给出详细信息，不方便定位问题，Dubbo SPI 在失败时记录真正的失败原因，并打印出来
+* 增加 [IOC](#23-ioc-机制)、[AOP](#24-aop-机制) 能力
+* 增加排序能力
+* 增加条件激活能力
+* 提供了一系列更灵活的 API，如[获取所有 SPI 扩展实现](./#21-按名称获取指定扩展类)、[根据名称查询某个扩展实现](./#211-获取所有拓展类)、根据类型查询扩展实现、查询匹配条件的扩展实现等。
 
-如果让你来设计加载固定扩展类，你会怎么做了？
-一种常见思路是读取特定目录下的配置文件，然后解析出全类名，通过反射机制来实例化这个类，然后将这个类放在集合中存起来，如果有需要的时候，直接从集合中取。Dubbo 中的实现也是这么一个思路。
-不过在 Dubbo 中，实现的更加完善，它实现了 IOC 和 AOP 的功能。IOC 就是说如果这个扩展类依赖其他属性，Dubbo 会自动的将这个属性进行注入。这个功能如何实现了？一个常见思路是获取这个扩展类的 setter
- 方法，调用 setter 方法进行属性注入。AOP 指的是什么了？这个说的是 Dubbo 能够为扩展类注入其包装类。比如 DubboProtocol 是 Protocol 的扩展类，ProtocolListenerWrapper 是 DubboProtocol 的包装类。
+### 1.1 SPI定义
 
-### 1.2 加载自适应扩展类
+Dubbo 中的 SPI 插件是标准的 Java Interface 定义，并且必须包含 `@org.apache.dubbo.common.extension.SPI` 注解：
 
-先说明下自适应扩展类的使用场景。比如我们有需求，在调用某一个方法时，基于参数选择调用到不同的实现类。和工厂方法有些类似，基于不同的参数，构造出不同的实例对象。
-在 Dubbo 中实现的思路和这个差不多，不过 Dubbo 的实现更加灵活，它的实现和策略模式有些类似。每一种扩展类相当于一种策略，基于 URL 消息总线，将参数传递给 ExtensionLoader，通过 ExtensionLoader 基于参数加载对应的扩展类，实现运行时动态调用到目标实例上。
+```java
+@SPI(value = "dubbo", scope = ExtensionScope.FRAMEWORK)
+public interface Protocol {
+	// ...
+}
+```
+
+`@SPI` 注解的定义如下：
+
+```java
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface SPI {
+    /**
+     * default extension name
+     */
+    String value() default "";
+
+    /**
+     * scope of SPI, default value is application scope.
+     */
+    ExtensionScope scope() default ExtensionScope.APPLICATION;
+}
+```
+
+### 1.2 SPI加载流程
+
+Dubbo 加载扩展的整个流程如下：
+
+![//imgs/v3/concepts/extension-load.png](/imgs/v3/concepts/extension-load.png)
+
+主要步骤为 4 个：
+* 读取并解析配置文件
+* 缓存所有扩展实现
+* 基于用户执行的扩展名，实例化对应的扩展实现
+* 进行扩展实例属性的 IOC 注入以及实例化扩展的包装类，实现 AOP 特性
+
 
 ## 2. Dubbo SPI 源码分析
 
-### 2.1 加载固定的扩展类
+### 2.1 按名称获取指定扩展类
 
 Dubbo 中，SPI 加载固定扩展类的入口是 ExtensionLoader 的 getExtension 方法，下面我们对拓展类对象的获取过程进行详细的分析。
 
@@ -135,7 +166,7 @@ createExtension 方法的逻辑稍复杂一下，包含了如下的步骤：
 
 以上步骤中，第一个步骤是加载拓展类的关键，第三和第四个步骤是 Dubbo IOC 与 AOP 的具体实现。在接下来的章节中，将会重点分析 getExtensionClasses 方法的逻辑，以及简单介绍 Dubbo IOC 的具体实现。
 
-#### 2.1.1 获取所有的拓展类
+#### 2.1.1 获取所有拓展类
 
 我们在通过名称获取拓展类之前，首先需要根据配置文件解析出拓展项名称到拓展类的映射关系表（Map\<名称, 拓展类\>），之后再根据拓展项名称从映射关系表中取出相应的拓展类即可。相关过程的代码分析如下：
 
@@ -313,80 +344,14 @@ private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL reso
 
 如上，loadClass 方法操作了不同的缓存，比如 cachedAdaptiveClass、cachedWrapperClasses 和 cachedNames 等等。除此之外，该方法没有其他什么逻辑了。
 
-到此，关于缓存类加载的过程就分析完了。整个过程没什么特别复杂的地方，大家按部就班的分析即可，不懂的地方可以调试一下。接下来，我们来聊聊 Dubbo IOC 方面的内容。
-
-#### 2.1.2 Dubbo IOC
-
-Dubbo IOC 是通过 setter 方法注入依赖。Dubbo 首先会通过反射获取到实例的所有方法，然后再遍历方法列表，检测方法名是否具有 setter 方法特征。若有，则通过 ObjectFactory 获取依赖对象，最后通过反射调用 setter 方法将依赖设置到目标对象中。整个过程对应的代码如下：
-
-```java
-private T injectExtension(T instance) {
-
-    if (objectFactory == null) {
-        return instance;
-    }
-
-    try {
-        // 遍历目标类的所有方法
-        for (Method method : instance.getClass().getMethods()) {
-            // 检测方法是否以 set 开头，且方法仅有一个参数，且方法访问级别为 public
-            if (!isSetter(method)) {
-                continue;
-            }
-            /**
-             * 检测是否有 DisableInject 注解修饰.
-             */
-            if (method.getAnnotation(DisableInject.class) != null) {
-                continue;
-            }
-            
-            /**
-             * 检测是否实现了ScopeModelAware、ExtensionAccessorAware类，如果实现则不注入
-             */
-            if (method.getDeclaringClass() == ScopeModelAware.class) {
-                    continue;
-            }
-            if (instance instanceof ScopeModelAware || instance instanceof ExtensionAccessorAware) {
-                if (ignoredInjectMethodsDesc.contains(ReflectUtils.getDesc(method))) {
-                    continue;
-                }
-            }
-            
-            // 基本类型不注入
-            Class<?> pt = method.getParameterTypes()[0];
-            if (ReflectUtils.isPrimitives(pt)) {
-                continue;
-            }
-
-            try {
-                // 获取属性名，比如 setName 方法对应属性名 name
-                String property = getSetterProperty(method);
-                // 从 ObjectFactory 中获取依赖对象
-                Object object = objectFactory.getExtension(pt, property);
-                if (object != null) {
-                    // 注入
-                    method.invoke(instance, object);
-                }
-            } catch (Exception e) {
-                logger.error("Failed to inject via method " + method.getName()
-                        + " of interface " + type.getName() + ": " + e.getMessage(), e);
-            }
-
-        }
-    } catch (Exception e) {
-        logger.error(e.getMessage(), e);
-    }
-    return instance;
-}
-```
-
-在上面代码中，objectFactory 变量的类型为 AdaptiveExtensionFactory，AdaptiveExtensionFactory 内部维护了一个 ExtensionFactory 列表，用于存储其他类型的 ExtensionFactory。Dubbo 目前提供了两种 ExtensionFactory，分别是 SpiExtensionFactory 和 SpringExtensionFactory。前者用于创建自适应的拓展，后者是用于从 Spring 的 IOC 容器中获取所需的拓展。这两个类的类的代码不是很复杂，这里就不一一分析了。
-
-Dubbo IOC 目前仅支持 setter 方式注入，总的来说，逻辑比较简单易懂。
+到此，关于缓存类加载的过程就分析完了。整个过程没什么特别复杂的地方，大家按部就班的分析即可，不懂的地方可以调试一下。
 
 ### 2.2 加载自适应扩展类
 
+先说明下自适应扩展类的使用场景。比如我们有需求，在调用某一个方法时，基于参数选择调用到不同的实现类，这和工厂方法有些类似，基于不同的参数，构造出不同的实例对象。在 Dubbo 中实现的思路和这个差不多，不过 Dubbo 的实现更加灵活，它的实现和策略模式有些类似。每一种扩展类相当于一种策略，基于 URL 消息总线，将参数传递给 ExtensionLoader，通过 ExtensionLoader 基于参数加载对应的扩展类，实现运行时动态调用到目标实例上。
+
 自适应扩展类的含义是说，基于参数，在运行时动态选择到具体的目标类，然后执行。
+
 在 Dubbo 中，很多拓展都是通过 SPI 机制进行加载的，比如 Protocol、Cluster、LoadBalance 等。有时，有些拓展并不想在框架启动阶段被加载，而是希望在拓展方法被调用时，根据运行时参数进行加载。这听起来有些矛盾。拓展未被加载，那么拓展方法就无法被调用（静态方法除外）。拓展方法未被调用，拓展就无法被加载。对于这个矛盾的问题，Dubbo 通过自适应拓展机制很好的解决了。自适应拓展机制的实现逻辑比较复杂，首先 Dubbo 会为拓展接口生成具有代理功能的代码。然后通过 javassist 或 jdk 编译这段代码，得到 Class 类。最后再通过反射创建代理类，整个过程比较复杂。
 
 加载自适应扩展类的入口是 ExtensionLoader 的 getAdaptiveExtension 方法。
@@ -614,6 +579,241 @@ public class HasAdaptiveExt$Adaptive implements org.apache.dubbo.common.extensio
 
 ```
 
+### 2.3 IOC 机制
+
+Dubbo IOC 是通过 setter 方法注入依赖。Dubbo 首先会通过反射获取到实例的所有方法，然后再遍历方法列表，检测方法名是否具有 setter 方法特征。若有，则通过 ObjectFactory 获取依赖对象，最后通过反射调用 setter 方法将依赖设置到目标对象中。整个过程对应的代码如下：
+
+```java
+private T injectExtension(T instance) {
+
+    if (objectFactory == null) {
+        return instance;
+    }
+
+    try {
+        // 遍历目标类的所有方法
+        for (Method method : instance.getClass().getMethods()) {
+            // 检测方法是否以 set 开头，且方法仅有一个参数，且方法访问级别为 public
+            if (!isSetter(method)) {
+                continue;
+            }
+            /**
+             * 检测是否有 DisableInject 注解修饰.
+             */
+            if (method.getAnnotation(DisableInject.class) != null) {
+                continue;
+            }
+
+            /**
+             * 检测是否实现了ScopeModelAware、ExtensionAccessorAware类，如果实现则不注入
+             */
+            if (method.getDeclaringClass() == ScopeModelAware.class) {
+                    continue;
+            }
+            if (instance instanceof ScopeModelAware || instance instanceof ExtensionAccessorAware) {
+                if (ignoredInjectMethodsDesc.contains(ReflectUtils.getDesc(method))) {
+                    continue;
+                }
+            }
+
+            // 基本类型不注入
+            Class<?> pt = method.getParameterTypes()[0];
+            if (ReflectUtils.isPrimitives(pt)) {
+                continue;
+            }
+
+            try {
+                // 获取属性名，比如 setName 方法对应属性名 name
+                String property = getSetterProperty(method);
+                // 从 ObjectFactory 中获取依赖对象
+                Object object = objectFactory.getExtension(pt, property);
+                if (object != null) {
+                    // 注入
+                    method.invoke(instance, object);
+                }
+            } catch (Exception e) {
+                logger.error("Failed to inject via method " + method.getName()
+                        + " of interface " + type.getName() + ": " + e.getMessage(), e);
+            }
+
+        }
+    } catch (Exception e) {
+        logger.error(e.getMessage(), e);
+    }
+    return instance;
+}
+```
+
+在上面代码中，objectFactory 变量的类型为 AdaptiveExtensionFactory，AdaptiveExtensionFactory 内部维护了一个 ExtensionFactory 列表，用于存储其他类型的 ExtensionFactory。Dubbo 目前提供了两种 ExtensionFactory，分别是 SpiExtensionFactory 和 SpringExtensionFactory。前者用于创建自适应的拓展，后者是用于从 Spring 的 IOC 容器中获取所需的拓展。这两个类的类的代码不是很复杂，这里就不一一分析了。
+
+Dubbo IOC 目前仅支持 setter 方式注入，总的来说，逻辑比较简单易懂。
+
+### 2.4 AOP 机制
+
+Dubbo AOP 机制采用 wrapper 设计模式实现，要成为一个 AOP wrapper 类，必须同时满足以下几个条件：
+1. wrapper 类必须实现 SPI 接口，如以下示例中的 `class QosProtocolWrapper implements Protocol`
+2. 构造器 constructor 必须包含一个相同的 SPI 参数，如以下示例中 `QosProtocolWrapper(Protocol protocol)`
+3. wrapper 类必须和普通的 SPI 实现一样写入配置文件，如以下示例 `resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol`
+
+```java
+public class QosProtocolWrapper implements Protocol, ScopeModelAware {
+    private final Protocol protocol;
+    public QosProtocolWrapper(Protocol protocol) {
+        if (protocol == null) {
+            throw new IllegalArgumentException("protocol == null");
+        }
+        this.protocol = protocol;
+    }
+}
+```
+
+写入配置文件 `resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol`：
+
+```properties
+qos=org.apache.dubbo.qos.protocol.QosProtocolWrapper
+```
+
+在通过 `getExtension(name)` 尝试获取并加载 SPI 扩展实例时，Dubbo 框架会判断所有满足以上 3 个条件的 wrapper 类实现，并将 wrapper 类按顺序包在实例外面，从而达到 AOP 拦截的效果。
+
+以下是 wrapper 判断与加载的实现逻辑，你还可以使用 @Wrapper 注解来控制 wrapper 类的激活条件：
+
+```java
+private T createExtension(String name, boolean wrap) {
+	Class<?> clazz = getExtensionClasses().get(name);
+	T instance = (T) extensionInstances.get(clazz);
+	// ...
+	if (wrap) { // 如果调用方告知需要 AOP，即 wrap=true
+		List<Class<?>> wrapperClassesList = new ArrayList<>();
+		if (cachedWrapperClasses != null) {
+			wrapperClassesList.addAll(cachedWrapperClasses);
+			wrapperClassesList.sort(WrapperComparator.COMPARATOR);
+			Collections.reverse(wrapperClassesList);
+		}
+
+		if (CollectionUtils.isNotEmpty(wrapperClassesList)) {
+			for (Class<?> wrapperClass : wrapperClassesList) {
+			    // 通过 @Wrapper 注解判断当前 wrapper 类是否要生效
+				Wrapper wrapper = wrapperClass.getAnnotation(Wrapper.class);
+				boolean match = (wrapper == null)
+						|| ((ArrayUtils.isEmpty(wrapper.matches())
+										|| ArrayUtils.contains(wrapper.matches(), name))
+								&& !ArrayUtils.contains(wrapper.mismatches(), name));
+				if (match) {
+					instance = injectExtension(
+							(T) wrapperClass.getConstructor(type).newInstance(instance));
+					instance = postProcessAfterInitialization(instance, name);
+				}
+			}
+		}
+	}
+}
+```
+
+### 2.5 Activate激活条件
+
+可以使用 `@org.apache.dubbo.common.extension.Activate` 来控制 SPI 扩展实现在什么场景下加载生效。相比于任何场景下都生效，能精确的控制扩展实现的生效条件会让实现变得更灵活。
+
+以下是一些使用场景示例：
+
+```java
+// 不加 @Activate 注解，getActivateExtension() 时不会加载，其他 getExtension() 方法仍可正常加载
+public class MetricsProviderFilter implements Filter{}
+```
+
+```java
+// 不加任何参数，表示在 getActivateExtension() 时无条件自动返回
+@Activate
+public class MetricsProviderFilter implements Filter{}
+```
+
+```java
+// group 支持 consumer、provider 两个固定值，getActivateExtension() 调用加载扩展点时自动过滤
+// provider 表示在提供者端会被加载；consumer 表示在消费者端会被加载
+@Activate(group="provider")
+public class MetricsProviderFilter implements Filter{}
+```
+
+```java
+// URL 参数中有 cache 这个 key 时，调用 getActivateExtension() 才会加载
+@Activate(value="cache")
+public class MetricsProviderFilter implements Filter{}
+```
+
+```java
+// URL 参数中有 cache 这个 key 并且值为 test 时，调用 getActivateExtension() 才会加载
+@Activate(value="cache:test")
+public class MetricsProviderFilter implements Filter{}
+```
+
+以下是 `@Activate` 注解的具体定义：
+
+```java
+/**
+ * Activate. This annotation is useful for automatically activate certain extensions with the given criteria,
+ * for examples: <code>@Activate</code> can be used to load certain <code>Filter</code> extension when there are
+ * multiple implementations.
+ * <ol>
+ * <li>{@link Activate#group()} specifies group criteria. Framework SPI defines the valid group values.
+ * <li>{@link Activate#value()} specifies parameter key in {@link URL} criteria.
+ * </ol>
+ * SPI provider can call {@link ExtensionLoader#getActivateExtension(URL, String, String)} to find out all activated
+ * extensions with the given criteria.
+ *
+ */
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface Activate {
+    /**
+     * Activate the current extension when one of the groups matches. The group passed into
+     * {@link ExtensionLoader#getActivateExtension(URL, String, String)} will be used for matching.
+     *
+     * @return group names to match
+     * @see ExtensionLoader#getActivateExtension(URL, String, String)
+     */
+    String[] group() default {};
+
+    /**
+     * Activate the current extension when the specified keys appear in the URL's parameters.
+     * <p>
+     * For example, given <code>@Activate("cache, validation")</code>, the current extension will be return only when
+     * there's either <code>cache</code> or <code>validation</code> key appeared in the URL's parameters.
+     * </p>
+     *
+     * @return URL parameter keys
+     * @see ExtensionLoader#getActivateExtension(URL, String)
+     * @see ExtensionLoader#getActivateExtension(URL, String, String)
+     */
+    String[] value() default {};
+
+    /**
+     * Absolute ordering info, optional
+     *
+     * Ascending order, smaller values will be in the front o the list.
+     *
+     * @return absolute ordering info
+     */
+    int order() default 0;
+
+    /**
+     * Activate loadClass when the current extension when the specified className all match
+     * @return className names to all match
+     */
+    String[] onClass() default {};
+}
+```
+
+### 2.6 扩展点排序
+
+排序同样使用 `@Activate` 注解设置，以下是使用示例，`order` 值越小加载优先级越高。
+
+```java
+@Activate(order=100)
+public class FilterImpl1 implements Filter{}
+
+@Activate(order=200)
+public class FilterImpl2 implements Filter{}
+```
 
 ## 3. Dubbo SPI 扩展示例
 

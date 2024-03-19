@@ -7,7 +7,7 @@ linkTitle: Filter
 no_list: true
 title: Filter
 type: docs
-weight: 1
+weight: 2
 ---
 
 在 [RPC框架 - Filter请求拦截](../../framework/filter/) 一节中，我们了解了 Filter 的工作机制，以及 Dubbo 框架提供的一些内置 Filter 实现。在本文中，我们来了解如何扩展自定义的过滤器实现：一个可以对返回的结果进行统一的处理、验证等统一 Filter 处理器，减少对开发人员的打扰。
