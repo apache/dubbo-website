@@ -64,37 +64,46 @@ IDL 格式的服务依赖 Protobuf 编译器，用来生成可以被用户调用
 
 Java compiler 配置参考：
 ```xml
-<plugin>
-    <groupId>org.xolstice.maven.plugins</groupId>
-    <artifactId>protobuf-maven-plugin</artifactId>
-    <version>0.6.1</version>
-    <configuration>
-        <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
-        </protocArtifact>
-        <pluginId>grpc-java</pluginId>
-        <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
-        </pluginArtifact>
-        <protocPlugins>
-            <protocPlugin>
-                <id>dubbo</id>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo-compiler</artifactId>
-                <version>3.0.10</version>
-                <mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
-            </protocPlugin>
-        </protocPlugins>
-    </configuration>
-    <executions>
-        <execution>
-            <goals>
-                <goal>compile</goal>
-                <goal>test-compile</goal>
-                <goal>compile-custom</goal>
-                <goal>test-compile-custom</goal>
-            </goals>
-        </execution>
-    </executions>
-</plugin>
+<build>
+    <extensions>
+        <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.7.0</version>
+        </extension>
+    </extensions>
+    <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.6.1</version>
+        <configuration>
+            <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
+            </protocArtifact>
+            <pluginId>grpc-java</pluginId>
+            <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
+            </pluginArtifact>
+            <protocPlugins>
+                <protocPlugin>
+                    <id>dubbo</id>
+                    <groupId>org.apache.dubbo</groupId>
+                    <artifactId>dubbo-compiler</artifactId>
+                    <version>3.2.11</version>
+                    <mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
+                </protocPlugin>
+            </protocPlugins>
+        </configuration>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>compile</goal>
+                    <goal>test-compile</goal>
+                    <goal>compile-custom</goal>
+                    <goal>test-compile-custom</goal>
+                </goals>
+            </execution>
+        </executions>
+    </plugin>
+</build>
 ```
 
 Java 语言生成的 stub 如下，核心是一个接口定义
