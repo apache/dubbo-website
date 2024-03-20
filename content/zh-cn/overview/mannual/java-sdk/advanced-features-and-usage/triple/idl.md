@@ -72,37 +72,39 @@ Java compiler 配置参考：
         <version>1.7.0</version>
         </extension>
     </extensions>
-    <plugin>
-        <groupId>org.xolstice.maven.plugins</groupId>
-        <artifactId>protobuf-maven-plugin</artifactId>
-        <version>0.6.1</version>
-        <configuration>
-            <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
-            </protocArtifact>
-            <pluginId>grpc-java</pluginId>
-            <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
-            </pluginArtifact>
-            <protocPlugins>
-                <protocPlugin>
-                    <id>dubbo</id>
-                    <groupId>org.apache.dubbo</groupId>
-                    <artifactId>dubbo-compiler</artifactId>
-                    <version>3.2.11</version>
-                    <mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
-                </protocPlugin>
-            </protocPlugins>
-        </configuration>
-        <executions>
-            <execution>
-                <goals>
-                    <goal>compile</goal>
-                    <goal>test-compile</goal>
-                    <goal>compile-custom</goal>
-                    <goal>test-compile-custom</goal>
-                </goals>
-            </execution>
-        </executions>
-    </plugin>
+    <plugins>
+        <plugin>
+            <groupId>org.xolstice.maven.plugins</groupId>
+            <artifactId>protobuf-maven-plugin</artifactId>
+            <version>0.6.1</version>
+            <configuration>
+                <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
+                </protocArtifact>
+                <pluginId>grpc-java</pluginId>
+                <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
+                </pluginArtifact>
+                <protocPlugins>
+                    <protocPlugin>
+                        <id>dubbo</id>
+                        <groupId>org.apache.dubbo</groupId>
+                        <artifactId>dubbo-compiler</artifactId>
+                        <version>3.2.11</version>
+                        <mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
+                    </protocPlugin>
+                </protocPlugins>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>compile</goal>
+                        <goal>test-compile</goal>
+                        <goal>compile-custom</goal>
+                        <goal>test-compile-custom</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
 </build>
 ```
 
