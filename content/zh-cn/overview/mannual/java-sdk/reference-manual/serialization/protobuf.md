@@ -18,7 +18,16 @@ Protocol Buffers是一种开源跨平台的序列化数据结构的协议。其�
 
 ## 2 使用方式
 
-### 2.1 配置启用
+### 2.1 引入依赖
+```xml
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-serialization-protobuf</artifactId>
+    <version>2.7.23</version>
+</dependency>
+```
+
+### 2.2 配置启用
 
 
 ```yaml
