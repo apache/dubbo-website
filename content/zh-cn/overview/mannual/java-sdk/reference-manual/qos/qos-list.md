@@ -35,7 +35,7 @@ weight: 2
 | onlineApp | 将一个或多个服务注册到注册中心（仅应用级） | onlineApp <br/><br/> onlineApp org.demo.DemoService | http://localhost:22222/onlineApp?service=org.demo.DemoService |
 | onlineInterface | 将一个或多个服务注册到注册中心（仅接口级） | onlineInterface <br/><br/> onlineInterface org.demo.DemoService | http://localhost:22222/onlineInterface?service=org.demo.DemoService |
 | ps | 查看当前进程信息，包括监听的端口等 | ps | http://localhost:22222/ps |
-| publishMetadata | 发布或更新当前应用Metadata数据（可用于手动更新应用级服务发现元数据）。publishMetadata 10 表示延迟 10s 发布。在3.3.0之前版本的命令为 publish-metadata | publishMetadata </> publishMetadata 10 | http://localhost:22222/publishMetadata |
+| publishMetadata | 发布或更新当前应用Metadata数据（可用于手动更新应用级服务发现元数据）。publishMetadata 10 表示延迟 10s 发布。在3.3.0之前版本的命令为 publish-metadata | publishMetadata <br/><br/> publishMetadata 10 | http://localhost:22222/publishMetadata |
 | pwd | 查看当前服务上下文，与 cd 配合使用 | pwd | http://localhost:22222/pwd |
 | quit | 退出当前 telnet 命令 | quit | 无 |
 | ready | 检查当前进程/服务是否准备就绪对外服务，可配置为 kubernetes readiness | ready | http://localhost:22222/ready |

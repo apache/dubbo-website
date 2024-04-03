@@ -16,14 +16,15 @@ weight: 5
 * 从消费方到提供方，也就是在请求发起时，在方法参数之外通过 attachment 传递附加参数。
 * 从提供方到消费方，也就是在响应结果返回时，在响应结果之外通过 attachment 传递附加参数。
 
-**理解隐式参数传递的最直接方式 http header，它的工作方式与 http header 完全一致，在 GET 或 POST 请求体之外可以传递任意多个 header 参数**。但需要注意的是，对于不同的协议，attachment 的实现方式略有不同：
+**理解隐式参数传递的最直接方式 http header，它的工作方式与 http header 完全一致，在 GET 或 POST 请求体之外可以传递任意多个 header 参数**。在实现原理上，对于不同的协议，attachment 的实现方式略有不同：
 * 对于 triple 协议，attachment 会转换为标准的 http header 进行传输。
 * 对于 dubbo 协议，attachment 是编码在协议体的固定位置进行传输，具体请参见 dubbo 协议规范。
 
 ![/user-guide/images/context.png](/imgs/user/context.png)
 
 {{% alert title="注意" color="primary" %}}
-path, group, version, dubbo, token, timeout 几个 key 是保留字段，传递 attachment 时请请使用其它值，尽量通过业务前缀等确保 key 的唯一性。
+* 在使用 triple 协议时，由于 http header 的限制，仅支持小写的 ascii 字符
+* path, group, version, dubbo, token, timeout 一些 key 是保留字段，传递 attachment 时应避免使用，尽量通过业务前缀等确保 key 的唯一性。
 {{% /alert %}}
 
 ## 消费端隐式参数

@@ -5,9 +5,9 @@ aliases:
     - /zh-cn/overview/tasks/rate-limit/hystrix/
 description: "使用 Hystrix 对 Dubbo 服务进行熔断限流保护"
 linkTitle: 待整合-Hystrix 熔断降级
-title: Hystrix 熔断降级
-type: docs
-weight: 2
+title: 使用 Hystrix 对 Dubbo 服务进行熔断限流保护
+tags: ["Java", "Hystrix", "限流降级"]
+date: 2023-12-14
 ---
 
 ## 背景
@@ -164,11 +164,25 @@ public class HystrixCommandAspect {
    ```
 可见`spring-cloud-starter-netflix-hystrix`实际上也是创建了`HystrixCommandAspect`来集成Hystrix。
 另外`spring-cloud-starter-netflix-hystrix`里还有metrics, health, dashboard等集成。
+
 ## 总结
 - 对于dubbo provider的`@Service`是一个spring bean，直接在上面配置`@HystrixCommand`即可
 - 对于dubbo consumer的`@Reference`，可以通过加一层简单的spring method包装，配置`@HystrixCommand`即可
 - Hystrix本身提供`HystrixCommandAspect`来集成Spring AOP，配置了`@HystrixCommand`和`@HystrixCollapser`的spring method都会被Hystrix处理
-## 链接
+
+### Sentinel 与 Hystrix 的比较
+
+目前业界常用的熔断降级/隔离的库是 Netflix 的 [Hystrix](https://github.com/Netflix/Hystrix)，那么 Sentinel 与 Hystrix 有什么异同呢？Hystrix 的关注点在于以 _隔离_ 和 _熔断_ 为主的容错机制，而 Sentinel 的侧重点在于多样化的流量控制、熔断降级、系统负载保护、实时监控和控制台，可以看到解决的问题还是有比较大的不同的。
+
+Hystrix 采用命令模式封装资源调用逻辑，并且资源的定义与隔离规则是强依赖的，即在创建 HystrixCommand 的时候就要指定隔离规则（因其执行模型依赖于隔离模式）。Sentinel 的设计更为简单，不关注资源是如何执行的，资源的定义与规则的配置相分离。用户可以先定义好资源，然后在需要的时候配置规则即可。Sentinel 的原则非常简单：根据对应资源配置的规则来为资源执行相应的限流/降级/负载保护策略，若规则未配置则仅进行统计。从 0.1.1 版本开始，Sentinel 还引入了[注解支持](https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81)，可以更方便地定义资源。
+
+隔离是 Hystrix 的核心功能。Hystrix 通过线程池或信号量的方式来对依赖（即 Sentinel 中对应的资源）进行隔离，其中最常用的是资源隔离。Hystrix 线程池隔离的好处是比较彻底，但是不足之处在于要开很多线程池，在应用本身线程数目比较多的时候上下文切换的 overhead 会非常大；Hystrix 的信号量隔离模式可以限制调用的并发数而不显式创建线程，这样的方式比较轻量级，但缺点是无法对慢调用自动进行降级，只能等待客户端自己超时，因此仍然可能会出现级联阻塞的情况。Sentinel 可以通过并发线程数模式的流量控制来提供信号量隔离的功能。并且结合基于响应时间的熔断降级模式，可以在不稳定资源的平均响应时间比较高的时候自动降级，防止过多的慢调用占满并发数，影响整个系统。
+
+Hystrix 熔断降级功能采用熔断器模式，在某个服务失败比率高时自动进行熔断。Sentinel 的熔断降级功能更为通用，支持平均响应时间与失败比率两个指标。Sentinel 还提供各种调用链路关系和流量控制效果支持，同时还可以根据系统负载去实时地调整流量来保护系统，应用场景更为丰富。同时，Sentinel 还提供了实时的监控 API 和控制台，可以方便用户快速了解目前系统的状态，对服务的稳定性了如指掌。
+
+更详细的对比请参见 [Sentinel 与 Hystrix 的对比](https://github.com/alibaba/Sentinel/wiki/Sentinel-%E4%B8%8E-Hystrix-%E7%9A%84%E5%AF%B9%E6%AF%94)。
+
+### 链接
 - <https://github.com/Netflix/Hystrix>
 - <https://github.com/apache/dubbo>
 - <http://start.dubbo.io/>
