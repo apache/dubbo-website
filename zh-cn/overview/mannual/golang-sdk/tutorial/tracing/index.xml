@@ -1,1 +1,83 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 全链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/tracing/</link><description>Recent content in 全链路追踪 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/tracing/index.xml" rel="self" type="application/rss+xml"/></channel></rss>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 全链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/tracing/</link><description>Recent content in 全链路追踪 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/tracing/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/tracing/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/tracing/tracing/</guid><description>
+&lt;p>Dubbo-go 支持基于 &lt;a href="https://opentelemetry.io/">OpenTelemetry&lt;/a> 标准的全链路追踪埋点，同时支持通过以下 exporter 导出到不同的 tracing 后端系统。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="./stdout">Stdout exporter&lt;/a>&lt;/li>
+&lt;li>&lt;a href="./jaeger">Jaeger exporter&lt;/a>&lt;/li>
+&lt;li>&lt;a href="./zipkin">Zipkin exporter&lt;/a>&lt;/li>
+&lt;li>&lt;a href="./otlp-http">OTLP-HTTP exporter&lt;/a>&lt;/li>
+&lt;li>&lt;a href="./otlp-grpc">OTLP-gRPC exporter&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>请注意，仅支持通过 &lt;code>dubbo.NewInstance&lt;/code> 方式创建 dubbo 应用时开启 tracing 功能，也就是我们快速开始中提到的 &lt;a href="">微服务应用模式&lt;/a>，对于 &lt;a href="">轻量 RPC API&lt;/a> 暂时不支持开启 tracing。&lt;/p>
+&lt;h2 id="示例详解">示例详解&lt;/h2>
+&lt;p>可在此查看 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/otel" target="_blank">完整示例源码地址&lt;/a>。&lt;/p>
+&lt;p>使用 &lt;code>dubbo.WithTracing()&lt;/code> 开启 tracing，可以通过多个参数控制 tracing 行为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/otel/trace&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> instance, err &lt;span style="color:#719e07">:=&lt;/span> dubbo.&lt;span style="color:#268bd2">NewInstance&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubbo.&lt;span style="color:#268bd2">WithTracing&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// add tracing options here
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> trace.&lt;span style="color:#268bd2">WithEnabled&lt;/span>(), &lt;span style="color:#586e75">// enable tracing feature
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> trace.&lt;span style="color:#268bd2">WithStdoutExporter&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> trace.&lt;span style="color:#268bd2">WithW3cPropagator&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> trace.&lt;span style="color:#268bd2">WithAlwaysMode&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> trace.&lt;span style="color:#268bd2">WithRatioMode&lt;/span>(), &lt;span style="color:#586e75">// use ratio mode
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> trace.&lt;span style="color:#268bd2">WithRatio&lt;/span>(&lt;span style="color:#2aa198">0.5&lt;/span>), &lt;span style="color:#586e75">// sample ratio, only active when use ratio mode
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果你在 &lt;code>dubbo.WithTracing()&lt;/code> 调用中不指定任何 option 参数，则会使用默认行为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># default tracing config&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enable&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">exporter&lt;/span>: stdout
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">endpoint&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">propagator&lt;/span>: w3c
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">sample-mode&lt;/span>: ratio
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">sample-ratio&lt;/span>: &lt;span style="color:#2aa198">0.5&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="tracingoptions详解">TracingOptions详解&lt;/h2>
+&lt;ul>
+&lt;li>enable: enable tracing or not
+&lt;ul>
+&lt;li>&lt;code>trace.WithEnabled()&lt;/code> means enable tracing&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>exporter: tracing exporter backends, support stdout, jaeger, zipkin, otlp-http, otlp-grpc
+&lt;ul>
+&lt;li>&lt;code>trace.WithStdoutExporter()&lt;/code>&lt;/li>
+&lt;li>&lt;code>trace.WithJaegerExporter()&lt;/code>&lt;/li>
+&lt;li>&lt;code>trace.WithZipkinExporter()&lt;/code>&lt;/li>
+&lt;li>&lt;code>trace.WithOtlpHttpExporter()&lt;/code>&lt;/li>
+&lt;li>&lt;code>trace.WithOtlpGrpcExporter()&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>endpoint: exporter backend endpoint, for example, jaeger exporter&amp;rsquo;s endpoint is &lt;code>http://localhost:14268/api/traces&lt;/code>
+&lt;ul>
+&lt;li>&lt;code>trace.WithEndpoint(string)&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>propagator: context propagator type, support w3c, b3, more details you can see &lt;a href="https://opentelemetry.io/docs/concepts/context-propagation/">here&lt;/a>
+&lt;ul>
+&lt;li>&lt;code>trace.WithW3cPropagator()&lt;/code>&lt;/li>
+&lt;li>&lt;code>trace.WithB3Propagator()&lt;/code> zipkin exporter default use this&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>sample-mode: sample mode, support ratio, always, never
+&lt;ul>
+&lt;li>&lt;code>trace.WithAlwaysMode()&lt;/code>&lt;/li>
+&lt;li>&lt;code>trace.WithNeverMode()&lt;/code>&lt;/li>
+&lt;li>&lt;code>trace.WithRatioMode()&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>sample-ratio: sample ratio, only used when sample-mode is ratio, range between 0 and 1
+&lt;ul>
+&lt;li>&lt;code>trace.WithRatio(float64)&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul></description></item></channel></rss>

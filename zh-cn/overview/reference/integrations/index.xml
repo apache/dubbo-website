@@ -105,7 +105,28 @@
 &lt;p>使用 docker 启动 nacos，请首先确保您已经在本地机器正确 &lt;a href="https://docs.docker.com/engine/install/" target="_blank">下载页面&lt;/a> 安装 docker&lt;/a>。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>docker run --name nacos-quick -e &lt;span style="color:#268bd2">MODE&lt;/span>&lt;span style="color:#719e07">=&lt;/span>standalone -p 8849:8848 -d nacos/nacos-server:2.3.1
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="kubernetes">kubernetes&lt;/h2>
-&lt;p>请参考 &lt;a href="https://github.com/nacos-group/nacos-k8s/blob/master/operator/README-CN.md" target="_blank">nacos-operator&lt;/a> 了解如何部署 Nacos 到 Kubernetes 集群。&lt;/p></description></item><item><title>Overview: Zookeeper</title><link>https://dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</guid><description>
+&lt;p>请参考 &lt;a href="https://github.com/nacos-group/nacos-k8s/blob/master/operator/README-CN.md" target="_blank">nacos-operator&lt;/a> 了解如何部署 Nacos 到 Kubernetes 集群。&lt;/p></description></item><item><title>Overview: Higress</title><link>https://dubbo.apache.org/zh-cn/overview/reference/integrations/higress/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/integrations/higress/</guid><description>
+&lt;p>本文档讲解如何安装与配置 Higress，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Higress 官方文档。&lt;/p>
+&lt;h2 id="docker">docker&lt;/h2>
+&lt;p>使用 docker 启动 Higress，请首先确保您已经在本地机器正确 &lt;a href="https://docs.docker.com/engine/install/" target="_blank">下载页面&lt;/a> 安装 docker&lt;/a>。&lt;/p>
+&lt;p>使用以下命令安装 Higress：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s -- -a -c nacos://192.168.0.1:8848 --nacos-username&lt;span style="color:#719e07">=&lt;/span>nacos --nacos-password&lt;span style="color:#719e07">=&lt;/span>nacos
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>请将 &lt;code>192.168.0.1&lt;/code> 替换为 Nacos 服务器的 IP（如果 Nacos 部署在本机，请不要使用如 &lt;code>localhost&lt;/code> 或 &lt;code>127.0.0.1&lt;/code> 的 Loopback 地址）。按需调整 &amp;ndash;nacos-username 和 &amp;ndash;nacos-password 的取值，如果 Nacos 服务未开启认证功能，则可以移除这两个参数。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;ul>
+&lt;li>如果您还没有安装 nacos，请 &lt;a href="../nacos/">参考文档完成安装&lt;/a>。&lt;/li>
+&lt;li>如果您使用 Zookeeper 做服务发现，请修改对应的集群地址为 zookeeper 集群地址。&lt;/li>
+&lt;/ul>
+&lt;/div>
+&lt;p>在浏览器中输入 &lt;code>http://127.0.0.1:8080&lt;/code> 进入 Higress 控制台。&lt;/p>
+&lt;h2 id="kubernetes">kubernetes&lt;/h2>
+&lt;p>通过以下命令安装 Higress：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>helm repo add higress.io https://higress.io/helm-charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install higress -n higress-system higress.io/higress --create-namespace --render-subchart-notes --set global.local&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">true&lt;/span> --set higress-console.o11y.enabled&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过以下端口映射命令，对本机访问开放端口：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl port-forward service/higress-gateway -n higress-system 80:80 443:443 8080:8080
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在浏览器中输入 &lt;code>http://127.0.0.1:8080&lt;/code> 进入 Higress 控制台。&lt;/p></description></item><item><title>Overview: Zookeeper</title><link>https://dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</guid><description>
 &lt;p>这篇文章讲解如何安装与配置 Zookeeper，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Zookeeper 官方文档。&lt;/p>
 &lt;h2 id="本地下载">本地下载&lt;/h2>
 &lt;h4 id="下载zookeeper">下载Zookeeper&lt;/h4>

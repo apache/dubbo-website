@@ -1,4 +1,160 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Java</title><link>https://dubbo.apache.org/zh-cn/tags/java/</link><description>Recent content in Java on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 28 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/java/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 走向 Native 化：Spring&amp;Dubbo AOT 技术示例与原理讲解</title><link>https://dubbo.apache.org/zh-cn/blog/2023/06/28/%E8%B5%B0%E5%90%91-native-%E5%8C%96springdubbo-aot-%E6%8A%80%E6%9C%AF%E7%A4%BA%E4%BE%8B%E4%B8%8E%E5%8E%9F%E7%90%86%E8%AE%B2%E8%A7%A3/</link><pubDate>Wed, 28 Jun 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/06/28/%E8%B5%B0%E5%90%91-native-%E5%8C%96springdubbo-aot-%E6%8A%80%E6%9C%AF%E7%A4%BA%E4%BE%8B%E4%B8%8E%E5%8E%9F%E7%90%86%E8%AE%B2%E8%A7%A3/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Java</title><link>https://dubbo.apache.org/zh-cn/tags/java/</link><description>Recent content in Java on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 14 Dec 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/java/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 使用 Resilience4j 断路器、限流器、重试、隔离机制保护 Dubbo 应用</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-resilience4j-%E6%96%AD%E8%B7%AF%E5%99%A8%E9%99%90%E6%B5%81%E5%99%A8%E9%87%8D%E8%AF%95%E9%9A%94%E7%A6%BB%E6%9C%BA%E5%88%B6%E4%BF%9D%E6%8A%A4-dubbo-%E5%BA%94%E7%94%A8/</link><pubDate>Thu, 14 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-resilience4j-%E6%96%AD%E8%B7%AF%E5%99%A8%E9%99%90%E6%B5%81%E5%99%A8%E9%87%8D%E8%AF%95%E9%9A%94%E7%A6%BB%E6%9C%BA%E5%88%B6%E4%BF%9D%E6%8A%A4-dubbo-%E5%BA%94%E7%94%A8/</guid><description>
+&lt;p>Resilience4j 提供了一组高阶函数（装饰器），包括断路器，限流器，重试，隔离，可以对任何的函数式接口，lambda表达式，或方法的引用进行增强，并且这些装饰器可以进行叠加。这样做的好处是，你可以根据需要选择特定的装饰器进行组合。&lt;/p>
+&lt;p>关于 Resilience4j 与 Dubbo 集成的使用示例请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-resilience4j">dubbo-samples-resilience4j&lt;/a>&lt;/p></description></item><item><title>Blog: 使用 Hystrix 对 Dubbo 服务进行熔断限流保护</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-hystrix-%E5%AF%B9-dubbo-%E6%9C%8D%E5%8A%A1%E8%BF%9B%E8%A1%8C%E7%86%94%E6%96%AD%E9%99%90%E6%B5%81%E4%BF%9D%E6%8A%A4/</link><pubDate>Thu, 14 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-hystrix-%E5%AF%B9-dubbo-%E6%9C%8D%E5%8A%A1%E8%BF%9B%E8%A1%8C%E7%86%94%E6%96%AD%E9%99%90%E6%B5%81%E4%BF%9D%E6%8A%A4/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。&lt;/p>
+&lt;p>本文介绍在spring应用里，怎么把 Dubbo 和 Hystrix 结合起来使用。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="spring-boot应用">Spring Boot应用&lt;/h2>
+&lt;p>Demo 地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix&lt;/a>&lt;/p>
+&lt;h3 id="生成dubbo集成spring-boot的应用">生成dubbo集成spring boot的应用&lt;/h3>
+&lt;p>对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： &lt;a href="http://start.dubbo.apache.org/bootstrap.html/">http://start.dubbo.apache.org/bootstrap.html/&lt;/a>&lt;/p>
+&lt;h3 id="配置spring-cloud-starter-netflix-hystrix">配置spring-cloud-starter-netflix-hystrix&lt;/h3>
+&lt;p>spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.cloud&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-cloud-starter-netflix-hystrix&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.4.4.RELEASE&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在Application类上增加&lt;code>@EnableHystrix&lt;/code>来启用hystrix starter：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableHystrix&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderApplication&lt;/span> {
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置provider端">配置Provider端&lt;/h3>
+&lt;p>在Dubbo的Provider上增加&lt;code>@HystrixCommand&lt;/code>配置，这样子调用就会经过Hystrix代理。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixCommand&lt;/span>(commandProperties &lt;span style="color:#719e07">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;circuitBreaker.requestVolumeThreshold&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;execution.isolation.thread.timeoutInMilliseconds&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span>) })
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// System.out.println(&amp;#34;async provider received: &amp;#34; + name);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// return &amp;#34;annotation: hello, &amp;#34; + name;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(&lt;span style="color:#2aa198">&amp;#34;Exception to show hystrix enabled.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置consumer端">配置Consumer端&lt;/h3>
+&lt;p>对于Consumer端，则可以增加一层method调用，并在method上配置&lt;code>@HystrixCommand&lt;/code>。当调用出错时，会走到&lt;code>fallbackMethod = &amp;quot;reliable&amp;quot;&lt;/code>的调用里。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Reference&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> HelloService demoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixCommand&lt;/span>(fallbackMethod &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;reliable&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">doSayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> demoService.sayHello(name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">reliable&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hystrix fallback value&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过上面的配置，很简单地就完成了Spring Boot里Dubbo + Hystrix的集成。&lt;/p>
+&lt;h2 id="传统spring-annotation应用">传统Spring Annotation应用&lt;/h2>
+&lt;p>Demo地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-hystrix&lt;/a>
+传统spring annotation应用的配置其实也很简单，和spring boot应用不同的是：&lt;/p>
+&lt;ol>
+&lt;li>显式配置Spring AOP支持：&lt;code>@EnableAspectJAutoProxy&lt;/code>&lt;/li>
+&lt;li>显式通过&lt;code>@Configuration&lt;/code>配置&lt;code>HystrixCommandAspect&lt;/code> Bean。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@EnableDubbo&lt;/span>(scanBasePackages &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.annotation.action&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@PropertySource&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;classpath:/spring/dubbo-consumer.properties&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@ComponentScan&lt;/span>(value &lt;span style="color:#719e07">=&lt;/span> {&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.annotation.action&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@EnableAspectJAutoProxy&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ConsumerConfiguration&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> HystrixCommandAspect &lt;span style="color:#268bd2">hystrixCommandAspect&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HystrixCommandAspect();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="hystrix集成spring-aop原理">Hystrix集成Spring AOP原理&lt;/h2>
+&lt;p>在上面的例子里可以看到，Hystrix对Spring的集成是通过Spring AOP来实现的。下面简单分析下实现。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Aspect&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HystrixCommandAspect&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Pointcut&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;@annotation(com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand)&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">hystrixCommandAnnotationPointcut&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Pointcut&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;@annotation(com.netflix.hystrix.contrib.javanica.annotation.HystrixCollapser)&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">hystrixCollapserAnnotationPointcut&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Around&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hystrixCommandAnnotationPointcut() || hystrixCollapserAnnotationPointcut()&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">methodsAnnotatedWithHystrixCommand&lt;/span>(&lt;span style="color:#268bd2">final&lt;/span> ProceedingJoinPoint joinPoint) &lt;span style="color:#268bd2">throws&lt;/span> Throwable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Method method &lt;span style="color:#719e07">=&lt;/span> getMethodFromTarget(joinPoint);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Validate.notNull(method, &lt;span style="color:#2aa198">&amp;#34;failed to get method from joinPoint: %s&amp;#34;&lt;/span>, joinPoint);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (method.isAnnotationPresent(HystrixCommand.class) &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> method.isAnnotationPresent(HystrixCollapser.class)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException(&lt;span style="color:#2aa198">&amp;#34;method cannot be annotated with HystrixCommand and HystrixCollapser &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;annotations at the same time&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetaHolderFactory metaHolderFactory &lt;span style="color:#719e07">=&lt;/span> META_HOLDER_FACTORY_MAP.get(HystrixPointcutType.of(method));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetaHolder metaHolder &lt;span style="color:#719e07">=&lt;/span> metaHolderFactory.create(joinPoint);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HystrixInvokable invokable &lt;span style="color:#719e07">=&lt;/span> HystrixCommandFactory.getInstance().create(metaHolder);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExecutionType executionType &lt;span style="color:#719e07">=&lt;/span> metaHolder.isCollapserAnnotationPresent() &lt;span style="color:#719e07">?&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metaHolder.getCollapserExecutionType() : metaHolder.getExecutionType();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>metaHolder.isObservable()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">=&lt;/span> CommandExecutor.execute(invokable, executionType, metaHolder);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">=&lt;/span> executeObservable(invokable, executionType, metaHolder);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (HystrixBadRequestException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e.getCause() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> e.getCause() : e;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (HystrixRuntimeException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> hystrixRuntimeExceptionToThrowable(metaHolder, e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>&lt;code>HystrixCommandAspect&lt;/code>里定义了两个注解的AspectJ Pointcut：&lt;code>@HystrixCommand&lt;/code>, &lt;code>@HystrixCollapser&lt;/code>。所有带这两个注解的spring bean都会经过AOP处理&lt;/li>
+&lt;li>在&lt;code>@Around&lt;/code> AOP处理函数里，可以看到Hystrix会创建出&lt;code>HystrixInvokable&lt;/code>，再通过&lt;code>CommandExecutor&lt;/code>来执行&lt;/li>
+&lt;/ol>
+&lt;h2 id="spring-cloud-starter-netflix-hystrix的代码分析">spring-cloud-starter-netflix-hystrix的代码分析&lt;/h2>
+&lt;ol>
+&lt;li>&lt;code>@EnableHystrix&lt;/code> 引入了&lt;code>@EnableCircuitBreaker&lt;/code>，&lt;code>@EnableCircuitBreaker&lt;/code>引入了&lt;code>EnableCircuitBreakerImportSelector&lt;/code>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableCircuitBreaker&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">@interface&lt;/span> EnableHystrix {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Import&lt;/span>(EnableCircuitBreakerImportSelector.class)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">@interface&lt;/span> EnableCircuitBreaker {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>&lt;code>EnableCircuitBreakerImportSelector&lt;/code>继承了&lt;code>SpringFactoryImportSelector&amp;lt;EnableCircuitBreaker&amp;gt;&lt;/code>，使spring加载&lt;code>META-INF/spring.factories&lt;/code>里的&lt;code>EnableCircuitBreaker&lt;/code>声明的配置
+在&lt;code>META-INF/spring.factories&lt;/code>里可以找到下面的配置，也就是引入了&lt;code>HystrixCircuitBreakerConfiguration&lt;/code>。
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">org.springframework.cloud.netflix.hystrix.HystrixCircuitBreakerConfiguration&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>在&lt;code>HystrixCircuitBreakerConfiguration&lt;/code>里可以发现创建了&lt;code>HystrixCommandAspect&lt;/code>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HystrixCircuitBreakerConfiguration&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> HystrixCommandAspect &lt;span style="color:#268bd2">hystrixCommandAspect&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HystrixCommandAspect();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>可见&lt;code>spring-cloud-starter-netflix-hystrix&lt;/code>实际上也是创建了&lt;code>HystrixCommandAspect&lt;/code>来集成Hystrix。
+另外&lt;code>spring-cloud-starter-netflix-hystrix&lt;/code>里还有metrics, health, dashboard等集成。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;ul>
+&lt;li>对于dubbo provider的&lt;code>@Service&lt;/code>是一个spring bean，直接在上面配置&lt;code>@HystrixCommand&lt;/code>即可&lt;/li>
+&lt;li>对于dubbo consumer的&lt;code>@Reference&lt;/code>，可以通过加一层简单的spring method包装，配置&lt;code>@HystrixCommand&lt;/code>即可&lt;/li>
+&lt;li>Hystrix本身提供&lt;code>HystrixCommandAspect&lt;/code>来集成Spring AOP，配置了&lt;code>@HystrixCommand&lt;/code>和&lt;code>@HystrixCollapser&lt;/code>的spring method都会被Hystrix处理&lt;/li>
+&lt;/ul>
+&lt;h3 id="sentinel-与-hystrix-的比较">Sentinel 与 Hystrix 的比较&lt;/h3>
+&lt;p>目前业界常用的熔断降级/隔离的库是 Netflix 的 &lt;a href="https://github.com/Netflix/Hystrix">Hystrix&lt;/a>，那么 Sentinel 与 Hystrix 有什么异同呢？Hystrix 的关注点在于以 &lt;em>隔离&lt;/em> 和 &lt;em>熔断&lt;/em> 为主的容错机制，而 Sentinel 的侧重点在于多样化的流量控制、熔断降级、系统负载保护、实时监控和控制台，可以看到解决的问题还是有比较大的不同的。&lt;/p>
+&lt;p>Hystrix 采用命令模式封装资源调用逻辑，并且资源的定义与隔离规则是强依赖的，即在创建 HystrixCommand 的时候就要指定隔离规则（因其执行模型依赖于隔离模式）。Sentinel 的设计更为简单，不关注资源是如何执行的，资源的定义与规则的配置相分离。用户可以先定义好资源，然后在需要的时候配置规则即可。Sentinel 的原则非常简单：根据对应资源配置的规则来为资源执行相应的限流/降级/负载保护策略，若规则未配置则仅进行统计。从 0.1.1 版本开始，Sentinel 还引入了&lt;a href="https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81">注解支持&lt;/a>，可以更方便地定义资源。&lt;/p>
+&lt;p>隔离是 Hystrix 的核心功能。Hystrix 通过线程池或信号量的方式来对依赖（即 Sentinel 中对应的资源）进行隔离，其中最常用的是资源隔离。Hystrix 线程池隔离的好处是比较彻底，但是不足之处在于要开很多线程池，在应用本身线程数目比较多的时候上下文切换的 overhead 会非常大；Hystrix 的信号量隔离模式可以限制调用的并发数而不显式创建线程，这样的方式比较轻量级，但缺点是无法对慢调用自动进行降级，只能等待客户端自己超时，因此仍然可能会出现级联阻塞的情况。Sentinel 可以通过并发线程数模式的流量控制来提供信号量隔离的功能。并且结合基于响应时间的熔断降级模式，可以在不稳定资源的平均响应时间比较高的时候自动降级，防止过多的慢调用占满并发数，影响整个系统。&lt;/p>
+&lt;p>Hystrix 熔断降级功能采用熔断器模式，在某个服务失败比率高时自动进行熔断。Sentinel 的熔断降级功能更为通用，支持平均响应时间与失败比率两个指标。Sentinel 还提供各种调用链路关系和流量控制效果支持，同时还可以根据系统负载去实时地调整流量来保护系统，应用场景更为丰富。同时，Sentinel 还提供了实时的监控 API 和控制台，可以方便用户快速了解目前系统的状态，对服务的稳定性了如指掌。&lt;/p>
+&lt;p>更详细的对比请参见 &lt;a href="https://github.com/alibaba/Sentinel/wiki/Sentinel-%E4%B8%8E-Hystrix-%E7%9A%84%E5%AF%B9%E6%AF%94">Sentinel 与 Hystrix 的对比&lt;/a>。&lt;/p>
+&lt;h3 id="链接">链接&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://start.dubbo.io/">http://start.dubbo.io/&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients">https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Blog: 走向 Native 化：Spring&amp;Dubbo AOT 技术示例与原理讲解</title><link>https://dubbo.apache.org/zh-cn/blog/2023/06/28/%E8%B5%B0%E5%90%91-native-%E5%8C%96springdubbo-aot-%E6%8A%80%E6%9C%AF%E7%A4%BA%E4%BE%8B%E4%B8%8E%E5%8E%9F%E7%90%86%E8%AE%B2%E8%A7%A3/</link><pubDate>Wed, 28 Jun 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/06/28/%E8%B5%B0%E5%90%91-native-%E5%8C%96springdubbo-aot-%E6%8A%80%E6%9C%AF%E7%A4%BA%E4%BE%8B%E4%B8%8E%E5%8E%9F%E7%90%86%E8%AE%B2%E8%A7%A3/</guid><description>
 &lt;p>Java 应用在云计算时代面临“冷启动”慢、内存占用高、预热时间长等问题，无法很好的适应 Serverless 等云上部署模式，GraalVM 通过静态编译、打包等技术在很大程度上解决了这些问题，同时针对 GraalVM 的一些使用限制，Spring 和 Dubbo 等主流框架也都提供了相应的 AOT 解决方案。&lt;/p>
 &lt;p>本文我们将详细分析 Java 应用在云时代面临的挑战，GraalVM Native Image 是如何解决这些问题，GraalVM 的基本概念与工作原理，最后我们通过一个 Spring6 + Dubbo3 的微服务应用示例演示了如何将一个普通微服务应用进行静态化打包。&lt;/p>
 &lt;p>本文主要分为以下四个部分展开&lt;/p>
@@ -14796,713 +14952,4 @@ Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> injvm=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> ...&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>但是通过 &lt;em>injvm&lt;/em> 来配置本地调用的方式已经被废弃。通过 &lt;em>scope&lt;/em> 的方式来控制是官方推荐的。&lt;/p>
 &lt;h3 id="总结">总结&lt;/h3>
-&lt;p>本文介绍了本地调用的概念以及带来的好处，并进一步的揭示了 dubbo 本地调用实际上是在当前进程中暴露了 &lt;em>injvm&lt;/em> 的协议，而该协议并不会对外暴露端口，然后讨论了如何通过 &lt;em>scope&lt;/em> 来细粒度的控制本地调用的行为，并强调了通过 &lt;em>invjm&lt;/em> 来配置的方式已经被废弃，在未来版本中可能会被删除。&lt;/p></description></item><item><title>Blog: 使用Apache Skywalking (Incubator) 做分布式跟踪</title><link>https://dubbo.apache.org/zh-cn/blog/2019/08/11/%E4%BD%BF%E7%94%A8apache-skywalking-incubator-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</link><pubDate>Sun, 11 Aug 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/08/11/%E4%BD%BF%E7%94%A8apache-skywalking-incubator-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</guid><description>
-&lt;h2 id="apache-skywalkingincubator简介">Apache Skywalking(Incubator)简介&lt;/h2>
-&lt;p>&lt;a href="https://github.com/apache/skywalking">Apache Skywalking(Incubator)&lt;/a> 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM系统。&lt;a href="https://github.com/apache/skywalking">Apache Skywalking(Incubator)&lt;/a>通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。&lt;a href="https://github.com/apache/skywalking">Apache Skywalking (Incubating)&lt;/a>目前支持多种语言，其中包括&lt;a href="https://github.com/apache/skywalking">Java&lt;/a>，&lt;a href="https://github.com/OpenSkywalking/skywalking-netcore">.Net Core&lt;/a>，&lt;a href="https://github.com/OpenSkywalking/skywalking-nodejs">Node.js&lt;/a>和&lt;a href="https://github.com/SkyAPM/go2sky">Go&lt;/a>语言。&lt;/p>
-&lt;p>目前Skywalking已经支持从6个可视化维度剖析分布式系统的运行情况。总览视图是应用和组件的全局视图，其中包括组件和应用数量，应用的告警波动，慢服务列表以及应用吞吐量；拓扑图从应用依赖关系出发，展现整个应用的拓扑关系；应用视图则是从单个应用的角度，展现应用的上下游关系，TopN的服务和服务器，JVM的相关信息以及对应的主机信息。服务视图关注单个服务入口的运行情况以及此服务的上下游依赖关系，依赖度，帮助用户针对单个服务的优化和监控；调用链展现了调用的单次请求经过的所有埋点以及每个埋点的执行时长；告警视图根据配置阈值针对应用、服务器、服务进行实时告警。&lt;/p>
-&lt;h2 id="dubbo与apache-skywalkingincubator">Dubbo与Apache Skywalking(Incubator)&lt;/h2>
-&lt;h3 id="编写dubbo示例程序">编写Dubbo示例程序&lt;/h3>
-&lt;p>Dubbo实例程序已上传到&lt;a href="https://github.com/SkywalkingTest/dubbo-trace-example">Github仓库&lt;/a>中。方便大家下载使用。&lt;/p>
-&lt;h4 id="api工程">API工程&lt;/h4>
-&lt;p>服务接口：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.skywalking.demo.interfaces;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public &lt;span style="color:#268bd2">interface&lt;/span> HelloService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="dubbo服务提供工程">Dubbo服务提供工程&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.skywalking.demo.provider;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@&lt;span style="color:#268bd2">Service&lt;/span>(version = &lt;span style="color:#2aa198">&amp;#34;${demo.service.version}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application = &lt;span style="color:#2aa198">&amp;#34;${dubbo.application.id}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol = &lt;span style="color:#2aa198">&amp;#34;${dubbo.protocol.id}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry = &lt;span style="color:#2aa198">&amp;#34;${dubbo.registry.id}&amp;#34;&lt;/span>, timeout = &lt;span style="color:#2aa198">60000&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public class HelloServiceImpl implements HelloService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> public String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LockSupport.&lt;span style="color:#268bd2">parkNanos&lt;/span>(TimeUnit.SECONDS.&lt;span style="color:#268bd2">toNanos&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer工程">Consumer工程&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.skywalking.demo.consumer;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@RestController
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public class ConsumerController {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> private static &lt;span style="color:#dc322f">int&lt;/span> COUNT = &lt;span style="color:#2aa198">0&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @&lt;span style="color:#268bd2">Reference&lt;/span>(version = &lt;span style="color:#2aa198">&amp;#34;${demo.service.version}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> application = &lt;span style="color:#2aa198">&amp;#34;${dubbo.application.id}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> url = &lt;span style="color:#2aa198">&amp;#34;dubbo://localhost:20880&amp;#34;&lt;/span>, timeout = &lt;span style="color:#2aa198">60000&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> private HelloService helloService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @&lt;span style="color:#268bd2">GetMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/sayHello/{name}&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> public String &lt;span style="color:#268bd2">sayHello&lt;/span>(@&lt;span style="color:#268bd2">PathVariable&lt;/span>(name = &lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>) String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> ((COUNT&lt;span style="color:#719e07">++&lt;/span>) &lt;span style="color:#719e07">%&lt;/span> &lt;span style="color:#2aa198">3&lt;/span> &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>){
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> throw new &lt;span style="color:#268bd2">RuntimeException&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LockSupport.&lt;span style="color:#268bd2">parkNanos&lt;/span>(TimeUnit.SECONDS.&lt;span style="color:#268bd2">toNanos&lt;/span>(&lt;span style="color:#2aa198">2&lt;/span>));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> helloService.&lt;span style="color:#268bd2">sayHello&lt;/span>(name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="部署apache-skywalkingincubator">部署Apache Skywalking(Incubator)&lt;/h3>
-&lt;p>Apache Skywalking(Incubator）共提供两种部署模式：单节点模式和集群模式，以下为单节点模式部署步骤，集群模式部署详情参考&lt;a href="https://skywalking.apache.org/docs/main/next/en/setup/backend/backend-setup/">文档&lt;/a>。&lt;/p>
-&lt;h4 id="依赖第三方组件">依赖第三方组件&lt;/h4>
-&lt;ol>
-&lt;li>JDK8+&lt;/li>
-&lt;li>Elasticsearch 5.x&lt;/li>
-&lt;/ol>
-&lt;h4 id="部署步骤">部署步骤&lt;/h4>
-&lt;ol>
-&lt;li>下载&lt;a href="http://skywalking.apache.org/downloads/"> Apache Skywalking Collector&lt;/a>&lt;/li>
-&lt;li>部署ElasticSearch
-&lt;ul>
-&lt;li>修改elasticsearch.yml文件，并设置&lt;code>cluster.name&lt;/code>设置成&lt;code>CollectorDBCluster&lt;/code>。此名称需要和collector配置文件一致。&lt;/li>
-&lt;li>修改ES配置&lt;code>network.host&lt;/code>值，将&lt;code>network.host&lt;/code>的值修改成&lt;code>0.0.0.0&lt;/code>。&lt;/li>
-&lt;li>启动Elasticsearch&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>解压并启动Skywalking Collector。运行&lt;code>bin/startup.sh&lt;/code>命令即可启动Skywalking Collector&lt;/li>
-&lt;/ol>
-&lt;h4 id="启动示例程序">启动示例程序&lt;/h4>
-&lt;p>在启动示例程序之前，执行编译打包的命令:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>./mvnw clean package
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动服务提供端">启动服务提供端&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>java -jar -javaagent:$AGENT_PATH/skywalking-agent.jar -Dskywalking.agent.application_code=dubbo-provider -Dskywalking.collector.servers=localhost:10800 dubbo-provider/target/dubbo-provider.jar
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动服务消费端">启动服务消费端&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>java -jar -javaagent:$AGENT_PATH/skywalking-agent.jar -Dskywalking.agent.application_code=dubbo-consumer -Dskywalking.collector.servers=localhost:10800 dubbo-consumer/target/dubbo-consumer.jar
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="访问消费端提供的服务">访问消费端提供的服务&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>curl http://localhost:8080/sayHello/test
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="skywalking监控截图">Skywalking监控截图：&lt;/h2>
-&lt;h3 id="首页">首页&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-dashboard.png" alt="/admin-guide/images/skywalking-dashboard.png">&lt;/p>
-&lt;h3 id="拓扑图">拓扑图&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-topology.png" alt="/admin-guide/images/skywalking-topology.png">&lt;/p>
-&lt;h3 id="应用视图">应用视图&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-application.png" alt="/admin-guide/images/skywalking-application.png">&lt;/p>
-&lt;p>JVM信息
-&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-application_instance.png" alt="/admin-guide/images/skywalking-application_instance.png">&lt;/p>
-&lt;h3 id="服务视图">服务视图&lt;/h3>
-&lt;p>服务消费端：
-&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-service-consumer.png" alt="/admin-guide/images/skywalking-service-consumer.png">&lt;/p>
-&lt;p>服务提供端：
-&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-service-provider.png" alt="/admin-guide/images/skywalking-service-provider.png">&lt;/p>
-&lt;h3 id="trace视图">Trace视图&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-trace.png" alt="/admin-guide/images/skywalking-trace.png">&lt;/p>
-&lt;p>Span信息：
-&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-span-Info.png" alt="/admin-guide/images/skywalking-span-Info.png">&lt;/p>
-&lt;h3 id="告警视图">告警视图&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/skywalking-alarm.png" alt="/admin-guide/images/skywalking-alarm.png">&lt;/p></description></item><item><title>Blog: 在 Dubbo 中使用 REST</title><link>https://dubbo.apache.org/zh-cn/blog/2019/07/26/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-rest/</link><pubDate>Fri, 26 Jul 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/07/26/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-rest/</guid><description>
-&lt;h2 id="什么是-rest">什么是 REST&lt;/h2>
-&lt;p>REST 是 Roy Thomas Fielding &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup> 在 2000 年他的博士论文 &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup> “架构风格以及基于网络的软件架构设计” 中提出来的一个概念。REST 是 &lt;strong>RE&lt;/strong>presentational &lt;strong>S&lt;/strong>tate &lt;strong>T&lt;/strong>ransfer 的缩写，翻译过来就是 “表现层状态转化”。REST 就是 Roy 在这篇论文中提出的面向互联网的软件所应当具备的架构风格。&lt;/p>
-&lt;p>按照 REpresentational State Transfer 的字面意思，可以把应用看成是一个虚拟的状态机，软件提供的不是服务而是一系列的&lt;strong>资源&lt;/strong>，对这些资源的访问通过&lt;strong>统一的操作&lt;/strong>来访问，而返回的结果代表了资源状态的一次跃迁。REST 是一种架构风格，如果一个软件架构符合 REST 风格，就可以称之为 RESTful 架构。这个架构应当具备以下一些设计上的约束：资源具有唯一标示、资源之间有关联关系、使用标准的方式来访问、资源有多种表现形式、无状态交互。&lt;/p>
-&lt;p>举例来说，一个简单的静态 HTML 页面的网站就很好的符合了 RESTful 架构风格。访问 &lt;code>http://example.com/accounts&lt;/code> 返回一个包含所有账号的页面，选取其中一个链接 &lt;code>http://example.com/accounts/1&lt;/code> 又会返回包含用户 1 的详细信息。爬虫软件在这种场景下工作的很好，当知道了某个网站的首页地址后，可以自举发现这个网站上所有关联的网页。更重要的是，这种访问形式不依赖网站提供的任何客户端，而是仅仅通过 HTTP 标准的访问方式完成的。可以说，HTML 这种超媒体文档的组织形式就是资源的表现层状态迁移的一种形式。&lt;/p>
-&lt;p>对于一个提供服务的动态网站来说，可以按照类似的思路将其 RESTful 化：&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>GET &lt;code>http://example.com/accounts&lt;/code> 返回所有账号信息&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>POST &lt;code>http://example.com/accounts&lt;/code> 创建一个新的账号&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>GET &lt;code>http://example.com/accounts/1&lt;/code> 返回账号 1 的信息&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>DELETE &lt;code>http://example.com/accounts/1&lt;/code> 删除账号 1&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>PUT &lt;code>http://example.com/accounts/1&lt;/code> 更新账号 1 信息&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;p>其中的思路是利用 HTTP 协议的标准方法 POST、DELETE、PUT、GET 来表达对于一个资源的增删改查 (CRUD) 操作，利用 URL 来表示一个资源的唯一标识。对资源访问的错误码也复用 HTTP 协议的状态码。返回结果通常由 json 或 XML 来表示，如果其中包换了对关联资源的访问方式 (所谓的表现层状态迁移) ，这种类型的 RESTful 应用可以进一步的称之为 &lt;em>hypermedia as the engine of application state&lt;/em> (HATEOAS) 应用 &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/rest-sample.png" alt="micro-image">&lt;/p>
-&lt;p>&lt;em>source: /imgs/blog/2019/07/26/rest/micro-image.png&lt;/em>&lt;/p>
-&lt;p>这里需要注意的是，按照 Roy 的定义，RESTful 架构风格与 HTTP 协议并没有什么强关联关系。但是，基于 HTTP 的 RESTful 架构风格是实现起来最自然，也是目前使用最广泛的一种实现，我们称之为 RESTful HTTP。同样的，在下文中将会专注在 HTTP 的场景下介绍如何在 Dubbo 框架中将服务暴露成 Restful 架构。&lt;/p>
-&lt;h2 id="在-dubbo-中使用-rest">在 Dubbo 中使用 REST&lt;/h2>
-&lt;h3 id="背景">背景&lt;/h3>
-&lt;p>随着微服务的流行以及多语言互操作诉求日益增多，在 Dubbo 中暴露 REST 服务变成了一个不容忽视的诉求。为了在 Dubbo 中暴露 REST 服务，通常有两种做法，一种是直接依赖 Sprng REST 或者其他 REST 框架来直接暴露，另一种是通过 Dubbo 框架内置的 REST 能力暴露。两种做法各有优缺点，主要体现在前者与微服务体系中的服务发现组件能够更好的工作，而后者可以无缝的享受到 Dubbo 体系中的服务发现以及服务治理的能力。本文关注的是如何使用后者来暴露 REST 服务。&lt;/p>
-&lt;p>自 &lt;code>2.6.0&lt;/code> 开始，Dubbo 合并了当当网捐献的 DubboX &lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup> 中的主要特性，其中就包括了基于 RESTeasy &lt;code>3.0.19.Final&lt;/code> 的 REST 支持，具备 JAXRS 2.0 规范中所有的能力。&lt;/p>
-&lt;h3 id="基本用法">基本用法&lt;/h3>
-&lt;p>在以下的例子中，展示了如何通过最传统的 Spring XML 配置的方式来快速的暴露和调用一个 REST 服务。其中底层的 server 使用的是 netty，服务注册发现基于 Zookeeper。&lt;/p>
-&lt;blockquote>
-&lt;p>注：本章节讨论的示例可以通过 &lt;a href="https://github.com/beiwei30/dubbo-rest-samples/tree/master/basic">https://github.com/beiwei30/dubbo-rest-samples/tree/master/basic&lt;/a> 来获得&lt;/p>
-&lt;/blockquote>
-&lt;h4 id="1-maven-依赖">1. Maven 依赖&lt;/h4>
-&lt;p>首先需要在项目中引入 dubbo all-in-one 的依赖以及 RESTEasy 相关的必要依赖。因为在本例中使用 Zookeeper 作为服务发现，还需要引入 Zookeeper client 相关的依赖。为了方便使用，第三方的依赖可以通过框架提供的 BOM 文件 &lt;code>dubbo-dependencies-bom&lt;/code> 来引入。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;properties&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo.version&amp;gt;&lt;/span>2.6.5&lt;span style="color:#268bd2">&amp;lt;/dubbo.version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/properties&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencyManagement&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-dependencies-bom&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>import&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencyManagement&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- REST support dependencies --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.netty&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>netty-all&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.jboss.resteasy&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>resteasy-jaxrs&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.jboss.resteasy&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>resteasy-client&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.jboss.resteasy&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>resteasy-netty4&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>javax.validation&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>validation-api&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.jboss.resteasy&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>resteasy-jackson-provider&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.jboss.resteasy&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>resteasy-jaxb-provider&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>javax.servlet&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>javax.servlet-api&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- zookeeper client dependency --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>curator-framework&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-定义服务接口">2. 定义服务接口&lt;/h4>
-&lt;p>定义一个服务接口 &lt;code>UserService&lt;/code>，该接口提供两个功能，一个是获取指定 User 的详细信息，另一个是新注册一个用户。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>) &lt;span style="color:#586e75">// #1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.APPLICATION_JSON, MediaType.TEXT_XML}) &lt;span style="color:#586e75">// #2&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span> &lt;span style="color:#586e75">// #3&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;{id: \\d+}&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span> &lt;span style="color:#586e75">// #4&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;register&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long &lt;span style="color:#268bd2">registerUser&lt;/span>(User user);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过在接口上用 JaxRS 标准的 annotation 来修饰，我们规定了该服务在 REST 下的访问形式：&lt;/p>
-&lt;ol>
-&lt;li>&lt;code>@Path(&amp;quot;users&amp;quot;)&lt;/code> 定义了 UserService 通过 &amp;lsquo;/users&amp;rsquo; 来访问&lt;/li>
-&lt;li>在类级别上定义 &lt;code>@Consumers&lt;/code> 和 &lt;code>@Produces&lt;/code> 来规定参数以及返回值的类型为 XML 和 JSON。在类级别上定义之后，就可以不用在方法级别上进一步定义了&lt;/li>
-&lt;li>getUser 方法上通过 &lt;code>@GET&lt;/code> 定义了接受的 HTTP 方法为 GET，通过 &lt;code>@Path&lt;/code> 来规定参数是来自于 URL 中的 path。&amp;lsquo;GET /users/1&amp;rsquo; 等同于调用 &amp;lsquo;getUser(1)&amp;rsquo;&lt;/li>
-&lt;li>registerUser 方法上通过 &lt;code>@POST&lt;/code> 定义了接受的 HTTP 方法为 POST，通过将 JSON 或 XML 格式的 User 数据 POST 到 &amp;lsquo;/users/register&amp;rsquo; 上来创建一个 User&lt;/li>
-&lt;/ol>
-&lt;p>在 Dubbo 中，将 REST 相关的 annotation 定义在接口或者实现上都是可以的。这个在设计上是个权衡问题。Annotation 定义在实现类上可以保证接口的纯净，否则对于不需要通过 REST 方式调用的 Dubbo 调用方来说将需要强制依赖 JaxRS 的库，但是同时，对于需要通过 REST 方式调用的 Dubbo 调用方来说，就需要自己来处理 REST 调用相关的细节了。Annotation 定义在接口上，框架会自动处理掉 REST 调用相关的细节，并和 Dubbo 的服务发现以及服务治理功能能够很好的结合起来。在本例中采用了在接口上定义 JaxRS annotation 的形式。&lt;/p>
-&lt;h4 id="3-实现服务接口">3. 实现服务接口&lt;/h4>
-&lt;p>为了简洁，这里给出的接口的实现只是简单的返回了接口需要的类型的示例，在真实的系统中，逻辑可能会比较复杂。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> AtomicLong id &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AtomicLong();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(Long id) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> User(id, &lt;span style="color:#2aa198">&amp;#34;username-&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Long &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> id.incrementAndGet();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="4-装配服务">4. 装配服务&lt;/h4>
-&lt;p>如上所述，本例展示的是如何通过传统的 Spring XML 的方式来装配并暴露 Dubbo 服务。需要指出的是，这里展示了如何同时暴露两种不同的协议，一种是 REST，另一种是原生的 Dubbo 协议。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://code.alibabatech.com/schema/dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest-provider&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #1 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #2 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;netty&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #3 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;netty4&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #4 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.rest.api.UserService&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rest,dubbo&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #5 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.rest.impl.UserServiceImpl&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #6 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>定义了该应用的名字为 &lt;code>rest-provider&lt;/code>&lt;/li>
-&lt;li>定义了服务注册通过 Zookeeper，并且 URL 为 &amp;ldquo;zookeeper://127.0.0.1:2181&amp;rdquo;&lt;/li>
-&lt;li>在端口 8080 上以 REST 方式暴露服务，底层的传输使用的是 netty&lt;/li>
-&lt;li>在默认端口 20880 上以原生 Dubbo 方式暴露服务，底层的传输方式是 netty&lt;/li>
-&lt;li>将 ‘userService&amp;rsquo; 的 Spring bean （也就是 UserServiceImpl）暴露为 UserService 服务，支持的协议既包括了 REST 也包括了 Dubbo&lt;/li>
-&lt;li>将 UserServiceImpl 注册成 &amp;lsquo;userService&amp;rsquo; 的 Spring bean&lt;/li>
-&lt;/ol>
-&lt;h4 id="5-服务提供方的启动类">5. 服务提供方的启动类&lt;/h4>
-&lt;p>简单的通过 ClassPathXmlApplicationContext 来加载刚刚配置的 Spring XML 配置 &amp;lsquo;rest-provider.xml&amp;rsquo; 即可启动 Dubbo 服务端&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RestProvider&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> IOException {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassPathXmlApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ClassPathXmlApplicationContext(&lt;span style="color:#2aa198">&amp;#34;spring/rest-provider.xml&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.in.read();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="6-启动服务端">6. 启动服务端&lt;/h4>
-&lt;p>由于本例依赖 Zookeeper 做服务注册发现，在启动 RestProvider 之前，需要先启动一个 Zookeeper 服务器。之后就可以之间运行 RestProvider 了。通过以下的输出日志，我们可以知道 UserService 以两种方式对外暴露了同一个服务，其中：&lt;/p>
-&lt;ul>
-&lt;li>REST: rest://192.168.2.132:8080/org.apache.dubbo.samples.rest.api.UserService&lt;/li>
-&lt;li>Dubbo: dubbo://192.168.2.132:20880/org.apache.dubbo.samples.rest.api.UserServic&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>01/01/19 07:18:56:056 CST&lt;span style="color:#719e07">]&lt;/span> main INFO config.AbstractConfig: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> Export dubbo service org.apache.dubbo.samples.rest.api.UserService to url rest://192.168.2.132:8080/org.apache.dubbo.samples.rest.api.UserService?anyhost&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>rest-provider&amp;amp;bean.name&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.rest.api.UserService&amp;amp;bind.ip&lt;span style="color:#719e07">=&lt;/span>192.168.2.132&amp;amp;bind.port&lt;span style="color:#719e07">=&lt;/span>8080&amp;amp;&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;&lt;span style="color:#268bd2">generic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.rest.api.UserService&amp;amp;&lt;span style="color:#268bd2">methods&lt;/span>&lt;span style="color:#719e07">=&lt;/span>getUser,registerUser&amp;amp;&lt;span style="color:#268bd2">pid&lt;/span>&lt;span style="color:#719e07">=&lt;/span>27386&amp;amp;&lt;span style="color:#268bd2">server&lt;/span>&lt;span style="color:#719e07">=&lt;/span>netty&amp;amp;&lt;span style="color:#268bd2">side&lt;/span>&lt;span style="color:#719e07">=&lt;/span>provider&amp;amp;&lt;span style="color:#268bd2">timestamp&lt;/span>&lt;span style="color:#719e07">=&lt;/span>1546341536194, dubbo version: 2.6.5, current host: 192.168.2.132
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>01/01/19 07:18:57:057 CST&lt;span style="color:#719e07">]&lt;/span> main INFO config.AbstractConfig: &lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span> Export dubbo service org.apache.dubbo.samples.rest.api.UserService to url dubbo://192.168.2.132:20880/org.apache.dubbo.samples.rest.api.UserService?anyhost&lt;span style="color:#719e07">=&lt;/span>true&amp;amp;&lt;span style="color:#268bd2">application&lt;/span>&lt;span style="color:#719e07">=&lt;/span>rest-provider&amp;amp;bean.name&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.rest.api.UserService&amp;amp;bind.ip&lt;span style="color:#719e07">=&lt;/span>192.168.2.132&amp;amp;bind.port&lt;span style="color:#719e07">=&lt;/span>20880&amp;amp;&lt;span style="color:#268bd2">dubbo&lt;/span>&lt;span style="color:#719e07">=&lt;/span>2.0.2&amp;amp;&lt;span style="color:#268bd2">generic&lt;/span>&lt;span style="color:#719e07">=&lt;/span>false&amp;amp;&lt;span style="color:#268bd2">interface&lt;/span>&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.rest.api.UserService&amp;amp;&lt;span style="color:#268bd2">methods&lt;/span>&lt;span style="color:#719e07">=&lt;/span>getUser,registerUser&amp;amp;&lt;span style="color:#268bd2">pid&lt;/span>&lt;span style="color:#719e07">=&lt;/span>27386&amp;amp;&lt;span style="color:#268bd2">server&lt;/span>&lt;span style="color:#719e07">=&lt;/span>netty4&amp;amp;&lt;span style="color:#268bd2">side&lt;/span>&lt;span style="color:#719e07">=&lt;/span>provider&amp;amp;&lt;span style="color:#268bd2">timestamp&lt;/span>&lt;span style="color:#719e07">=&lt;/span>1546341537392, dubbo version: 2.6.5, current host: 192.168.2.132
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以通过 zkCli 访问 Zookeeper 服务器来验证。&amp;rsquo;/dubbo/org.apache.dubbo.samples.rest.api.UserService/providers&amp;rsquo; 路径下返回了一个数组 [dubbo://&amp;hellip;, rest:.//&amp;hellip;]。数组的第一个元素是 ’dubbo‘ 打头的，而第二个元素是 &amp;lsquo;rest&amp;rsquo; 打头的。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 10&lt;span style="color:#719e07">]&lt;/span> ls /dubbo/org.apache.dubbo.samples.rest.api.UserService/providers
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>dubbo%3A%2F%2F192.168.2.132%3A20880%2Forg.apache.dubbo.samples.rest.api.UserService%3Fanyhost%3Dtrue%26application%3Drest-provider%26bean.name%3Dorg.apache.dubbo.samples.rest.api.UserService%26dubbo%3D2.0.2%26generic%3Dfalse%26interface%3Dorg.apache.dubbo.samples.rest.api.UserService%26methods%3DgetUser%2CregisterUser%26pid%3D27386%26server%3Dnetty4%26side%3Dprovider%26timestamp%3D1546341537392, rest%3A%2F%2F192.168.2.132%3A8080%2Forg.apache.dubbo.samples.rest.api.UserService%3Fanyhost%3Dtrue%26application%3Drest-provider%26bean.name%3Dorg.apache.dubbo.samples.rest.api.UserService%26dubbo%3D2.0.2%26generic%3Dfalse%26interface%3Dorg.apache.dubbo.samples.rest.api.UserService%26methods%3DgetUser%2CregisterUser%26pid%3D27386%26server%3Dnetty%26side%3Dprovider%26timestamp%3D1546341536194&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以简单的通过 &amp;lsquo;curl&amp;rsquo; 在命令行验证刚才暴露出来的 REST 服务：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ curl http://localhost:8080/users/1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>:1,&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;username-1&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ curl -X POST -H &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> -d &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;id&amp;#34;:1,&amp;#34;name&amp;#34;:&amp;#34;Larry Page&amp;#34;}&amp;#39;&lt;/span> http://localhost:8080/users/register
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">1&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="7-装配调用端">7. 装配调用端&lt;/h4>
-&lt;p>Dubbo 调用方只需要依赖服务的接口，通过以下方式装配好 Dubbo Consumer，即可发起调用。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://code.alibabatech.com/schema/dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest-consumer&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.rest.api.UserService&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #1 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>&amp;lsquo;userService&amp;rsquo; 配置的 protocol 为 “rest&amp;quot;，将通过 REST 协议调用服务端&lt;/li>
-&lt;/ol>
-&lt;p>需要特别指出的是，这里显示的指定 protocol=&amp;ldquo;rest&amp;rdquo; 在通常情况下不是必须的。这里需要显示指定的原因是我们例子中服务端同时暴露了多种协议，这里指定使用 rest 是为了确保调用方走 REST 协议。&lt;/p>
-&lt;h4 id="8-发起调用">8. 发起调用&lt;/h4>
-&lt;p>简单的通过 ClassPathXmlApplicationContext 来加载刚刚配置的 Spring XML 配置 &amp;lsquo;rest-consumer.xml&amp;rsquo; 即可发起对 RestProvider 所提供的 UserService 的 REST 服务的调用。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RestConsumer&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassPathXmlApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ClassPathXmlApplicationContext(&lt;span style="color:#2aa198">&amp;#34;spring/rest-consumer.xml&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UserService userService &lt;span style="color:#719e07">=&lt;/span> context.getBean(&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span>, UserService.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;&amp;gt;&amp;gt;&amp;gt; &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> userService.getUser(1L));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User user &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> User(2L, &lt;span style="color:#2aa198">&amp;#34;Larry Page&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;&amp;gt;&amp;gt;&amp;gt; &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> userService.registerUser(user));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里分别展示了对 &amp;lsquo;getUser&amp;rsquo; 和 &amp;lsquo;registerUser&amp;rsquo; 的调用，输出结果如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt;&amp;gt;&amp;gt; User&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#268bd2">id&lt;/span>&lt;span style="color:#719e07">=&lt;/span>1, &lt;span style="color:#268bd2">name&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#39;username-1&amp;#39;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt;&amp;gt;&amp;gt; &lt;span style="color:#2aa198">2&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="进阶">进阶&lt;/h3>
-&lt;h4 id="a-在-rest-中使用-annotation">A. 在 REST 中使用 Annotation&lt;/h4>
-&lt;p>在 Dubbo 中使用 annotation 而不是 Spring XML 来暴露和引用服务，对于 REST 协议来说并没有什么不同。有关如何使用 annotation 更详细的用法，请参阅《在 Dubbo 中使用注解》章节。这里主要展示一下与上面基于 Spring XML 配置的例子不同之处。&lt;/p>
-&lt;blockquote>
-&lt;p>注：本章节讨论的示例可以通过 &lt;a href="https://github.com/beiwei30/dubbo-rest-samples/tree/master/annotation">https://github.com/beiwei30/dubbo-rest-samples/tree/master/annotation&lt;/a> 来获得&lt;/p>
-&lt;/blockquote>
-&lt;h5 id="1-使用-java-configuration-来配置服务提供方的-protocolregistryapplication">1. 使用 Java Configuration 来配置服务提供方的 protocol、registry、application&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Configuration&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@EnableDubbo&lt;/span>(scanBasePackages &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.rest.impl&amp;#34;&lt;/span>) &lt;span style="color:#586e75">// #1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderConfiguration&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span> &lt;span style="color:#586e75">// #2&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ProtocolConfig &lt;span style="color:#268bd2">protocolConfig&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ProtocolConfig protocolConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ProtocolConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocolConfig.setName(&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocolConfig.setPort(8080);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocolConfig.setServer(&lt;span style="color:#2aa198">&amp;#34;netty&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> protocolConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span> &lt;span style="color:#586e75">// #3&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> RegistryConfig &lt;span style="color:#268bd2">registryConfig&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setProtocol(&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(&lt;span style="color:#2aa198">&amp;#34;localhost&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setPort(2181);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> registryConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ApplicationConfig &lt;span style="color:#268bd2">applicationConfig&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig.setName(&lt;span style="color:#2aa198">&amp;#34;rest-provider&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>通过 &lt;code>@EnableDubbo&lt;/code> 来指定需要扫描 Dubbo 服务的包名，在本例中，UserServiceImpl 在 &amp;ldquo;org.apache.dubbo.samples.rest.impl&amp;rdquo; 下&lt;/li>
-&lt;li>通过提供一个 ProtocolConfig 的 Spring Bean 来指定服务提供方按照 REST 来暴露服务&lt;/li>
-&lt;li>通过提供一个 RegistryConfig 的 Spring Bean 来指定服务提供方所使用的服务注册机制&lt;/li>
-&lt;/ol>
-&lt;h5 id="2-使用-service-来申明-dubbo-服务">2. 使用 @Service 来申明 Dubbo 服务&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span> &lt;span style="color:#586e75">// #1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>简单的使用 &lt;code>@Service&lt;/code> 或者 &lt;code>@Service(protocol = &amp;quot;rest&amp;quot;)&lt;/code> 修饰 &amp;ldquo;UserServiceImpl&amp;rdquo; 来申明一个 Dubbo 服务，这里 &lt;code>protocol = &amp;quot;rest&amp;quot;&lt;/code> 不是必须提供的，原因是通过 Java Configuration 只配置了一个 ProtocolConfig 的示例，在这种情况下，Dubbo 会自动装配该协议到服务中&lt;/li>
-&lt;/ol>
-&lt;h5 id="3-服务提供方启动类">3. 服务提供方启动类&lt;/h5>
-&lt;p>通过使用 &lt;code>ProviderConfiguration&lt;/code> 来初始化一个 &lt;code>AnnotationConfigApplicationContext&lt;/code> 实例，就可以完全摆脱 Spring XML 的配置文件，完全借助 annotation 来装配好一个 Dubbo 的服务提供方。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RestProvider&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> IOException {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AnnotationConfigApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AnnotationConfigApplicationContext(ProviderConfiguration.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.in.read();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="4-使用-java-configuration-来配置服务消费方的-registryapplication">4. 使用 Java Configuration 来配置服务消费方的 registry、application&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Configuration&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@EnableDubbo&lt;/span>(scanBasePackages &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.rest.comp&amp;#34;&lt;/span>) &lt;span style="color:#586e75">// #1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@ComponentScan&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.rest.comp&amp;#34;&lt;/span>}) &lt;span style="color:#586e75">// #2&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ConsumerConfiguration&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span> &lt;span style="color:#586e75">// #3&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> RegistryConfig &lt;span style="color:#268bd2">registryConfig&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setProtocol(&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(&lt;span style="color:#2aa198">&amp;#34;localhost&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setPort(2181);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> registryConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ApplicationConfig &lt;span style="color:#268bd2">applicationConfig&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig.setName(&lt;span style="color:#2aa198">&amp;#34;rest-consumer&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> applicationConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>通过 &lt;code>@EnableDubbo&lt;/code> 来指定需要扫描 Dubbo 服务引用 &lt;code>@Reference&lt;/code> 的包名。在本例中，UserService 的引用在 &amp;ldquo;org.apache.dubbo.samples.rest.comp&amp;rdquo; 下&lt;/li>
-&lt;li>通过 &lt;code>@ComponentScan&lt;/code> 来指定需要扫描的 Spring Bean 的包名。在本例中，包含 UserService 引用的类 UserServiceComponent 本身需要是一个 Spring Bean，以方便调用，所以，这里指定的包名也是 &amp;ldquo;org.apache.dubbo.samples.rest.comp&amp;rdquo;&lt;/li>
-&lt;li>通过提供一个 RegistryConfig 的 Spring Bean 来指定服务消费方所使用的服务发现机制&lt;/li>
-&lt;/ol>
-&lt;p>这里提到的 UserServiceComponent 的 Spring Bean 定义如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceComponent&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService { &lt;span style="color:#586e75">// #1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Reference&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> UserService userService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(Long id) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> userService.getUser(id);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Long &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> userService.registerUser(user);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>这里比较好的实践是让这个 Spring Bean 也继承 &lt;code>UserService&lt;/code> 接口，这样在调用的时候也可以面向接口编程&lt;/li>
-&lt;/ol>
-&lt;h5 id="5-服务调用方启动类">5. 服务调用方启动类&lt;/h5>
-&lt;p>通过使用 &lt;code>ConsumerConfiguration&lt;/code> 来初始化一个 &lt;code>AnnotationConfigApplicationContext&lt;/code> 实例，就可以完全摆脱 Spring XML 的配置文件，完全借助 annotation 来装配好一个 Dubbo 的服务消费方。然后就可以通过查找 &lt;code>UserServiceComponent&lt;/code> 类型的 Spring Bean 来发起远程调用。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RestConsumer&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AnnotationConfigApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AnnotationConfigApplicationContext(ConsumerConfiguration.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UserService userService &lt;span style="color:#719e07">=&lt;/span> context.getBean(UserServiceComponent.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;&amp;gt;&amp;gt;&amp;gt; &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> userService.getUser(1L));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User user &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> User(2L, &lt;span style="color:#2aa198">&amp;#34;Larry Page&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;&amp;gt;&amp;gt;&amp;gt; &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> userService.registerUser(user));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="b-让协议跑在不同的服务器上">B. 让协议跑在不同的服务器上&lt;/h4>
-&lt;p>目前 REST 协议在 Dubbo 中可以跑在五种不同的 server 上，分别是：&lt;/p>
-&lt;ul>
-&lt;li>&amp;ldquo;netty&amp;rdquo;: 直接基于 netty 框架的 rest server，通过 &lt;code>&amp;lt;dubbo:protocol name=&amp;quot;rest&amp;quot; server=&amp;quot;netty&amp;quot;/&amp;gt;&lt;/code> 来配置&lt;/li>
-&lt;li>&amp;ldquo;tomcat&amp;rdquo;: 基于嵌入式 tomcat 的 rest server，通过 &lt;code>&amp;lt;dubbo:protocol name=&amp;quot;rest&amp;quot; server=&amp;quot;tomcat&amp;quot;/&amp;gt;&lt;/code> 来配置&lt;/li>
-&lt;li>&amp;ldquo;jetty&amp;rdquo;: &lt;strong>默认选项&lt;/strong>，基于嵌入式 jetty 的 rest server，通过 &lt;code>&amp;lt;dubbo:protocol name=&amp;quot;rest&amp;quot; server=&amp;quot;jetty&amp;quot;/&amp;gt;&lt;/code> 来配置&lt;/li>
-&lt;li>&amp;ldquo;sunhttp&amp;rdquo;: 使用 JDK 内置的 Sun HTTP server 作为 rest server，通过 &lt;code>&amp;lt;dubbo:protocol name=&amp;quot;rest&amp;quot; server=&amp;quot;sunhttp&amp;quot;/&amp;gt;&lt;/code> 来配置，仅推荐在开发环境中使用&lt;/li>
-&lt;li>&amp;ldquo;servlet”: 采用外部应用服务器的 servlet 容器来做 rest server，这个时候，除了配置 &lt;code>&amp;lt;dubbo:protocol name=&amp;quot;rest&amp;quot; server=&amp;quot;servlet&amp;quot;/&amp;gt;&lt;/code> 之外，还需要在 web.xml 中做额外的配置&lt;/li>
-&lt;/ul>
-&lt;p>由于以上的例子展示了 &amp;ldquo;netty&amp;rdquo; 作为 rest server，下面演示一下使用嵌入式 tomcat 的 rest server 的用法。&lt;/p>
-&lt;blockquote>
-&lt;p>注：本章节讨论的示例可以通过 &lt;a href="https://github.com/beiwei30/dubbo-rest-samples/tree/master/tomcat">https://github.com/beiwei30/dubbo-rest-samples/tree/master/tomcat&lt;/a> 来获得&lt;/p>
-&lt;/blockquote>
-&lt;h5 id="1-增加-tomcat-相关的依赖">1. 增加 Tomcat 相关的依赖&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.tomcat.embed&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>tomcat-embed-core&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.tomcat.embed&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>tomcat-embed-logging-juli&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="2-配置-protocol-使用-tomcat-作为-rest-server">2. 配置 protocol 使用 tomcat 作为 REST server&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tomcat&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动服务提供方之后，在以下的输出将会出现与嵌入式 Tomcat 相关的日志信息：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Jan 01, &lt;span style="color:#2aa198">2019&lt;/span> 10:15:12 PM org.apache.catalina.core.StandardContext setPath
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>WARNING: A context path must either be an empty string or start with a &lt;span style="color:#2aa198">&amp;#39;/&amp;#39;&lt;/span> and &lt;span style="color:#719e07">do&lt;/span> not end with a &lt;span style="color:#2aa198">&amp;#39;/&amp;#39;&lt;/span>. The path &lt;span style="color:#719e07">[&lt;/span>/&lt;span style="color:#719e07">]&lt;/span> does not meet these criteria and has been changed to &lt;span style="color:#719e07">[]&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Jan 01, &lt;span style="color:#2aa198">2019&lt;/span> 10:15:13 PM org.apache.coyote.AbstractProtocol init
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: Initializing ProtocolHandler &lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">&amp;#34;http-nio-8080&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Jan 01, &lt;span style="color:#2aa198">2019&lt;/span> 10:15:13 PM org.apache.tomcat.util.net.NioSelectorPool getSharedSelector
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: Using a shared selector &lt;span style="color:#719e07">for&lt;/span> servlet write/read
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Jan 01, &lt;span style="color:#2aa198">2019&lt;/span> 10:15:13 PM org.apache.catalina.core.StandardService startInternal
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: Starting service &lt;span style="color:#719e07">[&lt;/span>Tomcat&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Jan 01, &lt;span style="color:#2aa198">2019&lt;/span> 10:15:13 PM org.apache.catalina.core.StandardEngine startInternal
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: Starting Servlet Engine: Apache Tomcat/8.5.31
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Jan 01, &lt;span style="color:#2aa198">2019&lt;/span> 10:15:13 PM org.apache.coyote.AbstractProtocol start
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO: Starting ProtocolHandler &lt;span style="color:#719e07">[&lt;/span>&lt;span style="color:#2aa198">&amp;#34;http-nio-8080&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="c-使用外部的-servlet-容器">C. 使用外部的 Servlet 容器&lt;/h4>
-&lt;p>进一步的，还可以使用外部的 servlet 容器来启动 Dubbo 的 REST 服务。&lt;/p>
-&lt;blockquote>
-&lt;p>注：本章节讨论的示例可以通过 &lt;a href="https://github.com/beiwei30/dubbo-rest-samples/tree/master/servlet">https://github.com/beiwei30/dubbo-rest-samples/tree/master/servlet&lt;/a> 来获得&lt;/p>
-&lt;/blockquote>
-&lt;h5 id="1-修改-pomxml-改变打包方式">1. 修改 pom.xml 改变打包方式&lt;/h5>
-&lt;p>因为使用的是外部的 servlet 容器，需要将打包方式修改为 &amp;ldquo;war&amp;rdquo;&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;packaging&amp;gt;&lt;/span>war&lt;span style="color:#268bd2">&amp;lt;/packaging&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="2-修改-rest-providerxml">2. 修改 rest-provider.xml&lt;/h5>
-&lt;p>配置 &amp;ldquo;server&amp;rdquo; 为 &amp;ldquo;servlet&amp;rdquo; 表示将使用外部的 servlet 容器。并配置 &amp;ldquo;contextpath&amp;rdquo; 为 &amp;ldquo;&amp;quot;，原因是在使用外部 servlet 容器时，Dubbo 的 REST 支持需要知道被托管的 webapp 的 contextpath 是什么。这里我们计划通过 root context path 来部署应用，所以配置其为 &amp;ldquo;&amp;quot;。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span> contextpath=&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="3-配置-web-infwebxml">3. 配置 WEB-INF/web.xml&lt;/h5>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;web-app&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://xmlns.jcp.org/xml/ns/javaee&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> version=&lt;span style="color:#2aa198">&amp;#34;3.1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;context-param&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #1 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param-name&amp;gt;&lt;/span>contextConfigLocation&lt;span style="color:#268bd2">&amp;lt;/param-name&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param-value&amp;gt;&lt;/span>/WEB-INF/classes/spring/rest-provider.xml&lt;span style="color:#268bd2">&amp;lt;/param-value&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/context-param&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener-class&amp;gt;&lt;/span>com.alibaba.dubbo.remoting.http.servlet.BootstrapListener&lt;span style="color:#268bd2">&amp;lt;/listener-class&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/listener&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener-class&amp;gt;&lt;/span>org.springframework.web.context.ContextLoaderListener&lt;span style="color:#268bd2">&amp;lt;/listener-class&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/listener&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #2 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>com.alibaba.dubbo.remoting.http.servlet.DispatcherServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;load-on-startup&amp;gt;&lt;/span>1&lt;span style="color:#268bd2">&amp;lt;/load-on-startup&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/api/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>配置 Dubbo 和 Spring 相关的 ContextListener，打开 Dubbo HTTP 支持，以及通过 rest-provider.xml 来装配 Dubbo 服务&lt;/li>
-&lt;li>配置 Dubbo HTTP 所需的 DiapatcherServlet&lt;/li>
-&lt;/ol>
-&lt;p>这样做之后，不再需要 RestProvider 来启动 Dubbo 服务，可以将其从工程中删掉。对应的，现在 Dubbo 的服务将会随着 Servlet 容器的启动而启动。启动完毕之后，可以通过类似 &amp;ldquo;http://localhost:8080/api/users/1&amp;rdquo; 来访问暴露出的 REST 服务。需要注意的是，这个例子里假定了服务提供方的 WAR 包部署在 root context path 上，所以当该应用通过 IDE 配置的 tomcat server 启动时，需要指定 Application Context 为 &amp;ldquo;/&amp;quot;。&lt;/p>
-&lt;h4 id="d-增加-swagger-支持">D. 增加 Swagger 支持&lt;/h4>
-&lt;p>在上面使用外部 Servlet 容器的例子的基础上，讨论如何暴露 Swagger OpenApi 以及如何继承 Swagger UI。&lt;/p>
-&lt;blockquote>
-&lt;p>注：本章节讨论的示例可以通过 &lt;a href="https://github.com/beiwei30/dubbo-rest-samples/tree/master/servlet">https://github.com/beiwei30/dubbo-rest-samples/tree/master/servlet&lt;/a> 来获得&lt;/p>
-&lt;/blockquote>
-&lt;h5 id="1-暴露-swagger-openapi">1. 暴露 Swagger OpenApi&lt;/h5>
-&lt;p>增加 swagger 相关依赖，以便通过 &amp;ldquo;http://localhost:8080/openapi.json&amp;rdquo; 来访问 REST 服务的描述&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;properties&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;swagger.version&amp;gt;&lt;/span>2.0.6&lt;span style="color:#268bd2">&amp;lt;/swagger.version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/properties&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.swagger.core.v3&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>swagger-jaxrs2&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${swagger.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.swagger.core.v3&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>swagger-jaxrs2-servlet-initializer&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${swagger.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改 WEB-INF/web.xml，增加 openapi servlet 的配置&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;web-app&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- #3 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>openapi&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>io.swagger.v3.jaxrs2.integration.OpenApiServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>openapi&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/openapi.json&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/openapi.yaml&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/web-app&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>重新启动应用之后，可以通过访问 &amp;ldquo;http://localhost:8080/openapi.json&amp;rdquo; 或者 &amp;ldquo;http://localhost:8080/openapi.yaml&amp;rdquo; 来访问暴露出的 openapi 的契约，以下是 yaml 格式的表述：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">openapi&lt;/span>: &lt;span style="color:#2aa198">3.0.1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">paths&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /api/users/{id}:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">get&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">operationId&lt;/span>: getUser
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: id
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">in&lt;/span>: path
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">required&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schema&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: integer
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">format&lt;/span>: int64
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">responses&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">default&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">description&lt;/span>: default response
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">content&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application/json&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schema&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">$ref&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;#/components/schemas/User&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">text/xml&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schema&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">$ref&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;#/components/schemas/User&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">/api/users/register&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">post&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">operationId&lt;/span>: registerUser
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">requestBody&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">description&lt;/span>: a user to register
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">content&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application/json&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schema&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">$ref&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;#/components/schemas/User&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">text/xml&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schema&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">$ref&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;#/components/schemas/User&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">responses&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">default&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">description&lt;/span>: default response
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">content&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application/json&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schema&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: integer
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">format&lt;/span>: int64
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">text/xml&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schema&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: integer
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">format&lt;/span>: int64
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">components&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">schemas&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">User&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: object
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">properties&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">id&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: integer
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">format&lt;/span>: int64
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: string
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="2-集成-swagger-ui">2. 集成 Swagger UI&lt;/h5>
-&lt;p>在 pom.xml 中继续增加 swagger-ui 的依赖，这里使用的是 webjars 的版本，从集成的角度来说更加简洁。webjars 的工作机制可以参阅 webjars 官网 &lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;properties&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;swagger.webjar.version&amp;gt;&lt;/span>3.20.3&lt;span style="color:#268bd2">&amp;lt;/swagger.webjar.version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/properties&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.webjars&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>swagger-ui&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${swagger.webjar.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在工程的 webapp/WEB-INF 根目录下增加一个 HTML 文件，内容如下。HTML 文件名可以为任何名字，没有硬性要求，如果该文件被命名为 &amp;ldquo;swagger-ui.html&amp;rdquo;，那么你可以通过访问 “http://localhost:8080/swagger-ui.html&amp;rdquo; 来访问 swagger UI。本例为了演示方便起见，将其命名为 &amp;ldquo;index.html&amp;rdquo;，这样当访问 &amp;ldquo;http://localhost:8080&amp;rdquo; 时，就可以很方便的得到 swagger UI 的页面。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;!DOCTYPE html&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#268bd2">html&lt;/span> lang&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;en&amp;#34;&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#268bd2">head&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">meta&lt;/span> charset&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">title&lt;/span>&amp;gt;API UI&amp;lt;/&lt;span style="color:#268bd2">title&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">link&lt;/span> rel&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;stylesheet&amp;#34;&lt;/span> type&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;text/css&amp;#34;&lt;/span> href&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;webjars/swagger-ui/3.20.3/swagger-ui.css&amp;#34;&lt;/span> &amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">link&lt;/span> rel&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;icon&amp;#34;&lt;/span> type&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;image/png&amp;#34;&lt;/span> href&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;webjars/swagger-ui/3.20.3/favicon-32x32.png&amp;#34;&lt;/span> sizes&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;32x32&amp;#34;&lt;/span> /&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">link&lt;/span> rel&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;icon&amp;#34;&lt;/span> type&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;image/png&amp;#34;&lt;/span> href&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;webjars/swagger-ui/3.20.3/favicon-16x16.png&amp;#34;&lt;/span> sizes&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;16x16&amp;#34;&lt;/span> /&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;&lt;span style="color:#268bd2">style&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">html&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">box-sizing&lt;/span>: &lt;span style="color:#cb4b16">border-box&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">overflow&lt;/span>: &lt;span style="color:#719e07">-moz-&lt;/span>scrollbars-vertical;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">overflow-y&lt;/span>: &lt;span style="color:#cb4b16">scroll&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">*,&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">*&lt;/span>:&lt;span style="color:#268bd2">before&lt;/span>&lt;span style="color:#719e07">,&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">*&lt;/span>:&lt;span style="color:#268bd2">after&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">box-sizing&lt;/span>: &lt;span style="color:#cb4b16">inherit&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">body&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">margin&lt;/span>:&lt;span style="color:#2aa198">0&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">background&lt;/span>: &lt;span style="color:#2aa198">#fafafa&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;/&lt;span style="color:#268bd2">style&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#268bd2">head&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#268bd2">body&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#268bd2">div&lt;/span> id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;swagger-ui&amp;#34;&lt;/span>&amp;gt;&amp;lt;/&lt;span style="color:#268bd2">div&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#268bd2">script&lt;/span> src&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;webjars/swagger-ui/3.20.3/swagger-ui-bundle.js&amp;#34;&lt;/span>&amp;gt; &amp;lt;/&lt;span style="color:#268bd2">script&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#268bd2">script&lt;/span> src&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;webjars/swagger-ui/3.20.3/swagger-ui-standalone-preset.js&amp;#34;&lt;/span>&amp;gt; &amp;lt;/&lt;span style="color:#268bd2">script&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#268bd2">script&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">window&lt;/span>.onload &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#268bd2">function&lt;/span> () {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">window&lt;/span>.ui &lt;span style="color:#719e07">=&lt;/span> SwaggerUIBundle({
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> url&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;openapi.json&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dom_id&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#39;#swagger-ui&amp;#39;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> deepLinking&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> presets&lt;span style="color:#719e07">:&lt;/span> [
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SwaggerUIBundle.presets.apis,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SwaggerUIStandalonePreset
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ],
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> plugins&lt;span style="color:#719e07">:&lt;/span> [
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SwaggerUIBundle.plugins.DownloadUrl
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ],
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> layout&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">&amp;#34;StandaloneLayout&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#268bd2">script&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#268bd2">body&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#268bd2">html&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>再次重启服务器，并访问 &amp;ldquo;http://localhost:8080&amp;rdquo; 时，将会看到 swagger UI 页面的展示：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/swagger-ui.png" alt="swagger-ui">&lt;/p>
-&lt;p>通过 Swagger UI 可以很方便的浏览当前服务器提供的 REST 服务的文档信息，甚至可以直接调用来做服务测试。以 &amp;lsquo;/api/users/{id}&amp;rsquo; 为例，测试结果如下图所示：&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/swagger-ui-execute.png" alt="swagger-ui-execute">&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;p>本文主要关注了在 Dubbo 中支持 REST 协议的情况。首先探索了 REST 概念的起源，澄清了 REST 是一种适合互联网的软件架构风格，进一步的说明了 REST 风格的架构可以与 HTTP 协议无关，但是 HTTP 协议的确是 REST 风格架构的最常用甚至是最佳的组合和搭档。然后讨论了如何在 Dubbo 中开发 REST HTTP 的几种典型用法，其中包括了通过不同的配置，如传统的 Spring XML，完全通过 annotation 来配置两种典型的用法，本文中没有涉及到的还有纯 API 编程方式，Spring Boot 配置方式也是完全可以的，因为篇幅原因没有提及；还讨论了如何通过不同的 REST server 来暴露 REST HTTP 服务，包括了 embedded tomcat，netty，以及外置的 servlet 容器等几种用法。最后，在外置的 servlet 容器的基础上，进一步的讨论了如何通过 Swagger 暴露 openAPI 以及集成 Swagger UI 的方法。&lt;/p>
-&lt;p>本文没有涉及的内容包含但不限于国际化支持、Dubbo REST 更高阶的注入扩展的用法、以及 Dubbo REST 支持未来的规划。其中 Dubbo REST 扩展的支持可以参考 &lt;a href="https://github.com/beiwei30/dubbo-rest-samples/tree/master/extensions">https://github.com/beiwei30/dubbo-rest-samples/tree/master/extensions&lt;/a> 中的演示。以后有机会会开专门的篇幅来探讨更高级的 Swagger 的支持、以及对未来的展望。&lt;/p>
-&lt;div class="footnotes" role="doc-endnotes">
-&lt;hr>
-&lt;ol>
-&lt;li id="fn:1">
-&lt;p>&lt;a href="http://en.wikipedia.org/wiki/Roy_Fielding">http://en.wikipedia.org/wiki/Roy_Fielding&lt;/a>&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li id="fn:2">
-&lt;p>&lt;a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm">http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li id="fn:3">
-&lt;p>&lt;a href="https://martinfowler.com/articles/richardsonMaturityModel.html">https://martinfowler.com/articles/richardsonMaturityModel.html&lt;/a>&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li id="fn:4">
-&lt;p>&lt;a href="https://github.com/dangdangdotcom/dubbox">https://github.com/dangdangdotcom/dubbox&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li id="fn:5">
-&lt;p>&lt;a href="https://www.webjars.org/documentation#servlet3">https://www.webjars.org/documentation#servlet3&lt;/a>&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;/div></description></item></channel></rss>
+&lt;p>本文介绍了本地调用的概念以及带来的好处，并进一步的揭示了 dubbo 本地调用实际上是在当前进程中暴露了 &lt;em>injvm&lt;/em> 的协议，而该协议并不会对外暴露端口，然后讨论了如何通过 &lt;em>scope&lt;/em> 来细粒度的控制本地调用的行为，并强调了通过 &lt;em>invjm&lt;/em> 来配置的方式已经被废弃，在未来版本中可能会被删除。&lt;/p></description></item></channel></rss>
