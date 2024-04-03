@@ -5,71 +5,17 @@ type: docs
 weight: 7
 ---
 
+Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。
+
+Filter 工作原理如下图所示：
+
+<img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/framework/filter.png"/>
 
 
+## 使用方式
+### 1. Filter 拦截器概念
 
-参考samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/master/filter)
-
-## 1. 准备工作
-
-- dubbo-go cli 工具和依赖工具已安装
-- 阅读[【组件加载与可扩展性】](/zh-cn/overview/mannual/golang-sdk/preface/design/aop_and_extension/)
-- 创建一个新的 demo 应用
-
-## 2. 配置指定 Filter
-
-指定filter时可用','分隔
-
-- Consumer 端
-
-  ```yaml
-  dubbo:
-    consumer:
-      filter: echo,token,tps,myCustomFilter # 可指定自定义filter
-  ```
-
-
-
-- Provider 端
-
-  ```yaml
-  dubbo:
-    provider:
-      services:
-        GreeterProvider:
-          filter: myCustomFilter,echo,tps
-  ```
-
-## 3. 自定义Filter
-
-用户可在代码中自定义 Filter，注册到框架上，并在配置中选择使用。
-
-```go
-func init() {
-	extension.SetFilter("myCustomFilter", NewMyClientFilter)
-}
-
-func NewMyClientFilter() filter.Filter {
-	return &MyClientFilter{}
-}
-
-type MyClientFilter struct {
-}
-
-func (f *MyClientFilter) Invoke(ctx context.Context, invoker protocol.Invoker, invocation protocol.Invocation) protocol.Result {
-	fmt.Println("MyClientFilter Invoke is called, method Name = ", invocation.MethodName())
-	return invoker.Invoke(ctx, invocation)
-}
-func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result, invoker protocol.Invoker, protocol protocol.Invocation) protocol.Result {
-	fmt.Println("MyClientFilter OnResponse is called")
-	return result
-}
-
-```
-
-参考samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/master/filter)
-
-## 1. Filter 概念
+Filter 定义如下：
 
 ```go
 // Filter interface defines the functions of a filter
@@ -86,9 +32,9 @@ Filter 可以加载在 Consumer 端或者 Provider端。当加载在 Consumer �
 
 Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，可以记录日志、设置数据打点，记录 invoker 所对应服务端性能，限流等等工作。
 
-## 2. 框架预定义 Filter
+### 2. 框架预定义 Filter
 
-框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于[filter](https://github.com/apache/dubbo-go/tree/release-3.0/filter)
+框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于 [filter](https://github.com/apache/dubbo-go/tree/main/filter)
 
 - accesslog
 - active
@@ -110,38 +56,14 @@ Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，�
 - tps
 - tracing
 
-## 3. 默认加载Filter
+### 3. 默认加载Filter
 
-用户在配置文件中配置了将要使用的 Filters 时，框架使用用户配置的 Filters 和默认 Filters，否则仅加载默认 Filters：
+用户在配置文件中配置了自定义 Filter 加载策略时，框架将同时加载用户配置的 filters 和默认 filters，否则仅加载默认 filters。当前版本默认激活的 filter 列表如下：
 
 - Consumer: cshutdown
 - Provider: echo, metrics, token, accesslog, tps, generic_service, executivete, pshutdown
 
-## 4. 用户指定 Filter
-
-指定filter时可用','分隔
-
-- Consumer 端
-
-  ```yaml
-  dubbo:
-    consumer:
-      filter: echo,token,tps,myCustomFilter # 可指定自定义filter
-  ```
-
-
-
-- Provider 端
-
-  ```yaml
-  dubbo:
-    provider:
-      services:
-        GreeterProvider:
-          filter: myCustomFilter,echo,tps
-  ```
-
-## 5. 自定义Filter
+### 4. 自定义Filter
 
 用户可在代码中自定义 Filter，注册到框架上，并在配置中选择使用。
 
@@ -165,5 +87,9 @@ func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result,
 	fmt.Println("MyClientFilter OnResponse is called")
 	return result
 }
-
 ```
+
+## 完整示例
+可通过以下链接学习如何使用 API 配置和启用 Filter 的 <a href="https://github.com/apache/dubbo-go-samples/tree/main/filter" target="_blank">完整示例源码地址</a>
+
+
