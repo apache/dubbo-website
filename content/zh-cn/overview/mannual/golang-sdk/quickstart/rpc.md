@@ -125,30 +125,28 @@ protoc --go_out=. --go_opt=paths=source_relative \
 运行以上命令后，在目标目录中看到以下生成的文件：
 
 ```
-proto
-└── greet
-    └── v1
-        ├── greet.pb.go
-        └── greetv1triple
-            └── greet.triple.go
+ proto
+    ├── greet.pb.go
+    ├── greet.proto
+    └── greet.triple.go
 ```
 
 在 proto/greet/v1 包下有两部分内容：
 
 - `greet.pb.go` 是由谷歌标准的 `protoc-gen-go`生成，它包含 `GreetRequest`、`GreetResponse` 结构体和响应的编解码规则。
-- `greetv1triple` 包下的文件`reet.triple.go`是由 Dubbo 自定义的插件`protoc-gen-triple-go`成，其中关键的信息包括生成的接口 `GreeterClient`、构造器等。
+- `greet.triple.go` 是由 Dubbo 自定义的插件`protoc-gen-go-triple`成，其中关键的信息包括生成的接口 `GreetService`、构造器等。
 
 ### 实现服务
 
-接下来我们就需要添加业务逻辑了，实现 `greetv1triple.GreeterClient` 接口即可。
+接下来我们就需要添加业务逻辑了，实现 `greet.GreetService` 接口即可。
 
 ```go
-type GreeterServer struct {
-	greet.UnimplementedGreeterServer
+type GreetTripleServer struct {
 }
 
-func (s *GreeterServer) SayHello(ctx context.Context, in *greet.HelloRequest) (*greet.User, error) {
-	return &greet.User{Name: "Hello " + in.Name, Id: "12345", Age: 21}, nil
+func (srv *GreetTripleServer) Greet(ctx context.Context, req *greet.GreetRequest) (*greet.GreetResponse, error) {
+	resp := &greet.GreetResponse{Greeting: req.Name}
+	return resp, nil
 }
 ```
 
@@ -160,18 +158,20 @@ func (s *GreeterServer) SayHello(ctx context.Context, in *greet.HelloRequest) (*
 func main() {
 	srv, err := server.NewServer(
 		server.WithServerProtocol(
-			protocol.WithTriple(),
 			protocol.WithPort(20000),
+			protocol.WithTriple(),
 		),
 	)
 	if err != nil {
 		panic(err)
 	}
-	if err := greetv1triple.RegisterGreetServiceHandler(srv, &api.GreetTripleServer{}); err != nil {
+
+	if err := greet.RegisterGreetServiceHandler(srv, &GreetTripleServer{}); err != nil {
 		panic(err)
 	}
+
 	if err := srv.Serve(); err != nil {
-		panic(err)
+		logger.Error(err)
 	}
 }
 ```
@@ -183,26 +183,30 @@ func main() {
 curl \
     --header "Content-Type: application/json" \
     --data '{"name": "Dubbo"}' \
-    http://localhost:50051/org.apache.dubbo.demo.DemoService/sayHello
+    http://localhost:20000/greet.GreetService/Greet
 ```
 
-也可以使用 Dubbo client 请求服务，我们首先需要从生成代码即 `greetv1triple` 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起 RPC 调用了。
+也可以使用 Dubbo client 请求服务，我们首先需要从生成代码即 `greet` 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起 RPC 调用了。
 
 ```go
 func main() {
-	// for the most brief RPC case
 	cli, err := client.NewClient(
-		client.WithURL("tri://127.0.0.1:20000"),
+		client.WithClientURL("127.0.0.1:20000"),
 	)
 	if err != nil {
 		panic(err)
 	}
-	svc, err := greettriple.NewGreetService(cli)
+
+	svc, err := greet.NewGreetService(cli)
 	if err != nil {
 		panic(err)
 	}
 
-	common.TestClient(svc)
+	resp, err := svc.Greet(context.Background(), &greet.GreetRequest{Name: "hello world"})
+	if err != nil {
+		logger.Error(err)
+	}
+	logger.Infof("Greet response: %s", resp.Greeting)
 }
 ```
 
