@@ -2,57 +2,146 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
     - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
-description: 查看 RPC 调用的监控信息
-title: 查看 RPC 调用的监控信息
+description: ""
+title: metrics监控
 type: docs
 weight: 1
 ---
 
+This example demonstrates the metrics usage of dubbo-go as an RPC framework.
 
+## Contents
 
+- server/main.go - is the main definition of the service, handler and rpc server
+- client/main.go - is the rpc client
+- proto - contains the protobuf definition of the API
 
+## How to run
 
-
-## 1. 准备工作
-
-- dubbo-go cli 工具和依赖工具已安装
-- 创建一个新的 demo 应用
-
-## 2. 修改客户端逻辑，重复发起调用
-
-go-client/cmd/client.go
-
-```go
-func main() {
-	config.SetConsumerService(grpcGreeterImpl)
-	if err := config.Load(); err != nil {
-		panic(err)
-	}
-
-	logger.Info("start to test dubbo")
-	req := &api.HelloRequest{
-		Name: "laurence",
-	}
-	for{ // 重复发起调用
-		reply, err := grpcGreeterImpl.SayHello(context.Background(), req)
-		if err != nil {
-			logger.Error(err)
-		}
-		logger.Infof("client response result: %v\n", reply)
-	}
-}
+### Run server
+```shell
+go run ./go-server/cmd/main.go
 ```
 
-## 3. 查看请求 RT 信息
-
-先后启动服务端、客户端服务应用。浏览器查看 localhost:9090/metrics, 搜索 "dubbo", 即可查看服务端暴露接口的请求时延，单位 ns。
-
-```
-$ curl localhost:9090/metrics | grep dubbo
-
-# HELP dubbo_provider_service_rt 
-# TYPE dubbo_provider_service_rt gauge
-dubbo_provider_service_rt{group="",method="SayHello",service="api.Greeter",timeout="",version="3.0.0"} 41084
+test server work as expected:
+```shell
+curl \
+    --header "Content-Type: application/json" \
+    --data '{"name": "Dubbo"}' \
+    http://localhost:20000/greet.GreetService/Greet
 ```
 
-可看到当前最近一次请求 rt 为 41084 ns。
+### Run client
+```shell
+go run ./go-client/cmd/main.go
+```
+
+## deploy to local
+install prometheus and open prometheus config file `prometheus.yml`, write the config like this
+
+```yaml
+global:
+  evaluation_interval: 15s
+  scrape_interval: 15s
+scrape_configs:
+- job_name: dubbo-provider
+  scrape_interval: 15s
+  scrape_timeout: 5s
+  metrics_path: /prometheus
+  static_configs:
+    - targets: ['localhost:9099']
+- job_name: dubbo-consumer
+  scrape_interval: 15s
+  scrape_timeout: 5s
+  metrics_path: /prometheus
+  static_configs:
+    - targets: ['localhost:9097']
+```
+
+install grafana and open grafana web page like `localhost:3000`
+
+open: 【Home / Connections / Data sources】
+
+click 【Add new data source】
+
+select Prometheus
+
+enter 【Prometheus server URL】 like `http://localhost:9090` and click 【Save & test】
+
+![datasource.png](./assert/datasource.png)
+
+open 【Home / Dashboards 】click 【New】【import】and enter 19294 click Load
+
+![import](./assert/import.png)
+
+if your grafana can't access internet you can open `https://grafana.com/grafana/dashboards/19294-dubbo-observability/` and click 【Download JSON】
+
+paste the JSON
+
+![json.png](./assert/import-json.png)
+
+![datasource.png](./assert/import-datasource.png)
+
+click 【Import】button and you will see the Dubbo Observability dashboard,enjoy it
+
+![databoard](./assert/dashboard.png)
+
+## Deploy to Kubernetes
+
+#### kube-prometheus
+
+install prometheus in k8s [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus)
+
+Set `prometheus-service.yaml` type to NodePort
+
+1. add `dubboPodMoitor.yaml` to  `kube-prometheus` `manifests` dir, The content is as follows
+ ```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: podmonitor
+  labels:
+    app: podmonitor
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - dubbo-system
+  selector:
+    matchLabels:
+      app-type: dubbo
+  podMetricsEndpoints:
+    - port: metrics # ref to dubbo-app port name metrics
+      path: /prometheus
+---
+# rbac
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dubbo-system
+  name: pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+---
+# rbac
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: dubbo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-reader
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-k8s
+    namespace: monitoring
+```
+2. `kubectl apply -f Deployment.yaml`
+3. open prometheus web page such as http://localhost:9090/targets
+   ![podmonitor.png](./assert/podmonitor.png)
+

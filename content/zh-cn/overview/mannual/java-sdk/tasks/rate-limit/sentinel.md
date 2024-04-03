@@ -6,19 +6,18 @@ aliases:
     - /zh/overview/tasks/rate-limit/sentinel/
     - /zh-cn/overview/tasks/rate-limit/sentinel/
 description: "使用 Sentinel 保护您的应用，防止应用因个别服务的突发流量过载而出现稳定性问题。"
-linkTitle: 待整合-Sentinel 限流
-title: Sentinel 限流
+linkTitle: Sentinel限流
+title: 使用 Sentinel 应对突发流量，保护您的应用
 type: docs
 weight: 1
 ---
 
-## Sentinel 是什么
-
 随着微服务的流行，服务和服务之间的稳定性变得越来越重要。Sentinel 是面向分布式、多语言异构化服务架构的流量治理组件，主要以流量为切入点，从流量路由、流量控制、流量整形、熔断降级、系统自适应过载保护、热点流量防护等多个维度来帮助开发者保障微服务的稳定性。
+
 
 ## 一、示例架构说明
 
-完整示例项目地址 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-sentinel" target="_blank">dubbo-samples-sentinel</a>
+本文演示如何使用 Sentinel 实现 Dubbo 服务调用限流。完整示例项目地址 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-sentinel" target="_blank">dubbo-samples-sentinel</a>
 
 接口定义：
 

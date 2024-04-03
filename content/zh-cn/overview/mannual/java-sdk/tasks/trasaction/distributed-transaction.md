@@ -8,9 +8,8 @@ title: 使用Seata让Dubbo支持分布式事务
 type: docs
 weight: 42
 ---
-在Dubbo中可以使用Seata来实现分布式事务功能
+本示例演示如何使用 Apache Seata 实现 Dubbo 分布式事务功能，保证数据一致性。
 
-## 开始之前
 Apache Seata 是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。
 在Dubbo中集成Seata实现分布式事务非常方便，只需简单几步即可完成，本文将带你快速体验。开始前，请先完成以下内容:
 - 请克隆[dubbo-samples](https://github.com/apache/dubbo-samples)至本地并导入到开发工具中，并找到/2-advanced/dubbo-samples-seata子项目。
@@ -18,7 +17,7 @@ Apache Seata 是一款开源的分布式事务解决方案，致力于在微服�
 
 ![seata-flow](/imgs/docs3-v2/java-sdk/seata/flow.png)
 
-### 步骤 1：建立数据库并初始化相关测试数据
+## 步骤 1：建立数据库并初始化相关测试数据
 - 本文将使用MySQL 5.7 (更多支持的数据库可在文末查看附录)。
 进入dubbo-samples-seata的script目录，找到dubbo_biz.sql和undo_log.sql两个数据库脚本文件，内容如下:
 
@@ -80,12 +79,12 @@ INSERT INTO account_tbl(`user_id`,`money`) VALUES('ACC_001','1000');
 INSERT INTO stock_tbl(`commodity_code`,`count`) VALUES('STOCK_001','100');
 
 ```
-#### 请依次执行以下操作:
+### 请依次执行以下操作:
 * 1.1 创建seata数据库(实际业务场景中会使用不同的数据库，本文为了方便演示仅创建一个数据库，所有的表都在该数据库中创建)
 * 1.2 执行undo_log.sql表中的脚本完成AT模式所需的undo_log表创建
 * 1.3 执行dubbo_biz.sql表中的脚本完成示例业务表创建以及测试数据的初始化
 
-### 步骤 2：更新spring-boot应用配置中的数据库连接信息
+## 步骤 2：更新spring-boot应用配置中的数据库连接信息
 
 请将以下3个子模块的数据库连接信息更新为你的信息，其他配置无需更改，至此，客户端的配置已经完毕。
 
@@ -98,7 +97,7 @@ username: root
 password: 123456
 ```
 
-### 步骤 3：启动Seata-Server
+## 步骤 3：启动Seata-Server
 - 本文使用的是Seata-Server V2.0.0版本。
 
 请将下载的Seata-Server二进制包解压，并进入bin目录，然后执行以下命令即可启动Seata-Server。
@@ -112,17 +111,17 @@ password: 123456
 ./seata-server.bat
 ```
 
-### 步骤 4：启动示例
+## 步骤 4：启动示例
 
 一切准备就绪，开始启动示例
 
-#### 请依次启动以下子项目:
+### 请依次启动以下子项目:
 * 4.1 Account Service
 * 4.2 Order Service
 * 4.3 Stock Service
 * 4.4 Business Service
 
-### 步骤 5：查看分布式事务执行结果
+## 步骤 5：查看分布式事务执行结果
 通过访问以下链接，可以测试分布式事务成功提交流程:
 
 http://127.0.0.1:9999/test/commit?userId=ACC_001&commodityCode=STOCK_001&orderCount=1
@@ -135,7 +134,7 @@ http://127.0.0.1:9999/test/rollback?userId=ACC_001&commodityCode=STOCK_001&order
 
 **分布式事务失败回滚时，业务表的数据将没有任何改变，请注意观察数据库表中的数据。**
 
-### 附录
+## 附录
 * 支持的事务模式:Seata目前支持AT、TCC、SAGA、XA等模式，详情请访问[Seata官网](https://seata.apache.org/zh-cn/docs/user/mode/at)进行了解
 * 支持的配置中心:Seata支持丰富的配置中心，如zookeeper、nacos、consul、apollo、etcd、file(本文使用此配置中心，无需第三方依赖，方便快速演示)，详情请访问[Seata配置中心](https://seata.apache.org/zh-cn/docs/user/configuration/)进行了解
 * 支持的注册中心:Seata支持丰富的注册中心，如eureka、sofa、redis、zookeeper、nacos、consul、etcd、file(本文使用此注册中心，无需第三方依赖，方便快速演示)，详情请访问[Seata注册中心](https://seata.apache.org/zh-cn/docs/user/registry/)进行了解

@@ -3,8 +3,8 @@ aliases:
    - /zh/docs3-v2/golang-sdk/quickstart/
    - /zh-cn/docs3-v2/golang-sdk/quickstart/
 description: Dubbo-go 快速开始
-linkTitle: 快速开始
-title: 快速开始
+linkTitle: 开发RPC服务
+title: 开发 RPC Server & RPC Client
 type: docs
 weight: 1
 ---
@@ -54,7 +54,7 @@ $ cd dubbo-go-samples/helloworld
 ```
 
 ### 运行 server
-在 `helloworld` 目录：
+在 `go-server/cmd` 目录：
 
 运行以下命令，启动 server：
 
@@ -62,20 +62,20 @@ $ cd dubbo-go-samples/helloworld
 $ go run server.go
 ```
 
-使用 `cURL` 验证 server 正常启动：
+使用 `cURL` 验证 server 已经正常启动：
 
 ```shell
 $ curl \
-    --header "Content-Type: application/json" \
-    --data '{"name": "Dubbo"}' \
-    http://localhost:50051/greet.v1.GreetService/Greet
+      --header "Content-Type: application/json" \
+      --data '{"name": "Dubbo"}' \
+      http://localhost:20000/greet.GreetService/Greet
 
 Greeting: Hello world
 ```
 
 ### 运行 client
 
-打开一个新的 terminal，运行以下命令，启动 client
+打开一个新的 terminal，运行以下命令，在 `go-client/cmd` 目录运行以下命令，启动 client
 
 ```shell
 $ go run client.go
@@ -83,7 +83,7 @@ $ go run client.go
 Greeting: Hello world
 ```
 
-以上就是一个完整的 dubbo-go rpc 工作流程。
+以上就是一个完整的 dubbo-go RPC 通信服务开发过程。
 
 ## 源码讲解
 接下来，我们将对 `dubbo-go-samples/helloworld` 示例进行源码层面的讲解。
@@ -94,9 +94,8 @@ Greeting: Hello world
 ```protobuf
 syntax = "proto3";
 
-package greet.v1;
-
-option go_package = "github.com/apache/dubbo-go-samples/helloworld/greet/v1";
+package greet;
+option go_package = "github.com/apache/dubbo-go-samples/helloworld/proto;greet";
 
 message GreetRequest {
   string name = 1;
@@ -115,7 +114,7 @@ service GreetService {
 
 ### 生成代码
 
-在运行 server 或者 client 之前，我们需要使用 `protoc-gen-go`、`protoc-gen-go-triple`生成相关的代码
+在运行 server 或者 client 之前，我们需要使用 `protoc-gen-go`、`protoc-gen-go-triple` 生成相关的代码
 
 ```bash
 protoc --go_out=. --go_opt=paths=source_relative \
