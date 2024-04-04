@@ -84,7 +84,12 @@ Content-Type: application/json
 }
 ```
 
+
 ## 更多内容
 值得注意的是，当前框架中尚未建立完整的服务状态管理机制，dubbo-go 框架会将所有加载的服务设置为 `SERVING` 状态，但尚没有 `NOT SERVING` 设置机制（在满足某个特定条件的情况下将服务状态设置为 NOT SERVING）。
 
 如果有需要，用户可通过扩展 dubbo-go 框架的方式，提供完整的服务状态管理能力，这样就可以查询到实时更新的服务状态，并根据服务状态进行流量转发。
+
+部分参考资料：
++ https://github.com/grpc/grpc/blob/master/doc/health-checking.md
++ https://github.com/grpc/grpc-go/tree/master/health

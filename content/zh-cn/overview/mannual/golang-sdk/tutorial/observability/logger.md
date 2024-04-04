@@ -59,3 +59,17 @@ type Logger interface {
 
 ## 2. 完全自定义日志
 当前 dubbo-go 框架支持 zap、logrus 两个日志框架，如果您想让 dubbo 框架内核使用其他日志框架打印日志，推荐以标准扩展形式增加支持，具体可参考核心库中内置的 [源码实现](https://github.com/apache/dubbo-go/tree/main/logger)。
+
+## 3. 访问日志
+
+可以通过以下方式配置开启访问日志：
+
+```go
+srv, err := server.NewServer(
+	server.WithAccesslog("true"),
+	// server.WithAccesslog("default"),
+	// server.WithAccesslog("/your/path/to/store/the/log/logfile"),
+)
+```
+
+对于 `true` 和 `default` 而言，访问日志会使用 Dubbo 中的 logger 组件打印出来。如果指定了具体的日志文件路径，则直接写入到该文件。
