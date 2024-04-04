@@ -12,7 +12,8 @@ weight: 6
 
 在本篇文档中，我们将演示 dubbo java 和 dubbo go 的服务发现互通能力，这样结合协议兼容性，我们就能实现完整的打通 dubbo java 和 dubbo go 微服务体系。
 
-This example shows dubbo-go's service discovery and java-go interoperation feature  with Nacos as registry.
+
+本文档使用 Nacos 注册中心作为演示，可在此查看本文档 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/service_discovery)。
 
 
 > before run the code , you should Follow this instruction to install and start Nacos server.
