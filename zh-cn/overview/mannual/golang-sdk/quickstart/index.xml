@@ -69,43 +69,43 @@
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --go-triple_out&lt;span style="color:#719e07">=&lt;/span>. --go-triple_opt&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#268bd2">paths&lt;/span>&lt;span style="color:#719e07">=&lt;/span>source_relative &lt;span style="color:#cb4b16">\
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> proto/greet.proto
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行以上命令后，在目标目录中看到以下生成的文件：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>proto
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── greet
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── v1
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> proto
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ├── greet.pb.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── greetv1triple
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ├── greet.proto
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── greet.triple.go
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 proto/greet/v1 包下有两部分内容：&lt;/p>
 &lt;ul>
 &lt;li>&lt;code>greet.pb.go&lt;/code> 是由谷歌标准的 &lt;code>protoc-gen-go&lt;/code>生成，它包含 &lt;code>GreetRequest&lt;/code>、&lt;code>GreetResponse&lt;/code> 结构体和响应的编解码规则。&lt;/li>
-&lt;li>&lt;code>greetv1triple&lt;/code> 包下的文件&lt;code>reet.triple.go&lt;/code>是由 Dubbo 自定义的插件&lt;code>protoc-gen-triple-go&lt;/code>成，其中关键的信息包括生成的接口 &lt;code>GreeterClient&lt;/code>、构造器等。&lt;/li>
+&lt;li>&lt;code>greet.triple.go&lt;/code> 是由 Dubbo 自定义的插件&lt;code>protoc-gen-go-triple&lt;/code>成，其中关键的信息包括生成的接口 &lt;code>GreetService&lt;/code>、构造器等。&lt;/li>
 &lt;/ul>
 &lt;h3 id="实现服务">实现服务&lt;/h3>
-&lt;p>接下来我们就需要添加业务逻辑了，实现 &lt;code>greetv1triple.GreeterClient&lt;/code> 接口即可。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> GreeterServer &lt;span style="color:#268bd2">struct&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greet.UnimplementedGreeterServer
+&lt;p>接下来我们就需要添加业务逻辑了，实现 &lt;code>greet.GreetService&lt;/code> 接口即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> GreetTripleServer &lt;span style="color:#268bd2">struct&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterServer) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>greet.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>greet.User, &lt;span style="color:#dc322f">error&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>greet.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>, Age: &lt;span style="color:#2aa198">21&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (srv &lt;span style="color:#719e07">*&lt;/span>GreetTripleServer) &lt;span style="color:#268bd2">Greet&lt;/span>(ctx context.Context, req &lt;span style="color:#719e07">*&lt;/span>greet.GreetRequest) (&lt;span style="color:#719e07">*&lt;/span>greet.GreetResponse, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> resp &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>greet.GreetResponse{Greeting: req.Name}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> resp, &lt;span style="color:#cb4b16">nil&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动-server">启动 Server&lt;/h3>
 &lt;p>创建一个新的 Server，把我们上一步中实现的 &lt;code>GreeterServer&lt;/code>注册给它，接下来就可以直接初始化和启动 Server 了，它将在指定的端口接收请求。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> srv, err &lt;span style="color:#719e07">:=&lt;/span> server.&lt;span style="color:#268bd2">NewServer&lt;/span>(
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> server.&lt;span style="color:#268bd2">WithServerProtocol&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithTriple&lt;/span>(),
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithPort&lt;/span>(&lt;span style="color:#2aa198">20000&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithTriple&lt;/span>(),
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ),
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> greetv1triple.&lt;span style="color:#268bd2">RegisterGreetServiceHandler&lt;/span>(srv, &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.GreetTripleServer{}); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> greet.&lt;span style="color:#268bd2">RegisterGreetServiceHandler&lt;/span>(srv, &lt;span style="color:#719e07">&amp;amp;&lt;/span>GreetTripleServer{}); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> srv.&lt;span style="color:#268bd2">Serve&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Error&lt;/span>(err)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="访问服务">访问服务&lt;/h3>
@@ -113,22 +113,26 @@
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;name&amp;#34;: &amp;#34;Dubbo&amp;#34;}&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:50051/org.apache.dubbo.demo.DemoService/sayHello
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以使用 Dubbo client 请求服务，我们首先需要从生成代码即 &lt;code>greetv1triple&lt;/code> 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起 RPC 调用了。&lt;/p>
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:20000/greet.GreetService/Greet
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以使用 Dubbo client 请求服务，我们首先需要从生成代码即 &lt;code>greet&lt;/code> 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起 RPC 调用了。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// for the most brief RPC case
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> cli, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">NewClient&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client.&lt;span style="color:#268bd2">WithURL&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;tri://127.0.0.1:20000&amp;#34;&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cli, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">NewClient&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client.&lt;span style="color:#268bd2">WithClientURL&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20000&amp;#34;&lt;/span>),
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> svc, err &lt;span style="color:#719e07">:=&lt;/span> greettriple.&lt;span style="color:#268bd2">NewGreetService&lt;/span>(cli)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> svc, err &lt;span style="color:#719e07">:=&lt;/span> greet.&lt;span style="color:#268bd2">NewGreetService&lt;/span>(cli)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> common.&lt;span style="color:#268bd2">TestClient&lt;/span>(svc)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> resp, err &lt;span style="color:#719e07">:=&lt;/span> svc.&lt;span style="color:#268bd2">Greet&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), &lt;span style="color:#719e07">&amp;amp;&lt;/span>greet.GreetRequest{Name: &lt;span style="color:#2aa198">&amp;#34;hello world&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Greet response: %s&amp;#34;&lt;/span>, resp.Greeting)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上即是 dubbo-go rpc 的基本工作原理！&lt;/p>
 &lt;h2 id="更多内容">更多内容&lt;/h2>

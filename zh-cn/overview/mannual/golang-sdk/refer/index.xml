@@ -511,4 +511,113 @@ CallUserStruct参数定义：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>=======================
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req:&amp;amp;main.CallUserStruct{ID:&amp;#34;A000&amp;#34;, Male:true, SubInfo:main.SubInfo{SubID:&amp;#34;A001&amp;#34;, SubMale:false, SubAge:18}}
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>=======================
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可见接收到了来自cli的数据&lt;/p></description></item><item><title>Overview: 源码解读</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/</guid><description/></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可见接收到了来自cli的数据&lt;/p></description></item><item><title>Overview: 源码解读</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/</guid><description/></item><item><title>Overview: 使用 Nacos 作为注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/nacos/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-使用-grpc_cli-工具进行-dubbo-服务调试">2. 使用 grpc_cli 工具进行 Dubbo 服务调试&lt;/h2>
+&lt;h3 id="21-开启服务端">2.1 开启服务端&lt;/h3>
+&lt;p>示例：user.go:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, userStruct &lt;span style="color:#719e07">*&lt;/span>CallUserStruct) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;=======================\nreq:%#v\n&amp;#34;&lt;/span>, userStruct)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rsp &lt;span style="color:#719e07">:=&lt;/span> User{&lt;span style="color:#2aa198">&amp;#34;A002&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;Alex Stocks&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">18&lt;/span>, userStruct.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;=======================\nrsp:%#v\n&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>rsp, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务端开启一个服务，名为GetUser，传入一个CallUserStruct的参数，返回一个User参数&lt;br>
+CallUserStruct参数定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> CallUserStruct &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Male &lt;span style="color:#dc322f">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubInfo SubInfo &lt;span style="color:#586e75">// 嵌套子结构
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (cs CallUserStruct) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.CallUserStruct&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> SubInfo &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubMale &lt;span style="color:#dc322f">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubAge &lt;span style="color:#dc322f">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s SubInfo) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>User结构定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Id &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubInfo SubInfo &lt;span style="color:#586e75">// 嵌套上述子结构SubInfo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>开启服务：&lt;/p>
+&lt;p>&lt;code>cd server &lt;/code>&lt;br>
+&lt;code>source builddev.sh&lt;/code>&lt;br>
+&lt;code>go run .&lt;/code>&lt;/p>
+&lt;h3 id="22-定义请求体打解包协议">2.2 定义请求体(打解包协议)&lt;/h3>
+&lt;p>请求体定义为json文件，约定键值均为string&lt;br>
+键对应go语言struct字段名例如&amp;quot;ID&amp;quot;、&amp;ldquo;Name&amp;rdquo; ，值对应&amp;quot;type@val&amp;quot;&lt;br>
+其中type支持string int bool time，val使用string 来初始化，如果只填写type则初始化为零值。
+约定每个struct必须有JavaClassName字段，务必与server端严格对应&lt;/p>
+&lt;p>见userCall.json:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;ID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@A000&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;Male&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool@true&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubInfo&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@A001&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubMale&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool@false&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubAge&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int@18&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;JavaClassName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.CallUserStruct&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>userCall.json将参数CallUserStruct的结构及子结构SubInfo都定义了出来，并且给请求参数赋值。&lt;/p>
+&lt;p>user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段一定与server端严格对应&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;ID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Age&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.User&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubInfo&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubMale&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubAge&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;JavaClassName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23-执行请求">2.3 执行请求&lt;/h3>
+&lt;p>&lt;code>dubbogo-cli call --h=localhost --p 20001 --proto=dubbo --i=com.ikurento.user.UserProvider --method=GetUser --sendObj=&amp;quot;./userCall.json&amp;quot; --recvObj=&amp;quot;./user.json&amp;quot;&lt;/code>&lt;/p>
+&lt;p>cli端打印结果：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 Created pkg:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID:A000 Male:true SubInfo:0xc00006ea20 JavaClassName:com.ikurento.user.CallUserStruct}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID:A001 SubMale:false SubAge:18 JavaClassName:com.ikurento.user.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 Created pkg:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID: Name: Age:0 JavaClassName:com.ikurento.user.User SubInfo:0xc00006ec90}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID: SubMale:false SubAge:0 JavaClassName:com.ikurento.user.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 connected to localhost:20001!
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 try calling interface:com.ikurento.user.UserProvider.GetUser
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 with protocol:dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 After 3ms , Got Rsp:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID:A002 Name:Alex Stocks Age:18 JavaClassName: SubInfo:0xc0001241b0}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID:A001 SubMale:false SubAge:18 JavaClassName:}```
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到详细的请求体赋值情况，以及返回结果和耗时。支持嵌套结构&lt;/p>
+&lt;p>server端打印结果&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>=======================
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req:&amp;amp;main.CallUserStruct{ID:&amp;#34;A000&amp;#34;, Male:true, SubInfo:main.SubInfo{SubID:&amp;#34;A001&amp;#34;, SubMale:false, SubAge:18}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>=======================
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可见接收到了来自cli的数据&lt;/p></description></item></channel></rss>

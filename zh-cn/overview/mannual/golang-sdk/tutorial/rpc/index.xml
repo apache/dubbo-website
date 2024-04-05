@@ -360,7 +360,12 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="更多内容">更多内容&lt;/h2>
 &lt;p>值得注意的是，当前框架中尚未建立完整的服务状态管理机制，dubbo-go 框架会将所有加载的服务设置为 &lt;code>SERVING&lt;/code> 状态，但尚没有 &lt;code>NOT SERVING&lt;/code> 设置机制（在满足某个特定条件的情况下将服务状态设置为 NOT SERVING）。&lt;/p>
-&lt;p>如果有需要，用户可通过扩展 dubbo-go 框架的方式，提供完整的服务状态管理能力，这样就可以查询到实时更新的服务状态，并根据服务状态进行流量转发。&lt;/p></description></item><item><title>Overview: 请求重试</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/retry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/retry/</guid><description>
+&lt;p>如果有需要，用户可通过扩展 dubbo-go 框架的方式，提供完整的服务状态管理能力，这样就可以查询到实时更新的服务状态，并根据服务状态进行流量转发。&lt;/p>
+&lt;p>部分参考资料：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/grpc/grpc/blob/master/doc/health-checking.md">https://github.com/grpc/grpc/blob/master/doc/health-checking.md&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/grpc/grpc-go/tree/master/health">https://github.com/grpc/grpc-go/tree/master/health&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Overview: 请求重试</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/retry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/retry/</guid><description>
 &lt;p>当一次服务调用失败时，我们可以让框架选择自动重试几次，这样能提高用户侧看到的请求成功率。在 failover cluster 模式下 dubbo-go 支持自动重试。&lt;/p>
 &lt;h2 id="1介绍">1.介绍&lt;/h2>
 &lt;p>本示例演示如何在 client 端调用失败时配置重试功能，&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/retry" target="_blank">完整示例源码地址&lt;/a>&lt;/p>
@@ -507,40 +512,113 @@
 &lt;li>dubbo，基于 TCP 的高性能私有通信协议，缺点是通用性较差，更适合在 Dubbo SDK 间使用；&lt;/li>
 &lt;li>任意协议扩展，通过扩展 protocol 可以之前任意 RPC 协议，官方生态库提供 JsonRPC、thrift 等支持。&lt;/li>
 &lt;/ul>
-&lt;p>本篇文档中，我们将介绍关于 triple 协议的使用方式、如何实现与已有 dubbo2 系统的互相调用、扩展更多协议支持等。更多原理性介绍请参考 &lt;a href="">协议规范&lt;/a> 或者 &lt;a href="">dubbo java 中相关描述文档&lt;/a>。&lt;/p>
+&lt;p>本篇文档中，我们将介绍关于 triple 协议的使用方式、如何实现与已有 dubbo2 系统的互相调用、扩展更多协议支持等。更多原理性介绍请参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/">协议规范&lt;/a> 或者 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/protocol/">dubbo java 中相关描述文档&lt;/a>。&lt;/p>
 &lt;h2 id="triple-协议">triple 协议&lt;/h2>
-&lt;p>triple 协议支持使用 protobuf 和 non-protobuf 两种开发模式，我们推荐使用 protobuf 模式开发服务。&lt;/p>
-&lt;h3 id="protobuf-开发模式">protobuf 开发模式&lt;/h3>
-&lt;p>目前我们大部分示例都是使用这个模式开发，可查看 &lt;a href="">快速开始&lt;/a> 学习完整开发示例，以下是基本步骤：&lt;/p>
+&lt;p>triple 协议支持使用 protobuf 和 non-protobuf 两种开发模式，我们 &lt;strong>推荐使用 protobuf 模式开发服务&lt;/strong>。&lt;/p>
+&lt;p>目前我们大部分示例都是使用这个模式开发，可查看 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/">快速开始&lt;/a> 学习完整开发示例，以下是基本步骤：&lt;/p>
 &lt;ol>
 &lt;li>先使用 protobuf 定义服务&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>安装 protoc 插件，编译生成代码：&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> greet;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> go_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-samples/helloworld/proto;greet&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreetRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreetResponse&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> greeting &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> GreetService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Greet(GreetRequest) &lt;span style="color:#719e07">returns&lt;/span> (GreetResponse) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6">安装 protoc 插件&lt;/a>，编译生成代码：&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>protoc --go_out&lt;span style="color:#719e07">=&lt;/span>. --go_opt&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#268bd2">paths&lt;/span>&lt;span style="color:#719e07">=&lt;/span>source_relative &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --go-triple_out&lt;span style="color:#719e07">=&lt;/span>. --go-triple_opt&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#268bd2">paths&lt;/span>&lt;span style="color:#719e07">=&lt;/span>source_relative &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> proto/greet.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
 &lt;li>server 端发布服务&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>srv, err &lt;span style="color:#719e07">:=&lt;/span> server.&lt;span style="color:#268bd2">NewServer&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> server.&lt;span style="color:#268bd2">WithServerProtocol&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithPort&lt;/span>(&lt;span style="color:#2aa198">20000&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithTriple&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>greet.&lt;span style="color:#268bd2">RegisterGreetServiceHandler&lt;/span>(srv, &lt;span style="color:#719e07">&amp;amp;&lt;/span>GreetTripleServer{})
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
 &lt;li>client 端调用服务&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="非-protobuf-开发模式">非 protobuf 开发模式&lt;/h3>
-&lt;p>非 protobuf 即 non-protobuf 模式下，我们不需要先定义 protobuf 服务，直接使用 golang 定义接口即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>cli, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">NewClient&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client.&lt;span style="color:#268bd2">WithClientURL&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:20000&amp;#34;&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>svc, err &lt;span style="color:#719e07">:=&lt;/span> greet.&lt;span style="color:#268bd2">NewGreetService&lt;/span>(cli)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>resp, err &lt;span style="color:#719e07">:=&lt;/span> svc.&lt;span style="color:#268bd2">Greet&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), &lt;span style="color:#719e07">&amp;amp;&lt;/span>greet.GreetRequest{Name: &lt;span style="color:#2aa198">&amp;#34;hello world&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="dubbo-java-体系互调">dubbo-java 体系互调&lt;/h2>
+&lt;p>如果 java 和 go 都使用 triple+protobuf 模式，很明显他们是可以直接互调通信的。&lt;/p>
+&lt;p>但问题是很多 java 用户是使用的 triple non-protobuf 模式，还有一些老版本用户是使用的 dubbo tcp 协议。对于这部分业务，我们要可以使用 dubbo-go 框架的以下编码模式实现协议互调：&lt;/p>
 &lt;ol>
 &lt;li>定义服务&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;p>直接使用 struct 定义服务：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> GreetProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (&lt;span style="color:#719e07">*&lt;/span>GreetProvider) &lt;span style="color:#268bd2">SayHello&lt;/span>(req &lt;span style="color:#dc322f">string&lt;/span>, req1 &lt;span style="color:#dc322f">string&lt;/span>, req2 &lt;span style="color:#dc322f">string&lt;/span>) (&lt;span style="color:#dc322f">string&lt;/span>, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> req &lt;span style="color:#719e07">+&lt;/span> req1 &lt;span style="color:#719e07">+&lt;/span> req2, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
 &lt;li>server 发布服务&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;p>指定要发布的协议，可以是 dubbo、triple 或其他协议，请注意 &lt;code>WithInterface(&amp;quot;GreetProvider&amp;quot;)&lt;/code> 要保持和 dubbo-java 侧的服务名一致（如保持 java 全路径名）：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>ins, err &lt;span style="color:#719e07">:=&lt;/span> dubbo.&lt;span style="color:#268bd2">NewInstance&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubbo.&lt;span style="color:#268bd2">WithName&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;dubbo_server&amp;#34;&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubbo.&lt;span style="color:#268bd2">WithProtocol&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithTriple&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithPort&lt;/span>(&lt;span style="color:#2aa198">20001&lt;/span>)),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>srvDubbo, err &lt;span style="color:#719e07">:=&lt;/span> ins.&lt;span style="color:#268bd2">NewServer&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err = srvDubbo.&lt;span style="color:#268bd2">Register&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>GreetProvider{}, &lt;span style="color:#cb4b16">nil&lt;/span>, server.&lt;span style="color:#268bd2">WithInterface&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GreetProvider&amp;#34;&lt;/span>)); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err = srvDubbo.&lt;span style="color:#268bd2">Serve&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
 &lt;li>client 调用服务&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="协议扩展">协议扩展&lt;/h2>
-&lt;p>除了 triple 协议之外，dubbo-go 框架支持多种协议模式。&lt;/p>
-&lt;h3 id="dubbo协议">dubbo协议&lt;/h3>
-&lt;h3 id="与老版本dubbo-java互调">与老版本dubbo-java互调&lt;/h3>
-&lt;h3 id="多协议发布">多协议发布&lt;/h3>
-&lt;h3 id="其他扩展协议">其他扩展协议&lt;/h3></description></item><item><title>Overview: 异常类型返回值</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/error/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/error/</guid><description>
+&lt;p>指定要调用的协议，可以是 dubbo、triple 或其他协议，请注意 &lt;code>WithInterface(&amp;quot;GreetProvider&amp;quot;)&lt;/code> 要保持和 dubbo-java 侧的服务名一致（如保持 java 全路径名）：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>cliDubbo, _ &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">NewClient&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client.&lt;span style="color:#268bd2">WithClientProtocolTriple&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client.&lt;span style="color:#268bd2">WithClientSerialization&lt;/span>(constant.Hessian2Serialization),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>connDubbo, _ &lt;span style="color:#719e07">:=&lt;/span> cliDubbo.&lt;span style="color:#268bd2">Dial&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GreetProvider&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">ipanic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> respDubbo &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err = connDubbo.&lt;span style="color:#268bd2">CallUnary&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;hello&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;new&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">&amp;amp;&lt;/span>respDubbo, &lt;span style="color:#2aa198">&amp;#34;SayHello&amp;#34;&lt;/span>); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Errorf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GreetProvider.Greet err: %s&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="协议扩展">协议扩展&lt;/h2>
+&lt;p>Dubbo 框架支持协议扩展，目前官方生态支持的协议包括：&lt;/p>
+&lt;ul>
+&lt;li>triple&lt;/li>
+&lt;li>dubbo&lt;/li>
+&lt;li>jsonrpc&lt;/li>
+&lt;/ul>
+&lt;p>在一些场景下，你可以在一个应用内同时发布多个协议的服务，或者同时以不同的协议调用服务，这里有一个 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/multirpc">多协议发布的使用示例&lt;/a> 供参考。&lt;/p></description></item><item><title>Overview: 异常类型返回值</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/error/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/error/</guid><description>
 &lt;h2 id="1介绍">1.介绍&lt;/h2>
 &lt;p>本文档演示如何在 RPC 调用过程中处理 error 错误类型响应，可在此查看 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/error" target="_blank">完整示例源码地址&lt;/a>。&lt;/p>
 &lt;h2 id="2示例详解">2.示例详解&lt;/h2>
@@ -801,6 +879,24 @@
 &lt;p>先启动服务端，再启动客户端，可以观察到服务端打印了客户端通过context传递的参数值，说明参数被成功传递并获取&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2024-02-26 11:13:14 INFO logger/logging.go:42 Dubbo attachment key1 = [user defined value 1]
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2024-02-26 11:13:14 INFO logger/logging.go:42 Dubbo attachment key2 = [user defined value 2]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 启动时检查</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/start-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/start-check/</guid><description>
+&lt;p>Dubbo 框架缺省会在启动时检查依赖的服务是否可用（注册中心是否有可用地址），不可用时会抛出异常，阻止应用初始化完成，以便上线时，能及早发现问题，默认 check=&amp;ldquo;true&amp;rdquo;，并等待3s。&lt;/p>
+&lt;p>可以通过 check=&amp;ldquo;false&amp;rdquo; 关闭检查，比如，测试时，有些服务不关心，或者出现了循环依赖，必须有一方先启动。&lt;/p>
+&lt;p>关闭 check 后，请注意 provider数量比较多时， consumer 订阅 provider 生成服务地址可能会有一定延迟，如果 consumer 一启动就对外提供服务，可能会造成&amp;quot;冷启动&amp;quot;。所以在这个时候，请对服务进行预热。&lt;/p>
+&lt;p>示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">check &lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">reference&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">myserivce&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">check&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>cli, err &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">NewClient&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client.&lt;span style="color:#268bd2">WithClientCheck&lt;/span>(&lt;span style="color:#cb4b16">false&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>svc, err &lt;span style="color:#719e07">:=&lt;/span> health.&lt;span style="color:#268bd2">NewHealth&lt;/span>(cli)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>svc.&lt;span style="color:#268bd2">Check&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), &lt;span style="color:#719e07">&amp;amp;&lt;/span>health.HealthCheckRequest{Service: &lt;span style="color:#2aa198">&amp;#34;greet.GreetService&amp;#34;&lt;/span>}, client.&lt;span style="color:#268bd2">WithCheck&lt;/span>(&lt;span style="color:#cb4b16">false&lt;/span>))
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: filter拦截器</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/filter/</guid><description>
 &lt;p>Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。&lt;/p>
 &lt;p>Filter 工作原理如下图所示：&lt;/p>
