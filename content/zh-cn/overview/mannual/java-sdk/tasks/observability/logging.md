@@ -55,18 +55,23 @@ java -Ddubbo.application.logger=slf4j
     <artifactId>slf4j-api</artifactId>
     <version>1.7.30</version>
 </dependency>
-
-<!-- Logback implementation -->
+<!-- Log4j2 to SLF4J Bridge -->
 <dependency>
-    <groupId>ch.qos.logback</groupId>
-    <artifactId>logback-classic</artifactId>
-    <version>1.2.3</version>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-slf4j-impl</artifactId>
+    <version>2.14.1</version>
 </dependency>
-
+<!-- Log4j2 Core -->
 <dependency>
-    <groupId>ch.qos.logback</groupId>
-    <artifactId>logback-core</artifactId>
-    <version>1.2.3</version>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-core</artifactId>
+    <version>2.14.1</version>
+</dependency>
+<!-- Log4j2 API -->
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-api</artifactId>
+    <version>2.14.1</version>
 </dependency>
 ```
 

@@ -8,7 +8,8 @@ type: docs
 weight: 1
 ---
 
-This example demonstrates the metrics usage of dubbo-go as an RPC framework.
+Dubbo 支持采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统，实现对微服务集群的可视化监控，以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/metrics)。
+
 
 ## Contents
 
@@ -68,23 +69,23 @@ select Prometheus
 
 enter 【Prometheus server URL】 like `http://localhost:9090` and click 【Save & test】
 
-![datasource.png](./assert/datasource.png)
+![datasource.png](/imgs/golang/metrics/dashboard.png)
 
 open 【Home / Dashboards 】click 【New】【import】and enter 19294 click Load
 
-![import](./assert/import.png)
+![import](/imgs/golang/metrics/import.png)
 
 if your grafana can't access internet you can open `https://grafana.com/grafana/dashboards/19294-dubbo-observability/` and click 【Download JSON】
 
 paste the JSON
 
-![json.png](./assert/import-json.png)
+![json.png](/imgs/golang/metrics/import-json.png)
 
-![datasource.png](./assert/import-datasource.png)
+![datasource.png](/imgs/golang/metrics/import-datasource.png)
 
 click 【Import】button and you will see the Dubbo Observability dashboard,enjoy it
 
-![databoard](./assert/dashboard.png)
+![databoard](/imgs/golang/metrics/dashboard.png)
 
 ## Deploy to Kubernetes
 
@@ -143,5 +144,5 @@ subjects:
 ```
 2. `kubectl apply -f Deployment.yaml`
 3. open prometheus web page such as http://localhost:9090/targets
-   ![podmonitor.png](./assert/podmonitor.png)
+   ![podmonitor.png](/imgs/golang/metrics/podmonitor.png)
 
