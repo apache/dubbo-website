@@ -108,7 +108,7 @@ docker run --name some-zookeeper  -p 2181:2181 --restart always -d zookeeper
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.provider.Application"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api "-Dexec.mainClass=org.apache.dubbo.samples.provider.Application"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.provider.Application"
@@ -130,7 +130,7 @@ Linux / MacOS:
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.client.Application"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api "-Dexec.mainClass=org.apache.dubbo.samples.client.Application"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.client.Application"
