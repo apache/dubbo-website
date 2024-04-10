@@ -63,7 +63,7 @@ After starting the registry, the next step is to start a service provider that p
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-xml -Dexec.mainClass="org.apache.dubbo.samples.provider.Application"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-xml "-Dexec.mainClass=org.apache.dubbo.samples.provider.Application"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-xml -Dexec.mainClass="org.apache.dubbo.samples.provider.Application"
@@ -86,7 +86,7 @@ The last step is to start a service consumer to call the service provider, which
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-xml -Dexec.mainClass="org.apache.dubbo.samples.client.Application"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-xml "-Dexec.mainClass=org.apache.dubbo.samples.client.Application"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-xml -Dexec.mainClass="org.apache.dubbo.samples.client.Application"
