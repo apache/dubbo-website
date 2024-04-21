@@ -217,7 +217,7 @@ Task 派发采用 RoundRobin 方式。
 
 ## 参考文档
 
-1. [connect Function with UDP](http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch08lev1sec11.html)
+1. connect Function with UDP(`http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch08lev1sec11.html`)
 2. [深入Go UDP编程](http://colobu.com/2016/10/19/Go-UDP-Programming/)
 
 

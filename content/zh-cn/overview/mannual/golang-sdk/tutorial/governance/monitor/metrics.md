@@ -13,7 +13,7 @@ weight: 7
 
 
 
-参考Samples： [dubbo-go-samples/metrics](https://github.com/apache/dubbo-go-samples/tree/master/metrics)
+参考Samples： [dubbo-go-samples/metrics](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/metrics)
 
 ## 1. 数据上报配置
 

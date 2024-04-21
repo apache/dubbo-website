@@ -2,17 +2,13 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config-center/apollo/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/apollo/
+    - /zh-cn/overview/what/ecosystem/config-center/apollo/
 description: Apollo 配置中心的基本使用和工作原理。
 linkTitle: Apollo
 title: Apollo
 type: docs
 weight: 4
 ---
-
-
-
-
-
 
 ## 1 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)

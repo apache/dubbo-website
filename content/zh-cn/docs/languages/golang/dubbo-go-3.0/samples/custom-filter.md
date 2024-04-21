@@ -15,7 +15,7 @@ type: docs
 
 # Dubbo-go 3.0 自定义Filter组件
 
-参考samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/master/filter)
+参考samples [dubbo-go-samples/filter](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/filter)
 
 ## 1. Filter 概念
 
@@ -36,7 +36,7 @@ Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，�
 
 ## 2. 框架预定义 Filter
 
-框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于[filter](https://github.com/apache/dubbo-go/tree/3.0/filter)
+框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于[filter](https://github.com/apache/dubbo-go/tree/release-3.0/filter)
 
 - accesslog
 - active

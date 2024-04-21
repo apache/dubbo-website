@@ -47,7 +47,7 @@ When we need to call a remote service, the remote service has not been developed
 ```
 
 #### Notice:
-**Dubbo from `2.2.0`, each service will be exposed locally by default, and can be referenced locally without any configuration. If you do not want the service to be exposed remotely, you only need to set the protocol to injvm in the provider. **
+Dubbo from `2.2.0`, each service will be exposed locally by default, and can be referenced locally without any configuration. If you do not want the service to be exposed remotely, you only need to set the protocol to injvm in the provider. **
 
 
 ### Automatic exposure
@@ -57,3 +57,20 @@ Starting with `2.2.0`, every service is exposed locally by default. When referen
 ```xml
 <dubbo:reference ... scope="remote" />
 ```
+
+### Dynamic configuration call behavior
+
+Starting with' 3.2', the api provided by Dubbo allows users to dynamically configure whether a single call is a local call or a remote call, and when it is not configured, the local service will be referenced first by default.
+
+**Configure a single call as a remote call.**
+
+```java
+RpcContext.getServiceContext().setLocalInvoke(false);
+```
+
+**Configure a single call as a local call.**
+
+```java
+RpcContext.getServiceContext().setLocalInvoker(true);
+```
+

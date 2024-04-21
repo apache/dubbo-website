@@ -5,6 +5,7 @@ no_list: true
 title: Admin 整体架构与安装步骤
 type: docs
 weight: 1
+working_in_progress: true
 ---
 
 回顾 [Dubbo 服务治理体系的总体架构](../../../what/overview/)，Admin 是服务治理控制面中的一个核心组件，负责微服务集群的服务治理、可视化展示等。
@@ -22,36 +23,109 @@ weight: 1
 
 ### Dubboctl 安装
 #### Download
-下载 Dubbo Admin 发行版本
+当前Dubboctl未正式发行，可按以下方式进行尝试。
+拉取Dubbo Admin并编译Dubboctl
 ```shell
-curl -L https://dubbo.apache.org/installer.sh | VERSION=0.1.0 sh -
-# Admin 要组织好发行版本
+git clone https://github.com/apache/dubbo-admin.git
+cd dubbo-admin/cmd/dubboctl
+go build -o dubboctl .
 ```
 
 将 dubboctl 放入可执行路径
 ```shell
-ln -s dubbo-admin-0.1.0/bin/dubboctl /usr/local/bin/dubboctl
+ln -s dubbo-admin/cmd/dubboctl/dubboctl /usr/local/bin/dubboctl
 ```
 #### Install
 安装过程会依次：
 
-1. 安装 Admin 自定义的一些资源
-2. 拉起 Admin、Nacos、Zookeeper 等不同的组件服务
+1. 将用户自定义的配置profile以及set参数覆盖于默认profile，得到最终的profile
+```yaml
+# default profile
+apiVersion: dubbo.apache.org/v1alpha1
+kind: DubboOperator
+metadata:
+  namespace: dubbo-system
+spec:
+  profile: default
+  namespace: dubbo-system
+  componentsMeta:
+    admin:
+      enabled: true
+    grafana:
+      enabled: true
+      repoURL: https://grafana.github.io/helm-charts
+      version: 6.52.4
+    nacos:
+      enabled: true
+    zookeeper:
+      enabled: true
+      repoURL: https://charts.bitnami.com/bitnami
+      version: 11.1.6
+    prometheus:
+      enabled: true
+      repoURL: https://prometheus-community.github.io/helm-charts
+      version: 20.0.2
+    skywalking:
+      enabled: true
+      repoURL: https://apache.jfrog.io/artifactory/skywalking-helm
+      version: 4.3.0
+    zipkin:
+      enabled: true
+      repoURL: https://openzipkin.github.io/zipkin
+      version: 0.3.0
+```
+建议使用自定义profile进行配置，在componentsMeta中开启或关闭组件，在components下配置各组件。其中components下各组件的配置值都是helm chart的values，各组件的具体配置请参考：
+Grafana: https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
+Zookeeper: https://github.com/bitnami/charts/tree/main/bitnami/zookeeper/#installing-the-chart
+Prometheus: https://github.com/prometheus-community/helm-charts/tree/main/charts
+Skywalking: https://github.com/apache/skywalking-kubernetes/blob/master/chart/skywalking/README.md
+Zipkin: https://github.com/Financial-Times/zipkin-helm
+```yaml
+# customization profile
+apiVersion: dubbo.apache.org/v1alpha1
+kind: DubboOperator
+metadata:
+  namespace: dubbo-system
+spec:
+  profile: default
+  namespace: dubbo-system
+  componentsMeta:
+    admin:
+      enabled: true
+    grafana:
+      enabled: true
+      version: 6.31.0
+    prometheus:
+      enabled: false
+  components:
+    admin:
+      replicas: 3
+    grafana:
+      testFramework:
+        enabled: false
+```
+2. 根据profile拉取所需组件并生成manifest，目前Admin，Nacos已在本地，无需拉取；Grafana，Zookeeper，Prometheus，Skywalking，Zipkin将从官方chart库拉取，具体地址和版本可见上方default profile
+3. 将manifest应用于k8s集群
 ```shell
-dubboctl install # 使用默认 manifests 安装
+dubboctl manifest install # 使用默认 manifests 安装
 
 # or
 
-dubboctl manifests| kubectl apply -f -
+dubboctl manifest generate | kubectl apply -f -
 ```
 
 ```shell
-dubboctl install --set profile=minimal # 指定不同的 profile，即安装组件的组合
+dubboctl install --set spec.components.admin.replicas=2 # 设置组件的配置
 ```
 
 ```shell
-dubboctl install --set admin.nacos.enabled=true, admin.nacos.namespace=test
-# 指定不同的覆盖参数
+dubboctl install --set spec.componentsMeta.admin.enabled=true, spec.componentsMeta.grafana.enabled=false
+# 开启或关闭组件
+```
+
+```shell
+dubboctl install --set spec.componentsMeta.grafana.repoURL=https://grafana.github.io/helm-charts, spec.componentsMeta.grafana.version=6.31.0
+# 设置需远程拉取组件的仓库地址与版本
 ```
 
 检查安装效果
@@ -65,45 +139,45 @@ kubectl port-forward svc/dubbo-admin -n dubbo-system 38080:38080
 ```
 
 打开浏览器，访问： `http://127.0.0.1:38080/`
+
 ### Helm 安装
-#### 前置条件
 
-- [Install the Helm client](https://helm.sh/docs/intro/install/), version 3.6 or above.
-- Kubernetes 集群
-- 配置 helm repository
-```shell
-$ helm repo add dubbo https://dubbo.apache.org/charts
-$ helm repo update
+获取图表
 ```
-#### 安装步骤
-##### 安装方式一
-```shell
-helm install dubbo-admin dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-nacos dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-zookeeper dubbo/dubbo-stack -n dubbo-system
+helm repo add https://charts.bitnami.com/bitnami
+helm repo add https://prometheus-community.github.io/helm-charts
+helm repo add https://grafana.github.io/helm-charts
+helm repo add https://apache.jfrog.io/artifactory/skywalking-helm
+helm repo add https://openzipkin.github.io/zipkin
+```
+安装 zookeeper
+```bash
+helm install zookeeper bitnami/zookeeper -n dubbo-system
 ```
 
-```shell
-helm install dubbo-admin-grafana dubbo/dubbo-stack -n dubbo-system
-
-helm install dubbo-admin-prometheus dubbo/dubbo-stack -n dubbo-system
-```
-##### 安装方式二
-```shell
-helm install dubbo-admin-all dubbo/dubbo-stack -n dubbo-system
+安装 prometheus
+```bash
+helm install prometheus prometheus-community/prometheus -n dubbo-system
 ```
 
-> 引发的问题。需要明确哪些组件是保证生产可用的，哪些是仅作展示的，比如 nacos/zookeeper/admin 保障生产可用，prometheus/grafana 是仅作展示
-> 如果基于以上结论，则大部分情况下，dubbo-admin-all 是不推荐保生产安装的；更推荐使用类似 dubbo-admin-nacos 生产保障包，然后自己用 prometheus 社区的生产安装包
+安装 grafana
+```bash
+helm install grafana grafana/grafana -n dubbo-system
+```
 
+安装 skywalking
+```bash
+helm install skywalking skywalking/skywalking -n dubbo-system
+```
+
+安装 zipkin
+```
+helm install zipkin openzipkin/zipkin -n dubbo-system
+```
 
 检查安装状态
 ```shell
-helm ls -n dubbo-system
-
-kubectl get deployments -n dubbo-system --output wide
+helm ls -n dubbo-system ；kubectl get pods -n dubbo-system --output wide
 ```
 
 ### VM 安装

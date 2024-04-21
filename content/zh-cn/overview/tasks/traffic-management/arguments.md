@@ -17,7 +17,7 @@ weight: 6
 ## 开始之前
 
 * [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../../deploy)
+* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
 
 ## 任务详情
 
@@ -84,4 +84,4 @@ conditions:
 * arguments[0]=1~100
 * url_key=value
 
-更为灵活的是，条件路由的匹配条件支持扩展，用户可以自定义匹配条件的来源和格式，具体可参见 [条件路由规则说明](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/traffic/routing-rule/)。
+更为灵活的是，条件路由的匹配条件支持扩展，用户可以自定义匹配条件的来源和格式，具体可参见 [条件路由规则说明](/zh-cn/overview/core-features/traffic/condition-rule/)。

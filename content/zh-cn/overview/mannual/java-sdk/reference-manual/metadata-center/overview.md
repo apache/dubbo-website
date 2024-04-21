@@ -14,18 +14,12 @@ weight: 1
 
 
 
-元数据中心为 Dubbo 中的两类元数据提供了存取能力：
+元数据中心为 Dubbo 中的两类元数据提供了存取能力
 - 1 地址发现元数据
-    - 1.1 '接口-应用' 映射关系
-    - 1.2 接口配置数据
 - 2 服务运维元数据
-    - 2.1 接口定义描述数据
-    - 2.2 消费者订阅关系数据
-
-关于如何配置开启元数据中心请参考具体实现文档。
 
 ## 1 地址发现元数据
-Dubbo3 中引入了 [应用级服务发现机制](/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/#应用级服务发现简介) 用来解决异构微服务体系互通与大规模集群实践的性能问题，应用级服务发现将全面取代 2.x 是时代的接口级服务发现。
+Dubbo3 中引入了 [应用级服务发现机制](/zh-cn/overview/core-features/service-discovery/#面向百万实例集群的服务发现机制) 用来解决异构微服务体系互通与大规模集群实践的性能问题，应用级服务发现将全面取代 2.x 时代的接口级服务发现。
 同时为了保持 Dubbo 面向服务/接口的易用性、服务治理的灵活性，Dubbo 围绕应用级服务发现构建了一套元数据机制，即 `接口 - 应用映射关系` 与 `接口配置元数据`。
 
 ### 1.1 接口 - 应用映射关系
@@ -43,8 +37,9 @@ $ get /dubbo/mapping/org.apache.dubbo.demo.DemoService
 $ demo-provider,two-demo-provider,dubbo-demo-annotation-provider
 ```
 
-1. 节点路径是 `/dubbo/mapping/{interface name}`
-2. 多个应用名通过英文逗号 `,` 隔开
+*① 节点路径是 `/dubbo/mapping/{interface name}`*
+
+*② 多个应用名通过英文逗号 `,` 隔开*
 
 ### 1.2 接口配置元数据
 
@@ -53,7 +48,7 @@ $ demo-provider,two-demo-provider,dubbo-demo-annotation-provider
 
 以 Zookeeper 为例，接口配置元数据保存在以下位置，如果多个实例生成的 revision 相同，则最终会共享同一份元数据配置：
 
-/dubbo/metadata/{application name}/{revision}
+`/dubbo/metadata/{application name}/{revision}`
 
 ```shell script
 [zk: localhost:2181(CONNECTED) 33] get /dubbo/metadata/demo-provider/da3be833baa2088c5f6776fb7ab1a436
@@ -121,7 +116,9 @@ $ demo-provider,two-demo-provider,dubbo-demo-annotation-provider
 
 ## 2 服务运维元数据
 
-Dubbo 上报的服务运维元数据通常为各种运维系统所用，如服务测试、网关数据映射、服务静态依赖关系分析等。各种第三方系统可直接读取并使用这部分数据，具体对接方式可参见本章提及的几个第三方系统。
+Dubbo 上报的服务运维元数据通常为各种运维系统所用，如服务测试、网关数据映射、服务静态依赖关系分析等。
+
+各种第三方系统可直接读取并使用这部分数据，具体对接方式可参见本章提及的几个第三方系统。
 
 ### 2.1 Provider 上报的元数据
 provider端存储的元数据内容如下：
@@ -169,9 +166,9 @@ provider端存储的元数据内容如下：
 }
 ```
 
-主要有两部分：
-* `parameters` 为服务配置与参数详情。
-* `types` 为服务定义信息。
+*① `parameters` 为服务配置与参数详情。*
+
+*② `types` 为服务定义信息。*
 
 ##### Consumer 上报的元数据：
 
@@ -190,16 +187,16 @@ provider端存储的元数据内容如下：
 }
 ```
 
-Consumer 进程订阅时使用的配置元数据。
+*Consumer 进程订阅时使用的配置元数据。*
 
 ## 3 元数据上报工作机制
 
 元数据上报默认是一个异步的过程，为了更好的控制异步行为，元数据配置组件 (metadata-report) 开放了两个配置项：
 * 失败重试
-* 每天定时重刷
+* 每天定时重试刷新
 
 ### 3.1 retrytimes 失败重试
-失败重试可以通过 retrytimes （重试次数,默认100），retryperiod（重试周期，默认3000ms）进行设置。
+失败重试可以通过 retrytimes （重试次数。默认 100），retryperiod（重试周期。默认 3000ms）进行设置。
 
 ### 3.2 定时刷新
 默认开启，可以通过设置 cycleReport=false 进行关闭。
@@ -217,5 +214,4 @@ dubbo.metadata-report.sync.report=false    ##非必须,default值为false
 ```
 > 如果元数据地址(dubbo.metadata-report.address)也不进行配置，会判断注册中心的协议是否支持元数据中心，如果支持，会使用注册中心的地址来用作元数据中心。
 
-## 4 了解如何扩展
-请参见 [扩展 metadata-report](../../spi/description/metadata-report/) 了解如何扩展自定义第三方实现。
+请参见 [metadata-report](../../spi/description/metadata-report/) 了解如何扩展自定义第三方实现。

@@ -23,9 +23,7 @@ weight: 2
                 </h4>
                     <p>通过以下教程快速上手 Dubbo Java 开发：</p>
                     <p><a href='{{< relref "./java/brief" >}}'>1 - 快速部署</a></p>
-                    <p><a href='{{< relref "./java/api" >}}'>2 - 基于 Dubbo API 开发</a></p>
-                    <p><a href='{{< relref "./java/spring-boot" >}}'>3 - 基于 Dubbo x Spring Boot 开发</a></p>
-                    <p><a href='{{< relref "./java/spring-xml" >}}'>4 - 基于 Dubbo x Spring XML 开发</a></p>
+                    <p><a href='{{< relref "./java/spring-boot" >}}'>2 - 基于 dubbo-spring-boot-starter 开发</a></p>
             </div>
         </div>
     </div>

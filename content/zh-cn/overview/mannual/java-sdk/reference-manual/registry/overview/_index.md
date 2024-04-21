@@ -10,10 +10,6 @@ weight: 1
 ---
 
 
-
-
-
-
 注册中心是 Dubbo 服务治理的核心组件，Dubbo 依赖注册中心的协调实现服务（地址）发现，自动化的服务发现是微服务实现动态扩缩容、负载均衡、、流量治理的基础。Dubbo 的服务发现机制经历了 Dubbo2 时代的接口级服务发现、Dubbo3 时代的应用级服务发现，具体可参见 [服务发现机制](/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/) 解析了解具体演进过程。
 
 ## 基本使用
@@ -28,11 +24,11 @@ dubbo
 ```
 其中，protocol 为选择的配置中心类型，cluster-address 为访问注册中心的集群地址，如
 
-`address: nacos://localshot:8848`
+`address: nacos://localhost:8848`
 
 如需集群格式地址可使用 backup 参数
 
-`address: nacos://localshot:8848?backup=localshot:8846,localshot:8847`
+`address: nacos://localhost:8848?backup=localshot:8846,localshot:8847`
 
 > 应用必须指定 Dubbo 注册中心，即使不启用注册中心也要配置（可通过设置地址为空 address='N/A' ）。
 

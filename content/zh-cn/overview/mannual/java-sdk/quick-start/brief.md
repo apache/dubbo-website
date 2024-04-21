@@ -95,7 +95,7 @@ Linux / MacOS:
 注：需要开一个独立的 terminal 运行，命令将会保持一直执行的状态。
 
 Docker:
-docker run --name some-zookeeper --restart always -d zookeeper
+docker run --name some-zookeeper  -p 2181:2181 --restart always -d zookeeper
 ```
 
 在执行完上述命令以后，等待一会出现如下图所示的日志即代表注册中心启动完毕，可以继续执行后续任务。
@@ -108,7 +108,7 @@ docker run --name some-zookeeper --restart always -d zookeeper
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.provider.Application"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api "-Dexec.mainClass=org.apache.dubbo.samples.provider.Application"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.provider.Application"
@@ -130,7 +130,7 @@ Linux / MacOS:
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.client.Application"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api "-Dexec.mainClass=org.apache.dubbo.samples.client.Application"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass="org.apache.dubbo.samples.client.Application"

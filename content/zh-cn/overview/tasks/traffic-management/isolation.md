@@ -21,7 +21,7 @@ weight: 5
 ## 开始之前
 
 * [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../../deploy)
+* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
 
 ## 任务详情
 
@@ -104,6 +104,6 @@ force: true
 
 ## 其他事项
 
-除了示例中演示的动态环境划分，也可以在部署态指定实例所属流量标签（通过一个特殊的 key `dubbo.provider.tag` 实现），这样当实例启动成功后就已经被自动圈定在某个流量环境，具体配置方式可参见 [标签路由](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/traffic/routing-rule/) 说明。
+除了示例中演示的动态环境划分，也可以在部署态指定实例所属流量标签（通过一个特殊的 key `dubbo.provider.tag` 实现），这样当实例启动成功后就已经被自动圈定在某个流量环境，具体配置方式可参见 [标签路由](/zh-cn/overview/core-features/traffic/tag-rule/) 说明。
 
 通常，`dubbo.tag` 流量标的传递需要依赖全链路追踪工具的帮助，Dubbo 只会负责 A-B 的点对点标签传递，示例中也是通过在每次点对点 RPC 调用前重复设置达成的传递效果，在实践中，全链路灰度往往从 tag 设置进全链路上下文后自动启动，我们只需要扩展 Dubbo Filter 将全链路工具上下文中的 tag 标签读取并设置进 Dubbo 上下文即可实现全链路在 Dubbo 中的自动传递，具体可参见 [Dubbo 链路追踪集成示例](../../observability)。另外，除了 RPC 调用，在微服务体系的其他基础产品中也需要依赖全链路上下文保证灰度标识的传递，以保证完整的流量隔离环境。

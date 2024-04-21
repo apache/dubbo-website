@@ -9,7 +9,7 @@ weight: 4
 ---
 
 
-动态配置规则 (ConfigurationRule) 是 Dubbo 设计的在无需重启应用的情况下，动态调整 RPC 调用行为的一种能力，也成为动态覆盖规则，因为它是通过在运行态覆盖 Dubbo 实例或者 Dubbo 实例中 URL 地址的各种参数值，实现改变 RPC 调用行为的能力。
+动态配置规则 (ConfigurationRule) 是 Dubbo 设计的在无需重启应用的情况下，动态调整 RPC 调用行为的一种能力，也称为动态覆盖规则，因为它是通过在运行态覆盖 Dubbo 实例或者 Dubbo 实例中 URL 地址的各种参数值，实现改变 RPC 调用行为的能力。
 
 使用动态配置规则，有以下几条关键信息值得注意：
 * **设置规则生效过滤条件。** 配置规则支持一系列的过滤条件，用来限定规则只对符合特定条件的服务、应用或实例才生效。
@@ -25,7 +25,7 @@ key: shop-detail
 configs:
   - side: provider
     parameters:
-      accesslog: true
+      accesslog: 'true'
 ```
 
 以下是一个服务级别的配置示例，`key: org.apache.dubbo.samples.UserService` 和 `side: consumer` 说明这条配置对所有正在消费 UserService 的 Dubbo 实例生效，在调用失败后都执行 4 次重试。`match` 条件进一步限制了消费端的范围，限定为只对应用名为 `shop-frontend` 的这个消费端应用生效。
@@ -41,7 +41,7 @@ configs:
           - exact: shop-frontend
     side: consumer
     parameters:
-      retries: 4
+      retries: '4'
 ```
 ## ConfigurationRule
 配置规则主体，定义要设置的目标服务或应用、具体的规则配置。具体配置规则 (configs) 可以设置多条。

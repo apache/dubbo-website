@@ -14,7 +14,7 @@ weight: 2
 
 ## 开始之前
 * [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../../deploy)
+* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
 
 ## 任务详情
 
@@ -57,16 +57,15 @@ configVersion: v3.0
 enabled: true
 configs:
   - side: consumer
-    match
     parameters:
-      retries: 4
+      retries: 5
 ```
 
 从 `UserService` 服务消费者视角（即 Frontend 应用）增加了调用失败后的重试次数。
 
 ```yaml
 parameters:
-  retries: 4
+  retries: 5
 ```
 
 `side: consumer` 配置会将规则发送到服务消费方实例，所有 `UserService` 服务实例会基于新的 timeout 值进行重新发布，并通过注册中心通知给所有消费方。

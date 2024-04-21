@@ -54,8 +54,9 @@ weight: 22
 <dubbo:service injvm="true" .../>
 ```
 
-#### 注意：
+{{% alert title="注意" color="warning" %}}
 **Dubbo 从 `2.2.0` 每个服务默认都会在本地暴露，无需进行任何配置即可进行本地引用，如果不希望服务进行远程暴露，只需要在 provider 将 protocol 设置成 injvm 即可。**
+{{% /alert %}}
 
 
 ### 自动暴露
@@ -65,3 +66,21 @@ weight: 22
 ```xml
 <dubbo:reference ... scope="remote" />
 ```
+
+
+### 动态配置调用行为
+
+从`3.2`开始，Dubbo提供api可以让用户在使用中动态地去配置单一次调用时为本地调用或者远程调用，当没配置的时候将默认优先引用本地服务
+
+**配置单一次调用为远程调用**
+
+```java
+RpcContext.getServiceContext().setLocalInvoke(false);
+```
+
+**配置单一次调用为本地调用**
+
+```java
+RpcContext.getServiceContext().setLocalInvoker(true);
+```
+

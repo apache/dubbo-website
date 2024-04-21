@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/nacos/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/metadata-center/nacos/
+    - /zh-cn/overview/what/ecosystem/metadata-center/nacos/
 description: Nacos 元数据中心基本使用与工作原理
 linkTitle: Nacos
 title: Nacos
@@ -90,7 +91,7 @@ Consumers接口元信息详情（通过 `report-consumer-definition=true` 控制
 ![image-dubbo-metadata-nacos-4.png](/imgs/blog/dubbo-metadata-nacos-4.png)
 
 ### 4.2 [地址发现 - 接口-应用映射](../overview//#11-接口---应用映射关系)
-在上面提到，service name 和 application name 可能是一对多的，在 nacos 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 nacos 中 publishConfigCas 的能力去解决该问题。在 nacos 中，使用 publishConfigCas 会让用户传递一个参数 casMd5，该值的含义是之前配置内容的 md5 值。不同客户端在更新之前，先去查一次 nacos 的 content 的值，计算出 md5 值，当作本地凭证。在更新时，把凭证 md5 传到服务端比对 md5 值, 如果不一致说明在次期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
+在上面提到，service name 和 application name 可能是一对多的，在 nacos 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 nacos 中 publishConfigCas 的能力去解决该问题。在 nacos 中，使用 publishConfigCas 会让用户传递一个参数 casMd5，该值的含义是之前配置内容的 md5 值。不同客户端在更新之前，先去查一次 nacos 的 content 的值，计算出 md5 值，当作本地凭证。在更新时，把凭证 md5 传到服务端比对 md5 值, 如果不一致说明在此期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
 
 Nacos api:
 ```java
@@ -110,7 +111,7 @@ configService.publishConfigCas(key, group, content, ticket);
  dubbo.application.metadata-type=remote
  ```
 
-或者，在自省模式模式下仍开启中心化元数据注册
+或者，在自省模式下仍开启中心化元数据注册
 
 ```properties
 dubbo.application.metadata-type=local

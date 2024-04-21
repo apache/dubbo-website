@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/http/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/http/
+    - /zh/overview/what/ecosystem/protocol/http/
 description: HTTP协议
 linkTitle: HTTP协议
 title: HTTP协议
@@ -73,6 +74,8 @@ http短连接，协议标准化且易读，容易对接外部系统，适用于�
 </servlet-mapping>
 ```
 
-> 如果使用 servlet 派发请求
-> * 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同，
-> * 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。
+{{% alert title="注意" color="primary" %}}
+如果使用 servlet 派发请求
+* 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同，
+* 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。
+{{% /alert %}}

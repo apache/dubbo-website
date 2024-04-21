@@ -2,17 +2,13 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
+    - /zh/overview/what/ecosystem/protocol/dubbo/
 description: Dubbo协议
 linkTitle: Dubbo协议
 title: Dubbo协议
 type: docs
 weight: 2
 ---
-
-
-
-
-
 
 ## 特性说明
 Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。
@@ -41,7 +37,7 @@ Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据
 
 * 参数及返回值需实现 `Serializable` 接口
 * 参数及返回值不能自定义实现 `List`, `Map`, `Number`, `Date`, `Calendar` 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。
-* Hessian 序列化，只传成员属性值和值的类型，不传方法或静态变量，兼容情况**吴亚军提供**
+* Hessian 序列化，只传成员属性值和值的类型，不传方法或静态变量，兼容情况由**吴亚军提供**
 
 | 数据通讯 | 情况 | 结果 |
 | ------------- | ------------- | ------------- |
@@ -55,10 +51,10 @@ Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据
 
 输入参数和结果集属性名变化，对客户端序列化无影响，但是如果客户端不重新部署，不管输入还是输出，属性名变化的属性值是获取不到的。
 
-**总结**
+{{% alert title="总结" color="info" %}}
 - 服务器端和客户端对领域对象并不需要完全一致，而是按照最大匹配原则。
 - 会抛异常的情况：枚举值一边多一种，一边少一种，正好使用了差别的那种，或者属性名相同，类型不同。
-
+{{% /alert %}}
 
 ## 使用场景
 

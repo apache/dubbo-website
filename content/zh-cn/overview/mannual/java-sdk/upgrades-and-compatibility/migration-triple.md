@@ -14,9 +14,7 @@ weight: 7
 
 
 
-## Triple 介绍
-
-`Triple` 协议的格式和原理请参阅 [RPC 通信协议](/zh-cn/docs/concepts/rpc-protocol/)
+## Triple 协议介绍
 
 根据 Triple 设计的目标，`Triple` 协议有以下优势:
 
@@ -32,6 +30,7 @@ weight: 7
 
 对于需要网关接入的 Dubbo 用户，Triple 协议提供了更加原生的方式，让网关开发或者使用开源的 grpc 网关组件更加简单。网关可以选择不解析 payload ，在性能上也有很大提高。在使用 Dubbo 协议时，语言相关的序列化方式是网关的一个很大痛点，而传统的 HTTP 转 Dubbo 的方式对于跨语言序列化几乎是无能为力的。同时，由于 Triple 的协议元数据都存储在请求头中，网关可以轻松的实现定制需求，如路由和限流等功能。
 
+> `Triple` 协议的格式和原理请参阅 [RPC 通信协议](/zh-cn/docs/concepts/rpc-protocol/)
 
 ## Dubbo2 协议迁移流程
 
@@ -76,6 +75,18 @@ public class IGreeter2Impl implements IWrapperGreeter {
 }
 ```
 
+### 仅使用 triple 协议
+
+当所有的 consuemr 都升级至支持 `Triple` 协议的版本后，provider 可切换至仅使用 `Triple` 协议启动
+
+结构如图所示:
+![strust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
+
+[Provider](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java)
+和 [Consumer](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java) 完成调用，输出如下:
+
+![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
+
 ### 仅使用 dubbo 协议
 
 为保证兼容性，我们先将部分 provider 升级到 `dubbo3` 版本并使用 `dubbo` 协议。
@@ -83,7 +94,7 @@ public class IGreeter2Impl implements IWrapperGreeter {
 使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) 和 [`Consumer`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java) ,完成调用，输出如下:
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
 
-###  同时使用 dubbo 和 triple 协议
+###  同时使用两协议
 
 对于线上服务的升级，不可能一蹴而就同时完成 provider 和 consumer 升级, 需要按步操作，保证业务稳定。
 第二步, provider 提供双协议的方式同时支持 dubbo + tri 两种协议的客户端。
@@ -96,19 +107,6 @@ public class IGreeter2Impl implements IWrapperGreeter {
 使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java)和[`Consumer`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java),完成调用，输出如下:
 
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
-
-
-### 仅使用 triple 协议
-
-当所有的 consuemr 都升级至支持 `Triple` 协议的版本后，provider 可切换至仅使用 `Triple` 协议启动 
-
-结构如图所示:
-![strust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
-
-[Provider](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java)
-和 [Consumer](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java) 完成调用，输出如下:
-
-![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
 
 
 ### 实现原理
@@ -145,11 +143,9 @@ message TripleResponseWrapper {
 > 对于请求参数，可以看到 args 被`repeated`修饰，这是因为需要支持 java 方法的多个参数。当然，序列化只能是一种。序列化的实现沿用 Dubbo2 实现的 spi
 
 
-## 多语言用户 (正在使用 Protobuf) 
-> 建议新服务均使用该方式
+## 多语言用户
 
-对于 Dubbo3 和 Triple 来说，主推的是使用 `protobuf` 序列化，并且使用 `proto` 定义的 `IDL` 来生成相关接口定义。以 `IDL` 做为多语言中的通用接口约定，加上 `Triple` 与 `Grpc` 的天然互通性，可以轻松地实现跨语言交互，例如 Go 语言等。
-
+使用 `protobuf` 建议新服务均使用该方式，对于 Dubbo3 和 Triple 来说，主推的是使用 `protobuf` 序列化，并且使用 `proto` 定义的 `IDL` 来生成相关接口定义。以 `IDL` 做为多语言中的通用接口约定，加上 `Triple` 与 `Grpc` 的天然互通性，可以轻松地实现跨语言交互，例如 Go 语言等。
 
 将编写好的 `.proto` 文件使用 `dubbo-compiler` 插件进行编译并编写实现类，完成方法调用：
 
@@ -178,7 +174,7 @@ public interface PbGreeter {
 }
 ```
 
-## 开启 Triple 新特性 —— Stream (流)
+## Triple 新特性 Stream 流
 Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
 
 - 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
@@ -205,7 +201,7 @@ Stream 分为以下三种:
 - 全双工，发送不需要等待
 - 支持取消和超时
 
-### 非 PB 序列化的流
+## 非 PB 序列化的流
 1. api
 ```java
 public interface IWrapperGreeter {
@@ -299,7 +295,7 @@ for (int i = 0; i < n; i++) {
 request.onCompleted();
 ```
 
-## 使用 Protobuf 序列化的流
+## Protobuf 序列化的流
 
 对于 `Protobuf` 序列化方式，推荐编写 `IDL` 使用 `compiler` 插件进行编译生成。生成的代码大致如下:
 ```java
@@ -318,7 +314,7 @@ public interface PbGreeter {
 }
 ```
 
-### 流的实现原理
+## 流的实现原理
 
 `Triple`协议的流模式是怎么支持的呢？
 
@@ -337,7 +333,8 @@ public interface PbGreeter {
 
 通过对于协议的介绍，我们知道 `Triple` 协议是基于 `HTTP2` 并兼容 `GRPC`。为了保证和验证与`GRPC`互通能力，Dubbo3 也编写了各种从场景下的测试。详细的可以通过[这里](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/README.MD) 了解更多。
 
-##  未来: Everything on Stub
+
+{{% alert title="未来: Everything on Stub" color="primary" %}} 
 
 用过 `Grpc` 的同学应该对 `Stub` 都不陌生。
 Grpc 使用 `compiler` 将编写的 `proto` 文件编译为相关的 protobuf 对象和相关 rpc 接口。默认的会同时生成几种不同的 `stub`
@@ -350,3 +347,4 @@ Grpc 使用 `compiler` 将编写的 `proto` 文件编译为相关的 protobuf �
 `stub` 用一种统一的使用方式帮我们屏蔽了不同调用方式的细节。不过目前 `Dubbo3` 暂时只支持传统定义接口并进行调用的使用方式。
 
 在不久的未来，`Triple` 也将实现各种常用的 `Stub`，让用户写一份`proto`文件，通过 `comipler` 可以在任意场景方便的使用，请拭目以待。
+{{% /alert %}}

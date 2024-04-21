@@ -15,7 +15,7 @@ weight: 1
 通过以下的这个命令签出最新的项目源码 [^1]：
 
 ```sh
-git clone https://github.com/apache/dubbo.git dubbo
+git clone https://github.com/apache/dubbo.git
 ```
 
 ## 分支

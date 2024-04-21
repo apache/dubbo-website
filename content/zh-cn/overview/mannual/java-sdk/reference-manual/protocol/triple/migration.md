@@ -63,8 +63,9 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) 和 [`Consumer`](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java) 完成调用。
 
-输出如下:
+{{% alert title="输出结果" color="info" %}}
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
+{{% /alert %}}
 
 ### 仅使用 triple 协议
 
@@ -76,9 +77,10 @@ public class IGreeter2Impl implements IWrapperGreeter {
 [Provider](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java)
 和 [Consumer](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java) 完成调用。
 
-输出如下:
 
+{{% alert title="输出结果" color="info" %}}
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
+{{% /alert %}}
 
 ###  同时使用 dubbo 和 triple 协议
 
@@ -95,6 +97,6 @@ public class IGreeter2Impl implements IWrapperGreeter {
 
 使用 `dubbo` 协议和 `triple` 协议启动[`Provider`](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java)和[`Consumer`](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java) 完成调用。
 
-输出如下:
-
+{{% alert title="输出结果" color="info" %}}
 ![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
+{{% /alert %}}

@@ -5,9 +5,10 @@ description: ""
 linkTitle: 开发 Web 应用
 title: 使用 Dubbo 开发 Web 应用
 type: docs
-weight: 20
+weight: 2
 ---
 
+文档编写中...
 
 Dubbo3 HTTP 协议支持仍在建设中，目前最新的 3.3 开发分支已经有初版原型供体验。正式的生产可用版本预计会在 3.4/3.4 的某个正式版本发布。
 

@@ -16,7 +16,7 @@ weight: 3
 
 具体用例可以参考：[dubbo-samples-triple/pojo](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/pojo);
 
-## 开启 Triple 新特性 —— Stream (流)
+## Stream (流)
 Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
 
 - 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
@@ -43,7 +43,7 @@ Stream 分为以下三种:
 - 全双工，发送不需要等待
 - 支持取消和超时
 
-### 非 PB 序列化的流
+## 非 PB 序列化的流
 1. api
 ```java
 public interface IWrapperGreeter {

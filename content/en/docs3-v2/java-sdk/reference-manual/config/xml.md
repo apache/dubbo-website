@@ -9,7 +9,7 @@ description: "Develop Dubbo application with Spring XML"
 Dubbo has custom configuration components based on Spring Schema extensions, and the configuration capabilities that can be achieved using XML are generally equivalent to [Configuration Reference Manual](../properties).
 
 
-For complete examples of the following content, please refer to [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
+For complete examples of the following content, please refer to [dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml)
 
 ## service provider
 

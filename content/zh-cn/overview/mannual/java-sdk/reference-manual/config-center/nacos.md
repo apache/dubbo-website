@@ -2,17 +2,13 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config-center/nacos/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/nacos/
+    - /zh-cn/overview/what/ecosystem/config-center/nacos/
 description: Nacos 配置中心的基本使用和工作原理。
 linkTitle: Nacos
 title: Nacos
 type: docs
 weight: 3
 ---
-
-
-
-
-
 
 ## 1 前置条件
 * 了解 [Dubbo 基本开发步骤](../../../quick-start/spring-boot/)
@@ -115,5 +111,5 @@ dubbo
 
 流量治理规则有多种类型，不同类型的规则 dataId 的后缀是不同的：
 
-- configurators [覆盖规则](../../../advanced-features-and-usage/traffic/config-rule/)
-- tag-router [标签路由](../../../advanced-features-and-usage/traffic/routing-rule/) 与 condition-router [条件路由](../../../advanced-features-and-usage/traffic/routing-rule/)
+- configurators [覆盖规则](/zh-cn/overview/core-features/traffic/configuration-rule/)
+- tag-router [标签路由](/zh-cn/overview/core-features/traffic/tag-rule/) 与 condition-router [条件路由](/zh-cn/overview/core-features/traffic/condition-rule/)

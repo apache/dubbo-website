@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/registry/redis/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/registry/redis/
+    - /zh-cn/overview/what/ecosystem/registry/redis/
 description: Redis 注册中心的基本使用和工作原理。
 linkTitle: Redis
 title: Redis

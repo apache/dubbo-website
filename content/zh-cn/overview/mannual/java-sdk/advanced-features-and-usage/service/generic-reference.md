@@ -342,11 +342,12 @@ Google Protobuf 对象缺少标准的 JSON 格式，生成的服务元数据信�
 从服务元数据中也可以比较容易构建泛化调用对象。
 
 
-> 注意事项
+{{% alert title="注意事项" color="primary" %}}
 
 1. 如果参数为基本类型或者 Date,List,Map 等，则不需要转换，直接调用。 
  
 2. 如果参数为其他 POJO，则使用 Map 代替。
+{{% /alert %}}
 
 如：
 ``` java

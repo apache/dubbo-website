@@ -26,7 +26,7 @@ weight: 4
 目前可以以 API、XML、Annotation 的方式进行配置
 
 **配置参数**
-- `ApplicationConfig` 新增 `String executor-management-mode` 参数，配置值为 `default` 和 `isolation` ，默认为 `default`。
+- `ApplicationConfig` 新增 `String executor-management-mode` 参数，配置值为 `default` 和 `isolation` ，默认为 `isolation`。
     - `executor-management-mode = default` 使用原有 **以协议端口为粒度、服务间共享** 的线程池管理方式
     - `executor-management-mode = isolation` 使用新增的 **以服务三元组为粒度、服务间隔离** 的线程池管理方式
 - `ServiceConfig` 新增 `Executor executor` 参数，**用以服务间隔离的线程池**，可以由用户配置化、提供自己想要的线程池，若没有指定，则会根据协议配置(`ProtocolConfig`)信息构建默认的线程池用以服务隔离。

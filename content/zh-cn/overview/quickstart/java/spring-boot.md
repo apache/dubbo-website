@@ -2,8 +2,8 @@
 aliases:
     - /zh/overview/quickstart/java/spring-boot/
 description: 本文将基于 Dubbo Samples 示例演示如何通过 Dubbo x Spring Boot 快速开发微服务应用。
-linkTitle: Dubbo x Spring Boot 开发微服务应用
-title: 3 - Dubbo x Spring Boot 开发微服务应用
+linkTitle: Dubbo Spring Boot Starter 开发微服务应用
+title: 2 - Dubbo Spring Boot Starter 开发微服务应用
 type: docs
 weight: 3
 ---
@@ -243,6 +243,17 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
 编辑 `./pom.xml` 这个文件，添加下列配置。
 
 ```xml
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-spring-boot-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>dubbo-spring-boot-demo-interface</module>
+        <module>dubbo-spring-boot-demo-provider</module>
+        <module>dubbo-spring-boot-demo-consumer</module>
+    </modules>
+
     <properties>
         <dubbo.version>3.2.0-beta.4</dubbo.version>
         <spring-boot.version>2.7.8</spring-boot.version>
@@ -304,7 +315,7 @@ docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
     <dependencies>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-spring-boot-interface</artifactId>
+            <artifactId>dubbo-spring-boot-demo-interface</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -355,7 +366,7 @@ public interface DemoService {
 }
 ```
 
-在 `GreetingsService` 中，定义了 `sayHi` 这个方法。后续服务端发布的服务，消费端订阅的服务都是围绕着 `GreetingsService` 接口展开的。
+在 `DemoService` 中，定义了 `sayHello` 这个方法。后续服务端发布的服务，消费端订阅的服务都是围绕着 `DemoService` 接口展开的。
 
 ### 5. 定义服务端的实现
 

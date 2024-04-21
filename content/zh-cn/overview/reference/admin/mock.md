@@ -5,6 +5,7 @@ no_list: true
 title: Admin 服务 Mock 功能简介
 type: docs
 weight: 4
+working_in_progress: true
 ---
 
 Mock 功能是设计用来提升微服务研发与测试效率的，它可以短路 Consumer 侧发起的远程调用，提前返回预先设定好的 Mock 值，这样即使在没有 Provider 可用的情况下，消费端也能正常的推进开发、测试进程。除此之外，mock 也可用于快速模拟负责返回值的测试数据、模拟服务端异常等场景
@@ -51,11 +52,11 @@ Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用�
     开启 Mock 前，请确保在消费端应用中引入以下依赖：
 
     ```xml
-    <denpendency>
+    <dependency>
       <groupId>org.apache.dubbo.extensions</groupId>
       <artifactId>dubbo-mock-admin</artifactId>
       <version>${version}</version>
-    </denpendency>
+    </dependency>
     ```
 
     > 查看 [dubbo-mock-admin 的可用版本](/zh-cn/download/spi-extensions/)

@@ -72,4 +72,4 @@ INFO    cmd/main.go:75  response: &{A001 Alex Stocks 18 2022-11-19 12:52:38.092 
 ```
 
 ## 3.使用Polaris作为注册中心
-相关源码：[示例源码](https://github.com/apache/dubbo-go-samples/tree/master/polaris/registry)
+相关源码：[示例源码](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/polaris/registry)

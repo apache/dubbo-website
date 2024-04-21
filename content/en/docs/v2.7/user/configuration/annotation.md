@@ -7,7 +7,7 @@ description: "Configure Dubbo with annotation"
 ---
 
 {{% pageinfo %}}
- Requires`2.6.3` or higher, click here to view the [complete sample](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
+ Requires`2.6.3` or higher, click here to view the [complete sample](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-annotation)
 {{% /pageinfo %}}
 
 

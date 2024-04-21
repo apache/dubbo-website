@@ -86,7 +86,7 @@ The Filter on the Consumer side will automatically convert ordinary calls into g
 
 ### Manual generalization call
 
-The request initiated by the manual generalization call does not pass through the filter, so the consumer side needs to initiate the generalization call explicitly. The typical application scenario is testing. In [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/master/generic), manual calls are used for the convenience of testing.
+The request initiated by the manual generalization call does not pass through the filter, so the consumer side needs to initiate the generalization call explicitly. The typical application scenario is testing. In [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/generic), manual calls are used for the convenience of testing.
 
 The generalized call does not need to create a configuration file (dubbogo.yaml), but it needs to manually configure the registration center, reference and other information in the code. The initialization method is encapsulated into the newRefConf method, as shown below.
 

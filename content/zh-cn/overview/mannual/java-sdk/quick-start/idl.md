@@ -4,7 +4,7 @@ aliases:
     - /zh-cn/docs3-v2/java-sdk/quick-start/idl/
 description: 从零演示如何基于 IDL 方式来定义 Dubbo 服务并使用 Triple 协议
 linkTitle: IDL 定义跨语言服务
-title: IDL 定义跨语言服务
+title: 5 - IDL 定义跨语言服务
 type: docs
 weight: 11
 ---
@@ -182,7 +182,7 @@ weight: 11
 
            DubboBootstrap bootstrap = DubboBootstrap.getInstance();
            bootstrap.application(new ApplicationConfig("tri-stub-server"))
-                   .registry(new RegistryConfig("multicast://127.0.0.1:2181"))
+                   .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
                    .protocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051))
                    .service(service)
                    .start();

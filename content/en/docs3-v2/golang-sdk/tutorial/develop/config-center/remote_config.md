@@ -16,7 +16,7 @@ weight: 3
 
 The Dubbogo service framework supports pre-putting the content of the configuration file 'dubbogo.yaml' into the configuration center, and then configuring the address of the registration center. In the local dubbogo.yaml configuration file, you only need to write the information of the configuration center. The middleware currently supported as the configuration center are: apollo, nacos, zookeeper
 
-You can refer to [Configuration Center samples](https://github.com/apache/dubbo-go-samples/tree/master/configcenter), any service that is correctly configured with config-center configuration will first load the entire configuration from the configuration center document.
+You can refer to [Configuration Center samples](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/configcenter), any service that is correctly configured with config-center configuration will first load the entire configuration from the configuration center document.
 
 ```yaml
 dubbo:

@@ -379,7 +379,7 @@ public class AggregateMetricsCollector implements MetricsCollector, MetricsListe
 }
 ```
 
-如果开启了本地聚合，则通过 spring 的 BeanFactory 添加监听，将 AggregateMetricsCollector 与 DefaultMetricsCollector 绑定，实现一种生存者消费者的模式，DefaultMetricsCollector 中使用监听器列表，方便扩展
+如果开启了本地聚合，则通过 spring 的 BeanFactory 添加监听，将 AggregateMetricsCollector 与 DefaultMetricsCollector 绑定，实现一种生产者消费者的模式，DefaultMetricsCollector 中使用监听器列表，方便扩展
 
 ```java
 private void registerListener() {

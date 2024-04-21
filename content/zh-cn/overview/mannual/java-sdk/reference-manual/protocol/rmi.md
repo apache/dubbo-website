@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/rmi/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/rmi/
+    - /zh/overview/what/ecosystem/protocol/rmi/
 description: Rmi协议
 linkTitle: Rmi协议
 title: Rmi协议
@@ -51,7 +52,7 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 ```sh
 java -Dsun.rmi.transport.tcp.responseTimeout=3000
 ```
-更多 RMI 优化参数请查看 [JDK 文档](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
+> 更多 RMI 优化参数请查看 [JDK 文档](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
 
 ### 接口说明
 如果服务接口继承了 `java.rmi.Remote` 接口，可以和原生 RMI 互操作，即：
@@ -97,9 +98,10 @@ java -Dsun.rmi.transport.tcp.responseTimeout=3000
 <dubbo:protocol name="rmi" codec="spring" />
 ```
 
+{{% alert title="注意" color="primary" %}}
+- **如果正在使用 RMI 提供服务给外部访问，** 公司内网环境应该不会有攻击风险。
 
-> - **如果正在使用 RMI 提供服务给外部访问，** 公司内网环境应该不会有攻击风险。
+- **同时应用里依赖了老的 common-collections 包的情况下，** dubbo 不会依赖这个包，请排查自己的应用有没有使用。
 
-> - **同时应用里依赖了老的 common-collections 包的情况下，** dubbo 不会依赖这个包，请排查自己的应用有没有使用。
-
-> - **存在反序列化安全风险。** 请检查应用：将 commons-collections3 请升级到 [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html)；将 commons-collections4 请升级到 [4.1](https://commons.apache.org/proper/commons-collections/release_4_1.html)。新版本的 commons-collections 解决了该问题。
+- **存在反序列化安全风险。** 请检查应用：将 commons-collections3 请升级到 [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html)；将 commons-collections4 请升级到 [4.1](https://commons.apache.org/proper/commons-collections/release_4_1.html)。新版本的 commons-collections 解决了该问题。
+{{% /alert %}}

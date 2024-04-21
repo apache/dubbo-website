@@ -172,7 +172,7 @@ redefine success, size: 1
 
 * https://arthas.aliyun.com/doc/ognl.html
 * https://arthas.aliyun.com/doc/sc.html
-* https://commons.apache.org/proper/commons-ognl/language-guide.html
+* https://commons.apache.org/dormant/commons-ognl/language-guide.html
 
 在排查问题时，需要查看到更多的信息，如果可以把logger级别修改为`DEBUG`，就非常有帮助。
 

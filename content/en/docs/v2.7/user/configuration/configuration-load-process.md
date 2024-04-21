@@ -92,7 +92,7 @@ Next, let's look at the changes corresponding to `ServiceConfig, ReferenceConfig
 
 - XML
 
-Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-xml)
+Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml)
 
 ```xml
   <!-- dubbo-provier.xml -->
@@ -112,7 +112,7 @@ Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/1-basi
 
 - Annotation
 
-Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-annotation)
+Refer to [the sample](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-annotation)
 
 ```java
   // AnnotationService implementation
