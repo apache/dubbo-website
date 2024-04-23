@@ -153,7 +153,7 @@ private Map<String, Class<?>> loadExtensionClasses() {
 * `META-INF/services`
 
 2. 使用反射创建扩展实例
-    这个过程很简单，使用`clazz.newInstance())`来完成。创建的扩展实例的属性都是空值。
+    这个过程很简单，使用`clazz.newInstance()`来完成。创建的扩展实例的属性都是空值。
 3. 扩展实例自动装配
     在实际的场景中，类之间都是有依赖的。扩展实例中也会引用一些依赖，比如简单的Java类，另一个Dubbo的扩展或一个Spring Bean等。依赖的情况很复杂，Dubbo的处理也相对复杂些。我们稍后会有专门的章节对其进行说明，现在，我们只需要知道，Dubbo可以正确的注入扩展点中的普通依赖，Dubbo扩展依赖或Spring依赖等。
 4. 扩展实例自动包装
@@ -191,7 +191,7 @@ private ExtensionLoader(Class<?> type) {
         objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
 ```
-objectFacory本身也是一个扩展，通过`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())`来获取。
+objectFacory本身也是一个扩展，通过`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension()`来获取。
 
 
 ![Dubbo-ExtensionFactory](/imgs/blog/dubbo-extensionfactory.png "")
@@ -229,7 +229,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
     }
 }
 ```
-AdaptiveExtensionLoader类有@Adaptive注解。前面提到了，Dubbo会为每一个扩展创建一个自适应实例。如果扩展类上有@Adaptive，会使用该类作为自适应类。如果没有，Dubbo会为我们创建一个。所以`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())`会返回一个AdaptiveExtensionLoader实例，作为自适应扩展实例。
+AdaptiveExtensionLoader类有@Adaptive注解。前面提到了，Dubbo会为每一个扩展创建一个自适应实例。如果扩展类上有@Adaptive，会使用该类作为自适应类。如果没有，Dubbo会为我们创建一个。所以`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension()`会返回一个AdaptiveExtensionLoader实例，作为自适应扩展实例。
 AdaptiveExtensionLoader会遍历所有的ExtensionFactory实现，尝试着去加载扩展。如果找到了，返回。如果没有，在下一个ExtensionFactory中继续找。Dubbo内置了两个ExtensionFactory，分别从Dubbo自身的扩展机制和Spring容器中去寻找。由于ExtensionFactory本身也是一个扩展点，我们可以实现自己的ExtensionFactory，让Dubbo的自动装配支持我们自定义的组件。比如，我们在项目中使用了Google的guice这个 IOC 容器。我们可以实现自己的GuiceExtensionFactory，让Dubbo支持从guice容器中加载扩展。
 
 ## Dubbo SPI高级用法之 AOP
