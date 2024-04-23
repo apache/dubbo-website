@@ -10,11 +10,15 @@ type: docs
 weight: 2
 ---
 
-在 [triple协议规范]() 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：
+在 [triple协议规范](/zh-cn/overview/reference/protocols/triple-spec/) 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：
 * 在后端服务之间使用高效的 triple 二进制协议。
 * 对于前端接入层，则支持所有标准 HTTP 工具如 cURL 等以标准 `application/json` 格式请求后端服务。
 
 接下来我们就看一下，对于前端 HTTP 流量而言，如何通过一些通用的网关产品快速接入后端的 triple 微服务体系。
+
+{{% alert title="注意" color="info" %}}
+使用 triple 协议后，不再需要泛化调用等协议转换步骤，任何主流的网关设备都可以通过 http 流量直接访问后端 Dubbo 服务。
+{{% /alert %}}
 
 ## 原生 HTTP 接入
 
@@ -24,7 +28,7 @@ weight: 2
 
 在真正的生产环境下，**唯一需要网关解决的只剩下地址发现问题，即如何动态感知后端 triple 服务的实例变化？** 好消息是，目前几款主流的开源网关产品如 Apache APISIX、Higress 等普遍支持以 Nacos、Zookeeper、Kubernetes 作为 upstream 数据源。
 
-以下我们以 `APISIX + Nacos + Dubbo` 的典型用法为例，详细说明整套机制的工作流程。
+以下我们以 `Higress + Nacos + Dubbo` 的典型用法为例，详细说明整套机制的工作流程。
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/apisix-nacos-dubbo.png"/>
 

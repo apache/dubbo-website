@@ -8,7 +8,8 @@ description: ""
 
 Dubbo Mesh 路由规则是基于 Istio 的 VirtualService、DestinationRule 改造而来，总体思路和格式可以参考 Istio 流量管控规则参考手册：[Istio VirtualService](https://istio.io/latest/docs/reference/config/networking/virtual-service/) 和 [Istio DestinationRule](https://istio.io/latest/docs/reference/config/networking/destination-rule/)
 
-本文描述了 Dubbo Mesh 路由规则的设计原理，和 Istio 规则的差异等。
+本文描述了 Dubbo Mesh 路由规则的设计原理，以及它和 Istio 规则的差异等。参考链接：https://www.yuque.com/docs/share/c132d5db-0dcb-487f-8833-7c7732964bd4?#。
+
 
 ### 基本思想
 基于路由链，采用Pipeline的处理方式，如下图所示：

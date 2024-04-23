@@ -10,6 +10,10 @@ aliases:
     - /zh/overview/what/gateway/higress/
 ---
 
+{{% alert title="注意" color="warning" %}}
+本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 [使用 Apache APISIX 代理 Dubbo 服务（triple协议）](../dubbo-triple-with-apisix-gateway) 学习具体示例。
+{{% /alert %}}
+
 ## 背景
 
 [Apache Dubbo](/zh-cn/) 是由阿里巴巴开源并捐赠给 Apache 的微服务开发框架，它提供了 RPC 通信与微服务治理两大关键能力。不仅经过了阿里电商场景中海量流量的验证，也在国内的技术公司中被广泛落地。

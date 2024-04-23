@@ -8,10 +8,6 @@ title: 优雅下线
 type: docs
 ---
 
-
-
-
-
 # 优雅下线
 
 ## 背景
@@ -61,8 +57,8 @@ dubbo:
 
 ```go
 extension.AddCustomShutdownCallback(func() {
-        // 用户自定义操作
-    })
+	// 用户自定义操作
+})
 ```
 
 ## 参考资料

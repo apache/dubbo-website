@@ -2,14 +2,13 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
     - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
-description: ""
+description: "采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统"
 title: metrics监控
 type: docs
-weight: 1
+weight: 2
 ---
 
 Dubbo 支持采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统，实现对微服务集群的可视化监控，以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/metrics)。
-
 
 ## Contents
 

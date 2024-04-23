@@ -1,10 +1,6 @@
 ---
-aliases:
-    - /zh/overview/tasks/ecosystem/
-    - /zh-cn/overview/tasks/ecosystem/
-description: 围绕 Dubbo 生态的限流降级、全链路追踪、分布式一致性等解决方案
+description: "如果通过 Higress、APISIX 等网关产品解决前端 http 流量接入后端 RPC 微服务问题。"
 linkTitle: HTTP网关接入
-no_list: true
 title: HTTP流量接入
 type: docs
 weight: 8

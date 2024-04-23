@@ -8,11 +8,6 @@ type: docs
 weight: 2
 ---
 
-
-
-
-
-
 在本章节中，我们将使用应用模板快速创建一组 Dubbo-go Server和 Client 端应用，部署在 Istio 集群中；观察、调试和验证服务发现和调用成功。
 
 ## 1. 准备工作

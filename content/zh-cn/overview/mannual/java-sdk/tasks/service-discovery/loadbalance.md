@@ -18,7 +18,7 @@ Dubbo 内置了 client-based 负载均衡机制，如下是当前支持的负载
 | 算法                        | 特性                    | 备注                                            | 配置值                                             |
 | :-------------------------- | :---------------------- | :---------------------------------------------- | :---------------------------------------------- |
 | Weighted Random LoadBalance           | 加权随机                | 默认算法，默认权重相同              | random (默认) |
-| RoundRobin LoadBalance       | 加权轮询                | 借鉴于 Nginx 的平滑加权轮询算法，默认权重相同， | roundrobin |
+| RoundRobin LoadBalance       | 加权轮询                | 借鉴于 Nginx 的平滑加权轮询算法，默认权重相同 | roundrobin |
 | LeastActive LoadBalance      | 最少活跃优先 + 加权随机 | 背后是能者多劳的思想                           | leastactive |
 | Shortest-Response LoadBalance | 最短响应优先 + 加权随机 | 更加关注响应速度                             | shortestresponse |
 | ConsistentHash LoadBalance   | 一致性哈希             | 确定的入参，确定的提供者，适用于有状态请求        | consistenthash |
