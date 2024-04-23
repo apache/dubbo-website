@@ -28,7 +28,7 @@ description: >
 
 相比于直接构建与 TPC 传输层的私有 RPC 协议，构建于 HTTP 之上的远程调用解决方案会有更好的通用性，如WebServices 或 REST 架构，使用 HTTP + JSON 可以说是一个事实标准的解决方案。
 
-之所有选择构建在 HTTP 之上，我认为有两个最大的优势：
+之所以选择构建在 HTTP 之上，我认为有两个最大的优势：
 
 1. HTTP 的语义和可扩展性能很好的满足 RPC 调用需求。
 2. 通用性，HTTP 协议几乎被网络上的所有设备所支持，具有很好的协议穿透性。
@@ -385,7 +385,7 @@ public static void main(String[] args) throws IOException {
 	// ...
   GreeterGrpc.IGreeter greeter = (GreeterGrpc.IGreeter) context.getBean("greeter");
   ListenableFuture<HelloReply> future =   
-        greeter.sayHAsyncello(HelloRequest.newBuilder().setName("world!").build());
+        greeter.sayHelloAsync(HelloRequest.newBuilder().setName("world!").build());
   // ...
 }
 ```
