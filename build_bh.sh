@@ -1,4 +1,4 @@
-(cd ./benchmark && cnpm install && cnpm run build)
+(cd ./benchmark && npm install && npm run build)
 
 for file in benchmark/dist/css/app.*.css; do
     cp "$file" "static/css/app.css"
