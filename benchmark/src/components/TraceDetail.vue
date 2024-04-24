@@ -1,6 +1,13 @@
 <template>
   <div>
     <el-row>
+      <el-col :span="24">
+        <div style="font-size: 15px; text-align: left; margin-top: 50px">
+          <h2>方法链路耗时对比</h2>
+        </div>
+      </el-col>
+    </el-row>
+    <el-row>
       <el-col :span="6">
         <span>选择两个配置对比</span>
         <el-cascader :show-all-levels="false"
@@ -115,19 +122,19 @@ export default {
         }, {
           value: 'fastjson2',
           label: 'Fastjson2'
-        },{
+        }, {
           value: 'fastjson',
           label: 'Fastjson'
-        },{
+        }, {
           value: 'avro',
           label: 'Avro'
-        },{
+        }, {
           value: 'fst',
           label: 'Fst'
-        },{
+        }, {
           value: 'gson',
           label: 'Gson'
-        },{
+        }, {
           value: 'kryo',
           label: 'Kryo'
         }, {
@@ -157,19 +164,19 @@ export default {
         }, {
           value: 'fastjson2',
           label: 'Fastjson2'
-        },{
+        }, {
           value: 'fastjson',
           label: 'Fastjson'
-        },{
+        }, {
           value: 'avro',
           label: 'Avro'
-        },{
+        }, {
           value: 'fst',
           label: 'Fst'
-        },{
+        }, {
           value: 'gson',
           label: 'Gson'
-        },{
+        }, {
           value: 'kryo',
           label: 'Kryo'
         }, {
@@ -193,7 +200,7 @@ export default {
       this.$.ajax({
         type: "GET",
         async: false,
-        url: "https://raw.githubusercontent.com/wxbty/jmh_result/main/test-results/fixed/rpc/merged_prop_traces.json",
+        url: "https://raw.githubusercontent.com/dyjjack/jmh_result/main/test-results/fixed/rpc/trace/merged_prop_traces.json",
         success: function (res) {
           rpcResultList = res
         }
@@ -210,7 +217,7 @@ export default {
       this.$.ajax({
         type: "GET",
         async: false,
-        url: "https://raw.githubusercontent.com/wxbty/jmh_result/main/test-results/fixed/serialization/merged_prop_traces.json",
+        url: "https://raw.githubusercontent.com/dyjjack/jmh_result/main/test-results/fixed/serialization/trace/merged_traces.json",
         success: function (res) {
           serializationResultList = res;
         }
@@ -227,6 +234,10 @@ export default {
 
     createSpanTree(spans) {
       console.log(spans)
+      if (!spans) {
+        console.error("spans is null")
+        return []
+      }
       let spanMap = new Map();
       let rootSpans = [];
 
@@ -349,6 +360,9 @@ export default {
       if (type === 'serialization') {
         let leftSerializationFilter = this.serializationTable.find(item => value[0] === JSON.parse(item.prop)['dubbo.protocol.serialization']);
         let rightSerializationFilter = this.serializationTable.find(item => value[1] === JSON.parse(item.prop)['dubbo.protocol.serialization']);
+
+        console.log("leftSerializationFilter", leftSerializationFilter)
+        console.log("rightSerializationFilter", rightSerializationFilter)
 
         this.leftTableDate = leftSerializationFilter ? this.createSpanTree(leftSerializationFilter.spans_) : []
         this.rightTableDate = rightSerializationFilter ? this.createSpanTree(rightSerializationFilter.spans_) : []

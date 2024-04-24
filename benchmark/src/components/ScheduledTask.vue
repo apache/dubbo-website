@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="ScheduledTask" style="width:100%;height:400px"></div>
-    <div id="ScheduledTaskThrpt" style="width:100%;height:400px"></div>
+    <div id="ScheduledTaskThrpt" style="width:100%;height:400px;margin-top: 60px"></div>
   </div>
 </template>
 
@@ -26,7 +26,7 @@ export default {
       this.$.ajax({
         type: "GET",
         async: false,
-        url: "https://raw.githubusercontent.com/wxbty/jmh_result/main/test-results/scheduled/merged_results.json",
+        url: "https://raw.githubusercontent.com/dyjjack/jmh_result/main/test-results/scheduled/merged_results.json",
         success: function (res) {
           jmh = res
         }
@@ -52,7 +52,7 @@ export default {
             let {time, serialization, protocol} = result.params;
             let item = {
               time: Number(time),
-              score: Math.round(result.primaryMetric.scorePercentiles['99.0'] * 1000),
+              score: Number((result.primaryMetric.scorePercentiles['99.0'] * 1000).toFixed(1)),
               serialization: serialization,
               protocol: protocol
             };
@@ -81,22 +81,23 @@ export default {
 //       let xAxisData = Array.from(new Set([].concat(...Object.values(templateList).map(obj => obj.time)))).sort((a, b) => a - b);
 
 // 自定义时间轴的标签格式
-      function formatDate(timestamp) {
-        var date = new Date(timestamp);
-        return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
-      }
+//       function formatDate(timestamp) {
+//         var date = new Date(timestamp);
+//         return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
+//       }
 
 // 生成ECharts所需的series数据结构
       let seriesData = Object.keys(templateList).map((key) => {
         let data = templateList[key].time.map((time, index) => {
           return {
-            name: formatDate(time),
+            name: this.timestampToTime(time),
             value: [time, templateList[key].score[index]]
           };
         });
         return {
           name: key,
           type: 'line',
+          smooth: true,
           showSymbol: true, // 显示标记点
           hoverAnimation: false, // 关闭hover动画
           symbolSize: 10, // 设置点的直径大小为10
@@ -123,7 +124,7 @@ export default {
         tooltip: {
           trigger: 'axis',
           formatter: function (params) {
-            let res = params[0].axisValueLabel + '<br/>';
+            let res = params[0].data.name  + '<br/>';
             params.forEach(item => {
               res += item.marker + " " + (item.data.value[1] !== null ? item.data.value[1] : '-') + 'ms<br/>';
             });
@@ -153,6 +154,18 @@ export default {
           type: 'value',
           name: '耗时(ms)'
         },
+        dataZoom: [
+          {
+            type: 'inside', // 在图表内部拖动缩放
+            start: 80,
+            end: 100
+          },
+          {
+            type: 'slider', // 有一个滑动条
+            start: 80,
+            end: 100
+          }
+        ],
         series: seriesData
       };
 
@@ -201,22 +214,23 @@ export default {
 //       let xAxisData = Array.from(new Set([].concat(...Object.values(templateList).map(obj => obj.time)))).sort((a, b) => a - b);
 
 // 自定义时间轴的标签格式
-      function formatDate(timestamp) {
-        var date = new Date(timestamp);
-        return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
-      }
+//       function formatDate(timestamp) {
+//         var date = new Date(timestamp);
+//         return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
+//       }
 
 // 生成ECharts所需的series数据结构
       let seriesData = Object.keys(templateList).map((key) => {
         let data = templateList[key].time.map((time, index) => {
           return {
-            name: formatDate(time),
+            name: this.timestampToTime(time),
             value: [time, templateList[key].score[index]]
           };
         });
         return {
           name: key,
           type: 'line',
+          smooth: true,
           showSymbol: true, // 显示标记点
           hoverAnimation: false, // 关闭hover动画
           symbolSize: 10, // 设置点的直径大小为10
@@ -243,7 +257,7 @@ export default {
         tooltip: {
           trigger: 'axis',
           formatter: function (params) {
-            let res = params[0].axisValueLabel + '<br/>';
+            let res = params[0].data.name  + '<br/>';
             params.forEach(item => {
               res += item.marker + " " + (item.data.value[1] !== null ? item.data.value[1] : '-') + 'ops/s<br/>';
             });
@@ -273,11 +287,34 @@ export default {
           type: 'value',
           name: 'ops/s'
         },
+        dataZoom: [
+          {
+            type: 'inside', // 在图表内部拖动缩放
+            start: 80,
+            end: 100
+          },
+          {
+            type: 'slider', // 有一个滑动条
+            start: 80,
+            end: 100
+          }
+        ],
         series: seriesData
       };
 
       // 使用刚指定的配置项和数据显示图表。
       myChart.setOption(option);
+    },
+    timestampToTime(timestamp) {
+      let date = new Date(Number(timestamp));
+      let Y = date.getFullYear() + '-';
+      let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+      let D = date.getDate() + ' ';
+      let h = date.getHours() + ':';
+      let m = date.getMinutes() + ':';
+      let s = date.getSeconds();
+
+      return Y + M + D + h + m + s;
     }
   }
 }

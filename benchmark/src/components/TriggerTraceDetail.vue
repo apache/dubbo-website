@@ -1,32 +1,54 @@
 <template>
   <div>
-    <el-row>
-      <el-button type="primary" @click="open">触发Actions</el-button>
-    </el-row>
+    <div class="form-layout">
+      <el-form label-width="100px" class="left-form">
+        <el-form-item label="仓库地址" prop="repo_url">
+          <el-input v-model="REPO_URL" placeholder="仓库地址"></el-input>
+        </el-form-item>
+
+        <el-form-item label="Github Token" prop="PUSH_TOKEN">
+          <el-input v-model="PUSH_TOKEN" placeholder="token"></el-input>
+        </el-form-item>
+
+        <!-- 使用一个新的form-item来包裹后三个需要放在一行的元素，但这样做并不是标准的。通常，form-item直接放在form下面 -->
+        <el-row :gutter="20" class="form-row">
+          <el-col :span="8">
+            <el-form-item label="左侧配置" prop="leftSelectedOptions" class="form-item-in-row">
+              <el-cascader v-model="leftSelectedOptions" :options="cascaderOptions" clearable></el-cascader>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="右侧配置" prop="rightSelectedOptions" class="form-item-in-row">
+              <el-cascader v-model="rightSelectedOptions" :options="cascaderOptions" clearable></el-cascader>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item class="form-item-in-row">
+              <el-button type="primary" @click="open">开始运行</el-button>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div class="right-text">
+        <div
+            style="font-size: 16px; line-height: 1.5; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; text-decoration: none; text-align: left;">
+          <p style="text-align: left;">用户需提供一个自己的GitHub仓库来存储数据，可以新创建一个，
+            也可使用现有的。您只需要参照示例仓库（<a href="https://github.com/dyjjack/jmh_result" target="_blank">jmh_result</a>可直接fork）
+            的workflow的配置即可。此外，为确保有权限推送数据，还需配置用户的GitHub Token。</p>
+        </div>
+      </div>
+    </div>
 
     <el-row>
       <el-col :span="6">
-        <span>选择具体配置</span>
-        <el-cascader v-model="leftSelectedOptions"
-                     :options="cascaderOptions"
-                     clearable>
-
-        </el-cascader>
-        <div id="TriggerP99" style="width:100%;height:400px"></div>
+        <div id="TriggerP99" style="width:100%;height:400px;margin-top: 30px"></div>
       </el-col>
       <el-col :span="6">
-        <span>选择具体配置</span>
-        <el-cascader v-model="rightSelectedOptions"
-                     :options="cascaderOptions"
-                     clearable>
-
-        </el-cascader>
-        <div id="TriggerQps" style="width:100%;height:400px"></div>
+        <div id="TriggerQps" style="width:100%;height:400px;margin-top: 30px"></div>
       </el-col>
-
       <el-col :span="6">
         <el-header>
-          <h1>{{ leftTableTitle }}</h1>
+          <h1 style="overflow: hidden;  white-space: nowrap;  text-overflow: ellipsis">{{ leftTableTitle }}</h1>
         </el-header>
         <el-table
             :data="leftTableDate"
@@ -37,8 +59,8 @@
             default-expand-all
             :tree-props="{children: 'children'}"
         >
-          <el-table-column prop="operationName_" label="方法名" min-width="90%"></el-table-column>
-          <el-table-column prop="cost" label="耗时（ms）" min-width="10%"></el-table-column>
+          <el-table-column prop="operationName_" label="方法名" min-width="82%"></el-table-column>
+          <el-table-column prop="cost" label="耗时（ms）" min-width="18%"></el-table-column>
         </el-table>
       </el-col>
 
@@ -55,8 +77,8 @@
             default-expand-all
             :tree-props="{children: 'children'}"
         >
-          <el-table-column prop="operationName_" label="方法名" min-width="90%"></el-table-column>
-          <el-table-column prop="cost" label="耗时（ms）" min-width="10%"></el-table-column>
+          <el-table-column prop="operationName_" label="方法名" min-width="82%"></el-table-column>
+          <el-table-column prop="cost" label="耗时（ms）" min-width="18%"></el-table-column>
         </el-table>
       </el-col>
     </el-row>
@@ -68,6 +90,11 @@ export default {
   name: 'TriggerTraceDetail',
   data() {
     return {
+      REPO_URL: null,
+      PUSH_NAME: null,
+      REPO_NAME: null,
+      PUSH_TOKEN: null,
+
       triggerTable: [],
 
       leftTableTitle: '',
@@ -171,6 +198,8 @@ export default {
   mounted() {
     try {
       this.init();
+      this.sampleEcharts();
+      this.thrptEcharts();
     } catch (error) {
       console.error("init：", error);
     }
@@ -179,35 +208,41 @@ export default {
     } catch (error) {
       console.error("initTable：", error);
     }
-    try {
-      this.sampleEcharts();
-    } catch (error) {
-      console.error("sampleEcharts：", error);
-    }
-    try {
-      this.thrptEcharts();
-    } catch (error) {
-      console.error("thrptEcharts：", error);
-    }
   },
 
   methods: {
     init() {
-      let jmh;
+      this.REPO_URL = localStorage.getItem('REPO_URL') || ''
+      this.PUSH_NAME = localStorage.getItem('PUSH_NAME') || ''
+      this.REPO_NAME = localStorage.getItem('REPO_NAME') || ''
+      this.PUSH_TOKEN = localStorage.getItem('PUSH_TOKEN') || ''
 
-      this.$.ajax({
-        type: "GET",
-        async: false,
-        url: "https://raw.githubusercontent.com/wxbty/jmh_result/main/test-results/scenario/merged_prop_results.json",
-        success: function (res) {
-          jmh = res
+
+      if (this.PUSH_NAME && this.REPO_NAME) {
+        let jmh;
+
+        const gitUrlPattern = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\.git$/; // 正则表达式匹配带.git后缀的GitHub仓库URL
+        const match = this.REPO_URL.match(gitUrlPattern);
+        if (match) {
+          this.PUSH_NAME = match[1]; // 用户名是第一个捕获组
+          this.REPO_NAME = match[2]; // 仓库名是第二个捕获组
         }
-      });
 
-      try {
-        this.resultList = JSON.parse(jmh);
-      } catch (error) {
-        console.error("解析JMH结果字符串出错：", error);
+        this.$.ajax({
+          type: "GET",
+          async: false,
+          url: "https://raw.githubusercontent.com/" + this.PUSH_NAME + "/" + this.REPO_NAME + "/main/test-results/scenario/merged_prop_results.json",
+          success: function (res) {
+            jmh = res
+          }
+        });
+
+        try {
+          this.resultList = JSON.parse(jmh);
+        } catch (error) {
+          console.error("解析JMH结果字符串出错：", error);
+          throw error;
+        }
       }
     },
 
@@ -224,7 +259,7 @@ export default {
             let protocol = JSON.parse(result.params.prop)['dubbo.protocol.name'];
             let serialization = JSON.parse(result.params.prop)['dubbo.protocol.serialization']
             return {
-              score: Math.round(result.primaryMetric.scorePercentiles['99.0'] * 1000),
+              score: Number((result.primaryMetric.scorePercentiles['99.0'] * 1000).toFixed(1)),
               protocol: protocol + "-" + serialization
             };
           });
@@ -287,7 +322,7 @@ export default {
               position: 'top', //在上方显示
               textStyle: {
                 //数值样式
-                fontSize: '30px',
+                fontSize: '15px',
                 color: '#666'
               },
             }
@@ -375,7 +410,7 @@ export default {
               position: 'top', //在上方显示
               textStyle: {
                 //数值样式
-                fontSize: '30px',
+                fontSize: '15px',
                 color: '#666'
               },
             }
@@ -400,28 +435,31 @@ export default {
     },
     initTable() {
 
-      let rpcResultList;
-      this.$.ajax({
-        type: "GET",
-        async: false,
-        url: "https://raw.githubusercontent.com/wxbty/jmh_result/main/test-results/scenario/merged_prop_traces.json",
-        success: function (res) {
-          rpcResultList = res
-        }
-      });
+      if (this.PUSH_NAME && this.REPO_NAME) {
+        let jmh;
 
-      try {
-        this.triggerTable = JSON.parse(rpcResultList)
-        console.log("this.rpcTable", this.triggerTable)
-      } catch (error) {
-        console.error("解析JMH结果字符串出错：", error);
+        this.$.ajax({
+          type: "GET",
+          async: false,
+          url: "https://raw.githubusercontent.com/" + this.PUSH_NAME + "/" + this.REPO_NAME + "/main/test-results/scenario/merged_prop_traces.json",
+          success: function (res) {
+            jmh = res
+          }
+        });
+
+        try {
+          this.triggerTable = JSON.parse(jmh);
+        } catch (error) {
+          console.error("解析JMH结果字符串出错：", error);
+        }
+
+        this.leftTableDate = this.createSpanTree(this.triggerTable != null && this.triggerTable.length > 0 ? this.triggerTable[0].spans_ : [])
+        this.rightTableDate = this.createSpanTree(this.triggerTable != null && this.triggerTable.length > 1 ? this.triggerTable[1].spans_ : [])
+
+        this.leftTableTitle = this.triggerTable != null && this.triggerTable.length > 0 ? JSON.parse(this.triggerTable[0].prop)['dubbo.protocol.name'] + "-" + JSON.parse(this.triggerTable[0].prop)['dubbo.protocol.serialization'] : ""
+        this.rightTableTitle = this.triggerTable != null && this.triggerTable.length > 1 ? JSON.parse(this.triggerTable[1].prop)['dubbo.protocol.name'] + "-" + JSON.parse(this.triggerTable[1].prop)['dubbo.protocol.serialization'] : ""
       }
 
-      this.leftTableDate = this.createSpanTree(this.triggerTable != null && this.triggerTable.length > 0 ? this.triggerTable[0].spans_ : [])
-      this.rightTableDate = this.createSpanTree(this.triggerTable != null && this.triggerTable.length > 1 ? this.triggerTable[1].spans_ : [])
-
-      this.leftTableTitle = this.triggerTable != null && this.triggerTable.length > 0 ? this.triggerTable[0].prop : ""
-      this.rightTableTitle = this.triggerTable != null && this.triggerTable.length > 1 ? this.triggerTable[1].prop : ""
     }
     ,
 
@@ -462,6 +500,20 @@ export default {
         this.$message({
           type: 'warning',
           message: '请选择至少一个'
+        });
+        return
+      }
+      if (!this.PUSH_TOKEN) {
+        this.$message({
+          type: 'warning',
+          message: 'token为空'
+        });
+        return
+      }
+      if (!this.REPO_URL) {
+        this.$message({
+          type: 'warning',
+          message: '仓库地址为空'
         });
         return
       }
@@ -521,23 +573,51 @@ export default {
 
             instance.confirmButtonLoading = true;
             instance.confirmButtonText = '执行中...';
+
+            const gitUrlPattern = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\.git$/; // 正则表达式匹配带.git后缀的GitHub仓库URL
+            const match = this.REPO_URL.match(gitUrlPattern);
+            if (match) {
+              this.PUSH_NAME = match[1]; // 用户名是第一个捕获组
+              this.REPO_NAME = match[2]; // 仓库名是第二个捕获组
+            } else {
+              this.PUSH_NAME = '';
+              this.REPO_NAME = '';
+              this.$message({
+                type: 'error',
+                message: '输入的URL格式不正确，请确保它是带有.git后缀的GitHub仓库URL'
+              });
+            }
+
             this.$.ajax({
-              url: "https://api.github.com/repos/wxbty/dubbo/dispatches",
+              url: "https://api.github.com/repos/" + this.PUSH_NAME + "/" + this.REPO_NAME + "/dispatches",
               type: "POST",
-              beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "Basic " + btoa("username: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"));
+              beforeSend: (xhr) => {
+                xhr.setRequestHeader("Authorization", "Basic " + btoa("username:" + this.PUSH_TOKEN));
                 xhr.setRequestHeader("Content-Type", "application/json");
                 xhr.setRequestHeader("Accept", "application/vnd.github.everest-preview+json");
               },
               data: JSON.stringify({
                 "event_type": "manual-trigger",
                 "client_payload": {
-                  "prop": prop
+                  "prop": prop,
+                  "PUSH_NAME": this.PUSH_NAME,
+                  "REPO_NAME": this.REPO_NAME,
+                  "PUSH_TOKEN": this.PUSH_TOKEN,
+                  "RESULTS_REPO_BRANCH": 'main'
                 }
               }),
-              success: function (data) {
+
+              PUSH_NAME: null,
+              REPO_NAME: null,
+              PUSH_TOKEN: null,
+
+              success: (data) => {
                 instance.confirmButtonLoading = false;
                 console.log("Success:", data);
+                localStorage.setItem('PUSH_NAME', this.PUSH_NAME)
+                localStorage.setItem('REPO_NAME', this.REPO_NAME)
+                localStorage.setItem('PUSH_TOKEN', this.PUSH_TOKEN)
+                localStorage.setItem('REPO_URL', this.REPO_URL)
                 done();
               },
               error: (xhr, status, error) => {
@@ -587,5 +667,37 @@ li {
 
 a {
   color: #42b983;
+}
+
+.form-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* 根据需要调整垂直对齐方式 */
+}
+
+.left-form {
+  flex: 1; /* 占据剩余空间的一部分 */
+  max-width: calc(50% - 20px); /* 假设两边间隔为20px，则左侧表单最大宽度为50%减去间隔 */
+  margin-right: 20px; /* 右边距，与.right-text保持间隔 */
+}
+
+.right-text {
+  flex-shrink: 0; /* 防止.right-text被压缩 */
+  width: calc(50% - 20px); /* 右侧文本区域宽度 */
+  /* 其他样式，如字体大小、颜色等 */
+}
+
+.left-form .el-form-item__label {
+  text-align: left; /* 确保标签左对齐 */
+}
+
+.left-form .el-row {
+  display: flex; /* 使用Flexbox布局 */
+  align-items: center; /* 垂直居中 */
+}
+
+.left-form .el-col {
+  display: flex;
+  flex-direction: column; /* 子元素垂直排列 */
 }
 </style>

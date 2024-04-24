@@ -1,13 +1,14 @@
 <template>
   <div id="app">
     <div id="SerializationTaskP99" style="width:100%;height:400px"></div>
-    <div id="SerializationTaskQPS" style="width:100%;height:400px"></div>
+    <div id="SerializationTaskQPS" style="width:100%;height:400px;margin-top: 60px"></div>
   </div>
 </template>
 
 <script>
+
 export default {
-  name: 'RpcTask',
+  name: 'SerializationTask',
   data() {
     return {
       resultList: [],
@@ -20,73 +21,120 @@ export default {
   },
   methods: {
     init() {
-
-// 获取JMH结果字符串
       let jmh;
+
       this.$.ajax({
-        type: 'GET',
+        type: "GET",
         async: false,
-        url: 'https://raw.githubusercontent.com/wxbty/jmh_result/main/test-results/fixed/serialization/merged_prop_results.json',
+        url: 'https://raw.githubusercontent.com/dyjjack/jmh_result/main/test-results/fixed/serialization/merged_results.json',
         success: function (res) {
-          jmh = res;
+          jmh = res
         }
       });
-
 
       try {
         this.resultList = JSON.parse(jmh);
       } catch (error) {
-        console.error('解析JMH结果字符串出错：', error);
+        console.error("解析JMH结果字符串出错：", error);
       }
-
     },
+
     sampleEcharts() {
       // 基于准备好的dom，初始化echarts实例
       const myChart = this.$echarts.init(document.getElementById('SerializationTaskP99'));
 
-
-      let time = this.resultList[0].params.time
 // 转换数据结构，按serialization属性分类并收集Item对象
       let collect = this.resultList
-          .filter((a) => a.mode === 'sample')
-          .map((result) => {
-            // 注意这里只用一个参数接收当前元素
-            let protocol = JSON.parse(result.params.prop)['dubbo.protocol.serialization'];
-            return {
-              score: Math.round(result.primaryMetric.scorePercentiles['99.0'] * 1000),
-              protocol: protocol
+          .filter(a => a.mode === 'sample')
+          // .filter(a => a.params['dubbo.protocol.serialization'] === 'hessian2')
+          // .filter(a => filterSerialization.includes(a.params.serialization) && filterProtocol.includes(a.params.protocol))
+          .reduce((acc, result) => {
+            let time = result.params.time;
+            let serialization = JSON.parse(result.params.prop)['dubbo.protocol.serialization'];
+            let item = {
+              time: Number(time),
+              score: Number((result.primaryMetric.scorePercentiles['99.0'] * 1000).toFixed(1)),
+              serialization: serialization
             };
-          });
+            let key = serialization;
+            if (!acc[key]) {
+              acc[key] = [];
+            }
+            acc[key].push(item);
+            return acc;
+          }, {});
 
-      // let seriesDate = collect.map((result) => {
-      //   // 注意这里只用一个参数接收当前元素
-      //   return {
-      //     type: 'bar'
-      //   };
-      // });
-      //
-      // console.log(collect);
-      // console.log(seriesDate);
 
+// 创建一个存储Template对象的数组
+      let templateList = {};
+
+      Object.entries(collect).forEach(([key, items]) => {
+        // 按时间升序排序
+        let sortedItems = items.sort((a, b) => a.time - b.time);
+
+        templateList[key] = {
+          time: sortedItems.map(i => i.time),
+          score: sortedItems.map(i => i.score)
+        };
+      });
+
+
+// 使用时间类型的轴
+//       let xAxisData = Array.from(new Set([].concat(...Object.values(templateList).map(obj => obj.time)))).sort((a, b) => a - b);
+
+// 自定义时间轴的标签格式
+//       function formatDate(timestamp) {
+//         var date = new Date(timestamp);
+//         return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
+//       }
+
+// 生成ECharts所需的series数据结构
+      let seriesData = Object.keys(templateList).map((key) => {
+        let data = templateList[key].time.map((time, index) => {
+          return {
+            name: this.timestampToTime(time),
+            value: [time, templateList[key].score[index]]
+          };
+        });
+        return {
+          name: key,
+          type: 'line',
+          smooth: true,
+          showSymbol: true, // 显示标记点
+          hoverAnimation: false, // 关闭hover动画
+          symbolSize: 10, // 设置点的直径大小为10
+          markPoint: {
+            data: [
+              {type: 'max', name: 'Max'},
+              {type: 'min', name: 'Min'}
+            ]
+          },
+          markLine: {
+            data: [{type: 'average', name: 'Avg'}]
+          },
+          data: data
+        };
+      });
+
+
+// ECharts配置对象
       let option = {
+        // animation: false,
         title: {
           text: '序列化协议 P99对比',
-          x: 'center',
-          subtext: this.timestampToTime(time)
         },
         tooltip: {
           trigger: 'axis',
-          axisPointer: {
-            type: 'none'
-          },
           formatter: function (params) {
-            return params[0].data.score + 'ms';
+            let res = params[0].axisValueLabel + '<br/>';
+            params.forEach(item => {
+              res += item.marker + " " + item.seriesName + ': ' + (item.data.value[1] !== null ? item.data.value[1] : '-') + 'ms<br/>';
+            });
+            return res;
           }
         },
-        toolbox: {
-          feature: {
-            saveAsImage: {}
-          }
+        legend: {
+          data: Object.keys(templateList)
         },
         grid: {
           // top: '3%',
@@ -95,84 +143,134 @@ export default {
           bottom: '3%',
           containLabel: true
         },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
         xAxis: {
-          type: 'category'
+          type: 'time',
+          boundaryGap: false
         },
         yAxis: {
           type: 'value',
           name: '耗时(ms)'
         },
-        dataset: {
-          dimensions: ['protocol', 'score'],
-          source: collect
-        },
-        series: [
+        dataZoom: [
           {
-            type: 'bar',
-            label: {
-              //柱体上显示数值
-              show: true, //开启显示
-              position: 'top', //在上方显示
-              textStyle: {
-                //数值样式
-                fontSize: '30px',
-                color: '#666'
-              },
-            }
+            type: 'inside', // 在图表内部拖动缩放
+            start: 50,
+            end: 100
+          },
+          {
+            type: 'slider', // 有一个滑动条
+            start: 50,
+            end: 100
           }
-        ]
+        ],
+        series: seriesData
       };
 
       // 使用刚指定的配置项和数据显示图表。
       myChart.setOption(option);
-    },
+    }
+    ,
     thrptEcharts() {
       // 基于准备好的dom，初始化echarts实例
       const myChart = this.$echarts.init(document.getElementById('SerializationTaskQPS'));
 
-
-      let time = this.resultList[0].params.time
 // 转换数据结构，按serialization属性分类并收集Item对象
       let collect = this.resultList
-          .filter((a) => a.mode === 'thrpt')
-          .map((result) => {
-            // 注意这里只用一个参数接收当前元素
-            let protocol = JSON.parse(result.params.prop)['dubbo.protocol.serialization'];
-            return {
+          .filter(a => a.mode === 'thrpt')
+          // .filter(a => a.params['dubbo.protocol.serialization'] === 'hessian2')
+          // .filter(a => filterSerialization.includes(a.params.serialization) && filterProtocol.includes(a.params.protocol))
+          .reduce((acc, result) => {
+            let time = result.params.time;
+            let serialization = JSON.parse(result.params.prop)['dubbo.protocol.serialization'];
+            let item = {
+              time: Number(time),
               score: Math.round(result.primaryMetric.scorePercentiles['99.0']),
-              protocol: protocol
+              serialization: serialization
             };
-          });
+            let key = serialization;
+            if (!acc[key]) {
+              acc[key] = [];
+            }
+            acc[key].push(item);
+            return acc;
+          }, {});
 
-      // let seriesDate = collect.map((result) => {
-      //   // 注意这里只用一个参数接收当前元素
-      //   return {
-      //     type: 'bar'
-      //   };
-      // });
-      //
-      // console.log(collect);
-      // console.log(seriesDate);
 
+// 创建一个存储Template对象的数组
+      let templateList = {};
+
+      Object.entries(collect).forEach(([key, items]) => {
+        // 按时间升序排序
+        let sortedItems = items.sort((a, b) => a.time - b.time);
+
+        templateList[key] = {
+          time: sortedItems.map(i => i.time),
+          score: sortedItems.map(i => i.score)
+        };
+      });
+
+
+// 使用时间类型的轴
+//       let xAxisData = Array.from(new Set([].concat(...Object.values(templateList).map(obj => obj.time)))).sort((a, b) => a - b);
+
+// 自定义时间轴的标签格式
+//       function formatDate(timestamp) {
+//         var date = new Date(timestamp);
+//         return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
+//       }
+
+// 生成ECharts所需的series数据结构
+      let seriesData = Object.keys(templateList).map((key) => {
+        let data = templateList[key].time.map((time, index) => {
+          return {
+            name: this.timestampToTime(time),
+            value: [time, templateList[key].score[index]]
+          };
+        });
+        return {
+          name: key,
+          type: 'line',
+          smooth: true,
+          showSymbol: true, // 显示标记点
+          hoverAnimation: false, // 关闭hover动画
+          symbolSize: 10, // 设置点的直径大小为10
+          markPoint: {
+            data: [
+              {type: 'max', name: 'Max'},
+              {type: 'min', name: 'Min'}
+            ]
+          },
+          markLine: {
+            data: [{type: 'average', name: 'Avg'}]
+          },
+          data: data
+        };
+      });
+
+
+// ECharts配置对象
       let option = {
+        // animation: false,
         title: {
           text: '序列化协议 QPS对比',
-          x: 'center',
-          subtext: this.timestampToTime(time)
         },
         tooltip: {
           trigger: 'axis',
-          axisPointer: {
-            type: 'none'
-          },
           formatter: function (params) {
-            return params[0].data.score + 'ops/s';
+            let res = params[0].axisValueLabel + '<br/>';
+            params.forEach(item => {
+              res += item.marker + " " + item.seriesName + ': ' + (item.data.value[1] !== null ? item.data.value[1] : '-') + 'ops/s<br/>';
+            });
+            return res;
           }
         },
-        toolbox: {
-          feature: {
-            saveAsImage: {}
-          }
+        legend: {
+          data: Object.keys(templateList)
         },
         grid: {
           // top: '3%',
@@ -181,32 +279,32 @@ export default {
           bottom: '3%',
           containLabel: true
         },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
         xAxis: {
-          type: 'category'
+          type: 'time',
+          boundaryGap: false
         },
         yAxis: {
           type: 'value',
           name: 'ops/s'
         },
-        dataset: {
-          dimensions: ['protocol', 'score'],
-          source: collect
-        },
-        series: [
+        dataZoom: [
           {
-            type: 'bar',
-            label: {
-              //柱体上显示数值
-              show: true, //开启显示
-              position: 'top', //在上方显示
-              textStyle: {
-                //数值样式
-                fontSize: '30px',
-                color: '#666'
-              },
-            }
+            type: 'inside', // 在图表内部拖动缩放
+            start: 50,
+            end: 100
+          },
+          {
+            type: 'slider', // 有一个滑动条
+            start: 50,
+            end: 100
           }
-        ]
+        ],
+        series: seriesData
       };
 
       // 使用刚指定的配置项和数据显示图表。
