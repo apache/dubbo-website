@@ -14,7 +14,7 @@ weight: 2
 
 ## 示例应用说明
 
-本示例完整源码与部署资源文件可查看 [dubbo-samples-gateway-triple-apisix](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix)，示例架构图如下：
+本示例完整源码与部署资源文件可查看 [dubbo-samples-gateway-triple-apisix](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-triple)，示例架构图如下：
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/apisix-nacos-dubbo.png"/>
 
@@ -83,18 +83,41 @@ curl \
 
 ## 接入 APISIX 网关
 
-你首先需要 [下载并安装 Apache APISIX](https://apisix.apache.org/docs/apisix/getting-started/README/) 。
+本文档使用 Docker 安装 APISIX。确保本地先安装 [Docker](https://www.docker.com/) 和 [Docker Compose](https://docs.docker.com/compose/)。
+
+首先，下载 [apisix-docker](https://github.com/apache/apisix-docker) 仓库。
+
+```shell
+$ git clone https://github.com/apache/apisix-docker.git
+$ cd apisix-docker/example
+```
+
+由于本示例要接入到 Nacos 注册中心，因此需要修改 `apisix-docker/example` 目录下安装用的 `docker-compose.yaml`，添加如下 docker compose 配置内容：
+
+```yaml
+  nacos:
+    image: nacos/nacos-server:v2.1.1
+    container_name: nacos-standalone
+    environment:
+    - PREFER_HOST_MODE=hostname
+    - MODE=standalone
+    ports:
+    - "8848:8848"
+    - "9848:9848"
+    networks:
+      apisix:
+```
 
 启动 APISIX 前，在 `conf/config.yaml` 文件中增加如下配置，[让 APISIX 连接到 Nacos 注册中心](https://apisix.apache.org/docs/apisix/discovery/nacos/#service-discovery-via-nacos)：
 
-```shell
+```yaml
 discovery:
   nacos:
     host:
       - "http://192.168.33.1:8848"
 ```
 
-启动 APISIX。接下来，我们需要配置 APISIX 网关，来网关代理访问后端 Dubbo 服务。
+最后使用 `docker-compose` 启用 APISIX：`docker-compose -p docker-apisix up -d`。
 
 ### 配置服务源与路由
 
@@ -121,6 +144,11 @@ curl http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f13
 ```shell
 curl -i http://127.0.0.1:9080/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/
 ```
+
+### REST 模式
+
+如果您觉得 `/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/` 这样的 http 端口对于网关访问不够友好，可参考 [为 triple 协议发布 rest 风格 http 接口](/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/#rest-风格接口)。
+
 
 
 
