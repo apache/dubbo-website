@@ -4,28 +4,36 @@
 &lt;li>&lt;strong>多协议发布&lt;/strong>，为 dubbo 协议服务暴露 rest 风格的 http 协议访问方式，这种模式架构上会变得非常简单，通用的网关产品即可支持。&lt;/li>
 &lt;li>&lt;strong>通过网关实现协议转换&lt;/strong>，这种方式需要将 http 协议转换为后端服务能识别的 dubbo 协议，要求网关必须支持 dubbo 协议。&lt;/li>
 &lt;/ul>
-&lt;h2 id="同时发布-restdubbo-协议">同时发布 rest、dubbo 协议&lt;/h2>
+&lt;h2 id="同时发布-httpdubbo-协议">同时发布 http、dubbo 协议&lt;/h2>
 &lt;p>&lt;strong>如果我们能让一个服务同时发布 dubbo、http 协议，这样后端调用是基于高效的 dubbo 二进制协议，同时浏览器、web服务等前端设施也可以用 http 协议访问到相同的服务。&lt;/strong> 好消息是，Dubbo 框架支持为同一个服务发布多个协议，并且支持客户端通过同一个端口以不同的协议访问服务，如下所示：&lt;/p>
 &lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/dubbo-rest.png"/>
-&lt;p>要为我们的 dubbo 服务额外发布 http 访问方式，我们只需要在接口上增加注解即可（目前支持 Spring Web、JAX-RS 两种注解）。如下所示，假设我们已经有一个名为 DemoService 的 dubbo 服务，需要增加以下注解：&lt;/p>
+&lt;p>为了实现同时发布 dubbo、http 协议，我们只需要在配置文件中增加一行配置即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ext-protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>增加 &lt;code>ext-protocol: tri&lt;/code> 配置后，进程就可以在 20880 端口上提供 http 服务了，这点我们从之前的 triple 协议中有过具体了解了，启用应用后就可以在 20880 端口访问：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;[&amp;#34;Dubbo&amp;#34;]&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:20880/org.apache.dubbo.protocol.multiple.demo.DemoService/sayHello
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>此时，网关就可以直接以 http 方式接入后端 dubbo 服务，任何 http 网关都可以非常容易接入，操作非常简洁明了。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+另外，关于 dubbo、triple 多协议发布的完整示例源码和讲解可参见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/multi-protocols/">dubbo+rest 双协议发布的示例&lt;/a>。
+&lt;/div>
+&lt;p>如果你对 &lt;code>/org.apache.dubbo.protocol.multiple.demo.DemoService/sayHello&lt;/code> 格式的前端访问路径不满意，可以选择发布 rest 风格的 http 接口，我们只需要在接口上增加注解即可（目前支持 Spring Web、JAX-RS 两种注解）。如下所示，假设我们已经有一个名为 DemoService 的 dubbo 服务，只需要增加以下注解：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RestController&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/triple&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GetMapping&lt;/span>(value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/demo&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>();
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来，我们需要在配置文件中增加如下配置：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>: dubbo
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">extra-protocols&lt;/span>: rest
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>文档写的过程中，确认配置是否正确？是不是要配置到某个服务上，而不是配置全局多协议，因为没有注解的可能会报错（或者不让它报错）。&lt;/p>
-&lt;/blockquote>
-&lt;p>完整的示例请参见 &lt;a href="">dubbo-samples 中增加一个 dubbo+rest 双协议发布的示例&lt;/a>&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，就能发布同时支持 dubbo、rest 两种协议的服务，对于 http 网关接入更为简单便捷，唯一成本是需要改造接口增加注解。&lt;/p>
+&lt;p>为 dubbo 协议服务增加了 http 访问方式之后，就可以很容易的将 dubbo 服务接入网关了，具体可以参见下一小节中的 &lt;a href="zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/">triple 协议网关接入&lt;/a> 示例，那里有详细的说明。&lt;/p>
 &lt;h2 id="http-转-dubbo-协议">http 转 dubbo 协议&lt;/h2>
-&lt;p>如果你觉得增加 rest 注解是一项很大的编程挑战，那么也是一个前端的 HTTP 流量要经过一层 &lt;code>http -&amp;gt; dubbo&lt;/code> 的协议转换才能实现正常调用&lt;/p>
+&lt;p>如果你不打算如上所述的方式改造应用进行多协议发布（实际上只是改一行配置），那么您如果要从网关接入后端 dubbo 服务，则前端的 HTTP 流量要经过一层 &lt;code>http -&amp;gt; dubbo&lt;/code> 的协议转换才能实现正常调用&lt;/p>
 &lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/http-to-dubbo.png"/>
 &lt;p>如上图所示，从浏览器、手机或者 Web 服务器发送的 HTTP 请求，经过网关进行 http 到 dubbo 协议转换，网关最终转发 dubbo 协议到后端微服务集群。因此，我们需要一个支持 dubbo 协议转换的网关，来帮助实现协议转发，以下是该架构下网关需要实现的几个关键点：&lt;/p>
 &lt;ul>
@@ -33,88 +41,194 @@
 &lt;li>&lt;strong>自动地址发现&lt;/strong>，支持 Nacos、Zookeeper、Kubernetes 等主流注册中心，动态感知后端 dubbo 实例变化。&lt;/li>
 &lt;li>&lt;strong>结合 dubbo 协议的路由&lt;/strong>，如在发起 dubbo 协议调用时，支持按照特定规则地址筛选、传递附加参数到 dubbo 后端服务。&lt;/li>
 &lt;/ul>
-&lt;p>目前市面上支持 dubbo 协议接入、且对以上三点提供比较完善支持的开源网关产品众多，包括大家 Apache APISIX、Higress、Apache Shenyu 等。接下来，让我们通过一些示例来了解网关产品搭配 Dubbo 的具体使用方法把。&lt;/p>
-&lt;h3 id="案例">案例&lt;/h3>
-&lt;p>我们有非常详细的网关接入 dubbo 案例，请参考：&lt;/p>
+&lt;p>目前市面上支持 dubbo 协议接入、且对以上三点提供比较完善支持的开源网关产品众多，包括大家 Higress、Apache APISIX、Apache Shenyu 等。接下来，让我们通过一些示例来了解网关产品搭配 Dubbo 的具体使用方法吧：&lt;/p>
 &lt;ul>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/">使用 Apache APISIX 代理 Dubbo 流量&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/">使用 Apache Shenyu 代理 Dubbo 流量&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2023/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/">使用 Higress 代理 Dubbo 流量&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/">使用 Apache APISIX 代理 Dubbo 流量&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/">使用 Apache Shenyu 代理 Dubbo 流量&lt;/a>&lt;/li>
 &lt;/ul></description></item><item><title>Overview: 通过网关将 http 流量接入 Dubbo 后端服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/</guid><description>
-&lt;p>在 &lt;a href="">triple协议规范&lt;/a> 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：&lt;/p>
+&lt;p>在 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/">triple协议规范&lt;/a> 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：&lt;/p>
 &lt;ul>
 &lt;li>在后端服务之间使用高效的 triple 二进制协议。&lt;/li>
 &lt;li>对于前端接入层，则支持所有标准 HTTP 工具如 cURL 等以标准 &lt;code>application/json&lt;/code> 格式请求后端服务。&lt;/li>
 &lt;/ul>
 &lt;p>接下来我们就看一下，对于前端 HTTP 流量而言，如何通过一些通用的网关产品快速接入后端的 triple 微服务体系。&lt;/p>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+使用 triple 协议后，不再需要泛化调用、&lt;code>http -&amp;gt; dubbo&lt;/code> 协议转换等步骤，任何主流的网关设备都可以通过 http 流量直接访问后端 triple 协议服务。
+&lt;/div>
 &lt;h2 id="原生-http-接入">原生 HTTP 接入&lt;/h2>
 &lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/http-to-triple.png"/>
 &lt;p>如上图所示，从浏览器、手机或 Web 服务器过来的 HTTP 请求，网关可直接以 &lt;code>application/json&lt;/code> 格式转发给后端 Dubbo 服务，后端服务之间则继续走 triple 二进制协议。&lt;strong>由于进出网关的都是标准的 HTTP 流量，网关不需要做任何的私有协议转换工作，不需要任何定制化逻辑，只需专注于流量路由等职责即可。&lt;/strong>&lt;/p>
 &lt;p>在真正的生产环境下，&lt;strong>唯一需要网关解决的只剩下地址发现问题，即如何动态感知后端 triple 服务的实例变化？&lt;/strong> 好消息是，目前几款主流的开源网关产品如 Apache APISIX、Higress 等普遍支持以 Nacos、Zookeeper、Kubernetes 作为 upstream 数据源。&lt;/p>
-&lt;p>以下我们以 &lt;code>APISIX + Nacos + Dubbo&lt;/code> 的典型用法为例，详细说明整套机制的工作流程。&lt;/p>
-&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/apisix-nacos-dubbo.png"/>
-&lt;p>Dubbo 后端应用就选用我们 quickstart 中的示例，其源码与启动方式可参见相应文档，在该示例中定义并发布了一个 &lt;code>org.apache.dubbo.samples.quickstart.dubbo.api.DemoService&lt;/code> 的 triple 服务：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 APISIX 中配置 nacos upstream 及路由，即可实现后端实例地址自动发现（假设 APISIX 端口是 9080）：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://127.0.0.1:9080/apisix/admin/routes/1 -H &lt;span style="color:#2aa198">&amp;#39;X-API-KEY: edd1c9f034335f136f87ad84b625c8f1&amp;#39;&lt;/span> -X PUT -i -d &lt;span style="color:#2aa198">&amp;#39;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">{
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;uri&amp;#34;: &amp;#34;/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/&amp;#34;,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;upstream&amp;#34;: {
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;service_name&amp;#34;: &amp;#34;dubbo-quickstart&amp;#34;,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;type&amp;#34;: &amp;#34;roundrobin&amp;#34;,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;discovery_type&amp;#34;: &amp;#34;nacos&amp;#34;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">}&amp;#39;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
-&lt;div class="alert alert-info" role="alert">
+&lt;p>以下我们以 &lt;code>Higress + Nacos + Dubbo&lt;/code> 的典型用法为例，详细说明整套机制的工作流程。&lt;/p>
+&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/triple-higress.png"/>
+&lt;h3 id="启动示例应用">启动示例应用&lt;/h3>
+&lt;p>本示例完整源码请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-higress-triple">dubbo-samples-gateway-higress-triple&lt;/a>。&lt;/p>
+&lt;p>该示例中定义并发布了一个定义为 &lt;code>org.apache.dubbo.samples.gateway.api.DemoService&lt;/code> 的 triple 服务：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来，我们演示如何启动 Dubbo 服务，并使用 Higress 网关转发请求到后端服务。&lt;/p>
+&lt;h3 id="接入-higress-网关">接入 Higress 网关&lt;/h3>
+&lt;p>接下来，我们具体演示 Higress 网关接入应用的具体步骤。包括部署 Dubbo 应用、Nacos 注册中心、Higress 网关等。&lt;/p>
+&lt;h4 id="安装-higress-和-nacos">安装 Higress 和 Nacos&lt;/h4>
+&lt;p>以下示例部署在 Kubernetes 环境，因此请确保您已经连接到一个可用 Kubernetes 集群。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>安装 Higress，参考 &lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm">Higress安装部署文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>安装 Nacos，运行&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple/deploy/nacos/Nacos.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动-dubbo-应用">启动 Dubbo 应用&lt;/h4>
+&lt;p>将以上示例应用打包为 docker image 后（这里我们使用官方示例提前打包好的镜像），以标准 Kubernetes Deployment 形式启动应用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple/deploy/provider/Deployment.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>具体的部署文件定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: gateway-higress-triple-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: gateway-higress-triple-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: gateway-higress-triple-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: gateway-higress-triple-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: gateway-higress-triple-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: docker.io/allenyi/higress-triple:2.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">imagePullPolicy&lt;/span>: IfNotPresent
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># 与容器暴露的端口一致&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">containerPort&lt;/span>: &lt;span style="color:#2aa198">50052&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># 配置Nacos注册中心地址，对应Dubbo服务配置中的${nacos.address:127.0.0.1}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: NACOS_ADDRESS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: nacos-server.default.svc.cluster.local
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="通过-higress-转发请求到-dubbo-服务">通过 Higress 转发请求到 Dubbo 服务&lt;/h4>
+&lt;p>Higress 可以通过 McpBridge 来对接 Nacos 作为服务来源，在 K8s 集群中 apply 以下资源来配置 McpBridge：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple/deploy/mcp/mcpbridge.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上安装的 McpBridge 资源的具体定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.higress.io/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: McpBridge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-service-resource
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: higress-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">domain&lt;/span>: nacos-server.default.svc.cluster.local
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacosGroups&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - DEFAULT_GROUP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-service-resource
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: nacos2
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>更多详细配置参考&lt;a href="https://higress.io/zh-cn/docs/user/mcp-bridge">McpBridge配置说明&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;p>接下来我们创建如下 Ingress，从而创建一条指向 Dubbo 服务的 HTTP 路由：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple/deploy/ingress/Ingress.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，path 前缀为 &lt;code>/org.apache.dubbo.samples.gateway.api.DemoService&lt;/code> 的请求就会被路由到我们刚刚创建的 Dubbo 服务上。&lt;/p>
+&lt;p>以上 apply 安装的具体资源定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.k8s.io/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Ingress
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">annotations&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">higress.io/destination&lt;/span>: gateway-higress-triple-provider.DEFAULT-GROUP.public.nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: default &lt;span style="color:#586e75">#与应用部署namespace保持一致&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ingressClassName&lt;/span>: higress
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">rules&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">paths&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">backend&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">resource&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">apiGroup&lt;/span>: networking.higress.io
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">kind&lt;/span>: McpBridge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /org.apache.dubbo.samples.gateway.api.DemoService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pathType&lt;/span>: Prefix
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注意这里通过注解 higress.io/destination 指定路由最终要转发到的目标服务： &lt;code>gateway-higress-triple-provider&lt;/code>，gateway-higress-triple-provider 为刚刚启动 Dubbo 服务的应用名（这里依赖 Dubbo3 默认注册的应用粒度地址列表）。&lt;/p>
+&lt;p>对于 Nacos 来源的服务，这里的目标服务格式为：“服务名称.服务分组.命名空间ID.nacos”，注意这里需要遵循 DNS 域名格式，因此服务分组中的下划线&amp;rsquo;_&amp;lsquo;被转换成了横杠&amp;rsquo;-&amp;rsquo;。命名空间未指定时，这里默认值为&amp;quot;public&amp;quot;。&lt;/p>
+&lt;blockquote>
+&lt;p>更多流量治理相关配置参考&lt;a href="https://higress.io/zh-cn/docs/user/annotation">Ingress Annotation 配置说明&lt;/a>和&lt;a href="https://higress.io/zh-cn/docs/user/annotation-use-case">通过Ingress Annotation实现高阶流量治理&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="请求验证">请求验证&lt;/h3>
+&lt;p>通过 cURL 访问 Higress，可以实现对 triple 后端服务的调用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ curl &lt;span style="color:#2aa198">&amp;#34;localhost/org.apache.dubbo.samples.gateway.api.DemoService/sayHello?name=HigressTriple&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;Hello HigressTriple&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>/org.apache.dubbo.samples.gateway.api.DemoService/sayHello/&lt;/code> 这种根据 Java 路径名与方法直接暴露的访问路径，虽然可以很容易调通，但对于前端来说并不友好。接下来我们一起看一下如何发布 REST 风格的 HTTP 服务。&lt;/p>
+&lt;div class="alert alert-warning" role="alert">
 &lt;h4 class="alert-heading">注意&lt;/h4>
-&lt;ul>
-&lt;li>说一下示例用的是应用级服务发现。接口级服务发现如何配置？&lt;/li>
-&lt;/ul>
+这里要运行 &lt;code>kubectl port-forward service/higress-gateway -n higress-system 80:80 443:443&lt;/code> 将集群内的 Higress 暴露出来才可访问。
 &lt;/div>
-&lt;p>通过 cURL 访问 APISIX 网关，可以实现对 triple 后端服务的调用：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ curl &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;[&amp;#34;Dubbo&amp;#34;]&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://127.0.0.1:9080/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/&lt;/code> 是后端 triple 服务原生的 http 访问路径。&lt;/p>
-&lt;div class="alert alert-info" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
-&lt;ul>
-&lt;li>说以下 json 格式参数问题？&lt;/li>
-&lt;/ul>
-&lt;/div>
-&lt;p>&lt;code>/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/&lt;/code> 这种根据 Java 路径名与方法直接暴露的访问路径，虽然可以很容易调通，但对于前端来说并不友好。接下来我们一起看一下如何发布 REST 风格的 HTTP 服务。&lt;/p>
 &lt;h2 id="rest-风格接口">REST 风格接口&lt;/h2>
-&lt;p>在前面的示例中，如类似 &lt;code>http://127.0.0.1:9080/triple/demo/hello&lt;/code> 会是更符合前端使用的访问方式，要做到这一点，我们可以通过在 APISIX 等网关配置 uri rewrite 重写，实现前端 &lt;code>/triple/demo/hello&lt;/code> 到后端 &lt;code>/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/&lt;/code> 的映射。&lt;/p>
-&lt;p>除了配置网关 rewrite 重新规则之外，&lt;strong>Dubbo 框架还为 triple 服务暴露 REST 风格的 HTTP 访问路径提供了内置支持&lt;/strong>，具体使用方式取决于你使用的是基于 &lt;a href="">protobuf 的服务定义模式&lt;/a>，还是基于 &lt;a href="">java 接口的服务定义模式&lt;/a>：&lt;/p>
+&lt;p>在前面的示例中，如类似 &lt;code>http://127.0.0.1:9080/triple/demo/hello&lt;/code> 会是更符合前端使用的访问方式，要做到这一点，我们可以通过在 Higress 等网关配置 uri rewrite 重写，实现前端 &lt;code>/triple/demo/hello&lt;/code> 到后端 &lt;code>/org.apache.dubbo.samples.gateway.api.DemoService/sayHello/&lt;/code> 的映射。&lt;/p>
+&lt;p>除了配置网关 rewrite 重新规则之外，&lt;strong>Dubbo 框架还为 triple 服务暴露 REST 风格的 HTTP 访问路径提供了内置支持&lt;/strong>，具体使用方式取决于你使用的是基于 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/">protobuf 的服务定义模式&lt;/a>，还是基于 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/">java 接口的服务定义模式&lt;/a>：&lt;/p>
 &lt;ul>
 &lt;li>Java 接口模式，通过直接为 java 接口增加注解可以同时发布 REST 风格服务，目前支持 Spring Web 与 JAX-RS 两套注解标准。&lt;/li>
 &lt;li>Protobuf 模式，通过使用 grpc-gateway 可发布 REST 风格服务。&lt;/li>
 &lt;/ul>
-&lt;h3 id="java接口模式注解">Java接口模式(注解)&lt;/h3>
+&lt;h3 id="为服务定义增加注解">为服务定义增加注解&lt;/h3>
 &lt;p>通过为 Java 接口增加以下任意一种注解，即可发布 triple 二进制、REST 风格的服务。这样配置之后，对于同一个服务，你既可以使用标准二进制 triple 格式访问服务，也可以使用 REST HTTP 方式以 JSON 格式访问服务。&lt;/p>
 &lt;p>Spring Web 风格注解：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>JAX-RS 风格注解：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种模式，我们在&lt;a href="">【进阶学习 - 协议 - rest】&lt;/a>一节中有更详细的说明和使用示例，可以前往查看。&lt;/p>
-&lt;h3 id="protobuf模式grpc-gateway">Protobuf模式(grpc-gateway)&lt;/h3>
-&lt;p>grpc-gateway 的介绍，要确认 Dubbo 是否支持。&lt;/p>
-&lt;h2 id="灰度发布">灰度发布&lt;/h2>
-&lt;blockquote>
-&lt;p>针对 triple 协议的灰度方案写一写。&lt;/p>
-&lt;/blockquote>
-&lt;ol>
-&lt;li>&lt;code>curl -H &amp;quot;x-traffic-type: gray&amp;quot;&lt;/code>&lt;/li>
-&lt;li>网关配置好灰度规则，此时网关会选择好后端triple实例&lt;/li>
-&lt;li>网关透传给 triple &lt;code>/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/&lt;/code>，dubbo进程读出来，并将某些参数透传给 attachment - dubbo.tag&lt;/li>
-&lt;li>dubbo.tag
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/triple/demo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/hello&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>) String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;p>关于接口注解&lt;/p>
 &lt;ul>
-&lt;li>框架还是得自动传下去？但不force tag；额外增加参数放弃表示一次性&lt;/li>
-&lt;li>tracing 框架帮助往下传？&lt;/li>
+&lt;li>在之前的示例 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-higress-triple">dubbo-samples-gateway-higress-triple&lt;/a> 中已经启用，可查看源码了解实际用法。&lt;/li>
+&lt;li>在&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/">【进阶学习 - 协议 - rest】&lt;/a>一节中有详细的说明和使用示例，也可以前往查看。&lt;/li>
 &lt;/ul>
-&lt;/li>
-&lt;/ol>
-&lt;p>&lt;a href="https://help.aliyun.com/zh/mse/use-cases/implement-full-link-phased-release-based-on-ingress-apisix-gateway">https://help.aliyun.com/zh/mse/use-cases/implement-full-link-phased-release-based-on-ingress-apisix-gateway&lt;/a>&lt;/p>
+&lt;/div>
+&lt;p>这时我们的路由前缀配置如下，Nacos 地址配置与之前保持一致，path 前缀改为访问更为友好的 &lt;code>/triple/demo&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.k8s.io/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Ingress
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">annotations&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">higress.io/destination&lt;/span>: gateway-higress-triple-provider.DEFAULT-GROUP.public.nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ingressClassName&lt;/span>: higress
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">rules&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">http&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">paths&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">backend&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">resource&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">apiGroup&lt;/span>: networking.higress.io
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">kind&lt;/span>: McpBridge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: default
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /triple/demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pathType&lt;/span>: Prefix
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以使用 &lt;code>/triple/demo/hello&lt;/code> 访问服务：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ curl &lt;span style="color:#2aa198">&amp;#34;localhost/triple/demo/hello?name=HigressTriple&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;Hello HigressTriple&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
 &lt;div class="alert alert-info" role="alert">
 &lt;h4 class="alert-heading">注意&lt;/h4>
 本文描述内容，仅适用于 Dubbo 3.3.0 之后发布的 triple 协议版本。
-&lt;/div></description></item></channel></rss>
+&lt;/div>
+&lt;h2 id="参考连接">参考连接&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://higress.io/zh-cn/docs/user/spring-cloud">Higress 实现 Spring Cloud 服务发现与路由配置(http协议)&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

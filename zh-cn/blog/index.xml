@@ -1664,7 +1664,207 @@ dubbo2.7.3默认开启qos功能，导致一些混部在物理机的dubbo服务�
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
 &lt;li>ApplicationModel 由 FrameWorkModel 创建，ModuleModel 由 ApplicationModel 创建，由此完成它们之间层级关系的引用。&lt;/li>
 &lt;li>ServiceConfig 和 ReferenceConfig 需要设置其所属的 ScopeModel（实际只能为 ModuleModel ）。然后，还需将它们设置到对应的ModuleModel 中。&lt;/li>
-&lt;/ul></description></item><item><title>Blog: 通过模板生成项目脚手架</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</link><pubDate>Sun, 31 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</guid><description>
+&lt;/ul></description></item><item><title>Blog: 使用 Apache APISIX 代理 Dubbo 服务 (dubbo 协议)</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</link><pubDate>Thu, 25 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</guid><description>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 &lt;a href="../dubbo-triple-with-apisix-gateway">使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a> 学习具体示例。
+&lt;/div>
+&lt;p>&lt;a href="https://apisix.apache.org/">Apache APISIX&lt;/a> 是 Apache 软件基金会的顶级开源项目，也是当前最活跃的开源网关项目。作为一个动态、实时、高性能的开源 API 网关，Apache APISIX 提供了负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等丰富的流量管理功能。&lt;/p>
+&lt;p>Apache APISIX 基于开源项目 tengine/mod_dubbo 模块为 Apache Dubbo 服务配备了HTTP 网关能力。通过 dubbo-proxy 插件，可以轻松地将 Dubbo Service 发布为 HTTP 服务。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/apisix-plugin/1.png" alt="架构图">&lt;/p>
+&lt;h2 id="入门篇">入门篇&lt;/h2>
+&lt;h3 id="安装-apisix">安装 APISIX&lt;/h3>
+&lt;p>本文档使用 Docker 安装 APISIX。确保本地先安装 &lt;a href="https://www.docker.com/">Docker&lt;/a> 和 &lt;a href="https://docs.docker.com/compose/">Docker Compose&lt;/a>。&lt;/p>
+&lt;p>首先，下载 &lt;a href="https://github.com/apache/apisix-docker">apisix-docker&lt;/a> 仓库。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ git clone https://github.com/apache/apisix-docker.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> apisix-docker/example
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于本示例要接入到 Nacos 注册中心，因此 &lt;code>apisix-docker/example&lt;/code> 目录下安装用的 &lt;code>docker-compose.yaml&lt;/code>，添加如下内容：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: nacos/nacos-server:v2.1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">container_name&lt;/span>: nacos-standalone
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">environment&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - PREFER_HOST_MODE=hostname
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - MODE=standalone
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;8848:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;9848:9848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">networks&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">apisix&lt;/span>:
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 config.yaml 文件中增加 nacos 注册中心配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">discovery&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;http://192.168.33.1:8848&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 config.yaml 文件中进行 dubbo-proxy 插件启用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Add this in config.yaml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">plugins&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - ... &lt;span style="color:#586e75"># plugin you need&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - dubbo-proxy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>如果你使用了 Apache APISIX 2.11 版本镜像，则可以省去 &lt;code>dubbo-proxy&lt;/code> 配置环节，该版本的 APISIX-Base 中已默认编译了 Dubbo 模块，可直接使用。&lt;/p>
+&lt;/blockquote>
+&lt;p>最后，使用 &lt;code>docker-compose&lt;/code> 启用 APISIX：&lt;code>docker-compose -p docker-apisix up -d&lt;/code>&lt;/p>
+&lt;h3 id="示例说明">示例说明&lt;/h3>
+&lt;p>在接下来的操作中，我们将使用 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-dubbo">dubbo-samples-gateway-triple-apisix&lt;/a> 项目进行部分展示。&lt;/p>
+&lt;p>在进入正式操作前，我们先简单看下 Dubbo 接口的定义、配置以及相关实现。&lt;/p>
+&lt;h4 id="接口实现一览">接口实现一览&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">ApisixService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * standard samples dubbo infterace demo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param context pass http infos
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return Map&amp;lt;String, Object&amp;gt;&amp;lt;/&amp;gt; pass to response http
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> **/&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">apisixDubbo&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> httpRequestContext);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，Dubbo 接口的定义是固定的。即方法参数中 &lt;code>Map&lt;/code> 表示 APISIX 传递给 Dubbo Provider 关于 HTTP request 的一些信息（如：header、body&amp;hellip;)。而方法返回值的 &lt;code>Map&lt;/code> 表示 Dubbo Provider 传递给 APISIX 要如何返回 HTTP response 的一些信息。&lt;/p>
+&lt;p>通过上述配置后，Consumer 可通过 &lt;code>org.apache.dubbo.samples.gateway.apisix.dubbo.api.ApisixService&lt;/code> 访问其中的&lt;code>apisixDubbo&lt;/code> 方法。具体接口实现如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ApisixServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ApisixService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">apisixDubbo&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> httpRequestContext) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (Map.Entry&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> entry : httpRequestContext.entrySet()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Key = &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> entry.getKey() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, Value = &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> entry.getValue());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> ret &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ret.put(&lt;span style="color:#2aa198">&amp;#34;body&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;dubbo success\n&amp;#34;&lt;/span>); &lt;span style="color:#586e75">// http response body&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ret.put(&lt;span style="color:#2aa198">&amp;#34;status&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;200&amp;#34;&lt;/span>); &lt;span style="color:#586e75">// http response status&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ret.put(&lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;123&amp;#34;&lt;/span>); &lt;span style="color:#586e75">// http response header&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> ret;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上述代码中，&lt;code>ApisixServiceImpl&lt;/code> 会打印接收到的 &lt;code>httpRequestContext&lt;/code>，并通过返回包含有指定 Key 的 Map 对象去描述该 Dubbo 请求的 HTTP 响应。&lt;/p>
+&lt;p>在 &lt;code>dubbo-samples-gateway-apisix-dubbo&lt;/code> 目录，运行以下命令启动应用（或者选择使用 IDE 启动应用）：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ git clone -b main --depth &lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.gateway.apisix.dubbo.provider.ProviderApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动 consumer 进程，验证服务正常启动，可以被调用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.gateway.apisix.dubbo.consumer.ConsumerApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="接入apisix">接入APISIX&lt;/h3>
+&lt;ol>
+&lt;li>创建指向 Dubbo 服务的 Upstream。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://127.0.0.1:9180/apisix/admin/upstreams/1 -H &lt;span style="color:#2aa198">&amp;#39;X-API-KEY: edd1c9f034335f136f87ad84b625c8f1&amp;#39;&lt;/span> -X PUT -d &lt;span style="color:#2aa198">&amp;#39;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">{
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;service_name&amp;#34;: &amp;#34;gateway-apisix-dubbo&amp;#34;,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;type&amp;#34;: &amp;#34;roundrobin&amp;#34;,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;discovery_type&amp;#34;: &amp;#34;nacos&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">}&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>为 DemoService 暴露一个 HTTP 路由。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://127.0.0.1:9180/apisix/admin/routes/1 -H &lt;span style="color:#2aa198">&amp;#39;X-API-KEY: edd1c9f034335f136f87ad84b625c8f1&amp;#39;&lt;/span> -X PUT -d &lt;span style="color:#2aa198">&amp;#39;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">{
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;uris&amp;#34;: [
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;/demo&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> ],
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;plugins&amp;#34;: {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;dubbo-proxy&amp;#34;: {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;service_name&amp;#34;: &amp;#34;org.apache.dubbo.samples.gateway.apisix.dubbo.api.ApisixService&amp;#34;,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;method&amp;#34;: &amp;#34;apisixDubbo&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> },
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;upstream_id&amp;#34;: 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">}&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>使用 curl 命令请求 Apache APISIX，并查看返回结果。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://127.0.0.1:9080/demo -H &lt;span style="color:#2aa198">&amp;#34;Host: example.org&amp;#34;&lt;/span> -X POST --data &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;name&amp;#34;: &amp;#34;hello&amp;#34;}&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; HTTP/1.1 &lt;span style="color:#2aa198">200&lt;/span> OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Date: Sun, &lt;span style="color:#2aa198">26&lt;/span> Dec &lt;span style="color:#2aa198">2021&lt;/span> 11:33:27 GMT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Content-Type: text/plain; &lt;span style="color:#268bd2">charset&lt;/span>&lt;span style="color:#719e07">=&lt;/span>utf-8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Content-Length: &lt;span style="color:#2aa198">14&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Connection: keep-alive
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; test: &lt;span style="color:#2aa198">123&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Server: APISIX/2.11.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo success
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>:::note 说明
+上述代码返回中包含了 &lt;code>test: 123&lt;/code> Header，以及 &lt;code>dubbo success&lt;/code> 字符串作为 Body 体。这与我们在 &lt;code>DemoServiceImpl&lt;/code> 编码的预期效果一致。
+:::&lt;/p>
+&lt;ol start="6">
+&lt;li>查看 Dubbo Provider 的日志。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Key = content-length, Value = 17
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key = host, Value = example.org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key = content-type, Value = application/x-www-form-urlencoded
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key = body, Value = [B@70754265
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key = accept, Value = */*
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key = user-agent, Value = curl/7.80.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>:::note 说明
+通过 &lt;code>httpRequestContext&lt;/code> 可以拿到 HTTP 请求的 Header 和 Body。其中 Header 会作为 Map 元素，而 Body 中 Key 值是固定的字符串&amp;quot;body&amp;quot;，Value 则代表 Byte 数组。
+:::&lt;/p>
+&lt;h3 id="进阶篇复杂场景示例">进阶篇：复杂场景示例&lt;/h3>
+&lt;p>在上述的简单用例中可以看出，我们确实通过 Apache APISIX 将 Dubbo Service 发布为一个 HTTP 服务，但是在使用过程中的限制也非常明显。比如：接口的参数和返回值都必须要是 &lt;code>Map&amp;lt;String, Object&amp;gt;&lt;/code>。&lt;/p>
+&lt;p>那么，如果项目中出现已经定义好、但又不符合上述限制的接口，该如何通过 Apache APISIX 来暴露 HTTP 服务呢？&lt;/p>
+&lt;h4 id="操作步骤">操作步骤&lt;/h4>
+&lt;p>针对上述场景，我们可以通过 HTTP Request Body 描述要调用的 Service 和 Method 以及对应参数，再利用 Java 的反射机制实现目标方法的调用。最后将返回值序列化为 JSON，并写入到 HTTP Response Body 中。&lt;/p>
+&lt;p>这样就可以将 Apache APISIX 的 「HTTP to Dubbo」 能力进一步加强，并应用到所有已存在的 Dubbo Service 中。具体操作可参考下方：&lt;/p>
+&lt;ol>
+&lt;li>为已有项目增加一个 Dubbo Service 用来统一处理 HTTP to Dubbo 的转化。方法定义如下：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DubboInvocationParameter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String type;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String value;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DubboInvocation&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String service;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String method;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> DubboInvocationParameter&lt;span style="color:#719e07">[]&lt;/span> parameters;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">HTTP2DubboService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">invoke&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> context) &lt;span style="color:#268bd2">throws&lt;/span> Exception;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>提供服务实现并将其发布为标准的 Dubbo 服务。网关将所有流量都转发到这个服务，由这个服务在后端进程内完成调用转发。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HTTP2DubboServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HTTP2DubboService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Autowired&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> ApplicationContext appContext;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">invoke&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> context) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DubboInvocation invocation &lt;span style="color:#719e07">=&lt;/span> JSONObject.parseObject((&lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span>) context.get(&lt;span style="color:#2aa198">&amp;#34;body&amp;#34;&lt;/span>), DubboInvocation.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object&lt;span style="color:#719e07">[]&lt;/span> args &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[&lt;/span>invocation.getParameters().size()&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> args.length; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DubboInvocationParameter parameter &lt;span style="color:#719e07">=&lt;/span> invocation.getParameters().get(i);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> args&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> JSONObject.parseObject(parameter.getValue(), Class.forName(parameter.getType()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object svc &lt;span style="color:#719e07">=&lt;/span> appContext.getBean(Class.forName(invocation.getService()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> svc.getClass().getMethod(invocation.getMethod()).invoke(args);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> httpResponse &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpResponse.put(&lt;span style="color:#2aa198">&amp;#34;status&amp;#34;&lt;/span>, 200);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpResponse.put(&lt;span style="color:#2aa198">&amp;#34;body&amp;#34;&lt;/span>, JSONObject.toJSONString(result));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> httpResponse;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>在 APISIX 中为 &lt;code>HTTP2DubboService&lt;/code> 服务配置路由规则（此处省略）。接下来，就可以通过类似如下方式发起对后端 Dubbo 服务的调用了：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://127.0.0.1:9080/demo -H &lt;span style="color:#2aa198">&amp;#34;Host: example.org&amp;#34;&lt;/span> -X POST --data &lt;span style="color:#2aa198">&amp;#39;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">{
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;service&amp;#34;: &amp;#34;org.apache.dubbo.samples.apisix.UserService&amp;#34;,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;method&amp;#34;: &amp;#34;createUser&amp;#34;,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;parameters&amp;#34;: [
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;type&amp;#34;: &amp;#34;org.apache.dubbo.samples.apisix.User&amp;#34;,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> &amp;#34;value&amp;#34;: &amp;#34;{&amp;#39;&lt;/span>name&lt;span style="color:#2aa198">&amp;#39;: &amp;#39;&lt;/span>hello&lt;span style="color:#2aa198">&amp;#39;}&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> ]
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">}&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>本文为大家介绍了如何借助 Apache APISIX 实现 Dubbo Service 的代理，通过引入 &lt;code>dubbo-proxy&lt;/code> 插件便可为 Dubbo 框架的后端系统构建更简单更高效的流量链路。&lt;/p>
+&lt;p>希望通过上述操作步骤和用例场景分享，能为大家在相关场景的使用提供借鉴思路。更多关于 &lt;code>dubbo-proxy&lt;/code> 插件的介绍与使用可参考&lt;a href="https://apisix.apache.org/docs/apisix/plugins/dubbo-proxy/">官方文档&lt;/a>。&lt;/p>
+&lt;p>关于这部分的更多示例，还可以参考 &lt;a href="https://github.com/chickenlj/APISIX-Dubbo-Nacos">https://github.com/chickenlj/APISIX-Dubbo-Nacos&lt;/a>&lt;/p></description></item><item><title>Blog: 通过模板生成项目脚手架</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</link><pubDate>Sun, 31 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</guid><description>
 &lt;p>&lt;a href="https://start.dubbo.apache.org/bootstrap.html" target="_blank">Dubbo Initializer&lt;/a> 可用来快速生成 Java 项目脚手架，帮助简化微服务项目搭建、基本配置、组件依赖管理等。&lt;/p>
 &lt;blockquote>
 &lt;p>Initializer 仍在持续更新中，更多 Dubbo Feature 的支持将会陆续发布。&lt;/p>
@@ -4707,11 +4907,14 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/ol>
 &lt;h2 id="总结">总结&lt;/h2>
 &lt;p>Dubbo 3.2 是一个非常重要的版本，它带来了众多新功能和改进，使得 Dubbo 更加强大和易用。我们非常感谢社区的支持和贡献，希望大家可以尽快体验 Dubbo 3.2，享受其中带来的便利和优势。&lt;/p></description></item><item><title>Blog: 如何通过 Higress 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Sat, 01 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>
-&lt;h1 id="higress-对接-dubbo-服务">Higress 对接 Dubbo 服务&lt;/h1>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，具体可参见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/">使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a> 学习具体示例。
+&lt;/div>
 &lt;p>Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过配置协议转换，可以将一个Dubbo服务以HTTP接口暴露出来，从而用HTTP请求实现对Dubbo接口的调用。本文将通过一个示例来介绍如何用Higress配置HTTP到Dubbo的协议转换。该示例会引导您轻松地部署一个Nacos server和一个Dubbo服务，然后通过Ingress将HTTP请求转发到注册在Nacos上的Dubbo服务，并通过Higress的协议转换能力完成对Dubbo服务的HTTP调用。&lt;/p>
+&lt;p>以下是一个使用 &lt;code>Higress + dubbo协议 + Nacos注册中心&lt;/code> 的完整示例：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo">dubbo-samples-gateway-higress-dubbo&lt;/a>。&lt;/p>
 &lt;h2 id="前提条件">前提条件&lt;/h2>
 &lt;ol>
-&lt;li>Higress目前支持的Dubbo框架的版本为2.x。若您使用Dubbo3.0，要求使用dubbo协议（目前暂不支持Triple协议）。&lt;/li>
 &lt;li>已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm">Higress安装部署文档&lt;/a>。&lt;/li>
 &lt;/ol>
 &lt;h2 id="部署nacos和dubbo服务">部署Nacos和Dubbo服务&lt;/h2>
@@ -4759,7 +4962,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: ClusterIP
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在K8s集群中apply以下资源，以部署一个Dubbo服务，该Dubbo服务将注册到上述的Naocs中。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 K8s 集群中 apply 以下资源，以部署一个Dubbo服务，该 Dubbo 服务将注册到上述的 Naocs 中（你可以选择重新打包，我们接下来直接使用社区提前准备好的镜像包）。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
@@ -4783,48 +4986,29 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: DUBBO_REGISTRY_ADDRESS
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: nacos-server.default.svc.cluster.local
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该Dubbo服务的代码可以在Nacos的&lt;a href="https://github.com/nacos-group/nacos-examples/tree/master/nacos-dubbo-example">示例代码&lt;/a>仓库中找到，其接口定义为：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.alibaba.nacos.example.dubbo.service;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该Dubbo服务的代码可以在 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo">dubbo-samples-gateway-higress-dubbo&lt;/a> 仓库中找到，其接口定义为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.gateway.api;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayName&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口实现如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.alibaba.nacos.example.dubbo.service;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.alibaba.dubbo.config.annotation.Service;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.alibaba.dubbo.rpc.RpcContext;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.beans.factory.annotation.Value;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Default {@link DemoService}
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * https://nacos.io/zh-cn/docs/use-nacos-with-dubbo.html
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @since 2.6.5
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;${demo.service.version}&amp;#34;&lt;/span>, group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;${demo.service.group}&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultService&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Value&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;${demo.service.name}&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String serviceName;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayName&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RpcContext rpcContext &lt;span style="color:#719e07">=&lt;/span> RpcContext.getContext();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> String.format(&lt;span style="color:#2aa198">&amp;#34;Service [name :%s , port : %d] %s(\&amp;#34;%s\&amp;#34;) : Hello,%s&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceName,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpcContext.getLocalPort(),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rpcContext.getMethodName(),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name);
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;${demo.service.version}&amp;#34;&lt;/span>, group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;${demo.service.group}&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在本示例中，该Dubbo服务的服务名为com.alibaba.nacos.example.dubbo.service.DemoService，服务版本为1.0.0，服务分组为dev。&lt;/p>
-&lt;p>为了测试方便，我们可以通过运行以下命令来将我们部署在K8s集群中的Naocs服务映射到本地端口：&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在本示例中，该Dubbo服务的服务名为 &lt;code>org.apache.dubbo.samples.gateway.api.DemoService&lt;/code>，服务版本为 &lt;code>1.0.0&lt;/code>，服务分组为 &lt;code>dev&lt;/code>。&lt;/p>
+&lt;p>为了测试方便，我们可以通过运行以下命令来将我们部署在 K8S 集群中的 Naocs 服务映射到本地端口：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl port-forward svc/nacos-server 8848:8848 --address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#39;0.0.0.0&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后请求Nacos的服务发现接口，可以查看到我们Dubbo服务的元数据信息，从而对以上部署进行验证。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">$curl&lt;/span> -X GET &lt;span style="color:#2aa198">&amp;#39;http://127.0.0.1:8848/nacos/v1/ns/instance/list?serviceName=providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev&amp;#39;&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ curl -X GET &lt;span style="color:#2aa198">&amp;#39;http://127.0.0.1:8848/nacos/v1/ns/instance/list?serviceName=providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT_GROUP@@providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;groupName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT_GROUP&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;clusters&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;cacheMillis&amp;#34;&lt;/span>:10000,&lt;span style="color:#2aa198">&amp;#34;hosts&amp;#34;&lt;/span>:&lt;span style="color:#719e07">[{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;ip&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;10.244.0.58&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;port&amp;#34;&lt;/span>:20880,&lt;span style="color:#2aa198">&amp;#34;weight&amp;#34;&lt;/span>:1.0,&lt;span style="color:#2aa198">&amp;#34;healthy&amp;#34;&lt;/span>:true,&lt;span style="color:#2aa198">&amp;#34;enabled&amp;#34;&lt;/span>:true,&lt;span style="color:#2aa198">&amp;#34;ephemeral&amp;#34;&lt;/span>:true,&lt;span style="color:#2aa198">&amp;#34;clusterName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;serviceName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DEFAULT_GROUP@@providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;metadata&amp;#34;&lt;/span>:&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;side&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;provider&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;release&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo_demo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;methods&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;sayName&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;deprecated&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;2.0.2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;pid&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;3034042&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;interface&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;com.alibaba.nacos.example.dubbo.service.DemoService&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;service-name-mapping&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;version&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;generic&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;revision&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo_demo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;path&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;com.alibaba.nacos.example.dubbo.service.DemoService&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;protocol&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;metadata-type&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;remote&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;application&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dubbo-provider-demo&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;background&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dynamic&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;category&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;providers&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;group&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;dev&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;anyhost&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;timestamp&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;1680176973875&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;ipDeleteTimeout&amp;#34;&lt;/span>:30000,&lt;span style="color:#2aa198">&amp;#34;instanceHeartBeatInterval&amp;#34;&lt;/span>:5000,&lt;span style="color:#2aa198">&amp;#34;instanceHeartBeatTimeOut&amp;#34;&lt;/span>:15000&lt;span style="color:#719e07">}]&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;lastRefTime&amp;#34;&lt;/span>:1680178336936,&lt;span style="color:#2aa198">&amp;#34;checksum&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;allIPs&amp;#34;&lt;/span>:false,&lt;span style="color:#2aa198">&amp;#34;reachProtectionThreshold&amp;#34;&lt;/span>:false,&lt;span style="color:#2aa198">&amp;#34;valid&amp;#34;&lt;/span>:true&lt;span style="color:#719e07">}&lt;/span>%
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="通过ingress转发请求到dubbo服务">通过Ingress转发请求到Dubbo服务&lt;/h2>
-&lt;p>Higress可以通过McpBridge来对接Nacos作为服务来源，在K8s集群中apply以下资源来配置McpBridge&lt;/p>
+&lt;p>Higress 可以通过 McpBridge 来对接 Nacos 作为服务来源，在 K8s 集群中 apply 以下资源来配置 McpBridge&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: networking.higress.io/v1
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: McpBridge
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
@@ -4844,7 +5028,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Ingress
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">annotations&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">higress.io/destination&lt;/span>: providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev.DEFAULT-GROUP.public.nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">higress.io/destination&lt;/span>: gateway-higress-dubbo-provider.DEFAULT-GROUP.public.nacos
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: demo
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: higress-system
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
@@ -4859,7 +5043,17 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: default
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /dubbo
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pathType&lt;/span>: Prefix
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，path前缀为/dubbo的请求就会被路由到我们刚刚创建的Dubbo服务上。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，path前缀为 &lt;code>/dubbo&lt;/code> 的请求就会被路由到我们刚刚创建的 Dubbo 服务上。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;p>以上 &lt;code>higress.io/destination&lt;/code> 用来指定本路由的地址来源，它使用 &lt;code>服务名称.服务分组.命名空间ID.nacos&lt;/code> 的固定格式，其中，&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>服务名称&lt;/code> 可以是应用名或者接口名，Dubbo3 建议直接配置应用名，只有使用接口级服务发现时配置接口名，其格式为完整 &lt;code>nacos dataid&lt;/code>，如 &lt;code>providers:{service-name}:{version}:{group}&lt;/code>&lt;/li>
+&lt;li>&lt;code>服务分组&lt;/code>，nacos 分组，未明确设置时，使用 &lt;code>DEFAULT-GROUP&lt;/code> 即可。注意这里需要遵循 DNS 域名格式，因此服务分组中的下划线&amp;rsquo;_&amp;lsquo;被转换成了横杠&amp;rsquo;-&amp;rsquo;&lt;/li>
+&lt;li>&lt;code>命名空间ID&lt;/code>，nacos 命空间，未明确设置时，使用 &lt;code>public&lt;/code> 即可&lt;/li>
+&lt;li>&lt;code>nacos&lt;/code>，使用固定值 &lt;code>nacos&lt;/code> 代表数据来源&lt;/li>
+&lt;/ul>
+&lt;/div>
 &lt;h2 id="通过envoyfilter配置http到dubbo的协议转换规则">通过EnvoyFilter配置HTTP到Dubbo的协议转换规则&lt;/h2>
 &lt;p>经过上述步骤，我们已经在K8s环境下部署了一套Naocs和Dubbo，并通过Ingress将path前缀为/dubbo的请求路由到我们配好的Dubbo服务上。但光是这样是无法正常通信的，因为Dubbo服务使用的是定制的Dubbo协议，无法天然与HTTP协议进行兼容。因此接下来我们将通过EnvoyFilter来配置HTTP到Dubbo的协议转换规则，从而实现用HTTP请求来调用Dubbo服务。&lt;/p>
 &lt;p>在K8s集群中apply以下资源，要注意的是，EnvoyFilter是属于Istio的CRD，因此需要参照前提条件中的第2点来开启Higress对Istio CRD的支持。&lt;/p>
@@ -4922,13 +5116,13 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path_matcher&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match_http_method_spec&lt;/span>: ALL_GET
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match_pattern&lt;/span>: /dubbo/hello
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: com.alibaba.nacos.example.dubbo.service.DemoService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: org.apache.dubbo.samples.gateway.api.DemoService
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">1.0.0&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url_unescape_spec&lt;/span>: ALL_CHARACTERS_EXCEPT_RESERVED
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">applyTo&lt;/span>: CLUSTER
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cluster&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">service&lt;/span>: providers:com.alibaba.nacos.example.dubbo.service.DemoService:1.0.0:dev.DEFAULT-GROUP.public.nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">service&lt;/span>: gateway-higress-dubbo.DEFAULT-GROUP.public.nacos
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">context&lt;/span>: GATEWAY
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">patch&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">operation&lt;/span>: MERGE
@@ -4943,8 +5137,11 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;p>通过以上配置，我们就可以执行以下curl命令来调用这个dubbo服务了：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">$curl&lt;/span> &lt;span style="color:#2aa198">&amp;#34;localhost/dubbo/hello?p=abc&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">{&lt;/span>&lt;span style="color:#2aa198">&amp;#34;result&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;Service [name :demoService , port : 20880] sayName(\&amp;#34;abc\&amp;#34;) : Hello,abc&amp;#34;&lt;/span>&lt;span style="color:#719e07">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="配置参考">配置参考&lt;/h2>
-&lt;p>EnvoyFilter的相关配置项参考&lt;a href="https://higress.io/zh-cn/docs/user/dubbo-envoyfilter">HTTP转Dubbo配置说明&lt;/a>&lt;/p></description></item><item><title>Blog: 2022 年度总结与 2023 新年规划</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</link><pubDate>Thu, 23 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</guid><description>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;ul>
+&lt;li>EnvoyFilter的相关配置项参考&lt;a href="https://higress.io/zh-cn/docs/user/dubbo-envoyfilter">HTTP转Dubbo配置说明&lt;/a>&lt;/li>
+&lt;li>完整示例源码 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo">dubbo-samples-gateway-higress-dubbo&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Blog: 2022 年度总结与 2023 新年规划</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</link><pubDate>Thu, 23 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/23/2022-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%E4%B8%8E-2023-%E6%96%B0%E5%B9%B4%E8%A7%84%E5%88%92/</guid><description>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/roadmap/2023-roadmap.jpg" alt="dubbo-introduction">&lt;/p>
 &lt;h2 id="2022-年度总结">2022 年度总结&lt;/h2>
 &lt;h3 id="1-dubbo-开源-12-周年">1 Dubbo 开源 12 周年&lt;/h3>
@@ -4977,67 +5174,4 @@ Spring Boot3 &amp;amp; Spring6&lt;/p>
 &lt;li>提升 HTTP 开发体验，补全 Web 互通&lt;/li>
 &lt;li>打造 gRPC over Dubbo 最佳实践&lt;/li>
 &lt;li>完善的认证鉴权体系&lt;/li>
-&lt;/ul></description></item><item><title>Blog: 一文帮你快速了解 Dubbo 核心能力</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/23/%E4%B8%80%E6%96%87%E5%B8%AE%E4%BD%A0%E5%BF%AB%E9%80%9F%E4%BA%86%E8%A7%A3-dubbo-%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B/</link><pubDate>Thu, 23 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/23/%E4%B8%80%E6%96%87%E5%B8%AE%E4%BD%A0%E5%BF%AB%E9%80%9F%E4%BA%86%E8%A7%A3-dubbo-%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B/</guid><description>
-&lt;h2 id="dubbo-简介">Dubbo 简介&lt;/h2>
-&lt;h3 id="一句话定义">一句话定义&lt;/h3>
-&lt;p>Apache Dubbo 是一款微服务开发框架，它帮助解决微服务开发中的通信问题，同时为构建企业级微服务的提供服务治理能力，Dubbo 不绑定编程语言，我们的目标是为所有主流语言提供对等的微服务开发体验。
-&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/1-overview.jpg" alt="overview">&lt;/p>
-&lt;h3 id="基本架构">基本架构&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/2-arc.jpg" alt="overview">&lt;/p>
-&lt;p>Dubbo 从架构图上分为数据面和控制面。在数据面，使用 Dubbo 开发的微服务进程间基于 RPC 协议通信。DubboAdmin 控制面作为服务治理的抽象入口，由一系列可选的服务治理组件构成，负责 Dubbo集群的服务发现、流量管控策略、可视化监测。&lt;/p>
-&lt;h3 id="行业应用">行业应用&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/3-usecase.jpg" alt="overview">&lt;/p>
-&lt;p>Dubbo 设计用于解决阿里巴巴内部大规模 微服务集群实践难题，当前已被广泛应用于几乎所有行业的微服务实践中。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/4-usecase-alibaba.jpg" alt="overview">&lt;/p>
-&lt;p>以阿里巴巴为例，在 2021 年，阿里巴巴基于内部多年 HSF 框架实践积累，面向云原生架构设计了下一代微服务框架 Dubbo3，用于解决性能、治理升级、服务网格等一系列问题；截止目前，阿里巴巴已全面完成从 HSF到 Dubbo3 的迁移，核心业务都跑在开源 Dubbo3 之上。&lt;/p>
-&lt;h2 id="dubbo-到底提供了哪些核心能力">Dubbo 到底提供了哪些核心能力？&lt;/h2>
-&lt;h3 id="提供微服务抽象与框架">提供微服务抽象与框架&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/5-framework.jpg" alt="overview">&lt;/p>
-&lt;p>首先，Dubbo 作为服务开发框架解决了业务应用中微服务定义、暴露、通信与治理的问题，为业务应用开发定义了一套微服务编程范式。
-具体来说，Dubbo 为业务应用提供了微服务开发API、RPC 协议、服务治理三大核心能力，让开发者真正的专注业务逻辑开发。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/6-extensibility.jpg" alt="overview">&lt;/p>
-&lt;p>Dubbo 不是应用框架的替代者，它可以很好的工作在每种语言的主流编程框架之上，以 Java 为例，Dubbo 可以很好的与 Spring 协作，并在此基础上提供服务定义、微服务编程、服务发现、负载均衡、流量管控等能力。&lt;/p>
-&lt;h3 id="提供灵活的通信协议切换能力">提供灵活的通信协议切换能力&lt;/h3>
-&lt;p>在通信方面，Dubbo 区别于其他 RPC 框架的是它不绑定特定协议，你可以在底层选用 HTTP./2、TCP、gRPC、REST、Hessian 等任意通信协议，同时享受统一的 API、以及对等的服务治理能力。&lt;/p>
-&lt;h3 id="一切皆可扩展">一切皆可扩展&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/8-extensibility.jpg" alt="overview">&lt;/p>
-&lt;p>Dubbo 的另一个优势在于其可扩展性设计，从流量管控、协议编码、诊断调优、再到服务治理，你都可以去扩展，满足企业级微服务开发与运维的所有诉求。&lt;/p>
-&lt;h3 id="丰富的生态">丰富的生态&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/9-ecosystem.jpg" alt="overview">&lt;/p>
-&lt;p>基于扩展能力 Dubbo 官方提供了丰富的生态适配，涵盖了所有主流的开源微服务组件。&lt;/p>
-&lt;h3 id="服务网格">服务网格&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/10-mesh.jpg" alt="overview">&lt;/p>
-&lt;p>对于服务网格架构，Dubbo也可以轻松接入原生 Istio 体系；
-在数据面支持与 Envoy 部署的 Proxy 模式，也支持无 Envoy 的 Proxyless 模式，提供更灵活的数据面选择。&lt;/p>
-&lt;h2 id="构建企业级dubbo-微服务有多简单你只需要-4-步">构建企业级Dubbo 微服务有多简单？你只需要 4 步&lt;/h2>
-&lt;p>我们以 Java 微服务开发为例。&lt;/p>
-&lt;h3 id="第一步">第一步&lt;/h3>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/11-initializer.png" alt="overview">&lt;/p>
-&lt;p>使用 &lt;a href="https://start.dubbo.apache.org/bootstrap.html">官方脚手架&lt;/a> 快速创建项目模板，只需要选择依赖的版本、组件，点击 “获取代码” 即可&lt;/p>
-&lt;h3 id="第二步">第二步&lt;/h3>
-&lt;p>将模板项目导入 IDE 开发环境。
-定义 Java 接口作为 Dubbo 服务。
-&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/12-interface.jpg" alt="overview">&lt;/p>
-&lt;p>开发 Dubbo 服务端，实现接口并完成业务逻辑编码，通过一条简单的注解配置完成服务发布。
-&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/13-impl.jpg" alt="overview">&lt;/p>
-&lt;p>开发Dubbo 客户端，通过注解声明 Dubbo 服务，然后就可以发起远程方法调用了。至此，开发工作完成。
-&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/14-reference.jpg" alt="overview">&lt;/p>
-&lt;h3 id="第三步">第三步&lt;/h3>
-&lt;p>进入部署环节，我们选择 Kubernetes 作为部署环境。&lt;/p>
-&lt;p>首先，通过一条命令安装 dubbo-admin 等服务治理组件，安装成功之后，我们查看部署状态。接下来，开始部署业务应用，随后查看确认直到应用已经正常启动
-&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/15-deploy.jpg" alt="overview">&lt;/p>
-&lt;p>然后，我们就可以打开 Admin 控制台查看服务部署与调用情况了。这里是 Dubbo Admin 控制台的页面显示效果，可以看到刚才启动的 Dubbo 服务部署状态；除此之外，Admin 还提供了更详细的流量监控监测，点击服务统计，可进入监控页面&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/16-admin.jpg" alt="overview">&lt;/p>
-&lt;p>你可以在此了解Dubbo 集群的详细运行状态，包括每个应用对外服务和调用服务的情况，QpS、成功率等，还可以查看每个实例的资源健康状况。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/17-grafana1.png" alt="overview">&lt;/p>
-&lt;h3 id="第四步">第四步&lt;/h3>
-&lt;p>进行流量管控。当应用已经平稳运行后，进一步控制流量的访问行为，包括实现金丝雀发布、全链路灰度、动态调整超时时间、调整权重、按比例流量分发、参数路由等。控制台提供了可视化的流量治理规则操作入口，在这里可以直接下发流量规则。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/19-gray.jpg" alt="overview">&lt;/p>
-&lt;p>以一个线上环境的灰度隔离示例，通过 Dubbo 流量管控机制，我们可以给每个应用的一部分机器打上 gray 标签，接下来，对于入口为 gray 的流量，就可以控制确保它只在有 gray 标记的 Dubbo 实例内流转，实现了全链路的逻辑隔离效果，
-对于隔离多套开发环境、线上灰度测试等场景都非常有用。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/20-region.jpg" alt="overview">&lt;/p>
-&lt;p>对于同区域优先调用的场景，这里有两个应用做了多区域部署，紫色是杭州区域、蓝色是北京区域，部署在橙色区域的应用会优先访问同区域的应用，以此降低访问延迟，蓝色区域部署的服务亦是如此。&lt;/p>
-&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/2/introduction/21-region.jpg" alt="overview">&lt;/p>
-&lt;p>当应用在同区域区域部署的实例不可用时，调用会自动跨区域切换到其他可用区，确保整体可用性。&lt;/p>
-&lt;h2 id="总结">总结&lt;/h2>
-&lt;p>接下来，请开始你的Dubbo 之旅吧。&lt;/p></description></item></channel></rss>
+&lt;/ul></description></item></channel></rss>
