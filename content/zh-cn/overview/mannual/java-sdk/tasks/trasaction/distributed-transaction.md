@@ -2,9 +2,9 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/distributed-transaction/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/distributed-transaction/
-description: Dubbo 中分布式事务的支持
+description: "使用 Seata 解决 Dubbo 服务数据一致性问题，支持分布式事务。"
 linkTitle: 使用Seata让Dubbo支持分布式事务
-title: 使用Seata让Dubbo支持分布式事务
+title: 使用 Seata 支持分布式事务
 type: docs
 weight: 42
 ---

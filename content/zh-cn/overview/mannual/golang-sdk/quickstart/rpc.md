@@ -27,7 +27,7 @@ weight: 1
 
     ```shell
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-    go install github.com/apache/dubbo-go/compiler/protoc-gen-go-triple@latest
+    go install github.com/dubbogo/protoc-gen-go-triple@v3.0.0
     ```
 
     确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 验证，如果该命令不能正常工作的话，请执行以下命令：
@@ -119,7 +119,7 @@ service GreetService {
 ```bash
 protoc --go_out=. --go_opt=paths=source_relative \
     --go-triple_out=. --go-triple_opt=paths=source_relative \
-    proto/greet.proto
+    ./greet.proto
 ```
 
 运行以上命令后，在目标目录中看到以下生成的文件：
@@ -221,7 +221,7 @@ func main() {
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/rpc/streaming" >}}'>流式通信</a>
+                     <a href='{{< relref "../tutorial/rpc" >}}'>RPC 框架更多特性</a>
                 </h4>
                 <p>学习 Streaming 通信模型、配置超时时间、传递headers等更多框架配置。</p>
             </div>
@@ -231,7 +231,7 @@ func main() {
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/service-discovery" >}}'>服务发现等治理能力</a>
+                     <a href='{{< relref "../tutorial" >}}'>服务发现等治理能力</a>
                 </h4>
                 <p>学习如何使用 dubbo-go 开发微服务，引入服务发现、可观测性、流量管控等服务治理能力。</p>
             </div>

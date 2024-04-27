@@ -3,7 +3,7 @@ description: logger
 title: 配置和管理框架日志
 linkTitle: 框架日志
 type: docs
-weight: 5
+weight: 1
 ---
 
 本示例演示如何配置 dubbo-go 框架日志组件，将框架运行态日志保存到指定的位置。可在此查看  <a href="https://github.com/apache/dubbo-go-samples/tree/main/logger/level" target="_blank">完整示例源码地址</a>。

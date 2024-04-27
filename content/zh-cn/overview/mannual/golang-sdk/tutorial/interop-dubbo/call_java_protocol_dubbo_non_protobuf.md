@@ -9,7 +9,13 @@ type: docs
 weight: 4
 ---
 
+{{% alert title="注意" color="warning" %}}
 在阅读本文档之前，请记住我们推荐使用 protobuf+triple 的模式编写 java 和 go 语言互通的服务。本文仅当您已经有老版本 dubbo java 应用的情况下适用，否则的话请参考上一篇文档，使用 protobuf+triple 开发服务。
+{{% /alert %}}
+
+
+可在此查看本文档 [完整示例源码](https://github.com/apache/dubbo-go-samples/tree/main/java_interop/non-protobuf-dubbo)。
+
 
 ## go-client 调用 java-server
 但如果您是 dubbo java 的老用户，可能您的 dubbo java 应用并没有使用 protobuf（直接使用 java interface 定义服务），这个时候您需要使用以下方式开发 dubbo go-client，来调用老版本的 dubbo 服务。

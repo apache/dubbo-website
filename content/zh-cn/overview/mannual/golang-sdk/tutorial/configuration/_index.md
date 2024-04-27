@@ -4,7 +4,7 @@ aliases:
     - /zh-cn/docs3-v2/golang-sdk/tutorial/debugging/
     - /zh-cn/overview/mannual/golang-sdk/refer/basic_concept/
     - /zh-cn/overview/mannual/golang-sdk/refer/config/
-description: 配置文件
+description: "使用 dubbogo.yml 配置文件形式开发微服务应用。"
 title: 配置文件
 type: docs
 weight: 30
