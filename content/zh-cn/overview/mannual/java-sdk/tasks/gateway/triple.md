@@ -34,7 +34,7 @@ weight: 2
 
 ### 启动示例应用
 
-本示例完整源码请参见 [dubbo-samples-gateway-higress-triple](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-higress-triple)。
+本示例完整源码请参见 [dubbo-samples-gateway-higress-triple](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple)。
 
 该示例中定义并发布了一个定义为 `org.apache.dubbo.samples.gateway.api.DemoService` 的 triple 服务：
 
