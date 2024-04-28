@@ -251,4 +251,5 @@ $ curl "localhost/triple/demo/hello?name=HigressTriple"
 {{% /alert %}}
 
 ## 参考连接
+* [使用 Apache APISIX 代理 triple 协议流量](/zh-cn/blog/2024/04/22/使用-apache-apisix-代理-dubbo-服务triple协议/)
 * [Higress 实现 Spring Cloud 服务发现与路由配置(http协议)](https://higress.io/zh-cn/docs/user/spring-cloud)
