@@ -1,9 +1,9 @@
 ---
 aliases:
     - /zh/overview/tasks/mesh/migration/proxyless/
-description: ""
-linkTitle: 其他问题？
-title: 其他问题？
+description: 演示了 Dubbo3 的 Proxyless 模式。
+linkTitle: Proxyless 模式
+title: Proxyless 模式
 type: docs
 weight: 3
 ---
