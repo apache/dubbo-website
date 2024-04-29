@@ -48,7 +48,7 @@ public class GenericTask implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        GenericService genericService = buildGenericService("org.apache.dubbo.samples.develop.DevelopService","group2","2.0");
+        GenericService genericService = buildGenericService("org.apache.dubbo.samples.develop.DevelopService","group1","1.0");
         //传入需要调用的方法，参数类型列表，参数列表
         Object result = genericService.$invoke("invoke", new String[]{"java.lang.String"}, new Object[]{"g1"});
         System.out.println("GenericTask Response: " + JSON.toJSONString(result));
