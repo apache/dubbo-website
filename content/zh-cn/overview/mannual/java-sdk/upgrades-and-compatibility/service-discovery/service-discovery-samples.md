@@ -28,21 +28,24 @@ weight: 5
 1. 全局开关
 
 应用配置（可以通过配置文件或者 -D 指定）`dubbo.application.register-mode` 为 instance（只注册应用级）、all（接口级+应用级均注册）开启全局的注册开关，配置此开关后，默认会向所有的注册中心中注册应用级的地址，供消费端服务发现使用。
-> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src/main/resources/dubbo.properties)
+> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider1/src/main/resources/application.yml)
 
 ```
 # 双注册
-dubbo.application.register-mode=all
+dubbo:
+    registry:
+        register-mode: all
 ```
 ```
 # 仅应用级注册
-dubbo.application.register-mode=instance
+dubbo:
+    registry:
+        register-mode: instance
 ```
 
 2. 注册中心地址参数配置
 
 注册中心的地址上可以配置 `registry-type=service` 来显示指定该注册中心为应用级服务发现的注册中心，带上此配置的注册中心将只进行应用级服务发现。
-> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources/spring/dubbo-provider.xml)
 
 ```xml
 <dubbo:registry address="nacos://${nacos.address:127.0.0.1}:8848?registry-type=service"/>

@@ -48,7 +48,7 @@ public void doSayHello(String name) {
 
 **1. 异构微服务体系共存**
 
-我们很容易想到的一个挑战是：**不同的体系间通常是使用不同的 RPC 通信协议、部署独立的注册中心集群，面对这种多协议、多注册中心集群的场景，要如何实现相互之间透明的地址发现和透明的 RPC 调用？**如果我们什么都不做，那么每个微服务体系就只能感知到自己体系内的服务状态，流量也在各自的体系内封闭。而要做到从体系 A 平滑的迁移到体系 B，或者想长期的保持公司内部多个体系的共存，则解决不同体系间的互联互通，实现流量的透明调度将是非常重要的环节。
+我们很容易想到的一个挑战是：**不同的体系间通常是使用不同的 RPC 通信协议、部署独立的注册中心集群，面对这种多协议、多注册中心集群的场景，要如何实现相互之间透明的地址发现和透明的 RPC 调用？** 如果我们什么都不做，那么每个微服务体系就只能感知到自己体系内的服务状态，流量也在各自的体系内封闭。而要做到从体系 A 平滑的迁移到体系 B，或者想长期的保持公司内部多个体系的共存，则解决不同体系间的互联互通，实现流量的透明调度将是非常重要的环节。
 
 ![2](/imgs/blog/microservices.png) 
 
@@ -61,7 +61,7 @@ public void doSayHello(String name) {
 
 * Dubbo 体系内部另一个常出现的问题是，在大规模分布式部署的场景下，微服务系统会做跨区域、跨注册中心的部署，这个时候就会出现多集群间地址同步和流量调度的问题。
 
-总结起来，**不论是同构体系还是异构体系，都面临对多协议通信、多注册中心集群地址发现的问题。**Dubbo 目前是支持多协议、多注册中心的，可以说就是为解决我们上面分析的 Dubbo 同构体系内的场景而设计的，因此下面我们从同构体系的多协议、多注册中心场景讲起，先了解 Dubbo 多协议、多注册中心的基本支持情况以及它们是如何工作的。而在后面的一章再进一步探索怎么扩展这个能力来支持异构微服务体系的互联互通。
+总结起来，**不论是同构体系还是异构体系，都面临对多协议通信、多注册中心集群地址发现的问题。** Dubbo 目前是支持多协议、多注册中心的，可以说就是为解决我们上面分析的 Dubbo 同构体系内的场景而设计的，因此下面我们从同构体系的多协议、多注册中心场景讲起，先了解 Dubbo 多协议、多注册中心的基本支持情况以及它们是如何工作的。而在后面的一章再进一步探索怎么扩展这个能力来支持异构微服务体系的互联互通。
 
 ## Dubbo 体系内的多协议、多注册中心机制
 
@@ -109,7 +109,8 @@ public void doSayHello(String name) {
 3. 消费端应用 C
 
 ```xml
-<dubbo:reference protocol="grpc" interface="org.apache.dubbo.samples.basic.api.DemoService3"/>                                                                                     <dubbo:reference protocol="grpc" interface="org.apache.dubbo.samples.basic.api.DemoService4"/>
+<dubbo:reference protocol="grpc" interface="org.apache.dubbo.samples.basic.api.DemoService3"/>
+<dubbo:reference protocol="grpc" interface="org.apache.dubbo.samples.basic.api.DemoService4"/>
 
 <dubbo:reference protocol="dubbo" interface="org.apache.dubbo.samples.basic.api.DemoService0"/>
 
@@ -157,7 +158,8 @@ Dubbo 目前所支持的协议包括 Dubbo、REST、Thrift、gRPC、JsonRPC、He
 1. 服务提供端，双注册中心发布
 
 ```xml
-<dubbo:registry id="beijingRegistry" address="zookeeper://${zookeeper.address1}" default="false"/>                                                                           <dubbo:registry id="shanghaiRegistry" address="zookeeper://${zookeeper.address2}" />
+<dubbo:registry id="beijingRegistry" address="zookeeper://${zookeeper.address1}" default="false"/>
+<dubbo:registry id="shanghaiRegistry" address="zookeeper://${zookeeper.address2}" />
                                                                                           
 <dubbo:service interface="org.apache.dubbo.samples.multi.registry.api.HelloService" ref="helloService" registry="shanghaiRegistry,beijingRegistry"/>
 <dubbo:service interface="org.apache.dubbo.samples.multi.registry.api.DemoService" ref="demoService" registry="shanghaiRegistry,beijingRegistry"/>
@@ -167,7 +169,8 @@ Dubbo 目前所支持的协议包括 Dubbo、REST、Thrift、gRPC、JsonRPC、He
 2. 服务消费端，根据消费需求做单/双注册中心订阅
 
 ```xml
-<dubbo:registry id="beijingRegistry" address="zookeeper://${zookeeper.address1}" default="false" preferred="true" weight="100"/>                                                                                         <dubbo:registry id="shanghaiRegistry" address="zookeeper://${zookeeper.address2}" default="true" weight="20"/>
+<dubbo:registry id="beijingRegistry" address="zookeeper://${zookeeper.address1}" default="false" preferred="true" weight="100"/>
+<dubbo:registry id="shanghaiRegistry" address="zookeeper://${zookeeper.address2}" default="true" weight="20"/>
 
 <dubbo:reference interface="org.apache.dubbo.samples.multi.registry.api.DemoService"/>
 

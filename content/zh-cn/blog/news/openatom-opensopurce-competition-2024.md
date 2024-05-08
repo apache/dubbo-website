@@ -153,8 +153,7 @@ triple 协议相关实现源码：
 
 1. 后端： [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
 
-2. 前端交互图：[http://101.34.253.152/2024-1-14-v0.0.7/](http://101.34.253.152/2024-1-14-v0.0.7/)
-3. 前端代码框架：https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
+2. 前端代码框架：https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
 
 #### 4.3 参考资料
 
