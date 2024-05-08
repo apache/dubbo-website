@@ -11,19 +11,6 @@
       </div>
       </el-col>
     </el-row>
-    <el-row>
-      <el-divider><span style="font-size: 20px;">提交性能趋势</span></el-divider>
-      <el-col :span="12"><PullRequest></PullRequest></el-col>
-      <el-col :span="12"><ScheduledTask></ScheduledTask></el-col>
-    </el-row>
-    <el-row style="margin-top: 60px">
-      <el-divider><span style="font-size: 20px;">相同场景对比</span></el-divider>
-      <el-col :span="12"><RpcTask></RpcTask></el-col>
-      <el-col :span="12"><SerializationTask></SerializationTask></el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="24"><TraceDetail></TraceDetail></el-col>
-    </el-row>
 
     <el-row style="margin-top: 100px">
       <el-divider><span style="font-size: 20px;">手动触发对比</span></el-divider>
@@ -33,22 +20,12 @@
 </template>
 
 <script>
-import PullRequest from "@/components/PullRequest.vue";
-import ScheduledTask from "@/components/ScheduledTask.vue";
-import TraceDetail from "@/components/TraceDetail.vue";
-import RpcTask from "@/components/RpcTask.vue";
-import SerializationTask from "@/components/SerializationTask.vue";
 import TriggerTraceDetail from "@/components/TriggerTraceDetail.vue";
 
 export default {
   name: 'App',
   components: {
-    TriggerTraceDetail,
-    SerializationTask,
-    RpcTask,
-    TraceDetail,
-    ScheduledTask,
-    PullRequest
+    TriggerTraceDetail
   }
 }
 </script>
