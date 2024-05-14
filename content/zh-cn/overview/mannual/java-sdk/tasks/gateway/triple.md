@@ -34,7 +34,7 @@ weight: 2
 
 ### 启动示例应用
 
-本示例完整源码请参见 [dubbo-samples-gateway-higress-triple](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-higress-triple)。
+本示例完整源码请参见 [dubbo-samples-gateway-higress-triple](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple)。
 
 该示例中定义并发布了一个定义为 `org.apache.dubbo.samples.gateway.api.DemoService` 的 triple 服务：
 
@@ -210,7 +210,7 @@ public interface DemoService {
 
 {{% alert title="注意" color="info" %}}
 关于接口注解
-* 在之前的示例 [dubbo-samples-gateway-higress-triple](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-higress-triple) 中已经启用，可查看源码了解实际用法。
+* 在之前的示例 [dubbo-samples-gateway-higress-triple](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple) 中已经启用，可查看源码了解实际用法。
 * 在[【进阶学习 - 协议 - rest】](/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/)一节中有详细的说明和使用示例，也可以前往查看。
 {{% /alert %}}
 
@@ -251,4 +251,5 @@ $ curl "localhost/triple/demo/hello?name=HigressTriple"
 {{% /alert %}}
 
 ## 参考连接
+* [使用 Apache APISIX 代理 triple 协议流量](/zh-cn/blog/2024/04/22/使用-apache-apisix-代理-dubbo-服务triple协议/)
 * [Higress 实现 Spring Cloud 服务发现与路由配置(http协议)](https://higress.io/zh-cn/docs/user/spring-cloud)
