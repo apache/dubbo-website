@@ -239,7 +239,7 @@
 目前 rest 协议仅支持 &lt;code>Java 接口&lt;/code> 服务定义模式，相比于 dubbo 和 triple 协议，rest 场景下我们需要为 Interface 增加注解，支持 Spring MVC、JAX_RS 两种注解。
 &lt;/div>
 &lt;p>如果你记得 triple 协议原生支持 cURL 访问，即类似 &lt;code>org.apache.dubbo.springboot.demo.idl.Greeter/greet&lt;/code> 的访问模式。通过增加以上注解后，即可为 triple 服务额外增加 REST 风格访问支持，如 &lt;code>demo/greet&lt;/code> 的 GET 请求。&lt;/p>
-&lt;h3 id="spring-web">Spring Web&lt;/h3>
+&lt;h3 id="spring-web注解">Spring Web注解&lt;/h3>
 &lt;p>Spring MVC 服务定义范例：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RestController&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/demo&amp;#34;&lt;/span>)
@@ -247,7 +247,7 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GetMapping&lt;/span>(value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/hello&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>();
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="jax-rs">JAX-RS&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="jax-rs注解">JAX-RS注解&lt;/h3>
 &lt;p>JAX-RS 服务定义范例：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/demo&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
@@ -255,16 +255,265 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/hello&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>();
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="性能指标">性能指标&lt;/h2>
-&lt;h2 id="协议实现">协议实现&lt;/h2>
-&lt;p>列一些 java 实现中的细节内容，可以配置或调整的选项等。&lt;/p>
-&lt;h3 id="网络配置">网络配置&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="异常类型传递">异常类型传递&lt;/h2>
+&lt;p>Provider 端产生的业务异常需要作为响应值返回给 Consumer 客户端，消费端可以使用 &lt;code>try catch&lt;/code> 捕获可能抛出的异常：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy.echo(REQUEST_MSG);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>} &lt;span style="color:#719e07">catch&lt;/span> (YourCustomizedException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (RpcException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo 框架会在 provider 侧根据如下流程发送异常类型响应，不是所有业务异常都能原样返回，对于无法处理的异常类型，都会被框架封装成 &lt;code>RpcException&lt;/code> 类型返回：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/19/triple/2.jpeg" alt="triple-exception">&lt;/p>
+&lt;h2 id="附录">附录&lt;/h2>
+&lt;h3 id="protobuf与java原生数据类型对比">Protobuf与Java原生数据类型对比&lt;/h3>
+&lt;p>对于计划从 Java 接口完全迁移到 Protobuf 的用户而言，这里的信息可供参考，用以了解类型迁移可能面临的限制，Protobuf 描述语言是否能完全描述 Java 数据类型。&lt;/p>
+&lt;p>本文对比了Protobuf和Java Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。&lt;/p>
+&lt;h4 id="1-数据类型">1. 数据类型&lt;/h4>
+&lt;h5 id="11-基本类型">1.1. 基本类型&lt;/h5>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>ptoto类型&lt;/th>
+&lt;th>java类型&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>double&lt;/td>
+&lt;td>double&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>float&lt;/td>
+&lt;td>float&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>int64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint32&lt;/td>
+&lt;td>int[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>uint64&lt;/td>
+&lt;td>long[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sint64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed32&lt;/td>
+&lt;td>int[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>fixed64&lt;/td>
+&lt;td>long[注]&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed32&lt;/td>
+&lt;td>int&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>sfixed64&lt;/td>
+&lt;td>long&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bool&lt;/td>
+&lt;td>boolean&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>string&lt;/td>
+&lt;td>String&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>bytes&lt;/td>
+&lt;td>ByteString&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+在Java中，无符号的32位和64位整数使用它们的有符号对数来表示，顶部位只存储在符号位中。
+&lt;/div>
+&lt;h4 id="2-复合类型">2. 复合类型&lt;/h4>
+&lt;h5 id="21-枚举">2.1. 枚举&lt;/h5>
 &lt;ul>
-&lt;li>心跳检测&lt;/li>
-&lt;li>网络传输包设置&lt;/li>
-&lt;li>连接超时等&lt;/li>
+&lt;li>原始pb代码&lt;/li>
 &lt;/ul>
-&lt;h3 id="线程模型">线程模型&lt;/h3></description></item><item><title>Overview: Dubbo协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</guid><description>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">enum&lt;/span> TrafficLightColor {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_INVALID &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_UNSET &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_GREEN &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_YELLOW &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TRAFFIC_LIGHT_COLOR_RED &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">4&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>枚举是常量，因此采用大写&lt;/p>
+&lt;/blockquote>
+&lt;h5 id="22-数组">2.2. 数组&lt;/h5>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message VipIDToRidReq {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> repeated uint32 vipID &lt;span style="color:#719e07">=&lt;/span> 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png" alt="image">&lt;/p>
+&lt;blockquote>
+&lt;p>底层实际上是1个ArrayList&lt;/p>
+&lt;/blockquote>
+&lt;h5 id="23-集合">2.3. 集合&lt;/h5>
+&lt;p>PB不支持无序、不重复的集合，只能 &lt;code>借用数组实现&lt;/code>，需要 &lt;code>自行去重&lt;/code>。&lt;/p>
+&lt;h5 id="24-字典">2.4. 字典&lt;/h5>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message BatchOnlineRes {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32, uint32&lt;span style="color:#719e07">&amp;gt;&lt;/span> onlineMap &lt;span style="color:#719e07">=&lt;/span> 1;&lt;span style="color:#586e75">//在线状态&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234654-e4568080-db46-11eb-9700-b30022ebee21.png" alt="image">&lt;/p>
+&lt;h5 id="25-嵌套">2.5. 嵌套&lt;/h5>
+&lt;ul>
+&lt;li>原始pb代码&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>message BatchAnchorInfoRes {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map&lt;span style="color:#719e07">&amp;lt;&lt;/span>uint32, AnchorInfo&lt;span style="color:#719e07">&amp;gt;&lt;/span> list &lt;span style="color:#719e07">=&lt;/span> 1; &lt;span style="color:#586e75">//用户信息map列表&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/*
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">* 对应接口的功能: 批量或单个获取用户信息
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>message AnchorInfo {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> uint32 ownerUid &lt;span style="color:#719e07">=&lt;/span> 1 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;uid&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户id&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string nickName &lt;span style="color:#719e07">=&lt;/span> 2 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nn&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户昵称&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string smallAvatar &lt;span style="color:#719e07">=&lt;/span> 3 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;savt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像全路径-小&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string middleAvatar &lt;span style="color:#719e07">=&lt;/span> 4 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像全路径-中&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string bigAvatar &lt;span style="color:#719e07">=&lt;/span> 5 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;bavt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像全路径-大&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> string avatar &lt;span style="color:#719e07">=&lt;/span> 6 &lt;span style="color:#719e07">[&lt;/span>json_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;avt&amp;#34;&lt;/span>&lt;span style="color:#719e07">]&lt;/span>; &lt;span style="color:#586e75">//用户头像&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>生成的java代码&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs/advanced/protobufinterface/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png" alt="image">&lt;/p>
+&lt;h4 id="3-字段默认值">3. 字段默认值&lt;/h4>
+&lt;ul>
+&lt;li>对于字符串，默认值为空字符串。&lt;/li>
+&lt;li>对于字节，默认值为空字节。&lt;/li>
+&lt;li>对于bools，默认值为false。&lt;/li>
+&lt;li>对于数字类型，默认值为零。&lt;/li>
+&lt;li>对于枚举，默认值为第一个定义的枚举值，它必须为0。&lt;/li>
+&lt;li>对于消息字段，未设置字段。 它的确切值是语言相关的。 有关详细信息，请参阅生成的代码指南。&lt;/li>
+&lt;/ul>
+&lt;h4 id="4-整体结构">4. 整体结构&lt;/h4>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Feature&lt;/th>
+&lt;th>Java Interface&lt;/th>
+&lt;th>Protobuf&lt;/th>
+&lt;th>备注&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>方法重载&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>泛型/模板化&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>方法继承&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>嵌套定义&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>部分支持&lt;/td>
+&lt;td>PB仅支持message和enum嵌套&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>import文件&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>字段为null&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>多个入参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB仅支持单入参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0个入参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB必须有入参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>0个出参&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB必须有出参&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为抽象类&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为具象类&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为接口&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为具象类&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>入参/出参为基础类型&lt;/td>
+&lt;td>√&lt;/td>
+&lt;td>×&lt;/td>
+&lt;td>PB的入参/出参必须为结构体&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h4 id="5-社区资料">5. 社区资料&lt;/h4>
+&lt;ul>
+&lt;li>社区主页地址：https://developers.google.cn/protocol-buffers/&lt;/li>
+&lt;li>社区开源地址：https://github.com/google/protobuf&lt;/li>
+&lt;li>相关jar的maven：https://search.maven.org/search?q=com.google.protobuf&lt;/li>
+&lt;/ul></description></item><item><title>Overview: Dubbo协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</guid><description>
 &lt;p>Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用。&lt;/p>
 &lt;p>主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。&lt;/p>
 &lt;ul>
