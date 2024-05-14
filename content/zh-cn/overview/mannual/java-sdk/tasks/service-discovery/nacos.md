@@ -70,10 +70,11 @@ dubbo
 ```properties
 # dubbo.properties
 dubbo.registry.address=nacos://localhost:8848
+dubbo.registry.register-mode=instance
 ```
 或
 ```xml
-<dubbo:registry address="nacos://localhost:8848" />
+<dubbo:registry address="nacos://localhost:8848" register-mode="instance"/>
 ```
 
 ## 2 高级配置
@@ -85,6 +86,7 @@ dubbo.registry.address=nacos://localhost:8848
 dubbo
  registry
    address: nacos://localhost:8848?username=nacos&password=nacos
+   register-mode: instance
 ```
 
 或
@@ -103,6 +105,7 @@ dubbo.registry.register-mode=instance
 dubbo:
  registry:
    address: nacos://localhost:8848?namespace=5cbb70a5-xxx-xxx-xxx-d43479ae0932
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
 ```
 
 或者
@@ -112,6 +115,7 @@ dubbo:
 dubbo:
  registry:
    address: nacos://localhost:8848
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
    parameters.namespace: 5cbb70a5-xxx-xxx-xxx-d43479ae0932
 ```
 
@@ -122,6 +126,7 @@ dubbo:
 dubbo:
  registry:
    address: nacos://localhost:8848
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
    group: dubbo
 ```
 
@@ -133,6 +138,7 @@ Dubbo 3.0.0 版本以后，增加了是否注册消费者的参数，如果需�
 # application.yml
 dubbo:
   registry:
+    register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
     address: nacos://localhost:8848?register-consumer-url=true
 ```
 或者
@@ -141,6 +147,7 @@ dubbo:
 dubbo:
   registry:
     address: nacos://localhost:8848
+    register-mode: instance  # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
     parameters.register-consumer-url: true
 ```
 

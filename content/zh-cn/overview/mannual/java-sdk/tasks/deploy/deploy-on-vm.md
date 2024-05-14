@@ -2,7 +2,7 @@
 aliases:
     - /zh/overview/tasks/deploy/deploy-on-vm/
     - /zh-cn/overview/tasks/deploy/deploy-on-vm/
-description: ""
+description: "传统基于 Zookeeper、Nacos 的注册中心部署架构，部署 Dubbo 应用到虚拟机环境"
 linkTitle: 传统注册中心
 title: 传统基于 Zookeeper、Nacos 的注册中心部署架构，部署 Dubbo 应用到虚拟机环境
 type: docs

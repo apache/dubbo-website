@@ -1,6 +1,6 @@
 ---
 description: 快速部署Dubbo应用
-linkTitle: 快速部署Dubbo应用
+linkTitle: 部署Dubbo应用
 title: 快速部署Dubbo应用
 type: docs
 weight: 3

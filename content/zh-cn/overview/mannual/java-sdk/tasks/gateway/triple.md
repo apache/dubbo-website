@@ -180,11 +180,11 @@ $ curl "localhost/org.apache.dubbo.samples.gateway.api.DemoService/sayHello?name
 "Hello HigressTriple"
 ```
 
-`/org.apache.dubbo.samples.gateway.api.DemoService/sayHello/` 这种根据 Java 路径名与方法直接暴露的访问路径，虽然可以很容易调通，但对于前端来说并不友好。接下来我们一起看一下如何发布 REST 风格的 HTTP 服务。
-
-{{% alert title="注意" color="warning" %}}
+{{% alert title="注意" color="info" %}}
 这里要运行 `kubectl port-forward service/higress-gateway -n higress-system 80:80 443:443` 将集群内的 Higress 暴露出来才可访问。
 {{% /alert %}}
+
+`/org.apache.dubbo.samples.gateway.api.DemoService/sayHello/` 这种根据 Java 路径名与方法直接暴露的访问路径，虽然可以很容易调通，但对于前端来说并不友好。接下来我们一起看一下如何发布 REST 风格的 HTTP 服务。
 
 ## REST 风格接口
 
@@ -252,4 +252,4 @@ $ curl "localhost/triple/demo/hello?name=HigressTriple"
 
 ## 参考连接
 * [使用 Apache APISIX 代理 triple 协议流量](/zh-cn/blog/2024/04/22/使用-apache-apisix-代理-dubbo-服务triple协议/)
-* [Higress 实现 Spring Cloud 服务发现与路由配置(http协议)](https://higress.io/zh-cn/docs/user/spring-cloud)
+* [Higress 实现基于 http 协议微服务发现与路由配置](https://higress.io/zh-cn/docs/user/spring-cloud)
