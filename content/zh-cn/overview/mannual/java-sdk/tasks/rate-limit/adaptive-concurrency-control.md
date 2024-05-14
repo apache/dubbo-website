@@ -1,5 +1,5 @@
 ---
-description: "自适应限流，区别于普通限流策略，其具备自动调整限流策略是否生效、限流阈值的能力。"
+description: "自适应限流，区别于普通限流策略，其具备自动调整限流策略是否生效、限流阈值的能力，heuristic flow control。"
 linkTitle: 自适应限流
 title: 自适应限流
 type: docs

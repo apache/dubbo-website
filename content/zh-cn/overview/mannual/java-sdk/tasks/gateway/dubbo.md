@@ -11,8 +11,8 @@ weight: 2
 ---
 
 由于 dubbo 协议是基于 TCP 的二进制私有协议，因此更适合作为后端微服务间的高效 RPC 通信协议，这也导致 dubbo 协议对于前端流量接入不是很友好。在 Dubbo 框架中，有两种方式可以帮助开发者解决这个问题：
-* **多协议发布**，为 dubbo 协议服务暴露 rest 风格的 http 协议访问方式，这种模式架构上会变得非常简单，通用的网关产品即可支持。
-* **通过网关实现协议转换**，这种方式需要将 http 协议转换为后端服务能识别的 dubbo 协议，要求网关必须支持 dubbo 协议。
+* **多协议发布【推荐】**，为 dubbo 协议服务暴露 rest 风格的 http 协议访问方式，这种模式架构上会变得非常简单，通用的网关产品即可支持。
+* **通过网关实现 `http->dubbo` 协议转换**，这种方式需要将 http 协议转换为后端服务能识别的 dubbo 协议，要求网关必须支持 dubbo 协议。
 
 ## 同时发布 http、dubbo 协议
 **如果我们能让一个服务同时发布 dubbo、http 协议，这样后端调用是基于高效的 dubbo 二进制协议，同时浏览器、web服务等前端设施也可以用 http 协议访问到相同的服务。** 好消息是，Dubbo 框架支持为同一个服务发布多个协议，并且支持客户端通过同一个端口以不同的协议访问服务，如下所示：
@@ -60,8 +60,11 @@ public interface DemoService {
 为 dubbo 协议服务增加了 http 访问方式之后，就可以很容易的将 dubbo 服务接入网关了，具体可以参见下一小节中的 [triple 协议网关接入](zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/) 示例，那里有详细的说明。
 
 ## http 转 dubbo 协议
+{{% alert title="注意" color="warning" %}}
+如果您使用的是 Dubbo3 3.3.x 版本，在决定考虑此方案之前，我们强烈推荐您仔细评估本文前一节的 `多协议发布方案`。除非您因为某些特殊原因真的无法接受多协议发布带来的应用改造成本（实际上只是改一行配置而已），否则这个方案应该作为第二选择。
+{{% /alert %}}
 
-如果你不打算如上所述的方式改造应用进行多协议发布（实际上只是改一行配置），那么您如果要从网关接入后端 dubbo 服务，则前端的 HTTP 流量要经过一层 `http -> dubbo` 的协议转换才能实现正常调用
+如果要从网关接入后端 dubbo 服务，则前端的 HTTP 流量要经过一层 `http -> dubbo` 的协议转换才能实现正常调用
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/http-to-dubbo.png"/>
 
@@ -74,3 +77,5 @@ public interface DemoService {
 *  [使用 Higress 代理 Dubbo 流量]({{< relref "../../../../../../blog/integration/how-to-proxy-dubbo-in-higress" >}})
 *  [使用 Apache APISIX 代理 Dubbo 流量]({{< relref "../../../../../../blog/integration/how-to-proxy-dubbo-in-apache-apisix" >}})
 *  [使用 Apache Shenyu 代理 Dubbo 流量]({{< relref "../../../../../../blog/integration/how-to-proxy-dubbo-in-apache-shenyu" >}})
+
+如果您并没有使用现成的网关产品，而是使用自建的流量转换组件，您很有可能使用到了 Dubbo 框架中的 [**泛化调用**](/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic/) 机制，具体请参考相关文档了解详情。

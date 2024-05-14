@@ -1,10 +1,10 @@
 ---
 aliases:
     - /zh/overview/what/ecosystem/gateway/higress/
-description: "使用 Higress 作为 Dubbo 网关"
+description: "使用 Higress 作为 Dubbo 网关，代理 dubbo 协议服务。"
 linkTitle: 如何通过 Higress 网关代理 Dubbo 服务
 title: 如何通过 Higress 网关代理 Dubbo 服务
-date: 2023-04-01
+date: 2024-04-01
 tags: ["网关", "生态"]
 ---
 {{% alert title="注意" color="warning" %}}
@@ -13,6 +13,8 @@ tags: ["网关", "生态"]
 
 
 Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过配置协议转换，可以将一个Dubbo服务以HTTP接口暴露出来，从而用HTTP请求实现对Dubbo接口的调用。本文将通过一个示例来介绍如何用Higress配置HTTP到Dubbo的协议转换。该示例会引导您轻松地部署一个Nacos server和一个Dubbo服务，然后通过Ingress将HTTP请求转发到注册在Nacos上的Dubbo服务，并通过Higress的协议转换能力完成对Dubbo服务的HTTP调用。
+
+<img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/http-to-dubbo.png"/>
 
 以下是一个使用 `Higress + dubbo协议 + Nacos注册中心` 的完整示例：[dubbo-samples-gateway-higress-dubbo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo)。
 

@@ -2,8 +2,8 @@
 aliases:
     - /zh/overview/tasks/deploy/deploy-on-vm/
     - /zh-cn/overview/tasks/deploy/deploy-on-vm/
-description: ""
-linkTitle: Kubernetes Service
+description: "部署 Dubbo 应用到服务网格（Service Mesh），基于 Kubernetes Service 与控制面。"
+linkTitle: 服务网格
 title: 部署 Dubbo 应用到虚拟机环境
 type: docs
 weight: 3

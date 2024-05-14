@@ -2,349 +2,106 @@
 aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
     - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
-description: Triple 协议迁移指南
-linkTitle: Dubbo 协议迁移至 Triple 协议
-title: Dubbo 协议迁移至 Triple 协议
+description: "如何平滑的从 dubbo 协议升级到 triple 协议。"
+linkTitle: 升级到triple协议
+title: 升级到triple协议
 type: docs
-weight: 7
+weight: 2
 ---
 
-
-
-
-
-
-## Triple 协议介绍
-
-根据 Triple 设计的目标，`Triple` 协议有以下优势:
-
-- 具备跨语言交互的能力，传统的多语言多 SDK 模式和 Mesh 化跨语言模式都需要一种更通用易扩展的数据传输协议。
-- 提供更完善的请求模型，除了支持传统的 Request/Response 模型（Unary 单向通信），还支持 Stream（流式通信） 和 Bidirectional（双向通信）。
-- 易扩展、穿透性高，包括但不限于 Tracing / Monitoring 等支持，也应该能被各层设备识别，网关设施等可以识别数据报文，对 Service Mesh 部署友好，降低用户理解难度。
-- 完全兼容 grpc，客户端/服务端可以与原生grpc客户端打通。
-- 可以复用现有 grpc 生态下的组件, 满足云原生场景下的跨语言、跨环境、跨平台的互通需求。
-
-当前使用其他协议的 Dubbo 用户，框架提供了兼容现有序列化方式的迁移能力，在不影响线上已有业务的前提下，迁移协议的成本几乎为零。
-
-需要新增对接 Grpc 服务的 Dubbo 用户，可以直接使用 Triple 协议来实现打通，不需要单独引入 grpc client 来完成，不仅能保留已有的 Dubbo 易用性，也能降低程序的复杂度和开发运维成本，不需要额外进行适配和开发即可接入现有生态。
-
-对于需要网关接入的 Dubbo 用户，Triple 协议提供了更加原生的方式，让网关开发或者使用开源的 grpc 网关组件更加简单。网关可以选择不解析 payload ，在性能上也有很大提高。在使用 Dubbo 协议时，语言相关的序列化方式是网关的一个很大痛点，而传统的 HTTP 转 Dubbo 的方式对于跨语言序列化几乎是无能为力的。同时，由于 Triple 的协议元数据都存储在请求头中，网关可以轻松的实现定制需求，如路由和限流等功能。
-
-> `Triple` 协议的格式和原理请参阅 [RPC 通信协议](/zh-cn/docs/concepts/rpc-protocol/)
-
-## Dubbo2 协议迁移流程
-
-Dubbo2 的用户使用 dubbo 协议 + 自定义序列化，如 hessian2 完成远程调用。
-
-而 Grpc 的默认仅支持 Protobuf 序列化，对于 Java 语言中的多参数以及方法重载也无法支持。
-
-Dubbo3的之初就有一条目标是完美兼容 Dubbo2，所以为了 Dubbo2 能够平滑升级， Dubbo 框架侧做了很多工作来保证升级的无感，目前默认的序列化和 Dubbo2 保持一致为`hessian2`。
-
-所以，如果决定要升级到 Dubbo3 的 `Triple` 协议，只需要修改配置中的协议名称为 `tri` (注意: 不是triple)即可。
-
-接下来我们我们以一个使用 Dubbo2 协议的[工程](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration) 来举例，如何一步一步安全的升级。
-
-1. 仅使用 `dubbo` 协议启动 `provider` 和 `consumer`，并完成调用。
-2. 使用 `dubbo` 和 `tri` 协议 启动`provider`，以 `dubbo` 协议启动 `consumer`，并完成调用。
-3. 仅使用 `tri` 协议 启动 `provider`和 `consumer`，并完成调用。
-
-### 定义服务
-
-1. 定义接口
-```java
-public interface IWrapperGreeter {
-
-    //... 
-    
-    /**
-     * 这是一个普通接口，没有使用 pb 序列化
-     */
-    String sayHello(String request);
-
-}
-```
-
-2. 实现类如下
-```java
-public class IGreeter2Impl implements IWrapperGreeter {
-
-    @Override
-    public String sayHello(String request) {
-        return "hello," + request;
-    }
-}
-```
-
-### 仅使用 triple 协议
-
-当所有的 consuemr 都升级至支持 `Triple` 协议的版本后，provider 可切换至仅使用 `Triple` 协议启动
-
-结构如图所示:
-![strust](/imgs/v3/migration/tri/migrate-only-tri-strust.png)
-
-[Provider](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriProvider.java)
-和 [Consumer](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationTriConsumer.java) 完成调用，输出如下:
-
-![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
-
-### 仅使用 dubbo 协议
-
-为保证兼容性，我们先将部分 provider 升级到 `dubbo3` 版本并使用 `dubbo` 协议。
-
-使用 `dubbo` 协议启动一个 [`Provider`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboProvider.java) 和 [`Consumer`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationDubboConsumer.java) ,完成调用，输出如下:
-![result](/imgs/v3/migration/tri/dubbo3-tri-migration-dubbo-dubbo-result.png)
-
-###  同时使用两协议
-
-对于线上服务的升级，不可能一蹴而就同时完成 provider 和 consumer 升级, 需要按步操作，保证业务稳定。
-第二步, provider 提供双协议的方式同时支持 dubbo + tri 两种协议的客户端。
-
-结构如图所示:
-![strust](/imgs/v3/migration/tri/migrate-dubbo-tri-strust.png)
-
-> 按照推荐升级步骤，provider 已经支持了tri协议，所以 dubbo3的 consumer 可以直接使用 tri 协议
-
-使用`dubbo`协议和`triple`协议启动[`Provider`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothProvider.java)和[`Consumer`](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/migration/ApiMigrationBothConsumer.java),完成调用，输出如下:
-
-![result](/imgs/v3/migration/tri/dubbo3-tri-migration-both-dubbo-tri-result.png)
-
-
-### 实现原理
-
-通过上面介绍的升级过程，我们可以很简单的通过修改协议类型来完成升级。框架是怎么帮我们做到这些的呢？
-
-通过对 `Triple` 协议的介绍，我们知道Dubbo3的 `Triple` 的数据类型是 `protobuf` 对象，那为什么非 `protobuf` 的 java 对象也可以被正常传输呢。
-
-这里 Dubbo3 使用了一个巧妙的设计，首先判断参数类型是否为 `protobuf` 对象，如果不是。用一个 `protobuf` 对象将 `request` 和 `response` 进行 wrapper，这样就屏蔽了其他各种序列化带来的复杂度。在 `wrapper` 对象内部声明序列化类型，来支持序列化的扩展。
-
-wrapper 的`protobuf`的 IDL如下:
-```proto
-syntax = "proto3";
-
-package org.apache.dubbo.triple;
-
-message TripleRequestWrapper {
-    // hessian4
-    // json
-    string serializeType = 1;
-    repeated bytes args = 2;
-    repeated string argTypes = 3;
-}
-
-message TripleResponseWrapper {
-    string serializeType = 1;
-    bytes data = 2;
-    string type = 3;
-}
-```
-
-对于请求，使用`TripleRequestWrapper`进行包装，对于响应使用`TripleResponseWrapper`进行包装。
-
-> 对于请求参数，可以看到 args 被`repeated`修饰，这是因为需要支持 java 方法的多个参数。当然，序列化只能是一种。序列化的实现沿用 Dubbo2 实现的 spi
-
-
-## 多语言用户
-
-使用 `protobuf` 建议新服务均使用该方式，对于 Dubbo3 和 Triple 来说，主推的是使用 `protobuf` 序列化，并且使用 `proto` 定义的 `IDL` 来生成相关接口定义。以 `IDL` 做为多语言中的通用接口约定，加上 `Triple` 与 `Grpc` 的天然互通性，可以轻松地实现跨语言交互，例如 Go 语言等。
-
-将编写好的 `.proto` 文件使用 `dubbo-compiler` 插件进行编译并编写实现类，完成方法调用：
-
-![result](/imgs/v3/migration/tri/dubbo3-tri-migration-tri-tri-result.png)
-
-从上面升级的例子我们可以知道，`Triple` 协议使用 `protbuf` 对象序列化后进行传输，所以对于本身就是 `protobuf` 对象的方法来说，没有任何其他逻辑。
-
-使用 `protobuf` 插件编译后接口如下：
-```java
-public interface PbGreeter {
-
-    static final String JAVA_SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
-    static final String SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
-
-    static final boolean inited = PbGreeterDubbo.init();
-
-    org.apache.dubbo.sample.tri.GreeterReply greet(org.apache.dubbo.sample.tri.GreeterRequest request);
-
-    default CompletableFuture<org.apache.dubbo.sample.tri.GreeterReply> greetAsync(org.apache.dubbo.sample.tri.GreeterRequest request){
-        return CompletableFuture.supplyAsync(() -> greet(request));
-    }
-
-    void greetServerStream(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
-
-    org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterRequest> greetStream(org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
-}
-```
-
-## Triple 新特性 Stream 流
-Stream 是 Dubbo3 新提供的一种调用类型，在以下场景时建议使用流的方式:
-
-- 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
-- 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的
-- 推送类场景，多个消息在同一个调用的上下文中被发送和处理
-
-Stream 分为以下三种:
-- SERVER_STREAM(服务端流)
-![SERVER_STREAM](/imgs/v3/migration/tri/migrate-server-stream.png)
-- CLIENT_STREAM(客户端流)
-![CLIENT_STREAM](/imgs/v3/migration/tri/migrate-client-stream.png)
-- BIDIRECTIONAL_STREAM(双向流)
-![BIDIRECTIONAL_STREAM](/imgs/v3/migration/tri/migrate-bi-stream.png)
-
-> 由于 `java` 语言的限制，BIDIRECTIONAL_STREAM 和 CLIENT_STREAM 的实现是一样的。
-
-在 Dubbo3 中，流式接口以 `SteamObserver` 声明和使用，用户可以通过使用和实现这个接口来发送和处理流的数据、异常和结束。
-
-> 对于 Dubbo2 用户来说，可能会对StreamObserver感到陌生，这是Dubbo3定义的一种流类型，Dubbo2 中并不存在 Stream 的类型，所以对于迁移场景没有任何影响。
-
-流的语义保证
-- 提供消息边界，可以方便地对消息单独处理
-- 严格有序，发送端的顺序和接收端顺序一致
-- 全双工，发送不需要等待
-- 支持取消和超时
-
-## 非 PB 序列化的流
-1. api
-```java
-public interface IWrapperGreeter {
-
-    StreamObserver<String> sayHelloStream(StreamObserver<String> response);
-
-    void sayHelloServerStream(String request, StreamObserver<String> response);
-}
-```
-
-> Stream 方法的方法入参和返回值是严格约定的，为防止写错而导致问题，Dubbo3 框架侧做了对参数的检查, 如果出错则会抛出异常。
-> 对于 `双向流(BIDIRECTIONAL_STREAM)`, 需要注意参数中的 `StreamObserver` 是响应流，返回参数中的 `StreamObserver` 为请求流。
-
-2. 实现类
-```java
-public class WrapGreeterImpl implements WrapGreeter {
-
-    //...
-
-    @Override
-    public StreamObserver<String> sayHelloStream(StreamObserver<String> response) {
-        return new StreamObserver<String>() {
-            @Override
-            public void onNext(String data) {
-                System.out.println(data);
-                response.onNext("hello,"+data);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onCompleted() {
-                System.out.println("onCompleted");
-                response.onCompleted();
-            }
-        };
-    }
-
-    @Override
-    public void sayHelloServerStream(String request, StreamObserver<String> response) {
-        for (int i = 0; i < 10; i++) {
-            response.onNext("hello," + request);
-        }
-        response.onCompleted();
-    }
-}
-```
-
-3. 调用方式
-```java
-delegate.sayHelloServerStream("server stream", new StreamObserver<String>() {
-    @Override
-    public void onNext(String data) {
-        System.out.println(data);
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-        throwable.printStackTrace();
-    }
-
-    @Override
-    public void onCompleted() {
-        System.out.println("onCompleted");
-    }
-});
-
-
-StreamObserver<String> request = delegate.sayHelloStream(new StreamObserver<String>() {
-    @Override
-    public void onNext(String data) {
-        System.out.println(data);
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-        throwable.printStackTrace();
-    }
-
-    @Override
-    public void onCompleted() {
-        System.out.println("onCompleted");
-    }
-});
-for (int i = 0; i < n; i++) {
-    request.onNext("stream request" + i);
-}
-request.onCompleted();
-```
-
-## Protobuf 序列化的流
-
-对于 `Protobuf` 序列化方式，推荐编写 `IDL` 使用 `compiler` 插件进行编译生成。生成的代码大致如下:
-```java
-public interface PbGreeter {
-
-    static final String JAVA_SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
-    static final String SERVICE_NAME = "org.apache.dubbo.sample.tri.PbGreeter";
-
-    static final boolean inited = PbGreeterDubbo.init();
-    
-    //...
-
-    void greetServerStream(org.apache.dubbo.sample.tri.GreeterRequest request, org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
-
-    org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterRequest> greetStream(org.apache.dubbo.common.stream.StreamObserver<org.apache.dubbo.sample.tri.GreeterReply> responseObserver);
-}
-```
-
-## 流的实现原理
-
-`Triple`协议的流模式是怎么支持的呢？
-
-- 从协议层来说，`Triple` 是建立在 `HTTP2` 基础上的，所以直接拥有所有 `HTTP2` 的能力，故拥有了分 `stream` 和全双工的能力。
-
-- 框架层来说，`StreamObserver` 作为流的接口提供给用户，用于入参和出参提供流式处理。框架在收发 stream data 时进行相应的接口调用, 从而保证流的生命周期完整。
-
-## Triple 与应用级注册发现
-
-关于 Triple 协议的应用级服务注册和发现和其他语言是一致的，可以通过下列内容了解更多。
-
-- [服务发现](/zh-cn/docs/concepts/service-discovery/)
-- [应用级地址发现迁移指南](/zh-cn/docs/migration/migration-service-discovery/)
-
-## 与 GRPC 互通
-
-通过对于协议的介绍，我们知道 `Triple` 协议是基于 `HTTP2` 并兼容 `GRPC`。为了保证和验证与`GRPC`互通能力，Dubbo3 也编写了各种从场景下的测试。详细的可以通过[这里](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/README.MD) 了解更多。
-
-
-{{% alert title="未来: Everything on Stub" color="primary" %}} 
-
-用过 `Grpc` 的同学应该对 `Stub` 都不陌生。
-Grpc 使用 `compiler` 将编写的 `proto` 文件编译为相关的 protobuf 对象和相关 rpc 接口。默认的会同时生成几种不同的 `stub`
-
-- blockingStub
-- futureStub
-- reactorStub
-- ...
-
-`stub` 用一种统一的使用方式帮我们屏蔽了不同调用方式的细节。不过目前 `Dubbo3` 暂时只支持传统定义接口并进行调用的使用方式。
-
-在不久的未来，`Triple` 也将实现各种常用的 `Stub`，让用户写一份`proto`文件，通过 `comipler` 可以在任意场景方便的使用，请拭目以待。
+{{% alert title="请注意" color="warning" %}}
+* 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并继续使用 dubbo 通信协议。
+* 如果您是 Dubbo 新用户，强烈建议直接 [使用 triple 协议](/zh-cn/overview/mannual/java-sdk/tasks/protocol/) 即可。
 {{% /alert %}}
+
+本文档适合服务已经运行在 dubbo 协议之上的老用户，请先参考上一篇文档 [如何从 Dubbo2 升级到 Dubbo3](../migration/) 完成框架版本升级，然后遵循以下步骤以最小改动平滑迁移到 triple 协议。
+
+以下是协议升级的架构图，展示了平滑升级过程中不同 Dubbo 应用的状态：
+
+
+<img alt="dubbo协议迁移到tirple协议" style="max-width:800px;height:auto;" src="/imgs/v3/manual/java/migration/dubbo-to-triple.png"/>
+
+按先后顺序，升级基本步骤如下：
+1. Provider 提供者侧配置单端口双协议（dubbo、triple）发布
+2. Provider 提供者侧配置首选协议为 triple（此时，提供者注册的URL地址为 `dubbo://host:port/DemoService?preferred-protocol=tri`）
+3. Consumer 消费者升级，根据情况不同有以下两种方式：
+	* 升级消费者到 3.3 版本，消费者会根据 `preferred-protocol=tri` 优先调用 triple 协议
+	* 无法升级到 3.3 版本的消费者应用，可以配置 `@DubboReference(protocol="tri")` 调用 triple 协议
+4. 推动所有应用升级到最新 Dubbo3 版本，最终所有流量都是 triple 协议
+
+{{% alert title="请注意" color="warning" %}}
+请注意，以上提到的单端口多协议、识别 `preferred-protocol` 首选协议等功能，需要 Dubbo 3.3.0+ 版本！
+{{% /alert %}}
+
+### 步骤一：提供者双协议发布
+假设我们有以下应用配置，即在 20880 端口发布 dubbo 协议：
+```yaml
+dubbo:
+  protocol:
+    name: dubbo
+    port: 20880
+```
+
+我们需要增加两个配置项，如下所示：
+
+```yaml
+dubbo:
+  protocol:
+    name: dubbo
+    port: 20880
+    ext-protocol: tri
+    preferred-protocol: tri
+```
+
+其中，
+* `ext-protocol: tri` 指定在原 20880 端口上额外发布 triple 协议，即单端口双协议发布。
+* `preferred-protocol: tri` 会随注册中心同步到 Consumer 侧，告诉 consumer 优先使用 triple 协议调用
+
+{{% alert title="注意" color="warning" %}}
+`preferred-protocol: tri` 配置仅在 3.3.0 及之后版本支持，所以即使 provider 配置了这个选项，对于 3.3.0 版本即之前的 consumer 消费端并不会生效，还是会调用 dubbo 协议。
+{{% /alert %}}
+
+### 步骤二：消费端切换协议
+提供端完成步骤一配置并重启后，消费端根据版本与配置不同，可能处于以下三种状态之一：
+
+**1. 消费端是 3.3.0 及之后版本**
+
+此类消费端会自动识别提供者 url 上的 `preferred-protocol: tri` 标记，如果发现此标记，则消费端自动使用 triple 协议调用服务，否则继续使用 dubbo 协议。
+
+**2. 消费端是 2.x 或 3.3.0 之前版本**
+
+由于低版本 Dubbo 框架不能识别 `preferred-protocol: tri` 参数，因此这部分消费者不受提供者端多协议发布的任何影响，继续调用 dubbo 协议。
+
+**3. 消费端是 2.x 或 3.3.0 之前版本，且额外指定要调用的协议**
+
+与第 2 种情况基本一致，只是这时用户可以明确的为某些服务指定使用哪种 rpc 协议，如：
+
+```java
+@DubboReference(protocol="tri")
+private DemoService demoService;
+```
+
+或者
+
+```xml
+<dubbo:reference protocol="tri" />
+```
+
+在配置了 `protocol="tri"` 后，服务的调用会使用 triple 协议。需要注意的是，在配置 `protocol="tri"` 之前，一定要确保提供端已经发布了 triple 协议支持，否则调用将会失败。
+
+{{% alert title="注意" color="warning" %}}
+* 从以上三种情况可知，协议升级过程对消费端完全无感，消费端不会因提供端的多协议配置而出现任何通信障碍。
+* 对于消费端，最简单的协议切换方式就是通过 `preferred-protocol=tri` 进行自动切换，需要两边版本都升级到 3.3.0+ 才支持。
+{{% /alert %}}
+
+### 步骤三：完全收敛到triple协议
+步骤一、二操作起来非常简单，并且保证了过程平滑，通过单端口双协议、消费端自动切换保证了整个升级过程的平滑。
+
+平滑升级意味着我们要经历一个中间态，即在某一段时间内，集群内 dubbo 协议、triple 协议共存（有些服务间通信是dubbo协议、有些服务间通信是triple协议）。如何才能推进达成终态目标那，即所有服务调用都使用 triple 协议？我们推荐使用以下两种方式达成目标：
+* 推进集群内所有 Dubbo 应用都升级到 3.3.x 最新版本，这样消费端就能自动切换到 triple 协议
+* 通过 Dubbo 框架的指标埋点，观察某个应用（作为provider）是否仍在处理 dubbo 流量，对这部分应用的上下游进行治理
+
+{{% alert title="注意" color="info" %}}
+对于 Dubbo 框架而言，集群内 dubbo 协议和 triple 协议共存的状态并不存在任何技术问题，不同的服务调用使用不同协议也很正常，因此双协议共存的中间态是完全可以接受的。但有时候为了整体方案统一，我们可能需要达成单一通信协议的终态目标。
+{{% /alert %}}
+

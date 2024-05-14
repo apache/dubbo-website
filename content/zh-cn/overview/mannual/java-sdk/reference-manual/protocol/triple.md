@@ -126,7 +126,7 @@ Stream 分为以下三种。
 
 如果你记得 triple 协议原生支持 cURL 访问，即类似  `org.apache.dubbo.springboot.demo.idl.Greeter/greet` 的访问模式。通过增加以上注解后，即可为 triple 服务额外增加 REST 风格访问支持，如 `demo/greet` 的 GET 请求。
 
-### Spring Web
+### Spring Web注解
 Spring MVC 服务定义范例：
 ```java
 @RestController
@@ -137,7 +137,7 @@ public interface DemoService {
 }
 ```
 
-### JAX-RS
+### JAX-RS注解
 JAX-RS 服务定义范例：
 ```java
 @Path("/demo")
@@ -148,18 +148,165 @@ public interface DemoService {
 }
 ```
 
-## 性能指标
+## 异常类型传递
+Provider 端产生的业务异常需要作为响应值返回给 Consumer 客户端，消费端可以使用 `try catch` 捕获可能抛出的异常：
 
+```java
+try {
+	greeterProxy.echo(REQUEST_MSG);
+} catch (YourCustomizedException e) {
+	 e.printStackTrace();
+ } catch (RpcException e) {
+	e.printStackTrace();
+}
+```
 
-## 协议实现
-列一些 java 实现中的细节内容，可以配置或调整的选项等。
+Dubbo 框架会在 provider 侧根据如下流程发送异常类型响应，不是所有业务异常都能原样返回，对于无法处理的异常类型，都会被框架封装成 `RpcException` 类型返回：
 
-### 网络配置
-* 心跳检测
-* 网络传输包设置
-* 连接超时等
+![triple-exception](/imgs/blog/2022/12/19/triple/2.jpeg)
 
-### 线程模型
+## 附录
+### Protobuf与Java原生数据类型对比
+
+对于计划从 Java 接口完全迁移到 Protobuf 的用户而言，这里的信息可供参考，用以了解类型迁移可能面临的限制，Protobuf 描述语言是否能完全描述 Java 数据类型。
+
+本文对比了Protobuf和Java Interface这2种IDL的差异，帮助Dubbo协议开发者了解Protobuf，为后续转到Triple协议和Grpc协议做铺垫。
+
+#### 1. 数据类型
+
+##### 1.1. 基本类型
+
+| ptoto类型  | java类型 |
+| ---- | ---- |
+double | double
+float | float
+int32 | int
+int64 | long
+uint32 | int[注]
+uint64 | long[注]
+sint32 | int
+sint64 | long
+fixed32 | int[注]
+fixed64 | long[注]
+sfixed32 |  int
+sfixed64 | long
+bool | boolean
+string | String
+bytes | ByteString
+
+{{% alert title="注意" color="primary" %}}
+在Java中，无符号的32位和64位整数使用它们的有符号对数来表示，顶部位只存储在符号位中。
+{{% /alert %}}
+
+#### 2. 复合类型
+
+##### 2.1. 枚举
+
+* 原始pb代码
+
+```java.
+enum TrafficLightColor {
+    TRAFFIC_LIGHT_COLOR_INVALID = 0;
+    TRAFFIC_LIGHT_COLOR_UNSET = 1;
+    TRAFFIC_LIGHT_COLOR_GREEN = 2;
+    TRAFFIC_LIGHT_COLOR_YELLOW = 3;
+    TRAFFIC_LIGHT_COLOR_RED = 4;
+}
+```
+
+* 生成的java代码
+
+![image](/imgs/docs/advanced/protobufinterface/124234531-b96c2c80-db46-11eb-8155-a77dbe059f07.png)
+
+> 枚举是常量，因此采用大写
+##### 2.2. 数组
+
+* 原始pb代码
+
+```java
+message VipIDToRidReq {
+    repeated uint32 vipID = 1;
+}
+```
+
+* 生成的java代码
+
+![image](/imgs/docs/advanced/protobufinterface/124234564-c4bf5800-db46-11eb-94fc-a056af6089cb.png)
+
+> 底层实际上是1个ArrayList
+##### 2.3. 集合
+
+PB不支持无序、不重复的集合，只能 ``借用数组实现``，需要 ``自行去重``。
+
+##### 2.4. 字典
+
+* 原始pb代码
+
+```java
+message BatchOnlineRes {
+    map<uint32, uint32> onlineMap = 1;//在线状态
+}
+```
+
+* 生成的java代码
+
+![image](/imgs/docs/advanced/protobufinterface/124234654-e4568080-db46-11eb-9700-b30022ebee21.png)
+
+##### 2.5. 嵌套
+
+* 原始pb代码
+
+```java
+message BatchAnchorInfoRes {
+    map<uint32, AnchorInfo> list = 1; //用户信息map列表
+}
+/*
+* 对应接口的功能: 批量或单个获取用户信息
+*/
+message AnchorInfo {
+    uint32 ownerUid = 1 [json_name="uid"]; //用户id
+    string nickName = 2 [json_name="nn"]; //用户昵称
+    string smallAvatar = 3 [json_name="savt"]; //用户头像全路径-小
+    string middleAvatar = 4 [json_name="mavt"]; //用户头像全路径-中
+    string bigAvatar = 5 [json_name="bavt"]; //用户头像全路径-大
+    string avatar = 6 [json_name="avt"]; //用户头像
+}
+```
+
+* 生成的java代码
+
+![image](/imgs/docs/advanced/protobufinterface/124234723-f89a7d80-db46-11eb-82d0-a8aee5322098.png)
+
+#### 3. 字段默认值
+
+* 对于字符串，默认值为空字符串。
+* 对于字节，默认值为空字节。
+* 对于bools，默认值为false。
+* 对于数字类型，默认值为零。
+* 对于枚举，默认值为第一个定义的枚举值，它必须为0。
+* 对于消息字段，未设置字段。 它的确切值是语言相关的。 有关详细信息，请参阅生成的代码指南。
+
+#### 4. 整体结构
+
+|  Feature  |  Java Interface   | Protobuf  | 备注  |
+|  ----  | ----  | ----  | ----  |
+| 方法重载  | √ | × |  |
+| 泛型/模板化  | √ | × |  |
+| 方法继承  | √ | × |  |
+| 嵌套定义  | √ | 部分支持 | PB仅支持message和enum嵌套 |
+| import文件  | √ | √  |  |
+| 字段为null  | √ | × |  |
+| 多个入参  | √ | × | PB仅支持单入参 |
+| 0个入参  | √ | × | PB必须有入参 |
+| 0个出参  | √ | × | PB必须有出参 |
+| 入参/出参为抽象类  | √ | × | PB的入参/出参必须为具象类 |
+| 入参/出参为接口  | √ | × | PB的入参/出参必须为具象类 |
+| 入参/出参为基础类型  | √ | × | PB的入参/出参必须为结构体 |
+
+#### 5. 社区资料
+* 社区主页地址：https://developers.google.cn/protocol-buffers/
+* 社区开源地址：https://github.com/google/protobuf
+* 相关jar的maven：https://search.maven.org/search?q=com.google.protobuf
 
 
 

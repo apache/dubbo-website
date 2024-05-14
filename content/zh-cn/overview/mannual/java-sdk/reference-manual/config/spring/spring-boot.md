@@ -13,7 +13,13 @@ weight: 3
 
 ## application.yaml
 
-`application.properties(application.yaml)` 支持的配置项与 [配置参考手册](../properties) 中描述的基本是一一对应的。
+以下是 Dubbo 框架支持的配置组件列表，可以在 Spring Boot 配置文件中指定所需配置：
+
+### 配置示例
+
+```yaml
+
+```
 
 ### dubbo
 * [**dubbo.application** - `org.apache.dubbo.config.ApplicationConfig`](../../properties#dubboapplication)
@@ -23,12 +29,13 @@ weight: 3
 * [**dubbo.protocol** - `org.apache.dubbo.config.ProtocolConfig`](../../properties#dubboprotocol)
 * [**dubbo.provider** - `org.apache.dubbo.config.ProviderConfig`](../../properties#dubboprovider)
 * [**dubbo.registry** - `org.apache.dubbo.config.RegistryConfig`](../../properties#dubboregistry)
+* [**dubbo.metrics** - `org.apache.dubbo.config.MetricsConfig`](../../properties#dubbometrics)
+* [**dubbo.tracing** - `org.apache.dubbo.config.TracingConfig`](../../properties#dubbotracing)
 * [**dubbo.ssl** - `org.apache.dubbo.config.SslConfig`](../../properties#dubbossl)
 * ~~[**dubbo.monitor** - `org.apache.dubbo.config.MonitorConfig`](../../properties#dubbomonitor)~~
 * ~~[**dubbo.module** - `org.apache.dubbo.config.ModuleConfig`](../../properties#dubbomodule)~~
 
 ### dubbo.metrics
-* [**dubbo.metrics** - `org.apache.dubbo.config.MetricsConfig`](../../properties#dubbometrics)
 * [**dubbo.metrics.aggregation** - `org.apache.dubbo.config.nested.AggregationConfig`](../../properties#dubbometricsaggregation)
 * [**dubbo.metrics.histogram** - `org.apache.dubbo.config.nested.HistogramConfig`](../../properties#dubbometricshistogram)
 * [**dubbo.metrics.prometheus** - `org.apache.dubbo.config.nested.PrometheusConfig`](../../properties#dubbometricsprometheus)
@@ -36,7 +43,6 @@ weight: 3
 * [**dubbo.metrics.prometheus.pushgateway** - `org.apache.dubbo.config.nested.PrometheusConfig$Pushgateway`](../../properties#dubbometricsprometheuspushgateway)
 
 ### dubbo.tracing
-* [**dubbo.tracing** - `org.apache.dubbo.config.TracingConfig`](../../properties#dubbotracing)
 * [**dubbo.tracing.baggage.correlation** - `org.apache.dubbo.config.nested.BaggageConfig$Correlation`](../../properties#dubbotracingbaggage.correlation)
 * [**dubbo.tracing.tracing-exporter.otlp-config** - `org.apache.dubbo.config.nested.ExporterConfig$OtlpConfig`](../../properties#dubbotracingtracing-exporterotlp-config)
 * [**dubbo.tracing.tracing-exporter.zipkin-config** - `org.apache.dubbo.config.nested.ExporterConfig$ZipkinConfig`](../../properties#dubbotracingtracing-exporterzipkin-config)
@@ -45,8 +51,6 @@ weight: 3
 * [**dubbo.tracing.sampling** - `org.apache.dubbo.config.nested.SamplingConfig`](../../properties#dubbotracingsampling)
 * [**dubbo.tracing.tracing-exporter** - `org.apache.dubbo.config.nested.ExporterConfig`](../../properties#dubbotracingtracing-exporter)
 
-
-
-## starters
+## starter列表
 
 starter 列表、版本、对应的组件版本
