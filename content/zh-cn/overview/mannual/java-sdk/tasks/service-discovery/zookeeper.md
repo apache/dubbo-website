@@ -114,7 +114,7 @@ dubbo.registry.register-mode=instance
 ```
 或
 ```xml
-<dubbo:registry address="zookeeper://localhost:2181" />
+<dubbo:registry address="zookeeper://localhost:2181" register-mode="instance" />
 ```
 
 `address` 是启用 zookeeper 注册中心唯一必须指定的属性，而在生产环境下，`address` 通常被指定为集群地址，如
@@ -135,6 +135,7 @@ protocol 与 address 分开配置的模式也可以，如
 dubbo
  registry
    address: zookeeper://localhost:2181
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
    username: hello
    password: 1234
 ```
@@ -149,6 +150,7 @@ dubbo
 dubbo
  registry
    address: zookeeper://localhost:2181
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
    group: daily1
 ```
 
@@ -159,6 +161,7 @@ dubbo
 dubbo
  registry
    address: zookeeper://localhost:2181
+   register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
    timeout: 30 * 1000* # 连接超时时间，默认 30s
    session: 60 * 1000* # 会话超时时间，默认 60s
 ```

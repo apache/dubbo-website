@@ -9,13 +9,13 @@ type: docs
 weight: 1
 ---
 
-## 序列化
-以下是 Dubbo 框架支持的序列化协议列表，根据 `triple`、`dubbo` 通信协议进行分类。
+## 支持的协议列表
+以下是 Dubbo 框架支持的序列化协议列表，根据 `triple`、`dubbo` RPC 通信协议进行分类。
 
 | <span style="display:inline-block;width:100px">RPC协议</span> | <span style="display:inline-block;width:100px">编程模式</span> | <span style="display:inline-block;width:100px">序列化协议</span> | <span style="display:inline-block;width:200px">配置方式</span> | JDK版本 | 说明 |
 | --- | --- | --- | --- | --- | --- |
-| **triple** | IDL | protobuf <br/>protobuf-json | 默认值 | 8, 17, 21 | 使用 IDL 时的默认序列化方式，也可以选择 protobuf-json 序列化 |
-|  | Java接口 | protobuf wrapper | serialization="hessian" | 8, 17, 21 | 这种模式下采用的是两次序列化模式，即数据先被 hessian 序列化，再由 protobuf 序列化。<br/><br/>为了支持与 IDL 同等的调用模型，易用性较好但性能略有下降 |
+| **triple** | IDL | protobuf、<br/>protobuf-json | 默认值 | 8, 17, 21 | 使用 IDL 时的默认序列化方式，client 也可以选择 protobuf-json 序列化通信，无需额外配置 |
+|  | Java接口 | protobuf-wrapper | serialization="hessian" | 8, 17, 21 | 这种模式下采用的是两次序列化模式，即数据先被 hessian 序列化，再由 protobuf 序列化。<br/><br/>为了支持与 IDL 同等的调用模型，易用性较好但性能略有下降 |
 | **dubbo** | Java接口 | hessian | 默认值，serialization="hessian" | 8, 17, 21 | dubbo 协议默认序列化方式，具备兼容性好、高性能、跨语言的优势(java、go、c/c++、php、python、.net) |
 |  | Java接口 | protostuff | serialization="protostuff" | 8 | A java serialization library with built-in support for forward-backward compatibility (schema evolution) and validation. |
 |  | Java接口 | gson | serialization="gson" | 8, 17, 21 | 谷歌推出的一款 json 序列化库 |
@@ -27,9 +27,62 @@ weight: 1
 
 ## 性能对比报告
 
-序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。
+序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。
 
 具体请查看 [参考手册 - 性能基准报告](/zh-cn/overview/mannual/java-sdk/reference-manual/performance/)。
+
+## 切换序列化协议
+
+{{% alert title="注意" color="info" %}}
+本文档适用的典型场景是 Dubbo 老用户：用户已经有大量系统运行在 Dubbo 之上，由于一些场景需要，必须将使用多年的序列化升级一个新的序列化协议。
+{{% /alert %}}
+
+在 `3.2.0` 及之后版本中, Dubbo 的服务端引入新的配置 `prefer-serialization`，该特性可以通过协商的方式将整个系统的序列化协议平滑的升级到一个全新协议。
+
+### 切换步骤
+
+序列化协议升级，需要分两步走：
+
+**1. 需要推动服务端的序列化协议升级，同时在服务端的暴露配置中需要添加 `prefer-serialization` 配置。**
+
+比如：升级前的序列化协议是 hessian2，升级的目标序列化协议是 Fastjson2 那么在服务端的暴露配置中就应该添加如下所示的配置：
+
+Spring Boot 应用 `application.properties` 配置文件中增加如下内容：
+
+```properties
+dubbo.provider.prefer-serialization=fastjson2,hessian2 #这里定义了新的协议协商顺序
+dubbo.provider.serialization=hessian2 #这是之前的序列化协议
+```
+
+或者，如果使用 xml 配置的话：
+
+```xml
+<dubbo:provider serialization="hessian2" prefer-serialization="fastjson2,hessian2" />
+```
+
+**2. 客户端和服务端都需要增加新的序列化实现必要依赖**
+
+如以上示例所示，需要确保消费端和提供端都增加 fastjson2 依赖：
+```xml
+<dependency>
+  <groupId>com.alibaba.fastjson2</groupId>
+  <artifactId>fastjson2</artifactId>
+  <version>${fastjson2.version}</version>
+</dependency>
+```
+
+{{% alert title="警告" color="warning" %}}
+要使自动协商生效，需要确保：
+* 消费者端、提供者端都是 3.2.x 及以上版本，否则配置不生效（继续使用老序列化协议）
+* 消费者端、提供者端都加上了必须的序列化实现包依赖，否则不生效（继续使用老序列化协议，个别极端场景可能报错）。
+{{% /alert %}}
+
+### 实现原理
+
+dubbo 客户端序列化协议是根据服务端的注册配置来选择的（即服务端的`serialization`配置）。在请求阶段 dubbo 会把客户端的序列化协议组装到请求头上，服务端在进行反序列化时会根据请求头来确定反序列化协议。所以，如果服务端和客户端的版本不一致就可能会出现客户端序列化不了的情况。
+
+为了解决这个情况，`3.2.0` 在客户端序列化的时候会优先使用 `prefer-serialization` 配置的协议，如果不支持 `prefer-serialization` 相关的协议，才会使用 `serialization` 配置的协议。（可以把 `serialization` 理解为一个兜底的配置）
+
 
 ## 安全性
 

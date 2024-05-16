@@ -5,13 +5,14 @@ aliases:
 description: ""
 linkTitle: 单端口多协议
 title: 发布使用不同协议的多个服务，通过单端口监听
-type: docs
-weight: 5
+date: 2024-3-19
+author: 陈景明
+tags: ["源码解析", "协议"]
+description: >
+  Dubbo3 框架支持在单个端口发布多个不同的协议，比如可以同时发布 dubbo、triple 协议，本文介绍 Dubbo 是如何实现单端口多协议发布的。
 ---
 
 
-
-## 特性说明
 通过对protocol进行配置，dubbo3可以支持端口的协议复用。
 比如使用Triple协议启动端口复用后，可以在相同的端口上为服务增加
 Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个统一的端口复用
@@ -132,45 +133,3 @@ reference.setProtocol(this.protocol);
 
 ![pu-server-imgs4](/imgs/blog/pu-server/reference-service.png)
 
-
-
-文档编写中...
-
-Dubbo3 HTTP 协议支持仍在建设中，目前最新的 3.3 开发分支已经有初版原型供体验。正式的生产可用版本预计会在 3.4/3.4 的某个正式版本发布。
-
-以下是 Dubbo3 HTTP 协议与编程模式计划支持的几种业务场景：
-* 调用 http 协议的微服务体系
-* 发布 http 协议的服务
-* 多协议发布，一个服务同时发布 http&dubbo 协议
-
-## 调用 http 协议的微服务体系
-一个典型的应用场景是 Dubbo 调用 Spring Cloud 开发的微服务体系。
-
-不同体系的互通，最关键的两点便是地址格式与编码协议的兼容，只要 Dubbo 能自动发现 SpringCloud 体系的地址并能基于 HTTP 协议进行通信即可。Dubbo3 可以做到：
-* 支持 SpringCloud 体系的服务发现地址格式
-* 支持 HTTP+JSON 的数据传输格式
-
-![img](/imgs/v3/tasks/protocol/http-usecase-1.png)
-
-基于以上分析，当我们需要调用 Spring Cloud 体系的服务时，只需要在 Dubbo 侧编写标准的 Dubbo Reference 服务引用就可以。同时，为了简化开发工作，**Dubbo 支持标准的 Spring Web 注解**，因此，如果你可以直接在 Dubbo 中复用 Spring Cloud 中的接口定义：
-
-Spring Cloud 侧的服务定义：
-```java
-interface SpringCloudRestService {
- //xxx
-}
-```
-
-在 Dubbo 侧唯一要做的工作就是定义 Dubbo Reference：
-
-```java
-@DubboReference
-private SpringCloudRestService restService;
-```
-
-## 发布 http 协议的服务
-
-
-## 多协议发布
-
-![img](/imgs/v3/tasks/protocol/http-usecase-1.png)
