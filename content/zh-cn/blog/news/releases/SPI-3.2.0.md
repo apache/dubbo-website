@@ -1,6 +1,6 @@
 ---
-title: "dubbo-spi-extensions v3.2.0-RELEASE"
-linkTitle: "dubbo-spi-extensions v3.2.0-RELEASE"
+title: "dubbo-spi-extensions v3.2.0-RELEASE 正式发布"
+linkTitle: "dubbo-spi-extensions v3.2.0-RELEASE 正式发布˚"
 date: 2024-05-16
 tags: ["Release Notes"]
 weight: 70
