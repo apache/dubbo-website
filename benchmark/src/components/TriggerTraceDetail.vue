@@ -231,7 +231,7 @@ export default {
         this.$.ajax({
           type: "GET",
           async: false,
-          url: "https://raw.githubusercontent.com/" + this.PUSH_NAME + "/" + this.REPO_NAME + "/main/test-results/scenario/merged_prop_results.json",
+          url: "https://raw.githubusercontent.com/" + this.PUSH_NAME + "/" + this.REPO_NAME + "/master/test-results/scenario/merged_prop_results.json",
           success: function (res) {
             jmh = res
           }
@@ -441,7 +441,7 @@ export default {
         this.$.ajax({
           type: "GET",
           async: false,
-          url: "https://raw.githubusercontent.com/" + this.PUSH_NAME + "/" + this.REPO_NAME + "/main/test-results/scenario/merged_prop_traces.json",
+          url: "https://raw.githubusercontent.com/" + this.PUSH_NAME + "/" + this.REPO_NAME + "/master/test-results/scenario/merged_prop_traces.json",
           success: function (res) {
             jmh = res
           }
@@ -603,7 +603,7 @@ export default {
                   "PUSH_NAME": this.PUSH_NAME,
                   "REPO_NAME": this.REPO_NAME,
                   "PUSH_TOKEN": this.PUSH_TOKEN,
-                  "RESULTS_REPO_BRANCH": 'main'
+                  "RESULTS_REPO_BRANCH": 'master'
                 }
               }),
 
