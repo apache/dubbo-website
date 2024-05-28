@@ -33,7 +33,7 @@
         <div
             style="font-size: 16px; line-height: 1.5; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; text-decoration: none; text-align: left;">
           <p style="text-align: left;">用户需提供一个自己的GitHub仓库来存储数据，可以新创建一个，
-              也可使用现有的。您只需要参照示例仓库（<a href="https://github.com/wxbty/dubbo-awesome" target="_blank">jmh_result</a>可直接fork）
+              也可使用现有的。您只需要参照示例仓库（<a href="https://github.com/apache/dubbo-awesome" target="_blank">jmh_result</a>可直接fork）
             的workflow的配置即可。此外，为确保有权限推送数据，还需配置用户的GitHub Token。</p>
         </div>
       </div>
