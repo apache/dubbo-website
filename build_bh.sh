@@ -1,5 +1,11 @@
 (cd ./benchmark && npm install && npm run build)
 
+rm -rf static/css/app.css
+rm -rf static/css/chunk-vendors.css
+rm -rf static/js/app.js
+rm -rf static/js/chunk-vendors.js
+
+
 for file in benchmark/dist/css/app.*.css; do
     cp "$file" "static/css/app.css"
     break
