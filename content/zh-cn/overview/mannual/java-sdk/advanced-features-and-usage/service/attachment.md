@@ -109,3 +109,38 @@ public interface PenetrateAttachmentSelector {
 
 }
 ```
+
+# 历史遗留问题
+
+在之前的版本中，你可能会见到这样的使用方式：
+```java
+@Activate(group = {CommonConstants.CONSUMER})
+public class DubboConsumerFilter implements Filter {
+
+    @Override
+    public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        
+        RpcContext.getContext().setAttachment("demo","demo02");
+
+
+        return invoker.invoke(invocation);
+    }
+}
+```
+
+但是在新版本中我们的建议是 **在 Filter 里面的尽可能不要操作 RpcContext**，上面的使用方式会导致不生效。原因在于新版本中，我们在`ConsumerContextFilter`类中做了`ClientAttachment` -> `Invocation`属性的复制，该类是Dubbo内置Filter类，而内置Filter类先于用户定义Filter类执行，所以在自定义Filter类中这样使用不会生效。
+可以直接使用这种方式进行传递：
+
+```java
+@Activate(group = {CommonConstants.CONSUMER})
+public class DubboConsumerFilter implements Filter {
+
+    @Override
+    public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        
+        invocation.setAttachment("demo","demo02");
+
+        return invoker.invoke(invocation);
+    }
+}
+```
