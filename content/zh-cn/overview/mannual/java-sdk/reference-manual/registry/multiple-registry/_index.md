@@ -125,12 +125,12 @@ RpcContext.getContext().setAttachment("registry_zone", "qingdao");
 
 ### 2.2 多注册中心地址聚合
 ```xml
-<dubbo:registry address="multiple://127.0.0.1:2181?separator=;&reference-registry=zookeeper://address11?backup=address12,address13;zookeeper://address21?backup=address22,address23" />
+<dubbo:registry address="multiple://127.0.0.1:2181?separator=!&reference-registry=zookeeper://address11?backup=address12,address13#zookeeper://address21?backup=address22,address23" />
 ```
 
 这里增加了一个特殊的 multiple 协议开头的注册中心，其中：
 * `multiple://127.0.0.1:2181` 并没有什么具体含义，只是一个特定格式的占位符，地址可以随意指定
-* `reference-registry` 指定了要聚合的注册中心集群的列表，示例中有两个集群，分别是 `zookeeper://address11?backup=address12,address13` 和 `zookeeper://address21?backup=address22,address23`，其中还特别指定了集群分隔符 `separator=";"`
+* `reference-registry` 指定了要聚合的注册中心集群的列表，示例中有两个集群，分别是 `zookeeper://address11?backup=address12,address13` 和 `zookeeper://address21?backup=address22,address23`，其中还特别指定了集群分隔符 `separator="!"`
 
 如下图所示，不同注册中心集群的地址会被聚合到一个地址池后在消费端做负载均衡或路由选址。
 
@@ -139,7 +139,7 @@ RpcContext.getContext().setAttachment("registry_zone", "qingdao");
 在 3.1.0 版本及之后，还支持每个注册中心集群上设置特定的 attachments 属性，以实现对该注册中心集群下的地址做特定标记，后续配合 Router 组件扩展如 TagRouter 等就可以实现跨机房间的流量治理能力。
 
 ```xml
-<dubbo:registry address="multiple://127.0.0.1:2181?separator=;&reference-registry=zookeeper://address11?attachments=zone=hangzhou,tag=middleware;zookeeper://address21" />
+<dubbo:registry address="multiple://127.0.0.1:2181?separator=!&reference-registry=zookeeper://address11?attachments=zone=hangzhou,tag=middleware;zookeeper://address21" />
 ```
 
 增加 `attachments=zone=hangzhou,tag=middleware` 后，所有来自该注册中心的 URL 地址将自动携带 `zone` 和 `tag` 两个标识，方便消费端更灵活的做流量治理。
