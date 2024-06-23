@@ -56,6 +56,21 @@ private DemoService demoService2;
 private DemoService demoService2;
 ```
 
+### Group Aggregation
+
+> Reference Example
+[https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge)
+
+```java
+// Group aggregation, merging all groups and returning the result
+@DubboReference(group = "*", merger = "true")
+private DemoService demoService2;
+
+// Group aggregation, merging specified groups and returning the result
+@DubboReference(group = "merge,merge2", merger = "true")
+private DemoService demoService2;
+```
+
 After starting the Dubbo service, you can see the references of the same service name in different groups in the registration center. Taking Nacos as the registration center as an example, the following content is displayed:
 ![image-service-group-2.png](/imgs/blog/service-group-2.png)
 

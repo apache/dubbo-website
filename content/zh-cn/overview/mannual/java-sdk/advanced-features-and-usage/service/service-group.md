@@ -63,6 +63,23 @@ private DemoService demoService2;
 private DemoService demoService2;
 ```
 
+
+#### 分组聚合
+
+> 参考用例
+[https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge)
+
+```java
+// 分组聚合，对所有分组进行merge后返回
+@DubboReference(group = "*", merger = "true")
+private DemoService demoService2;
+
+// 分组聚合，对指定分组进行merge后返回
+@DubboReference(group = "merge,merge2", merger = "true")
+private DemoService demoService2;
+
+```
+
 同样启动 Dubbo 服务后，可在注册中心看到相同服务名不同分组的引用者，以 Nacos 作为注册中心为例，显示如下内容：
 ![image-service-group-2.png](/imgs/blog/service-group-2.png)
 
