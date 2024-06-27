@@ -6,11 +6,8 @@ description: 通过回声测试检测 Dubbo 服务是否可用
 linkTitle: 回声测试
 title: 回声测试
 type: docs
-weight: 12
+weight: 3
 ---
-
-
-
 
 
 
@@ -28,16 +25,15 @@ echo 测试是验证 Dubbo 服务基本功能的一种简单有效的方法，�
 ## 使用方式
 所有服务自动实现 `EchoService` 接口，只需将任意服务引用强制转型为 `EchoService`，即可使用。
 
-### Spring 配置
-```xml
-<dubbo:reference id="memberService" interface="com.xxx.MemberService" />
+如有以下 Dubbo proxy 实例：
+
+```java
+@DubboReference
+private MemberService memberService;
 ```
 
 ### 代码示例
 ```java
-// 远程服务引用
-MemberService memberService = ctx.getBean("memberService"); 
- 
 EchoService echoService = (EchoService) memberService; // 强制转型为EchoService
 
 // 回声测试可用性

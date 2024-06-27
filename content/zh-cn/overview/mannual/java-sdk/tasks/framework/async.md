@@ -226,3 +226,5 @@ private AsyncService asyncService;
 @DubboReference(methods = {@Method(name = "sayHello", timeout = 5000， return = false)})
 private AsyncService asyncService;
 ```
+
+

@@ -6,7 +6,7 @@ description: 路由状态采集
 linkTitle: 路由状态采集
 title: 路由状态采集
 type: docs
-weight: 2
+weight: 50
 ---
 
 

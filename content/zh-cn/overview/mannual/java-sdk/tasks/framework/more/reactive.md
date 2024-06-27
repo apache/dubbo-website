@@ -6,13 +6,12 @@ description: 使用 Reactive API 操作 Triple 流式调用
 linkTitle: 响应式编程
 title: 响应式编程
 type: docs
-weight: 1
+weight: 100
 ---
 
-
-
-
-
+{{% alert title="过时风险提醒" color="warning" %}}
+请注意，本文档描述的 Reactive 响应式使用方法可能存在过时的情况，请随时参考 apache/dubbo-samples 中的最新 reactive 示例了解用法。
+{{% /alert %}}
 
 ## 特性说明
 
