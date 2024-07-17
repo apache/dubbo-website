@@ -14,7 +14,7 @@ description: ""
 
 
 | | Description |
-| ------------ | ------------------------------------ ------------------------ |
+| ------------ | ------------------------------------------------------------ |
 | **Machine** | 4C8G Linux JDK 1.8 (Provider) 4C8G Linux JDK 1.8 (Consumer) |
 | **Pressure test case** | RPC method types include: no parameters and no return value, normal pojo return value, pojo list return value<br /><br />2.7 version Dubbo protocol (Hessian2 serialization)<br /> Version 3.0 Dubbo protocol (Hessian2 serialization)<br />3.0 version Dubbo protocol (Protobuf serialization)<br />3.0 version Triple protocol (Protobuf serialization)<br />3.0 version Triple protocol (Protobuf sets Hessian2 serialization) |
 | **Pressure test method** | In a single-link scenario, the consumer starts 32 concurrent threads (the current machine configuration qps rt has a more balanced number of concurrency), and collects the pressure test data after continuous pressure<br /> The pressure test data passes https: //github.com/apache/dubbo-benchmark Get |
@@ -24,7 +24,7 @@ description: ""
 ## 1.2 Data Analysis
 
 | | **Dubbo + Hessian2<br />2.7** | **Dubbo + Hessian2<br />3.0** | **Dubbo + Protobuf<br />3.0** | **Triple + Protobuf<br /> 3.0** | **Triple + Protobuf(Hessian)<br />3.0** |
-| ------------------ | ----------------------------- | ----------------------------- | -------------------- --------- | ------------------------------ | --------- --------------------------------- |
+| ------------------ | ----------------------------- | ----------------------------- | ----------------------------- | ------------------------------ | ------------------------------------------ |
 | **No parameter method** | 30333 ops/s<br />2.5ms P99 | 30414 ops/s<br />2.4ms P99 | 24123 ops/s<br />3.2ms P99 | 7016 ops/s< br />8.7ms P99 | 6635 ops/s<br />9.1ms P99 |
 | **pojo return value** | 8984 ops/s<br />6.1 ms P99 | 12279 ops/s<br />5.7 ms P99 | 21479 ops/s<br />3.0 ms P99 | 6255 ops/s< br />8.9 ms P99 | 6491 ops/s<br />10 ms P99 |
 | **pojo list return value** | 1916 ops/s<br />34 ms P99 | 2037 ops/s<br />34 ms P99 | 12722 ops/s<br />7.7 ms P99 | 6920 ops/s <br />9.6 ms P99 | 2833 ops/s<br />27 ms P99 |
