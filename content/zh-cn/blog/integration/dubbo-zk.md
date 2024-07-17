@@ -339,7 +339,7 @@ JLine support is enabled
 
 
 
-[^1]: https://www.ixiacom.com/company/blog/apache-zab—zookeeper-atomic-broadcast-protocol
+[^1]: https://zookeeper.apache.org/doc/r3.4.13/zookeeperInternals.html
 [^2]: https://www.apache.org/dyn/closer.cgi/zookeeper/
 [^3]: https://brew.sh
 [^4]: https://www.docker.com/community-edition
