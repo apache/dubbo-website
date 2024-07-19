@@ -6,7 +6,7 @@ description: 在 Dubbo 中缓存 ReferenceConfig
 linkTitle: 服务引用配置对象缓存
 title: 服务引用配置对象缓存
 type: docs
-weight: 2
+weight: 50
 ---
 
 

@@ -7,7 +7,7 @@ description: |
 linkTitle: triple协议
 title: 通过网关将 http 流量接入 Dubbo 后端服务
 type: docs
-weight: 2
+weight: 3
 ---
 
 在 [triple协议规范](/zh-cn/overview/reference/protocols/triple-spec/) 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：

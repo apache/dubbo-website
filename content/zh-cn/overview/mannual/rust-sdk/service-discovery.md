@@ -3,10 +3,6 @@ aliases:
     - /zh/docs3-v2/rust-sdk/service-discovery/
     - /zh-cn/docs3-v2/rust-sdk/service-discovery/
 description: 服务发现
-feature:
-    description: |
-        Dubbo Rust依赖第三方注册中心组件来协调服务发现过程，支持的注册中心： Nacos、Zookeeper。
-    title: 服务发现
 linkTitle: 服务发现
 title: 服务发现
 type: docs

@@ -6,11 +6,8 @@ description: 在发起 Dubbo 调用之前指定本次调用的目标 IP
 linkTitle: 运行时动态指定 IP 调用
 title: 动态指定 IP 调用
 type: docs
-weight: 5
+weight: 4
 ---
-
-
-
 
 
 ## 特性说明

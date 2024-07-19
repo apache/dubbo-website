@@ -6,7 +6,7 @@ description: 通过缓存结果加速访问速度
 linkTitle: 调用结果缓存
 title: 调用结果缓存
 type: docs
-weight: 7
+weight: 50
 ---
 
 
