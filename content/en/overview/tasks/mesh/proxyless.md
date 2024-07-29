@@ -103,7 +103,7 @@ Build the Istio environment reference document:
 
 [Istio Installation Documentation (https://istio.io/latest/docs/setup/getting-started/)](https://istio.io/latest/docs/setup/getting-started/)
 
-Note: When installing Istio, you need to enable [first-party-jwt support](https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account- tokens) (add the parameter `--set values.global.jwtPolicy=first-party-jwt` when using the `istioctl` tool to install)**, otherwise it will cause the problem of client authentication failure.
+Note: When installing Istio, you need to enable [first-party-jwt support](https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens) (add the parameter `--set values.global.jwtPolicy=first-party-jwt` when using the `istioctl` tool to install)**, otherwise it will cause the problem of client authentication failure.
 
 Attached installation command reference:
 
