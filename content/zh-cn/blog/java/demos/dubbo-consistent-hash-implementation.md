@@ -29,7 +29,7 @@ description: >
 
 ![Request](/imgs/blog/consistenthash/consistent-hash-request-model.jpg) 
 
-从图中，我们可以看到，R1请求映射在0-Node1中间，R2请求映射在Node1-Node2中间，R3请求映射在Node2-Node3中间。我们取**服务Hash值大于请求Hash值**的**第一个服务**作为实际的调用服务。也就是说，R1请求将调用Node1服务，R2请求将调用Node2服务，R3请求将调用Node3服务。
+从图中，我们可以看到，R1请求映射在0-Node1中间，R2请求映射在Node1-Node2中间，R3请求映射在Node2-Node3中间。我们取**服务Hash值大于等于请求Hash值**的**第一个服务**作为实际的调用服务。也就是说，R1请求将调用Node1服务，R2请求将调用Node2服务，R3请求将调用Node3服务。
 
 
 
@@ -140,7 +140,7 @@ protected LoadBalance initLoadBalance(List<Invoker<T>> invokers, Invocation invo
 
 **1、映射Provider至Hash值区间中（实际中映射的是Invoker）；**  
 
-**2、映射请求，然后找到大于请求Hash值的第一个Invoker。**  
+**2、映射请求，然后找到大于等于请求Hash值的第一个Invoker。**  
 
 
 
