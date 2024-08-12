@@ -4143,7 +4143,7 @@ ProtocolFilterWrapper代码如下：&lt;/p>
 &lt;h4 id="b映射请求定位服务">&lt;strong>b、映射请求、定位服务&lt;/strong>&lt;/h4>
 &lt;p>在发起请求时，我们往往会带上参数，而这些参数，就可以被我们用来确定具体调用哪一个服务。假设有请求R1、R2、R3，对它们的参数也经过计算特定识别码、取余的一系列运算之后，有如下映射关系：&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/consistenthash/consistent-hash-request-model.jpg" alt="Request">&lt;/p>
-&lt;p>从图中，我们可以看到，R1请求映射在0-Node1中间，R2请求映射在Node1-Node2中间，R3请求映射在Node2-Node3中间。我们取&lt;strong>服务Hash值大于请求Hash值&lt;/strong>的&lt;strong>第一个服务&lt;/strong>作为实际的调用服务。也就是说，R1请求将调用Node1服务，R2请求将调用Node2服务，R3请求将调用Node3服务。&lt;/p>
+&lt;p>从图中，我们可以看到，R1请求映射在0-Node1中间，R2请求映射在Node1-Node2中间，R3请求映射在Node2-Node3中间。我们取&lt;strong>服务Hash值大于等于请求Hash值&lt;/strong>的&lt;strong>第一个服务&lt;/strong>作为实际的调用服务。也就是说，R1请求将调用Node1服务，R2请求将调用Node2服务，R3请求将调用Node3服务。&lt;/p>
 &lt;h4 id="c新增服务节点">&lt;strong>c、新增服务节点&lt;/strong>&lt;/h4>
 &lt;p>假设新增服务Node4，映射在Node3之前，恰巧破坏了原来的一个映射关系：&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/consistenthash/consistent-hash-new-node-model.jpg" alt="New Node">&lt;/p>
@@ -4201,7 +4201,7 @@ ProtocolFilterWrapper代码如下：&lt;/p>
 &lt;p>需要说明的一点是，我所说的&lt;strong>负载均衡策略的执行&lt;/strong>，即是在所有的Provider中选出一个，作为当前Consumer的远程调用对象。在代码中，Provider被封装成了Invoker实体，所以直接说来，负载均衡策略的执行就是在Invoker列表中选出一个Invoker。&lt;/p>
 &lt;p>所以，对比普通一致性Hash的实现，Dubbo的一致性Hash算法也可以分为两步：&lt;/p>
 &lt;p>&lt;strong>1、映射Provider至Hash值区间中（实际中映射的是Invoker）；&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>2、映射请求，然后找到大于请求Hash值的第一个Invoker。&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>2、映射请求，然后找到大于等于请求Hash值的第一个Invoker。&lt;/strong>&lt;/p>
 &lt;h4 id="a映射invoker">&lt;strong>a、映射Invoker&lt;/strong>&lt;/h4>
 &lt;p>Dubbo中所有的负载均衡实现类都继承了AbstractLoadBalance，调用LoadBalance的select方法时，实际上调用的是AbstractLoadBalance的实现：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Override&lt;/span>
