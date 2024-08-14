@@ -6,7 +6,7 @@ description: 了解 Dubbo 服务鉴权
 linkTitle: 服务鉴权
 title: 服务鉴权
 type: docs
-weight: 23
+weight: 100
 ---
 
 

@@ -27,7 +27,7 @@ weight: 1
 
     ```shell
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-    go install github.com/dubbogo/protoc-gen-go-triple@v3.0.0
+    go install dubbo.apache.org/dubbo-go/v3/cmd/protoc-gen-go-triple@v3.0.1
     ```
 
     确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 验证，如果该命令不能正常工作的话，请执行以下命令：

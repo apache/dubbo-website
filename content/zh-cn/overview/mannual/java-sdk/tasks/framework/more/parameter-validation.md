@@ -6,12 +6,8 @@ description: 在 Dubbo 中进行参数校验
 linkTitle: 参数校验
 title: 参数校验
 type: docs
-weight: 2
+weight: 100
 ---
-
-
-
-
 
 ## 特性说明
 参数验证功能是基于 [JSR303](https://jcp.org/en/jsr/detail?id=303) 实现的，用户只需标识 JSR303 标准的验证 annotation，并通过声明 filter 来实现验证。
