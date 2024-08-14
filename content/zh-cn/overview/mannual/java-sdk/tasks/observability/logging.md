@@ -331,7 +331,6 @@ static {
                     // ignore
                 }
             }
-uppdate
             if (found) {
                 break;
             }
