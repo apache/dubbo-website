@@ -8,9 +8,9 @@ type: docs
 weight: 5
 ---
 
-这个示例演示了如何使用 triple 协议实现 Dubbo 服务与标准 gRPC 服务的互相调用，可在此查看 [示例完整源码]((https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-grpc)
+这个示例演示了如何使用 triple 协议实现 Dubbo 服务与标准 gRPC 服务的互相调用，可在此查看 [示例完整源码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-grpc)
 
-![triple-grpc.png](/imgs/v3/reference/protocol/triple-grpc.png)
+![triple-grpc.png](/imgs/v3/tasks/protocol/triple-grpc.png)
 
 就像在 [Triple协议规范](https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple/) 中所描述的，triple 协议与 gRPC 协议保持 100% 兼容，同时在易用性方面有了非常大的提升（比如支持 cURL、浏览器直接访问等），可以说 triple 是一个更好用的 gRPC 设计与实现。
 

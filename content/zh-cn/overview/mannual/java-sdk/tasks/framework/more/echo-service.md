@@ -19,25 +19,22 @@ weight: 3
 测试验证是否可以调用服务以及响应是否正确，对于在尝试在生产环境中使用服务之前验证服务特别有用。
 echo 测试是验证 Dubbo 服务基本功能的一种简单有效的方法，在将服务部署到生产环境之前执行此测试非常重要，以确保服务按预期工作。
 
-> 参考用例
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-echo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-echo)
-
 ## 使用方式
+
+本示例完整源码请参考 [dubbo-samples-echo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-echo)。
+
 所有服务自动实现 `EchoService` 接口，只需将任意服务引用强制转型为 `EchoService`，即可使用。
 
 如有以下 Dubbo proxy 实例：
 
 ```java
 @DubboReference
-private MemberService memberService;
+private DemoService demoService;
 ```
 
 ### 代码示例
 ```java
-EchoService echoService = (EchoService) memberService; // 强制转型为EchoService
+EchoService echoService = (EchoService) demoService;
 
-// 回声测试可用性
-String status = echoService.$echo("OK"); 
- 
-assert(status.equals("OK"));
+String status = (String) echoService.$echo("OK");
 ```
