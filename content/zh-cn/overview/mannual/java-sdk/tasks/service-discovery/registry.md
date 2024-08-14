@@ -13,7 +13,7 @@ weight: 1
 Dubbo 支持基于注册中心的自动实例发现机制，即 Dubbo 提供者注册实例地址到注册中心，Dubbo 消费者通过订阅注册中心变更事件自动获取最新实例变化，从而确保流量始终转发到正确的节点之上。Dubbo 目前支持 Nacos、Zookeeper、Kubernetes Service 等多种注册中心接入。
 
 ## 注册中心
-以下是 Dubbo 服务发现接入的一些主流注册中心实现，更多扩展实现与工作原理请查看 [注册中心参考手册]()：
+以下是 Dubbo 服务发现接入的一些主流注册中心实现，更多扩展实现与工作原理请查看 [注册中心参考手册](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/overview/)：
 
 | 注册中心 | 配置值 | 服务发现模型 | 是否支持鉴权 | spring-boot-starter |
 | --- | --- | --- | --- | --- |
@@ -39,7 +39,7 @@ dubbo:
 ```
 
 {{% alert title="手动注册" color="warning" %}}
-通过配置 `delay = -1`，可以禁止框架自动发布服务到注册中心，直到用户通过调用 [online]() 等命令手动完成发布，可以用这个特性配合部署系统实现服务的优雅上线，让用户对上线时机有更好的控制。具体配置如下：
+通过配置 `delay = -1`，可以禁止框架自动发布服务到注册中心，直到用户通过调用 [online](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/qos-list/) 等命令手动完成发布，可以用这个特性配合部署系统实现服务的优雅上线，让用户对上线时机有更好的控制。具体配置如下：
 
 ```yaml
 dubbo:
@@ -63,7 +63,7 @@ dubbo:
 
 ### 优雅下线
 优雅下线的推荐步骤如下：
-1. 在尝试停止 Dubbo 进程之前，先调用 [offline]() 从注册中心摘除实例地址（建议操作完成后额外等待几秒钟，以确保注册中心地址下线事件生效）。
+1. 在尝试停止 Dubbo 进程之前，先调用 [offline](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/qos-list/) 从注册中心摘除实例地址（建议操作完成后额外等待几秒钟，以确保注册中心地址下线事件生效）。
 2. 通过 `kill pid` 尝试停止 Dubbo 进程，此时框架会依次检查以下环节：
 	* 2.1 框架向所有消费方（通过遍历其持有的 channel 链接）发送 readonly 事件，收到事件的消费方将会停止往该实例发送新的请求。此动作默认开启。
 	* 2.2 框架会等待一定的时间，等待线程池中所有运行中的请求处理完成，默认是 `10000` 毫秒，可通过 `-Ddubbo.service.shutdown.wait=20000` 调整等待时间。
@@ -110,10 +110,10 @@ public class DemoServiceImpl implements DemoService {}
 private DemoService demoService
 ```
 
-关于多注册中心的更多配置、使用场景说明请参见[【参考手册 - 注册中心 - 多注册中心】](zh-cn/overview/mannual/java-sdk/reference-manual/registry/multiple-registry/)
+关于多注册中心的更多配置、使用场景说明请参见[【参考手册 - 注册中心 - 多注册中心】](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/multiple-registry/)
 
 ## 应用级vs接口级
-Dubbo3 在兼容 Dubbo2 `接口级服务发现`的同时，定义了新的`应用级服务发现`模型，关于它们的含义与工作原理请参考 [应用级服务发现]()。Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。
+Dubbo3 在兼容 Dubbo2 `接口级服务发现`的同时，定义了新的`应用级服务发现`模型，关于它们的含义与工作原理请参考 [应用级服务发现](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/service-discovery-application-vs-interface/)。Dubbo3 具备自动协商服务发现模型的能力，因此老版本 Dubbo2 用户可以无缝升级 Dubbo3。
 
 {{% alert title="注意" color="warning" %}}
 如果你是 Dubbo 新用户，强烈建议增加以下配置项目，以明确指示框架使用应用级服务发现:
@@ -124,7 +124,7 @@ dubbo:
     register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
 ```
 
-老用户均建议参考 [应用级服务发现迁移指南]() 完成平滑迁移。
+老用户均建议参考 [应用级服务发现迁移指南](zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/) 完成平滑迁移。
 {{% /alert %}}
 
 ## 只注册
@@ -262,12 +262,12 @@ dubbo:
 ```
 
 ## 直连提供者
-如果你的项目开启了服务发现，但在测试中想调用某个特定的 ip，可通过设置对端 ip 地址的 [直连模式]() 绕过服务发现机制进行调用。
+如果你的项目开启了服务发现，但在测试中想调用某个特定的 ip，可通过设置对端 ip 地址的 [直连模式](/zh-cn/overview/mannual/java-sdk/tasks/framework/more/explicit-target/) 绕过服务发现机制进行调用。
 
 ## 问题排查
 相比于 client 到 server 的 RPC 直连调用，开启服务发现后，常常会遇到各种个样奇怪的调用失败问题，以下是一些常见的问题与排查方法。
 
-1. **消费方找不到可用地址 (No Provider available)**，这里有详细的 [具体原因排查步骤]()。
+1. **消费方找不到可用地址 (No Provider available)**，这里有详细的 [具体原因排查步骤](/zh-cn/overview/mannual/java-sdk/tasks/troubleshoot/no-provider/)。
 2. **忘记配置注册中心**，从 3.3.0 开始，不配置注册中心地址的情况下，应用也是能够正常启动的，只是应用的任何服务都不会注册到注册中心，或者从注册中心订阅地址列表。
 3. **注册中心连不上**，如果配置了 `check=false`，虽然进程启动成功，可能服务注册、订阅并没有成功。
 4. **消费方因没有有效的地址而启动报错**，可以通过配置ReferenceConfig跳过可用地址列表检查，注解示例为 `@DubboRerefence(check=false)`。

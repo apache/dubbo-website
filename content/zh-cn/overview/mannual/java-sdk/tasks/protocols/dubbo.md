@@ -9,7 +9,7 @@ type: docs
 weight: 2
 ---
 
-本示例演示了如何开发基于 `dubbo` 协议通信的服务，可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-dubbo)：
+本示例演示了如何开发基于 `dubbo` 协议通信的服务，可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-dubbo)：
 
 {{% alert title="注意" color="info" %}}
 为了保证老版本兼容性，Dubbo 3.3.0 及之前版本的默认协议都是 `dubbo`。但如果您是新用户，正在考虑使用 Dubbo 构建一套全新的微服务系统，我们推荐您在应用中明确配置使用 `triple` 协议。
@@ -25,7 +25,7 @@ git clone --depth=1 https://github.com/apache/dubbo-samples.git
 
 进入示例源码目录：
 ```shell
-cd dubbo-samples/3-extensions/protocol/dubbo-samples-dubbo
+cd dubbo-samples/2-advanced/dubbo-samples-dubbo
 ```
 
 使用 maven 打包示例：
@@ -44,7 +44,7 @@ java -jar ./dubbo-samples-dubbo-provider/target/dubbo-samples-dubbo-provider-1.0
 运行以下命令：
 
 ```shell
-java -jar ./dubbo-samples-dubbo-provider/target/dubbo-samples-dubbo-consumer-1.0-SNAPSHOT.jar
+java -jar ./dubbo-samples-dubbo-consumer/target/dubbo-samples-dubbo-consumer-1.0-SNAPSHOT.jar
 ```
 
 ## 源码讲解
@@ -115,5 +115,5 @@ dubbo:
 ### 共享连接
 对 dubbo 协议实现来说，**消费端机器A与提供者机器B之间默认是使用的同一个链接**，即不论在 A 与 B 之间有多少服务调用，默认都始终使用同一个 tcp 连接。当然，Dubbo 框架提供了方法可以让您调整 A 与 B 之间的 tcp 连接数。
 
-此外，dubbo 协议还支持配置如 payload 限制、序列化、连接数、连接超时时间、心跳等，具体请参见[【参考手册 - dubbo协议】]()。
+此外，dubbo 协议还支持配置如 payload 限制、序列化、连接数、连接超时时间、心跳等，具体请参见[【参考手册 - dubbo协议】](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/)。
 

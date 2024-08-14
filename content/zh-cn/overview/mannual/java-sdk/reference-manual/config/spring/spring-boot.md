@@ -13,12 +13,20 @@ weight: 3
 
 ## application.yaml
 
-以下是 Dubbo 框架支持的配置组件列表，可以在 Spring Boot 配置文件中指定所需配置：
+以下是 Dubbo 框架支持的配置组件列表，可以在 Spring Boot 配置文件中指定所需配置。
 
 ### 配置示例
 
 ```yaml
-
+dubbo:
+  application:
+      name: dubbo-springboot-demo-provider
+      logger: slf4j
+  protocol:
+    name: dubbo
+    port: 50052
+  registry:
+    address: nacos://${nacos.address:127.0.0.1}:8848?username=nacos&password=nacos
 ```
 
 ### dubbo
@@ -53,4 +61,33 @@ weight: 3
 
 ## starter列表
 
-starter 列表、版本、对应的组件版本
+### dubbo-spring-boot-starter
+以下是一些 dubbo-spring-boot-starter 版本对应的 SpringBoot、JDK 依赖：
+
+| Dubbo Starter | 版本 | 推荐 Spring Boot 版本 | 兼容 Spring Boot 范围 | JDK 要求 |
+| --- | --- | --- | --- | --- |
+| dubbo-spring-boot-starter3 | 3.3.0 | 3.2.0 | [3.0.x ～ 3.2.x] | 17 |
+| dubbo-spring-boot-starter | 3.3.0 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
+| dubbo-spring-boot-starter | 3.2.21 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
+| dubbo-spring-boot-starter | 3.1.11 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
+| dubbo-spring-boot-starter | 2.7.21 | 2.3.1.RELEASE | [2.x ~ 3.0.x) | 8 |
+
+### 其他组件starter
+
+以下是 Dubbo 官方社区提供的 starter 列表（3.3.0+ 版本），方便在 Spring Boot 应用中快速使用：
+* `dubbo-spring-boot-starter`，管理 dubbo 核心依赖，用于识别 application.properties 或 application.yml 中 `dubbo.` 开头的配置项，扫描 @DubboService 等注解。
+* `dubbo-spring-boot-starter3`，管理 dubbo 核心依赖，与 dubbo-spring-boot-starter 相同，支持 spring boot 3.2 版本。
+* `dubbo-nacos-spring-boot-starter`，管理 nacos-client 等依赖，使用 Nacos 作为注册中心、配置中心时引入。
+* `dubbo-zookeeper-spring-boot-starter`，管理 zookeeper、curator 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入（Zookeeper server 3.4 及以下版本使用）。
+* `dubbo-zookeeper-curator5-spring-boot-starter`，管理 zookeeper、curator5 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入。
+* `dubbo-sentinel-spring-boot-starter`，管理 sentinel 等依赖，使用 Sentinel 进行限流降级时引入。
+* `dubbo-seata-spring-boot-starter`，管理 seata 等依赖，使用 Seata 作为分布式事务解决方案时引入。
+* `dubbo-observability-spring-boot-starter`，加入该依赖将自动开启 Dubbo 内置的 metrics 采集，可用于后续的 Prometheus、Grafana 等监控系统。
+* `dubbo-tracing-brave-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 Brave/Zipkin 作为 Tracer，将 Trace 信息 export 到 Zipkin。
+* `dubbo-tracing-otel-otlp-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 OTlp Collector。
+* `dubbo-tracing-otel-zipkin-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin。
+
+{{% alert title="注意" color="info" %}}
+* 关于每个 starter 适配的第三方组件版本，请查看 [组件版本映射表](/zh-cn/overview/mannual/java-sdk/versions/#版本说明)。
+* 每个 starter 都有对应的 application.yml 配置项，请跟随上文 [配置项列表](./#配置示例) 了解使用细节。
+{{% /alert %}}

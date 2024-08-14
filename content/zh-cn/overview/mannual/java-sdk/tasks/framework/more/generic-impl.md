@@ -28,6 +28,8 @@ weight: 1
 
 
 ## 使用方式
+本示例的完整源码请参考 [dubbo-samples-generic-impl](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic/dubbo-samples-generic-impl/)。
+
 在 Java 代码中实现 `GenericService` 接口
 
 ```java

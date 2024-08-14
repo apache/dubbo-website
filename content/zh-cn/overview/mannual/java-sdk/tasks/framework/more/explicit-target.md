@@ -29,10 +29,6 @@ private XxxService xxxService
 <dubbo:reference id="xxxService" interface="com.alibaba.xxx.XxxService" url="dubbo://localhost:20890" />
 ```
 
-{{% alert title="提示" color="primary" %}}
-`1.0.6` 及以上版本支持
-{{% /alert %}}
-
 ## 更多配置方式
 {{% alert title="注意" color="warning" %}}
 请注意以下配置方式是为了兼容老版本 Dubbo2 而保留，在部分 Dubbo3 版本中可能存在问题，请尽量使用文档前面推荐的配置方式。

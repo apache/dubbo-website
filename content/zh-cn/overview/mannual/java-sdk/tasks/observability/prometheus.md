@@ -45,7 +45,7 @@ kubectl -n dubbo-demo get deployments
 获得 Prometheus 访问地址 `kubectl port-forward service/prometheus-server 9090:9090`，
 打开浏览器，访问 localhost:9090/graph 即可打开 Prometheus 控制台。
 
-接下来，执行 Prometheus 查询命令。可以在此确认 [Dubbo 支持的 Metrics 指标](../../../reference/proposals/metrics/)。
+接下来，执行 Prometheus 查询命令。可以在此确认 [Dubbo 支持的 Metrics 指标](/zh-cn/overview/reference/metrics/standard_metrics/)。
 
 **1. 在 “Expression” 一览，输入 `dubbo_consumer_qps_total`，返回以下结果**
 
