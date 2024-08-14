@@ -1,201 +1,4 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Dubbo 作为轻量 RPC 框架解决组件通信问题</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/</link><description>Recent content in Dubbo 作为轻量 RPC 框架解决组件通信问题 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 泛化调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic/</guid><description>
-&lt;p>泛化调用（客户端泛化调用）是指在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。调用方没有接口及模型类元，知道服务的接口的全限定类名和方法名的情况下，可以通过泛化调用调用对应接口。&lt;/p>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>泛化调用可通过一个通用的 GenericService 接口对所有服务发起请求。典型使用场景如下：&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>网关服务：如果要搭建一个网关服务，那么服务网关要作为所有 RPC 服务的调用端。但是网关本身不应该依赖于服务提供方的接口 API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>测试平台：如果要搭建一个可以测试 RPC 调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的 RPC 服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口 API。所以需要泛化调用的支持。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>本示例中使用&amp;quot;发布和调用&amp;quot; 中示例代码&lt;/p>
-&lt;p>接口定义：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DevelopService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">hello&lt;/span>(String param);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口实现1：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;group1&amp;#34;&lt;/span>,version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DevelopProviderServiceV1&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DevelopService{
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">hello&lt;/span>(String param) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringBuilder s &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> s.append(&lt;span style="color:#2aa198">&amp;#34;ServiceV1 param:&amp;#34;&lt;/span>).append(param);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> s.toString();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="客户端调用">客户端调用&lt;/h2>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GenericTask&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> CommandLineRunner {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">run&lt;/span>(String... args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> GenericService genericService &lt;span style="color:#719e07">=&lt;/span> buildGenericService(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.develop.DevelopService&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;group2&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;2.0&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//传入需要调用的方法，参数类型列表，参数列表&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;hello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;g1&amp;#34;&lt;/span>});
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;GenericTask Response: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> JSON.toJSONString(result));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> GenericService &lt;span style="color:#268bd2">buildGenericService&lt;/span>(String interfaceClass, String group, String version) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> reference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setInterface(interfaceClass);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setVersion(version);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//开启泛化调用&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setGeneric(&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setTimeout(30000);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reference.setGroup(group);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceCache cache &lt;span style="color:#719e07">=&lt;/span> DubboBootstrap.getInstance().getCache();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> cache.get(reference);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Exception e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(e.getMessage());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
-&lt;li>在设置 &lt;code>ReferenceConfig&lt;/code> 时，使用 &lt;code>setGeneric(&amp;quot;true&amp;quot;)&lt;/code> 来开启泛化调用&lt;/li>
-&lt;li>配置完 &lt;code>ReferenceConfig&lt;/code> 后，使用 &lt;code>referenceConfig.get()&lt;/code> 获取到 &lt;code>GenericService&lt;/code> 类的实例&lt;/li>
-&lt;li>使用其 &lt;code>$invoke&lt;/code> 方法获取结果&lt;/li>
-&lt;li>其他设置与正常服务调用配置一致即可&lt;/li>
-&lt;/ol>
-&lt;h2 id="更多用法">更多用法&lt;/h2>
-&lt;h3 id="通过-spring-使用泛化调用">通过 Spring 使用泛化调用&lt;/h3>
-&lt;p>Spring 中服务暴露与服务发现有多种使用方式，如 xml，注解。这里以 xml 为例。
-步骤：&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>生产者端无需改动&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>消费者端原有的 &lt;code>dubbo:reference&lt;/code> 标签加上 &lt;code>generic=true&lt;/code> 的属性。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> generic = &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.generic.call.api.HelloService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
-&lt;li>
-&lt;p>获取到 Bean 容器，通过 Bean 容器拿到 &lt;code>GenericService&lt;/code> 实例。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>调用 &lt;code>$invoke&lt;/code> 方法获取结果&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> GenericService genericService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassPathXmlApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ClassPathXmlApplicationContext(&lt;span style="color:#2aa198">&amp;#34;spring/generic-impl-consumer.xml&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//服务对应bean的名字由xml标签的id决定&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> genericService &lt;span style="color:#719e07">=&lt;/span> context.getBean(&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获得结果&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>});
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="protobuf-对象泛化调用">Protobuf 对象泛化调用&lt;/h3>
-&lt;p>一般泛化调用只能用于生成的服务参数为 POJO 的情况，而 GoogleProtobuf 的对象是基于 Builder 生成的非正常 POJO，可以通过 protobuf-json 泛化调用。&lt;/p>
-&lt;p>GoogleProtobuf 序列化相关的 Demo 可以参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/serialization/dubbo-samples-protobuf">protobuf-demo&lt;/a>&lt;/p>
-&lt;h4 id="通过-spring-对-google-protobuf-对象泛化调用">通过 Spring 对 Google Protobuf 对象泛化调用&lt;/h4>
-&lt;p>在 Spring 中配置声明 generic = &amp;ldquo;protobuf-json&amp;rdquo;&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;barService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> generic=&lt;span style="color:#2aa198">&amp;#34;protobuf-json&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Java 代码获取 barService 并开始泛化调用：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>GenericService barService &lt;span style="color:#719e07">=&lt;/span> (GenericService) applicationContext.getBean(&lt;span style="color:#2aa198">&amp;#34;barService&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Object result &lt;span style="color:#719e07">=&lt;/span> barService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,&lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.protobuf.GooglePbBasic$CDubboGooglePBRequestType&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;{\&amp;#34;double\&amp;#34;:0.0,\&amp;#34;float\&amp;#34;:0.0,\&amp;#34;bytesType\&amp;#34;:\&amp;#34;Base64String\&amp;#34;,\&amp;#34;int32\&amp;#34;:0}&amp;#34;&lt;/span>});
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="通过-api-方式对-google-protobuf-对象泛化调用">通过 API 方式对 Google Protobuf 对象泛化调用&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> reference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 弱类型接口名&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setInterface(GenericService.class.getName());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setInterface(&lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 声明为Protobuf-json&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setGeneric(Constants.GENERIC_SERIALIZATION_PROTOBUF);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GenericService genericService &lt;span style="color:#719e07">=&lt;/span> reference.get();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> person &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;fixed64&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;int64&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 参考google官方的protobuf 3 的语法，服务的每个方法中只传输一个POJO对象&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// protobuf的泛化调用只允许传递一个类型为String的json对象来代表请求参数&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String requestString &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Gson().toJson(person);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 返回对象是GoolgeProtobuf响应对象的json字符串。&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;com.xxx.XxxService.GooglePbBasic$CDubboGooglePBRequestType&amp;#34;&lt;/span>},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span> {requestString});
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="googleprotobuf-对象的处理">GoogleProtobuf 对象的处理&lt;/h4>
-&lt;p>GoogleProtobuf 对象是由 Protocol 契约生成,相关知识请参考 &lt;a href="https://developers.google.com/protocol-buffers/?hl=zh-CN">ProtocolBuffers 文档&lt;/a>。假如有如下 Protobuf 契约&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-proto" data-lang="proto">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com&lt;span style="color:#719e07">.&lt;/span>xxx.XxxService.GooglePbBasic.basic;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">CDubboGooglePBRequestType&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">double&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">float&lt;/span> &lt;span style="color:#dc322f">float&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int32&lt;/span> &lt;span style="color:#dc322f">int32&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">bool&lt;/span> &lt;span style="color:#dc322f">bool&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">13&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">14&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">bytes&lt;/span> bytesType &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">15&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">CDubboGooglePBResponseType&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> msg &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> CDubboGooglePBService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> sayHello (CDubboGooglePBRequestType) &lt;span style="color:#719e07">returns&lt;/span> (CDubboGooglePBResponseType);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>则对应请求按照如下方法构造&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> person &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;double&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1.000&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;float&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1.00&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;int32&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span> );
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;bool&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> );
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//String 的对象需要经过base64编码&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;someBaseString&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>person.put(&lt;span style="color:#2aa198">&amp;#34;bytesType&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;150&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="googleprotobuf-服务元数据解析">GoogleProtobuf 服务元数据解析&lt;/h4>
-&lt;p>Google Protobuf 对象缺少标准的 JSON 格式，生成的服务元数据信息存在错误。请添加如下依赖元数据解析的依赖。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-metadata-definition-protobuf&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>从服务元数据中也可以比较容易构建泛化调用对象。&lt;/p>
-&lt;div class="alert alert-primary" role="alert">
-&lt;h4 class="alert-heading">注意事项&lt;/h4>
-&lt;ol>
-&lt;li>
-&lt;p>如果参数为基本类型或者 Date,List,Map 等，则不需要转换，直接调用。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>如果参数为其他 POJO，则使用 Map 代替。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;/div>
-&lt;p>如：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Student&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> age;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getName&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setName&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.name &lt;span style="color:#719e07">=&lt;/span> name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">getAge&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> age;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setAge&lt;/span>(&lt;span style="color:#dc322f">int&lt;/span> age) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.age &lt;span style="color:#719e07">=&lt;/span> age;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在调用时应该转换为：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> student &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>student.put(&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>student.put(&lt;span style="color:#2aa198">&amp;#34;age&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
-&lt;li>对于其他序列化格式，需要特殊配置&lt;/li>
-&lt;/ol></description></item><item><title>Overview: 泛化实现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic-impl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic-impl/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Dubbo 作为轻量 RPC 框架解决组件通信问题</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/</link><description>Recent content in Dubbo 作为轻量 RPC 框架解决组件通信问题 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 泛化实现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic-impl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic-impl/</guid><description>
 &lt;div class="alert alert-warning" role="alert">
 &lt;h4 class="alert-heading">注意&lt;/h4>
 请注意区分上一篇文档介绍的 &lt;a href="../generic">泛化调用&lt;/a>，泛化调用是给消费端用的，而泛化实现是给提供端用的。
@@ -217,6 +20,7 @@
 &lt;/li>
 &lt;/ul>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>本示例的完整源码请参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic/dubbo-samples-generic-impl/">dubbo-samples-generic-impl&lt;/a>。&lt;/p>
 &lt;p>在 Java 代码中实现 &lt;code>GenericService&lt;/code> 接口&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.foo;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MyGenericService&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> GenericService {
@@ -251,40 +55,32 @@
 &lt;li>在设置 &lt;code>ServiceConfig&lt;/code> 时，使用&lt;code>setGeneric(&amp;quot;true&amp;quot;)&lt;/code>来开启泛化调用&lt;/li>
 &lt;li>在设置 &lt;code>ServiceConfig&lt;/code> 时，使用 setRef 指定实现类时，要设置一个 &lt;code>GenericService&lt;/code> 的对象。而不是真正的服务实现类对象&lt;/li>
 &lt;li>其他设置与正常 Api 服务启动一致即可&lt;/li>
-&lt;/ol></description></item><item><title>Overview: 服务降级</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/service-downgrade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/service-downgrade/</guid><description/></item><item><title>Overview: 回声测试</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/echo-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/echo-service/</guid><description>
+&lt;/ol></description></item><item><title>Overview: 回声测试</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/echo-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/echo-service/</guid><description>
 &lt;h2 id="特性说明">特性说明&lt;/h2>
 &lt;p>回声测试用于检测服务是否可用，回声测试按照正常请求流程执行，能够测试整个调用是否通畅，可用于监控。执行回声测试，客户端发送一个包含特定值（如字符串）的请求。服务器应使用相同的值进行响应，从而验证请求是否已成功接收和处理。如果响应与请求不匹配，则表示服务运行不正常，应进一步调查。要求 Dubbo 服务器正在运行，并且服务器和客户端之间具有网络连接。在客户端，必须配置 Dubbo 客户端以连接到服务器，客户端将向服务器发送请求，然后服务器应返回与请求相同的响应。&lt;/p>
 &lt;h2 id="使用场景">使用场景&lt;/h2>
 &lt;p>测试验证是否可以调用服务以及响应是否正确，对于在尝试在生产环境中使用服务之前验证服务特别有用。
 echo 测试是验证 Dubbo 服务基本功能的一种简单有效的方法，在将服务部署到生产环境之前执行此测试非常重要，以确保服务按预期工作。&lt;/p>
-&lt;blockquote>
-&lt;p>参考用例
-&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-echo">https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-echo&lt;/a>&lt;/p>
-&lt;/blockquote>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>本示例完整源码请参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-echo">dubbo-samples-echo&lt;/a>。&lt;/p>
 &lt;p>所有服务自动实现 &lt;code>EchoService&lt;/code> 接口，只需将任意服务引用强制转型为 &lt;code>EchoService&lt;/code>，即可使用。&lt;/p>
 &lt;p>如有以下 Dubbo proxy 实例：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboReference&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> MemberService memberService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> DemoService demoService;
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="代码示例">代码示例&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>EchoService echoService &lt;span style="color:#719e07">=&lt;/span> (EchoService) memberService; &lt;span style="color:#586e75">// 强制转型为EchoService&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>EchoService echoService &lt;span style="color:#719e07">=&lt;/span> (EchoService) demoService;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 回声测试可用性&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String status &lt;span style="color:#719e07">=&lt;/span> echoService.$echo(&lt;span style="color:#2aa198">&amp;#34;OK&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">assert&lt;/span>(status.equals(&lt;span style="color:#2aa198">&amp;#34;OK&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String status &lt;span style="color:#719e07">=&lt;/span> (String) echoService.$echo(&lt;span style="color:#2aa198">&amp;#34;OK&amp;#34;&lt;/span>);
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 动态指定 IP 调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/specify-ip/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/specify-ip/</guid><description>
 &lt;h2 id="特性说明">特性说明&lt;/h2>
-&lt;p>使用 Dubbo 的扩展，实现指定 IP 调用。&lt;/p>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>发起请求的时候需要指定本次调用的服务端，如消息回调、流量隔离等。&lt;/p>
+&lt;p>在发起 RPC 请求的时候，需要指定本次调用的服务端，常用的场景包括消息回调、流量隔离等。&lt;/p>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
 &lt;h3 id="插件依赖">插件依赖&lt;/h3>
-&lt;p>适配 Dubbo 3 版本&lt;/p>
+&lt;p>首先，需要添加以下插件依赖到项目中&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-cluster-specify-address-dubbo3&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>适配 Dubbo 2 版本&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
@@ -354,12 +150,7 @@ echo 测试是验证 Dubbo 服务基本功能的一种简单有效的方法，�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> XxxService xxxService
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="xml配置方式">xml配置方式&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;xxxService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.xxx.XxxService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;dubbo://localhost:20890&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
-&lt;div class="alert alert-primary" role="alert">
-&lt;h4 class="alert-heading">提示&lt;/h4>
-&lt;code>1.0.6&lt;/code> 及以上版本支持
-&lt;/div>
-&lt;h2 id="更多配置方式">更多配置方式&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="更多配置方式">更多配置方式&lt;/h2>
 &lt;div class="alert alert-warning" role="alert">
 &lt;h4 class="alert-heading">注意&lt;/h4>
 请注意以下配置方式是为了兼容老版本 Dubbo2 而保留，在部分 Dubbo3 版本中可能存在问题，请尽量使用文档前面推荐的配置方式。
@@ -392,7 +183,7 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;p>调用服务方法前我们可以记录开始时间，调用结束后统计整个调用耗费，发生异常时我们可以告警或打印错误日志或者调用服务前后记录请求日志、响应日志等。&lt;/p>
 &lt;blockquote>
 &lt;p>参考用例
-&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify">https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-notify&lt;/a>&lt;/p>
+&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-notify">dubbo-samples-notify&lt;/a>&lt;/p>
 &lt;/blockquote>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
 &lt;h3 id="服务提供者与消费者共享服务接口">服务提供者与消费者共享服务接口&lt;/h3>
@@ -545,15 +336,22 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;callback1:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> msg);
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>});
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 本地伪装</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/local-mock/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/local-mock/</guid><description>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 服务讲解（本地伪装）</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/local-mock/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/local-mock/</guid><description>
 &lt;h2 id="特性说明">特性说明&lt;/h2>
 &lt;p>在 Dubbo3 中有一种机制可以实现轻量级的服务降级，也就是本地伪装。&lt;/p>
 &lt;p>Mock 是 Stub 的一个子集，便于服务提供方在客户端执行容错逻辑，因经常需要在出现 RpcException (比如网络失败，超时等)时进行容错，而在出现业务异常(比如登录用户名密码错误)时不需要容错，
 如果用 Stub，可能就需要捕获并依赖 RpcException 类，而用 Mock 就可以不依赖 RpcException，因为它的约定就是只有出现 RpcException 时才执行。&lt;/p>
 &lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>本地伪装常被用于服务降级。比如某验权服务，当服务提供方全部挂掉后，假如此时服务消费方发起了一次远程调用，那么本次调用将会失败并抛出一个 &lt;code>RpcException&lt;/code> 异常。&lt;/p>
-&lt;p>为了避免出现这种直接抛出异常的情况出现，那么客户端就可以利用本地伪装来提供 Mock 数据返回授权失败。&lt;/p>
+&lt;p>本地伪装常被用于服务降级。比如某验权服务，当服务提供方全部挂掉后，假如此时服务消费方发起了一次远程调用，那么本次调用将会失败并抛出一个 &lt;code>RpcException&lt;/code> 异常。为了避免出现这种直接抛出异常的情况出现，那么客户端就可以利用本地伪装来提供 Mock 数据返回授权失败。&lt;/p>
+&lt;p>其他使用场景包括：&lt;/p>
+&lt;ul>
+&lt;li>某服务或接口负荷超出最大承载能力范围，需要进行降级应急处理，避免系统崩溃&lt;/li>
+&lt;li>调用的某非关键服务或接口暂时不可用时，返回模拟数据或空，业务还能继续可用&lt;/li>
+&lt;li>降级非核心业务的服务或接口，腾出系统资源，尽量保证核心业务的正常运行&lt;/li>
+&lt;li>某上游基础服务超时或不可用时，执行能快速响应的降级预案，避免服务整体雪崩&lt;/li>
+&lt;/ul>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>完整示例源码请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-mock">dubbo-samples-mock&lt;/a>&lt;/p>
 &lt;h3 id="开启-mock-配置">开启 Mock 配置&lt;/h3>
 &lt;p>在 Spring XML 配置文件中按以下方式配置：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
@@ -631,43 +429,7 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> check=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;sayHello.mock&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;force:return fake&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="特性说明-1">特性说明&lt;/h2>
-&lt;p>推荐使用相关限流降级组件（如 &lt;a href="https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html">Sentinel&lt;/a>）以达到最佳体验。参考示例实践：&lt;a href="https://dubbo.apache.org/zh-cn/overview/tasks/ecosystem/rate-limit/">微服务治理/限流降级&lt;/a>&lt;/p>
-&lt;p>服务降级是指服务在非正常情况下进行降级应急处理。&lt;/p>
-&lt;h2 id="使用场景-1">使用场景&lt;/h2>
-&lt;ul>
-&lt;li>某服务或接口负荷超出最大承载能力范围，需要进行降级应急处理，避免系统崩溃&lt;/li>
-&lt;li>调用的某非关键服务或接口暂时不可用时，返回模拟数据或空，业务还能继续可用&lt;/li>
-&lt;li>降级非核心业务的服务或接口，腾出系统资源，尽量保证核心业务的正常运行&lt;/li>
-&lt;li>某上游基础服务超时或不可用时，执行能快速响应的降级预案，避免服务整体雪崩&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用方式-1">使用方式&lt;/h2>
-&lt;p>以 xml 配置为例：（通过注解方式配置类似）&lt;/p>
-&lt;h3 id="1配置一">1.配置一&lt;/h3>
-&lt;p>&lt;code>mock=&amp;quot;true&amp;quot;&lt;/code>&lt;/p>
-&lt;p>例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种方式需要在相同包下有类名 + &lt;code>Mock&lt;/code>后缀的实现类，即&lt;code>com.xxx.service&lt;/code>包下有&lt;code>DemoServiceMock&lt;/code>类。&lt;/p>
-&lt;h3 id="2配置二">2.配置二&lt;/h3>
-&lt;p>&lt;code>mock=&amp;quot;com.xxx.service.DemoServiceMock&amp;quot;&lt;/code>&lt;/p>
-&lt;p>例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoServiceMock&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种方式指定 Mock 类的全路径。&lt;/p>
-&lt;h3 id="3配置三">3.配置三&lt;/h3>
-&lt;p>&lt;code>mock=&amp;quot;[fail|force]return|throw xxx&amp;quot;&lt;/code>&lt;/p>
-&lt;ul>
-&lt;li>fail 或 force 关键字可选，表示调用失败或不调用强制执行 mock 方法，如果不指定关键字默认为 fail&lt;/li>
-&lt;li>return 表示指定返回结果，throw 表示抛出指定异常&lt;/li>
-&lt;li>xxx 根据接口的返回类型解析，可以指定返回值或抛出自定义的异常&lt;/li>
-&lt;/ul>
-&lt;p>例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;return&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;return null&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;fail:return aaa&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;force:return true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;fail:throw&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.xxx.service.DemoService&amp;#34;&lt;/span> mock=&lt;span style="color:#2aa198">&amp;#34;force:throw java.lang.NullPointException&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4配合-dubbo-admin-使用">4.配合 dubbo-admin 使用&lt;/h3>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配合-dubbo-admin-使用">配合 dubbo-admin 使用&lt;/h3>
 &lt;ul>
 &lt;li>
 &lt;p>应用消费端引入 &lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-mock-extensions" target="_blank">&lt;code>dubbo-mock-admin&lt;/code>&lt;/a>依赖&lt;/p>
@@ -680,6 +442,9 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;/li>
 &lt;/ul>
 &lt;p>以服务方法的维度设置规则，设置返回模拟数据，动态启用/禁用规则&lt;/p>
+&lt;h3 id="使用专业限流组件">使用专业限流组件&lt;/h3>
+&lt;p>如果您有更高级、专业的限流诉求，我们推荐使用专业的限流降级组件如 &lt;a href="https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html">Sentinel&lt;/a>，以达到最佳体验。参考示例实践：&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/">微服务治理/限流降级&lt;/a>&lt;/p>
+&lt;p>服务降级是指服务在非正常情况下进行降级应急处理。&lt;/p>
 &lt;div class="alert alert-primary" role="alert">
 &lt;h4 class="alert-heading">注意事项&lt;/h4>
 &lt;p>Dubbo 启动时会检查配置，当 mock 属性值配置有误时会启动失败，可根据错误提示信息进行排查&lt;/p>
@@ -694,6 +459,7 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;h2 id="使用场景">使用场景&lt;/h2>
 &lt;p>做 ThreadLocal 缓存，提前验证参数，调用失败后伪造容错数据等等，此时就需要在 API 中带上 Stub，客户端生成 Proxy 实例，会把 Proxy 通过构造函数传给 Stub &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>，然后把 Stub 暴露给用户，Stub 可以决定要不要去调 Proxy。&lt;/p>
 &lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>完整示例源码请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-stub">dubbo-samples-stub&lt;/a>&lt;/p>
 &lt;h3 id="spring-配置文件配置">spring 配置文件配置&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> stub=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
@@ -963,7 +729,7 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;h3 id="查看路由缓存状态">查看路由缓存状态&lt;/h3>
 &lt;p>Dubbo 在收到地址变更的时候，会将地址信息推送给所有的 &lt;code>Router&lt;/code>，这些 &lt;code>Router&lt;/code> 可以在此阶段提前计算路由的分组，缓存起来，以避免在调用时需要遍历所有的提供者计算分组参数。
 在 Dubbo 3 中引入的 &lt;code>StateRouter&lt;/code> 提供了通过 qos 命令工具实时获取每个路由的状态的能力。&lt;/p>
-&lt;p>运维人员可以通过 &lt;code>getRouterSnapshot&lt;/code> 命令获取路由的状态。具体命令使用方式可以参考 &lt;a href="../../../reference-manual/qos/router-snapshot/#getroutersnapshot-%E5%91%BD%E4%BB%A4">getRouterSnapshot 命令&lt;/a> 文档。&lt;/p>
+&lt;p>运维人员可以通过 &lt;code>getRouterSnapshot&lt;/code> 命令获取路由的状态。具体命令使用方式可以参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/qos/qos-list/">getRouterSnapshot 命令&lt;/a> 文档。&lt;/p>
 &lt;p>&lt;strong>注：此功能仅支持 &lt;code>StateRoute&lt;/code>，且 &lt;code>StateRouter&lt;/code> 需要基于 &lt;code>AbstractStateRouter&lt;/code> 实现 &lt;code>doBuildSnapshot&lt;/code> 接口。&lt;/strong>&lt;/p>
 &lt;h3 id="查看实际请求的路由计算结果">查看实际请求的路由计算结果&lt;/h3>
 &lt;p>Dubbo 3 中默认在路由筛选后为空的时候打印路由计算的节点状态。运维人员可以通过日志判断每个路由的计算结果是否符合预期。&lt;/p>
@@ -1006,41 +772,7 @@ key 为服务名，value 为服务提供者 url，此配置优先级最高，&lt
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="注意-1">注意：&lt;/h4>
-&lt;p>由于日志框架不匹配导致的日志为空可以参考&lt;a href="../../others/logger-management/">日志框架适配及运行时管理&lt;/a>动态修改日志输出框架。&lt;/p></description></item><item><title>Overview: TLS支持</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/tls/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/tls/</guid><description>
-&lt;h2 id="特性说明">特性说明&lt;/h2>
-&lt;p>内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。&lt;/p>
-&lt;p>TLS 的配置都有统一的入口。&lt;/p>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>对全链路有加密需求的用户可以使用 TLS。&lt;/p>
-&lt;blockquote>
-&lt;p>参考用例
-&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl">https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl&lt;/a>&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;h3 id="provider-端">Provider 端&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>SslConfig sslConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SslConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sslConfig.setServerKeyCertChainPath(&lt;span style="color:#2aa198">&amp;#34;path to cert&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sslConfig.setServerPrivateKeyPath(args&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 如果开启双向 cert 认证&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (mutualTls) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig.setServerTrustCertCollectionPath(args&lt;span style="color:#719e07">[&lt;/span>2&lt;span style="color:#719e07">]&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ProtocolConfig protocolConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ProtocolConfig(&lt;span style="color:#2aa198">&amp;#34;dubbo/grpc&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>protocolConfig.setSslEnabled(&lt;span style="color:#cb4b16">true&lt;/span>);
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果要使用的是 gRPC 协议，在开启 TLS 时会使用到协议协商机制，因此必须使用支持 ALPN 机制的 Provider，推荐使用的是 netty-tcnative，具体可参见 gRPC Java 社区的 &lt;a href="https://github.com/grpc/grpc-java/blob/master/SECURITY.md">总结&lt;/a>&lt;/p>
-&lt;h3 id="consumer-端">Consumer 端&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>mutualTls) {}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig.setClientTrustCertCollectionPath(args&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>} &lt;span style="color:#719e07">else&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig.setClientTrustCertCollectionPath(args&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig.setClientKeyCertChainPath(args&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sslConfig.setClientPrivateKeyPath(args&lt;span style="color:#719e07">[&lt;/span>2&lt;span style="color:#719e07">]&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为尽可能保证应用启动的灵活性，TLS Cert 的指定还能通过 -D 参数或环境变量等方式来在启动阶段根据部署环境动态指定，参考 Dubbo &lt;a href="https://dubbo.apache.org/zh-cn/docs/advanced/config-rule">配置读取规则&lt;/a>&lt;/p>
-&lt;blockquote>
-&lt;p>在服务调用的安全性上，Dubbo 在后续的版本中会持续投入，其中服务发现/调用的鉴权机制预计在接下来的版本中就会和大家见面。&lt;/p>
-&lt;/blockquote></description></item><item><title>Overview: 参数校验</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/parameter-validation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/parameter-validation/</guid><description>
+&lt;p>由于日志框架不匹配导致的日志为空可以参考&lt;a href="../../others/logger-management/">日志框架适配及运行时管理&lt;/a>动态修改日志输出框架。&lt;/p></description></item><item><title>Overview: 参数校验</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/parameter-validation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/parameter-validation/</guid><description>
 &lt;h2 id="特性说明">特性说明&lt;/h2>
 &lt;p>参数验证功能是基于 &lt;a href="https://jcp.org/en/jsr/detail?id=303">JSR303&lt;/a> 实现的，用户只需标识 JSR303 标准的验证 annotation，并通过声明 filter 来实现验证。&lt;/p>
 &lt;h4 id="maven-依赖">Maven 依赖&lt;/h4>

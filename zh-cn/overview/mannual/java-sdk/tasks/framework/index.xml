@@ -1112,4 +1112,125 @@ broadcast.fail.percent 只是控制的当失败后是否继续调用其他节点
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;failsafe&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 泛化调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/generic/</guid><description>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+泛化调用适用于老版本 dubbo 通信协议，如果您使用的是 3.3 及之后版本的 triple 协议，请直接使用 triple 自带的 http application/json 能力直接发起服务调用，相关示例可参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/">网关接入说明&lt;/a>。
+&lt;/div>
+&lt;p>泛化调用（客户端泛化调用）是指在调用方没有服务提供方 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。调用方没有接口及模型类元，知道服务的接口的全限定类名和方法名的情况下，可以通过泛化调用调用对应接口。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>泛化调用可通过一个通用的 GenericService 接口对所有服务发起请求。典型使用场景如下：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>网关服务：如果要搭建一个网关服务，那么服务网关要作为所有 RPC 服务的调用端。但是网关本身不应该依赖于服务提供方的接口 API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>测试平台：如果要搭建一个可以测试 RPC 调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的 RPC 服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口 API。所以需要泛化调用的支持。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>本示例的完整源码请参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic/dubbo-samples-generic-call/">dubbo-samples-generic-call&lt;/a>。&lt;/p>
+&lt;p>示例中有以下 Dubbo 服务定义和实现&lt;/p>
+&lt;p>服务接口定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">HelloService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncComplex&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncGenericComplex&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务具体实现并发布：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;sayHello: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncComplex&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncGenericComplex&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="api-调用方式">API 调用方式&lt;/h3>
+&lt;p>针对以上 Dubbo 服务，我们可以通过泛化调用 API 直接发起调用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> GenericService genericService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationConfig applicationConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig.setName(&lt;span style="color:#2aa198">&amp;#34;generic-call-consumer&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setAddress(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericService&lt;span style="color:#719e07">&amp;gt;&lt;/span> referenceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setInterface(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.generic.call.api.HelloService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationConfig.setRegistry(registryConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setApplication(applicationConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setGeneric(&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// do not wait for result, &amp;#39;false&amp;#39; by default&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setAsync(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> referenceConfig.setTimeout(7000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> genericService &lt;span style="color:#719e07">=&lt;/span> referenceConfig.get();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">invokeSayHello&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> InterruptedException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CountDownLatch latch &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CountDownLatch(1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span> RpcContext.getContext().getCompletableFuture();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> future.whenComplete((value, t) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.err.println(&lt;span style="color:#2aa198">&amp;#34;invokeSayHello(whenComplete): &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> value);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> latch.countDown();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.err.println(&lt;span style="color:#2aa198">&amp;#34;invokeSayHello(return): &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> result);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> latch.await();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>在设置 &lt;code>ReferenceConfig&lt;/code> 时，使用 &lt;code>setGeneric(&amp;quot;true&amp;quot;)&lt;/code> 来开启泛化调用&lt;/li>
+&lt;li>配置完 &lt;code>ReferenceConfig&lt;/code> 后，使用 &lt;code>referenceConfig.get()&lt;/code> 获取到 &lt;code>GenericService&lt;/code> 类的实例&lt;/li>
+&lt;li>使用其 &lt;code>$invoke&lt;/code> 方法获取结果&lt;/li>
+&lt;li>其他设置与正常服务调用配置一致即可&lt;/li>
+&lt;/ol>
+&lt;h3 id="spring-调用方式">Spring 调用方式&lt;/h3>
+&lt;p>Spring 中服务暴露与服务发现有多种使用方式，如 xml，注解。这里以 xml 为例。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>生产者端无需改动&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>消费者端原有的 &lt;code>dubbo:reference&lt;/code> 标签加上 &lt;code>generic=true&lt;/code> 的属性。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> generic = &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.generic.call.api.HelloService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>
+&lt;p>获取到 Bean 容器，通过 Bean 容器拿到 &lt;code>GenericService&lt;/code> 实例。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>调用 &lt;code>$invoke&lt;/code> 方法获取结果&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> GenericService genericService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassPathXmlApplicationContext context &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ClassPathXmlApplicationContext(&lt;span style="color:#2aa198">&amp;#34;spring/generic-impl-consumer.xml&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//服务对应bean的名字由xml标签的id决定&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> genericService &lt;span style="color:#719e07">=&lt;/span> context.getBean(&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获得结果&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result &lt;span style="color:#719e07">=&lt;/span> genericService.$invoke(&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> String&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Dubbo 作为轻量 RPC 框架解决组件通信问题</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/more/</guid><description/></item></channel></rss>
