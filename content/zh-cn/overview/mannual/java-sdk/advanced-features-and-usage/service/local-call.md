@@ -81,6 +81,6 @@ RpcContext.getServiceContext().setLocalInvoke(false);
 **配置单一次调用为本地调用**
 
 ```java
-RpcContext.getServiceContext().setLocalInvoker(true);
+RpcContext.getServiceContext().setLocalInvoke(true);
 ```
 
