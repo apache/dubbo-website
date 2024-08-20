@@ -11,11 +11,23 @@ weight: 42
 本示例演示如何使用 Apache Seata 实现 Dubbo 分布式事务功能，保证数据一致性。
 
 Apache Seata 是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。
-在Dubbo中集成Seata实现分布式事务非常方便，只需简单几步即可完成，本文将带你快速体验。开始前，请先完成以下内容:
-- 请克隆[dubbo-samples](https://github.com/apache/dubbo-samples)至本地并导入到开发工具中，并找到/2-advanced/dubbo-samples-seata子项目。
-- 请下载最新版的[seata-server二进制包](https://seata.apache.org/zh-cn/unversioned/download/seata-server)至本地。
+在Dubbo中集成Seata实现分布式事务非常方便，只需简单几步即可完成，本文将通过一个示例带你快速体验，示例总体架构图如下：
 
 ![seata-flow](/imgs/docs3-v2/java-sdk/seata/flow.png)
+
+开始前，请先完成以下内容:
+
+1. 下载示例源码
+	```shell
+	git clone --depth=1 https://github.com/apache/dubbo-samples.git
+	```
+
+	进入示例源码目录：
+	```shell
+	cd dubbo-samples/2-advanced/dubbo-samples-seata
+	```
+
+2. 下载最新版的[seata-server二进制包](https://seata.apache.org/zh-cn/unversioned/download/seata-server)至本地。
 
 ## 步骤 1：建立数据库并初始化相关测试数据
 - 本文将使用MySQL 5.7 (更多支持的数据库可在文末查看附录)。

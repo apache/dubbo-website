@@ -16,7 +16,7 @@ weight: 3
 自 Dubbo 3.3 版本之后，我们已经完全移除了老版本的 rest 协议实现，新版本的内置协议实现只剩下 triple 与 dubbo。因此，当我们提到 rest 时，都是指 triple 协议的 rest 访问支持能力。
 {{% /alert %}}
 
-前面讲解 [triple 协议示例](../triple/interface/#curl) 时，我们曾提到 triple 协议支持以 `application/json` 格式直接访问：
+在讲解 [triple 协议示例](../triple/interface/#curl) 时，我们曾提到 triple 协议支持以 `application/json` 格式直接访问：
 
 ```shell
 curl \
@@ -25,7 +25,7 @@ curl \
     http://localhost:50052/org.apache.dubbo.samples.api.GreetingsService/sayHi/
 ```
 
-如果你觉得以上 `http://localhost:50052/org.apache.dubbo.samples.api.GreetingsService/sayHi` 格式的 http 请求不够好，我们还可以让 triple 支持 rest 格式的 http 请求，只需要为接口增加一些注解即可 -- 目前支持 Spring Web、JAX-RS 两种注解格式。以下示例的完整代码请参见 [dubbo-samples]()。
+如果你觉得以上 `http://localhost:50052/org.apache.dubbo.samples.api.GreetingsService/sayHi` 格式的 http 请求不够好，我们还可以让 triple 支持 rest 格式的 http 请求，只需要为接口增加一些注解即可 -- 目前支持 Spring Web、JAX-RS 两种注解格式。以下示例的完整代码请参见 [dubbo-samples-triple-rest](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-rest)。
 
 ## 运行示例
 你可以跟随以下步骤，尝试运行本文档对应的示例源码。
@@ -37,7 +37,7 @@ git clone --depth=1 https://github.com/apache/dubbo-samples.git
 
 进入示例源码目录：
 ```shell
-cd dubbo-samples/extensions/protocol/rest/
+cd dubbo-samples/2-advanced/dubbo-samples-triple-rest/dubbo-samples-triple-rest-springmvc
 ```
 
 使用 maven 打包示例：

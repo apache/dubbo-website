@@ -2,17 +2,14 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/local-mock/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/local-mock/
+    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
+    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
 description: 了解如何在 Dubbo 中利用本地伪装实现服务降级
-linkTitle: 本地伪装
-title: 本地伪装
+linkTitle: 服务降级
+title: 服务讲解（本地伪装）
 type: docs
 weight: 10
 ---
-
-
-
-
-
 
 ## 特性说明
 
@@ -23,11 +20,17 @@ Mock 是 Stub 的一个子集，便于服务提供方在客户端执行容错逻
 
 ## 使用场景
 
-本地伪装常被用于服务降级。比如某验权服务，当服务提供方全部挂掉后，假如此时服务消费方发起了一次远程调用，那么本次调用将会失败并抛出一个 `RpcException` 异常。
+本地伪装常被用于服务降级。比如某验权服务，当服务提供方全部挂掉后，假如此时服务消费方发起了一次远程调用，那么本次调用将会失败并抛出一个 `RpcException` 异常。为了避免出现这种直接抛出异常的情况出现，那么客户端就可以利用本地伪装来提供 Mock 数据返回授权失败。
 
-为了避免出现这种直接抛出异常的情况出现，那么客户端就可以利用本地伪装来提供 Mock 数据返回授权失败。
+其他使用场景包括：
+- 某服务或接口负荷超出最大承载能力范围，需要进行降级应急处理，避免系统崩溃
+- 调用的某非关键服务或接口暂时不可用时，返回模拟数据或空，业务还能继续可用
+- 降级非核心业务的服务或接口，腾出系统资源，尽量保证核心业务的正常运行
+- 某上游基础服务超时或不可用时，执行能快速响应的降级预案，避免服务整体雪崩
 
 ## 使用方式
+
+完整示例源码请参见 [dubbo-samples-mock](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-mock)
 
 ### 开启 Mock 配置
 
@@ -161,80 +164,7 @@ Mock 可以在方法级别上指定，假定 `com.foo.BarService` 上有好几�
 </dubbo:reference>
 ```
 
-
-
-
-
-
-
-
-## 特性说明
-推荐使用相关限流降级组件（如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)）以达到最佳体验。参考示例实践：[微服务治理/限流降级](/zh-cn/overview/tasks/ecosystem/rate-limit/)
-
-服务降级是指服务在非正常情况下进行降级应急处理。
-
-## 使用场景
-
-- 某服务或接口负荷超出最大承载能力范围，需要进行降级应急处理，避免系统崩溃
-- 调用的某非关键服务或接口暂时不可用时，返回模拟数据或空，业务还能继续可用
-- 降级非核心业务的服务或接口，腾出系统资源，尽量保证核心业务的正常运行
-- 某上游基础服务超时或不可用时，执行能快速响应的降级预案，避免服务整体雪崩
-
-## 使用方式
-
-以 xml 配置为例：（通过注解方式配置类似）
-
-### 1.配置一
-`mock="true"`
-
-例：
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="true" />
-```
-这种方式需要在相同包下有类名 + `Mock`后缀的实现类，即`com.xxx.service`包下有`DemoServiceMock`类。
-
-### 2.配置二
-`mock="com.xxx.service.DemoServiceMock"`
-
-例：
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="com.xxx.service.DemoServiceMock" />
-```
-这种方式指定 Mock 类的全路径。
-
-### 3.配置三
-`mock="[fail|force]return|throw xxx"`
-
-* fail 或 force 关键字可选，表示调用失败或不调用强制执行 mock 方法，如果不指定关键字默认为 fail
-* return 表示指定返回结果，throw 表示抛出指定异常
-* xxx 根据接口的返回类型解析，可以指定返回值或抛出自定义的异常
-
-例：
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="return" />
-```
-
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="return null" />
-```
-
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="fail:return aaa" />
-```
-
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="force:return true" />
-```
-
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="fail:throw" />
-```
-
-```xml
-<dubbo:reference id="demoService" interface="com.xxx.service.DemoService" mock="force:throw java.lang.NullPointException" />
-```
-
-### 4.配合 dubbo-admin 使用
+### 配合 dubbo-admin 使用
 
 * 应用消费端引入 <a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-mock-extensions" target="_blank">`dubbo-mock-admin`</a>依赖
 
@@ -243,6 +173,13 @@ Mock 可以在方法级别上指定，假定 `com.foo.BarService` 上有好几�
 * 启动 dubbo-admin，在服务 Mock-> 规则配置菜单下设置 Mock 规则
 
 以服务方法的维度设置规则，设置返回模拟数据，动态启用/禁用规则
+
+
+### 使用专业限流组件
+
+如果您有更高级、专业的限流诉求，我们推荐使用专业的限流降级组件如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)，以达到最佳体验。参考示例实践：[微服务治理/限流降级](/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/)
+
+服务降级是指服务在非正常情况下进行降级应急处理。
 
 
 {{% alert title="注意事项" color="primary" %}}

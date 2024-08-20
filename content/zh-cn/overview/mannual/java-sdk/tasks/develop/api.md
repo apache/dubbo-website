@@ -25,9 +25,9 @@ public class Application {
 
 以上是启动 Dubbo RPC Server 的一段代码示例，`DubboBootstrap` 实例代表一个 Dubbo 应用，是整个 Dubbo 应用的启动入口。在 DubboBootstrap 基础上，我们可以设置 `protocol`、`service`、`registry`、`metrics` 等来注册服务、连接注册中心等，这和我们在 Spring Boot 中调整 application.yml 或者 application.properties 文件是对等的作用。
 
-官方推荐使用 `DubboBootstrap.start()` 作为应用的集中启动入口，但为了方便在进程启动后，在运行态单独发布一些服务，Dubbo 也允许直接调用 `ServiceConfig.export()` 或 `ReferenceConfig.refer()` 方法发布服务，这时 Service/Reference 会注册到默认的 DubboBootstrap 实例中，效果同调用 `DubboBootstrap.service(...).start()` 类似。
+官方推荐使用 `DubboBootstrap.start()` 作为应用的集中启动入口，但为了方便在进程启动后，在运行态单独发布一些服务，Dubbo 框架也允许直接调用 `ServiceConfig.export()` 或 `ReferenceConfig.refer()` 方法发布单个服务，这时 Service/Reference 会注册到默认的 DubboBootstrap 实例中，效果同调用 `DubboBootstrap.service(...).start()` 类似。
 
-以下是开发中会常用到的一些组件，完整组件定义及详细参数说明请参见 [参考手册 - 配置项手册]()：
+以下是开发中会常用到的一些组件，完整组件定义及详细参数说明请参见 [参考手册 - 配置项手册](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#配置项手册)：
 
 | API 组件 | 全局唯一 | 核心方法或属性 | 说明 |
 | --- | --- | --- | --- |
@@ -45,12 +45,6 @@ public class Application {
 | MethodConfig | 否 | name、oninvoke、onreturn、onthrow | ServiceConfig/ReferenceConfig 内嵌的方法级别配置 |
 | ArgumentConfig | 否 | index、type、callback | MethodConfig 内嵌的参数级别配置 |
 
-{{% alert title="注意" color="info" %}}
-Dubbo 支持模块化的应用开发，简单来讲就是在一个 JVM 进程内的多个相互隔离的模块，每个模块可以称之为一个应用，不同应用间的服务发布、服务调用、服务生命周期互相隔离。当与 Spring ApplicationContext 一一对应时，可以实现基于 ApplicationContext 的 Dubbo 资源隔离。具体请参见 [参考手册 - Dubbo 多模块设计与使用]()
-
-![多模块应用开发](https://www.yuque.com/apache-dubbo/dubbo3/vpv8nu)
-{{% /alert %}}
-
 ## 轻量 RPC 示例
 本示例演示如何使用轻量 Dubbo SDK 开发 RPC Server 与 Client，示例使用 Java Interface 方式定义、发布和访问 RPC 服务，底层使用 Triple 协议通信。本示例完整代码请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>。
 
@@ -63,22 +57,13 @@ Dubbo 支持模块化的应用开发，简单来讲就是在一个 JVM 进程内
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
-
-<!-- 为了避免 Netty 依赖冲突，您也可以是选择使用 dubbo-shaded 版本！-->
-<!--
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-shaded</artifactId>
-    <version>3.3.0-beta.1</version>
-</dependency>
--->
 ```
 
 ### 定义服务
 
-定义一个名为 `DemoService`的标准 Java 接口作为 Dubbo 服务（Dubbo 还支持[基于 IDL 的服务定义模式](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)）。
+定义一个名为 `DemoService`的标准 Java 接口作为 Dubbo 服务（Dubbo 还支持[基于 IDL 的服务定义模式](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/)）。
 
 ```java
 public interface DemoService {
@@ -204,7 +189,7 @@ private DemoService referService() {
 }
 ```
 
-由于 ReferenceConfig.get() 创建的代理对象持有连接、地址等大量资源，因此建议缓存复用，Dubbo 官方提供了 SimpleReferenceCache 实现参考实现。关于 SimpleReferenceCache 更多内容，请参考 [RPC 框架]()。
+由于 ReferenceConfig.get() 创建的代理对象持有连接、地址等大量资源，因此建议缓存复用，Dubbo 官方提供了 SimpleReferenceCache 实现参考实现。关于 SimpleReferenceCache 更多内容，请参考 [RPC 框架](/zh-cn/overview/mannual/java-sdk/tasks/framework/more/reference-config-cache/)。
 
 #### 获得引用代理
 使用 DubboBootstrap 作为启动入口，订阅服务并获得代理对象。
@@ -309,6 +294,6 @@ private DemoService referService() {
 
 ## 更多内容
 
-- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)，或者 [使用其他通信协议]()
-- 作为 RPC 框架，Dubbo 支持异步调用、连接管理、context上下文等，请参考 [RPC 框架核心功能]()
-- 您可以继续 [使用 API 为应用添加更多微服务治理能力]()，但我们更推进您使用 [Dubbo Spring Boot 开发微服务应用](../../microservice/develop/)
+- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/)，或者 [使用其他通信协议](/zh-cn/overview/mannual/java-sdk/tasks/protocols/)
+- 作为 RPC 框架，Dubbo 支持异步调用、连接管理、context上下文等，请参考 [RPC 框架核心功能](/zh-cn/overview/mannual/java-sdk/tasks/framework/)
+- 使用 [Dubbo Spring Boot 开发微服务应用](/zh-cn/overview/mannual/java-sdk/tasks/develop/springboot/)

@@ -11,10 +11,10 @@ weight: 1
 
 **不同于谷歌官方 gRPC 实现，Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），你可以继续使用 `Java 接口` 直接定义服务。对于期望平滑升级、没有多语言业务或者不熟悉 Protobuf 的用户而言，`Java 接口`方式是最简单的使用 triple 的方式。**
 
-以下是一个使用`Java 接口`开发 Dubbo 服务的基本示例，示例使用 triple 协议通信，可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/1-basic/dubbo-samples-api/)。
+以下是一个使用`Java 接口`开发 Dubbo 服务的基本示例，示例使用 triple 协议通信，可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api)。
 
 {{% alert title="注意" color="info" %}}
-本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例](https://github.com/apache/dubbo-samples/1-basic/dubbo-samples-spring-boot/) 供参考，同样是 `Java接口+triple` 的模式，此示例还额外加入了服务发现配置。
+本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot) 供参考，同样是 `Java接口+triple` 的模式，此示例还额外加入了服务发现配置。
 {{% /alert %}}
 
 ## 运行示例

@@ -187,7 +187,7 @@ dubbo:
 {{% /alert %}}
 
 ## 动态修改日志级别
-自 3.3 版本开始，Dubbo 框架支持通过 http 或 telnet 命令，在运行态动态修改日志配置（级别、框架等）。以下是使用示例，关于 telnet 命令的更多内容，可查看 [qos 命令指南]()。
+自 3.3 版本开始，Dubbo 框架支持通过 http 或 telnet 命令，在运行态动态修改日志配置（级别、框架等）。以下是使用示例，关于 telnet 命令的更多内容，可查看 [qos 命令指南](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/qos-list/)。
 
 1. 查询日志配置
 	命令：`loggerInfo`

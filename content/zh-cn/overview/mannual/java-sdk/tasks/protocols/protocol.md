@@ -36,7 +36,7 @@ Dubbo 作为一款 RPC 框架内置了高效的 RPC 通信协议，帮助解决�
  | **rest** | tri 或 rest | - Java Interface + SpringMVC <br/> - Java Interface + JAX-RS | 50051 | HTTP/1、HTTP/2 | JSON | 否 |
 
  {{% alert title="注意" color="info" %}}
- 考虑到对过往版本的兼容性，当前 Dubbo 各个发行版本均默认使用 `dubbo` 通信协议。**对于新用户而言，我们强烈建议在一开始就明确配置使用 `triple` 协议**，老用户也尽快参考文档 [实现协议的平滑迁移](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/migration)。
+ 考虑到对过往版本的兼容性，当前 Dubbo 各个发行版本均默认使用 `dubbo` 通信协议。**对于新用户而言，我们强烈建议在一开始就明确配置使用 `triple` 协议**，老用户也尽快参考文档 [实现协议的平滑迁移](zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration/)。
  {{% /alert %}}
 
 接下来，我们一起看以下几个协议的基本使用方式。
@@ -66,7 +66,7 @@ public interface DemoService {
 }
 ```
 
-可以说只设置 `protocol="tri"` 就可以了，其他与老版本 dubbo 协议开发没有任何区别。请通过【进阶学习 - 通信协议】查看 [java Interface + Triple 协议的具体使用示例]()。
+可以说只设置 `protocol="tri"` 就可以了，其他与老版本 dubbo 协议开发没有任何区别。请通过【进阶学习 - 通信协议】查看 [java Interface + Triple 协议的具体使用示例](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/)。
 
 #### 2. Protobuf(IDL)
 使用 Protobuf(IDL) 的方式定义服务，**适合于当前或未来有跨语言诉求的开发团队，同一份 IDL 服务可同时用于 Java/Go/Node.js 等多语言微服务开发，劣势是 protobuf 学习成本较高**。
@@ -101,7 +101,7 @@ public interface Greeter extends org.apache.dubbo.rpc.model.DubboStub {
 }
 ```
 
-Protobuf 模式支持的序列化方式有 Protobuf、Protobuf-json 两种模式。请通过【进阶学习 - 通信协议】查看 [Protobuf (IDL) + Triple 协议的具体使用示例]()。
+Protobuf 模式支持的序列化方式有 Protobuf、Protobuf-json 两种模式。请通过【进阶学习 - 通信协议】查看 [Protobuf (IDL) + Triple 协议的具体使用示例](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/)。
 
 #### 3. 我该使用哪种编程模式，如何选择？
 
@@ -125,7 +125,7 @@ curl \
 
 以上默认使用 `org.apache.dubbo.springboot.demo.idl.Greeter/greet` 这种 HTTP 访问路径，且仅支持 post 方法，如果你想对外发布 REST 风格服务，请参考下文 REST 协议小节。
 
-也可参考[【使用教程 - 前端网关接入】](../../gateway/triple/)
+也可参考[【使用教程 - 前端网关接入】](/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/)
 
 ## Dubbo 协议
 ### 基本配置
@@ -153,14 +153,14 @@ public interface DemoService {
 由于 Dubbo2 默认序列化协议是 hessian2，对于部分有拦截rpc调用payload的场景，比如sidecar等对链路payload有拦截与解析，在升级过程中需留意兼容性问题。
 {{% /alert %}}
 
-* 关于 dubbo 协议的具体使用示例请参见【进阶学习 - 通信协议】中的 [dubbo 协议示例](../dubbo/)。
+* 关于 dubbo 协议的具体使用示例请参见【进阶学习 - 通信协议】中的 [dubbo 协议示例](/zh-cn/overview/mannual/java-sdk/tasks/protocols/dubbo/)。
 
 ### HTTP 接入方式
 由于 dubbo 协议无法支持 http 流量直接接入，因此需要有一层网关实现前端 http 协议到后端 dubbo 协议的转换过程（`http -> dubbo`）。Dubbo 框架提供了 `泛化调用` 能力，可以让网关在无服务接口定义的情况下对后端服务发起调用。
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/http-to-dubbo.png"/>
 
-目前社区有很多开源网关产品（Higress、Shenyu、APISIX、Tengine等）支持 `http -> dubbo` 的，它们大部分都提供了可视化界面配置参数映射（泛化调用），同时还支持基于 Nacos、Zookeeper 等主流注册中心的自动地址发现，具体请查看 [【使用教程 - HTTP网关接入】](../../gateway/dubbo/)。
+目前社区有很多开源网关产品（Higress、Shenyu、APISIX、Tengine等）支持 `http -> dubbo` 的，它们大部分都提供了可视化界面配置参数映射（泛化调用），同时还支持基于 Nacos、Zookeeper 等主流注册中心的自动地址发现，具体请查看 [【使用教程 - HTTP网关接入】](/zh-cn/overview/mannual/java-sdk/tasks/gateway/dubbo/)。
 
 ## REST 协议
 在本文前面我们曾提到，自 3.3 版本开始 triple 协议支持以 rest 风格发布标准的 http 服务，因此，如果我们发布 rest 风格的服务等同于使用 triple 协议，只不过，我们要在服务定义上加入特定的注解（Spring Web、JAX-RS）。
@@ -248,8 +248,3 @@ dubbo:
     name: dubbo
     ext-protocol: tri
  ```
-
-## 更多内容
-* triple 协议规范
-* dubbo 协议规范
-* rest 协议规范

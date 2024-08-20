@@ -50,39 +50,26 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
     </dependencies>
 ```
 
-dubbo-spring-boot-starter 的版本号与 Dubbbo 框架版本号完全一致，因此你可以根据想要的 dubbo 版本选择 dubbo-spring-boot-starter 版本。以下是一些 dubbo-spring-boot-starter 版本对应的 SpringBoot、JDK 依赖：
-
-| Dubbo Starter | 版本 | 推荐 Spring Boot 版本 | 兼容 Spring Boot 范围 | JDK 要求 |
-| --- | --- | --- | --- | --- |
-| dubbo-spring-boot-starter3 | 3.3.0 | 3.2.0 | [3.0.x ～ 3.2.x] | 17 |
-| dubbo-spring-boot-starter | 3.3.0 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
-| dubbo-spring-boot-starter | 3.2.21 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
-| dubbo-spring-boot-starter | 3.1.11 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
-| dubbo-spring-boot-starter | 2.7.21 | 2.3.1.RELEASE | [2.x ~ 3.0.x) | 8 |
-
-以下是 Dubbo 官方社区提供的一些 starter（3.3.0+ 版本）：
-* `dubbo-spring-boot-starter`，管理 dubbo 核心依赖，用于识别 application.properties 或 application.yml 中 `dubbo.` 开头的配置项，扫描 @DubboService 等注解。
-* `dubbo-spring-boot-starter3`，管理 dubbo 核心依赖，与 dubbo-spring-boot-starter 相同，支持 spring boot 3.2 版本。
-* `dubbo-nacos-spring-boot-starter`，管理 nacos-client 等依赖，使用 Nacos 作为注册中心、配置中心时引入。
-* `dubbo-zookeeper-spring-boot-starter`，管理 zookeeper、curator 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入（Zookeeper server 3.4 及以下版本使用）。
-* `dubbo-zookeeper-curator5-spring-boot-starter`，管理 zookeeper、curator5 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入。
-* `dubbo-sentinel-spring-boot-starter`，管理 sentinel 等依赖，使用 Sentinel 进行限流降级时引入。
-* `dubbo-seata-spring-boot-starter`，管理 seata 等依赖，使用 Seata 作为分布式事务解决方案时引入。
-* `dubbo-observability-spring-boot-starter`，加入该依赖将自动开启 Dubbo 内置的 metrics 采集，可用于后续的 Prometheus、Grafana 等监控系统。
-* `dubbo-tracing-brave-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 Brave/Zipkin 作为 Tracer，将 Trace 信息 export 到 Zipkin。
-* `dubbo-tracing-otel-otlp-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 OTlp Collector。
-* `dubbo-tracing-otel-zipkin-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin。
-
-{{% alert title="注意" color="info" %}}
-* 关于每个 starter 适配的第三方组件版本，请查看 [组件版本映射表](../../../versions/#版本说明)。
-* 每个 starter 都有对应的 application.yml 配置，请跟随左侧菜单根据功能学习了解具体使用方法。也可以查看 [配置项列表](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#配置项手册) 了解配置细节。
-{{% /alert %}}
+`dubbo-spring-boot-starter` 和 `dubbo-zookeeper-spring-boot-starter` 是官方提供的 starter，提供了 Spring Boot 的集成适配，它们的版本号与 Dubbbo 主框架版本号完全一致。
 
 ### application.yml 配置文件
+以下是一个示例文件配置
 
-除 service、reference 之外的组件都可以在 application.yml 文件中设置，如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
+```yaml
+dubbo:
+  application:
+    name: dubbo-springboot-demo-provider
+    logger: slf4j
+  protocol:
+    name: triple
+    port: -1
+  registry:
+    address: zookeeper://127.0.0.1:2181
+```
 
-service、reference 组件也可以通过 `id` 与 application 中的全局组件做关联，以下面配置为例：
+除 service、reference 之外的组件都可以在 application.yml 文件中设置，具体可参考 [配置列表](/zh-cn/overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml)。
+
+service、reference 组件也可以通过 `id` 与 application 中的全局组件做关联，以下面配置为例。如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
 
 ```yaml
 dubbo:
@@ -96,7 +83,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-通过注解将 service 关联到上文定义的特定注册中心
+通过注解将 service 关联到上文定义的特定注册中心（通过id关联）
 ```java
 @DubboService(registry="zk-registry")
 public class DemoServiceImpl implements DemoService {}
@@ -209,13 +196,12 @@ dubbo.reference.org.apache.dubbo.springboot.demo.DemoService.timeout=6000
 ## 更多微服务开发模式
 * [纯 API 开发模式](../api/)
 * 其他 Spring 开发模式
-    * [Spring XML]()
-    * [Spring Annotation]()
+    * [Spring XML](/zh-cn/overview/mannual/java-sdk/reference-manual/config/spring/xml/)
 
 ## Dubbo 与 Spring Cloud 的关系
-Dubbo 与 Spring Cloud 是两套平行的微服务开发与解决方案，两者都提供了微服务定义、发布、治理的相关能力，对于微服务开发者来说，我们建议在开发之初就确定好 Apache Dubbo 与 Spring Cloud 之间的选型，尽量避免两个不同体系在同一集群中出现，以降低集群维护复杂度。而对于一些确需两套体系共存的场景，为了解决相互之间的通信问题，我们提供了 [Dubbo 与 Spring Cloud 异构微服务体系互通最佳实践]() 解决方案。
+Dubbo 与 Spring Cloud 是两套平行的微服务开发与解决方案，两者都提供了微服务定义、发布、治理的相关能力，对于微服务开发者来说，我们建议在开发之初就确定好 Apache Dubbo 与 Spring Cloud 之间的选型，尽量避免两个不同体系在同一集群中出现，以降低集群维护复杂度。而对于一些确需两套体系共存的场景，为了解决相互之间的通信问题，我们提供了 [Dubbo 与 Spring Cloud 异构微服务体系互通最佳实践](/zh-cn/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/) 解决方案。
 
- Dubbo 与 Spring Boot 是互补的关系，Dubbo 在 Spring Boot 体系之上提供了完整的微服务开发、治理能力，关于这一点我们在另一篇文章中有更详尽的说明：[Dubbo、Spring Cloud 与 Istio]()。
+ Dubbo 与 Spring Boot 是互补的关系，Dubbo 在 Spring Boot 体系之上提供了完整的微服务开发、治理能力，关于这一点我们在另一篇文章中有更详尽的说明：[Dubbo、Spring Cloud 与 Istio](/zh-cn/overview/what/xyz-difference/)。
 
 
 
