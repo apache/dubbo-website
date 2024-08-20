@@ -34,7 +34,7 @@ REST 是 Roy Thomas Fielding [^1] 在 2000 年他的博士论文 [^2]  “架构
 
 
 
-其中的思路是利用 HTTP 协议的标准方法 POST、DELETE、PUT、GET 来表达对于一个资源的增删改查 (CRUD) 操作，利用 URL 来表示一个资源的唯一标识。对资源访问的错误码也复用 HTTP 协议的状态码。返回结果通常由 json 或 XML 来表示，如果其中包换了对关联资源的访问方式 (所谓的表现层状态迁移) ，这种类型的 RESTful 应用可以进一步的称之为 *hypermedia as the engine of application state* (HATEOAS) 应用 [^3]。
+其中的思路是利用 HTTP 协议的标准方法 POST、DELETE、PUT、GET 来表达对于一个资源的增删改查 (CRUD) 操作，利用 URL 来表示一个资源的唯一标识。对资源访问的错误码也复用 HTTP 协议的状态码。返回结果通常由 json 或 XML 来表示，如果其中包括了对关联资源的访问方式 (所谓的表现层状态迁移) ，这种类型的 RESTful 应用可以进一步的称之为 *hypermedia as the engine of application state* (HATEOAS) 应用 [^3]。
 
 
 
@@ -52,7 +52,7 @@ REST 是 Roy Thomas Fielding [^1] 在 2000 年他的博士论文 [^2]  “架构
 
 ### 背景
 
-随着微服务的流行以及多语言互操作诉求日益增多，在 Dubbo 中暴露 REST 服务变成了一个不容忽视的诉求。为了在 Dubbo 中暴露 REST 服务，通常有两种做法，一种是直接依赖 Sprng REST 或者其他 REST 框架来直接暴露，另一种是通过 Dubbo 框架内置的 REST 能力暴露。两种做法各有优缺点，主要体现在前者与微服务体系中的服务发现组件能够更好的工作，而后者可以无缝的享受到 Dubbo 体系中的服务发现以及服务治理的能力。本文关注的是如何使用后者来暴露 REST 服务。
+随着微服务的流行以及多语言互操作诉求日益增多，在 Dubbo 中暴露 REST 服务变成了一个不容忽视的诉求。为了在 Dubbo 中暴露 REST 服务，通常有两种做法，一种是直接依赖 Spring REST 或者其他 REST 框架来直接暴露，另一种是通过 Dubbo 框架内置的 REST 能力暴露。两种做法各有优缺点，主要体现在前者与微服务体系中的服务发现组件能够更好的工作，而后者可以无缝的享受到 Dubbo 体系中的服务发现以及服务治理的能力。本文关注的是如何使用后者来暴露 REST 服务。
 
 
 

@@ -335,7 +335,7 @@ Through this document, readers can learn:
 * Learn about Zookeeper's interaction through practical sample codes
 * The storage of service registration and consumption information of Dubbo with ZooKeeper
 
-[^1]: https://www.ixiacom.com/company/blog/apache-zab—zookeeper-atomic-broadcast-protocol
+[^1]: https://en.wikipedia.org/wiki/Atomic_broadcast
 [^2]: https://www.apache.org/dyn/closer.cgi/zookeeper/
 [^3]: https://brew.sh
 [^4]: https://www.docker.com/community-edition

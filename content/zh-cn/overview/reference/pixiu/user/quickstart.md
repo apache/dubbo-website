@@ -12,19 +12,16 @@ weight: 10
 ---
 
 
-
-
-
-
 让我们从将 HTTP 请求转换为 Dubbo2 请求的案例来快速展示 Pixiu 的能力。
 
 ## 用例
 
-Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后的 Dubbo Server，然后将 Dubbo Server 的响应转换为 HTTP 响应，最后返回给 Client。
+Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后的 Dubbo Server，然后将 Dubbo Server 的响应转换为 HTTP
+响应，最后返回给 Client。
 
 ### 架构图
 
-![Architecture](/imgs/pixiu/user/quick_start_architecture.png) 
+![Architecture](/imgs/pixiu/user/quick_start_architecture.png)
 
 ### 案例
 
@@ -61,7 +58,8 @@ dubbo:
 #### Pixiu 配置和启动
 
 为了用例的场景，Pixiu 需要启动对应的 HTTP Listener 进行 HTTP 请求的监听，所以就会使用到 `httpconnectionmanager`。
-然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 `dgp.filter.http.dubboproxy`，这里我们将其`auto_resolve` 设置为true，表示开启 HTTP to Dubbo 默认转换协议(具体定义请看[附录](../appendix/http-to-dubbo-default-stragety))。
+然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 `dgp.filter.http.dubboproxy`，这里我们将其`auto_resolve` 设置为true，表示开启
+HTTP to Dubbo 默认转换协议(具体定义请看[附录](../appendix/http-to-dubbo-default-stragety))。
 
 Pixiu 的具体配置如下所示
 
@@ -96,10 +94,10 @@ static_resources:
                             password: ""
 ```
 
-
 #### Client 实现
 
-Client 就是简单的 HTTP Client 实现，但是需要按照前文提及的 HTTP to Dubbo 默认转换协议在 HTTP 请求的 Path 和 Header 中填入对应的数据，具体如下所示。
+Client 就是简单的 HTTP Client 实现，但是需要按照前文提及的 HTTP to Dubbo 默认转换协议在 HTTP 请求的 Path 和 Header
+中填入对应的数据，具体如下所示。
 
 ```
 	url := "http://localhost:8883/UserService/com.dubbogo.pixiu.UserService/GetUserByName"
@@ -116,11 +114,9 @@ Client 就是简单的 HTTP Client 实现，但是需要按照前文提及的 HT
 	resp, err := client.Do(req)
 ```
 
-
 #### 案例启动
 
 项目提供了快速启动脚本，需要本地先安装有 Go 语言开发环境。
-
 
 ```
 # cd 到案例总目录
@@ -142,13 +138,14 @@ cd samples/dubbogo/simple/
 
 # 或者使用 curl 
 
-curl -X POST 'http://localhost:8883/UserService/com.dubbogo.pixiu.UserService/GetUserByName' -d '{"types":"string","values":"tc"}' -H 'Content-Type: application/json' -H 'x-dubbo-http1.1-dubbo-version':'1.0.0' -H 'x-dubbo-service-protocol':"dubbo" -H 'x-dubbo-service-version':'1.0.0' -H 'x-dubbo-service-group':'test'
+curl -X POST 'http://localhost:8883/UserService/com.dubbogo.pixiu.UserService/GetUserByName' -d '{"types":"string","values":"tc"}' -H 'Content-Type: application/json' -H 'x-dubbo-http1.1-dubbo-version: 1.0.0' -H 'x-dubbo-service-protocol: dubbo' -H 'x-dubbo-service-version: 1.0.0' -H 'x-dubbo-service-group: test'
 
 # 返回值 {"age":15,"code":1,"iD":"0001","name":"tc","time":"2021-08-01T18:08:41+08:00"}
 
 ```
 
 #### docker示例
+
 ```shell
 docker pull phial3/dubbo-go-pixiu:latest
 

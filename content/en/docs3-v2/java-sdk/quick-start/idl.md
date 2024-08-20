@@ -145,7 +145,7 @@ For more usage of Triple and IDL, please refer to [official samples](https://git
    public class GreeterImpl extends DubboGreeterTriple. GreeterImplBase {
       @Override
       public HelloReply greet(HelloRequest request) {
-         return HelloReply. newBuilder()
+         return HelloReply.newBuilder()
          .setMessage("Hello," + request.getName() + "!")
          .build();
       }
@@ -172,8 +172,8 @@ For more usage of Triple and IDL, please refer to [official samples](https://git
            service.setInterface(Greeter.class);
            service.setRef(new GreeterImpl());
 
-           DubboBootstrap bootstrap = DubboBootstrap. getInstance();
-           bootstrap. application(new ApplicationConfig("tri-stub-server"))
+           DubboBootstrap bootstrap = DubboBootstrap.getInstance();
+           bootstrap.application(new ApplicationConfig("tri-stub-server"))
                    .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
                    .protocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051))
                    .service(service)
@@ -199,20 +199,20 @@ For more usage of Triple and IDL, please refer to [official samples](https://git
 
    public class MyDubboClient {
       public static void main(String[] args) {
-         DubboBootstrap bootstrap = DubboBootstrap. getInstance();
+         DubboBootstrap bootstrap = DubboBootstrap.getInstance();
          ReferenceConfig<Greeter> ref = new ReferenceConfig<>();
-         ref. setInterface(Greeter. class);
+         ref.setInterface(Greeter.class);
          ref.setProtocol(CommonConstants.TRIPLE);
          ref.setProxy(CommonConstants.NATIVE_STUB);
-         ref. setTimeout(3000);
-         bootstrap. application(new ApplicationConfig("tri-stub-client"))
+         ref.setTimeout(3000);
+         bootstrap.application(new ApplicationConfig("tri-stub-client"))
             .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
             .reference(ref)
             .start();
 
-         Greeter greeter = ref. get();
+         Greeter greeter = ref.get();
          HelloRequest request = HelloRequest.newBuilder().setName("Demo").build();
-         HelloReply reply = greeter. greet(request);
+         HelloReply reply = greeter.greet(request);
          System.out.println("Received reply:" + reply);
        }
    }

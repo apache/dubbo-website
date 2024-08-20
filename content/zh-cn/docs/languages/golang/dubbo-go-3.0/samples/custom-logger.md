@@ -15,7 +15,7 @@ type: docs
 
 # Dubbo-go 3.0 自定义日志组件
 
-参考samples [dubbo-go-samples/logger](https://github.com/apache/dubbo-go-samples/tree/master/logger)
+参考samples [dubbo-go-samples/logger](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/logger)
 
 ## 1. 日志配置
 

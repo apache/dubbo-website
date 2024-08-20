@@ -56,7 +56,7 @@ Date: Fri, 28 Apr 2023 14:16:42 GMT
 目前支持以上media，后面还会对type进行扩展
 
 ## 快速入门
-详细的依赖以及spring配置，可以参见dubbo 项目的duubo-demo-xml模块
+详细的依赖以及spring配置，可以参见dubbo 项目的dubbo-demo-xml模块
 https://github.com/apache/dubbo/tree/3.2/dubbo-demo/dubbo-demo-xml
 
 - spring web 编码

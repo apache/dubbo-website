@@ -185,7 +185,7 @@ dubbo:
 | Apache Commons Logging | native-maven-plugin      | 0.9.24 及其以上        |                     |
 | JDK Logger             | native-maven-plugin      | 0.9.24 及其以上        |                     |
 | slf4j                  | spring-boot-maven-plugin | 3.x.x (用最新版本即可) |                     |
-| Log4j                  |                          |                        | 计划推动GraalVM支持 |
+| Log4j                  | native-maven-plugin      | 0.10.0 及其以上        |                     |
 | Log4j2                 |                          |                        |                     |
 
 ### 序列化组件

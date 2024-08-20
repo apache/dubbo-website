@@ -147,7 +147,7 @@ After starting the registry, the next step is to start a service provider that p
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider -Dexec.mainClass="org.apache.dubbo.springboot.demo.provider .ProviderApplication"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider "-Dexec.mainClass=org.apache.dubbo.springboot.demo.provider.ProviderApplication"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider -Dexec.mainClass="org.apache.dubbo.springboot.demo.provider.ProviderApplication"
@@ -169,7 +169,7 @@ The last step is to start a service consumer to call the service provider, which
 
 ```bash
 Windows:
-./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer -Dexec.mainClass="org.apache.dubbo.springboot.demo.consumer .ConsumerApplication"
+./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer "-Dexec.mainClass=org.apache.dubbo.springboot.demo.consumer.ConsumerApplication"
 
 Linux / MacOS:
 ./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer -Dexec.mainClass="org.apache.dubbo.springboot.demo.consumer.ConsumerApplication"
