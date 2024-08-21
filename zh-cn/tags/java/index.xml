@@ -721,7 +721,7 @@ FORCE_APPLICATION：只启用新模式下应用级服务发现的注册中心逻
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/6/graalvm/dubbo-aot-2.png" alt="image.png">&lt;/p>
 &lt;h2 id="spring6--dubbo3-示例演示">Spring6 + Dubbo3 示例演示&lt;/h2>
 &lt;p>接下来，我们通过一个 Spring6 + Dubbo3 的示例微服务应用，演示如何使用 Spring AOT、Dubbo AOT 等，来实现应用的 Native Image 打包。&lt;/p>
-&lt;p>完整的代码示例可在这里下载：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-native-image">dubbo-samples-native-image&lt;/a>&lt;/p>
+&lt;p>完整的代码示例可在这里下载：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry">dubbo-samples-native-image&lt;/a>&lt;/p>
 &lt;h3 id="第一步安装graalvm">第一步：安装GraalVM&lt;/h3>
 &lt;ol>
 &lt;li>在Graalvm官网根据自己的系统选取对应Graalvm版本：&lt;a href="https://www.graalvm.org/downloads/">https://www.graalvm.org/downloads/&lt;/a>&lt;/li>
@@ -896,7 +896,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;li>&lt;strong>RtStatComposite，Rt（Response Time，响应时间）数据聚合器&lt;/strong>，包括应用级别和服务级别。根据应用名、服务名、注册的指标名及相应相应时间统计指标，提供添加操作。&lt;/li>
 &lt;/ul>
 &lt;p>对于以上四个聚合器，他们的职责就是存储某一类型的采样样本。&lt;/p>
-&lt;p>** 基本数据聚合器 （BaseStatComposite）** 对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p>
+&lt;p>&lt;strong>基本数据聚合器 （BaseStatComposite）&lt;/strong> 对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p>
 &lt;p>&lt;strong>当调用元数据中心指标收集器、注册中心指标收集器的 collect 方法时，最终会调用&lt;code>BaseStatComposite.export(MetricsCategory category)&lt;/code> , 该方法会收集内部三个聚合器的指标并返回。&lt;/strong>&lt;/p>
 &lt;p>需要注意的是， 配置中心指标收集器不依赖于基本数据聚合器 导出数据，它在创建时将基本数据聚合器置为null，而使用自己的 updatedMetrics 字段存储采样：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ConfigCenterMetricsCollector&lt;/span>
@@ -910,13 +910,13 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>混合指标收集器和数据聚合器之间呈现如下的包含关系：&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
 &lt;p>&lt;strong>DefaultMetricsCollector 默认指标采集器：&lt;/strong>&lt;/p>
-&lt;p>它不直接存储采样数据，而是通过收集其下**指标采样器（MetricsSampler）**的样本来完成采样工作。这些采样器包括：&lt;/p>
+&lt;p>它不直接存储采样数据，而是通过收集其下&lt;strong>指标采样器（MetricsSampler）&lt;/strong> 的样本来完成采样工作。这些采样器包括：&lt;/p>
 &lt;ul>
 &lt;li>方法采样器&lt;/li>
 &lt;li>应用采样器&lt;/li>
 &lt;li>线程池采样器&lt;/li>
 &lt;/ul>
-&lt;p>这些采样器完成采样后，还会利用采集器中的**事件多播器（Multicaster）**将指标事件发布出去，可以被其它监听器处理。详细流程将在后文中探讨。&lt;/p>
+&lt;p>这些采样器完成采样后，还会利用采集器中的&lt;strong>事件多播器（Multicaster）&lt;/strong> 将指标事件发布出去，可以被其它监听器处理。详细流程将在后文中探讨。&lt;/p>
 &lt;p>&lt;strong>HistogramMetricsCollector 直方图指标采集器：&lt;/strong>&lt;/p>
 &lt;p>由于需要使用Timer完成直方图属性的统计，它使用自己的容器存储采样数据。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HistogramMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsListener {
@@ -933,7 +933,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
 &lt;/li>
 &lt;li>
-&lt;p>&lt;strong>DefaultMetricsCollector 默认指标收集器&lt;/strong>，它的样本不仅来自于指标事件，还来自其下**采样器（Sampler）**中，用于Dubbo核心模块的采样。&lt;/p>
+&lt;p>&lt;strong>DefaultMetricsCollector 默认指标收集器&lt;/strong>，它的样本不仅来自于指标事件，还来自其下&lt;strong>采样器（Sampler）&lt;/strong> 中，用于Dubbo核心模块的采样。&lt;/p>
 &lt;/li>
 &lt;li>
 &lt;p>&lt;strong>HistogramMetricsCollector 直方图指标收集器&lt;/strong>，由于采样数据的特殊性，它的样本直接以 Map 存储在内部。&lt;/p>
@@ -1466,7 +1466,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该事件最终会由 RegistryMetricsCollector 中的 RegistryMetricsDispatcher 转发到关系该事件的监听器中。&lt;strong>事件和监听器之间通过 MetricsKey匹配&lt;/strong> 。&lt;/p>
-&lt;p>最终，MetricsKey 为 &lt;code>**DIRECTORY_METRIC_NUM_VALID**&lt;/code> 的监听器会处理这个事件，并更新 Collector中的计数。&lt;/p>
+&lt;p>最终，MetricsKey 为 &lt;code>**DIRECTORY_METRIC_NUM_VALID** &lt;/code> 的监听器会处理这个事件，并更新 Collector中的计数。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//DIRECTORY_METRIC_NUM_VALID 对应的 Listener。&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>MetricsCat APPLICATION_DIRECTORY_POST &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetricsCat(MetricsKey.DIRECTORY_METRIC_NUM_VALID, (key, placeType, collector) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> AbstractMetricsListener.onEvent(key,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
@@ -1534,7 +1534,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, event.getKey(), event.getGroup(),ConfigCenterEvent.APOLLO_PROTOCOL, ConfigChangeType.ADDED.name(), SELF_INCREMENT_SIZE));
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Apollo配置中心的配置发生变化时，它的 &lt;code>onChange&lt;/code> 方法会被触发，并在最后发布一个 ConfigCenterEvent。该事件最终转发到ConfigCenterMetricsCollector 中，同样增加 **CONFIGCENTER_METRIC_TOTAL **的计数。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Apollo配置中心的配置发生变化时，它的 &lt;code>onChange&lt;/code> 方法会被触发，并在最后发布一个 ConfigCenterEvent。该事件最终转发到ConfigCenterMetricsCollector 中，同样增加 &lt;strong>CONFIGCENTER_METRIC_TOTAL&lt;/strong> 的计数。&lt;/p>
 &lt;p>&lt;strong>NacosDynamicConfiguration&lt;/strong>&lt;/p>
 &lt;p>动态配置功能的 Nacos 配置中心实现。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//NacosDynamicConfiguration&lt;/span>
@@ -1544,7 +1544,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, event.getKey(), event.getGroup(),
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigCenterEvent.NACOS_PROTOCOL, ConfigChangeType.ADDED.name(), SELF_INCREMENT_SIZE));
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Nacos配置中心的配置发生变化时，它的 &lt;code>innerReceive&lt;/code> 方法被触发，发布一个 ConfigCenterEvent。它的处理流程和 ApolloDynamicConfiguration 一致，最终增加 **CONFIGCENTER_METRIC_TOTAL **的计数。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Nacos配置中心的配置发生变化时，它的 &lt;code>innerReceive&lt;/code> 方法被触发，发布一个 ConfigCenterEvent。它的处理流程和 ApolloDynamicConfiguration 一致，最终增加 &lt;strong>CONFIGCENTER_METRIC_TOTAL&lt;/strong> 的计数。&lt;/p>
 &lt;p>&lt;strong>ZookeeperDataListener&lt;/strong>&lt;/p>
 &lt;p>动态配置功能的 Zookeeper 实现。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ZookeeperDataListener&lt;/span>
@@ -1762,7 +1762,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;p>Dubbo 体系内部另一个常出现的问题是，在大规模分布式部署的场景下，微服务系统会做跨区域、跨注册中心的部署，这个时候就会出现多集群间地址同步和流量调度的问题。&lt;/p>
 &lt;/li>
 &lt;/ul>
-&lt;p>总结起来，**不论是同构体系还是异构体系，都面临对多协议通信、多注册中心集群地址发现的问题。**Dubbo 目前是支持多协议、多注册中心的，可以说就是为解决我们上面分析的 Dubbo 同构体系内的场景而设计的，因此下面我们从同构体系的多协议、多注册中心场景讲起，先了解 Dubbo 多协议、多注册中心的基本支持情况以及它们是如何工作的。而在后面的一章再进一步探索怎么扩展这个能力来支持异构微服务体系的互联互通。&lt;/p>
+&lt;p>总结起来，&lt;strong>不论是同构体系还是异构体系，都面临对多协议通信、多注册中心集群地址发现的问题。&lt;/strong> Dubbo 目前是支持多协议、多注册中心的，可以说就是为解决我们上面分析的 Dubbo 同构体系内的场景而设计的，因此下面我们从同构体系的多协议、多注册中心场景讲起，先了解 Dubbo 多协议、多注册中心的基本支持情况以及它们是如何工作的。而在后面的一章再进一步探索怎么扩展这个能力来支持异构微服务体系的互联互通。&lt;/p>
 &lt;h2 id="dubbo-体系内的多协议多注册中心机制">Dubbo 体系内的多协议、多注册中心机制&lt;/h2>
 &lt;p>我们将通过两个场景示例，来分别具体的讲一下 Dubbo 的多协议、多注册中心机制的使用方式和工作原理。&lt;/p>
 &lt;h3 id="多协议">多协议&lt;/h3>
@@ -5700,9 +5700,8 @@ DubboProtocol的createServer方法&lt;/p>
 &lt;ul>
 &lt;li>对于一个原先采用老版本Dubbo搭建的应用服务，在迁移到Dubbo 3时，Dubbo 3 会需要一个&lt;strong>元数据中心来维护RPC服务与应用的映射关系（即接口与应用的映射关系）&lt;/strong>，因为如果采用了&lt;strong>应用级别的服务发现和服务注册&lt;/strong>，在注册中心中将&lt;strong>采用“应用 —— 实例列表”结构&lt;/strong>的数据组织形式，&lt;strong>不再是以往的“接口 —— 实例列表”结构的数据组织形式&lt;/strong>，而以往用接口级别的服务注册和服务发现的应用服务在&lt;strong>迁移到应用级别&lt;/strong>时，&lt;strong>得不到接口与应用之间的对应关系&lt;/strong>，从而无法从注册中心得到实例列表信息，所以&lt;strong>Dubbo为了兼容这种场景，在Provider端启动时，会往元数据中心存储接口与应用的映射关系&lt;/strong>。&lt;/li>
 &lt;li>为了让&lt;strong>注册中心更加聚焦与地址的发现和推送能力&lt;/strong>，&lt;strong>减轻注册中心的负担&lt;/strong>，元数据中心承载了所有的服务元数据、大量接口/方法级别配置信息等，无论是接口粒度还是应用粒度的服务发现和注册，元数据中心都起到了重要的作用。&lt;/li>
-&lt;li>&lt;/li>
+&lt;li>如果有以上两种需求，都可以选择部署元数据中心，并通过Dubbo的配置来集成该元数据中心。&lt;/li>
 &lt;/ul>
-&lt;p>如果有以上两种需求，都可以选择部署元数据中心，并通过Dubbo的配置来集成该元数据中心。&lt;/p>
 &lt;p>&lt;strong>元数据中心并不依赖于注册中心和配置中心&lt;/strong>，用户可以自由选择是否集成和部署元数据中心，如下图所示：&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/centers-metadata.png" alt="/imgs/v3/concepts/centers-metadata.png">&lt;/p>
 &lt;p>该图中不配备配置中心，意味着可以不需要全局管理配置的能力。该图中不配备注册中心，意味着可能采用了Dubbo mesh的方案，也可能不需要进行服务注册，仅仅接收直连模式的服务调用。
@@ -5716,7 +5715,7 @@ DubboProtocol的createServer方法&lt;/p>
 &lt;li>元数据中心来维护RPC服务与应用的映射关系（即接口与应用的映射关系）来兼容接口与应用之间的对应关系&lt;/li>
 &lt;li>让注册中心更加聚焦与地址的发现和推送能力&lt;/li>
 &lt;/ul>
-&lt;p>注册中心的启动是在DefaultApplicationDeployer中的初始化方法 initialize() 中:如下所示&lt;/p>
+&lt;p>元数据中心的启动是在DefaultApplicationDeployer中的初始化方法 initialize() 中:如下所示&lt;/p>
 &lt;p>这里只看下 startMetadataCenter();方法即可&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">initialize&lt;/span>() {
@@ -7568,7 +7567,7 @@ dubbo:config-center 配置&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (isStarting()) {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// currently, is starting, maybe both start by module and application&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// if it has new modules, start them&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//存在挂器的模块&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//存在挂起的模块&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (hasPendingModule) {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//启动模块&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> startModules();
@@ -11466,13 +11465,25 @@ FrameworkModel 重置默认的应用模型对象 resetDefaultAppModel()方法
 &lt;/ul>
 &lt;/li>
 &lt;li>AbstractServiceConfig
-- &lt;strong>抽象的服务配置&lt;/strong>,这个就与我们的服务提供者有了具体的关系了,主要记录了一些服务提供者的公共配置,如服务版本,服务分组,服务延迟注册毫秒数,是否暴漏服务,服务权重,是否为动态服务,服务协议类型,是否注册等等.&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>抽象的服务配置&lt;/strong>,这个就与我们的服务提供者有了具体的关系了,主要记录了一些服务提供者的公共配置,如服务版本,服务分组,服务延迟注册毫秒数,是否暴漏服务,服务权重,是否为动态服务,服务协议类型,是否注册等等.&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;li>ServiceConfigBase
-- &lt;strong>服务的基础配置类&lt;/strong>,这个类型仍旧是个抽象的类型提取了一些基础的配置:导出服务的接口类,服务名称,接口实现的引用类型,提供者配置,是否是通用服务GenericService&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>服务的基础配置类&lt;/strong>,这个类型仍旧是个抽象的类型提取了一些基础的配置:导出服务的接口类,服务名称,接口实现的引用类型,提供者配置,是否是通用服务GenericService&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;li>ServiceConfig
-- &lt;strong>服务配置实现类&lt;/strong>, 上面的类型都是抽象类型不能做为具体存在的事物,这个类型是我们出现的第一个服务配置实现类型,服务配置实现类已经从父类型中继承了这么多的属性,这里主要为实现服务提供了一些配置如服务的协议配置,服务的代理工厂JavassistProxyFactory是将生成导出服务代理的ProxyFactory实现，是其默认实现,服务提供者模型,是否导出服务,导出的服务列表,服务监听器等等.&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>服务配置实现类&lt;/strong>, 上面的类型都是抽象类型不能做为具体存在的事物,这个类型是我们出现的第一个服务配置实现类型,服务配置实现类已经从父类型中继承了这么多的属性,这里主要为实现服务提供了一些配置如服务的协议配置,服务的代理工厂JavassistProxyFactory是将生成导出服务代理的ProxyFactory实现，是其默认实现,服务提供者模型,是否导出服务,导出的服务列表,服务监听器等等.&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;li>ServiceBean
-- &lt;strong>服务工厂Bean&lt;/strong> ,这个主要是Spring模块来简化配置的一个服务工厂Bean这里就先不详细介绍Spring相关的配置. -&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>服务工厂Bean&lt;/strong> ,这个主要是Spring模块来简化配置的一个服务工厂Bean这里就先不详细介绍Spring相关的配置.&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;/ul>
 &lt;h2 id="23-serviceconfig构造器的初始化调用链">2.3 ServiceConfig构造器的初始化调用链&lt;/h2>
 &lt;p>有了上面的类型继承关系我们就比较好分析了,接下来我们开始创建服务配置对象如下代码所示:&lt;/p>
@@ -13817,7 +13828,7 @@ Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能�
 &lt;h3 id="小结">小结&lt;/h3>
 &lt;ul>
 &lt;li>客户端异步的出发点就是请求发出和响应处理本身为两个不同的独立事件，响应如何被处理和在哪个线程中处理等都是不需要和请求发出事件的业务逻辑线程做耦合绑定。&lt;/li>
-&lt;li>响应事件回调的处理逻辑在哪个线程中做处理是需要根据情况来选择。建议，如果回调逻辑比较简单，建议直接在IO线程中；如果包含了远程访问或者DB访问等IO型的__同步__操作，建议在独立的线程池做处理。&lt;/li>
+&lt;li>响应事件回调的处理逻辑在哪个线程中做处理是需要根据情况来选择。建议，如果回调逻辑比较简单，建议直接在IO线程中；如果包含了远程访问或者DB访问等IO型的 &lt;strong>同步&lt;/strong> 操作，建议在独立的线程池做处理。&lt;/li>
 &lt;/ul></description></item><item><title>Blog: Dubbo 在跨语言和协议穿透性方向上的探索：支持 HTTP/2 gRPC 和 Protobuf</title><link>https://dubbo.apache.org/zh-cn/blog/2019/10/28/dubbo-%E5%9C%A8%E8%B7%A8%E8%AF%AD%E8%A8%80%E5%92%8C%E5%8D%8F%E8%AE%AE%E7%A9%BF%E9%80%8F%E6%80%A7%E6%96%B9%E5%90%91%E4%B8%8A%E7%9A%84%E6%8E%A2%E7%B4%A2%E6%94%AF%E6%8C%81-http/2-grpc-%E5%92%8C-protobuf/</link><pubDate>Mon, 28 Oct 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/10/28/dubbo-%E5%9C%A8%E8%B7%A8%E8%AF%AD%E8%A8%80%E5%92%8C%E5%8D%8F%E8%AE%AE%E7%A9%BF%E9%80%8F%E6%80%A7%E6%96%B9%E5%90%91%E4%B8%8A%E7%9A%84%E6%8E%A2%E7%B4%A2%E6%94%AF%E6%8C%81-http/2-grpc-%E5%92%8C-protobuf/</guid><description>
 &lt;p>本文总体上可分为基础产品简介、Dubbo 对 gRPC (HTTP/2) 和 Protobuf 的支持及示例演示三部分，在简介部分介绍了 Dubbo、HTTP/2、gRPC、Protobuf 的基本概念和特点；第二部分介绍了 Dubbo 为何要支持 gRPC (HTTP/2) 和 Protobuf，以及这种支持为 gRPC 和 Dubbo 开发带来的好处与不同；第三部分通过两个实例分别演示了 Dubbo gRPC 和 Dubbo Protobuf 的使用方式。&lt;/p>
 &lt;h2 id="基本介绍">基本介绍&lt;/h2>
@@ -13833,7 +13844,7 @@ Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能�
 &lt;/ul>
 &lt;h3 id="http1">HTTP/1&lt;/h3>
 &lt;p>相比于直接构建与 TPC 传输层的私有 RPC 协议，构建于 HTTP 之上的远程调用解决方案会有更好的通用性，如WebServices 或 REST 架构，使用 HTTP + JSON 可以说是一个事实标准的解决方案。&lt;/p>
-&lt;p>之所有选择构建在 HTTP 之上，我认为有两个最大的优势：&lt;/p>
+&lt;p>之所以选择构建在 HTTP 之上，我认为有两个最大的优势：&lt;/p>
 &lt;ol>
 &lt;li>HTTP 的语义和可扩展性能很好的满足 RPC 调用需求。&lt;/li>
 &lt;li>通用性，HTTP 协议几乎被网络上的所有设备所支持，具有很好的协议穿透性。&lt;/li>
@@ -13961,7 +13972,7 @@ Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能�
 &lt;h2 id="示例">示例&lt;/h2>
 &lt;h3 id="示例-1使用-dubbo-开发-grpc-服务">示例 1，使用 Dubbo 开发 gRPC 服务&lt;/h3>
 &lt;p>&lt;a href="https://grpc.io/">gRPC&lt;/a> 是 Google 开源的构建在 HTTP/2 之上的一个 PRC 通信协议。Dubbo 依赖其灵活的协议扩展机制，增加了对 gRPC (HTTP/2) 协议的支持。&lt;/p>
-&lt;p>目前的支持限定在 Dubbo Java 语言版本，后续 Go 语言或其他语言版本将会以类似方式提供支持。下面，通过一个&lt;a href="https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc">简单的示例&lt;/a>来演示如何在 Dubbo 中使用 gRPC 协议通信。&lt;/p>
+&lt;p>目前的支持限定在 Dubbo Java 语言版本，后续 Go 语言或其他语言版本将会以类似方式提供支持。下面，通过一个&lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc">简单的示例&lt;/a>来演示如何在 Dubbo 中使用 gRPC 协议通信。&lt;/p>
 &lt;h4 id="1-定义服务-idl">1. 定义服务 IDL&lt;/h4>
 &lt;p>首先，通过标准的 Protobuf 协议定义服务如下：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>syntax = &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
@@ -14128,7 +14139,7 @@ Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> GreeterGrpc.IGreeter greeter &lt;span style="color:#719e07">=&lt;/span> (GreeterGrpc.IGreeter) context.getBean(&lt;span style="color:#2aa198">&amp;#34;greeter&amp;#34;&lt;/span>);
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ListenableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>HelloReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> future &lt;span style="color:#719e07">=&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeter.sayHAsyncello(HelloRequest.newBuilder().setName(&lt;span style="color:#2aa198">&amp;#34;world!&amp;#34;&lt;/span>).build());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeter.sayHelloAsync(HelloRequest.newBuilder().setName(&lt;span style="color:#2aa198">&amp;#34;world!&amp;#34;&lt;/span>).build());
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>二、高级配置&lt;/strong>&lt;/p>
@@ -14278,7 +14289,7 @@ Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注意，这里与 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc">Dubbo 对 gRPC&lt;/a> 支持部分的区别在于：
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注意，这里与 &lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc">Dubbo 对 gRPC&lt;/a> 支持部分的区别在于：
 &lt;code> &amp;lt;pluginParameter&amp;gt;dubbo&amp;lt;/pluginParameter&amp;gt;&lt;/code>&lt;/p>
 &lt;ol start="2">
 &lt;li>
@@ -14574,7 +14585,7 @@ Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能�
 &lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-mock">https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-mock&lt;/a>&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&amp;#160;&lt;a href="#fnref1:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:3">
-&lt;p>/zh-cn/docsv2.7/user/examples/local-mock/&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/local-mock/">https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/local-mock/&lt;/a>&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
 &lt;/div></description></item><item><title>Blog: Dubbo 中的 URL 统一模型</title><link>https://dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</link><pubDate>Thu, 17 Oct 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</guid><description>

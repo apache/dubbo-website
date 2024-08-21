@@ -1,14 +1,91 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo Blog</title><link>https://dubbo.apache.org/en/blog/</link><description>Recent content in Apache Dubbo Blog on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Serialization Protocol Security</title><link>https://dubbo.apache.org/en/blog/1/01/01/serialization-protocol-security/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/1/01/01/serialization-protocol-security/</guid><description>
-&lt;p>Dubbo 3 has enhanced the security aspects of serialization protocols and recommends using the Triple protocol in non-Wrapper mode. This protocol is secure by default but requires developers to write IDL files.&lt;/p>
-&lt;p>In the Triple protocol&amp;rsquo;s Wrapper mode, compatibility with other serialization data is allowed, offering good compatibility. However, other protocols may have deserialization security flaws. For the Hessian2 protocol, users who require high-security attributes should enable whitelist mode according to the sample code. The framework will enable blacklist mode by default to block malicious calls.&lt;/p>
-&lt;p>Using other serialization protocols is not recommended. When an attacker can access the Provider interface, security flaws in other serialization protocols may lead to command execution through the Provider interface.&lt;/p>
-&lt;p>If you must use other serialization protocols and wish to maintain some level of security, you should enable the Token authentication mechanism. This will prevent threats to the Provider&amp;rsquo;s security from unauthenticated and untrusted request sources. When enabling Token authentication, you should also enable the authentication feature in the registry.&lt;/p>
-&lt;h2 id="notice">Notice&lt;/h2>
-&lt;p>The following serializations are proved that not safe enough to transfer on network and not recommend to use.&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Apache Dubbo Blog</title><link>https://dubbo.apache.org/en/blog/</link><description>Recent content in Apache Dubbo Blog on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Tracing Dubbo With OpenTelemetry</title><link>https://dubbo.apache.org/en/blog/2024/01/31/tracing-dubbo-with-opentelemetry/</link><pubDate>Wed, 31 Jan 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/2024/01/31/tracing-dubbo-with-opentelemetry/</guid><description>
+&lt;h2 id="overview">Overview&lt;/h2>
+&lt;p>This case shows using OpenTelemetry(otlp) as the Tracer in the Dubbo project to report the Trace information to the Otlp Collector, which then forwards it to Zipkin and Jagger. &lt;a href="https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-otel-otlp">Code address&lt;/a>&lt;/p>
+&lt;p>It consists of three parts：&lt;/p>
 &lt;ul>
-&lt;li>native-hessian&lt;/li>
-&lt;li>native-java (Java ObjectOutputStream and ObjectInputStream)&lt;/li>
-&lt;/ul></description></item><item><title>Blog: Introduction to Apache Dubbo plugin for IntelliJ IDEA</title><link>https://dubbo.apache.org/en/blog/2023/10/23/introduction-to-apache-dubbo-plugin-for-intellij-idea/</link><pubDate>Mon, 23 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/2023/10/23/introduction-to-apache-dubbo-plugin-for-intellij-idea/</guid><description>
+&lt;li>dubbo-samples-spring-boot-tracing-otel-oltp-interface&lt;/li>
+&lt;li>dubbo-samples-spring-boot-tracing-otel-oltp-provider&lt;/li>
+&lt;li>dubbo-samples-spring-boot-tracing-otel-oltp-consumer&lt;/li>
+&lt;/ul>
+&lt;h2 id="architecture">Architecture&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/demo_arch.png" alt="architecture architecture">&lt;/p>
+&lt;h2 id="quick-start">Quick Start&lt;/h2>
+&lt;h3 id="install--start-otlp-collector">Install &amp;amp; start Otlp Collector&lt;/h3>
+&lt;p>Follow &lt;a href="https://OpenTelemetry.io/docs/collector/getting-started/">OpenTelemetry Collector Quick Start&lt;/a> to start the otlp collector.&lt;/p>
+&lt;h3 id="start-provider">Start Provider&lt;/h3>
+&lt;p>Run &lt;code>org.apache.dubbo.springboot.demo.provider.ProviderApplication&lt;/code> directly from IDE.&lt;/p>
+&lt;h3 id="start-consumer">Start Consumer&lt;/h3>
+&lt;p>Start &lt;code>org.apache.dubbo.springboot.demo.consumer.ConsumerApplication&lt;/code> directly from IDE.&lt;/p>
+&lt;h3 id="view-trace-information">View trace information&lt;/h3>
+&lt;p>Open the zipkin dashboard &lt;code>http://localhost:9411/zipkin/&lt;/code> in the browser:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/zipkin_search.png" alt="zipkin.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/zipkin_detail.png" alt="zipkin.png">&lt;/p>
+&lt;p>Open the Jaeger dashboard &lt;code>http://localhost:16686/search&lt;/code> in the browser:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/jaeger_search.png" alt="jaeger_search.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/jaeger_detail.png" alt="jaeger_detail.png">&lt;/p>
+&lt;h2 id="how-to-use-it-in-spring-boot-project">How to use it in Spring Boot project&lt;/h2>
+&lt;h3 id="1-add-dependencies-to-your-project">1. Add dependencies to your project&lt;/h3>
+&lt;p>For Spring Boot projects, you can use &lt;code>dubbo-spring-boot-tracing-otel-otlp-starter&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- OpenTelemetry as Tracer, Otlp as exporter --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-tracing-otel-otlp-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-configuration">2. Configuration&lt;/h3>
+&lt;h4 id="applicationyml">application.yml&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span> &lt;span style="color:#586e75"># default is false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">sampling&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">probability&lt;/span>: &lt;span style="color:#2aa198">0.5&lt;/span> &lt;span style="color:#586e75"># sampling rate, default is 0.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">propagation&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: W3C &lt;span style="color:#586e75"># W3C/B3 default is W3C&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing-exporter&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">otlp-config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">endpoint&lt;/span>: http://localhost:4317
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 10s &lt;span style="color:#586e75"># default is 10s&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">compression-method&lt;/span>: none &lt;span style="color:#586e75"># none/gzip The method used to compress payloads, default is &amp;#34;none&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">headers&lt;/span>: &lt;span style="color:#586e75"># customized added headers, default is empty&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">auth&lt;/span>: admin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># tracing info output to logging&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">logging&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">level&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">root&lt;/span>: info
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pattern&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">console&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;[%d{dd/MM/yy HH:mm:ss:SSS z}] %t %5p %c{2} [%X{traceId:-}, %X{spanId:-}]: %m%n&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="how-to-use-based-on-dubbo-api">How to use based on Dubbo API&lt;/h2>
+&lt;h3 id="1-add-dependencies-to-your-project-1">1. Add dependencies to your project&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Required, dubbo-tracing core dependency --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-tracing&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Opentelemetry as Tracer --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-otel&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- OTlp as exporter --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.opentelemetry&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>opentelemetry-exporter-otlp&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-configuration-1">2. Configuration&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>TracingConfig tracingConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TracingConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Enable dubbo tracing&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setEnabled(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set the sampling&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setSampling(&lt;span style="color:#719e07">new&lt;/span> SamplingConfig(1.0f));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set Propagation, default is W3C, optional W3C/B3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setPropagation(&lt;span style="color:#719e07">new&lt;/span> PropagationConfig(&lt;span style="color:#2aa198">&amp;#34;W3C&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set trace reporting&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ExporterConfig exporterConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ExporterConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set up trace reporting to Zipkin&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>exporterConfig.setZipkin(&lt;span style="color:#719e07">new&lt;/span> ExporterConfig.OtlpConfig(&lt;span style="color:#2aa198">&amp;#34;http://localhost:4317&amp;#34;&lt;/span>, Duration.ofSeconds(10), &lt;span style="color:#2aa198">&amp;#34;none&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setExporter(exporterConfig);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Blog: Introduction to Apache Dubbo plugin for IntelliJ IDEA</title><link>https://dubbo.apache.org/en/blog/2023/10/23/introduction-to-apache-dubbo-plugin-for-intellij-idea/</link><pubDate>Mon, 23 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/2023/10/23/introduction-to-apache-dubbo-plugin-for-intellij-idea/</guid><description>
 &lt;p>The most popular Java IDE, IntelliJ IDEA, has collaborated with the open-source microservice framework Apache Dubbo community, bringing good news to microservice developers. Along with IntelliJ IDEA version 2023.2, Jetbras has officially released the new &lt;strong>Apache Dubbo in Spring Framework&lt;/strong> plugin version.&lt;/p>
 &lt;p>This plugin can help developers with Dubbo project initialization and facilitate the identification of Dubbo services and their dependencies during the project development process. Developing microservices based on Apache Dubbo will become very simple.&lt;/p>
 &lt;h2 id="how-to-install">How to install&lt;/h2>
@@ -2334,10 +2411,10 @@ dubbo-storage-service.xml&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sh seata-server.sh -p &lt;span style="color:#2aa198">8091&lt;/span> -h 127.0.0.1 -m file
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-5-run-example">Step 5: Run example&lt;/h3>
 &lt;ul>
-&lt;li>Start AccountService (&lt;a href="https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java">DubboAccountServiceStarter&lt;/a>).&lt;/li>
-&lt;li>Start StockService (&lt;a href="https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java">DubboStorageServiceStarter&lt;/a>).&lt;/li>
-&lt;li>Start OrderService (&lt;a href="https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java">DubboOrderServiceStarter&lt;/a>).&lt;/li>
-&lt;li>Run BusinessService for test (&lt;a href="https://github.com/apache/dubbo-samples/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java">DubboBusinessTester&lt;/a>).&lt;/li>
+&lt;li>Start AccountService (&lt;a href="https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java">DubboAccountServiceStarter&lt;/a>).&lt;/li>
+&lt;li>Start StockService (&lt;a href="https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java">DubboStorageServiceStarter&lt;/a>).&lt;/li>
+&lt;li>Start OrderService (&lt;a href="https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java">DubboOrderServiceStarter&lt;/a>).&lt;/li>
+&lt;li>Run BusinessService for test (&lt;a href="https://github.com/apache/dubbo-integration-cases/blob/master/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java">DubboBusinessTester&lt;/a>).&lt;/li>
 &lt;/ul>
 &lt;h3 id="related-projects">Related projects&lt;/h3>
 &lt;ul>
@@ -7161,4 +7238,123 @@ Once written and configured, the filter is activated by the Dubbo and executed i
 &lt;/ul></description></item><item><title>Blog: The ApacheCon NA schedule has been announced</title><link>https://dubbo.apache.org/en/blog/2018/05/02/the-apachecon-na-schedule-has-been-announced/</link><pubDate>Wed, 02 May 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/2018/05/02/the-apachecon-na-schedule-has-been-announced/</guid><description>
 &lt;p>Ian Luo(PMC) and Jun Liu(PMC) will talk about &amp;ldquo;Introducing Apache Dubbo(Incubating): What is Dubbo and How it Works&amp;rdquo; at ApacheCon NA this year in Montréal! Please check out the schedule &lt;a href="https://apachecon.dukecon.org/acna/2018/#/scheduledEvent/b8db9dc580d85853f">here&lt;/a> and register &lt;a href="https://www.eventbrite.com/e/apachecon-north-america-2018-registration-43200327342">here&lt;/a>.&lt;/p></description></item><item><title>Blog: The GSoC(Google Summer of Code) 2018</title><link>https://dubbo.apache.org/en/blog/2018/04/25/the-gsocgoogle-summer-of-code-2018/</link><pubDate>Wed, 25 Apr 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/2018/04/25/the-gsocgoogle-summer-of-code-2018/</guid><description>
 &lt;p>The GSoC(Google Summer of Code) 2018 projects has been announced, Raghu Reddy&amp;rsquo;s project &amp;ldquo;Extending Serialization protocols support for Apache Dubbo&amp;rdquo; has been &lt;a href="https://summerofcode.withgoogle.com/projects/#4747840161579008">accepted&lt;/a>! Congratulations!&lt;/p></description></item><item><title>Blog: Dubbo roadmap is announced in QCon Beijing 2018</title><link>https://dubbo.apache.org/en/blog/2018/04/22/dubbo-roadmap-is-announced-in-qcon-beijing-2018/</link><pubDate>Sun, 22 Apr 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/2018/04/22/dubbo-roadmap-is-announced-in-qcon-beijing-2018/</guid><description>
-&lt;p>Ian Luo has delivered a great talk at QCon Beijing 2018, where the roadmap of Dubbo has also be announced. Please enjoy the &lt;a href="https://github.com/dubbo/awesome-dubbo/raw/master/slides/qcon2018/dubbo-present-and-future.pdf">slides&lt;/a>!&lt;/p></description></item><item><title>Blog: Application-Level Service Discovery</title><link>https://dubbo.apache.org/en/blog/1/01/01/application-level-service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/1/01/01/application-level-service-discovery/</guid><description/></item></channel></rss>
+&lt;p>Ian Luo has delivered a great talk at QCon Beijing 2018, where the roadmap of Dubbo has also be announced. Please enjoy the &lt;a href="https://github.com/dubbo/awesome-dubbo/raw/master/slides/qcon2018/dubbo-present-and-future.pdf">slides&lt;/a>!&lt;/p></description></item><item><title>Blog: Application-Level Service Discovery</title><link>https://dubbo.apache.org/en/blog/1/01/01/application-level-service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/1/01/01/application-level-service-discovery/</guid><description/></item><item><title>Blog: Enhanced HTTP Standard Capabilities of Triple Protocol</title><link>https://dubbo.apache.org/en/blog/1/01/01/enhanced-http-standard-capabilities-of-triple-protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/1/01/01/enhanced-http-standard-capabilities-of-triple-protocol/</guid><description>
+&lt;h2 id="enhanced-http-standard-capabilities-of-triple-protocol---support-for-multiple-content-type">Enhanced HTTP Standard Capabilities of Triple Protocol - Support for Multiple Content-Type&lt;/h2>
+&lt;blockquote>
+&lt;p>This article focuses on how Triple supports more of the HTTP standard Content-Type and how the service receives these requests.&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="overview">&lt;strong>Overview&lt;/strong>&lt;/h4>
+&lt;p>Triple currently supports two serialization methods: Json and protobuf, corresponding to the ContentTypes:&lt;/p>
+&lt;ul>
+&lt;li>application/json&lt;/li>
+&lt;li>application/grpc+proto&lt;/li>
+&lt;/ul>
+&lt;p>This poses no issue when both the consumer and provider are backend services. However, for browser clients, they may send a wider variety of ContentTypes, which requires server-side support for decoding, such as:&lt;/p>
+&lt;ul>
+&lt;li>multipart/formdata&lt;/li>
+&lt;li>text/plain&lt;/li>
+&lt;li>application/x-www-form-urlencoded&lt;/li>
+&lt;li>application/xml&lt;/li>
+&lt;/ul>
+&lt;p>REST protocol has already largely implemented the above decoding capabilities. Enabling Triple to achieve these capabilities is an important step towards full interoperability between Triple server and browser clients.&lt;/p>
+&lt;h4 id="usage">&lt;strong>Usage&lt;/strong>&lt;/h4>
+&lt;h5 id="multipartformdata">&lt;strong>multipart/formdata&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetPojo &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> multipart/form-data; boundary=example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;username&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: text/plain
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LuYue
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userdetail&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;location&amp;#34;:&amp;#34;beijing&amp;#34;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;username&amp;#34;:&amp;#34;LuYue&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userimg&amp;#34;;filename=&amp;#34;user.jpeg&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: image/jpeg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;binary image data&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary--
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetPojo&lt;/span>(String username, User user, &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> attachment) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//LuYue&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//user.name=Luyue;user.location=beijing&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//&amp;lt;binary image data&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#719e07">new&lt;/span> String(attachment, StandardCharsets.UTF_8));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Each part is decoded according to its Content-Type.&lt;/li>
+&lt;li>If the method parameter is byte[] or Byte[], the corresponding field will not be decoded.&lt;/li>
+&lt;li>The response is encoded using application/json.&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationx-www-form-urlencoded">&lt;strong>application/x-www-form-urlencoded&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetUrlForm &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/x-www-form-urlencoded
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 33
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello=World&amp;amp;Apache=Dubbo&amp;amp;id=10086
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Two ways of receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(String hello, String apache, &lt;span style="color:#dc322f">long&lt;/span> id){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> hello);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> apache);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> params){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;Hello&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;Apache&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;Id&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>If the parameter is a Map, it is decoded into Map&amp;lt;String, String&amp;gt; for input.&lt;/li>
+&lt;li>If all parameters are Strings or numeric types, they are decoded and passed in according to the parameter list.&lt;/li>
+&lt;li>The response is encoded using application/json.&lt;/li>
+&lt;/ul>
+&lt;h5 id="textplain">&lt;strong>text/plain&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetString &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> text/plain; charset=UTF-8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>World!
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetString&lt;/span>(String world){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> world);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Charset supports ASCII, UTF-8, UTF-16, etc., with UTF-8 as the default.&lt;/li>
+&lt;li>The response is encoded using application/json.&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationxml">&lt;strong>application/xml&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetXml &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 86
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34; standalone=&amp;#34;yes&amp;#34;?&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;User&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;username&amp;gt;&lt;/span>JohnDoe&lt;span style="color:#268bd2">&amp;lt;/username&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;location&amp;gt;&lt;/span>New York&lt;span style="color:#268bd2">&amp;lt;/location&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/User&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetXml&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getUsername());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getLocation());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received xml.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>This implementation is the same as Rest&amp;rsquo;s XMLCodec.&lt;/li>
+&lt;li>The response is encoded using application/xml.&lt;/li>
+&lt;/ul></description></item></channel></rss>

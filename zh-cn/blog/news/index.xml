@@ -636,7 +636,209 @@
 &lt;p>v1.7.0 之前嵌套map无法正确解析，主要原因是对应的map对象被当做一个数据类型却未被自动加到类引用列表中，而嵌套map类信息是同一类型的引用，去类引用列表找，找不到就报错了。 解决这个问题的方法就是遇到map类对象，也将其加入到类引用列表中即可。 问题详细参考 &lt;a href="https://github.com/apache/dubbo-go-hessian2/issues/119">#119&lt;/a>.&lt;/p>
 &lt;h3 id="34-fix-fields-name-mismatch-in-duration-class-234httpsgithubcomapachedubbo-go-hessian2pull234">3.4 fix fields name mismatch in Duration class. &lt;a href="https://github.com/apache/dubbo-go-hessian2/pull/234">#234&lt;/a>&lt;/h3>
 &lt;p>这个 PR 解决了Duration对象中字段错误定义，原来是&amp;quot;second/nano&amp;quot;， 应该是&amp;quot;seconds/nanos&amp;quot;。&lt;/p>
-&lt;p>同时改善了测试验证数据。之前使用0作为int字段的测试数据，这是不准确的，因为int类型默认值就是0.&lt;/p></description></item><item><title>Blog: 通过模板生成项目脚手架</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</link><pubDate>Sun, 31 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</guid><description>
+&lt;p>同时改善了测试验证数据。之前使用0作为int字段的测试数据，这是不准确的，因为int类型默认值就是0.&lt;/p></description></item><item><title>Blog: Apache Dubbo 下一代云原生微服务挑战赛启动报名！五大赛题50万奖金池等你来战</title><link>https://dubbo.apache.org/zh-cn/blog/2024/01/18/apache-dubbo-%E4%B8%8B%E4%B8%80%E4%BB%A3%E4%BA%91%E5%8E%9F%E7%94%9F%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8C%91%E6%88%98%E8%B5%9B%E5%90%AF%E5%8A%A8%E6%8A%A5%E5%90%8D%E4%BA%94%E5%A4%A7%E8%B5%9B%E9%A2%9850%E4%B8%87%E5%A5%96%E9%87%91%E6%B1%A0%E7%AD%89%E4%BD%A0%E6%9D%A5%E6%88%98/</link><pubDate>Thu, 18 Jan 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/01/18/apache-dubbo-%E4%B8%8B%E4%B8%80%E4%BB%A3%E4%BA%91%E5%8E%9F%E7%94%9F%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8C%91%E6%88%98%E8%B5%9B%E5%90%AF%E5%8A%A8%E6%8A%A5%E5%90%8D%E4%BA%94%E5%A4%A7%E8%B5%9B%E9%A2%9850%E4%B8%87%E5%A5%96%E9%87%91%E6%B1%A0%E7%AD%89%E4%BD%A0%E6%9D%A5%E6%88%98/</guid><description>
+&lt;p>本文带来本赛题详细解读，&lt;a href="https://competition.atomgit.com/competitionInfo?id=be48a38bb1daf499bd5c98ac8a3108fd" target="_blank">开放原子开源基金会官方报名渠道&lt;/a> 及更多详情请查看文章最后链接与二维码。&lt;/p>
+&lt;h2 id="赛题解读">赛题解读&lt;/h2>
+&lt;p>我们期待参赛团队在高性能 Triple(HTTP/3) 协议设计、完善的 Benchmark 验收体系、零信任解决方案、Service Mesh架构 等方向持续探索，共同定义下一代云原生微服务体系，为开源社区和企业用户在性能、安全等方面带来收益。&lt;/p>
+&lt;p>本赛事一共包含五道赛题：&lt;/p>
+&lt;ul>
+&lt;li>基于 HTTP/3 的高性能传输协议(Java)&lt;/li>
+&lt;li>自动化的 Dubbo 框架与协议性能基准 Benchmark 机制与平台(语言不限)&lt;/li>
+&lt;li>设计并实现一套零信任安全机制（含 Java/Golang SDK 适配与证书管理）&lt;/li>
+&lt;li>面向云原生的下一代微服务集群监测机制，涵盖Kubernetes、Nacos 等(Golang)&lt;/li>
+&lt;li>一种跨集群Kubernetes、传统VM微服务集群的互通方案与实现(Golang)&lt;/li>
+&lt;/ul>
+&lt;h3 id="1-基于http3-的高性能传输协议java">1 基于HTTP/3 的高性能传输协议(Java)&lt;/h3>
+&lt;h4 id="11-赛题背景与目标">1.1 赛题背景与目标&lt;/h4>
+&lt;p>本赛题的主要目标是将 Dubbo 中的 triple 协议适配到 HTTP/3 之上，兑现 triple 协议规范中的所有核心能力。&lt;/p>
+&lt;p>关于 Dubbo3 triple 协议使用的相关示例请参考（请注意阅读 README 中链接指向的其他相关示例）：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic">https://github.com/apache/dubbo-samples/tree/master/1-basic&lt;/a>，通过运行示例，可以了解当前 triple 协议的功能。&lt;/p>
+&lt;p>以下是 Triple 协议规范：&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/">https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/&lt;/a>&lt;/p>
+&lt;h4 id="12-赛题说明">1.2 赛题说明&lt;/h4>
+&lt;p>请基于 Apache Dubbo Java 实现的 3.3 分支进行开发，代码仓库链接如下：
+&lt;a href="https://github.com/apache/dubbo/tree/3.3">https://github.com/apache/dubbo/tree/3.3&lt;/a>&lt;/p>
+&lt;p>triple 协议相关实现源码：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/apache/dubbo/tree/3.2/dubbo-rpc/dubbo-rpc-triple">https://github.com/apache/dubbo/tree/3.2/dubbo-rpc/dubbo-rpc-triple&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo/tree/3.3/dubbo-remoting/dubbo-remoting-http12">https://github.com/apache/dubbo/tree/3.3/dubbo-remoting/dubbo-remoting-http12&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>开发者可根据自己的理解修改 Dubbo源码实现，比如在 remoting 层做 http3 适配，赛题实现不受限制，可以依赖如 Netty 等任意网络库或框架。&lt;/p>
+&lt;h4 id="13-参考链接">1.3 参考链接&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/grpc/proposal/blob/master/G2-http3-protocol.md">https://github.com/grpc/proposal/blob/master/G2-http3-protocol.md&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://devblogs.microsoft.com/dotnet/http-3-support-in-dotnet-6/">https://devblogs.microsoft.com/dotnet/http-3-support-in-dotnet-6/&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/netty/netty-incubator-codec-http3">https://github.com/netty/netty-incubator-codec-http3&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://webtide.com/jetty-http-3-support/">https://webtide.com/jetty-http-3-support/&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="2-自动化的-dubbo-框架与协议性能基准-benchmark-机制与平台语言不限">2 自动化的 Dubbo 框架与协议性能基准 Benchmark 机制与平台(语言不限)&lt;/h3>
+&lt;h4 id="21-赛题背景与目标">2.1 赛题背景与目标&lt;/h4>
+&lt;p>作为一款 RPC 框架，Apache Dubbo 内置了两款高性能通信协议：&lt;/p>
+&lt;ul>
+&lt;li>triple 协议，基于 TCP 的高性能通信协议。&lt;/li>
+&lt;li>dubbo 协议，基于 HTTP 的高性能通信协议，支持 Streaming 通信模型。&lt;/li>
+&lt;/ul>
+&lt;p>本赛题计划建设的 benchmark 平台理论需具备持任意协议测试的能力，实际产出可以 dubbo、triple 协议为主。&lt;/p>
+&lt;h4 id="22-赛题说明">2.2 赛题说明&lt;/h4>
+&lt;ul>
+&lt;li>建设一套支持 dubbo benchmark 验收的机制与流程，如当前有支持 java 语言的 &lt;a href="https://github.com/apache/dubbo-samples">https://github.com/apache/dubbo-&lt;/a>benchmark 可供参考&lt;/li>
+&lt;li>给出 dubbo、triple 协议的性能指标，以直观可视化的方式展示&lt;/li>
+&lt;li>找出性能瓶颈点、给出优化建议或实现&lt;/li>
+&lt;/ul>
+&lt;h4 id="23-参考资料">2.3 参考资料&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/benchmark-action/github-action-benchmark">https://github.com/benchmark-action/github-action-benchmark&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://grpc.io/docs/guides/benchmarking/">https://grpc.io/docs/guides/benchmarking/&lt;/a>&lt;/li>
+&lt;li>triple协议规范 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/">https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/&lt;/a>&lt;/li>
+&lt;li>dubbo协议规范 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/">https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/&lt;/a>&lt;/li>
+&lt;li>了解 dubbo 的基本使用方式 &lt;a href="https://github.com/apache/dubbo-samples">https://github.com/apache/dubbo-samples&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="3-设计并实现一套零信任安全机制含javagolang-sdk-适配与证书管理">3 设计并实现一套零信任安全机制（含Java/Golang SDK 适配与证书管理）&lt;/h3>
+&lt;h4 id="31-赛题背景与目标">3.1 赛题背景与目标&lt;/h4>
+&lt;p>本赛题的直接目标是为 Dubbo RPC 数据通信提供 TLS/mTLS 支持，但仅有相应的 API 与底层 tcp 链路是不够的，为了打造一套微服务整体解决方案，我们期望建立如下的一套零信任安全体系：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2024/01/openatom/security.png" alt="openatom-2024">&lt;/p>
+&lt;p>赛题涉及到控制面到数据面（Dubbo SDK）的数据推送，如证书更新、认证规则、鉴权规则等，我们计划在这个推送链路使用 xDS 协议。&lt;/p>
+&lt;p>针对架构设计中的几个核心组件，其主要职责是：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>控制面组件&lt;/p>
+&lt;ol>
+&lt;li>作为 CA 机构负责证书签发与轮转，负责认证/鉴权规则的转换，提供 xDS Server 将证书与规则下发到数据面&lt;/li>
+&lt;li>接收认证/鉴权规则，一套定义良好的认证与鉴权规则，支持控制 TLS/mTLS 行为，如什么场景下启用mTLS等；支持配置符合匹配条件下的认证/鉴权，可通过下文参考链接了解更多内容&lt;/li>
+&lt;li>xDS 协议，提供 xDS Server 负责证书与规则的推送。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;p>数据面组件（Dubbo SDK）&lt;/p>
+&lt;ol>
+&lt;li>Dubbo 框架适配 xDS 通道，接收证书与规则&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="32-赛题说明">3.2 赛题说明&lt;/h4>
+&lt;p>本赛题是取自 Dubbo 体系的微服务零信任总体方案，以上架构图描述的内容为该总体方案核心目标。&lt;/p>
+&lt;p>本赛题选手可以参与开发的内容分为两部分：&lt;/p>
+&lt;ol>
+&lt;li>数据面（Dubbo SDK），此部分为必做内容，即为 Dubbo SDK（Java/Go） 提供 xDS 的安全机制适配支持。如果选手决定不做控制面部分开发，则可以使用任意控制面 xDS Server 如 Istio 等辅助开发，流程与规则亦可直接使用 Istio 等，最终跑通 SDK 整体流程即可。&lt;/li>
+&lt;li>控制面，此部分为选做内容，即通过定制 Dubbo 社区提供的控制面实现，实现一整套定制化零信任解决方案。&lt;/li>
+&lt;/ol>
+&lt;h5 id="321-数据面dubbo-sdk开发指南">3.2.1 数据面（Dubbo SDK）开发指南：&lt;/h5>
+&lt;ul>
+&lt;li>社区 Dubbo SDK 适配 xDS 的基本代码已经由官方提供，选手可直接在此之上关注安全相关 xDS 内容的进一步解析，并将接收到的证书、规则等适配到 Dubbo 框架内不&lt;/li>
+&lt;li>选手可以考虑 Dubbo 框架认证鉴权能力的可扩展性。比如为 Dubbo 提供一套通用的认证、鉴权 API，本赛题来自 xDS 控制面的安全源成为其中的一个扩展实现；未来可以扩展其他的如非 xDS 通道的证书来源等。&lt;/li>
+&lt;/ul>
+&lt;p>相关源码仓库：&lt;/p>
+&lt;ul>
+&lt;li>Dubbo Java 源码：&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds">https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds&lt;/a>&lt;/li>
+&lt;li>Dubbo Go 源码：&lt;a href="https://github.com/apache/dubbo-go/tree/main/xds">https://github.com/apache/dubbo-go/tree/main/xds&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h5 id="322-控制面开发指南">3.2.2 控制面开发指南：&lt;/h5>
+&lt;p>控制面的 xDS Server 将由官方社区提供基础实现，选手们可关注安全相关部分的设计与实现。&lt;/p>
+&lt;p>控制面源码仓库：&lt;a href="https://github.com/apache/dubbo-kubernetes">https://github.com/apache/dubbo-kubernetes&lt;/a>&lt;/p>
+&lt;h4 id="33-参考资料">3.3 参考资料&lt;/h4>
+&lt;p>总的来说，本赛题要建设的是一套通用的零信任体系，提供以下业界实现作为参考：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://istio.io/latest/docs/concepts/security/">https://istio.io/latest/docs/concepts/security/&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/grpc/proposal/blob/master/A29-xds-tls-security.md">https://github.com/grpc/proposal/blob/master/A29-xds-tls-security.md&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://kuma.io/docs/2.5.x/policies/mutual-tls/">https://kuma.io/docs/2.5.x/policies/mutual-tls/&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol#xds-protocol-delta">https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol#xds-protocol-delta&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="4-面向云原生的下一代微服务集群监测机制涵盖kubernetesnacos-golang">4 面向云原生的下一代微服务集群监测机制，涵盖Kubernetes、Nacos (Golang)&lt;/h3>
+&lt;h4 id="41-赛题背景与目标">4.1 赛题背景与目标&lt;/h4>
+&lt;p>微服务的整体可视化管控一直依赖都是一个非常重要的议题，本赛题的大背景是 Apache Dubbo 社区正在推进的 Dubbo 整体可视化项目，我们计划实现一个可以同时兼容 Zookeeper/Nacos 等传统注册中心、Kubernetes Service、Service Mesh 架构的统一的可视化控制台：&lt;/p>
+&lt;ul>
+&lt;li>微服务集群数据可视化。包括集群内的应用、服务、示例等基本信息展示。&lt;/li>
+&lt;li>监控相关。借助 Dubbo SDK 上报到 Prometheus 的 Metrics 数据，控制台通过查询 Prometheus 展示相关监控指标，绘制调用链路图与依赖关系图等。&lt;/li>
+&lt;li>流量管控。支持流量管控规则，支持规则可视化编辑、预览、下发。&lt;/li>
+&lt;/ul>
+&lt;h5 id="411-总体目标">4.1.1 总体目标&lt;/h5>
+&lt;p>相比之前老版本的 Dubbo Admin 实现，我们期望新版本的控制台在部署架构、功能丰富度上都实现全面升级。&lt;/p>
+&lt;p>因此参赛选手可重点关注以下几个方向：&lt;/p>
+&lt;ul>
+&lt;li>提供一个通用的微服务适配层抽象（如包含 Application、Servcice、Instance 等概念），作为新版控制台的统一数据源，屏蔽底层 Nacos、Kubernetes、Service Mesh 架构的差异。目前官方仓库提供了一个基本参考设计与实现。&lt;/li>
+&lt;li>设计控制台功能并提供完整实现。目前官方提供了参考交互效果图。&lt;/li>
+&lt;/ul>
+&lt;p>从用户 GUI 视角看，如可做菜单设计如下：&lt;/p>
+&lt;ul>
+&lt;li>首页大盘&lt;/li>
+&lt;li>资源详情
+&lt;ul>
+&lt;li>应用&lt;/li>
+&lt;li>服务&lt;/li>
+&lt;li>实例&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>流量管控&lt;/li>
+&lt;/ul>
+&lt;h4 id="42-赛题说明">4.2 赛题说明&lt;/h4>
+&lt;p>本赛题官方已经提供了后端适配层的参考实现，同时给出了部分前端交互设计初稿。选手完全可以此为基础进行开发设计，具体评分标准参见官方报名渠道说明。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>后端： &lt;a href="https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin">https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>前端代码框架：https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="43-参考资料">4.3 参考资料&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/kiali/kiali">https://github.com/kiali/kiali&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/codecentric/spring-boot-admin">https://github.com/codecentric/spring-boot-admin&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-admin">https://github.com/apache/dubbo-admin&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/istio/istio">https://github.com/istio/istio&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="5-一种跨集群kubernetes传统vm微服务集群的互通方案与实现golang">5 一种跨集群Kubernetes、传统VM微服务集群的互通方案与实现(Golang)&lt;/h3>
+&lt;h4 id="51-赛题背景与目标">5.1 赛题背景与目标&lt;/h4>
+&lt;p>在 Apache Dubbo 最新规划中，我们计划完整的支持以下部署架构：&lt;/p>
+&lt;h5 id="511-传统注册中心模式">5.1.1 传统注册中心模式&lt;/h5>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2024/01/openatom/5-1-vm.png" alt="5-1-vm">&lt;/p>
+&lt;h5 id="512-基于-kubernetes-调度的注册中心模式">5.1.2 基于 Kubernetes 调度的注册中心模式&lt;/h5>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2024/01/openatom/5-2-kubernetes.png" alt="5-2-kubernetes">&lt;/p>
+&lt;h5 id="513-基于-kubernetes-service-的-proxyless-service-mesh-模式">5.1.3 基于 Kubernetes Service 的 Proxyless Service Mesh 模式&lt;/h5>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2024/01/openatom/5-3-kubernetes-service.png" alt="5-3-kubernetes-service">&lt;/p>
+&lt;p>其中，控制面由 Dubbo 社区建设，仓库地址位于：&lt;a href="https://github.com/apache/dubbo-kubernetes">https://github.com/apache/dubbo-kubernetes&lt;/a>&lt;/p>
+&lt;h4 id="52-赛题解读">5.2 赛题解读&lt;/h4>
+&lt;p>由于网络模型、注册中心等多个层面的原因，以上三种部署架构在很多情况下是相互隔离的，要实现这几个架构间的通信变的非常困难。&lt;/p>
+&lt;p>为了实现多集群地址、路由规则等互通，我们提供了一个跨集群部署的示例架构图，如下所示&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2024/01/openatom/5-4-multiple-cluster.png" alt="5-4-kubernetes-service">&lt;/p>
+&lt;p>其中，红色部分即为跨集群的数据流向，其中红色实现部分为控制面数据流，红色虚线部分为数据面数据流。&lt;/p>
+&lt;h5 id="521-为什么要跨集群通信那">5.2.1 为什么要跨集群通信那？&lt;/h5>
+&lt;p>有以下场景可能会用到：&lt;/p>
+&lt;ol>
+&lt;li>Kubernetes 迁移，之前用的是 Zookeeper 传统注册中心架构，期望迁移到 Kubernetes 集群部署，或者期望使用 kubernetes Service 服务模型&lt;/li>
+&lt;li>Kubernetes 多集群部署，跨多个 Kubernetes 集群 Dubbo 微服务通信&lt;/li>
+&lt;li>混合部署，传统注册中心集群、Kubernetes 集群、Kubernetes Service（Service Mesh）架构混合部署&lt;/li>
+&lt;/ol>
+&lt;h5 id="522-期待交付用户的使用体验">5.2.2 期待交付用户的使用体验&lt;/h5>
+&lt;ol>
+&lt;li>Kubernetes Service：&lt;code>dubboctl install --mode=kubernetes --ingress-enabled&lt;/code>&lt;/li>
+&lt;li>Kubernetes：&lt;code>dubboctl instaqll --mode=universal --ingress-enabled&lt;/code>&lt;/li>
+&lt;li>传统 VM：
+&lt;ul>
+&lt;li>`dubbo-cp run &amp;ndash;registry-address=nacos://xxx``&lt;/li>
+&lt;li>&lt;code>dubbo-dp run --control-plane=xxx&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>跨集群则需要额外部署 global 集群，使用方式与以上类似&lt;/li>
+&lt;/ol>
+&lt;h5 id="521-主要交付内容">5.2.1 主要交付内容&lt;/h5>
+&lt;p>以上图示例架构为例，参赛选手应主要关注：&lt;/p>
+&lt;ol>
+&lt;li>控制面、Ingress 的开发与建设（Dubbo SDK 侧无须关注，包括 SDK 与控制面的 xDS 通信，此部分可假设整体已经就绪），包括提供新方案中对于跨集群通信必要的组件支持等。&lt;/li>
+&lt;li>跨集群的 global 控制面能力建设&lt;/li>
+&lt;/ol>
+&lt;p>Dubbo 官方目前提供了基础控制面实现，包括基于 xds server 的服务发现等内容，可在此基础上继续扩展跨集群方案实现。项目源码：&lt;a href="https://github.com/apache/dubbo-kubernetes">https://github.com/apache/dubbo-kubernetes&lt;/a>&lt;/p>
+&lt;h4 id="53-参考资料">5.3 参考资料&lt;/h4>
+&lt;ol>
+&lt;li>&lt;a href="https://istio.io/">https://istio.io/&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://kuma.io/docs/2.5.x/production/deployment/multi-zone/">https://kuma.io/docs/2.5.x/production/deployment/multi-zone/&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;h2 id="报名方式">报名方式&lt;/h2>
+&lt;h3 id="报名链接">报名链接&lt;/h3>
+&lt;p>&lt;a href="https://competition.atomgit.com/competitionInfo?id=be48a38bb1daf499bd5c98ac8a3108fd">开放原子开源基金会官方报名渠道&lt;/a>&lt;/p>
+&lt;h3 id="答疑群">答疑群&lt;/h3>
+&lt;p>有任何赛题疑问扫码加入以下钉钉群：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2024/01/openatom/dingding-group.png" alt="5-4-kubernetes-service">&lt;/p>
+&lt;h3 id="赛题详情海报">赛题详情海报&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2024/01/openatom/openatom-2024.png" alt="openatom-2024">&lt;/p></description></item><item><title>Blog: 通过模板生成项目脚手架</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</link><pubDate>Sun, 31 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/31/%E9%80%9A%E8%BF%87%E6%A8%A1%E6%9D%BF%E7%94%9F%E6%88%90%E9%A1%B9%E7%9B%AE%E8%84%9A%E6%89%8B%E6%9E%B6/</guid><description>
 &lt;p>&lt;a href="https://start.dubbo.apache.org/bootstrap.html" target="_blank">Dubbo Initializer&lt;/a> 可用来快速生成 Java 项目脚手架，帮助简化微服务项目搭建、基本配置、组件依赖管理等。&lt;/p>
 &lt;blockquote>
 &lt;p>Initializer 仍在持续更新中，更多 Dubbo Feature 的支持将会陆续发布。&lt;/p>
@@ -1155,7 +1357,7 @@
 &lt;ul>
 &lt;li>编译阶段自动生成Adaptive源码，已经不需要开发者维护了。&lt;/li>
 &lt;li>支持编译阶段自动生成Dubbo所需的Reachability Metadata。减小了打在业务启动的可执行文件里包的大小。因为在之前的版本里，它是把Dubbo所涉及的全量的可达性的元数据都打在二进制包里。比如业务用jka作为注册中心，我们把nacos也打在那里面，这就会导致它的二进制包非常大。现在这个版本如果用到jka，我们在box上解析不到nacos相关的依赖。所以我们就不会再把相关的内容打进去了，而且现在都是自动识别的。&lt;/li>
-&lt;li>新增dubbo-maven-plugin，用于替代dubbo-native-plugin。因为dubbo-native-plugin的能力和内容是比较聚焦的，我们把它重新归名为dubbo-maven-plugin后，涉及到的是我们能够降低业务接入的薪资负担。后面Dubbo相关的maven插件，都通过它来做就行了。&lt;/li>
+&lt;li>新增dubbo-maven-plugin，用于替代dubbo-native-plugin。因为dubbo-native-plugin的能力和内容是比较聚焦的，我们把它重新归名为dubbo-maven-plugin后，涉及到的是我们能够降低业务接入的心智负担。后面Dubbo相关的maven插件，都通过它来做就行了。&lt;/li>
 &lt;li>兼容了Spring6+Spring Boot3，这就是我们在下个版本把XML和注解支持上去的技术的基础。&lt;/li>
 &lt;/ul>
 &lt;p>2023年12月将会发布Dubbo 3.3x版本。它基于Spring6，完成对XML和注解方式的支持，还移除了dubbo-native-plugin。&lt;/p>
@@ -1390,7 +1592,7 @@
 &lt;p>比如山西集群的APP1调APP2的时候，我想去调上海APP2，如果你什么都不做，它默认调的就是山西集群的APP2。如果你在APP调用的时候加了一些路由信息，放在山西集群APP1里的SDK就会把它的流量切走，切到山西集群的Dubbo网关。&lt;/p>
 &lt;p>之后Dubbo网关会通过HTTP的协议走统一网关，再通过HTTP的协议到上海集群的Dubbo网关。在这里会把路由信息拿到，包括调用的Service、方法、版本号、参数等等。然后通过泛化的形式调上海集群的APP1，最后返回，完成这次跨网的调用。&lt;/p>
 &lt;p>那么为什么要有Dubbo Proxy这个角色呢？为什么不直接从APP1切到统一网关？少一个步骤不好么？涉及到的原因有以下三点：&lt;/p>
-&lt;p>虽然这个图上只画了一个APP1，但实际上山西鸡群里的调用非常多。如果几百个应用都直接到统一网关，网关就需要建立很多的长链接，而统一网关的资源是有限的。&lt;/p>
+&lt;p>虽然这个图上只画了一个APP1，但实际上山西集群里的调用非常多。如果几百个应用都直接到统一网关，网关就需要建立很多的长链接，而统一网关的资源是有限的。&lt;/p>
 &lt;p>因为安全性的问题，可能每次调用都要走一下白名单来保证安全。这个时候如果加了一个Dubbo Proxy，就可以去收敛IP。岛内不用和Dubbo Proxy交互，因为它们是同一个环境，不用考虑安全的问题。当Dubbo Proxy请求到网关之后，因为网关和统一网关之间只有一条链接，所以IP是收敛的。&lt;/p>
 &lt;p>还有一个是功能的收敛，当后面要做升级的时候，如果更新SDK，就需要每个应用都升级，这就需要推动业务做升级，做起来会比较痛苦。所以我们希望把升级功能全放在一个应用里，对业务功能无感，连升级SDK都不需要。当然因为SDK就做了一件事情，就是切换路由，基本不需要更新。&lt;/p>
 &lt;p>所以对于业务来说，它也解放了。我把它理解成是一个功能上的收益。这个模式叫分布式运行时，在现在也比较流行。我们可以把它理解成Dapper，把一些比较麻烦的操作放到公共的服务里，留给业务的SDK是很纯粹的。&lt;/p>
@@ -1505,7 +1707,7 @@
 &lt;ol>
 &lt;li>
 &lt;p>扫码关注回复 &amp;ldquo;Apache Dubbo&amp;rdquo; 官网微信公众号，回复 “编程之夏” 加入微信沟通群&lt;/p>
-&lt;p>&lt;img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/jpeg/54037/1684119089728-eae2eb7d-4098-430e-a69e-a3939265e22b.jpeg#clientId=ub09992a8-5524-4&amp;amp;from=paste&amp;amp;height=129&amp;amp;id=u938740a9&amp;amp;originHeight=258&amp;amp;originWidth=258&amp;amp;originalType=binary&amp;amp;ratio=2&amp;amp;rotation=0&amp;amp;showTitle=false&amp;amp;size=27895&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=ud0f6af1b-fed8-4a07-aa5a-4e3f3bce229&amp;amp;title=&amp;amp;width=129" alt="qrcode_for_gh_a84d4cf4c871_258 (1).jpg">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/news/ospp-2023-announcement/1684119089728-eae2eb7d-4098-430e-a69e-a3939265e22b.jpeg" alt="qrcode_for_gh_a84d4cf4c871_258 (1).jpg">&lt;/p>
 &lt;/li>
 &lt;li>
 &lt;p>钉钉群：22895027434（Dubbo 2023 编程之夏群），搜索并加入咨询问题&lt;/p>
@@ -2268,7 +2470,7 @@ Dubbo 社区是国内最早开始对 Proxyless Service Mesh 模式进行探索�
 &lt;p>从 2019 年到现在，在 Dubbo 毕业的这一年时间里，Dubbo 社区和产品都取得长足进步，同时 Dubbo 云原生版本 - Dubbo 3.0 的开发工作也已经全面铺开。&lt;/p>
 &lt;p>社区方面。需要重点提及的有两点：一个是落地与贡献的企业用户进一步增加，主动与社区取得联系的中、大规模公司达 200 多家，如携程、工商银行、瓜子二手车、网联清算、中通等；另一个是&lt;a href="http://mp.weixin.qq.com/s?__biz=MjM5NzM0MjcyMQ==&amp;amp;mid=2650091639&amp;amp;idx=1&amp;amp;sn=9733d57fd9babe53826bc93c2a466adf&amp;amp;chksm=bedaeb1989ad620f99abfee5902d69dc6c7544d1d70803d854f20ea7a1a44c1d0c4ba82f8d3a&amp;amp;scene=21#wechat_redirect">&lt;strong>以 Dubbo-go 为代表的子社区&lt;/strong>&lt;/a>蓬勃发展。&lt;/p>
 &lt;p>产品技术演进方面。Dubbo Java 版发布 10 个版本，在多语言、协议、性能、服务治理模型等方面都有深度探索。Dubbo go 发布超过 8 个版本，在功能基本对齐 Java 版本的基础上，一些方向上也已经走在了 Java 版本前面。&lt;/p>
-&lt;p>值得一提的是，阿里巴巴内部也正在积极推动 Dubbo 社区版本在内部的落地，从今年开始逐步实现&lt;strong>以 Dubbo 替换其内部的 HSF 框架&lt;/strong>。这一方面有利于阿里将其在 HSF 上的丰富服务治理经验回馈输出到社区，另一方面阿里官方的落地也将直接加速 Dubbo 云原生的发展。&lt;/p>
+&lt;p>值得一提的是，阿里巴巴内部也正在积极推动 Dubbo 社区版本在内部的落地，从今年开始逐步实现&lt;strong>以 Dubbo 升级其内部的 HSF 框架&lt;/strong>。这一方面有利于阿里将其在 HSF 上的丰富服务治理经验回馈输出到社区，另一方面阿里官方的落地也将直接加速 Dubbo 云原生的发展。&lt;/p>
 &lt;p>在云原生大潮下，&lt;strong>3.0 已被正式列为今年 Dubbo 产品建设的核心目标&lt;/strong>，涉及下一代 RPC 协议、服务治理模型、云原生基础设施适配等多方面的内容。其中，很多方面已经在当前的 2.7 版本中做了前置性探索，如近期发布的基于 HTTP/2 的协议支持、应用级服务发现等，后续工作将以此为基础展开。系列文章也会有对 Dubbo 3.0 Roadmap 及技术方案的详细解析。&lt;/p>
 &lt;h2 id="dubbo-毕业一周年回顾">Dubbo 毕业一周年回顾&lt;/h2>
 &lt;p>2017 年 7 月，Dubbo 开源项目被重新激活，2018 年捐献到 Apache 基金会，2019 年 5 月，Dubbo 正式从 Apache 基金会孵化毕业，成为 Apache 顶级项目。接下来，文章分别从社区、子社区、产品三方面介绍 Dubbo 过去一年的成绩。&lt;/p>
@@ -2892,7 +3094,7 @@ Dubbo Java 版本的典型服务定义如下：&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-idl.png" alt="service idl">&lt;/p>
 &lt;p>对 Reactive-style API 的支持则和上面 CompletableFuture 有些类似，允许用户定义 RxJava、Reactor API 的服务接口&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/idl-dubbo-compiler.png" alt="idl dubbo compiler">&lt;/p>
-&lt;p>但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”&lt;a href="https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc/dubbo-samples-rxjava">Dubbo 对 gRPC 的支持&lt;/a>” 一节的讲解。&lt;/p>
+&lt;p>但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”&lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava">Dubbo 对 gRPC 的支持&lt;/a>” 一节的讲解。&lt;/p>
 &lt;h3 id="性能优化">性能优化&lt;/h3>
 &lt;p>2.7 版本在性能优化方面也做了很多的工作，对 Dubbo 业务系统的吞吐量、调用链路响应速度、服务治理链路性能等都有明显提升。&lt;/p>
 &lt;ol>

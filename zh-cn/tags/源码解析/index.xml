@@ -44,7 +44,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;li>&lt;strong>RtStatComposite，Rt（Response Time，响应时间）数据聚合器&lt;/strong>，包括应用级别和服务级别。根据应用名、服务名、注册的指标名及相应相应时间统计指标，提供添加操作。&lt;/li>
 &lt;/ul>
 &lt;p>对于以上四个聚合器，他们的职责就是存储某一类型的采样样本。&lt;/p>
-&lt;p>** 基本数据聚合器 （BaseStatComposite）** 对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p>
+&lt;p>&lt;strong>基本数据聚合器 （BaseStatComposite）&lt;/strong> 对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p>
 &lt;p>&lt;strong>当调用元数据中心指标收集器、注册中心指标收集器的 collect 方法时，最终会调用&lt;code>BaseStatComposite.export(MetricsCategory category)&lt;/code> , 该方法会收集内部三个聚合器的指标并返回。&lt;/strong>&lt;/p>
 &lt;p>需要注意的是， 配置中心指标收集器不依赖于基本数据聚合器 导出数据，它在创建时将基本数据聚合器置为null，而使用自己的 updatedMetrics 字段存储采样：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ConfigCenterMetricsCollector&lt;/span>
@@ -58,13 +58,13 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>混合指标收集器和数据聚合器之间呈现如下的包含关系：&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
 &lt;p>&lt;strong>DefaultMetricsCollector 默认指标采集器：&lt;/strong>&lt;/p>
-&lt;p>它不直接存储采样数据，而是通过收集其下**指标采样器（MetricsSampler）**的样本来完成采样工作。这些采样器包括：&lt;/p>
+&lt;p>它不直接存储采样数据，而是通过收集其下&lt;strong>指标采样器（MetricsSampler）&lt;/strong> 的样本来完成采样工作。这些采样器包括：&lt;/p>
 &lt;ul>
 &lt;li>方法采样器&lt;/li>
 &lt;li>应用采样器&lt;/li>
 &lt;li>线程池采样器&lt;/li>
 &lt;/ul>
-&lt;p>这些采样器完成采样后，还会利用采集器中的**事件多播器（Multicaster）**将指标事件发布出去，可以被其它监听器处理。详细流程将在后文中探讨。&lt;/p>
+&lt;p>这些采样器完成采样后，还会利用采集器中的&lt;strong>事件多播器（Multicaster）&lt;/strong> 将指标事件发布出去，可以被其它监听器处理。详细流程将在后文中探讨。&lt;/p>
 &lt;p>&lt;strong>HistogramMetricsCollector 直方图指标采集器：&lt;/strong>&lt;/p>
 &lt;p>由于需要使用Timer完成直方图属性的统计，它使用自己的容器存储采样数据。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HistogramMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsListener {
@@ -81,7 +81,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
 &lt;/li>
 &lt;li>
-&lt;p>&lt;strong>DefaultMetricsCollector 默认指标收集器&lt;/strong>，它的样本不仅来自于指标事件，还来自其下**采样器（Sampler）**中，用于Dubbo核心模块的采样。&lt;/p>
+&lt;p>&lt;strong>DefaultMetricsCollector 默认指标收集器&lt;/strong>，它的样本不仅来自于指标事件，还来自其下&lt;strong>采样器（Sampler）&lt;/strong> 中，用于Dubbo核心模块的采样。&lt;/p>
 &lt;/li>
 &lt;li>
 &lt;p>&lt;strong>HistogramMetricsCollector 直方图指标收集器&lt;/strong>，由于采样数据的特殊性，它的样本直接以 Map 存储在内部。&lt;/p>
@@ -614,7 +614,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该事件最终会由 RegistryMetricsCollector 中的 RegistryMetricsDispatcher 转发到关系该事件的监听器中。&lt;strong>事件和监听器之间通过 MetricsKey匹配&lt;/strong> 。&lt;/p>
-&lt;p>最终，MetricsKey 为 &lt;code>**DIRECTORY_METRIC_NUM_VALID**&lt;/code> 的监听器会处理这个事件，并更新 Collector中的计数。&lt;/p>
+&lt;p>最终，MetricsKey 为 &lt;code>**DIRECTORY_METRIC_NUM_VALID** &lt;/code> 的监听器会处理这个事件，并更新 Collector中的计数。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//DIRECTORY_METRIC_NUM_VALID 对应的 Listener。&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>MetricsCat APPLICATION_DIRECTORY_POST &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetricsCat(MetricsKey.DIRECTORY_METRIC_NUM_VALID, (key, placeType, collector) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> AbstractMetricsListener.onEvent(key,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
@@ -682,7 +682,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, event.getKey(), event.getGroup(),ConfigCenterEvent.APOLLO_PROTOCOL, ConfigChangeType.ADDED.name(), SELF_INCREMENT_SIZE));
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Apollo配置中心的配置发生变化时，它的 &lt;code>onChange&lt;/code> 方法会被触发，并在最后发布一个 ConfigCenterEvent。该事件最终转发到ConfigCenterMetricsCollector 中，同样增加 **CONFIGCENTER_METRIC_TOTAL **的计数。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Apollo配置中心的配置发生变化时，它的 &lt;code>onChange&lt;/code> 方法会被触发，并在最后发布一个 ConfigCenterEvent。该事件最终转发到ConfigCenterMetricsCollector 中，同样增加 &lt;strong>CONFIGCENTER_METRIC_TOTAL&lt;/strong> 的计数。&lt;/p>
 &lt;p>&lt;strong>NacosDynamicConfiguration&lt;/strong>&lt;/p>
 &lt;p>动态配置功能的 Nacos 配置中心实现。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//NacosDynamicConfiguration&lt;/span>
@@ -692,7 +692,7 @@ dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, event.getKey(), event.getGroup(),
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigCenterEvent.NACOS_PROTOCOL, ConfigChangeType.ADDED.name(), SELF_INCREMENT_SIZE));
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Nacos配置中心的配置发生变化时，它的 &lt;code>innerReceive&lt;/code> 方法被触发，发布一个 ConfigCenterEvent。它的处理流程和 ApolloDynamicConfiguration 一致，最终增加 **CONFIGCENTER_METRIC_TOTAL **的计数。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Nacos配置中心的配置发生变化时，它的 &lt;code>innerReceive&lt;/code> 方法被触发，发布一个 ConfigCenterEvent。它的处理流程和 ApolloDynamicConfiguration 一致，最终增加 &lt;strong>CONFIGCENTER_METRIC_TOTAL&lt;/strong> 的计数。&lt;/p>
 &lt;p>&lt;strong>ZookeeperDataListener&lt;/strong>&lt;/p>
 &lt;p>动态配置功能的 Zookeeper 实现。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ZookeeperDataListener&lt;/span>
@@ -4287,9 +4287,8 @@ DubboProtocol的createServer方法&lt;/p>
 &lt;ul>
 &lt;li>对于一个原先采用老版本Dubbo搭建的应用服务，在迁移到Dubbo 3时，Dubbo 3 会需要一个&lt;strong>元数据中心来维护RPC服务与应用的映射关系（即接口与应用的映射关系）&lt;/strong>，因为如果采用了&lt;strong>应用级别的服务发现和服务注册&lt;/strong>，在注册中心中将&lt;strong>采用“应用 —— 实例列表”结构&lt;/strong>的数据组织形式，&lt;strong>不再是以往的“接口 —— 实例列表”结构的数据组织形式&lt;/strong>，而以往用接口级别的服务注册和服务发现的应用服务在&lt;strong>迁移到应用级别&lt;/strong>时，&lt;strong>得不到接口与应用之间的对应关系&lt;/strong>，从而无法从注册中心得到实例列表信息，所以&lt;strong>Dubbo为了兼容这种场景，在Provider端启动时，会往元数据中心存储接口与应用的映射关系&lt;/strong>。&lt;/li>
 &lt;li>为了让&lt;strong>注册中心更加聚焦与地址的发现和推送能力&lt;/strong>，&lt;strong>减轻注册中心的负担&lt;/strong>，元数据中心承载了所有的服务元数据、大量接口/方法级别配置信息等，无论是接口粒度还是应用粒度的服务发现和注册，元数据中心都起到了重要的作用。&lt;/li>
-&lt;li>&lt;/li>
+&lt;li>如果有以上两种需求，都可以选择部署元数据中心，并通过Dubbo的配置来集成该元数据中心。&lt;/li>
 &lt;/ul>
-&lt;p>如果有以上两种需求，都可以选择部署元数据中心，并通过Dubbo的配置来集成该元数据中心。&lt;/p>
 &lt;p>&lt;strong>元数据中心并不依赖于注册中心和配置中心&lt;/strong>，用户可以自由选择是否集成和部署元数据中心，如下图所示：&lt;/p>
 &lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/centers-metadata.png" alt="/imgs/v3/concepts/centers-metadata.png">&lt;/p>
 &lt;p>该图中不配备配置中心，意味着可以不需要全局管理配置的能力。该图中不配备注册中心，意味着可能采用了Dubbo mesh的方案，也可能不需要进行服务注册，仅仅接收直连模式的服务调用。
@@ -4303,7 +4302,7 @@ DubboProtocol的createServer方法&lt;/p>
 &lt;li>元数据中心来维护RPC服务与应用的映射关系（即接口与应用的映射关系）来兼容接口与应用之间的对应关系&lt;/li>
 &lt;li>让注册中心更加聚焦与地址的发现和推送能力&lt;/li>
 &lt;/ul>
-&lt;p>注册中心的启动是在DefaultApplicationDeployer中的初始化方法 initialize() 中:如下所示&lt;/p>
+&lt;p>元数据中心的启动是在DefaultApplicationDeployer中的初始化方法 initialize() 中:如下所示&lt;/p>
 &lt;p>这里只看下 startMetadataCenter();方法即可&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">initialize&lt;/span>() {
@@ -6155,7 +6154,7 @@ dubbo:config-center 配置&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (isStarting()) {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// currently, is starting, maybe both start by module and application&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// if it has new modules, start them&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//存在挂器的模块&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//存在挂起的模块&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (hasPendingModule) {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//启动模块&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> startModules();
@@ -10053,13 +10052,25 @@ FrameworkModel 重置默认的应用模型对象 resetDefaultAppModel()方法
 &lt;/ul>
 &lt;/li>
 &lt;li>AbstractServiceConfig
-- &lt;strong>抽象的服务配置&lt;/strong>,这个就与我们的服务提供者有了具体的关系了,主要记录了一些服务提供者的公共配置,如服务版本,服务分组,服务延迟注册毫秒数,是否暴漏服务,服务权重,是否为动态服务,服务协议类型,是否注册等等.&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>抽象的服务配置&lt;/strong>,这个就与我们的服务提供者有了具体的关系了,主要记录了一些服务提供者的公共配置,如服务版本,服务分组,服务延迟注册毫秒数,是否暴漏服务,服务权重,是否为动态服务,服务协议类型,是否注册等等.&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;li>ServiceConfigBase
-- &lt;strong>服务的基础配置类&lt;/strong>,这个类型仍旧是个抽象的类型提取了一些基础的配置:导出服务的接口类,服务名称,接口实现的引用类型,提供者配置,是否是通用服务GenericService&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>服务的基础配置类&lt;/strong>,这个类型仍旧是个抽象的类型提取了一些基础的配置:导出服务的接口类,服务名称,接口实现的引用类型,提供者配置,是否是通用服务GenericService&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;li>ServiceConfig
-- &lt;strong>服务配置实现类&lt;/strong>, 上面的类型都是抽象类型不能做为具体存在的事物,这个类型是我们出现的第一个服务配置实现类型,服务配置实现类已经从父类型中继承了这么多的属性,这里主要为实现服务提供了一些配置如服务的协议配置,服务的代理工厂JavassistProxyFactory是将生成导出服务代理的ProxyFactory实现，是其默认实现,服务提供者模型,是否导出服务,导出的服务列表,服务监听器等等.&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>服务配置实现类&lt;/strong>, 上面的类型都是抽象类型不能做为具体存在的事物,这个类型是我们出现的第一个服务配置实现类型,服务配置实现类已经从父类型中继承了这么多的属性,这里主要为实现服务提供了一些配置如服务的协议配置,服务的代理工厂JavassistProxyFactory是将生成导出服务代理的ProxyFactory实现，是其默认实现,服务提供者模型,是否导出服务,导出的服务列表,服务监听器等等.&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;li>ServiceBean
-- &lt;strong>服务工厂Bean&lt;/strong> ,这个主要是Spring模块来简化配置的一个服务工厂Bean这里就先不详细介绍Spring相关的配置. -&lt;/li>
+&lt;ul>
+&lt;li>&lt;strong>服务工厂Bean&lt;/strong> ,这个主要是Spring模块来简化配置的一个服务工厂Bean这里就先不详细介绍Spring相关的配置.&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;/ul>
 &lt;h2 id="23-serviceconfig构造器的初始化调用链">2.3 ServiceConfig构造器的初始化调用链&lt;/h2>
 &lt;p>有了上面的类型继承关系我们就比较好分析了,接下来我们开始创建服务配置对象如下代码所示:&lt;/p>

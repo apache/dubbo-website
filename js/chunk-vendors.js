@@ -1,0 +1,1 @@
+// Respond to static link checks, which will be dynamically replaced at build time
