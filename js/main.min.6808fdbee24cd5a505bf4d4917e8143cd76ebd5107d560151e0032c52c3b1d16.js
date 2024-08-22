@@ -1,0 +1,1 @@
+(function(e){"use strict";var t={init:function(){e(document).ready(function(){e(document).on("keypress",".td-search input",function(t){if(t.keyCode!==13)return;var n=e(this).val(),s="https://dubbo.apache.org/search/?q="+n;return document.location=s,!1})})}};t.init()})(jQuery)
