@@ -7,7 +7,7 @@ description: 在 Dubbo 中配置多协议
 linkTitle: 多协议
 title: 多协议
 type: docs
-weight: 5
+weight: 4
 ---
 
 区别于普通的 RPC 框架，Dubbo 作为一款微服务框架提供了非常灵活的协议支持，它不绑定一个单一通信协议。因此你**可以发布在一个进程中同时发布多个 RPC 协议、调用不同的 RPC 协议**。接下来我们就详细介绍多协议的具体使用场景与使用方式。
