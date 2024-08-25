@@ -63,7 +63,7 @@ static_resources:
 
 ### 启动zookeeper,需要提前准备好docker和compose，如果本地有的话可以忽略
 
-[docker-compose.yml](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbohttpproxy/server/dubbo/app)
+[docker-compose.yml](https://github.com/apache/dubbo-go-pixiu-samples/blob/main/dubbohttpproxy/docker/docker-compose.yml)
 
 ```shell
 docker-compose -f {CURRENT_PATH}/dubbo-go-pixiu-samples/dubbohttpproxy/docker/docker-compose.yml && docker-compose up -d
