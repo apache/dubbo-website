@@ -7,6 +7,10 @@ weight: 3
 working_in_progress: true
 ---
 
+{{% alert title="注意" color="warning" %}}
+从 Dubbo 3.3 版本开始，Rest 协议已移至 Extensions 库，由 Triple 协议来对 Rest 提供更全面的支持，具体参见 [Triple Rest用户手册](../../../mannual/java-sdk/reference-manual/protocol/tripe-rest-manual/)，
+如需继续使用原 Rest 协议，可引入对应 [dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-rpc-extensions/dubbo-rpc-rest) 库依赖
+{{% /alert %}}
 
 ## 什么是 Dubbo Http
 基于 spring web 和 resteasy 注解编码风格，通过http协议进行服务间调用互通，dubbo protocol扩展实现的协议
