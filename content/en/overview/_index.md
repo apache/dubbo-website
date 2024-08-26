@@ -1,7 +1,7 @@
 ---
 type: docs
 title: "Overview"
-linkTitle: "Overview"
+linkTitle: "DOCS"
 no_list: true
 hide_summary: true
 menu:

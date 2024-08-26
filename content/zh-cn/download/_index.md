@@ -6,7 +6,7 @@ layout: basic
 linkTitle: 版本发布
 menu:
     main:
-        weight: 30
+        weight: 4
 no_list: true
 title: 版本发布
 type: docs

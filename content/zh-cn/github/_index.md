@@ -1,10 +1,10 @@
 ---
 title: "Github"
 linkTitle: "Github"
-menu:
-  main:
-    post: <i class='fa-brands fa-github'></i>
-    weight: 70
+# menu:
+#   main:
+#     post: <i class='fa-brands fa-github'></i>
+#     weight: 70
 ---
 
 <section id="github" class="row td-cover-block td-cover-block--height-sm js-td-cover td-overlay  -bg-primary">
