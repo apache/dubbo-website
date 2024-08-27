@@ -3,7 +3,7 @@ aliases:
     - /zh/download/
 description: 版本发布
 layout: basic
-linkTitle: 版本发布
+linkTitle: 下载
 menu:
     main:
         weight: 4
