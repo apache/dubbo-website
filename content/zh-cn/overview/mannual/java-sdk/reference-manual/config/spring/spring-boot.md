@@ -64,13 +64,12 @@ dubbo:
 ### dubbo-spring-boot-starter
 以下是一些 dubbo-spring-boot-starter 版本对应的 SpringBoot、JDK 依赖：
 
-| Dubbo Starter | 版本 | 推荐 Spring Boot 版本 | 兼容 Spring Boot 范围 | JDK 要求 |
-| --- | --- | --- | --- | --- |
-| dubbo-spring-boot-starter3 | 3.3.0 | 3.2.0 | [3.0.x ～ 3.2.x] | 17 |
-| dubbo-spring-boot-starter | 3.3.0 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
-| dubbo-spring-boot-starter | 3.2.21 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
-| dubbo-spring-boot-starter | 3.1.11 | 2.7.18 | [2.x ~ 3.0.x) | 8 |
-| dubbo-spring-boot-starter | 2.7.21 | 2.3.1.RELEASE | [2.x ~ 3.0.x) | 8 |
+| 版本    | 兼容 Spring Boot 范围 |
+|-------|---------------|
+| 3.3.x | [1.x ~ 3.x)   |
+| 3.2.x | [1.x ~ 3.x)   |
+| 3.1.x | [1.x ~ 2.x)   |
+| 2.7.x | [1.x ~ 2.x)   |
 
 ### 其他组件starter
 
