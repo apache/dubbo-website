@@ -6,6 +6,11 @@ weight: 6
 ---
 
 
+{{% alert title="Note" color="warning" %}}
+Since Dubbo 3.3, the rest protocol has been moved to the extensions library, with the triple protocol now providing more comprehensive support for Rest. For details refer to [Triple Rest User Manual](../../tripe-rest-manual/).  
+If you wish to continue using the original rest protocol, please include the corresponding [dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-rpc-extensions/dubbo-rpc-rest) dependency.
+{{% /alert %}}
+
 ## Feature description
 HTTP form-based remote invocation protocol, implemented by Spring's HttpInvoker, supported by versions above `2.3.0`.
 

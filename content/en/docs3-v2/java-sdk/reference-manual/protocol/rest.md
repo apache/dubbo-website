@@ -5,6 +5,11 @@ linkTitle: "Rest protocol"
 weight: 4
 ---
 
+{{% alert title="Note" color="warning" %}}
+Since Dubbo 3.3, the rest protocol has been moved to the extensions library, with the triple protocol now providing more comprehensive support for Rest. For details refer to [Triple Rest User Manual](../../tripe-rest-manual/).  
+If you wish to continue using the original rest protocol, please include the corresponding [dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-rpc-extensions/dubbo-rpc-rest) dependency.
+{{% /alert %}}
+
 Support for REST calls based on the standard Java REST API - JAX-RS 2.0 (short for Java API for RESTful Web Services)
 
 ### Quick Start
