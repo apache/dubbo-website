@@ -1,5 +1,5 @@
 ---
 title: "Demo"
-layout: "shortcodes/blocks/demo"
+layout: "shortcodes/blocks/demo-zh"
 ---
   {{< blocks/demo-zh >}}
