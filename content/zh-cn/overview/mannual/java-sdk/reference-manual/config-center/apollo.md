@@ -67,8 +67,8 @@ configCenter.setAddress("apollo://localhost:8080");
 Apollo中的一个核心概念是命名空间 - namespace，和上面 Zookeeper、Nacos 的 namespace 概念不同，因此使用方式上也比较特殊些，建议充分了解 Apollo 自身的用法后再阅读以下文档内容。
 
 但总的来说，对 Apollo 的适配而言：
-* namespace 特用于流量治理规则隔离，参见 3.1
-* group 特用于外部化配置的隔离，参见 3.2
+* group 特用于外部化配置的隔离，参见 3.1
+* namespace 特用于流量治理规则隔离，参见 3.2
 
 ### 3.1 外部化配置
 
