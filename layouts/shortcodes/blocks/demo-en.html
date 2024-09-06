@@ -55,7 +55,7 @@
 
           </div>
         </div>
-        <button class="demo-form-submit-btn" onclick="handleSubmit()">Submit</button>
+        <button class="demo-form-submit-btn" id="submitButton">Submit</button>
       </div>
       <div class="demo-subject-right">
         <div class="demo-subject-right-des">You can visit <a href="">xxx.com</a> to experience the online mall we have deployed. If you
@@ -297,49 +297,78 @@
 </style>
 
 <script>
-  function handleSubmit() {
-    const company = document.getElementById("demoCompany").value;
-    const firstName = document.getElementById("demoFirstName").value;
-    const lastName = document.getElementById("demoLastName").value;
-    const email = document.getElementById("demoEmail").value;
-    const position = document.getElementById("demoPosition").value;
-    const sizeOptions = document.getElementsByName("options-outlined");
-    let selectedSize;
+  document.addEventListener('DOMContentLoaded', function () {
+    async function sendFetch(url) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            mode: 'cors'
+          });
+          response.json().then(res => {
+            resolve(res);
+          }).catch(error => {
+            error.message === "Unexpected end of JSON input" ? resolve({}) : reject(error);
+          });
+        } catch (error) {
+          console.dir(error);
+          reject(error);
+        }
+      });
+    }
 
-    /* 找到选择的按钮 */
-    for (const option of sizeOptions) {
-      if (option.checked) {
-        selectedSize = option.value;
-        break;
+    async function handleSubmit() {
+      const companyName = document.getElementById("demoCompany").value;
+      const firstName = document.getElementById("demoFirstName").value;
+      const lastName = document.getElementById("demoLastName").value;
+      const email = document.getElementById("demoEmail").value;
+      const job = document.getElementById("demoPosition").value;
+      const sizeOptions = document.getElementsByName("options-outlined");
+      let companySize;
+
+      for (const option of sizeOptions) {
+        if (option.checked) {
+          companySize = option.value;
+          break;
+        }
+      }
+
+      let url = "https://dubbo-website-feedback.cn-hangzhou.log.aliyuncs.com/logstores/feedback/track?APIVersion=0.6.0&companyName=" + encodeURIComponent(companyName) +
+        "&name=" + encodeURIComponent(firstName) + encodeURIComponent(lastName) +
+        "&email=" + encodeURIComponent(email) +
+        "&job=" + encodeURIComponent(job) +
+        "&companySize=" + encodeURIComponent(companySize);
+
+
+      try {
+        const res = await sendFetch(url);
+        // 清空输入框与复选框
+        document.getElementById("demoCompany").value = '';
+        document.getElementById("demoFirstName").value = '';
+        document.getElementById("demoLastName").value = '';
+        document.getElementById("demoEmail").value = '';
+        document.getElementById("demoPosition").value = '';
+
+        for (const option of sizeOptions) {
+          option.checked = false;
+        }
+        document.getElementById("demoSize1").checked = true;
+
+        // 显示通知
+        const notification = document.getElementById("notification");
+        notification.style.display = "block";
+        setTimeout(() => {
+          notification.style.display = "none";
+        }, 1000);
+      } catch (error) {
+        console.error('Error during fetch:', error);
       }
     }
 
-    console.log("公司:", company);
-    console.log("姓名:", firstName+lastName);
-    console.log("邮箱:", email);
-    console.log("职位:", position);
-    console.log("公司规模:", selectedSize);
-
-    
-
-    /* 清空输入框 */
-    document.getElementById("demoCompany").value = '';
-    document.getElementById("demoFirstName").value = '';
-    document.getElementById("demoLastName").value = '';
-    document.getElementById("demoEmail").value = '';
-    document.getElementById("demoPosition").value = '';
-    for (const option of sizeOptions) {
-      option.checked = false;
-    }
-    /* 公司规模重置为默认值 */
-    document.getElementById("demoSize1").checked = true; 
-    /* 显示成功消息 */
-    const notification = document.getElementById("notification");
-    notification.style.display = "block"; 
-
-    /*  隐藏通知，3秒后 */
-    setTimeout(() => {
-        notification.style.display = "none";
-    }, 1000);
-  }
+    // 添加事件监听器
+    document.getElementById('submitButton').addEventListener('click', handleSubmit);
+  });
 </script>
