@@ -3,7 +3,7 @@ aliases:
     - /en/release/
 description: Download
 layout: basic
-linkTitle: Download
+linkTitle: DOWNLOAD
 menu:
     main:
         weight: 30
