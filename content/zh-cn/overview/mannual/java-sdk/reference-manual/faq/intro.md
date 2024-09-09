@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/faq/intro/
     - /zh-cn/docs3-v2/java-sdk/faq/intro/
+    - /zh-cn/overview/mannual/java-sdk/faq/intro/
 description: 错误码机制的介绍
 linkTitle: 错误码机制的介绍
 title: 错误码机制的介绍

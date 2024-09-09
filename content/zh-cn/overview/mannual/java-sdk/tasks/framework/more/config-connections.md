@@ -7,6 +7,7 @@ aliases:
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/stickiness/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/lazy-connect/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/config-connections/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/config-connections/
 description: Dubbo 中服务端和客户端的连接控制
 linkTitle: 连接控制
 title: 连接控制

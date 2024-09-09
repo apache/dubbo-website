@@ -4,6 +4,7 @@ aliases:
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/consistent-hash/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/
 description: "Dubbo 支持的消费端负载均衡策略及其使用方法"
 linkTitle: 负载均衡
 title: 负载均衡策略与配置细节

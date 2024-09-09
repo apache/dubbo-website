@@ -1,6 +1,7 @@
 ---
 aliases:
     - /zh/docsv2.7/user/examples/fault-tolerent-strategy/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/fault-tolerent-strategy/
 description: 集群调用失败时，Dubbo 提供的容错方案
 linkTitle: 集群容错(重试)
 title: 集群容错

@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
     - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/concurrency-control/
 description: Dubbo 中的并发控制
 linkTitle: 并发控制
 title: 并发控制

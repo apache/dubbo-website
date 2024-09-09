@@ -515,7 +515,7 @@ default=org.apache.dubbo.samples.basic.comtomize.MyGrpcConfigurator
 
 **三、TLS 配置**
 
-配置方式和 Dubbo 提供的通用的 [TLS 支持](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/tls/)一致，具体请参见文档
+配置方式和 Dubbo 提供的通用的 [TLS 支持](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/tls/)一致，具体请参见文档
 
 
 
