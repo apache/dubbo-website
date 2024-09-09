@@ -79,7 +79,7 @@ Grafana: https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.
 Zookeeper: https://github.com/bitnami/charts/tree/main/bitnami/zookeeper/#installing-the-chart
 Prometheus: https://github.com/prometheus-community/helm-charts/tree/main/charts
 Skywalking: https://github.com/apache/skywalking-kubernetes/blob/master/chart/skywalking/README.md
-Zipkin: https://github.com/Financial-Times/zipkin-helm
+Zipkin: https://github.com/openzipkin/zipkin-helm
 ```yaml
 # customization profile
 apiVersion: dubbo.apache.org/v1alpha1
