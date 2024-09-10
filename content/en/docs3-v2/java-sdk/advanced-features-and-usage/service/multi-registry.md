@@ -84,4 +84,4 @@ If only the test environment temporarily needs to connect to two different regis
 </beans>
 ```
 
-[^1]: You can extend the registry by yourself, see: [Registry Extension](../../../reference-manual/spi/description/registry)
+[^1]: You can extend the registry by yourself, see: [Registry Extension](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/registry)

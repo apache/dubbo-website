@@ -244,7 +244,7 @@ reference3.setGroup("*");
 ```
 ### 指定合并策略
 
-指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称 [合并结果扩展](../../../reference-manual/spi/description/merger)
+指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称 [合并结果扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/merger)
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">

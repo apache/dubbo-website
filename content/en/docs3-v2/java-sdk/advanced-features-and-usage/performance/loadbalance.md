@@ -10,7 +10,7 @@ When cluster load balancing, Dubbo provides a variety of balancing strategies, t
 
 In terms of specific implementation, Dubbo provides client load balancing, that is, the Consumer uses the load balancing algorithm to determine which Provider instance to submit the request to.
 
-You can expand the load balancing strategy by yourself, see: [Load Balance Extension](../../../reference-manual/spi/description/load-balance)
+You can expand the load balancing strategy by yourself, see: [Load Balance Extension](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/load-balance)
 
 ## load balancing strategy
 Currently Dubbo has the following built-in load balancing algorithms, which users can directly configure and use:

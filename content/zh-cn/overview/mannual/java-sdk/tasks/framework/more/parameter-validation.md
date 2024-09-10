@@ -197,4 +197,4 @@ public class ValidationConsumer {
 }
 ```
 
-> **验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](../../../reference-manual/spi/description/validation)**
+> **验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/validation)**

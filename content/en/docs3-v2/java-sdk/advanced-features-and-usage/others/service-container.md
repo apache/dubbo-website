@@ -11,7 +11,7 @@ The service container of Dubbo 3 is a standalone startup program, because the ba
 
 The Dubbo3 service container is just a simple Main method and loads a simple Spring container for exposing services.
 
-The loading content of the service container can be extended, and spring, jetty, log4j, etc. are built-in, and can be extended through [container extension point](../../../reference-manual/spi/description/container). The configuration is configured in the -D parameter of the java command or `dubbo.properties`.
+The loading content of the service container can be extended, and spring, jetty, log4j, etc. are built-in, and can be extended through [container extension point](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/container). The configuration is configured in the -D parameter of the java command or `dubbo.properties`.
 
 ## scenes to be used
 The web container is mainly used to respond to http requests and static pages. The Dubbo service provider only provides dubbo services externally. It is not suitable to use the web container. As a dubbo service provider alone, it only needs to load a simple spring container through a main method Expose the service.

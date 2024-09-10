@@ -60,7 +60,7 @@ No provider available after route for the service 服务 from registry 注册中
 
 #### 开启路由全采样
 
-在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以 [通过 qos 开启路由全采样](../../../reference-manual/qos/router-snapshot/)。通过 qos 的 `getRecentRouterSnapshot` 命令可以远程获取最近的路由快照。
+在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以 [通过 qos 开启路由全采样](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/router-snapshot/)。通过 qos 的 `getRecentRouterSnapshot` 命令可以远程获取最近的路由快照。
 
 ```
 dubbo>getRecentRouterSnapshot

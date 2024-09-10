@@ -24,7 +24,7 @@ Dubbo支持了服务端结果缓存和客户端结果缓存。
 * `threadlocal` 当前线程缓存，比如一个页面渲染，用到很多 portal，每个 portal 都要去查用户信息，通过线程缓存，可以减少这种多余访问。
 * `jcache` 与 [JSR107](http://jcp.org/en/jsr/detail?id=107%27) 集成，可以桥接各种缓存实现。
 
-缓存类型可扩展 [缓存扩展](../../../reference-manual/spi/description/cache)
+缓存类型可扩展 [缓存扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/cache)
 
 关于 [示例代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
 
