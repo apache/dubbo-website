@@ -57,7 +57,7 @@ public interface DemoService {
 
 这样，就能发布同时支持 dubbo、rest 两种协议的服务，对于 http 网关接入更为简单便捷，唯一成本是需要改造接口增加注解。
 
-为 dubbo 协议服务增加了 http 访问方式之后，就可以很容易的将 dubbo 服务接入网关了，具体可以参见下一小节中的 [triple 协议网关接入](zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/) 示例，那里有详细的说明。
+为 dubbo 协议服务增加了 http 访问方式之后，就可以很容易的将 dubbo 服务接入网关了，具体可以参见下一小节中的 [triple 协议网关接入](/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/) 示例，那里有详细的说明。
 
 ## http 转 dubbo 协议
 {{% alert title="注意" color="warning" %}}

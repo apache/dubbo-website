@@ -2,6 +2,15 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/properties/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/dump/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/lazy-connect/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/stickiness/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/delay-publish/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/preflight-check/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/registry-only/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/
 description: 包含 Dubbo 支持的所有配置组件及每个配置组件支持的所有配置项
 linkTitle: 配置项手册
 title: 配置项参考手册

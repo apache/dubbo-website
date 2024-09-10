@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/webservice/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/webservice/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/webservice/
 description: Webservice协议
 linkTitle: Webservice协议
 title: Webservice协议

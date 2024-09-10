@@ -2,6 +2,12 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/overview/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/overview/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/grpc/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/guide/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/migration
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/overview/
+    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/protobufinterface/
+    - /zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/
 description: "本文 triple 在 dubbo java 实现中的一些具体细节，配置方式、性能指标等"
 linkTitle: triple
 title: 协议概述

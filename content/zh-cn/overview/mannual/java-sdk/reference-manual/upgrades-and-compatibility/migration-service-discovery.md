@@ -2,6 +2,10 @@
 aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
     - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
+    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/
+    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/
+    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/
+    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
 description: 本文具体说明了用户在升级到 Dubbo3 之后，如何快速开启应用级服务发现新特性，从接口级服务发现平滑迁移到应用级服务发现。
 linkTitle: 升级到应用级服务发现
 title: 升级到应用级服务发现
@@ -10,7 +14,7 @@ weight: 3
 ---
 
 {{% alert title="请注意" color="warning" %}}
-* 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并使用 [框架的服务发现默认行为](zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/#启用应用级服务发现)。
+* 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并使用 [框架的服务发现默认行为](/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/#启用应用级服务发现)。
 * 本文档更适用于 Dubbo2 老用户，用于了解在升级到 Dubbo3 版本后，框架中的服务发现模型切换过程与工作原理。新用户请直接 [配置启用应用级服务发现](/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/nacos/#13-配置并启用-nacos)。
 {{% /alert %}}
 

@@ -177,7 +177,7 @@ DEBUG .d.r.h.AbstractServerHttpChannelObserver :  [DUBBO] Http response headers 
 
 设想你是一条业务线负责人，你们有一套基于 Dubbo 开发的微服务集群，集群内服务间都是基于 triple 二进制协议通信；公司内还有一个重要业务，是跑在基于 Spring Cloud 开发的微服务集群上，而 Spring Cloud 集群内的服务间都是 http+json 协议通信。现在要实现这两个业务的互通，服务之间如何实现互调那？triple 协议支持 rest 格式访问可以解决这个问题，对于 Dubbo 微服务集群而言，相当于是对内使用 triple 二进制协议通信，对外交互使用 triple 提供的 rest 请求格式。
 
-关于这部分的具体使用示例，请参考博客 [微服务最佳实践零改造实现 Spring Cloud、Apache Dubbo 互通](zh-cn/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)。
+关于这部分的具体使用示例，请参考博客 [微服务最佳实践零改造实现 Spring Cloud、Apache Dubbo 互通](/zh-cn/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)。
 
 ### 网关流量接入
 

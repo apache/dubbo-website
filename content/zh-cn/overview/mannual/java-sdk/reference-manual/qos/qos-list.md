@@ -1,4 +1,6 @@
 ---
+alias:
+  - /zh-cn/overview/mannual/java-sdk/reference-manual/qos/command/
 description: "QoS 命令列表、命令大全。"
 linkTitle: 命令列表
 title: QoS 命令列表，命令大全

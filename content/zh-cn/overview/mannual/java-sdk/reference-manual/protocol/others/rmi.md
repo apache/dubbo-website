@@ -3,6 +3,7 @@ aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/protocol/rmi/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/rmi/
     - /zh/overview/what/ecosystem/protocol/rmi/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rmi/
 description: Rmi协议
 linkTitle: Rmi协议
 title: Rmi协议

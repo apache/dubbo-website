@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/registry/multicast/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/registry/multicast/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/registry/multicast/
 description: Multicast 广播注册中心（限开发阶段使用）。
 linkTitle: Multicast
 title: Multicast

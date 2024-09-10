@@ -6,6 +6,7 @@ aliases:
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-service/
     - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-reference/
+    - /zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic/
 description: 泛化调用，用于在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用
 linkTitle: 泛化调用
 title: 泛化调用

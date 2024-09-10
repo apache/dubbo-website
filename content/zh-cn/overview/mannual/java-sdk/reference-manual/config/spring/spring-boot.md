@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/annotation/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config/annotation/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/config/annotation/
 description: 以 Annotation、Spring Boot 开发 Dubbo 应用
 linkTitle: Spring Boot
 title: Spring Boot

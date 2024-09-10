@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/registry/multiple-registry/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/registry/multiple-registry/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-registry/
 description: 本文介绍了 Dubbo 的多注册中心支持及使用场景，如何通过多注册/多订阅实现跨区域服务部署、服务迁移等，也描述了同机房有限等跨机房流量调度的实现方式。
 linkTitle: 多注册中心
 title: 多注册中心

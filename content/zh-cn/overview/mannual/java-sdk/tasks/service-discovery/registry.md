@@ -124,7 +124,7 @@ dubbo:
     register-mode: instance # 新用户请设置此值，表示启用应用级服务发现，可选值 interface、instance、all
 ```
 
-老用户均建议参考 [应用级服务发现迁移指南](zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/) 完成平滑迁移。
+老用户均建议参考 [应用级服务发现迁移指南](/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/) 完成平滑迁移。
 {{% /alert %}}
 
 ## 只注册

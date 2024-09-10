@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
     - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
+	- /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/migration-triple/
 description: "如何平滑的从 dubbo 协议升级到 triple 协议。"
 linkTitle: 升级到triple协议
 title: 升级到triple协议
