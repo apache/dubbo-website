@@ -1,5 +1,5 @@
 ---
-alias:
+aliases:
   - /zh-cn/overview/reference/Metrics/standard_metrics/
 linkTitle: 标准监控指标
 title: Dubbo 框架标准监控指标
