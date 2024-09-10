@@ -31,7 +31,7 @@ Dubbo Metrics 的总体设计请参考 [可观测性 Metrics Proposal](/zh-cn/ov
 ```
 
 * 完整示例请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot" target="_blank">dubbo-samples-metrics-spring-boot</a>
-* 完整配置参数请参见 [Metrics 配置项手册](../../../reference-manual/config/properties/#metrics)
+* 完整配置参数请参见 [Metrics 配置项手册](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties//)
 
 ## 实现原理解析
 
