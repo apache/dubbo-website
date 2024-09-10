@@ -1,5 +1,5 @@
 ---
-
+aliases: [/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/traffic/]
 description: 演示 Dubbo 流量治理特性的使用方式。
 linkTitle: 流量管控
 no_list: true

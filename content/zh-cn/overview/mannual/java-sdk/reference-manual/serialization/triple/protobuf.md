@@ -1,7 +1,6 @@
 ---
 aliases:
-    - /zh/overview/what/ecosystem/serialization/fastjson/
-    - /zh-cn/overview/what/ecosystem/serialization/fastjson/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/idl/
 description: "本文介绍 protobuf 序列化，如何在 triple 协议场景下使用 protobuf、json 序列化。"
 linkTitle: Protobuf
 title: 如何在 triple 协议场景下使用 protobuf、json 序列化
