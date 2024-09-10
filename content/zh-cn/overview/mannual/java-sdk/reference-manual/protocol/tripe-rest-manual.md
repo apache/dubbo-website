@@ -5,7 +5,7 @@ aliases:
   - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rest/
 description: "本文是Triple Rest的用户使用手册"
 linkTitle: triple-rest用户手册
-title: triple-rest用户手册
+title: Triple Rest 用户手册
 type: docs
 weight: 7
 ---
@@ -470,8 +470,16 @@ commit();
 如果只是增加 `http header` 推荐用这个方式
 <a name="OlLbS"></a>
 
-### 自定义JSON序列化
+### 自定义JSON解析和输出
+支持Jackson、fastjson2、fastjson和gson等多种JSON框架，使用前请确保对应jar依赖已被引入
 
+#### 指定使用的JSON框架
+```properties
+dubbo.protocol.triple.rest.json-framework=jackson
+```
+
+#### 通过 JsonUtil SPI 定制
+可通过实现 SPI `org.apache.dubbo.common.json.JsonUtil` 方式来自定义JSON处理，具体可以参考 [org/apache/dubbo/common/json/impl](https://github.com/apache/dubbo/tree/3.3/dubbo-common/src/main/java/org/apache/dubbo/common/json/impl) 已有实现，建议继承现有实现并重写
 <a name="XeDPr"></a>
 
 ### 异常处理
@@ -800,6 +808,45 @@ public class DemoFilter implements Supplier<Filter>, RestExtension {
 - Filter 中 wrap request 和 response对象不会生效，原因是 Rest支持的 过滤器种类很多，使用wrapper会导致反复嵌套，处理过于复杂
 - 不支持 `request.getRequestDispatcher`
   <a name="Sxium"></a>
+
+### 安全配置
+
+当 REST 服务直接暴露在公网时，存在被攻击的安全风险。因此在暴露服务之前，需要充分评估风险并选择合适的认证方式来保证安全性。Triple 提供了多种安全认证机制，同时用户也可以自行实现相应的扩展来对访问进行安全校验。
+
+#### Basic 认证
+
+要启用 Basic 认证,请修改以下配置:
+
+```yaml
+dubbo:
+  provider:
+    auth: true
+    authenticator: basic
+    username: admin  
+    password: admin
+```
+
+启用后,所有 HTTP 请求都需要通过 Basic 认证才能访问。
+
+如果是 RPC 调用,还需要在消费者端配置相应的用户名和密码:
+
+```yaml
+dubbo:
+  consumer:
+    auth: true
+    authenticator: basic  
+    username: admin
+    password: admin
+```
+
+这样配置后,provider 和 consumer 之间的通信将使用 Basic 认证来保证安全性。请确保在生产环境中使用强密码,并考虑采用 HTTPS 来加密传输。
+
+### 认证扩展
+#### 实现自定义 Authenticator
+可通过 SPI `org.apache.dubbo.auth.spi.Authenticator` 来自定义认证，并通过配置 dubbo.provider.authenticator 来选择启用的 Authenticator
+
+#### 实现 HTTP 请求过滤
+可通过 SPI `org.apache.dubbo.rpc.HeaderFilter` 或 `org.apache.dubbo.rpc.protocol.tri.rest.filter.RestFilter` 来自定义 HTTP 过滤器逻辑
 
 ## 全局参数配置
 

@@ -7,7 +7,7 @@ weight: 13
 
 <a name="lipv5"></a>
 
-## New REST Support
+## New Rest Support
 
 ### Rest Features
 
@@ -27,7 +27,7 @@ such as path customization, output format customization, and exception handling.
   Considering that most users are accustomed to using SpringMVC or JAX-RS for REST API development, Triple Rest allows continued use of these methods for service definitions and
   supports most extensions and exception handling mechanisms (with over 80% of the original framework’s functionality). For lightweight users, the Basic dialect is available, and
   Triple’s out-of-the-box REST capabilities are based on this dialect.
-- **Strong Extensibility**  
+- **High Extensibility**  
   Offers more than 20 extension points, enabling users to easily create custom dialects and flexibly customize parameter retrieval, type conversion, error handling, and other
   logic.
 - **Out-of-the-Box**  

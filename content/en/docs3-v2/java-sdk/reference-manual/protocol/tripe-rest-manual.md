@@ -29,7 +29,7 @@ such as path customization, output format customization, and exception handling.
   Considering that most users are accustomed to using SpringMVC or JAX-RS for REST API development, Triple Rest allows continued use of these methods for service definitions and
   supports most extensions and exception handling mechanisms (with over 80% of the original framework’s functionality). For lightweight users, the Basic dialect is available, and
   Triple’s out-of-the-box REST capabilities are based on this dialect.
-- **Strong Extensibility**  
+- **High Extensibility**  
   Offers more than 20 extension points, enabling users to easily create custom dialects and flexibly customize parameter retrieval, type conversion, error handling, and other
   logic.
 - **Out-of-the-Box**  
@@ -472,6 +472,20 @@ If only adding `http headers`, use this method.
 
 ### Custom JSON Serialization
 
+Multiple JSON frameworks are supported, including Jackson, fastjson2, fastjson, and gson. Please ensure that the corresponding jar dependencies have been imported before use.
+
+#### Specifying the JSON Framework to Use
+
+```properties
+dubbo.protocol.triple.rest.json-framework=jackson
+```
+
+#### Customization through JsonUtil SPI
+
+You can customize JSON processing by implementing the SPI `org.apache.dubbo.common.json.JsonUtil`. For specific examples, you can refer to the existing implementations
+in [org/apache/dubbo/common/json/impl](https://github.com/apache/dubbo/tree/3.3/dubbo-common/src/main/java/org/apache/dubbo/common/json/impl). It is recommended to extend an
+existing implementation and override as needed.
+
 <a name="XeDPr"></a>
 
 ### Exception Handling
@@ -636,7 +650,7 @@ example: [dubbo-samples-triple-rest/dubbo-samples-triple-rest-jaxrs](https://git
 ### Path Mapping
 
 Services need to explicitly add the @Path annotation, and methods need to add request method annotations like @GET, @POST, @HEAD.<br />Refer directly to the Resteasy documentation,
-which supports most features, [Chapter 4. Using @Path and @GET, @POST, etc](https://docs.jboss.org/resteasy/docs/6.2.7.Final/userguide/html/ch04.html)
+which supports most features, [Chapter 4. Using @Path and @GET, @POST, etc.](https://docs.jboss.org/resteasy/docs/6.2.7.Final/userguide/html/ch04.html)
 <a name="TfvLf"></a>
 
 ### Parameter Types
@@ -805,6 +819,52 @@ Implement SPI `org.apache.dubbo.rpc.protocol.tri.rest.support.servlet.HttpSessio
 - Wrapping request and response objects in Filter will not work due to the large number of filter types supported by Rest, leading to complex nesting and handling.
 - `request.getRequestDispatcher` is not supported
   <a name="Sxium"></a>
+
+### Security Configuration
+
+When Rest services open direct access to the public network, there are security risks of potential attacks. Therefore, before exposing services, it's necessary to thoroughly assess
+the risks and choose appropriate authentication methods to ensure security. Triple provides various security authentication mechanisms, and users can also implement their own
+extensions to perform security checks on access.
+
+#### Basic Authentication
+
+To enable Basic Authentication, modify the following configuration:
+
+```yaml
+dubbo:
+  provider:
+    auth: true
+    authenticator: basic
+    username: admin
+    password: admin
+```
+
+Once enabled, all HTTP requests will require Basic Authentication to access.
+
+For RPC calls, you also need to configure the corresponding username and password on the consumer side:
+
+```yaml
+dubbo:
+  consumer:
+    auth: true
+    authenticator: basic
+    username: admin
+    password: admin
+```
+
+With this configuration, communication between provider and consumer will use Basic Authentication to ensure security. Make sure to use strong passwords in production environments
+and consider using HTTPS for encrypted transmission.
+
+### Authentication Extensions
+
+#### Implementing Custom Authenticator
+
+You can customize authentication by implementing the SPI `org.apache.dubbo.auth.spi.Authenticator`, and select the Authenticator to enable through the configuration
+`dubbo.provider.authenticator`.
+
+#### Implementing HTTP Request Filtering
+
+You can customize HTTP filtering logic by implementing the SPI `org.apache.dubbo.rpc.HeaderFilter` or `org.apache.dubbo.rpc.protocol.tri.rest.filter.RestFilter`.
 
 ## Global Parameter Configuration
 
