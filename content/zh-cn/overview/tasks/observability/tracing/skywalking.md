@@ -63,7 +63,7 @@ bash startup.sh
 
 之后，启动 Provider 和 Consumer 并确保 skywalking-agent 参数被正确设置，skywalking-agent 确保数据可以被正确的上报到后台系统。
 
-* 考虑到 skywalking-agent 本身也有内置的 Dubbo 拦截器，为了确保示例能使用 Dubbo 自带的 Micrometer 集成，我么你需要删除 skywalking-agent 自带的拦截器，直接将 `plugins` 目录删除即可
+* 考虑到 skywalking-agent 本身也有内置的 Dubbo 拦截器，为了确保示例能使用 Dubbo 自带的 Micrometer 集成，我们需要你删除 skywalking-agent 自带的拦截器，直接将 `plugins` 目录删除即可
 * 配置 Skywalking OAP 服务器地址，在以下文件中配置 OAP 地址 `/path/to/skywalking-agent/agent.config`，对应的参数项为 `collector.backend_service`。
 
 ```shell
