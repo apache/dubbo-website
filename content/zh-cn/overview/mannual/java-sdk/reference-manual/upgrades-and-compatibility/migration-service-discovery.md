@@ -3,9 +3,6 @@ aliases:
     - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
     - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
     - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/
-    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/
-    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/
-    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/
 description: 本文具体说明了用户在升级到 Dubbo3 之后，如何快速开启应用级服务发现新特性，从接口级服务发现平滑迁移到应用级服务发现。
 linkTitle: 升级到应用级服务发现
 title: 升级到应用级服务发现

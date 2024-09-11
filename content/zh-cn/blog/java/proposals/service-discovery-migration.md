@@ -1,4 +1,6 @@
 ---
+aliases:
+  - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/
 title: "如果从接口级服务发现平滑迁移到应用级服务发现"
 linkTitle: "Dubbo3 服务发现平滑迁移步骤与原理"
 tags: ["Java","服务发现"]

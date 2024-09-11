@@ -11,7 +11,7 @@ aliases:
 ---
 
 {{% alert title="注意" color="warning" %}}
-本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 [使用 Apache APISIX 代理 Dubbo 服务（triple协议）](../dubbo-triple-with-apisix-gateway) 学习具体示例。
+本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 [使用 Apache APISIX 代理 Dubbo 服务（triple协议）](/zh-cn/blog/2024/04/22/使用-apache-apisix-代理-dubbo-服务triple协议/) 学习具体示例。
 {{% /alert %}}
 
 
